@@ -27,6 +27,7 @@ import jumpToSvg from '../../style/icons/jump-to.svg';
 import { URLExt } from '@jupyterlab/coreutils';
 import { CodeJump as LSPJumpSettings, ModifierKey } from '../_jump_to';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { CommandEntryPoint } from '../command_manager';
 
 export const jumpToIcon = new LabIcon({
   name: 'lsp:jump-to',
@@ -253,7 +254,9 @@ const COMMANDS: IFeatureCommand[] = [
     },
     is_enabled: ({ connection }) => connection.isDefinitionSupported(),
     label: 'Jump back',
-    icon: jumpToIcon
+    icon: jumpToIcon,
+    // do not attach to any of the context menus
+    attach_to: new Set<CommandEntryPoint>()
   }
 ];
 
