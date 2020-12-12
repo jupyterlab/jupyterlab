@@ -34,6 +34,11 @@ export const jumpToIcon = new LabIcon({
   svgstr: jumpToSvg
 });
 
+const jumpBackIcon = new LabIcon({
+  name: 'lsp:jump-back',
+  svgstr: jumpToSvg.replace('jp-icon3', 'lsp-icon-flip-x jp-icon3')
+});
+
 const FEATURE_ID = PLUGIN_ID + ':jump_to';
 
 export class CMJumpToDefinition extends CodeMirrorIntegration {
@@ -254,7 +259,7 @@ const COMMANDS: IFeatureCommand[] = [
     },
     is_enabled: ({ connection }) => connection.isDefinitionSupported(),
     label: 'Jump back',
-    icon: jumpToIcon,
+    icon: jumpBackIcon,
     // do not attach to any of the context menus
     attach_to: new Set<CommandEntryPoint>()
   }
