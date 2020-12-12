@@ -20,6 +20,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   private known_editors_ids: Set<string>;
 
   private _language_info: ILanguageInfoMetadata;
+  private type: nbformat.CellType = 'code';
 
   constructor(extension: LSPExtension, editor_widget: NotebookPanel) {
     super(extension, editor_widget);
@@ -141,6 +142,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     this.widget.model.cells.changed.connect(async (cells, change) => {
       let cellsAdded: ICellModel[] = [];
       let cellsRemoved: ICellModel[] = [];
+      const type = this.type;
 
       if (change.type === 'set') {
         // handling of conversions is important, because the editors get re-used and their handlers inherited,
@@ -152,13 +154,13 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
           // during conversion the cells should not get deleted nor added
           for (let i = 0; i < change.newValues.length; i++) {
             if (
-              change.oldValues[i].type === 'code' &&
-              change.newValues[i].type !== 'code'
+              change.oldValues[i].type === type &&
+              change.newValues[i].type !== type
             ) {
               convertedToMarkdownOrRaw.push(change.newValues[i]);
             } else if (
-              change.oldValues[i].type !== 'code' &&
-              change.newValues[i].type === 'code'
+              change.oldValues[i].type !== type &&
+              change.newValues[i].type === type
             ) {
               convertedToCode.push(change.newValues[i]);
             }
@@ -168,7 +170,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
         }
       } else if (change.type == 'add') {
         cellsAdded = change.newValues.filter(
-          cellModel => cellModel.type === 'code'
+          cellModel => cellModel.type === type
         );
       }
       // note: editorRemoved is not emitted for removal of cells by change of type 'remove' (but only during cell type conversion)
@@ -256,7 +258,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   }
 
   private activeCellChanged(notebook: Notebook, cell: Cell) {
-    if (cell.model.type !== 'code') {
+    if (cell.model.type !== this.type) {
       return;
     }
     if (!this.known_editors_ids.has(cell.editor.uuid)) {
@@ -272,6 +274,13 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
 
   context_from_active_document(): ICommandContext | null {
     let cell = this.widget.content.activeCell;
+    if (cell.model.type !== this.type) {
+      // context will be sought on all cells to verify if the context menu should be visible,
+      // thus it is ok to just return null; it seems to stem from the implementation detail
+      // upstream, i.e. the markdown cells appear to be created by transforming the code cells
+      // but do not quote me on that.
+      return null;
+    }
     let editor = cell.editor;
     let ce_cursor = editor.getCursorPosition();
     let cm_cursor = PositionConverter.ce_to_cm(ce_cursor) as IEditorPosition;
