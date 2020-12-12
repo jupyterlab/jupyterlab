@@ -31,7 +31,7 @@ export const jumpToIcon = new LabIcon({
   svgstr: jumpToSvg
 });
 
-const FEATURE_ID = PLUGIN_ID + ':jump-to';
+const FEATURE_ID = PLUGIN_ID + ':jump_to';
 
 export class CMJumpToDefinition extends CodeMirrorIntegration {
   get jumper() {
@@ -59,7 +59,7 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
         const { button } = event;
         if (
           button === 0 &&
-          getModifierState(event, this.modifierKey as string)
+          getModifierState(event, this.modifierKey)
         ) {
           this.connection
             .getDefinition(virtual_position, document.document_info, false)
@@ -126,7 +126,6 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
 
     if (uris_equal(uri, document_uri)) {
       let editor_index = this.adapter.get_editor_index_at(virtual_position);
-      console.log('Editor index: ', editor_index);
       // if in current file, transform from the position within virtual document to the editor position:
       let editor_position = this.virtual_editor.transform_virtual_to_editor(
         virtual_position
@@ -136,8 +135,6 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       console.log('Jump target within editor:', editor_position_ce);
 
       let contents_path = this.adapter.widget.context.path;
-      console.log('path', this.adapter.widget.context.path);
-      console.log('localPath', this.adapter.widget.context.localPath);
 
       this.jumper.global_jump({
         line: editor_position_ce.line,
