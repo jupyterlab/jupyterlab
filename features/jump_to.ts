@@ -57,10 +57,7 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
         );
 
         const { button } = event;
-        if (
-          button === 0 &&
-          getModifierState(event, this.modifierKey)
-        ) {
+        if (button === 0 && getModifierState(event, this.modifierKey)) {
           this.connection
             .getDefinition(virtual_position, document.document_info, false)
             .then(targets => {
