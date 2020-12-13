@@ -34,12 +34,20 @@ export function until_ready(
   });
 }
 
+export type ModifierKey =
+  | 'Shift'
+  | 'Alt'
+  | 'AltGraph'
+  | 'Control'
+  | 'Meta'
+  | 'Accel';
+
 /**
- * TODO: this is slightly modified copy paste from jupyterlab-go-to-definition/editors/codemirror/extension.ts;
+ * CodeMirror-proof implementation of event.getModifierState()
  */
 export function getModifierState(
   event: MouseEvent | KeyboardEvent,
-  modifierKey: string
+  modifierKey: ModifierKey
 ): boolean {
   // Note: Safari does not support getModifierState on MouseEvent, see:
   // https://github.com/krassowski/jupyterlab-go-to-definition/issues/3
@@ -59,11 +67,18 @@ export function getModifierState(
     case 'Alt':
       value = event.altKey || key == 'Alt';
       break;
+    case 'AltGraph':
+      value = key == 'AltGraph';
+      break;
     case 'Control':
       value = event.ctrlKey || key == 'Control';
       break;
     case 'Meta':
       value = event.metaKey || key == 'Meta';
+      break;
+    case 'Accel':
+      value =
+        event.metaKey || key == 'Meta' || event.ctrlKey || key == 'Control';
       break;
   }
 
