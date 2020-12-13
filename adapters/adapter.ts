@@ -96,6 +96,8 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   protected app: JupyterFrontEnd;
 
   public activeEditorChanged: Signal<WidgetAdapter<T>, IEditorChangedData>;
+  public editorAdded: Signal<WidgetAdapter<T>, IEditorChangedData>;
+  public editorRemoved: Signal<WidgetAdapter<T>, IEditorChangedData>;
   public update_finished: Promise<void>;
 
   /**
@@ -117,6 +119,8 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.connection_manager = extension.connection_manager;
     this.adapterConnected = new Signal(this);
     this.activeEditorChanged = new Signal(this);
+    this.editorRemoved = new Signal(this);
+    this.editorAdded = new Signal(this);
     this.adapters = new Map();
     this.status_message = new StatusMessage();
     this.isConnected = false;

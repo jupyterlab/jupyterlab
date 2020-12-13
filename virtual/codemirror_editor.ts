@@ -280,9 +280,15 @@ export class CodeMirrorVirtualEditor
     };
     this._event_wrappers.set([eventName, handler], wrapped_handler);
 
-    this.forEveryBlockEditor(cm_editor => {
-      cm_editor.on(eventName, wrapped_handler);
-    });
+    this.forEveryBlockEditor(
+      cm_editor => {
+        cm_editor.on(eventName, wrapped_handler);
+      },
+      true,
+      cm_editor => {
+        cm_editor.off(eventName, wrapped_handler);
+      }
+    );
   }
 
   off(eventName: string, handler: CodeMirrorHandler, ...args: any[]): void {
@@ -496,28 +502,25 @@ export class CodeMirrorVirtualEditor
     return 0;
   }
 
-  addEventListener(type: string, listener: EventListenerOrEventListenerObject) {
-    this.forEveryBlockEditor(cm_editor => {
-      cm_editor.getWrapperElement().addEventListener(type, listener);
-    });
-  }
-
   forEveryBlockEditor(
     callback: (cm_editor: CodeMirror.Editor) => any,
-    monitor_for_new_blocks = true
+    monitor_for_new_blocks = true,
+    on_editor_removed_callback: (cm_editor: CodeMirror.Editor) => any = null
   ) {
     const editors_with_handlers = new Set<CodeMirror.Editor>();
 
-    // TODO... the need of iterating over all editors is universal. How does the virtual
-    //  editor gets knowledge of the editor instances? From the adapter obviously.
+    // TODO... the need of iterating over all editors is universal - so this could be
+    //  generalised to the VirtualEditor rather than live in CodeMirrorVirtualEditor;
+    //  How would the VirtualEditor get knowledge of the editor instances?
+    //  From the adapter (obviously).
     for (let editor of this.adapter.editors) {
       let cm_editor = (editor as CodeMirrorEditor).editor;
       editors_with_handlers.add(cm_editor);
       callback(cm_editor);
     }
     if (monitor_for_new_blocks) {
-      this.adapter.activeEditorChanged.connect(
-        (adapter, data: IEditorChangedData) => {
+      this.adapter.editorAdded.connect(
+        (adapter: WidgetAdapter<IDocumentWidget>, data: IEditorChangedData) => {
           let { editor } = data;
           if (editor == null) {
             return;
@@ -526,6 +529,16 @@ export class CodeMirrorVirtualEditor
           if (!editors_with_handlers.has(cm_editor)) {
             callback(cm_editor);
           }
+        }
+      );
+      this.adapter.editorRemoved.connect(
+        (adapter, data: IEditorChangedData) => {
+          let { editor } = data;
+          if (editor == null) {
+            return;
+          }
+          let cm_editor = (editor as CodeMirrorEditor).editor;
+          on_editor_removed_callback(cm_editor);
         }
       );
     }
