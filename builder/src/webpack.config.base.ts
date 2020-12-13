@@ -72,8 +72,10 @@ try {
   // no Phosphor shims required
 }
 
+const watch = process.argv.includes('--watch');
+
 module.exports = {
-  bail: false,
+  bail:  !watch,
   module: { rules },
   resolve: {
     alias: phosphorAlias,
