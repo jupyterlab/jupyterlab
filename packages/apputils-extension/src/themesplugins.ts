@@ -85,9 +85,6 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
         );
       }
 
-      // Set any CSS overrides
-      manager.loadCSSOverrides();
-
       commands.notifyCommandChanged(CommandIDs.changeTheme);
     });
 

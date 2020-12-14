@@ -56,9 +56,11 @@ export class ThemeManager implements IThemeManager {
 
     void registry.load(key).then(settings => {
       this._settings = settings;
+      // set up css overrides once we have a pointer to the settings schema
+      this._initOverrideProps();
+
       this._settings.changed.connect(this._loadSettings, this);
       this._loadSettings();
-      this._initOverrideProps();
     });
   }
 
@@ -92,7 +94,7 @@ export class ThemeManager implements IThemeManager {
    */
   getCSS(key: string): string {
     return (
-      this._overrides[key] ||
+      this._overrides[key] ??
       getComputedStyle(document.documentElement).getPropertyValue(`--jp-${key}`)
     );
   }
@@ -122,6 +124,9 @@ export class ThemeManager implements IThemeManager {
 
       document.body.appendChild(link);
       links.push(link);
+
+      // add any css overrides to document
+      this.loadCSSOverrides();
     });
   }
 
@@ -131,7 +136,7 @@ export class ThemeManager implements IThemeManager {
    */
   loadCSSOverrides(): void {
     const newOverrides =
-      (this._settings.user['overrides'] as Dict<string>) || {};
+      (this._settings.user['overrides'] as Dict<string>) ?? {};
 
     // iterate over the union of current and new CSS override keys
     Object.keys({ ...this._overrides, ...newOverrides }).forEach(key => {
@@ -142,6 +147,7 @@ export class ThemeManager implements IThemeManager {
         document.documentElement.style.setProperty(`--jp-${key}`, val);
       } else {
         // if key is not present or validation failed, the override will be removed
+        delete newOverrides[key];
         document.documentElement.style.removeProperty(`--jp-${key}`);
       }
     });
@@ -207,8 +213,10 @@ export class ThemeManager implements IThemeManager {
    * Add a CSS override to the settings.
    */
   setCSSOverride(key: string, value: string): Promise<void> {
-    this._overrides[key] = value;
-    return this._settings.set('overrides', this._overrides);
+    return this._settings.set('overrides', {
+      ...this._overrides,
+      [key]: value
+    });
   }
 
   /**
@@ -277,7 +285,7 @@ export class ThemeManager implements IThemeManager {
    * Get the display name of the theme.
    */
   getDisplayName(name: string): string {
-    return this._themes[name]?.displayName || name;
+    return this._themes[name]?.displayName ?? name;
   }
 
   /**
@@ -285,7 +293,7 @@ export class ThemeManager implements IThemeManager {
    */
   private _incrFontSize(key: string, add: boolean = true): Promise<void> {
     // get the numeric and unit parts of the current font size
-    const parts = (this.getCSS(key) || '13px').split(/([a-zA-Z]+)/);
+    const parts = (this.getCSS(key) ?? '13px').split(/([a-zA-Z]+)/);
 
     // determine the increment
     const incr = (add ? 1 : -1) * (parts[1] === 'em' ? 0.1 : 1);
@@ -299,17 +307,13 @@ export class ThemeManager implements IThemeManager {
    */
   private _initOverrideProps(): void {
     const definitions = this._settings.schema.definitions as any;
+    const overidesSchema = definitions.cssOverrides.properties;
 
-    // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of apputils
-    // TODO: delete workaround in v2.0.0
-    if (definitions && definitions.cssOverrides) {
-      const oSchema = definitions.cssOverrides.properties;
-      // the description field of each item in the overrides schema stores a
-      // CSS property that will be used to validate that override's values
-      Object.keys(oSchema).forEach(key => {
-        this._overrideProps[key] = oSchema[key].description;
-      });
-    }
+    Object.keys(overidesSchema).forEach(key => {
+      // override validation is against the CSS property in the description
+      // field. Example: for key ui-font-family, .description is font-family
+      this._overrideProps[key] = overidesSchema[key].description;
+    });
   }
 
   /**
