@@ -24,6 +24,10 @@
   flex-direction: row;
 }
 
+body[data-format='mobile'] .jp-OutputArea-child {
+  flex-direction: column;
+}
+
 .jp-OutputPrompt {
   flex: 0 0 var(--jp-cell-prompt-width);
   color: var(--jp-cell-outprompt-font-color);
@@ -46,6 +50,11 @@
   user-select: none;
 }
 
+body[data-format='mobile'] .jp-OutputPrompt {
+  flex: 0 0 auto;
+  text-align: left;
+}
+
 .jp-OutputArea-output {
   height: auto;
   overflow: auto;
@@ -58,6 +67,10 @@
 .jp-OutputArea-child .jp-OutputArea-output {
   flex-grow: 1;
   flex-shrink: 1;
+}
+
+body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
+  margin-left: var(--jp-notebook-padding);
 }
 
 /**

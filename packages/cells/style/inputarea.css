@@ -14,6 +14,10 @@
   overflow: hidden;
 }
 
+body[data-format='mobile'] .jp-InputArea {
+  flex-direction: column;
+}
+
 .jp-InputArea-editor {
   flex: 1 1 auto;
   overflow: hidden;
@@ -24,6 +28,10 @@
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   border-radius: 0px;
   background: var(--jp-cell-editor-background);
+}
+
+body[data-format='mobile'] .jp-InputArea-editor {
+  margin-left: var(--jp-notebook-padding);
 }
 
 .jp-InputPrompt {
@@ -47,4 +55,9 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+body[data-format='mobile'] .jp-InputPrompt {
+  flex: 0 0 auto;
+  text-align: left;
 }
