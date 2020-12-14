@@ -148,9 +148,9 @@ export namespace Build {
       if (!data.jupyterlab.themePath) {
         // We prefer the styleModule key if it exists, falling back to
         // the normal style key.
-        if (data.styleModule) {
+        if (typeof data.styleModule === 'string') {
           cssImports.push(`${name}/${data.styleModule}`);
-        } else if (data.style) {
+        } else if (typeof data.style === 'string') {
           cssImports.push(`${name}/${data.style}`);
         }
       }
