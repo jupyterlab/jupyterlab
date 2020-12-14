@@ -8,10 +8,6 @@
 // font.ts has ended up in @jupyuterlab/ui-components, which is not
 // meant to run in a node env in any case
 
-import { VirtualElement, h } from '@lumino/virtualdom';
-
-import { Menu } from '@lumino/widgets';
-
 const fontCandidates = [
   'Adobe Arabic',
   'Adobe Caslon Pro',
@@ -314,7 +310,7 @@ const fontCandidates = [
 /**
  * adapted from https://stackoverflow.com/a/3368855/425458
  */
-export class FontChecker {
+class FontChecker {
   constructor() {
     this.h = document.getElementsByTagName('body')[0];
 
@@ -360,7 +356,7 @@ export class FontChecker {
   defaultHeight: { [key: string]: number } = {};
 }
 
-export namespace FontChecker {
+namespace FontChecker {
   // a font will be compared against all the three default fonts.
   // And if it doesn't match all 3 then that font is not available
   export const baseFonts = ['monospace', 'sans-serif', 'serif'];
@@ -373,7 +369,7 @@ export namespace FontChecker {
   export const testSize = '72px';
 }
 
-export const getFonts = (): string[] => {
+const getFonts = (): string[] => {
   const fontChecker = new FontChecker();
 
   return fontCandidates.reduce((arr: string[], font: string) => {
@@ -385,35 +381,3 @@ export const getFonts = (): string[] => {
 };
 
 export const validFonts = getFonts();
-
-export class FontMenu extends Menu {
-  constructor(options: Menu.IOptions) {
-    if (!options.renderer) {
-      options.renderer = new FontMenu.Renderer();
-    }
-
-    super(options);
-  }
-}
-
-export namespace FontMenu {
-  export class Renderer extends Menu.Renderer {
-    /**
-     * Render the label element for a menu item.
-     *
-     * @param data - The data to use for rendering the label.
-     *
-     * @returns A virtual element representing the item label.
-     */
-    renderLabel(data: Menu.IRenderData): VirtualElement {
-      let content = this.formatLabel(data);
-      return h.div(
-        {
-          className: 'p-Menu-itemLabel',
-          style: { fontFamily: data.item.args['font'] as string }
-        },
-        content
-      );
-    }
-  }
-}
