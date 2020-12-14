@@ -1072,7 +1072,7 @@ export namespace NotebookActions {
         (child as CodeCell).outputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1098,7 +1098,7 @@ export namespace NotebookActions {
         (child as CodeCell).outputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1198,7 +1198,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = true;
       }
     });
-    Private.handleState(notebook, state);
+    Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1238,7 +1238,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = true;
       }
     });
-    Private.handleState(notebook, state);
+    Private.handleState(notebook, state, true);
   }
 
   /**
