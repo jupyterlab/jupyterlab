@@ -1,11 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Token } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
-import * as React from 'react';
-
 import {
   Dialog,
   ReactWidget,
@@ -13,8 +8,18 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/apputils';
+
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { closeIcon, LabIcon, refreshIcon } from '@jupyterlab/ui-components';
+
+import { Token } from '@lumino/coreutils';
+
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+
+import { ISignal } from '@lumino/signaling';
+
+import * as React from 'react';
 
 /**
  * The class name added to a running widget.
@@ -241,12 +246,22 @@ function Section(props: {
       <>
         <header className={SECTION_HEADER_CLASS}>
           <h2>{props.manager.name}</h2>
-          <button
-            className={`${SHUTDOWN_ALL_BUTTON_CLASS} jp-mod-styled`}
-            onClick={onShutdown}
-          >
-            {shutdownAllLabel}
-          </button>
+          <UseSignal signal={props.manager.runningChanged}>
+            {() => {
+              const disabled = props.manager.running().length === 0;
+              return (
+                <button
+                  className={`${SHUTDOWN_ALL_BUTTON_CLASS} jp-mod-styled ${
+                    disabled && 'jp-mod-disabled'
+                  }`}
+                  disabled={disabled}
+                  onClick={onShutdown}
+                >
+                  {shutdownAllLabel}
+                </button>
+              );
+            }}
+          </UseSignal>
         </header>
 
         <div className={CONTAINER_CLASS}>
