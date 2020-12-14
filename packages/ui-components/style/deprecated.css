@@ -78,10 +78,12 @@
   --jp-icon-spreadsheet: url('icons/filetype/spreadsheet.svg');
   --jp-icon-stop: url('icons/toolbar/stop.svg');
   --jp-icon-tab: url('icons/sidebar/tab.svg');
+  --jp-icon-table: url('icons/sidebar/table-rows.svg');
   --jp-icon-tag: url('icons/toolbar/tag.svg');
   --jp-icon-terminal: url('icons/statusbar/terminal.svg');
   --jp-icon-text-editor: url('icons/filetype/text-editor.svg');
   --jp-icon-toc: url('icons/sidebar/toc.svg');
+  --jp-icon-tree: url('icons/sidebar/tree-view.svg');
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
   --jp-icon-undo: url('icons/toolbar/undo.svg');
   --jp-icon-vega: url('icons/filetype/vega.svg');
@@ -288,6 +290,9 @@
 .jp-TabIcon {
   background-image: var(--jp-icon-tab);
 }
+.jp-TableIcon {
+  background-image: var(--jp-icon-table);
+}
 .jp-TagIcon {
   background-image: var(--jp-icon-tag);
 }
@@ -299,6 +304,9 @@
 }
 .jp-TocIcon {
   background-image: var(--jp-icon-toc);
+}
+.jp-TreeIcon {
+  background-image: var(--jp-icon-tree);
 }
 .jp-TrustedIcon {
   background-image: var(--jp-icon-trusted);
