@@ -191,11 +191,11 @@ export async function ensurePackage(
     const funcName = 'ensurePackage';
     const cssIndexContents = [
       utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
-      ...cssImports.map(x => `@import url('~${x}');`),
+      ...cssImports.map(x => `@import '~${x}';`),
       ''
     ];
     if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
-      cssIndexContents.push("@import url('./base.css');\n");
+      cssIndexContents.push("@import './base.css';\n");
     }
 
     // write out cssIndexContents, if needed
