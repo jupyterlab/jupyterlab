@@ -440,6 +440,13 @@ export async function ensurePackage(
     }
   }
 
+  // Ensure main and exports are set
+  data.exports = {
+    '.': './lib/index.js'
+  };
+  data.main = './lib/index.js';
+  data.types = './lib/index.d.ts';
+
   // Ensure dependencies and dev dependencies.
   data.dependencies = deps;
   data.devDependencies = devDeps;
