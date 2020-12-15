@@ -27,14 +27,10 @@
       "@jupyterlab/example-federated-middle": {
         "import": false
       },
-      "@jupyterlab/example-federated-middle/tokens": {
-        "packageName": "@jupyterlab/example-federated-middle",
+      "@jupyterlab/example-federated-middle/": {
         "import": false
       }
     }
   },
-
-
-
   "styleModule": "./style/index.js"
 }
