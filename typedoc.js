@@ -22,9 +22,9 @@ module.exports = {
 
     '**/packages/metapackage/**'
   ],
-  excludeNotExported: true,
-  ignoreCompilerErrors: false,
-  mode: 'library',
+  // excludeNotExported: true,
+  // ignoreCompilerErrors: false,
+  // mode: 'library',
   name: '@jupyterlab',
   out: 'docs/api',
   readme: 'README.md',
