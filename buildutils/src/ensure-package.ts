@@ -366,6 +366,25 @@ export async function ensurePackage(
     }
   }
 
+  // Ensure main and exports are set
+  if (data.exports === undefined) {
+    data.exports = {};
+  }
+  data.exports['.'] = './lib/index.js';
+  data.exports['./package.json'] = './package.json';
+  data.main = './lib/index.js';
+  data.types = 'index.d.ts';
+  data.typesVersions = {
+    '*': {
+      '*': ['./lib/*']
+    }
+  };
+
+  // Ensure tokens files are accessible from the top level
+  if (fs.existsSync(path.join(pkgPath, 'src/tokens.ts'))) {
+    data.exports['./tokens'] = './lib/tokens.js'
+  }
+
   // Ensure that the `style` directories match what is in the `package.json`
   const styles = glob.sync(path.join(pkgPath, 'style', '**/*.*'));
   const styleIndex: { [key: string]: string } = {};
@@ -374,6 +393,7 @@ export async function ensurePackage(
     if (data.style === undefined) {
       data.style = 'style/index.css';
     }
+    data.exports['./style/index.css'] = './style/index.css';
     styleIndex[path.join(pkgPath, data.style)] = data.style;
     if (!fs.existsSync(path.join(pkgPath, data.style))) {
       messages.push(
@@ -384,6 +404,8 @@ export async function ensurePackage(
     if (data.styleModule === undefined) {
       data.styleModule = 'style/index.js';
     }
+    data.exports['./style/index.js'] = './style/index.js';
+
     styleIndex[path.join(pkgPath, data.styleModule)] = data.styleModule;
     if (!fs.existsSync(path.join(pkgPath, data.styleModule))) {
       messages.push(
@@ -439,13 +461,6 @@ export async function ensurePackage(
       }
     }
   }
-
-  // Ensure main and exports are set
-  data.exports = {
-    '.': './lib/index.js'
-  };
-  data.main = './lib/index.js';
-  data.types = './lib/index.d.ts';
 
   // Ensure dependencies and dev dependencies.
   data.dependencies = deps;
