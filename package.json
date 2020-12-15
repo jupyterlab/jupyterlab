@@ -106,7 +106,7 @@
     "lint-staged": "^10.2.13",
     "prettier": "^2.1.1",
     "shell-quote": "^1.7.2",
-    "typedoc": "0.17.0-3",
+    "typedoc": "~0.20.0-beta.27",
     "yarn": "1.21.1"
   }
 }
