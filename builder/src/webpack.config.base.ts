@@ -75,7 +75,7 @@ try {
 const watch = process.argv.includes('--watch');
 
 module.exports = {
-  bail:  !watch,
+  bail: !watch,
   module: { rules },
   resolve: {
     alias: phosphorAlias,
