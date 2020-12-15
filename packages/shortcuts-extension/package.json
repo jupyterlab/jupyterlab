@@ -13,8 +13,11 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": false,
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "exports": {
+    ".": "./lib/index.js"
+  },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "directories": {
     "lib": "lib/"
   },

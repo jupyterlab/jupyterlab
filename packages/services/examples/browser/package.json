@@ -2,6 +2,11 @@
   "name": "@jupyterlab/example-services-browser",
   "version": "3.0.0-rc.13",
   "private": true,
+  "exports": {
+    ".": "./lib/index.js"
+  },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "scripts": {
     "build": "tsc && webpack",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
