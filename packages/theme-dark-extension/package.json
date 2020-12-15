@@ -14,10 +14,13 @@
   "author": "Project Jupyter",
   "sideEffects": true,
   "exports": {
-    ".": "./lib/index.js"
+    ".": "./lib/index.js",
+    "./package.json": "./package.json",
+    "./style/index.css": "./style/index.css",
+    "./style/index.js": "./style/index.js"
   },
   "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "types": "index.d.ts",
   "style": "style/index.css",
   "directories": {
     "lib": "lib/"
@@ -52,5 +55,12 @@
     "extension": true,
     "themePath": "style/index.css"
   },
-  "styleModule": "style/index.js"
+  "styleModule": "style/index.js",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./lib/*"
+      ]
+    }
+  }
 }

@@ -18,14 +18,15 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "exports": {
-    ".": "./lib/index.js"
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
   },
   "main": "./lib/index.js",
   "browser": {
     "node-fetch": false,
     "ws": "./lib/shim/ws.js"
   },
-  "types": "./lib/index.d.ts",
+  "types": "index.d.ts",
   "files": [
     "lib/**/*.js",
     "lib/*.js.map",
@@ -79,5 +80,12 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./lib/*"
+      ]
+    }
   }
 }

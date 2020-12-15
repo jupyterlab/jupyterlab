@@ -18,10 +18,12 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "exports": {
-    ".": "./lib/index.js"
+    ".": "./lib/index.js",
+    "./package.json": "./package.json",
+    "./tokens": "./lib/tokens.js"
   },
   "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "types": "index.d.ts",
   "directories": {
     "lib": "lib/"
   },
@@ -58,5 +60,12 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./lib/*"
+      ]
+    }
   }
 }

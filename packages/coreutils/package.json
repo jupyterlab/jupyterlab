@@ -14,13 +14,14 @@
   "author": "Project Jupyter",
   "sideEffects": false,
   "exports": {
-    ".": "./lib/index.js"
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
   },
   "main": "./lib/index.js",
   "browser": {
     "path": "path-browserify"
   },
-  "types": "./lib/index.d.ts",
+  "types": "index.d.ts",
   "directories": {
     "lib": "lib/"
   },
@@ -68,5 +69,12 @@
   },
   "jupyterlab": {
     "coreDependency": true
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./lib/*"
+      ]
+    }
   }
 }
