@@ -108,7 +108,7 @@ class ExtensionManager(object):
                 latest_version=data['version'],
                 installed_version=data['version'],
                 status=status,
-                install=data['install'],
+                install=data.get('install', {}),
                 pkg_type='federated'
             ))
 
