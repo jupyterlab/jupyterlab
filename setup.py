@@ -146,9 +146,9 @@ setup_args['install_requires'] = [
     'packaging',
     'tornado>=6.1.0',
     'jupyter_core',
-    'jupyterlab_server~=2.0.0rc5',
-    'jupyter_server~=1.0.1',
-    'nbclassic~=0.2.0',
+    'jupyterlab_server~=2.0.0rc9',
+    'jupyter_server~=1.1',
+    'nbclassic~=0.2',
     'jinja2>=2.10'
 ]
 
@@ -157,9 +157,9 @@ setup_args['extras_require'] = {
     'test': [
         'pytest>=6.0',
         'pytest-cov',
-        'pytest-tornasync',
         'pytest-console-scripts',
         'pytest-check-links',
+        'jupyterlab_server[test]~=2.0.0rc9',
         'requests',
         'wheel',
         'virtualenv'
@@ -187,10 +187,7 @@ setup_args['entry_points'] = {
         'jupyter-labextension = jupyterlab.labextensions:main',
         'jupyter-labhub = jupyterlab.labhubapp:main',
         'jlpm = jupyterlab.jlpmapp:main',
-    ],
-    'pytest11': [
-        'pytest_jupyterlab = jupyterlab.pytest_plugin'
-    ],
+    ]
 }
 
 

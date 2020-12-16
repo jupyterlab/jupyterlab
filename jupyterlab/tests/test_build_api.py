@@ -12,7 +12,7 @@ from jupyterlab_server.tests.utils import expected_http_error
 
 
 @pytest.fixture
-def build_api_tester(serverapp, labapp, fetch_long):
+def build_api_tester(jp_serverapp, labapp, fetch_long):
     return BuildAPITester(labapp, fetch_long)
 
 
