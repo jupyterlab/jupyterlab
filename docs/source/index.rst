@@ -61,7 +61,6 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
    extension/ui_helpers
    extension/extension_tutorial
    extension/extension_migration
-   extension/extension_migration_2_3
 
 .. toctree::
    :maxdepth: 1
