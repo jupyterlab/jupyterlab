@@ -109,7 +109,7 @@ class ExtensionManager(object):
                 installed_version=data['version'],
                 status=status,
                 install=data.get('install', {}),
-                pkg_type='federated'
+                pkg_type='source'
             ))
 
         for name, data in info['extensions'].items():
@@ -132,7 +132,7 @@ class ExtensionManager(object):
                 latest_version=pkg_info['latest_version'],
                 installed_version=data['version'],
                 status=status,
-                pkg_type='source'
+                pkg_type='pre-built'
             ))
         for name in build_check_info['uninstall']:
             data = yield self._get_scheduled_uninstall_info(name)
