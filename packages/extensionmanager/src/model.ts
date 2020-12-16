@@ -79,6 +79,11 @@ export interface IEntry {
   blockedExtensionsEntry: IListEntry | undefined;
 
   allowedExtensionsEntry: IListEntry | undefined;
+
+  /**
+   * The package type (source or pre-built).
+   */
+  pkg_type: 'source' | 'pre-built';
 }
 
 /**
@@ -124,6 +129,11 @@ export interface IInstalledEntry {
    * A flag indicating the status of an installed extension.
    */
   status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
+
+  /**
+   * The package type (source or pre-built).
+   */
+  pkg_type: 'source' | 'pre-built';
 }
 
 /**
@@ -522,7 +532,8 @@ export class ListModel extends VDomModel {
         latest_version: pkg.version,
         installed_version: '',
         blockedExtensionsEntry: isblockedExtensions,
-        allowedExtensionsEntry: isallowedExtensions
+        allowedExtensionsEntry: isallowedExtensions,
+        pkg_type: 'pre-built'
       };
     }
     return entries;
@@ -557,7 +568,8 @@ export class ListModel extends VDomModel {
             allowedExtensionsEntry: this.isListed(
               pkg.name,
               this._allowedExtensionsArray
-            )
+            ),
+            pkg_type: pkg.pkg_type
           };
         })
       );
