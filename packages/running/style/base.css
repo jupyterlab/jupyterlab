@@ -147,3 +147,11 @@
   box-shadow: none;
   background-color: var(--jp-layout-color2);
 }
+
+.jp-RunningSessions-shutdownAll.jp-mod-styled.jp-mod-disabled {
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-RunningSessions-shutdownAll.jp-mod-styled.jp-mod-disabled:hover {
+  background: none;
+}
