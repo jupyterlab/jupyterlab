@@ -167,7 +167,10 @@ export class HighlightsCM extends CodeMirrorIntegration {
         // request the highlights as soon as possible
         this.debounced_get_highlight.invoke(),
         // and in the meantime remove the old markers
-        async () => this.clear_markers()
+        async () => {
+          this.clear_markers();
+          this.last_token = null;
+        }
       ])
         .then(([highlights]) => {
           // in the time the response returned the document might have been closed - check that
