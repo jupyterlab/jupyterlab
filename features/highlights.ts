@@ -2,8 +2,7 @@ import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { DocumentHighlightKind } from '../lsp';
 import { VirtualDocument } from '../virtual/document';
-import { IRootPosition } from '../positioning';
-import { uris_equal } from '../utils';
+import { IRootPosition, IVirtualPosition } from '../positioning';
 import { FeatureSettings, IFeatureCommand } from '../feature';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import {
@@ -15,6 +14,9 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
 import highlightSvg from '../../style/icons/highlight.svg';
 import highlightTypeSvg from '../../style/icons/highlight-type.svg';
+import { Debouncer } from '@lumino/polling';
+import { CodeHighlights as LSPHighlightsSettings } from '../_highlights';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 export const highlightIcon = new LabIcon({
   name: 'lsp:highlight',
@@ -47,8 +49,21 @@ const COMMANDS: IFeatureCommand[] = [
 
 export class HighlightsCM extends CodeMirrorIntegration {
   protected highlight_markers: CodeMirror.TextMarker[] = [];
+  private debounced_get_highlight: Debouncer<lsProtocol.DocumentHighlight[]>;
+  private virtual_position: IVirtualPosition;
+  private sent_version: number;
+  private last_token: CodeEditor.IToken;
+
+  get settings() {
+    return super.settings as FeatureSettings<LSPHighlightsSettings>;
+  }
 
   register(): void {
+    this.debounced_get_highlight = this.create_debouncer();
+
+    this.settings.changed.connect(() => {
+      this.debounced_get_highlight = this.create_debouncer();
+    });
     this.editor_handlers.set('cursorActivity', this.onCursorActivity);
     super.register();
   }
@@ -67,13 +82,7 @@ export class HighlightsCM extends CodeMirrorIntegration {
     this.highlight_markers = [];
   }
 
-  protected handleHighlight = (
-    items: lsProtocol.DocumentHighlight[],
-    documentUri: string
-  ) => {
-    if (!uris_equal(documentUri, this.virtual_document.document_info.uri)) {
-      return;
-    }
+  protected handleHighlight = (items: lsProtocol.DocumentHighlight[]) => {
     this.clear_markers();
 
     if (!items) {
@@ -93,6 +102,22 @@ export class HighlightsCM extends CodeMirrorIntegration {
     }
   };
 
+  protected create_debouncer() {
+    return new Debouncer<lsProtocol.DocumentHighlight[]>(
+      this.on_cursor_activity,
+      this.settings.composite.debouncerDelay
+    );
+  }
+
+  protected on_cursor_activity = async () => {
+    this.sent_version = this.virtual_document.document_info.version;
+    return await this.connection.getDocumentHighlights(
+      this.virtual_position,
+      this.virtual_document.document_info,
+      false
+    );
+  };
+
   protected onCursorActivity = async () => {
     if (!this.virtual_editor?.virtual_document?.document_info) {
       return;
@@ -109,6 +134,14 @@ export class HighlightsCM extends CodeMirrorIntegration {
       return;
     }
 
+    const token = this.virtual_editor.get_token_at(root_position);
+
+    // if token has not changed, no need to update highlight
+    if (this.last_token && token.value === this.last_token.value) {
+      console.log('LSP: not requesting highlights (token did not change)');
+      return;
+    }
+
     let document: VirtualDocument;
     try {
       document = this.virtual_editor.document_at_root_position(root_position);
@@ -122,21 +155,49 @@ export class HighlightsCM extends CodeMirrorIntegration {
     if (document !== this.virtual_document) {
       return;
     }
+
     try {
       let virtual_position = this.virtual_editor.root_position_to_virtual_position(
         root_position
       );
-      const highlights = await this.connection.getDocumentHighlights(
-        virtual_position,
-        this.virtual_document.document_info,
-        false
-      );
-      if (!this.virtual_document.isDisposed) {
-        this.handleHighlight(
-          highlights,
-          this.virtual_document.document_info.uri
-        );
-      }
+
+      this.virtual_position = virtual_position;
+
+      Promise.all([
+        // request the highlights as soon as possible
+        this.debounced_get_highlight.invoke(),
+        // and in the meantime remove the old markers
+        async () => this.clear_markers()
+      ])
+        .then(([highlights]) => {
+          // in the time the response returned the document might have been closed - check that
+          if (this.virtual_document.isDisposed) {
+            return;
+          }
+
+          let version_after = this.virtual_document.document_info.version;
+
+          /// if document was updated since (e.g. user pressed delete - token change, but position did not)
+          if (version_after !== this.sent_version) {
+            console.log(
+              'LSP: skipping highlights response delayed by ' +
+                (version_after - this.sent_version) +
+                ' document versions'
+            );
+            return;
+          }
+          // if cursor position changed (e.g. user moved cursor up - position has changed, but document version did not)
+          if (virtual_position !== this.virtual_position) {
+            console.log(
+              'LSP: skipping highlights response: cursor moved since it was requested'
+            );
+            return;
+          }
+
+          this.handleHighlight(highlights);
+          this.last_token = token;
+        })
+        .catch(console.warn);
     } catch (e) {
       console.warn('Could not get highlights:', e);
     }
