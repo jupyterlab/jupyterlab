@@ -2,12 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import {
-  VDomRenderer,
-  ToolbarButtonComponent,
-  Dialog,
-  showDialog
-} from '@jupyterlab/apputils';
+import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
@@ -282,101 +277,59 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           <div className="jp-extensionmanager-entry-description">
             {entry.description}
           </div>
-          {entry.federated && entry.installed && (
-            <div className="jp-extensionmanager-entry-buttons">
+          <div className="jp-extensionmanager-entry-buttons">
+            {!entry.installed &&
+              !entry.blockedExtensionsEntry &&
+              !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
+              ListModel.isDisclaimed() && (
+                <Button
+                  onClick={() => props.performAction('install', entry)}
+                  minimal
+                  small
+                >
+                  {trans.__('Install')}
+                </Button>
+              )}
+            {ListModel.entryHasUpdate(entry) &&
+              !entry.blockedExtensionsEntry &&
+              !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
+              ListModel.isDisclaimed() && (
+                <Button
+                  onClick={() => props.performAction('install', entry)}
+                  minimal
+                  small
+                >
+                  {trans.__('Update')}
+                </Button>
+              )}
+            {entry.installed && (
               <Button
-                onClick={() =>
-                  showDialog({
-                    title,
-                    body: (
-                      <div>
-                        <p>
-                          {trans.__(`This is a Federated Extension. To uninstall it, please
-                read the user guide on:`)}
-                        </p>
-                        <p>
-                          <a
-                            href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            https://jupyterlab.readthedocs.io/en/stable/user/extensions.html
-                          </a>
-                        </p>
-                      </div>
-                    ),
-                    buttons: [
-                      Dialog.okButton({
-                        label: trans.__('OK'),
-                        caption: trans.__('OK')
-                      })
-                    ]
-                  }).then(result => {
-                    return result.button.accept;
-                  })
-                }
+                onClick={() => props.performAction('uninstall', entry)}
                 minimal
                 small
               >
-                {trans.__('About')}
+                {trans.__('Uninstall')}
               </Button>
-            </div>
-          )}
-          {!entry.federated && (
-            <div className="jp-extensionmanager-entry-buttons">
-              {!entry.installed &&
-                !entry.blockedExtensionsEntry &&
-                !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
-                ListModel.isDisclaimed() && (
-                  <Button
-                    onClick={() => props.performAction('install', entry)}
-                    minimal
-                    small
-                  >
-                    {trans.__('Install')}
-                  </Button>
-                )}
-              {ListModel.entryHasUpdate(entry) &&
-                !entry.blockedExtensionsEntry &&
-                !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
-                ListModel.isDisclaimed() && (
-                  <Button
-                    onClick={() => props.performAction('install', entry)}
-                    minimal
-                    small
-                  >
-                    {trans.__('Update')}
-                  </Button>
-                )}
-              {entry.installed && (
-                <Button
-                  onClick={() => props.performAction('uninstall', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Uninstall')}
-                </Button>
-              )}
-              {entry.enabled && (
-                <Button
-                  onClick={() => props.performAction('disable', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Disable')}
-                </Button>
-              )}
-              {entry.installed && !entry.enabled && (
-                <Button
-                  onClick={() => props.performAction('enable', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Enable')}
-                </Button>
-              )}
-            </div>
-          )}
+            )}
+            {entry.enabled && (
+              <Button
+                onClick={() => props.performAction('disable', entry)}
+                minimal
+                small
+              >
+                {trans.__('Disable')}
+              </Button>
+            )}
+            {entry.installed && !entry.enabled && (
+              <Button
+                onClick={() => props.performAction('enable', entry)}
+                minimal
+                small
+              >
+                {trans.__('Enable')}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </li>

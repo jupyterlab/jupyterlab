@@ -5,8 +5,6 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { VDomModel } from '@jupyterlab/apputils';
 
-import { PageConfig } from '@jupyterlab/coreutils';
-
 import {
   KernelSpec,
   ServerConnection,
@@ -72,11 +70,6 @@ export interface IEntry {
    * The latest version of the extension.
    */
   latest_version: string;
-
-  /**
-   * Whether the extension is federated or not.
-   */
-  federated: boolean;
 
   /**
    * The installed version of the extension.
@@ -528,7 +521,6 @@ export class ListModel extends VDomModel {
         status: null,
         latest_version: pkg.version,
         installed_version: '',
-        federated: false,
         blockedExtensionsEntry: isblockedExtensions,
         allowedExtensionsEntry: isallowedExtensions
       };
@@ -558,7 +550,6 @@ export class ListModel extends VDomModel {
             status: pkg.status,
             latest_version: pkg.latest_version,
             installed_version: pkg.installed_version,
-            federated: false,
             blockedExtensionsEntry: this.isListed(
               pkg.name,
               this._blockedExtensionsArray
@@ -697,23 +688,6 @@ export class ListModel extends VDomModel {
     const installed: IEntry[] = [];
     for (const key of Object.keys(installedMap)) {
       installed.push(installedMap[key]);
-    }
-    for (const federated_extension of JSON.parse(
-      PageConfig.getOption('federated_extensions')
-    )) {
-      installed.push({
-        name: federated_extension['name'],
-        description: '',
-        url: federated_extension['load'],
-        installed: true,
-        enabled: true,
-        status: null,
-        latest_version: '',
-        installed_version: '',
-        federated: true,
-        blockedExtensionsEntry: undefined,
-        allowedExtensionsEntry: undefined
-      });
     }
     this._installed = installed.sort(Private.comparator);
 
