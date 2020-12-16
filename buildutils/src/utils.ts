@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import childProcess from 'child_process';
 import { DepGraph } from 'dependency-graph';
 import sortPackageJson from 'sort-package-json';
-import {JSONExt, JSONObject } from '@lumino/coreutils';
+import { JSONExt, JSONObject } from '@lumino/coreutils';
 
 type Dict<T> = { [key: string]: T };
 
@@ -85,10 +85,7 @@ export function readJSONFile(filePath: string): any {
 /**
  * Write a json file.
  */
-export function writeJSONFile(
-  filePath: string,
-  data: JSONObject
-): boolean {
+export function writeJSONFile(filePath: string, data: JSONObject): boolean {
   function sortObjByKey(value: any): any {
     // https://stackoverflow.com/a/35810961
     return typeof value === 'object'
