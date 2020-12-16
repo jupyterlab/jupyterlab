@@ -382,7 +382,7 @@ CSS Imports
 - Cover duplication of CSS issues
 - Mention the package.json styleModule key
 
-JupyterLab will prefer to put the styleModule key, then the style key, if they exist.
+JupyterLab will prefer to put the ``styleModule`` key, then the style key, if they exist.
 
 
 Prebuilt Extensions
@@ -391,12 +391,18 @@ Prebuilt Extensions
 package.json metadata
 ^^^^^^^^^^^^^^^^^^^^^
 
-In addition to the package metadata for source extensions, prebuilt extensions have extra metadata for where the prebuilt assets should go.
+In addition to the package metadata for source extensions, prebuilt extensions have extra ``jupyterlab`` metadata for where the prebuilt assets should go.
+
+* ``outputDir``: :ref:`outputDir`
+* ``webpackConfig``: :ref:`webpackConfig`
+
+.. _outputDir:
 
 Output Directory
 """"""""""""""""
 
 
+.. _webpackConfig:
 
 Custom webpack config
 """""""""""""""""""""
