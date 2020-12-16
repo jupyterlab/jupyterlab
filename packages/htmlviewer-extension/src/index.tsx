@@ -110,6 +110,7 @@ function activateHTMLViewer(
   app.commands.addCommand(CommandIDs.trustHTML, {
     label: trans.__('Trust HTML File'),
     isEnabled: () => !!tracker.currentWidget,
+    isToggleable: true,
     isToggled: () => {
       const current = tracker.currentWidget;
       if (!current) {

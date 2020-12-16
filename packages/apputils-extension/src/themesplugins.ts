@@ -96,6 +96,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           ? trans.__('Use Theme: %1', displayName)
           : displayName;
       },
+      isToggleable: true,
       isToggled: args => args['theme'] === currentTheme,
       execute: args => {
         const theme = args['theme'] as string;
@@ -108,6 +109,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.themeScrollbars, {
       label: trans.__('Theme Scrollbars'),
+      isToggleable: true,
       isToggled: () => manager.isToggledThemeScrollbars(),
       execute: () => manager.toggleThemeScrollbars()
     });
@@ -116,6 +118,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
       label: args =>
         args['enabled'] ? `${args['font']}` : trans.__('waiting for fonts'),
       isEnabled: args => args['enabled'] as boolean,
+      isToggleable: true,
       isToggled: args => manager.getCSS(args['key'] as string) === args['font'],
       execute: args =>
         manager.setCSSOverride(args['key'] as string, args['font'] as string)

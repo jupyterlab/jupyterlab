@@ -669,6 +669,7 @@ async function activateConsole(
         console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
       }
     },
+    isToggleable: true,
     isToggled: args => args['interactionMode'] === interactionMode
   });
 

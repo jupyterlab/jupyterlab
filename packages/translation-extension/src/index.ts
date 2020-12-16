@@ -131,6 +131,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
                 caption: label,
                 isEnabled: () => !toggled,
                 isVisible: () => true,
+                isToggleable: true,
                 isToggled: () => toggled,
                 execute: () => {
                   return showDialog({

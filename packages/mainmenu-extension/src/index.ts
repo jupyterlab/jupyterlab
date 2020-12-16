@@ -636,6 +636,7 @@ export function createViewMenu(
       menu.editorViewers,
       'toggleLineNumbers'
     ),
+    isToggleable: true,
     isToggled: Private.delegateToggled(
       app,
       menu.editorViewers,
@@ -655,6 +656,7 @@ export function createViewMenu(
       menu.editorViewers,
       'toggleMatchBrackets'
     ),
+    isToggleable: true,
     isToggled: Private.delegateToggled(
       app,
       menu.editorViewers,
@@ -674,6 +676,7 @@ export function createViewMenu(
       menu.editorViewers,
       'toggleWordWrap'
     ),
+    isToggleable: true,
     isToggled: Private.delegateToggled(
       app,
       menu.editorViewers,
@@ -837,6 +840,7 @@ export function createTabsMenu(
       const widget = find(app.shell.widgets('main'), w => w.id === id);
       return (widget && widget.title.label) || '';
     },
+    isToggleable: true,
     isToggled: args => {
       const id = args['id'] || '';
       return !!app.shell.currentWidget && app.shell.currentWidget.id === id;

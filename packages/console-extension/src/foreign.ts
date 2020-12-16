@@ -93,6 +93,7 @@ function activateForeign(
         handler.enabled = !handler.enabled;
       }
     },
+    isToggleable: true,
     isToggled: () =>
       tracker.currentWidget !== null &&
       !!Private.foreignHandlerProperty.get(tracker.currentWidget.console)

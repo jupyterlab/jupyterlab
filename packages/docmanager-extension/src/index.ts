@@ -687,6 +687,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.toggleAutosave, {
     label: trans.__('Autosave Documents'),
+    isToggleable: true,
     isToggled: () => docManager.autosave,
     execute: () => {
       const value = !docManager.autosave;

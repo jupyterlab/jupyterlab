@@ -879,6 +879,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.toggleNavigateToCurrentDirectory, {
     label: trans.__('Show Active File in File Browser'),
+    isToggleable: true,
     isToggled: () => browser.navigateToCurrentDirectory,
     execute: () => {
       const value = !browser.navigateToCurrentDirectory;

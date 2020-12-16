@@ -769,6 +769,7 @@ function addCommands(
         }
       }
     },
+    isToggleable: true,
     isToggled: () => !shell.leftCollapsed,
     isVisible: () => !shell.isEmpty('left')
   });
@@ -785,6 +786,7 @@ function addCommands(
         }
       }
     },
+    isToggleable: true,
     isToggled: () => !shell.rightCollapsed,
     isVisible: () => !shell.isEmpty('right')
   });
@@ -794,6 +796,7 @@ function addCommands(
     execute: () => {
       shell.presentationMode = !shell.presentationMode;
     },
+    isToggleable: true,
     isToggled: () => shell.presentationMode,
     isVisible: () => true
   });
@@ -815,6 +818,7 @@ function addCommands(
 
   app.commands.addCommand(CommandIDs.toggleMode, {
     label: trans.__('Single-Document Mode'),
+    isToggleable: true,
     isToggled: () => shell.mode === 'single-document',
     execute: () => {
       const args =

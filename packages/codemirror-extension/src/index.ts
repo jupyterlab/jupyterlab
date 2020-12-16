@@ -318,6 +318,7 @@ function activateEditorCommands(
         console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
     },
+    isToggleable: true,
     isToggled: args => args['theme'] === theme
   });
 
@@ -335,6 +336,7 @@ function activateEditorCommands(
         console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
     },
+    isToggleable: true,
     isToggled: args => args['keyMap'] === keyMap
   });
 
@@ -377,6 +379,7 @@ function activateEditorCommands(
       }
     },
     isEnabled,
+    isToggleable: true,
     isToggled: args => {
       const widget = tracker.currentWidget;
       if (!widget) {

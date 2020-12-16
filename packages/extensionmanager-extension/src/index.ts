@@ -96,6 +96,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           void registry.set(plugin.id, 'enabled', !enabled);
         }
       },
+      isToggleable: true,
       isToggled: () => enabled,
       isEnabled: () => serviceManager.builder.isAvailable
     });

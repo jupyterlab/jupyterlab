@@ -289,6 +289,7 @@ export namespace Commands {
           });
       },
       isEnabled,
+      isToggleable: true,
       isToggled: () => config.lineNumbers,
       label: trans.__('Line Numbers')
     });
@@ -316,6 +317,7 @@ export namespace Commands {
           });
       },
       isEnabled,
+      isToggleable: true,
       isToggled: args => {
         const lineWrap = (args['mode'] as wrappingMode) || 'off';
         return config.lineWrap === lineWrap;
@@ -344,6 +346,7 @@ export namespace Commands {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
       },
+      isToggleable: true,
       isToggled: args => {
         const insertSpaces = !!args['insertSpaces'];
         const size = (args['size'] as number) || 4;
@@ -373,6 +376,7 @@ export namespace Commands {
       },
       label: trans.__('Match Brackets'),
       isEnabled,
+      isToggleable: true,
       isToggled: () => config.matchBrackets
     });
   }
@@ -396,6 +400,7 @@ export namespace Commands {
           });
       },
       label: trans.__('Auto Close Brackets for Text Editor'),
+      isToggleable: true,
       isToggled: () => config.autoClosingBrackets
     });
   }

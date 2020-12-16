@@ -44,6 +44,7 @@ Here is a sample block of code that adds a command to the application (given by 
       label: 'My Cool Command',
       isEnabled: true,
       isVisible: true,
+      isToggleable: true,
       isToggled: () => toggled,
       iconClass: 'some-css-icon-class',
       execute: () => {
@@ -54,6 +55,7 @@ Here is a sample block of code that adds a command to the application (given by 
 This example adds a new command, which, when triggered, calls the ``execute`` function.
 ``isEnabled`` indicates whether the command is enabled, and determines whether renderings of it are greyed out.
 ``isToggled`` indicates whether to render a check mark next to the command.
+``isToggleable`` indicates whether a command can be toggled for screenreaders.
 ``isVisible`` indicates whether to render the command at all.
 ``iconClass`` specifies a CSS class which can be used to display an icon next to renderings of the command.
 

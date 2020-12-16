@@ -154,6 +154,7 @@ describe('@jupyterlab/apputils', () => {
         iconClass: 'test-icon-class',
         className: 'test-log-class',
         isEnabled: () => enabled,
+        isToggleable: true,
         isToggled: () => toggled,
         isVisible: () => visible
       });

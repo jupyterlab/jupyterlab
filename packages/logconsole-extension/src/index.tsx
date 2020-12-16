@@ -214,6 +214,7 @@ function activateLogConsole(
         createLogConsoleWidget(options);
       }
     },
+    isToggleable: true,
     isToggled: () => {
       return logConsoleWidget !== null;
     }

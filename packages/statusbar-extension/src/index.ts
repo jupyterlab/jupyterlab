@@ -97,6 +97,7 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
           );
         }
       },
+      isToggleable: true,
       isToggled: () => statusBar.isVisible
     });
 

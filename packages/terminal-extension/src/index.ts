@@ -440,6 +440,7 @@ export function addCommands(
         : displayName;
     },
     caption: trans.__('Set the terminal theme'),
+    isToggleable: true,
     isToggled: args => {
       const { theme } = options;
       return args['theme'] === theme;
