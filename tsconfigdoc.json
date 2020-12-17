@@ -1,6 +1,7 @@
 {
   "$schema": "http://json.schemastore.org/tsconfig",
   "extends": "./tsconfigbase",
+  "exclude": ["**/test/**", "**/testutils/**"],
   "compilerOptions": {
     "paths": {
       "@jupyterlab/*": [

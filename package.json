@@ -55,7 +55,7 @@
     "create:test": "node buildutils/lib/create-test-package.js",
     "create:theme": "node buildutils/lib/create-theme.js",
     "deduplicate": "jlpm yarn-deduplicate -s fewer --fail",
-    "docs": "rimraf packages/*/test testutils && typedoc --options typedoc.js && git ls-files -z -d | xargs -0 git checkout --",
+    "docs": "typedoc --options typedoc.js",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --fix .",
     "eslint:check": "eslint --ext .js,.jsx,.ts,.tsx .",
