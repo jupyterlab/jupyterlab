@@ -385,7 +385,7 @@ function getprebuiltUninstallInstruction(
           {trans.__(`This is a prebuilt extension. To uninstall it, please
     apply following instructions.`)}
         </p>
-        <p>{entry.install?.uninstallInstructions}</p>
+        <p>{trans.__(entry.install?.uninstallInstructions)}</p>
       </div>
     );
   }
