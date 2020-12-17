@@ -246,6 +246,8 @@ namespace CommandIDs {
 
   export const replaceSelection = 'notebook:replace-selection';
 
+  export const autoClosingBrackets = 'notebook:toggle-autoclosing-brackets';
+
   export const toggleCollapseCmd = 'Collapsible_Headings:Toggle_Collapse';
 
   export const collapseAllCmd = 'Collapsible_Headings:Collapse_All';
@@ -1061,6 +1063,30 @@ function activateNotebookHandler(
       updateConfig(settings);
       settings.changed.connect(() => {
         updateConfig(settings);
+      });
+      commands.addCommand(CommandIDs.autoClosingBrackets, {
+        execute: () => {
+          let codeConfig = settings.get('codeCellConfig')
+            .composite as JSONObject;
+          let markdownConfig = settings.get('markdownCellConfig')
+            .composite as JSONObject;
+          let rawConfig = settings.get('rawCellConfig').composite as JSONObject;
+
+          const state = !codeConfig.autoClosingBrackets;
+          [
+            codeConfig.autoClosingBrackets,
+            markdownConfig.autoClosingBrackets,
+            rawConfig.autoClosingBrackets
+          ] = [state, state, state];
+
+          void settings.set('codeCellConfig', codeConfig);
+          void settings.set('markdownCellConfig', markdownConfig);
+          void settings.set('rawCellConfig', rawConfig);
+        },
+        label: trans.__('Auto Close Brackets for All Cell Types'),
+        isToggled: () =>
+          (settings.get('codeCellConfig').composite as JSONObject)
+            .autoClosingBrackets as boolean
       });
     })
     .catch((reason: Error) => {
