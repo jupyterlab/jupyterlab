@@ -30,7 +30,7 @@ export async function main() {
   await sessionConnection.setPath('bar.ipynb');
 
   log('Execute "a=1"');
-  const future = sessionConnection.kernel.requestExecute({ code: 'a = 1' });
+  const future = sessionConnection.kernel!.requestExecute({ code: 'a = 1' });
   future.onReply = reply => {
     log(`Got execute reply with status ${reply.content.status}`);
   };
@@ -43,6 +43,6 @@ export async function main() {
   const sessionModels = await SessionAPI.listRunning();
   if (sessionModels.length > 0) {
     const session = sessionManager.connectTo({ model: sessionModels[0] });
-    log(`Connected to ${session.kernel.name}`);
+    log(`Connected to ${session.kernel!.name}`);
   }
 }

@@ -120,8 +120,6 @@ export async function ensurePackage(
   if (fs.existsSync(path.join(pkgPath, 'typedoc.json'))) {
     const name = data.name.split('/');
     utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
-      excludeNotExported: true,
-      mode: 'file',
       out: `../../docs/api/${name[name.length - 1]}`,
       theme: '../../typedoc-theme'
     });

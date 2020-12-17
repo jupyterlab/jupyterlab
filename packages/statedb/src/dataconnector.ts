@@ -38,7 +38,7 @@ export abstract class DataConnector<T, U = T, V = string, W = string>
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Nonexistence of an `id` will succeed with `undefined`.
    */
-  abstract async fetch(id: V): Promise<T | undefined>;
+  abstract fetch(id: V): Promise<T | undefined>;
 
   /**
    * Retrieve the list of items available from the data connector.

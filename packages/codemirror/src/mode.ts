@@ -172,7 +172,7 @@ export namespace Mode {
    */
   export function findByExtension(ext: string | string[]): ISpec | null {
     if (typeof ext === 'string') {
-      return CodeMirror.findModeByExtension(name);
+      return CodeMirror.findModeByExtension(ext);
     }
     for (let i = 0; i < ext.length; i++) {
       const mode = CodeMirror.findModeByExtension(ext[i]);
