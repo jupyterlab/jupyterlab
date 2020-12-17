@@ -1297,7 +1297,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
           if (this._pendingMessages.length > 0) {
             this._sendPending();
           }
-        }
+        };
         p.then(sendPendingOnce);
         // FIXME: if sent while zmq subscriptions are not established,
         // kernelInfo may not resolve, so use a timeout to ensure we don't hang forever.
