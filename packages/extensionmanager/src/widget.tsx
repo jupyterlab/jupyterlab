@@ -235,8 +235,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
-            {entry.pkg_type == 'source' && <div>{entry.name}</div>}
-            {entry.pkg_type == 'prebuilt' && (
+            {entry.pkg_type == 'prebuilt' && <div>{entry.name}</div>}
+            {entry.pkg_type == 'source' && (
               <a href={entry.url} target="_blank" rel="noopener noreferrer">
                 {entry.name}
               </a>
@@ -287,7 +287,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           </div>
           <div className="jp-extensionmanager-entry-buttons">
             {!entry.installed &&
-              entry.pkg_type == 'prebuilt' &&
+              entry.pkg_type == 'source' &&
               !entry.blockedExtensionsEntry &&
               !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
               ListModel.isDisclaimed() && (
@@ -300,7 +300,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 </Button>
               )}
             {ListModel.entryHasUpdate(entry) &&
-              entry.pkg_type == 'prebuilt' &&
+              entry.pkg_type == 'source' &&
               !entry.blockedExtensionsEntry &&
               !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
               ListModel.isDisclaimed() && (
@@ -312,7 +312,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                   {trans.__('Update')}
                 </Button>
               )}
-            {entry.installed && entry.pkg_type == 'prebuilt' && (
+            {entry.installed && entry.pkg_type == 'source' && (
               <Button
                 onClick={() => props.performAction('uninstall', entry)}
                 minimal
@@ -321,7 +321,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Uninstall')}
               </Button>
             )}
-            {entry.enabled && entry.pkg_type == 'prebuilt' && (
+            {entry.enabled && entry.pkg_type == 'source' && (
               <Button
                 onClick={() => props.performAction('disable', entry)}
                 minimal
@@ -330,7 +330,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Disable')}
               </Button>
             )}
-            {entry.installed && entry.pkg_type == 'prebuilt' && !entry.enabled && (
+            {entry.installed && entry.pkg_type == 'source' && !entry.enabled && (
               <Button
                 onClick={() => props.performAction('enable', entry)}
                 minimal
@@ -339,14 +339,16 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Enable')}
               </Button>
             )}
-            {entry.installed && entry.pkg_type == 'source' && (
+            {entry.installed && entry.pkg_type == 'prebuilt' && (
               <div className="jp-extensionmanager-entry-buttons">
                 <Button
                   onClick={() =>
                     showDialog({
                       title,
                       body: (
-                        <div>{getSourceUninstallInstruction(entry, trans)}</div>
+                        <div>
+                          {getprebuiltUninstallInstruction(entry, trans)}
+                        </div>
                       ),
                       buttons: [
                         Dialog.okButton({
@@ -372,7 +374,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   );
 }
 
-function getSourceUninstallInstruction(
+function getprebuiltUninstallInstruction(
   entry: IEntry,
   trans: TranslationBundle
 ): JSX.Element {
@@ -380,7 +382,7 @@ function getSourceUninstallInstruction(
     return (
       <div>
         <p>
-          {trans.__(`This is a Source Extension. To uninstall it, please
+          {trans.__(`This is a prebuilt extension. To uninstall it, please
     apply following instructions.`)}
         </p>
         <p>{entry.install?.uninstallInstructions}</p>
@@ -390,7 +392,7 @@ function getSourceUninstallInstruction(
   return (
     <div>
       <p>
-        {trans.__(`This is a Source Extension. To uninstall it, please
+        {trans.__(`This is a prebuilt extension. To uninstall it, please
     read the user guide on:`)}
       </p>
       <p>

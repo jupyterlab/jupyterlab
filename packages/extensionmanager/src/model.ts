@@ -81,9 +81,9 @@ export interface IEntry {
   allowedExtensionsEntry: IListEntry | undefined;
 
   /**
-   * The package type (source or prebuilt).
+   * The package type (prebuilt or source).
    */
-  pkg_type: 'source' | 'prebuilt';
+  pkg_type: 'prebuilt' | 'source';
 
   /**
    * The information about extension installation.
@@ -157,9 +157,9 @@ export interface IInstalledEntry {
   status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
 
   /**
-   * The package type (source or prebuilt).
+   * The package type (prebuilt or source).
    */
-  pkg_type: 'source' | 'prebuilt';
+  pkg_type: 'prebuilt' | 'source';
 
   /**
    * The information about extension installation.
@@ -585,7 +585,7 @@ export class ListModel extends VDomModel {
         installed_version: '',
         blockedExtensionsEntry: isblockedExtensions,
         allowedExtensionsEntry: isallowedExtensions,
-        pkg_type: 'prebuilt',
+        pkg_type: 'source',
         install: undefined
       };
     }
