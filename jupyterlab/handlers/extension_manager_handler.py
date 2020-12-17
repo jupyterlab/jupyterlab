@@ -132,7 +132,7 @@ class ExtensionManager(object):
                 latest_version=pkg_info['latest_version'],
                 installed_version=data['version'],
                 status=status,
-                pkg_type='pre-built'
+                pkg_type='prebuilt'
             ))
         for name in build_check_info['uninstall']:
             data = yield self._get_scheduled_uninstall_info(name)
