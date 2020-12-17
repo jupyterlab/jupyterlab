@@ -23,7 +23,7 @@ from ..commands import (
 
 
 def _make_extension_entry(name, description, url, enabled, core, latest_version,
-                          installed_version, status, installed=None):
+                          installed_version, status, pkg_type, installed=None, install=None):
     """Create an extension entry that can be sent to the client"""
     ret = dict(
         name=name,
@@ -34,9 +34,12 @@ def _make_extension_entry(name, description, url, enabled, core, latest_version,
         latest_version=latest_version,
         installed_version=installed_version,
         status=status,
+        pkg_type=pkg_type
     )
     if installed is not None:
         ret['installed'] = installed
+    if install is not None:
+        ret['install'] = install
     return ret
 
 
@@ -87,7 +90,28 @@ class ExtensionManager(object):
         build_check_info = _build_check_info(app_options)
         _ensure_compat_errors(info, app_options)
         extensions = []
-        # TODO: Ensure loops can run in parallel
+
+        # TODO: the three for-loops below can be run concurrently
+        for name, data in info['federated_extensions'].items():
+            status = 'ok'
+            pkg_info = data #yield self._get_pkg_info(name, data)
+            if info['compat_errors'].get(name, None):
+                status = 'error'
+            extensions.append(_make_extension_entry(
+                name=name,
+                description=pkg_info.get('description', ''),
+                url=data.get('url', ''),
+                enabled=(name not in info['disabled']),
+                core=False,
+                # Use wanted version to ensure we limit ourselves
+                # within semver restrictions
+                latest_version=data['version'],
+                installed_version=data['version'],
+                status=status,
+                install=data.get('install', {}),
+                pkg_type='prebuilt'
+            ))
+
         for name, data in info['extensions'].items():
             status = 'ok'
             pkg_info = yield self._get_pkg_info(name, data)
@@ -108,6 +132,7 @@ class ExtensionManager(object):
                 latest_version=pkg_info['latest_version'],
                 installed_version=data['version'],
                 status=status,
+                pkg_type='source'
             ))
         for name in build_check_info['uninstall']:
             data = yield self._get_scheduled_uninstall_info(name)
@@ -122,6 +147,7 @@ class ExtensionManager(object):
                     latest_version=data['version'],
                     installed_version=data['version'],
                     status='warning',
+                    pkg_type='prebuilt'
                 ))
         raise gen.Return(extensions)
 
