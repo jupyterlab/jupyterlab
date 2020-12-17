@@ -584,12 +584,19 @@ export async function ensureIntegrity(): Promise<boolean> {
   }
 
   // Handle the refs in the top level tsconfigdoc.json
+  const tsConfigDocExclude = [
+    'application-extension',
+    'metapackage',
+    'nbconvert-css'
+  ];
   const tsConfigdocPath = path.resolve('.', 'tsconfigdoc.json');
   const tsConfigdocData = utils.readJSONFile(tsConfigdocPath);
-  tsConfigdocData.references = [];
-  utils.getCorePaths().forEach(pth => {
-    tsConfigdocData.references.push({ path: './' + path.relative('.', pth) });
-  });
+  tsConfigdocData.references = utils
+    .getCorePaths()
+    .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
+    .map(pth => {
+      return { path: './' + path.relative('.', pth) };
+    });
   utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
 
   // Handle buildutils
