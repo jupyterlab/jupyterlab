@@ -236,7 +236,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
             {entry.pkg_type == 'source' && <div>{entry.name}</div>}
-            {entry.pkg_type == 'pre-built' && (
+            {entry.pkg_type == 'prebuilt' && (
               <a href={entry.url} target="_blank" rel="noopener noreferrer">
                 {entry.name}
               </a>
@@ -287,7 +287,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           </div>
           <div className="jp-extensionmanager-entry-buttons">
             {!entry.installed &&
-              entry.pkg_type == 'pre-built' &&
+              entry.pkg_type == 'prebuilt' &&
               !entry.blockedExtensionsEntry &&
               !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
               ListModel.isDisclaimed() && (
@@ -300,7 +300,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 </Button>
               )}
             {ListModel.entryHasUpdate(entry) &&
-              entry.pkg_type == 'pre-built' &&
+              entry.pkg_type == 'prebuilt' &&
               !entry.blockedExtensionsEntry &&
               !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
               ListModel.isDisclaimed() && (
@@ -312,7 +312,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                   {trans.__('Update')}
                 </Button>
               )}
-            {entry.installed && entry.pkg_type == 'pre-built' && (
+            {entry.installed && entry.pkg_type == 'prebuilt' && (
               <Button
                 onClick={() => props.performAction('uninstall', entry)}
                 minimal
@@ -321,7 +321,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Uninstall')}
               </Button>
             )}
-            {entry.enabled && entry.pkg_type == 'pre-built' && (
+            {entry.enabled && entry.pkg_type == 'prebuilt' && (
               <Button
                 onClick={() => props.performAction('disable', entry)}
                 minimal
@@ -330,17 +330,15 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Disable')}
               </Button>
             )}
-            {entry.installed &&
-              entry.pkg_type == 'pre-built' &&
-              !entry.enabled && (
-                <Button
-                  onClick={() => props.performAction('enable', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Enable')}
-                </Button>
-              )}
+            {entry.installed && entry.pkg_type == 'prebuilt' && !entry.enabled && (
+              <Button
+                onClick={() => props.performAction('enable', entry)}
+                minimal
+                small
+              >
+                {trans.__('Enable')}
+              </Button>
+            )}
             {entry.installed && entry.pkg_type == 'source' && (
               <div className="jp-extensionmanager-entry-buttons">
                 <Button
@@ -348,21 +346,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                     showDialog({
                       title,
                       body: (
-                        <div>
-                          <p>
-                            {trans.__(`This is a Source Extension. To uninstall it, please
-                  read the user guide on:`)}
-                          </p>
-                          <p>
-                            <a
-                              href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              https://jupyterlab.readthedocs.io/en/stable/user/extensions.html
-                            </a>
-                          </p>
-                        </div>
+                        <div>{getSourceUninstallInstruction(entry, trans)}</div>
                       ),
                       buttons: [
                         Dialog.okButton({
@@ -385,6 +369,40 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
         </div>
       </div>
     </li>
+  );
+}
+
+function getSourceUninstallInstruction(
+  entry: IEntry,
+  trans: TranslationBundle
+): JSX.Element {
+  if (entry.install?.uninstallInstructions) {
+    return (
+      <div>
+        <p>
+          {trans.__(`This is a Source Extension. To uninstall it, please
+    apply following instructions.`)}
+        </p>
+        <p>{entry.install?.uninstallInstructions}</p>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <p>
+        {trans.__(`This is a Source Extension. To uninstall it, please
+    read the user guide on:`)}
+      </p>
+      <p>
+        <a
+          href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          https://jupyterlab.readthedocs.io/en/stable/user/extensions.html
+        </a>
+      </p>
+    </div>
   );
 }
 
