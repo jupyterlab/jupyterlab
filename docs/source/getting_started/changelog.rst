@@ -30,9 +30,9 @@ A new visual debugger
 JupyterLab now ships with a debugger front-end by default, available for kernels that support the new debugging protocol.  See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/debugger.html>`__ for more details.
 
 
-Improvements to Single Document Mode and Mobile 
-"""""""""""""""""""""""""""""""""""""""""""""""
-The single-document user interface is now more streamlined. JupyterLab now supports showing the current file in use in the browser URL bar, similar to the classic Jupyter Notebook.
+Improvements to Simple Interface mode and Mobile 
+""""""""""""""""""""""""""""""""""""""""""""""""
+The Simple Interface mode (previously Single Document Mode) is now more streamlined. JupyterLab now supports showing the current file in use in the browser URL bar, similar to the classic Jupyter Notebook.
 
 
 Table of Contents is now in core

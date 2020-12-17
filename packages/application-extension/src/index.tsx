@@ -814,7 +814,7 @@ function addCommands(
   });
 
   app.commands.addCommand(CommandIDs.toggleMode, {
-    label: trans.__('Single-Document Mode'),
+    label: trans.__('Simple Interface'),
     isToggled: () => shell.mode === 'single-document',
     execute: () => {
       const args =

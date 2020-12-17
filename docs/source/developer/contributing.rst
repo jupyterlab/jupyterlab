@@ -795,7 +795,7 @@ directly quoting a word in the UI:
 -  Files tab
 -  Running panel
 -  Tabs panel
--  Single-Document Mode
+-  Simple Interface mode
 
 The capitalized words match the label of the UI element the user is
 clicking on because there does not exist a good colloquial name for the

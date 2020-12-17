@@ -101,8 +101,8 @@ marked with a colored top border (blue by default).
 
 .. _tabs:
 
-Tabs and Single-Document Mode
------------------------------
+Tabs and Simple Interface Mode
+------------------------------
 
 The Tabs panel in the left sidebar lists the open documents or
 activities in the main work area:
@@ -120,9 +120,9 @@ The same information is also available in the Tabs menu:
 .. _tabs-singledocument:
 
 It is often useful to focus on a single document or activity without closing
-other tabs in the main work area. Single-document mode enable this, while making
-it simple to return to your multi-activity layout in the main work area.
-Toggle single-document mode using the View menu:
+other tabs in the main work area. Simple Interface mode enables this, while making
+it easy to return to your multi-activity layout in the main work area.
+Toggle Simple Interface mode using the View menu:
 
 .. raw:: html
 
@@ -130,7 +130,7 @@ Toggle single-document mode using the View menu:
     <iframe src="https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-When you leave single-document mode, the original layout of the main
+When you leave Simple Interface mode, the original layout of the main
 area is restored.
 
 Context Menus
