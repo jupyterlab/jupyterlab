@@ -99,7 +99,7 @@ class Builder(object):
     def _run_build(self, app_dir, logger, kill_event, core_config, labextensions_path):
         app_options = AppOptions(
             app_dir=app_dir, logger=logger, kill_event=kill_event,
-            core_config=core_config, labextensions_path=abextensions_path)
+            core_config=core_config, labextensions_path=labextensions_path)
         try:
             return build(app_options=app_options)
         except Exception as e:
