@@ -730,10 +730,16 @@ class _AppHandler(object):
             logger.info('\nUninstalled core extensions:')
             [logger.info('    %s' % item) for item in sorted(uninstalled_core)]
 
-        disabled = info['disabled']
+        all_exts = list(info['federated_extensions']) + list(info['extensions']) + list(info['core_extensions'])
+        # Ignore disabled extensions that are not installed
+        disabled = [i for i in info['disabled'] if i.partition(':')[0] in all_exts]
         if disabled:
             logger.info('\nDisabled extensions:')
-            [logger.info('    %s' % item) for item in sorted(disabled)]
+            for item in sorted(disabled):
+                # Show that all plugins will be disabled if the whole extension matches
+                if item in all_exts:
+                    item += ' (all plugins)'
+                logger.info('    %s' % item)
 
         # Here check if modules are improperly shadowed
         improper_shadowed = []
