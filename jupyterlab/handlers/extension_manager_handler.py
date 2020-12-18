@@ -113,6 +113,8 @@ class ExtensionManager(object):
             ))
 
         for name, data in info['extensions'].items():
+            if name in info['shadowed_exts']:
+                continue
             status = 'ok'
             pkg_info = yield self._get_pkg_info(name, data)
             if info['compat_errors'].get(name, None):
