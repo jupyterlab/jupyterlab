@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-services-outputarea",
-  "version": "3.0.0-rc.14",
+  "version": "3.0.0-rc.15",
   "private": true,
   "sideEffects": [
     "style/*"
@@ -17,10 +17,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^5.0.0-rc.14",
-    "@jupyterlab/outputarea": "^3.0.0-rc.14",
-    "@jupyterlab/rendermime": "^3.0.0-rc.14",
-    "@jupyterlab/services": "^6.0.0-rc.14"
+    "@jupyterlab/coreutils": "^5.0.0-rc.15",
+    "@jupyterlab/outputarea": "^3.0.0-rc.15",
+    "@jupyterlab/rendermime": "^3.0.0-rc.15",
+    "@jupyterlab/services": "^6.0.0-rc.15"
   },
   "devDependencies": {
     "css-loader": "^5.0.1",
