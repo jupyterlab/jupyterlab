@@ -104,6 +104,7 @@ export namespace IFrame {
    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox
    */
   export type SandboxExceptions =
+    | 'allow-downloads'
     | 'allow-forms'
     | 'allow-modals'
     | 'allow-orientation-lock'
