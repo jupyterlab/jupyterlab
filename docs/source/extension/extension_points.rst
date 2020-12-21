@@ -110,7 +110,7 @@ might want to use the services in your extensions.
   created by the application.
 - ``@jupyterlab/settingregistry:ISettingRegistry``: A service for the JupyterLab settings system.
   Use this if you want to store settings for your application.
-  See `extension settings <#extension-settings>`__ for more information.
+  See :ref:`schemaDir` for more information.
 - ``@jupyterlab/statedb:IStateDB``: A service for the JupyterLab state database.
   Use this if you want to store data that will persist across page loads.
   See `state database <#state-database>`__ for more information.
@@ -325,10 +325,9 @@ browser supports overriding the behavior of this item.
      });
    }
 
-Note that before enabling this plugin in the usual way, you must *disable* the
-default plugin provided by the built-in file browser.
+Note that an extension providing a replacement plugin like this must either :ref:`automatically disable <disabledExtensions>` the replaced core plugin or the user must disable the core plugin manually:
 
-.. code:: bash
+.. code-block:: bash
 
    jupyter labextension disable @jupyterlab/filebrowser-extension:share-file
 

@@ -168,17 +168,11 @@ document can then be saved by the user in the usual manner.
 Theme plugins
 ^^^^^^^^^^^^^
 
-A theme is an application plugin that requires the ``ThemeManager`` service and can
-be loaded and unloaded dynamically. The package must include all static
-assets that are referenced by ``@import`` in its main CSS files. Local URLs can
-be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or
-``url('../foo/bar.css')`` can be used to refer local files in the
-theme. Absolute URLs (starting with a ``/``) or external URLs (e.g.
-``https:``) can be used to refer to external assets. See the `JupyterLab Light
-Theme <https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension>`__
-for an example. Ensure that the theme files are included in the
-``"files"`` metadata in ``package.json``.  Note that if you want to use SCSS, SASS, or LESS files,
-you must compile them to CSS and point JupyterLab to the CSS files.
+A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated. 
+
+The extension package containing the theme plugin must include all static assets that are referenced by ``@import`` in its theme CSS files. Local URLs can be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or ``url('../foo/bar.css')`` can be used to refer local files in the theme. Absolute URLs (starting with a ``/``) or external URLs (e.g. ``https:``) can be used to refer to external assets.
+
+See the `JupyterLab Light Theme <https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension>`__ for an example.
 
 See the `TypeScript theme cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`__ for a quick start to developing a theme plugin.
 
@@ -206,12 +200,14 @@ We will talk about each ``jupyterlab`` metadata field in ``package.json`` for so
 * ``sharedPackages``: :ref:`deduplication`
 * ``discovery``: :ref:`ext-author-companion-packages`
 
+A JupyterLab extension must have at least one of ``jupyterlab.extension`` or ``jupyterlab.mimeExtension`` set. 
+
 .. _main_entry_point:
 
-Main entry point
-^^^^^^^^^^^^^^^^
+Application Plugins
+^^^^^^^^^^^^^^^^^^^
 
-The ``jupyterlab.extension`` field signifies that this package is a JupyterLab extension and gives the module that exports a plugin or list of plugins as default exports. Set the value to ``true`` if plugins are the default exports from the main package module (i.e., the file listed in the ``main`` key of ``package.json``). If your plugins are exported by a different module, set this to the relative path to the module (e.g., ``"lib/foo"``). Example::
+The ``jupyterlab.extension`` field signifies that the package exports one or more JupyterLab application plugins. Set the value to ``true`` if the default export of the main package module (i.e., the file listed in the ``main`` key of ``package.json``) is an application plugin or a list of application plugins. If your plugins are exported as default exports from a different module, set this to the relative path to the module (e.g., ``"lib/foo"``). Example::
 
         "jupyterlab": {
           "extension": true
@@ -219,18 +215,26 @@ The ``jupyterlab.extension`` field signifies that this package is a JupyterLab e
 
 .. _mimeExtension:
 
-Mime Extension entry point
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Mime Renderer Plugins
+^^^^^^^^^^^^^^^^^^^^^
 
-The ``jupyterlab.mimeExtension`` field signifies that the package exports a mime renderer plugin. Like the ``jupyterlab.extension`` field, the value can be a boolean (indicating the mime renderer plugin or list of plugins is the default export from the ``main`` field), or a string, which is the relative path to the module exporting these values.
+The ``jupyterlab.mimeExtension`` field signifies that the package exports mime renderer plugins. Like the ``jupyterlab.extension`` field, the value can be a boolean (indicating a mime renderer plugin or list of mime renderer plugins is the default export from the ``main`` field), or a string, which is the relative path to the module exporting (as the default export) one or more mime renderer plugins.
 
 .. _themePath:
 
 Theme path
 ^^^^^^^^^^
-The path to the
-theme asset entry point is specified ``package.json`` under the ``"jupyterlab"``
-key as ``"themePath"``.
+
+Theme plugin assets (e.g., CSS files) need to bundled separately from a typical application plugin's assets so they can be loaded and unloaded as the theme is activated or deactivated. If an extension exports a theme plugin, it should give the relative path to the theme assets in the ``jupyterlab.themePath`` field::
+
+        "jupyterlab": {
+          "extension": true,
+          "themePath": "style/index.css"
+        }
+
+An extension cannot bundle multiple theme plugins, and any other CSS in the package is ignored (so any other application or mimeRenderer plugins in the package cannot have associated CSS).
+
+Ensure that the theme path files are included in the ``files`` metadata in ``package.json``.  If you want to use SCSS, SASS, or LESS files, you must compile them to CSS and point ``jupyterlab.themePath`` to the CSS files.
 
 
 .. _schemaDir:
@@ -239,49 +243,45 @@ Plugin Settings
 ^^^^^^^^^^^^^^^
 
 JupyterLab exposes a plugin settings system that can be used to provide
-default setting values and user overrides. This uses the ``jupyterlab.schemaDir`` field of the extension metadata.
+default setting values and user overrides. A plugin's settings are specified with a JSON schema file. The ``jupyterlab.schemaDir`` field in ``package.json`` gives the relative location of the directory containing plugin settings schema files.
 
-An extension can specify user settings using a JSON Schema. The schema
-definition should be in a file that resides in the ``schemaDir``
-directory that is specified in the ``package.json`` file of the
-extension. The actual file name should use is the part that follows the
-package name of extension. So for example, the JupyterLab
-``apputils-extension`` package hosts several plugins:
+The setting system relies on plugin ids following the convention ``<source_package_name>:<plugin_name>``. The settings schema file for the plugin ``plugin_name`` is ``<schemaDir>/<plugin_name>.json``.
 
--  ``'@jupyterlab/apputils-extension:menu'``
--  ``'@jupyterlab/apputils-extension:palette'``
--  ``'@jupyterlab/apputils-extension:settings'``
--  ``'@jupyterlab/apputils-extension:themes'``
+For example, the JupyterLab ``filebrowser-extension`` package exports the ``@jupyterlab/filebrowser-extension:browser`` plugin. In the ``package.json`` for ``@jupyterlab/filebrowser-extension``, we have::
 
-And in the ``package.json`` for ``@jupyterlab/apputils-extension``, the
-``schemaDir`` field is a directory called ``schema``. Since the
-``themes`` plugin requires a JSON schema, its schema file location is:
-``schema/themes.json``. The plugin's name is used to automatically
-associate it with its settings file, so this naming convention is
-important. Ensure that the schema files are included in the ``"files"``
-metadata in ``package.json``.
+        "jupyterlab": {
+          "schemaDir": "schema",
+        }
+
+The file browser setting schema file (which specifies some default keyboard shortcuts and other settings for the filebrowser) is located in ``schema/browser.json`` (see `here <https://github.com/jupyterlab/jupyterlab/blob/master/packages/filebrowser-extension/schema/browser.json>`__).
 
 See the
 `fileeditor-extension <https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension>`__
 for another example of an extension that uses settings.
 
-A system administrator or user can override default values of extension settings with the :ref:`overrides.json <overridesjson>` file.
+Please ensure that the schema files are included in the ``files`` metadata in ``package.json``.
+
+A system administrator or user can override default values provided in a plugin's settings schema file with the :ref:`overrides.json <overridesjson>` file.
 
 .. _disabledExtensions:
 
 Disabling other extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``disabledExtensions`` field gives a list of extensions or regex patterns for extensions or plugins to disable when this extension is installed, with the same semantics as the ``disabledExtensions`` field of :ref:`page_config.json <page_configjson>`. This can be used to automatically override and disable built-in extensions. For example, if an extension replaces the plugins provided by the core status bar extension, you can disable the core status bar extension automatically with::
+The ``jupyterlab.disabledExtensions`` field gives a list of extensions or plugins to disable when this extension is installed, with the same semantics as the ``disabledExtensions`` field of :ref:`page_config.json <page_configjson>`. This is useful if your extension overrides built-in extensions. For example, if an extension replaces the ``@jupyterlab/filebrowser-extension:share-file`` plugin to :ref:`override the "Copy Shareable Link" <copy_shareable_link>` functionality in the file browser, it can automatically disable the ``@jupyterlab/filebrowser-extension:share-file`` plugin with::
 
         "jupyterlab": {
-          "disabledExtensions": ["@jupyterlab/statusbar-extension"]
+          "disabledExtensions": ["@jupyterlab/filebrowser-extension:share-file"]
         }
+
+To disable all plugins in an extension, give the extension package name, e.g., ``"@jupyterlab/filebrowser-extension"`` in the above example.
 
 .. _deduplication:
 
 Deduplication of Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. warning:: TODO: STOPPED HERE
 
 One important concern and challenge in the JupyterLab extension system is deduplicating dependencies of extensions instead of having extensions use their own bundled copies of dependencies. For example, the Lumino widgets system on which JupyterLab relies for communication across the application requires all packages use the same copy of the ``@lumino/widgets`` package. Tokens identifying plugin services also need to be shared across the providers and consumers of the services, so dependencies that export tokens need to be deduplicated.
 
