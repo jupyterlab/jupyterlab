@@ -16,7 +16,8 @@
       "tests",
       "tests/test-*",
       "testutils",
-      "jupyterlab/tests/mock_packages/extension"
+      "jupyterlab/tests/mock_packages/extension",
+      "jupyterlab/tests/mock_packages/interop/*"
     ]
   },
   "scripts": {
@@ -54,7 +55,7 @@
     "create:test": "node buildutils/lib/create-test-package.js",
     "create:theme": "node buildutils/lib/create-theme.js",
     "deduplicate": "jlpm yarn-deduplicate -s fewer --fail",
-    "docs": "typedoc --options typedoc.js packages/*/src/index.ts* packages/*/src/*.d.ts",
+    "docs": "typedoc --options typedoc.js",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --fix .",
     "eslint:check": "eslint --ext .js,.jsx,.ts,.tsx .",
@@ -104,9 +105,8 @@
     "lerna": "^3.19.0",
     "lint-staged": "^10.2.13",
     "prettier": "^2.1.1",
-    "react-docgen-typescript-loader": "^3.7.2",
     "shell-quote": "^1.7.2",
-    "typedoc": "0.17.0-3",
+    "typedoc": "~0.20.0-beta.27",
     "yarn": "1.21.1"
   }
 }

@@ -21,12 +21,11 @@ module.exports = ({ config }) => {
     include: [SRC_PATH, STORIES_PATH],
     use: [
       {
-        loader: require.resolve('awesome-typescript-loader'),
+        loader: require.resolve('ts-loader'),
         options: {
-          configFileName: './.storybook/tsconfig.json'
+          configFile: './.storybook/tsconfig.json'
         }
-      },
-      { loader: require.resolve('react-docgen-typescript-loader') }
+      }
     ]
   });
   config.resolve.extensions.push('.ts', '.tsx');

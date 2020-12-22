@@ -151,9 +151,13 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     createViewMenu(app, menu.viewMenu, trans);
     createHelpMenu(app, menu.helpMenu, trans);
 
+    // Set the Tabs Title so it's visible also in other shells
+    const tabsMenu = menu.tabsMenu;
+    tabsMenu.menu.title.label = trans.__('Tabs');
+
     // The tabs menu relies on lab shell functionality.
     if (labShell) {
-      createTabsMenu(app, menu.tabsMenu, labShell, trans);
+      createTabsMenu(app, tabsMenu, labShell, trans);
     }
 
     // Create commands to open the main application menus.
@@ -808,7 +812,6 @@ export function createTabsMenu(
   trans: TranslationBundle
 ): void {
   const commands = app.commands;
-  menu.menu.title.label = trans.__('Tabs');
 
   // Add commands for cycling the active tabs.
   menu.addGroup(

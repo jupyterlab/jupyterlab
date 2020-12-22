@@ -22,6 +22,38 @@ async function createModule(scope, module) {
  * The main entry point for the application.
  */
 export async function main() {
+
+   // Handle a browser test.
+   // Set up error handling prior to loading extensions.
+   var browserTest = PageConfig.getOption('browserTest');
+   if (browserTest.toLowerCase() === 'true') {
+     var el = document.createElement('div');
+     el.id = 'browserTest';
+     document.body.appendChild(el);
+     el.textContent = '[]';
+     el.style.display = 'none';
+     var errors = [];
+     var reported = false;
+     var timeout = 25000;
+
+     var report = function() {
+       if (reported) {
+         return;
+       }
+       reported = true;
+       el.className = 'completed';
+     }
+
+     window.onerror = function(msg, url, line, col, error) {
+       errors.push(String(error));
+       el.textContent = JSON.stringify(errors)
+     };
+     console.error = function(message) {
+       errors.push(String(message));
+       el.textContent = JSON.stringify(errors)
+     };
+  }
+
   var JupyterLab = require('@jupyterlab/application').JupyterLab;
   var disabled = [];
   var deferred = [];
@@ -56,7 +88,7 @@ export async function main() {
 
   /**
    * Iterate over active plugins in an extension.
-   * 
+   *
    * #### Notes
    * This also populates the disabled, deferred, and ignored arrays.
    */
@@ -167,34 +199,7 @@ export async function main() {
   }
 
   // Handle a browser test.
-  var browserTest = PageConfig.getOption('browserTest');
   if (browserTest.toLowerCase() === 'true') {
-    var el = document.createElement('div');
-    el.id = 'browserTest';
-    document.body.appendChild(el);
-    el.textContent = '[]';
-    el.style.display = 'none';
-    var errors = [];
-    var reported = false;
-    var timeout = 25000;
-
-    var report = function() {
-      if (reported) {
-        return;
-      }
-      reported = true;
-      el.className = 'completed';
-    }
-
-    window.onerror = function(msg, url, line, col, error) {
-      errors.push(String(error));
-      el.textContent = JSON.stringify(errors)
-    };
-    console.error = function(message) {
-      errors.push(String(message));
-      el.textContent = JSON.stringify(errors)
-    };
-
     lab.restored
       .then(function() { report(errors); })
       .catch(function(reason) { report([`RestoreError: ${reason.message}`]); });

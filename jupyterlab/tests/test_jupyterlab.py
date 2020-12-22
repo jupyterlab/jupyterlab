@@ -778,10 +778,10 @@ class TestExtension(AppHandlerTest):
         assert sorted(updated) == [self.pkg_names['extension'], self.pkg_names['mimeextension']]
 
 
-def test_load_extension(serverapp, make_lab_app):
+def test_load_extension(jp_serverapp, make_lab_app):
     app = make_lab_app()
     stderr = sys.stderr
 #    sys.stderr = self.devnull
-    app._link_jupyter_server_extension(serverapp)
+    app._link_jupyter_server_extension(jp_serverapp)
     app.initialize()
     sys.stderr = stderr

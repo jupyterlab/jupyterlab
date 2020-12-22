@@ -496,7 +496,7 @@ const main: JupyterFrontEndPlugin<void> = {
     service.eventMessage.connect((_, event): void => {
       commands.notifyCommandChanged();
       if (labShell && event.event === 'initialized') {
-        labShell.expandRight();
+        labShell.activateById(sidebar.id);
       }
     });
 

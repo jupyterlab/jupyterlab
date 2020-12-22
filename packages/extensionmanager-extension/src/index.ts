@@ -44,7 +44,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const settings = await registry.load(plugin.id);
     let enabled = settings.composite['enabled'] === true;
 
-    const { commands, serviceManager, shell } = app;
+    const { commands, serviceManager } = app;
     let view: ExtensionView | undefined;
 
     const createView = () => {
@@ -58,9 +58,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
       return v;
     };
 
-    if (enabled) {
+    if (enabled && labShell) {
       view = createView();
-      shell.add(view, 'left', { rank: 1000 });
+      labShell.add(view, 'left', { rank: 1000 });
     }
 
     // If the extension is enabled or disabled,
@@ -69,15 +69,17 @@ const plugin: JupyterFrontEndPlugin<void> = {
       .then(([, settings]) => {
         settings.changed.connect(async () => {
           enabled = settings.composite['enabled'] === true;
-          if (enabled && (!view || (view && !view.isAttached))) {
+          if (enabled && !view?.isAttached) {
             const accepted = await Private.showWarning(trans);
             if (!accepted) {
               void settings.set('enabled', false);
               return;
             }
             view = view || createView();
-            shell.add(view, 'left');
-          } else if (!enabled && view && view.isAttached) {
+            if (labShell) {
+              labShell.add(view, 'left', { rank: 1000 });
+            }
+          } else if (!enabled && view?.isAttached) {
             app.commands.notifyCommandChanged(CommandIDs.toggle);
             view.close();
           }

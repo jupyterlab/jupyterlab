@@ -6,6 +6,7 @@
 
 from __future__ import print_function
 
+import importlib
 import json
 import os
 import os.path as osp
@@ -28,8 +29,6 @@ from ipython_genutils.py3compat import string_types, cast_unicode_py2
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_server.config_manager import BaseJSONConfigManager
 from jupyterlab_server.config import get_federated_extensions
-
-from traitlets.utils.importstring import import_item
 
 from .commands import build, AppOptions, _test_overlap
 
@@ -361,7 +360,7 @@ def _get_labextension_metadata(module):
         magic-named `_jupyter_labextension_paths` function
     """
     try:
-        m = import_item(module)
+        m = importlib.import_module(module)
     except Exception:
         m = None
 
@@ -376,6 +375,9 @@ def _get_labextension_metadata(module):
                 from setuptools import find_packages
                 package = find_packages(mod_path)[0]
 
+            # Replace hyphens with underscores to match Python convention
+            package = package.replace('-', '_')
+
             # Make sure the package is installed
             import pkg_resources
             try:
@@ -384,7 +386,7 @@ def _get_labextension_metadata(module):
                 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
                 sys.path.insert(0, mod_path)
 
-            m = import_item(package)
+            m = importlib.import_module(package)
 
     if not hasattr(m, '_jupyter_labextension_paths'):
         raise KeyError('The Python module {} is not a valid labextension, '

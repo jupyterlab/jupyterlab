@@ -6,6 +6,8 @@
 .jp-switch {
   display: flex;
   align-items: center;
+  padding-left: 4px;
+  padding-right: 4px;
   font-size: var(--jp-ui-font-size1);
   background-color: transparent;
   color: var(--jp-ui-font-color1);

@@ -36,19 +36,12 @@ interface IScore {
    * The indices of the text matches.
    */
   indices: number[] | null;
-
-  /**
-   * The command item associated with the match.
-   */
-  item: Contents.IModel;
 }
 
 /**
  * Perform a fuzzy search on a single item.
  */
-function fuzzySearch(item: Contents.IModel, query: string): IScore | null {
-  let source = `${item.name}`;
-
+function fuzzySearch(source: string, query: string): IScore | null {
   // Set up the match score and indices array.
   let score = Infinity;
   let indices: number[] | null = null;
@@ -91,8 +84,7 @@ function fuzzySearch(item: Contents.IModel, query: string): IScore | null {
   // Handle a split match.
   return {
     score,
-    indices,
-    item
+    indices
   };
 }
 
@@ -116,7 +108,9 @@ const FilterBox = (props: IFilterBoxProps) => {
     props.listing.model.setFilter((item: Contents.IModel) => {
       if (props.useFuzzyFilter) {
         // Run the fuzzy search for the item and query.
-        let score = fuzzySearch(item, target.value);
+        const name = item.name.toLowerCase();
+        const query = target.value.toLowerCase();
+        let score = fuzzySearch(name, query);
         // Ignore the item if it is not a match.
         if (!score) {
           item.indices = [];

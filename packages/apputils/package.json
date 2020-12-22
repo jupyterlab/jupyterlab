@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils",
-  "version": "3.0.0-rc.13",
+  "version": "3.0.0-rc.15",
   "description": "JupyterLab - Application Utilities",
   "keywords": [
     "jupyter",
@@ -47,12 +47,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^5.0.0-rc.13",
-    "@jupyterlab/services": "^6.0.0-rc.13",
-    "@jupyterlab/settingregistry": "^3.0.0-rc.13",
-    "@jupyterlab/statedb": "^3.0.0-rc.13",
-    "@jupyterlab/translation": "^3.0.0-rc.13",
-    "@jupyterlab/ui-components": "^3.0.0-rc.13",
+    "@jupyterlab/coreutils": "^5.0.0-rc.15",
+    "@jupyterlab/services": "^6.0.0-rc.15",
+    "@jupyterlab/settingregistry": "^3.0.0-rc.15",
+    "@jupyterlab/statedb": "^3.0.0-rc.15",
+    "@jupyterlab/translation": "^3.0.0-rc.15",
+    "@jupyterlab/ui-components": "^3.0.0-rc.15",
     "@lumino/algorithm": "^1.3.3",
     "@lumino/commands": "^1.12.0",
     "@lumino/coreutils": "^1.5.3",
@@ -71,15 +71,15 @@
     "url": "^0.11.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-rc.13",
+    "@jupyterlab/testutils": "^3.0.0-rc.15",
     "@types/jest": "^26.0.10",
     "@types/react-dom": "^17.0.0",
     "@types/sanitize-html": "^1.23.3",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
-    "typedoc": "0.17.0-3",
-    "typescript": "~4.0.2"
+    "typedoc": "~0.20.0-beta.27",
+    "typescript": "~4.1.3"
   },
   "publishConfig": {
     "access": "public"

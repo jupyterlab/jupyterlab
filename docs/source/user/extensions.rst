@@ -144,6 +144,9 @@ List all installed extensions, including those installed with ``pip`` or
    name, which may be different from the name of the ``pip`` or ``conda``
    package used to distribute the extension.
 
+
+.. _enable_disable_config:
+
 Enabling and Disabling Extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -161,6 +164,29 @@ You can enable a disabled extension with:
 
     jupyter labextension enable my-extension
 
+Installed extensions are enabled by default, unless there is configuration explicity disabling them.
+Extensions can be disabled or forcably enabled using the command line.   
+Extensions or individual plugins with an extension can be disabled by another extension.
+
+The priority order for whether an extension is enabled or disabled is as follows:
+
+- Presence of ``<jupyter_config_path>/labconfig/pageconfig.json`` file(s) with a ``disabledExtensions`` key that is a object with package names as keys and boolean values. 
+- (deprecated) Presence of ``disabledExensions`` key in ``<lab_app_dir>/settings/pageconfig.json``.   This value is a list of extensions to disable, but is deprecated in favor of the layered configuration approach in the `labconfig` location(s).
+- Presence of ``disabledExtensions`` key in another JupyterLab extension's metadata that disables a given extension.  The key is ignored if that extension itself is disabled.
+
+When using the command line, you can target the ``--level`` of the config: ``user``, ``system``, or ``sys-prefix`` (default).
+      
+An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as follows:
+
+.. code:: json
+
+   {
+      "disabledExtensions": {
+            "@jupyterlab/notebook-extension": true
+      }
+   }
+
+See :ref:`documentation on LabConfig directories <labconfig_directories>` for more information.
 
 Managing Extensions Using the Extension Manager
 -----------------------------------------------

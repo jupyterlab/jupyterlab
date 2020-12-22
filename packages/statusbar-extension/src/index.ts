@@ -354,7 +354,7 @@ export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * The single-document mode switch in the top area.
+ * The simple interface mode switch in the status bar.
  */
 const modeSwitch: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:mode-switch',
@@ -384,9 +384,9 @@ const modeSwitch: JupyterFrontEndPlugin<void> = {
       );
       if (binding) {
         const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
-        modeSwitch.caption = trans.__('Single-Document Mode (%1)', ks);
+        modeSwitch.caption = trans.__('Simple Interface (%1)', ks);
       } else {
-        modeSwitch.caption = trans.__('Single-Document Mode');
+        modeSwitch.caption = trans.__('Simple Interface');
       }
     };
     updateModeSwitchTitle();
@@ -394,7 +394,7 @@ const modeSwitch: JupyterFrontEndPlugin<void> = {
       updateModeSwitchTitle();
     });
 
-    modeSwitch.label = trans.__('Mode');
+    modeSwitch.label = trans.__('Simple');
 
     statusBar.registerStatusItem(
       '@jupyterlab/statusbar-extension:mode-switch',

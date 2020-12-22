@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime-extension",
-  "version": "3.0.0-rc.13",
+  "version": "3.0.0-rc.15",
   "description": "A rendermime extension for JupyterLab",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,15 +34,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-rc.13",
-    "@jupyterlab/docmanager": "^3.0.0-rc.13",
-    "@jupyterlab/rendermime": "^3.0.0-rc.13",
-    "@jupyterlab/translation": "^3.0.0-rc.13"
+    "@jupyterlab/application": "^3.0.0-rc.15",
+    "@jupyterlab/docmanager": "^3.0.0-rc.15",
+    "@jupyterlab/rendermime": "^3.0.0-rc.15",
+    "@jupyterlab/translation": "^3.0.0-rc.15"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "0.17.0-3",
-    "typescript": "~4.0.2"
+    "typedoc": "~0.20.0-beta.27",
+    "typescript": "~4.1.3"
   },
   "publishConfig": {
     "access": "public"

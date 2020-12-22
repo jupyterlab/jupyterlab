@@ -49,31 +49,24 @@ function generateConfig({
     './index': index
   };
 
-  if (data.jupyterlab.extension === true) {
+  const extension = data.jupyterlab.extension;
+  if (extension === true) {
     exposes['./extension'] = index;
-  } else if (typeof data.jupyterlab.extension === 'string') {
-    exposes['./extension'] = path.join(packagePath, data.jupyterlab.extension);
+  } else if (typeof extension === 'string') {
+    exposes['./extension'] = path.join(packagePath, extension);
   }
 
-  if (data.jupyterlab.mimeExtension === true) {
+  const mimeExtension = data.jupyterlab.mimeExtension;
+  if (mimeExtension === true) {
     exposes['./mimeExtension'] = index;
-  } else if (typeof data.jupyterlab.mimeExtension === 'string') {
-    exposes['./mimeExtension'] = path.join(
-      packagePath,
-      data.jupyterlab.mimeExtension
-    );
+  } else if (typeof mimeExtension === 'string') {
+    exposes['./mimeExtension'] = path.join(packagePath, mimeExtension);
   }
 
-  if (data.style) {
-    let style = path.join(packagePath, data.style);
-    if (path.extname(style) === '.css') {
-      // See if there is a corresponding js file we can load instead
-      const jsFile = `${style.slice(0, style.length - 4)}.js`;
-      if (fs.existsSync(jsFile)) {
-        style = jsFile;
-      }
-    }
-    exposes['./style'] = style;
+  if (typeof data.styleModule === 'string') {
+    exposes['./style'] = path.join(packagePath, data.styleModule);
+  } else if (typeof data.style === 'string') {
+    exposes['./style'] = path.join(packagePath, data.style);
   }
 
   const coreData = require(path.join(corePath, 'package.json'));

@@ -1,21 +1,17 @@
 {
   "$schema": "http://json.schemastore.org/tsconfig",
   "extends": "./tsconfigbase",
+  "exclude": ["**/test/**", "**/testutils/**"],
   "compilerOptions": {
-    "composite": false,
-    "baseUrl": ".",
     "paths": {
       "@jupyterlab/*": [
-        "packages/*/src"
+        "./packages/*/src"
       ]
     }
   },
   "references": [
     {
       "path": "./packages/application"
-    },
-    {
-      "path": "./packages/application-extension"
     },
     {
       "path": "./packages/apputils"
@@ -163,12 +159,6 @@
     },
     {
       "path": "./packages/mathjax2-extension"
-    },
-    {
-      "path": "./packages/metapackage"
-    },
-    {
-      "path": "./packages/nbconvert-css"
     },
     {
       "path": "./packages/nbformat"
