@@ -281,18 +281,63 @@ To disable all plugins in an extension, give the extension package name, e.g., `
 Deduplication of Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. warning:: TODO: STOPPED HERE
+The ``jupyterlab.sharedPackages`` field controls how dependencies are bundled, shared, and deduplicated among extensions.
 
-One important concern and challenge in the JupyterLab extension system is deduplicating dependencies of extensions instead of having extensions use their own bundled copies of dependencies. For example, the Lumino widgets system on which JupyterLab relies for communication across the application requires all packages use the same copy of the ``@lumino/widgets`` package. Tokens identifying plugin services also need to be shared across the providers and consumers of the services, so dependencies that export tokens need to be deduplicated.
+One important concern and challenge in the JupyterLab extension system is deduplicating dependencies of extensions instead of having extensions use their own bundled copies of dependencies. For example, the Lumino widgets system on which JupyterLab relies for communication across the application requires all packages use the same copy of the ``@lumino/widgets`` package. :ref:`Tokens <tokens>` identifying plugin services also need to be shared across the providers and consumers of the services, so dependencies that export tokens need to be deduplicated.
 
-Deduplication in JupyterLab happens in two ways. For source extensions, JupyterLab deduplicates dependencies when rebuilds itself to include the extension during the extension installation process. Deduplication is one of the main reasons JupyterLab needs to be rebuilt when installing source extensions. For prebuilt extensions, JupyterLab relies on the Webpack 5.0 module federation system to share dependencies across different bundles (including the core JupyterLab application bundle).
+JupyterLab automatically deduplicates the entire dependency tree between source extensions when it rebuilds itself during a source extension installation. This deduplication is relatively straightforward because the entire dependency tree is known at one time (during the rebuild), and all deduplication is figured out once on the server. Deduplication between source and prebuilt extensions, or between prebuilt extensions themselves, is a more nuanced problem that needs to happen in the browser every time JuptyerLab is run, and is discussed below.
 
-To ensure that a consumer gets the same token instance that the provider provided to the sytem, the consumer should list the package it imported the tokens from as unbundled package in its ``package.json`` ``jupyterlab.sharedPackages`` config—this will generate a JavaScript error if the package (and thus the token) is not present in the system at runtime. Optional token packages should be listed as singletons that are bundled (otherwise, if they are not present in the system, it will cause a js error when you try to import them).
+TODO: insert a paragraph here with the summary of how to use sharedPackages in common case, then refer the reader to the below for an explanation of deduplication and understanding the concepts better.
 
-By default, an extension's dependencies will be shared and deduplicated with other extension's direct dependencies, and JupyterLab will bundle a copy of the dependency. The ``sharedPackages`` key enables you to control how dependencies are bundled with your extension when building JupyterLab (or when building your extension when creating a prebuilt extension). ``sharedPackages`` is an object where the keys are JavaScript package names and values are sharing configuration. Set the value to ``false`` to not share a dependency with other packages. Set the value to an object to control how it is shared. 
+
+Deduplication with prebuilt extensions
+""""""""""""""""""""""""""""""""""""""
+
+Prebuilt extensions need to deduplicate many of their dependencies with other prebuilt extensions and with source extensions. This deduplication happens in two phases:
+
+1. When JupyterLab is initialized in the browser, the core Jupyterlab build (including all source extensions) and each prebuilt extension can share copies of dependencies with a package cache in the browser.
+2. A source or prebuilt extension can import a dependency from the cache while JupyterLab is running.
+
+The main options controlling how things work in this deduplication are as follows. If a package is listed in this sharing config, it will be requested from the package cache.
+
+* ``bundled`` - if true, a copy of this package is also provided to the package cache. If false, we will request a version from the package cache. Set this to false if we know that the package cache will have the package and you do not want to bundle a copy (perhaps to make your prebuilt bundle smaller).
+``singleton`` - if true, makes sure to use the same copy of a dependency that others are using, even if it is not the right version.
+``strictVersion`` - if true, throw an error if we would be using the wrong version of a dependency.
+
+In general, strictVersion defaults to true - we want to make sure we are using a required version of a dependency.
+
+JupyterLab has a default list of singleton packages (including core Lumino and JupyterLab packages).
+
+We suggest when dealing with tokens, bundled is true if providing a token or consuming an optional token, and false if consuming a required token (i.e., in that case, we just want to use the copy of the package provided by whoever is providing the token to the system).
+
+The basic tool we have available is a JavaScript package cache available in a running JupyterLab. Extensions can provide copies of dependencies to the cache, and can ask for specific version ranges. Depending on how an extension is configured, it will generally get the highest version of the dependency provided to the system.
+
+
+In general, the highest version satisfying the requirements 
+
+
+Goal here is to explain the three main options in ``jupyterlab.sharedPackages``: ``bundled``, ``singleton``, and ``strictVersion``.
+
+
+ idea behind deduplication here is that a dependency (and its entire dependency tree) is bundled together and placed in a cache of shared Javascript packages.
+
+By default, JupyterLab shares direct dependencies of source and prebuilt extensions in a way that other prebuilt extensions can deduplicate with them. The ``jupyterlab.sharedpackages`` configuration affects how this deduplication works.
+
+The ``jupyterlab.sharedPackages`` configuration enables you to control how dependencies are bundled with your extension when building JupyterLab (or when building your extension when creating a prebuilt extension). ``sharedPackages`` is an object where the keys are JavaScript package names and values are sharing configuration. Set the value to ``false`` to not share a dependency with other packages. Set the value to an object to control how it is shared. 
+
+The ``jupyterlab.sharedPackages`` field is an object where keys are JavaScript package names and values are sharing configuration options from the Webpack 5 module federation 
+
+
+* ``bundled``: ``true`` if the dependency should be bundled, ``false`` if it should not be bundled.
+* ``singleton``: ``true`` if only one version is allowed 
+
 
 Usually the only fields needed here are ``bundled: false`` to not bundle a dependency (but rely on another extension to bundle the dependency). Do this if you import a token from the dependency, 
 
+To ensure that a consumer plugin gets the same token instance that the provider provided to the sytem, the consumer should list the package it imported the tokens from as unbundled package in its ``package.json`` ``jupyterlab.sharedPackages`` config—this will generate a JavaScript error if the package (and thus the token) is not present in the system at runtime. Optional token packages should be listed as singletons that are bundled (otherwise, if they are not present in the system, it will cause a js error when you try to import them).
+
+
+For those curious about implementation details, JupyterLab relies on the Webpack 5.0 `module federation system <https://webpack.js.org/concepts/module-federation/>`__ to implement this module sharing between source and prebuilt, or between prebuilt extensions.
 
 .. _ext-author-companion-packages:
 
