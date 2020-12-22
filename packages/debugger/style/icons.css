@@ -31,6 +31,32 @@
   border-radius: 50%;
 }
 
+button.jp-Button.bp3-button.bp3-minimal.jp-TreeView.jp-TreeView,
+button.jp-Button.bp3-button.bp3-minimal.jp-TreeView.jp-TableView {
+  display: flex;
+  align-items: center;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+  width: 35px;
+}
+
+button.jp-Button.bp3-button.bp3-minimal.jp-TreeView:hover {
+  cursor: pointer;
+  background-color: var(--jp-layout-color1);
+  border-radius: 34px;
+}
+
+button.jp-Button.bp3-button.bp3-minimal.jp-TableView:hover {
+  cursor: pointer;
+  background-color: var(--jp-layout-color1);
+  border-radius: 34px;
+}
+
+.jp-ViewModeSelected {
+  background-color: var(--jp-layout-color1);
+  border-radius: 34px;
+}
+
 [data-jp-debugger='true'] .jp-Toolbar-item .jp-ToggleSwitch,
 [data-jp-table='true'] .jp-Toolbar-item .jp-ToggleSwitch {
   background-color: var(--jp-warn-color0);

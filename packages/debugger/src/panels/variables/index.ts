@@ -5,6 +5,8 @@ import { IThemeManager, ToolbarButton } from '@jupyterlab/apputils';
 
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
+import { tableRowsIcon, treeViewIcon } from '@jupyterlab/ui-components';
+
 import { CommandRegistry } from '@lumino/commands';
 
 import { Panel, Widget } from '@lumino/widgets';
@@ -15,7 +17,7 @@ import { VariablesBodyGrid } from './grid';
 
 import { VariablesHeader } from './header';
 
-import { ScopeSwitcher } from './scope';
+// import { ScopeSwitcher } from './scope';
 
 import { VariablesBodyTree } from './tree';
 
@@ -52,22 +54,42 @@ export class Variables extends Panel {
       this.update();
     };
 
+    // this._header.toolbar.addItem(
+    //   'scope-switcher',
+    //   new ScopeSwitcher({
+    //     translator,
+    //     model,
+    //     tree: this._tree,
+    //     grid: this._table
+    //   })
+    // );
+
+    // this._header.toolbar.addItem(
+    //   'view-VariableSwitch',
+    //   new ToolbarButton({
+    //     iconClass: 'jp-ToggleSwitch',
+    //     onClick: onViewChange,
+    //     tooltip: trans.__('Table / Tree View')
+    //   })
+    // );
+
     this._header.toolbar.addItem(
-      'scope-switcher',
-      new ScopeSwitcher({
-        translator,
-        model,
-        tree: this._tree,
-        grid: this._table
+      'view-VariableTreeView',
+      new ToolbarButton({
+        icon: treeViewIcon,
+        className: 'jp-TreeView',
+        onClick: onViewChange,
+        tooltip: trans.__('Tree View')
       })
     );
 
     this._header.toolbar.addItem(
-      'view-VariableSwitch',
+      'view-VariableTableView',
       new ToolbarButton({
-        iconClass: 'jp-ToggleSwitch',
+        icon: tableRowsIcon,
+        className: 'jp-TableView',
         onClick: onViewChange,
-        tooltip: trans.__('Table / Tree View')
+        tooltip: trans.__('Table View')
       })
     );
 
