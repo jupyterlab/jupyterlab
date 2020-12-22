@@ -119,9 +119,13 @@ In the following discussion, the plugin that is providing a service to the syste
 Tokens
 """"""
 
-A service provided by a plugin is identified by a *token*, i.e., a concrete instance of the Lumino Token class. The provider plugin lists the token in its plugin metadata ``provides`` field, and returns the associated service from its ``activate`` function. Consumer plugins import the token (for example, from the provider plugin's extension JavaScript package) and list the token in their plugin metadata ``requires`` or ``optional`` fields. When JupyterLab instantiates the consumer plugin, it will pass in the service associated with the token. JupyterLab orders plugin activation to ensure that a provider of a service is activated before its consumers. A token can only be registered with the system once.
+A service provided by a plugin is identified by a *token*, i.e., a concrete instance of the Lumino Token class. The provider plugin lists the token in its plugin metadata ``provides`` field, and returns the associated service from its ``activate`` function.
 
-A token defined in TypeScript can also define a TypeScript interface for the service associated with the token. If the provider or consumer uses TypeScript, the service will be type-checked against this interface.
+Consumer plugins import the token (for example, from the provider plugin's extension JavaScript package, or from a third package exporting the token for both the provider and consumer) and list the token in their plugin metadata ``requires`` or ``optional`` fields. When JupyterLab instantiates the consumer plugin by calling its ``activate`` function, it will pass in the service associated with the token as an argument. If the service is not available (i.e., the token has not been registered with JupyterLab), then JupyterLab will either throw an error and not activate the consumer (if the token was listed in ``requires``), or will set the corresponding ``activate`` argument to ``null`` (if the token was listed in ``optional``). JupyterLab orders plugin activation to ensure that a provider of a service is activated before its consumers. A token can only be registered with the system once.
+
+A consumer might list a token as ``optional`` when the service it identifies is not critical to the consumer, but would be nice to have if the service is available. For example, a consumer might list the status bar service as optional so that it can add an indicator to the status bar if it is available, but still make it possible for users running a customized JupyterLab distribution without a status bar to use the consumer plugin.
+
+A token defined in TypeScript can also define a TypeScript interface for the service associated with the token. If a package using the token uses TypeScript, the service will be type-checked against this interface when the package is compiled to JavaScript.
 
 .. note::
    JupyterLab uses tokens to identify services (instead of strings, for example) to prevent conflicts between identifiers and to enable type checking when using TypeScript.
@@ -281,63 +285,86 @@ To disable all plugins in an extension, give the extension package name, e.g., `
 Deduplication of Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``jupyterlab.sharedPackages`` field controls how dependencies are bundled, shared, and deduplicated among extensions.
+The ``jupyterlab.sharedPackages`` field controls how dependencies are bundled, shared, and deduplicated with prebuilt extensions.
 
 One important concern and challenge in the JupyterLab extension system is deduplicating dependencies of extensions instead of having extensions use their own bundled copies of dependencies. For example, the Lumino widgets system on which JupyterLab relies for communication across the application requires all packages use the same copy of the ``@lumino/widgets`` package. :ref:`Tokens <tokens>` identifying plugin services also need to be shared across the providers and consumers of the services, so dependencies that export tokens need to be deduplicated.
 
-JupyterLab automatically deduplicates the entire dependency tree between source extensions when it rebuilds itself during a source extension installation. This deduplication is relatively straightforward because the entire dependency tree is known at one time (during the rebuild), and all deduplication is figured out once on the server. Deduplication between source and prebuilt extensions, or between prebuilt extensions themselves, is a more nuanced problem that needs to happen in the browser every time JuptyerLab is run, and is discussed below.
+JupyterLab automatically deduplicates the entire dependency tree between source extensions when it rebuilds itself during a source extension installation. Deduplication between source and prebuilt extensions, or between prebuilt extensions themselves, is a more nuanced problem (for those curious about implementation details, this deduplication in JupyterLab is powered by the Webpack 5.0 `module federation system <https://webpack.js.org/concepts/module-federation/>`__). JupyterLab comes with a reasonable default strategy for deduplicating dependencies for prebuilt extensions. The ``jupyterlab.sharedPackages`` object in an extension's ``package.json`` enables an extension author to modify the default deduplication strategy for a given dependency with three boolean options. The keys of this object are dependency package names, and the values are either ``false`` (signifying that dependency should not be shared/deduplicated), or objects with up to three fields:
 
-TODO: insert a paragraph here with the summary of how to use sharedPackages in common case, then refer the reader to the below for an explanation of deduplication and understanding the concepts better.
+* ``bundled``: if ``true`` (default), the dependency is bundled with the extension and is made available as one of the copies available to JupyterLab. If ``false``, the dependency is not bundled with the extension, so the extension will use a version of the dependency from a different extension.
+* ``singleton``: if ``true``, the extension will always prefer to use the copy of the dependency that other extensions are using, rather than using the highest version available. The default is ``false``.
+* ``strictVersion``: if ``true``, the extension will always make sure the copy of the dependency it is using satisfies the dependency version range it requires.
+
+By default, JupyterLab deduplicates direct dependencies of prebuilt extensions with direct dependencies of other source and prebuilt extensions, choosing the highest version of a dependency available to JupyterLab. JupyterLab chooses reasonable default options when using tokens and services from core JupyterLab packages. We suggest the following ``sharedPackages`` configurations when using tokens provided by packages other than core JupyterLab packages (see :ref:`services` for more details about using tokens).
+
+.. _dedup_provide_service:
+
+Providing a service
+"""""""""""""""""""
+
+When an extension (the "provider") is providing a service identified by a token that is imported from a dependency ``token-package``, the provider should configure the dependency as a singleton. This makes sure the provider is identifying the service with the same token that others are importing. If ``token-package`` is not a core package, it will be bundled with the provider and available for consumers to import if they :ref:`require the service <dedup_require_service>`.
+
+.. code-block:: json
+
+   "jupyterlab": {
+     "sharedPackages": {
+       "token-package": {
+         "singleton": true
+        }
+      }
+    }
+
+.. _dedup_require_service:
+
+Requiring a service
+"""""""""""""""""""
+
+When an extension (the "consumer") is requiring a service provided by another extension (the "provider"), identified by a token imported from a package (the ``token-package``, which may be same as the provider), the consumer should configure the dependency ``token-package`` to be a singleton to ensure the consumer is getting the same exact same token the provider is using to identify the service. Also, since the provider is providing a copy of ``token-package``, the consumer can exclude it from its bundle.
+
+.. code-block:: json
+
+   "jupyterlab": {
+     "sharedPackages": {
+       "token-package": {
+         "bundled": false,
+         "singleton": true
+        }
+      }
+    }
+
+.. _dedup_optional_service:
+
+Optionally using a service
+""""""""""""""""""""""""""
+
+When an extension (the "consumer") is optionally using a service identified by a token imported from a package (the ``token-package``), there is no guarantee that a provider is going to be available and bundling ``token-package``. In this case, the consumer should only configure ``token-package`` to be a singleton:
+
+.. code-block:: json
+
+   "jupyterlab": {
+     "sharedPackages": {
+       "token-package": {
+         "singleton": true
+        }
+      }
+    }
 
 
-Deduplication with prebuilt extensions
-""""""""""""""""""""""""""""""""""""""
-
-Prebuilt extensions need to deduplicate many of their dependencies with other prebuilt extensions and with source extensions. This deduplication happens in two phases:
-
-1. When JupyterLab is initialized in the browser, the core Jupyterlab build (including all source extensions) and each prebuilt extension can share copies of dependencies with a package cache in the browser.
-2. A source or prebuilt extension can import a dependency from the cache while JupyterLab is running.
-
-The main options controlling how things work in this deduplication are as follows. If a package is listed in this sharing config, it will be requested from the package cache.
-
-* ``bundled`` - if true, a copy of this package is also provided to the package cache. If false, we will request a version from the package cache. Set this to false if we know that the package cache will have the package and you do not want to bundle a copy (perhaps to make your prebuilt bundle smaller).
-``singleton`` - if true, makes sure to use the same copy of a dependency that others are using, even if it is not the right version.
-``strictVersion`` - if true, throw an error if we would be using the wrong version of a dependency.
-
-In general, strictVersion defaults to true - we want to make sure we are using a required version of a dependency.
-
-JupyterLab has a default list of singleton packages (including core Lumino and JupyterLab packages).
-
-We suggest when dealing with tokens, bundled is true if providing a token or consuming an optional token, and false if consuming a required token (i.e., in that case, we just want to use the copy of the package provided by whoever is providing the token to the system).
-
-The basic tool we have available is a JavaScript package cache available in a running JupyterLab. Extensions can provide copies of dependencies to the cache, and can ask for specific version ranges. Depending on how an extension is configured, it will generally get the highest version of the dependency provided to the system.
 
 
-In general, the highest version satisfying the requirements 
+.. TODO: fill out the following text to a more complete explanation of how the deduplication works.
 
+   Prebuilt extensions need to deduplicate many of their dependencies with other prebuilt extensions and with source extensions. This deduplication happens in two phases:
+   
+   1. When JupyterLab is initialized in the browser, the core Jupyterlab build (including all source extensions) and each prebuilt extension can share copies of dependencies with a package cache in the browser.
+   2. A source or prebuilt extension can import a dependency from the cache while JupyterLab is running.
+   
+   The main options controlling how things work in this deduplication are as follows. If a package is listed in this sharing config, it will be requested from the package cache.
+   
+   * ``bundled`` - if true, a copy of this package is also provided to the package cache. If false, we will request a version from the package cache. Set this to false if we know that the package cache will have the package and you do not want to bundle a copy (perhaps to make your prebuilt bundle smaller).
+   ``singleton`` - if true, makes sure to use the same copy of a dependency that others are using, even if it is not the right version.
+   ``strictVersion`` - if true, throw an error if we would be using the wrong version of a dependency.
 
-Goal here is to explain the three main options in ``jupyterlab.sharedPackages``: ``bundled``, ``singleton``, and ``strictVersion``.
-
-
- idea behind deduplication here is that a dependency (and its entire dependency tree) is bundled together and placed in a cache of shared Javascript packages.
-
-By default, JupyterLab shares direct dependencies of source and prebuilt extensions in a way that other prebuilt extensions can deduplicate with them. The ``jupyterlab.sharedpackages`` configuration affects how this deduplication works.
-
-The ``jupyterlab.sharedPackages`` configuration enables you to control how dependencies are bundled with your extension when building JupyterLab (or when building your extension when creating a prebuilt extension). ``sharedPackages`` is an object where the keys are JavaScript package names and values are sharing configuration. Set the value to ``false`` to not share a dependency with other packages. Set the value to an object to control how it is shared. 
-
-The ``jupyterlab.sharedPackages`` field is an object where keys are JavaScript package names and values are sharing configuration options from the Webpack 5 module federation 
-
-
-* ``bundled``: ``true`` if the dependency should be bundled, ``false`` if it should not be bundled.
-* ``singleton``: ``true`` if only one version is allowed 
-
-
-Usually the only fields needed here are ``bundled: false`` to not bundle a dependency (but rely on another extension to bundle the dependency). Do this if you import a token from the dependency, 
-
-To ensure that a consumer plugin gets the same token instance that the provider provided to the sytem, the consumer should list the package it imported the tokens from as unbundled package in its ``package.json`` ``jupyterlab.sharedPackages`` config—this will generate a JavaScript error if the package (and thus the token) is not present in the system at runtime. Optional token packages should be listed as singletons that are bundled (otherwise, if they are not present in the system, it will cause a js error when you try to import them).
-
-
-For those curious about implementation details, JupyterLab relies on the Webpack 5.0 `module federation system <https://webpack.js.org/concepts/module-federation/>`__ to implement this module sharing between source and prebuilt, or between prebuilt extensions.
 
 .. _ext-author-companion-packages:
 
