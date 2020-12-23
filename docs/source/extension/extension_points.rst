@@ -10,7 +10,7 @@ A list of common core tokens that extension authors can request is given in :ref
 Following the list of core tokens is a guide for using some of JupyterLab's most commonly-used extension points.
 However, it is not an exhaustive account of how to extend the application components,
 and more detailed descriptions of their public APIs may be found in the
-`JupyterLab <http://jupyterlab.github.io/jupyterlab/index.html>`__ and
+`JupyterLab <../api/index.html>`__ and
 `Lumino <http://jupyterlab.github.io/lumino/index.html>`__ API documentation.
 
 .. contents:: Table of contents
@@ -407,7 +407,7 @@ Jupyter Front-End Shell
 -----------------------
 
 The Jupyter front-end
-`shell <https://jupyterlab.github.io/jupyterlab/interfaces/_application_src_index_.jupyterfrontend.ishell.html>`__
+`shell <../api/interfaces/application.jupyterfrontend.ishell.html>`__
 is used to add and interact with content in the application. The ``IShell``
 interface provides an ``add()`` method for adding widgets to the application.
 In JupyterLab, the application shell consists of:
