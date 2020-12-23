@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module tooltip-extension
+ */
 
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 

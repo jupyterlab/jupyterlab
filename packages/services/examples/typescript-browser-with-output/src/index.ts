@@ -3,6 +3,10 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/**
+ * @packageDocumentation
+ * @module example-services-outputarea
+ */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 (window as any).__webpack_public_path__ = URLExt.join(

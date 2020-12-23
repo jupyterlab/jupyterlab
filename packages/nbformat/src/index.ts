@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module nbformat
+ */
 
 // Notebook format interfaces
 // https://nbformat.readthedocs.io/en/latest/format_description.html

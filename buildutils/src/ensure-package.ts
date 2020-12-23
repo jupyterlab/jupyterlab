@@ -464,6 +464,41 @@ export async function ensurePackage(
     data.scripts.prepublishOnly = 'npm run build';
   }
 
+  // Ensure the main module has an @packageDocumentation comment
+  let mainFile = path.join(pkgPath, 'src', 'index.ts');
+  if (!fs.existsSync(mainFile)) {
+    mainFile = path.join(pkgPath, 'src', 'index.tsx');
+  }
+  if (pkgPath.includes('packages') && fs.existsSync(mainFile)) {
+    let main = fs.readFileSync(mainFile, 'utf8');
+    let lines = main.split('\n');
+    let writeMain = false;
+
+    if (!main.includes('Copyright ')) {
+      lines.unshift(
+        '// Copyright (c) Jupyter Development Team.',
+        '// Distributed under the terms of the Modified BSD License.',
+        ''
+      );
+      writeMain = true;
+    }
+    if (!main.includes('@packageDocumentation')) {
+      lines.splice(
+        lines.indexOf(''),
+        0,
+        '/**',
+        ' * @packageDocumentation',
+        ` * @module ${data.name.split('/')[1]}`,
+        ' */'
+      );
+      writeMain = true;
+    }
+
+    if (writeMain) {
+      fs.writeFileSync(mainFile, lines.join('\n'));
+    }
+  }
+
   if (utils.writePackageData(path.join(pkgPath, 'package.json'), data)) {
     messages.push('Updated package.json');
   }
