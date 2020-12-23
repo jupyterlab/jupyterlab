@@ -47,6 +47,11 @@ Visual filter in file browser
 
 The file browser now has a filter input which filters the list of files using the same fuzzy matching as the command palette.
 
+Property inspector moved to right sidebar
+"""""""""""""""""""""""""""""""""""""""""
+
+The default interface for JupyterLab now has system-wide sidebar panes on the left side and sidebar panels that interact with a specific document (such as the debugger or notebook property inspector) on the right side. As always, you can move panes between the left and right sidebars (right click on the sidebar icon, or change it in Advanced Settings).
+
 For Developers
 ^^^^^^^^^^^^^^
 
