@@ -319,7 +319,7 @@ When an extension (the "provider") is providing a service identified by a token 
 Requiring a service
 """""""""""""""""""
 
-When an extension (the "consumer") is requiring a service provided by another extension (the "provider"), identified by a token imported from a package (the ``token-package``, which may be same as the provider), the consumer should configure the dependency ``token-package`` to be a singleton to ensure the consumer is getting the same exact same token the provider is using to identify the service. Also, since the provider is providing a copy of ``token-package``, the consumer can exclude it from its bundle.
+When an extension (the "consumer") is requiring a service provided by another extension (the "provider"), identified by a token imported from a package (the ``token-package``, which may be the same as the provider), the consumer should configure the dependency ``token-package`` to be a singleton to ensure the consumer is getting the exact same token the provider is using to identify the service. Also, since the provider is providing a copy of ``token-package``, the consumer can exclude it from its bundle.
 
 .. code-block:: json
 
