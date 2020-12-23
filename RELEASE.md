@@ -127,7 +127,7 @@ These lines:
   - [ ] https://github.com/jupyterlab/jupyter-renderers
 - [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
 - [ ] Update the extension examples:
-  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar)
+  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
 - [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 
