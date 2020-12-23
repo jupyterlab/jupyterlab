@@ -324,7 +324,7 @@ class AppOptions(HasTraits):
 
     kill_event = Instance(Event, args=(), help='Event for aborting call')
 
-    labextensions_path = List(Unicode(), help='The paths to look in for federated JupyterLab extensions')
+    labextensions_path = List(Unicode(), help='The paths to look in for prebuilt JupyterLab extensions')
 
     registry = Unicode(help="NPM packages registry URL")
 

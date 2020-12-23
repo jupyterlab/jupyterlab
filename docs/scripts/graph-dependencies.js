@@ -1,3 +1,20 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+/**
+ * This script generates a transitive reduction of the dependency graph among
+ * jupyterlab packages using the graphviz library. It works from package.json
+ * dependencies, so does not capture the nuances of how plugins depend on each
+ * other, such as optional dependencies. Still, it can be useful to have a way
+ * to generate such a graph to get an idea of how packages depend on other
+ * packages.
+ *
+ * You must have graphviz installed to run this script. Run from the docs
+ * directory:
+ *
+ * % node scripts/graph-dependencies.js
+ */
+
 const childProcess = require('child_process');
 const fs = require('fs-extra');
 const glob = require('glob');
@@ -9,7 +26,7 @@ const baseUrl = 'https://github.com/jupyterlab/jupyterlab/tree/master/packages';
 const packages = glob.sync(path.join(basePath, 'packages/*'));
 
 // Begin the graph specification
-let text = ['digraph G {', 'ratio = 0.6;', 'rankdir=LR;'];
+let text = ['digraph G {', 'node [shape=box];'];
 
 packages.forEach(function (packagePath) {
   // Load the package.json data.

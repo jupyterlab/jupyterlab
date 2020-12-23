@@ -67,7 +67,7 @@ if [[ $GROUP == linkcheck ]]; then
     # Expire links after a week
     LINKS_EXPIRE=604800
     args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
-    args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html ${args}"
+    args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html --ignore docs/build/html/api --ignore docs/build/html/getting_started/changelog.html ${args}"
     py.test $args --links-ext .html -k .html docs/build/html || py.test $args --links-ext .html -k .html --lf docs/build/html
 
     # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)

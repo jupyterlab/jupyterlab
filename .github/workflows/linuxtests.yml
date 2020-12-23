@@ -42,7 +42,7 @@ jobs:
           node-version: '12.x'
 
       - name: Cache pip on Linux
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         if: startsWith(runner.os, 'Linux')
         with:
           path: ~/.cache/pip
@@ -54,7 +54,7 @@ jobs:
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
       - name: Cache yarn
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -63,13 +63,13 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Cache checked links build
-        uses: actions/cache@v1
-        if: ${{ matrix.group == 'docs' }}
+        uses: actions/cache@v2
+        if: ${{ matrix.group == 'linkcheck' }}
         with:
           path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-link-check-${{ hashFiles('**/*.rst') }}
+          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst') }}-nochangelog
           restore-keys: |
-            ${{ runner.os }}-link-check-
+            ${{ runner.os }}-linkcheck-
 
       - name: Install dependencies
         env:

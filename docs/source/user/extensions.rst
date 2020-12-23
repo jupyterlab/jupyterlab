@@ -23,35 +23,19 @@ documentation <developer_extensions>`.
 Installing Extensions
 ---------------------
 
-A JupyterLab extension is a JavaScript package that runs in the browser. An
-extension's JavaScript can be distributed as a single JavaScript package
-(which requires a rebuild of JupyterLab to activate it), or starting in
-JupyterLab 3.0, can be bundled together with its dependencies (which does not
-require a rebuild of JupyterLab to activate it). Rebuilding JupyterLab
-requires Node.js to be :ref:`installed <installing_nodejs>`.
+A JupyterLab extension contains JavaScript that is installed into Jupyterlab and run in the browser. An extension contains one or more plugins that extend JupyterLab. There are two types of JupyterLab extensions: a *source extension* (which requires a rebuild of JupyterLab when installed), and a *prebuilt extension* (which does not require a rebuild of JupyterLab). Rebuilding JupyterLab requires Node.js to be :ref:`installed <installing_nodejs>`.
 
-An extension can be installed using the `pip <https://pypi.org/>`__ or `conda
-<https://anaconda.org/>`__ package managers, or using the Jupyter Lab tools to
-install packages from `npm
-<https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__.
+JupyterLab extensions can be installed in a number of ways, including:
 
-- Python ``pip`` or ``conda`` packages can include extensions as either single
-  JavaScript packages (requiring Node.js and a JupyterLab rebuild) or bundled
-  with their dependencies (not requiring Node.js nor a JupyterLab rebuild).
-  These packages may also include by a server-side component necessary for the
-  extension to function.
-- The Extension Manager in JupyterLab and the ``jupyter labextension install``
-  command install extension packages from `npm
-  <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__. These
-  require Node.js and a JupyterLab rebuild to activate. See
-  :ref:`installing_nodejs` and :ref:`install_command`.
+- Python ``pip`` or ``conda`` packages can include either a source extension or a prebuilt extension. These packages may also include a server-side component necessary for the extension to function.
+- The Extension Manager in JupyterLab and the ``jupyter labextension install`` command can install source extension packages from `npm <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__. Installing a source extension requires Node.js and a JupyterLab rebuild to activate. See :ref:`installing_nodejs` and :ref:`install_command`.
 
 .. _installing_nodejs:
 
 Installing Node.js
 ^^^^^^^^^^^^^^^^^^
 
-Some extensions require `Node.js <https://nodejs.org/>`__ to rebuild
+Source extensions require `Node.js <https://nodejs.org/>`__ to rebuild
 JupyterLab and activate the extension. If you use ``conda`` with
 ``conda-forge`` packages, you can get Node.js with:
 
@@ -74,15 +58,12 @@ Managing Extensions with ``jupyter labextension``
 -------------------------------------------------
 
 The ``jupyter labextension`` command enables you to install or uninstall
-extensions from `npm
-<https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__, list all
-installed extensions, or disable any extension. See the help with ``jupyter
-labextension --help``. 
+source extensions from `npm <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__, list all installed extensions, or disable any extension. See the help with ``jupyter labextension --help``. 
 
-Installing and Uninstalling Extensions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Installing and Uninstalling Source Extensions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can install extensions from `npm
+You can install source extensions from `npm
 <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__ with:
 
 .. code:: bash
@@ -96,23 +77,22 @@ of an extension, for example:
 
     jupyter labextension install my-extension@1.2.3
 
-You can also install an extension that is not uploaded to npm, i.e.,
+You can also install a source extension that is not uploaded to npm, i.e.,
 ``my-extension`` can be a local directory containing the extension, a
 gzipped tarball, or a URL to a gzipped tarball.
 
 .. note::
-    Any extension installed from npm will require :ref:`installing
+    Installing a source extension will require :ref:`installing
     Node.js <installing_nodejs>` and require a rebuild of JupyterLab.
 
-
-Uninstall extensions that were installed from npm using the command:
+Uninstall source extensions using the command:
 
 .. code:: bash
 
     jupyter labextension uninstall my-extension my-other-extension
 
 If you are installing/uninstalling several extensions in several stages,
-you may want to defer rebuilding the application by including the flag
+you may want to defer rebuilding JupyterLab by including the flag
 ``--no-build`` in the install/uninstall step. Once you are ready to
 rebuild, you can run the command:
 
@@ -150,7 +130,7 @@ List all installed extensions, including those installed with ``pip`` or
 Enabling and Disabling Extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Disabling an extension prevents the extension from running in JupyterLab
+Disabling an extension prevents the all plugins in the extension from running in JupyterLab
 (though the code is still loaded). You can disable specific JupyterLab
 extensions (including core extensions) without rebuilding JupyterLab with:
 
@@ -164,11 +144,11 @@ You can enable a disabled extension with:
 
     jupyter labextension enable my-extension
 
-Installed extensions are enabled by default, unless there is configuration explicity disabling them.
-Extensions can be disabled or forcably enabled using the command line.   
-Extensions or individual plugins with an extension can be disabled by another extension.
+Installed extensions are enabled by default unless there is configuration explicity disabling them.
+Extensions can be disabled or enabled using the command line.
+Extensions or individual plugins within an extension can be disabled by another extension.
 
-The priority order for whether an extension is enabled or disabled is as follows:
+The priority order for determining whether an extension is enabled or disabled is as follows:
 
 - Presence of ``<jupyter_config_path>/labconfig/pageconfig.json`` file(s) with a ``disabledExtensions`` key that is a object with package names as keys and boolean values. 
 - (deprecated) Presence of ``disabledExensions`` key in ``<lab_app_dir>/settings/pageconfig.json``.   This value is a list of extensions to disable, but is deprecated in favor of the layered configuration approach in the `labconfig` location(s).
@@ -195,8 +175,6 @@ You can use the Extension Manager in JupyterLab to manage extensions that are
 distributed as single JavaScript packages on npm.
 
 The Extension Manager is in the :ref:`left sidebar <left-sidebar>`.
-
-TODO: update screenshots
 
 .. figure:: images/extension_manager_default.png
    :align: center
@@ -286,7 +264,7 @@ performs a free-text search of JupyterLab extensions on the NPM registry.
 Installing an Extension
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Once you have found an extension that you think is interesting, install
+Once you have found a source extension that you think is interesting, install
 it by clicking the "Install" button of the extension list entry.
 
 
@@ -323,7 +301,7 @@ Managing Installed Extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When there are some installed extensions, they will be shown in the "Installed"
-section. These can then be uninstalled or disabled. Disabling an extension will
+section. These can then be uninstalled (if they are source extensions) or disabled. Disabling an extension will
 prevent it from being activated, but without rebuilding the application.
 
 
@@ -352,8 +330,8 @@ will be up to you to take these into account or not.
 Listings
 ^^^^^^^^
 
-When searching extensions in the Extension Manager, JupyterLab displays the complete search result and 
-the user is free to install any extension. This is the :ref:`default_mode`.
+When searching source extensions in the Extension Manager, JupyterLab displays the complete search result and 
+the user is free to install any source extension. This is the :ref:`default_mode`.
 
 To bring more security, you or your administrator can enable ``blocklists`` or ``allowlists``
 mode. JupyterLab will check the extensions against the defined listings.

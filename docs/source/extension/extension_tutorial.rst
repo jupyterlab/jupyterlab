@@ -1,7 +1,7 @@
 .. _extension_tutorial:
 
-Let's Make an Astronomy Picture of the Day JupyterLab Extension
-===============================================================
+Extension Tutorial
+==================
 
 JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,
@@ -22,7 +22,7 @@ By working through this tutorial, you'll learn:
 -  How to version control your work with git
 -  How to release your extension for others to enjoy
 
-.. figure:: extension_tutorial_complete.png
+.. figure:: images/extension_tutorial_complete.png
    :align: center
    :class: jp-screenshot
    :alt: The completed extension, showing the Astronomy Picture of the Day for 24 Jul 2015.
@@ -147,7 +147,7 @@ initialize it as a git repository and commit the current code.
 
 Note: This step is not technically necessary, but it is good practice to
 track changes in version control system in case you need to rollback to
-an earlier version or want to collaborate with others. For example, you
+an earlier version or want to collaborate with others. You
 can compare your work throughout this tutorial with the commits in a
 reference version of ``jupyterlab_apod`` on GitHub at
 https://github.com/jupyterlab/jupyterlab_apod.
@@ -369,7 +369,7 @@ click one of the launcher tabs so that the *Astronomy Picture* panel is still
 open but no longer active. Now run the *Random Astronomy Picture* command one
 more time. The single *Astronomy Picture* tab should come to the foreground.
 
-.. figure:: extension_tutorial_empty.png
+.. figure:: images/extension_tutorial_empty.png
    :align: center
    :class: jp-screenshot
    :alt: The in-progress extension, showing a blank panel.
@@ -452,7 +452,7 @@ tab, and run the *Random Astronomy Picture* command again. You should now see a
 picture in the panel when it opens (if that random date had a picture and not a
 video).
 
-.. figure:: extension_tutorial_single.png
+.. figure:: images/extension_tutorial_single.png
    :align: center
    :class: jp-screenshot
 
@@ -865,7 +865,7 @@ see an Astronomy Picture panel reappear immediately without running the command.
 the panel and refresh the browser tab. You should then not see an Astronomy Picture tab
 after the refresh.
 
-.. figure:: extension_tutorial_complete.png
+.. figure:: images/extension_tutorial_complete.png
    :align: center
    :class: jp-screenshot
    :alt: The completed extension, showing the Astronomy Picture of the Day for 24 Jul 2015.
@@ -951,16 +951,16 @@ You may want to also publish your extension as a JavaScript package to the
    extension into JupyterLab explicitly (similar to how was done in JupyterLab
    versions 1 and 2), which leads to a more optimal JupyterLab package.
 
-2. As we saw above, JupyterLab enables extensions to use objects provided by
-   other extensions. If you want to provide an object to the JupyterLab system
-   for other extensions to use, you will need to publish your JavaScript
-   package to npm so other extensions can depend on it and import and require
-   your token. For example, our extension above uses the ``ICommandPalette``
-   and ``ILayoutRestorer`` objects provided by some core extensions in
-   JupyterLab. We were able to tell JupyterLab we required these objects by
+2. As we saw above, JupyterLab enables extensions to use services provided by
+   other extensions. For example, our extension above uses the ``ICommandPalette``
+   and ``ILayoutRestorer`` services provided by core extensions in
+   JupyterLab. We were able to tell JupyterLab we required these services by
    importing their tokens from the ``@jupyterlab/apputils`` and
    ``@jupyterlab/application`` npm packages and listing them in our plugin
-   definition.
+   definition. If you want to provide a service to the JupyterLab system
+   for other extensions to use, you will need to publish your JavaScript
+   package to npm so other extensions can depend on it and import and require
+   your token.
 
 Learn more
 ----------

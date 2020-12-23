@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module terminal-extension
+ */
 
 import { toArray } from '@lumino/algorithm';
 import { Menu } from '@lumino/widgets';

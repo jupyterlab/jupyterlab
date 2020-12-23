@@ -1,11 +1,142 @@
 .. _extension_migration:
 
-JupyterLab 1.x to 2.x Extension Migration Guide
-===============================================
+Extension Migration Guide
+================================================
 
-This is a migration guide for updating extensions that support JupyterLab 1.x
-to work in JupyterLab 2.x. We will look at two examples of extensions that
-cover most of the APIs that extension authors might be using:
+.. _extension_migration_2_3:
+
+JupyterLab 2.x to 3.x
+---------------------
+
+Here are some helpful tips for migrating an extension from JupyterLab 2.x to JupyterLab 3.x.
+
+Upgrading library versions manually
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To update the extensions so it is compatible with the 3.0 release, update the compatibility
+range of the ``@jupyterlab`` dependencies in the ``package.json``. The diff should be similar to:
+
+.. code:: diff
+
+   index 6f1562f..3fcdf37 100644
+   ^^^ a/package.json
+   +++ b/package.json
+      "dependencies": {
+   -    "@jupyterlab/application": "^2.0.0",
+   +    "@jupyterlab/application": "^3.0.0",
+
+Upgrading library versions using the upgrade script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab 3.0 provides a script to upgrade an existing extension to use the new extension system and packaging.
+
+First, make sure to update to JupyterLab 3.0 and install ``jupyter-packaging`` and ``cookiecutter``. With ``pip``:
+
+.. code:: bash
+
+   pip install jupyterlab -U
+   pip install jupyter-packaging cookiecutter
+
+
+Or with ``conda``:
+
+.. code:: bash
+
+   conda install -c conda-forge jupyterlab=3 jupyter-packaging cookiecutter
+
+
+Then at the root folder of the extension, run:
+
+.. code:: bash
+
+   python -m jupyterlab.upgrade_extension .
+
+The upgrade script creates the necessary files for packaging the JupyterLab extension as a Python package, such as
+``setup.py`` and ``pyproject.toml``.
+
+The upgrade script also updates the dependencies in ``package.json`` to the ``^3.0.0`` packages. Here is an example diff:
+
+.. code:: diff
+
+   index 6f1562f..3fcdf37 100644
+   ^^^ a/package.json
+   +++ b/package.json
+   @@ -29,9 +29,13 @@
+      "scripts": {
+   -    "build": "tsc",
+   -    "build:labextension": "npm run clean:labextension && mkdirp myextension/labextension && cd myextension/labextension && npm pack ../..",
+   -    "clean": "rimraf lib tsconfig.tsbuildinfo",
+   +    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
+   +    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
+   +    "build:lib": "tsc",
+   +    "build:labextension": "jupyter labextension build .",
+   +    "build:labextension:dev": "jupyter labextension build --development True .",
+   +    "clean": "rimraf lib tsconfig.tsbuildinfo myextension/labextension",
+   +    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
+      "clean:labextension": "rimraf myextension/labextension",
+      "eslint": "eslint . --ext .ts,.tsx --fix",
+      "eslint:check": "eslint . --ext .ts,.tsx",
+   @@ -59,12 +63,12 @@
+      ]
+      },
+      "dependencies": {
+   -    "@jupyterlab/application": "^2.0.0",
+   -    "@jupyterlab/apputils": "^2.0.0",
+   -    "@jupyterlab/observables": "^3.0.0",
+   +    "@jupyterlab/builder": "^3.0.0",
+   +    "@jupyterlab/application": "^3.0.0",
+   +    "@jupyterlab/apputils": "^3.0.0",
+   +    "@jupyterlab/observables": "^3.0.0",
+      "@lumino/algorithm": "^1.2.3",
+      "@lumino/commands": "^1.10.1",
+      "@lumino/disposable": "^1.3.5",
+   @@ -99,6 +103,13 @@
+   -    "typescript": "~3.8.3"
+   +    "typescript": "~4.0.1"
+      },
+      "jupyterlab": {
+   -    "extension": "lib/plugin"
+   +    "extension": "lib/plugin",
+   +    "outputDir": "myextension/labextension/"
+      }
+   }
+
+
+On the diff above, we see that additional development scripts are also added, as they are used by the new extension system workflow.
+
+The diff also shows the new ``@jupyterlab/builder`` as a ``devDependency``.
+``@jupyterlab/builder`` is a package required to build the extension as a federated extension.
+It hides away internal dependencies such as ``webpack``, and produces the assets that can then be distributed as part of a Python package.
+
+Extension developers do not need to interact with ``@jupyterlab/builder`` directly, but instead can use the
+``jupyter labextension build`` command. This command is run automatically as part of the ``build`` script
+(``jlpm run build``).
+
+For more details about the new file structure and packaging of the extension, check out the extension tutorial: :ref:`extension_tutorial`
+
+Publishing the extension to PyPI and conda-forge
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Starting from JupyterLab 3.0, extensions can be distributed as a Python package.
+
+The extension tutorial provides explanations to package the extension so it can be
+published on PyPI and conda forge: :ref:`extension_tutorial_publish`.
+
+.. note::
+
+   While publishing to PyPI is the new recommended way for distributing extensions to users,
+   it is still useful to continue publishing extensions to ``npm`` as well,
+   so other developers can extend them in their own extensions.
+
+
+.. _extension_migration_1_2:
+
+JupyterLab 1.x to 2.x
+---------------------
+
+Here are some helpful tips for migrating an extension from JupyterLab 1.x to
+JupyterLab 2.x. We will look at two examples of extensions that cover most of
+the APIs that extension authors might be using:
 
 - ``@jupyterlab/debugger`` migration pull request:
   https://github.com/jupyterlab/debugger/pull/337/files
@@ -14,7 +145,7 @@ cover most of the APIs that extension authors might be using:
   https://github.com/jupyterlab/jupyterlab-shortcutui/pull/53/files
 
 Upgrading library versions
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``@phosphor/*`` libraries that JupyterLab 1.x uses have been renamed to
 ``@lumino/*``. Updating your ``package.json`` is straightforward. The easiest
@@ -23,14 +154,14 @@ way to do this is to look in the
 and to simply adopt the versions of the relevant libraries that are used
 there.
 
-.. figure:: extension_migration_dependencies_debugger.png
+.. figure:: images/extension_migration_dependencies_debugger.png
    :align: center
    :class: jp-screenshot
    :alt: Updating the debugger extension's libraries in package.json
 
    Updating the debugger extension's libraries in ``package.json``
 
-.. figure:: extension_migration_dependencies_shortcuts.png
+.. figure:: images/extension_migration_dependencies_shortcuts.png
    :align: center
    :class: jp-screenshot
    :alt: Updating the shortcuts UI extension's libraries in package.json
@@ -44,7 +175,7 @@ there.
   ``package.json`` should depend on version ``^2.0.0`` of these packages.
 
 Migrating from ``@phosphor`` to ``@lumino``
--------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-
 
 The foundational packages used by JupyterLab are now all prefixed with the NPM
 namespace ``@lumino`` instead of ``@phosphor``. The APIs for these packages
@@ -99,7 +230,7 @@ the new ``@lumino`` namespaced packages:
     e.g. ``lm-dragenter``
 
 Updating former ``@jupyterlab/coreutils`` imports
--------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-
 
 JupyterLab 2.0 introduces several new packages with classes and tokens that
 have been moved out of ``@jupyterlab/coreutils`` into their own packages. These
@@ -135,7 +266,7 @@ exports have been moved.
 ============================  =================================
 
 Using ``Session`` and ``SessionContext`` to manage kernel sessions
-------------------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. note::
 
   For full API documentation and examples of how to use
@@ -153,7 +284,7 @@ Any widget that matches the ``interface IDocumentWidget`` has a
 For example, consider how the ``@jupyterlab/debugger`` extension's
 ``DebuggerService`` updated its ``isAvailable()`` method.
 
-.. figure:: extension_migration_session.png
+.. figure:: images/extension_migration_session.png
    :align: center
    :class: jp-screenshot
    :alt: Updating the isAvailable method of the debugger service
@@ -170,9 +301,11 @@ For example, consider how the ``@jupyterlab/debugger`` extension's
   from a new kernel connection), you can do ``await kernel.info``.
 
 Using the new icon system and ``LabIcon``
------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. note::
 
   For full API documentation and examples of how to use
   the new icon support based on ``LabIcon`` from ``@jupyterlab/ui-components``,
   `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/master/packages/ui-components#readme>`__.
+
+

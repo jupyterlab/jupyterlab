@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module mainmenu-extension
+ */
 
 import { each, find } from '@lumino/algorithm';
 
