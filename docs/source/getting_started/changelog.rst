@@ -92,7 +92,7 @@ Prebuilt extensions are also known as federated extensions in the changes below,
 * Allow custom webpack config for federated extensions (`#9224 <https://github.com/jupyterlab/jupyterlab/pull/9224>`__, `#9175 <https://github.com/jupyterlab/jupyterlab/issues/9175>`__)
 * Use the new webpack 5 ‘auto’ publicpath (`#9062 <https://github.com/jupyterlab/jupyterlab/pull/9062>`__, `#9043 <https://github.com/jupyterlab/jupyterlab/issues/9043>`__)
 * Bump webpack to 5.0rc1 (`#9091 <https://github.com/jupyterlab/jupyterlab/pull/9091>`__)
-* Update the upgrade script to not replace dev deps to caret (`#9090 <https://github.com/jupyterlab/jupyterlab/pull/9090>`__, `# <https://github.com/jupyterlab/jupyterlab/commit/aee97d8a9577635622e7e2c75714c7d4f7929623/issues/>`__)
+* Update the upgrade script to not replace dev deps to caret (`#9090 <https://github.com/jupyterlab/jupyterlab/pull/9090>`__)
 * Bump webpack to 5.0rc2 (`#9103 <https://github.com/jupyterlab/jupyterlab/pull/9103>`__)
 * Fix watch mode (`#9101 <https://github.com/jupyterlab/jupyterlab/pull/9101>`__, `#9089 <https://github.com/jupyterlab/jupyterlab/issues/9089>`__)
 * Upgrade to webpack 5 (`#9148 <https://github.com/jupyterlab/jupyterlab/pull/9148>`__)
