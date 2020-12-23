@@ -542,7 +542,7 @@ We provide a `cookiecutter <https://github.com/jupyterlab/extension-cookiecutter
 Serving a prebuilt extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A prebuilt extension is copied into a directory such as ``sys-prefix/share/jupyter/labextensions/package-name``. The JupyterLab server makes these files available via a `/labextensions/` server handler. The settings and themes handlers in the server also load settings and themes from the prebuilt extension installation directories. If a prebuilt extension has the same name as a source extension, the prebuilt extension is preferred.
+A prebuilt extension is copied into a directory such as ``sys-prefix/share/jupyter/labextensions/package-name``. The JupyterLab server makes these files available via a ``/labextensions/`` server handler. The settings and themes handlers in the server also load settings and themes from the prebuilt extension installation directories. If a prebuilt extension has the same name as a source extension, the prebuilt extension is preferred.
 
 
 Runtime configuration
