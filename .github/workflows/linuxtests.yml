@@ -67,7 +67,7 @@ jobs:
         if: ${{ matrix.group == 'linkcheck' }}
         with:
           path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst') }}
+          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst') }}-nochangelog
           restore-keys: |
             ${{ runner.os }}-linkcheck-
 
