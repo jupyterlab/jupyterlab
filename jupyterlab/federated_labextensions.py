@@ -47,7 +47,7 @@ def develop_labextension(path, symlink=True, overwrite=False,
                         destination=None,
                         logger=None, sys_prefix=False
                         ):
-    """Install a federated extension for JupyterLab
+    """Install a prebuilt extension for JupyterLab
 
     Stages files and/or directories into the labextensions directory.
     By default, this compares modification time, and only stages files that need updating.

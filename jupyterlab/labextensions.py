@@ -112,7 +112,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
 
-    labextensions_path = List(Unicode(), help='The standard paths to look in for federated JupyterLab extensions')
+    labextensions_path = List(Unicode(), help='The standard paths to look in for prebuilt JupyterLab extensions')
 
     @default('labextensions_path')
     def _default_labextensions_path(self):
@@ -385,9 +385,9 @@ class CheckLabExtensionsApp(BaseExtensionApp):
 
 _examples = """
 jupyter labextension list                        # list all configured labextensions
-jupyter labextension develop                     # develop a federated labextension
-jupyter labextension build                       # build a federated labextension
-jupyter labextension watch                       # watch a federated labextension
+jupyter labextension develop                     # develop a prebuilt labextension
+jupyter labextension build                       # build a prebuilt labextension
+jupyter labextension watch                       # watch a prebuilt labextension
 jupyter labextension install <extension name>    # install a labextension
 jupyter labextension uninstall <extension name>  # uninstall a labextension
 """
