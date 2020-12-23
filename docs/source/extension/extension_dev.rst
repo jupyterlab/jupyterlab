@@ -537,54 +537,23 @@ Serving a prebuilt extension
 A prebuilt extension is copied into a directory such as ``sys-prefix/share/jupyter/labextensions/package-name``. The JupyterLab server makes these files available via a `/labextensions/` server handler. The settings and themes handlers in the server also load settings and themes from the prebuilt extension installation directories. If a prebuilt extension has the same name as a source extension, the prebuilt extension is preferred.
 
 
-Packaging extensions
---------------------
-
-Most extensions are single JavaScript packages, and can be shipped on npmjs.org.
-This makes them discoverable by the JupyterLab extension manager, provided they
-have the ``jupyterlab-extension`` keyword  in their ``package.json``.  If the package also
-contains a server extension (Python package), the author has two options.
-The server extension and the JupyterLab extension can be shipped in a single package,
-or they can be shipped separately.
-
-The JupyterLab extension can be bundled in a package on PyPI and conda-forge so
-that it ends up in the user's application directory.  Note that the user will still have to run ``jupyter lab build``
-(or build when prompted in the UI) in order to use the extension.
-The general idea is to pack the Jupyterlab extension using ``npm pack``, and then
-use the ``data_files`` logic in ``setup.py`` to ensure the file ends up in the
-``<jupyterlab_application>/share/jupyter/lab/extensions``
-directory.
-
-Note that even if the JupyterLab extension is unusable without the
-server extension, as long as you use the companion package metadata it is still
-useful to publish it to npmjs.org so it is discoverable by the JupyterLab extension manager.
-
-The server extension can be enabled on install by using ``data_files``.
-an example of this approach is `jupyterlab-matplotlib <https://github.com/matplotlib/jupyter-matplotlib/tree/ce9cc91e52065d33e57c3265282640f2aa44e08f>`__.  The file used to enable the server extension is `here <https://github.com/matplotlib/jupyter-matplotlib/blob/ce9cc91e52065d33e57c3265282640f2aa44e08f/jupyter-matplotlib.json>`__.   The logic to ship the JS tarball and server extension
-enabler is in `setup.py <https://github.com/matplotlib/jupyter-matplotlib/blob/ce9cc91e52065d33e57c3265282640f2aa44e08f/setup.py>`__.  Note that the ``setup.py``
-file has additional logic to automatically create the JS tarball as part of the
-release process, but this could also be done manually.
-
-
-
-
-
-
 Runtime configuration
 ---------------------
-- We handle disabling of lab extensions using a trait on the ``LabApp`` class, so it can be set by admins and overridden by users.  Extensions are automatically enabled when installed, and must be explicitly disabled.  The disabled config can consist of a package name or a plugin regex pattern
-- ``page_config`` and ``overrides`` are also handled with traits so that admins can provide defaults and users can provide overrides
+
+- We handle disabling of lab extensions using a trait on the ``LabApp`` class,
+so it can be set by admins and overridden by users.  Extensions are
+automatically enabled when installed, and must be explicitly disabled.  The
+disabled config can consist of a package name or a plugin regex pattern
+- ``page_config`` and ``overrides`` are also handled with traits so that
+admins can provide defaults and users can provide overrides
 
 
+Development workflow for source extensions
+------------------------------------------
 
+Developing prebuilt extensions is usually much easier since they do not require rebuilding JupyterLab to see changes. If you need to develop a source extension, here are some tips for a development workflow.
 
-Development workflow
---------------------
-
-We encourage extension authors to add the `jupyterlab-extension GitHub topic
-<https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__ to any GitHub extension repository.
-
-While authoring the extension, you can use the command:
+While authoring a source extension, you can use the command:
 
 .. code-block:: bash
 
@@ -691,6 +660,9 @@ path on the user's machine or a provided tarball. Any valid
 ``npm install`` specifier can be used in
 ``jupyter labextension install`` (e.g. ``foo@latest``, ``bar@3.0.0.0``,
 ``path/to/folder``, and ``path/to/tar.gz``).
+
+We encourage extension authors to add the `jupyterlab-extension GitHub topic
+<https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__ to any GitHub extension repository.
 
 Testing your extension
 ^^^^^^^^^^^^^^^^^^^^^^
