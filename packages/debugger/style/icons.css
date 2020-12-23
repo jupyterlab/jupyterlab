@@ -15,16 +15,13 @@ button.jp-Button.bp3-button.bp3-minimal.jp-TreeView.jp-TableView {
 button.jp-Button.bp3-button.bp3-minimal.jp-TreeView:hover {
   cursor: pointer;
   background-color: var(--jp-layout-color1);
-  border-radius: 34px;
 }
 
 button.jp-Button.bp3-button.bp3-minimal.jp-TableView:hover {
   cursor: pointer;
   background-color: var(--jp-layout-color1);
-  border-radius: 34px;
 }
 
 .jp-ViewModeSelected {
   background-color: var(--jp-layout-color1);
-  border-radius: 34px;
 }

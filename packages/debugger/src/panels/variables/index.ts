@@ -5,7 +5,7 @@ import { IThemeManager, ToolbarButton } from '@jupyterlab/apputils';
 
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
-import { Switch, tableRowsIcon, treeViewIcon } from '@jupyterlab/ui-components';
+import { tableRowsIcon, treeViewIcon } from '@jupyterlab/ui-components';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -56,41 +56,47 @@ export class Variables extends Panel {
         this._tree.hide();
         this._table.show();
         this.node.setAttribute('data-jp-table', 'true');
+        markViewButtonSelection('table');
       } else {
         this._tree.show();
         this._table.hide();
         this.node.removeAttribute('data-jp-table');
+        markViewButtonSelection('tree');
       }
       this.update();
     };
 
-    const button = new Switch();
-    button.id = 'jp-debugger';
-    button.valueChanged.connect((_, args) => {
-      onViewChange();
+    const treeViewButton = new ToolbarButton({
+      icon: treeViewIcon,
+      className: 'jp-TreeView',
+      onClick: onViewChange,
+      tooltip: trans.__('Tree View')
     });
-    button.caption = trans.__('Table / Tree View');
-    this._header.toolbar.addItem('view-VariableSwitch', button);
 
-    this._header.toolbar.addItem(
-      'view-VariableTreeView',
-      new ToolbarButton({
-        icon: treeViewIcon,
-        className: 'jp-TreeView',
-        onClick: onViewChange,
-        tooltip: trans.__('Tree View')
-      })
-    );
+    const tableViewButton = new ToolbarButton({
+      icon: tableRowsIcon,
+      className: 'jp-TableView',
+      onClick: onViewChange,
+      tooltip: trans.__('Table View')
+    });
 
-    this._header.toolbar.addItem(
-      'view-VariableTableView',
-      new ToolbarButton({
-        icon: tableRowsIcon,
-        className: 'jp-TableView',
-        onClick: onViewChange,
-        tooltip: trans.__('Table View')
-      })
-    );
+    const markViewButtonSelection = (selectedView: string): void => {
+      const viewModeClassName = 'jp-ViewModeSelected';
+
+      if (selectedView === 'tree') {
+        tableViewButton.removeClass(viewModeClassName);
+        treeViewButton.addClass(viewModeClassName);
+      } else {
+        treeViewButton.removeClass(viewModeClassName);
+        tableViewButton.addClass(viewModeClassName);
+      }
+    };
+
+    markViewButtonSelection(this._table.isHidden ? 'tree' : 'table');
+
+    this._header.toolbar.addItem('view-VariableTreeView', treeViewButton);
+
+    this._header.toolbar.addItem('view-VariableTableView', tableViewButton);
 
     this.addWidget(this._header);
     this.addWidget(this._tree);
