@@ -545,14 +545,6 @@ Serving a prebuilt extension
 A prebuilt extension is copied into a directory such as ``sys-prefix/share/jupyter/labextensions/package-name``. The JupyterLab server makes these files available via a ``/labextensions/`` server handler. The settings and themes handlers in the server also load settings and themes from the prebuilt extension installation directories. If a prebuilt extension has the same name as a source extension, the prebuilt extension is preferred.
 
 
-Runtime configuration
----------------------
-
-Disable an extension using ``jupyter labextension disable <name>``, where ``<name>`` is an extension name (to disable all plugins in the extension) or a plugin name. 
-
-- We handle disabling of lab extensions using a trait on the ``LabApp`` class, so it can be set by admins and overridden by users.  Extensions are automatically enabled when installed, and must be explicitly disabled.  The disabled config can specify an extension package name or a plugin name.
-- ``page_config`` and ``overrides`` are also handled with traits so that admins can provide defaults and users can provide overrides
-
 Development workflow for source extensions
 ------------------------------------------
 
