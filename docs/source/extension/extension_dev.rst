@@ -458,7 +458,7 @@ Prebuilt Extensions
 package.json metadata
 ^^^^^^^^^^^^^^^^^^^^^
 
-In addition to the package metadata for source extensions, prebuilt extensions have extra ``jupyterlab`` metadata for where the prebuilt assets should go.
+In addition to the package metadata for source extensions, prebuilt extensions have extra ``jupyterlab`` metadata.
 
 * ``outputDir``: :ref:`outputDir`
 * ``webpackConfig``: :ref:`webpackConfig`
@@ -521,12 +521,20 @@ Since prebuilt extensions are distributed in many ways (Python pip packages, con
 * ``packageName``: This is the package name of the prebuilt extension in the package manager above, which may be different than the package name in ``package.json``.
 * ``uninstallInstructions``: This is a short block of text giving the user instructions for uninstalling the prebuilt extension. For example, it might instruct them to use a system package manager or talk to a system administrator.
 
-Building a prebuilt extension
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _prebuilt_dev_workflow:
 
-JupyterLab provides a ``jupyter labextension build`` command that is used to build prebuilt extensions. The command uses dependency metadata from the active JupyterLab to produce a set of files from a source extension that comprise the prebuilt extension. The files include a main entry point ``remoteEntry.<hash>.js``, dependencies bundled into JavaScript files, ``package.json`` (with some extra build metadata), as well as plugin settings and theme directory structures if needed.
+Developing a prebuilt extension
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A ``jupyter labextension develop`` command installs an in-development prebuilt extension into JupyterLab. It essentially creates a symlink in the ``sys-prefix/share/jupyter/labextensions/package-name`` to the prebuilt extension output directory.
+Build a prebuilt extension using the ``jupyter labextension build`` command. This command uses dependency metadata from the active JupyterLab to produce a set of files from a source extension that comprise the prebuilt extension. The files include a main entry point ``remoteEntry.<hash>.js``, dependencies bundled into JavaScript files, ``package.json`` (with some extra build metadata), as well as plugin settings and theme directory structures if needed.
+
+While authoring a prebuilt extension, you can use the ``labextension develop`` command to create a link to your prebuilt output directory, similar to ``pip install -e``::
+
+   jupyter labextension develop . --overwrite
+
+Then rebuilding your extension and refreshing JupyterLab in the browser should pick up changes in your prebuilt extension source code.
+
+If you are developing your prebuilt extension against the JupyterLab source repo, you can run JupyterLab with ``jupyter lab --dev-mode --extensions-in-dev-mode`` to have the development version of JupyterLab load prebuilt extensions.
 
 We provide a `cookiecutter <https://github.com/jupyterlab/extension-cookiecutter-ts>`_ that handles all of the scaffolding for an extension author, including the shipping of appropriate data files, so that when the user installs the package, the prebuilt extension ends up in ``share/jupyter/labextensions``
 
@@ -540,18 +548,15 @@ A prebuilt extension is copied into a directory such as ``sys-prefix/share/jupyt
 Runtime configuration
 ---------------------
 
-- We handle disabling of lab extensions using a trait on the ``LabApp`` class,
-so it can be set by admins and overridden by users.  Extensions are
-automatically enabled when installed, and must be explicitly disabled.  The
-disabled config can consist of a package name or a plugin regex pattern
-- ``page_config`` and ``overrides`` are also handled with traits so that
-admins can provide defaults and users can provide overrides
+Disable an extension using ``jupyter labextension disable <name>``, where ``<name>`` is an extension name (to disable all plugins in the extension) or a plugin name. 
 
+- We handle disabling of lab extensions using a trait on the ``LabApp`` class, so it can be set by admins and overridden by users.  Extensions are automatically enabled when installed, and must be explicitly disabled.  The disabled config can specify an extension package name or a plugin name.
+- ``page_config`` and ``overrides`` are also handled with traits so that admins can provide defaults and users can provide overrides
 
 Development workflow for source extensions
 ------------------------------------------
 
-Developing prebuilt extensions is usually much easier since they do not require rebuilding JupyterLab to see changes. If you need to develop a source extension, here are some tips for a development workflow.
+:ref:`Developing prebuilt extensions <prebuilt_dev_workflow>` is usually much easier since they do not require rebuilding JupyterLab to see changes. If you need to develop a source extension, here are some tips for a development workflow.
 
 While authoring a source extension, you can use the command:
 
@@ -593,7 +598,7 @@ specific patch release of one of the core JupyterLab packages you can
 temporarily pin that requirement to a specific version in your own
 dependencies.
 
-If you must install an extension into a development branch of JupyterLab, you have to graft it into the source tree of JupyterLab itself. This may be done using the command
+If you must install a source extension into a development branch of JupyterLab, you have to graft it into the source tree of JupyterLab itself. This may be done using the command
 
 ::
 
@@ -609,7 +614,7 @@ subsequently reversed by running
     jlpm run remove:package <extension-dir-name>
 
 This will remove the package metadata from the source tree and delete
-all of the package files.
+all of the package files. Note that :ref:`developing a prebuilt extension <prebuilt_dev_workflow>` against a development version of JupyterLab is generally much easier.
 
 The package should export EMCAScript 6 compatible JavaScript. It can
 import CSS using the syntax ``require('foo.css')``. The CSS files can
