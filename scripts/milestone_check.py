@@ -24,7 +24,8 @@ ranges = {
     '2.0.2': 'origin/2.0.x --not v2.0.1',
     '2.1': 'origin/2.1.x --not origin/2.0.x',
     '2.2': 'origin/2.2.x --not origin/2.1.x',
-    '3.0': 'origin/master --not origin/2.2.x'
+    # 6507205805 is a commit in the debugger ancestor tree before merging
+    '3.0': 'origin/master ^origin/2.2.x ^6507205805'
 }
 
 try:
