@@ -134,7 +134,13 @@ def update_extension(target, interactive=True):
             data[key] = dict(sorted(data[key].items()))
         else:
             del data[key]
-            
+
+    # Update style settings
+    data.setdefault('styleModule', 'style/index.js')
+    if 'style/index.js' not in data['sideEffects']:
+        data['sideEffects'].append('style/index.js')
+        data['files'].append('style/index.js')
+
     # Update the root package.json file
     with open(package_file, 'w') as fid:
         json.dump(data, fid, indent=2)
