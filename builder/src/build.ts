@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { LicenseWebpackPlugin } from 'license-webpack-plugin';
 
 import * as webpack from 'webpack';
 import * as fs from 'fs-extra';
@@ -226,6 +227,10 @@ export namespace Build {
             // both options are optional
             filename: '[name].css',
             chunkFilename: '[id].css'
+          }),
+          new LicenseWebpackPlugin({
+            perChunkOutput: false,
+            outputFilename: 'licenses/[name].licenses.txt'
           })
         ]
       });
