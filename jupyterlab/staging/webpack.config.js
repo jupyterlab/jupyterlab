@@ -280,7 +280,7 @@ const plugins = [
   }),
   new LicenseWebpackPlugin({
     perChunkOutput: false,
-    outputFilename: 'licenses/[name].licenses.txt'
+    outputFilename: 'third-party-licenses.txt'
   })
 ];
 
