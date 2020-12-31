@@ -65,10 +65,19 @@ export class HighlightsCM extends CodeMirrorIntegration {
       this.debounced_get_highlight = this.create_debouncer();
     });
     this.editor_handlers.set('cursorActivity', this.onCursorActivity);
-    this.editor_handlers.set('blur', this.onCursorActivity);
+    this.editor_handlers.set('blur', this.onBlur);
     this.editor_handlers.set('focus', this.onCursorActivity);
     super.register();
   }
+
+  protected onBlur = () => {
+    if (this.settings.composite.removeOnBlur) {
+      this.clear_markers();
+      this.last_token = null;
+    } else {
+      this.onCursorActivity().catch(console.warn);
+    }
+  };
 
   remove(): void {
     this.handleHighlight = null;
