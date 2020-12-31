@@ -65,6 +65,8 @@ export class HighlightsCM extends CodeMirrorIntegration {
       this.debounced_get_highlight = this.create_debouncer();
     });
     this.editor_handlers.set('cursorActivity', this.onCursorActivity);
+    this.editor_handlers.set('blur', this.onCursorActivity);
+    this.editor_handlers.set('focus', this.onCursorActivity);
     super.register();
   }
 
@@ -136,9 +138,17 @@ export class HighlightsCM extends CodeMirrorIntegration {
 
     const token = this.virtual_editor.get_token_at(root_position);
 
-    // if token has not changed, no need to update highlight
-    if (this.last_token && token.value === this.last_token.value) {
-      console.log('LSP: not requesting highlights (token did not change)');
+    // if token has not changed, no need to update highlight, unless it is an empty token
+    // which would indicate that the cursor is at the first character
+    if (
+      this.last_token &&
+      token.value === this.last_token.value &&
+      token.value !== ''
+    ) {
+      console.log(
+        'LSP: not requesting highlights (token did not change)',
+        token
+      );
       return;
     }
 
