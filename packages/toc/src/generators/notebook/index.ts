@@ -2,7 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
-import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
+import {
+  CodeCell,
+  CodeCellModel,
+  MarkdownCell,
+  Cell,
+  ICellModel
+} from '@jupyterlab/cells';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { nullTranslator } from '@jupyterlab/translation';
 import { TableOfContentsRegistry as Registry } from '../../registry';
@@ -42,6 +48,11 @@ function createNotebookGenerator(
     sanitizer: sanitizer,
     translator: translator || nullTranslator
   });
+  tracker.activeCellChanged.connect(
+    (sender: INotebookTracker, args: Cell<ICellModel>) => {
+      widget.update();
+    }
+  );
   return {
     tracker,
     usesLatex: true,

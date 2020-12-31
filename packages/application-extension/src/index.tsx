@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module application-extension
+ */
 
 import {
   IConnectionLost,
@@ -39,7 +43,7 @@ import { IStateDB } from '@jupyterlab/statedb';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
-import { buildIcon } from '@jupyterlab/ui-components';
+import { buildIcon, jupyterIcon } from '@jupyterlab/ui-components';
 
 import { each, iter, toArray } from '@lumino/algorithm';
 
@@ -341,13 +345,11 @@ const router: JupyterFrontEndPlugin<IRouter> = {
 const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
   id: '@jupyterlab/application-extension:tree-resolver',
   autoStart: true,
-  requires: [JupyterFrontEnd.IPaths, IRouter, IWindowResolver],
+  requires: [IRouter],
   provides: JupyterFrontEnd.ITreeResolver,
   activate: (
     app: JupyterFrontEnd,
-    paths: JupyterFrontEnd.IPaths,
-    router: IRouter,
-    resolver: IWindowResolver
+    router: IRouter
   ): JupyterFrontEnd.ITreeResolver => {
     const { commands } = app;
     const set = new DisposableSet();
@@ -816,7 +818,7 @@ function addCommands(
   });
 
   app.commands.addCommand(CommandIDs.toggleMode, {
-    label: trans.__('Single-Document Mode'),
+    label: trans.__('Simple Interface'),
     isToggled: () => shell.mode === 'single-document',
     execute: () => {
       const args =
@@ -940,6 +942,24 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   }
 };
 
+const JupyterLogo: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:logo',
+  autoStart: true,
+  requires: [ILabShell],
+  activate: (app: JupyterFrontEnd, shell: ILabShell) => {
+    const logo = new Widget();
+    jupyterIcon.element({
+      container: logo.node,
+      elementPosition: 'center',
+      margin: '2px 2px 2px 8px',
+      height: 'auto',
+      width: '16px'
+    });
+    logo.id = 'jp-MainLogo';
+    shell.add(logo, 'top', { rank: 0 });
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -955,7 +975,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   status,
   info,
   paths,
-  propertyInspector
+  propertyInspector,
+  JupyterLogo
 ];
 
 export default plugins;

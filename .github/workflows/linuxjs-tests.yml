@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
-          node-version: '10.x'
+          node-version: '12.x'
       - name: Cache pip on Linux
         uses: actions/cache@v1
         if: startsWith(runner.os, 'Linux')

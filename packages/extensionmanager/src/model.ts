@@ -79,6 +79,37 @@ export interface IEntry {
   blockedExtensionsEntry: IListEntry | undefined;
 
   allowedExtensionsEntry: IListEntry | undefined;
+
+  /**
+   * The package type (prebuilt or source).
+   */
+  pkg_type: 'prebuilt' | 'source';
+
+  /**
+   * The information about extension installation.
+   */
+  install: IInstall | undefined;
+}
+
+/**
+ * Information about extension installation.
+ */
+export interface IInstall {
+  /**
+   * The used pacakge manager (e.g. pip, conda...)
+   */
+  packageManager: string | undefined;
+
+  /**
+   * The package name as known by the package manager.
+   */
+  packageName: string | undefined;
+
+  /**
+   * The uninstallation instructions as a comprehensive
+   * text for the end user.
+   */
+  uninstallInstructions: string | undefined;
 }
 
 /**
@@ -124,6 +155,37 @@ export interface IInstalledEntry {
    * A flag indicating the status of an installed extension.
    */
   status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
+
+  /**
+   * The package type (prebuilt or source).
+   */
+  pkg_type: 'prebuilt' | 'source';
+
+  /**
+   * The information about extension installation.
+   */
+  install: IInstallEntry | undefined;
+}
+
+/**
+ * Information about extension installation.
+ */
+export interface IInstallEntry {
+  /**
+   * The used pacakge manager (e.g. pip, conda...)
+   */
+  packageManager: string | undefined;
+
+  /**
+   * The package name as known by the package manager.
+   */
+  packageName: string | undefined;
+
+  /**
+   * The uninstallation instructions as a comprehensive
+   * text for the end user.
+   */
+  uninstallInstructions: string | undefined;
 }
 
 /**
@@ -522,7 +584,9 @@ export class ListModel extends VDomModel {
         latest_version: pkg.version,
         installed_version: '',
         blockedExtensionsEntry: isblockedExtensions,
-        allowedExtensionsEntry: isallowedExtensions
+        allowedExtensionsEntry: isallowedExtensions,
+        pkg_type: 'source',
+        install: undefined
       };
     }
     return entries;
@@ -557,7 +621,13 @@ export class ListModel extends VDomModel {
             allowedExtensionsEntry: this.isListed(
               pkg.name,
               this._allowedExtensionsArray
-            )
+            ),
+            pkg_type: pkg.pkg_type,
+            install: {
+              packageManager: pkg.install?.packageManager,
+              packageName: pkg.install?.packageName,
+              uninstallInstructions: pkg.install?.uninstallInstructions
+            }
           };
         })
       );

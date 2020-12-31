@@ -10,6 +10,6 @@ export async function main() {
   const kernelSpecManager = new KernelSpecManager();
   await kernelSpecManager.ready;
   const kernelSpecs = kernelSpecManager.specs;
-  log(`Default spec: ${kernelSpecs.default}`);
-  log(`Available specs: ${Object.keys(kernelSpecs.kernelspecs)}`);
+  log(`Default spec: ${kernelSpecs?.default}`);
+  log(`Available specs: ${Object.keys(kernelSpecs?.kernelspecs ?? {})}`);
 }

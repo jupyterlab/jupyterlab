@@ -276,13 +276,11 @@ export namespace PageConfig {
      * #### Notes
      * This is intended for `deferredExtensions` and `disabledExtensions`.
      */
-    function populate(key: string): { raw: string; rule: RegExp }[] {
+    function populate(key: string): string[] {
       try {
         const raw = getOption(key);
         if (raw) {
-          return JSON.parse(raw).map((pattern: string) => {
-            return { raw: pattern, rule: new RegExp(pattern) };
-          });
+          return JSON.parse(raw);
         }
       } catch (error) {
         console.warn(`Unable to parse ${key}.`, error);
@@ -306,7 +304,14 @@ export namespace PageConfig {
      * @param id - The plugin ID.
      */
     export function isDeferred(id: string): boolean {
-      return deferred.some(val => val.raw === id || val.rule.test(id));
+      // Check for either a full plugin id match or an extension
+      // name match.
+      const separatorIndex = id.indexOf(':');
+      let extName = '';
+      if (separatorIndex !== -1) {
+        extName = id.slice(0, separatorIndex);
+      }
+      return deferred.some(val => val === id || (extName && val === extName));
     }
 
     /**
@@ -315,7 +320,14 @@ export namespace PageConfig {
      * @param id - The plugin ID.
      */
     export function isDisabled(id: string): boolean {
-      return disabled.some(val => val.raw === id || val.rule.test(id));
+      // Check for either a full plugin id match or an extension
+      // name match.
+      const separatorIndex = id.indexOf(':');
+      let extName = '';
+      if (separatorIndex !== -1) {
+        extName = id.slice(0, separatorIndex);
+      }
+      return disabled.some(val => val === id || (extName && val === extName));
     }
   }
 }

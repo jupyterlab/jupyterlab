@@ -194,8 +194,8 @@ Adding classes to a one-color icon
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For most simple, one-color icons, it is desirable for the icon's color
-to strongly constrast with that of the application's background. You can
-acheive this using one of the ``jp-iconX`` classes.
+to strongly contrast with that of the application's background. You can
+achieve this using one of the ``jp-iconX`` classes.
 
 **Example: check icon**
 

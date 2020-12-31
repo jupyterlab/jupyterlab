@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module debugger-extension
+ */
 
 import {
   ILabShell,
@@ -496,7 +500,7 @@ const main: JupyterFrontEndPlugin<void> = {
     service.eventMessage.connect((_, event): void => {
       commands.notifyCommandChanged();
       if (labShell && event.event === 'initialized') {
-        labShell.expandRight();
+        labShell.activateById(sidebar.id);
       }
     });
 

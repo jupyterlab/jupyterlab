@@ -4,7 +4,7 @@
 import { PartialJSONObject } from '@lumino/coreutils';
 
 import urlparse from 'url-parse';
-import * as posix from 'path-posix';
+import * as posix from 'path';
 
 /**
  * The namespace for URL-related functions.

@@ -10,6 +10,10 @@ import * as path from 'path';
 import { handlePackage } from './update-dist-tag';
 import * as utils from './utils';
 
+async function sleep(wait: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, wait));
+}
+
 // Specify the program signature.
 commander
   .description('Publish the JS packages and prep the Python package')
@@ -52,6 +56,13 @@ commander
         utils.run(cmd);
       });
     });
+
+    // Pause to allow npm some time to update their servers to list the published packages.
+    const pause = 5; // minutes
+    console.log(
+      `Pausing ${pause} minutes after publishing to allow npmjs.com to update their package listing.`
+    );
+    await sleep(pause * 60 * 1000);
 
     // Update core mode.  This cannot be done until the JS packages are
     // released.

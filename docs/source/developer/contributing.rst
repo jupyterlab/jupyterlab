@@ -92,12 +92,16 @@ something (this may take a few minutes to load):
 
 .. image:: https://mybinder.org/badge_logo.svg
    :target: https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/
+   
+If you want to test your own branch hosted on GitHub, just enter it on https://mybinder.org.
+If everything goes right, filling out the form takes about 2 minutes, and the build takes about 7 minutes 
+to complete.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Building JupyterLab from its GitHub source code requires Node.js. The
-development version requires Node.js version 10+, as defined in the
+development version requires Node.js version 12+, as defined in the
 ``engines`` specification in
 `dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/master/dev_mode/package.json>`__.
 
@@ -791,7 +795,7 @@ directly quoting a word in the UI:
 -  Files tab
 -  Running panel
 -  Tabs panel
--  Single-Document Mode
+-  Simple Interface mode
 
 The capitalized words match the label of the UI element the user is
 clicking on because there does not exist a good colloquial name for the

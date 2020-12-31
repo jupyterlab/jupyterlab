@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module notebook-extension
+ */
 
 import {
   ILayoutRestorer,
@@ -2210,6 +2214,13 @@ function populateMenus(
       const kernel = current.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
+      }
+      return Promise.resolve(void 0);
+    },
+    reconnectToKernel: current => {
+      const kernel = current.sessionContext.session?.kernel;
+      if (kernel) {
+        return kernel.reconnect();
       }
       return Promise.resolve(void 0);
     },

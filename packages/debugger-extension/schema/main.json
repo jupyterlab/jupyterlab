@@ -36,6 +36,7 @@
       "$ref": "#/definitions/variableFilters",
       "default": {
         "xpython": [
+          "debugpy",
           "display",
           "get_ipython",
           "ptvsd",

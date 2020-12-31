@@ -12,12 +12,3 @@ Component Interactions
 ## Dependencies
 
 - JupyterLab
-
-## Optional Dependencies
-
-- [nbresuse](https://github.com/yuvipanda/nbresuse)
-
-```bash
-pip install nbresuse
-jupyter serverextension enable --py nbresuse
-```

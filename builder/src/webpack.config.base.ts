@@ -72,18 +72,29 @@ try {
   // no Phosphor shims required
 }
 
+const watch = process.argv.includes('--watch');
+
 module.exports = {
-  bail: true,
+  bail: !watch,
   module: { rules },
-  resolve: { alias: { url: false, buffer: false, ...phosphorAlias } },
+  resolve: {
+    alias: phosphorAlias,
+    fallback: {
+      url: false,
+      buffer: false,
+      path: require.resolve('path-browserify')
+    }
+  },
   watchOptions: {
     poll: 500,
     aggregateTimeout: 1000
   },
   plugins: [
     new webpack.DefinePlugin({
+      // Needed for Blueprint. See https://github.com/palantir/blueprint/issues/4393
       'process.env': '{}',
-      process: {}
+      // Needed for various packages using cwd(), like the path polyfill
+      process: { cwd: () => '/' }
     })
   ]
 };

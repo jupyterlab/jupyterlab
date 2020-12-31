@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import json2html = require('json-to-html');
+import json2html from 'json-to-html';
 
 import {
   IRenderMime,

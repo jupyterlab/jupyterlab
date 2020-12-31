@@ -81,7 +81,7 @@ export namespace ILabShell {
     | 'main'
     | 'header'
     | 'top'
-    | 'title'
+    | 'menu'
     | 'left'
     | 'right'
     | 'bottom';
@@ -191,7 +191,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this.id = 'main';
 
     const headerPanel = (this._headerPanel = new BoxPanel());
-    const titleHandler = (this._titleHandler = new Private.PanelHandler());
+    const menuHandler = (this._menuHandler = new Private.PanelHandler());
     const topHandler = (this._topHandler = new Private.PanelHandler());
     const bottomPanel = (this._bottomPanel = new BoxPanel());
     const hboxPanel = new BoxPanel();
@@ -204,7 +204,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const rootLayout = new BoxLayout();
 
     headerPanel.id = 'jp-header-panel';
-    titleHandler.panel.id = 'jp-title-panel';
+    menuHandler.panel.id = 'jp-menu-panel';
     topHandler.panel.id = 'jp-top-panel';
     bottomPanel.id = 'jp-bottom-panel';
     hboxPanel.id = 'jp-main-content-panel';
@@ -252,19 +252,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
     BoxLayout.setStretch(headerPanel, 0);
-    BoxLayout.setStretch(titleHandler.panel, 0);
+    BoxLayout.setStretch(menuHandler.panel, 0);
     BoxLayout.setStretch(topHandler.panel, 0);
     BoxLayout.setStretch(hboxPanel, 1);
     BoxLayout.setStretch(bottomPanel, 0);
 
     rootLayout.addWidget(headerPanel);
-    rootLayout.addWidget(titleHandler.panel);
     rootLayout.addWidget(topHandler.panel);
     rootLayout.addWidget(hboxPanel);
     rootLayout.addWidget(bottomPanel);
 
     // initially hiding header and bottom panel when no elements inside,
-    // and the title panel as we only show that in single document mode.
     this._headerPanel.hide();
     this._bottomPanel.hide();
 
@@ -291,58 +289,16 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const titleWidget = (this._titleWidget = new Widget());
     titleWidget.id = 'jp-title-panel-title';
     titleWidget.node.appendChild(document.createElement('h1'));
-    this.add(titleWidget, 'title');
+    this.add(titleWidget, 'top', { rank: 100 });
 
     if (this._dockPanel.mode === 'multiple-document') {
-      this._titleHandler.panel.hide();
+      this._topHandler.addWidget(this._menuHandler.panel, 100);
+      titleWidget.hide();
+    } else {
+      rootLayout.insertWidget(2, this._menuHandler.panel);
     }
 
-    // Set up single-document mode switch in menu bar
-    const spacer = new Widget();
-    spacer.id = 'jp-top-spacer';
-    this.add(spacer, 'top', { rank: 1000 });
-
-    // switch accessibility refs:
-    // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/Switch_role
-    // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Accessibility_concerns
-    const sdmSwitch = document.createElement('button');
-    sdmSwitch.className = 'jp-slider jp-slider-sdm';
-    sdmSwitch.setAttribute('role', 'switch');
-    sdmSwitch.value = 'single-document';
-    sdmSwitch.title = 'Single-Document Mode';
-    this.modeChanged.connect((_, mode) => {
-      sdmSwitch.setAttribute(
-        'aria-checked',
-        mode === 'single-document' ? 'true' : 'false'
-      );
-    });
-    sdmSwitch.setAttribute(
-      'aria-checked',
-      this.mode === 'single-document' ? 'true' : 'false'
-    );
-    sdmSwitch.addEventListener('click', () => {
-      this.mode =
-        sdmSwitch.getAttribute('aria-checked') === 'true'
-          ? 'multiple-document'
-          : 'single-document';
-    });
-
-    const sdmLabel = document.createElement('label');
-    sdmLabel.className = 'jp-slider-label';
-    sdmLabel.textContent = 'Single-Document Mode';
-    sdmLabel.title = 'Single-Document Mode';
-    const sdmTrack = document.createElement('div');
-    sdmTrack.className = 'jp-slider-track';
-    sdmTrack.setAttribute('aria-hidden', 'true');
-    sdmSwitch.appendChild(sdmLabel);
-    sdmSwitch.appendChild(sdmTrack);
-
-    const sdmSwitchWidget = new Widget();
-    sdmSwitchWidget.node.appendChild(sdmSwitch);
-    sdmSwitchWidget.id = 'jp-single-document-mode';
-    this.add(sdmSwitchWidget, 'top', { rank: 1010 });
-
-    // Wire up signals to update the title panel of the single document mode to
+    // Wire up signals to update the title panel of the simple interface mode to
     // follow the title of this.currentWidget
     this.currentChanged.connect((sender, args) => {
       let newValue = args.newValue;
@@ -473,8 +429,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
       // Set the mode data attribute on the application shell node.
       this.node.dataset.shellMode = mode;
-      // Show the title panel
-      this._titleHandler.panel.show();
+
+      // Adjust menu and title
+      // this.add(this._menuHandler.panel, 'top', {rank: 100});
+      (this.layout as BoxLayout).insertWidget(2, this._menuHandler.panel);
+      this._titleWidget.show();
       this._updateTitlePanelTitle();
 
       this._modeChanged.emit(mode);
@@ -518,8 +477,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     // Set the mode data attribute on the applications shell node.
     this.node.dataset.shellMode = mode;
-    // Hide the title panel
-    this._titleHandler.panel.hide();
+
+    // Adjust menu and title
+    this.add(this._menuHandler.panel, 'top', { rank: 100 });
+    // this._topHandler.addWidget(this._menuHandler.panel, 100)
+    this._titleWidget.hide();
+
     // Emit the mode changed signal
     this._modeChanged.emit(mode);
   }
@@ -661,8 +624,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._addToHeaderArea(widget, options);
       case 'top':
         return this._addToTopArea(widget, options);
-      case 'title':
-        return this._addToTitleArea(widget, options);
+      case 'menu':
+        return this._addToMenuArea(widget, options);
       case 'bottom':
         return this._addToBottomArea(widget, options);
       default:
@@ -745,6 +708,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._headerPanel.widgets.length === 0;
       case 'top':
         return this._topHandler.panel.widgets.length === 0;
+      case 'menu':
+        return this._menuHandler.panel.widgets.length === 0;
       case 'bottom':
         return this._bottomPanel.widgets.length === 0;
       case 'right':
@@ -830,7 +795,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Returns the widgets for an application area.
    */
   widgets(area?: ILabShell.Area): IIterator<Widget> {
-    switch (area || 'main') {
+    switch (area ?? 'main') {
       case 'main':
         return this._dockPanel.widgets();
       case 'left':
@@ -841,6 +806,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._headerPanel.children();
       case 'top':
         return this._topHandler.panel.children();
+      case 'menu':
+        return this._menuHandler.panel.children();
       case 'bottom':
         return this._bottomPanel.children();
       default:
@@ -1014,7 +981,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * #### Notes
    * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
-  private _addToTitleArea(
+  private _addToMenuArea(
     widget: Widget,
     options?: DocumentRegistry.IOpenOptions
   ): void {
@@ -1024,10 +991,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
     options = options || {};
     const rank = options.rank ?? DEFAULT_RANK;
-    this._titleHandler.addWidget(widget, rank);
+    this._menuHandler.addWidget(widget, rank);
     this._onLayoutModified();
-    if (this._titleHandler.panel.isHidden) {
-      this._titleHandler.panel.show();
+    if (this._menuHandler.panel.isHidden) {
+      this._menuHandler.panel.show();
     }
   }
 
@@ -1204,7 +1171,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _tracker = new FocusTracker<Widget>();
   private _headerPanel: Panel;
   private _topHandler: Private.PanelHandler;
-  private _titleHandler: Private.PanelHandler;
+  private _menuHandler: Private.PanelHandler;
   private _titleWidget: Widget;
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
@@ -1259,6 +1226,10 @@ namespace Private {
    * A class which manages a panel and sorts its widgets by rank.
    */
   export class PanelHandler {
+    constructor() {
+      MessageLoop.installMessageHook(this._panel, this._panelChildHook);
+    }
+
     /**
      * Get the panel managed by the handler.
      */
@@ -1278,6 +1249,39 @@ namespace Private {
       ArrayExt.insert(this._items, index, item);
       this._panel.insertWidget(index, widget);
     }
+
+    /**
+     * A message hook for child add/remove messages on the main area dock panel.
+     */
+    private _panelChildHook = (
+      handler: IMessageHandler,
+      msg: Message
+    ): boolean => {
+      switch (msg.type) {
+        case 'child-added':
+          {
+            const widget = (msg as Widget.ChildMessage).child;
+            // If we already know about this widget, we're done
+            if (this._items.find(v => v.widget === widget)) {
+              break;
+            }
+
+            // Otherwise, add to the end by default
+            const rank = this._items[this._items.length - 1].rank;
+            this._items.push({ widget, rank });
+          }
+          break;
+        case 'child-removed':
+          {
+            const widget = (msg as Widget.ChildMessage).child;
+            ArrayExt.removeFirstWhere(this._items, v => v.widget === widget);
+          }
+          break;
+        default:
+          break;
+      }
+      return true;
+    };
 
     private _items = new Array<Private.IRankItem>();
     private _panel = new Panel();

@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module launcher-extension
+ */
 
 import {
   ILabShell,
@@ -28,8 +32,8 @@ namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
-  requires: [ILabShell, ITranslator],
-  optional: [ICommandPalette],
+  requires: [ITranslator],
+  optional: [ILabShell, ICommandPalette],
   provides: ILauncher,
   autoStart: true
 };
@@ -44,11 +48,11 @@ export default plugin;
  */
 function activate(
   app: JupyterFrontEnd,
-  labShell: ILabShell,
   translator: ITranslator,
+  labShell: ILabShell | null,
   palette: ICommandPalette | null
 ): ILauncher {
-  const { commands } = app;
+  const { commands, shell } = app;
   const trans = translator.load('jupyterlab');
   const model = new LauncherModel();
 
@@ -58,7 +62,7 @@ function activate(
       const cwd = args['cwd'] ? String(args['cwd']) : '';
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {
-        labShell.add(item, 'main', { ref: id });
+        shell.add(item, 'main', { ref: id });
       };
       const launcher = new Launcher({
         model,
@@ -75,15 +79,17 @@ function activate(
       const main = new MainAreaWidget({ content: launcher });
 
       // If there are any other widgets open, remove the launcher close icon.
-      main.title.closable = !!toArray(labShell.widgets('main')).length;
+      main.title.closable = !!toArray(shell.widgets('main')).length;
       main.id = id;
 
-      labShell.add(main, 'main', { activate: args['activate'] as boolean });
+      shell.add(main, 'main', { activate: args['activate'] as boolean });
 
-      labShell.layoutModified.connect(() => {
-        // If there is only a launcher open, remove the close icon.
-        main.title.closable = toArray(labShell.widgets('main')).length > 1;
-      }, main);
+      if (labShell) {
+        labShell.layoutModified.connect(() => {
+          // If there is only a launcher open, remove the close icon.
+          main.title.closable = toArray(labShell.widgets('main')).length > 1;
+        }, main);
+      }
 
       return main;
     }

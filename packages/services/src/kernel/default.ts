@@ -31,6 +31,7 @@ import * as restapi from './restapi';
 // Stub for requirejs.
 declare let requirejs: any;
 
+const KERNEL_INFO_TIMEOUT = 3000;
 const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
 
 /**
@@ -440,6 +441,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._updateStatus('restarting');
     this._kernelSession = RESTARTING_KERNEL_SESSION;
     await restapi.restartKernel(this.id, this.serverSettings);
+    // Reconnect to the kernel to address cases where kernel ports
+    // have changed during the restart.
+    await this.reconnect();
   }
 
   /**
@@ -1069,6 +1073,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   private _clearKernelState(): void {
     this._kernelSession = '';
+    this._pendingMessages = [];
     this._futures.forEach(future => {
       future.dispose();
     });
@@ -1253,13 +1258,51 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     if (this.status !== 'dead') {
       if (connectionStatus === 'connected') {
+        let restarting = false;
+        if (this._kernelSession === RESTARTING_KERNEL_SESSION) {
+          // Reset kernelSession on new connections,
+          // so we can start sending messages.
+          // Otherwise, requests are queued forever until we get a ws message
+          // that we did not ask for.
+          this._kernelSession = '';
+          restarting = true;
+        }
+
         // Send pending messages, and make sure we send at least one message
         // to get kernel status back.
-        if (this._pendingMessages.length > 0) {
-          this._sendPending();
-        } else {
-          void this.requestKernelInfo();
+        // always request kernel info first, to get kernel status back
+        // and ensure iopub is fully established
+        let p = this.requestKernelInfo();
+        if (restarting) {
+          // preserve restarting state until a reply is received
+          // so messages don't hop ahead of the pending queue
+          // while we are waiting for the kernelInfoReply
+          this._kernelSession = RESTARTING_KERNEL_SESSION;
         }
+        // only after kernelInfo resolves (or after a timeout)
+        // start sending our pending messages, if any
+
+        let sendPendingCalled = false;
+        let sendPendingOnce = () => {
+          if (sendPendingCalled) {
+            return;
+          }
+          sendPendingCalled = true;
+          if (restarting && this._kernelSession === RESTARTING_KERNEL_SESSION) {
+            // we were restarting and a message didn't arrive to set the session
+            // it would be better to retry here
+            this._kernelSession = '';
+          }
+          clearTimeout(timeoutHandle);
+          if (this._pendingMessages.length > 0) {
+            this._sendPending();
+          }
+        };
+        void p.then(sendPendingOnce);
+        // FIXME: if sent while zmq subscriptions are not established,
+        // kernelInfo may not resolve, so use a timeout to ensure we don't hang forever.
+        // It may be preferable to retry kernelInfo rather than give up after one timeout.
+        let timeoutHandle = setTimeout(sendPendingOnce, KERNEL_INFO_TIMEOUT);
       } else {
         // If the connection is down, then we do not know what is happening
         // with the kernel, so set the status to unknown.
@@ -1383,14 +1426,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this._updateConnectionStatus('connecting');
 
       // The first reconnect attempt should happen immediately, and subsequent
-      // attemps should pick a random number in a growing range so that we
+      // attempts should pick a random number in a growing range so that we
       // don't overload the server with synchronized reconnection attempts
       // across multiple kernels.
       const timeout = Private.getRandomIntInclusive(
         0,
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
-      console.error(
+      console.warn(
         `Connection lost, reconnecting in ${Math.floor(
           timeout / 1000
         )} seconds.`

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/attachments",
-  "version": "3.0.0-rc.6",
+  "version": "3.0.0",
   "description": "JupyterLab - Notebook Cell Attachments",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -13,7 +13,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": [
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -25,7 +26,8 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -35,19 +37,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/nbformat": "^3.0.0-rc.6",
-    "@jupyterlab/observables": "^4.0.0-rc.6",
-    "@jupyterlab/rendermime": "^3.0.0-rc.6",
-    "@jupyterlab/rendermime-interfaces": "^3.0.0-rc.6",
+    "@jupyterlab/nbformat": "^3.0.0",
+    "@jupyterlab/observables": "^4.0.0",
+    "@jupyterlab/rendermime": "^3.0.0",
+    "@jupyterlab/rendermime-interfaces": "^3.0.0",
     "@lumino/disposable": "^1.4.3",
     "@lumino/signaling": "^1.4.3"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "0.17.0-3",
-    "typescript": "~4.0.2"
+    "typedoc": "~0.20.0-beta.27",
+    "typescript": "~4.1.3"
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "styleModule": "style/index.js"
 }

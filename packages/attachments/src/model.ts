@@ -382,11 +382,11 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
   /**
    * Resolve a relative url to a correct server path.
    */
-  resolveUrl(url: string): Promise<string> {
+  async resolveUrl(url: string): Promise<string> {
     if (this._parent && !url.startsWith('attachment:')) {
       return this._parent.resolveUrl(url);
     }
-    return Promise.resolve(url);
+    return url;
   }
 
   /**
@@ -395,7 +395,7 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
    * #### Notes
    * The returned URL may include a query parameter.
    */
-  getDownloadUrl(path: string): Promise<string> {
+  async getDownloadUrl(path: string): Promise<string> {
     if (this._parent && !path.startsWith('attachment:')) {
       return this._parent.getDownloadUrl(path);
     }
@@ -404,7 +404,7 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
     const attachment = this._model.get(key);
     if (attachment === undefined) {
       // Resolve with unprocessed path, to show as broken image
-      return Promise.resolve(path);
+      return path;
     }
     const { data } = attachment;
     const mimeType = Object.keys(data)[0];
@@ -413,12 +413,10 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
       mimeType === undefined ||
       imageRendererFactory.mimeTypes.indexOf(mimeType) === -1
     ) {
-      return Promise.reject(
-        `Cannot render unknown image mime type "${mimeType}".`
-      );
+      throw new Error(`Cannot render unknown image mime type "${mimeType}".`);
     }
     const dataUrl = `data:${mimeType};base64,${data[mimeType]}`;
-    return Promise.resolve(dataUrl);
+    return dataUrl;
   }
 
   /**

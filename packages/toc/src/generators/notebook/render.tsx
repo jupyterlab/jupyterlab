@@ -3,11 +3,11 @@
 
 import * as React from 'react';
 import { INotebookTracker } from '@jupyterlab/notebook';
+import { ellipsesIcon } from '@jupyterlab/ui-components';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { INotebookHeading } from '../../utils/headings';
 import { CodeComponent } from './codemirror';
 import { OptionsManager } from './options_manager';
-import { twistButton } from './twist_button';
 
 /**
  * Renders a notebook table of contents item.
@@ -38,26 +38,55 @@ function render(
               numbering +
               options.sanitizer.sanitize(item.html, sanitizerOptions)
           }}
-          className={item.type + '-cell toc-cell-item ' + fontSizeClass}
+          className={item.type + '-cell toc-cell-item'}
         />
       );
       // Render the headers:
       if (item.type === 'header') {
-        let collapsed = item.cellRef!.model.metadata.get(
-          'toc-hr-collapsed'
-        ) as boolean;
+        let button = (
+          <div
+            className="jp-Collapser p-Widget lm-Widget"
+            onClick={(event: any) => {
+              event.stopPropagation();
+              onClick(item);
+            }}
+          >
+            <div className="toc-Collapser-child" />
+          </div>
+        );
 
-        let button = twistButton({
-          heading: item,
-          collapsed: collapsed || false,
-          onClick: onClick
-        });
+        let collapsed;
+        if (item.cellRef!.model.metadata.has('toc-hr-collapsed')) {
+          collapsed = item.cellRef!.model.metadata.get(
+            'toc-hr-collapsed'
+          ) as boolean;
+        }
+        let ellipseButton = collapsed ? (
+          <div
+            className="toc-Ellipses"
+            onClick={(event: any) => {
+              event.stopPropagation();
+              onClick(item);
+            }}
+          >
+            <ellipsesIcon.react />
+          </div>
+        ) : (
+          <div />
+        );
 
         // Render the heading item:
         jsx = (
-          <div className="toc-entry-holder">
+          <div
+            className={
+              'toc-entry-holder ' +
+              fontSizeClass +
+              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
+            }
+          >
             {button}
             {jsx}
+            {ellipseButton}
           </div>
         );
       }
@@ -66,24 +95,52 @@ function render(
     if (item.type === 'header' || options.showMarkdown) {
       // Render headers/markdown for plain text:
       jsx = (
-        <span className={item.type + '-cell toc-cell-item ' + fontSizeClass}>
+        <span className={item.type + '-cell toc-cell-item'}>
           {numbering + item.text}
         </span>
       );
       if (item.type === 'header') {
-        let collapsed = item.cellRef!.model.metadata.get(
-          'toc-hr-collapsed'
-        ) as boolean;
-
-        let button = twistButton({
-          heading: item,
-          collapsed: collapsed || false,
-          onClick: onClick
-        });
+        let button = (
+          <div
+            className="jp-Collapser p-Widget lm-Widget"
+            onClick={(event: any) => {
+              event.stopPropagation();
+              onClick(item);
+            }}
+          >
+            <div className="toc-Collapser-child" />
+          </div>
+        );
+        let collapsed;
+        if (item.cellRef!.model.metadata.has('toc-hr-collapsed')) {
+          collapsed = item.cellRef!.model.metadata.get(
+            'toc-hr-collapsed'
+          ) as boolean;
+        }
+        let ellipseButton = collapsed ? (
+          <div
+            className="toc-Ellipses"
+            onClick={(event: any) => {
+              event.stopPropagation();
+              onClick(item);
+            }}
+          >
+            <ellipsesIcon.react />
+          </div>
+        ) : (
+          <div />
+        );
         jsx = (
-          <div className="toc-entry-holder">
+          <div
+            className={
+              'toc-entry-holder ' +
+              fontSizeClass +
+              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
+            }
+          >
             {button}
             {jsx}
+            {ellipseButton}
           </div>
         );
       }
@@ -108,7 +165,7 @@ function render(
    * Callback invoked upon encountering a "click" event.
    *
    * @private
-   * @param cellRef - cell reference
+   * @param heading - notebook heading that was clicked
    */
   function onClick(heading?: INotebookHeading) {
     let collapsed;

@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module docmanager-extension
+ */
 
 import {
   ILabShell,
@@ -256,11 +260,6 @@ Available file types:
     // If the document registry gains or loses a factory or file type,
     // regenerate the settings description with the available options.
     registry.changed.connect(() => settingRegistry.reload(pluginId));
-
-    docManager.mode = labShell!.mode;
-    labShell!.modeChanged.connect((_, args) => {
-      docManager.mode = args as string;
-    });
 
     return docManager;
   }

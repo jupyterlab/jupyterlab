@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IThemeManager, ToolbarButton } from '@jupyterlab/apputils';
+import { IThemeManager } from '@jupyterlab/apputils';
 
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { Switch } from '@jupyterlab/ui-components';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -14,6 +15,8 @@ import { IDebugger } from '../../tokens';
 import { VariablesBodyGrid } from './grid';
 
 import { VariablesHeader } from './header';
+
+import { ScopeSwitcher } from './scope';
 
 import { VariablesBodyTree } from './tree';
 
@@ -37,7 +40,16 @@ export class Variables extends Panel {
     this._table = new VariablesBodyGrid({ model, commands, themeManager });
     this._table.hide();
 
-    const onClick = (): void => {
+    this._header.toolbar.addItem(
+      'scope-switcher',
+      new ScopeSwitcher({
+        translator,
+        model,
+        tree: this._tree,
+        grid: this._table
+      })
+    );
+    const onViewChange = (): void => {
       if (this._table.isHidden) {
         this._tree.hide();
         this._table.show();
@@ -50,14 +62,13 @@ export class Variables extends Panel {
       this.update();
     };
 
-    this._header.toolbar.addItem(
-      'view-VariableSwitch',
-      new ToolbarButton({
-        iconClass: 'jp-ToggleSwitch',
-        onClick,
-        tooltip: trans.__('Table / Tree View')
-      })
-    );
+    const button = new Switch();
+    button.id = 'jp-debugger';
+    button.valueChanged.connect((_, args) => {
+      onViewChange();
+    });
+    button.caption = trans.__('Table / Tree View');
+    this._header.toolbar.addItem('view-VariableSwitch', button);
 
     this.addWidget(this._header);
     this.addWidget(this._tree);
@@ -115,7 +126,7 @@ export const convertType = (variable: IDebugger.IVariable): string | number => {
     case 'str':
       return value.slice(1, value.length - 1);
     default:
-      return type ?? '';
+      return type ?? value;
   }
 };
 

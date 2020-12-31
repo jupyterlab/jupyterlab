@@ -87,6 +87,7 @@ class ProgressProcess(Process):
             stderr=subprocess.STDOUT,
             stdout=subprocess.PIPE,
             universal_newlines=True,
+            encoding='utf-8',
         )
         self._kill_event = kill_event or Event()
 
@@ -293,7 +294,7 @@ def watch_dev(logger=None):
                           startup_regex=WEBPACK_EXPECT)
 
     return package_procs + [wp_proc]
-    
+
 
 class AppOptions(HasTraits):
     """Options object for build system"""
@@ -323,7 +324,7 @@ class AppOptions(HasTraits):
 
     kill_event = Instance(Event, args=(), help='Event for aborting call')
 
-    labextensions_path = List(Unicode(), help='The paths to look in for federated JupyterLab extensions')
+    labextensions_path = List(Unicode(), help='The paths to look in for prebuilt JupyterLab extensions')
 
     registry = Unicode(help="NPM packages registry URL")
 
@@ -452,40 +453,41 @@ def clean(app_options=None):
 
 
 def build(name=None, version=None, static_url=None,
-          command='build:prod', kill_event=None,
-          clean_staging=False, app_options=None):
+          kill_event=None,
+          clean_staging=False, app_options=None, production=True, minimize=True):
     """Build the JupyterLab application.
     """
     app_options = _ensure_options(app_options)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     return handler.build(name=name, version=version, static_url=static_url,
-                         command=command, clean_staging=clean_staging)
+                         production=production, minimize=minimize, clean_staging=clean_staging)
 
 
 def get_app_info(app_options=None):
     """Get a dictionary of information about the app.
     """
     handler = _AppHandler(app_options)
+    handler._ensure_disabled_info()
     return handler.info
 
 
-def enable_extension(extension, app_options=None):
+def enable_extension(extension, app_options=None, level='sys_prefix'):
     """Enable a JupyterLab extension.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(app_options)
-    return handler.toggle_extension(extension, False)
+    return handler.toggle_extension(extension, False, level=level)
 
 
-def disable_extension(extension, app_options=None):
+def disable_extension(extension, app_options=None, level='sys_prefix'):
     """Disable a JupyterLab package.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(app_options)
-    return handler.toggle_extension(extension, True)
+    return handler.toggle_extension(extension, True, level=level)
 
 
 def check_extension(extension, installed=False, app_options=None):
@@ -580,7 +582,7 @@ class _AppHandler(object):
         # Do this last since it relies on other attributes
         self.info = self._get_app_info()
 
-        
+
 
     def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.
@@ -629,19 +631,19 @@ class _AppHandler(object):
         return True
 
     def build(self, name=None, version=None, static_url=None,
-              command='build:prod:minimize', clean_staging=False):
+              clean_staging=False, production=True, minimize=True):
         """Build the application.
         """
-        # resolve the build type
-        parts = command.split(':')
-        if len(parts) < 2:
-            parts.append('dev')
-        elif parts[1] == 'none':
-            parts[1] = ('dev' if self.info['linked_packages'] or self.info['local_extensions'] else
-                        'prod')
-        command = ':'.join(parts)
+        if production is None:
+            production = not (self.info['linked_packages'] or self.info['local_extensions'])
 
-        self.logger.info('Building jupyterlab assets (%s)' % command)
+        if not production:
+            minimize = False
+
+        info = ['production' if production else 'development']
+        if production:
+            info.append('minimized' if minimize else 'not minimized')
+        self.logger.info(f'Building jupyterlab assets ({", ".join(info)})')
 
         # Set up the build directory.
         app_dir = self.app_dir
@@ -661,16 +663,16 @@ class _AppHandler(object):
             raise RuntimeError(msg)
 
         # Build the app.
-        if parts[1] != 'nobuild':
-            dedupe_yarn(staging, self.logger)
-            starting_dir = os.getcwd()
-            os.chdir(staging)
-            ret = self._run(['node', YARN_PATH, 'run', command])
-            os.chdir(starting_dir)
-            if ret != 0:
-                msg = 'JupyterLab failed to build'
-                self.logger.debug(msg)
-                raise RuntimeError(msg)
+        dedupe_yarn(staging, self.logger)
+        starting_dir = os.getcwd()
+        os.chdir(staging)
+        command = f'build:{"prod" if production else "dev"}{":minimize" if minimize else ""}'
+        ret = self._run(['node', YARN_PATH, 'run', command])
+        os.chdir(starting_dir)
+        if ret != 0:
+            msg = 'JupyterLab failed to build'
+            self.logger.debug(msg)
+            raise RuntimeError(msg)
 
     def watch(self):
         """Start the application watcher and then run the watch in
@@ -693,6 +695,7 @@ class _AppHandler(object):
     def list_extensions(self):
         """Print an output of the extensions.
         """
+        self._ensure_disabled_info()
         logger = self.logger
         info = self.info
 
@@ -703,7 +706,7 @@ class _AppHandler(object):
 
         if info['federated_extensions']:
             self._list_federated_extensions()
-  
+
         if info['extensions']:
             logger.info('Other labextensions (built into JupyterLab)')
             self._list_extensions(info, 'app')
@@ -727,10 +730,28 @@ class _AppHandler(object):
             logger.info('\nUninstalled core extensions:')
             [logger.info('    %s' % item) for item in sorted(uninstalled_core)]
 
-        disabled = info['disabled']
+        all_exts = list(info['federated_extensions']) + list(info['extensions']) + list(info['core_extensions'])
+        # Ignore disabled extensions that are not installed
+        disabled = [i for i in info['disabled'] if i.partition(':')[0] in all_exts]
         if disabled:
             logger.info('\nDisabled extensions:')
-            [logger.info('    %s' % item) for item in sorted(disabled)]
+            for item in sorted(disabled):
+                # Show that all plugins will be disabled if the whole extension matches
+                if item in all_exts:
+                    item += ' (all plugins)'
+                logger.info('    %s' % item)
+
+        # Here check if modules are improperly shadowed
+        improper_shadowed = []
+        for ext_name in self.info['shadowed_exts']:
+           source_version = self.info['extensions'][ext_name]['version']
+           prebuilt_version = self.info['federated_extensions'][ext_name]['version']
+           if not gte(prebuilt_version, source_version, True):
+               improper_shadowed.append(ext_name)
+
+        if improper_shadowed:
+            logger.info('\nThe following source extensions are overshadowed by older prebuilt extensions:')
+            [logger.info('    %s' % name) for name in sorted(improper_shadowed)]
 
         messages = self.build_check(fast=True)
         if messages:
@@ -763,6 +784,8 @@ class _AppHandler(object):
             msg = 'Version mismatch: %s (built), %s (current)'
             return [msg % (static_version, core_version)]
 
+        shadowed_exts = self.info['shadowed_exts']
+
         # Look for mismatched extensions.
         new_package = self._get_package_template(silent=fast)
         new_jlab = new_package['jupyterlab']
@@ -771,11 +794,15 @@ class _AppHandler(object):
         for ext_type in ['extensions', 'mimeExtensions']:
             # Extensions that were added.
             for ext in new_jlab[ext_type]:
+                if ext in shadowed_exts:
+                    continue
                 if ext not in old_jlab[ext_type]:
                     messages.append('%s needs to be included in build' % ext)
 
             # Extensions that were removed.
             for ext in old_jlab[ext_type]:
+                if ext in shadowed_exts:
+                    continue
                 if ext not in new_jlab[ext_type]:
                     messages.append('%s needs to be removed from build' % ext)
 
@@ -792,7 +819,7 @@ class _AppHandler(object):
 
         # Look for updated local extensions.
         for (name, source) in local.items():
-            if fast:
+            if fast or name in shadowed_exts:
                 continue
             dname = pjoin(app_dir, 'extensions')
             if self._check_local(name, source, dname):
@@ -800,7 +827,7 @@ class _AppHandler(object):
 
         # Look for updated linked packages.
         for (name, item) in linked.items():
-            if fast:
+            if fast or name in shadowed_exts:
                 continue
             dname = pjoin(app_dir, 'staging', 'linked_packages')
             if self._check_local(name, item['source'], dname):
@@ -974,16 +1001,17 @@ class _AppHandler(object):
         self._write_build_config(config)
         return True
 
-    def toggle_extension(self, extension, value):
+    def toggle_extension(self, extension, value, level='sys_prefix'):
         """Enable or disable a lab extension.
 
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         lab_config = LabConfig()
         app_settings_dir = osp.join(self.app_dir, 'settings')
-        page_config = get_static_page_config(app_settings_dir=app_settings_dir, logger=self.logger)
 
-        disabled = page_config.get('disabled_labextensions', {})
+        page_config = get_static_page_config(app_settings_dir=app_settings_dir, logger=self.logger, level=level)
+
+        disabled = page_config.get('disabledExtensions', {})
         did_something = False
         is_disabled = disabled.get(extension, False)
         if value and not is_disabled:
@@ -994,13 +1022,14 @@ class _AppHandler(object):
             did_something = True
 
         if did_something:
-            page_config['disabled_labextensions'] = disabled
-            write_page_config(page_config)
+            page_config['disabledExtensions'] = disabled
+            write_page_config(page_config, level=level)
         return did_something
 
     def check_extension(self, extension, check_installed_only=False):
         """Check if a lab extension is enabled or disabled
         """
+        self._ensure_disabled_info()
         info = self.info
 
         if extension in info["core_extensions"]:
@@ -1061,13 +1090,6 @@ class _AppHandler(object):
         info['core_data'] = core_data = self.core_data
         info['extensions'] = extensions = self._get_extensions(core_data)
 
-        labextensions_path = self.labextensions_path
-        app_settings_dir = osp.join(self.app_dir, 'settings')
-        page_config = get_page_config(labextensions_path, app_settings_dir=app_settings_dir, logger=self.logger)
-
-        disabled = page_config.get('disabled_labextensions', {})
-        info['disabled'] = [name for name in disabled if disabled[name]]
-
         info['local_extensions'] = self._get_local_extensions()
         info['linked_packages'] = self._get_linked_packages()
         info['app_extensions'] = app = []
@@ -1089,18 +1111,30 @@ class _AppHandler(object):
         info['sys_dir'] = self.sys_dir
         info['app_dir'] = self.app_dir
 
-        info['core_extensions'] = core_extensions = _get_core_extensions(
-            self.core_data)
+        info['core_extensions'] = _get_core_extensions(self.core_data)
+
+        info['federated_extensions'] = get_federated_extensions(self.labextensions_path)
+        info['shadowed_exts'] = [ext for ext in info['extensions'] if ext in info['federated_extensions']]
+        return info
+
+    def _ensure_disabled_info(self):
+        info = self.info
+        if 'disabled' in info:
+            return
+
+        labextensions_path = self.labextensions_path
+        app_settings_dir = osp.join(self.app_dir, 'settings')
+
+        page_config = get_page_config(labextensions_path, app_settings_dir=app_settings_dir, logger=self.logger)
+
+        info['disabled'] = page_config.get('disabledExtensions', [])
 
         disabled_core = []
-        for key in core_extensions:
+        for key in info['core_extensions']:
             if key in info['disabled']:
                 disabled_core.append(key)
 
         info['disabled_core'] = disabled_core
-
-        info['federated_extensions'] = get_federated_extensions(self.labextensions_path)
-        return info
 
     def _populate_staging(self, name=None, version=None, static_url=None,
                           clean=False):
@@ -1126,7 +1160,7 @@ class _AppHandler(object):
                 _rmtree(staging, self.logger)
                 os.makedirs(staging)
 
-        for fname in ['index.js', 'publicpath.js',
+        for fname in ['index.js', 'bootstrap.js', 'publicpath.js',
                       'webpack.config.js',
                       'webpack.prod.config.js',
                       'webpack.prod.minimize.config.js',
@@ -1220,6 +1254,7 @@ class _AppHandler(object):
         local = self.info['local_extensions']
         linked = self.info['linked_packages']
         extensions = self.info['extensions']
+        shadowed_exts = self.info['shadowed_exts']
         jlab = data['jupyterlab']
 
         def format_path(path):
@@ -1233,16 +1268,22 @@ class _AppHandler(object):
 
         # Handle local extensions.
         for (key, source) in local.items():
+            if key in shadowed_exts:
+                continue
             jlab['linkedPackages'][key] = source
             data['resolutions'][key] = 'file:' + self.info['extensions'][key]['path']
 
         # Handle linked packages.
         for (key, item) in linked.items():
+            if key in shadowed_exts:
+                continue
             path = pjoin(self.app_dir, 'staging', 'linked_packages')
             path = pjoin(path, item['filename'])
             data['dependencies'][key] = format_path(path)
             jlab['linkedPackages'][key] = item['source']
             data['resolutions'][key] = format_path(path)
+
+        data['jupyterlab']['extensionMetadata'] = dict()
 
         # Handle extensions
         compat_errors = self._get_extension_compat()
@@ -1266,6 +1307,9 @@ class _AppHandler(object):
                 if ext is True:
                     ext = ''
                 jlab[item + 's'][key] = ext
+
+                # Add metadata for the extension
+                data['jupyterlab']['extensionMetadata'][key] = jlab_data
 
         # Handle uninstalled core extensions.
         for item in self.info['uninstalled_core']:
@@ -1445,6 +1489,7 @@ class _AppHandler(object):
     def _list_extensions(self, info, ext_type):
         """List the extensions of a given type.
         """
+        self._ensure_disabled_info()
         logger = self.logger
         names = info['%s_extensions' % ext_type]
         if not names:
@@ -1488,6 +1533,7 @@ class _AppHandler(object):
         logger.info('')
 
     def _list_federated_extensions(self):
+        self._ensure_disabled_info()
         info = self.info
         logger = self.logger
 

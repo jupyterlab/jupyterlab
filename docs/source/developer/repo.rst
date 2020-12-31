@@ -123,4 +123,4 @@ TypeDoc Theming: ``typedoc-theme``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A small theme used to help render our 
-`TypeDoc <http://jupyterlab.github.io/jupyterlab/index.html>`__ documentation. 
+`TypeDoc <../api/index.html>`__ documentation.

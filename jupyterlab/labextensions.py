@@ -33,6 +33,14 @@ flags['no-build'] = (
     {'BaseExtensionApp': {'should_build': False}},
     "Defer building the app after the action."
 )
+flags['dev-build'] = (
+    {'BaseExtensionApp': {'dev_build': True}},
+    "Build in development mode."
+)
+flags['no-minimize'] = (
+    {'BaseExtensionApp': {'minimize': False}},
+    "Do not minimize a production build."
+)
 flags['clean'] = (
     {'BaseExtensionApp': {'should_clean': True}},
     "Cleanup intermediate files after the action."
@@ -71,6 +79,12 @@ aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 install_aliases = copy(aliases)
 install_aliases['pin-version-as'] = 'InstallLabExtensionApp.pin'
 
+enable_aliases = copy(aliases)
+enable_aliases['level'] = 'EnableLabExtensionsApp.level'
+
+disable_aliases = copy(aliases)
+disable_aliases['level'] = 'DisableLabExtensionsApp.level'
+
 VERSION = get_app_version()
 
 
@@ -93,12 +107,12 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (production mode).")
 
     minimize = Bool(True, config=True,
-        help="Whether to use a minifier during the Webpack build (defaults to True). Only affects production builds.")
+        help="Whether to minimize a production build (defaults to True).")
 
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
 
-    labextensions_path = List(Unicode(), help='The standard paths to look in for federated JupyterLab extensions')
+    labextensions_path = List(Unicode(), help='The standard paths to look in for prebuilt JupyterLab extensions')
 
     @default('labextensions_path')
     def _default_labextensions_path(self):
@@ -112,17 +126,11 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         with self.debug_logging():
             ans = self.run_task()
             if ans and self.should_build:
-                parts = ['build']
-                parts.append('none' if self.dev_build is None else
-                             'dev' if self.dev_build else
-                             'prod')
-                if self.minimize:
-                    parts.append('minimize')
-                command = ':'.join(parts)
+                production = None if self.dev_build is None else not self.dev_build
                 app_options = AppOptions(app_dir=self.app_dir, logger=self.log,
                       core_config=self.core_config)
                 build(clean_staging=self.should_clean,
-                      command=command, app_options=app_options)
+                      production = production, minimize = self.minimize, app_options=app_options)
 
     def run_task(self):
         pass
@@ -174,7 +182,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
 class DevelopLabExtensionApp(BaseExtensionApp):
     desciption = "Develop labextension"
     flags = develop_flags
-    
+
     user = Bool(False, config=True, help="Whether to do a user install")
     sys_prefix = Bool(True, config=True, help="Use the sys.prefix as the prefix")
     overwrite = Bool(False, config=True, help="Whether to overwrite files")
@@ -324,28 +332,34 @@ class ListLabExtensionsApp(BaseExtensionApp):
 
     def run_task(self):
         list_extensions(app_options=AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path))
 
 
 class EnableLabExtensionsApp(BaseExtensionApp):
     description = "Enable labextension(s) by name"
+    aliases = enable_aliases
+
+    level = Unicode('sys_prefix', help="Level at which to enable: sys_prefix, user, system").tag(config=True)
 
     def run_task(self):
         app_options = AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path)
-        [enable_extension(arg, app_options=app_options) for arg in self.extra_args]
+        [enable_extension(arg, app_options=app_options, level=self.level) for arg in self.extra_args]
 
 
 class DisableLabExtensionsApp(BaseExtensionApp):
     description = "Disable labextension(s) by name"
+    aliases = disable_aliases
+
+    level = Unicode('sys_prefix', help="Level at which to enable: sys_prefix, user, system").tag(config=True)
 
     def run_task(self):
         app_options = AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path)
-        [disable_extension(arg, app_options=app_options) for arg in self.extra_args]
+        [disable_extension(arg, app_options=app_options, level=self.level) for arg in self.extra_args]
 
 
 class CheckLabExtensionsApp(BaseExtensionApp):
@@ -357,7 +371,7 @@ class CheckLabExtensionsApp(BaseExtensionApp):
 
     def run_task(self):
         app_options = AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path)
         all_enabled = all(
             check_extension(
@@ -371,9 +385,9 @@ class CheckLabExtensionsApp(BaseExtensionApp):
 
 _examples = """
 jupyter labextension list                        # list all configured labextensions
-jupyter labextension develop                     # develop a federated labextension
-jupyter labextension build                       # build a federated labextension
-jupyter labextension watch                       # watch a federated labextension
+jupyter labextension develop                     # develop a prebuilt labextension
+jupyter labextension build                       # build a prebuilt labextension
+jupyter labextension watch                       # watch a prebuilt labextension
 jupyter labextension install <extension name>    # install a labextension
 jupyter labextension uninstall <extension name>  # uninstall a labextension
 """

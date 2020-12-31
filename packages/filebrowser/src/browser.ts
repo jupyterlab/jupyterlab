@@ -148,6 +148,45 @@ export class FileBrowser extends Widget {
   readonly toolbar: Toolbar<Widget>;
 
   /**
+   * Override Widget.layout with a more specific PanelLayout type.
+   */
+  layout: PanelLayout;
+
+  /**
+   * Whether to show active file in file browser
+   */
+  get navigateToCurrentDirectory(): boolean {
+    return this._navigateToCurrentDirectory;
+  }
+
+  set navigateToCurrentDirectory(value: boolean) {
+    this._navigateToCurrentDirectory = value;
+  }
+
+  /**
+   * Whether to use fuzzy filtering on file names.
+   */
+  set useFuzzyFilter(value: boolean) {
+    this._useFuzzyFilter = value;
+
+    this._filenameSearcher = FilenameSearcher({
+      listing: this._listing,
+      useFuzzyFilter: this._useFuzzyFilter,
+      placeholder: this._trans.__('Filter files by name'),
+      forceRefresh: true
+    });
+    this._filenameSearcher.addClass(FILTERBOX_CLASS);
+
+    this.layout.removeWidget(this._filenameSearcher);
+    this.layout.removeWidget(this._crumbs);
+    this.layout.removeWidget(this._listing);
+
+    this.layout.addWidget(this._filenameSearcher);
+    this.layout.addWidget(this._crumbs);
+    this.layout.addWidget(this._listing);
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
@@ -161,11 +200,11 @@ export class FileBrowser extends Widget {
    *
    * @param name - The name of the item to select.
    */
-  async selectItemByName(name: string) {
+  async selectItemByName(name: string): Promise<void> {
     await this._listing.selectItemByName(name);
   }
 
-  clearSelectedItems() {
+  clearSelectedItems(): void {
     this._listing.clearSelectedItems();
   }
 
@@ -287,6 +326,8 @@ export class FileBrowser extends Widget {
     return this._listing.modelForClick(event);
   }
 
+  protected translator: ITranslator;
+
   /**
    * Handle a connection lost signal from the model.
    */
@@ -307,44 +348,6 @@ export class FileBrowser extends Widget {
     }
   }
 
-  /**
-   * Whether to show active file in file browser
-   */
-  get navigateToCurrentDirectory(): boolean {
-    return this._navigateToCurrentDirectory;
-  }
-
-  set navigateToCurrentDirectory(value: boolean) {
-    this._navigateToCurrentDirectory = value;
-  }
-
-  /**
-   * Whether to use fuzzy filtering on file names.
-   */
-  set useFuzzyFilter(value: boolean) {
-    this._useFuzzyFilter = value;
-
-    this._filenameSearcher = FilenameSearcher({
-      listing: this._listing,
-      useFuzzyFilter: this._useFuzzyFilter,
-      placeholder: this._trans.__('Filter files by name'),
-      forceRefresh: true
-    });
-    this._filenameSearcher.addClass(FILTERBOX_CLASS);
-
-    this.layout.removeWidget(this._filenameSearcher);
-    this.layout.removeWidget(this._crumbs);
-    this.layout.removeWidget(this._listing);
-
-    this.layout.addWidget(this._filenameSearcher);
-    this.layout.addWidget(this._crumbs);
-    this.layout.addWidget(this._listing);
-  }
-
-  // Override Widget.layout with a more specific PanelLayout type.
-  layout: PanelLayout;
-
-  protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _crumbs: BreadCrumbs;
   private _listing: DirListing;

@@ -64,6 +64,15 @@ build_aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
 build_flags = dict(flags)
 
+build_flags['dev-build'] = (
+    {'LabBuildApp': {'dev_build': True}},
+    "Build in development mode."
+)
+build_flags['no-minimize'] = (
+    {'LabBuildApp': {'minimize': False}},
+    "Do not minimize a production build."
+)
+
 version = __version__
 app_version = get_app_version()
 if version != app_version:
@@ -93,7 +102,7 @@ jupyter --paths
 Explanation:
 
 - `dev-build`: This option controls whether a `dev` or a more streamlined
-`production` build is used. This option will default to `False` (ie the
+`production` build is used. This option will default to `False` (i.e., the
 `production` build) for most users. However, if you have any labextensions
 installed from local files, this option will instead default to `True`.
 Explicitly setting `dev-build` to `False` will ensure that the `production`
@@ -131,23 +140,15 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
         help="The version of the built application")
 
     dev_build = Bool(None, allow_none=True, config=True,
-        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (prod mode).")
+        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (production mode).")
 
     minimize = Bool(True, config=True,
-        help="Whether to use a minifier during the Webpack build (defaults to True). Only affects production builds.")
+        help="Whether to minimize a production build (defaults to True).")
 
     pre_clean = Bool(False, config=True,
         help="Whether to clean before building (defaults to False)")
 
     def start(self):
-        parts = ['build']
-        parts.append('none' if self.dev_build is None else
-                     'dev' if self.dev_build else
-                     'prod')
-        if self.minimize:
-            parts.append('minimize')
-        command = ':'.join(parts)
-
         app_dir = self.app_dir or get_app_dir()
         app_options = AppOptions(
             app_dir=app_dir, logger=self.log, core_config=self.core_config
@@ -159,8 +160,9 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
                 clean(app_options=app_options)
             self.log.info('Building in %s', app_dir)
             try:
+                production = None if self.dev_build is None else not self.dev_build
                 build(name=self.name, version=self.version,
-                  command=command, app_options=app_options)
+                  app_options=app_options, production = production, minimize=self.minimize)
             except Exception as e:
                 print(buildFailureMsg)
                 raise e
@@ -484,7 +486,11 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     )
     flags['expose-app-in-browser'] = (
         {'LabApp': {'expose_app_in_browser': True}},
-        "Expose the global app instance to browser via window.jupyterlab"
+        "Expose the global app instance to browser via window.jupyterlab."
+    )
+    flags['extensions-in-dev-mode'] = (
+        {'LabApp': {'extensions_in_dev_mode': True}},
+        "Load prebuilt extensions in dev-mode."
     )
 
     subcommands = dict(
@@ -526,6 +532,13 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         show a red stripe at the top of the page.  It can only be used if JupyterLab
         is installed as `pip install -e .`.
         """)
+
+    extensions_in_dev_mode = Bool(False, config=True,
+        help="""Whether to load prebuilt extensions in dev mode. This may be
+        useful to run and test prebuilt extensions in development installs of
+        JupyterLab. APIs in a JupyterLab development install may be
+        incompatible with published packages, so prebuilt extensions compiled
+        against published packages may not work correctly.""")
 
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
@@ -615,8 +628,9 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             dev_static_dir = ujoin(DEV_DIR, 'static')
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
-            self.labextensions_path = []
-            self.extra_labextensions_path = []
+            if not self.extensions_in_dev_mode:
+                self.labextensions_path = []
+                self.extra_labextensions_path = []
         elif self.core_mode:
             dev_static_dir = ujoin(HERE, 'static')
             self.static_paths = [dev_static_dir]
@@ -657,7 +671,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         self.log.info('JupyterLab extension loaded from %s' % HERE)
         self.log.info('JupyterLab application directory is %s' % self.app_dir)
 
-        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir)
+        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir, labextensions_path = self.extra_labextensions_path + self.labextensions_path)
         builder = Builder(self.core_mode, app_options=build_handler_options)
         build_handler = (build_path, BuildHandler, {'builder': builder})
         handlers.append(build_handler)

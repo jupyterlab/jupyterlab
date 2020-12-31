@@ -21,9 +21,7 @@ if (Promise.allSettled === undefined) {
     );
 }
 
-// This must be after the public path is set.
-// This cannot be extracted because the public path is dynamic.
-require('./imports.css');
+require('./style.js')
 
 function loadScript(url) {
   return new Promise((resolve, reject) => {

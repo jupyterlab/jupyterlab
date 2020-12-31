@@ -1,10 +1,10 @@
-import path = require('path');
-import glob = require('glob');
-import fs = require('fs-extra');
-import childProcess = require('child_process');
+import path from 'path';
+import glob from 'glob';
+import fs from 'fs-extra';
+import childProcess from 'child_process';
 import { DepGraph } from 'dependency-graph';
-import sortPackageJson = require('sort-package-json');
-import coreutils = require('@lumino/coreutils');
+import sortPackageJson from 'sort-package-json';
+import { JSONExt, JSONObject } from '@lumino/coreutils';
 
 type Dict<T> = { [key: string]: T };
 
@@ -58,7 +58,10 @@ export function getCorePaths(): string[] {
  *
  * @returns Whether the file has changed.
  */
-export function writePackageData(pkgJsonPath: string, data: any): boolean {
+export function writePackageData(
+  pkgJsonPath: string,
+  data: JSONObject
+): boolean {
   const text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
   const orig = fs.readFileSync(pkgJsonPath, 'utf8').split('\r\n').join('\n');
   if (text !== orig) {
@@ -82,7 +85,7 @@ export function readJSONFile(filePath: string): any {
 /**
  * Write a json file.
  */
-export function writeJSONFile(filePath: string, data: any): boolean {
+export function writeJSONFile(filePath: string, data: JSONObject): boolean {
   function sortObjByKey(value: any): any {
     // https://stackoverflow.com/a/35810961
     return typeof value === 'object'
@@ -104,7 +107,7 @@ export function writeJSONFile(filePath: string, data: any): boolean {
   } catch (e) {
     // no-op
   }
-  if (!coreutils.JSONExt.deepEqual(data, orig)) {
+  if (!JSONExt.deepEqual(data, orig)) {
     fs.writeFileSync(filePath, text, 'utf8');
     return true;
   }

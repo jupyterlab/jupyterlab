@@ -248,7 +248,7 @@ describe('rendermime/factories', () => {
         expect(w.node.innerHTML).toBe(source);
       });
 
-      it('it should be re-renderable', async () => {
+      it('should be re-renderable', async () => {
         const f = markdownRendererFactory;
         const source = '<p>hello</p>';
         const mimeType = 'text/markdown';

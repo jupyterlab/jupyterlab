@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module console-extension
+ */
 
 import {
   ILabStatus,
@@ -105,13 +109,13 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   requires: [
     ConsolePanel.IContentFactory,
     IEditorServices,
-    ILayoutRestorer,
-    IFileBrowserFactory,
     IRenderMimeRegistry,
     ISettingRegistry,
     ITranslator
   ],
   optional: [
+    ILayoutRestorer,
+    IFileBrowserFactory,
     IMainMenu,
     ICommandPalette,
     ILauncher,
@@ -149,11 +153,11 @@ async function activateConsole(
   app: JupyterFrontEnd,
   contentFactory: ConsolePanel.IContentFactory,
   editorServices: IEditorServices,
-  restorer: ILayoutRestorer,
-  browserFactory: IFileBrowserFactory,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
+  restorer: ILayoutRestorer | null,
+  browserFactory: IFileBrowserFactory | null,
   mainMenu: IMainMenu | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
@@ -172,19 +176,21 @@ async function activateConsole(
   });
 
   // Handle state restoration.
-  void restorer.restore(tracker, {
-    command: CommandIDs.create,
-    args: widget => {
-      const { path, name, kernelPreference } = widget.console.sessionContext;
-      return {
-        path,
-        name,
-        kernelPreference: { ...kernelPreference }
-      };
-    },
-    name: widget => widget.console.sessionContext.path ?? UUID.uuid4(),
-    when: manager.ready
-  });
+  if (restorer) {
+    void restorer.restore(tracker, {
+      command: CommandIDs.create,
+      args: widget => {
+        const { path, name, kernelPreference } = widget.console.sessionContext;
+        return {
+          path,
+          name,
+          kernelPreference: { ...kernelPreference }
+        };
+      },
+      name: widget => widget.console.sessionContext.path ?? UUID.uuid4(),
+      when: manager.ready
+    });
+  }
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
@@ -376,9 +382,10 @@ async function activateConsole(
     icon: args => (args['isPalette'] ? undefined : consoleIcon),
     execute: args => {
       const basePath =
-        (args['basePath'] as string) ||
-        (args['cwd'] as string) ||
-        browserFactory.defaultBrowser.model.path;
+        ((args['basePath'] as string) ||
+          (args['cwd'] as string) ||
+          browserFactory?.defaultBrowser.model.path) ??
+        '';
       return createConsole({ basePath, ...args });
     }
   });

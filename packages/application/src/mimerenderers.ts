@@ -152,7 +152,8 @@ export function createRendermimePlugin(
           defaultFor: option.defaultFor,
           defaultRendered: option.defaultRendered,
           toolbarFactory,
-          translator
+          translator,
+          factory: item.rendererFactory
         });
         registry.addWidgetFactory(factory);
 

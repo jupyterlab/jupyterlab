@@ -1,7 +1,7 @@
 import json
 import os.path as osp
 
-name = 'mock_package'
+name = 'mock-package'
 HERE = osp.abspath(osp.dirname(__file__))
 
 with open(osp.join(HERE, 'package.json')) as fid:

@@ -23,9 +23,7 @@ import { Kernel, Session } from '@jupyterlab/services';
 
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
-import { bugIcon } from '@jupyterlab/ui-components';
-
-import { DisposableSet } from '@lumino/disposable';
+import { bugIcon, Switch } from '@jupyterlab/ui-components';
 
 import { Debugger } from './debugger';
 
@@ -38,16 +36,16 @@ import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
 
 /**
- * Add a button to the widget toolbar to enable and disable debugging.
+ * Add a bug icon to the widget toolbar to enable and disable debugging.
  *
  * @param widget The widget to add the debug toolbar button to.
  * @param onClick The callback when the toolbar button is clicked.
  */
-function updateToolbar(
+function updateIconButton(
   widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
   onClick: () => void,
   translator?: ITranslator
-): DisposableSet {
+): ToolbarButton {
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
   const icon = new ToolbarButton({
@@ -58,17 +56,41 @@ function updateToolbar(
   });
   widget.toolbar.addItem('debugger-icon', icon);
 
-  const button = new ToolbarButton({
-    iconClass: 'jp-ToggleSwitch',
-    tooltip: trans.__('Enable / Disable Debugger'),
-    onClick
-  });
-  widget.toolbar.addItem('debugger-button', button);
+  return icon;
+}
 
-  const elements = new DisposableSet();
-  elements.add(icon);
-  elements.add(button);
-  return elements;
+/**
+ * Add a toggle button to the widget toolbar to enable and disable debugging.
+ *
+ * @param widget The widget to add the debug toolbar button to.
+ * @param onClick The callback when the toolbar button is clicked.
+ */
+function updateToggleButton(
+  widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
+  sessionStarted: boolean,
+  onClick: () => void,
+  translator?: ITranslator
+): Switch {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
+
+  const button = new Switch();
+  button.id = 'jp-debugger';
+  button.value = sessionStarted;
+  button.caption = trans.__('Enable / Disable Debugger');
+  button.handleEvent = (event: Event) => {
+    event.preventDefault();
+    switch (event.type) {
+      case 'click':
+        onClick();
+        break;
+      default:
+        break;
+    }
+  };
+
+  widget.toolbar.addItem('debugger-button', button);
+  return button;
 }
 
 /**
@@ -244,21 +266,33 @@ export class DebuggerHandler {
     };
 
     const addToolbarButton = (): void => {
-      const button = this._buttons[widget.id];
-      if (button) {
-        return;
+      if (!this._iconButton) {
+        this._iconButton = updateIconButton(widget, toggleDebugging);
       }
-      const newButton = updateToolbar(widget, toggleDebugging);
-      this._buttons[widget.id] = newButton;
+      if (!this._toggleButton) {
+        this._toggleButton = updateToggleButton(
+          widget,
+          this._service.isStarted,
+          toggleDebugging
+        );
+      }
+      this._toggleButton.value = this._service.isStarted;
     };
 
     const removeToolbarButton = (): void => {
-      const button = this._buttons[widget.id];
-      if (!button) {
+      if (!this._iconButton) {
         return;
+      } else {
+        this._iconButton.dispose();
+        delete this._iconButton;
       }
-      button.dispose();
-      delete this._buttons[widget.id];
+
+      if (!this._toggleButton) {
+        return;
+      } else {
+        this._toggleButton.dispose();
+        delete this._toggleButton;
+      }
     };
 
     const toggleDebugging = async (): Promise<void> => {
@@ -271,10 +305,16 @@ export class DebuggerHandler {
         this._service.isStarted &&
         this._previousConnection?.id === connection?.id
       ) {
+        if (this._toggleButton) {
+          this._toggleButton.value = false;
+        }
         this._service.session!.connection = connection;
         await this._service.stop();
         removeHandlers();
       } else {
+        if (this._toggleButton) {
+          this._toggleButton.value = true;
+        }
         this._service.session!.connection = connection;
         this._previousConnection = connection;
         await this._service.restoreState(true);
@@ -298,8 +338,8 @@ export class DebuggerHandler {
         : null;
       this._service.session.connection = connection;
     }
-    addToolbarButton();
     await this._service.restoreState(false);
+    addToolbarButton();
 
     // check the state of the debug session
     if (!this._service.isStarted) {
@@ -351,7 +391,8 @@ export class DebuggerHandler {
       status: Kernel.Status
     ) => void;
   } = {};
-  private _buttons: { [id: string]: DisposableSet } = {};
+  private _iconButton?: ToolbarButton;
+  private _toggleButton?: Switch;
 }
 
 /**

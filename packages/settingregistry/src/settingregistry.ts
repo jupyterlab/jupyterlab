@@ -619,7 +619,7 @@ export class SettingRegistry implements ISettingRegistry {
 
     // If the timeout has not been exceeded, stall and try again in 250ms.
     if (elapsed < timeout) {
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         setTimeout(() => {
           resolve();
         }, 250);
