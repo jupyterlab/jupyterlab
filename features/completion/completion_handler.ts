@@ -178,6 +178,8 @@ export class LSPConnector
         //  but this is not the job of this extension; nevertheless its better to keep this in
         //  mind to avoid introducing design decisions which would make this impossible
         //  (for other extensions)
+
+        // TODO: should it be cashed?
         const kernelLanguage = await this._kernel_language();
 
         if (document.language === kernelLanguage) {
@@ -222,7 +224,7 @@ export class LSPConnector
   ): Promise<CompletionHandler.ICompletionItemsReply> {
     let connection = this._connections.get(document.id_path);
 
-    console.log('[LSP][Completer] Fetching and Transforming');
+    console.log('[LSP][Completer] Fetching');
     console.log('[LSP][Completer] Token:', token, start, end);
 
     const trigger_kind =
@@ -242,6 +244,8 @@ export class LSPConnector
       typed_character,
       trigger_kind
     )) || []) as lsProtocol.CompletionItem[];
+
+    console.log('[LSP][Completer] Transforming');
 
     let prefix = token.value.slice(0, position_in_token + 1);
     let all_non_prefixed = true;
@@ -286,6 +290,10 @@ export class LSPConnector
 
       items.push(completionItem);
     });
+    console.log('[LSP][Completer] Transformed');
+    // required to make the repetitive trigger characters like :: or ::: work for R with R languageserver,
+    // see https://github.com/krassowski/jupyterlab-lsp/issues/436
+    const prefix_offset = token.value.length
 
     return {
       // note in the ContextCompleter it was:
@@ -297,7 +305,7 @@ export class LSPConnector
       // a different workaround would be to prepend the token.value prefix:
       // text = token.value + text;
       // but it did not work for "from statistics <tab>" and lead to "from statisticsimport" (no space)
-      start: token.offset + (all_non_prefixed ? 1 : 0),
+      start: token.offset + (all_non_prefixed ? prefix_offset : 0),
       end: token.offset + prefix.length,
       items: items
     };
