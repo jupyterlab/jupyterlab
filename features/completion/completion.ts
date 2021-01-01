@@ -44,17 +44,10 @@ export class CompletionCM extends CodeMirrorIntegration {
   afterChange(change: CodeMirror.EditorChange): void {
     // TODO: maybe the completer could be kicked off in the handleChange() method directly; signature help still
     //  requires an up-to-date virtual document on the LSP side, so we need to wait for sync.
-    if (
-      change.text &&
-      change.text[0].length == 1 &&
-      this.settings.composite.continuousHinting
-    ) {
-      (this.feature.labIntegration as CompletionLabIntegration)
-        .invoke_completer(AdditionalCompletionTriggerKinds.AutoInvoked)
-        .catch(console.warn);
-      return;
-    }
 
+    // note: trigger character completion need to be have a higher priority than auto-invoked completion
+    // because the latter does not work for on-dot completion due to suppression of trivial suggestions
+    // see gh430
     let last_character = this.extract_last_character(change);
     if (this.completionCharacters.indexOf(last_character) > -1) {
       this.virtual_editor.console.log(
@@ -63,6 +56,17 @@ export class CompletionCM extends CodeMirrorIntegration {
       );
       (this.feature.labIntegration as CompletionLabIntegration)
         .invoke_completer(CompletionTriggerKind.TriggerCharacter)
+        .catch(console.warn);
+      return;
+    }
+
+    if (
+      change.text &&
+      change.text[0].length == 1 &&
+      this.settings.composite.continuousHinting
+    ) {
+      (this.feature.labIntegration as CompletionLabIntegration)
+        .invoke_completer(AdditionalCompletionTriggerKinds.AutoInvoked)
         .catch(console.warn);
     }
   }
