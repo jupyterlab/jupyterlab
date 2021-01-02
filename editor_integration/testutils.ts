@@ -387,7 +387,7 @@ export function showAllCells(notebook: Notebook) {
   }
 }
 
-export function getCellsJSON(notebook: Notebook) {
+export function getCellsJSON(notebook: Notebook): Array<nbformat.ICell> {
   let cells: Array<ICellModel> = [];
   for (let i = 0; i < notebook.model.cells.length; i++) {
     cells.push(notebook.model.cells.get(i));

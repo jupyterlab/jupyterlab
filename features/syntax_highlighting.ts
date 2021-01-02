@@ -14,8 +14,8 @@ import {
 } from '../feature';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import CodeMirror from 'codemirror';
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor/lib/mimetype';
-import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 import { CodeSyntax as LSPSyntaxHighlightingSettings } from '../_syntax_highlighting';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
