@@ -86,20 +86,17 @@ the label ``foo`` and ``bar baz`` to an issue, comment
 
 Contributing from within the browser
 ------------------------------------
-Using the `github.com <https://github.com>` web interface - which is
-documented `here <https://docs.github.com/en/free-pro-team@latest/github>` if you
-run into problems - you can create and propose a change purely within your browser.
+Using the `github.com <https://github.com>` web interface - documented
+`here <https://docs.github.com/en/free-pro-team@latest/github>` - you
+can create and propose a change purely within your browser.
 
-Using `Binder <https://mybinder.org>`, you can test your changes within the browser
-as well. We recommend you have at least 8 GB of RAM for this. To build and launch an
-instance of the latest JupyterLab master, open a new tab with the following link:
+Using `Binder <https://mybinder.org>`, you can test the current master branch and your
+changes within the browser as well. We recommend you have at least 8 GB of RAM for this.
+To build and launch an instance of the latest JupyterLab master, open
+`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/>`
+in a new tab. The build takes about 7 minutes to complete.
 
-.. image:: https://mybinder.org/badge_logo.svg
-   :target: https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/
-
-The build takes about 7 minutes to complete.
-
-If you want to test your own branch hosted on GitHub, just enter it on https://mybinder.org.
+To test your own branch hosted on GitHub, enter it on https://mybinder.org.
 If everything goes right, filling out the form takes about 2 minutes, and the build should take
 about 7 minutes again.
 
