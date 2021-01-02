@@ -84,11 +84,14 @@ issues with labels using the ``@meeseeksdev`` bot. For example: To apply
 the label ``foo`` and ``bar baz`` to an issue, comment
 ``@meeseeksdev tag foo "bar baz"`` on the issue.
 
-Setting Up a Development Environment
-------------------------------------
+Proposing and testing changes within the browser
+------------------------------------------------
+Using the `github.com <https://github.com>` web interface - which is
+documented `here <https://docs.github.com/en/free-pro-team@latest/github>` if you
+run into problems - you can create and propose a change purely within your browser.
 
 You can launch a binder with the latest JupyterLab master to test
-something (this may take a few minutes to load):
+something (this takes about 7 minutes):
 
 .. image:: https://mybinder.org/badge_logo.svg
    :target: https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/
