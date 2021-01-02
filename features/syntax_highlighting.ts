@@ -14,6 +14,7 @@ import {
 } from '../feature';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import CodeMirror from 'codemirror';
+import 'codemirror/mode/meta'; // required for  CodeMirror.findModeByMIME
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { CodeSyntax as LSPSyntaxHighlightingSettings } from '../_syntax_highlighting';
