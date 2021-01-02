@@ -91,10 +91,8 @@ documented `here <https://docs.github.com/en/free-pro-team@latest/github>` if yo
 run into problems - you can create and propose a change purely within your browser.
 
 Using `Binder <https://mybinder.org>`, you can test your changes within the browser
-as well. We recommend you have at least 8 GB of RAM for this.
-
-To build and launch an instance of the latest JupyterLab master,
-open a new tab with the following link:
+as well. We recommend you have at least 8 GB of RAM for this. To build and launch an
+instance of the latest JupyterLab master, open a new tab with the following link:
 
 .. image:: https://mybinder.org/badge_logo.svg
    :target: https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/
