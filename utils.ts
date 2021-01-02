@@ -5,7 +5,7 @@ import mergeWith from 'lodash.mergewith';
 const RE_PATH_ANCHOR = /^file:\/\/([^\/]+|\/[A-Z]:)/;
 
 export async function sleep(timeout: number) {
-  return new Promise(resolve => {
+  return new Promise<void>(resolve => {
     setTimeout(() => {
       resolve();
     }, timeout);
