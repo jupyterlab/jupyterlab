@@ -100,6 +100,11 @@ To test your own branch hosted on GitHub, enter it on https://mybinder.org.
 If everything goes right, filling out the form takes about 2 minutes, and the build should take
 about 7 minutes again.
 
+Setting up a local development environment
+------------------------------------------
+This section explains how to set up a local development environment. We assume you use GNU/Linux,
+Mac OS X, or Windows Subsystem for Linux.
+
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
