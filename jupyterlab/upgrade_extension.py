@@ -159,9 +159,9 @@ def update_extension(target, interactive=True):
             os.makedirs(osp.dirname(file_target), exist_ok=True)
             shutil.copy(p, file_target)
         else:
-            with open(p) as fid:
+            with open(p, "rb") as fid:
                 old_data = fid.read()
-            with open(file_target) as fid:
+            with open(file_target, "rb") as fid:
                 new_data = fid.read()
             if old_data == new_data:
                 continue
