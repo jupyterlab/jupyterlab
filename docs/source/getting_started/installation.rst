@@ -114,30 +114,25 @@ Installation problems
 ---------------------
 
 If your computer is behind corporate proxy or firewall,
-you may encounter HTTP and SSL errors due to custom security profiles managed by corporate IT departments.
+you may encounter HTTP and SSL errors due to the proxy or firewall blocking connections to widely-used servers. For example, you might see this error if conda cannot connect to its own repositories::
 
-Example of typical error, when conda cannot connect to own repositories:
+    CondaHTTPError: HTTP 000 CONNECTION FAILED for url <https://repo.anaconda.com/pkgs/main/win-64/current_repodata.json>
 
-+ `CondaHTTPError: HTTP 000 CONNECTION FAILED for url <https://repo.anaconda.com/pkgs/main/win-64/current_repodata.json>`
+Here are some widely-used sites that host packages in the Python and JavaScript open-source ecosystems. Your network adminstrator may be able to allow http and https connections to these domains:
 
+- pypi.org
+- pythonhosted.org
+- continuum.io
+- anaconda.com
+- conda.io
+- github.com
+- githubusercontent.com
+- npmjs.com
+- yarnpkg.com
 
-This may happen because your company can block connections to widely-used repositories in Python and JavaScript communities.
-
-Here are some widely-used sites that host packages in the Python and JavaScript open-source ecosystem. Your network adminstrator may be able to allow http and https connections to these:
-
-- \*.pypi.org
-- \*.pythonhosted.org
-- \*.continuum.io
-- \*.anaconda.com
-- \*.conda.io
-- \*.github.com
-- \*.githubusercontent.com
-- \*.npmjs.com
-- \*.yarnpkg.com
-
-Alternatively you can specify proxy user (mostly domain user with password),
+Alternatively, you can specify a proxy user (usually a domain user with password),
 that is allowed to communicate via network. This can be easily achieved
-by setting two common environment variables: `HTTP_PROXY` and `HTTPS_PROXY`.
+by setting two common environment variables: ``HTTP_PROXY`` and ``HTTPS_PROXY``.
 These variables are automatically used by many open-source tools (like ``conda``) if set correctly.
 
 .. code:: bash
@@ -149,7 +144,6 @@ These variables are automatically used by many open-source tools (like ``conda``
     # For Linux / MacOS
     export HTTP_PROXY=http://USER:PWD@proxy.company.com:PORT
     export HTTPS_PROXY=https://USER:PWD@proxy.company.com:PORT
-
 
 In case you can communicate via HTTP, but installation with ``conda`` fails
 on connectivity problems to HTTPS servers, you can disable using SSL for ``conda``.
@@ -164,7 +158,7 @@ on connectivity problems to HTTPS servers, you can disable using SSL for ``conda
 
 You can do a similar thing for ``pip``.
 The approach here is to mark repository servers as trusted hosts,
-which means, SSL communication will not be required for downloading Python libraries.
+which means SSL communication will not be required for downloading Python libraries.
 
 .. code:: bash
 
@@ -175,12 +169,12 @@ which means, SSL communication will not be required for downloading Python libra
 Using the tips from above, you can handle many network problems 
 related to installing Python libraries.
 
-Many Jupyter extensions require having a working ``npm`` and ``jlpm`` (alias for ``yarn``) commands,
-which is required for downloading useful Jupyter extensions or other JavaScript dependencies.
+Many Jupyter extensions require having working ``npm`` and ``jlpm`` (alias for ``yarn``) commands,
+which is required for downloading useful Jupyter extensions or other JavaScript dependencies. If ``npm`` cannot connect to its own repositories, you might see an error like::
 
-Example of typical error message, when ``npm`` cannot connect to own repositories:
+    ValueError: "@jupyterlab/toc" is not a valid npm package
 
-+ `ValueError: "@jupyterlab/toc" is not a valid npm package`
+You can set the proxy or registry used for npm with the following commands.
 
 .. code:: bash
 
