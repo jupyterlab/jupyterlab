@@ -7,7 +7,7 @@ v3.0
 ----
 
 See the `JupyterLab
-3.0 <https://github.com/jupyterlab/jupyterlab/milestone/3.0?closed=1>`__
+3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
 
