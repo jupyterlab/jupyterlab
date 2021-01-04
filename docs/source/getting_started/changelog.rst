@@ -52,6 +52,11 @@ Property inspector moved to right sidebar
 
 The default interface for JupyterLab now has system-wide sidebar panes on the left side and sidebar panels that interact with a specific document (such as the debugger or notebook property inspector) on the right side. As always, you can move panes between the left and right sidebars (right click on the sidebar icon, or change it in Advanced Settings).
 
+Command Palette
+"""""""""""""""
+
+The command palette is now a floating window that appears on top of your JupyterLab workspace. This enables users to quickly invoke a command while keeping the sidebar closed or switching sidebar panels. The command palette can be put back into the sidebar by adjusting the default in Advanced Settings.
+
 Jupyter Server
 """"""""""""""
 
