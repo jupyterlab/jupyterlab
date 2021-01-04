@@ -468,7 +468,7 @@ In addition to the package metadata for source extensions, prebuilt extensions h
 Output Directory
 """"""""""""""""
 
-When JupyterLab builds the prebuilt extension, it creates a JavaScript bundle which can then be copied into the appropriate location. The ``jupyterlab.outputDir`` field gives the relative path to the directory where this JavaScript bundle should be placed:
+When JupyterLab builds the prebuilt extension, it creates a directory of files which can then be copied into the :ref:`appropriate install location <distributing_prebuilt_extensions>`. The ``jupyterlab.outputDir`` field gives the relative path to the directory where these JavaScript and other files should be placed. A copy of the ``package.json`` file with additional build metadata will be put in the ``outputDir`` and the JavaScript and other files that will be served are put into the ``static`` subdirectory.
 
 .. code-block:: json
 
@@ -506,21 +506,6 @@ Custom webpack configuration can be used to enable webpack features, configure a
 This custom config will be merged with the `prebuilt extension config <https://github.com/jupyterlab/jupyterlab/blob/master/builder/src/extensionConfig.ts>`_
 when building the prebuilt extension.
 
-Packaging Information
-^^^^^^^^^^^^^^^^^^^^^
-
-Since prebuilt extensions are distributed in many ways (Python pip packages, conda packages, and potentially in many other packaging systems), packages can include an extra file, ``install.json``, that helps the user know how a prebuilt extension was installed and how to uninstall it. This file is put in the appropriate location by the packaging system distributing the prebuilt extension, and is used by JupyterLab to help a user know how to manage the extension. For example, ``jupyter labextension list`` includes information from this file, and ``jupyter labextension uninstall`` can print helpful uninstall instructions. Here is an example ``install.json`` file::
-
-   {
-     "packageManager": "python",
-     "packageName": "mypackage",
-     "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package mypackage"
-   }
-
-* ``packageManager``: This is the package manager that was used to install the prebuilt extension, for example, ``python``, ``pip``, ``conda``, ``debian``, ``system administrator``, etc.
-* ``packageName``: This is the package name of the prebuilt extension in the package manager above, which may be different than the package name in ``package.json``.
-* ``uninstallInstructions``: This is a short block of text giving the user instructions for uninstalling the prebuilt extension. For example, it might instruct them to use a system package manager or talk to a system administrator.
-
 .. _prebuilt_dev_workflow:
 
 Developing a prebuilt extension
@@ -538,11 +523,36 @@ If you are developing your prebuilt extension against the JupyterLab source repo
 
 We provide a `cookiecutter <https://github.com/jupyterlab/extension-cookiecutter-ts>`_ that handles all of the scaffolding for an extension author, including the shipping of appropriate data files, so that when the user installs the package, the prebuilt extension ends up in ``share/jupyter/labextensions``
 
+.. _distributing_prebuilt_extensions:
 
-Serving a prebuilt extension
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Distributing a prebuilt extension
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A prebuilt extension is copied into a directory such as ``sys-prefix/share/jupyter/labextensions/package-name``. The JupyterLab server makes these files available via a ``/labextensions/`` server handler. The settings and themes handlers in the server also load settings and themes from the prebuilt extension installation directories. If a prebuilt extension has the same name as a source extension, the prebuilt extension is preferred.
+Prebuilt extensions can be distributed by any system that can copy the prebuilt assets into an appropriate location where JupyterLab can find them. The `official extension cookiecutter <https://github.com/jupyterlab/extension-cookiecutter-ts>`_ shows how to distribute prebuilt extensions via Python pip or conda packages. A system package manager, or even just an administrative script that copies directories, could be used as well.
+
+To distribute a prebuilt extension, copy its :ref:`output directory <outputDir>` to a location where JupyterLab will find it, typically  ``<sys-prefix>/share/jupyter/labextensions/<package-name>``, where ``<package-name>`` is the JavaScript package name in the ``package.json``. For example, if your JavaScript package name is ``@my-org/my-package``, then the appropriate directory would be ``<sys-prefix>/share/jupyter/labextensions/@my-org/my-package``.
+
+The JupyterLab server makes the ``static/`` files available via a ``/labextensions/`` server handler. The settings and themes handlers in the server also load settings and themes from the prebuilt extension directories. If a prebuilt extension has the same name as a source extension, the prebuilt extension is preferred.
+
+.. _install.json:
+
+Packaging Information
+"""""""""""""""""""""
+
+Since prebuilt extensions are distributed in many ways (Python pip packages, conda packages, and potentially in many other packaging systems), the prebuilt extension directory can include an extra file, ``install.json``, that helps the user know how a prebuilt extension was installed and how to uninstall it. This file should be copied by the packaging system distributing the prebuilt extension into the top-level directory, for example ``<sys-prefix>/share/jupyter/labextensions/<package-name>/install.json``.
+
+This ``install.json`` file is used by JupyterLab to help a user know how to manage the extension. For example, ``jupyter labextension list`` includes information from this file, and ``jupyter labextension uninstall`` can print helpful uninstall instructions. Here is an example ``install.json`` file::
+
+   {
+     "packageManager": "python",
+     "packageName": "mypackage",
+     "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package mypackage"
+   }
+
+* ``packageManager``: This is the package manager that was used to install the prebuilt extension, for example, ``python``, ``pip``, ``conda``, ``debian``, ``system administrator``, etc.
+* ``packageName``: This is the package name of the prebuilt extension in the package manager above, which may be different than the package name in ``package.json``.
+* ``uninstallInstructions``: This is a short block of text giving the user instructions for uninstalling the prebuilt extension. For example, it might instruct them to use a system package manager or talk to a system administrator.
+
 
 
 Development workflow for source extensions
