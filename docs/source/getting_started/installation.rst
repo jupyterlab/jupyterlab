@@ -66,32 +66,10 @@ Docker
 If you have `Docker installed <https://docs.docker.com/install/>`__, you can install and use JupyterLab by selecting one
 of the many `ready-to-run Docker images <https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html>`__
 maintained by the Jupyter Team. Follow the instructions in the `Quick Start Guide <https://jupyter-docker-stacks.readthedocs.io/en/latest/>`__
-to deploy the chosen Docker image. NOTE: Ensure your docker command includes the `-e JUPYTER_ENABLE_LAB=yes` flag to ensure
+to deploy the chosen Docker image.
+
+Ensure your docker command includes the ``-e JUPYTER_ENABLE_LAB=yes`` flag to ensure
 JupyterLab is enabled in your container.
-
-
-
-Installing with Previous Versions of Notebook
----------------------------------------------
-
-If you are using a version of Jupyter Notebook earlier than 5.3, then you must also run the following command to enable the JupyterLab
-server extension:
-
-.. code:: bash
-
-    jupyter serverextension enable --py jupyterlab --sys-prefix
-
-
-Prerequisites
--------------
-
-JupyterLab requires the Jupyter Notebook version 4.3 or later. To check
-the version of the ``notebook`` package that you have installed:
-
-.. code:: bash
-
-    jupyter notebook --version
-
 
 Usage with JupyterHub
 ---------------------
@@ -119,7 +97,7 @@ A tool like `postcss <https://postcss.org/>`__ can be used to convert the CSS fi
 Usage with private NPM registry
 -------------------------------
 
-To install extensions, you will need access to a NPM packages registry. Some companies do not allow
+To install some extensions, you will need access to an NPM packages registry. Some companies do not allow
 reaching directly public registry and have a private registry. To use it, you need to configure ``npm``
 **and** ``yarn`` to point to that registry (ask your corporate IT department for the correct URL):
 
@@ -128,13 +106,9 @@ reaching directly public registry and have a private registry. To use it, you ne
     npm config set registry https://registry.company.com/
     yarn config set registry https://registry.company.com/
     
-JupyterLab will pick up that registry automatically.
+JupyterLab will pick up that registry automatically. You can check which registry URL is used by JupyterLab by running::
 
-.. note::
-
-    You can check which registry URL is used by JupyterLab by running::
-    
-      python -c "from jupyterlab.commands import AppOptions; print(AppOptions().registry)"
+    python -c "from jupyterlab.commands import AppOptions; print(AppOptions().registry)"
 
 Installation problems
 ---------------------
@@ -228,14 +202,3 @@ on connectivity problems to HTTPS servers, you can disable using SSL for ``npm``
 
     # Configure npm to not use SSL
     npm set strict-ssl False
-
-Problems with Extensions and Settings
--------------------------------------
-
-Jupyterlab saves settings via `PUT` requests to the server with a JSON5-compatible payload, even though it claims the PUT request is valid JSON. `JSON5 <https://json5.org/>`__ is a superset of JSON that allows comments, etc. There may be deployment problems, manifest as 400 error return codes when saving settings, if these `PUT` requests are rejected by a routing layer that tries to validate the payload as JSON instead of JSON5.
-
-Common symptoms of this during debugging are:
-
-- The settings are selected but nothing changes, or when extension manager is enabled but the manager tab is not added.
-- JupyterLab's logs don't have the 400 return codes when `PUT` requests are issued.
-- If your JupyterLab logs are on Elastic Search, you'll see `Unexpected token / in JSON at position`. This comes from the JSON5 comments not being valid JSON.
