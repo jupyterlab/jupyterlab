@@ -52,6 +52,11 @@ Property inspector moved to right sidebar
 
 The default interface for JupyterLab now has system-wide sidebar panes on the left side and sidebar panels that interact with a specific document (such as the debugger or notebook property inspector) on the right side. As always, you can move panes between the left and right sidebars (right click on the sidebar icon, or change it in Advanced Settings).
 
+Jupyter Server
+""""""""""""""
+
+JupyterLab 3.0 now depends on `Jupyter Server <https://jupyter-server.readthedocs.io>`_, which is a new Jupyter project based on the server portion of the classic Notebook server. See the `Migration Guide <https://jupyter-server.readthedocs.io/en/stable/operators/migrate-from-nbserver.html>`_ to migrate custom notebook configuration to Jupyter Server.
+
 For Developers
 ^^^^^^^^^^^^^^
 
