@@ -80,7 +80,7 @@ def update_extension(target, interactive=True):
         if name not in data:
             continue
 
-        for (key, value) in data[name].items():
+        for (key, value) in list(data[name].items()):
             if key.startswith('@phosphor/'):
                 has_phosphor = True
                 data[name][key.replace('@phosphor/', '@lumino/')] = value
