@@ -436,6 +436,21 @@ describe('csvviewer/parse', () => {
       expect(results.ncols).toEqual(3);
       expect(results.offsets).toEqual([0, 2, 5]);
     });
+
+    it('handles empty file', () => {
+      const data = ``;
+      const options = { data, rowDelimiter: '\n' };
+      let results;
+
+      results = parser({ ...options, columnOffsets: false });
+      expect(results.nrows).toEqual(0);
+      expect(results.offsets).toEqual([]);
+
+      results = parser({ ...options, columnOffsets: true });
+      expect(results.nrows).toEqual(0);
+      expect(results.ncols).toEqual(0);
+      expect(results.offsets).toEqual([]);
+    });
   });
 });
 

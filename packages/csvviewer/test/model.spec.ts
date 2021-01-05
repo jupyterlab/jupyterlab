@@ -19,7 +19,7 @@ const CSV_TEST_FILES = [
   ],
 
   [
-    'empty',
+    'empty_values',
     readCSV('csv-spectrum/csvs/empty.csv'),
     require('csv-spectrum/json/empty.json')
   ],
@@ -29,6 +29,8 @@ const CSV_TEST_FILES = [
     readCSV('csv-spectrum/csvs/empty_crlf.csv'),
     require('csv-spectrum/json/empty_crlf.json')
   ],
+
+  ['empty_file', '', []],
 
   [
     'escaped_quotes',
