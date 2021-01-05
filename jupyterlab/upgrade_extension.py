@@ -137,8 +137,9 @@ def update_extension(target, interactive=True):
 
     # Update style settings
     data.setdefault('styleModule', 'style/index.js')
-    if 'style/index.js' not in data['sideEffects']:
+    if 'sideEffects' in data and 'style/index.js' not in data['sideEffects']:
         data['sideEffects'].append('style/index.js')
+    if 'files' in data and 'style/index.js' not in data['files']:
         data['files'].append('style/index.js')
 
     # Update the root package.json file
