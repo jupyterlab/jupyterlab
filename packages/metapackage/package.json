@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/metapackage",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "JupyterLab - Meta Package.  All of the packages used by the core JupyterLab application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -103,8 +103,8 @@
     "@jupyterlab/statedb": "^3.0.0",
     "@jupyterlab/statusbar": "^3.0.0",
     "@jupyterlab/statusbar-extension": "^3.0.0",
-    "@jupyterlab/terminal": "^3.0.0",
-    "@jupyterlab/terminal-extension": "^3.0.0",
+    "@jupyterlab/terminal": "^3.0.1",
+    "@jupyterlab/terminal-extension": "^3.0.1",
     "@jupyterlab/theme-dark-extension": "^3.0.0",
     "@jupyterlab/theme-light-extension": "^3.0.0",
     "@jupyterlab/toc": "^5.0.0",

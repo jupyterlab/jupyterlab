@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-federated-core",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "private": true,
   "scripts": {
     "build": "npm run clean && webpack",
@@ -142,7 +142,7 @@
     "@jupyterlab/settingeditor-extension": "^3.0.0",
     "@jupyterlab/shortcuts-extension": "^3.0.0",
     "@jupyterlab/statusbar-extension": "^3.0.0",
-    "@jupyterlab/terminal-extension": "^3.0.0",
+    "@jupyterlab/terminal-extension": "^3.0.1",
     "@jupyterlab/theme-light-extension": "^3.0.0",
     "@jupyterlab/toc-extension": "^5.0.0",
     "@jupyterlab/tooltip-extension": "^3.0.0",
