@@ -423,27 +423,25 @@ export class DSVModel extends DataModel implements IDisposable {
       }).ncols;
     }
 
-    // Parse the data up to and including the requested row, starting from the
-    // beginning of the last row offset. The first row offset returned will be
-    // the same as the last row offset we already have.
-    const reparse = this._rowCount! > 0;
+    // `reparse` is the number of rows we are requesting to parse over again.
+    // We generally start at the beginning of the last row offset, so that the
+    // first row offset returned is the same as the last row offset we already
+    // have. We parse the data up to and including the requested row.
+    const reparse = this._rowCount! > 0 ? 1 : 0;
     const { nrows, offsets } = PARSERS[this._parser]({
       data: this._rawData,
-      startIndex: reparse
-        ? this._rowOffsets[this._rowCount! - 1]
-        : 0,
+      startIndex: this._rowOffsets[this._rowCount! - reparse] ?? 0,
       delimiter: this._delimiter,
       rowDelimiter: this._rowDelimiter,
       quote: this._quote,
       columnOffsets: false,
-      // We are reparsing the last row if we've already started, so add one
-      maxRows: endRow - this._rowCount! + (reparse ? 1 : 0)
+      maxRows: endRow - this._rowCount! + reparse
     });
 
     // If we have already set up our initial bookkeeping, return early if we
     // did not get any new rows beyond the last row that we've parsed, i.e.,
     // nrows===1.
-    if (this._startedParsing && nrows <= 1) {
+    if (this._startedParsing && (nrows <= reparse)) {
       this._doneParsing = true;
       this._ready.resolve(undefined);
       return;
@@ -451,11 +449,9 @@ export class DSVModel extends DataModel implements IDisposable {
 
     this._startedParsing = true;
 
-    // Update the row count. If we requested to reparse a row, and we received
-    // at least one new row, then we should correct the count for that
-    // duplicate row.
+    // Update the row count, accounting for how many rows were reparsed.
     const oldRowCount = this._rowCount!;
-    const duplicateRows = reparse && nrows > 0 ? 1 : 0;
+    const duplicateRows = Math.min(nrows, reparse);
     this._rowCount = oldRowCount + nrows - duplicateRows;
 
     // If we didn't reach the requested row, we must be done.
