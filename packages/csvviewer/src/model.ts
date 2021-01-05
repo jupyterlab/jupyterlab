@@ -457,7 +457,8 @@ export class DSVModel extends DataModel implements IDisposable {
 
     // Copy the new offsets into a new row offset array.
     const oldRowOffsets = this._rowOffsets;
-    this._rowOffsets = new Uint32Array(this._rowCount);
+    // Always store at least one offset, even if data is empty
+    this._rowOffsets = new Uint32Array(this._rowCount || 1);
     this._rowOffsets.set(oldRowOffsets);
     this._rowOffsets.set(offsets, oldRowCount - 1);
 
