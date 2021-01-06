@@ -59,6 +59,8 @@ flags.update(
     }
 )
 
+
+
 if make_singleuser_app:
 
     class SingleUserNotebookMixin(LabApp):
@@ -510,8 +512,23 @@ else:
             env.loader = ChoiceLoader([FunctionLoader(get_page), orig_loader])
 
 
+
+# Overrides for Jupyter Server Extension config
+class OverrideSingleUserNotebookApp(SingleUserNotebookApp):
+    name = 'labhub'
+
+    # Disable the default jupyterlab extension and enable ourself
+    serverapp_config = {
+        "open_browser": True,
+        "jpserver_extensions": { "jupyterlab": False, "jupyterlab.labhubapp": True }
+    }
+
+
+load_jupyter_server_extension = OverrideSingleUserNotebookApp._load_jupyter_server_extension
+
+
 def main(argv=None):
-    return SingleUserNotebookApp.launch_instance(argv)
+    return OverrideSingleUserNotebookApp.launch_instance(argv)
 
 
 if __name__ == "__main__":
