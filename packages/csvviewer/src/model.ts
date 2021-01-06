@@ -423,21 +423,25 @@ export class DSVModel extends DataModel implements IDisposable {
       }).ncols;
     }
 
-    // Parse the data up to and including the requested row, starting from the
-    // last row offset we have.
+    // `reparse` is the number of rows we are requesting to parse over again.
+    // We generally start at the beginning of the last row offset, so that the
+    // first row offset returned is the same as the last row offset we already
+    // have. We parse the data up to and including the requested row.
+    const reparse = this._rowCount! > 0 ? 1 : 0;
     const { nrows, offsets } = PARSERS[this._parser]({
       data: this._rawData,
-      startIndex: this._rowOffsets[this._rowCount! - 1],
+      startIndex: this._rowOffsets[this._rowCount! - reparse] ?? 0,
       delimiter: this._delimiter,
       rowDelimiter: this._rowDelimiter,
       quote: this._quote,
       columnOffsets: false,
-      maxRows: endRow - this._rowCount! + 1
+      maxRows: endRow - this._rowCount! + reparse
     });
 
-    // Return if we didn't actually get any new rows beyond the one we've
-    // already parsed.
-    if (this._startedParsing && nrows <= 1) {
+    // If we have already set up our initial bookkeeping, return early if we
+    // did not get any new rows beyond the last row that we've parsed, i.e.,
+    // nrows===1.
+    if (this._startedParsing && (nrows <= reparse)) {
       this._doneParsing = true;
       this._ready.resolve(undefined);
       return;
@@ -445,9 +449,10 @@ export class DSVModel extends DataModel implements IDisposable {
 
     this._startedParsing = true;
 
-    // Update the row count.
+    // Update the row count, accounting for how many rows were reparsed.
     const oldRowCount = this._rowCount!;
-    this._rowCount = oldRowCount + nrows - 1;
+    const duplicateRows = Math.min(nrows, reparse);
+    this._rowCount = oldRowCount + nrows - duplicateRows;
 
     // If we didn't reach the requested row, we must be done.
     if (this._rowCount < endRow) {
@@ -455,11 +460,13 @@ export class DSVModel extends DataModel implements IDisposable {
       this._ready.resolve(undefined);
     }
 
-    // Copy the new offsets into a new row offset array.
-    const oldRowOffsets = this._rowOffsets;
-    this._rowOffsets = new Uint32Array(this._rowCount);
-    this._rowOffsets.set(oldRowOffsets);
-    this._rowOffsets.set(offsets, oldRowCount - 1);
+    // Copy the new offsets into a new row offset array if needed.
+    if (this._rowCount > oldRowCount) {
+      const oldRowOffsets = this._rowOffsets;
+      this._rowOffsets = new Uint32Array(this._rowCount);
+      this._rowOffsets.set(oldRowOffsets);
+      this._rowOffsets.set(offsets, oldRowCount - duplicateRows);
+    }
 
     // Expand the column offsets array if needed
 
@@ -596,9 +603,8 @@ export class DSVModel extends DataModel implements IDisposable {
   private _resetParser(): void {
     this._columnCount = undefined;
 
-    // First row offset is *always* 0, so we always have the first row offset.
-    this._rowOffsets = new Uint32Array(1);
-    this._rowCount = 1;
+    this._rowOffsets = new Uint32Array(0);
+    this._rowCount = 0;
     this._startedParsing = false;
 
     this._columnOffsets = new Uint32Array(0);
@@ -631,7 +637,7 @@ export class DSVModel extends DataModel implements IDisposable {
 
   // Data values
   private _rawData: string;
-  private _rowCount: number | undefined = 1;
+  private _rowCount: number | undefined = 0;
   private _columnCount: number | undefined;
 
   // Cache information
@@ -658,7 +664,7 @@ export class DSVModel extends DataModel implements IDisposable {
   /**
    * The index for the start of each row.
    */
-  private _rowOffsets: Uint32Array = new Uint32Array(1);
+  private _rowOffsets: Uint32Array = new Uint32Array(0);
   /**
    * The number of rows to parse initially before doing a delayed parse of the
    * entire data.
