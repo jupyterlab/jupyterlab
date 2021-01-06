@@ -7,8 +7,6 @@ const plib = require('path');
 const fs = require('fs-extra');
 const Handlebars = require('handlebars');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const LicenseWebpackPlugin = require('license-webpack-plugin')
-  .LicenseWebpackPlugin;
 const webpack = require('webpack');
 const merge = require('webpack-merge').default;
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
@@ -275,10 +273,6 @@ const plugins = [
     },
     name: 'CORE_FEDERATION',
     shared
-  }),
-  new LicenseWebpackPlugin({
-    perChunkOutput: false,
-    outputFilename: 'third-party-licenses.txt'
   })
 ];
 
