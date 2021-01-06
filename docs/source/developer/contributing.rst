@@ -84,18 +84,26 @@ issues with labels using the ``@meeseeksdev`` bot. For example: To apply
 the label ``foo`` and ``bar baz`` to an issue, comment
 ``@meeseeksdev tag foo "bar baz"`` on the issue.
 
-Setting Up a Development Environment
+Contributing from within the browser
 ------------------------------------
+Using the https://github.com web interface - documented
+`here <https://docs.github.com/en/free-pro-team@latest/github>`__ - you
+can create and propose a change purely within your browser.
 
-You can launch a binder with the latest JupyterLab master to test
-something (this may take a few minutes to load):
+Using `Binder <https://mybinder.org>`__, you can test the current master branch and your
+changes within the browser as well. We recommend you have at least 8 GB of RAM for this.
+To build and launch an instance of the latest JupyterLab master, open
+`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/>`__
+in a new tab. The build takes about 7 minutes to complete.
 
-.. image:: https://mybinder.org/badge_logo.svg
-   :target: https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/
-   
-If you want to test your own branch hosted on GitHub, just enter it on https://mybinder.org.
-If everything goes right, filling out the form takes about 2 minutes, and the build takes about 7 minutes 
-to complete.
+To test your own branch hosted on GitHub, enter it on https://mybinder.org.
+If everything goes right, filling out the form takes about 2 minutes, and the build should take
+about 7 minutes again.
+
+Setting up a local development environment
+------------------------------------------
+This section explains how to set up a local development environment. We assume you use GNU/Linux,
+Mac OS X, or Windows Subsystem for Linux.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

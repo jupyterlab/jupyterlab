@@ -63,7 +63,7 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c anaconda cookiecutter nodejs jupyter-packaging git
+    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c anaconda jupyterlab=3 cookiecutter nodejs jupyter-packaging git
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
@@ -76,11 +76,6 @@ Note: You'll need to run the command above in each new terminal you open
 before you can work with the tools you installed in the
 ``jupyterlab-ext`` environment.
 
-Now we can install the latest version of JupyterLab.
-
-.. code:: bash
-
-    pip install jupyterlab --pre
 
 Create a repository
 -------------------
@@ -101,7 +96,7 @@ This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
-    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout 3.0
+    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
 
 When prompted, enter values like the following for all of the cookiecutter
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
@@ -131,7 +126,8 @@ You should see a list like the following.
 
 ::
 
-    LICENSE          MANIFEST.in      README.md        binder/          jupyterlab_apod/ package.json     pyproject.toml   setup.py         src/             style/           tsconfig.json
+    LICENSE          README.md        jupyterlab_apod/ pyproject.toml   src/             tsconfig.json
+    MANIFEST.in      install.json     package.json     setup.py         style/
 
 Commit what you have to git
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

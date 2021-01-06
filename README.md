@@ -17,7 +17,7 @@
 [![Discourse](https://img.shields.io/badge/help_forum-discourse-blue.svg)](https://discourse.jupyter.org/c/jupyterlab)
 [![Gitter](https://img.shields.io/badge/social_chat-gitter-blue.svg)](https://gitter.im/jupyterlab/jupyterlab)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab/tree/demo)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/3818244?urlpath=lab/tree/demo)
 
 An extensible environment for interactive and reproducible computing, based on the
 Jupyter Notebook and Architecture. [Currently ready for users.](https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906)
@@ -29,13 +29,13 @@ powerful user interface.
 JupyterLab will eventually replace the classic Jupyter Notebook.
 
 JupyterLab can be extended using [npm](https://www.npmjs.com/) packages
-that use our public APIs. To find JupyterLab extensions, search for the npm keyword [jupyterlab-extension](https://www.npmjs.com/search?q=keywords:jupyterlab-extension) or the GitHub topic [jupyterlab-extension](https://github.com/topics/jupyterlab-extension). To learn more about extensions, see the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html).
+that use our public APIs. To find JupyterLab extensions, search for the npm keyword [jupyterlab-extension](https://www.npmjs.com/search?q=keywords:jupyterlab-extension) or the GitHub topic [jupyterlab-extension](https://github.com/topics/jupyterlab-extension). To learn more about extensions, see the [user documentation](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html).
 
 The current JupyterLab releases are suitable for general
 usage, and the extension APIs will continue to
 evolve for JupyterLab extension developers.
 
-Read the latest version's documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/latest/).
+Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/stable/).
 
 ---
 
@@ -88,19 +88,13 @@ If you encounter an error like "Command 'jupyter' not found", please make sure `
 
 ### Prerequisites and Supported Browsers
 
-Jupyter notebook version 4.3 or later is required. To check the notebook version, run the command:
-
-```bash
-jupyter notebook --version
-```
-
 The latest versions of the following browsers are currently _known to work_:
 
 - Firefox
 - Chrome
 - Safari
 
-See our [documentation](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html) for additional details.
+See our [documentation](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) for additional details.
 
 ---
 
@@ -110,7 +104,7 @@ We encourage you to ask questions on the [Discourse forum](https://discourse.jup
 
 ### Bug report
 
-To report a bug please read the [guidelines](https://jupyterlab.readthedocs.io/en/latest/getting_started/issue.html) and then open a [Github issue](https://github.com/jupyterlab/jupyterlab/issues/new?template=bug_report.md). To keep resolved issues self-contained, the [lock bot](https://github.com/apps/lock) will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.
+To report a bug please read the [guidelines](https://jupyterlab.readthedocs.io/en/stable/getting_started/issue.html) and then open a [Github issue](https://github.com/jupyterlab/jupyterlab/issues/new?template=bug_report.md). To keep resolved issues self-contained, the [lock bot](https://github.com/apps/lock) will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.
 
 ### Feature request
 
@@ -120,15 +114,15 @@ We also welcome suggestions for new features as they help make the project more 
 
 ## Development
 
-### Contributing
-
-To contribute code or documentation to the project, please read the [contributor documentation](https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html).
-
-JupyterLab follows the Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
-
 ### Extending JupyterLab
 
-To start developing an extension, see the [developer documentation](https://jupyterlab.readthedocs.io/en/latest/developer/extension_dev.html) and the [API docs](http://jupyterlab.github.io/jupyterlab/index.html).
+To start developing an extension for JupyterLab, see the [developer documentation](https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html) and the [API docs](https://jupyterlab.readthedocs.io/en/stable/api/).
+
+### Contributing
+
+To contribute code or documentation to JupyterLab itself, please read the [contributor documentation](https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html).
+
+JupyterLab follows the Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
 
 ### License
 

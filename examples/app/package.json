@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-app",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -32,7 +32,7 @@
     "@jupyterlab/settingeditor-extension": "^3.0.0",
     "@jupyterlab/shortcuts-extension": "^3.0.0",
     "@jupyterlab/statusbar-extension": "^3.0.0",
-    "@jupyterlab/terminal-extension": "^3.0.0",
+    "@jupyterlab/terminal-extension": "^3.0.1",
     "@jupyterlab/theme-dark-extension": "^3.0.0",
     "@jupyterlab/theme-light-extension": "^3.0.0",
     "@jupyterlab/tooltip-extension": "^3.0.0",

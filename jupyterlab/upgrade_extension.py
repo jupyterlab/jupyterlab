@@ -80,7 +80,7 @@ def update_extension(target, interactive=True):
         if name not in data:
             continue
 
-        for (key, value) in data[name].items():
+        for (key, value) in list(data[name].items()):
             if key.startswith('@phosphor/'):
                 has_phosphor = True
                 data[name][key.replace('@phosphor/', '@lumino/')] = value
@@ -134,7 +134,14 @@ def update_extension(target, interactive=True):
             data[key] = dict(sorted(data[key].items()))
         else:
             del data[key]
-            
+
+    # Update style settings
+    data.setdefault('styleModule', 'style/index.js')
+    if 'sideEffects' in data and 'style/index.js' not in data['sideEffects']:
+        data['sideEffects'].append('style/index.js')
+    if 'files' in data and 'style/index.js' not in data['files']:
+        data['files'].append('style/index.js')
+
     # Update the root package.json file
     with open(package_file, 'w') as fid:
         json.dump(data, fid, indent=2)
@@ -153,9 +160,9 @@ def update_extension(target, interactive=True):
             os.makedirs(osp.dirname(file_target), exist_ok=True)
             shutil.copy(p, file_target)
         else:
-            with open(p) as fid:
+            with open(p, "rb") as fid:
                 old_data = fid.read()
-            with open(file_target) as fid:
+            with open(file_target, "rb") as fid:
                 new_data = fid.read()
             if old_data == new_data:
                 continue

@@ -7,7 +7,7 @@ v3.0
 ----
 
 See the `JupyterLab
-3.0 <https://github.com/jupyterlab/jupyterlab/milestone/3.0?closed=1>`__
+3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
 
@@ -51,6 +51,16 @@ Property inspector moved to right sidebar
 """""""""""""""""""""""""""""""""""""""""
 
 The default interface for JupyterLab now has system-wide sidebar panes on the left side and sidebar panels that interact with a specific document (such as the debugger or notebook property inspector) on the right side. As always, you can move panes between the left and right sidebars (right click on the sidebar icon, or change it in Advanced Settings).
+
+Command Palette
+"""""""""""""""
+
+The command palette is now a floating window that appears on top of your JupyterLab workspace. This enables users to quickly invoke a command while keeping the sidebar closed or switching sidebar panels. The command palette can be put back into the sidebar by adjusting the default in Advanced Settings.
+
+Jupyter Server
+""""""""""""""
+
+JupyterLab 3.0 now depends on `Jupyter Server <https://jupyter-server.readthedocs.io>`_, which is a new Jupyter project based on the server portion of the classic Notebook server. See the `Migration Guide <https://jupyter-server.readthedocs.io/en/stable/operators/migrate-from-nbserver.html>`_ to migrate custom notebook configuration to Jupyter Server.
 
 For Developers
 ^^^^^^^^^^^^^^
