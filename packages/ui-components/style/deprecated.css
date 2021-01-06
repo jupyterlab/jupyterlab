@@ -290,6 +290,9 @@
 .jp-TabIcon {
   background-image: var(--jp-icon-tab);
 }
+.jp-TableRowsIcon {
+  background-image: var(--jp-icon-table-rows);
+}
 .jp-TagIcon {
   background-image: var(--jp-icon-tag);
 }
@@ -301,6 +304,9 @@
 }
 .jp-TocIcon {
   background-image: var(--jp-icon-toc);
+}
+.jp-TreeViewIcon {
+  background-image: var(--jp-icon-tree-view);
 }
 .jp-TrustedIcon {
   background-image: var(--jp-icon-trusted);
