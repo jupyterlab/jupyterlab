@@ -730,6 +730,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         self.handlers.extend(handlers)
         super().initialize_handlers()
 
+    def initialize(self, argv=None):
+        """Subclass because the ExtensionApp.initialize() method does not take arguments"""
+        super().initialize()
+
 #-----------------------------------------------------------------------------
 # Main entry point
 #-----------------------------------------------------------------------------
