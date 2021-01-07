@@ -388,14 +388,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
       throw new Error('Kernel is dead');
     }
 
-    function formatMessage(msg: KernelMessage.IMessage) {
-      var output = msg.header.msg_type;
-      if (KernelMessage.isExecuteRequestMsg(msg)) {
-        output += `: ${msg.content.code.substring(0, 10)}`
-      }
-      return output
-    }
-
     // If we have a kernel_info_request and we are restarting, send the
     // kernel_info_request immediately if we can, and if not throw an error so
     // we can retry later. We do this because we must get at least one message
@@ -406,7 +398,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
       KernelMessage.isInfoRequestMsg(msg)
     ) {
       if (this.connectionStatus === 'connected') {
-        console.log('Sending kernel info request immediately');
         this._ws!.send(serialize.serialize(msg));
         return;
       } else {
@@ -416,11 +407,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     // If there are pending messages, add to the queue so we keep messages in order
     if (queue && this._pendingMessages.length > 0) {
-      console.log(
-        `Queueing message because others are on the queue (${formatMessage(msg)})`,
-        msg,
-        this._pendingMessages
-      );
       this._pendingMessages.push(msg);
       return;
     }
@@ -430,16 +416,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this.connectionStatus === 'connected' &&
       this._kernelSession !== RESTARTING_KERNEL_SESSION
     ) {
-      console.log(`Sending message immediately ${formatMessage(msg)}`, msg);
       this._ws!.send(serialize.serialize(msg));
     } else if (queue) {
-      console.log(
-        `Queueing message (connectionStatus: ${this.connectionStatus}, kernel session ${this._kernelSession}, ${formatMessage(msg)})`,
-        msg
-      );
       this._pendingMessages.push(msg);
     } else {
-      throw new Error(`Could not send message: ${formatMessage(msg)}`);
+      throw new Error('Could not send message');
     }
   }
 
@@ -1108,7 +1089,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this._kernelSession !== RESTARTING_KERNEL_SESSION &&
       this._pendingMessages.length > 0
     ) {
-      console.error('Sending pending message', this._pendingMessages[0]);
       this._sendMessage(this._pendingMessages[0], false);
 
       // We shift the message off the queue after the message is sent so that
