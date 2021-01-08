@@ -21,28 +21,7 @@ if (Promise.allSettled === undefined) {
     );
 }
 
-require('./style.js')
-
-function loadScript(url) {
-  return new Promise((resolve, reject) => {
-    const newScript = document.createElement('script');
-    newScript.onerror = reject;
-    newScript.onload = resolve;
-    newScript.async = true;
-    document.head.appendChild(newScript);
-    newScript.src = url;
-  });
-}
-
-async function loadComponent(url, scope) {
-  await loadScript(url);
-
-  // From MIT-licensed https://github.com/module-federation/module-federation-examples/blob/af043acd6be1718ee195b2511adf6011fba4233c/advanced-api/dynamic-remotes/app1/src/App.js#L6-L12
-  await __webpack_init_sharing__('default');
-  const container = window._JUPYTERLAB[scope];
-  // Initialize the container, it may provide shared modules and may need ours
-  await container.init(__webpack_share_scopes__.default);
-}
+import('./style.js');
 
 async function createModule(scope, module) {
   try {
@@ -64,39 +43,25 @@ async function main() {
   var ignorePlugins = [];
   var register = [];
 
+  const federatedExtensionPromises = [];
+  const federatedMimeExtensionPromises = [];
+  const federatedStylePromises = [];
+
   // This is all the data needed to load and activate plugins. This should be
   // gathered by the server and put onto the initial page template.
   const extension_data = JSON.parse(
     PageConfig.getOption('federated_extensions')
   );
 
-  const federatedExtensionPromises = [];
-  const federatedMimeExtensionPromises = [];
-  const federatedStylePromises = [];
+  const queuedFederated = [];
 
-  // We first load all federated components so that the shared module
-  // deduplication can run and figure out which shared modules from all
-  // components should be actually used.
-  const extensions = await Promise.allSettled(extension_data.map( async data => {
-    await loadComponent(
-      `${URLExt.join(PageConfig.getOption('fullLabextensionsUrl'), data.name, data.load)}`,
-      data.name
-    );
-    return data;
-  }));
-
-  extensions.forEach(p => {
-    if (p.status === "rejected") {
-      // There was an error loading the component
-      console.error(p.reason);
-      return;
-    }
-
-    const data = p.value;
+  extensions.forEach(data => {
     if (data.extension) {
+      queuedFederated.push(data.name);
       federatedExtensionPromises.push(createModule(data.name, data.extension));
     }
     if (data.mimeExtension) {
+      queuedFederated.push(data.name);
       federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
     if (data.style) {
@@ -137,12 +102,15 @@ async function main() {
   // Handle the registered mime extensions.
   const mimeExtensions = [];
   {{#each jupyterlab_mime_extensions}}
-  try {
-    for (let plugin of activePlugins(require('{{@key}}/{{this}}'))) {
-      mimeExtensions.push(plugin);
+  if (!queuedFederated.includes('{{@key}}')) {
+    try {
+      let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+      for (let plugin of activePlugins(ext)) {
+        mimeExtensions.push(plugin);
+      }
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
   }
   {{/each}}
 
@@ -160,12 +128,15 @@ async function main() {
 
   // Handled the registered standard extensions.
   {{#each jupyterlab_extensions}}
-  try {
-    for (let plugin of activePlugins(require('{{@key}}/{{this}}'))) {
-      register.push(plugin);
+  if (!queuedFederated.includes('{{@key}}')) {
+    try {
+      let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+      for (let plugin of activePlugins(ext)) {
+        register.push(plugin);
+      }
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
   }
   {{/each}}
 
@@ -205,5 +176,3 @@ async function main() {
     console.debug('Example started!');
   });
 }
-
-window.addEventListener('load', main);

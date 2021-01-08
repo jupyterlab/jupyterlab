@@ -10,12 +10,6 @@ const fs = require('fs-extra');
 const path = require('path');
 const Handlebars = require('handlebars');
 
-const names = Object.keys(data.dependencies).filter(function (name) {
-  const packageData = require(path.join(name, 'package.json'));
-  return packageData.jupyterlab !== undefined;
-});
-
-const jlab = data.jupyterlab;
 
 // Ensure a clear build directory.
 const buildDir = path.resolve(__dirname, 'build');
@@ -24,26 +18,24 @@ if (fs.existsSync(buildDir)) {
 }
 fs.ensureDirSync(buildDir);
 
-const extras = Build.ensureAssets({
-  packageNames: names,
+// Configuration to handle extension assets
+const extensionAssetConfig = Build.ensureAssets({
+  packageNames: jlab.extensions,
   output: buildDir
 });
 
 const singletons = {};
 
-data.jupyterlab.singletonPackages.forEach(element => {
+jlab.singletonPackages.forEach(element => {
   singletons[element] = { singleton: true };
 });
 
-// Handle the extensions.
-const extensions = jlab.extensions || {};
-const mimeExtensions = jlab.mimeExtensions || {};
-const externalExtensions = jlab.externalExtensions || {};
+// Create a list of application extensions and mime extensions from
+// jlab.extensions
+const extensions = {};
+const mimeExtensions = {};
 
-// go through each external extension
-// add to mapping of extension and mime extensions, of package name
-// to path of the extension.
-for (const key in externalExtensions) {
+for (const key of jlab.extensions) {
   const {
     jupyterlab: { extension, mimeExtension }
   } = require(`${key}/package.json`);
@@ -68,8 +60,7 @@ fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
 
 // Make a bootstrap entrypoint
 const entryPoint = path.join(buildDir, 'bootstrap.js');
-const bootstrap = 'import("./index.out.js");';
-fs.writeFileSync(entryPoint, bootstrap);
+fs.copySync('./bootstrap.js', entryPoint);
 
 if (process.env.NODE_ENV === 'production') {
   baseConfig.mode = 'production';
@@ -101,4 +92,4 @@ module.exports = [
       })
     ]
   })
-].concat(extras);
+].concat(extensionAssetConfig);

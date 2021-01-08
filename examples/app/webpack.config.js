@@ -4,13 +4,27 @@ const data = require('./package.json');
 const webpack = require('webpack');
 const Build = require('@jupyterlab/builder').Build;
 
-const names = Object.keys(data.dependencies).filter(function (name) {
-  const packageData = require(name + '/package.json');
-  return packageData.jupyterlab !== undefined;
-});
+const jlab = data.jupyterlab;
 
-const extras = Build.ensureAssets({
-  packageNames: names,
+// Create a list of application extensions and mime extensions from
+// jlab.extensions
+const extensions = {};
+const mimeExtensions = {};
+
+for (const key of jlab.extensions) {
+  const {
+    jupyterlab: { extension, mimeExtension }
+  } = require(`${key}/package.json`);
+  if (extension !== undefined) {
+    extensions[key] = extension === true ? '' : extension;
+  }
+  if (mimeExtension !== undefined) {
+    mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
+  }
+}
+
+const extensionAssetConfig = Build.ensureAssets({
+  packageNames: [...Object.keys(jlab.extensions ?? {}), ...Object.keys(jlab.mimeExtensions ?? {})],
   output: './build'
 });
 
@@ -76,4 +90,4 @@ module.exports = [
       })
     ]
   }
-].concat(extras);
+].concat(extensionAssetConfig);
