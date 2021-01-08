@@ -175,8 +175,9 @@ class BrowserApp(LabApp):
     JS console errors, JS errors, and Python logged errors.
     """
     name = __name__
+    open_browser = False
+
     serverapp_config = {
-        "open_browser": False,
         "base_url": "/foo/"
     }
     ip = '127.0.0.1'
