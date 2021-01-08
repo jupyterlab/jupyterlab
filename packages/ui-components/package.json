@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/ui-components",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "JupyterLab - UI components written in React",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -57,7 +57,7 @@
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^3.0.0",
+    "@jupyterlab/testutils": "^3.0.1",
     "@storybook/addon-actions": "^6.0.19",
     "@storybook/react": "^6.0.19",
     "@types/jest": "^26.0.10",
