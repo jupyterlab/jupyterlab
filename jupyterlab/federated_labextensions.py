@@ -375,9 +375,6 @@ def _get_labextension_metadata(module):
                 from setuptools import find_packages
                 package = find_packages(mod_path)[0]
 
-            # Replace hyphens with underscores to match Python convention
-            package = package.replace('-', '_')
-
             # Make sure the package is installed
             import pkg_resources
             try:
