@@ -1031,13 +1031,6 @@ export interface IExecuteRequestMsg extends IShellMessage<'execute_request'> {
 }
 
 /**
- * Test whether a kernel message is an `'execute_request'` message.
- */
-export function isExecuteRequestMsg(msg: IMessage): msg is IExecuteRequestMsg {
-  return msg.header.msg_type === 'execute_request';
-}
-
-/**
  * The content of an `execute-reply` message.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#execution-results).
