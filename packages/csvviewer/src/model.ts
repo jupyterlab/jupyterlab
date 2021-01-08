@@ -441,7 +441,7 @@ export class DSVModel extends DataModel implements IDisposable {
     // If we have already set up our initial bookkeeping, return early if we
     // did not get any new rows beyond the last row that we've parsed, i.e.,
     // nrows===1.
-    if (this._startedParsing && (nrows <= reparse)) {
+    if (this._startedParsing && nrows <= reparse) {
       this._doneParsing = true;
       this._ready.resolve(undefined);
       return;
