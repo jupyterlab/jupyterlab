@@ -519,7 +519,6 @@ class OverrideSingleUserNotebookApp(SingleUserNotebookApp):
 
     # Disable the default jupyterlab extension and enable ourself
     serverapp_config = {
-        "open_browser": True,
         "jpserver_extensions": { "jupyterlab": False, "jupyterlab.labhubapp": True }
     }
 
