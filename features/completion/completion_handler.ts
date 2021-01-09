@@ -293,7 +293,7 @@ export class LSPConnector
     console.log('[LSP][Completer] Transformed');
     // required to make the repetitive trigger characters like :: or ::: work for R with R languageserver,
     // see https://github.com/krassowski/jupyterlab-lsp/issues/436
-    const prefix_offset = token.value.length
+    const prefix_offset = token.value.length;
 
     return {
       // note in the ContextCompleter it was:
