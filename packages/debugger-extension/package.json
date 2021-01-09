@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/debugger-extension",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "JupyterLab - Debugger Extension",
   "keywords": [
     "jupyter",
@@ -49,23 +49,23 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.1",
-    "@jupyterlab/apputils": "^3.0.1",
-    "@jupyterlab/codeeditor": "^3.0.1",
-    "@jupyterlab/console": "^3.0.1",
-    "@jupyterlab/coreutils": "^5.0.0",
-    "@jupyterlab/debugger": "^3.0.1",
-    "@jupyterlab/docregistry": "^3.0.1",
-    "@jupyterlab/fileeditor": "^3.0.1",
-    "@jupyterlab/notebook": "^3.0.1",
-    "@jupyterlab/services": "^6.0.1",
-    "@jupyterlab/settingregistry": "^3.0.0",
-    "@jupyterlab/translation": "^3.0.1"
+    "@jupyterlab/application": "^3.0.2",
+    "@jupyterlab/apputils": "^3.0.2",
+    "@jupyterlab/codeeditor": "^3.0.2",
+    "@jupyterlab/console": "^3.0.2",
+    "@jupyterlab/coreutils": "^5.0.1",
+    "@jupyterlab/debugger": "^3.0.2",
+    "@jupyterlab/docregistry": "^3.0.2",
+    "@jupyterlab/fileeditor": "^3.0.2",
+    "@jupyterlab/notebook": "^3.0.2",
+    "@jupyterlab/services": "^6.0.2",
+    "@jupyterlab/settingregistry": "^3.0.1",
+    "@jupyterlab/translation": "^3.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^3.0.1",
+    "@jupyterlab/testutils": "^3.0.2",
     "@types/codemirror": "^0.0.97",
     "@types/jest": "^26.0.10",
     "@types/react-dom": "^17.0.0",
