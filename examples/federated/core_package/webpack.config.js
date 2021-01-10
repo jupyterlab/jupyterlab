@@ -10,6 +10,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const Handlebars = require('handlebars');
 
+// TODO: Check this webpack config against the dev_mode webpack config and make sure all relevant changes are copied back.
 
 // Ensure a clear build directory.
 const buildDir = path.resolve(__dirname, 'build');
