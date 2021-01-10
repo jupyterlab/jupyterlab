@@ -205,22 +205,24 @@ class JumperLabIntegration implements IFeatureLabIntegration {
   constructor(
     settings: FeatureSettings<any>,
     adapterManager: ILSPAdapterManager,
-    fileEditorTracker: IEditorTracker,
     notebookTracker: INotebookTracker,
-    documentManager: IDocumentManager
+    documentManager: IDocumentManager,
+    fileEditorTracker: IEditorTracker | null
   ) {
     this.settings = settings;
     this.adapterManager = adapterManager;
     this.jumpers = new Map();
 
-    fileEditorTracker.widgetAdded.connect((sender, widget) => {
-      let fileEditor = widget.content;
+    if (fileEditorTracker !== null) {
+      fileEditorTracker.widgetAdded.connect((sender, widget) => {
+        let fileEditor = widget.content;
 
-      if (fileEditor.editor instanceof CodeMirrorEditor) {
-        let jumper = new FileEditorJumper(widget, documentManager);
-        this.jumpers.set(widget.id, jumper);
-      }
-    });
+        if (fileEditor.editor instanceof CodeMirrorEditor) {
+          let jumper = new FileEditorJumper(widget, documentManager);
+          this.jumpers.set(widget.id, jumper);
+        }
+      });
+    }
 
     notebookTracker.widgetAdded.connect(async (sender, widget) => {
       // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
@@ -271,27 +273,27 @@ export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
     ILSPFeatureManager,
     ISettingRegistry,
     ILSPAdapterManager,
-    IEditorTracker,
     INotebookTracker,
     IDocumentManager
   ],
+  optional: [IEditorTracker],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
     settingRegistry: ISettingRegistry,
     adapterManager: ILSPAdapterManager,
-    fileEditorTracker: IEditorTracker,
     notebookTracker: INotebookTracker,
-    documentManager: IDocumentManager
+    documentManager: IDocumentManager,
+    fileEditorTracker: IEditorTracker | null
   ) => {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
     let labIntegration = new JumperLabIntegration(
       settings,
       adapterManager,
-      fileEditorTracker,
       notebookTracker,
-      documentManager
+      documentManager,
+      fileEditorTracker
     );
 
     featureManager.register({

@@ -9,6 +9,7 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { WidgetAdapter } from './adapters/adapter';
 import { ILabShell, JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { LSPExtension } from './index';
+import { IClassicShell } from '@jupyterlab-classic/application';
 
 export class WidgetAdapterManager implements ILSPAdapterManager {
   adapterTypeAdded: Signal<
@@ -26,12 +27,12 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     return this.adapterTypes;
   }
 
-  constructor(protected labShell: ILabShell) {
+  constructor(protected shell: ILabShell | IClassicShell) {
     this.adapterChanged = new Signal(this);
     this.adapterDisposed = new Signal(this);
     this.adapterTypeAdded = new Signal(this);
     this.adapterTypes = [];
-    labShell.currentChanged.connect(this.refreshAdapterFromCurrentWidget, this);
+    shell.currentChanged.connect(this.refreshAdapterFromCurrentWidget, this);
   }
 
   public registerAdapterType(options: IAdapterTypeOptions<IDocumentWidget>) {
@@ -76,7 +77,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
   }
 
   protected refreshAdapterFromCurrentWidget() {
-    const current = this.labShell.currentWidget as IDocumentWidget;
+    const current = this.shell.currentWidget as IDocumentWidget;
     if (!current) {
       return;
     }
@@ -131,10 +132,10 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
 
   isAnyActive() {
     return (
-      this.labShell.currentWidget &&
+      this.shell.currentWidget &&
       this.adapterTypes.some(type => type.tracker.currentWidget) &&
       this.adapterTypes.some(
-        type => type.tracker.currentWidget == this.labShell.currentWidget
+        type => type.tracker.currentWidget == this.shell.currentWidget
       )
     );
   }
@@ -142,9 +143,24 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
 
 export const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
   id: PLUGIN_ID + ':ILSPAdapterManager',
-  requires: [ILabShell],
-  activate: (app, labShell: ILabShell) => {
-    return new WidgetAdapterManager(labShell);
+  optional: [ILabShell, IClassicShell],
+  activate: (
+    app,
+    labShell: ILabShell | null,
+    classicShell: IClassicShell | null
+  ) => {
+    let shell: ILabShell | IClassicShell;
+    if (labShell === null && classicShell === null) {
+      console.log(
+        'Neither ILabShell not or IClassicShell was resolved, using app.shell'
+      );
+      shell = app.shell as IClassicShell;
+    } else if (labShell === null) {
+      shell = classicShell;
+    } else {
+      shell = labShell;
+    }
+    return new WidgetAdapterManager(shell);
   },
   provides: ILSPAdapterManager,
   autoStart: true

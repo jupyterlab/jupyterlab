@@ -130,11 +130,11 @@ export class LSPExtension implements ILSPExtension {
     private palette: ICommandPalette,
     documentManager: IDocumentManager,
     paths: IPaths,
-    status_bar: IStatusBar,
     adapterManager: ILSPAdapterManager,
     public editor_type_manager: ILSPVirtualEditorManager,
     private code_extractors_manager: ILSPCodeExtractorsManager,
-    private code_overrides_manager: ILSPCodeOverridesManager
+    private code_overrides_manager: ILSPCodeOverridesManager,
+    status_bar: IStatusBar | null
   ) {
     this.language_server_manager = new LanguageServerManager({});
     this.connection_manager = new DocumentConnectionManager({
@@ -145,12 +145,14 @@ export class LSPExtension implements ILSPExtension {
     status_bar_item.model.language_server_manager = this.language_server_manager;
     status_bar_item.model.connection_manager = this.connection_manager;
 
-    status_bar.registerStatusItem(PLUGIN_ID + ':language-server-status', {
-      item: status_bar_item,
-      align: 'left',
-      rank: 1,
-      isActive: () => adapterManager.isAnyActive()
-    });
+    if (status_bar !== null) {
+      status_bar.registerStatusItem(PLUGIN_ID + ':language-server-status', {
+        item: status_bar_item,
+        align: 'left',
+        rank: 1,
+        isActive: () => adapterManager.isAnyActive()
+      });
+    }
 
     this.feature_manager = new FeatureManager();
 
@@ -216,12 +218,12 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
     ICommandPalette,
     IDocumentManager,
     IPaths,
-    IStatusBar,
     ILSPAdapterManager,
     ILSPVirtualEditorManager,
     ILSPCodeExtractorsManager,
     ILSPCodeOverridesManager
   ],
+  optional: [IStatusBar],
   activate: (app, ...args) => {
     let extension = new LSPExtension(
       app,
@@ -230,11 +232,11 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
         ICommandPalette,
         IDocumentManager,
         IPaths,
-        IStatusBar,
         ILSPAdapterManager,
         ILSPVirtualEditorManager,
         ILSPCodeExtractorsManager,
-        ILSPCodeOverridesManager
+        ILSPCodeOverridesManager,
+        IStatusBar | null
       ])
     );
     return extension.feature_manager;
