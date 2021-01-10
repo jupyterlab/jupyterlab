@@ -110,6 +110,6 @@ void (async function bootstrap() {
 
   // Now that all federated containers are initialized with the main
   // container, we can import the main function.
-  let main = (await import('./index.out.js')).main;
+  let main = (await import('./index.js')).main;
   window.addEventListener('load', main);
 })();

@@ -48,7 +48,7 @@ for (const key of jlab.extensions) {
 }
 
 // Create the entry point file.
-const source = fs.readFileSync('index.js').toString();
+const source = fs.readFileSync('index.template.js').toString();
 const template = Handlebars.compile(source);
 const extData = {
   jupyterlab_extensions: extensions,
@@ -56,7 +56,7 @@ const extData = {
 };
 const result = template(extData);
 
-fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
+fs.writeFileSync(path.join(buildDir, 'index.js'), result);
 
 // Make a bootstrap entrypoint
 const entryPoint = path.join(buildDir, 'bootstrap.js');
