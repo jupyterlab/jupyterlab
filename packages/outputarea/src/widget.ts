@@ -105,9 +105,42 @@ export class OutputArea extends Widget {
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
-    for (let i = 0; i < model.length; i++) {
-      const output = model.get(i);
-      this._insertOutput(i, output);
+    const maximumTopBottomOutput = options.maximumTopBottomOutput || 10;
+    const hiddenVsShownRatio = 10;
+    if (model.length < maximumTopBottomOutput * hiddenVsShownRatio) {
+      for (let i = 0; i < model.length; i++) {
+        const output = model.get(i);
+        this._insertOutput(i, output);
+      }
+    } else {
+      let i = 0;
+      for (let j = 0; j < maximumTopBottomOutput; j++) {
+        const output = model.get(j);
+        console.log(output);
+        i++;
+        this._insertOutput(i, output);
+      }
+      const separator = model.contentFactory.createOutputModel({
+        value: {
+          output_type: 'display_data',
+          data: {
+            'text/html': `
+              <div style="margin: 10px"
+                <pre>Output of this cell has been trimmed on the initial display.</pre>
+                <pre>Total outputs is ${model.length}, displaying the first ${maximumTopBottomOutput} top and last ${maximumTopBottomOutput} bottom outputs.</pre>
+                <pre>Run again this cell to get the complete output.</pre>
+              </div>
+              `
+          }
+        }
+      });
+      this._insertOutput(i, separator);
+      i++;
+      for (let j = 0; j < maximumTopBottomOutput; j++) {
+        const output = model.get(model.length - (maximumTopBottomOutput - j));
+        this._insertOutput(i, output);
+        i++;
+      }
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
@@ -608,6 +641,11 @@ export namespace OutputArea {
      * The rendermime instance used by the widget.
      */
     rendermime: IRenderMimeRegistry;
+
+    /**
+     * The maximum number of output items to display on top and bottom of cell output.
+     */
+    maximumTopBottomOutput?: number;
   }
 
   /**

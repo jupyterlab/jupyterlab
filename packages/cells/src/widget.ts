@@ -573,8 +573,12 @@ export namespace Cell {
     /**
      * Whether this cell is a placeholder for future rendering.
      */
-
     placeholder?: boolean;
+
+    /**
+     * The maximum number of output items to display on top and bottom of cell output.
+     */
+    maximumTopBottomOutput?: number;
   }
 
   /**
