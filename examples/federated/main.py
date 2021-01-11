@@ -20,7 +20,7 @@ def _jupyter_server_extension_points():
     return [
         {
             'module': __name__,
-            'app': ExampleApp
+            'app': ExamplePrebuiltApp
         }
     ]
 
@@ -73,4 +73,4 @@ class ExamplePrebuiltApp(LabServerApp):
     #     super().initialize_handlers()
 
 if __name__ == '__main__':
-    ExampleApp.launch_instance()
+    ExamplePrebuiltApp.launch_instance()

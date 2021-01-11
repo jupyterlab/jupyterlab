@@ -12,6 +12,8 @@ const Handlebars = require('handlebars');
 
 // TODO: Check this webpack config against the dev_mode webpack config and make sure all relevant changes are copied back.
 
+const jlab = data.jupyterlab;
+
 // Ensure a clear build directory.
 const buildDir = path.resolve(__dirname, 'build');
 if (fs.existsSync(buildDir)) {
@@ -70,6 +72,7 @@ if (process.env.NODE_ENV === 'production') {
 module.exports = [
   merge(baseConfig, {
     mode: 'development',
+    devtool: 'source-map',
     entry: ['./publicpath.js', './' + path.relative(__dirname, entryPoint)],
     output: {
       path: buildDir,

@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JupyterLab } from '@jupyterlab/application';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 // Promise.allSettled polyfill, until our supported browsers implement it
@@ -36,8 +37,7 @@ async function createModule(scope, module) {
 /**
  * The main entry point for the application.
  */
-async function main() {
-  var JupyterLab = require('@jupyterlab/application').JupyterLab;
+export async function main() {
   var disabled = [];
   var deferred = [];
   var ignorePlugins = [];
@@ -49,7 +49,7 @@ async function main() {
 
   // This is all the data needed to load and activate plugins. This should be
   // gathered by the server and put onto the initial page template.
-  const extension_data = JSON.parse(
+  const extensions = JSON.parse(
     PageConfig.getOption('federated_extensions')
   );
 
