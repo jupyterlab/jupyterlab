@@ -49,14 +49,16 @@ const extensions = [
 const mimeExtensions = [
   import('@jupyterlab/json-extension'),
   import('@jupyterlab/pdf-extension')
-]
+];
 
 window.addEventListener('load', async function () {
   // Make sure the styles have loaded
   await styles;
 
   // Initialize JupyterLab with the mime extensions and application extensions.
-  const lab = new JupyterLab({mimeExtensions: await Promise.all(mimeExtensions)});
+  const lab = new JupyterLab({
+    mimeExtensions: await Promise.all(mimeExtensions)
+  });
   lab.registerPluginModules(await Promise.all(extensions));
 
   /* eslint-disable no-console */

@@ -12,13 +12,8 @@ const { ModuleFederationPlugin } = webpack.container;
 
 const packageData = require('./package.json');
 
-
-
-
 // Handle the extensions.
 const jlab = packageData.jupyterlab;
-
-
 
 const singletons = {};
 
@@ -74,8 +69,6 @@ fs.writeFileSync(path.join(buildDir, 'index.js'), template(extData));
 // initialization logic in index.js
 const entryPoint = path.join(buildDir, 'bootstrap.js');
 fs.copySync('./bootstrap.js', entryPoint);
-
-
 
 // Set up module federation sharing config
 const shared = {};
@@ -166,8 +159,6 @@ for (let [pkg, { requiredVersion }] of Object.entries(shared)) {
 for (let pkg of jlab.singletonPackages) {
   shared[pkg].singleton = true;
 }
-
-
 
 const plugins = [
   new ModuleFederationPlugin({
