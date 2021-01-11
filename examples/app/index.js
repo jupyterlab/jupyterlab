@@ -1,16 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JupyterLab } from '@jupyterlab/application';
+
+// The webpack public path needs to be set before loading the CSS assets.
 import { PageConfig } from '@jupyterlab/coreutils';
 // eslint-disable-next-line
 __webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 
-// This must be after the public path is set so CSS assets can load properly.
-import('./build/style.js');
+// Load the CSS assets
+const styles = import('./build/style.js');
 
-// These imports should match the list of extensions in package.json (listed
-// separately there so the webpack config Build.ensureAssets step can copy
-// extension assets to the build directory). These import statements assume
+// These extension and mimeExtension imports should match the list of extensions in package.json. They are listed
+// separately in package.json so the webpack config Build.ensureAssets step can copy
+// extension assets to the build directory. These import statements assume
 // the JupyterLab plugins are the default export from each package.
 const extensions = [
   import('@jupyterlab/application-extension'),
@@ -43,14 +46,23 @@ const extensions = [
   import('@jupyterlab/ui-components-extension')
 ];
 
+const mimeExtensions = [
+  import('@jupyterlab/json-extension'),
+  import('@jupyterlab/pdf-extension')
+]
+
 window.addEventListener('load', async function () {
-  const JupyterLab = import('@jupyterlab/application').JupyterLab;
-  const lab = new JupyterLab();
-  lab.registerPluginModules(extensions);
+  // Make sure the styles have loaded
+  await styles;
+
+  // Initialize JupyterLab with the mime extensions and application extensions.
+  const lab = new JupyterLab({mimeExtensions: await Promise.all(mimeExtensions)});
+  lab.registerPluginModules(await Promise.all(extensions));
+
   /* eslint-disable no-console */
   console.log('Starting app');
   await lab.start();
   console.log('App started, waiting for restore');
   await lab.restored;
-  console.log('Example started!');
+  console.log('Example loaded!');
 });
