@@ -38,10 +38,10 @@ async function createModule(scope, module) {
  * The main entry point for the application.
  */
 export async function main() {
-  var disabled = [];
-  var deferred = [];
-  var ignorePlugins = [];
-  var register = [];
+  const disabled = [];
+  const deferred = [];
+  const ignorePlugins = [];
+  const pluginsToRegister = [];
 
   const federatedExtensionPromises = [];
   const federatedMimeExtensionPromises = [];
@@ -53,15 +53,16 @@ export async function main() {
     PageConfig.getOption('federated_extensions')
   );
 
-  const queuedFederated = [];
+  // The set of federated extension names.
+  const federatedExtensionNames = new Set();
 
   extensions.forEach(data => {
     if (data.extension) {
-      queuedFederated.push(data.name);
+      federatedExtensionNames.add(data.name);
       federatedExtensionPromises.push(createModule(data.name, data.extension));
     }
     if (data.mimeExtension) {
-      queuedFederated.push(data.name);
+      federatedExtensionNames.add(data.name);
       federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
     if (data.style) {
@@ -99,10 +100,10 @@ export async function main() {
     }
   }
 
-  // Handle the registered mime extensions.
+  // Handle the mime extensions.
   const mimeExtensions = [];
   {{#each jupyterlab_mime_extensions}}
-  if (!queuedFederated.includes('{{@key}}')) {
+  if (!federatedExtensionNames.has('{{@key}}')) {
     try {
       let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
       for (let plugin of activePlugins(ext)) {
@@ -126,13 +127,13 @@ export async function main() {
     }
   });
 
-  // Handled the registered standard extensions.
+  // Handled the standard extensions.
   {{#each jupyterlab_extensions}}
-  if (!queuedFederated.includes('{{@key}}')) {
+  if (!federatedExtensionNames.has('{{@key}}')) {
     try {
       let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
       for (let plugin of activePlugins(ext)) {
-        register.push(plugin);
+        pluginsToRegister.push(plugin);
       }
     } catch (e) {
       console.error(e);
@@ -145,7 +146,7 @@ export async function main() {
   federatedExtensions.forEach(p => {
     if (p.status === "fulfilled") {
       for (let plugin of activePlugins(p.value)) {
-        register.push(plugin);
+        pluginsToRegister.push(plugin);
       }
     } else {
       console.error(p.reason);
@@ -157,6 +158,7 @@ export async function main() {
      console.error(reason);
     });
 
+  // Create a new JupyterLab object and start it
   const lab = new JupyterLab({
     mimeExtensions,
     disabled: {
@@ -170,7 +172,8 @@ export async function main() {
         .map(function (val) { return val.raw; })
     },
   });
-  register.forEach(function(item) { lab.registerPluginModule(item); });
+
+  lab.registerPluginModules(pluginsToRegister);
   lab.start({ ignorePlugins });
   lab.restored.then(() => {
     console.debug('Example started!');
