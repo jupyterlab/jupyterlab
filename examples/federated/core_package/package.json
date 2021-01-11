@@ -55,8 +55,6 @@
     "@jupyterlab/logconsole-extension": "~3.0.0",
     "@jupyterlab/mainmenu": "~3.0.0",
     "@jupyterlab/mainmenu-extension": "~3.0.0",
-    "@jupyterlab/markdownviewer": "~3.0.0",
-    "@jupyterlab/markdownviewer-extension": "~3.0.0",
     "@jupyterlab/mathjax2": "~3.0.0",
     "@jupyterlab/mathjax2-extension": "~3.0.0",
     "@jupyterlab/metapackage": "~3.0.1",
@@ -176,6 +174,8 @@
     "whatwg-fetch": "^3.0.0"
   },
   "jupyterlab": {
+    "buildDir": "./build",
+    "outputDir": "./build",
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",
