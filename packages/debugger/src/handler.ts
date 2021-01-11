@@ -267,7 +267,10 @@ export class DebuggerHandler {
 
     const addToolbarButton = (): void => {
       if (!this._iconButtons[widget.id]) {
-        this._iconButtons[widget.id] = updateIconButton(widget, toggleDebugging);
+        this._iconButtons[widget.id] = updateIconButton(
+          widget,
+          toggleDebugging
+        );
       }
       if (!this._toggleButtons[widget.id]) {
         this._toggleButtons[widget.id] = updateToggleButton(
@@ -392,10 +395,10 @@ export class DebuggerHandler {
     ) => void;
   } = {};
   private _iconButtons: {
-    [id: string]: ToolbarButton | undefined
+    [id: string]: ToolbarButton | undefined;
   } = {};
   private _toggleButtons: {
-    [id: string]: Switch | undefined
+    [id: string]: Switch | undefined;
   } = {};
 }
 
