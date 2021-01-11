@@ -4,27 +4,10 @@ const data = require('./package.json');
 const webpack = require('webpack');
 const Build = require('@jupyterlab/builder').Build;
 
-const jlab = data.jupyterlab;
-
-// Create a list of application extensions and mime extensions from
-// jlab.extensions
-const extensions = {};
-const mimeExtensions = {};
-
-for (const key of jlab.extensions) {
-  const {
-    jupyterlab: { extension, mimeExtension }
-  } = require(`${key}/package.json`);
-  if (extension !== undefined) {
-    extensions[key] = extension === true ? '' : extension;
-  }
-  if (mimeExtension !== undefined) {
-    mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
-  }
-}
-
+// Generate webpack config to copy extension assets to the build directory,
+// such as setting schema files, theme assets, etc.
 const extensionAssetConfig = Build.ensureAssets({
-  packageNames: [...Object.keys(jlab.extensions ?? {}), ...Object.keys(jlab.mimeExtensions ?? {})],
+  packageNames: data.jupyterlab.extensions,
   output: './build'
 });
 
@@ -35,9 +18,6 @@ module.exports = [
       path: __dirname + '/build',
       filename: 'bundle.js'
     },
-    // node: {
-    //   fs: 'empty'
-    // },
     bail: true,
     devtool: 'source-map',
     mode: 'development',
