@@ -492,7 +492,6 @@ export class OutputArea extends Widget {
       this._insertOutput(i, o);
       i++;
     });
-    //    this.update()
   }
 
   /**
