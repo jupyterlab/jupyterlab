@@ -310,13 +310,14 @@ if [[ $GROUP == usage ]]; then
 
     # Check the labhubapp
     ./test_install/bin/pip install jupyterhub
-    ./test_install/bin/jupyter-labhub --no-browser &
+    export JUPYTERHUB_API_TOKEN="mock_token"
+    ./test_install/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
     TASK_PID=$!
+    unset JUPYTERHUB_API_TOKEN
     # Make sure the task is running
     ps -p $TASK_PID || exit 1
     sleep 5
     kill $TASK_PID
-    wait $TASK_PID
 
     # Make sure we can clean various bits of the app dir
     jupyter lab clean
