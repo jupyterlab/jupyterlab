@@ -237,11 +237,14 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
   }
 }
 
+const SELECTED_CLASS = 'jp-mod-selected';
+
 /**
  * StatusBar item.
  */
 export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
   protected _popup: Popup = null;
+  private interactiveStateObserver: MutationObserver;
 
   /**
    * Construct a new VDomRenderer for the status item.
@@ -251,6 +254,33 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
     this.addClass(interactiveItem);
     this.addClass('lsp-statusbar-item');
     this.title.caption = 'LSP status';
+
+    // add human-readable (and stable) class name reflecting otherwise obfuscated typestyle interactiveItem
+    this.interactiveStateObserver = new MutationObserver(() => {
+      const has_selected = this.node.classList.contains(SELECTED_CLASS);
+      if (!this.node.classList.contains(interactiveItem)) {
+        if (!has_selected) {
+          this.addClass(SELECTED_CLASS);
+        }
+      } else {
+        if (has_selected) {
+          this.removeClass(SELECTED_CLASS);
+        }
+      }
+    });
+  }
+
+  protected onAfterAttach(msg: any) {
+    super.onAfterAttach(msg);
+    this.interactiveStateObserver.observe(this.node, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  }
+
+  protected onBeforeDetach(msg: any) {
+    super.onBeforeDetach(msg);
+    this.interactiveStateObserver.disconnect();
   }
 
   /**
