@@ -47,31 +47,25 @@ if (fs.existsSync(outputDir)) {
 }
 fs.ensureDirSync(outputDir);
 
-const dataDir = path.resolve(jlab.dataDir);
-
-const schemaDir = path.join(dataDir, 'schemas')
-if (fs.existsSync(schemaDir)) {
-  fs.removeSync(schemaDir);
+const schemaDir = path.resolve(jlab.schemaDir)
+if (fs.existsSync(path.join(schemaDir, 'schemas'))) {
+  fs.removeSync(path.join(schemaDir, 'schemas'));
 }
-fs.ensureDirSync(schemaDir);
+// fs.ensureDirSync(path.join(schemaDir, 'schemas'));
 
-const themeDir = path.join(dataDir, 'themes')
-if (fs.existsSync(themeDir)) {
-  fs.removeSync(themeDir);
+const themeDir = path.resolve(jlab.themeDir)
+if (fs.existsSync(path.join(themeDir, 'themes'))) {
+  fs.removeSync(path.join(themeDir, 'themes'));
 }
 fs.ensureDirSync(themeDir);
 
 // Configuration to handle extension assets
 const extensionAssetConfig = Build.ensureAssets({
   packageNames: extensionPackages,
-  output: path.resolve(jlab.dataDir)
+  output: buildDir,
+  schemaOutput: schemaDir,
+  themeOutput: themeDir
 });
-if (dataDir !== buildDir) {
-  fs.moveSync(
-    path.join(dataDir, 'style.js'),
-    path.join(buildDir, 'style.js')
-  )
-}
 
 // Create the entry point and other assets in build directory.
 const source = fs.readFileSync('index.template.js').toString();

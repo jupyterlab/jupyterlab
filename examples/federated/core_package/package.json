@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "npm run clean && webpack",
-    "clean": "rimraf build",
+    "clean": "rimraf static",
     "watch": "npm run clean && webpack --watch"
   },
   "resolutions": {
@@ -176,7 +176,8 @@
   "jupyterlab": {
     "buildDir": "./build",
     "outputDir": "./static",
-    "dataDir": "../data",
+    "themeDir": "../data",
+    "schemaDir": "../data",
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",
