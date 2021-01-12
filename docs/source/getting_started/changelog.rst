@@ -28,7 +28,7 @@ v3.0.2
 * Fix parsing of empty CSV files.  (`#9557 <https://github.com/jupyterlab/jupyterlab/pull/9557>`__)
 * Use tree/table buttons to display debugger variables view mode.  (`#9502 <https://github.com/jupyterlab/jupyterlab/pull/9502>`__)
 * Update tutorial for final jlab 3 release.   (`#9562 <https://github.com/jupyterlab/jupyterlab/pull/9562>`__)
-* Fix #9550 in upgrade_extension.py.  (`#9551 <https://github.com/jupyterlab/jupyterlab/pull/9551>`__)
+* Fix upgrade_extension.py.  (`#9551 <https://github.com/jupyterlab/jupyterlab/pull/9551>`__, `#9550 <https://github.com/jupyterlab/jupyterlab/pull/9550>`__)
 * Update the Binder link in the README to point to a 3.0 Binder.  (`#9549 <https://github.com/jupyterlab/jupyterlab/pull/9549>`__)
 
 v3.0.1
