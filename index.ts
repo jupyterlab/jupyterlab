@@ -11,7 +11,7 @@ import { LanguageServerManager } from './manager';
 import '../style/index.css';
 import { ContextCommandManager } from './command_manager';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { LSPStatus } from './components/statusbar';
+import { StatusButtonExtension } from './components/statusbar';
 import { DocumentConnectionManager } from './connection_manager';
 import {
   IAdapterTypeOptions,
@@ -141,17 +141,21 @@ export class LSPExtension implements ILSPExtension {
       language_server_manager: this.language_server_manager
     });
 
-    const status_bar_item = new LSPStatus(adapterManager);
-    status_bar_item.model.language_server_manager = this.language_server_manager;
-    status_bar_item.model.connection_manager = this.connection_manager;
+    const statusButtonExtension = new StatusButtonExtension({
+      language_server_manager: this.language_server_manager,
+      connection_manager: this.connection_manager,
+      adapter_manager: adapterManager
+    });
 
     if (status_bar !== null) {
       status_bar.registerStatusItem(PLUGIN_ID + ':language-server-status', {
-        item: status_bar_item,
+        item: statusButtonExtension.createItem(),
         align: 'left',
         rank: 1,
         isActive: () => adapterManager.isAnyActive()
       });
+    } else {
+      app.docRegistry.addWidgetExtension('Notebook', statusButtonExtension);
     }
 
     this.feature_manager = new FeatureManager();

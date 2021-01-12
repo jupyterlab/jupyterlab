@@ -30,9 +30,11 @@ import { collect_documents, VirtualDocument } from '../virtual/document';
 import { LSPConnection } from '../connection';
 import { DocumentConnectionManager } from '../connection_manager';
 import { ILanguageServerManager, ILSPAdapterManager } from '../tokens';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { codeCheckIcon } from '../index';
 import { DocumentLocator } from './utils';
+import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { LanguageServerManager } from '../manager';
 
 interface IServerStatusProps {
   server: SCHEMA.LanguageServerSession;
@@ -240,6 +242,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
  */
 export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
   protected _popup: Popup = null;
+
   /**
    * Construct a new VDomRenderer for the status item.
    */
@@ -284,6 +287,41 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
       align: 'left'
     });
   };
+}
+
+export class StatusButtonExtension
+  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+  constructor(
+    private options: {
+      language_server_manager: LanguageServerManager;
+      connection_manager: DocumentConnectionManager;
+      adapter_manager: ILSPAdapterManager;
+    }
+  ) {}
+
+  /**
+   * For statusbar registration and for internal use.
+   */
+  createItem(): LSPStatus {
+    const status_bar_item = new LSPStatus(this.options.adapter_manager);
+    status_bar_item.model.language_server_manager = this.options.language_server_manager;
+    status_bar_item.model.connection_manager = this.options.connection_manager;
+    return status_bar_item;
+  }
+
+  /**
+   * For registration on notebook panels.
+   */
+  createNew(
+    panel: NotebookPanel,
+    context: DocumentRegistry.IContext<INotebookModel>
+  ): LSPStatus {
+    const item = this.createItem();
+    item.addClass('jp-ToolbarButton');
+    panel.toolbar.insertAfter('spacer', 'LSPStatus', item);
+
+    return item;
+  }
 }
 
 type StatusCode =
