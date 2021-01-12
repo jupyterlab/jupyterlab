@@ -107,7 +107,11 @@ export class OutputArea extends Widget {
     this.layout = new PanelLayout();
     const maximumTopBottomOutput = options.maximumTopBottomOutput || 10;
     const hiddenVsShownRatio = 10;
-    if (model.length < maximumTopBottomOutput * hiddenVsShownRatio) {
+    this.trimmedOutputModels = new Array<IOutputModel>();
+    if (
+      maximumTopBottomOutput <= 0 ||
+      model.length < maximumTopBottomOutput * hiddenVsShownRatio
+    ) {
       for (let i = 0; i < model.length; i++) {
         const output = model.get(i);
         this._insertOutput(i, output);
@@ -116,7 +120,6 @@ export class OutputArea extends Widget {
       let i = 0;
       for (let j = 0; j < maximumTopBottomOutput; j++) {
         const output = model.get(j);
-        console.log(output);
         i++;
         this._insertOutput(i, output);
       }
@@ -125,17 +128,26 @@ export class OutputArea extends Widget {
           output_type: 'display_data',
           data: {
             'text/html': `
-              <div style="margin: 10px"
+              <a style="margin: 10px; text-decoration: none;">
                 <pre>Output of this cell has been trimmed on the initial display.</pre>
                 <pre>Total outputs is ${model.length}, displaying the first ${maximumTopBottomOutput} top and last ${maximumTopBottomOutput} bottom outputs.</pre>
-                <pre>Run again this cell to get the complete output.</pre>
-              </div>
+                <pre>Click on this messsage or run again this cell to get the complete output.</pre>
+              </a>
               `
           }
         }
       });
-      this._insertOutput(i, separator);
+      this._insertOutput(i, separator, () =>
+        this._showTrimmedOutputs(maximumTopBottomOutput)
+      );
       i++;
+      for (
+        i = maximumTopBottomOutput;
+        i < model.length - maximumTopBottomOutput;
+        i++
+      ) {
+        this.trimmedOutputModels.push(model.get(i));
+      }
       for (let j = 0; j < maximumTopBottomOutput; j++) {
         const output = model.get(model.length - (maximumTopBottomOutput - j));
         this._insertOutput(i, output);
@@ -160,6 +172,11 @@ export class OutputArea extends Widget {
    * The rendermime instance used by the widget.
    */
   readonly rendermime: IRenderMimeRegistry;
+
+  /**
+   * The hidden output models.
+   */
+  readonly trimmedOutputModels: IOutputModel[];
 
   /**
    * A read-only sequence of the chidren widgets in the output area.
@@ -445,15 +462,37 @@ export class OutputArea extends Widget {
   /**
    * Render and insert a single output into the layout.
    */
-  private _insertOutput(index: number, model: IOutputModel): void {
+  private _insertOutput(
+    index: number,
+    model: IOutputModel,
+    onClick?: () => void
+  ): void {
     let output = this.createOutputItem(model);
     if (output) {
       output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
     } else {
       output = new Widget();
     }
+    if (onClick) {
+      output?.node.addEventListener('click', onClick);
+    }
     const layout = this.layout as PanelLayout;
     layout.insertWidget(index, output);
+  }
+
+  /**
+   * Remove the information message related to the trimmed output
+   * and show all previously trimmed outputs.
+   */
+  private _showTrimmedOutputs(maximumTopBottomOutput: number) {
+    const layout = this.layout as PanelLayout;
+    layout.removeWidgetAt(maximumTopBottomOutput);
+    let i = maximumTopBottomOutput;
+    this.trimmedOutputModels.map(o => {
+      this._insertOutput(i, o);
+      i++;
+    });
+    //    this.update()
   }
 
   /**
