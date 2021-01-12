@@ -33,7 +33,7 @@ v3.0.2
 
 v3.0.1
 ^^^^^^
-* Fixes error when applying `jupyterlab.upgrade_extension` on Windows.  (`#9546 <https://github.com/jupyterlab/jupyterlab/pull/9509>`__)
+* Fixes error when applying ``jupyterlab.upgrade_extension`` on Windows.  (`#9546 <https://github.com/jupyterlab/jupyterlab/pull/9509>`__)
 * Improve upgrade script to add style settings.  (`#9515 <https://github.com/jupyterlab/jupyterlab/pull/9515>`__)
 * Fixed incorrect link to GitHub milestone.  (`#9516 <https://github.com/jupyterlab/jupyterlab/pull/9516>`__)
 * Split contribution guidelines into web-based and local instructions.  (`#9540 <https://github.com/jupyterlab/jupyterlab/pull/9540>`__)
