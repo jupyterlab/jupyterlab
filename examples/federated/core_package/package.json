@@ -175,7 +175,7 @@
   },
   "jupyterlab": {
     "buildDir": "./build",
-    "outputDir": "./build",
+    "outputDir": "./static",
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",
