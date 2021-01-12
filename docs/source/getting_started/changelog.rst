@@ -37,7 +37,7 @@ v3.0.1
 * Improve upgrade script to add style settings.  (`#9515 <https://github.com/jupyterlab/jupyterlab/pull/9515>`__)
 * Fixed incorrect link to GitHub milestone.  (`#9516 <https://github.com/jupyterlab/jupyterlab/pull/9516>`__)
 * Split contribution guidelines into web-based and local instructions.  (`#9540 <https://github.com/jupyterlab/jupyterlab/pull/9540>`__)
-* Remove --checkout 3.0 in the extension tutorial.  (`#9545 <https://github.com/jupyterlab/jupyterlab/pull/9545>`__)
+* Remove ``--checkout 3.0`` in the extension tutorial.  (`#9545 <https://github.com/jupyterlab/jupyterlab/pull/9545>`__)
 * Docs updates for 3.0.  (`#9546 <https://github.com/jupyterlab/jupyterlab/pull/9546>`__)
 * Fix usage test. (`#9547 <https://github.com/jupyterlab/jupyterlab/pull/9547>`__)
 * Remove visible 1px border for terminal.  (`#9548 <https://github.com/jupyterlab/jupyterlab/pull/9548>`__)
