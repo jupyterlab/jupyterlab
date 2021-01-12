@@ -34,30 +34,27 @@ for (const key of jlab.extensions) {
 
 const extensionPackages = jlab.extensions;
 
-// Ensure a clear build directory.
-const buildDir = path.resolve(jlab.buildDir);
-if (fs.existsSync(buildDir)) {
-  fs.removeSync(buildDir);
+// Ensure a clean directory.
+function clean(dir) {
+  if (fs.existsSync(dir)) {
+    fs.removeSync(dir);
+  }
+  fs.ensureDirSync(dir);
 }
-fs.ensureDirSync(buildDir);
+
+const buildDir = path.resolve(jlab.buildDir);
+clean(buildDir);
 
 const outputDir = path.resolve(jlab.outputDir);
-if (fs.existsSync(outputDir)) {
-  fs.removeSync(outputDir);
-}
-fs.ensureDirSync(outputDir);
+clean(outputDir);
 
-const schemaDir = path.resolve(jlab.schemaDir)
-if (fs.existsSync(path.join(schemaDir, 'schemas'))) {
-  fs.removeSync(path.join(schemaDir, 'schemas'));
-}
-// fs.ensureDirSync(path.join(schemaDir, 'schemas'));
+const schemaDir = path.resolve(jlab.schemaDir);
+// ensureAssets puts schemas in the schemas subdirectory
+clean(path.join(schemaDir, 'schemas'));
 
-const themeDir = path.resolve(jlab.themeDir)
-if (fs.existsSync(path.join(themeDir, 'themes'))) {
-  fs.removeSync(path.join(themeDir, 'themes'));
-}
-fs.ensureDirSync(themeDir);
+const themeDir = path.resolve(jlab.themeDir);
+// ensureAssets puts themes in the themes subdirectory
+clean(path.join(themeDir, 'themes'));
 
 // Configuration to handle extension assets
 const extensionAssetConfig = Build.ensureAssets({
