@@ -28,14 +28,14 @@ class ExamplePrebuiltApp(LabServerApp):
     name = 'lab'
     load_other_extensions = False
     app_name = 'JupyterLab Example App with Prebuilt Extensions'
-    app_settings_dir = os.path.join(HERE, 'core_package', 'static', 'application_settings')
+    app_settings_dir = os.path.join(HERE, 'data', 'application_settings')
     app_version = version
     schemas_dir = os.path.join(HERE, 'core_package', 'static', 'schemas')
     static_dir = os.path.join(HERE, 'core_package', 'static')
     templates_dir = os.path.join(HERE, 'templates')
     themes_dir = os.path.join(HERE, 'core_package', 'static', 'themes')
-    user_settings_dir = os.path.join(HERE, 'core_package', 'static', 'user_settings')
-    workspaces_dir = os.path.join(HERE, 'core_package', 'static', 'workspaces')
+    user_settings_dir = os.path.join(HERE, 'data', 'user_settings')
+    workspaces_dir = os.path.join(HERE, 'data', 'workspaces')
 
     # Set the location for prebuilt extensions, overriding the default
     # of looking in each of the Jupyter data paths.
