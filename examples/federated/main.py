@@ -30,10 +30,10 @@ class ExamplePrebuiltApp(LabServerApp):
     app_name = 'JupyterLab Example App with Prebuilt Extensions'
     app_settings_dir = os.path.join(HERE, 'data', 'application_settings')
     app_version = version
-    schemas_dir = os.path.join(HERE, 'core_package', 'static', 'schemas')
+    schemas_dir = os.path.join(HERE, 'data', 'schemas')
     static_dir = os.path.join(HERE, 'core_package', 'static')
     templates_dir = os.path.join(HERE, 'templates')
-    themes_dir = os.path.join(HERE, 'core_package', 'static', 'themes')
+    themes_dir = os.path.join(HERE, 'data', 'themes')
     user_settings_dir = os.path.join(HERE, 'data', 'user_settings')
     workspaces_dir = os.path.join(HERE, 'data', 'workspaces')
 

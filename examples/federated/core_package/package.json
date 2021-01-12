@@ -176,6 +176,7 @@
   "jupyterlab": {
     "buildDir": "./build",
     "outputDir": "./static",
+    "dataDir": "../data",
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",
@@ -249,6 +250,7 @@
       "@jupyterlab/statusbar-extension",
       "@jupyterlab/terminal-extension",
       "@jupyterlab/theme-light-extension",
+      "@jupyterlab/theme-dark-extension",
       "@jupyterlab/tooltip-extension",
       "@jupyterlab/translation-extension",
       "@jupyterlab/ui-components-extension",

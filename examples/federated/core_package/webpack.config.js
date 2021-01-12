@@ -47,14 +47,28 @@ if (fs.existsSync(outputDir)) {
 }
 fs.ensureDirSync(outputDir);
 
+const dataDir = path.resolve(jlab.dataDir);
+
+const schemaDir = path.join(dataDir, 'schemas')
+if (fs.existsSync(schemaDir)) {
+  fs.removeSync(schemaDir);
+}
+fs.ensureDirSync(schemaDir);
+
+const themeDir = path.join(dataDir, 'themes')
+if (fs.existsSync(themeDir)) {
+  fs.removeSync(themeDir);
+}
+fs.ensureDirSync(themeDir);
+
 // Configuration to handle extension assets
 const extensionAssetConfig = Build.ensureAssets({
   packageNames: extensionPackages,
-  output: outputDir
+  output: path.resolve(jlab.dataDir)
 });
-if (outputDir !== buildDir) {
+if (dataDir !== buildDir) {
   fs.moveSync(
-    path.join(outputDir, 'style.js'),
+    path.join(dataDir, 'style.js'),
     path.join(buildDir, 'style.js')
   )
 }
