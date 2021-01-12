@@ -12,7 +12,7 @@ milestone on GitHub for the full list of pull requests and issues closed.
 
 v3.0.4
 ^^^^^^
-* Do not use ?? in plain js, as it is too new.  (`#9606 <https://github.com/jupyterlab/jupyterlab/pull/9606>`__)
+* Do not use ``??`` in plain js, as it is too new.  (`#9606 <https://github.com/jupyterlab/jupyterlab/pull/9606>`__)
 * Fix handling of multiple notebooks for the debugger.  (`#9598 <https://github.com/jupyterlab/jupyterlab/pull/9598>`__)
 * Refactor labhub + CI.  (`#9604 <https://github.com/jupyterlab/jupyterlab/pull/9604>`__)
 
