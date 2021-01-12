@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application-top",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "private": true,
   "scripts": {
     "build": "jlpm run clean && webpack",
@@ -128,7 +128,7 @@
     "@jupyterlab/console-extension": "~3.0.2",
     "@jupyterlab/coreutils": "~5.0.1",
     "@jupyterlab/csvviewer-extension": "~3.0.2",
-    "@jupyterlab/debugger-extension": "~3.0.2",
+    "@jupyterlab/debugger-extension": "^3.0.3",
     "@jupyterlab/docmanager-extension": "~3.0.2",
     "@jupyterlab/documentsearch-extension": "~3.0.2",
     "@jupyterlab/extensionmanager-extension": "~3.0.2",
