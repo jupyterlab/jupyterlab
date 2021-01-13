@@ -66,5 +66,5 @@ window.addEventListener('load', async function () {
   await lab.start();
   console.log('App started, waiting for restore');
   await lab.restored;
-  console.log('Example loaded!');
+  console.log('Example started!');
 });

@@ -20,11 +20,11 @@ def _jupyter_server_extension_points():
     return [
         {
             'module': __name__,
-            'app': ExamplePrebuiltApp
+            'app': ExampleApp
         }
     ]
 
-class ExamplePrebuiltApp(LabServerApp):
+class ExampleApp(LabServerApp):
     name = 'lab'
     load_other_extensions = False
     app_name = 'JupyterLab Example App with Prebuilt Extensions'
@@ -42,4 +42,4 @@ class ExamplePrebuiltApp(LabServerApp):
     labextensions_path = [os.path.join(HERE, "labextensions")]
 
 if __name__ == '__main__':
-    ExamplePrebuiltApp.launch_instance()
+    ExampleApp.launch_instance()
