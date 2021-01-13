@@ -42,17 +42,21 @@ function clean(dir) {
   fs.ensureDirSync(dir);
 }
 
+// buildDir is a temporary directory where files are copied before the build.
 const buildDir = path.resolve(jlab.buildDir);
 clean(buildDir);
 
+// outputDir is where the final built assets go
 const outputDir = path.resolve(jlab.outputDir);
 clean(outputDir);
 
-const schemaDir = path.resolve(jlab.schemaDir);
+// <schemaDir>/schemas is where the settings schemas live
+const schemaDir = path.resolve(jlab.schemaDir || outputDir);
 // ensureAssets puts schemas in the schemas subdirectory
 clean(path.join(schemaDir, 'schemas'));
 
-const themeDir = path.resolve(jlab.themeDir);
+// <themeDir>/themes is where theme assets live
+const themeDir = path.resolve(jlab.themeDir || outputDir);
 // ensureAssets puts themes in the themes subdirectory
 clean(path.join(themeDir, 'themes'));
 
