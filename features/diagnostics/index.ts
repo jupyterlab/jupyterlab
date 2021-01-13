@@ -34,8 +34,8 @@ const COMMANDS: IFeatureCommand[] = [
       }
       app.shell.activateById(panel_widget.id);
     },
-    is_enabled: (context) => {
-      return context.app.name != 'JupyterLab Classic'
+    is_enabled: context => {
+      return context.app.name != 'JupyterLab Classic';
     },
     label: 'Show diagnostics panel',
     rank: 3,
