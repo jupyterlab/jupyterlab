@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterLab } from '@jupyterlab/application';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 // Promise.allSettled polyfill, until our supported browsers implement it
 // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
