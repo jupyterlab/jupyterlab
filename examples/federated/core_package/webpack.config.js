@@ -11,15 +11,12 @@ const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
 const { ModuleFederationPlugin } = webpack.container;
 
 const packageData = require('./package.json');
-
-// Handle the extensions.
 const jlab = packageData.jupyterlab;
 
 // Create a list of application extensions and mime extensions from
 // jlab.extensions
 const extensions = {};
 const mimeExtensions = {};
-
 for (const key of jlab.extensions) {
   const {
     jupyterlab: { extension, mimeExtension }
@@ -32,58 +29,49 @@ for (const key of jlab.extensions) {
   }
 }
 
-const extensionPackages = jlab.extensions;
-
-// Ensure a clean directory.
-function clean(dir) {
-  if (fs.existsSync(dir)) {
-    fs.removeSync(dir);
-  }
-  fs.ensureDirSync(dir);
-}
-
 // buildDir is a temporary directory where files are copied before the build.
 const buildDir = path.resolve(jlab.buildDir);
-clean(buildDir);
+fs.emptyDirSync(buildDir);
 
 // outputDir is where the final built assets go
 const outputDir = path.resolve(jlab.outputDir);
-clean(outputDir);
+fs.emptyDirSync(outputDir);
 
 // <schemaDir>/schemas is where the settings schemas live
 const schemaDir = path.resolve(jlab.schemaDir || outputDir);
 // ensureAssets puts schemas in the schemas subdirectory
-clean(path.join(schemaDir, 'schemas'));
+fs.emptyDirSync(path.join(schemaDir, 'schemas'));
 
 // <themeDir>/themes is where theme assets live
 const themeDir = path.resolve(jlab.themeDir || outputDir);
 // ensureAssets puts themes in the themes subdirectory
-clean(path.join(themeDir, 'themes'));
+fs.emptyDirSync(path.join(themeDir, 'themes'));
 
 // Configuration to handle extension assets
 const extensionAssetConfig = Build.ensureAssets({
-  packageNames: extensionPackages,
+  packageNames: jlab.extensions,
   output: buildDir,
   schemaOutput: schemaDir,
   themeOutput: themeDir
 });
 
 // Create the entry point and other assets in build directory.
-const source = fs.readFileSync('index.template.js').toString();
-const template = Handlebars.compile(source);
-const extData = {
-  jupyterlab_extensions: extensions,
-  jupyterlab_mime_extensions: mimeExtensions
-};
-
-fs.writeFileSync(path.join(buildDir, 'index.js'), template(extData));
+const template = Handlebars.compile(
+  fs.readFileSync('index.template.js').toString()
+);
+fs.writeFileSync(
+  path.join(buildDir, 'index.js'),
+  template({ extensions, mimeExtensions })
+);
 
 // Create the bootstrap file that loads federated extensions and calls the
 // initialization logic in index.js
 const entryPoint = path.join(buildDir, 'bootstrap.js');
 fs.copySync('./bootstrap.js', entryPoint);
 
-
+/**
+ * Create the webpack ``shared`` configuration
+ */
 function createShared(packageData) {
   // Set up module federation sharing config
   const shared = {};
@@ -219,5 +207,7 @@ module.exports = [
 ].concat(extensionAssetConfig);
 
 // For debugging, write the config out
-const logPath = path.join(buildDir, 'build_log.json');
-fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));
+fs.writeFileSync(
+  path.join(buildDir, 'webpack.config-log.json'),
+  JSON.stringify(module.exports, null, '  ')
+);

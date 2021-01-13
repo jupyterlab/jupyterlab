@@ -102,7 +102,7 @@ export async function main() {
 
   // Handle the mime extensions.
   const mimeExtensions = [];
-  {{#each jupyterlab_mime_extensions}}
+  {{#each mimeExtensions}}
   if (!federatedExtensionNames.has('{{@key}}')) {
     try {
       let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
@@ -128,7 +128,7 @@ export async function main() {
   });
 
   // Handled the standard extensions.
-  {{#each jupyterlab_extensions}}
+  {{#each extensions}}
   if (!federatedExtensionNames.has('{{@key}}')) {
     try {
       let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
