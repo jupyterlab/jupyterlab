@@ -3,8 +3,6 @@
 
 import expect from 'expect';
 
-import { PageConfig } from '@jupyterlab/coreutils';
-
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
@@ -26,7 +24,7 @@ import { toArray } from '@lumino/algorithm';
 
 import { UUID } from '@lumino/coreutils';
 
-import { FileBrowserModel, CHUNK_SIZE, LARGE_FILE_SIZE } from '../src';
+import { FileBrowserModel, CHUNK_SIZE } from '../src';
 
 /**
  * A contents manager that delays requests by less each time it is called
@@ -381,40 +379,7 @@ describe('filebrowser/model', () => {
         expect(called).toBe(true);
       });
 
-      describe('older notebook version', () => {
-        let prevNotebookVersion: string;
-
-        beforeAll(() => {
-          prevNotebookVersion = PageConfig.setOption(
-            'notebookVersion',
-            JSON.stringify([5, 0, 0])
-          );
-        });
-
-        it('should not upload large file', async () => {
-          const fname = UUID.uuid4() + '.html';
-          const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
-
-          await expect(model.upload(file)).rejects.toBe(
-            `Cannot upload file (>15 MB). ${fname}`
-          );
-        });
-
-        afterAll(() => {
-          PageConfig.setOption('notebookVersion', prevNotebookVersion);
-        });
-      });
-
-      describe('newer notebook version', () => {
-        let prevNotebookVersion: string;
-
-        beforeAll(() => {
-          prevNotebookVersion = PageConfig.setOption(
-            'notebookVersion',
-            JSON.stringify([5, 1, 0])
-          );
-        });
-
+      describe('large uploads', () => {
         for (const ending of ['.txt', '.ipynb']) {
           for (const size of [
             CHUNK_SIZE - 1,
@@ -498,10 +463,6 @@ describe('filebrowser/model', () => {
           ]);
           expect(toArray(model.uploads())).toEqual([]);
           await uploaded;
-        });
-
-        afterAll(() => {
-          PageConfig.setOption('notebookVersion', prevNotebookVersion);
         });
       });
     });
