@@ -22,7 +22,7 @@
 let _CONFIG_DATA = null;
 function getOption(name) {
   if (_CONFIG_DATA === null) {
-    let configData;
+    let configData = {};
     // Use script tag if available.
     if (typeof document !== 'undefined' && document) {
       const el = document.getElementById('jupyter-config-data');
@@ -31,7 +31,7 @@ function getOption(name) {
         configData = JSON.parse(el.textContent || '{}');
       }
     }
-    _CONFIG_DATA = configData ?? Object.create(null);
+    _CONFIG_DATA = configData;
   }
 
   return _CONFIG_DATA[name] || '';
