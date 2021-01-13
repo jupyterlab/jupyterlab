@@ -32,17 +32,14 @@ import { WIDGET_ADAPTER_MANAGER } from './adapter_manager';
 import { FILE_EDITOR_ADAPTER } from './adapters/file_editor';
 import { NOTEBOOK_ADAPTER } from './adapters/notebook';
 import { VIRTUAL_EDITOR_MANAGER } from './virtual/editor';
-import IPaths = JupyterFrontEnd.IPaths;
 import { CODEMIRROR_VIRTUAL_EDITOR } from './virtual/codemirror_editor';
-import { LabIcon } from '@jupyterlab/ui-components';
-import codeCheckSvg from '../style/icons/code-check.svg';
 import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import { COMPLETION_PLUGIN } from './features/completion';
 import { CODE_EXTRACTORS_MANAGER } from './extractors/manager';
 import { IForeignCodeExtractorsRegistry } from './extractors/types';
 import {
-  ILSPCodeOverridesManager,
-  ICodeOverridesRegistry
+  ICodeOverridesRegistry,
+  ILSPCodeOverridesManager
 } from './overrides/tokens';
 import { DEFAULT_TRANSCLUSIONS } from './transclusions/defaults';
 import { SYNTAX_HIGHLIGHTING_PLUGIN } from './features/syntax_highlighting';
@@ -50,13 +47,9 @@ import { COMPLETION_THEME_MANAGER } from '@krassowski/completion-theme';
 import { plugin as THEME_VSCODE } from '@krassowski/theme-vscode';
 import { plugin as THEME_MATERIAL } from '@krassowski/theme-material';
 import { CODE_OVERRIDES_MANAGER } from './overrides';
+import IPaths = JupyterFrontEnd.IPaths;
 
 export * from './tokens';
-
-export const codeCheckIcon = new LabIcon({
-  name: 'lsp:codeCheck',
-  svgstr: codeCheckSvg
-});
 
 export interface IFeatureOptions {
   /**

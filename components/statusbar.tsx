@@ -20,10 +20,10 @@ import {
 import {
   caretDownIcon,
   caretUpIcon,
-  LabIcon,
-  stopIcon,
   circleEmptyIcon,
-  circleIcon
+  circleIcon,
+  LabIcon,
+  stopIcon
 } from '@jupyterlab/ui-components';
 import { WidgetAdapter } from '../adapters/adapter';
 import { collect_documents, VirtualDocument } from '../virtual/document';
@@ -31,10 +31,10 @@ import { LSPConnection } from '../connection';
 import { DocumentConnectionManager } from '../connection_manager';
 import { ILanguageServerManager, ILSPAdapterManager } from '../tokens';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { codeCheckIcon } from '../index';
 import { DocumentLocator } from './utils';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import { LanguageServerManager } from '../manager';
+import { codeCheckIcon, codeClockIcon, codeWarningIcon } from './icons';
 
 interface IServerStatusProps {
   server: SCHEMA.LanguageServerSession;
@@ -249,7 +249,10 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
   /**
    * Construct a new VDomRenderer for the status item.
    */
-  constructor(widget_manager: ILSPAdapterManager) {
+  constructor(
+    widget_manager: ILSPAdapterManager,
+    protected displayText: boolean = true
+  ) {
     super(new LSPStatus.Model(widget_manager));
     this.addClass(interactiveItem);
     this.addClass('lsp-statusbar-item');
@@ -292,16 +295,19 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
     }
     return (
       <GroupItem
-        spacing={2}
+        spacing={this.displayText ? 2 : 0}
         title={this.model.long_message}
         onClick={this.handleClick}
+        className={'lsp-status-group'}
       >
         <this.model.status_icon.react
           top={'2px'}
           kind={'statusBar'}
           title={'LSP Code Intelligence'}
         />
-        <TextItem source={this.model.short_message} />
+        {this.displayText ? (
+          <TextItem source={this.model.short_message} />
+        ) : null}
         <TextItem source={this.model.feature_message} />
       </GroupItem>
     );
@@ -332,8 +338,11 @@ export class StatusButtonExtension
   /**
    * For statusbar registration and for internal use.
    */
-  createItem(): LSPStatus {
-    const status_bar_item = new LSPStatus(this.options.adapter_manager);
+  createItem(displayText: boolean = true): LSPStatus {
+    const status_bar_item = new LSPStatus(
+      this.options.adapter_manager,
+      displayText
+    );
     status_bar_item.model.language_server_manager = this.options.language_server_manager;
     status_bar_item.model.connection_manager = this.options.connection_manager;
     return status_bar_item;
@@ -346,7 +355,7 @@ export class StatusButtonExtension
     panel: NotebookPanel,
     context: DocumentRegistry.IContext<INotebookModel>
   ): LSPStatus {
-    const item = this.createItem();
+    const item = this.createItem(false);
     item.addClass('jp-ToolbarButton');
     panel.toolbar.insertAfter('spacer', 'LSPStatus', item);
 
@@ -385,6 +394,14 @@ const classByStatus: StatusIconClass = {
   initializing: 'preparing',
   initialized_but_some_missing: 'ready',
   connecting: 'preparing'
+};
+
+const iconByStatus: Record<StatusCode, LabIcon> = {
+  waiting: codeClockIcon,
+  initialized: codeCheckIcon,
+  initializing: codeClockIcon,
+  initialized_but_some_missing: codeWarningIcon,
+  connecting: codeClockIcon
 };
 
 const shortMessageByStatus: StatusMap = {
@@ -577,7 +594,7 @@ export namespace LSPStatus {
       if (!this.adapter) {
         return stopIcon;
       }
-      return codeCheckIcon.bindprops({
+      return iconByStatus[this.status.status].bindprops({
         className: 'lsp-status-icon ' + classByStatus[this.status.status]
       });
     }
