@@ -81,7 +81,8 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
 /*
- * TODO
+ * The ratio of outputs compared to maximumTopBottomOutput
+ * for which the trim mode should be enabled.
  */
 const TRIMMED_RATIO = 10;
 
@@ -145,20 +146,21 @@ export class OutputArea extends Widget {
   /**
    * The hidden output models.
    */
-  readonly trimmedOutputModels: IOutputModel[];
+  private trimmedOutputModels: IOutputModel[];
 
   /*
-   * TODO
+   * The maximum outputs to show at the top and
+   * bottom of the output area in case of trim mode.
    */
   private maximumTopBottomOutput: number;
 
   /*
-   * TODO
+   * The index for the end of the head in case of trim mode.
    */
   private headEndIndex: number = -1;
 
   /*
-   * TODO
+   * The index for the begin of the tail in case of trim mode.
    */
   private tailBeginIndex: number = -1;
 
@@ -319,6 +321,7 @@ export class OutputArea extends Widget {
    * Follow changes on the output model state.
    */
   protected onStateChanged(sender: IOutputAreaModel): void {
+    this.trimmedOutputModels = new Array<IOutputModel>();
     for (let i = 0; i < this.model.length; i++) {
       this._setOutput(i, this.model.get(i));
     }
@@ -451,6 +454,9 @@ export class OutputArea extends Widget {
     model: IOutputModel,
     force?: boolean
   ): void {
+    if (index === 1) {
+      this.trimmedOutputModels = new Array<IOutputModel>();
+    }
     if (index === this.headEndIndex && !force) {
       const separatorModel = this.model.contentFactory.createOutputModel({
         value: {
@@ -473,18 +479,32 @@ export class OutputArea extends Widget {
       const layout = this.layout as PanelLayout;
       layout.insertWidget(index, separator!);
     }
+    const output = this._createOutput(model);
+    const layout = this.layout as PanelLayout;
+    if (force) {
+      layout.insertWidget(index, output);
+    } else if (index < this.headEndIndex) {
+      layout.insertWidget(index, output);
+    } else if (index >= this.headEndIndex && index < this.tailBeginIndex) {
+      this.trimmedOutputModels.push(model);
+      layout.removeWidgetAt(this.headEndIndex + 1);
+      layout.insertWidget(this.headEndIndex + 2, output);
+    } else if (index == this.tailBeginIndex) {
+      layout.removeWidgetAt(this.headEndIndex + 1);
+      layout.insertWidget(this.headEndIndex + 2, output);
+    } else if (index > this.tailBeginIndex) {
+      layout.insertWidget(index + 2, output);
+    }
+  }
+
+  private _createOutput(model: IOutputModel): Widget {
     let output = this.createOutputItem(model);
     if (output) {
       output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
     } else {
       output = new Widget();
     }
-    if (index < this.headEndIndex || index > this.tailBeginIndex || force) {
-      const layout = this.layout as PanelLayout;
-      layout.insertWidget(index, output);
-    } else {
-      this.trimmedOutputModels.push(model);
-    }
+    return output;
   }
 
   /**
@@ -494,11 +514,10 @@ export class OutputArea extends Widget {
   private _showTrimmedOutputs(maximumTopBottomOutput: number) {
     const layout = this.layout as PanelLayout;
     layout.removeWidgetAt(maximumTopBottomOutput);
-    let i = maximumTopBottomOutput;
-    this.trimmedOutputModels.map(o => {
-      this._insertOutput(i, o, true);
-      i++;
-    });
+    for (let i = 0; i < this.trimmedOutputModels.length; i++) {
+      const output = this._createOutput(this.trimmedOutputModels[i]);
+      layout.insertWidget(maximumTopBottomOutput + i, output);
+    }
   }
 
   /**
