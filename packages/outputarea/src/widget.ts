@@ -80,6 +80,11 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
  */
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
+/*
+ * TODO
+ */
+const TRIMMED_RATIO = 10;
+
 /** ****************************************************************************
  * OutputArea
  ******************************************************************************/
@@ -105,54 +110,18 @@ export class OutputArea extends Widget {
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
-    const maximumTopBottomOutput = options.maximumTopBottomOutput || 10;
-    const hiddenVsShownRatio = 10;
+    this.maximumTopBottomOutput = options.maximumTopBottomOutput || 10;
     this.trimmedOutputModels = new Array<IOutputModel>();
     if (
-      maximumTopBottomOutput <= 0 ||
-      model.length < maximumTopBottomOutput * hiddenVsShownRatio
+      this.maximumTopBottomOutput > 0 &&
+      model.length > this.maximumTopBottomOutput * TRIMMED_RATIO
     ) {
-      for (let i = 0; i < model.length; i++) {
-        const output = model.get(i);
-        this._insertOutput(i, output);
-      }
-    } else {
-      let i = 0;
-      for (let j = 0; j < maximumTopBottomOutput; j++) {
-        const output = model.get(j);
-        i++;
-        this._insertOutput(i, output);
-      }
-      const separator = model.contentFactory.createOutputModel({
-        value: {
-          output_type: 'display_data',
-          data: {
-            'text/html': `
-              <a style="margin: 10px; text-decoration: none;">
-                <pre>Output of this cell has been trimmed on the initial display.</pre>
-                <pre>Total outputs is ${model.length}, displaying the first ${maximumTopBottomOutput} top and last ${maximumTopBottomOutput} bottom outputs.</pre>
-                <pre>Click on this messsage or run again this cell to get the complete output.</pre>
-              </a>
-              `
-          }
-        }
-      });
-      this._insertOutput(i, separator, () =>
-        this._showTrimmedOutputs(maximumTopBottomOutput)
-      );
-      i++;
-      for (
-        i = maximumTopBottomOutput;
-        i < model.length - maximumTopBottomOutput;
-        i++
-      ) {
-        this.trimmedOutputModels.push(model.get(i));
-      }
-      for (let j = 0; j < maximumTopBottomOutput; j++) {
-        const output = model.get(model.length - (maximumTopBottomOutput - j));
-        this._insertOutput(i, output);
-        i++;
-      }
+      this.headEndIndex = this.maximumTopBottomOutput;
+      this.tailBeginIndex = model.length - this.maximumTopBottomOutput;
+    }
+    for (let i = 0; i < model.length; i++) {
+      const output = model.get(i);
+      this._insertOutput(i, output);
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
@@ -177,6 +146,21 @@ export class OutputArea extends Widget {
    * The hidden output models.
    */
   readonly trimmedOutputModels: IOutputModel[];
+
+  /*
+   * TODO
+   */
+  private maximumTopBottomOutput: number;
+
+  /*
+   * TODO
+   */
+  private headEndIndex: number = -1;
+
+  /*
+   * TODO
+   */
+  private tailBeginIndex: number = -1;
 
   /**
    * A read-only sequence of the chidren widgets in the output area.
@@ -465,19 +449,42 @@ export class OutputArea extends Widget {
   private _insertOutput(
     index: number,
     model: IOutputModel,
-    onClick?: () => void
+    force?: boolean
   ): void {
+    if (index === this.headEndIndex && !force) {
+      const separatorModel = this.model.contentFactory.createOutputModel({
+        value: {
+          output_type: 'display_data',
+          data: {
+            'text/html': `
+              <a style="margin: 10px; text-decoration: none;">
+                <pre>Output of this cell has been trimmed on the initial display.</pre>
+                <pre>Total outputs is ${this.model.length}, displaying the first ${this.maximumTopBottomOutput} top and last ${this.maximumTopBottomOutput} bottom outputs.</pre>
+                <pre>Click on this messsage or run again this cell to get the complete output.</pre>
+              </a>
+              `
+          }
+        }
+      });
+      const onClick = () =>
+        this._showTrimmedOutputs(this.maximumTopBottomOutput);
+      const separator = this.createOutputItem(separatorModel);
+      separator!.node.addEventListener('click', onClick);
+      const layout = this.layout as PanelLayout;
+      layout.insertWidget(index, separator!);
+    }
     let output = this.createOutputItem(model);
     if (output) {
       output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
     } else {
       output = new Widget();
     }
-    if (onClick) {
-      output?.node.addEventListener('click', onClick);
+    if (index < this.headEndIndex || index > this.tailBeginIndex || force) {
+      const layout = this.layout as PanelLayout;
+      layout.insertWidget(index, output);
+    } else {
+      this.trimmedOutputModels.push(model);
     }
-    const layout = this.layout as PanelLayout;
-    layout.insertWidget(index, output);
   }
 
   /**
@@ -489,7 +496,7 @@ export class OutputArea extends Widget {
     layout.removeWidgetAt(maximumTopBottomOutput);
     let i = maximumTopBottomOutput;
     this.trimmedOutputModels.map(o => {
-      this._insertOutput(i, o);
+      this._insertOutput(i, o, true);
       i++;
     });
   }
