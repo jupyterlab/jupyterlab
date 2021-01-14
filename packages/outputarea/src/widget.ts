@@ -109,7 +109,6 @@ export class OutputArea extends Widget {
     this.maxNumberOutputs = options.maxNumberOutputs || 20;
     this.headTailNumberOutputs = Math.round(this.maxNumberOutputs / 2);
     this.headEndIndex = this.headTailNumberOutputs;
-    this.tailBeginIndex = this.headTailNumberOutputs;
     for (let i = 0; i < model.length; i++) {
       const output = model.get(i);
       this._insertOutput(i, output);
@@ -154,11 +153,6 @@ export class OutputArea extends Widget {
    * The index for the end of the head in case of trim mode.
    */
   private headEndIndex: number = -1;
-
-  /*
-   * The index for the begin of the tail in case of trim mode.
-   */
-  private tailBeginIndex: number = -1;
 
   /**
    * A read-only sequence of the chidren widgets in the output area.
