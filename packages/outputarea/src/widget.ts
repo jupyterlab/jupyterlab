@@ -80,12 +80,6 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
  */
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
-/*
- * The ratio of outputs compared to maxNumberOutputsTopDown
- * for which the trim mode should be enabled.
- */
-const TRIMMED_RATIO = 10;
-
 /** ****************************************************************************
  * OutputArea
  ******************************************************************************/
@@ -111,15 +105,11 @@ export class OutputArea extends Widget {
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
-    this.maxNumberOutputsTopDown = (options.maxNumberOutputs || 20) / 2;
     this.trimmedOutputModels = new Array<IOutputModel>();
-    if (
-      this.maxNumberOutputsTopDown > 0 &&
-      model.length > this.maxNumberOutputsTopDown * TRIMMED_RATIO
-    ) {
-      this.headEndIndex = this.maxNumberOutputsTopDown;
-      this.tailBeginIndex = model.length - this.maxNumberOutputsTopDown;
-    }
+    this.maxNumberOutputs = options.maxNumberOutputs || 20;
+    this.headTailNumberOutputs = Math.round(this.maxNumberOutputs / 2);
+    this.headEndIndex = this.headTailNumberOutputs;
+    this.tailBeginIndex = this.headTailNumberOutputs;
     for (let i = 0; i < model.length; i++) {
       const output = model.get(i);
       this._insertOutput(i, output);
@@ -149,10 +139,16 @@ export class OutputArea extends Widget {
   private trimmedOutputModels: IOutputModel[];
 
   /*
-   * The maximum outputs to show at the top and
-   * bottom of the output area in case of trim mode.
+   * The maximum outputs to show in the trimmed
+   * output area.
    */
-  private maxNumberOutputsTopDown: number;
+  private maxNumberOutputs: number;
+
+  /*
+   * The maximum outputs to show in the trimmed
+   * output head and tail areas.
+   */
+  private headTailNumberOutputs: number = -1;
 
   /*
    * The index for the end of the head in case of trim mode.
@@ -454,10 +450,10 @@ export class OutputArea extends Widget {
     model: IOutputModel,
     force?: boolean
   ): void {
-    if (index === 1) {
+    if (index === 0) {
       this.trimmedOutputModels = new Array<IOutputModel>();
     }
-    if (index === this.headEndIndex && !force) {
+    if (index === this.maxNumberOutputs && !force) {
       const separatorModel = this.model.contentFactory.createOutputModel({
         value: {
           output_type: 'display_data',
@@ -465,35 +461,32 @@ export class OutputArea extends Widget {
             'text/html': `
               <a style="margin: 10px; text-decoration: none;">
                 <pre>Output of this cell has been trimmed on the initial display.</pre>
-                <pre>Total outputs is ${this.model.length}, displaying the first ${this.maxNumberOutputsTopDown} top and last ${this.maxNumberOutputsTopDown} bottom outputs.</pre>
-                <pre>Click on this messsage or run again this cell to get the complete output.</pre>
+                <pre>Displaying the first ${this.maxNumberOutputs} top and last bottom outputs.</pre>
+                <pre>Click on this messsage, or run again this cell, to get the complete output.</pre>
               </a>
               `
           }
         }
       });
       const onClick = () =>
-        this._showTrimmedOutputs(this.maxNumberOutputsTopDown);
+        this._showTrimmedOutputs(this.headTailNumberOutputs);
       const separator = this.createOutputItem(separatorModel);
       separator!.node.addEventListener('click', onClick);
       const layout = this.layout as PanelLayout;
-      layout.insertWidget(index, separator!);
+      layout.insertWidget(this.headEndIndex, separator!);
     }
     const output = this._createOutput(model);
     const layout = this.layout as PanelLayout;
     if (force) {
       layout.insertWidget(index, output);
-    } else if (index < this.headEndIndex) {
+    } else if (index < this.maxNumberOutputs) {
       layout.insertWidget(index, output);
-    } else if (index >= this.headEndIndex && index < this.tailBeginIndex) {
+    } else if (index >= this.maxNumberOutputs) {
+      layout.removeWidgetAt(this.headTailNumberOutputs + 1);
+      layout.insertWidget(index, output);
+    }
+    if (index >= this.headTailNumberOutputs) {
       this.trimmedOutputModels.push(model);
-      layout.removeWidgetAt(this.headEndIndex + 1);
-      layout.insertWidget(this.headEndIndex + 2, output);
-    } else if (index == this.tailBeginIndex) {
-      layout.removeWidgetAt(this.headEndIndex + 1);
-      layout.insertWidget(this.headEndIndex + 2, output);
-    } else if (index > this.tailBeginIndex) {
-      layout.insertWidget(index + 2, output);
     }
   }
 
@@ -511,12 +504,16 @@ export class OutputArea extends Widget {
    * Remove the information message related to the trimmed output
    * and show all previously trimmed outputs.
    */
-  private _showTrimmedOutputs(maxNumberOutputsTopDown: number) {
+  private _showTrimmedOutputs(headTailNumberOutputs: number) {
     const layout = this.layout as PanelLayout;
-    layout.removeWidgetAt(maxNumberOutputsTopDown);
-    for (let i = 0; i < this.trimmedOutputModels.length; i++) {
+    layout.removeWidgetAt(headTailNumberOutputs);
+    for (
+      let i = 0;
+      i < this.trimmedOutputModels.length - this.headTailNumberOutputs;
+      i++
+    ) {
       const output = this._createOutput(this.trimmedOutputModels[i]);
-      layout.insertWidget(maxNumberOutputsTopDown + i, output);
+      layout.insertWidget(headTailNumberOutputs + i, output);
     }
   }
 
@@ -630,9 +627,6 @@ export class OutputArea extends Widget {
     // API responses that contain a pager are special cased and their type
     // is overridden from 'execute_reply' to 'display_data' in order to
     // render output.
-
-    console.log('---', msg);
-
     const model = this.model;
     const content = msg.content;
     if (content.status !== 'ok') {
