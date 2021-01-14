@@ -38,10 +38,6 @@
 }
 
 /* console foregrounds and backgrounds */
-.jp-RenderedText pre span {
-  display: inline-block;
-}
-
 .jp-RenderedText pre .ansi-black-fg {
   color: #3e424d;
 }
