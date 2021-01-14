@@ -87,7 +87,7 @@ export interface IOutputAreaModel extends IDisposable {
   /**
    * The maximum number of output items to display on top and bottom of cell output.
    */
-  maximumTopBottomOutput?: number;
+  maxNumberOutputs?: number;
 }
 
 /**

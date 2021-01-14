@@ -81,7 +81,7 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
 /*
- * The ratio of outputs compared to maximumTopBottomOutput
+ * The ratio of outputs compared to maxNumberOutputsTopDown
  * for which the trim mode should be enabled.
  */
 const TRIMMED_RATIO = 10;
@@ -111,14 +111,14 @@ export class OutputArea extends Widget {
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
-    this.maximumTopBottomOutput = options.maximumTopBottomOutput || 10;
+    this.maxNumberOutputsTopDown = (options.maxNumberOutputs || 20) / 2;
     this.trimmedOutputModels = new Array<IOutputModel>();
     if (
-      this.maximumTopBottomOutput > 0 &&
-      model.length > this.maximumTopBottomOutput * TRIMMED_RATIO
+      this.maxNumberOutputsTopDown > 0 &&
+      model.length > this.maxNumberOutputsTopDown * TRIMMED_RATIO
     ) {
-      this.headEndIndex = this.maximumTopBottomOutput;
-      this.tailBeginIndex = model.length - this.maximumTopBottomOutput;
+      this.headEndIndex = this.maxNumberOutputsTopDown;
+      this.tailBeginIndex = model.length - this.maxNumberOutputsTopDown;
     }
     for (let i = 0; i < model.length; i++) {
       const output = model.get(i);
@@ -152,7 +152,7 @@ export class OutputArea extends Widget {
    * The maximum outputs to show at the top and
    * bottom of the output area in case of trim mode.
    */
-  private maximumTopBottomOutput: number;
+  private maxNumberOutputsTopDown: number;
 
   /*
    * The index for the end of the head in case of trim mode.
@@ -465,7 +465,7 @@ export class OutputArea extends Widget {
             'text/html': `
               <a style="margin: 10px; text-decoration: none;">
                 <pre>Output of this cell has been trimmed on the initial display.</pre>
-                <pre>Total outputs is ${this.model.length}, displaying the first ${this.maximumTopBottomOutput} top and last ${this.maximumTopBottomOutput} bottom outputs.</pre>
+                <pre>Total outputs is ${this.model.length}, displaying the first ${this.maxNumberOutputsTopDown} top and last ${this.maxNumberOutputsTopDown} bottom outputs.</pre>
                 <pre>Click on this messsage or run again this cell to get the complete output.</pre>
               </a>
               `
@@ -473,7 +473,7 @@ export class OutputArea extends Widget {
         }
       });
       const onClick = () =>
-        this._showTrimmedOutputs(this.maximumTopBottomOutput);
+        this._showTrimmedOutputs(this.maxNumberOutputsTopDown);
       const separator = this.createOutputItem(separatorModel);
       separator!.node.addEventListener('click', onClick);
       const layout = this.layout as PanelLayout;
@@ -511,12 +511,12 @@ export class OutputArea extends Widget {
    * Remove the information message related to the trimmed output
    * and show all previously trimmed outputs.
    */
-  private _showTrimmedOutputs(maximumTopBottomOutput: number) {
+  private _showTrimmedOutputs(maxNumberOutputsTopDown: number) {
     const layout = this.layout as PanelLayout;
-    layout.removeWidgetAt(maximumTopBottomOutput);
+    layout.removeWidgetAt(maxNumberOutputsTopDown);
     for (let i = 0; i < this.trimmedOutputModels.length; i++) {
       const output = this._createOutput(this.trimmedOutputModels[i]);
-      layout.insertWidget(maximumTopBottomOutput + i, output);
+      layout.insertWidget(maxNumberOutputsTopDown + i, output);
     }
   }
 
@@ -630,6 +630,9 @@ export class OutputArea extends Widget {
     // API responses that contain a pager are special cased and their type
     // is overridden from 'execute_reply' to 'display_data' in order to
     // render output.
+
+    console.log('---', msg);
+
     const model = this.model;
     const content = msg.content;
     if (content.status !== 'ok') {
@@ -709,7 +712,7 @@ export namespace OutputArea {
     /**
      * The maximum number of output items to display on top and bottom of cell output.
      */
-    maximumTopBottomOutput?: number;
+    maxNumberOutputs?: number;
   }
 
   /**

@@ -576,9 +576,9 @@ export namespace Cell {
     placeholder?: boolean;
 
     /**
-     * The maximum number of output items to display on top and bottom of cell output.
+     * The maximum number of output items to display in cell output.
      */
-    maximumTopBottomOutput?: number;
+    maxNumberOutputs?: number;
   }
 
   /**
