@@ -10,6 +10,14 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+
+v3.0.5
+^^^^^^
+* Enable large file uploads.  (`#9616 <https://github.com/jupyterlab/jupyterlab/pull/9616>`__)
+* Fix display of ``??`` help on Windows.  (`#9617 <https://github.com/jupyterlab/jupyterlab/pull/9617>`__)
+* Update app and federated examples.  (`#9586 <https://github.com/jupyterlab/jupyterlab/pull/9586>`__)
+
+
 v3.0.4
 ^^^^^^
 * Do not use ``??`` in plain js, as it is too new.  (`#9606 <https://github.com/jupyterlab/jupyterlab/pull/9606>`__)
