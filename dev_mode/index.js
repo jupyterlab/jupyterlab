@@ -5,6 +5,24 @@
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
+// Promise.allSettled polyfill, until our supported browsers implement it
+// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
+if (Promise.allSettled === undefined) {
+  Promise.allSettled = promises =>
+    Promise.all(
+      promises.map(promise =>
+        promise
+          .then(value => ({
+            status: "fulfilled",
+            value,
+          }), reason => ({
+            status: "rejected",
+            reason,
+          }))
+      )
+    );
+}
+
 import './style.js';
 
 async function createModule(scope, module) {
@@ -118,7 +136,7 @@ export async function main() {
   // Handle the registered mime extensions.
   const mimeExtensions = [];
   {{#each jupyterlab_mime_extensions}}
-  if (queuedFederated.indexOf('{{@key}}') === -1) {
+  if (!queuedFederated.includes('{{@key}}')) {
     try {
       let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
       for (let plugin of activePlugins(ext)) {
@@ -144,7 +162,7 @@ export async function main() {
 
   // Handled the registered standard extensions.
   {{#each jupyterlab_extensions}}
-  if (queuedFederated.indexOf('{{@key}}') === -1) {
+  if (!queuedFederated.includes('{{@key}}')) {
     try {
       let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
       for (let plugin of activePlugins(ext)) {
@@ -208,4 +226,3 @@ export async function main() {
   }
 
 }
-

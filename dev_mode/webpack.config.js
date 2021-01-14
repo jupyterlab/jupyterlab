@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-const plib = require('path');
+const path = require('path');
 const fs = require('fs-extra');
 const Handlebars = require('handlebars');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -16,10 +16,10 @@ const { ModuleFederationPlugin } = webpack.container;
 
 const Build = require('@jupyterlab/builder').Build;
 const WPPlugin = require('@jupyterlab/builder').WPPlugin;
-const package_data = require('./package.json');
+const packageData = require('./package.json');
 
 // Handle the extensions.
-const jlab = package_data.jupyterlab;
+const jlab = packageData.jupyterlab;
 const { extensions, mimeExtensions, externalExtensions } = jlab;
 
 // Add external extensions to the extensions/mimeExtensions data as
@@ -42,17 +42,16 @@ const extensionPackages = [
 ];
 
 // Ensure a clear build directory.
-const buildDir = plib.resolve(jlab.buildDir);
+const buildDir = path.resolve(jlab.buildDir);
 if (fs.existsSync(buildDir)) {
   fs.removeSync(buildDir);
 }
 fs.ensureDirSync(buildDir);
 
-const outputDir = plib.resolve(jlab.outputDir);
+const outputDir = path.resolve(jlab.outputDir);
 
-// Build the assets
-const extraConfig = Build.ensureAssets({
-  // Deduplicate the extension package names
+// Configuration to handle extension assets
+const extensionAssetConfig = Build.ensureAssets({
   packageNames: extensionPackages,
   output: outputDir
 });
@@ -64,18 +63,18 @@ const extData = {
   jupyterlab_extensions: extensions,
   jupyterlab_mime_extensions: mimeExtensions
 };
-fs.writeFileSync(plib.join(buildDir, 'index.out.js'), template(extData));
+fs.writeFileSync(path.join(buildDir, 'index.out.js'), template(extData));
 
 // Create the bootstrap file that loads federated extensions and calls the
 // initialization logic in index.out.js
-const entryPoint = plib.join(buildDir, 'bootstrap.js');
+const entryPoint = path.join(buildDir, 'bootstrap.js');
 fs.copySync('./bootstrap.js', entryPoint);
 
-fs.copySync('./package.json', plib.join(buildDir, 'package.json'));
+fs.copySync('./package.json', path.join(buildDir, 'package.json'));
 if (outputDir !== buildDir) {
   fs.copySync(
-    plib.join(outputDir, 'style.js'),
-    plib.join(buildDir, 'style.js')
+    path.join(outputDir, 'style.js'),
+    path.join(buildDir, 'style.js')
   );
 }
 
@@ -87,8 +86,8 @@ Object.keys(jlab.linkedPackages).forEach(function (name) {
   if (name in watched) {
     return;
   }
-  const localPkgPath = require.resolve(plib.join(name, 'package.json'));
-  watched[name] = plib.dirname(localPkgPath);
+  const localPkgPath = require.resolve(path.join(name, 'package.json'));
+  watched[name] = path.dirname(localPkgPath);
   if (localPkgPath.indexOf('node_modules') !== -1) {
     watchNodeModules = true;
   }
@@ -110,7 +109,7 @@ function maybeSync(localPath, name, rest) {
   if (!stats.isFile(localPath)) {
     return;
   }
-  const source = fs.realpathSync(plib.join(jlab.linkedPackages[name], rest));
+  const source = fs.realpathSync(path.join(jlab.linkedPackages[name], rest));
   if (source === fs.realpathSync(localPath)) {
     return;
   }
@@ -132,7 +131,7 @@ function maybeSync(localPath, name, rest) {
  * files during a `--watch` build.
  */
 function ignored(path) {
-  path = plib.resolve(path);
+  path = path.resolve(path);
   if (path in ignoreCache) {
     // Bail if already found.
     return ignoreCache[path];
@@ -142,7 +141,7 @@ function ignored(path) {
   let ignore = true;
   Object.keys(watched).some(name => {
     const rootPath = watched[name];
-    const contained = path.indexOf(rootPath + plib.sep) !== -1;
+    const contained = path.indexOf(rootPath + path.sep) !== -1;
     if (path !== rootPath && !contained) {
       return false;
     }
@@ -161,7 +160,7 @@ function ignored(path) {
 const shared = {};
 
 // Make sure any resolutions are shared
-for (let [pkg, requiredVersion] of Object.entries(package_data.resolutions)) {
+for (let [pkg, requiredVersion] of Object.entries(packageData.resolutions)) {
   shared[pkg] = { requiredVersion };
 }
 
@@ -259,7 +258,7 @@ const plugins = [
   }),
   new HtmlWebpackPlugin({
     chunksSortMode: 'none',
-    template: plib.join(__dirname, 'templates', 'template.html'),
+    template: path.join(__dirname, 'templates', 'template.html'),
     title: jlab.name || 'JupyterLab'
   }),
   // custom plugin for ignoring files during a `--watch` build
@@ -287,7 +286,7 @@ module.exports = [
       main: ['./publicpath', 'whatwg-fetch', entryPoint]
     },
     output: {
-      path: plib.resolve(buildDir),
+      path: path.resolve(buildDir),
       publicPath: '{{page_config.fullStaticUrl}}/',
       filename: '[name].[contenthash].js'
     },
@@ -316,7 +315,7 @@ module.exports = [
     externals: ['node-fetch', 'ws'],
     plugins
   })
-].concat(extraConfig);
+].concat(extensionAssetConfig);
 
 // Needed to watch changes in linked extensions in node_modules
 // (jupyter lab --watch)
@@ -325,5 +324,5 @@ if (watchNodeModules) {
   module.exports[0].snapshot = { managedPaths: [] };
 }
 
-const logPath = plib.join(buildDir, 'build_log.json');
+const logPath = path.join(buildDir, 'build_log.json');
 fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));
