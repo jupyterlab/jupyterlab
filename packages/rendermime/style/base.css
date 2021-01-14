@@ -9,7 +9,9 @@
 
 :root {
   /* This is the padding value to fill the gaps between lines containing spans with background color. */
-  --jp-private-code-span-padding: calc( (var(--jp-code-line-height) - 1) * var(--jp-code-font-size) / 2 );
+  --jp-private-code-span-padding: calc(
+    (var(--jp-code-line-height) - 1) * var(--jp-code-font-size) / 2
+  );
 }
 
 .jp-RenderedText {
