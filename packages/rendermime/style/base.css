@@ -7,6 +7,11 @@
 | RenderedText
 |----------------------------------------------------------------------------*/
 
+:root {
+  /* This is the padding value to fill the gaps between lines containing spans with background color. */
+  --jp-private-code-span-padding: calc( (var(--jp-code-line-height) - 1) * var(--jp-code-font-size) / 2 );
+}
+
 .jp-RenderedText {
   text-align: left;
   padding-left: var(--jp-code-padding);
@@ -65,27 +70,35 @@
 
 .jp-RenderedText pre .ansi-black-bg {
   background-color: #3e424d;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-red-bg {
   background-color: #e75c58;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-green-bg {
   background-color: #00a250;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-yellow-bg {
   background-color: #ddb62b;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-blue-bg {
   background-color: #208ffb;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-magenta-bg {
   background-color: #d160c4;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-cyan-bg {
   background-color: #60c6c8;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-white-bg {
   background-color: #c5c1b4;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 
 .jp-RenderedText pre .ansi-black-intense-fg {
@@ -115,27 +128,35 @@
 
 .jp-RenderedText pre .ansi-black-intense-bg {
   background-color: #282c36;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-red-intense-bg {
   background-color: #b22b31;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-green-intense-bg {
   background-color: #007427;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-yellow-intense-bg {
   background-color: #b27d12;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-blue-intense-bg {
   background-color: #0065ca;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-magenta-intense-bg {
   background-color: #a03196;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-cyan-intense-bg {
   background-color: #258f8f;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 .jp-RenderedText pre .ansi-white-intense-bg {
   background-color: #a1a6b2;
+  padding: var(--jp-private-code-span-padding) 0;
 }
 
 .jp-RenderedText pre .ansi-default-inverse-fg {
@@ -143,6 +164,7 @@
 }
 .jp-RenderedText pre .ansi-default-inverse-bg {
   background-color: var(--jp-inverse-layout-color0);
+  padding: var(--jp-private-code-span-padding) 0;
 }
 
 .jp-RenderedText pre .ansi-bold {
