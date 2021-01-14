@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/tooltip",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "JupyterLab - Tooltip Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -39,7 +39,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^3.0.2",
     "@jupyterlab/codeeditor": "^3.0.2",
-    "@jupyterlab/rendermime": "^3.0.2",
+    "@jupyterlab/rendermime": "^3.0.3",
     "@jupyterlab/services": "^6.0.2",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/imageviewer",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "JupyterLab - Image Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -44,13 +44,13 @@
   "dependencies": {
     "@jupyterlab/apputils": "^3.0.2",
     "@jupyterlab/coreutils": "^5.0.1",
-    "@jupyterlab/docregistry": "^3.0.2",
+    "@jupyterlab/docregistry": "^3.0.3",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",
     "@lumino/widgets": "^1.16.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.2",
+    "@jupyterlab/testutils": "^3.0.3",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

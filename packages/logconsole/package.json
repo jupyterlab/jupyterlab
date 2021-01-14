@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/logconsole",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "JupyterLab - Log Console",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,8 +40,8 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^5.0.1",
     "@jupyterlab/nbformat": "^3.0.1",
-    "@jupyterlab/outputarea": "^3.0.2",
-    "@jupyterlab/rendermime": "^3.0.2",
+    "@jupyterlab/outputarea": "^3.0.3",
+    "@jupyterlab/rendermime": "^3.0.3",
     "@jupyterlab/services": "^6.0.2",
     "@jupyterlab/translation": "^3.0.2",
     "@lumino/coreutils": "^1.5.3",
@@ -51,7 +51,7 @@
     "@lumino/widgets": "^1.16.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.2",
+    "@jupyterlab/testutils": "^3.0.3",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

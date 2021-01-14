@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/console",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "JupyterLab - Code Console",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -44,12 +44,12 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^3.0.2",
-    "@jupyterlab/cells": "^3.0.2",
+    "@jupyterlab/cells": "^3.0.3",
     "@jupyterlab/codeeditor": "^3.0.2",
     "@jupyterlab/coreutils": "^5.0.1",
     "@jupyterlab/nbformat": "^3.0.1",
     "@jupyterlab/observables": "^4.0.1",
-    "@jupyterlab/rendermime": "^3.0.2",
+    "@jupyterlab/rendermime": "^3.0.3",
     "@jupyterlab/services": "^6.0.2",
     "@jupyterlab/translation": "^3.0.2",
     "@jupyterlab/ui-components": "^3.0.2",
@@ -62,7 +62,7 @@
     "@lumino/widgets": "^1.16.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.2",
+    "@jupyterlab/testutils": "^3.0.3",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
