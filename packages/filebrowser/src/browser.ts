@@ -88,7 +88,10 @@ export class FileBrowser extends Widget {
     this.toolbar = new Toolbar<Widget>();
     // a11y
     this.toolbar.node.setAttribute('role', 'navigation');
-    this.toolbar.node.setAttribute('aria-label', this._trans.__('file browser'));
+    this.toolbar.node.setAttribute(
+      'aria-label',
+      this._trans.__('file browser')
+    );
     this._directoryPending = false;
 
     const newFolder = new ToolbarButton({
