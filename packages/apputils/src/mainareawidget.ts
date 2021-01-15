@@ -38,7 +38,11 @@ export class MainAreaWidget<T extends Widget = Widget>
     this.id = DOMUtils.createDomID();
 
     const content = (this._content = options.content);
+    content.node.setAttribute('role', 'region');
+    content.node.setAttribute('aria-label', 'notebook content');
     const toolbar = (this._toolbar = options.toolbar || new Toolbar());
+    toolbar.node.setAttribute('role', 'navigation');
+    toolbar.node.setAttribute('aria-label', 'notebook actions');
     const spinner = this._spinner;
 
     const layout = (this.layout = new BoxLayout({ spacing: 0 }));

@@ -325,6 +325,9 @@ function activateBrowser(
 ): void {
   const trans = translator.load('jupyterlab');
   const browser = factory.defaultBrowser;
+  browser.node.setAttribute('role', 'region');
+  browser.node.setAttribute('aria-label', 'File Browser Section');
+
   const { commands } = app;
 
   // Let the application restorer track the primary file browser (that is

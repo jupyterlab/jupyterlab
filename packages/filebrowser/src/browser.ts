@@ -86,6 +86,9 @@ export class FileBrowser extends Widget {
     this._trans = this.translator.load('jupyterlab');
     this._crumbs = new BreadCrumbs({ model, translator });
     this.toolbar = new Toolbar<Widget>();
+    // a11y
+    this.toolbar.node.setAttribute('role', 'navigation');
+    this.toolbar.node.setAttribute('aria-label', 'file browser');
     this._directoryPending = false;
 
     const newFolder = new ToolbarButton({

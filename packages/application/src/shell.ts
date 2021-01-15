@@ -192,8 +192,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     const headerPanel = (this._headerPanel = new BoxPanel());
     const menuHandler = (this._menuHandler = new Private.PanelHandler());
+    menuHandler.panel.node.setAttribute('role', 'navigation');
+    menuHandler.panel.node.setAttribute('aria-label', 'main navigation');
     const topHandler = (this._topHandler = new Private.PanelHandler());
+    topHandler.panel.node.setAttribute('role', 'banner');
     const bottomPanel = (this._bottomPanel = new BoxPanel());
+    bottomPanel.node.setAttribute('role', 'contentinfo');
     const hboxPanel = new BoxPanel();
     const dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
@@ -213,11 +217,27 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     leftHandler.sideBar.addClass(SIDEBAR_CLASS);
     leftHandler.sideBar.addClass('jp-mod-left');
+    leftHandler.sideBar.setAttribute('role', 'complementary');
+    leftHandler.sideBar.setAttribute('aria-label', 'main sidebar');
+    leftHandler.sideBar.contentNode.setAttribute('role', 'navigation');
+    leftHandler.sideBar.contentNode.setAttribute(
+      'aria-label',
+      'main sidebar navigation'
+    );
     leftHandler.stackedPanel.id = 'jp-left-stack';
 
     rightHandler.sideBar.addClass(SIDEBAR_CLASS);
     rightHandler.sideBar.addClass('jp-mod-right');
+    rightHandler.sideBar.setAttribute('role', 'complementary');
+    rightHandler.sideBar.setAttribute('aria-label', 'alternate sidebar');
+    rightHandler.sideBar.contentNode.setAttribute('role', 'navigation');
+    rightHandler.sideBar.contentNode.setAttribute(
+      'aria-label',
+      'alternate sidebar navigation'
+    );
     rightHandler.stackedPanel.id = 'jp-right-stack';
+
+    dockPanel.node.setAttribute('role', 'main');
 
     hboxPanel.spacing = 0;
     dockPanel.spacing = 5;
