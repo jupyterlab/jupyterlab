@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
@@ -37,12 +37,13 @@ export class MainAreaWidget<T extends Widget = Widget>
     this.addClass('jp-MainAreaWidget');
     this.id = DOMUtils.createDomID();
 
+    const trans = (options.translator || nullTranslator).load('jupyterlab');
     const content = (this._content = options.content);
     content.node.setAttribute('role', 'region');
-    content.node.setAttribute('aria-label', 'notebook content');
+    content.node.setAttribute('aria-label', trans.__('notebook content'));
     const toolbar = (this._toolbar = options.toolbar || new Toolbar());
     toolbar.node.setAttribute('role', 'navigation');
-    toolbar.node.setAttribute('aria-label', 'notebook actions');
+    toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
     const spinner = this._spinner;
 
     const layout = (this.layout = new BoxLayout({ spacing: 0 }));
