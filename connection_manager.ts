@@ -32,12 +32,13 @@ export interface ISocketConnectionOptions {
 }
 
 /**
- * Each Widget with a document (whether file or a notebook) has its own DocumentConnectionManager
- * (see JupyterLabWidgetAdapter), keeping the virtual document spaces separate if a file is opened twice.
+ * Each Widget with a document (whether file or a notebook) has the same DocumentConnectionManager
+ * (see JupyterLabWidgetAdapter). Using id_path instead of uri led to documents being overwritten
+ * as two identical id_paths could be created for two different notebooks.
  */
 export class DocumentConnectionManager {
-  connections: Map<VirtualDocument.id_path, LSPConnection>;
-  documents: Map<VirtualDocument.id_path, VirtualDocument>;
+  connections: Map<VirtualDocument.uri, LSPConnection>;
+  documents: Map<VirtualDocument.uri, VirtualDocument>;
   initialized: Signal<DocumentConnectionManager, IDocumentConnectionData>;
   connected: Signal<DocumentConnectionManager, IDocumentConnectionData>;
   /**
@@ -53,7 +54,7 @@ export class DocumentConnectionManager {
   closed: Signal<DocumentConnectionManager, IDocumentConnectionData>;
   documents_changed: Signal<
     DocumentConnectionManager,
-    Map<VirtualDocument.id_path, VirtualDocument>
+    Map<VirtualDocument.uri, VirtualDocument>
   >;
   language_server_manager: ILanguageServerManager;
   initial_configurations: TLanguageServerConfigurations;
@@ -83,7 +84,7 @@ export class DocumentConnectionManager {
       this
     );
 
-    this.documents.set(virtual_document.id_path, virtual_document);
+    this.documents.set(virtual_document.uri, virtual_document);
     this.documents_changed.emit(this.documents);
   }
 
@@ -98,7 +99,7 @@ export class DocumentConnectionManager {
       this
     );
 
-    this.documents.delete(virtual_document.id_path);
+    this.documents.delete(virtual_document.uri);
     for (const foreign of virtual_document.foreign_documents.values()) {
       this.disconnect_document_signals(foreign, false);
     }
@@ -111,7 +112,7 @@ export class DocumentConnectionManager {
   on_foreign_document_opened(_host: VirtualDocument, context: IForeignContext) {
     console.log(
       'LSP: ConnectionManager received foreign document: ',
-      context.foreign_document.id_path
+      context.foreign_document.uri
     );
   }
 
@@ -149,7 +150,7 @@ export class DocumentConnectionManager {
 
     // if connecting for the first time, all documents subsequent documents will
     // be re-opened and synced
-    this.connections.set(virtual_document.id_path, connection);
+    this.connections.set(virtual_document.uri, connection);
 
     return connection;
   }
@@ -188,12 +189,12 @@ export class DocumentConnectionManager {
       if (error.message.indexOf('code = 1005') !== -1) {
         console.warn(`LSP: Connection failed for ${connection}`);
         this.forEachDocumentOfConnection(connection, virtual_document => {
-          console.warn('LSP: disconnecting ' + virtual_document.id_path);
+          console.warn('LSP: disconnecting ' + virtual_document.uri);
           this.closed.emit({ connection, virtual_document });
           this.ignored_languages.add(virtual_document.language);
 
           console.warn(
-            `Cancelling further attempts to connect ${virtual_document.id_path} and other documents for this language (no support from the server)`
+            `Cancelling further attempts to connect ${virtual_document.uri} and other documents for this language (no support from the server)`
           );
         });
       } else if (error.message.indexOf('code = 1006') !== -1) {
@@ -230,13 +231,13 @@ export class DocumentConnectionManager {
     callback: (virtual_document: VirtualDocument) => void
   ) {
     for (const [
-      virtual_document_id_path,
+      virtual_document_uri,
       a_connection
     ] of this.connections.entries()) {
       if (connection !== a_connection) {
         continue;
       }
-      callback(this.documents.get(virtual_document_id_path));
+      callback(this.documents.get(virtual_document_uri));
     }
   }
 
@@ -287,12 +288,12 @@ export class DocumentConnectionManager {
       try {
         await until_ready(() => connection.isReady, 200, 200);
       } catch {
-        console.warn(`LSP: Connect timed out for ${virtual_document.id_path}`);
+        console.warn(`LSP: Connect timed out for ${virtual_document.uri}`);
         return;
       }
     }
 
-    console.log('LSP:', document_path, virtual_document.id_path, 'connected.');
+    console.log('LSP:', document_path, virtual_document.uri, 'connected.');
 
     this.connected.emit({ connection, virtual_document });
 
@@ -300,7 +301,7 @@ export class DocumentConnectionManager {
   }
 
   public unregister_document(virtual_document: VirtualDocument) {
-    this.connections.delete(virtual_document.id_path);
+    this.connections.delete(virtual_document.uri);
     this.documents_changed.emit(this.documents);
   }
 }

@@ -40,7 +40,7 @@ export class LSPConnector
   implements CompletionHandler.ICompletionItemsConnector {
   isDisposed = false;
   private _editor: CodeEditor.IEditor;
-  private _connections: Map<VirtualDocument.id_path, LSPConnection>;
+  private _connections: Map<VirtualDocument.uri, LSPConnection>;
   private _context_connector: ContextConnector;
   private _kernel_connector: KernelConnector;
   private _kernel_and_context_connector: CompletionConnector;
@@ -222,7 +222,7 @@ export class LSPConnector
     document: VirtualDocument,
     position_in_token: number
   ): Promise<CompletionHandler.ICompletionItemsReply> {
-    let connection = this._connections.get(document.id_path);
+    let connection = this._connections.get(document.uri);
 
     console.log('[LSP][Completer] Fetching');
     console.log('[LSP][Completer] Token:', token, start, end);

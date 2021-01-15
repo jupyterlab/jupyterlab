@@ -734,7 +734,7 @@ export class VirtualDocument {
     return this.parent.id_path + '-' + this.virtual_id;
   }
 
-  get uri(): string {
+  get uri(): VirtualDocument.uri {
     const encodedPath = encodeURI(this.path);
     if (!this.parent) {
       return encodedPath;
@@ -816,6 +816,10 @@ export namespace VirtualDocument {
    * for documents which should be interpreted as one when stretched across cells.
    */
   export type virtual_id = string;
+  /**
+   * Identifier composed of the file path and id_path.
+   */
+  export type uri = string;
 }
 
 export function collect_documents(

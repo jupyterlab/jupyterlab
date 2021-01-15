@@ -413,7 +413,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
     // TODO only send the difference, using connection.sendSelectiveChange()
     let connection = this.connection_manager.connections.get(
-      virtual_document.id_path
+      virtual_document.uri
     );
     let adapter = this.adapters.get(virtual_document.id_path);
 
@@ -596,7 +596,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     );
     return {
       document,
-      connection: this.connection_manager.connections.get(document.id_path),
+      connection: this.connection_manager.connections.get(document.uri),
       virtual_position,
       root_position,
       features: this.get_features(document),
