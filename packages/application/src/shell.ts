@@ -209,7 +209,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     menuHandler.panel.node.setAttribute('role', 'navigation');
     menuHandler.panel.node.setAttribute(
       'aria-label',
-      trans.__('main navigation')
+      trans.__('main')
     );
     const topHandler = (this._topHandler = new Private.PanelHandler());
     topHandler.panel.node.setAttribute('role', 'banner');
