@@ -147,12 +147,12 @@ export class OutputArea extends Widget {
    * The maximum outputs to show in the trimmed
    * output head and tail areas.
    */
-  private headTailNumberOutputs: number = -1;
+  private headTailNumberOutputs: number;
 
   /*
    * The index for the end of the head in case of trim mode.
    */
-  private headEndIndex: number = -1;
+  private headEndIndex: number;
 
   /**
    * A read-only sequence of the chidren widgets in the output area.
@@ -438,16 +438,16 @@ export class OutputArea extends Widget {
 
   /**
    * Render and insert a single output into the layout.
+   *
+   * @param index - The index of the output to be inserted.
+   * @param model - The model of the output to be inserted.
    */
-  private _insertOutput(
-    index: number,
-    model: IOutputModel,
-    force?: boolean
-  ): void {
+  private _insertOutput(index: number, model: IOutputModel): void {
     if (index === 0) {
       this.trimmedOutputModels = new Array<IOutputModel>();
     }
-    if (index === this.maxNumberOutputs && !force) {
+    if (index === this.maxNumberOutputs) {
+      // TODO Improve style of the display message.
       const separatorModel = this.model.contentFactory.createOutputModel({
         value: {
           output_type: 'display_data',
@@ -471,9 +471,7 @@ export class OutputArea extends Widget {
     }
     const output = this._createOutput(model);
     const layout = this.layout as PanelLayout;
-    if (force) {
-      layout.insertWidget(index, output);
-    } else if (index < this.maxNumberOutputs) {
+    if (index < this.maxNumberOutputs) {
       layout.insertWidget(index, output);
     } else if (index >= this.maxNumberOutputs) {
       layout.removeWidgetAt(this.headTailNumberOutputs + 1);
