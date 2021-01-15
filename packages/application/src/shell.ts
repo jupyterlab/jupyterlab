@@ -242,7 +242,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     leftHandler.sideBar.contentNode.setAttribute('role', 'navigation');
     leftHandler.sideBar.contentNode.setAttribute(
       'aria-label',
-      trans.__('main sidebar navigation')
+      trans.__('main sidebar')
     );
     leftHandler.stackedPanel.id = 'jp-left-stack';
 
