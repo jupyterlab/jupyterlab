@@ -106,7 +106,7 @@ export class OutputArea extends Widget {
       options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
     this.trimmedOutputModels = new Array<IOutputModel>();
-    this.maxNumberOutputs = options.maxNumberOutputs || 20;
+    this.maxNumberOutputs = options.maxNumberOutputs || 0;
     this.headTailNumberOutputs = Math.round(this.maxNumberOutputs / 2);
     this.headEndIndex = this.headTailNumberOutputs;
     for (let i = 0; i < model.length; i++) {
@@ -446,7 +446,7 @@ export class OutputArea extends Widget {
     if (index === 0) {
       this.trimmedOutputModels = new Array<IOutputModel>();
     }
-    if (index === this.maxNumberOutputs) {
+    if (index === this.maxNumberOutputs && this.maxNumberOutputs !== 0) {
       // TODO Improve style of the display message.
       const separatorModel = this.model.contentFactory.createOutputModel({
         value: {
@@ -456,7 +456,7 @@ export class OutputArea extends Widget {
               <a style="margin: 10px; text-decoration: none;">
                 <pre>Output of this cell has been trimmed on the initial display.</pre>
                 <pre>Displaying the first ${this.maxNumberOutputs} top and last bottom outputs.</pre>
-                <pre>Click on this messsage, or run again this cell, to get the complete output.</pre>
+                <pre>Click on this message to get the complete output.</pre>
               </a>
               `
           }
@@ -471,13 +471,13 @@ export class OutputArea extends Widget {
     }
     const output = this._createOutput(model);
     const layout = this.layout as PanelLayout;
-    if (index < this.maxNumberOutputs) {
+    if (index < this.maxNumberOutputs || this.maxNumberOutputs === 0) {
       layout.insertWidget(index, output);
     } else if (index >= this.maxNumberOutputs) {
       layout.removeWidgetAt(this.headTailNumberOutputs + 1);
       layout.insertWidget(index, output);
     }
-    if (index >= this.headTailNumberOutputs) {
+    if (index >= this.headTailNumberOutputs && this.maxNumberOutputs !== 0) {
       this.trimmedOutputModels.push(model);
     }
   }
