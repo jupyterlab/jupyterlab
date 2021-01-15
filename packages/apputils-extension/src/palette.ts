@@ -104,7 +104,7 @@ export namespace Palette {
     let modal = false;
 
     palette.node.setAttribute('role', 'region');
-    palette.node.setAttribute('aria-label', 'Command Palette Section');
+    palette.node.setAttribute('aria-label', trans.__('Command Palette Section'));
     shell.add(palette, 'left', { rank: 300 });
 
     if (settingRegistry) {

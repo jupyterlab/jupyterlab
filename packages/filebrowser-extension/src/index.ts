@@ -326,7 +326,7 @@ function activateBrowser(
   const trans = translator.load('jupyterlab');
   const browser = factory.defaultBrowser;
   browser.node.setAttribute('role', 'region');
-  browser.node.setAttribute('aria-label', 'File Browser Section');
+  browser.node.setAttribute('aria-label', trans.__('File Browser Section'));
 
   const { commands } = app;
 

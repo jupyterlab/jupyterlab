@@ -67,7 +67,7 @@ async function activateTOC(
   toc.title.caption = trans.__('Table of Contents');
   toc.id = 'table-of-contents';
   toc.node.setAttribute('role', 'region');
-  toc.node.setAttribute('aria-label', 'Table of Contents Section');
+  toc.node.setAttribute('aria-label', trans.__('Table of Contents Section'));
 
   labShell.add(toc, 'left', { rank: 400 });
 

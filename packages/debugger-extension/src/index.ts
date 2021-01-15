@@ -513,7 +513,7 @@ const main: JupyterFrontEndPlugin<void> = {
     }
 
     sidebar.node.setAttribute('role', 'region');
-    sidebar.node.setAttribute('aria-label', 'Debugger section');
+    sidebar.node.setAttribute('aria-label', trans.__('Debugger section'));
 
     shell.add(sidebar, 'right');
 
