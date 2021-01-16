@@ -236,10 +236,17 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     );
 
     // recreate virtual document using current path and language
-    let virtual_document = this.create_virtual_document();
-    this.virtual_editor.virtual_document = virtual_document;
+    // as virtual editor assumes it gets the virtual document at init,
+    // just dispose virtual editor (which disposes virtual document too)
+    // and re-initialize both virtual editor and document
+    this.virtual_editor.dispose();
+
+    this.init_virtual();
+
     // reconnect
-    this.connect_document(virtual_document, true).catch(console.warn);
+    this.connect_document(this.virtual_editor.virtual_document, true).catch(
+      console.warn
+    );
   }
 
   protected on_save_state(context: any, state: DocumentRegistry.SaveState) {
