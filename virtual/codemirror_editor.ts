@@ -9,7 +9,6 @@ import {
   VirtualDocument
 } from './document';
 import { IForeignCodeExtractorsRegistry } from '../extractors/types';
-import { create_console, EditorLogConsole } from './console';
 import { Signal } from '@lumino/signaling';
 import {
   IEditorPosition,
@@ -21,7 +20,7 @@ import { IEditorChange, IVirtualEditor, IWindowCoordinates } from './editor';
 import { IEditorChangedData, WidgetAdapter } from '../adapters/adapter';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
-import { ILSPVirtualEditorManager, PLUGIN_ID } from '../tokens';
+import { ILSPLogConsole, ILSPVirtualEditorManager, PLUGIN_ID } from '../tokens';
 
 export type CodeMirrorHandler = (
   instance: CodeMirrorVirtualEditor,
@@ -84,7 +83,7 @@ export class CodeMirrorVirtualEditor
   editor_name: IEditorName = 'CodeMirrorEditor';
   virtual_document: VirtualDocument;
   code_extractors: IForeignCodeExtractorsRegistry;
-  console: EditorLogConsole;
+  console: ILSPLogConsole;
   cm_editor_to_ce_editor: Map<CodeMirror.Editor, CodeEditor.IEditor>;
   ce_editor_to_cm_editor: Map<CodeEditor.IEditor, CodeMirror.Editor>;
   isDisposed = false;
@@ -100,7 +99,7 @@ export class CodeMirrorVirtualEditor
   constructor(options: IVirtualEditor.IOptions) {
     this.adapter = options.adapter;
     this.virtual_document = options.virtual_document;
-    this.console = create_console('browser');
+    this.console = this.adapter.console;
     this.change = new Signal(this);
 
     this.editor_to_source_line = new Map();
@@ -308,7 +307,7 @@ export class CodeMirrorVirtualEditor
     position: IEditorPosition
   ): IRootPosition | null {
     if (!this.editor_to_source_line.has(editor)) {
-      console.warn('Editor not found in editor_to_source_line map');
+      this.console.warn('Editor not found in editor_to_source_line map');
       return null;
     }
     let shift = this.editor_to_source_line.get(editor);

@@ -7,6 +7,7 @@ import {
 import { WidgetAdapter } from './adapters/adapter';
 import { IFeatureCommand } from './feature';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { BrowserConsole } from './virtual/console';
 
 describe('ContextMenuCommandManager', () => {
   class ManagerImplementation extends ContextCommandManager {
@@ -18,6 +19,7 @@ describe('ContextMenuCommandManager', () => {
         tracker: null,
         suffix: null,
         entry_point: null,
+        console: new BrowserConsole(),
         ...options
       });
     }

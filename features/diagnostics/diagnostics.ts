@@ -227,7 +227,7 @@ class DiagnosticsPanel {
             );
           })
           .catch(() => {
-            console.log(
+            console.warn(
               'Could not copy with clipboard.writeText interface, falling back'
             );
             window.prompt(
@@ -417,7 +417,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
           this.virtual_document.last_virtual_line -
           this.virtual_document.blank_lines_between_cells;
         if (start.line > last_line_number) {
-          console.log(
+          this.console.log(
             `Out of range diagnostic (${start.line} line > ${last_line_number}) was skipped `,
             diagnostics
           );
@@ -425,7 +425,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
         } else {
           let last_line = this.virtual_document.last_line;
           if (start.line == last_line_number && start.ch > last_line.length) {
-            console.log(
+            this.console.log(
               `Out of range diagnostic (${start.ch} character > ${last_line.length} at line ${last_line_number}) was skipped `,
               diagnostics
             );
@@ -443,7 +443,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
             start_in_root
           );
         } catch (e) {
-          console.log(
+          this.console.warn(
             `Could not place inspections from ${response.uri}`,
             ` inspections: `,
             diagnostics,
@@ -457,7 +457,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
         // and the user already changed the document so
         // that now this regions is in another virtual document!
         if (this.virtual_document !== document) {
-          console.log(
+          this.console.log(
             `Ignoring inspections from ${response.uri}`,
             ` (this region is covered by a another virtual document: ${document.uri})`,
             ` inspections: `,
@@ -471,7 +471,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
             .get(start.line)
             .skip_inspect.indexOf(document.id_path) !== -1
         ) {
-          console.log(
+          this.console.log(
             'Ignoring inspections silenced for this document:',
             diagnostics
           );
@@ -496,7 +496,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
         try {
           end_in_editor = document.transform_virtual_to_editor(end);
         } catch (err) {
-          console.warn('LSP: Malformed range for diagnostic', end);
+          this.console.warn('Malformed range for diagnostic', end);
           end_in_editor = { ...start_in_editor, ch: start_in_editor.ch + 1 };
         }
 
@@ -550,11 +550,11 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
               .getDoc()
               .markText(start_in_editor, end_in_editor, options);
           } catch (e) {
-            console.warn(
-              'Marking inspection (diagnostic text) failed, see following logs (2):'
+            this.console.warn(
+              'Marking inspection (diagnostic text) failed:',
+              diagnostics,
+              e
             );
-            console.log(diagnostics);
-            console.log(e);
             return;
           }
           this.marked_diagnostics.set(diagnostic_hash, marker);
@@ -583,7 +583,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
       this.setDiagnostics(response);
       diagnostics_panel.update();
     } catch (e) {
-      console.warn(e);
+      this.console.warn(e);
     }
   };
 

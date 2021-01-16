@@ -81,7 +81,7 @@ export class SignatureCM extends CodeMirrorIntegration {
         }
       } else {
         if (item.documentation.kind !== 'markdown') {
-          this.virtual_editor.console.warn(
+          this.console.warn(
             'Unknown MarkupContent kind:',
             item.documentation.kind
           );
@@ -95,7 +95,7 @@ export class SignatureCM extends CodeMirrorIntegration {
   private handleSignature(response: lsProtocol.SignatureHelp) {
     this.lab_integration.tooltip.remove();
 
-    this.virtual_editor.console.log('Signature received', response);
+    this.console.log('Signature received', response);
     if (!this.signature_character || !response || !response.signatures.length) {
       return;
     }
@@ -108,7 +108,7 @@ export class SignatureCM extends CodeMirrorIntegration {
     let language = this.get_language_at(editor_position, cm_editor);
     let markup = this.get_markup_for_signature_help(response, language);
 
-    this.virtual_editor.console.log(
+    this.console.log(
       'Signature will be shown',
       language,
       markup,
@@ -144,10 +144,7 @@ export class SignatureCM extends CodeMirrorIntegration {
       root_position
     );
 
-    this.virtual_editor.console.log(
-      'Signature will be requested for',
-      virtual_position
-    );
+    this.console.log('Signature will be requested for', virtual_position);
 
     this.connection
       .getSignatureHelp(
@@ -156,7 +153,7 @@ export class SignatureCM extends CodeMirrorIntegration {
         false
       )
       .then(help => this.handleSignature(help))
-      .catch(console.warn);
+      .catch(this.console.warn);
   }
 }
 

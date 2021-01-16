@@ -13,7 +13,7 @@ import {
   IDocumentConnectionData,
   ISocketConnectionOptions
 } from '../connection_manager';
-import { ILSPExtension } from '../index';
+import { ILSPExtension, ILSPLogConsole } from '../index';
 import { IFeatureEditorIntegration, IFeature } from '../feature';
 import { EditorAdapter } from '../editor_integration/editor_adapter';
 import IEditor = CodeEditor.IEditor;
@@ -92,6 +92,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   public connection_manager: DocumentConnectionManager;
   public status_message: StatusMessage;
   protected isDisposed = false;
+  console: ILSPLogConsole;
 
   protected app: JupyterFrontEnd;
 
@@ -124,6 +125,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.adapters = new Map();
     this.status_message = new StatusMessage();
     this.isConnected = false;
+    this.console = extension.console.scope('WidgetAdapter');
 
     // set up signal connections
     this.widget.context.saveState.connect(this.on_save_state, this);
@@ -143,8 +145,8 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     manager: DocumentConnectionManager,
     { virtual_document }: IDocumentConnectionData
   ) {
-    console.log(
-      'LSP: connection closed, disconnecting adapter',
+    this.console.log(
+      'connection closed, disconnecting adapter',
       virtual_document.id_path
     );
     if (virtual_document !== this.virtual_editor?.virtual_document) {
@@ -245,7 +247,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
     // reconnect
     this.connect_document(this.virtual_editor.virtual_document, true).catch(
-      console.warn
+      this.console.warn
     );
   }
 
@@ -273,7 +275,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
    */
   public update_documents() {
     if (this.isDisposed) {
-      console.warn('Cannot update documents: adapter disposed');
+      this.console.warn('Cannot update documents: adapter disposed');
       return;
     }
     return this.virtual_editor.virtual_document.update_manager.update_documents(
@@ -301,8 +303,8 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       // refresh the document on the LSP server
       this.document_changed(virtual_document, virtual_document, true);
 
-      console.log(
-        'LSP: virtual document(s) for',
+      this.console.log(
+        'virtual document(s) for',
         this.document_path,
         'have been initialized'
       );
@@ -329,7 +331,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     );
 
     const connection_context = await this.connect(virtual_document).catch(
-      console.warn
+      this.console.warn
     );
 
     if (!send_open) {
@@ -341,7 +343,9 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
         virtual_document.document_info
       );
     } else {
-      console.warn(`Connection for ${virtual_document.path} was not opened`);
+      this.console.warn(
+        `Connection for ${virtual_document.path} was not opened`
+      );
     }
   }
 
@@ -364,7 +368,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       virtual_document: this.create_virtual_document()
     });
     if (virtual_editor == null) {
-      console.error('Could not initialize a VirtualEditor for adapter: ', this);
+      this.console.error(
+        'Could not initialize a VirtualEditor for adapter: ',
+        this
+      );
       return;
     }
     this.virtual_editor = virtual_editor;
@@ -414,7 +421,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     is_init = false
   ) {
     if (this.isDisposed) {
-      console.warn('Cannot swap document: adapter disposed');
+      this.console.warn('Cannot swap document: adapter disposed');
       return;
     }
 
@@ -425,11 +432,11 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     let adapter = this.adapters.get(virtual_document.id_path);
 
     if (!connection?.isReady) {
-      console.log('LSP: Skipping document update signal: connection not ready');
+      this.console.log('Skipping document update signal: connection not ready');
       return;
     }
     if (adapter == null) {
-      console.log('LSP: Skipping document update signal: adapter not ready');
+      this.console.log('Skipping document update signal: adapter not ready');
       return;
     }
 
@@ -456,7 +463,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
           await adapter.updateAfterChange();
         })
         .then()
-        .catch(console.warn);
+        .catch(this.console.warn);
     }
   }
 
@@ -486,7 +493,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   private async connect(virtual_document: VirtualDocument) {
     let language = virtual_document.language;
 
-    console.log(`LSP: will connect using language: ${language}`);
+    this.console.log(`will connect using language: ${language}`);
 
     let options: ISocketConnectionOptions = {
       virtual_document,
@@ -553,9 +560,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     let adapter = new EditorAdapter(
       this.virtual_editor,
       virtual_document,
-      adapter_features
+      adapter_features,
+      this.console
     );
-    console.log('LSP: Adapter for', this.document_path, 'is ready.');
+    this.console.log('Adapter for', this.document_path, 'is ready.');
     // the client is now fully ready: signal to the server that the document is "open"
     connection.sendOpenWhenReady(virtual_document.document_info);
     return adapter;
@@ -563,7 +571,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   private async onContentChanged(_slot: any) {
     // update the virtual documents (sending the updates to LSP is out of scope here)
-    this.update_finished = this.update_documents().catch(console.warn);
+    this.update_finished = this.update_documents().catch(this.console.warn);
     await this.update_finished;
   }
 

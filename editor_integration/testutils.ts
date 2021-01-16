@@ -28,6 +28,7 @@ import IEditor = CodeEditor.IEditor;
 import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 import {
   ILSPFeatureManager,
+  ILSPLogConsole,
   ILSPVirtualEditorManager,
   WidgetAdapterConstructor
 } from '../tokens';
@@ -47,6 +48,7 @@ import { IFeatureSettings } from '../feature';
 import { IForeignCodeExtractorsRegistry } from '../extractors/types';
 import { ICodeOverridesRegistry } from '../overrides/tokens';
 import { Signal } from '@lumino/signaling';
+import { BrowserConsole } from '../virtual/console';
 
 export interface ITestEnvironment {
   document_options: VirtualDocument.IOptions;
@@ -98,6 +100,7 @@ export class MockExtension implements ILSPExtension {
   editor_type_manager: ILSPVirtualEditorManager;
   foreign_code_extractors: IForeignCodeExtractorsRegistry;
   code_overrides: ICodeOverridesRegistry;
+  console: ILSPLogConsole;
 
   constructor() {
     this.app = null;
@@ -105,7 +108,8 @@ export class MockExtension implements ILSPExtension {
     this.editor_type_manager = new VirtualEditorManager();
     this.language_server_manager = new MockLanguageServerManager({});
     this.connection_manager = new DocumentConnectionManager({
-      language_server_manager: this.language_server_manager
+      language_server_manager: this.language_server_manager,
+      console: new BrowserConsole()
     });
     this.editor_type_manager.registerEditorType({
       implementation: CodeMirrorVirtualEditor,
@@ -114,6 +118,7 @@ export class MockExtension implements ILSPExtension {
     });
     this.foreign_code_extractors = {};
     this.code_overrides = {};
+    this.console = new BrowserConsole();
   }
 }
 

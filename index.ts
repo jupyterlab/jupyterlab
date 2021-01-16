@@ -18,6 +18,7 @@ import {
   ILSPAdapterManager,
   ILSPCodeExtractorsManager,
   ILSPFeatureManager,
+  ILSPLogConsole,
   ILSPVirtualEditorManager,
   PLUGIN_ID,
   TLanguageServerConfigurations
@@ -48,6 +49,7 @@ import { plugin as THEME_VSCODE } from '@krassowski/theme-vscode';
 import { plugin as THEME_MATERIAL } from '@krassowski/theme-material';
 import { CODE_OVERRIDES_MANAGER } from './overrides';
 import IPaths = JupyterFrontEnd.IPaths;
+import { LOG_CONSOLE } from './virtual/console';
 
 export * from './tokens';
 
@@ -110,6 +112,7 @@ export interface ILSPExtension {
   editor_type_manager: ILSPVirtualEditorManager;
   foreign_code_extractors: IForeignCodeExtractorsRegistry;
   code_overrides: ICodeOverridesRegistry;
+  console: ILSPLogConsole;
 }
 
 export class LSPExtension implements ILSPExtension {
@@ -127,11 +130,13 @@ export class LSPExtension implements ILSPExtension {
     public editor_type_manager: ILSPVirtualEditorManager,
     private code_extractors_manager: ILSPCodeExtractorsManager,
     private code_overrides_manager: ILSPCodeOverridesManager,
+    public console: ILSPLogConsole,
     status_bar: IStatusBar | null
   ) {
     this.language_server_manager = new LanguageServerManager({});
     this.connection_manager = new DocumentConnectionManager({
-      language_server_manager: this.language_server_manager
+      language_server_manager: this.language_server_manager,
+      console: this.console
     });
 
     const statusButtonExtension = new StatusButtonExtension({
@@ -183,6 +188,7 @@ export class LSPExtension implements ILSPExtension {
       tracker: type.tracker,
       suffix: type.name,
       entry_point: type.entrypoint,
+      console: this.console,
       ...type.context_menu
     });
     this.feature_manager.registerCommandManager(command_manger);
@@ -218,7 +224,8 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
     ILSPAdapterManager,
     ILSPVirtualEditorManager,
     ILSPCodeExtractorsManager,
-    ILSPCodeOverridesManager
+    ILSPCodeOverridesManager,
+    ILSPLogConsole
   ],
   optional: [IStatusBar],
   activate: (app, ...args) => {
@@ -233,6 +240,7 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
         ILSPVirtualEditorManager,
         ILSPCodeExtractorsManager,
         ILSPCodeOverridesManager,
+        ILSPLogConsole,
         IStatusBar | null
       ])
     );
@@ -254,6 +262,7 @@ const default_features: JupyterFrontEndPlugin<void>[] = [
 ];
 
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  LOG_CONSOLE,
   CODE_EXTRACTORS_MANAGER,
   WIDGET_ADAPTER_MANAGER,
   NOTEBOOK_ADAPTER,

@@ -11,6 +11,7 @@ import {
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IForeignCodeExtractorsRegistry } from '../extractors/types';
 import { VirtualDocument } from './document';
+import { BrowserConsole } from './console';
 
 describe('VirtualEditor', () => {
   let r_line_extractor = new RegExpForeignCodeExtractor({
@@ -29,7 +30,8 @@ describe('VirtualEditor', () => {
 
   const LANGSERVER_MANAGER = new MockLanguageServerManager({});
   const CONNECTION_MANAGER = new DocumentConnectionManager({
-    language_server_manager: LANGSERVER_MANAGER
+    language_server_manager: LANGSERVER_MANAGER,
+    console: new BrowserConsole()
   });
 
   const DEBUG = false;

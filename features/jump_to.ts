@@ -70,10 +70,10 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
             .getDefinition(virtual_position, document.document_info, false)
             .then(targets => {
               this.handle_jump(targets, document.document_info.uri).catch(
-                console.warn
+                this.console.warn
               );
             })
-            .catch(console.warn);
+            .catch(this.console.warn);
           event.preventDefault();
           event.stopPropagation();
         }
@@ -98,7 +98,10 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       return;
     }
 
-    console.log('Will jump to the first of suggested locations:', locations);
+    this.console.log(
+      'Will jump to the first of suggested locations:',
+      locations
+    );
 
     const location_or_link = locations[0];
 
@@ -136,8 +139,8 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
         virtual_position
       );
       let editor_position_ce = PositionConverter.cm_to_ce(editor_position);
-      console.log(`Jumping to ${editor_index}th editor of ${uri}`);
-      console.log('Jump target within editor:', editor_position_ce);
+      this.console.log(`Jumping to ${editor_index}th editor of ${uri}`);
+      this.console.log('Jump target within editor:', editor_position_ce);
 
       let contents_path = this.adapter.widget.context.path;
 
@@ -151,8 +154,8 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
     } else {
       // otherwise there is no virtual document and we expect the returned position to be source position:
       let source_position_ce = PositionConverter.cm_to_ce(virtual_position);
-      console.log(`Jumping to external file: ${uri}`);
-      console.log('Jump target (source location):', source_position_ce);
+      this.console.log(`Jumping to external file: ${uri}`);
+      this.console.log('Jump target (source location):', source_position_ce);
 
       let jump_data = {
         editor_index: 0,
@@ -185,7 +188,7 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
         });
         return;
       } catch (err) {
-        console.warn(err);
+        this.console.warn(err);
       }
 
       this.jumper.global_jump({

@@ -5,26 +5,23 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualDocument } from '../virtual/document';
 import { until_ready } from '../utils';
 import { IRootPosition } from '../positioning';
-import { create_console, EditorLogConsole } from '../virtual/console';
+import { ILSPLogConsole } from '../tokens';
 
 export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
   features: Map<string, IFeatureEditorIntegration<T>>;
   isDisposed = false;
 
-  /**
-   * Console for debugging.
-   */
-  console: EditorLogConsole;
-
   private last_change: IEditorChange;
+  private console: ILSPLogConsole;
 
   constructor(
     protected editor: IVirtualEditor<CodeEditor.IEditor>,
     protected virtual_document: VirtualDocument,
-    features = new Array<IFeatureEditorIntegration<T>>()
+    features = new Array<IFeatureEditorIntegration<T>>(),
+    console: ILSPLogConsole
   ) {
     this.editor.change.connect(this.saveChange, this);
-    this.console = create_console('browser');
+    this.console = console.scope('EditorAdapter');
 
     this.features = new Map();
 
@@ -45,7 +42,7 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
     try {
       await until_ready(() => this.last_change != null, 30, 22);
     } catch (err) {
-      console.log(
+      this.console.log(
         'No change obtained from CodeMirror editor within the expected time of 0.66s'
       );
       return;
@@ -58,7 +55,7 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
     try {
       root_position = this.editor.get_cursor_position();
     } catch (err) {
-      console.log('LSP: Root position not found');
+      this.console.log('Root position not found');
       return;
     }
 

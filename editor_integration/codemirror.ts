@@ -24,6 +24,7 @@ import {
 import { StatusMessage, WidgetAdapter } from '../adapters/adapter';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { IEditorChange } from '../virtual/editor';
+import { ILSPLogConsole } from '../tokens';
 
 function toDocumentChanges(changes: {
   [uri: string]: lsProtocol.TextEdit[];
@@ -111,6 +112,7 @@ export abstract class CodeMirrorIntegration
 
   protected status_message: StatusMessage;
   protected adapter: WidgetAdapter<IDocumentWidget>;
+  protected console: ILSPLogConsole;
 
   get settings(): IFeatureSettings<any> {
     return this.feature.settings;
@@ -127,6 +129,7 @@ export abstract class CodeMirrorIntegration
     this.connection = options.connection;
     this.status_message = options.status_message;
     this.adapter = options.adapter;
+    this.console = this.adapter.console.scope(options.feature.name);
 
     this.editor_handlers = new Map();
     this.connection_handlers = new Map();

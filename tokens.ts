@@ -147,6 +147,17 @@ export interface IVirtualEditorType<T extends IEditor> {
   supports: new (...args: any) => T;
 }
 
+export interface ILogConsoleCore {
+  debug(...args: any[]): void;
+  log(...args: any[]): void;
+  warn(...args: any[]): void;
+  error(...args: any[]): void;
+}
+
+export interface ILSPLogConsole extends ILogConsoleCore {
+  scope(scope: string): ILSPLogConsole;
+}
+
 export interface ILSPVirtualEditorManager {
   /**
    * Register editor type implementation.
@@ -196,4 +207,8 @@ export const ILSPVirtualEditorManager = new Token<ILSPVirtualEditorManager>(
 
 export const ILSPCodeExtractorsManager = new Token<ILSPCodeExtractorsManager>(
   PLUGIN_ID + ':ILSPCodeExtractorsManager'
+);
+
+export const ILSPLogConsole = new Token<ILSPLogConsole>(
+  PLUGIN_ID + ':ILSPLogConsole'
 );

@@ -141,7 +141,7 @@ export class HighlightsCM extends CodeMirrorIntegration {
         .getDoc()
         .getCursor('start') as IRootPosition;
     } catch (err) {
-      console.warn('LSP: no root position available');
+      this.console.warn('no root position available');
       return;
     }
 
@@ -154,8 +154,8 @@ export class HighlightsCM extends CodeMirrorIntegration {
       token.value === this.last_token.value &&
       token.value !== ''
     ) {
-      console.log(
-        'LSP: not requesting highlights (token did not change)',
+      this.console.log(
+        'not requesting highlights (token did not change)',
         token
       );
       return;
@@ -165,8 +165,8 @@ export class HighlightsCM extends CodeMirrorIntegration {
     try {
       document = this.virtual_editor.document_at_root_position(root_position);
     } catch (e) {
-      console.warn(
-        'LSP: Could not obtain virtual document from position',
+      this.console.warn(
+        'Could not obtain virtual document from position',
         root_position
       );
       return;
@@ -201,8 +201,8 @@ export class HighlightsCM extends CodeMirrorIntegration {
 
           /// if document was updated since (e.g. user pressed delete - token change, but position did not)
           if (version_after !== this.sent_version) {
-            console.log(
-              'LSP: skipping highlights response delayed by ' +
+            this.console.log(
+              'skipping highlights response delayed by ' +
                 (version_after - this.sent_version) +
                 ' document versions'
             );
@@ -210,8 +210,8 @@ export class HighlightsCM extends CodeMirrorIntegration {
           }
           // if cursor position changed (e.g. user moved cursor up - position has changed, but document version did not)
           if (virtual_position !== this.virtual_position) {
-            console.log(
-              'LSP: skipping highlights response: cursor moved since it was requested'
+            this.console.log(
+              'skipping highlights response: cursor moved since it was requested'
             );
             return;
           }
@@ -219,9 +219,9 @@ export class HighlightsCM extends CodeMirrorIntegration {
           this.handleHighlight(highlights);
           this.last_token = token;
         })
-        .catch(console.warn);
+        .catch(this.console.warn);
     } catch (e) {
-      console.warn('Could not get highlights:', e);
+      this.console.warn('Could not get highlights:', e);
     }
   };
 }

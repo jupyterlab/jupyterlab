@@ -11,7 +11,8 @@ import {
   TLanguageServerId,
   ILanguageServerManager,
   ILanguageServerConfiguration,
-  TLanguageServerConfigurations
+  TLanguageServerConfigurations,
+  ILSPLogConsole
 } from './tokens';
 
 export interface IDocumentConnectionData {
@@ -59,6 +60,7 @@ export class DocumentConnectionManager {
   language_server_manager: ILanguageServerManager;
   initial_configurations: TLanguageServerConfigurations;
   private ignored_languages: Set<string>;
+  private console: ILSPLogConsole;
 
   constructor(options: DocumentConnectionManager.IOptions) {
     this.connections = new Map();
@@ -70,6 +72,7 @@ export class DocumentConnectionManager {
     this.closed = new Signal(this);
     this.documents_changed = new Signal(this);
     this.language_server_manager = options.language_server_manager;
+    this.console = options.console;
     Private.setLanguageServerManager(options.language_server_manager);
   }
 
@@ -110,8 +113,8 @@ export class DocumentConnectionManager {
   }
 
   on_foreign_document_opened(_host: VirtualDocument, context: IForeignContext) {
-    console.log(
-      'LSP: ConnectionManager received foreign document: ',
+    this.console.log(
+      'ConnectionManager received foreign document: ',
       context.foreign_document.uri
     );
   }
@@ -124,7 +127,7 @@ export class DocumentConnectionManager {
   private async connect_socket(
     options: ISocketConnectionOptions
   ): Promise<LSPConnection> {
-    console.log('LSP: Connection Socket', options);
+    this.console.log('Connection Socket', options);
     let { virtual_document, language } = options;
 
     this.connect_document_signals(virtual_document);
@@ -171,6 +174,8 @@ export class DocumentConnectionManager {
         settings: parsedSettings
       };
 
+      this.console.log('Server Update: ', language_server_id);
+      this.console.log('Sending settings: ', serverSettings);
       Private.updateServerConfiguration(language_server_id, serverSettings);
     }
   }
@@ -182,31 +187,31 @@ export class DocumentConnectionManager {
    */
   on_new_connection = (connection: LSPConnection) => {
     connection.on('error', e => {
-      console.warn(e);
+      this.console.warn(e);
       // TODO invalid now
       let error: Error = e.length && e.length >= 1 ? e[0] : new Error();
       // TODO: those codes may be specific to my proxy client, need to investigate
       if (error.message.indexOf('code = 1005') !== -1) {
-        console.warn(`LSP: Connection failed for ${connection}`);
+        this.console.warn(`Connection failed for ${connection}`);
         this.forEachDocumentOfConnection(connection, virtual_document => {
-          console.warn('LSP: disconnecting ' + virtual_document.uri);
+          this.console.warn('disconnecting ' + virtual_document.uri);
           this.closed.emit({ connection, virtual_document });
           this.ignored_languages.add(virtual_document.language);
 
-          console.warn(
+          this.console.warn(
             `Cancelling further attempts to connect ${virtual_document.uri} and other documents for this language (no support from the server)`
           );
         });
       } else if (error.message.indexOf('code = 1006') !== -1) {
-        console.warn('LSP: Connection closed by the server ');
+        this.console.warn('Connection closed by the server');
       } else {
-        console.error('LSP: Connection error:', e);
+        this.console.error('Connection error:', e);
       }
     });
 
     connection.on('serverInitialized', capabilities => {
       this.forEachDocumentOfConnection(connection, virtual_document => {
-        // TODO: is this still neccessary, e.g. for status bar to update responsively?
+        // TODO: is this still necessary, e.g. for status bar to update responsively?
         this.initialized.emit({ connection, virtual_document });
       });
 
@@ -216,9 +221,9 @@ export class DocumentConnectionManager {
 
     connection.on('close', closed_manually => {
       if (!closed_manually) {
-        console.warn('LSP: Connection unexpectedly disconnected');
+        this.console.warn('Connection unexpectedly disconnected');
       } else {
-        console.warn('LSP: Connection closed');
+        this.console.warn('Connection closed');
         this.forEachDocumentOfConnection(connection, virtual_document => {
           this.closed.emit({ connection, virtual_document });
         });
@@ -265,11 +270,11 @@ export class DocumentConnectionManager {
           success = true;
         })
         .catch(e => {
-          console.warn(e);
+          this.console.warn(e);
         });
 
-      console.log(
-        'LSP: will attempt to re-connect in ' + interval / 1000 + ' seconds'
+      this.console.log(
+        'will attempt to re-connect in ' + interval / 1000 + ' seconds'
       );
       await sleep(interval);
 
@@ -279,7 +284,7 @@ export class DocumentConnectionManager {
   }
 
   async connect(options: ISocketConnectionOptions) {
-    console.log('LSP: connection requested', options);
+    this.console.log('connection requested', options);
     let connection = await this.connect_socket(options);
 
     let { virtual_document, document_path } = options;
@@ -288,12 +293,12 @@ export class DocumentConnectionManager {
       try {
         await until_ready(() => connection.isReady, 200, 200);
       } catch {
-        console.warn(`LSP: Connect timed out for ${virtual_document.uri}`);
+        this.console.warn(`Connect timed out for ${virtual_document.uri}`);
         return;
       }
     }
 
-    console.log('LSP:', document_path, virtual_document.uri, 'connected.');
+    this.console.log(document_path, virtual_document.uri, 'connected.');
 
     this.connected.emit({ connection, virtual_document });
 
@@ -309,6 +314,7 @@ export class DocumentConnectionManager {
 export namespace DocumentConnectionManager {
   export interface IOptions {
     language_server_manager: ILanguageServerManager;
+    console: ILSPLogConsole;
   }
 
   export function solve_uris(
@@ -412,9 +418,6 @@ namespace Private {
     language_server_id: TLanguageServerId,
     settings: ILanguageServerConfiguration
   ): void {
-    console.log('Server Update: ', language_server_id);
-    console.log('Sending settings: ', settings);
-
     const connection = _connections.get(language_server_id);
     if (connection) {
       connection.sendConfigurationChange(settings);

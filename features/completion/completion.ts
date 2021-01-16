@@ -16,7 +16,7 @@ import { FeatureSettings, IFeatureLabIntegration } from '../../feature';
 
 import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { IDocumentConnectionData } from '../../connection_manager';
-import { ILSPAdapterManager } from '../../tokens';
+import { ILSPAdapterManager, ILSPLogConsole } from '../../tokens';
 import { NotebookAdapter } from '../../adapters/notebook/notebook';
 import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
 
@@ -83,7 +83,8 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     private completionManager: ICompletionManager,
     public settings: FeatureSettings<LSPCompletionSettings>,
     private adapterManager: ILSPAdapterManager,
-    private completionThemeManager: ILSPCompletionThemeManager
+    private completionThemeManager: ILSPCompletionThemeManager,
+    private console: ILSPLogConsole
   ) {
     adapterManager.adapterChanged.connect(this.swap_adapter, this);
     settings.changed.connect(() => {
@@ -179,7 +180,8 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       settings: this.settings,
       // it might or might not be a notebook panel (if it is not, the sessionContext and session will just be undefined)
       session: (this.current_adapter.widget as NotebookPanel)?.sessionContext
-        ?.session
+        ?.session,
+      console: this.console
     });
   }
 }

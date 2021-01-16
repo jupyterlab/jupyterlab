@@ -27,7 +27,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     this.ce_editor_to_cell = new Map();
     this.editor = editor_widget.content;
     this.known_editors_ids = new Set();
-    this.init_once_ready().catch(console.warn);
+    this.init_once_ready().catch(this.console.warn);
   }
 
   private async update_language_info() {
@@ -41,18 +41,18 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     change: Session.ISessionConnection.IKernelChangedArgs
   ) {
     if (!change.newValue) {
-      console.log('LSP: kernel was shut down');
+      this.console.log('kernel was shut down');
       return;
     }
     try {
       await this.update_language_info();
-      console.log(
-        `LSP: Changed to ${this._language_info.name} kernel, reconnecting`
+      this.console.log(
+        `Changed to ${this._language_info.name} kernel, reconnecting`
       );
       await until_ready(this.is_ready, -1);
       this.reload_connection();
     } catch (err) {
-      console.warn(err);
+      this.console.warn(err);
       // try to reconnect anyway
       this.reload_connection();
     }
@@ -118,11 +118,11 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   }
 
   async init_once_ready() {
-    console.log('LSP: waiting for', this.document_path, 'to fully load');
+    this.console.log('waiting for', this.document_path, 'to fully load');
     await this.widget.context.sessionContext.ready;
     await until_ready(this.is_ready, -1);
     await this.update_language_info();
-    console.log('LSP:', this.document_path, 'ready for connection');
+    this.console.log(this.document_path, 'ready for connection');
 
     this.init_virtual();
     this.connect_contentChanged_signal();
@@ -130,7 +130,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     // connect the document, but do not open it as the adapter will handle this
     // after registering all features
     this.connect_document(this.virtual_editor.virtual_document, false).catch(
-      console.warn
+      this.console.warn
     );
 
     this.widget.context.sessionContext.kernelChanged.connect(
@@ -249,7 +249,8 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       // notebooks are continuous, each cell is dependent on the previous one
       standalone: false,
       // notebooks are not supported by LSP servers
-      has_lsp_supported_file: false
+      has_lsp_supported_file: false,
+      console: this.console
     });
   }
 
@@ -297,7 +298,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     );
 
     if (root_position == null) {
-      console.warn('Could not retrieve current context', virtual_editor);
+      this.console.warn('Could not retrieve current context', virtual_editor);
       return null;
     }
 
