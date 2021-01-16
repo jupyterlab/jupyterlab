@@ -408,7 +408,7 @@ const shortMessageByStatus: StatusMap = {
   waiting: 'Waiting...',
   initialized: 'Fully initialized',
   initialized_but_some_missing: 'Initialized (additional servers needed)',
-  initializing: 'Partially initialized',
+  initializing: 'Initializing...',
   connecting: 'Connecting...'
 };
 
@@ -540,15 +540,23 @@ export namespace LSPStatus {
       let initialized_documents = new Set<VirtualDocument>();
       let absent_documents = new Set<VirtualDocument>();
       // detected documents with LSP servers available
-      let documents_with_servers = new Set<VirtualDocument>();
+      let documents_with_available_servers = new Set<VirtualDocument>();
+      // detected documents with LSP servers known
+      let documents_with_known_servers = new Set<VirtualDocument>();
 
       detected_documents.forEach((document, uri) => {
         let connection = this._connection_manager.connections.get(uri);
+        let server_id = this._connection_manager.language_server_manager.getServerId(
+          { language: document.language }
+        );
+        if (server_id !== null) {
+          documents_with_known_servers.add(document);
+        }
         if (!connection) {
           absent_documents.add(document);
           return;
         } else {
-          documents_with_servers.add(document);
+          documents_with_available_servers.add(document);
         }
 
         if (connection.isConnected) {
@@ -573,9 +581,14 @@ export namespace LSPStatus {
         status = 'waiting';
       } else if (initialized_documents.size === detected_documents.size) {
         status = 'initialized';
-      } else if (initialized_documents.size === documents_with_servers.size) {
+      } else if (
+        initialized_documents.size === documents_with_available_servers.size &&
+        detected_documents.size > documents_with_known_servers.size
+      ) {
         status = 'initialized_but_some_missing';
-      } else if (connected_documents.size === documents_with_servers.size) {
+      } else if (
+        connected_documents.size === documents_with_available_servers.size
+      ) {
         status = 'initializing';
       } else {
         status = 'connecting';
