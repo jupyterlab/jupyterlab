@@ -3,7 +3,7 @@
 
 import { showDialog, Dialog } from '@jupyterlab/apputils';
 
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, PathExt, PageConfig } from '@jupyterlab/coreutils';
 
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
 
@@ -396,14 +396,27 @@ export class FileBrowserModel implements IDisposable {
    * @returns A promise containing the new file contents model.
    *
    * #### Notes
-   * This will ask for confirmation, then upload the file in 1 MB chunks.
+   * On Notebook version < 5.1.0, this will fail to upload files that are too
+   * big to be sent in one request to the server. On newer versions, it will
+   * ask for confirmation then upload the file in 1 MB chunks.
    */
   async upload(file: File): Promise<Contents.IModel> {
+    const supportsChunked = PageConfig.getNotebookVersion() >= [5, 1, 0];
     const largeFile = file.size > LARGE_FILE_SIZE;
+
+    if (largeFile && !supportsChunked) {
+      const msg = this._trans.__(
+        'Cannot upload file (>%1 MB). %2',
+        LARGE_FILE_SIZE / (1024 * 1024),
+        file.name
+      );
+      console.warn(msg);
+      throw msg;
+    }
 
     const err = 'File not uploaded';
     if (largeFile && !(await this._shouldUploadLarge(file))) {
-      throw 'Canceled large file upload';
+      throw 'Cancelled large file upload';
     }
     await this._uploadCheckDisposed();
     await this.refresh();
@@ -415,7 +428,7 @@ export class FileBrowserModel implements IDisposable {
       throw err;
     }
     await this._uploadCheckDisposed();
-    const chunkedUpload = file.size > CHUNK_SIZE;
+    const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
     return await this._upload(file, chunkedUpload);
   }
 
