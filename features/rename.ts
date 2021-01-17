@@ -141,7 +141,7 @@ export class RenameCM extends CodeMirrorIntegration {
 
       this.status_message.set(status, 5 * 1000);
     } catch (error) {
-      console.warn(error);
+      this.console.warn(error);
     }
 
     return outcome;

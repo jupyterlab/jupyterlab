@@ -1,6 +1,7 @@
 import {
   ILSPAdapterManager,
   ILSPFeatureManager,
+  ILSPLogConsole,
   PLUGIN_ID
 } from '../../tokens';
 import {
@@ -29,7 +30,8 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
     ISettingRegistry,
     ICompletionManager,
     ILSPAdapterManager,
-    ILSPCompletionThemeManager
+    ILSPCompletionThemeManager,
+    ILSPLogConsole
   ],
   autoStart: true,
   activate: (
@@ -38,7 +40,8 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry,
     completionManager: ICompletionManager,
     adapterManager: ILSPAdapterManager,
-    iconsThemeManager: ILSPCompletionThemeManager
+    iconsThemeManager: ILSPCompletionThemeManager,
+    logConsole: ILSPLogConsole
   ) => {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
     const labIntegration = new CompletionLabIntegration(
@@ -46,7 +49,8 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
       completionManager,
       settings,
       adapterManager,
-      iconsThemeManager
+      iconsThemeManager,
+      logConsole.scope('CompletionLab')
     );
 
     featureManager.register({

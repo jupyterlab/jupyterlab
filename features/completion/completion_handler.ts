@@ -32,6 +32,7 @@ import {
 } from '@krassowski/completion-theme/lib/types';
 import { LabIcon } from '@jupyterlab/ui-components';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
+import { ILSPLogConsole } from '../../tokens';
 
 /**
  * A LSP connector for completion handlers.
@@ -44,6 +45,7 @@ export class LSPConnector
   private _context_connector: ContextConnector;
   private _kernel_connector: KernelConnector;
   private _kernel_and_context_connector: CompletionConnector;
+  private console: ILSPLogConsole;
 
   // signal that this is the new type connector (providing completion items)
   responseType = ICompletionItemsResponseType;
@@ -76,6 +78,7 @@ export class LSPConnector
         kernel_options
       );
     }
+    this.console = options.console;
   }
 
   dispose() {
@@ -132,7 +135,7 @@ export class LSPConnector
     const token = editor.getTokenForPosition(cursor);
 
     if (this.suppress_auto_invoke_in.indexOf(token.type) !== -1) {
-      console.log('Suppressing completer auto-invoke in', token.type);
+      this.console.log('Suppressing completer auto-invoke in', token.type);
       return;
     }
 
@@ -193,14 +196,14 @@ export class LSPConnector
       }
       if (!promise) {
         promise = lsp_promise.catch(e => {
-          console.warn('LSP: hint failed', e);
+          this.console.warn('hint failed', e);
           return this.fallback_connector
             .fetch(request)
             .then(this.transform_reply);
         });
       }
     } catch (e) {
-      console.warn('LSP: kernel completions failed', e);
+      this.console.warn('kernel completions failed', e);
       promise = this.fallback_connector
         .fetch(request)
         .then(this.transform_reply);
@@ -224,8 +227,8 @@ export class LSPConnector
   ): Promise<CompletionHandler.ICompletionItemsReply> {
     let connection = this._connections.get(document.uri);
 
-    console.log('[LSP][Completer] Fetching');
-    console.log('[LSP][Completer] Token:', token, start, end);
+    this.console.debug('Fetching');
+    this.console.debug('Token:', token, start, end);
 
     const trigger_kind =
       this.trigger_kind == AdditionalCompletionTriggerKinds.AutoInvoked
@@ -245,7 +248,7 @@ export class LSPConnector
       trigger_kind
     )) || []) as lsProtocol.CompletionItem[];
 
-    console.log('[LSP][Completer] Transforming');
+    this.console.debug('Transforming');
 
     let prefix = token.value.slice(0, position_in_token + 1);
     let all_non_prefixed = true;
@@ -290,7 +293,7 @@ export class LSPConnector
 
       items.push(completionItem);
     });
-    console.log('[LSP][Completer] Transformed');
+    this.console.debug('Transformed');
     // required to make the repetitive trigger characters like :: or ::: work for R with R languageserver,
     // see https://github.com/krassowski/jupyterlab-lsp/issues/436
     const prefix_offset = token.value.length;
@@ -324,7 +327,7 @@ export class LSPConnector
   private transform_reply(
     reply: CompletionHandler.IReply
   ): CompletionHandler.ICompletionItemsReply {
-    console.log('[LSP][Completer] Transforming kernel reply:', reply);
+    this.console.log('Transforming kernel reply:', reply);
     let items: CompletionHandler.ICompletionItem[];
     const metadata = reply.metadata || {};
     const types = metadata._jupyter_types_experimental as JSONArray;
@@ -355,7 +358,7 @@ export class LSPConnector
     lsp: CompletionHandler.ICompletionItemsReply,
     editor: CodeEditor.IEditor
   ): CompletionHandler.ICompletionItemsReply {
-    console.log('[LSP][Completer] Merging completions:', lsp, kernel);
+    this.console.debug('Merging completions:', lsp, kernel);
 
     if (!kernel.items.length) {
       return lsp;
@@ -372,9 +375,9 @@ export class LSPConnector
       const cursor = editor.getCursorPosition();
       const line = editor.getLine(cursor.line);
       prefix = line.substring(kernel.start, lsp.start);
-      console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
+      this.console.debug('Removing kernel prefix: ', prefix);
     } else if (lsp.start < kernel.start) {
-      console.warn('[LSP][Completer] Kernel start > LSP start');
+      this.console.warn('Kernel start > LSP start');
     }
 
     // combine completions, de-duping by insertText; LSP completions will show up first, kernel second.
@@ -400,7 +403,7 @@ export class LSPConnector
     });
     // TODO: Sort items
     // Return reply with processed items.
-    console.log('[LSP][Completer] Merged: ', { ...lsp, items: processedItems });
+    this.console.debug('Merged: ', { ...lsp, items: processedItems });
     return { ...lsp, items: processedItems };
   }
 
@@ -466,5 +469,7 @@ export namespace LSPConnector {
     themeManager: ILSPCompletionThemeManager;
 
     session?: Session.ISessionConnection;
+
+    console: ILSPLogConsole;
   }
 }

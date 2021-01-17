@@ -14,10 +14,11 @@ import {
 import { IDocumentInfo } from 'lsp-ws-connection/src';
 
 import { DocumentConnectionManager } from '../connection_manager';
-import { create_console, EditorLogConsole } from './console';
 import IRange = CodeEditor.IRange;
 import { ReversibleOverridesMap } from '../overrides/maps';
 import { LanguageIdentifier } from '../lsp';
+import { ILSPLogConsole } from '../tokens';
+import { BrowserConsole } from './console';
 
 type language = string;
 
@@ -146,6 +147,7 @@ export namespace VirtualDocument {
      */
     standalone?: boolean;
     parent?: VirtualDocument;
+    console?: ILSPLogConsole;
   }
 }
 
@@ -256,7 +258,7 @@ export class VirtualDocument {
     this.changed = new Signal(this);
     this.unused_documents = new Set();
     this.document_info = new VirtualDocumentInfo(this);
-    this.update_manager = new UpdateManager(this);
+    this.update_manager = new UpdateManager(this, options.console);
     this.clear();
   }
 
@@ -840,7 +842,7 @@ export interface IBlockAddedInfo {
 }
 
 export class UpdateManager {
-  console: EditorLogConsole;
+  console: ILSPLogConsole;
 
   /**
    * Virtual documents update guard.
@@ -862,14 +864,16 @@ export class UpdateManager {
   update_began: Signal<UpdateManager, ICodeBlockOptions[]>;
   update_finished: Signal<UpdateManager, ICodeBlockOptions[]>;
 
-  constructor(private virtual_document: VirtualDocument) {
+  constructor(
+    private virtual_document: VirtualDocument,
+    console: ILSPLogConsole
+  ) {
     this.document_updated = new Signal(this);
     this.block_added = new Signal(this);
     this.update_began = new Signal(this);
     this.update_finished = new Signal(this);
     this.document_updated.connect(this.on_updated, this);
-    // TODO singleton
-    this.console = create_console('browser');
+    this.console = console || new BrowserConsole();
   }
 
   dispose() {
@@ -887,7 +891,7 @@ export class UpdateManager {
     try {
       root_document.close_expired_documents();
     } catch (e) {
-      this.console.warn('LSP: Failed to close expired documents');
+      this.console.warn('Failed to close expired documents');
     }
   }
 

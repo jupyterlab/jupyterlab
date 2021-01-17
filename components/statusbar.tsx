@@ -35,6 +35,9 @@ import { DocumentLocator } from './utils';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import { LanguageServerManager } from '../manager';
 import { codeCheckIcon, codeClockIcon, codeWarningIcon } from './icons';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { SERVER_EXTENSION_404 } from '../errors';
+import okButton = Dialog.okButton;
 
 interface IServerStatusProps {
   server: SCHEMA.LanguageServerSession;
@@ -317,11 +320,19 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
     if (this._popup) {
       this._popup.dispose();
     }
-    this._popup = showPopup({
-      body: new LSPPopup(this.model),
-      anchor: this,
-      align: 'left'
-    });
+    if (this.model.status.status == 'no_server_extension') {
+      showDialog({
+        title: 'LSP server extension not found',
+        body: SERVER_EXTENSION_404,
+        buttons: [okButton()]
+      }).catch(console.warn);
+    } else {
+      this._popup = showPopup({
+        body: new LSPPopup(this.model),
+        anchor: this,
+        align: 'left'
+      });
+    }
   };
 }
 
@@ -364,6 +375,7 @@ export class StatusButtonExtension
 }
 
 type StatusCode =
+  | 'no_server_extension'
   | 'waiting'
   | 'initializing'
   | 'initialized'
@@ -389,6 +401,7 @@ type StatusMap = Record<StatusCode, string>;
 type StatusIconClass = Record<StatusCode, string>;
 
 const classByStatus: StatusIconClass = {
+  no_server_extension: 'error',
   waiting: 'inactive',
   initialized: 'ready',
   initializing: 'preparing',
@@ -397,6 +410,7 @@ const classByStatus: StatusIconClass = {
 };
 
 const iconByStatus: Record<StatusCode, LabIcon> = {
+  no_server_extension: codeWarningIcon,
   waiting: codeClockIcon,
   initialized: codeCheckIcon,
   initializing: codeClockIcon,
@@ -405,6 +419,7 @@ const iconByStatus: Record<StatusCode, LabIcon> = {
 };
 
 const shortMessageByStatus: StatusMap = {
+  no_server_extension: 'Server extension missing',
   waiting: 'Waiting...',
   initialized: 'Fully initialized',
   initialized_but_some_missing: 'Initialized (additional servers needed)',
@@ -577,7 +592,9 @@ export namespace LSPStatus {
       });
 
       let status: StatusCode;
-      if (detected_documents.size === 0) {
+      if (this.language_server_manager.statusCode === 404) {
+        status = 'no_server_extension';
+      } else if (detected_documents.size === 0) {
         status = 'waiting';
       } else if (initialized_documents.size === detected_documents.size) {
         status = 'initialized';

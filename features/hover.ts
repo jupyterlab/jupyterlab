@@ -116,8 +116,8 @@ export class HoverCM extends CodeMirrorIntegration {
       );
     });
     if (matching_items.length > 1) {
-      console.warn(
-        'LSP: Potential hover cache malfunction: ',
+      this.console.warn(
+        'Potential hover cache malfunction: ',
         virtual_position,
         matching_items
       );
@@ -138,7 +138,7 @@ export class HoverCM extends CodeMirrorIntegration {
             this.maybeHideTooltip(event.target);
           }
         })
-        .catch(console.warn);
+        .catch(this.console.warn);
     });
     this.wrapper_handlers.set('mouseleave', this.onMouseLeave);
 
@@ -420,7 +420,7 @@ export class HoverCM extends CodeMirrorIntegration {
           e.message === "Cannot read property 'string' of undefined"
         )
       ) {
-        console.warn(e);
+        this.console.warn(e);
       }
     }
   };

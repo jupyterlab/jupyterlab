@@ -8,7 +8,7 @@ import { IRootPosition, IVirtualPosition } from './positioning';
 import { IVirtualEditor } from './virtual/editor';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { ILSPAdapterManager } from './tokens';
+import { ILSPAdapterManager, ILSPLogConsole } from './tokens';
 
 function is_context_menu_over_token(adapter: WidgetAdapter<IDocumentWidget>) {
   let position = adapter.get_position_from_context_menu();
@@ -28,6 +28,7 @@ export interface ILSPCommandManagerOptions {
   tracker: IWidgetTracker;
   suffix: string;
   entry_point: CommandEntryPoint;
+  console: ILSPLogConsole;
 }
 
 abstract class LSPCommandManager {
@@ -110,6 +111,7 @@ export class ContextCommandManager extends LSPCommandManager {
   public entry_point: CommandEntryPoint;
   protected rank_group?: number;
   protected rank_group_size?: number;
+  protected console: ILSPLogConsole;
 
   constructor(options: ILSPContextManagerOptions) {
     super(options);
@@ -117,6 +119,7 @@ export class ContextCommandManager extends LSPCommandManager {
     this.entry_point = options.entry_point;
     this.rank_group = options.rank_group;
     this.rank_group_size = options.rank_group_size;
+    this.console = options.console;
     if (options.callback) {
       options.callback(this);
     }
@@ -172,7 +175,7 @@ export class ContextCommandManager extends LSPCommandManager {
       try {
         context = this.current_adapter.get_context_from_context_menu();
       } catch (e) {
-        console.warn(
+        this.console.warn(
           'contextMenu is attached, but could not get the context',
           e
         );
@@ -195,7 +198,7 @@ export class ContextCommandManager extends LSPCommandManager {
         command.is_enabled(context)
       );
     } catch (e) {
-      console.warn('is_visible failed', e);
+      this.console.warn('is_visible failed', e);
       return false;
     }
   }

@@ -48,12 +48,12 @@ export class FileEditorAdapter extends WidgetAdapter<
     this.init_virtual();
     this.connect_contentChanged_signal();
 
-    console.log('LSP: file ready for connection:', this.path);
+    this.console.log('file ready for connection:', this.path);
 
     // connect the document, but do not open it as the adapter will handle this
     // after registering all features
     this.connect_document(this.virtual_editor.virtual_document, false).catch(
-      console.warn
+      this.console.warn
     );
 
     this.editor.model.mimeTypeChanged.connect(this.reload_connection, this);
@@ -103,7 +103,8 @@ export class FileEditorAdapter extends WidgetAdapter<
       overrides_registry: {},
       foreign_code_extractors: {},
       standalone: true,
-      has_lsp_supported_file: true
+      has_lsp_supported_file: true,
+      console: this.console
     });
   }
 }

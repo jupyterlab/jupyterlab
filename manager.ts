@@ -14,10 +14,16 @@ export class LanguageServerManager implements ILanguageServerManager {
   protected _sessions: TSessionMap = new Map();
   private _settings: ServerConnection.ISettings;
   private _baseUrl: string;
+  private _statusCode: number;
+  private _retries: number;
+  private _retriesInterval: number;
 
   constructor(options: ILanguageServerManager.IOptions) {
     this._settings = options.settings || ServerConnection.makeSettings();
     this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
+    this._retries = options.retries || 2;
+    this._retriesInterval = options.retriesInterval || 10000;
+    this._statusCode = null;
     this.fetchSessions().catch(console.warn);
   }
 
@@ -45,6 +51,10 @@ export class LanguageServerManager implements ILanguageServerManager {
     return null;
   }
 
+  get statusCode(): number {
+    return this._statusCode;
+  }
+
   async fetchSessions() {
     let response = await ServerConnection.makeRequest(
       this.statusUrl,
@@ -52,8 +62,14 @@ export class LanguageServerManager implements ILanguageServerManager {
       this._settings
     );
 
+    this._statusCode = response.status;
+
     if (!response.ok) {
       console.error('Could not fetch sessions', response);
+      if (this._retries > 0) {
+        this._retries -= 1;
+        setTimeout(this.fetchSessions.bind(this), this._retriesInterval);
+      }
       return;
     }
 
