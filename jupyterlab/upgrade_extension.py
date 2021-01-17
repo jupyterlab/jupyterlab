@@ -44,8 +44,10 @@ def update_extension(target, interactive=True):
         python_name = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=target).decode('utf8').strip()
     else:
         python_name = data['name']
-        if '@' in python_name:
-            python_name = python_name[1:].replace('/', '_').replace('-', '_')
+        if python_name.startswith('@'):
+            python_name = python_name[1:].replace('/', '_')
+
+    python_name = python_name.replace('-', '_')
     
     output_dir = osp.join(target, '_temp_extension')
     if osp.exists(output_dir):
