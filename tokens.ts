@@ -57,6 +57,7 @@ export interface ILanguageServerManager {
   ): TLanguageServerId;
   fetchSessions(): Promise<void>;
   statusUrl: string;
+  statusCode: number;
 }
 
 export interface ILanguageServerConfiguration {
@@ -73,6 +74,15 @@ export namespace ILanguageServerManager {
   export interface IOptions {
     settings?: ServerConnection.ISettings;
     baseUrl?: string;
+    /**
+     * Number of connection retries to fetch the sessions.
+     * Default 2.
+     */
+    retries?: number;
+    /**
+     * The interval for retries, default 10 seconds.
+     */
+    retriesInterval?: number;
   }
   export interface IGetServerIdOptions {
     language?: TLanguageId;
