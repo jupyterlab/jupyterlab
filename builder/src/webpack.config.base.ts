@@ -83,7 +83,7 @@ module.exports = {
       url: false,
       buffer: false,
       path: require.resolve('path-browserify'),
-      process: require.resolve("process/")
+      process: require.resolve('process/')
     }
   },
   watchOptions: {
@@ -92,7 +92,7 @@ module.exports = {
   },
   plugins: [
     new webpack.ProvidePlugin({
-      process: 'process/browser',
-    }),
+      process: 'process/browser'
+    })
   ]
 };
