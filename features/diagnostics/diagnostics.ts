@@ -275,10 +275,6 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     this.connection_handlers.set('diagnostic', this.handleDiagnostic);
     this.wrapper_handlers.set('focusin', this.switchDiagnosticsPanelSource);
     this.unique_editor_ids = new DefaultMap(() => this.unique_editor_ids.size);
-    if (!diagnostics_databases.has(this.virtual_editor)) {
-      diagnostics_databases.set(this.virtual_editor, new DiagnosticsDatabase());
-    }
-    this.diagnostics_db = diagnostics_databases.get(this.virtual_editor);
     this.settings.changed.connect(this.refreshDiagnostics, this);
     super.register();
   }
@@ -294,7 +290,13 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
    *
    * Maps virtual_document.uri to IEditorDiagnostic[].
    */
-  public diagnostics_db: DiagnosticsDatabase;
+  public get diagnostics_db(): DiagnosticsDatabase {
+    // Note that virtual_editor can change at runtime (kernel restart)
+    if (!diagnostics_databases.has(this.virtual_editor)) {
+      diagnostics_databases.set(this.virtual_editor, new DiagnosticsDatabase());
+    }
+    return diagnostics_databases.get(this.virtual_editor);
+  }
 
   switchDiagnosticsPanelSource = () => {
     if (
