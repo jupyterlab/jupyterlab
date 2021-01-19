@@ -489,7 +489,7 @@ export namespace LSPStatus {
           server => server.spec.languages.indexOf(language) !== -1
         );
         if (servers.length > 1) {
-          console.warn('More than one server per language for' + language);
+          console.warn('More than one server per language for', language);
         }
         if (servers.length === 0) {
           continue;
