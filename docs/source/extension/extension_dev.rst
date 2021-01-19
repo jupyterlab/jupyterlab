@@ -690,7 +690,7 @@ To transpile jupyterlab packages, you need to install the following package:
 
 ::
 
-   jlpm add --dev jest@^24 @types/jest@^24 ts-jest@^24 @babel/core@^7 @babel/preset-env@^7
+   jlpm add --dev jest @types/jest ts-jest @babel/core@^7 @babel/preset-env@^7
 
 Then in `jest.config.js`, you will specify to use babel for js files and ignore
 all node modules except the jupyterlab ones:
