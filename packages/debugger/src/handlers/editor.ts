@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Y from 'yjs';
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-
-import { IObservableString } from '@jupyterlab/observables';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -43,7 +43,7 @@ export class EditorHandler implements IDisposable {
     this._editor = options.editor;
 
     this._editorMonitor = new ActivityMonitor({
-      signal: this._editor.model.value.changed,
+      signal: this._editor.model.valueChanged,
       timeout: EDITOR_CHANGED_TIMEOUT
     });
     this._editorMonitor.activityStopped.connect(() => {
@@ -139,7 +139,7 @@ export class EditorHandler implements IDisposable {
     });
 
     void this._debuggerService.updateBreakpoints(
-      this._editor.model.value.text,
+      this._editor.model.getValue(),
       breakpoints,
       this._path
     );
@@ -171,7 +171,7 @@ export class EditorHandler implements IDisposable {
     }
 
     void this._debuggerService.updateBreakpoints(
-      this._editor.model.value.text,
+      this._editor.model.getValue(),
       breakpoints,
       this._path
     );
@@ -218,7 +218,7 @@ export class EditorHandler implements IDisposable {
    * or its path (if it exists).
    */
   private _getBreakpoints(): IDebugger.IBreakpoint[] {
-    const code = this._editor.model.value.text;
+    const code = this._editor.model.getValue();
     return this._debuggerService.model.breakpoints.getBreakpoints(
       this._path || this._debuggerService.getCodeId(code)
     );
@@ -228,10 +228,7 @@ export class EditorHandler implements IDisposable {
   private _path: string;
   private _editor: CodeEditor.IEditor;
   private _debuggerService: IDebugger;
-  private _editorMonitor: ActivityMonitor<
-    IObservableString,
-    IObservableString.IChangedArgs
-  >;
+  private _editorMonitor: ActivityMonitor<CodeEditor.IModel, Y.YTextEvent>;
 }
 
 /**

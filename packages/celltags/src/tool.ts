@@ -55,7 +55,7 @@ export class TagTool extends NotebookTools.Tool {
   checkApplied(name: string): boolean {
     const activeCell = this.tracker?.activeCell;
     if (activeCell) {
-      const tags = activeCell.model.metadata.get('tags') as string[];
+      const tags = activeCell.model.ymeta.get('tags') as string[];
       if (tags) {
         return tags.includes(name);
       }
@@ -71,12 +71,10 @@ export class TagTool extends NotebookTools.Tool {
   addTag(name: string) {
     const cell = this.tracker?.activeCell;
     if (cell) {
-      const oldTags = [
-        ...((cell.model.metadata.get('tags') as string[]) ?? [])
-      ];
+      const oldTags = (cell.model.ymeta.get('tags') as string[]) || [];
       let tagsToAdd = name.split(/[,\s]+/);
       tagsToAdd = tagsToAdd.filter(tag => tag !== '' && !oldTags.includes(tag));
-      cell.model.metadata.set('tags', oldTags.concat(tagsToAdd));
+      cell.model.ymeta.set('tags', oldTags.concat(tagsToAdd));
       this.refreshTags();
       this.loadActiveTags();
     }
@@ -90,13 +88,11 @@ export class TagTool extends NotebookTools.Tool {
   removeTag(name: string) {
     const cell = this.tracker?.activeCell;
     if (cell) {
-      const oldTags = [
-        ...((cell.model.metadata.get('tags') as string[]) ?? [])
-      ];
+      const oldTags = cell.model.ymeta.get('tags') as string[];
       let tags = oldTags.filter(tag => tag !== name);
-      cell.model.metadata.set('tags', tags);
+      cell.model.ymeta.set('tags', tags);
       if (tags.length === 0) {
-        cell.model.metadata.delete('tags');
+        cell.model.ymeta.delete('tags');
       }
       this.refreshTags();
       this.loadActiveTags();
@@ -120,11 +116,11 @@ export class TagTool extends NotebookTools.Tool {
    */
   pullTags() {
     const notebook = this.tracker?.currentWidget;
-    const cells = notebook?.model?.cells ?? [];
+    const cells = notebook?.model?.cellInstances || [];
     const allTags = reduce(
       cells,
       (allTags: string[], cell) => {
-        const tags = (cell.metadata.get('tags') as string[]) ?? [];
+        const tags = (cell.ymeta.get('tags') as string[]) || [];
         return [...allTags, ...tags];
       },
       []
@@ -168,7 +164,7 @@ export class TagTool extends NotebookTools.Tool {
       []
     );
     const validTags = [...new Set(tags)].filter(tag => tag !== '');
-    cell.model.metadata.set('tags', validTags);
+    cell.model.ymeta.set('tags', validTags);
     this.refreshTags();
     this.loadActiveTags();
   }
@@ -205,7 +201,7 @@ export class TagTool extends NotebookTools.Tool {
         this.refreshTags();
         this.loadActiveTags();
       });
-      this.tracker.currentWidget.model!.cells.changed.connect(() => {
+      this.tracker.currentWidget.model!.cellsChanged.connect(() => {
         this.refreshTags();
         this.loadActiveTags();
       });
@@ -220,9 +216,7 @@ export class TagTool extends NotebookTools.Tool {
    * Handle a change to active cell metadata.
    */
   protected onActiveCellMetadataChanged(): void {
-    const tags = this.tracker.activeCell!.model.metadata.get(
-      'tags'
-    ) as string[];
+    const tags = this.tracker.activeCell!.model.ymeta.get('tags');
     let taglist: string[] = [];
     if (tags) {
       if (typeof tags === 'string') {

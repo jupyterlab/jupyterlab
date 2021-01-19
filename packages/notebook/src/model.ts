@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Y from 'yjs';
+
 import { DocumentModel, DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
@@ -14,18 +16,10 @@ import {
   CellModel
 } from '@jupyterlab/cells';
 
+import { Signal } from '@lumino/signaling';
+
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { UUID } from '@lumino/coreutils';
-
-import {
-  IObservableJSON,
-  IObservableUndoableList,
-  IObservableList,
-  IModelDB
-} from '@jupyterlab/observables';
-
-import { CellList } from './celllist';
 import { showDialog, Dialog } from '@jupyterlab/apputils';
 import {
   nullTranslator,
@@ -37,11 +31,6 @@ import {
  * The definition of a model object for a notebook widget.
  */
 export interface INotebookModel extends DocumentRegistry.IModel {
-  /**
-   * The list of cells in the notebook.
-   */
-  readonly cells: IObservableUndoableList<ICellModel>;
-
   /**
    * The cell model factory for the notebook.
    */
@@ -58,14 +47,21 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   readonly nbformatMinor: number;
 
   /**
-   * The metadata associated with the notebook.
-   */
-  readonly metadata: IObservableJSON;
-
-  /**
    * The array of deleted cells since the notebook was last run.
    */
   readonly deletedCells: string[];
+  readonly cellsChanged: Signal<INotebookModel, Y.YArrayEvent<Y.Map<any>>>;
+  readonly cellInstances: Array<ICellModel>;
+  readonly ycells: Y.Array<Y.Map<any>>;
+  insertCell(index: number, cell: ICellModel): void;
+  insertCells(index: number, cells: ICellModel[]): void;
+  setCell(index: number, cell: ICellModel): void;
+  getCell(index: number): ICellModel;
+  deleteCell(index: number, length?: number): void;
+  moveCell(from: number, to: number): void;
+
+  readonly yUndoManager: Y.UndoManager;
+  readonly ymeta: Y.Map<any>;
 }
 
 /**
@@ -76,43 +72,50 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    super(options.languagePreference, options.modelDB);
+    super(options.languagePreference, options.ymodel);
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
-    this.contentFactory = factory.clone(this.modelDB.view('cells'));
-    this._cells = new CellList(this.modelDB, this.contentFactory);
-    this._trans = (options.translator || nullTranslator).load('jupyterlab');
-    this._cells.changed.connect(this._onCellsChanged, this);
 
-    // Handle initial metadata.
-    const metadata = this.modelDB.createMap('metadata');
-    if (!metadata.has('language_info')) {
-      const name = options.languagePreference || '';
-      metadata.set('language_info', { name });
+    this.ycells = this.ymodel.getArray();
+    this.contentFactory = factory.clone(this.ycells);
+    this.yUndoManager = new Y.UndoManager(this.ycells);
+
+    this._trans = (options.translator || nullTranslator).load('jupyterlab');
+
+    if (options.ymodel == null) {
+      // only overwrite metadata if we create the model initially
+      if (options.languagePreference) {
+        this.ymeta.set('language_info', { name: options.languagePreference });
+      }
     }
-    this._ensureMetadata();
-    metadata.changed.connect(this.triggerContentChange, this);
     this._deletedCells = [];
+    this.triggerContentChange = this.triggerContentChange.bind(this);
+    this.ycells.observeDeep(this.triggerContentChange);
+    this._onCellsChanged = this._onCellsChanged.bind(this);
+    this.ycells.observe(this._onCellsChanged);
+
+    this.cellInstances = this.ycells.toArray().map(type => {
+      if (!this.ytypeCellMapping.has(type)) {
+        this.ytypeCellMapping.set(type, this._createCellFromType(type));
+      }
+      return this.ytypeCellMapping.get(type) as ICellModel;
+    });
   }
+
+  readonly yUndoManager: Y.UndoManager;
+
+  readonly ytypeCellMapping: Map<Y.Map<any>, ICellModel> = new Map();
+
+  readonly ycells: Y.Array<any>;
+  /**
+   * @todo listen to changes of ycells and create ICell instances
+   */
+  cellInstances: Array<ICellModel>;
 
   /**
    * The cell model factory for the notebook.
    */
   readonly contentFactory: NotebookModel.IContentFactory;
-
-  /**
-   * The metadata associated with the notebook.
-   */
-  get metadata(): IObservableJSON {
-    return this.modelDB.get('metadata') as IObservableJSON;
-  }
-
-  /**
-   * Get the observable list of notebook cells.
-   */
-  get cells(): IObservableUndoableList<ICellModel> {
-    return this._cells;
-  }
 
   /**
    * The major version number of the nbformat.
@@ -132,9 +135,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    const spec = this.metadata.get(
-      'kernelspec'
-    ) as nbformat.IKernelspecMetadata;
+    const spec = this.ymeta.get('kernelspec') as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
 
@@ -149,7 +150,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    const info = this.metadata.get(
+    const info = this.ymeta.get(
       'language_info'
     ) as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
@@ -163,9 +164,8 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     if (this.isDisposed) {
       return;
     }
-    const cells = this.cells;
-    this._cells = null!;
-    cells.dispose();
+    this.ycells.unobserveDeep(this.triggerContentChange);
+    this.ycells.unobserve(this._onCellsChanged);
     super.dispose();
   }
 
@@ -190,15 +190,17 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.INotebookContent {
-    const cells: nbformat.ICell[] = [];
-    for (let i = 0; i < (this.cells?.length || 0); i++) {
-      const cell = this.cells.get(i);
-      cells.push(cell.toJSON());
-    }
-    this._ensureMetadata();
+    const cells = this.cellInstances.map(cell => cell.toJSON());
     const metadata = Object.create(null) as nbformat.INotebookMetadata;
-    for (const key of this.metadata.keys()) {
-      metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
+    for (const [key, value] of this.ymeta.entries()) {
+      metadata[key] = JSON.parse(JSON.stringify(value));
+    }
+    // ensure that metadata is set correctly
+    if (metadata['language_info'] == null) {
+      metadata['language_info'] = { name: '' };
+    }
+    if (metadata['kernelspec'] == null) {
+      metadata['kernelspec'] = { name: '', display_name: '' };
     }
     return {
       metadata,
@@ -215,27 +217,23 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: nbformat.INotebookContent): void {
-    const cells: ICellModel[] = [];
-    const factory = this.contentFactory;
-    for (const cell of value.cells) {
-      switch (cell.cell_type) {
-        case 'code':
-          cells.push(factory.createCodeCell({ cell }));
-          break;
-        case 'markdown':
-          cells.push(factory.createMarkdownCell({ cell }));
-          break;
-        case 'raw':
-          cells.push(factory.createRawCell({ cell }));
-          break;
-        default:
+    // bundle all changes to the model to a single change
+    this.ymodel.transact(() => {
+      // @todo this should convert cell to type first
+      this.ycells.insert(0, value.cells);
+      // per spec clear the existing metadata
+      Array.from(this.ymeta.keys()).forEach(key => {
+        this.ymeta.delete(key);
+      });
+      const metadata = value.metadata;
+      for (const key in metadata) {
+        // orig_nbformat is not intended to be stored per spec.
+        if (key === 'orig_nbformat') {
           continue;
+        }
+        this.ymeta.set(key, metadata[key]);
       }
-    }
-    this.cells.beginCompoundOperation();
-    this.cells.clear();
-    this.cells.pushAll(cells);
-    this.cells.endCompoundOperation();
+    }, 'json-parse');
 
     let oldValue = 0;
     let newValue = 0;
@@ -286,19 +284,45 @@ close the notebook without saving it.`,
         buttons: [Dialog.okButton({ label: this._trans.__('Ok') })]
       });
     }
-
-    // Update the metadata.
-    this.metadata.clear();
-    const metadata = value.metadata;
-    for (const key in metadata) {
-      // orig_nbformat is not intended to be stored per spec.
-      if (key === 'orig_nbformat') {
-        continue;
-      }
-      this.metadata.set(key, metadata[key]);
-    }
-    this._ensureMetadata();
     this.dirty = true;
+  }
+
+  insertCell(index: number, cell: ICellModel) {
+    this.insertCells(index, [cell]);
+  }
+
+  insertCells(index: number, cells: Array<ICellModel>) {
+    cells.forEach(cell => this.ytypeCellMapping.set(cell.ymodel, cell));
+    this.ycells.insert(
+      index,
+      cells.map(cell => cell.ymodel)
+    );
+  }
+
+  setCell(index: number, cell: ICellModel) {
+    this.ymodel.transact(() => {
+      this.ycells.delete(index);
+      this.insertCell(index, cell);
+    });
+  }
+
+  getCell(index: number): ICellModel {
+    return this.cellInstances[index];
+  }
+
+  deleteCell(index: number, length: number = 1): void {
+    this.ycells.delete(index, length);
+  }
+
+  moveCell(from: number, to: number): void {
+    this.ymodel.transact(() => {
+      const fromCell = this._createCellFromJSON(this.getCell(from).toJSON());
+      this.deleteCell(from);
+      if (from < to) {
+        to--;
+      }
+      this.insertCell(from, fromCell);
+    });
   }
 
   /**
@@ -310,54 +334,62 @@ close the notebook without saving it.`,
    */
   initialize(): void {
     super.initialize();
-    if (!this.cells.length) {
-      const factory = this.contentFactory;
-      this.cells.push(factory.createCodeCell({}));
+    if (!this.ycells.length) {
+      // this will trigger an event on ycells
+      this.ycells.push([this.contentFactory.createCodeCell({}).toJSON()]);
     }
-    this.cells.clearUndo();
+    this.yUndoManager.clear();
   }
 
-  /**
-   * Handle a change in the cells list.
-   */
-  private _onCellsChanged(
-    list: IObservableList<ICellModel>,
-    change: IObservableList.IChangedArgs<ICellModel>
-  ): void {
-    switch (change.type) {
-      case 'add':
-        change.newValues.forEach(cell => {
-          cell.contentChanged.connect(this.triggerContentChange, this);
-        });
-        break;
-      case 'remove':
-        break;
-      case 'set':
-        change.newValues.forEach(cell => {
-          cell.contentChanged.connect(this.triggerContentChange, this);
-        });
-        break;
+  private _createCellFromType(type: Y.Map<any>): ICellModel {
+    const factory = this.contentFactory;
+    switch (type.get('cell_type')) {
+      case 'code':
+        return factory.createCodeCell({ ymodel: type });
+      case 'markdown':
+        return factory.createMarkdownCell({ ymodel: type });
+      case 'raw':
+        return factory.createRawCell({ ymodel: type });
       default:
-        break;
-    }
-    this.triggerContentChange();
-  }
-
-  /**
-   * Make sure we have the required metadata fields.
-   */
-  private _ensureMetadata(): void {
-    const metadata = this.metadata;
-    if (!metadata.has('language_info')) {
-      metadata.set('language_info', { name: '' });
-    }
-    if (!metadata.has('kernelspec')) {
-      metadata.set('kernelspec', { name: '', display_name: '' });
+        throw new Error('Found unknown cell type');
     }
   }
 
+  private _createCellFromJSON(cell: any): ICellModel {
+    const factory = this.contentFactory;
+    switch (cell['cell_type']) {
+      case 'code':
+        return factory.createCodeCell({ cell });
+      case 'markdown':
+        return factory.createMarkdownCell({ cell });
+      case 'raw':
+        return factory.createRawCell({ cell });
+      default:
+        throw new Error('Found unknown cell type');
+    }
+  }
+
+  private _onCellsChanged = (event: Y.YArrayEvent<Y.Map<any>>) => {
+    // update the type⇔cell mapping by iterating through the addded/removed types
+    event.changes.added.forEach(item => {
+      const type = (item.content as Y.ContentType).type as Y.Map<any>;
+      if (!this.ytypeCellMapping.has(type)) {
+        this.ytypeCellMapping.set(type, this._createCellFromType(type));
+      }
+    });
+    event.changes.deleted.forEach(item => {
+      const type = (item.content as Y.ContentType).type as Y.Map<any>;
+      this.ytypeCellMapping.delete(type);
+    });
+    this.cellInstances = this.ycells
+      .toArray()
+      .map(type => this.ytypeCellMapping.get(type))
+      .filter(x => x != null) as Array<ICellModel>;
+    this.cellsChanged.emit(event);
+  };
+
+  readonly cellsChanged = new Signal<any, Y.YArrayEvent<Y.Map<any>>>(this);
   private _trans: TranslationBundle;
-  private _cells: CellList;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _deletedCells: string[];
@@ -386,7 +418,7 @@ export namespace NotebookModel {
     /**
      * A modelDB for storing notebook data.
      */
-    modelDB?: IModelDB;
+    ymodel?: Y.Doc;
 
     /**
      * Language translator.
@@ -406,7 +438,7 @@ export namespace NotebookModel {
     /**
      * The IModelDB in which to put data for the notebook model.
      */
-    modelDB: IModelDB | undefined;
+    ymodel?: Y.Doc;
 
     /**
      * Create a new cell by cell type.
@@ -454,7 +486,7 @@ export namespace NotebookModel {
     /**
      * Clone the content factory with a new IModelDB.
      */
-    clone(modelDB: IModelDB): IContentFactory;
+    clone(modelDB: Y.Array<any>): IContentFactory;
   }
 
   /**
@@ -467,18 +499,12 @@ export namespace NotebookModel {
     constructor(options: ContentFactory.IOptions) {
       this.codeCellContentFactory =
         options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
-      this.modelDB = options.modelDB;
     }
 
     /**
      * The factory for code cell content.
      */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
-
-    /**
-     * The IModelDB in which to put the notebook data.
-     */
-    readonly modelDB: IModelDB | undefined;
 
     /**
      * Create a new cell by cell type.
@@ -491,8 +517,12 @@ export namespace NotebookModel {
      * This method is intended to be a convenience method to programmaticaly
      * call the other cell creation methods in the factory.
      */
-    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel {
-      switch (type) {
+    createCell(
+      cell_type: nbformat.CellType,
+      opts: CellModel.IOptions
+    ): ICellModel {
+      opts.cell = Object.assign({}, opts.cell, { cell_type });
+      switch (cell_type) {
         case 'code':
           return this.createCodeCell(opts);
         case 'markdown':
@@ -514,15 +544,6 @@ export namespace NotebookModel {
      *   `codeCellContentFactory` will be used.
      */
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
-      if (options.contentFactory) {
-        options.contentFactory = this.codeCellContentFactory;
-      }
-      if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
-        options.modelDB = this.modelDB.view(options.id);
-      }
       return new CodeCellModel(options);
     }
 
@@ -535,12 +556,6 @@ export namespace NotebookModel {
      *   new cell will be initialized with the data from the source.
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
-      if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
-        options.modelDB = this.modelDB.view(options.id);
-      }
       return new MarkdownCellModel(options);
     }
 
@@ -553,21 +568,14 @@ export namespace NotebookModel {
      *   new cell will be initialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
-      if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
-        options.modelDB = this.modelDB.view(options.id);
-      }
       return new RawCellModel(options);
     }
 
     /**
      * Clone the content factory with a new IModelDB.
      */
-    clone(modelDB: IModelDB): ContentFactory {
+    clone(): ContentFactory {
       return new ContentFactory({
-        modelDB: modelDB,
         codeCellContentFactory: this.codeCellContentFactory
       });
     }
@@ -585,11 +593,6 @@ export namespace NotebookModel {
        * The factory for code cell model content.
        */
       codeCellContentFactory?: CodeCellModel.IContentFactory;
-
-      /**
-       * The modelDB in which to place new content.
-       */
-      modelDB?: IModelDB;
     }
   }
 

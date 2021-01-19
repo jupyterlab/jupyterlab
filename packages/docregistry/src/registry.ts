@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Y from 'yjs';
+
 import {
   ArrayExt,
   ArrayIterator,
@@ -27,8 +29,6 @@ import {
   IChangedArgs as IChangedArgsGeneric,
   PathExt
 } from '@jupyterlab/coreutils';
-
-import { IModelDB } from '@jupyterlab/observables';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -757,6 +757,11 @@ export namespace DocumentRegistry {
     stateChanged: ISignal<this, IChangedArgsGeneric<any>>;
 
     /**
+     * A signal emitted when the model state changes.
+     */
+    metadataChanged: ISignal<any, Y.YMapEvent<any>>;
+
+    /**
      * The dirty state of the model.
      *
      * #### Notes
@@ -788,7 +793,8 @@ export namespace DocumentRegistry {
      * Making direct edits to the values stored in the`IModelDB`
      * is not recommended, and may produce unpredictable results.
      */
-    readonly modelDB: IModelDB;
+    readonly ymodel: Y.Doc;
+    readonly ymeta: Y.Map<any>;
 
     /**
      * Serialize the model to a string.
@@ -1147,7 +1153,7 @@ export namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string, modelDB?: IModelDB): T;
+    createNew(languagePreference?: string, ymodel?: Y.Doc): T;
 
     /**
      * Get the preferred kernel language given a file path.

@@ -3,7 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
+import * as Y from 'yjs';
+
+import { JSONExt, JSONObject, JSONValue, UUID } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -14,17 +16,6 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { UUID } from '@lumino/coreutils';
-
-import {
-  IObservableJSON,
-  IModelDB,
-  IObservableValue,
-  ObservableValue,
-  IObservableMap
-} from '@jupyterlab/observables';
-
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
 /**
@@ -47,6 +38,11 @@ export interface ICellModel extends CodeEditor.IModel {
   readonly contentChanged: ISignal<ICellModel, void>;
 
   /**
+   * A signal emitted when the metadata of the model changes.
+   */
+  readonly metadataChanged: ISignal<ICellModel, Y.YMapEvent<any>>;
+
+  /**
    * A signal emitted when a model state changes.
    */
   readonly stateChanged: ISignal<ICellModel, IChangedArgs<any>>;
@@ -59,12 +55,15 @@ export interface ICellModel extends CodeEditor.IModel {
   /**
    * The metadata associated with the cell.
    */
-  readonly metadata: IObservableJSON;
+  readonly ymeta: Y.Map<any>;
+  readonly ytext: Y.Text;
+  readonly ymodel: Y.Map<any>;
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.ICell;
+  valueChanged: ISignal<ICellModel, Y.YTextEvent>;
 }
 
 /**
@@ -157,51 +156,123 @@ export function isRawCellModel(model: ICellModel): model is IRawCellModel {
 /**
  * An implementation of the cell model.
  */
-export class CellModel extends CodeEditor.Model implements ICellModel {
+export class CellModel implements ICellModel {
   /**
    * Construct a cell model from optional cell content.
    */
   constructor(options: CellModel.IOptions) {
-    super({ modelDB: options.modelDB });
+    if (options.cell && options.ymodel) {
+      throw new Error(
+        "You can set either an initialized ymodel or create a new cell using a `cell` property. You can't do both."
+      );
+    }
+    const ymodel = options.ymodel || new Y.Map();
+    this.ymodel = ymodel;
+    this.id = UUID.uuid4();
+    if (options.ymodel) {
+      this.ytext = ymodel.get('source');
+      this.ymeta = ymodel.get('metadata');
+    } else {
+      this.ytext = new Y.Text();
+      ymodel.set('source', this.ytext);
+      this.ymeta = new Y.Map();
+      ymodel.set('metadata', this.ymeta);
+      ymodel.set('type', this.type);
+      const cell = options.cell!;
+      ymodel.set('cell_type', cell.cell_type);
+      // @todo shouldn't this be join('\n') ?
+      const source = Array.isArray(cell.source)
+        ? cell.source.join('')
+        : cell.source;
+      if (source) {
+        this.ytext.insert(0, source);
+      }
 
-    this.id = options.id || UUID.uuid4();
+      const metadata = JSONExt.deepCopy(cell.metadata);
+      if (this.type !== 'raw') {
+        delete metadata['format'];
+      }
+      if (this.type !== 'code') {
+        delete metadata['collapsed'];
+        delete metadata['scrolled'];
+      }
 
-    this.value.changed.connect(this.onGenericChange, this);
+      for (const key in metadata) {
+        this.ymeta.set(key, metadata[key]);
+      }
+    }
+    this.ydoc = this.ymodel.doc!;
+    this._onModelChanged = this._onModelChanged.bind(this);
+    this.ymodel.observe(this._onModelChanged);
+    this.ytext.observe(this._onValueChange);
+    this._onMetadataChanged = this._onMetadataChanged.bind(this); // do this because we still want to use inheritance.
+    this.ymeta.observe(this._onMetadataChanged);
+  }
 
-    const cellType = this.modelDB.createValue('type');
-    cellType.set(this.type);
+  readonly ydoc: Y.Doc;
+  readonly ymodel: Y.Map<any>;
+  readonly ytext: Y.Text;
+  readonly ymeta: Y.Map<any>;
+  readonly id: string;
+  private _isDisposed: boolean = false;
+  private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
 
-    const observableMetadata = this.modelDB.createMap('metadata');
-    observableMetadata.changed.connect(this.onGenericChange, this);
+  setValue(value: string): void {
+    this.ytext.doc?.transact(() => {
+      this.ytext.delete(0, this.ytext.length);
+      this.ytext.insert(0, value);
+    });
+  }
 
-    const cell = options.cell;
-    const trusted = this.modelDB.createValue('trusted');
-    trusted.changed.connect(this.onTrustedChanged, this);
+  getValue(): string {
+    return this.ytext.toString();
+  }
 
-    if (!cell) {
-      trusted.set(false);
+  /**
+   * A signal emitted when a mimetype changes.
+   */
+  get mimeTypeChanged(): ISignal<this, IChangedArgs<string>> {
+    return this._mimeTypeChanged;
+  }
+
+  /**
+   * A mime type of the model.
+   */
+  get mimeType(): string {
+    return this.ymeta.get('mimeType') as string;
+  }
+
+  set mimeType(newValue: string) {
+    const oldValue = this.mimeType;
+    if (oldValue === newValue) {
       return;
     }
-    trusted.set(!!cell.metadata['trusted']);
-    delete cell.metadata['trusted'];
+    this.ymeta.set('mimeType', newValue);
+  }
 
-    if (Array.isArray(cell.source)) {
-      this.value.text = (cell.source as string[]).join('');
-    } else {
-      this.value.text = cell.source as string;
-    }
-    const metadata = JSONExt.deepCopy(cell.metadata);
-    if (this.type !== 'raw') {
-      delete metadata['format'];
-    }
-    if (this.type !== 'code') {
-      delete metadata['collapsed'];
-      delete metadata['scrolled'];
-    }
+  protected _onModelChanged(event: Y.YMapEvent<any>): void {
+    // nop
+  }
 
-    for (const key in metadata) {
-      observableMetadata.set(key, metadata[key]);
+  /**
+   * Whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
     }
+    this._isDisposed = true;
+    Signal.clearData(this);
+    this.ymodel.unobserve(this._onModelChanged);
+    this.ytext.unobserve(this._onValueChange);
+    this.ymeta.unobserve(this._onMetadataChanged);
   }
 
   /**
@@ -217,6 +288,8 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * A signal emitted when the state of the model changes.
    */
   readonly contentChanged = new Signal<this, void>(this);
+  readonly valueChanged = new Signal<this, Y.YTextEvent>(this);
+  readonly metadataChanged: Signal<this, Y.YMapEvent<any>>;
 
   /**
    * A signal emitted when a model state changes.
@@ -224,22 +297,10 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   readonly stateChanged = new Signal<this, IChangedArgs<any>>(this);
 
   /**
-   * The id for the cell.
-   */
-  readonly id: string;
-
-  /**
-   * The metadata associated with the cell.
-   */
-  get metadata(): IObservableJSON {
-    return this.modelDB.get('metadata') as IObservableJSON;
-  }
-
-  /**
    * Get the trusted state of the model.
    */
   get trusted(): boolean {
-    return this.modelDB.getValue('trusted') as boolean;
+    return this.ymeta.get('trusted') || false;
   }
 
   /**
@@ -250,7 +311,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     if (oldValue === newValue) {
       return;
     }
-    this.modelDB.setValue('trusted', newValue);
+    this.ymeta.set('trusted', newValue);
   }
 
   /**
@@ -258,16 +319,15 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    */
   toJSON(): nbformat.ICell {
     const metadata: nbformat.IBaseCellMetadata = Object.create(null);
-    for (const key of this.metadata.keys()) {
-      const value = JSON.parse(JSON.stringify(this.metadata.get(key)));
-      metadata[key] = value as JSONValue;
-    }
-    if (this.trusted) {
-      metadata['trusted'] = true;
+    for (const [key, value] of this.ymeta.entries()) {
+      if (key !== 'trusted' || value === true) {
+        // only set trusted as a property, if true
+        metadata[key] = JSON.parse(JSON.stringify(value)) as JSONValue;
+      }
     }
     return {
       cell_type: this.type,
-      source: this.value.text,
+      source: this.ytext.toString().split('\n'),
       metadata
     } as nbformat.ICell;
   }
@@ -277,19 +337,39 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    *
    * The default implementation is a no-op.
    */
-  onTrustedChanged(
-    trusted: IObservableValue,
-    args: ObservableValue.IChangedArgs
-  ): void {
+  onTrustedChanged(trusted: boolean): void {
     /* no-op */
+  }
+
+  protected _onMetadataChanged(event: Y.YMapEvent<any>): void {
+    if (event.keysChanged.has('trusted')) {
+      this.onTrustedChanged(this.ymeta.get('trusted'));
+    }
+    if (event.keysChanged.has('mimeType')) {
+      this._mimeTypeChanged.emit({
+        name: 'mimeType',
+        oldValue: event.changes.keys.get('mimeType')?.oldValue as string,
+        newValue: this.ymeta.get('mimeType') as string
+      });
+    }
+    this.metadataChanged.emit(event);
+    this.onGenericChange();
   }
 
   /**
    * Handle a change to the observable value.
    */
-  protected onGenericChange(): void {
+  private _onValueChange = (event: Y.YTextEvent): void => {
+    this.valueChanged.emit(event);
     this.contentChanged.emit(void 0);
-  }
+  };
+
+  /**
+   * Handle a change to the observable value.
+   */
+  protected onGenericChange = (): void => {
+    this.contentChanged.emit(void 0);
+  };
 }
 
 /**
@@ -304,16 +384,7 @@ export namespace CellModel {
      * The source cell data.
      */
     cell?: nbformat.IBaseCell;
-
-    /**
-     * An IModelDB in which to store cell data.
-     */
-    modelDB?: IModelDB;
-
-    /**
-     * A unique identifier for this cell.
-     */
-    id?: string;
+    ymodel?: Y.Map<any>;
   }
 }
 
@@ -337,7 +408,7 @@ export class AttachmentsCellModel extends CellModel {
 
     this._attachments = factory.createAttachmentsModel({
       values: attachments,
-      modelDB: this.modelDB
+      ymodel: this.ymodel
     });
     this._attachments.stateChanged.connect(this.onGenericChange, this);
   }
@@ -438,7 +509,10 @@ export class MarkdownCellModel extends AttachmentsCellModel {
   constructor(options: CellModel.IOptions) {
     super(options);
     // Use the Github-flavored markdown mode.
-    this.mimeType = 'text/x-ipythongfm';
+    /**
+     * @todo find out how mimeTypes are used in Attachment cells..
+     */
+    // this.mimeType = 'text/x-ipythongfm';
   }
 
   /**
@@ -470,16 +544,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     const trusted = this.trusted;
     const cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
-    const executionCount = this.modelDB.createValue('executionCount');
-    if (!executionCount.get()) {
-      if (cell && cell.cell_type === 'code') {
-        executionCount.set(cell.execution_count || null);
-        outputs = cell.outputs;
-      } else {
-        executionCount.set(null);
-      }
+
+    if (cell && cell.cell_type === 'code') {
+      this.ymodel.set('executionCount', cell.execution_count || null);
+      outputs = cell.outputs;
+    } else {
+      this.ymodel.set('executionCount', null);
     }
-    executionCount.changed.connect(this._onExecutionCountChanged, this);
 
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
     this._outputs.changed.connect(this.onGenericChange, this);
@@ -487,11 +558,11 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
     // they are redundant in nbformat 4.4. See
     // https://github.com/jupyter/nbformat/issues/137
-    this.metadata.changed.connect(Private.collapseChanged, this);
-
+    // @todo do we still need to fix this?
+    /*
     // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
     // preference to `collapsed`.
-    if (this.metadata.has('collapsed')) {
+    if (this.ymeta.has('collapsed')) {
       const collapsed = this.metadata.get('collapsed') as boolean | undefined;
       Private.collapseChanged(this.metadata, {
         type: 'change',
@@ -499,8 +570,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         oldValue: collapsed,
         newValue: collapsed
       });
-    } else if (this.metadata.has('jupyter')) {
-      const jupyter = this.metadata.get('jupyter') as JSONObject;
+    } else if (this.ymeta.has('jupyter')) {
+      const jupyter = this.ymeta.get('jupyter') as JSONObject;
       if (jupyter.hasOwnProperty('outputs_hidden')) {
         Private.collapseChanged(this.metadata, {
           type: 'change',
@@ -510,8 +581,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         });
       }
     }
+    */
   }
 
+  protected _onMetadataChanged(event: Y.YMapEvent<any>): void {
+    super._onMetadataChanged(event);
+    Private.collapseChanged(this.ymeta, event);
+  }
   /**
    * The type of the cell.
    */
@@ -523,20 +599,20 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this.modelDB.getValue('executionCount') as nbformat.ExecutionCount;
+    return this.ymodel.get('executionCount') as nbformat.ExecutionCount;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
     const oldValue = this.executionCount;
     if (newValue === oldValue) {
       return;
     }
-    this.modelDB.setValue('executionCount', newValue || null);
+    this.ymodel.set('executionCount', newValue || null);
   }
 
-  clearExecution() {
+  clearExecution(): void {
     this.outputs.clear();
     this.executionCount = null;
-    this.metadata.delete('execution');
+    this.ymeta.delete('execution');
   }
 
   /**
@@ -553,9 +629,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     if (this.isDisposed) {
       return;
     }
+    super.dispose();
     this._outputs.dispose();
     this._outputs = null!;
-    super.dispose();
   }
 
   /**
@@ -571,33 +647,27 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Handle a change to the trusted state.
    */
-  onTrustedChanged(
-    trusted: IObservableValue,
-    args: ObservableValue.IChangedArgs
-  ): void {
+  onTrustedChanged(trusted: boolean): void {
     if (this._outputs) {
-      this._outputs.trusted = args.newValue as boolean;
+      this._outputs.trusted = trusted;
     }
     this.stateChanged.emit({
       name: 'trusted',
-      oldValue: args.oldValue,
-      newValue: args.newValue
+      oldValue: !trusted,
+      newValue: trusted
     });
   }
 
-  /**
-   * Handle a change to the execution count.
-   */
-  private _onExecutionCountChanged(
-    count: IObservableValue,
-    args: ObservableValue.IChangedArgs
-  ): void {
-    this.contentChanged.emit(void 0);
-    this.stateChanged.emit({
-      name: 'executionCount',
-      oldValue: args.oldValue,
-      newValue: args.newValue
-    });
+  protected _onModelChanged(event: Y.YMapEvent<any>): void {
+    super._onModelChanged(event);
+    if (event.keysChanged.has('executionCount')) {
+      this.contentChanged.emit(void 0);
+      this.stateChanged.emit({
+        name: 'executionCount',
+        oldValue: event.changes.keys.get('executionCount')?.oldValue,
+        newValue: this.ymodel.get('executionCount')
+      });
+    }
   }
 
   private _outputs: IOutputAreaModel;
@@ -645,31 +715,39 @@ export namespace CodeCellModel {
   export const defaultContentFactory = new ContentFactory();
 }
 
+/**
+ * @todo Seems like every time `collapsed` is changed, every client will also change `outputs_hidden`.
+ * While this is only a minor performance-drain, we should probably limit this event to local changes only,
+ * or perform some kind of check only after a time.
+ */
 namespace Private {
   export function collapseChanged(
-    metadata: IObservableJSON,
-    args: IObservableMap.IChangedArgs<JSONValue>
-  ) {
-    if (args.key === 'collapsed') {
-      const jupyter = (metadata.get('jupyter') || {}) as JSONObject;
-      const { outputs_hidden, ...newJupyter } = jupyter;
+    ymeta: Y.Map<any>,
+    event: Y.YMapEvent<any>
+  ): void {
+    if (event.keysChanged.has('collapsed')) {
+      const jupyter = (ymeta.get('jupyter') || {}) as JSONObject;
+      const { outputs_hidden, ...newJupyter } = JSON.parse(
+        JSON.stringify(jupyter)
+      );
 
-      if (outputs_hidden !== args.newValue) {
-        if (args.newValue !== undefined) {
-          newJupyter['outputs_hidden'] = args.newValue;
+      const newValue = ymeta.get('collapsed');
+      if (outputs_hidden !== newValue) {
+        if (newValue !== undefined) {
+          newJupyter['outputs_hidden'] = newValue;
         }
         if (Object.keys(newJupyter).length === 0) {
-          metadata.delete('jupyter');
+          ymeta.delete('jupyter');
         } else {
-          metadata.set('jupyter', newJupyter);
+          ymeta.set('jupyter', newJupyter);
         }
       }
-    } else if (args.key === 'jupyter') {
-      const jupyter = (args.newValue || {}) as JSONObject;
+    } else if (event.keysChanged.has('jupyter')) {
+      const jupyter = (ymeta.get('jupyter') || {}) as JSONObject;
       if (jupyter.hasOwnProperty('outputs_hidden')) {
-        metadata.set('collapsed', jupyter.outputs_hidden);
+        ymeta.set('collapsed', jupyter.outputs_hidden);
       } else {
-        metadata.delete('collapsed');
+        ymeta.delete('collapsed');
       }
     }
   }

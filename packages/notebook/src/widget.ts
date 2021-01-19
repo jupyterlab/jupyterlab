@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each } from '@lumino/algorithm';
+import * as Y from 'yjs';
 
-import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { ArrayExt, each } from '@lumino/algorithm';
 
 import { Message } from '@lumino/messaging';
 
@@ -38,11 +38,10 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { IObservableMap, IObservableList } from '@jupyterlab/observables';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { INotebookModel } from './model';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -219,23 +218,6 @@ export class StaticNotebook extends Widget {
     const oldValue = this._model;
     this._model = newValue;
 
-    if (oldValue && oldValue.modelDB.isCollaborative) {
-      void oldValue.modelDB.connected.then(() => {
-        oldValue!.modelDB.collaborators!.changed.disconnect(
-          this._onCollaboratorsChanged,
-          this
-        );
-      });
-    }
-    if (newValue && newValue.modelDB.isCollaborative) {
-      void newValue.modelDB.connected.then(() => {
-        newValue!.modelDB.collaborators!.changed.connect(
-          this._onCollaboratorsChanged,
-          this
-        );
-      });
-    }
-
     // Trigger private, protected, and public changes.
     this._onModelChanged(oldValue, newValue);
     this.onModelChanged(oldValue, newValue);
@@ -323,15 +305,11 @@ export class StaticNotebook extends Widget {
    * when the `language_info` metadata changes.
    */
   protected onMetadataChanged(
-    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
-    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
+    sender: DocumentRegistry.IModel,
+    event: Y.YMapEvent<any>
   ): void {
-    switch (args.key) {
-      case 'language_info':
-        this._updateMimetype();
-        break;
-      default:
-        break;
+    if (event.keysChanged.has('language_info')) {
+      this._updateMimetype();
     }
   }
 
@@ -341,15 +319,6 @@ export class StaticNotebook extends Widget {
    * The default implementation is a no-op
    */
   protected onCellInserted(index: number, cell: Cell): void {
-    // This is a no-op.
-  }
-
-  /**
-   * Handle a cell being moved.
-   *
-   * The default implementation is a no-op
-   */
-  protected onCellMoved(fromIndex: number, toIndex: number): void {
     // This is a no-op.
   }
 
@@ -371,8 +340,8 @@ export class StaticNotebook extends Widget {
   ): void {
     const layout = this.layout as PanelLayout;
     if (oldValue) {
-      oldValue.cells.changed.disconnect(this._onCellsChanged, this);
-      oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
+      oldValue.cellsChanged.disconnect(this._onCellsChanged, this);
+      oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       // TODO: reuse existing cell widgets if possible. Remember to initially
       // clear the history of each cell if we do this.
@@ -385,73 +354,59 @@ export class StaticNotebook extends Widget {
       return;
     }
     this._updateMimetype();
-    const cells = newValue.cells;
-    if (!cells.length) {
-      cells.push(
+    if (!newValue.cellInstances.length) {
+      newValue.insertCell(
+        0,
         newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
       );
     }
-    each(cells, (cell: ICellModel, i: number) => {
+    each(newValue.cellInstances, (cell: ICellModel, i: number) => {
       this._insertCell(i, cell);
     });
-    cells.changed.connect(this._onCellsChanged, this);
+    newValue.cellsChanged.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
-    newValue.metadata.changed.connect(this.onMetadataChanged, this);
+    newValue.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
   /**
    * Handle a change cells event.
    */
   private _onCellsChanged(
-    sender: IObservableList<ICellModel>,
-    args: IObservableList.IChangedArgs<ICellModel>
+    sender: DocumentRegistry.IModel,
+    event: Y.YArrayEvent<Y.Map<any>>
   ) {
     let index = 0;
-    switch (args.type) {
-      case 'add':
-        index = args.newIndex;
-        each(args.newValues, value => {
-          this._insertCell(index++, value);
-        });
-        break;
-      case 'move':
-        this._moveCell(args.oldIndex, args.newIndex);
-        break;
-      case 'remove':
-        each(args.oldValues, value => {
-          this._removeCell(args.oldIndex);
-        });
-        // Add default cell if there are no cells remaining.
-        if (!sender.length) {
-          const model = this.model;
-          // Add the cell in a new context to avoid triggering another
-          // cell changed event during the handling of this signal.
-          requestAnimationFrame(() => {
-            if (model && !model.isDisposed && !model.cells.length) {
-              model.cells.push(
-                model.contentFactory.createCell(
-                  this.notebookConfig.defaultCell,
-                  {}
-                )
-              );
-            }
-          });
-        }
-        break;
-      case 'set':
-        // TODO: reuse existing widgets if possible.
-        index = args.newIndex;
-        each(args.newValues, value => {
-          // Note: this ordering (insert then remove)
-          // is important for getting the active cell
-          // index for the editable notebook correct.
-          this._insertCell(index, value);
-          this._removeCell(index + 1);
+    const delta = event.changes.delta;
+    for (let i = 0; i < delta.length; i++) {
+      const ditem: any = delta[i];
+      if (ditem.retain != null) {
+        index += ditem.retain;
+      } else if (ditem.insert != null) {
+        ditem.insert.forEach((insert: Y.Map<any>[], i: number) => {
+          const cell = this.model?.getCell(index)!;
+          this._insertCell(index, cell);
           index++;
         });
-        break;
-      default:
-        return;
+      } else {
+        // ditem.delete
+        for (let j = 0; j < ditem.delete; j++) {
+          this._removeCell(index);
+        }
+      }
+    }
+    // Add default cell if there are no cells remaining.
+    if (!this.model!.ycells.length) {
+      const model = this.model;
+      // Add the cell in a new context to avoid triggering another
+      // cell changed event during the handling of this signal.
+      requestAnimationFrame(() => {
+        if (model && !model.isDisposed && !model.ycells.length) {
+          model.insertCell(
+            0,
+            model.contentFactory.createCell(this.notebookConfig.defaultCell, {})
+          );
+        }
+      });
     }
   }
 
@@ -467,7 +422,7 @@ export class StaticNotebook extends Widget {
         break;
       case 'markdown':
         widget = this._createMarkdownCell(cell as IMarkdownCellModel);
-        if (cell.value.text === '') {
+        if (cell.getValue() === '') {
           (widget as MarkdownCell).rendered = false;
         }
         break;
@@ -540,15 +495,6 @@ export class StaticNotebook extends Widget {
   }
 
   /**
-   * Move a cell widget.
-   */
-  private _moveCell(fromIndex: number, toIndex: number): void {
-    const layout = this.layout as PanelLayout;
-    layout.insertWidget(toIndex, layout.widgets[fromIndex]);
-    this.onCellMoved(fromIndex, toIndex);
-  }
-
-  /**
    * Remove a cell widget.
    */
   private _removeCell(index: number): void {
@@ -563,7 +509,7 @@ export class StaticNotebook extends Widget {
    * Update the mimetype of the notebook.
    */
   private _updateMimetype(): void {
-    const info = this._model?.metadata.get(
+    const info = this._model?.ymeta.get(
       'language_info'
     ) as nbformat.ILanguageInfoMetadata;
     if (!info) {
@@ -578,8 +524,10 @@ export class StaticNotebook extends Widget {
   }
 
   /**
+   * @todo handle collaborators
+   *
    * Handle an update to the collaborators.
-   */
+   *
   private _onCollaboratorsChanged(): void {
     // If there are selections corresponding to non-collaborators,
     // they are stale and should be removed.
@@ -592,6 +540,7 @@ export class StaticNotebook extends Widget {
       }
     }
   }
+  */
 
   /**
    * Update editor settings for notebook cells.
@@ -936,15 +885,15 @@ export class Notebook extends StaticNotebook {
     if (!this.model) {
       return -1;
     }
-    return this.model.cells.length ? this._activeCellIndex : -1;
+    return this.model.ycells.length ? this._activeCellIndex : -1;
   }
   set activeCellIndex(newValue: number) {
     const oldValue = this._activeCellIndex;
-    if (!this.model || !this.model.cells.length) {
+    if (!this.model || !this.model.ycells.length) {
       newValue = -1;
     } else {
       newValue = Math.max(newValue, 0);
-      newValue = Math.min(newValue, this.model.cells.length - 1);
+      newValue = Math.min(newValue, this.model.ycells.length - 1);
     }
 
     this._activeCellIndex = newValue;
@@ -1461,6 +1410,9 @@ export class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
+    /**
+     * @todo handle collaborators (this might be useful)
+     *
     if (this.model && this.model.modelDB.isCollaborative) {
       const modelDB = this.model.modelDB;
       void modelDB.connected.then(() => {
@@ -1475,6 +1427,7 @@ export class Notebook extends StaticNotebook {
         }
       });
     }
+    */
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
@@ -1929,17 +1882,17 @@ export class Notebook extends StaticNotebook {
       }
 
       // Move the cells one by one
-      model.cells.beginCompoundOperation();
-      if (fromIndex < toIndex) {
-        each(toMove, cellWidget => {
-          model.cells.move(fromIndex, toIndex);
-        });
-      } else if (fromIndex > toIndex) {
-        each(toMove, cellWidget => {
-          model.cells.move(fromIndex++, toIndex++);
-        });
-      }
-      model.cells.endCompoundOperation();
+      model.ymodel.transact(() => {
+        if (fromIndex < toIndex) {
+          each(toMove, cellWidget => {
+            model.moveCell(fromIndex, toIndex);
+          });
+        } else if (fromIndex > toIndex) {
+          each(toMove, cellWidget => {
+            model.moveCell(fromIndex++, toIndex++);
+          });
+        }
+      });
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
@@ -1954,23 +1907,17 @@ export class Notebook extends StaticNotebook {
       const factory = model.contentFactory;
 
       // Insert the copies of the original cells.
-      model.cells.beginCompoundOperation();
-      each(values, (cell: nbformat.ICell) => {
-        let value: ICellModel;
+      const cells = values.map((cell: nbformat.ICell) => {
         switch (cell.cell_type) {
           case 'code':
-            value = factory.createCodeCell({ cell });
-            break;
+            return factory.createCodeCell({ cell });
           case 'markdown':
-            value = factory.createMarkdownCell({ cell });
-            break;
+            return factory.createMarkdownCell({ cell });
           default:
-            value = factory.createRawCell({ cell });
-            break;
+            return factory.createRawCell({ cell });
         }
-        model.cells.insert(index++, value);
       });
-      model.cells.endCompoundOperation();
+      model.insertCells(index++, cells);
       // Select the inserted cells.
       this.deselectAll();
       this.activeCellIndex = start;
@@ -1982,12 +1929,12 @@ export class Notebook extends StaticNotebook {
    * Start a drag event.
    */
   private _startDrag(index: number, clientX: number, clientY: number): void {
-    const cells = this.model!.cells;
+    const model = this.model!;
     const selected: nbformat.ICell[] = [];
     const toMove: Cell[] = [];
 
     each(this.widgets, (widget, i) => {
-      const cell = cells.get(i);
+      const cell = model.getCell(i);
       if (this.isSelectedOrActive(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
         selected.push(cell.toJSON());
@@ -2012,7 +1959,7 @@ export class Notebook extends StaticNotebook {
     dragImage = Private.createDragImage(
       selected.length,
       countString,
-      activeCell?.model.value.text.split('\n')[0].slice(0, 26) ?? ''
+      activeCell?.model.getValue().split('\n')[0].slice(0, 26) ?? ''
     );
 
     // Set up the drag event.
@@ -2030,7 +1977,7 @@ export class Notebook extends StaticNotebook {
     this._drag.mimeData.setData('internal:cells', toMove);
     // Add mimeData for the text content of the selected cells,
     // allowing for drag/drop into plain text fields.
-    const textContent = toMove.map(cell => cell.model.value.text).join('\n');
+    const textContent = toMove.map(cell => cell.model.getValue()).join('\n');
     this._drag.mimeData.setData('text/plain', textContent);
 
     // Remove mousemove and mouseup listeners and start the drag.
@@ -2127,7 +2074,7 @@ export class Notebook extends StaticNotebook {
       return;
     }
     this.activeCellIndex = index;
-    if (model.cells.get(index).type === 'markdown') {
+    if (model.getCell(index).type === 'markdown') {
       const widget = this.widgets[index] as MarkdownCell;
       widget.rendered = false;
     } else if (target.localName === 'img') {
@@ -2142,8 +2089,11 @@ export class Notebook extends StaticNotebook {
   private _trimSelections(): void {
     for (let i = 0; i < this.widgets.length; i++) {
       if (i !== this._activeCellIndex) {
-        const cell = this.widgets[i];
-        cell.model.selections.delete(cell.editor.uuid);
+        /**
+         * @todo handle selections
+         */
+        // const cell = this.widgets[i]; // @todo uncomment
+        // cell.model.selections.delete(cell.editor.uuid); // @todo
       }
     }
   }

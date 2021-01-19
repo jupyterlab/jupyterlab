@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Y from 'yjs';
+
 import {
   Contents,
   ServiceManager,
@@ -25,8 +27,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
-
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -62,14 +62,7 @@ export class Context<
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
-    const dbFactory = options.modelDBFactory;
-    if (dbFactory) {
-      const localPath = manager.contents.localPath(this._path);
-      this._modelDB = dbFactory.createNew(localPath);
-      this._model = this._factory.createNew(lang, this._modelDB);
-    } else {
-      this._model = this._factory.createNew(lang);
-    }
+    this._model = this._factory.createNew(lang, new Y.Doc({ guid: localPath }));
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -190,9 +183,6 @@ export class Context<
     }
     this._isDisposed = true;
     this.sessionContext.dispose();
-    if (this._modelDB) {
-      this._modelDB.dispose();
-    }
     this._model.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
@@ -229,6 +219,10 @@ export class Context<
       this._model.initialize();
       return this._save();
     }
+    /**
+     * @todo see if we can reuse this
+     *
+     *
     if (this._modelDB) {
       return this._modelDB.connected.then(() => {
         if (this._modelDB.isPrepopulated) {
@@ -242,6 +236,8 @@ export class Context<
     } else {
       return this._revert(true);
     }
+    */
+    return Promise.resolve();
   }
 
   /**
@@ -523,11 +519,14 @@ export class Context<
     try {
       let value: Contents.IModel;
       await this._manager.ready;
-      if (!model.modelDB.isCollaborative) {
-        value = await this._maybeSave(options);
-      } else {
-        value = await this._manager.contents.save(this._path, options);
-      }
+      /**
+       * @todo reuse maybeSave
+       */
+      // if (!model.modelDB.isCollaborative) {
+      //  value = await this._maybeSave(options);
+      // } else {
+      value = await this._manager.contents.save(this._path, options);
+      // }
       if (this.isDisposed) {
         return;
       }
@@ -624,8 +623,10 @@ export class Context<
   }
 
   /**
+   * @todo use this as a template for sending collaborative files to server
+   *
    * Save a file, dealing with conflicts.
-   */
+   *
   private _maybeSave(
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
@@ -658,6 +659,7 @@ export class Context<
       }
     );
   }
+  */
 
   /**
    * Handle a save/load error with a dialog.
@@ -700,6 +702,7 @@ export class Context<
   /**
    * Handle a time conflict.
    */
+  // @ts-ignore
   private _timeConflict(
     tClient: Date,
     model: Contents.IModel,
@@ -713,7 +716,7 @@ export class Context<
     );
     const body = this._trans.__(
       `"%1" has changed on disk since the last time it was opened or saved.
-Do you want to overwrite the file on disk with the version open here, 
+Do you want to overwrite the file on disk with the version open here,
 or load the version on disk (revert)?`,
       this.path
     );
@@ -790,7 +793,6 @@ or load the version on disk (revert)?`,
     options?: DocumentRegistry.IOpenOptions
   ) => void;
   private _model: T;
-  private _modelDB: IModelDB;
   private _path = '';
   private _useCRLF = false;
   private _factory: DocumentRegistry.IModelFactory<T>;
@@ -834,11 +836,6 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: ISessionContext.IKernelPreference;
-
-    /**
-     * An IModelDB factory method which may be used for the document.
-     */
-    modelDBFactory?: ModelDB.IFactory;
 
     /**
      * An optional callback for opening sibling widgets.

@@ -126,7 +126,7 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
     if (cell === null) {
       return false;
     }
-    let tagList = cell.model.metadata.get('tags') as string[];
+    let tagList = cell.model.ymeta.get('tags') as string[];
     if (tagList) {
       for (let i = 0; i < tagList.length; i++) {
         if (tagList[i] === tag) {

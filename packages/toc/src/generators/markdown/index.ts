@@ -40,7 +40,7 @@ function isEnabled(editor: IDocumentWidget<FileEditor>) {
  */
 function generate(editor: IDocumentWidget<FileEditor>): INumberedHeading[] {
   let dict = {};
-  return getHeadings(editor.content.model.value.text, onClick, dict);
+  return getHeadings(editor.content.model.getValue(), onClick, dict);
 
   /**
    * Returns a "click" handler.

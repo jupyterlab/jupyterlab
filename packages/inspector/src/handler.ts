@@ -73,8 +73,12 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       // Call onEditorChange to cover the case where the user changes
       // the active cell
       this.onEditorChange();
-      editor.model.selections.changed.connect(this._onChange, this);
-      editor.model.value.changed.connect(this._onChange, this);
+      this._onChange = this._onChange.bind(this);
+      /**
+       * @todo implement selections
+       */
+      // editor.model.selections.changed.connect(this._onChange, this); // @todo
+      editor.model.ytext.observe(this._onChange);
     }
   }
 
@@ -111,6 +115,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     }
     this._isDisposed = true;
     this._disposed.emit(void 0);
+    this._editor?.model.ytext.unobserve(this._onChange);
     Signal.clearData(this);
   }
 
@@ -132,7 +137,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       return;
     }
 
-    const text = editor.model.value.text;
+    const text = editor.model.getValue();
     const position = editor.getCursorPosition();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const update: IInspector.IInspectorUpdate = { content: null };

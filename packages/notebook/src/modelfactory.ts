@@ -5,7 +5,7 @@ import { CodeCellModel } from '@jupyterlab/cells';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { IModelDB } from '@jupyterlab/observables';
+import * as Y from 'yjs';
 
 import { Contents } from '@jupyterlab/services';
 
@@ -73,9 +73,9 @@ export class NotebookModelFactory
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string, modelDB?: IModelDB): INotebookModel {
+  createNew(languagePreference?: string, ymodel?: Y.Doc): INotebookModel {
     const contentFactory = this.contentFactory;
-    return new NotebookModel({ languagePreference, contentFactory, modelDB });
+    return new NotebookModel({ languagePreference, contentFactory });
   }
 
   /**

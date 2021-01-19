@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IObservableJSON } from '@jupyterlab/observables';
+import * as Y from 'yjs';
+
 import {
   nullTranslator,
   ITranslator,
@@ -75,11 +76,11 @@ export class JSONEditor extends Widget {
     this.node.appendChild(this.headerNode);
     this.node.appendChild(this.editorHostNode);
 
-    const model = new CodeEditor.Model();
-
-    model.value.text = this._trans.__('No data!');
+    const model = new CodeEditor.Model({
+      value: this._trans.__('No data!')
+    });
     model.mimeType = 'application/json';
-    model.value.changed.connect(this._onValueChanged, this);
+    model.ytext.observe(this._onValueChanged);
     this.model = model;
     this.editor = options.editorFactory({ host: this.editorHostNode, model });
     this.editor.setOption('readOnly', true);
@@ -118,20 +119,20 @@ export class JSONEditor extends Widget {
   /**
    * The observable source.
    */
-  get source(): IObservableJSON | null {
+  get source(): Y.Map<any> | null {
     return this._source;
   }
-  set source(value: IObservableJSON | null) {
+  set source(value: Y.Map<any> | null) {
     if (this._source === value) {
       return;
     }
     if (this._source) {
-      this._source.changed.disconnect(this._onSourceChanged, this);
+      this._source.unobserve(this._onSourceChanged);
     }
     this._source = value;
     this.editor.setOption('readOnly', value === null);
     if (value) {
-      value.changed.connect(this._onSourceChanged, this);
+      value.observe(this._onSourceChanged);
     }
     this._setValue();
   }
@@ -208,10 +209,7 @@ export class JSONEditor extends Widget {
   /**
    * Handle a change to the metadata of the source.
    */
-  private _onSourceChanged(
-    sender: IObservableJSON,
-    args: IObservableJSON.IChangedArgs
-  ) {
+  private _onSourceChanged = (event: Y.YMapEvent<any>) => {
     if (this._changeGuard) {
       return;
     }
@@ -220,15 +218,15 @@ export class JSONEditor extends Widget {
       return;
     }
     this._setValue();
-  }
+  };
 
   /**
    * Handle change events.
    */
-  private _onValueChanged(): void {
+  private _onValueChanged = (): void => {
     let valid = true;
     try {
-      const value = JSON.parse(this.editor.model.value.text);
+      const value = JSON.parse(this.editor.model.ytext.toString());
       this.removeClass(ERROR_CLASS);
       this._inputDirty =
         !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue);
@@ -239,7 +237,7 @@ export class JSONEditor extends Widget {
     }
     this.revertButtonNode.hidden = !this._inputDirty;
     this.commitButtonNode.hidden = !valid || !this._inputDirty;
-  }
+  };
 
   /**
    * Handle blur events for the text area.
@@ -276,7 +274,7 @@ export class JSONEditor extends Widget {
   private _mergeContent(): void {
     const model = this.editor.model;
     const old = this._originalValue;
-    const user = JSON.parse(model.value.text) as JSONObject;
+    const user = JSON.parse(model.ytext.toString()) as JSONObject;
     const source = this.source;
     if (!source) {
       return;
@@ -309,12 +307,14 @@ export class JSONEditor extends Widget {
     const model = this.editor.model;
     const content = this._source ? this._source.toJSON() : {};
     this._changeGuard = true;
+    // delete current value so we can set new content
+    model.ytext.delete(0, model.ytext.length);
     if (content === void 0) {
-      model.value.text = this._trans.__('No data!');
+      model.ytext.insert(0, this._trans.__('No data!'));
       this._originalValue = JSONExt.emptyObject;
     } else {
       const value = JSON.stringify(content, null, 4);
-      model.value.text = value;
+      model.ytext.insert(0, value);
       this._originalValue = content;
       // Move the cursor to within the brace.
       if (value.length > 1 && value[0] === '{') {
@@ -331,7 +331,7 @@ export class JSONEditor extends Widget {
   private _trans: TranslationBundle;
   private _dataDirty = false;
   private _inputDirty = false;
-  private _source: IObservableJSON | null = null;
+  private _source: Y.Map<any> | null = null;
   private _originalValue: ReadonlyPartialJSONObject = JSONExt.emptyObject;
   private _changeGuard = false;
 }

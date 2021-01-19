@@ -5,8 +5,6 @@ import { isMarkdownCellModel } from '@jupyterlab/cells';
 
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 
-import { each } from '@lumino/algorithm';
-
 import { Token } from '@lumino/coreutils';
 
 import {
@@ -78,7 +76,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
         const cellModel = this.content.widgets[0].model;
-        if (cellModel.type === 'code' && cellModel.value.text === '') {
+        if (cellModel.type === 'code' && cellModel.getValue() === '') {
           this.content.mode = 'edit';
         }
       }
@@ -88,11 +86,10 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   _onSave(sender: DocumentRegistry.Context, state: DocumentRegistry.SaveState) {
     if (state === 'started' && this.model) {
       // Find markdown cells
-      const { cells } = this.model;
-      each(cells, cell => {
+      this.model.cellInstances.forEach(cell => {
         if (isMarkdownCellModel(cell)) {
           for (const key of cell.attachments.keys) {
-            if (!cell.value.text.includes(key)) {
+            if (!cell.getValue().includes(key)) {
               cell.attachments.remove(key);
             }
           }
@@ -222,7 +219,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Update the kernel language.
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
-    this.model!.metadata.set('language_info', language);
+    this.model!.ymeta.set('language_info', language);
   }
 
   /**
@@ -233,7 +230,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (this.isDisposed) {
       return;
     }
-    this.model!.metadata.set('kernelspec', {
+    this.model!.ymeta.set('kernelspec', {
       name: kernel.name,
       display_name: spec?.display_name,
       language: spec?.language

@@ -53,11 +53,14 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     this.node.dataset[CODE_RUNNER] = 'true';
     this.node.dataset[UNDOER] = 'true';
 
-    editor.model.value.text = context.model.toString();
+    editor.model.setValue(context.model.toString());
     void context.ready.then(() => {
       this._onContextReady();
     });
 
+    /**
+     * @todo re-enable?
+     *
     if (context.model.modelDB.isCollaborative) {
       const modelDB = context.model.modelDB;
       void modelDB.connected.then(() => {
@@ -80,6 +83,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
         this._onCollaboratorsChanged();
       });
     }
+    */
   }
 
   /**
@@ -108,7 +112,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     const editorModel = editor.model;
 
     // Set the editor model value.
-    editorModel.value.text = contextModel.toString();
+    editorModel.setValue(contextModel.toString());
 
     // Prevent the initial loading from disk from being in the editor history.
     editor.clearHistory();
@@ -125,18 +129,19 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
    */
   private _onContentChanged(): void {
     const editorModel = this.editor.model;
-    const oldValue = editorModel.value.text;
+    const oldValue = editorModel.getValue();
     const newValue = this._context.model.toString();
 
     if (oldValue !== newValue) {
-      editorModel.value.text = newValue;
+      editorModel.setValue(newValue);
     }
   }
 
   /**
+   * @todo re-enable
    * Handle a change to the collaborators on the model
    * by updating UI elements associated with them.
-   */
+   *
   private _onCollaboratorsChanged(): void {
     // If there are selections corresponding to non-collaborators,
     // they are stale and should be removed.
@@ -150,6 +155,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
       }
     }
   }
+  */
 
   protected _context: DocumentRegistry.Context;
   private _ready = new PromiseDelegate<void>();

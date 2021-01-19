@@ -65,7 +65,7 @@ function isEnabled(editor: IDocumentWidget<FileEditor>) {
  */
 function generate(editor: IDocumentWidget<FileEditor>): IHeading[] {
   // Split the text into lines:
-  let lines = editor.content.model.value.text.split('\n') as Array<any>;
+  let lines = editor.content.model.getValue().split('\n') as Array<any>;
 
   // Convert the list into "entries" so we can use the line number to scroll the editor upon ToC item click:
   lines = toEntries(lines);

@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Y from 'yjs';
+
 import { ArrayExt, each, chain } from '@lumino/algorithm';
 
 import {
@@ -26,7 +28,7 @@ import {
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
+import { ObservableJSON } from '@jupyterlab/observables';
 
 import {
   nullTranslator,
@@ -163,7 +165,7 @@ export class NotebookTools extends Widget implements INotebookTools {
       this._prevActiveNotebookModel &&
       !this._prevActiveNotebookModel.isDisposed
     ) {
-      this._prevActiveNotebookModel.metadata.changed.disconnect(
+      this._prevActiveNotebookModel.metadataChanged.disconnect(
         this._onActiveNotebookPanelMetadataChanged,
         this
       );
@@ -174,7 +176,7 @@ export class NotebookTools extends Widget implements INotebookTools {
         : null;
     this._prevActiveNotebookModel = activeNBModel;
     if (activeNBModel) {
-      activeNBModel.metadata.changed.connect(
+      activeNBModel.metadataChanged.connect(
         this._onActiveNotebookPanelMetadataChanged,
         this
       );
@@ -189,7 +191,7 @@ export class NotebookTools extends Widget implements INotebookTools {
    */
   private _onActiveCellChanged(): void {
     if (this._prevActiveCell && !this._prevActiveCell.isDisposed) {
-      this._prevActiveCell.metadata.changed.disconnect(
+      this._prevActiveCell.metadataChanged.disconnect(
         this._onActiveCellMetadataChanged,
         this
       );
@@ -197,7 +199,7 @@ export class NotebookTools extends Widget implements INotebookTools {
     const activeCell = this.activeCell ? this.activeCell.model : null;
     this._prevActiveCell = activeCell;
     if (activeCell) {
-      activeCell.metadata.changed.connect(
+      activeCell.metadataChanged.connect(
         this._onActiveCellMetadataChanged,
         this
       );
@@ -216,36 +218,47 @@ export class NotebookTools extends Widget implements INotebookTools {
     });
   }
 
+  private _messageToolChildren(event: Y.YMapEvent<any>, messageType: string) {
+    event.changes.keys.forEach((change, key) => {
+      let type: 'add' | 'remove' | 'change';
+      switch (change.action) {
+        case 'add':
+          type = 'add';
+          break;
+        case 'delete':
+          type = 'remove';
+          break;
+        default:
+          type = 'change';
+      }
+
+      const message = new ObservableJSON.ChangeMessage(messageType, {
+        type, // add remove change
+        key,
+        oldValue: change.oldValue,
+        newValue: (event.target as Y.Map<any>).get(key)
+      });
+      each(this._toolChildren(), widget => {
+        MessageLoop.sendMessage(widget, message);
+      });
+    });
+  }
+
   /**
    * Handle a change in the active cell metadata.
    */
-  private _onActiveNotebookPanelMetadataChanged(
-    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
-    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
-  ): void {
-    const message = new ObservableJSON.ChangeMessage(
-      'activenotebookpanel-metadata-changed',
-      args
-    );
-    each(this._toolChildren(), widget => {
-      MessageLoop.sendMessage(widget, message);
-    });
+  private _onActiveNotebookPanelMetadataChanged(event: Y.YMapEvent<any>): void {
+    this._messageToolChildren(event, 'activenotebookpanel-metadata-changed');
   }
 
   /**
    * Handle a change in the notebook model metadata.
    */
   private _onActiveCellMetadataChanged(
-    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
-    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
+    sender: any,
+    event: Y.YMapEvent<any>
   ): void {
-    const message = new ObservableJSON.ChangeMessage(
-      'activecell-metadata-changed',
-      args
-    );
-    each(this._toolChildren(), widget => {
-      MessageLoop.sendMessage(widget, message);
-    });
+    this._messageToolChildren(event, 'activecell-metadata-changed');
   }
 
   private _toolChildren() {
@@ -466,7 +479,7 @@ export namespace NotebookTools {
         layout.widgets[0].dispose();
       }
       if (this._cellModel && !this._cellModel.isDisposed) {
-        this._cellModel.value.changed.disconnect(this._onValueChanged, this);
+        this._cellModel.valueChanged.disconnect(this._onValueChanged, this);
         this._cellModel.mimeTypeChanged.disconnect(
           this._onMimeTypeChanged,
           this
@@ -487,9 +500,9 @@ export namespace NotebookTools {
       const factory = activeCell.contentFactory.editorFactory;
 
       const cellModel = (this._cellModel = activeCell.model);
-      cellModel.value.changed.connect(this._onValueChanged, this);
+      cellModel.valueChanged.connect(this._onValueChanged, this);
       cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
-      this._model.value.text = cellModel.value.text.split('\n')[0];
+      this._model.setValue(cellModel.getValue().split('\n')[0]);
       this._model.mimeType = cellModel.mimeType;
 
       const model = this._model;
@@ -505,7 +518,7 @@ export namespace NotebookTools {
      * Handle a change to the current editor value.
      */
     private _onValueChanged(): void {
-      this._model.value.text = this._cellModel!.value.text.split('\n')[0];
+      this._model.setValue(this._cellModel!.getValue().split('\n')[0]);
     }
 
     /**
@@ -606,7 +619,7 @@ export namespace NotebookTools {
       const nb =
         this.notebookTools.activeNotebookPanel &&
         this.notebookTools.activeNotebookPanel.content;
-      this.editor.source = nb?.model?.metadata ?? null;
+      this.editor.source = nb?.model?.ymeta ?? null;
     }
   }
 
@@ -637,7 +650,7 @@ export namespace NotebookTools {
 
     private _update() {
       const cell = this.notebookTools.activeCell;
-      this.editor.source = cell ? cell.model.metadata : null;
+      this.editor.source = cell ? cell.model.ymeta : null;
     }
   }
 
@@ -770,7 +783,7 @@ export namespace NotebookTools {
      * Get the value for the data.
      */
     private _getValue = (cell: Cell) => {
-      let value = cell.model.metadata.get(this.key);
+      let value = cell.model.ymeta.get(this.key);
       if (value === undefined) {
         value = this._default;
       }
@@ -785,9 +798,9 @@ export namespace NotebookTools {
       value: ReadonlyPartialJSONValue | undefined
     ) => {
       if (value === this._default) {
-        cell.model.metadata.delete(this.key);
+        cell.model.ymeta.delete(this.key);
       } else {
-        cell.model.metadata.set(this.key, value);
+        cell.model.ymeta.set(this.key, value);
       }
     };
 
@@ -891,13 +904,13 @@ export namespace NotebookTools {
         [trans.__('Notes'), 'notes']
       ],
       getter: cell => {
-        const value = cell.model.metadata.get('slideshow') as
+        const value = cell.model.ymeta.get('slideshow') as
           | ReadonlyPartialJSONObject
           | undefined;
         return value && value['slide_type'];
       },
       setter: (cell, value) => {
-        let data = cell.model.metadata.get('slideshow') || Object.create(null);
+        let data = cell.model.ymeta.get('slideshow') || Object.create(null);
         if (value === null) {
           // Make a shallow copy so we aren't modifying the original metadata.
           data = { ...data };
@@ -906,9 +919,9 @@ export namespace NotebookTools {
           data = { ...data, slide_type: value };
         }
         if (Object.keys(data).length > 0) {
-          cell.model.metadata.set('slideshow', data);
+          cell.model.ymeta.set('slideshow', data);
         } else {
-          cell.model.metadata.delete('slideshow');
+          cell.model.ymeta.delete('slideshow');
         }
       }
     };

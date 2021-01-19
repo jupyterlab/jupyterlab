@@ -9517,6 +9517,11 @@ isomorphic-fetch@^2.1.1:
     node-fetch "^1.0.1"
     whatwg-fetch ">=0.10.0"
 
+isomorphic.js@^0.1.3:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/isomorphic.js/-/isomorphic.js-0.1.5.tgz#f210e58ba4c96978a991c443cf67283366e9b70f"
+  integrity sha512-MkX5lLQApx/8IAIU31PKvpAZosnu2Jqcj1rM8TzxyA4CR96tv3SgMKQNTCxL58G7696Q57zd7ubHV/hTg+5fNA==
+
 isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
@@ -10358,6 +10363,13 @@ license-webpack-plugin@^2.3.11:
   dependencies:
     "@types/webpack-sources" "^0.1.5"
     webpack-sources "^1.2.0"
+
+lib0@^0.2.33, lib0@^0.2.35:
+  version "0.2.35"
+  resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.35.tgz#1d62adb3feefce70c84f3eb664c5e50286de41ca"
+  integrity sha512-drVD3EscB3TIxiFzceuZg7oF5Z6I8a0KX+7FowNcAXOEsTej/hlHB+ElJ8Pa/Ge73Gy3fklSJtPxpNd2PajdWg==
+  dependencies:
+    isomorphic.js "^0.1.3"
 
 lighthouse-logger@^1.0.0, lighthouse-logger@^1.2.0:
   version "1.2.0"
@@ -16609,6 +16621,13 @@ xterm@~4.8.1:
   resolved "https://registry.yarnpkg.com/xterm/-/xterm-4.8.1.tgz#155a1729a43e1a89b406524e22c5634339e39ca1"
   integrity sha512-ax91ny4tI5eklqIfH79OUSGE2PUX2rGbwONmB6DfqpyhSZO8/cf++sqiaMWEVCMjACyMfnISW7C3gGMoNvNolQ==
 
+y-codemirror@^2.0.9:
+  version "2.0.9"
+  resolved "https://registry.yarnpkg.com/y-codemirror/-/y-codemirror-2.0.9.tgz#3804c11736b53a71046c23efdbe81128cc850820"
+  integrity sha512-wSSQRGhHKtDdKKjPclhRM3TRg/d1s7kPdzV4nYmVeEsyOZgMWhFxr/23EdSll5r6XUzQ1C3M5YVEQ4SZzhsDDw==
+  dependencies:
+    lib0 "^0.2.33"
+
 y18n@^3.2.0:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/y18n/-/y18n-3.2.1.tgz#6d15fba884c08679c0d77e88e7759e811e07fa41"
@@ -16710,3 +16729,10 @@ yarn@1.21.1:
   version "1.21.1"
   resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.21.1.tgz#1d5da01a9a03492dc4a5957befc1fd12da83d89c"
   integrity sha512-dQgmJv676X/NQczpbiDtc2hsE/pppGDJAzwlRiADMTvFzYbdxPj2WO4PcNyriSt2c4jsCMpt8UFRKHUozt21GQ==
+
+yjs@^13.4.12:
+  version "13.4.12"
+  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.4.12.tgz#74e7fe5adaeb0056f500ed3a6765f5de08abfaf1"
+  integrity sha512-ABmFknpmjcGOOWx6m4dTsjEWsN77+jHTI5DbjbwUu5t9ni1teUPOrdZtsNwQDuNPTdwGpiU9MJtIr7W6dgr9aw==
+  dependencies:
+    lib0 "^0.2.35"

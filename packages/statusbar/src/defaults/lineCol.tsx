@@ -325,7 +325,10 @@ export namespace LineCol {
     set editor(editor: CodeEditor.IEditor | null) {
       const oldEditor = this._editor;
       if (oldEditor) {
-        oldEditor.model.selections.changed.disconnect(this._onSelectionChanged);
+        /**
+         * @todo implement selections
+         */
+        // oldEditor.model.selections.changed.disconnect(this._onSelectionChanged);
       }
 
       const oldState = this._getAllState();
@@ -334,7 +337,10 @@ export namespace LineCol {
         this._column = 1;
         this._line = 1;
       } else {
-        this._editor.model.selections.changed.connect(this._onSelectionChanged);
+        /**
+         * @todo implement selections
+         */
+        // this._editor.model.selections.changed.connect(this._onSelectionChanged);
 
         const pos = this._editor.getCursorPosition();
         this._column = pos.column + 1;
@@ -359,8 +365,10 @@ export namespace LineCol {
     }
 
     /**
+     * @todo implement selections
+     *
      * React to a change in the cursors of the current editor.
-     */
+     *
     private _onSelectionChanged = () => {
       const oldState = this._getAllState();
       const pos = this.editor!.getCursorPosition();
@@ -369,6 +377,7 @@ export namespace LineCol {
 
       this._triggerChange(oldState, this._getAllState());
     };
+    */
 
     private _getAllState(): [number, number] {
       return [this._line, this._column];

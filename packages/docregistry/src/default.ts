@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Y from 'yjs';
+
 import { Mode } from '@jupyterlab/codemirror';
 
 import { Contents } from '@jupyterlab/services';
@@ -17,8 +19,6 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 
-import { IModelDB } from '@jupyterlab/observables';
-
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 import { DocumentRegistry, IDocumentWidget } from './index';
@@ -32,10 +32,23 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, modelDB?: IModelDB) {
-    super({ modelDB });
+  constructor(languagePreference?: string, ymodel?: Y.Doc) {
+    super({ ymodel });
     this._defaultLang = languagePreference || '';
-    this.value.changed.connect(this.triggerContentChange, this);
+    this.triggerContentChange = this.triggerContentChange.bind(this);
+    this.ytext.observe(this.triggerContentChange);
+  }
+
+  /**
+   * Dispose of the resources used by the document manager.
+   */
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+    this.ytext.unobserve(this.triggerContentChange);
   }
 
   /**
@@ -106,7 +119,7 @@ export class DocumentModel
    * Serialize the model to a string.
    */
   toString(): string {
-    return this.value.text;
+    return this.toString();
   }
 
   /**
@@ -116,14 +129,17 @@ export class DocumentModel
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    this.value.text = value;
+    this.ymodel.transact(() => {
+      this.ytext.delete(0, this.ytext.length);
+      this.ytext.insert(0, value);
+    });
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): PartialJSONValue {
-    return JSON.parse(this.value.text || 'null');
+    return JSON.parse(this.ytext.toString() || 'null');
   }
 
   /**
@@ -221,9 +237,9 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    */
   createNew(
     languagePreference?: string,
-    modelDB?: IModelDB
+    ymodel?: Y.Doc
   ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, modelDB);
+    return new DocumentModel(languagePreference, ymodel);
   }
 
   /**

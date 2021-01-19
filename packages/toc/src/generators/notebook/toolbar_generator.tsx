@@ -82,16 +82,16 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
             tracker.currentWidget.content.activeCellChanged.connect(() => {
               options.updateWidget();
             });
-            const numbering = tracker.currentWidget.model!.metadata.get(
+            const numbering = tracker.currentWidget.model!.ymeta.get(
               'toc-autonumbering'
             ) as boolean;
-            const showCode = tracker.currentWidget.model!.metadata.get(
+            const showCode = tracker.currentWidget.model!.ymeta.get(
               'toc-showcode'
             ) as boolean;
-            const showMarkdown = tracker.currentWidget.model!.metadata.get(
+            const showMarkdown = tracker.currentWidget.model!.ymeta.get(
               'toc-showmarkdowntxt'
             ) as boolean;
-            const showTags = tracker.currentWidget.model!.metadata.get(
+            const showTags = tracker.currentWidget.model!.ymeta.get(
               'toc-showtags'
             ) as boolean;
             options.initializeOptions(
@@ -153,12 +153,12 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
     loadTags() {
       const notebook = tracker.currentWidget;
       if (notebook) {
-        const cells = notebook.model!.cells;
+        const model = notebook.model!;
         const tags = new Set<string>();
         this.tags = [];
-        for (let i = 0; i < cells.length; i++) {
-          const cell = cells.get(i)!;
-          const list = cell.metadata.get('tags') as JSONValue;
+        for (let i = 0; i < model.cellInstances.length; i++) {
+          const cell = model.getCell(i)!;
+          const list = cell.ymeta.get('tags') as JSONValue;
           if (Array.isArray(list)) {
             list.forEach((tag: string) => tag && tags.add(tag));
           }

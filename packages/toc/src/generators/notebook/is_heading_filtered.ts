@@ -16,8 +16,7 @@ function isHeadingFiltered(heading: INotebookHeading, tags: string[]): boolean {
     return false;
   }
   if (heading && heading.cellRef) {
-    let meta = heading.cellRef.model.metadata;
-    let ctags = meta.get('tags') as string[];
+    let ctags = heading.cellRef.model.ymeta.get('tags') as string[];
     if (ctags) {
       for (let j = 0; j < ctags.length; j++) {
         let name = ctags[j];

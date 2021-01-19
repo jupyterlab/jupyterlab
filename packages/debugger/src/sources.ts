@@ -107,7 +107,7 @@ export class DebuggerSources implements IDebugger.ISources {
       const cells = notebookPanel.content.widgets;
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
-        const code = cell.model.value.text;
+        const code = cell.model.getValue();
         const codeId = this._getCodeId(code, kernel);
         if (!codeId) {
           return;
@@ -153,7 +153,7 @@ export class DebuggerSources implements IDebugger.ISources {
 
       const cells = consoleWidget.console.cells;
       each(cells, cell => {
-        const code = cell.model.value.text;
+        const code = cell.model.getValue();
         const codeId = this._getCodeId(code, kernel);
         if (!codeId) {
           return;
@@ -195,7 +195,7 @@ export class DebuggerSources implements IDebugger.ISources {
         return;
       }
 
-      const code = editor.model.value.text;
+      const code = editor.model.getValue();
       const codeId = this._getCodeId(code, kernel);
       if (!codeId) {
         return;
@@ -228,7 +228,7 @@ export class DebuggerSources implements IDebugger.ISources {
         return;
       }
 
-      const code = editor.model.value.text;
+      const code = editor.model.getValue();
       const codeId = this._getCodeId(code, kernel);
       if (!codeId) {
         return;

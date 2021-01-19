@@ -86,7 +86,7 @@ class OptionsManager extends Registry.IOptionsManager {
    */
   set notebookMetadata(value: [string, any]) {
     if (this._notebook.currentWidget != null) {
-      this._notebook.currentWidget.model!.metadata.set(value[0], value[1]);
+      this._notebook.currentWidget.model!.ymeta.set(value[0], value[1]);
     }
   }
 

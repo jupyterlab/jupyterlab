@@ -16,7 +16,7 @@ import { render } from './render';
  */
 function generate(editor: IDocumentWidget<FileEditor>): IHeading[] {
   // Split the text into lines:
-  let lines = editor.content.model.value.text.split('\n') as Array<any>;
+  let lines = editor.content.model.getValue().split('\n') as Array<any>;
 
   // Iterate over the lines to get the heading level and text for each line:
   let headings: IHeading[] = [];

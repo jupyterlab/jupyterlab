@@ -1,16 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Y from 'yjs';
+
 import * as nbformat from '@jupyterlab/nbformat';
-
-import {
-  IObservableMap,
-  ObservableMap,
-  IObservableValue,
-  ObservableValue,
-  IModelDB
-} from '@jupyterlab/observables';
-
 import {
   IAttachmentModel,
   AttachmentModel,
@@ -35,7 +28,7 @@ export interface IAttachmentsModel extends IDisposable {
   /**
    * A signal emitted when the model changes.
    */
-  readonly changed: ISignal<IAttachmentsModel, IAttachmentsModel.ChangedArgs>;
+  readonly changed: ISignal<IAttachmentsModel, Y.YMapEvent<any>>;
 
   /**
    * The length of the items in the model.
@@ -115,13 +108,8 @@ export namespace IAttachmentsModel {
     /**
      * An optional IModelDB to store the attachments model.
      */
-    modelDB?: IModelDB;
+    ymodel?: Y.Map<any>;
   }
-
-  /**
-   * A type alias for changed args.
-   */
-  export type ChangedArgs = IObservableMap.IChangedArgs<IAttachmentModel>;
 
   /**
    * The interface for an attachment content factory.
@@ -144,6 +132,20 @@ export class AttachmentsModel implements IAttachmentsModel {
   constructor(options: IAttachmentsModel.IOptions = {}) {
     this.contentFactory =
       options.contentFactory || AttachmentsModel.defaultContentFactory;
+
+    // If we are given a IModelDB, keep an up-to-date
+    // serialized copy of the AttachmentsModel in it.
+    const ymodel = options.ymodel;
+    if (ymodel) {
+      this.ymodel = ymodel;
+      this.fromJSON((ymodel.get('attachments') || {}) as nbformat.IAttachments);
+    } else {
+      this.ymodel = new Y.Map();
+    }
+
+    this._onMapChanged = this._onMapChanged.bind(this);
+    this.ymodel.observe(this._onMapChanged);
+
     if (options.values) {
       for (const key of Object.keys(options.values)) {
         if (options.values[key] !== undefined) {
@@ -151,21 +153,8 @@ export class AttachmentsModel implements IAttachmentsModel {
         }
       }
     }
-    this._map.changed.connect(this._onMapChanged, this);
-
-    // If we are given a IModelDB, keep an up-to-date
-    // serialized copy of the AttachmentsModel in it.
-    if (options.modelDB) {
-      this._modelDB = options.modelDB;
-      this._serialized = this._modelDB.createValue('attachments');
-      if (this._serialized.get()) {
-        this.fromJSON(this._serialized.get() as nbformat.IAttachments);
-      } else {
-        this._serialized.set(this.toJSON());
-      }
-      this._serialized.changed.connect(this._onSerializedChanged, this);
-    }
   }
+  readonly ymodel: Y.Map<any>;
 
   /**
    * A signal emitted when the model state changes.
@@ -177,7 +166,7 @@ export class AttachmentsModel implements IAttachmentsModel {
   /**
    * A signal emitted when the model changes.
    */
-  get changed(): ISignal<this, IAttachmentsModel.ChangedArgs> {
+  get changed(): ISignal<this, Y.YMapEvent<any>> {
     return this._changed;
   }
 
@@ -185,14 +174,14 @@ export class AttachmentsModel implements IAttachmentsModel {
    * The keys of the attachments in the model.
    */
   get keys(): ReadonlyArray<string> {
-    return this._map.keys();
+    return Array.from(this.ymodel.keys());
   }
 
   /**
    * Get the length of the items in the model.
    */
   get length(): number {
-    return this._map.keys().length;
+    return this.ymodel.size;
   }
 
   /**
@@ -215,7 +204,7 @@ export class AttachmentsModel implements IAttachmentsModel {
       return;
     }
     this._isDisposed = true;
-    this._map.dispose();
+    this.ymodel.unobserve(this._onMapChanged);
     Signal.clearData(this);
   }
 
@@ -223,14 +212,14 @@ export class AttachmentsModel implements IAttachmentsModel {
    * Whether the specified key is set.
    */
   has(key: string): boolean {
-    return this._map.has(key);
+    return this.ymodel.has(key);
   }
 
   /**
    * Get an item at the specified key.
    */
   get(key: string): IAttachmentModel | undefined {
-    return this._map.get(key);
+    return this.ymodel.get(key);
   }
 
   /**
@@ -239,24 +228,25 @@ export class AttachmentsModel implements IAttachmentsModel {
   set(key: string, value: nbformat.IMimeBundle): void {
     // Normalize stream data.
     const item = this._createItem({ value });
-    this._map.set(key, item);
+    this.ymodel.set(key, item);
   }
 
   /**
    * Remove the attachment whose name is the specified key
    */
   remove(key: string): void {
-    this._map.delete(key);
+    this.ymodel.delete(key);
   }
 
   /**
    * Clear all of the attachments.
    */
   clear(): void {
-    this._map.values().forEach((item: IAttachmentModel) => {
-      item.dispose();
+    this.ymodel.doc?.transact(() => {
+      Array.from(this.ymodel.keys()).forEach(key => {
+        this.ymodel.delete(key);
+      });
     });
-    this._map.clear();
   }
 
   /**
@@ -279,9 +269,9 @@ export class AttachmentsModel implements IAttachmentsModel {
    */
   toJSON(): nbformat.IAttachments {
     const ret: nbformat.IAttachments = {};
-    for (const key of this._map.keys()) {
-      ret[key] = this._map.get(key)!.toJSON();
-    }
+    this.ymodel.forEach((value, key) => {
+      ret[key] = value;
+    });
     return ret;
   }
 
@@ -298,32 +288,9 @@ export class AttachmentsModel implements IAttachmentsModel {
   /**
    * Handle a change to the list.
    */
-  private _onMapChanged(
-    sender: IObservableMap<IAttachmentModel>,
-    args: IObservableMap.IChangedArgs<IAttachmentModel>
-  ) {
-    if (this._serialized && !this._changeGuard) {
-      this._changeGuard = true;
-      this._serialized.set(this.toJSON());
-      this._changeGuard = false;
-    }
-    this._changed.emit(args);
+  private _onMapChanged(event: Y.YMapEvent<any>) {
+    this._changed.emit(event);
     this._stateChanged.emit(void 0);
-  }
-
-  /**
-   * If the serialized version of the outputs have changed due to a remote
-   * action, then update the model accordingly.
-   */
-  private _onSerializedChanged(
-    sender: IObservableValue,
-    args: ObservableValue.IChangedArgs
-  ) {
-    if (!this._changeGuard) {
-      this._changeGuard = true;
-      this.fromJSON(args.newValue as nbformat.IAttachments);
-      this._changeGuard = false;
-    }
   }
 
   /**
@@ -333,13 +300,9 @@ export class AttachmentsModel implements IAttachmentsModel {
     this._stateChanged.emit(void 0);
   }
 
-  private _map = new ObservableMap<IAttachmentModel>();
   private _isDisposed = false;
   private _stateChanged = new Signal<IAttachmentsModel, void>(this);
-  private _changed = new Signal<this, IAttachmentsModel.ChangedArgs>(this);
-  private _modelDB: IModelDB | null = null;
-  private _serialized: IObservableValue | null = null;
-  private _changeGuard = false;
+  private _changed = new Signal<this, Y.YMapEvent<any>>(this);
 }
 
 /**

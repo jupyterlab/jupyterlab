@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Y from 'yjs';
+
 import { JSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
@@ -9,14 +11,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
-import {
-  IModelDB,
-  ModelDB,
-  IObservableValue,
-  ObservableValue,
-  IObservableMap,
-  IObservableString
-} from '@jupyterlab/observables';
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -177,11 +171,6 @@ export namespace CodeEditor {
     mimeTypeChanged: ISignal<IModel, IChangedArgs<string>>;
 
     /**
-     * The text stored in the model.
-     */
-    readonly value: IObservableString;
-
-    /**
      * A mime type of the model.
      *
      * #### Notes
@@ -190,15 +179,19 @@ export namespace CodeEditor {
     mimeType: string;
 
     /**
-     * The currently selected code.
-     */
-    readonly selections: IObservableMap<ITextSelection[]>;
-
-    /**
      * The underlying `IModelDB` instance in which model
      * data is stored.
+     *
+     * @todo
      */
-    readonly modelDB: IModelDB;
+    // ymodel: Y.Doc;
+    readonly ytext: Y.Text;
+    readonly ymeta: Y.Map<any>;
+    readonly ydoc: Y.Doc;
+    setValue(value: string): void;
+    getValue(): string;
+    valueChanged: ISignal<IModel, Y.YTextEvent>;
+    metadataChanged: ISignal<any, Y.YMapEvent<any>>;
   }
 
   /**
@@ -211,27 +204,40 @@ export namespace CodeEditor {
     constructor(options?: Model.IOptions) {
       options = options || {};
 
-      if (options.modelDB) {
-        this.modelDB = options.modelDB;
+      if (options.ymodel) {
+        this.ymodel = options.ymodel;
       } else {
-        this.modelDB = new ModelDB();
+        this.ymodel = new Y.Doc();
+      }
+      this.ydoc = this.ymodel;
+      this.ymeta = this.ymodel.getMap('meta');
+      this.ytext = this.ymodel.getText('value');
+      this._onValueChanged = this._onValueChanged.bind(this);
+      this.ytext.observe(this._onValueChanged);
+
+      if (options.ymodel == null) {
+        // initialize content
+        if (options.value) {
+          this.ytext.insert(0, options.value);
+        }
+
+        this.ymeta.set('mimeType', options.mimeType || 'text/plain');
       }
 
-      const value = this.modelDB.createString('value');
-      value.text = value.text || options.value || '';
-
-      const mimeType = this.modelDB.createValue('mimeType');
-      mimeType.set(options.mimeType || 'text/plain');
-      mimeType.changed.connect(this._onMimeTypeChanged, this);
-
-      this.modelDB.createMap('selections');
+      this.ymeta.observe(this._onMetaChanged);
+      // @todo when implementing selection, make sure to implement the same behavior in codeeditor/src/widget.ts
     }
 
-    /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     */
-    readonly modelDB: IModelDB;
+    setValue(value: string) {
+      this.ytext.doc?.transact(() => {
+        this.ytext.delete(0, this.ytext.length);
+        this.ytext.insert(0, value);
+      });
+    }
+
+    getValue() {
+      return this.ytext.toString();
+    }
 
     /**
      * A signal emitted when a mimetype changes.
@@ -241,31 +247,18 @@ export namespace CodeEditor {
     }
 
     /**
-     * Get the value of the model.
-     */
-    get value(): IObservableString {
-      return this.modelDB.get('value') as IObservableString;
-    }
-
-    /**
-     * Get the selections for the model.
-     */
-    get selections(): IObservableMap<ITextSelection[]> {
-      return this.modelDB.get('selections') as IObservableMap<ITextSelection[]>;
-    }
-
-    /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this.modelDB.getValue('mimeType') as string;
+      return this.ymeta.get('mimeType') as string;
     }
+
     set mimeType(newValue: string) {
       const oldValue = this.mimeType;
       if (oldValue === newValue) {
         return;
       }
-      this.modelDB.setValue('mimeType', newValue);
+      this.ymeta.set('mimeType', newValue);
     }
 
     /**
@@ -283,23 +276,32 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
-      this.value.text = '';
       Signal.clearData(this);
+      this.ymeta.unobserve(this._onMetaChanged);
+    }
+    private _onValueChanged(event: Y.YTextEvent) {
+      this.valueChanged.emit(event);
     }
 
-    private _onMimeTypeChanged(
-      mimeType: IObservableValue,
-      args: ObservableValue.IChangedArgs
-    ): void {
-      this._mimeTypeChanged.emit({
-        name: 'mimeType',
-        oldValue: args.oldValue as string,
-        newValue: args.newValue as string
-      });
-    }
+    private _onMetaChanged = (event: Y.YMapEvent<string>) => {
+      if (event.keysChanged.has('mimeType')) {
+        this._mimeTypeChanged.emit({
+          name: 'mimeType',
+          oldValue: event.changes.keys.get('mimeType')?.oldValue as string,
+          newValue: this.ymeta.get('mimeType') as string
+        });
+      }
+      this.metadataChanged.emit(event);
+    };
 
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
+    readonly valueChanged = new Signal<this, Y.YTextEvent>(this);
+    readonly metadataChanged = new Signal<this, Y.YMapEvent<any>>(this);
+    ymodel: Y.Doc;
+    ydoc: Y.Doc;
+    ytext: Y.Text;
+    ymeta: Y.Map<any>;
   }
 
   /**
@@ -728,7 +730,7 @@ export namespace CodeEditor {
       /**
        * An optional modelDB for storing model state.
        */
-      modelDB?: IModelDB;
+      ymodel?: Y.Doc;
     }
   }
 }

@@ -41,14 +41,18 @@ export class CodeEditorWrapper extends Widget {
    */
   constructor(options: CodeEditorWrapper.IOptions) {
     super();
-    const editor = (this.editor = options.factory({
+    this.editor = options.factory({
       host: this.node,
       model: options.model,
       uuid: options.uuid,
       config: options.config,
       selectionStyle: options.selectionStyle
-    }));
-    editor.model.selections.changed.connect(this._onSelectionsChanged, this);
+    });
+    /**
+     * @todo implement selection handling in editor model (using Yjs-Awareness?)
+     */
+    // this.editor.model.selections.changed.connect(this._onSelectionsChanged, this); // @todo
+    this.model.ytext.observe(this._onSelectionsChanged); // @todo remove this line as it only polyfills the above
     this._updateOnShow = options.updateOnShow !== false;
   }
 
@@ -280,7 +284,7 @@ export class CodeEditorWrapper extends Widget {
       return;
     }
     const offset = this.editor.getOffsetAt(position);
-    this.model.value.insert(offset, data);
+    this.model.ytext.insert(offset, data);
   }
 
   private _updateOnShow: boolean;

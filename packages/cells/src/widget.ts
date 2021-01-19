@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import * as Y from 'yjs';
+
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { ISessionContext } from '@jupyterlab/apputils';
@@ -14,8 +16,6 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { DirListing } from '@jupyterlab/filebrowser';
 
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { IObservableMap, IObservableJSON } from '@jupyterlab/observables';
 
 import {
   OutputArea,
@@ -35,13 +35,7 @@ import {
 
 import { KernelMessage, Kernel } from '@jupyterlab/services';
 
-import {
-  JSONValue,
-  PromiseDelegate,
-  JSONObject,
-  UUID,
-  PartialJSONValue
-} from '@lumino/coreutils';
+import { PromiseDelegate, JSONObject, UUID } from '@lumino/coreutils';
 
 import { some, filter, toArray } from '@lumino/algorithm';
 
@@ -221,7 +215,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       );
     }
 
-    model.metadata.changed.connect(this.onMetadataChanged, this);
+    model.ymeta.observe(this.onMetadataChanged);
   }
 
   /**
@@ -303,8 +297,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Save view editable state to model
    */
   saveEditableState() {
-    const { metadata } = this.model;
-    const current = metadata.get('editable');
+    const { ymeta } = this.model;
+    const current = ymeta.get('editable');
 
     if (
       (this.readOnly && current === false) ||
@@ -314,9 +308,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     }
 
     if (this.readOnly) {
-      this.model.metadata.set('editable', false);
+      ymeta.set('editable', false);
     } else {
-      this.model.metadata.delete('editable');
+      ymeta.delete('editable');
     }
   }
 
@@ -324,7 +318,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Load view editable state from model.
    */
   loadEditableState() {
-    this.readOnly = this.model.metadata.get('editable') === false;
+    this.readOnly = this.model.ymeta.get('editable') === false;
   }
 
   /**
@@ -370,7 +364,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Save view collapse state to model
    */
   saveCollapseState() {
-    const jupyter = { ...(this.model.metadata.get('jupyter') as any) };
+    const jupyter = { ...(this.model.ymeta.get('jupyter') as any) };
 
     if (
       (this.inputHidden && jupyter.source_hidden === true) ||
@@ -385,9 +379,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       delete jupyter.source_hidden;
     }
     if (Object.keys(jupyter).length === 0) {
-      this.model.metadata.delete('jupyter');
+      this.model.ymeta.delete('jupyter');
     } else {
-      this.model.metadata.set('jupyter', jupyter);
+      this.model.ymeta.set('jupyter', jupyter);
     }
   }
 
@@ -395,7 +389,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Revert view collapse state from model.
    */
   loadCollapseState() {
-    const jupyter = (this.model.metadata.get('jupyter') as any) || {};
+    const jupyter = (this.model.ymeta.get('jupyter') as any) || {};
     this.inputHidden = !!jupyter.source_hidden;
   }
 
@@ -466,6 +460,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this._model = null!;
     this._inputWrapper = null!;
     this._inputPlaceholder = null!;
+    this._model.ymeta.unobserve(this.onMetadataChanged);
     super.dispose();
   }
 
@@ -508,25 +503,18 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(
-    model: IObservableJSON,
-    args: IObservableMap.IChangedArgs<PartialJSONValue | undefined>
-  ): void {
-    switch (args.key) {
-      case 'jupyter':
-        if (this.syncCollapse) {
-          this.loadCollapseState();
-        }
-        break;
-      case 'editable':
-        if (this.syncEditable) {
-          this.loadEditableState();
-        }
-        break;
-      default:
-        break;
+  protected onMetadataChanged = (event: Y.YMapEvent<any>) => {
+    if (event.keysChanged.has('jupyter')) {
+      if (this.syncCollapse) {
+        this.loadCollapseState();
+      }
     }
-  }
+    if (event.keysChanged.has('editable')) {
+      if (this.syncEditable) {
+        this.loadEditableState();
+      }
+    }
+  };
 
   private _readOnly = false;
   private _model: T;
@@ -787,8 +775,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
     try {
       super.saveCollapseState();
 
-      const metadata = this.model.metadata;
-      const collapsed = this.model.metadata.get('collapsed');
+      const ymeta = this.model.ymeta;
+      const collapsed = ymeta.get('collapsed');
 
       if (
         (this.outputHidden && collapsed === true) ||
@@ -800,9 +788,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
       // Do not set jupyter.outputs_hidden since it is redundant. See
       // and https://github.com/jupyter/nbformat/issues/137
       if (this.outputHidden) {
-        metadata.set('collapsed', true);
+        ymeta.set('collapsed', true);
       } else {
-        metadata.delete('collapsed');
+        ymeta.delete('collapsed');
       }
     } finally {
       this._savingMetadata = false;
@@ -817,7 +805,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
    */
   loadCollapseState() {
     super.loadCollapseState();
-    this.outputHidden = !!this.model.metadata.get('collapsed');
+    this.outputHidden = !!this.model.ymeta.get('collapsed');
   }
 
   /**
@@ -838,8 +826,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * Save view collapse state to model
    */
   saveScrolledState() {
-    const { metadata } = this.model;
-    const current = metadata.get('scrolled');
+    const { ymeta } = this.model;
+    const current = ymeta.get('scrolled');
 
     if (
       (this.outputsScrolled && current === true) ||
@@ -848,9 +836,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
       return;
     }
     if (this.outputsScrolled) {
-      metadata.set('scrolled', true);
+      ymeta.set('scrolled', true);
     } else {
-      metadata.delete('scrolled');
+      ymeta.delete('scrolled');
     }
   }
 
@@ -858,13 +846,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * Revert view collapse state from model.
    */
   loadScrolledState() {
-    const metadata = this.model.metadata;
+    const { ymeta } = this.model;
 
     // We don't have the notion of 'auto' scrolled, so we make it false.
-    if (metadata.get('scrolled') === 'auto') {
+    if (ymeta.get('scrolled') === 'auto') {
       this.outputsScrolled = false;
     } else {
-      this.outputsScrolled = !!metadata.get('scrolled');
+      this.outputsScrolled = !!ymeta.get('scrolled');
     }
   }
 
@@ -957,30 +945,23 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(
-    model: IObservableJSON,
-    args: IObservableMap.IChangedArgs<JSONValue>
-  ): void {
+  protected onMetadataChanged = (event: Y.YMapEvent<any>) => {
     if (this._savingMetadata) {
       // We are in middle of a metadata transaction, so don't react to it.
       return;
     }
-    switch (args.key) {
-      case 'scrolled':
-        if (this.syncScrolled) {
-          this.loadScrolledState();
-        }
-        break;
-      case 'collapsed':
-        if (this.syncCollapse) {
-          this.loadCollapseState();
-        }
-        break;
-      default:
-        break;
+    if (event.keysChanged.has('scrolled')) {
+      if (this.syncScrolled) {
+        this.loadScrolledState();
+      }
     }
-    super.onMetadataChanged(model, args);
-  }
+    if (event.keysChanged.has('collapsed')) {
+      if (this.syncCollapse) {
+        this.loadCollapseState();
+      }
+    }
+    super.onMetadataChanged(event);
+  };
 
   /**
    * Handle changes in the number of outputs in the output area.
@@ -1023,18 +1004,18 @@ export namespace CodeCell {
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     const model = cell.model;
-    const code = model.value.text;
+    const code = model.ytext.toString();
     if (!code.trim() || !sessionContext.session?.kernel) {
       model.clearExecution();
       return;
     }
     const cellId = { cellId: model.id };
     metadata = {
-      ...model.metadata.toJSON(),
+      ...model.ymeta.toJSON(),
       ...metadata,
       ...cellId
     };
-    const { recordTiming } = metadata;
+    const { recordTiming } = metadata as JSONObject;
     model.clearExecution();
     cell.outputHidden = false;
     cell.setPrompt('*');
@@ -1073,15 +1054,15 @@ export namespace CodeCell {
           const value = msg.header.date || new Date().toISOString();
           const timingInfo: any = Object.assign(
             {},
-            model.metadata.get('execution')
+            model.ymeta.get('execution')
           );
           timingInfo[`iopub.${label}`] = value;
-          model.metadata.set('execution', timingInfo);
+          model.ymeta.set('execution', timingInfo);
           return true;
         };
         cell.outputArea.future.registerMessageHook(recordTimingHook);
       } else {
-        model.metadata.delete('execution');
+        model.ymeta.delete('execution');
       }
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
@@ -1090,7 +1071,7 @@ export namespace CodeCell {
       if (recordTiming) {
         const timingInfo = Object.assign(
           {},
-          model.metadata.get('execution') as any
+          model.ymeta.get('execution') as any
         );
         const started = msg.metadata.started as string;
         // Started is not in the API, but metadata IPyKernel sends
@@ -1101,7 +1082,7 @@ export namespace CodeCell {
         const finished = msg.header.date as string;
         timingInfo['shell.execute_reply'] =
           finished || new Date().toISOString();
-        model.metadata.set('execution', timingInfo);
+        model.ymeta.set('execution', timingInfo);
       }
       return msg;
     } catch (e) {
@@ -1488,7 +1469,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   private _updateRenderedInput(): Promise<void> {
     const model = this.model;
-    const text = (model && model.value.text) || DEFAULT_MARKDOWN_TEXT;
+    const text = (model && model.getValue()) || DEFAULT_MARKDOWN_TEXT;
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });

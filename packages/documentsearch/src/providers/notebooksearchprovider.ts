@@ -206,7 +206,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       queriesEnded.push(provider.endQuery());
       provider.changed.disconnect(this._onSearchProviderChanged, this);
     });
-    Signal.disconnectBetween(this._searchTarget!.model!.cells, this);
+    Signal.disconnectBetween(this._searchTarget!.model, this);
 
     this._searchProviders = [];
     this._currentProvider = null;
@@ -237,7 +237,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    */
   async endSearch(): Promise<void> {
     this._searchTarget!.hide();
-    Signal.disconnectBetween(this._searchTarget!.model!.cells, this);
+    Signal.disconnectBetween(this._searchTarget!.model!, this);
 
     const index = this._searchTarget!.content.activeCellIndex;
     const searchEnded: Promise<void>[] = [];

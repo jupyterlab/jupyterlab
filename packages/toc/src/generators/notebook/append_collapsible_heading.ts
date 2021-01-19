@@ -54,7 +54,7 @@ function appendCollapsibleHeading(
     }
     // If there is no parent, reset collapsing...
     if (parent) {
-      const isCollapsed = headings[k + 1].cellRef.model.metadata.get(
+      const isCollapsed = headings[k + 1].cellRef.model.ymeta.get(
         'toc-hr-collapsed'
       ) as boolean;
       collapseLevel = isCollapsed ? headings[k + 1].level : -1;

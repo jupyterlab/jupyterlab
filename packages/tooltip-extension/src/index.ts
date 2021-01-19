@@ -294,7 +294,7 @@ namespace Private {
    */
   export function fetch(options: IFetchOptions): Promise<JSONObject> {
     const { detail, editor, kernel } = options;
-    const code = editor.model.value.text;
+    const code = editor.model.getValue();
     const position = editor.getCursorPosition();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
 

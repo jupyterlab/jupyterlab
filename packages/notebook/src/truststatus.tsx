@@ -8,7 +8,6 @@ import { Cell } from '@jupyterlab/cells';
 
 import { notTrustedIcon, trustedIcon } from '@jupyterlab/ui-components';
 
-import { toArray } from '@lumino/algorithm';
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -247,7 +246,7 @@ export namespace NotebookTrustStatus {
       if (model === null) {
         return { total: 0, trusted: 0 };
       }
-      const cells = toArray(model.cells);
+      const cells = model.cellInstances;
 
       const trusted = cells.reduce((accum, current) => {
         if (current.trusted) {

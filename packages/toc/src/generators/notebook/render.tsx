@@ -56,8 +56,8 @@ function render(
         );
 
         let collapsed;
-        if (item.cellRef!.model.metadata.has('toc-hr-collapsed')) {
-          collapsed = item.cellRef!.model.metadata.get(
+        if (item.cellRef!.model.ymeta.has('toc-hr-collapsed')) {
+          collapsed = item.cellRef!.model.ymeta.get(
             'toc-hr-collapsed'
           ) as boolean;
         }
@@ -112,8 +112,8 @@ function render(
           </div>
         );
         let collapsed;
-        if (item.cellRef!.model.metadata.has('toc-hr-collapsed')) {
-          collapsed = item.cellRef!.model.metadata.get(
+        if (item.cellRef!.model.ymeta.has('toc-hr-collapsed')) {
+          collapsed = item.cellRef!.model.ymeta.get(
             'toc-hr-collapsed'
           ) as boolean;
         }
@@ -169,14 +169,14 @@ function render(
    */
   function onClick(heading?: INotebookHeading) {
     let collapsed;
-    if (heading!.cellRef!.model.metadata.has('toc-hr-collapsed')) {
-      collapsed = heading!.cellRef!.model.metadata.get(
+    if (heading!.cellRef!.model.ymeta.has('toc-hr-collapsed')) {
+      collapsed = heading!.cellRef!.model.ymeta.get(
         'toc-hr-collapsed'
       ) as boolean;
-      heading!.cellRef!.model.metadata.delete('toc-hr-collapsed');
+      heading!.cellRef!.model.ymeta.delete('toc-hr-collapsed');
     } else {
       collapsed = false;
-      heading!.cellRef!.model.metadata.set('toc-hr-collapsed', true);
+      heading!.cellRef!.model.ymeta.set('toc-hr-collapsed', true);
     }
     if (heading) {
       options.updateAndCollapse({

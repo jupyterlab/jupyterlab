@@ -51,7 +51,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
   /**
    * The collapsed state of the panel.
    */
-  get collapsed() {
+  get collapsed(): boolean {
     return this._collapsed;
   }
   set collapsed(value: boolean) {
@@ -75,14 +75,14 @@ export class Collapse<T extends Widget = Widget> extends Widget {
   /**
    * Toggle the collapse state of the panel.
    */
-  toggle() {
+  toggle(): void {
     this.collapsed = !this.collapsed;
   }
 
   /**
    * Dispose the widget.
    */
-  dispose() {
+  dispose(): void {
     if (this.isDisposed) {
       return;
     }
@@ -115,11 +115,11 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     }
   }
 
-  protected onAfterAttach(msg: Message) {
+  protected onAfterAttach(msg: Message): void {
     this._header.node.addEventListener('click', this);
   }
 
-  protected onBeforeDetach(msg: Message) {
+  protected onBeforeDetach(msg: Message): void {
     this._header.node.removeEventListener('click', this);
   }
 

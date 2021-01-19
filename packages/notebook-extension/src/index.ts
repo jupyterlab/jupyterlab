@@ -1034,7 +1034,7 @@ function addCommands(
       const { context, content } = current;
 
       const cell = content.activeCell;
-      const metadata = cell?.model.metadata.toJSON();
+      const metadata = cell?.model.ymeta.toJSON();
       const path = context.path;
       // ignore action in non-code cell
       if (!cell || cell.model.type !== 'code') {
@@ -1051,11 +1051,11 @@ function addCommands(
         // Get the selected code from the editor.
         const start = editor.getOffsetAt(selection.start);
         const end = editor.getOffsetAt(selection.end);
-        code = editor.model.value.text.substring(start, end);
+        code = editor.model.getValue().substring(start, end);
       } else {
         // no selection, find the complete statement around the current line
         const cursor = editor.getCursorPosition();
-        const srcLines = editor.model.value.text.split('\n');
+        const srcLines = editor.model.getValue().split('\n');
         let curLine = selection.start.line;
         while (
           curLine < editor.lineCount &&
@@ -1773,7 +1773,7 @@ function addCommands(
       };
 
       current.context.pathChanged.connect(updateCloned);
-      current.context.model?.cells.changed.connect(updateCloned);
+      current.context.model.cellsChanged.connect(updateCloned);
 
       // Add the cloned output to the output widget tracker.
       void clonedOutputs.add(widget);
@@ -1781,7 +1781,7 @@ function addCommands(
       // Remove the output view if the parent notebook is closed.
       current.content.disposed.connect(() => {
         current!.context.pathChanged.disconnect(updateCloned);
-        current!.context.model?.cells.changed.disconnect(updateCloned);
+        current!.context.model.cellsChanged.disconnect(updateCloned);
         widget.dispose();
       });
     },

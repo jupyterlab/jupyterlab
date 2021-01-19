@@ -31,7 +31,7 @@ export class NotebookHandler implements IDisposable {
 
     const notebook = this._notebookPanel.content;
     notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
-    notebook.model?.cells.changed.connect(this._onCellsChanged, this);
+    notebook.model?.cellsChanged.connect(this._onCellsChanged, this);
 
     this._onCellsChanged();
   }
