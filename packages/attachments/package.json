@@ -38,11 +38,11 @@
   },
   "dependencies": {
     "@jupyterlab/nbformat": "^3.1.0-alpha.2",
-    "@jupyterlab/observables": "^4.1.0-alpha.2",
     "@jupyterlab/rendermime": "^3.1.0-alpha.2",
     "@jupyterlab/rendermime-interfaces": "^3.1.0-alpha.2",
     "@lumino/disposable": "^1.4.3",
-    "@lumino/signaling": "^1.4.3"
+    "@lumino/signaling": "^1.4.3",
+    "yjs": "^13.4.12"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

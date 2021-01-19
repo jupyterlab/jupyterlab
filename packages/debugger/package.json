@@ -72,7 +72,8 @@
     "@lumino/widgets": "^1.16.1",
     "codemirror": "~5.57.0",
     "react": "^17.0.1",
-    "vscode-debugprotocol": "^1.37.0"
+    "vscode-debugprotocol": "^1.37.0",
+    "yjs": "^13.4.12"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",

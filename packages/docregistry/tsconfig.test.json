@@ -15,9 +15,6 @@
       "path": "../coreutils"
     },
     {
-      "path": "../observables"
-    },
-    {
       "path": "../rendermime"
     },
     {
@@ -49,9 +46,6 @@
     },
     {
       "path": "../coreutils"
-    },
-    {
-      "path": "../observables"
     },
     {
       "path": "../rendermime"
