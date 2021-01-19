@@ -378,6 +378,12 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
       let code = diagnostic.code;
       if (
         typeof code !== 'undefined' &&
+        // pygls servers return code null if value is missing (rather than undefined)
+        // which is a departure from the LSP specs: https://microsoft.github.io/language-server-protocol/specification#diagnostic
+        // there is an open issue: https://github.com/openlawlibrary/pygls/issues/124
+        // and PR: https://github.com/openlawlibrary/pygls/pull/132
+        // this also affects hover tooltips.
+        code !== null &&
         ignoredDiagnosticsCodes.has(code.toString())
       ) {
         return false;
