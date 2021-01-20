@@ -75,7 +75,7 @@ export class NotebookModelFactory
    */
   createNew(languagePreference?: string, ymodel?: Y.Doc): INotebookModel {
     const contentFactory = this.contentFactory;
-    return new NotebookModel({ languagePreference, contentFactory });
+    return new NotebookModel({ languagePreference, contentFactory, ymodel });
   }
 
   /**

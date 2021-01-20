@@ -209,8 +209,6 @@ export namespace CodeEditor {
       } else {
         console.log('create new ydoc '); // @todo remove logging
         this.ymodel = new Y.Doc();
-        // @ts-ignore
-        window.somedoc = this.ymodel;
       }
       this.ydoc = this.ymodel;
       this.ymeta = this.ymodel.getMap('meta');
