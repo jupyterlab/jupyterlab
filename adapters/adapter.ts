@@ -167,20 +167,8 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.widget.context.saveState.disconnect(this.on_save_state, this);
     this.connection_manager.closed.disconnect(this.on_connection_closed, this);
     this.widget.disposed.disconnect(this.dispose, this);
-    this.widget.context.model.contentChanged.disconnect(
-      this.onContentChanged,
-      this
-    );
 
-    for (let adapter of this.adapters.values()) {
-      adapter.dispose();
-    }
-    this.adapters.clear();
-
-    this.connection_manager.disconnect_document_signals(
-      this.virtual_editor.virtual_document
-    );
-    this.virtual_editor.dispose();
+    this.disconnect();
 
     // just to be sure
     this.virtual_editor = null;
@@ -224,6 +212,23 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   abstract get language_file_extension(): string;
 
+  disconnect() {
+    this.connection_manager.unregister_document(
+      this.virtual_editor.virtual_document
+    );
+    this.widget.context.model.contentChanged.disconnect(
+      this.onContentChanged,
+      this
+    );
+
+    for (let adapter of this.adapters.values()) {
+      adapter.dispose();
+    }
+    this.adapters.clear();
+
+    this.virtual_editor.dispose();
+  }
+
   // equivalent to triggering didClose and didOpen, as per syncing specification,
   // but also reloads the connection; used during file rename (or when it was moved)
   protected reload_connection() {
@@ -233,16 +238,12 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     }
 
     // disconnect all existing connections (and dispose adapters)
-    this.connection_manager.unregister_document(
-      this.virtual_editor.virtual_document
-    );
+    this.disconnect();
 
     // recreate virtual document using current path and language
     // as virtual editor assumes it gets the virtual document at init,
     // just dispose virtual editor (which disposes virtual document too)
     // and re-initialize both virtual editor and document
-    this.virtual_editor.dispose();
-
     this.init_virtual();
 
     // reconnect
