@@ -62,7 +62,13 @@ export class Context<
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
-    this._model = this._factory.createNew(lang, new Y.Doc({ guid: localPath }));
+    const ydoc = new Y.Doc({ guid: localPath });
+    // @todo remove debugging information:
+    // @ts-ignore
+    window.ydocs = window.ydocs || {};
+    // @ts-ignore
+    window.ydocs[localPath] = ydoc;
+    this._model = this._factory.createNew(lang, ydoc);
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -218,6 +224,8 @@ export class Context<
     if (isNew) {
       this._model.initialize();
       return this._save();
+    } else {
+      return this._revert();
     }
     /**
      * @todo see if we can reuse this

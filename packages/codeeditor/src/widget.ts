@@ -51,6 +51,7 @@ export class CodeEditorWrapper extends Widget {
     /**
      * @todo implement selection handling in editor model (using Yjs-Awareness?)
      */
+    this._onSelectionsChanged = this._onSelectionsChanged.bind(this);
     // this.editor.model.selections.changed.connect(this._onSelectionsChanged, this); // @todo
     this.model.ytext.observe(this._onSelectionsChanged); // @todo remove this line as it only polyfills the above
     this._updateOnShow = options.updateOnShow !== false;

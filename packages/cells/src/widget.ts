@@ -214,7 +214,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
         }
       );
     }
-
+    this.onMetadataChanged = this.onMetadataChanged.bind(this);
     model.ymeta.observe(this.onMetadataChanged);
   }
 
@@ -451,16 +451,16 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
     }
+    this._model.ymeta.unobserve(this.onMetadataChanged);
     this._input = null!;
     this._model = null!;
     this._inputWrapper = null!;
     this._inputPlaceholder = null!;
-    this._model.ymeta.unobserve(this.onMetadataChanged);
     super.dispose();
   }
 
@@ -503,7 +503,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged = (event: Y.YMapEvent<any>): void => {
+  protected onMetadataChanged(event: Y.YMapEvent<any>): void {
     if (event.keysChanged.has('jupyter')) {
       if (this.syncCollapse) {
         this.loadCollapseState();
@@ -514,7 +514,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
         this.loadEditableState();
       }
     }
-  };
+  }
 
   private _readOnly = false;
   private _model: T;
@@ -945,7 +945,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged = (event: Y.YMapEvent<any>) => {
+  protected onMetadataChanged(event: Y.YMapEvent<any>): void {
     if (this._savingMetadata) {
       // We are in middle of a metadata transaction, so don't react to it.
       return;
@@ -961,7 +961,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       }
     }
     super.onMetadataChanged(event);
-  };
+  }
 
   /**
    * Handle changes in the number of outputs in the output area.

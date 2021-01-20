@@ -114,8 +114,8 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       return;
     }
     this._isDisposed = true;
-    this._disposed.emit(void 0);
     this._editor?.model.ytext.unobserve(this._onChange);
+    this._disposed.emit(void 0);
     Signal.clearData(this);
   }
 

@@ -47,8 +47,8 @@ export class DocumentModel
     if (this.isDisposed) {
       return;
     }
-    super.dispose();
     this.ytext.unobserve(this.triggerContentChange);
+    super.dispose();
   }
 
   /**

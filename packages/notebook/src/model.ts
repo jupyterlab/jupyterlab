@@ -219,8 +219,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   fromJSON(value: nbformat.INotebookContent): void {
     // bundle all changes to the model to a single change
     this.ymodel.transact(() => {
-      // @todo this should convert cell to type first
-      this.ycells.insert(0, value.cells);
+      this.ycells.delete(0, this.ycells.length);
       // per spec clear the existing metadata
       Array.from(this.ymeta.keys()).forEach(key => {
         this.ymeta.delete(key);
@@ -233,6 +232,11 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
         }
         this.ymeta.set(key, metadata[key]);
       }
+      // @todo this should convert cell to type first
+      this.insertCells(
+        0,
+        value.cells.map(cell => this._createCellFromJSON(cell))
+      );
     }, 'json-parse');
 
     let oldValue = 0;

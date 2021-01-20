@@ -247,7 +247,10 @@ export class NotebookTools extends Widget implements INotebookTools {
   /**
    * Handle a change in the active cell metadata.
    */
-  private _onActiveNotebookPanelMetadataChanged(event: Y.YMapEvent<any>): void {
+  private _onActiveNotebookPanelMetadataChanged(
+    sender: any,
+    event: Y.YMapEvent<any>
+  ): void {
     this._messageToolChildren(event, 'activenotebookpanel-metadata-changed');
   }
 
