@@ -306,7 +306,7 @@ export class DocumentConnectionManager {
         );
       } catch {
         this.console.warn(
-          `LSP: Connection to ${virtual_document.uri} timed out after ${firstTimeoutSeconds} seconds, will continue retrying for another ${secondTimeoutMinutes} minutes`
+          `Connection to ${virtual_document.uri} timed out after ${firstTimeoutSeconds} seconds, will continue retrying for another ${secondTimeoutMinutes} minutes`
         );
         try {
           await until_ready(
@@ -316,7 +316,7 @@ export class DocumentConnectionManager {
           );
         } catch {
           this.console.warn(
-            `LSP: Connection to ${virtual_document.uri} timed out again after ${secondTimeoutMinutes} minutes, giving up`
+            `Connection to ${virtual_document.uri} timed out again after ${secondTimeoutMinutes} minutes, giving up`
           );
           return;
         }
