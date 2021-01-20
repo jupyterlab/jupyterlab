@@ -581,7 +581,7 @@ export class CollapsibleSection extends React.Component<
     }
     return (
       <>
-        <header>
+        <div className="header">
           <ToolbarButtonComponent
             icon={icon}
             onClick={() => {
@@ -590,7 +590,7 @@ export class CollapsibleSection extends React.Component<
           />
           <span className={className}>{this.props.header}</span>
           {!this.props.disabled && this.props.headerElements}
-        </header>
+        </div>
         <Collapse isOpen={isOpen}>{this.props.children}</Collapse>
       </>
     );
