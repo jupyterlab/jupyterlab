@@ -228,14 +228,14 @@ export namespace CodeEditor {
       // @todo when implementing selection, make sure to implement the same behavior in codeeditor/src/widget.ts
     }
 
-    setValue(value: string) {
+    setValue(value: string): void {
       this.ytext.doc?.transact(() => {
         this.ytext.delete(0, this.ytext.length);
         this.ytext.insert(0, value);
       });
     }
 
-    getValue() {
+    getValue(): string {
       return this.ytext.toString();
     }
 

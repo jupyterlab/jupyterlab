@@ -119,7 +119,7 @@ export class DocumentModel
    * Serialize the model to a string.
    */
   toString(): string {
-    return this.toString();
+    return this.ytext.toString();
   }
 
   /**

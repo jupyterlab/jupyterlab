@@ -289,7 +289,7 @@ export class CellModel implements ICellModel {
    */
   readonly contentChanged = new Signal<this, void>(this);
   readonly valueChanged = new Signal<this, Y.YTextEvent>(this);
-  readonly metadataChanged: Signal<this, Y.YMapEvent<any>>;
+  readonly metadataChanged = new Signal<this, Y.YMapEvent<any>>(this);
 
   /**
    * A signal emitted when a model state changes.

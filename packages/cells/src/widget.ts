@@ -503,7 +503,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged = (event: Y.YMapEvent<any>) => {
+  protected onMetadataChanged = (event: Y.YMapEvent<any>): void => {
     if (event.keysChanged.has('jupyter')) {
       if (this.syncCollapse) {
         this.loadCollapseState();

@@ -107,7 +107,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
     this.ybinding = new CodemirrorBinding(model.ytext, editor);
-    this._onMimeTypeChanged();
     this._poll = new Poll({
       factory: async () => {
         this._checkSync();
@@ -120,6 +119,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
+    if (!this.model.mimeType) {
+      console.info(
+        'There should be an "init" function that initialized default content'
+      ); // @todo
+      this.model.mimeType = options.mimeType || 'text/plain';
+    }
+    this._onMimeTypeChanged();
     /**
      * @todo implement selections
      */
@@ -872,6 +878,7 @@ export namespace CodeMirrorEditor {
      * The configuration options for the editor.
      */
     config?: Partial<IConfig>;
+    mimeType?: string;
   }
 
   /**
