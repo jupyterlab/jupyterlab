@@ -14,15 +14,18 @@ import { TeX } from 'mathjax-full/js/input/tex';
 // HTML output
 import { CHTML } from 'mathjax-full/js/output/chtml';
 
-import { browserAdaptor } from 'mathjax-full/js/adaptors/browserAdaptor';
-
 import { TeXFont } from 'mathjax-full/js/output/chtml/fonts/tex';
-
-import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html';
 
 import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages';
 
-RegisterHTMLHandler(browserAdaptor());
+import { SafeHandler } from 'mathjax-full/js/ui/safe/SafeHandler';
+
+import { HTMLHandler } from 'mathjax-full/js/handlers/html/HTMLHandler';
+
+import { browserAdaptor } from 'mathjax-full/js/adaptors/browserAdaptor';
+
+
+mathjax.handlers.register(SafeHandler(new HTMLHandler(browserAdaptor())));
 
 // Override dynamically generated fonts in favor
 // of our font css that is picked up by webpack.
