@@ -14,13 +14,13 @@
 }
 
 @font-face /* 3 */ {
-  font-family: MJXTEX-MI;
-  src: url("~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff") format("woff");
+  font-family: MJXTEX-I;
+  src: url("~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff") format("woff");
 }
 
 @font-face /* 4 */ {
-  font-family: MJXTEX-I;
-  src: url("~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff") format("woff");
+  font-family: MJXTEX-MI;
+  src: url("~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff") format("woff");
 }
 
 @font-face /* 5 */ {
@@ -59,7 +59,7 @@
 }
 
 @font-face /* 12 */ {
-  font-family: MJXTEX-C-B;
+  font-family: MJXTEX-CB;
   src: url("~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Bold.woff") format("woff");
 }
 
@@ -69,7 +69,7 @@
 }
 
 @font-face /* 14 */ {
-  font-family: MJXTEX-FR-B;
+  font-family: MJXTEX-FRB;
   src: url("~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Bold.woff") format("woff");
 }
 
@@ -79,12 +79,12 @@
 }
 
 @font-face /* 16 */ {
-  font-family: MJXTEX-SS-B;
+  font-family: MJXTEX-SSB;
   src: url("~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Bold.woff") format("woff");
 }
 
 @font-face /* 17 */ {
-  font-family: MJXTEX-SS-I;
+  font-family: MJXTEX-SSI;
   src: url("~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Italic.woff") format("woff");
 }
 
