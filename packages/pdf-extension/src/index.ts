@@ -35,7 +35,11 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       body.style.margin = '0px';
       iframe.contentWindow!.document.body = body;
       this._object = iframe.contentWindow!.document.createElement('object');
-      this._object.type = MIME_TYPE;
+      // work around for https://discussions.apple.com/thread/252247740
+      // Detect if running on Desktop Safari
+      if (!(window as any).safari) {
+        this._object.type = MIME_TYPE;
+      }
       this._object.width = '100%';
       this._object.height = '100%';
       body.appendChild(this._object);
