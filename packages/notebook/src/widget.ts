@@ -957,7 +957,7 @@ export namespace StaticNotebook {
     renderCellOnIdle: true,
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px',
-    maxNumberOutputs: 10
+    maxNumberOutputs: 50
   };
 
   /**
