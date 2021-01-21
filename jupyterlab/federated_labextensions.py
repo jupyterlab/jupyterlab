@@ -139,7 +139,7 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=True
     Returns a list of installed/updated directories.
 
     See develop_labextension for parameter information."""
-    m, labexts = _get_labextension_metadata(module, logger)
+    m, labexts = _get_labextension_metadata(module)
     base_path = os.path.split(m.__file__)[0]
 
     full_dests = []
@@ -344,7 +344,7 @@ def _get_labextension_dir(user=False, sys_prefix=False, prefix=None, labextensio
     return labext
 
 
-def _get_labextension_metadata(module, logger=None):
+def _get_labextension_metadata(module):
     """Get the list of labextension paths associated with a Python module.
 
     Returns a tuple of (the module path,             [{
@@ -397,9 +397,6 @@ def _get_labextension_metadata(module, logger=None):
 
     # Looking for the labextension metadata
     for package in packages :
-        if package.find('_') != -1 :
-            logger.warn('[WARNING]: `{}` is not a valid name for a python module. Do not use `-`.'.format(package))
-
         m = importlib.import_module(package)
         if hasattr(m, '_jupyter_labextension_paths') :
             return m, m._jupyter_labextension_paths()
