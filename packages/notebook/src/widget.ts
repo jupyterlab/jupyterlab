@@ -594,7 +594,8 @@ export class StaticNotebook extends Widget {
       rendermime,
       contentFactory,
       updateEditorOnShow: false,
-      placeholder: false
+      placeholder: false,
+      maxNumberOutputs: this.notebookConfig.maxNumberOutputs
     };
     const cell = this.contentFactory.createCodeCell(options, this);
     cell.syncCollapse = true;
@@ -938,6 +939,11 @@ export namespace StaticNotebook {
      * to render cells below the visible view.
      */
     observedBottomMargin: string;
+
+    /**
+     * Defines the maximum number of outputs per cell.
+     */
+    maxNumberOutputs: number;
   }
 
   /**
@@ -950,7 +956,8 @@ export namespace StaticNotebook {
     numberCellsToRenderDirectly: 20,
     renderCellOnIdle: true,
     observedTopMargin: '1000px',
-    observedBottomMargin: '1000px'
+    observedBottomMargin: '1000px',
+    maxNumberOutputs: 50
   };
 
   /**

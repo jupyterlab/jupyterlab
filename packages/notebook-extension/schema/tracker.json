@@ -388,6 +388,12 @@
       "description": "Defines the observed bottom margin for the virtual notebook, set a positive number of pixels to render cells below the visible view",
       "type": "string",
       "default": "1000px"
+    },
+    "maxNumberOutputs": {
+      "title": "The maximum number of output cells to to be rendered in the output area. Set to 0 to have the complete display.",
+      "description": "Defines the maximum number of output cells to to to be rendered in the output area for cells with many outputs. The output area will have a head and a tail, and the outputs between will be trimmed and not displayed unless the user clicks on the information message.",
+      "type": "number",
+      "default": 50
     }
   },
   "additionalProperties": false,

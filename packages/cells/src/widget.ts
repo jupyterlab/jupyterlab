@@ -573,8 +573,12 @@ export namespace Cell {
     /**
      * Whether this cell is a placeholder for future rendering.
      */
-
     placeholder?: boolean;
+
+    /**
+     * The maximum number of output items to display in cell output.
+     */
+    maxNumberOutputs?: number;
   }
 
   /**
@@ -712,7 +716,8 @@ export class CodeCell extends Cell {
       const output = (this._output = new OutputArea({
         model: model.outputs,
         rendermime,
-        contentFactory: contentFactory
+        contentFactory: contentFactory,
+        maxNumberOutputs: options.maxNumberOutputs
       }));
       output.addClass(CELL_OUTPUT_AREA_CLASS);
       // Set a CSS if there are no outputs, and connect a signal for future
