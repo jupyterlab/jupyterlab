@@ -139,7 +139,7 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=True
     Returns a list of installed/updated directories.
 
     See develop_labextension for parameter information."""
-    m, labexts = _get_labextension_metadata(module)
+    m, labexts = _get_labextension_metadata(module, logger)
     base_path = os.path.split(m.__file__)[0]
 
     full_dests = []
@@ -344,7 +344,7 @@ def _get_labextension_dir(user=False, sys_prefix=False, prefix=None, labextensio
     return labext
 
 
-def _get_labextension_metadata(module):
+def _get_labextension_metadata(module, logger=None):
     """Get the list of labextension paths associated with a Python module.
 
     Returns a tuple of (the module path,             [{
@@ -359,40 +359,52 @@ def _get_labextension_metadata(module):
         Importable Python module exposing the
         magic-named `_jupyter_labextension_paths` function
     """
+
+    mod_path = osp.abspath(module)
+    if not osp.exists(mod_path):
+        raise FileNotFoundError('The path `{}` does not exist.'.format(module))
+
+    # Check if the path is a valid labextension
     try:
         m = importlib.import_module(module)
+        if hasattr(m, '_jupyter_labextension_paths') :
+            labexts = m._jupyter_labextension_paths()
+            return m, labexts
+        else :
+            m = None
+
     except Exception:
         m = None
 
-    if not hasattr(m, '_jupyter_labextension_paths'):
-        mod_path = osp.abspath(module)
-        if osp.exists(mod_path):
+    # Try getting the package name from setup.py
+    try:
+        package = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=mod_path).decode('utf8').strip()
+    except subprocess.CalledProcessError:
+        raise FileNotFoundError('The Python package `{}` is not a valid package, '
+                'it is missing the `setup.py` file.'.format(module))
 
-            # Try getting the package name from setup.py
-            try:
-                package = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=mod_path).decode('utf8').strip()
-            except subprocess.CalledProcessError:
-                from setuptools import find_packages
-                package = find_packages(mod_path)[0]
+    # Make sure the package is installed
+    import pkg_resources
+    try:
+        dist = pkg_resources.get_distribution(package)
+    except pkg_resources.DistributionNotFound:
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
+        sys.path.insert(0, mod_path)
 
-            # Replace hyphens with underscores to match Python convention
-            package = package.replace('-', '_')
+    # Looking for modules in the package
+    from setuptools import find_packages
+    packages = find_packages(mod_path)
 
-            # Make sure the package is installed
-            import pkg_resources
-            try:
-                dist = pkg_resources.get_distribution(package)
-            except pkg_resources.DistributionNotFound:
-                subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
-                sys.path.insert(0, mod_path)
+    # Looking for the labextension metadata
+    for package in packages :
+        if package.find('_') != -1 :
+            logger.warn('[WARNING]: `{}` is not a valid name for a python module. Do not use `-`.'.format(package))
 
-            m = importlib.import_module(package)
+        m = importlib.import_module(package)
+        if hasattr(m, '_jupyter_labextension_paths') :
+            return m, m._jupyter_labextension_paths()
 
-    if not hasattr(m, '_jupyter_labextension_paths'):
-        raise KeyError('The Python module {} is not a valid labextension, '
-                       'it is missing the `_jupyter_labextension_paths()` method.'.format(module))
-    labexts = m._jupyter_labextension_paths()
-    return m, labexts
+    raise ModuleNotFoundError('There is not a labextensions at {}'.format(module))
 
 
 if __name__ == '__main__':
