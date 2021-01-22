@@ -360,13 +360,13 @@ function activateBrowser(
     updateBrowserTitle();
   });
 
-  void Promise.all([app.restored, browser.model.restored]).then(() => {
-    if (treePathUpdater) {
+  if (treePathUpdater) {
+    void Promise.all([app.restored, browser.model.restored]).then(() => {
       browser.model.pathChanged.connect((sender, args) => {
         treePathUpdater(args.newValue);
       });
-    }
-  });
+    });
+  }
 }
 
 function activateWidget(
