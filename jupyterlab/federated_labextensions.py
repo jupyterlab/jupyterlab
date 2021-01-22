@@ -390,6 +390,11 @@ def _get_labextension_metadata(module):
     except pkg_resources.DistributionNotFound:
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
         sys.path.insert(0, mod_path)
+    
+    # Importing module with the same name as package
+    m = importlib.import_module(package)
+    if hasattr(m, '_jupyter_labextension_paths') :
+        return m, m._jupyter_labextension_paths()
 
     # Looking for modules in the package
     from setuptools import find_packages

@@ -26,6 +26,7 @@ jupyterlab/schemas
 jupyterlab/themes
 jupyterlab/style.js
 jupyterlab/tests/**/static
+jupyterlab/tests/**/labextension
 
 # Remove after next release
 jupyterlab/imports.css
