@@ -2,6 +2,7 @@ name: example-environment
 channels:
   - conda-forge
 dependencies:
+  - jupyterlab-link-share
   - jupyter-server-proxy
   - matplotlib-base
   - nodejs=14
