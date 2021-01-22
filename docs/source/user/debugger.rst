@@ -20,9 +20,9 @@ Here is a list of kernels that are known to be supporting the debug protocol:
 Other Jupyter Kernels can also support debugging and be compatible with the JupyterLab debugger
 by implementing the `Jupyter Debugger Protocol <https://jupyter-client.readthedocs.io/en/latest/messaging.html#debug-request>`_.
 
-If you know of other kernels with support for debugging, please open a PR to add them to this list!
+If you know of other kernels with support for debugging, please open a PR to add them to this list.
 
-Here is an example on how to install ``xeus-python`` in a new ``conda`` environment:
+Here is an example of how to install ``xeus-python`` in a new ``conda`` environment:
 
 .. code:: bash
 
