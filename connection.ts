@@ -4,10 +4,10 @@
 // Introduced modifications are BSD licenced, copyright JupyterLab development team.
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import {
+  IDocumentInfo,
   ILspOptions,
   IPosition,
-  LspWsConnection,
-  IDocumentInfo
+  LspWsConnection
 } from 'lsp-ws-connection';
 import { until_ready } from './utils';
 
@@ -137,5 +137,22 @@ export class LSPConnection extends LspWsConnection {
       textDocumentChange
     );
     documentInfo.version++;
+  }
+
+  async getCompletionResolve(completionItem: lsProtocol.CompletionItem) {
+    if (!this.isReady || !this.isCompletionResolveProvider()) {
+      return;
+    }
+    return this.connection.sendRequest<lsProtocol.CompletionItem>(
+      'completionItem/resolve',
+      completionItem
+    );
+  }
+
+  /**
+   * Does support completionItem/resolve?.
+   */
+  public isCompletionResolveProvider(): boolean {
+    return this.serverCapabilities?.completionProvider?.resolveProvider;
   }
 }

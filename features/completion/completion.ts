@@ -7,8 +7,8 @@ import * as CodeMirror from 'codemirror';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { IEditorChangedData, WidgetAdapter } from '../../adapters/adapter';
-import { LSPConnector } from './completion_handler';
-import { ICompletionManager } from '@jupyterlab/completer';
+import { LazyCompletionItem, LSPConnector } from './completion_handler';
+import { CompletionHandler, ICompletionManager } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { NotebookPanel } from '@jupyterlab/notebook';
@@ -19,6 +19,8 @@ import { IDocumentConnectionData } from '../../connection_manager';
 import { ILSPAdapterManager, ILSPLogConsole } from '../../tokens';
 import { NotebookAdapter } from '../../adapters/notebook/notebook';
 import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
+import { LSPCompletionRenderer } from './renderer';
+import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];
@@ -75,8 +77,10 @@ export class CompletionCM extends CodeMirrorIntegration {
 export class CompletionLabIntegration implements IFeatureLabIntegration {
   // TODO: maybe instead of creating it each time, keep a hash map instead?
   protected current_completion_connector: LSPConnector;
-  protected current_completion_handler: ICompletionManager.ICompletableAttributes;
+  protected current_completion_handler: CompletionHandler;
   protected current_adapter: WidgetAdapter<IDocumentWidget> = null;
+  protected renderer: LSPCompletionRenderer;
+  private markdown_renderer: IRenderMime.IRenderer;
 
   constructor(
     private app: JupyterFrontEnd,
@@ -84,12 +88,33 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     public settings: FeatureSettings<LSPCompletionSettings>,
     private adapterManager: ILSPAdapterManager,
     private completionThemeManager: ILSPCompletionThemeManager,
-    private console: ILSPLogConsole
+    private console: ILSPLogConsole,
+    private renderMimeRegistry: IRenderMimeRegistry
   ) {
+    this.renderer = new LSPCompletionRenderer({ integrator: this });
+    this.renderer.activeChanged.connect(this.active_completion_changed, this);
     adapterManager.adapterChanged.connect(this.swap_adapter, this);
     settings.changed.connect(() => {
       completionThemeManager.set_theme(this.settings.composite.theme);
+      completionThemeManager.set_icons_overrides(
+        this.settings.composite.typesMap
+      );
     });
+
+    this.markdown_renderer = this.renderMimeRegistry.createRenderer(
+      'text/markdown'
+    );
+  }
+
+  active_completion_changed(
+    renderer: LSPCompletionRenderer,
+    item: LazyCompletionItem
+  ) {
+    if (item.needsResolution()) {
+      item.fetchDocumentation();
+    } else if (item.isResolved()) {
+      this.refresh_doc_panel(item);
+    }
   }
 
   private swap_adapter(
@@ -130,11 +155,14 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       return;
     }
     this.set_completion_connector(adapter, editor);
-    this.current_completion_handler = this.completionManager.register({
-      connector: this.current_completion_connector,
-      editor: editor,
-      parent: adapter.widget
-    });
+    this.current_completion_handler = this.completionManager.register(
+      {
+        connector: this.current_completion_connector,
+        editor: editor,
+        parent: adapter.widget
+      },
+      this.renderer
+    ) as CompletionHandler;
   }
 
   invoke_completer(kind: ExtendedCompletionTriggerKind) {
@@ -162,7 +190,51 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     }
     this.set_completion_connector(adapter, editor_changed.editor);
     this.current_completion_handler.editor = editor_changed.editor;
+    // @ts-ignore
     this.current_completion_handler.connector = this.current_completion_connector;
+  }
+
+  refresh_doc_panel(item: LazyCompletionItem) {
+    // TODO upstream: make completer public?
+    let completer = this.current_completion_handler.completer;
+
+    // TODO upstream: allow to get completionItems() without markup
+    //   (note: not trivial as _markup() does filtering too)
+    const items = completer.model.completionItems();
+
+    // TODO upstream: Completer will have getActiveItem()
+    // @ts-ignore
+    const index = completer._activeIndex;
+    const active: CompletionHandler.ICompletionItem = items[index];
+
+    if (active.insertText != item.insertText) {
+      return;
+    }
+
+    if (item.documentation) {
+      let docPanel = completer.node.querySelector('.jp-Completer-docpanel');
+
+      // TODO upstream: renderer should take care of the documentation rendering
+      //  sent PR: https://github.com/jupyterlab/jupyterlab/pull/9663
+      if (item.isDocumentationMarkdown) {
+        this.markdown_renderer
+          .renderModel({
+            data: {
+              'text/markdown': item.documentation
+            },
+            trusted: false,
+            metadata: {},
+            setData(options: IRenderMime.IMimeModel.ISetDataOptions) {}
+          })
+          .catch(this.console.warn);
+        // remove all children
+        docPanel.textContent = '';
+        docPanel.appendChild(this.markdown_renderer.node);
+      } else {
+        docPanel.textContent = item.documentation;
+      }
+      docPanel.setAttribute('style', '');
+    }
   }
 
   private set_completion_connector(
@@ -178,6 +250,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       connections: this.current_adapter.connection_manager.connections,
       virtual_editor: this.current_adapter.virtual_editor,
       settings: this.settings,
+      labIntegration: this,
       // it might or might not be a notebook panel (if it is not, the sessionContext and session will just be undefined)
       session: (this.current_adapter.widget as NotebookPanel)?.sessionContext
         ?.session,

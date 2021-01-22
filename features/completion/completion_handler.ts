@@ -31,8 +31,137 @@ import {
   KernelKind
 } from '@krassowski/completion-theme/lib/types';
 import { LabIcon } from '@jupyterlab/ui-components';
-import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 import { ILSPLogConsole } from '../../tokens';
+import { CompletionLabIntegration } from './completion';
+import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
+
+export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
+  private _documentation: string;
+  private _is_documentation_markdown: boolean;
+  private _requested_resolution: boolean;
+  private _resolved: boolean;
+  /**
+   * Self-reference to make sure that the instance for will remain accessible
+   * after any copy operation (whether via spread syntax or Object.assign)
+   * performed by the JupyterLab completer internals.
+   */
+  public self: LazyCompletionItem;
+
+  get isDocumentationMarkdown(): boolean {
+    return this._is_documentation_markdown;
+  }
+
+  constructor(
+    /**
+     * User facing completion.
+     * If insertText is not set, this will be inserted.
+     */
+    public label: string,
+    /**
+     * Type of this completion item.
+     */
+    public type: string,
+    /**
+     * LabIcon object for icon to be rendered with completion type.
+     */
+    public icon: LabIcon,
+    private match: lsProtocol.CompletionItem,
+    private connector: LSPConnector,
+    private uri: string
+  ) {
+    this._setDocumentation(match.documentation);
+    this._requested_resolution = false;
+    this._resolved = false;
+    this.self = this;
+  }
+
+  private _setDocumentation(documentation: string | lsProtocol.MarkupContent) {
+    if (lsProtocol.MarkupContent.is(documentation)) {
+      this._documentation = documentation.value;
+      this._is_documentation_markdown = documentation.kind === 'markdown';
+    } else {
+      this._documentation = documentation;
+      this._is_documentation_markdown = false;
+    }
+  }
+
+  /**
+   * Completion to be inserted.
+   */
+  get insertText(): string {
+    return this.match.insertText || this.match.label;
+  }
+
+  public needsResolution(): boolean {
+    if (this.documentation) {
+      return false;
+    }
+
+    if (this._resolved) {
+      return false;
+    }
+
+    if (this._requested_resolution) {
+      return false;
+    }
+
+    const connection = this.connector.get_connection(this.uri);
+
+    return connection.isCompletionResolveProvider();
+  }
+
+  public isResolved() {
+    return this._resolved;
+  }
+
+  public fetchDocumentation(): void {
+    if (!this.needsResolution()) {
+      return;
+    }
+
+    const connection = this.connector.get_connection(this.uri);
+
+    this._requested_resolution = true;
+
+    connection.getCompletionResolve(this.match).then(resolvedCompletionItem => {
+      if (resolvedCompletionItem === null) {
+        return;
+      }
+      this._setDocumentation(resolvedCompletionItem.documentation);
+      this._resolved = true;
+      this.connector.lab_integration.refresh_doc_panel(this);
+    });
+  }
+
+  /**
+   * A human-readable string with additional information
+   * about this item, like type or symbol information.
+   */
+  get documentation(): string {
+    if (!this.connector.should_show_documentation) {
+      return null;
+    }
+    if (this._documentation) {
+      return this._documentation;
+    }
+    return null;
+  }
+
+  /**
+   * Indicates if the item is deprecated.
+   */
+  get deprecated(): boolean {
+    if (this.match.deprecated) {
+      return this.match.deprecated;
+    }
+    return (
+      this.match.tags &&
+      this.match.tags.some(
+        tag => tag == lsProtocol.CompletionItemTag.Deprecated
+      )
+    );
+  }
+}
 
 /**
  * A LSP connector for completion handlers.
@@ -52,12 +181,14 @@ export class LSPConnector
 
   virtual_editor: IVirtualEditor<CodeEditor.IEditor>;
   trigger_kind: ExtendedCompletionTriggerKind;
+  lab_integration: CompletionLabIntegration;
+  items: CompletionHandler.ICompletionItems;
 
   protected get suppress_auto_invoke_in(): string[] {
     return this.options.settings.composite.suppressInvokeIn;
   }
 
-  protected get should_show_documentation(): boolean {
+  get should_show_documentation(): boolean {
     return this.options.settings.composite.showDocumentation;
   }
 
@@ -78,6 +209,7 @@ export class LSPConnector
         kernel_options
       );
     }
+    this.lab_integration = options.labIntegration;
     this.console = options.console;
   }
 
@@ -211,9 +343,14 @@ export class LSPConnector
 
     return promise.then(reply => {
       reply = this.suppress_if_needed(reply, token);
+      this.items = reply.items;
       this.trigger_kind = CompletionTriggerKind.Invoked;
       return reply;
     });
+  }
+
+  public get_connection(uri: string) {
+    return this._connections.get(uri);
   }
 
   async fetch_lsp(
@@ -225,7 +362,7 @@ export class LSPConnector
     document: VirtualDocument,
     position_in_token: number
   ): Promise<CompletionHandler.ICompletionItemsReply> {
-    let connection = this._connections.get(document.uri);
+    let connection = this.get_connection(document.uri);
 
     this.console.debug('Fetching');
     this.console.debug('Token:', token, start, end);
@@ -249,31 +386,19 @@ export class LSPConnector
     )) || []) as lsProtocol.CompletionItem[];
 
     this.console.debug('Transforming');
-
     let prefix = token.value.slice(0, position_in_token + 1);
     let all_non_prefixed = true;
     let items: CompletionHandler.ICompletionItem[] = [];
-    const show_documentation = this.should_show_documentation;
     lspCompletionItems.forEach(match => {
       let kind = match.kind ? CompletionItemKind[match.kind] : '';
-      let completionItem = {
-        label: match.label,
-        insertText: match.insertText,
-        type: kind,
-        documentation: show_documentation
-          ? lsProtocol.MarkupContent.is(match.documentation)
-            ? match.documentation.value
-            : match.documentation
-          : null,
-        filterText: match.filterText,
-        deprecated: match.deprecated,
-        data: { ...match }
-      } as CompletionHandler.ICompletionItem;
-
-      let icon = this.icon_for(kind);
-      if (icon) {
-        completionItem.icon = icon;
-      }
+      let completionItem = new LazyCompletionItem(
+        match.label,
+        kind,
+        this.icon_for(kind),
+        match,
+        this,
+        document.uri
+      );
 
       // Update prefix values
       let text = match.insertText ? match.insertText : match.label;
@@ -318,7 +443,7 @@ export class LSPConnector
     if (!this.options.settings.composite.theme) {
       return undefined;
     }
-    if (typeof type === 'undefined' || type == '<unknown>') {
+    if (typeof type === 'undefined') {
       type = KernelKind;
     }
     return (this.options.themeManager.get_icon(type) as LabIcon) || undefined;
@@ -465,6 +590,8 @@ export namespace LSPConnector {
     connections: Map<VirtualDocument.id_path, LSPConnection>;
 
     settings: FeatureSettings<LSPCompletionSettings>;
+
+    labIntegration: CompletionLabIntegration;
 
     themeManager: ILSPCompletionThemeManager;
 
