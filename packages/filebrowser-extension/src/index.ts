@@ -167,7 +167,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
 /**
  * A plugin to activate the file browser widget in a ILabShell
  */
-const lab: JupyterFrontEndPlugin<void> = {
+const browserWidget: JupyterFrontEndPlugin<void> = {
   activate: activateWidget,
   id: '@jupyterlab/filebrowser-extension:widget',
   requires: [IDocumentManager, IFileBrowserFactory, ITranslator, ILabShell],
@@ -243,7 +243,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   browser,
   shareFile,
   fileUploadStatus,
-  lab
+  browserWidget
 ];
 export default plugins;
 
