@@ -143,7 +143,13 @@ const browser: JupyterFrontEndPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
   requires: [IFileBrowserFactory, ITranslator],
-  optional: [ILayoutRestorer, ISettingRegistry, ITreePathUpdater, ICommandPalette, IMainMenu],
+  optional: [
+    ILayoutRestorer,
+    ISettingRegistry,
+    ITreePathUpdater,
+    ICommandPalette,
+    IMainMenu
+  ],
   autoStart: true
 };
 
@@ -166,7 +172,7 @@ const lab: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:widget',
   requires: [IDocumentManager, IFileBrowserFactory, ITranslator, ILabShell],
   optional: [ISettingRegistry],
-  autoStart: true,
+  autoStart: true
 };
 
 /**
