@@ -231,21 +231,40 @@ export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to add a launcher button to the file browser toolbar
+ */
+export const toolbarButton: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:launcher-toolbar-button',
+  autoStart: true,
+  requires: [IFileBrowserFactory, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ) => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const { defaultBrowser: browser } = factory;
+
+    // Add a launcher toolbar item.
+    const launcher = new ToolbarButton({
+      icon: addIcon,
+      onClick: () => {
+        if (commands.hasCommand('launcher:create')) {
+          return Private.createLauncher(commands, browser);
+        }
+      },
+      tooltip: trans.__('New Launcher'),
+      actualOnClick: true
+    });
+    browser.toolbar.insertItem(0, 'launch', launcher);
+  }
+};
+
+/**
  * The file browser namespace token.
  */
 const namespace = 'filebrowser';
-
-/**
- * Export the plugins as default.
- */
-const plugins: JupyterFrontEndPlugin<any>[] = [
-  factory,
-  browser,
-  shareFile,
-  fileUploadStatus,
-  browserWidget
-];
-export default plugins;
 
 /**
  * Activate the file browser factory provider.
@@ -258,7 +277,6 @@ async function activateFactory(
   router: IRouter | null,
   tree: JupyterFrontEnd.ITreeResolver | null
 ): Promise<IFileBrowserFactory> {
-  const trans = translator.load('jupyterlab');
   const { commands } = app;
   const tracker = new WidgetTracker<FileBrowser>({ namespace });
   const createFileBrowser = (
@@ -276,19 +294,6 @@ async function activateFactory(
     });
     const restore = options.restore;
     const widget = new FileBrowser({ id, model, restore, translator });
-
-    // Add a launcher toolbar item.
-    const launcher = new ToolbarButton({
-      icon: addIcon,
-      onClick: () => {
-        if (commands.hasCommand('launcher:create')) {
-          return Private.createLauncher(commands, widget);
-        }
-      },
-      tooltip: trans.__('New Launcher'),
-      actualOnClick: true
-    });
-    widget.toolbar.insertItem(0, 'launch', launcher);
 
     // Track the newly created file browser.
     void tracker.add(widget);
@@ -1265,3 +1270,16 @@ namespace Private {
     router.routed.connect(listener);
   }
 }
+
+/**
+ * Export the plugins as default.
+ */
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  factory,
+  browser,
+  shareFile,
+  fileUploadStatus,
+  browserWidget,
+  toolbarButton
+];
+export default plugins;
