@@ -76,7 +76,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
 
-    this.ycells = this.ymodel.getArray();
+    this.ycells = this.ymodel.getArray('cells');
     this.contentFactory = factory.clone(this.ycells);
     this.yUndoManager = new Y.UndoManager(this.ycells);
 

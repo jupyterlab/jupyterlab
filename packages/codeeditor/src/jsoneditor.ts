@@ -77,9 +77,9 @@ export class JSONEditor extends Widget {
     this.node.appendChild(this.editorHostNode);
 
     const model = new CodeEditor.Model({
-      value: this._trans.__('No data!')
+      value: this._trans.__('No data!'),
+      mimeType: 'application/json'
     });
-    model.mimeType = 'application/json';
     model.ytext.observe(this._onValueChanged);
     this.model = model;
     this.editor = options.editorFactory({ host: this.editorHostNode, model });
@@ -223,7 +223,7 @@ export class JSONEditor extends Widget {
   /**
    * Handle change events.
    */
-  private _onValueChanged = (): void => {
+  private _onValueChanged(): void {
     let valid = true;
     try {
       const value = JSON.parse(this.editor.model.ytext.toString());
@@ -237,7 +237,7 @@ export class JSONEditor extends Widget {
     }
     this.revertButtonNode.hidden = !this._inputDirty;
     this.commitButtonNode.hidden = !valid || !this._inputDirty;
-  };
+  }
 
   /**
    * Handle blur events for the text area.
@@ -274,7 +274,7 @@ export class JSONEditor extends Widget {
   private _mergeContent(): void {
     const model = this.editor.model;
     const old = this._originalValue;
-    const user = JSON.parse(model.ytext.toString()) as JSONObject;
+    const user = JSON.parse(model.getValue()) as JSONObject;
     const source = this.source;
     if (!source) {
       return;

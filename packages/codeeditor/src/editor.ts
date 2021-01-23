@@ -211,7 +211,7 @@ export namespace CodeEditor {
         this.ymodel = new Y.Doc();
       }
       this.ydoc = this.ymodel;
-      this.ymeta = this.ymodel.getMap('meta');
+      this.ymeta = this.ymodel.getMap('metadata');
       this.ytext = this.ymodel.getText('value');
       this._onValueChanged = this._onValueChanged.bind(this);
       this.ytext.observe(this._onValueChanged);

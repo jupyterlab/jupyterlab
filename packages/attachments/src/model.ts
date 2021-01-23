@@ -132,9 +132,6 @@ export class AttachmentsModel implements IAttachmentsModel {
   constructor(options: IAttachmentsModel.IOptions = {}) {
     this.contentFactory =
       options.contentFactory || AttachmentsModel.defaultContentFactory;
-
-    // If we are given a IModelDB, keep an up-to-date
-    // serialized copy of the AttachmentsModel in it.
     const ymodel = options.ymodel;
     if (ymodel) {
       this.ymodel = ymodel;
@@ -268,11 +265,7 @@ export class AttachmentsModel implements IAttachmentsModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IAttachments {
-    const ret: nbformat.IAttachments = {};
-    this.ymodel.forEach((value, key) => {
-      ret[key] = value;
-    });
-    return ret;
+    return this.ymodel.toJSON();
   }
 
   /**

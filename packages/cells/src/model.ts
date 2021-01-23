@@ -168,11 +168,13 @@ export class CellModel implements ICellModel {
     }
     const ymodel = options.ymodel || new Y.Map();
     this.ymodel = ymodel;
-    this.id = UUID.uuid4();
     if (options.ymodel) {
       this.ytext = ymodel.get('source');
       this.ymeta = ymodel.get('metadata');
+      this.id = ymodel.get('id');
     } else {
+      this.id = UUID.uuid4();
+      ymodel.set('id', this.id);
       this.ytext = new Y.Text();
       ymodel.set('source', this.ytext);
       this.ymeta = new Y.Map();
@@ -367,9 +369,9 @@ export class CellModel implements ICellModel {
   /**
    * Handle a change to the observable value.
    */
-  protected onGenericChange = (): void => {
+  protected onGenericChange(): void {
     this.contentChanged.emit(void 0);
-  };
+  }
 }
 
 /**
@@ -509,10 +511,7 @@ export class MarkdownCellModel extends AttachmentsCellModel {
   constructor(options: CellModel.IOptions) {
     super(options);
     // Use the Github-flavored markdown mode.
-    /**
-     * @todo find out how mimeTypes are used in Attachment cells..
-     */
-    // this.mimeType = 'text/x-ipythongfm';
+    this.mimeType = 'text/x-ipythongfm';
   }
 
   /**
@@ -599,7 +598,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this.ymodel.get('executionCount') as nbformat.ExecutionCount;
+    return (
+      this.ymodel.get('executionCount') || (null as nbformat.ExecutionCount)
+    );
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
     const oldValue = this.executionCount;

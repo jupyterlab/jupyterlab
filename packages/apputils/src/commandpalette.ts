@@ -104,7 +104,8 @@ export class ModalCommandPalette extends Panel {
         break;
       case 'focus':
         // if the focus shifted outside of this DOM element, hide and reset.
-        if (!this.node.contains(event.target as HTMLElement)) {
+        const target = event.target as HTMLElement;
+        if (!this.node.contains(target as HTMLElement)) {
           event.stopPropagation();
           this.hideAndReset();
         }
