@@ -233,7 +233,7 @@ export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
 /**
  * A plugin to add a launcher button to the file browser toolbar
  */
-export const toolbarButton: JupyterFrontEndPlugin<void> = {
+export const launcherToolbarButton: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:launcher-toolbar-button',
   autoStart: true,
   requires: [IFileBrowserFactory, ITranslator],
@@ -1280,6 +1280,6 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   shareFile,
   fileUploadStatus,
   browserWidget,
-  toolbarButton
+  launcherToolbarButton
 ];
 export default plugins;
