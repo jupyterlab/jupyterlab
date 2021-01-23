@@ -20,7 +20,7 @@ import { ILSPAdapterManager, ILSPLogConsole } from '../../tokens';
 import { NotebookAdapter } from '../../adapters/notebook/notebook';
 import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
 import { LSPCompletionRenderer } from './renderer';
-import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];
@@ -80,7 +80,6 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
   protected current_completion_handler: CompletionHandler;
   protected current_adapter: WidgetAdapter<IDocumentWidget> = null;
   protected renderer: LSPCompletionRenderer;
-  private markdown_renderer: IRenderMime.IRenderer;
 
   constructor(
     private app: JupyterFrontEnd,
@@ -91,7 +90,14 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     private console: ILSPLogConsole,
     private renderMimeRegistry: IRenderMimeRegistry
   ) {
-    this.renderer = new LSPCompletionRenderer({ integrator: this });
+    const markdown_renderer = this.renderMimeRegistry.createRenderer(
+      'text/markdown'
+    );
+    this.renderer = new LSPCompletionRenderer({
+      integrator: this,
+      markdownRenderer: markdown_renderer,
+      console: console.scope('renderer')
+    });
     this.renderer.activeChanged.connect(this.active_completion_changed, this);
     adapterManager.adapterChanged.connect(this.swap_adapter, this);
     settings.changed.connect(() => {
@@ -100,10 +106,6 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
         this.settings.composite.typesMap
       );
     });
-
-    this.markdown_renderer = this.renderMimeRegistry.createRenderer(
-      'text/markdown'
-    );
   }
 
   active_completion_changed(
@@ -190,6 +192,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     }
     this.set_completion_connector(adapter, editor_changed.editor);
     this.current_completion_handler.editor = editor_changed.editor;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.current_completion_handler.connector = this.current_completion_connector;
   }
@@ -202,7 +205,8 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     //   (note: not trivial as _markup() does filtering too)
     const items = completer.model.completionItems();
 
-    // TODO upstream: Completer will have getActiveItem()
+    // TODO upstream: add getActiveItem() to Completer
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const index = completer._activeIndex;
     const active: CompletionHandler.ICompletionItem = items[index];
@@ -214,25 +218,14 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     if (item.documentation) {
       let docPanel = completer.node.querySelector('.jp-Completer-docpanel');
 
+      // remove all children
+      docPanel.textContent = '';
       // TODO upstream: renderer should take care of the documentation rendering
       //  sent PR: https://github.com/jupyterlab/jupyterlab/pull/9663
-      if (item.isDocumentationMarkdown) {
-        this.markdown_renderer
-          .renderModel({
-            data: {
-              'text/markdown': item.documentation
-            },
-            trusted: false,
-            metadata: {},
-            setData(options: IRenderMime.IMimeModel.ISetDataOptions) {}
-          })
-          .catch(this.console.warn);
-        // remove all children
-        docPanel.textContent = '';
-        docPanel.appendChild(this.markdown_renderer.node);
-      } else {
-        docPanel.textContent = item.documentation;
-      }
+
+      const node = this.renderer.createDocumentationNode(item);
+      docPanel.appendChild(node);
+
       docPanel.setAttribute('style', '');
     }
   }

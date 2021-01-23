@@ -123,14 +123,17 @@ export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
 
     this._requested_resolution = true;
 
-    connection.getCompletionResolve(this.match).then(resolvedCompletionItem => {
-      if (resolvedCompletionItem === null) {
-        return;
-      }
-      this._setDocumentation(resolvedCompletionItem.documentation);
-      this._resolved = true;
-      this.connector.lab_integration.refresh_doc_panel(this);
-    });
+    connection
+      .getCompletionResolve(this.match)
+      .then(resolvedCompletionItem => {
+        if (resolvedCompletionItem === null) {
+          return;
+        }
+        this._setDocumentation(resolvedCompletionItem.documentation);
+        this._resolved = true;
+        this.connector.lab_integration.refresh_doc_panel(this);
+      })
+      .catch(console.warn);
   }
 
   /**

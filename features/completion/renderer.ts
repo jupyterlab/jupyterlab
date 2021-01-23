@@ -5,6 +5,8 @@ import { Completer } from '@jupyterlab/completer';
 import { CompletionLabIntegration } from './completion';
 import { Signal } from '@lumino/signaling';
 import { LazyCompletionItem } from './completion_handler';
+import { IRenderMime } from '@jupyterlab/rendermime';
+import { ILSPLogConsole } from '../../tokens';
 
 export class LSPCompletionRenderer
   extends Completer.Renderer
@@ -47,10 +49,34 @@ export class LSPCompletionRenderer
 
     return li;
   }
+
+  createDocumentationNode(item: LazyCompletionItem): HTMLElement {
+    if (item.isDocumentationMarkdown) {
+      this.options.markdownRenderer
+        .renderModel({
+          data: {
+            'text/markdown': item.documentation
+          },
+          trusted: false,
+          metadata: {},
+          setData(options: IRenderMime.IMimeModel.ISetDataOptions) {
+            // empty
+          }
+        })
+        .catch(this.options.console.warn);
+      return this.options.markdownRenderer.node;
+    } else {
+      let node = new HTMLDivElement();
+      node.textContent = item.documentation;
+      return node;
+    }
+  }
 }
 
 export namespace LSPCompletionRenderer {
   export interface IOptions {
     integrator: CompletionLabIntegration;
+    markdownRenderer: IRenderMime.IRenderer;
+    console: ILSPLogConsole;
   }
 }
