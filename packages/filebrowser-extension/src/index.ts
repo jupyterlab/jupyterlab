@@ -171,7 +171,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
   activate: activateWidget,
   id: '@jupyterlab/filebrowser-extension:widget',
   requires: [IDocumentManager, IFileBrowserFactory, ITranslator, ILabShell],
-  optional: [ISettingRegistry],
   autoStart: true
 };
 
@@ -365,13 +364,40 @@ function activateBrowser(
     updateBrowserTitle();
   });
 
-  if (treePathUpdater) {
-    void Promise.all([app.restored, browser.model.restored]).then(() => {
+  void Promise.all([app.restored, browser.model.restored]).then(() => {
+    if (treePathUpdater) {
       browser.model.pathChanged.connect((sender, args) => {
         treePathUpdater(args.newValue);
       });
-    });
-  }
+    }
+
+    let navigateToCurrentDirectory: boolean = false;
+    let useFuzzyFilter: boolean = true;
+
+    if (settingRegistry) {
+      void settingRegistry
+        .load('@jupyterlab/filebrowser-extension:browser')
+        .then(settings => {
+          settings.changed.connect(settings => {
+            navigateToCurrentDirectory = settings.get(
+              'navigateToCurrentDirectory'
+            ).composite as boolean;
+            browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
+          });
+          navigateToCurrentDirectory = settings.get(
+            'navigateToCurrentDirectory'
+          ).composite as boolean;
+          browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
+          settings.changed.connect(settings => {
+            useFuzzyFilter = settings.get('useFuzzyFilter')
+              .composite as boolean;
+            browser.useFuzzyFilter = useFuzzyFilter;
+          });
+          useFuzzyFilter = settings.get('useFuzzyFilter').composite as boolean;
+          browser.useFuzzyFilter = useFuzzyFilter;
+        });
+    }
+  });
 }
 
 function activateWidget(
@@ -379,8 +405,7 @@ function activateWidget(
   docManager: IDocumentManager,
   factory: IFileBrowserFactory,
   translator: ITranslator,
-  labShell: ILabShell,
-  settingRegistry: ISettingRegistry | null
+  labShell: ILabShell
 ): void {
   const { commands } = app;
   const { defaultBrowser: browser, tracker } = factory;
@@ -446,36 +471,9 @@ function activateWidget(
       maybeCreate();
     });
 
-    let navigateToCurrentDirectory: boolean = false;
-    let useFuzzyFilter: boolean = true;
-
-    if (settingRegistry) {
-      void settingRegistry
-        .load('@jupyterlab/filebrowser-extension:browser')
-        .then(settings => {
-          settings.changed.connect(settings => {
-            navigateToCurrentDirectory = settings.get(
-              'navigateToCurrentDirectory'
-            ).composite as boolean;
-            browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
-          });
-          navigateToCurrentDirectory = settings.get(
-            'navigateToCurrentDirectory'
-          ).composite as boolean;
-          browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
-          settings.changed.connect(settings => {
-            useFuzzyFilter = settings.get('useFuzzyFilter')
-              .composite as boolean;
-            browser.useFuzzyFilter = useFuzzyFilter;
-          });
-          useFuzzyFilter = settings.get('useFuzzyFilter').composite as boolean;
-          browser.useFuzzyFilter = useFuzzyFilter;
-        });
-    }
-
     // Whether to automatically navigate to a document's current directory
     labShell.currentChanged.connect(async (_, change) => {
-      if (navigateToCurrentDirectory && change.newValue) {
+      if (browser.navigateToCurrentDirectory && change.newValue) {
         const { newValue } = change;
         const context = docManager.contextForWidget(newValue);
         if (context) {
