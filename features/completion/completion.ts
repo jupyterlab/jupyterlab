@@ -261,18 +261,18 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
 
       docPanel.setAttribute('style', '');
     } else {
-      docPanel.setAttribute('style', 'none');
+      docPanel.setAttribute('style', 'display: none');
     }
   }
 
-  set_doc_panel_placeholder(enabled: boolean) {
+  set_doc_panel_placeholder(enable: boolean) {
     let completer = this.current_completion_handler.completer;
     const docPanel = completer.node.querySelector(DOC_PANEL_SELECTOR);
-    if (enabled) {
+    if (enable) {
       docPanel.setAttribute('style', '');
       docPanel.classList.add(DOC_PANEL_PLACEHOLDER_CLASS);
-    } else {
-      docPanel.setAttribute('style', 'none');
+    } else if (docPanel.classList.contains(DOC_PANEL_PLACEHOLDER_CLASS)) {
+      docPanel.setAttribute('style', 'display: none');
       docPanel.classList.remove(DOC_PANEL_PLACEHOLDER_CLASS);
     }
   }

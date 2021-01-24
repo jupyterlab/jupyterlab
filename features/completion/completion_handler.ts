@@ -130,12 +130,12 @@ export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
     connection
       .getCompletionResolve(this.match)
       .then(resolvedCompletionItem => {
+        this.connector.lab_integration.set_doc_panel_placeholder(false);
         if (resolvedCompletionItem === null) {
           return;
         }
         this._setDocumentation(resolvedCompletionItem.documentation);
         this._resolved = true;
-        this.connector.lab_integration.set_doc_panel_placeholder(false);
         this.connector.lab_integration.refresh_doc_panel(this);
       })
       .catch(e => {

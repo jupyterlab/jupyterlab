@@ -66,7 +66,7 @@ export class LSPCompletionRenderer
         .catch(this.options.console.warn);
       return this.options.markdownRenderer.node;
     } else {
-      let node = new HTMLDivElement();
+      let node = document.createElement('div');
       node.textContent = item.documentation;
       return node;
     }
