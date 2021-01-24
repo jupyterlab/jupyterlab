@@ -211,7 +211,7 @@ export class CellModel implements ICellModel {
     this.ymeta.observe(this._onMetadataChanged);
   }
 
-  readonly yawareness?: any;
+  readonly yawareness: any;
   readonly ydoc: Y.Doc;
   readonly ymodel: Y.Map<any>;
   readonly ytext: Y.Text;

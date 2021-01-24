@@ -531,7 +531,7 @@ export namespace NotebookTools {
       this._model.mimeType = this._cellModel!.mimeType;
     }
 
-    private _model = new CodeEditor.Model();
+    private _model = new CodeEditor.Model({ yawareness: null });
     private _cellModel: CodeEditor.IModel | null;
   }
 

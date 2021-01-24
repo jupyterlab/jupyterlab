@@ -59,7 +59,7 @@ export class RawEditor extends SplitPanel {
 
     // Create read-only defaults editor.
     const defaults = (this._defaults = new CodeEditorWrapper({
-      model: new CodeEditor.Model(),
+      model: new CodeEditor.Model({ yawareness: null }),
       factory: editorFactory
     }));
 
@@ -69,7 +69,7 @@ export class RawEditor extends SplitPanel {
 
     // Create read-write user settings editor.
     const user = (this._user = new CodeEditorWrapper({
-      model: new CodeEditor.Model(),
+      model: new CodeEditor.Model({ yawareness: null }),
       factory: editorFactory,
       config: { lineNumbers: true }
     }));

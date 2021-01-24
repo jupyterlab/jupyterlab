@@ -296,7 +296,10 @@ close the notebook without saving it.`,
   }
 
   insertCells(index: number, cells: Array<ICellModel>) {
-    cells.forEach(cell => this.ytypeCellMapping.set(cell.ymodel, cell));
+    cells.forEach(cell => {
+      this.ytypeCellMapping.set(cell.ymodel, cell);
+      cell.yawareness = this.yawareness;
+    });
     this.ycells.insert(
       index,
       cells.map(cell => cell.ymodel)

@@ -188,7 +188,7 @@ export namespace CodeEditor {
     readonly ytext: Y.Text;
     readonly ymeta: Y.Map<any>;
     readonly ydoc: Y.Doc;
-    readonly yawareness?: any;
+    yawareness: any;
     setValue(value: string): void;
     getValue(): string;
     valueChanged: ISignal<IModel, Y.YTextEvent>;
@@ -202,7 +202,7 @@ export namespace CodeEditor {
     /**
      * Construct a new Model.
      */
-    constructor(options?: Model.IOptions) {
+    constructor(options: Model.IOptions) {
       options = options || {};
 
       if (options.ymodel) {
@@ -733,7 +733,7 @@ export namespace CodeEditor {
 
       ymodel?: Y.Doc;
 
-      yawareness?: any;
+      yawareness: any;
     }
   }
 }
