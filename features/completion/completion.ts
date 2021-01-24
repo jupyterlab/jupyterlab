@@ -22,6 +22,9 @@ import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/typ
 import { LSPCompletionRenderer } from './renderer';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
+const DOC_PANEL_SELECTOR = '.jp-Completer-docpanel';
+const DOC_PANEL_PLACEHOLDER_CLASS = 'lsp-completer-placeholder';
+
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];
 
@@ -112,10 +115,28 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     renderer: LSPCompletionRenderer,
     item: LazyCompletionItem
   ) {
+    if (!item.supportsResolution()) {
+      return;
+    }
+
     if (item.needsResolution()) {
+      this.set_doc_panel_placeholder(true);
       item.fetchDocumentation();
     } else if (item.isResolved()) {
       this.refresh_doc_panel(item);
+    }
+
+    // also fetch completion for the previous and the next item to prevent jitter
+    const index = this.current_index;
+    const items = this.current_items;
+
+    if (index - 1 >= 0) {
+      const previous = items[index - 1] as LazyCompletionItem;
+      previous?.self?.fetchDocumentation();
+    }
+    if (index + 1 < items.length) {
+      const next = items[index + 1] as LazyCompletionItem;
+      next?.self?.fetchDocumentation();
     }
   }
 
@@ -197,27 +218,39 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     this.current_completion_handler.connector = this.current_completion_connector;
   }
 
-  refresh_doc_panel(item: LazyCompletionItem) {
+  private get current_items() {
     // TODO upstream: make completer public?
     let completer = this.current_completion_handler.completer;
 
     // TODO upstream: allow to get completionItems() without markup
     //   (note: not trivial as _markup() does filtering too)
-    const items = completer.model.completionItems();
+    return completer.model.completionItems();
+  }
+
+  private get current_index() {
+    let completer = this.current_completion_handler.completer;
 
     // TODO upstream: add getActiveItem() to Completer
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const index = completer._activeIndex;
-    const active: CompletionHandler.ICompletionItem = items[index];
+    return completer._activeIndex;
+  }
+
+  refresh_doc_panel(item: LazyCompletionItem) {
+    let completer = this.current_completion_handler.completer;
+
+    const active: CompletionHandler.ICompletionItem = this.current_items[
+      this.current_index
+    ];
 
     if (active.insertText != item.insertText) {
       return;
     }
 
-    if (item.documentation) {
-      let docPanel = completer.node.querySelector('.jp-Completer-docpanel');
+    const docPanel = completer.node.querySelector(DOC_PANEL_SELECTOR);
+    docPanel.classList.remove(DOC_PANEL_PLACEHOLDER_CLASS);
 
+    if (item.documentation) {
       // remove all children
       docPanel.textContent = '';
       // TODO upstream: renderer should take care of the documentation rendering
@@ -227,6 +260,20 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       docPanel.appendChild(node);
 
       docPanel.setAttribute('style', '');
+    } else {
+      docPanel.setAttribute('style', 'none');
+    }
+  }
+
+  set_doc_panel_placeholder(enabled: boolean) {
+    let completer = this.current_completion_handler.completer;
+    const docPanel = completer.node.querySelector(DOC_PANEL_SELECTOR);
+    if (enabled) {
+      docPanel.setAttribute('style', '');
+      docPanel.classList.add(DOC_PANEL_PLACEHOLDER_CLASS);
+    } else {
+      docPanel.setAttribute('style', 'none');
+      docPanel.classList.remove(DOC_PANEL_PLACEHOLDER_CLASS);
     }
   }
 

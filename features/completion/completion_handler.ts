@@ -92,6 +92,12 @@ export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
     return this.match.insertText || this.match.label;
   }
 
+  public supportsResolution() {
+    const connection = this.connector.get_connection(this.uri);
+
+    return connection.isCompletionResolveProvider();
+  }
+
   public needsResolution(): boolean {
     if (this.documentation) {
       return false;
@@ -105,9 +111,7 @@ export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
       return false;
     }
 
-    const connection = this.connector.get_connection(this.uri);
-
-    return connection.isCompletionResolveProvider();
+    return this.supportsResolution();
   }
 
   public isResolved() {
@@ -131,9 +135,13 @@ export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
         }
         this._setDocumentation(resolvedCompletionItem.documentation);
         this._resolved = true;
+        this.connector.lab_integration.set_doc_panel_placeholder(false);
         this.connector.lab_integration.refresh_doc_panel(this);
       })
-      .catch(console.warn);
+      .catch(e => {
+        this.connector.lab_integration.set_doc_panel_placeholder(false);
+        console.warn(e);
+      });
   }
 
   /**
