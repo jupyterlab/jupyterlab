@@ -72,7 +72,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    super(options.languagePreference, options.ymodel);
+    super(options.languagePreference, options.ymodel, options.yawareness);
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
 
@@ -346,28 +346,30 @@ close the notebook without saving it.`,
   }
 
   private _createCellFromType(type: Y.Map<any>): ICellModel {
+    const yawareness = this.yawareness;
     const factory = this.contentFactory;
     switch (type.get('cell_type')) {
       case 'code':
-        return factory.createCodeCell({ ymodel: type });
+        return factory.createCodeCell({ ymodel: type, yawareness });
       case 'markdown':
-        return factory.createMarkdownCell({ ymodel: type });
+        return factory.createMarkdownCell({ ymodel: type, yawareness });
       case 'raw':
-        return factory.createRawCell({ ymodel: type });
+        return factory.createRawCell({ ymodel: type, yawareness });
       default:
         throw new Error('Found unknown cell type');
     }
   }
 
   private _createCellFromJSON(cell: any): ICellModel {
+    const yawareness = this.yawareness;
     const factory = this.contentFactory;
     switch (cell['cell_type']) {
       case 'code':
-        return factory.createCodeCell({ cell });
+        return factory.createCodeCell({ cell, yawareness });
       case 'markdown':
-        return factory.createMarkdownCell({ cell });
+        return factory.createMarkdownCell({ cell, yawareness });
       case 'raw':
-        return factory.createRawCell({ cell });
+        return factory.createRawCell({ cell, yawareness });
       default:
         throw new Error('Found unknown cell type');
     }
@@ -423,6 +425,8 @@ export namespace NotebookModel {
      * A modelDB for storing notebook data.
      */
     ymodel?: Y.Doc;
+
+    yawareness?: any;
 
     /**
      * Language translator.

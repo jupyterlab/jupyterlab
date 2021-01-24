@@ -168,6 +168,7 @@ export class CellModel implements ICellModel {
     }
     const ymodel = options.ymodel || new Y.Map();
     this.ymodel = ymodel;
+    this.yawareness = options.yawareness;
     if (options.ymodel) {
       this.ytext = ymodel.get('source');
       this.ymeta = ymodel.get('metadata');
@@ -210,6 +211,7 @@ export class CellModel implements ICellModel {
     this.ymeta.observe(this._onMetadataChanged);
   }
 
+  readonly yawareness?: any;
   readonly ydoc: Y.Doc;
   readonly ymodel: Y.Map<any>;
   readonly ytext: Y.Text;
@@ -386,6 +388,7 @@ export namespace CellModel {
      */
     cell?: nbformat.IBaseCell;
     ymodel?: Y.Map<any>;
+    yawareness?: any;
   }
 }
 

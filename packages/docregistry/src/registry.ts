@@ -1153,7 +1153,7 @@ export namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string, ymodel?: Y.Doc): T;
+    createNew(languagePreference?: string, ymodel?: Y.Doc, yawareness?: any): T;
 
     /**
      * Get the preferred kernel language given a file path.

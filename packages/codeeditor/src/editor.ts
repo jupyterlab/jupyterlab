@@ -188,6 +188,7 @@ export namespace CodeEditor {
     readonly ytext: Y.Text;
     readonly ymeta: Y.Map<any>;
     readonly ydoc: Y.Doc;
+    readonly yawareness?: any;
     setValue(value: string): void;
     getValue(): string;
     valueChanged: ISignal<IModel, Y.YTextEvent>;
@@ -210,6 +211,7 @@ export namespace CodeEditor {
         console.log('create new ydoc '); // @todo remove logging
         this.ymodel = new Y.Doc();
       }
+      this.yawareness = options.yawareness || null;
       this.ydoc = this.ymodel;
       this.ymeta = this.ymodel.getMap('metadata');
       this.ytext = this.ymodel.getText('value');
@@ -299,10 +301,11 @@ export namespace CodeEditor {
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
     readonly valueChanged = new Signal<this, Y.YTextEvent>(this);
     readonly metadataChanged = new Signal<this, Y.YMapEvent<any>>(this);
-    ymodel: Y.Doc;
-    ydoc: Y.Doc;
-    ytext: Y.Text;
-    ymeta: Y.Map<any>;
+    readonly yawareness;
+    readonly ymodel: Y.Doc;
+    readonly ydoc: Y.Doc;
+    readonly ytext: Y.Text;
+    readonly ymeta: Y.Map<any>;
   }
 
   /**
@@ -728,10 +731,9 @@ export namespace CodeEditor {
        */
       mimeType?: string;
 
-      /**
-       * An optional modelDB for storing model state.
-       */
       ymodel?: Y.Doc;
+
+      yawareness?: any;
     }
   }
 }

@@ -106,7 +106,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
-    this.ybinding = new CodemirrorBinding(model.ytext, editor);
+    this.ybinding = new CodemirrorBinding(
+      model.ytext,
+      editor,
+      model.yawareness
+    );
     this._poll = new Poll({
       factory: async () => {
         this._checkSync();

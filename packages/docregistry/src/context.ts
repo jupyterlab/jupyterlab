@@ -65,13 +65,13 @@ export class Context<
 
     const ydoc = new Y.Doc({ guid: localPath });
     // @todo remove websocket provider - this should be handled by a separate plugin
-    new WebrtcProvider(ydoc.guid, ydoc);
+    const awareness = new WebrtcProvider(ydoc.guid, ydoc).awareness;
     // @todo remove debugging information:
     // @ts-ignore
     window.ydocs = window.ydocs || [];
     // @ts-ignore
     window.ydocs.push(ydoc);
-    this._model = this._factory.createNew(lang, ydoc);
+    this._model = this._factory.createNew(lang, ydoc, awareness);
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
