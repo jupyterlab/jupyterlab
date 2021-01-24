@@ -2,9 +2,11 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+import * as Y from 'yjs';
+
 import {
   JSONExt,
-  JSONObject,
   JSONValue,
   PartialJSONValue,
   ReadonlyPartialJSONObject,
@@ -14,8 +16,6 @@ import {
 import { ISignal, Signal } from '@lumino/signaling';
 
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -54,6 +54,8 @@ export interface IOutputModel extends IRenderMime.IMimeModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput;
+
+  reinitialize(options: nbformat.IOutput, trusted: boolean): void;
 }
 
 /**
@@ -67,12 +69,13 @@ export namespace IOutputModel {
     /**
      * The raw output value.
      */
-    value: nbformat.IOutput;
+    value?: nbformat.IOutput;
 
     /**
      * Whether the output is trusted.  The default is false.
      */
     trusted?: boolean;
+    ymodel: Y.Map<any>;
   }
 }
 
@@ -84,30 +87,41 @@ export class OutputModel implements IOutputModel {
    * Construct a new output model.
    */
   constructor(options: IOutputModel.IOptions) {
-    const { data, metadata, trusted } = Private.getBundleOptions(options);
-    this._data = new ObservableJSON({ values: data as JSONObject });
-    this._rawData = data;
-    this._metadata = new ObservableJSON({ values: metadata as JSONObject });
-    this._rawMetadata = metadata;
-    this.trusted = trusted;
-    // Make a copy of the data.
-    const value = options.value;
-    for (const key in value) {
-      // Ignore data and metadata that were stripped.
-      switch (key) {
-        case 'data':
-        case 'metadata':
-          break;
-        default:
-          this._raw[key] = Private.extract(value, key);
+    this._ymodel = options.ymodel;
+    if (options.value) {
+      // need to initialize
+      const trusted = !!options.trusted;
+      const { data, metadata } = Private.getBundleOptions(options.value);
+      const ydata = new Y.Map();
+      this._ymodel.set('data', ydata);
+      if (data) {
+        for (const key in data) {
+          ydata.set(key, data[key]);
+        }
+      }
+      const ymetadata = new Y.Map();
+      this._ymodel.set('metadata', ymetadata);
+      if (metadata) {
+        for (const key in metadata) {
+          ymetadata.set(key, metadata[key]);
+        }
+      }
+      this._ymodel.set('trusted', !!trusted);
+      this._ymodel.set('output_type', options.value.output_type);
+      if (nbformat.isExecuteResult(options.value)) {
+        if (options.value.execution_count) {
+          this._ymodel.set('execution_count', options.value.execution_count);
+        }
       }
     }
-    this.type = value.output_type;
-    if (nbformat.isExecuteResult(value)) {
-      this.executionCount = value.execution_count;
-    } else {
-      this.executionCount = null;
-    }
+    this._ydata = this._ymodel.get('data');
+    this._ymetadata = this._ymodel.get('metadata');
+    this._changedHandler = this._changedHandler.bind(this);
+    this._ymodel.observeDeep(this._changedHandler);
+  }
+
+  private _changedHandler() {
+    this._changed.emit(void 0);
   }
 
   /**
@@ -120,24 +134,35 @@ export class OutputModel implements IOutputModel {
   /**
    * The output type.
    */
-  readonly type: string;
+  get type(): string {
+    return this._ymodel.get('output_type');
+  }
 
   /**
    * The execution count.
    */
-  readonly executionCount: nbformat.ExecutionCount;
+  get executionCount(): nbformat.ExecutionCount {
+    return this._ymodel.get('execution_count') || null;
+  }
 
   /**
    * Whether the model is trusted.
    */
-  readonly trusted: boolean;
+  get trusted(): boolean {
+    return !!this._ymodel.get('trusted');
+  }
+
+  set trusted(value: boolean) {
+    if (this.trusted !== value) {
+      this._ymodel.set('trusted', value);
+    }
+  }
 
   /**
    * Dispose of the resources used by the output model.
    */
   dispose(): void {
-    this._data.dispose();
-    this._metadata.dispose();
+    this._ymodel.unobserveDeep(this._changedHandler);
     Signal.clearData(this);
   }
 
@@ -145,14 +170,14 @@ export class OutputModel implements IOutputModel {
    * The data associated with the model.
    */
   get data(): ReadonlyPartialJSONObject {
-    return this._rawData;
+    return this._ydata.toJSON();
   }
 
   /**
    * The metadata associated with the model.
    */
   get metadata(): ReadonlyPartialJSONObject {
-    return this._rawMetadata;
+    return this._ymetadata.toJSON();
   }
 
   /**
@@ -164,14 +189,17 @@ export class OutputModel implements IOutputModel {
    */
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
     if (options.data) {
-      this._updateObservable(this._data, options.data);
-      this._rawData = options.data;
+      this._updateYMap(this._ydata, options.data);
     }
     if (options.metadata) {
-      this._updateObservable(this._metadata, options.metadata!);
-      this._rawMetadata = options.metadata;
+      this._updateYMap(this._ymetadata, options.metadata!);
     }
-    this._changed.emit(void 0);
+  }
+
+  reinitialize(options: nbformat.IOutput, trusted: boolean): void {
+    const { data, metadata } = Private.getBundleOptions(options);
+    this.trusted = trusted;
+    this.setData({ data, metadata });
   }
 
   /**
@@ -179,9 +207,11 @@ export class OutputModel implements IOutputModel {
    */
   toJSON(): nbformat.IOutput {
     const output: PartialJSONValue = {};
-    for (const key in this._raw) {
-      output[key] = Private.extract(this._raw, key);
-    }
+    this._ymodel.forEach((value, key) => {
+      if (key !== 'data' && key !== 'metadata') {
+        output[key] = value;
+      }
+    });
     switch (this.type) {
       case 'display_data':
       case 'execute_result':
@@ -200,36 +230,33 @@ export class OutputModel implements IOutputModel {
   /**
    * Update an observable JSON object using a readonly JSON object.
    */
-  private _updateObservable(
-    observable: IObservableJSON,
-    data: ReadonlyPartialJSONObject
-  ) {
-    const oldKeys = observable.keys();
-    const newKeys = Object.keys(data);
+  private _updateYMap(ymap: Y.Map<any>, data: ReadonlyPartialJSONObject) {
+    ymap.doc!.transact(() => {
+      const oldKeys = Array.from(ymap.keys());
+      const newKeys = Object.keys(data);
 
-    // Handle removed keys.
-    for (const key of oldKeys) {
-      if (newKeys.indexOf(key) === -1) {
-        observable.delete(key);
+      // Handle removed keys.
+      for (const key of oldKeys) {
+        if (newKeys.indexOf(key) === -1) {
+          ymap.delete(key);
+        }
       }
-    }
 
-    // Handle changed data.
-    for (const key of newKeys) {
-      const oldValue = observable.get(key);
-      const newValue = data[key];
-      if (oldValue !== newValue) {
-        observable.set(key, newValue as JSONValue);
+      // Handle changed data.
+      for (const key of newKeys) {
+        const oldValue = ymap.get(key);
+        const newValue = data[key];
+        if (oldValue !== newValue) {
+          ymap.set(key, newValue as JSONValue);
+        }
       }
-    }
+    });
   }
 
+  private _ymodel: Y.Map<any>;
+  private _ydata: Y.Map<any>;
+  private _ymetadata: Y.Map<any>;
   private _changed = new Signal<this, void>(this);
-  private _raw: PartialJSONObject = {};
-  private _rawMetadata: ReadonlyPartialJSONObject;
-  private _rawData: ReadonlyPartialJSONObject;
-  private _data: IObservableJSON;
-  private _metadata: IObservableJSON;
 }
 
 /**
@@ -306,12 +333,11 @@ namespace Private {
    * Get the bundle options given output model options.
    */
   export function getBundleOptions(
-    options: IOutputModel.IOptions
-  ): Required<Omit<MimeModel.IOptions, 'callback'>> {
-    const data = getData(options.value);
-    const metadata = getMetadata(options.value);
-    const trusted = !!options.trusted;
-    return { data, metadata, trusted };
+    value: nbformat.IOutput
+  ): Required<Omit<Omit<MimeModel.IOptions, 'callback'>, 'trusted'>> {
+    const data = getData(value!);
+    const metadata = getMetadata(value!);
+    return { data, metadata };
   }
 
   /**

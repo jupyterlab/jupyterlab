@@ -88,8 +88,9 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       // Find markdown cells
       this.model.cellInstances.forEach(cell => {
         if (isMarkdownCellModel(cell)) {
+          const cellValue = cell.getValue();
           for (const key of cell.attachments.keys) {
-            if (!cell.getValue().includes(key)) {
+            if (!cellValue.includes(key)) {
               cell.attachments.remove(key);
             }
           }

@@ -30,7 +30,7 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { IOutputAreaModel } from './model';
+import { IOutputAreaModel, IOutputAreaEvent } from './model';
 
 /**
  * The class name added to an output area widget.
@@ -213,14 +213,20 @@ export class OutputArea extends Widget {
    */
   protected onModelChanged(
     sender: IOutputAreaModel,
-    args: IOutputAreaModel.ChangedArgs
+    args: IOutputAreaEvent
   ): void {
-    switch (args.type) {
-      case 'add':
-        this._insertOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
-        break;
-      case 'remove':
+    for (let i = 0, currIndex = 0; i < args.delta.length; i++) {
+      const d = args.delta[i];
+      if (d.insert != null) {
+        // Insert new content
+        d.insert.forEach((val: IOutputModel) => {
+          this._insertOutput(currIndex++, val);
+        });
+      } else if (d.retain != null) {
+        // update currIndex
+        currIndex += d.retain;
+      } else if (d.delete != null) {
+        // Delete content
         if (this.widgets.length) {
           // all items removed from model
           if (this.model.length === 0) {
@@ -228,33 +234,24 @@ export class OutputArea extends Widget {
           } else {
             // range of items removed from model
             // remove widgets corresponding to removed model items
-            const startIndex = args.oldIndex;
-            for (
-              let i = 0;
-              i < args.oldValues.length && startIndex < this.widgets.length;
-              ++i
-            ) {
-              const widget = this.widgets[startIndex];
+            for (let i = 0; i < d.delete; ++i) {
+              const widget = this.widgets[currIndex];
               widget.parent = null;
               widget.dispose();
             }
-
             // apply item offset to target model item indices in _displayIdMap
-            this._moveDisplayIdIndices(startIndex, args.oldValues.length);
-
+            this._moveDisplayIdIndices(currIndex, d.delete);
             // prevent jitter caused by immediate height change
             this._preventHeightChangeJitter();
           }
-          this.outputLengthChanged.emit(this.model.length);
         }
-        break;
-      case 'set':
-        this._setOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
-        break;
-      default:
-        break;
+      }
     }
+    args.updated.forEach(updatedIndex => {
+      this._setOutput(updatedIndex, this.model.get(updatedIndex));
+    });
+
+    this.outputLengthChanged.emit(this.model.length);
   }
 
   /**

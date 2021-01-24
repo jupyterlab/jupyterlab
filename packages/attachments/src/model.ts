@@ -132,24 +132,16 @@ export class AttachmentsModel implements IAttachmentsModel {
   constructor(options: IAttachmentsModel.IOptions = {}) {
     this.contentFactory =
       options.contentFactory || AttachmentsModel.defaultContentFactory;
-    const ymodel = options.ymodel;
-    if (ymodel) {
-      this.ymodel = ymodel;
-      this.fromJSON((ymodel.get('attachments') || {}) as nbformat.IAttachments);
+    if (options.ymodel) {
+      this.ymodel = options.ymodel;
     } else {
       this.ymodel = new Y.Map();
-    }
-
-    this._onMapChanged = this._onMapChanged.bind(this);
-    this.ymodel.observe(this._onMapChanged);
-
-    if (options.values) {
-      for (const key of Object.keys(options.values)) {
-        if (options.values[key] !== undefined) {
-          this.set(key, options.values[key]!);
-        }
+      if (options.values && !options.ymodel) {
+        this.fromJSON(options.values);
       }
     }
+    this._onMapChanged = this._onMapChanged.bind(this);
+    this.ymodel.observe(this._onMapChanged);
   }
   readonly ymodel: Y.Map<any>;
 
@@ -239,7 +231,7 @@ export class AttachmentsModel implements IAttachmentsModel {
    * Clear all of the attachments.
    */
   clear(): void {
-    this.ymodel.doc?.transact(() => {
+    this.ymodel.doc!.transact(() => {
       Array.from(this.ymodel.keys()).forEach(key => {
         this.ymodel.delete(key);
       });
@@ -253,7 +245,6 @@ export class AttachmentsModel implements IAttachmentsModel {
    * This will clear any existing data.
    */
   fromJSON(values: nbformat.IAttachments) {
-    this.clear();
     Object.keys(values).forEach(key => {
       if (values[key] !== undefined) {
         this.set(key, values[key]!);

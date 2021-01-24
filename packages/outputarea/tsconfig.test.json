@@ -9,9 +9,6 @@
       "path": "../nbformat"
     },
     {
-      "path": "../observables"
-    },
-    {
       "path": "../rendermime"
     },
     {
@@ -31,9 +28,6 @@
     },
     {
       "path": "../nbformat"
-    },
-    {
-      "path": "../observables"
     },
     {
       "path": "../rendermime"

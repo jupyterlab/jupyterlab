@@ -80,6 +80,7 @@ export class JSONEditor extends Widget {
       value: this._trans.__('No data!'),
       mimeType: 'application/json'
     });
+    this._onValueChanged = this._onValueChanged.bind(this);
     model.ytext.observe(this._onValueChanged);
     this.model = model;
     this.editor = options.editorFactory({ host: this.editorHostNode, model });
@@ -226,7 +227,7 @@ export class JSONEditor extends Widget {
   private _onValueChanged(): void {
     let valid = true;
     try {
-      const value = JSON.parse(this.editor.model.ytext.toString());
+      const value = JSON.parse(this.editor.model.getValue());
       this.removeClass(ERROR_CLASS);
       this._inputDirty =
         !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue);
@@ -307,14 +308,12 @@ export class JSONEditor extends Widget {
     const model = this.editor.model;
     const content = this._source ? this._source.toJSON() : {};
     this._changeGuard = true;
-    // delete current value so we can set new content
-    model.ytext.delete(0, model.ytext.length);
     if (content === void 0) {
-      model.ytext.insert(0, this._trans.__('No data!'));
+      model.setValue(this._trans.__('No data!'));
       this._originalValue = JSONExt.emptyObject;
     } else {
       const value = JSON.stringify(content, null, 4);
-      model.ytext.insert(0, value);
+      model.setValue(value);
       this._originalValue = content;
       // Move the cursor to within the brace.
       if (value.length > 1 && value[0] === '{') {

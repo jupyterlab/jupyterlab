@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Y from 'yjs';
+
 import * as nbformat from '@jupyterlab/nbformat';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
@@ -172,8 +174,8 @@ export class LoggerOutputAreaModel
    * Manually apply length limit.
    */
   private _applyMaxLength() {
-    if (this.list.length > this._maxLength) {
-      this.list.removeRange(0, this.list.length - this._maxLength);
+    if (this.outputModels.length > this._maxLength) {
+      this.ymodel.delete(0, this.outputModels.length - this._maxLength);
     }
   }
 
@@ -202,7 +204,8 @@ export class Logger implements ILogger {
     this.source = options.source;
     this.outputAreaModel = new LoggerOutputAreaModel({
       contentFactory: new LogConsoleModelContentFactory(),
-      maxLength: options.maxLength
+      maxLength: options.maxLength,
+      ymodel: new Y.Doc().getArray() // provide any Y.Array instance that is not shared
     });
   }
 

@@ -905,7 +905,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
    */
   cloneOutputArea(): OutputArea {
     return new SimplifiedOutputArea({
-      model: this.model.outputs!,
+      model: this.model.outputs,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime
     });
@@ -1004,7 +1004,7 @@ export namespace CodeCell {
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     const model = cell.model;
-    const code = model.ytext.toString();
+    const code = model.getValue();
     if (!code.trim() || !sessionContext.session?.kernel) {
       model.clearExecution();
       return;

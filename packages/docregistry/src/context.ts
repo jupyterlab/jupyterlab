@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as Y from 'yjs';
-import { WebsocketProvider } from 'y-websocket';
+import { WebrtcProvider } from 'y-webrtc';
 
 import {
   Contents,
@@ -65,7 +65,7 @@ export class Context<
 
     const ydoc = new Y.Doc({ guid: localPath });
     // @todo remove websocket provider - this should be handled by a separate plugin
-    new WebsocketProvider('wss://demos.yjs.dev', ydoc.guid, ydoc);
+    new WebrtcProvider(ydoc.guid, ydoc);
     // @todo remove debugging information:
     // @ts-ignore
     window.ydocs = window.ydocs || [];

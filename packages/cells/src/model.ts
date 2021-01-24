@@ -179,9 +179,8 @@ export class CellModel implements ICellModel {
       ymodel.set('source', this.ytext);
       this.ymeta = new Y.Map();
       ymodel.set('metadata', this.ymeta);
-      ymodel.set('type', this.type);
+      ymodel.set('cell_type', this.type);
       const cell = options.cell!;
-      ymodel.set('cell_type', cell.cell_type);
       // @todo shouldn't this be join('\n') ?
       const source = Array.isArray(cell.source)
         ? cell.source.join('')
@@ -408,9 +407,16 @@ export class AttachmentsCellModel extends CellModel {
         .attachments;
     }
 
+    let yattachmentsModel;
+    if (options.ymodel) {
+      yattachmentsModel = options.ymodel.get('attachments');
+    } else {
+      yattachmentsModel = new Y.Map();
+      this.ymodel.set('attachments', yattachmentsModel);
+    }
     this._attachments = factory.createAttachmentsModel({
       values: attachments,
-      ymodel: this.ymodel
+      ymodel: yattachmentsModel
     });
     this._attachments.stateChanged.connect(this.onGenericChange, this);
   }
@@ -544,14 +550,27 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     const cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
 
-    if (cell && cell.cell_type === 'code') {
-      this.ymodel.set('executionCount', cell.execution_count || null);
-      outputs = cell.outputs;
+    let youtputs;
+    if (!options.ymodel) {
+      if (cell && cell.cell_type === 'code') {
+        this.ymodel.set('executionCount', cell.execution_count || null);
+        if (cell.outputs) {
+          outputs = cell.outputs;
+        }
+      } else {
+        this.ymodel.set('executionCount', null);
+      }
+      youtputs = new Y.Array();
+      this.ymodel.set('outputs', youtputs);
     } else {
-      this.ymodel.set('executionCount', null);
+      youtputs = this.ymodel.get('outputs');
     }
 
-    this._outputs = factory.createOutputArea({ trusted, values: outputs });
+    this._outputs = factory.createOutputArea({
+      trusted,
+      values: outputs,
+      ymodel: youtputs as Y.Array<any>
+    });
     this._outputs.changed.connect(this.onGenericChange, this);
 
     // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since

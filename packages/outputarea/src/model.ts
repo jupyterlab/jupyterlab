@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Y from 'yjs';
+
 import { each, map, toArray } from '@lumino/algorithm';
 
 import { IDisposable } from '@lumino/disposable';
@@ -9,10 +11,18 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
-
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
 import { JSONExt } from '@lumino/coreutils';
+
+/**
+ * This is a custom event that is fired when the output model is modified.
+ * If items were added or deleted, then `delta` (a Yjs delta) describes the added & removed items.
+ * If items were updated (attributes were modified), then Array contains the indexed of all items that were updated
+ */
+export interface IOutputAreaEvent {
+  readonly delta: Array<any>;
+  readonly updated: Array<number>;
+}
 
 /**
  * The model for an output area.
@@ -26,7 +36,7 @@ export interface IOutputAreaModel extends IDisposable {
   /**
    * A signal emitted when the model changes.
    */
-  readonly changed: ISignal<IOutputAreaModel, IOutputAreaModel.ChangedArgs>;
+  readonly changed: ISignal<IOutputAreaModel, IOutputAreaEvent>;
 
   /**
    * The length of the items in the model.
@@ -109,12 +119,8 @@ export namespace IOutputAreaModel {
      * If not given, a default factory will be used.
      */
     contentFactory?: IContentFactory;
+    ymodel: Y.Array<any>;
   }
-
-  /**
-   * A type alias for changed args.
-   */
-  export type ChangedArgs = IObservableList.IChangedArgs<IOutputModel>;
 
   /**
    * The interface for an output content factory.
@@ -134,17 +140,21 @@ export class OutputAreaModel implements IOutputAreaModel {
   /**
    * Construct a new observable outputs instance.
    */
-  constructor(options: IOutputAreaModel.IOptions = {}) {
+  constructor(options: IOutputAreaModel.IOptions) {
     this._trusted = !!options.trusted;
     this.contentFactory =
       options.contentFactory || OutputAreaModel.defaultContentFactory;
-    this.list = new ObservableList<IOutputModel>();
+    this.ymodel = options.ymodel;
+    this.outputModels = this.ymodel
+      .toArray()
+      .map(ymap => this._createItem({ ymodel: ymap }));
+    this._onGenericChange = this._onGenericChange.bind(this);
+    this.ymodel.observeDeep(this._onGenericChange);
     if (options.values) {
       each(options.values, value => {
         this._add(value);
       });
     }
-    this.list.changed.connect(this._onListChanged, this);
   }
 
   /**
@@ -157,7 +167,7 @@ export class OutputAreaModel implements IOutputAreaModel {
   /**
    * A signal emitted when the model changes.
    */
-  get changed(): ISignal<this, IOutputAreaModel.ChangedArgs> {
+  get changed(): ISignal<this, IOutputAreaEvent> {
     return this._changed;
   }
 
@@ -165,7 +175,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Get the length of the items in the model.
    */
   get length(): number {
-    return this.list ? this.list.length : 0;
+    return this.ymodel.length;
   }
 
   /**
@@ -186,13 +196,13 @@ export class OutputAreaModel implements IOutputAreaModel {
       return;
     }
     const trusted = (this._trusted = value);
-    for (let i = 0; i < this.list.length; i++) {
-      let item = this.list.get(i);
-      const value = item.toJSON();
-      item.dispose();
-      item = this._createItem({ value, trusted });
-      this.list.set(i, item);
-    }
+    // Set the trusted property on all output models.
+    // Do this in a single transaction to reduce the number of event calls.
+    this.ymodel.doc!.transact(() => {
+      this.outputModels.forEach(item => {
+        item.trusted = trusted;
+      });
+    });
   }
 
   /**
@@ -215,7 +225,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       return;
     }
     this._isDisposed = true;
-    this.list.dispose();
+    this.ymodel.unobserveDeep(this._onGenericChange);
     Signal.clearData(this);
   }
 
@@ -223,18 +233,18 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Get an item at the specified index.
    */
   get(index: number): IOutputModel {
-    return this.list.get(index);
+    return this.outputModels[index];
   }
 
   /**
    * Set the value at the specified index.
    */
   set(index: number, value: nbformat.IOutput): void {
-    value = JSONExt.deepCopy(value);
+    value.value = JSONExt.deepCopy(value);
     // Normalize stream data.
     Private.normalize(value);
-    const item = this._createItem({ value, trusted: this._trusted });
-    this.list.set(index, item);
+    const item = this.get(index);
+    item.reinitialize(value, this._trusted);
   }
 
   /**
@@ -267,10 +277,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       this.clearNext = true;
       return;
     }
-    each(this.list, (item: IOutputModel) => {
-      item.dispose();
-    });
-    this.list.clear();
+    this.ymodel.delete(0, this.ymodel.length); // @todo call .dispose on all deleted items
   }
 
   /**
@@ -279,10 +286,12 @@ export class OutputAreaModel implements IOutputAreaModel {
    * #### Notes
    * This will clear any existing data.
    */
-  fromJSON(values: nbformat.IOutput[]) {
-    this.clear();
-    each(values, value => {
-      this._add(value);
+  fromJSON(values: nbformat.IOutput[]): void {
+    this.ymodel.doc!.transact(() => {
+      this.clear();
+      each(values, value => {
+        this._add(value);
+      });
     });
   }
 
@@ -290,7 +299,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput[] {
-    return toArray(map(this.list, (output: IOutputModel) => output.toJSON()));
+    return toArray(map(this.outputModels, output => output.toJSON()));
   }
 
   /**
@@ -303,6 +312,8 @@ export class OutputAreaModel implements IOutputAreaModel {
     // Normalize the value.
     Private.normalize(value);
 
+    const lastModel = this.length === 0 ? null : this.get(this.length - 1);
+
     // Consolidate outputs if they are stream outputs of the same kind.
     if (
       nbformat.isStream(value) &&
@@ -310,7 +321,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       value.name === this._lastName &&
       this.shouldCombine({
         value,
-        lastModel: this.list.get(this.length - 1)
+        lastModel: lastModel!
       })
     ) {
       // In order to get a list change event, we add the previous
@@ -319,12 +330,8 @@ export class OutputAreaModel implements IOutputAreaModel {
       this._lastStream += value.text as string;
       this._lastStream = Private.removeOverwrittenChars(this._lastStream);
       value.text = this._lastStream;
-      const item = this._createItem({ value, trusted });
-      const index = this.length - 1;
-      const prev = this.list.get(index);
-      prev.dispose();
-      this.list.set(index, item);
-      return index;
+      lastModel!.reinitialize(value, trusted);
+      return this.ymodel.length;
     }
 
     if (nbformat.isStream(value)) {
@@ -332,7 +339,10 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
 
     // Create the new item.
-    const item = this._createItem({ value, trusted });
+    const yItemModel = new Y.Map();
+    const item = this._createItem({ ymodel: yItemModel, value, trusted });
+    // dispose of item, we are going to add it automatically in the listChanged event (this also handles remote events)
+    item.dispose();
 
     // Update the stream information.
     if (nbformat.isStream(value)) {
@@ -343,7 +353,8 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
 
     // Add the item to our list and return the new length.
-    return this.list.push(item);
+    this.ymodel.push([yItemModel]);
+    return this.ymodel.length;
   }
 
   /**
@@ -355,7 +366,7 @@ export class OutputAreaModel implements IOutputAreaModel {
   protected shouldCombine(options: {
     value: nbformat.IOutput;
     lastModel: IOutputModel;
-  }) {
+  }): boolean {
     return true;
   }
 
@@ -366,44 +377,68 @@ export class OutputAreaModel implements IOutputAreaModel {
   protected clearNext = false;
 
   /**
-   * An observable list containing the output models
-   * for this output area.
-   */
-  protected list: IObservableList<IOutputModel>;
-
-  /**
    * Create an output item and hook up its signals.
    */
   private _createItem(options: IOutputModel.IOptions): IOutputModel {
     const factory = this.contentFactory;
     const item = factory.createOutputModel(options);
-    item.changed.connect(this._onGenericChange, this);
     return item;
-  }
-
-  /**
-   * Handle a change to the list.
-   */
-  private _onListChanged(
-    sender: IObservableList<IOutputModel>,
-    args: IObservableList.IChangedArgs<IOutputModel>
-  ) {
-    this._changed.emit(args);
   }
 
   /**
    * Handle a change to an item.
    */
-  private _onGenericChange(): void {
+  private _onGenericChange(events: Array<Y.YEvent>, tr: Y.Transaction): void {
+    // find the YArrayEvent on `this.model` if possible
+    const yarrayEvent = events.find(event => event.target === this.ymodel);
+    // replace the `delta.insert` content with the actual inserted models
+    const _delta = yarrayEvent ? yarrayEvent.changes.delta : []; // otherwise no items were added or removed
+    const delta = [];
+    for (let i = 0, currIndex = 0; i < _delta.length; i++) {
+      const d = _delta[i] as any;
+      if (d.insert != null) {
+        const insert = d.insert.map((outputYModel: Y.Map<any>) =>
+          this._createItem({ ymodel: outputYModel })
+        );
+        this.outputModels.splice(currIndex, 0, ...insert);
+        delta.push({ insert });
+        currIndex += d.insert.length;
+      } else if (d.retain != null) {
+        delta.push(d);
+        currIndex += d.retain;
+      } else {
+        // it is a d.delete op
+        this.outputModels.splice(currIndex, d.delete);
+        delta.push(d);
+      }
+    }
+
+    // find the updated items and store their indexes in `updated`
+    const updated = [] as Array<number>;
+    this.ymodel.forEach((child, index) => {
+      if (tr.changedParentTypes.has(child)) {
+        updated.push(index);
+      }
+    });
+    this._changed.emit({ delta, updated });
     this._stateChanged.emit(void 0);
   }
 
+  /**
+   * An observable list containing the output models
+   * for this output area.
+   */
+  protected ymodel: Y.Array<Y.Map<any>>;
+  /**
+   * Instances of the generated output children.
+   */
+  protected outputModels: IOutputModel[];
   private _lastStream: string;
   private _lastName: 'stdout' | 'stderr';
   private _trusted = false;
   private _isDisposed = false;
   private _stateChanged = new Signal<IOutputAreaModel, void>(this);
-  private _changed = new Signal<this, IOutputAreaModel.ChangedArgs>(this);
+  private _changed = new Signal<this, IOutputAreaEvent>(this);
 }
 
 /**

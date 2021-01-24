@@ -44,7 +44,6 @@
   "dependencies": {
     "@jupyterlab/apputils": "^3.1.0-alpha.2",
     "@jupyterlab/nbformat": "^3.1.0-alpha.2",
-    "@jupyterlab/observables": "^4.1.0-alpha.2",
     "@jupyterlab/rendermime": "^3.1.0-alpha.2",
     "@jupyterlab/rendermime-interfaces": "^3.1.0-alpha.2",
     "@jupyterlab/services": "^6.1.0-alpha.2",
@@ -55,7 +54,8 @@
     "@lumino/properties": "^1.2.3",
     "@lumino/signaling": "^1.4.3",
     "@lumino/widgets": "^1.16.1",
-    "resize-observer-polyfill": "^1.5.1"
+    "resize-observer-polyfill": "^1.5.1",
+    "yjs": "^13.4.12"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.1.0-alpha.2",
