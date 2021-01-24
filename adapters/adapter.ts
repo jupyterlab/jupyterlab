@@ -259,10 +259,26 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     }
 
     if (state === 'completed') {
-      for (let connection of this.connection_manager.connections.values()) {
-        connection.sendSaved(
-          this.virtual_editor.virtual_document.document_info
+      // note: must only be send to the appropriate connections as
+      // some servers (Julia) break if they receive save notification
+      // for a document that was not opened before, see:
+      // https://github.com/krassowski/jupyterlab-lsp/issues/490
+      const documents_to_save = [this.virtual_editor.virtual_document];
+
+      for (let virtual_document of documents_to_save) {
+        let connection = this.connection_manager.connections.get(
+          virtual_document.uri
         );
+        this.console.log(
+          'Sending save notification for',
+          virtual_document.uri,
+          'to',
+          connection
+        );
+        connection.sendSaved(virtual_document.document_info);
+        for (let foreign of virtual_document.foreign_documents.values()) {
+          documents_to_save.push(foreign);
+        }
       }
     }
   }
