@@ -12,7 +12,7 @@ Requirements
 
 For the debugger to be enabled and visible, a kernel with support for debugging is required.
 
-Here is a list of kernels that are known to be supporting the debug protocol:
+Here is a list of kernels that are known to be supporting the Jupyter Debug Protocol:
 
 - `xeus-python <https://github.com/jupyter-xeus/xeus-python>`_: Jupyter kernel for the Python programming language
 - `xeus-robot <https://github.com/jupyter-xeus/xeus-robot>`_: Jupyter kernel for Robot Framework
