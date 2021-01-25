@@ -12,11 +12,17 @@ Requirements
 
 For the debugger to be enabled and visible, a kernel with support for debugging is required.
 
-For now ``xeus-python`` is the only Jupyter Kernels for Python that supports debugging.
-However other Jupyter Kernels can also support debugging and be compatible with the JupyterLab debugger
+Here is a list of kernels that are known to be supporting the Jupyter Debug Protocol:
+
+- `xeus-python <https://github.com/jupyter-xeus/xeus-python>`_: Jupyter kernel for the Python programming language
+- `xeus-robot <https://github.com/jupyter-xeus/xeus-robot>`_: Jupyter kernel for Robot Framework
+
+Other Jupyter Kernels can also support debugging and be compatible with the JupyterLab debugger
 by implementing the `Jupyter Debugger Protocol <https://jupyter-client.readthedocs.io/en/latest/messaging.html#debug-request>`_.
 
-To install ``xeus-python`` in a new ``conda`` environment:
+If you know of other kernels with support for debugging, please open a PR to add them to this list.
+
+Here is an example of how to install ``xeus-python`` in a new ``conda`` environment:
 
 .. code:: bash
 
