@@ -536,8 +536,10 @@ export class Context<
       // if (!model.modelDB.isCollaborative) {
       //  value = await this._maybeSave(options);
       // } else {
-      value = await this._manager.contents.save(this._path, options);
+      //  value = await this._manager.contents.save(this._path, options);
       // }
+      // @todo revert to checkif if this is collaborative (the provider should be defined on the context)
+      value = await this._maybeSave(options);
       if (this.isDisposed) {
         return;
       }
@@ -637,7 +639,7 @@ export class Context<
    * @todo use this as a template for sending collaborative files to server
    *
    * Save a file, dealing with conflicts.
-   *
+   */
   private _maybeSave(
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
@@ -670,7 +672,6 @@ export class Context<
       }
     );
   }
-  */
 
   /**
    * Handle a save/load error with a dialog.

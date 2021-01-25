@@ -91,31 +91,12 @@ export class OutputModel implements IOutputModel {
     if (options.value) {
       // need to initialize
       const trusted = !!options.trusted;
-      const { data, metadata } = Private.getBundleOptions(options.value);
-      const ydata = new Y.Map();
-      this._ymodel.set('data', ydata);
-      if (data) {
-        for (const key in data) {
-          ydata.set(key, data[key]);
-        }
-      }
-      const ymetadata = new Y.Map();
-      this._ymodel.set('metadata', ymetadata);
-      if (metadata) {
-        for (const key in metadata) {
-          ymetadata.set(key, metadata[key]);
-        }
+
+      for (let key in options.value) {
+        this._ymodel.set(key, options.value[key]);
       }
       this._ymodel.set('trusted', !!trusted);
-      this._ymodel.set('output_type', options.value.output_type);
-      if (nbformat.isExecuteResult(options.value)) {
-        if (options.value.execution_count) {
-          this._ymodel.set('execution_count', options.value.execution_count);
-        }
-      }
     }
-    this._ydata = this._ymodel.get('data');
-    this._ymetadata = this._ymodel.get('metadata');
     this._changedHandler = this._changedHandler.bind(this);
     this._ymodel.observeDeep(this._changedHandler);
   }
@@ -170,14 +151,14 @@ export class OutputModel implements IOutputModel {
    * The data associated with the model.
    */
   get data(): ReadonlyPartialJSONObject {
-    return this._ydata.toJSON();
+    return Private.getData(this._ymodel.toJSON());
   }
 
   /**
    * The metadata associated with the model.
    */
   get metadata(): ReadonlyPartialJSONObject {
-    return this._ymetadata.toJSON();
+    return Private.getMetadata(this._ymodel.toJSON());
   }
 
   /**
@@ -189,17 +170,16 @@ export class OutputModel implements IOutputModel {
    */
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
     if (options.data) {
-      this._updateYMap(this._ydata, options.data);
+      this._ymodel.set('data', options.data);
     }
     if (options.metadata) {
-      this._updateYMap(this._ymetadata, options.metadata!);
+      this._ymodel.set('metadata', options.metadata);
     }
   }
 
   reinitialize(options: nbformat.IOutput, trusted: boolean): void {
-    const { data, metadata } = Private.getBundleOptions(options);
+    this._updateYMap(this._ymodel, options);
     this.trusted = trusted;
-    this.setData({ data, metadata });
   }
 
   /**
@@ -208,7 +188,7 @@ export class OutputModel implements IOutputModel {
   toJSON(): nbformat.IOutput {
     const output: PartialJSONValue = {};
     this._ymodel.forEach((value, key) => {
-      if (key !== 'data' && key !== 'metadata') {
+      if (key !== 'trusted') {
         output[key] = value;
       }
     });
@@ -254,8 +234,6 @@ export class OutputModel implements IOutputModel {
   }
 
   private _ymodel: Y.Map<any>;
-  private _ydata: Y.Map<any>;
-  private _ymetadata: Y.Map<any>;
   private _changed = new Signal<this, void>(this);
 }
 

@@ -145,16 +145,16 @@ export class OutputAreaModel implements IOutputAreaModel {
     this.contentFactory =
       options.contentFactory || OutputAreaModel.defaultContentFactory;
     this.ymodel = options.ymodel;
-    this.outputModels = this.ymodel
-      .toArray()
-      .map(ymap => this._createItem({ ymodel: ymap }));
-    this._onGenericChange = this._onGenericChange.bind(this);
-    this.ymodel.observeDeep(this._onGenericChange);
     if (options.values) {
       each(options.values, value => {
         this._add(value);
       });
     }
+    this.outputModels = this.ymodel
+      .toArray()
+      .map(ymap => this._createItem({ ymodel: ymap }));
+    this._onGenericChange = this._onGenericChange.bind(this);
+    this.ymodel.observeDeep(this._onGenericChange);
   }
 
   /**
