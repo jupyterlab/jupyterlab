@@ -34,7 +34,8 @@ export class ReadOnlyEditorFactory {
     const editor = new CodeEditorWrapper({
       model: new CodeEditor.Model({
         value: content,
-        mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path)
+        mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path),
+        yawareness: null
       }),
       factory,
       config: {
