@@ -13,7 +13,6 @@ import {
   KernelSpec,
   KernelSpecAPI,
   KernelManager,
-  KernelAPI
 } from '../../src';
 
 import {
