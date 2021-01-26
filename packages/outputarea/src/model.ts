@@ -150,9 +150,12 @@ export class OutputAreaModel implements IOutputAreaModel {
         this._add(value);
       });
     }
-    this.outputModels = this.ymodel
-      .toArray()
-      .map(ymap => this._createItem({ ymodel: ymap }));
+    this.outputModels = this.ymodel.toArray().map(ymap => {
+      if (!this.typeMapping.has(ymap)) {
+        this.typeMapping.set(ymap, this._createItem({ ymodel: ymap }));
+      }
+      return this.typeMapping.get(ymap)!;
+    });
     this._onGenericChange = this._onGenericChange.bind(this);
     this.ymodel.observeDeep(this._onGenericChange);
   }
@@ -233,7 +236,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Get an item at the specified index.
    */
   get(index: number): IOutputModel {
-    return this.outputModels[index];
+    return this.typeMapping.get(this.ymodel.get(index))!;
   }
 
   /**
@@ -342,7 +345,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     const yItemModel = new Y.Map();
     const item = this._createItem({ ymodel: yItemModel, value, trusted });
     // dispose of item, we are going to add it automatically in the listChanged event (this also handles remote events)
-    item.dispose();
+    this.typeMapping.set(yItemModel, item);
 
     // Update the stream information.
     if (nbformat.isStream(value)) {
@@ -385,30 +388,51 @@ export class OutputAreaModel implements IOutputAreaModel {
     return item;
   }
 
+  private _updateOutputModels(event: Y.YArrayEvent<Y.Map<any>>) {
+    // update the type⇔cell mapping by iterating through the addded/removed types
+    event.changes.added.forEach(item => {
+      const type = (item.content as Y.ContentType).type as Y.Map<any>;
+      if (!this.typeMapping.has(type)) {
+        this.typeMapping.set(type, this._createItem({ ymodel: type }));
+      }
+    });
+    event.changes.deleted.forEach(item => {
+      const type = (item.content as Y.ContentType).type as Y.Map<any>;
+      const model = this.typeMapping.get(type);
+      if (model) {
+        model.dispose();
+        this.typeMapping.delete(type);
+      }
+    });
+    this.outputModels = this.ymodel
+      .toArray()
+      .map(type => this.typeMapping.get(type)!);
+  }
+
   /**
    * Handle a change to an item.
    */
   private _onGenericChange(events: Array<Y.YEvent>, tr: Y.Transaction): void {
     // find the YArrayEvent on `this.model` if possible
-    const yarrayEvent = events.find(event => event.target === this.ymodel);
+    const yarrayEvent = events.find(event => event.target === this.ymodel) as
+      | Y.YArrayEvent<Y.Map<any>>
+      | undefined;
+    if (yarrayEvent) {
+      this._updateOutputModels(yarrayEvent);
+    }
     // replace the `delta.insert` content with the actual inserted models
     const _delta = yarrayEvent ? yarrayEvent.changes.delta : []; // otherwise no items were added or removed
     const delta = [];
-    for (let i = 0, currIndex = 0; i < _delta.length; i++) {
+    for (let i = 0; i < _delta.length; i++) {
       const d = _delta[i] as any;
       if (d.insert != null) {
         const insert = d.insert.map((outputYModel: Y.Map<any>) =>
-          this._createItem({ ymodel: outputYModel })
+          this.typeMapping.get(outputYModel)
         );
-        this.outputModels.splice(currIndex, 0, ...insert);
         delta.push({ insert });
-        currIndex += d.insert.length;
       } else if (d.retain != null) {
         delta.push(d);
-        currIndex += d.retain;
       } else {
-        // it is a d.delete op
-        this.outputModels.splice(currIndex, d.delete);
         delta.push(d);
       }
     }
@@ -433,6 +457,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Instances of the generated output children.
    */
   protected outputModels: IOutputModel[];
+  private typeMapping: Map<Y.Map<any>, IOutputModel> = new Map();
   private _lastStream: string;
   private _lastName: 'stdout' | 'stderr';
   private _trusted = false;

@@ -388,7 +388,11 @@ close the notebook without saving it.`,
     });
     event.changes.deleted.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
-      this.ytypeCellMapping.delete(type);
+      const model = this.ytypeCellMapping.get(type);
+      if (model) {
+        model.dispose();
+        this.ytypeCellMapping.delete(type);
+      }
     });
     this.cellInstances = this.ycells
       .toArray()
