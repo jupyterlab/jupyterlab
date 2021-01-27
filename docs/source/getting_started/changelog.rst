@@ -11,6 +11,20 @@ See the `JupyterLab
 milestone on GitHub for the full list of pull requests and issues closed.
 
 
+v3.0.6
+^^^^^^
+* Remove jest version constrain.  (`#9632 <https://github.com/jupyterlab/jupyterlab/pull/9632>`__)
+* Disable large uploads for notebook server < 5.1.  (`#9628 <https://github.com/jupyterlab/jupyterlab/pull/9628>`__)
+* Ignore timeout errors when preloading settings.  (`#9629 <https://github.com/jupyterlab/jupyterlab/pull/9629>`__)
+* Customize template branch when upgrading extension.  (`#9630 <https://github.com/jupyterlab/jupyterlab/pull/9630>`__)
+* Renamed variable that clashed with a module.  (`#9641 <https://github.com/jupyterlab/jupyterlab/pull/9641>`__)
+* Allow for lazily retrieved documentation (with a getter).  (`#9643 <https://github.com/jupyterlab/jupyterlab/pull/9643>`__)
+* Upgrade ``html-webpack-plugin`` to support webpack 5.  (`#9651 <https://github.com/jupyterlab/jupyterlab/pull/9651>`__)
+* Fix viewing of PDF files in Safari.  (`#9656 <https://github.com/jupyterlab/jupyterlab/pull/9656>`__)
+* Add ToC entries for all headers in markdown cells.  (`#9358 <https://github.com/jupyterlab/jupyterlab/pull/9358>`__)
+* Revert creating a new browser tab for a new launcher when in simple interface.  (`#9664 <https://github.com/jupyterlab/jupyterlab/pull/9664>`__)
+* Add ``xeus-robot`` to the debugger documentation.  (`#9661 <https://github.com/jupyterlab/jupyterlab/pull/9661>`__)
+
 v3.0.5
 ^^^^^^
 * Enable large file uploads.  (`#9616 <https://github.com/jupyterlab/jupyterlab/pull/9616>`__)
