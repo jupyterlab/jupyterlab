@@ -74,7 +74,7 @@ class TOCTree extends React.Component<IProperties, IState> {
     });
     return (
       <div className="jp-TableOfContents">
-        <div className="header">{this.props.title}</div>
+        <div className="jp-stack-panel-header">{this.props.title}</div>
         {Toolbar && <Toolbar />}
         <ul className="jp-TableOfContents-content">{list}</ul>
       </div>
