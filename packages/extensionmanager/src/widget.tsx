@@ -581,7 +581,7 @@ export class CollapsibleSection extends React.Component<
     }
     return (
       <>
-        <div className="header">
+        <div className="jp-stack-panel-header">
           <ToolbarButtonComponent
             icon={icon}
             onClick={() => {
