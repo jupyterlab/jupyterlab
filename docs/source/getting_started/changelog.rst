@@ -13,6 +13,8 @@ milestone on GitHub for the full list of pull requests and issues closed.
 
 v3.0.6
 ^^^^^^
+* Listen for ``'restarting'`` instead of ``'autorestarting'`` from server.  (`#9674 <https://github.com/jupyterlab/jupyterlab/pull/9674>`__)
+* Use ``jupyterhub make_singleuser_app`` mixin when available.  (`#9681 <https://github.com/jupyterlab/jupyterlab/pull/9681>`__)
 * Remove jest version constrain.  (`#9632 <https://github.com/jupyterlab/jupyterlab/pull/9632>`__)
 * Disable large uploads for notebook server < 5.1.  (`#9628 <https://github.com/jupyterlab/jupyterlab/pull/9628>`__)
 * Ignore timeout errors when preloading settings.  (`#9629 <https://github.com/jupyterlab/jupyterlab/pull/9629>`__)
