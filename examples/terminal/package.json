@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-terminal",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,9 +8,9 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/services": "^6.0.2",
-    "@jupyterlab/terminal": "^3.0.3",
-    "@jupyterlab/theme-light-extension": "^3.0.3",
+    "@jupyterlab/services": "^6.0.3",
+    "@jupyterlab/terminal": "^3.0.4",
+    "@jupyterlab/theme-light-extension": "^3.0.4",
     "@lumino/widgets": "^1.16.1",
     "es6-promise": "~4.2.8"
   },
