@@ -70,7 +70,6 @@ mimetype_map = {
 
 def render_data(filename_or_url):
     mimetype = guess_mimetype(filename_or_url)
-    print(mimetype)
     display_func = mimetype_map.get(mimetype, None)
     if display_func is not None:
         data, metadata = display_func(filename_or_url)

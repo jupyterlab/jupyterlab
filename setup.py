@@ -187,7 +187,8 @@ setup_args['entry_points'] = {
         'jupyter-labextension = jupyterlab.labextensions:main',
         'jupyter-labhub = jupyterlab.labhubapp:main',
         'jlpm = jupyterlab.jlpmapp:main',
-        'jupyter-display = jupyterlab.displayapp:main'
+        'jupyter-display = jupyterlab.displayapp:main',
+        'jupyter-open = jupyterlab.openapp:main'
     ]
 }
 

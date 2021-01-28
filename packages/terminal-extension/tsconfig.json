@@ -20,6 +20,12 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
       "path": "../running"
     },
     {
