@@ -248,7 +248,7 @@ function Section(props: {
   return (
     <div className={SECTION_CLASS}>
       <>
-        <div className={`${SECTION_HEADER_CLASS} header`}>
+        <div className={`${SECTION_HEADER_CLASS} jp-stack-panel-header`}>
           <h2>{props.manager.name}</h2>
           <UseSignal signal={props.manager.runningChanged}>
             {() => {
