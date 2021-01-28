@@ -466,8 +466,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
-    this._clearKernelState();
     this._updateStatus('restarting');
+    this._clearKernelState();
     this._kernelSession = RESTARTING_KERNEL_SESSION;
     await restapi.restartKernel(this.id, this.serverSettings);
     // Reconnect to the kernel to address cases where kernel ports
@@ -1020,27 +1020,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
-   * Handle a restart on the kernel.  This is not part of the `IKernel`
-   * interface.
-   */
-  private async _handleRestart(): Promise<void> {
-    this._clearKernelState();
-    this._updateStatus('restarting');
-
-    // Reconnect to a new websocket and kick off an async kernel request to
-    // eventually reset the kernel status. We do this with a setTimeout so
-    // that it comes after the microtask logic in _handleMessage for
-    // restarting/autostarting status updates.
-    setTimeout(() => {
-      // We must reconnect since the kernel connection information may have
-      // changed, and the server only refreshes its zmq connection when a new
-      // websocket is opened.
-      void this.reconnect();
-      void this.requestKernelInfo();
-    }, 0);
-  }
-
-  /**
    * Forcefully clear the socket state.
    *
    * #### Notes
@@ -1375,7 +1354,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
           // Updating the status is synchronous, and we call no async user code
           const executionState = (msg as KernelMessage.IStatusMsg).content
             .execution_state;
-          if (executionState === 'autorestarting') {
+          if (executionState === 'restarting') {
             // The kernel has been auto-restarted by the server. After
             // processing for this message is completely done, we want to
             // handle this restart, so we don't await, but instead schedule
@@ -1383,18 +1362,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
             // schedule this here so that it comes before any microtasks that
             // might be scheduled in the status signal emission below.
             void Promise.resolve().then(async () => {
-              // handleRestart changes the status to 'restarting', so we call it
-              // first so that the status won't flip back and forth between
-              // 'restarting' and 'autorestarting'.
-              await this._handleRestart();
               this._updateStatus('autorestarting');
-            });
-          }
-          if (executionState === 'restarting') {
-            void Promise.resolve().then(async () => {
-              await this._handleRestart();
-              this._kernelSession = msg.header.session;
-              this._updateStatus('restarting');
+              this._clearKernelState();
+
+              // We must reconnect since the kernel connection information may have
+              // changed, and the server only refreshes its zmq connection when a new
+              // websocket is opened.
+              await this.reconnect();
             });
           }
           this._updateStatus(executionState);
