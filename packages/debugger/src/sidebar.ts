@@ -224,7 +224,7 @@ namespace Private {
    */
   export function createHeader(): HTMLElement {
     const header = document.createElement('div');
-    header.classList.add('header');
+    header.classList.add('jp-stack-panel-header');
 
     const title = document.createElement('h2');
 
