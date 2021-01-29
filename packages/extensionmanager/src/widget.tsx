@@ -235,11 +235,12 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
-            {entry.pkg_type == 'prebuilt' && <div>{entry.name}</div>}
-            {entry.pkg_type == 'source' && (
+            {entry.url ? (
               <a href={entry.url} target="_blank" rel="noopener noreferrer">
                 {entry.name}
               </a>
+            ) : (
+              <div>{entry.name}</div>
             )}
           </div>
           {entry.blockedExtensionsEntry && (
