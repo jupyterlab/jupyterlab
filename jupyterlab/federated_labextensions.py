@@ -185,7 +185,7 @@ def build_labextension(path, logger=None, development=False, static_url=None, so
     subprocess.check_call(arguments, cwd=ext_path)
 
 
-def watch_labextension(path, labextensions_path, logger=None, development=False, source_map=False):
+def watch_labextension(path, labextensions_path, logger=None, development=False, source_map=False, core_path=None):
     """Watch a labextension in a given path"""
     if core_path is None:
         core_path = osp.join(HERE, 'staging')
