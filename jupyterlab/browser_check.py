@@ -175,7 +175,9 @@ class BrowserApp(LabApp):
     JS console errors, JS errors, and Python logged errors.
     """
     name = __name__
+    app_name = "JupyterLab Browser Check"
     open_browser = False
+    default_url = "/foo/lab"
 
     serverapp_config = {
         "base_url": "/foo/"
