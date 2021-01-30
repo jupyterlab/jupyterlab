@@ -46,7 +46,6 @@ export class FileEditorAdapter extends WidgetAdapter<
     this.editor = editor_widget.content;
 
     this.init_virtual();
-    this.connect_contentChanged_signal();
 
     this.console.log('file ready for connection:', this.path);
 

@@ -13,6 +13,10 @@ import { ICommandContext } from '../../command_manager';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import IEditor = CodeEditor.IEditor;
 import { VirtualDocument } from '../../virtual/document';
+import {
+  IObservableUndoableList,
+  IObservableList
+} from '@jupyterlab/observables';
 
 export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   editor: Notebook;
@@ -125,7 +129,6 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     this.console.log(this.document_path, 'ready for connection');
 
     this.init_virtual();
-    this.connect_contentChanged_signal();
 
     // connect the document, but do not open it as the adapter will handle this
     // after registering all features
@@ -139,83 +142,98 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     );
 
     this.widget.content.activeCellChanged.connect(this.activeCellChanged, this);
-    this.widget.model.cells.changed.connect(async (cells, change) => {
-      let cellsAdded: ICellModel[] = [];
-      let cellsRemoved: ICellModel[] = [];
-      const type = this.type;
-
-      if (change.type === 'set') {
-        // handling of conversions is important, because the editors get re-used and their handlers inherited,
-        // so we need to clear our handlers from editors of e.g. markdown cells which previously were code cells.
-        let convertedToMarkdownOrRaw = [];
-        let convertedToCode = [];
-
-        if (change.newValues.length === change.oldValues.length) {
-          // during conversion the cells should not get deleted nor added
-          for (let i = 0; i < change.newValues.length; i++) {
-            if (
-              change.oldValues[i].type === type &&
-              change.newValues[i].type !== type
-            ) {
-              convertedToMarkdownOrRaw.push(change.newValues[i]);
-            } else if (
-              change.oldValues[i].type !== type &&
-              change.newValues[i].type === type
-            ) {
-              convertedToCode.push(change.newValues[i]);
-            }
-          }
-          cellsAdded = convertedToCode;
-          cellsRemoved = convertedToMarkdownOrRaw;
-        }
-      } else if (change.type == 'add') {
-        cellsAdded = change.newValues.filter(
-          cellModel => cellModel.type === type
-        );
-      }
-      // note: editorRemoved is not emitted for removal of cells by change of type 'remove' (but only during cell type conversion)
-      // because there is no easy way to get the widget associated with the removed cell(s) - because it is no
-      // longer in the notebook widget list! It would need to be tracked on our side, but it is not necessary
-      // as (except for a tiny memory leak) it should not impact the functionality in any way
-
-      if (
-        cellsRemoved.length ||
-        cellsAdded.length ||
-        change.type === 'move' ||
-        change.type === 'remove'
-      ) {
-        // in contrast to the file editor document which can be only changed by the modification of the editor content,
-        // the notebook document cna also get modified by a change in the number or arrangement of editors themselves;
-        // for this reason each change has to trigger documents update (so that LSP mirror is in sync).
-        await this.update_documents();
-      }
-
-      for (let cellModel of cellsRemoved) {
-        let cellWidget = this.widget.content.widgets.find(
-          cell => cell.model.id === cellModel.id
-        );
-        this.known_editors_ids.delete(cellWidget.editor.uuid);
-
-        // for practical purposes this editor got removed from our consideration;
-        // it might seem that we should instead look for the editor indicated by
-        // the oldValues[i] cellModel, but this one got already transferred to the
-        // markdown cell in newValues[i]
-        this.editorRemoved.emit({
-          editor: cellWidget.editor
-        });
-      }
-
-      for (let cellModel of cellsAdded) {
-        let cellWidget = this.widget.content.widgets.find(
-          cell => cell.model.id === cellModel.id
-        );
-        this.known_editors_ids.add(cellWidget.editor.uuid);
-
-        this.editorAdded.emit({
-          editor: cellWidget.editor
-        });
-      }
+    this.widget.model.cells.changed.connect(this.handle_cell_change, this);
+    this.editor.modelChanged.connect(notebook => {
+      // note: this should not usually happen;
+      // there is no default action that would trigger this,
+      // its just a failsafe in case if another extension decides
+      // to swap the notebook model
+      this.console.warn(
+        'Model changed, connecting cell change handler; this is not something we were expecting'
+      );
+      notebook.model.cells.changed.connect(this.handle_cell_change, this);
     });
+  }
+
+  async handle_cell_change(
+    cells: IObservableUndoableList<ICellModel>,
+    change: IObservableList.IChangedArgs<ICellModel>
+  ) {
+    let cellsAdded: ICellModel[] = [];
+    let cellsRemoved: ICellModel[] = [];
+    const type = this.type;
+
+    if (change.type === 'set') {
+      // handling of conversions is important, because the editors get re-used and their handlers inherited,
+      // so we need to clear our handlers from editors of e.g. markdown cells which previously were code cells.
+      let convertedToMarkdownOrRaw = [];
+      let convertedToCode = [];
+
+      if (change.newValues.length === change.oldValues.length) {
+        // during conversion the cells should not get deleted nor added
+        for (let i = 0; i < change.newValues.length; i++) {
+          if (
+            change.oldValues[i].type === type &&
+            change.newValues[i].type !== type
+          ) {
+            convertedToMarkdownOrRaw.push(change.newValues[i]);
+          } else if (
+            change.oldValues[i].type !== type &&
+            change.newValues[i].type === type
+          ) {
+            convertedToCode.push(change.newValues[i]);
+          }
+        }
+        cellsAdded = convertedToCode;
+        cellsRemoved = convertedToMarkdownOrRaw;
+      }
+    } else if (change.type == 'add') {
+      cellsAdded = change.newValues.filter(
+        cellModel => cellModel.type === type
+      );
+    }
+    // note: editorRemoved is not emitted for removal of cells by change of type 'remove' (but only during cell type conversion)
+    // because there is no easy way to get the widget associated with the removed cell(s) - because it is no
+    // longer in the notebook widget list! It would need to be tracked on our side, but it is not necessary
+    // as (except for a tiny memory leak) it should not impact the functionality in any way
+
+    if (
+      cellsRemoved.length ||
+      cellsAdded.length ||
+      change.type === 'move' ||
+      change.type === 'remove'
+    ) {
+      // in contrast to the file editor document which can be only changed by the modification of the editor content,
+      // the notebook document cna also get modified by a change in the number or arrangement of editors themselves;
+      // for this reason each change has to trigger documents update (so that LSP mirror is in sync).
+      await this.update_documents();
+    }
+
+    for (let cellModel of cellsRemoved) {
+      let cellWidget = this.widget.content.widgets.find(
+        cell => cell.model.id === cellModel.id
+      );
+      this.known_editors_ids.delete(cellWidget.editor.uuid);
+
+      // for practical purposes this editor got removed from our consideration;
+      // it might seem that we should instead look for the editor indicated by
+      // the oldValues[i] cellModel, but this one got already transferred to the
+      // markdown cell in newValues[i]
+      this.editorRemoved.emit({
+        editor: cellWidget.editor
+      });
+    }
+
+    for (let cellModel of cellsAdded) {
+      let cellWidget = this.widget.content.widgets.find(
+        cell => cell.model.id === cellModel.id
+      );
+      this.known_editors_ids.add(cellWidget.editor.uuid);
+
+      this.editorAdded.emit({
+        editor: cellWidget.editor
+      });
+    }
   }
 
   get editors(): CodeEditor.IEditor[] {

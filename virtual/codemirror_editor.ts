@@ -27,6 +27,10 @@ export type CodeMirrorHandler = (
   ...args: any[]
 ) => void;
 type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
+type BlockSignalHandler = (
+  adapter: WidgetAdapter<IDocumentWidget>,
+  data: IEditorChangedData
+) => void;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -86,6 +90,8 @@ export class CodeMirrorVirtualEditor
   console: ILSPLogConsole;
   cm_editor_to_ce_editor: Map<CodeMirror.Editor, CodeEditor.IEditor>;
   ce_editor_to_cm_editor: Map<CodeEditor.IEditor, CodeMirror.Editor>;
+  private block_added_handlers: BlockSignalHandler[];
+  private block_removed_handlers: BlockSignalHandler[];
   isDisposed = false;
 
   change: Signal<IVirtualEditor<CodeMirrorEditor>, IEditorChange>;
@@ -101,6 +107,9 @@ export class CodeMirrorVirtualEditor
     this.virtual_document = options.virtual_document;
     this.console = this.adapter.console;
     this.change = new Signal(this);
+
+    this.block_added_handlers = [];
+    this.block_removed_handlers = [];
 
     this.editor_to_source_line = new Map();
     this.cm_editor_to_ce_editor = new Map();
@@ -121,7 +130,7 @@ export class CodeMirrorVirtualEditor
         }
       }
     });
-    // this is not thee most efficient, but probably the most reliable way
+    // this is not the most efficient, but probably the most reliable way
     this.virtual_document.update_manager.update_began.connect(
       this.onEditorsUpdated,
       this
@@ -157,6 +166,8 @@ export class CodeMirrorVirtualEditor
     }
 
     this._event_wrappers.clear();
+
+    this.disconnectBlockMonitoring();
 
     this.virtual_document.dispose();
 
@@ -272,7 +283,7 @@ export class CodeMirrorVirtualEditor
         return handler(this, ...args);
       } catch (error) {
         this.console.warn(
-          'Wrapped handler (which should accept a CodeMirror Editor instance) failed',
+          'CodeMirrorVirtualEditor handler (which should accept a CodeMirror Editor instance) failed',
           { error, instance, args, this: this }
         );
       }
@@ -501,6 +512,17 @@ export class CodeMirrorVirtualEditor
     return 0;
   }
 
+  protected disconnectBlockMonitoring() {
+    for (let handler of this.block_added_handlers) {
+      this.adapter.editorAdded.disconnect(handler);
+    }
+    this.block_added_handlers = [];
+    for (let handler of this.block_removed_handlers) {
+      this.adapter.editorRemoved.disconnect(handler);
+    }
+    this.block_removed_handlers = [];
+  }
+
   forEveryBlockEditor(
     callback: (cm_editor: CodeMirror.Editor) => any,
     monitor_for_new_blocks = true,
@@ -518,28 +540,34 @@ export class CodeMirrorVirtualEditor
       callback(cm_editor);
     }
     if (monitor_for_new_blocks) {
-      this.adapter.editorAdded.connect(
-        (adapter: WidgetAdapter<IDocumentWidget>, data: IEditorChangedData) => {
-          let { editor } = data;
-          if (editor == null) {
-            return;
-          }
-          let cm_editor = (editor as CodeMirrorEditor).editor;
-          if (!editors_with_handlers.has(cm_editor)) {
-            callback(cm_editor);
-          }
+      const on_block_added = (
+        adapter: WidgetAdapter<IDocumentWidget>,
+        data: IEditorChangedData
+      ) => {
+        let { editor } = data;
+        if (editor == null) {
+          return;
         }
-      );
-      this.adapter.editorRemoved.connect(
-        (adapter, data: IEditorChangedData) => {
-          let { editor } = data;
-          if (editor == null) {
-            return;
-          }
-          let cm_editor = (editor as CodeMirrorEditor).editor;
-          on_editor_removed_callback(cm_editor);
+        let cm_editor = (editor as CodeMirrorEditor).editor;
+        if (!editors_with_handlers.has(cm_editor)) {
+          callback(cm_editor);
         }
-      );
+      };
+      const on_block_removed = (
+        adapter: WidgetAdapter<IDocumentWidget>,
+        data: IEditorChangedData
+      ) => {
+        let { editor } = data;
+        if (editor == null) {
+          return;
+        }
+        let cm_editor = (editor as CodeMirrorEditor).editor;
+        on_editor_removed_callback(cm_editor);
+      };
+      this.block_added_handlers.push(on_block_added);
+      this.block_added_handlers.push(on_block_removed);
+      this.adapter.editorAdded.connect(on_block_added);
+      this.adapter.editorRemoved.connect(on_block_removed);
     }
   }
 
