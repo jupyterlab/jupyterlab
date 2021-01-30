@@ -1,4 +1,3 @@
-// This file is auto-generated from the corresponding file in /dev_mode
 /*-----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
@@ -111,6 +110,6 @@ void (async function bootstrap() {
 
   // Now that all federated containers are initialized with the main
   // container, we can import the main function.
-  let main = (await import('./index.out.js')).main;
+  let main = (await import('./index.js')).main;
   window.addEventListener('load', main);
 })();

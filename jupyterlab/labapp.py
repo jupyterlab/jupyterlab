@@ -546,11 +546,6 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     expose_app_in_browser = Bool(False, config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab")
 
-    # By default, open a browser for JupyterLab
-    serverapp_config = {
-        "open_browser": True
-    }
-
     @default('app_dir')
     def _default_app_dir(self):
         app_dir = get_app_dir()
@@ -712,14 +707,16 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             handlers.append(ext_handler)
 
         # If running under JupyterHub, add more metadata.
-        if hasattr(self, 'hub_prefix'):
-            page_config['hubPrefix'] = self.hub_prefix
-            page_config['hubHost'] = self.hub_host
-            page_config['hubUser'] = self.user
-            page_config['shareUrl'] = ujoin(self.hub_prefix, 'user-redirect')
+        if 'hub_prefix' in self.serverapp.tornado_settings:
+            tornado_settings = self.serverapp.tornado_settings
+            hub_prefix = tornado_settings['hub_prefix']
+            page_config['hubPrefix'] = hub_prefix
+            page_config['hubHost'] = tornado_settings['hub_host']
+            page_config['hubUser'] = tornado_settings['user']
+            page_config['shareUrl'] = ujoin(hub_prefix, 'user-redirect')
             # Assume the server_name property indicates running JupyterHub 1.0.
-            if hasattr(self, 'server_name'):
-                page_config['hubServerName'] = self.server_name
+            if hasattr(self.serverapp, 'server_name'):
+                page_config['hubServerName'] = self.serverapp.server_name
             api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
             page_config['token'] = api_token
 

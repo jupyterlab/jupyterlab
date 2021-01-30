@@ -162,7 +162,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
   requires: [IDocumentManager, ITranslator],
-  optional: [ILabShell, IStateDB, IRouter, JupyterFrontEnd.ITreeResolver]
+  optional: [IStateDB, IRouter, JupyterFrontEnd.ITreeResolver]
 };
 
 /**
@@ -243,7 +243,6 @@ async function activateFactory(
   app: JupyterFrontEnd,
   docManager: IDocumentManager,
   translator: ITranslator,
-  labShell: ILabShell | null,
   state: IStateDB | null,
   router: IRouter | null,
   tree: JupyterFrontEnd.ITreeResolver | null
@@ -268,29 +267,17 @@ async function activateFactory(
     const widget = new FileBrowser({ id, model, restore, translator });
 
     // Add a launcher toolbar item.
-    if (labShell) {
-      const launcher = new ToolbarButton({
-        icon: addIcon,
-        onClick: () => {
-          if (
-            labShell.mode === 'multiple-document' &&
-            commands.hasCommand('launcher:create')
-          ) {
-            return Private.createLauncher(commands, widget);
-          } else {
-            const newUrl = PageConfig.getUrl({
-              mode: labShell.mode,
-              workspace: PageConfig.defaultWorkspace,
-              treePath: model.path
-            });
-            window.open(newUrl, '_blank');
-          }
-        },
-        tooltip: trans.__('New Launcher'),
-        actualOnClick: true
-      });
-      widget.toolbar.insertItem(0, 'launch', launcher);
-    }
+    const launcher = new ToolbarButton({
+      icon: addIcon,
+      onClick: () => {
+        if (commands.hasCommand('launcher:create')) {
+          return Private.createLauncher(commands, widget);
+        }
+      },
+      tooltip: trans.__('New Launcher'),
+      actualOnClick: true
+    });
+    widget.toolbar.insertItem(0, 'launch', launcher);
 
     // Track the newly created file browser.
     void tracker.add(widget);

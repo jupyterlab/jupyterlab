@@ -266,32 +266,35 @@ export class DebuggerHandler {
     };
 
     const addToolbarButton = (): void => {
-      if (!this._iconButton) {
-        this._iconButton = updateIconButton(widget, toggleDebugging);
+      if (!this._iconButtons[widget.id]) {
+        this._iconButtons[widget.id] = updateIconButton(
+          widget,
+          toggleDebugging
+        );
       }
-      if (!this._toggleButton) {
-        this._toggleButton = updateToggleButton(
+      if (!this._toggleButtons[widget.id]) {
+        this._toggleButtons[widget.id] = updateToggleButton(
           widget,
           this._service.isStarted,
           toggleDebugging
         );
       }
-      this._toggleButton.value = this._service.isStarted;
+      this._toggleButtons[widget.id]!.value = this._service.isStarted;
     };
 
     const removeToolbarButton = (): void => {
-      if (!this._iconButton) {
+      if (!this._iconButtons[widget.id]) {
         return;
       } else {
-        this._iconButton.dispose();
-        delete this._iconButton;
+        this._iconButtons[widget.id]!.dispose();
+        delete this._iconButtons[widget.id];
       }
 
-      if (!this._toggleButton) {
+      if (!this._toggleButtons[widget.id]) {
         return;
       } else {
-        this._toggleButton.dispose();
-        delete this._toggleButton;
+        this._toggleButtons[widget.id]!.dispose();
+        delete this._toggleButtons[widget.id];
       }
     };
 
@@ -305,15 +308,15 @@ export class DebuggerHandler {
         this._service.isStarted &&
         this._previousConnection?.id === connection?.id
       ) {
-        if (this._toggleButton) {
-          this._toggleButton.value = false;
+        if (this._toggleButtons[widget.id]) {
+          this._toggleButtons[widget.id]!.value = false;
         }
         this._service.session!.connection = connection;
         await this._service.stop();
         removeHandlers();
       } else {
-        if (this._toggleButton) {
-          this._toggleButton.value = true;
+        if (this._toggleButtons[widget.id]) {
+          this._toggleButtons[widget.id]!.value = true;
         }
         this._service.session!.connection = connection;
         this._previousConnection = connection;
@@ -391,8 +394,12 @@ export class DebuggerHandler {
       status: Kernel.Status
     ) => void;
   } = {};
-  private _iconButton?: ToolbarButton;
-  private _toggleButton?: Switch;
+  private _iconButtons: {
+    [id: string]: ToolbarButton | undefined;
+  } = {};
+  private _toggleButtons: {
+    [id: string]: Switch | undefined;
+  } = {};
 }
 
 /**

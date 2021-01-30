@@ -11,6 +11,64 @@ See the `JupyterLab
 milestone on GitHub for the full list of pull requests and issues closed.
 
 
+v3.0.6
+^^^^^^
+* Listen for ``'restarting'`` instead of ``'autorestarting'`` from server.  (`#9674 <https://github.com/jupyterlab/jupyterlab/pull/9674>`__)
+* Use ``jupyterhub make_singleuser_app`` mixin when available.  (`#9681 <https://github.com/jupyterlab/jupyterlab/pull/9681>`__)
+* Remove jest version constrain.  (`#9632 <https://github.com/jupyterlab/jupyterlab/pull/9632>`__)
+* Disable large uploads for notebook server < 5.1.  (`#9628 <https://github.com/jupyterlab/jupyterlab/pull/9628>`__)
+* Ignore timeout errors when preloading settings.  (`#9629 <https://github.com/jupyterlab/jupyterlab/pull/9629>`__)
+* Customize template branch when upgrading extension.  (`#9630 <https://github.com/jupyterlab/jupyterlab/pull/9630>`__)
+* Renamed variable that clashed with a module.  (`#9641 <https://github.com/jupyterlab/jupyterlab/pull/9641>`__)
+* Allow for lazily retrieved documentation (with a getter).  (`#9643 <https://github.com/jupyterlab/jupyterlab/pull/9643>`__)
+* Upgrade ``html-webpack-plugin`` to support webpack 5.  (`#9651 <https://github.com/jupyterlab/jupyterlab/pull/9651>`__)
+* Fix viewing of PDF files in Safari.  (`#9656 <https://github.com/jupyterlab/jupyterlab/pull/9656>`__)
+* Add ToC entries for all headers in markdown cells.  (`#9358 <https://github.com/jupyterlab/jupyterlab/pull/9358>`__)
+* Revert creating a new browser tab for a new launcher when in simple interface.  (`#9664 <https://github.com/jupyterlab/jupyterlab/pull/9664>`__)
+* Add ``xeus-robot`` to the debugger documentation.  (`#9661 <https://github.com/jupyterlab/jupyterlab/pull/9661>`__)
+
+v3.0.5
+^^^^^^
+* Enable large file uploads.  (`#9616 <https://github.com/jupyterlab/jupyterlab/pull/9616>`__)
+* Fix display of ``??`` help on Windows.  (`#9617 <https://github.com/jupyterlab/jupyterlab/pull/9617>`__)
+* Update app and federated examples.  (`#9586 <https://github.com/jupyterlab/jupyterlab/pull/9586>`__)
+
+
+v3.0.4
+^^^^^^
+* Do not use ``??`` in plain js, as it is too new.  (`#9606 <https://github.com/jupyterlab/jupyterlab/pull/9606>`__)
+* Fix handling of multiple notebooks for the debugger.  (`#9598 <https://github.com/jupyterlab/jupyterlab/pull/9598>`__)
+* Refactor labhub + CI.  (`#9604 <https://github.com/jupyterlab/jupyterlab/pull/9604>`__)
+
+v3.0.3
+^^^^^^
+* Move open_browser to the top level configs of classes.  (`#9580 <https://github.com/jupyterlab/jupyterlab/pull/9580>`__)
+
+v3.0.2
+^^^^^^
+* Manage kernel message queueing better to prevent out-of-order execution.  (`#9571 <https://github.com/jupyterlab/jupyterlab/pull/9571>`__)
+* Fix breadcrumb links.  (`#9572 <https://github.com/jupyterlab/jupyterlab/pull/9572>`__)
+* Fix integration with JupyterHub.   (`#9568 <https://github.com/jupyterlab/jupyterlab/pull/9568>`__)
+* Fix parsing of empty CSV files.  (`#9557 <https://github.com/jupyterlab/jupyterlab/pull/9557>`__)
+* Use tree/table buttons to display debugger variables view mode.  (`#9502 <https://github.com/jupyterlab/jupyterlab/pull/9502>`__)
+* Update tutorial for final jlab 3 release.   (`#9562 <https://github.com/jupyterlab/jupyterlab/pull/9562>`__)
+* Fix upgrade_extension.py.  (`#9551 <https://github.com/jupyterlab/jupyterlab/pull/9551>`__, `#9550 <https://github.com/jupyterlab/jupyterlab/pull/9550>`__)
+* Update the Binder link in the README to point to a 3.0 Binder.  (`#9549 <https://github.com/jupyterlab/jupyterlab/pull/9549>`__)
+
+v3.0.1
+^^^^^^
+* Fixes error when applying ``jupyterlab.upgrade_extension`` on Windows.  (`#9546 <https://github.com/jupyterlab/jupyterlab/pull/9509>`__)
+* Improve upgrade script to add style settings.  (`#9515 <https://github.com/jupyterlab/jupyterlab/pull/9515>`__)
+* Fixed incorrect link to GitHub milestone.  (`#9516 <https://github.com/jupyterlab/jupyterlab/pull/9516>`__)
+* Split contribution guidelines into web-based and local instructions.  (`#9540 <https://github.com/jupyterlab/jupyterlab/pull/9540>`__)
+* Remove ``--checkout 3.0`` in the extension tutorial.  (`#9545 <https://github.com/jupyterlab/jupyterlab/pull/9545>`__)
+* Docs updates for 3.0.  (`#9546 <https://github.com/jupyterlab/jupyterlab/pull/9546>`__)
+* Fix usage test. (`#9547 <https://github.com/jupyterlab/jupyterlab/pull/9547>`__)
+* Remove visible 1px border for terminal.  (`#9548 <https://github.com/jupyterlab/jupyterlab/pull/9548>`__)
+
+v3.0.0
+^^^^^^
+
 User-facing changes
 ^^^^^^^^^^^^^^^^^^^
 

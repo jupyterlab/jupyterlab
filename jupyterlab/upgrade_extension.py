@@ -13,14 +13,16 @@ except ImportError:
     raise RuntimeError("Please install cookiecutter")
 
 
-COOKIECUTTER_BRANCH = "3.0"
+DEFAULT_COOKIECUTTER_BRANCH = "3.0"
 
 
-def update_extension(target, interactive=True):
+def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=True):
     """Update an extension to the current JupyterLab
 
     target: str 
         Path to the extension directory containing the extension
+    branch: str [default: DEFAULT_COOKIECUTTER_BRANCH]
+        Template branch to checkout
     interactive: bool [default: true]
         Whether to ask before overwriting content
     
@@ -63,7 +65,7 @@ def update_extension(target, interactive=True):
     )
 
     template = 'https://github.com/jupyterlab/extension-cookiecutter-ts'
-    cookiecutter(template=template, checkout=COOKIECUTTER_BRANCH, output_dir=output_dir, 
+    cookiecutter(template=template, checkout=branch, output_dir=output_dir, 
                 extra_context=extra_context, no_input=not interactive)
 
     python_name = os.listdir(output_dir)[0]
@@ -197,7 +199,11 @@ if __name__ == "__main__":
                        action='store',
                        type=str,
                        help='the target path')
+    
+    parser.add_argument('--branch',
+                        help='the template branch to checkout',
+                        default=DEFAULT_COOKIECUTTER_BRANCH)
 
     args = parser.parse_args()
 
-    update_extension(args.path, args.no_input==False)
+    update_extension(args.path, args.branch, args.no_input==False)

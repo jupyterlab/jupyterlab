@@ -415,6 +415,8 @@ export class CompleterModel implements Completer.IModel {
         );
         results.push({
           ...item,
+          // Allow for lazily retrieved documentation (with a getter)
+          documentation: item.documentation,
           label: marked.join(''),
           // If no insertText is present, preserve original label value
           // by setting it as the insertText.
