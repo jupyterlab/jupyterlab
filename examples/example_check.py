@@ -43,7 +43,7 @@ def main():
         """
         name = __name__
         open_browser = False
-        default_url = "/foo"
+        default_url = "/foo" + mod.ExampleApp.extension_url
 
         serverapp_config = {
             "base_url": "/foo/",

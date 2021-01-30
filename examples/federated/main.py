@@ -25,6 +25,7 @@ def _jupyter_server_extension_points():
     ]
 
 class ExampleApp(LabServerApp):
+    extension_url = '/lab'
     name = 'lab'
     load_other_extensions = False
     app_name = 'JupyterLab Example App with Prebuilt Extensions'
