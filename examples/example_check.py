@@ -43,6 +43,7 @@ def main():
         """
         name = __name__
         open_browser = False
+        default_url = "/foo"
 
         serverapp_config = {
             "base_url": "/foo/",
