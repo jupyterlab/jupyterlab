@@ -401,7 +401,7 @@ export class LSPConnector
 
     this.console.debug('All promises set up and ready.');
     return promise.then(reply => {
-      reply = this.suppress_if_needed(reply, token);
+      reply = this.suppress_if_needed(reply, token, cursor);
       this.items = reply.items;
       this.trigger_kind = CompletionTriggerKind.Invoked;
       return reply;
@@ -610,8 +610,24 @@ export class LSPConnector
 
   private suppress_if_needed(
     reply: CompletionHandler.ICompletionItemsReply,
-    token: CodeEditor.IToken
+    token: CodeEditor.IToken,
+    cursor_at_request: CodeEditor.IPosition
   ) {
+    const cursor_now = this._editor.getCursorPosition();
+
+    // if the cursor advanced in the same line, the previously retrieved completions may still be useful
+    // if the line changed or cursor moved backwards then no reason to keep the suggestions
+    if (
+      cursor_at_request.line != cursor_now.line ||
+      cursor_now.column < cursor_at_request.column
+    ) {
+      return {
+        start: reply.start,
+        end: reply.end,
+        items: []
+      };
+    }
+
     if (this.trigger_kind == AdditionalCompletionTriggerKinds.AutoInvoked) {
       if (
         // do not auto-invoke if no match found
