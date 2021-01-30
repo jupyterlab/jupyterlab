@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as Y from 'yjs';
-import { WebrtcProvider } from 'y-webrtc';
+import { WebsocketProvider } from 'y-websocket';
 
 import {
   Contents,
@@ -27,7 +27,7 @@ import {
   sessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -65,7 +65,10 @@ export class Context<
 
     const ydoc = new Y.Doc({ guid: localPath });
     // @todo remove websocket provider - this should be handled by a separate plugin
-    const awareness = new WebrtcProvider(ydoc.guid, ydoc).awareness;
+    const server = ServerConnection.makeSettings();
+    const url = URLExt.join(server.wsUrl, 'api/yjs');
+    console.debug("URL:", url);
+    const awareness = new WebsocketProvider(url, ydoc.guid, ydoc).awareness;
     // @todo remove debugging information:
     // @ts-ignore
     window.ydocs = window.ydocs || [];
