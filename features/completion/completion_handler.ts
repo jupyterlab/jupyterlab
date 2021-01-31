@@ -374,11 +374,9 @@ export class LSPConnector
             ]);
           }
 
-          // TODO: use allSettled if available; requires ES2020 or a polyfill
-          // allSettled ensures that the result is not lost if one of the promises rejects
           promise = Promise.all([
-            kernel_promise,
-            lsp_promise
+            kernel_promise.catch(p => p),
+            lsp_promise.catch(p => p)
           ]).then(([kernel, lsp]) =>
             this.merge_replies(this.transform_reply(kernel), lsp, this._editor)
           );
@@ -544,10 +542,17 @@ export class LSPConnector
   ): CompletionHandler.ICompletionItemsReply {
     this.console.debug('Merging completions:', lsp, kernel);
 
-    if (!kernel.items.length) {
+    if (kernel instanceof Error) {
+      this.console.warn('Caught kernel completions error', kernel);
+    }
+    if (lsp instanceof Error) {
+      this.console.warn('Caught LSP completions error', lsp);
+    }
+
+    if (kernel instanceof Error || !kernel.items.length) {
       return lsp;
     }
-    if (!lsp.items.length) {
+    if (lsp instanceof Error || !lsp.items.length) {
       return kernel;
     }
 
