@@ -13,6 +13,7 @@ import json
 import logging
 import os
 import os.path as osp
+from pathlib import Path
 import re
 import shutil
 import site
@@ -146,7 +147,9 @@ def get_app_dir():
     """
     # Default to the override environment variable.
     if os.environ.get('JUPYTERLAB_DIR'):
-        return osp.abspath(os.environ['JUPYTERLAB_DIR'])
+        # We must resolve the path to get the canonical case of the path for
+        # case-sensitive systems
+        return str(Path(os.environ['JUPYTERLAB_DIR']).resolve())
 
     # Use the default locations for data_files.
     app_dir = pjoin(sys.prefix, 'share', 'jupyter', 'lab')
@@ -164,7 +167,10 @@ def get_app_dir():
           osp.exists(app_dir) and
           osp.exists('/usr/local/share/jupyter/lab')):
         app_dir = '/usr/local/share/jupyter/lab'
-    return osp.abspath(app_dir)
+
+    # We must resolve the path to get the canonical case of the path for
+    # case-sensitive systems
+    return str(Path(app_dir).resolve())
 
 
 def dedupe_yarn(path, logger=None):
@@ -664,11 +670,8 @@ class _AppHandler(object):
 
         # Build the app.
         dedupe_yarn(staging, self.logger)
-        starting_dir = os.getcwd()
-        os.chdir(staging)
         command = f'build:{"prod" if production else "dev"}{":minimize" if minimize else ""}'
-        ret = self._run(['node', YARN_PATH, 'run', command])
-        os.chdir(starting_dir)
+        ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
         if ret != 0:
             msg = 'JupyterLab failed to build'
             self.logger.debug(msg)
