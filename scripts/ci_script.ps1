@@ -7,7 +7,7 @@ python -c "from jupyterlab.commands import build_check; build_check()"
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
 if ($Env:GROUP -eq "python") {
-    jupyter lab build --log-level=DEBUG
+    jupyter lab build --debug
     if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
     # Run the python tests

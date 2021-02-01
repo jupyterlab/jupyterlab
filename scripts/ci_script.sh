@@ -12,7 +12,7 @@ fi
 
 
 if [[ $GROUP == python ]]; then
-    jupyter lab build --log-level=DEBUG
+    jupyter lab build --debug
     # Run the python tests
     py.test
 fi
