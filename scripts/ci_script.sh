@@ -259,8 +259,8 @@ if [[ $GROUP == usage ]]; then
     pushd tmp
     mkdir real_app_dir
     ln -s real_app_dir link_app_dir
-    # verify that app directory is not resolved
-    env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep link_app_dir
+    # verify that app directory is resolved
+    env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep real_app_dir
     popd
 
     # Make sure we can successfully load the dev app.
