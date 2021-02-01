@@ -328,7 +328,7 @@ close the notebook without saving it.`,
       if (from < to) {
         to--;
       }
-      this.insertCell(from, fromCell);
+      this.insertCell(to, fromCell);
     });
   }
 
