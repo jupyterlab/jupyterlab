@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-federated-core",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "private": true,
   "scripts": {
     "build": "npm run clean && webpack",
@@ -121,7 +121,7 @@
     "@jupyterlab/csvviewer-extension": "^3.0.4",
     "@jupyterlab/docmanager-extension": "^3.0.4",
     "@jupyterlab/documentsearch-extension": "^3.0.4",
-    "@jupyterlab/extensionmanager-extension": "^3.0.4",
+    "@jupyterlab/extensionmanager-extension": "^3.0.5",
     "@jupyterlab/filebrowser-extension": "^3.0.4",
     "@jupyterlab/fileeditor-extension": "^3.0.4",
     "@jupyterlab/help-extension": "^3.0.4",

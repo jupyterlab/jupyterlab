@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/metapackage",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "description": "JupyterLab - Meta Package.  All of the packages used by the core JupyterLab application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -56,8 +56,8 @@
     "@jupyterlab/docregistry": "^3.0.4",
     "@jupyterlab/documentsearch": "^3.0.4",
     "@jupyterlab/documentsearch-extension": "^3.0.4",
-    "@jupyterlab/extensionmanager": "^3.0.4",
-    "@jupyterlab/extensionmanager-extension": "^3.0.4",
+    "@jupyterlab/extensionmanager": "^3.0.5",
+    "@jupyterlab/extensionmanager-extension": "^3.0.5",
     "@jupyterlab/filebrowser": "^3.0.4",
     "@jupyterlab/filebrowser-extension": "^3.0.4",
     "@jupyterlab/fileeditor": "^3.0.4",
