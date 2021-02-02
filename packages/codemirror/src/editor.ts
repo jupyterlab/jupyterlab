@@ -106,11 +106,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
+    const yUndoManager = model.yUndoManager || undefined;
     this.ybinding = new CodemirrorBinding(
       model.ytext,
       editor,
-      model.yawareness
+      model.yawareness,
+      { yUndoManager }
     );
+    if (yUndoManager) {
+      yUndoManager.on('stack-item-popped', this._yUndoPopped);
+    }
     this._poll = new Poll({
       factory: async () => {
         this._checkSync();
@@ -173,6 +178,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   readonly ybinding: CodemirrorBinding;
+
+  private _yUndoPopped = ({ changedParentTypes }: any) => {
+    if (changedParentTypes.has(this.model.ytext)) {
+      // focus editor when a change within this editor was undone
+      this.editor.focus();
+    }
+  };
 
   /**
    * A signal emitted when either the top or bottom edge is requested.
@@ -261,6 +273,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._isDisposed = true;
+    if (this.model.yUndoManager) {
+      this.model.yUndoManager.on('stack-item-popped', this._yUndoPopped);
+    }
+    this.ybinding.destroy();
     this.host.removeEventListener('focus', this, true);
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
@@ -321,21 +337,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
-    this.doc.undo();
+    this.model.yUndoManager?.undo();
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
-    this.doc.redo();
+    this.model.yUndoManager?.redo();
   }
 
   /**
    * Clear the undo history.
    */
   clearHistory(): void {
-    this.doc.clearHistory();
+    this.model.yUndoManager?.clear();
   }
 
   /**

@@ -32,8 +32,13 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, ymodel?: Y.Doc, yawareness?: any) {
-    super({ ymodel, yawareness });
+  constructor(
+    languagePreference?: string,
+    ymodel?: Y.Doc,
+    yawareness?: any,
+    yUndoManager: Y.UndoManager | null = null
+  ) {
+    super({ ymodel, yawareness, yUndoManager });
     this._defaultLang = languagePreference || '';
     this.triggerContentChange = this.triggerContentChange.bind(this);
     this.ytext.observe(this.triggerContentChange);
@@ -238,9 +243,15 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
   createNew(
     languagePreference?: string,
     ymodel?: Y.Doc,
-    yawareness?: any
+    yawareness?: any,
+    yUndoManager?: Y.UndoManager | null
   ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, ymodel, yawareness);
+    return new DocumentModel(
+      languagePreference,
+      ymodel,
+      yawareness,
+      yUndoManager
+    );
   }
 
   /**

@@ -61,6 +61,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   moveCell(from: number, to: number): void;
 
   readonly yUndoManager: Y.UndoManager;
+  readonly yawareness: any;
   readonly ymeta: Y.Map<any>;
 }
 
@@ -299,6 +300,7 @@ close the notebook without saving it.`,
     cells.forEach(cell => {
       this.ytypeCellMapping.set(cell.ymodel, cell);
       cell.yawareness = this.yawareness;
+      cell.yUndoManager = this.yUndoManager;
     });
     this.ycells.insert(
       index,
@@ -343,7 +345,13 @@ close the notebook without saving it.`,
     super.initialize();
     if (!this.ycells.length) {
       // this will trigger an event on ycells
-      this.ycells.push([this.contentFactory.createCodeCell({}).toJSON()]);
+      const yawareness = this.yawareness;
+      const yUndoManager = this.yUndoManager;
+      this.ycells.push([
+        this.contentFactory
+          .createCodeCell({ yawareness, yUndoManager })
+          .toJSON()
+      ]);
     }
     this.yUndoManager.clear();
   }
@@ -351,13 +359,26 @@ close the notebook without saving it.`,
   private _createCellFromType(type: Y.Map<any>): ICellModel {
     const yawareness = this.yawareness;
     const factory = this.contentFactory;
+    const yUndoManager = this.yUndoManager;
     switch (type.get('cell_type')) {
       case 'code':
-        return factory.createCodeCell({ ymodel: type, yawareness });
+        return factory.createCodeCell({
+          ymodel: type,
+          yawareness,
+          yUndoManager
+        });
       case 'markdown':
-        return factory.createMarkdownCell({ ymodel: type, yawareness });
+        return factory.createMarkdownCell({
+          ymodel: type,
+          yawareness,
+          yUndoManager
+        });
       case 'raw':
-        return factory.createRawCell({ ymodel: type, yawareness });
+        return factory.createRawCell({
+          ymodel: type,
+          yawareness,
+          yUndoManager
+        });
       default:
         throw new Error('Found unknown cell type');
     }
@@ -366,13 +387,14 @@ close the notebook without saving it.`,
   private _createCellFromJSON(cell: any): ICellModel {
     const yawareness = this.yawareness;
     const factory = this.contentFactory;
+    const yUndoManager = this.yUndoManager;
     switch (cell['cell_type']) {
       case 'code':
-        return factory.createCodeCell({ cell, yawareness });
+        return factory.createCodeCell({ cell, yawareness, yUndoManager });
       case 'markdown':
-        return factory.createMarkdownCell({ cell, yawareness });
+        return factory.createMarkdownCell({ cell, yawareness, yUndoManager });
       case 'raw':
-        return factory.createRawCell({ cell, yawareness });
+        return factory.createRawCell({ cell, yawareness, yUndoManager });
       default:
         throw new Error('Found unknown cell type');
     }

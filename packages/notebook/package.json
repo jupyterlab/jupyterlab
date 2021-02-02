@@ -63,7 +63,7 @@
     "@lumino/virtualdom": "^1.8.0",
     "@lumino/widgets": "^1.16.1",
     "react": "^17.0.1",
-    "yjs": "^13.4.12"
+    "yjs": "^13.4.14"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.1.0-alpha.2",

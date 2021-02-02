@@ -188,6 +188,7 @@ export namespace CodeEditor {
     readonly ytext: Y.Text;
     readonly ymeta: Y.Map<any>;
     readonly ydoc: Y.Doc;
+    yUndoManager: Y.UndoManager | null;
     yawareness: any;
     setValue(value: string): void;
     getValue(): string;
@@ -215,6 +216,7 @@ export namespace CodeEditor {
       this.ydoc = this.ymodel;
       this.ymeta = this.ymodel.getMap('metadata');
       this.ytext = this.ymodel.getText('value');
+      this.yUndoManager = options.yUndoManager || null;
       this._onValueChanged = this._onValueChanged.bind(this);
       this.ytext.observe(this._onValueChanged);
 
@@ -304,6 +306,7 @@ export namespace CodeEditor {
     readonly yawareness;
     readonly ymodel: Y.Doc;
     readonly ydoc: Y.Doc;
+    readonly yUndoManager: Y.UndoManager | null;
     readonly ytext: Y.Text;
     readonly ymeta: Y.Map<any>;
   }
@@ -734,6 +737,8 @@ export namespace CodeEditor {
       ymodel?: Y.Doc;
 
       yawareness: any;
+
+      yUndoManager: Y.UndoManager | null;
     }
   }
 }

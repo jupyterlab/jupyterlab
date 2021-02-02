@@ -355,9 +355,14 @@ export class StaticNotebook extends Widget {
     }
     this._updateMimetype();
     if (!newValue.cellInstances.length) {
+      const yawareness = this.model!.yawareness;
+      const yUndoManager = this.model!.yUndoManager;
       newValue.insertCell(
         0,
-        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
+        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {
+          yawareness,
+          yUndoManager
+        })
       );
     }
     each(newValue.cellInstances, (cell: ICellModel, i: number) => {
@@ -401,9 +406,14 @@ export class StaticNotebook extends Widget {
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
         if (model && !model.isDisposed && !model.ycells.length) {
+          const yawareness = this.model!.yawareness;
+          const yUndoManager = this.model!.yUndoManager;
           model.insertCell(
             0,
-            model.contentFactory.createCell(this.notebookConfig.defaultCell, {})
+            model.contentFactory.createCell(this.notebookConfig.defaultCell, {
+              yUndoManager,
+              yawareness
+            })
           );
         }
       });
@@ -1906,15 +1916,22 @@ export class Notebook extends StaticNotebook {
       const values = event.mimeData.getData(JUPYTER_CELL_MIME);
       const factory = model.contentFactory;
 
+      const yUndoManager = this.model!.yUndoManager;
+      const yawareness = this.model!.yawareness;
+
       // Insert the copies of the original cells.
       const cells = values.map((cell: nbformat.ICell) => {
         switch (cell.cell_type) {
           case 'code':
-            return factory.createCodeCell({ cell });
+            return factory.createCodeCell({ cell, yUndoManager, yawareness });
           case 'markdown':
-            return factory.createMarkdownCell({ cell });
+            return factory.createMarkdownCell({
+              cell,
+              yUndoManager,
+              yawareness
+            });
           default:
-            return factory.createRawCell({ cell });
+            return factory.createRawCell({ cell, yUndoManager, yawareness });
         }
       });
       model.insertCells(index++, cells);

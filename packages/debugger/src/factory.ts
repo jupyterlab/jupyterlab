@@ -35,7 +35,8 @@ export class ReadOnlyEditorFactory {
       model: new CodeEditor.Model({
         value: content,
         mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path),
-        yawareness: null
+        yawareness: null,
+        yUndoManager: null
       }),
       factory,
       config: {

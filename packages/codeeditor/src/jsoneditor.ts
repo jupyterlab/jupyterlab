@@ -79,7 +79,8 @@ export class JSONEditor extends Widget {
     const model = new CodeEditor.Model({
       value: this._trans.__('No data!'),
       mimeType: 'application/json',
-      yawareness: null
+      yawareness: null,
+      yUndoManager: null
     });
     this._onValueChanged = this._onValueChanged.bind(this);
     model.ytext.observe(this._onValueChanged);

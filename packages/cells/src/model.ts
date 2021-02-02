@@ -204,6 +204,7 @@ export class CellModel implements ICellModel {
       }
     }
     this.ydoc = this.ymodel.doc!;
+    this.yUndoManager = options.yUndoManager || null;
     this._onModelChanged = this._onModelChanged.bind(this);
     this.ymodel.observe(this._onModelChanged);
     this.ytext.observe(this._onValueChange);
@@ -213,6 +214,7 @@ export class CellModel implements ICellModel {
 
   readonly yawareness: any;
   readonly ydoc: Y.Doc;
+  readonly yUndoManager: Y.UndoManager | null;
   readonly ymodel: Y.Map<any>;
   readonly ytext: Y.Text;
   readonly ymeta: Y.Map<any>;
@@ -389,6 +391,7 @@ export namespace CellModel {
     cell?: nbformat.IBaseCell;
     ymodel?: Y.Map<any>;
     yawareness?: any;
+    yUndoManager?: Y.UndoManager;
   }
 }
 
