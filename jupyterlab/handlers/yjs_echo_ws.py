@@ -8,8 +8,7 @@ class YJSEchoWS(WebSocketHandler):
     rooms = {}
 
     def open(self, guid):
-        print("[YJSEchoWS]: open", self.open_args)
-        print("[YJSEchoWS]: open", self.open_kwargs)
+        #print("[YJSEchoWS]: open", guid)
         cls = self.__class__
         self.id = str(uuid.uuid4())
         self.room_id = guid
@@ -24,7 +23,7 @@ class YJSEchoWS(WebSocketHandler):
         cls.rooms[self.room_id] = clients
     
     def on_message(self, message):
-        print("[YJSEchoWS]: message, ", message)
+        #print("[YJSEchoWS]: message, ", message)
         cls = self.__class__
         clients = cls.rooms.get(self.room_id, None)
         if clients :
@@ -33,7 +32,7 @@ class YJSEchoWS(WebSocketHandler):
                     loop.add_callback(hook_send_message, message)
 
     def on_close(self):
-        print("[YJSEchoWS]: close")
+        #print("[YJSEchoWS]: close")
         cls = self.__class__
         clients = cls.rooms.get(self.room_id, None)
         if clients :
@@ -47,7 +46,7 @@ class YJSEchoWS(WebSocketHandler):
         return True
     
     def check_origin(self, origin):
-        print("[YJSEchoWS]: check origin")
+        #print("[YJSEchoWS]: check origin")
         return True
     
     def hook_send_message(self, msg):
