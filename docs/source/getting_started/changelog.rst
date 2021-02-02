@@ -10,6 +10,13 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.7
+^^^^^^
+* Add link for prebuilt extensions too.  (`#9702 <https://github.com/jupyterlab/jupyterlab/pull/9702>`__)
+* Remove outdated note on ipywidgets. (`#9707 <https://github.com/jupyterlab/jupyterlab/pull/9707>`__)
+* Fix debug flag handling in build command.  (`#9715 <https://github.com/jupyterlab/jupyterlab/pull/9715>`__)
+* Update notebook toolbar example docs.  (`#9705 <https://github.com/jupyterlab/jupyterlab/pull/9705>`__)
+* Use ``Path.resolve()`` to get canonical case-sensitive path names.  (`#9709 <https://github.com/jupyterlab/jupyterlab/pull/9709>`__)
 
 v3.0.6
 ^^^^^^
