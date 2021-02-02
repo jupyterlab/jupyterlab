@@ -79,7 +79,9 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
 
     this.ycells = this.ymodel.getArray('cells');
     this.contentFactory = factory.clone(this.ycells);
-    this.yUndoManager = new Y.UndoManager(this.ycells);
+    this.yUndoManager = new Y.UndoManager(this.ycells, {
+      trackedOrigins: new Set([this])
+    });
 
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
 
@@ -302,17 +304,19 @@ close the notebook without saving it.`,
       cell.yawareness = this.yawareness;
       cell.yUndoManager = this.yUndoManager;
     });
-    this.ycells.insert(
-      index,
-      cells.map(cell => cell.ymodel)
-    );
+    this.ymodel.transact(() => {
+      this.ycells.insert(
+        index,
+        cells.map(cell => cell.ymodel)
+      );
+    }, this);
   }
 
   setCell(index: number, cell: ICellModel) {
     this.ymodel.transact(() => {
       this.ycells.delete(index);
       this.insertCell(index, cell);
-    });
+    }, this);
   }
 
   getCell(index: number): ICellModel {
@@ -320,7 +324,9 @@ close the notebook without saving it.`,
   }
 
   deleteCell(index: number, length: number = 1): void {
-    this.ycells.delete(index, length);
+    this.ymodel.transact(() => {
+      this.ycells.delete(index, length);
+    }, this);
   }
 
   moveCell(from: number, to: number): void {
@@ -331,7 +337,7 @@ close the notebook without saving it.`,
         to--;
       }
       this.insertCell(to, fromCell);
-    });
+    }, this);
   }
 
   /**
