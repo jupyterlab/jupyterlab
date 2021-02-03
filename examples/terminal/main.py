@@ -64,6 +64,7 @@ class ExampleHandler(
 class ExampleApp(LabServerApp):
 
     extension_url = '/example'
+    default_url = '/example'
     app_url = "/example"
     name = __name__
     load_other_extensions = False
