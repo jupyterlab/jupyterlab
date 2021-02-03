@@ -362,7 +362,7 @@ def _get_labextension_metadata(module):
 
     mod_path = osp.abspath(module)
     if not osp.exists(mod_path):
-        raise FileNotFoundError('The path `{}` does not exist.'.format(module))
+        raise FileNotFoundError('The path `{}` does not exist.'.format(mod_path))
 
     # Check if the path is a valid labextension
     try:
@@ -392,19 +392,27 @@ def _get_labextension_metadata(module):
         sys.path.insert(0, mod_path)
     
     # Importing module with the same name as package
-    m = importlib.import_module(package)
-    if hasattr(m, '_jupyter_labextension_paths') :
-        return m, m._jupyter_labextension_paths()
-
+    try:
+        # Replace hyphens with underscores to match Python convention
+        package = package.replace('-', '_')
+        m = importlib.import_module(package)
+        if hasattr(m, '_jupyter_labextension_paths') :
+            return m, m._jupyter_labextension_paths()
+    except Exception:
+        m = None
+    
     # Looking for modules in the package
     from setuptools import find_packages
     packages = find_packages(mod_path)
 
     # Looking for the labextension metadata
     for package in packages :
-        m = importlib.import_module(package)
-        if hasattr(m, '_jupyter_labextension_paths') :
-            return m, m._jupyter_labextension_paths()
+        try:
+            m = importlib.import_module(package)
+            if hasattr(m, '_jupyter_labextension_paths') :
+                return m, m._jupyter_labextension_paths()
+        except Exception:
+            m = None
 
     raise ModuleNotFoundError('There is not a labextensions at {}'.format(module))
 

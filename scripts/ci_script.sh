@@ -193,7 +193,7 @@ if [[ $GROUP == usage ]]; then
     # Test develop script with hyphens and underscores in the module name
     jupyter labextension develop test-hyphens --debug
     jupyter labextension develop test_no_hyphens --debug
-    jupyter labextension develop test-hyphens-underscores --debug
+    jupyter labextension develop test-hyphens-underscore --debug
 
     python -m jupyterlab.browser_check
     jupyter labextension list 1>labextensions 2>&1
