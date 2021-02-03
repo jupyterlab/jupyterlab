@@ -131,29 +131,29 @@ function maybeSync(localPath, name, rest) {
  * in a package contained by the Jupyterlab repo. Used to ignore
  * files during a `--watch` build.
  */
-function ignored(path) {
-  path = path.resolve(path);
-  if (path in ignoreCache) {
+function ignored(checkedPath) {
+  checkedPath = path.resolve(checkedPath);
+  if (checkedPath in ignoreCache) {
     // Bail if already found.
-    return ignoreCache[path];
+    return ignoreCache[checkedPath];
   }
 
   // Limit the watched files to those in our local linked package dirs.
   let ignore = true;
   Object.keys(watched).some(name => {
     const rootPath = watched[name];
-    const contained = path.indexOf(rootPath + path.sep) !== -1;
-    if (path !== rootPath && !contained) {
+    const contained = checkedPath.indexOf(rootPath + path.sep) !== -1;
+    if (checkedPath !== rootPath && !contained) {
       return false;
     }
-    const rest = path.slice(rootPath.length);
+    const rest = checkedPath.slice(rootPath.length);
     if (rest.indexOf('node_modules') === -1) {
       ignore = false;
-      maybeSync(path, name, rest);
+      maybeSync(checkedPath, name, rest);
     }
     return true;
   });
-  ignoreCache[path] = ignore;
+  ignoreCache[checkedPath] = ignore;
   return ignore;
 }
 
