@@ -13,15 +13,19 @@ class YJSEchoWS(WebSocketHandler):
         self.id = str(uuid.uuid4())
         self.room_id = guid
         clients = cls.rooms.get(self.room_id, None)
-        
+
         if clients :
             clients[self.id] = ( IOLoop.current(), self.hook_send_message )
         else :
             clients = { self.id: ( IOLoop.current(), self.hook_send_message )}
-            self.write_message( bytes(5), binary=True )
-        
+
+            # Request that the client initializes the document.
+            # Todo: We probably want to send this message as well
+            #       when the client didn't initialize the document
+            self.write_message( bytes([5]), binary=True )
+
         cls.rooms[self.room_id] = clients
-    
+
     def on_message(self, message):
         #print("[YJSEchoWS]: message, ", message)
         cls = self.__class__
@@ -37,17 +41,18 @@ class YJSEchoWS(WebSocketHandler):
         clients = cls.rooms.get(self.room_id, None)
         if clients :
             clients.pop(self.id)
-        
-        if len(cls.rooms) == 0 :
+
+        if len(clients) == 0 :
             cls.rooms.pop(self.room_id)
+            #print("[YJSEchoWS]: close room " + self.room_id)
         else :
             cls.rooms[self.room_id] = clients
 
         return True
-    
+
     def check_origin(self, origin):
         #print("[YJSEchoWS]: check origin")
         return True
-    
+
     def hook_send_message(self, msg):
         self.write_message(msg, binary=True)

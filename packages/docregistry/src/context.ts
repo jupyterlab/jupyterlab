@@ -67,8 +67,18 @@ export class Context<
     // @todo remove websocket provider - this should be handled by a separate plugin
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
-    console.debug("URL:", url);
-    const awareness = new WebsocketProvider(url, ydoc.guid, ydoc).awareness;
+    console.debug('URL:', url);
+    const provider = new WebsocketProvider(url, ydoc.guid, ydoc);
+    provider.messageHandlers[5] = (
+      encoder,
+      decoder,
+      provider,
+      emitSynced,
+      messageType
+    ) => {
+      console.log('Init document!!');
+    };
+    const awareness = provider.awareness;
     // @todo remove debugging information:
     // @ts-ignore
     window.ydocs = window.ydocs || [];
