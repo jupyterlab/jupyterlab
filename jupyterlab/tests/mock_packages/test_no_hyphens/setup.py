@@ -1,4 +1,3 @@
-import json
 from os import path
 from setuptools import setup
 from jupyter_packaging import (
@@ -6,7 +5,7 @@ from jupyter_packaging import (
     ensure_targets, combine_commands
 )
 
-version = '0.0.1'
+version = '3.0.2'
 name = 'test_no_hyphens'
 module_name = 'test_no_hyphens'
 lab_ext_name = 'test_no_hyphens'
