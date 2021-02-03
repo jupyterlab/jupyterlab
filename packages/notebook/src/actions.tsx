@@ -1605,17 +1605,6 @@ namespace Private {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
-    if (cell instanceof CodeCell) {
-      if ((cell as CodeCell).outputArea.hasPendingInput) {
-        void showDialog({
-          title: 'Waiting on Input',
-          body: `Please submit your input before running again this cell`,
-          buttons: [Dialog.okButton()]
-        });
-        return Promise.resolve(false);
-      }
-    }
-
     switch (cell.model.type) {
       case 'markdown':
         (cell as MarkdownCell).rendered = true;
