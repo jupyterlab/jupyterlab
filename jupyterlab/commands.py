@@ -37,6 +37,20 @@ from jupyterlab.jlpmapp import YARN_PATH, HERE
 from jupyterlab.coreconfig import _get_default_core_data, CoreConfig
 
 
+try:
+    from jupyterlab_server.config import get_package_url
+except ImportError:
+    def get_package_url(data):
+        # homepage, repository  are optional
+        if 'homepage' in data:
+            url = data['homepage']
+        elif 'repository' in data and isinstance(data['repository'], dict):
+            url = data['repository'].get('url', '')
+        else:
+            url = ''
+        return url
+
+
 # The regex for expecting the webpack output.
 WEBPACK_EXPECT = re.compile(r'.*theme-light-extension/style/index.css')
 
@@ -1404,13 +1418,7 @@ class _AppHandler(object):
                 alias = filename[len(PIN_PREFIX):-len(".tgz")]
             else:
                 alias = None
-            # homepage, repository  are optional
-            if 'homepage' in data:
-                url = data['homepage']
-            elif 'repository' in data and isinstance(data['repository'], dict):
-                url = data['repository'].get('url', '')
-            else:
-                url = ''
+            url = get_package_url(data)
             extensions[alias or name] = dict(path=path,
                                     filename=osp.basename(path),
                                     url=url,
