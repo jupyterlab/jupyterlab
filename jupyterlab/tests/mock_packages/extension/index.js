@@ -3,7 +3,7 @@
 
 import { ILauncher } from '@jupyterlab/launcher';
 
-module.exports = [
+export default [
   {
     id: 'mockextension',
     requires: [ILauncher],
