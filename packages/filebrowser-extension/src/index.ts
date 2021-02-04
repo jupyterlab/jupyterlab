@@ -387,7 +387,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
             const { path } = context;
             try {
               await Private.navigateToPath(path, factory, translator);
-              labShell.currentWidget?.activate();
             } catch (reason) {
               console.warn(
                 `${CommandIDs.goToPath} failed to open: ${path}`,
