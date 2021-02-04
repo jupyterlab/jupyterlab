@@ -28,27 +28,13 @@ import warnings
 
 from jupyter_core.paths import jupyter_config_path, jupyter_path
 from jupyterlab_server.process import which, Process, WatchHelper, list2cmdline
-from jupyterlab_server.config import LabConfig, get_page_config, get_federated_extensions, get_static_page_config, write_page_config
+from jupyterlab_server.config import LabConfig, get_page_config, get_federated_extensions, get_package_url, get_static_page_config, write_page_config
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from traitlets import HasTraits, Bool, Dict, Instance, List, Unicode, default
 
 from jupyterlab.semver import Range, gte, lt, lte, gt, make_semver
 from jupyterlab.jlpmapp import YARN_PATH, HERE
 from jupyterlab.coreconfig import _get_default_core_data, CoreConfig
-
-
-try:
-    from jupyterlab_server.config import get_package_url
-except ImportError:
-    def get_package_url(data):
-        # homepage, repository  are optional
-        if 'homepage' in data:
-            url = data['homepage']
-        elif 'repository' in data and isinstance(data['repository'], dict):
-            url = data['repository'].get('url', '')
-        else:
-            url = ''
-        return url
 
 
 # The regex for expecting the webpack output.
