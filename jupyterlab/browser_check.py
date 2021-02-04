@@ -176,6 +176,8 @@ class BrowserApp(LabApp):
     """
     name = __name__
     open_browser = False
+    app_name = "JupyterLab Browser Check"
+    default_url = "/foo/lab"
 
     serverapp_config = {
         "base_url": "/foo/"
