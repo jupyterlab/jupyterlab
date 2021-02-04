@@ -4,6 +4,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 import contextlib
+from copy import deepcopy
 from packaging.version import Version
 import errno
 from glob import glob
@@ -580,7 +581,8 @@ class _AppHandler(object):
         self.app_dir = options.app_dir
         self.sys_dir = get_app_dir() if options.use_sys_dir else self.app_dir
         self.logger = options.logger
-        self.core_data = options.core_config._data
+        # Make a deep copy of the core data so we don't influence the original copy
+        self.core_data = deepcopy(options.core_config._data)
         self.labextensions_path = options.labextensions_path
         self.kill_event = options.kill_event
         self.registry = options.registry
@@ -1253,7 +1255,8 @@ class _AppHandler(object):
         """Get the template the for staging package.json file.
         """
         logger = self.logger
-        data = self.info['core_data']
+        # make a deep copy of the data so we don't influence the core data
+        data = deepcopy(self.info['core_data'])
         local = self.info['local_extensions']
         linked = self.info['linked_packages']
         extensions = self.info['extensions']
