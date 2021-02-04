@@ -12,25 +12,18 @@ import os
 import os.path as osp
 import shutil
 import sys
-import tarfile
-import zipfile
 from os.path import basename, join as pjoin, normpath
 import subprocess
 import sys
 
-from urllib.parse import urlparse
-from urllib.request import urlretrieve
 from jupyter_core.paths import (
-    jupyter_data_dir, jupyter_config_path, jupyter_path,
-    SYSTEM_JUPYTER_PATH, ENV_JUPYTER_PATH,
+    jupyter_data_dir, SYSTEM_JUPYTER_PATH, ENV_JUPYTER_PATH,
 )
 from jupyter_core.utils import ensure_dir_exists
-from ipython_genutils.py3compat import string_types, cast_unicode_py2
-from ipython_genutils.tempdir import TemporaryDirectory
-from jupyter_server.config_manager import BaseJSONConfigManager
+from ipython_genutils.py3compat import cast_unicode_py2
 from jupyterlab_server.config import get_federated_extensions
 
-from .commands import build, AppOptions, _test_overlap
+from .commands import _test_overlap
 
 
 DEPRECATED_ARGUMENT = object()
@@ -390,7 +383,7 @@ def _get_labextension_metadata(module):
     except pkg_resources.DistributionNotFound:
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
         sys.path.insert(0, mod_path)
-    
+
     # Importing module with the same name as package
     try:
         # Replace hyphens with underscores to match Python convention
@@ -400,7 +393,7 @@ def _get_labextension_metadata(module):
             return m, m._jupyter_labextension_paths()
     except Exception:
         m = None
-    
+
     # Looking for modules in the package
     from setuptools import find_packages
     packages = find_packages(mod_path)
@@ -415,7 +408,3 @@ def _get_labextension_metadata(module):
             m = None
 
     raise ModuleNotFoundError('There is not a labextensions at {}'.format(module))
-
-
-if __name__ == '__main__':
-    main()
