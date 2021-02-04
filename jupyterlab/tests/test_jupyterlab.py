@@ -11,7 +11,7 @@ import shutil
 import sys
 import subprocess
 import shutil
-import pathlib
+from pathlib import Path
 import platform
 from os.path import join as pjoin
 from tempfile import TemporaryDirectory
@@ -131,8 +131,8 @@ class AppHandlerTest(TestCase):
         self.assertEqual(paths.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(
-            os.path.realpath(commands.get_app_dir()),
-            os.path.realpath(pjoin(self.data_dir, 'lab'))
+            Path(commands.get_app_dir()).resolve(),
+            (Path(self.data_dir) / 'lab').resolve()
         )
 
         self.app_dir = commands.get_app_dir()
@@ -276,7 +276,7 @@ class TestExtension(AppHandlerTest):
         Same as above test, but installs from a local folder instead of from npm.
         """
         # Download each version of the package from NPM:
-        base_dir = pathlib.Path(self.tempdir())
+        base_dir = Path(self.tempdir())
 
         # The archive file names are printed to stdout when run `npm pack`
         packages = [

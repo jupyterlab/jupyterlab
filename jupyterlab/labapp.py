@@ -62,7 +62,7 @@ build_aliases['dev-build'] = 'LabBuildApp.dev_build'
 build_aliases['minimize'] = 'LabBuildApp.minimize'
 build_aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
-build_flags = dict(flags)
+build_flags = dict(base_flags)
 
 build_flags['dev-build'] = (
     {'LabBuildApp': {'dev_build': True}},
