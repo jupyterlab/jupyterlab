@@ -164,8 +164,12 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
           0,
           start
         )}${node!.textContent!.slice(end)}`;
-        // Are we replacing from the start?
-        if (start === 0) {
+        // Are we replacing somewhere in the middle?
+        if (node?.nodeType == Node.TEXT_NODE) {
+          const endText = (node as Text).splitText(start);
+          node!.parentNode!.insertBefore(spannedNode, endText);
+          // Are we replacing from the start?
+        } else if (start === 0) {
           node!.parentNode!.prepend(spannedNode);
           // Are we replacing at the end?
         } else if (end === originalLength) {
@@ -173,11 +177,6 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
           // Are the two results are adjacent to each other?
         } else if (lastNodeAdded && end === subsections[idx + 1].start) {
           node!.parentNode!.insertBefore(spannedNode, lastNodeAdded);
-          // Ok, we are replacing somewhere in the middle
-        } else {
-          // We know this is Text as we filtered for this in the walker above
-          const endText = (node as Text).splitText(start);
-          node!.parentNode!.insertBefore(spannedNode, endText);
         }
         lastNodeAdded = spannedNode;
         newMatches.unshift({
