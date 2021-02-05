@@ -39,6 +39,7 @@ async function main() {
 
   for (let error of errors) {
     console.error(`Parsed an error from text content: ${error.message}`, error);
+    testError = true;
   }
 
   await browser.close();
