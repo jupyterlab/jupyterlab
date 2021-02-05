@@ -178,17 +178,30 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension unlink mimeextension --no-build --debug
     jupyter labextension link mimeextension --no-build --debug
     jupyter labextension unlink  @jupyterlab/mock-mime-extension --no-build --debug
-    # Test with a full install
+
+    # Test with a source package install
     jupyter labextension install mimeextension  --no-build --debug
     jupyter labextension list --debug
     jupyter labextension disable @jupyterlab/mock-mime-extension --debug
     jupyter labextension enable @jupyterlab/mock-mime-extension --debug
-    jupyter labextension disable @jupyterlab/notebook-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-mime-extension --no-build --debug
+
+    # Test enable/disable and uninstall/install a core package
+    jupyter labextension disable @jupyterlab/notebook-extension --debug
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
-    # Test with a dynamic install
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep "Uninstalled core extensions:"
+    jupyter labextension install @jupyterlab/notebook-extension --no-build --debug
+    jupyter labextension enable @jupyterlab/notebook-extension --debug
+
+    # Test with a prebuilt install
     jupyter labextension develop extension --debug
     jupyter labextension build extension
+
+    # Test develop script with hyphens and underscores in the module name
+    jupyter labextension develop test-hyphens --overwrite --debug
+    jupyter labextension develop test_no_hyphens --overwrite --debug
+    jupyter labextension develop test-hyphens-underscore --overwrite --debug
 
     python -m jupyterlab.browser_check
     jupyter labextension list 1>labextensions 2>&1
@@ -200,6 +213,8 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension list 1>labextensions 2>&1
     # check the federated extension is still listed after jupyter labextension uninstall
     cat labextensions | grep -q "mock-extension"
+    # build it again without a static-url to avoid causing errors
+    jupyter labextension build extension
     popd
 
     jupyter lab workspaces export > workspace.json --debug
