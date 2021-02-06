@@ -109,7 +109,7 @@ export class SignatureCM extends CodeMirrorIntegration {
 
     let root_position = position_at_request;
 
-    // if the cursor advanced in the same line, the previously retrieved completions may still be useful
+    // if the cursor advanced in the same line, the previously retrieved signature may still be useful
     // if the line changed or cursor moved backwards then no reason to keep the suggestions
     if (
       position_at_request.line != root_position.line ||
