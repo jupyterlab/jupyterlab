@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "types": ["node"]
+    "lib": ["es2018", "dom"]
   },
   "include": ["src/*"],
   "references": [

@@ -3,6 +3,8 @@
 
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
+import * as decoding from 'lib0/decoding.js';
+import * as encoding from 'lib0/encoding.js';
 
 import {
   Contents,
@@ -41,6 +43,135 @@ import {
 
 import { DocumentRegistry } from './registry';
 
+class WebsocketProviderWithLocks extends WebsocketProvider {
+  constructor(url: string, guid: string, ydoc: Y.Doc) {
+    super(url, guid, ydoc);
+    // Message handler that confirms when a lock has been acquired
+    this.messageHandlers[127] = (
+      encoder,
+      decoder,
+      provider,
+      emitSynced,
+      messageType
+    ) => {
+      const timestamp = decoding.readUint32(decoder);
+      console.log('Acquired lock!', timestamp);
+      const lockRequest = this.currentLockRequest;
+      this.currentLockRequest = null;
+      if (lockRequest) {
+        lockRequest.resolve(timestamp);
+      }
+    };
+    // Message handler that receives the initial content
+    this.messageHandlers[125] = (
+      encoder,
+      decoder,
+      provider,
+      emitSynced,
+      messageType
+    ) => {
+      const initialContent = decoding.readTailAsUint8Array(decoder);
+      // Apply data from server
+      if (initialContent.byteLength > 0) {
+        Y.applyUpdate(ydoc, initialContent);
+      }
+      console.log('Received initial content!', initialContent);
+      const initialContentRequest = this.initialContentRequest;
+      this.initialContentRequest = null;
+      if (initialContentRequest) {
+        initialContentRequest.resolve(initialContent.byteLength > 0);
+      }
+    };
+  }
+
+  __sendMessage(message: Uint8Array) {
+    // send once connected
+    const send = () => {
+      if (this.wsconnected) {
+        this.ws!.send(message);
+      } else {
+        this.once('status', send);
+      }
+    };
+    send();
+  }
+
+  /**
+   * Resolves to true if the initial content has been initialized on the server. false otherwise.
+   */
+  requestInitialContent(): Promise<boolean> {
+    if (this.initialContentRequest) {
+      return this.initialContentRequest.promise;
+    }
+
+    let resolve: any, reject: any;
+    const promise: Promise<boolean> = new Promise((_resolve, _reject) => {
+      resolve = _resolve;
+      reject = _reject;
+    });
+    this.initialContentRequest = { promise, resolve, reject };
+    this.__sendMessage(new Uint8Array([125]));
+
+    // Resolve with true if the server doesn't respond for some reason.
+    // In case of a connection problem, we don't want the user to re-initialize the window.
+    // Instead wait for y-websocket to connect to the server.
+    // @todo maybe we should reload instead..
+    setTimeout(() => resolve(false), 1000);
+    return promise;
+  }
+
+  putInitializedState(): void {
+    const encoder = encoding.createEncoder();
+    encoding.writeVarUint(encoder, 124);
+    encoding.writeUint8Array(encoder, Y.encodeStateAsUpdate(this.doc));
+    this.__sendMessage(encoding.toUint8Array(encoder));
+  }
+
+  acquireLock() {
+    if (this.currentLockRequest) {
+      return this.currentLockRequest.promise;
+    }
+    this.__sendMessage(new Uint8Array([127]));
+    // try to acquire lock in regular interval
+    const intervalID = setInterval(() => {
+      if (this.wsconnected) {
+        // try to acquire lock
+        this.ws!.send(new Uint8Array([127]));
+      }
+    }, 500);
+    let resolve: any, reject: any;
+    const promise: Promise<number> = new Promise((_resolve, _reject) => {
+      resolve = _resolve;
+      reject = _reject;
+    });
+    this.currentLockRequest = { promise, resolve, reject };
+    promise.finally(() => {
+      clearInterval(intervalID);
+    });
+    return promise;
+  }
+
+  releaseLock(lock: number) {
+    const encoder = encoding.createEncoder();
+    // reply with release lock
+    encoding.writeVarUint(encoder, 126);
+    encoding.writeUint32(encoder, lock);
+    console.log('Releasing lock!', lock);
+    this.ws?.send(encoding.toUint8Array(encoder));
+  }
+
+  private currentLockRequest: {
+    promise: Promise<number>;
+    resolve: (lock: number) => void;
+    reject: () => void;
+  } | null = null;
+  private initialContentRequest: {
+    promise: Promise<boolean>;
+    resolve: (initialized: boolean) => void;
+    reject: () => void;
+  } | null = null;
+}
+
 /**
  * An implementation of a document context.
  *
@@ -64,27 +195,19 @@ export class Context<
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
     const ydoc = new Y.Doc({ guid: localPath });
+    this.ydoc = ydoc;
+    this.ycontext = ydoc.getMap('context');
     // @todo remove websocket provider - this should be handled by a separate plugin
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
     console.debug('URL:', url);
-    const provider = new WebsocketProvider(url, ydoc.guid, ydoc);
-    provider.messageHandlers[5] = (
-      encoder,
-      decoder,
-      provider,
-      emitSynced,
-      messageType
-    ) => {
-      console.log('Init document!!');
-    };
-    const awareness = provider.awareness;
+    this.provider = new WebsocketProviderWithLocks(url, ydoc.guid, ydoc);
     // @todo remove debugging information:
     // @ts-ignore
     window.ydocs = window.ydocs || [];
     // @ts-ignore
     window.ydocs.push(ydoc);
-    this._model = this._factory.createNew(lang, ydoc, awareness);
+    this._model = this._factory.createNew(lang, ydoc, this.provider.awareness);
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -206,6 +329,7 @@ export class Context<
     this._isDisposed = true;
     this.sessionContext.dispose();
     this._model.dispose();
+    this.provider.destroy();
     this._disposed.emit(void 0);
     Signal.clearData(this);
   }
@@ -237,40 +361,47 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   initialize(isNew: boolean): Promise<void> {
-    if (isNew) {
-      this._model.initialize();
-      return this._save();
-    } else {
-      return this._revert();
-    }
-    /**
-     * @todo see if we can reuse this
-     *
-     *
-    if (this._modelDB) {
-      return this._modelDB.connected.then(() => {
-        if (this._modelDB.isPrepopulated) {
-          this._model.initialize();
-          void this._save();
-          return void 0;
-        } else {
-          return this._revert(true);
-        }
-      });
-    } else {
-      return this._revert(true);
-    }
-    */
-    return Promise.resolve();
+    this._model.initialize();
+    return this.provider.acquireLock().then((lock: number) => {
+      return this.provider
+        .requestInitialContent()
+        .then(contentIsInitialized => {
+          let promise;
+          if (isNew || contentIsInitialized) {
+            promise = this._save();
+          } else {
+            promise = this._revert();
+          }
+          // if save/revert completed successfully, we set the inialized content in the rtc server.
+          promise = promise.then(() => {
+            this.provider.putInitializedState();
+          });
+          // make sure that the lock is released after the above operations are completed.
+          promise.finally(() => {
+            this.provider.releaseLock(lock);
+          });
+          return promise;
+        });
+    });
   }
 
   /**
    * Save the document contents to disk.
    */
   save(): Promise<void> {
-    return this.ready.then(() => {
-      return this._save();
-    });
+    return Promise.all([this.provider.acquireLock(), this.ready]).then(
+      ([lock]) => {
+        let promise = this._save();
+        // if save completed successfully, we set the inialized content in the rtc server.
+        promise = promise.then(() => {
+          this.provider.putInitializedState();
+        });
+        promise.finally(() => {
+          this.provider.releaseLock(lock);
+        });
+        return promise;
+      }
+    );
   }
 
   /**
@@ -328,9 +459,15 @@ export class Context<
    * Revert the document contents to disk contents.
    */
   revert(): Promise<void> {
-    return this.ready.then(() => {
-      return this._revert();
-    });
+    return Promise.all([this.provider.acquireLock(), this.ready]).then(
+      ([lock]) => {
+        const promise = this._revert();
+        promise.finally(() => {
+          this.provider.releaseLock(lock);
+        });
+        return promise;
+      }
+    );
   }
 
   /**
@@ -481,6 +618,7 @@ export class Context<
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
+    this.ycontext.set('last_modified', newModel.last_modified);
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
@@ -595,6 +733,7 @@ export class Context<
    * deserializing the content.
    */
   private _revert(initializeModel: boolean = false): Promise<void> {
+    console.log('revert!');
     const opts: Contents.IFetchOptions = {
       format: this._factory.fileFormat,
       type: this._factory.contentType,
@@ -668,7 +807,9 @@ export class Context<
         // (our last save)
         // In some cases the filesystem reports an inconsistent time,
         // so we allow 0.5 seconds difference before complaining.
-        const modified = this.contentsModel?.last_modified;
+        const ycontextModified = this.ycontext.get('last_modified');
+        // prefer using the timestamp from ycontext because it is more up to date
+        const modified = ycontextModified || this.contentsModel?.last_modified;
         const tClient = modified ? new Date(modified) : new Date();
         const tDisk = new Date(model.last_modified);
         if (modified && tDisk.getTime() - tClient.getTime() > 500) {
@@ -811,6 +952,9 @@ or load the version on disk (revert)?`,
   }
 
   protected translator: ITranslator;
+  protected provider: WebsocketProviderWithLocks;
+  protected ydoc: Y.Doc;
+  protected ycontext: Y.Map<any>;
   private _trans: TranslationBundle;
   private _manager: ServiceManager.IManager;
   private _opener: (
