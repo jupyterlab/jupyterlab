@@ -618,6 +618,15 @@ export class LSPConnector
     token: CodeEditor.IToken,
     cursor_at_request: CodeEditor.IPosition
   ) {
+    if (!this._editor.hasFocus()) {
+      this.console.debug('Ignoring completion response: the corresponding editor lost focus')
+      return {
+        start: reply.start,
+        end: reply.end,
+        items: []
+      };
+    }
+
     const cursor_now = this._editor.getCursorPosition();
 
     // if the cursor advanced in the same line, the previously retrieved completions may still be useful
@@ -626,6 +635,7 @@ export class LSPConnector
       cursor_at_request.line != cursor_now.line ||
       cursor_now.column < cursor_at_request.column
     ) {
+      this.console.debug('Ignoring completion response: cursor has receded or changed line')
       return {
         start: reply.start,
         end: reply.end,
