@@ -99,6 +99,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     this.renderer = new LSPCompletionRenderer({
       integrator: this,
       markdownRenderer: markdown_renderer,
+      latexTypesetter: this.renderMimeRegistry.latexTypesetter,
       console: console.scope('renderer')
     });
     this.renderer.activeChanged.connect(this.active_completion_changed, this);
