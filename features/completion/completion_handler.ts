@@ -619,7 +619,9 @@ export class LSPConnector
     cursor_at_request: CodeEditor.IPosition
   ) {
     if (!this._editor.hasFocus()) {
-      this.console.debug('Ignoring completion response: the corresponding editor lost focus')
+      this.console.debug(
+        'Ignoring completion response: the corresponding editor lost focus'
+      );
       return {
         start: reply.start,
         end: reply.end,
@@ -635,7 +637,9 @@ export class LSPConnector
       cursor_at_request.line != cursor_now.line ||
       cursor_now.column < cursor_at_request.column
     ) {
-      this.console.debug('Ignoring completion response: cursor has receded or changed line')
+      this.console.debug(
+        'Ignoring completion response: cursor has receded or changed line'
+      );
       return {
         start: reply.start,
         end: reply.end,
