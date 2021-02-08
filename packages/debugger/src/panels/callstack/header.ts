@@ -15,7 +15,9 @@ export class CallstackHeader extends Widget {
    * Instantiate a new CallstackHeader.
    */
   constructor(translator?: ITranslator) {
-    super({ node: document.createElement('header') });
+    super({ node: document.createElement('div') });
+    this.node.classList.add('jp-stack-panel-header');
+
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
