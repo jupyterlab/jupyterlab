@@ -49,7 +49,7 @@
     "@lumino/messaging": "^1.4.3",
     "@lumino/signaling": "^1.4.3",
     "@lumino/widgets": "^1.16.1",
-    "yjs": "^13.4.14"
+    "yjs": "^13.5.0"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.1.0-alpha.2",
