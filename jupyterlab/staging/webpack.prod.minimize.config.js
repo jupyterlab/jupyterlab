@@ -1,6 +1,8 @@
 // This file is auto-generated from the corresponding file in /dev_mode
 const TerserPlugin = require('terser-webpack-plugin');
 const merge = require('webpack-merge').default;
+const LicenseWebpackPlugin = require('license-webpack-plugin')
+  .LicenseWebpackPlugin;
 const config = require('./webpack.config');
 
 config[0] = merge(config[0], {
@@ -25,7 +27,15 @@ config[0] = merge(config[0], {
         cache: process.platform !== 'win32'
       })
     ]
-  }
+  },
+  plugins: [
+    new LicenseWebpackPlugin({
+      perChunkOutput: false,
+      outputFilename: 'third-party-licenses.txt',
+      excludedPackageTest: packageName =>
+        packageName === '@jupyterlab/application-top'
+    })
+  ]
 });
 
 module.exports = config;
