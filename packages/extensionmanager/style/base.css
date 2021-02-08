@@ -49,7 +49,7 @@
   Section headers
 */
 
-.jp-extensionmanager-view header {
+.jp-extensionmanager-view .jp-stack-panel-header {
   display: flex;
   justify-content: space-between;
   flex: 0 0 auto;
@@ -65,34 +65,41 @@
   padding: 4px;
 }
 
-.jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
+.jp-extensionmanager-view .jp-stack-panel-header > .jp-ToolbarButtonComponent {
   padding: 0px 2px;
 }
 
-.jp-extensionmanager-view header .jp-extensionmanager-headerText {
+.jp-extensionmanager-view
+  .jp-stack-panel-header
+  .jp-extensionmanager-headerText {
   flex: 1 0 auto;
   margin: 0px 4px;
 }
 
-.jp-extensionmanager-view header .jp-extensionmanager-headerTextDisabled {
+.jp-extensionmanager-view
+  .jp-stack-panel-header
+  .jp-extensionmanager-headerTextDisabled {
   flex: 1 0 auto;
   margin: 0px 4px;
   color: var(--jp-layout-color3);
 }
 
-.jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
+.jp-extensionmanager-view .jp-stack-panel-header > .jp-ToolbarButtonComponent {
   border: 1px solid transparent;
   background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
 }
 
-.jp-extensionmanager-view header > .jp-ToolbarButtonComponent:hover {
+.jp-extensionmanager-view
+  .jp-stack-panel-header
+  > .jp-ToolbarButtonComponent:hover {
   /* border: 1px solid var(--jp-brand-color1); */
 }
 
 /*
   Listing messages
 */
+
 .jp-extensionmanager-listingmessage {
   background-color: var(--jp-brand-color1);
   color: var(--jp-ui-inverse-font-color1);
@@ -104,6 +111,7 @@
 /*
   Error messages
 */
+
 .jp-extensionmanager-view .jp-extensionmanager-error pre {
   white-space: pre-wrap;
 }
@@ -174,6 +182,7 @@
   display: flex;
   justify-content: center;
 }
+
 /*
   Entry layout and styling
 */
@@ -199,6 +208,7 @@
 }
 
 /* Precedence order update/error/warning matters! */
+
 .jp-extensionmanager-entry.jp-extensionmanager-entry-update {
   border-left: solid 8px var(--jp-brand-color2);
   padding-left: 4px;
@@ -357,6 +367,7 @@
 /*
   Generic dialog
 */
+
 .jp-extensionmanager-dialog .jp-extensionmanager-dialog-subheader {
   font-size: var(--jp-ui-font-size1);
   font-weight: 600;

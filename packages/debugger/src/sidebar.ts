@@ -223,7 +223,9 @@ namespace Private {
    * Create a sidebar header node.
    */
   export function createHeader(): HTMLElement {
-    const header = document.createElement('header');
+    const header = document.createElement('div');
+    header.classList.add('jp-stack-panel-header');
+
     const title = document.createElement('h2');
 
     title.textContent = '-';
