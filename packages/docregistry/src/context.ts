@@ -73,7 +73,9 @@ class WebsocketProviderWithLocks extends WebsocketProvider {
       const initialContent = decoding.readTailAsUint8Array(decoder);
       // Apply data from server
       if (initialContent.byteLength > 0) {
-        Y.applyUpdate(ydoc, initialContent);
+        setTimeout(() => {
+          Y.applyUpdate(ydoc, initialContent);
+        }, 0);
       }
       console.log('Received initial content!', initialContent);
       const initialContentRequest = this.initialContentRequest;
@@ -87,11 +89,13 @@ class WebsocketProviderWithLocks extends WebsocketProvider {
   __sendMessage(message: Uint8Array) {
     // send once connected
     const send = () => {
-      if (this.wsconnected) {
-        this.ws!.send(message);
-      } else {
-        this.once('status', send);
-      }
+      setTimeout(() => {
+        if (this.wsconnected) {
+          this.ws!.send(message);
+        } else {
+          this.once('status', send);
+        }
+      }, 0);
     };
     send();
   }
