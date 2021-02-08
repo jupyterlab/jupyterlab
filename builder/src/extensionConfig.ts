@@ -229,7 +229,8 @@ function generateConfig({
     plugins.push(
       new LicenseWebpackPlugin({
         perChunkOutput: false,
-        outputFilename: 'third-party-licenses.txt'
+        outputFilename: 'third-party-licenses.txt',
+        excludedPackageTest: packageName => packageName === data.name
       })
     );
   }
