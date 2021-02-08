@@ -22,6 +22,7 @@ from jupyter_core.paths import (
 from jupyter_core.utils import ensure_dir_exists
 from ipython_genutils.py3compat import cast_unicode_py2
 from jupyterlab_server.config import get_federated_extensions
+from jupyter_server.extension.serverextension import ArgumentConflict
 
 from .commands import _test_overlap
 
