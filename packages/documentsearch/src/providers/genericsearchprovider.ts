@@ -6,13 +6,13 @@ import { ISearchProvider, ISearchMatch } from '../interfaces';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
+export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
 
 export class GenericSearchProvider implements ISearchProvider<Widget> {
   /**
    * We choose opt out as most node types should be searched (e.g. script).
-   * Even nodes like <data>, could have innerText we care about.
+   * Even nodes like <data>, could have textContent we care about.
    *
    * Note: nodeName is capitalized, so we do the same here
    */
@@ -158,7 +158,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
         // TODO: support tspan for svg when svg support is added
         const spannedNode = document.createElement('span');
         spannedNode.classList.add(...FOUND_CLASSES);
-        spannedNode.innerText = text;
+        spannedNode.textContent = text;
         // Splice the text out before we add it back in with a span
         node!.textContent = `${node!.textContent!.slice(
           0,
@@ -400,7 +400,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
   private _changed = new Signal<this, void>(this);
 }
 
-interface IGenericSearchMatch extends ISearchMatch {
+export interface IGenericSearchMatch extends ISearchMatch {
   readonly originalNode: Node;
   readonly spanElement: HTMLElement;
   /*
