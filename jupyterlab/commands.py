@@ -29,7 +29,7 @@ import warnings
 
 from jupyter_core.paths import jupyter_config_path, jupyter_path
 from jupyterlab_server.process import which, Process, WatchHelper, list2cmdline
-from jupyterlab_server.config import LabConfig, get_page_config, get_federated_extensions, get_static_page_config, write_page_config
+from jupyterlab_server.config import LabConfig, get_page_config, get_federated_extensions, get_package_url, get_static_page_config, write_page_config
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from traitlets import HasTraits, Bool, Dict, Instance, List, Unicode, default
 
@@ -1407,13 +1407,7 @@ class _AppHandler(object):
                 alias = filename[len(PIN_PREFIX):-len(".tgz")]
             else:
                 alias = None
-            # homepage, repository  are optional
-            if 'homepage' in data:
-                url = data['homepage']
-            elif 'repository' in data and isinstance(data['repository'], dict):
-                url = data['repository'].get('url', '')
-            else:
-                url = ''
+            url = get_package_url(data)
             extensions[alias or name] = dict(path=path,
                                     filename=osp.basename(path),
                                     url=url,

@@ -146,7 +146,7 @@ setup_args['install_requires'] = [
     'packaging',
     'tornado>=6.1.0',
     'jupyter_core',
-    'jupyterlab_server~=2.0',
+    'jupyterlab_server~=2.2',
     'jupyter_server~=1.2',
     'nbclassic~=0.2',
     'jinja2>=2.10'
@@ -159,7 +159,7 @@ setup_args['extras_require'] = {
         'pytest-cov',
         'pytest-console-scripts',
         'pytest-check-links',
-        'jupyterlab_server[test]~=2.0',
+        'jupyterlab_server[test]~=2.2',
         'requests',
         'wheel',
         'virtualenv'
