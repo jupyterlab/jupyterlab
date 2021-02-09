@@ -351,11 +351,13 @@ close the notebook without saving it.`,
       // this will trigger an event on ycells
       const yawareness = this.yawareness;
       const yUndoManager = this.yUndoManager;
-      this.ycells.push([
-        this.contentFactory
-          .createCodeCell({ yawareness, yUndoManager })
-          .toJSON()
-      ]);
+      this.insertCell(
+        0,
+        this.contentFactory.createCell('code', {
+          yawareness,
+          yUndoManager
+        })
+      );
     }
     this.yUndoManager.clear();
     this.isInitialized = true;
