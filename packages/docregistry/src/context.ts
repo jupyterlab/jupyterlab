@@ -5,6 +5,7 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import * as decoding from 'lib0/decoding.js';
 import * as encoding from 'lib0/encoding.js';
+import * as buffer from 'lib0/buffer.js';
 
 import {
   Contents,
@@ -209,6 +210,10 @@ export class Context<
     // @todo remove debugging information:
     // @ts-ignore
     window.ydocs = window.ydocs || [];
+    // @ts-ignore
+    window.Y = Y;
+    // @ts-ignore
+    window.buffer = buffer;
     // @ts-ignore
     window.ydocs.push(ydoc);
     this._model = this._factory.createNew(lang, ydoc, this.provider.awareness);

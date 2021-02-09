@@ -29,6 +29,8 @@ class YJSEchoWS(WebSocketHandler):
             room = YjsRoom()
             cls.rooms[self.room_id] = room
         room.clients[self.id] = ( IOLoop.current(), self.hook_send_message )
+        # Send SyncStep1 message (based on y-protocols)
+        self.write_message(bytes([0, 0, 1, 0]), binary=True)
 
     def on_message(self, message):
         #print("[YJSEchoWS]: message, ", message)
