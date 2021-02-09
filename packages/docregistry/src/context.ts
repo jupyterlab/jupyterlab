@@ -370,11 +370,11 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   initialize(isNew: boolean): Promise<void> {
-    this._model.initialize();
     return this.provider.acquireLock().then((lock: number) => {
       return this.provider
         .requestInitialContent()
         .then(contentIsInitialized => {
+          this._model.initialize();
           let promise;
           if (isNew || contentIsInitialized) {
             promise = this._save();

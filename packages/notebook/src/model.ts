@@ -63,6 +63,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   readonly yUndoManager: Y.UndoManager;
   readonly yawareness: any;
   readonly ymeta: Y.Map<any>;
+  isInitialized: boolean;
 }
 
 /**
@@ -357,6 +358,7 @@ close the notebook without saving it.`,
       ]);
     }
     this.yUndoManager.clear();
+    this.isInitialized = true;
   }
 
   private _createCellFromType(type: Y.Map<any>): ICellModel {
@@ -431,6 +433,7 @@ close the notebook without saving it.`,
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _deletedCells: string[];
+  isInitialized: boolean = false;
 }
 
 /**

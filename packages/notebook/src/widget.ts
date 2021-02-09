@@ -354,7 +354,7 @@ export class StaticNotebook extends Widget {
       return;
     }
     this._updateMimetype();
-    if (!newValue.cellInstances.length) {
+    if (!newValue.cellInstances.length && newValue.isInitialized) {
       const yawareness = this.model!.yawareness;
       const yUndoManager = this.model!.yUndoManager;
       newValue.insertCell(
