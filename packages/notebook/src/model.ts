@@ -333,9 +333,6 @@ close the notebook without saving it.`,
     this.ymodel.transact(() => {
       const fromCell = this._createCellFromJSON(this.getCell(from).toJSON());
       this.deleteCell(from);
-      if (from < to) {
-        to--;
-      }
       this.insertCell(to, fromCell);
     }, this);
   }
