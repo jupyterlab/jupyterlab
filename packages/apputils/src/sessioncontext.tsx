@@ -805,9 +805,9 @@ export class SessionContext implements ISessionContext {
       this._pendingKernelName = model.name;
     }
 
-    if (this._session) {
+    if (this._session && !this._isTerminating) {
       await this._shutdownSession();
-    } else {
+    } else if (!this._session) {
       this._kernelChanged.emit({
         name: 'kernel',
         oldValue: null,
@@ -851,7 +851,7 @@ export class SessionContext implements ISessionContext {
       // Update the name in case it has changed since we launched the session.
       await session.setName(this._name);
 
-      if (this._session) {
+      if (this._session && !this._isTerminating) {
         await this._shutdownSession();
       }
       return this._handleNewSession(session);
