@@ -235,6 +235,13 @@ function generateConfig({
     );
   }
 
+  // Add version argument when in production so the Jupyter server
+  // does not cache the files in the static file handler.
+  let filename = '[name].[contenthash].js';
+  if (mode === 'production') {
+    filename += '?v=[contenthash]';
+  }
+
   const config = [
     merge(
       baseConfig,
@@ -243,7 +250,7 @@ function generateConfig({
         devtool,
         entry: {},
         output: {
-          filename: '[name].[contenthash].js',
+          filename,
           path: staticPath,
           publicPath: staticUrl || 'auto'
         },

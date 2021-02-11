@@ -6,6 +6,11 @@ const LicenseWebpackPlugin = require('license-webpack-plugin')
 config[0] = merge(config[0], {
   mode: 'production',
   devtool: 'source-map',
+  output: {
+    // Add version argument when in production so the Jupyter server
+    // does not cache the files the static file handler.
+    filename: '[name].[contenthash].js?v=[contenthash]'
+  },
   optimization: {
     minimize: false
   },
