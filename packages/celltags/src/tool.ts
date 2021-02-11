@@ -220,7 +220,9 @@ export class TagTool extends NotebookTools.Tool {
    * Handle a change to active cell metadata.
    */
   protected onActiveCellMetadataChanged(): void {
-    const tags = this.tracker.activeCell!.model.metadata.get('tags') as string[];
+    const tags = this.tracker.activeCell!.model.metadata.get(
+      'tags'
+    ) as string[];
     let taglist: string[] = [];
     if (tags) {
       if (typeof tags === 'string') {
