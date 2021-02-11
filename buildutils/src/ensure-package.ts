@@ -499,6 +499,14 @@ export async function ensurePackage(
     }
   }
 
+  // Ensure extra LICENSE is not packaged (always use repo license)
+  let licenseFile = path.join(pkgPath, 'LICENSE');
+
+  if (fs.existsSync(licenseFile)) {
+    messages.push('Removed LICENSE (prefer top-level)');
+    await fs.unlink(licenseFile);
+  }
+
   if (utils.writePackageData(path.join(pkgPath, 'package.json'), data)) {
     messages.push('Updated package.json');
   }
