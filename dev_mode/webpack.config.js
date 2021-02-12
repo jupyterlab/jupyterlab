@@ -32,7 +32,7 @@ fs.ensureDirSync(buildDir);
 // Build the assets
 var extraConfig = Build.ensureAssets({
   packageNames: packageNames,
-  output: jlab.outputDir,
+  output: jlab.outputDir
 });
 
 // Create the entry point file.
@@ -40,7 +40,7 @@ var source = fs.readFileSync('index.js').toString();
 var template = Handlebars.compile(source);
 var data = {
   jupyterlab_extensions: extensions,
-  jupyterlab_mime_extensions: mimeExtensions,
+  jupyterlab_mime_extensions: mimeExtensions
 };
 var result = template(data);
 
@@ -54,7 +54,7 @@ fs.copySync(
 // Set up variables for the watch mode ignore plugins
 let watched = {};
 let ignoreCache = Object.create(null);
-Object.keys(jlab.linkedPackages).forEach(function (name) {
+Object.keys(jlab.linkedPackages).forEach(function(name) {
   if (name in watched) return;
   const localPkgPath = require.resolve(plib.join(name, 'package.json'));
   watched[name] = plib.dirname(localPkgPath);
@@ -74,7 +74,7 @@ function maybeSync(localPath, name, rest) {
   if (source === fs.realpathSync(localPath)) {
     return;
   }
-  fs.watchFile(source, { interval: 500 }, function (curr) {
+  fs.watchFile(source, { interval: 500 }, function(curr) {
     if (!curr || curr.nlink === 0) {
       return;
     }
@@ -100,7 +100,7 @@ function ignored(path) {
 
   // Limit the watched files to those in our local linked package dirs.
   let ignore = true;
-  Object.keys(watched).some((name) => {
+  Object.keys(watched).some(name => {
     const rootPath = watched[name];
     const contained = path.indexOf(rootPath + plib.sep) !== -1;
     if (path !== rootPath && !contained) {
@@ -125,19 +125,19 @@ const plugins = [
       return ['domelementtype', 'hash-base', 'inherits'].includes(
         instance.name
       );
-    },
+    }
   }),
   new HtmlWebpackPlugin({
     chunksSortMode: 'none',
     template: plib.join('templates', 'template.html'),
-    title: jlab.name || 'JupyterLab',
+    title: jlab.name || 'JupyterLab'
   }),
   new webpack.HashedModuleIdsPlugin(),
 
   // custom plugin for ignoring files during a `--watch` build
   new WPPlugin.FilterWatchIgnorePlugin(ignored),
   // custom plugin that copies the assets to the static directory
-  new WPPlugin.FrontEndPlugin(buildDir, jlab.staticDir),
+  new WPPlugin.FrontEndPlugin(buildDir, jlab.staticDir)
 ];
 
 if (process.argv.includes('--analyze')) {
@@ -148,19 +148,19 @@ module.exports = [
   {
     mode: 'development',
     entry: {
-      main: ['whatwg-fetch', plib.resolve(buildDir, 'index.out.js')],
+      main: ['whatwg-fetch', plib.resolve(buildDir, 'index.out.js')]
     },
     output: {
       path: plib.resolve(buildDir),
       publicPath: '{{page_config.fullStaticUrl}}/',
       // Add version argument when in production so the Jupyter server
       // allows caching of files (i.e., does not set the CacheControl header to no-cache to prevent caching static files)
-      filename: '[name].[chunkhash].js?v=[chunkhash]',
+      filename: '[name].[chunkhash].js?v=[chunkhash]'
     },
     optimization: {
       splitChunks: {
-        chunks: 'all',
-      },
+        chunks: 'all'
+      }
     },
     module: {
       rules: [
@@ -172,25 +172,25 @@ module.exports = [
           use: ['source-map-loader'],
           enforce: 'pre',
           // eslint-disable-next-line no-undef
-          exclude: /node_modules/,
+          exclude: /node_modules/
         },
         { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
         { test: /\.js.map$/, use: 'file-loader' },
         {
           test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-          use: 'url-loader?limit=10000&mimetype=application/font-woff',
+          use: 'url-loader?limit=10000&mimetype=application/font-woff'
         },
         {
           test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-          use: 'url-loader?limit=10000&mimetype=application/font-woff',
+          use: 'url-loader?limit=10000&mimetype=application/font-woff'
         },
         {
           test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-          use: 'url-loader?limit=10000&mimetype=application/octet-stream',
+          use: 'url-loader?limit=10000&mimetype=application/octet-stream'
         },
         {
           test: /\.otf(\?v=\d+\.\d+\.\d+)?$/,
-          use: 'url-loader?limit=10000&mimetype=application/octet-stream',
+          use: 'url-loader?limit=10000&mimetype=application/octet-stream'
         },
         { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
         {
@@ -199,8 +199,8 @@ module.exports = [
           issuer: { test: /\.css$/ },
           use: {
             loader: 'svg-url-loader',
-            options: { encoding: 'none', limit: 10000 },
-          },
+            options: { encoding: 'none', limit: 10000 }
+          }
         },
         {
           // in ts and tsx files (both of which compile to js),
@@ -208,24 +208,24 @@ module.exports = [
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
           issuer: { test: /\.js$/ },
           use: {
-            loader: 'raw-loader',
-          },
-        },
-      ],
+            loader: 'raw-loader'
+          }
+        }
+      ]
     },
     watchOptions: {
       poll: 500,
-      aggregateTimeout: 1000,
+      aggregateTimeout: 1000
     },
     node: {
-      fs: 'empty',
+      fs: 'empty'
     },
     bail: true,
     devtool: 'inline-source-map',
     externals: ['node-fetch', 'ws'],
     plugins,
     stats: {
-      chunkModules: true,
-    },
-  },
+      chunkModules: true
+    }
+  }
 ].concat(extraConfig);
