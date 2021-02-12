@@ -13,6 +13,7 @@ var factory = {
 };
 
 module.exports = {
+  id: '@jupyterlab/mock-mime-extension:plugin',
   mimeType: 'text/plain',
   rendererFactory: factory,
   widgetFactoryOptions: {
