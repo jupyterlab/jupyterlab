@@ -194,6 +194,7 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
     jupyter labextension build extension --static-url /foo/
+    jupyter labextension build extension --core-path ../../../examples/federated/core_package
     jupyter labextension disable @jupyterlab/mock-extension --debug
     jupyter labextension enable @jupyterlab/mock-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
