@@ -234,10 +234,15 @@ export namespace CodeEditor {
     }
 
     setValue(value: string): void {
-      this.ytext.doc?.transact(() => {
-        this.ytext.delete(0, this.ytext.length);
-        this.ytext.insert(0, value);
-      });
+      // @todo I don't se a use-case for this method as it is only used to initialize content.
+      // Initializing content should only happen when initializing.
+      if (value !== this.ytext.toString()) {
+        console.log('overwriting value in editor');
+        this.ytext.doc?.transact(() => {
+          this.ytext.delete(0, this.ytext.length);
+          this.ytext.insert(0, value);
+        });
+      }
     }
 
     getValue(): string {
