@@ -213,6 +213,8 @@ export class JSONEditor extends Widget {
    * Handle a change to the metadata of the source.
    */
   private _onSourceChanged = (event: Y.YMapEvent<any>) => {
+    return;
+    // @todo rework this
     if (this._changeGuard) {
       return;
     }

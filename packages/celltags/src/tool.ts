@@ -164,9 +164,16 @@ export class TagTool extends NotebookTools.Tool {
       []
     );
     const validTags = [...new Set(tags)].filter(tag => tag !== '');
-    cell.model.ymeta.set('tags', validTags);
-    this.refreshTags();
-    this.loadActiveTags();
+    const currTags: Array<string> = cell.model.ymeta.get('tags');
+    if (
+      currTags == null ||
+      currTags.length !== validTags.length ||
+      currTags.some(tag => !validTags.includes(tag))
+    ) {
+      cell.model.ymeta.set('tags', validTags);
+      this.refreshTags();
+      this.loadActiveTags();
+    }
   }
 
   /**
