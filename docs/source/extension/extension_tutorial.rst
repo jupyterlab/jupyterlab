@@ -105,6 +105,7 @@ are using to fetch pictures).
 ::
 
     author_name []: Your Name
+    author_email []: your@name.org
     python_name [myextension]: jupyterlab_apod
     labextension_name [myextension]: jupyterlab_apod
     project_short_description [A JupyterLab extension.]: Show a random NASA Astronomy Picture of the Day in a JupyterLab panel
