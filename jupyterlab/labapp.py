@@ -6,6 +6,7 @@
 
 import json
 import os
+import re
 import os.path as osp
 from os.path import join as pjoin
 import sys
@@ -37,7 +38,9 @@ from .handlers.extension_manager_handler import (
     extensions_handler_path, ExtensionManager, ExtensionHandler
 )
 from .handlers.error_handler import ErrorHandler
-
+from .handlers.licenses_handler import (
+    licenses_handler_path, LicensesHandler, LicensesManager
+)
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -413,6 +416,58 @@ class LabWorkspaceApp(JupyterApp):
         self.exit(0)
 
 
+class LabLicensesApp(JupyterApp):
+    version = version
+    app_name = "JupyterLab"
+    description = """
+    List frontend licenses
+    """
+
+    app_dir = Unicode('', config=True,
+        help='The app directory for which to show licenses')
+
+    json = Bool(False, config=True,
+        help='Print the licenses as JSON')
+
+    bundles_pattern = Unicode('.*', config=True,
+        help='A regular expression of bundles to print')
+
+    aliases = {
+        **base_aliases,
+        'bundles': 'LabLicensesApp.bundles_pattern'
+    }
+
+    flags = flags
+    flags['json'] = (
+        {'LabLicensesApp': {'json': True}},
+        'Emit the licenses as JSON.'
+    )
+
+    @default('app_dir')
+    def _default_app_dir(self):
+        return get_app_dir()
+
+    def start(self):
+        # TODO: how do these ever get set?
+        self.labextensions_path = []
+        self.extra_labextensions_path = []
+
+        manager = LicensesManager(parent=self)
+        licenses = manager.licenses()
+
+        if self.json:
+            print(json.dumps(licenses, indent=2, sort_keys=True))
+        else:
+            for bundle_name, license_text in licenses.items():
+                if not re.match(self.bundles_pattern, bundle_name):
+                    continue
+                # TODO: parametrize template
+                print(f'''{bundle_name}\n{"="*80}''')
+                print(license_text.strip())
+
+        self.exit(0)
+
+
 aliases = dict(base_aliases)
 aliases.update({
     'ip': 'ServerApp.ip',
@@ -496,6 +551,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
         clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
+        licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0]),
         path=(LabPathApp, LabPathApp.description.splitlines()[0]),
         paths=(LabPathApp, LabPathApp.description.splitlines()[0]),
         workspace=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
@@ -705,6 +761,14 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
                 {'manager': ext_manager}
             )
             handlers.append(ext_handler)
+
+        licenses_manager = LicensesManager(parent=self)
+        licenses_handler = (
+            licenses_handler_path,
+            LicensesHandler,
+            {'manager': licenses_manager}
+        )
+        handlers.append(licenses_handler)
 
         # If running under JupyterHub, add more metadata.
         if 'hub_prefix' in self.serverapp.tornado_settings:
