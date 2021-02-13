@@ -7,7 +7,7 @@ import * as CodeMirror from 'codemirror';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { IEditorChangedData, WidgetAdapter } from '../../adapters/adapter';
-import { LazyCompletionItem, LSPConnector } from './completion_handler';
+import { LSPConnector } from './completion_handler';
 import { CompletionHandler, ICompletionManager } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
@@ -21,6 +21,8 @@ import { NotebookAdapter } from '../../adapters/notebook/notebook';
 import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
 import { LSPCompletionRenderer } from './renderer';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { LSPCompleterModel } from './model';
+import { LazyCompletionItem } from './item';
 
 const DOC_PANEL_SELECTOR = '.jp-Completer-docpanel';
 const DOC_PANEL_PLACEHOLDER_CLASS = 'lsp-completer-placeholder';
@@ -117,6 +119,10 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     item: LazyCompletionItem
   ) {
     if (!item.supportsResolution()) {
+      if (item.isDocumentationMarkdown) {
+        // TODO: remove once https://github.com/jupyterlab/jupyterlab/pull/9663 is merged and released
+        this.refresh_doc_panel(item);
+      }
       return;
     }
 
@@ -187,10 +193,18 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       },
       this.renderer
     ) as CompletionHandler;
+    let completer = this.completer;
+    completer.addClass('lsp-completer');
+    completer.model = new LSPCompleterModel();
+  }
+
+  get completer() {
+    return this.current_completion_handler.completer;
   }
 
   invoke_completer(kind: ExtendedCompletionTriggerKind) {
     let command: string;
+
     this.current_completion_connector.trigger_kind = kind;
 
     if (this.adapterManager.currentAdapter instanceof NotebookAdapter) {

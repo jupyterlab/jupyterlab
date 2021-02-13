@@ -4,9 +4,9 @@
 import { Completer } from '@jupyterlab/completer';
 import { CompletionLabIntegration } from './completion';
 import { Signal } from '@lumino/signaling';
-import { LazyCompletionItem } from './completion_handler';
 import { IRenderMime } from '@jupyterlab/rendermime';
 import { ILSPLogConsole } from '../../tokens';
+import { LazyCompletionItem } from './item';
 
 export class LSPCompletionRenderer
   extends Completer.Renderer
@@ -27,9 +27,8 @@ export class LSPCompletionRenderer
     // make sure that an instance reference, and not an object copy is being used;
     item = item.self;
 
-    // only monitor nodes that have item.self as others are not LazyCompletionItems
-    // and only monitor those that need documentation retrieval
-    if (item && !item.documentation) {
+    // only monitor nodes that have item.self as others are not our completion items
+    if (item) {
       let inactive = true;
       const observer = new MutationObserver(mutations => {
         if (li.classList.contains('jp-mod-active')) {

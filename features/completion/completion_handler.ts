@@ -33,146 +33,8 @@ import {
 import { LabIcon } from '@jupyterlab/ui-components';
 import { ILSPLogConsole } from '../../tokens';
 import { CompletionLabIntegration } from './completion';
+import { LazyCompletionItem } from './item';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
-
-export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
-  private _documentation: string;
-  private _is_documentation_markdown: boolean;
-  private _requested_resolution: boolean;
-  private _resolved: boolean;
-  /**
-   * Self-reference to make sure that the instance for will remain accessible
-   * after any copy operation (whether via spread syntax or Object.assign)
-   * performed by the JupyterLab completer internals.
-   */
-  public self: LazyCompletionItem;
-
-  get isDocumentationMarkdown(): boolean {
-    return this._is_documentation_markdown;
-  }
-
-  constructor(
-    /**
-     * User facing completion.
-     * If insertText is not set, this will be inserted.
-     */
-    public label: string,
-    /**
-     * Type of this completion item.
-     */
-    public type: string,
-    /**
-     * LabIcon object for icon to be rendered with completion type.
-     */
-    public icon: LabIcon,
-    private match: lsProtocol.CompletionItem,
-    private connector: LSPConnector,
-    private uri: string
-  ) {
-    this._setDocumentation(match.documentation);
-    this._requested_resolution = false;
-    this._resolved = false;
-    this.self = this;
-  }
-
-  private _setDocumentation(documentation: string | lsProtocol.MarkupContent) {
-    if (lsProtocol.MarkupContent.is(documentation)) {
-      this._documentation = documentation.value;
-      this._is_documentation_markdown = documentation.kind === 'markdown';
-    } else {
-      this._documentation = documentation;
-      this._is_documentation_markdown = false;
-    }
-  }
-
-  /**
-   * Completion to be inserted.
-   */
-  get insertText(): string {
-    return this.match.insertText || this.match.label;
-  }
-
-  public supportsResolution() {
-    const connection = this.connector.get_connection(this.uri);
-
-    return connection.isCompletionResolveProvider();
-  }
-
-  public needsResolution(): boolean {
-    if (this.documentation) {
-      return false;
-    }
-
-    if (this._resolved) {
-      return false;
-    }
-
-    if (this._requested_resolution) {
-      return false;
-    }
-
-    return this.supportsResolution();
-  }
-
-  public isResolved() {
-    return this._resolved;
-  }
-
-  public fetchDocumentation(): void {
-    if (!this.needsResolution()) {
-      return;
-    }
-
-    const connection = this.connector.get_connection(this.uri);
-
-    this._requested_resolution = true;
-
-    connection
-      .getCompletionResolve(this.match)
-      .then(resolvedCompletionItem => {
-        this.connector.lab_integration.set_doc_panel_placeholder(false);
-        if (resolvedCompletionItem === null) {
-          return;
-        }
-        this._setDocumentation(resolvedCompletionItem.documentation);
-        this._resolved = true;
-        this.connector.lab_integration.refresh_doc_panel(this);
-      })
-      .catch(e => {
-        this.connector.lab_integration.set_doc_panel_placeholder(false);
-        console.warn(e);
-      });
-  }
-
-  /**
-   * A human-readable string with additional information
-   * about this item, like type or symbol information.
-   */
-  get documentation(): string {
-    if (!this.connector.should_show_documentation) {
-      return null;
-    }
-    if (this._documentation) {
-      return this._documentation;
-    }
-    return null;
-  }
-
-  /**
-   * Indicates if the item is deprecated.
-   */
-  get deprecated(): boolean {
-    if (this.match.deprecated) {
-      return this.match.deprecated;
-    }
-    return (
-      this.match.tags &&
-      this.match.tags.some(
-        tag => tag == lsProtocol.CompletionItemTag.Deprecated
-      )
-    );
-  }
-}
 
 /**
  * A LSP connector for completion handlers.
@@ -194,6 +56,11 @@ export class LSPConnector
   trigger_kind: ExtendedCompletionTriggerKind;
   lab_integration: CompletionLabIntegration;
   items: CompletionHandler.ICompletionItems;
+
+  get kernel_completions_first(): boolean {
+    // TODO: test this in acceptance tests!
+    return this.options.settings.composite.kernelCompletionsFirst;
+  }
 
   protected get suppress_auto_invoke_in(): string[] {
     return this.options.settings.composite.suppressInvokeIn;
@@ -449,7 +316,6 @@ export class LSPConnector
     lspCompletionItems.forEach(match => {
       let kind = match.kind ? CompletionItemKind[match.kind] : '';
       let completionItem = new LazyCompletionItem(
-        match.label,
         kind,
         this.icon_for(kind),
         match,
@@ -520,7 +386,8 @@ export class LSPConnector
           label: item.text as string,
           insertText: item.text as string,
           type: item.type as string,
-          icon: this.icon_for(item.type as string)
+          icon: this.icon_for(item.type as string),
+          sortText: this.kernel_completions_first ? 'a' : 'z'
         };
       });
     } else {
@@ -528,7 +395,8 @@ export class LSPConnector
         return {
           label: match,
           insertText: match,
-          icon: this.icon_for('Kernel')
+          icon: this.icon_for('Kernel'),
+          sortText: this.kernel_completions_first ? 'a' : 'z'
         };
       });
     }
