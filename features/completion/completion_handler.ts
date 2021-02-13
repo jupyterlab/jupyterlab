@@ -58,7 +58,6 @@ export class LSPConnector
   items: CompletionHandler.ICompletionItems;
 
   get kernel_completions_first(): boolean {
-    // TODO: test this in acceptance tests!
     return this.options.settings.composite.kernelCompletionsFirst;
   }
 
