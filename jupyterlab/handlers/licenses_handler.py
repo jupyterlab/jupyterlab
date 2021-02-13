@@ -19,7 +19,7 @@ from ..commands import AppOptions, get_app_info
 
 
 # TODO: maybe better as JSON?
-THIRD_PARTY_LICENSES = "third-party-licenses.txt"
+THIRD_PARTY_LICENSES = "third-party-licenses.json"
 
 # The path for lab licenses handler.
 licenses_handler_path = r"/lab/api/licenses"
@@ -49,21 +49,55 @@ class LicensesManager(LoggingConfigurable):
             )
         )
 
-    def license_bundle(self, path):
+    def license_bundle(self, path, bundle):
         """Return the content of a path's license bundle, or None if it doesn't exist"""
         licenses_path = path / THIRD_PARTY_LICENSES
         if not licenses_path.exists():
+            self.log.warn(
+                "Third-party licenses not found for %s: %s",
+                bundle,
+                licenses_path
+            )
             return None
-        return licenses_path.read_text(encoding="utf-8")
+
+        try:
+            bundle_text = licenses_path.read_text(encoding="utf-8")
+        except Exception as err:
+            self.log.warn(
+                "Failed to open third-party licenses for %s: %s\n%s",
+                bundle,
+                licenses_path,
+                err
+            )
+            return None
+
+        try:
+            bundle_json = json.loads(bundle_text)
+        except Exception as err:
+            self.log.warn(
+                "Failed to parse third-party licenses for %s: %s\n%s",
+                bundle,
+                licenses_path,
+                err
+            )
+            return None
+
+        return bundle_json
+
+    def app_static(self):
+        if self.parent.dev_mode:
+            return Path(__file__).parent.parent.parent / "dev_mode/static"
+        return Path(self.parent.app_dir) / "static"
 
     def licenses(self) -> dict:
         """Read all of the licenses
             TODO: schema
         """
-        app_licenses = self.license_bundle(Path(self.parent.app_dir) / "static")
-
         licenses = {
-            self.parent.app_name: app_licenses,
+            self.parent.app_name: self.license_bundle(
+                self.app_static(),
+                self.parent.app_name
+            ),
             **{
                 fed_ext: ext_info["license_text"]
                 for ext_name, ext_info
