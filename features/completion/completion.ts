@@ -63,7 +63,7 @@ export class CompletionCM extends CodeMirrorIntegration {
       );
       (this.feature.labIntegration as CompletionLabIntegration)
         .invoke_completer(CompletionTriggerKind.TriggerCharacter)
-        .catch(console.warn);
+        .catch(this.console.warn);
       return;
     }
 
@@ -74,7 +74,7 @@ export class CompletionCM extends CodeMirrorIntegration {
     ) {
       (this.feature.labIntegration as CompletionLabIntegration)
         .invoke_completer(AdditionalCompletionTriggerKinds.AutoInvoked)
-        .catch(console.warn);
+        .catch(this.console.warn);
     }
   }
 }
@@ -198,13 +198,18 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     completer.model = new LSPCompleterModel();
   }
 
-  get completer() {
+  protected get completer() {
+    // TODO upstream: make completer public?
     return this.current_completion_handler.completer;
   }
 
-  invoke_completer(kind: ExtendedCompletionTriggerKind) {
-    let command: string;
+  protected get model(): LSPCompleterModel {
+    return this.completer.model as LSPCompleterModel;
+  }
 
+  invoke_completer(kind: ExtendedCompletionTriggerKind) {
+    // TODO: ideally this would not re-trigger if list of items not isIncomplete
+    let command: string;
     this.current_completion_connector.trigger_kind = kind;
 
     if (this.adapterManager.currentAdapter instanceof NotebookAdapter) {
@@ -234,12 +239,9 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
   }
 
   private get current_items() {
-    // TODO upstream: make completer public?
-    let completer = this.current_completion_handler.completer;
-
     // TODO upstream: allow to get completionItems() without markup
     //   (note: not trivial as _markup() does filtering too)
-    return completer.model.completionItems();
+    return this.model.completionItems();
   }
 
   private get current_index() {

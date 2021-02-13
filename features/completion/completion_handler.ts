@@ -61,8 +61,12 @@ export class LSPConnector
     return this.options.settings.composite.kernelCompletionsFirst;
   }
 
-  protected get suppress_auto_invoke_in(): string[] {
-    return this.options.settings.composite.suppressInvokeIn;
+  protected get suppress_continuous_hinting_in(): string[] {
+    return this.options.settings.composite.suppressContinuousHintingIn;
+  }
+
+  protected get suppress_trigger_character_in(): string[] {
+    return this.options.settings.composite.suppressTriggerCharacterIn;
   }
 
   get should_show_documentation(): boolean {
@@ -155,9 +159,16 @@ export class LSPConnector
     const cursor = editor.getCursorPosition();
     const token = editor.getTokenForPosition(cursor);
 
-    if (this.suppress_auto_invoke_in.indexOf(token.type) !== -1) {
-      this.console.log('Suppressing completer auto-invoke in', token.type);
-      return;
+    if (this.trigger_kind == AdditionalCompletionTriggerKinds.AutoInvoked) {
+      if (this.suppress_continuous_hinting_in.indexOf(token.type) !== -1) {
+        this.console.debug('Suppressing completer auto-invoke in', token.type);
+        return;
+      }
+    } else if (this.trigger_kind == CompletionTriggerKind.TriggerCharacter) {
+      if (this.suppress_trigger_character_in.indexOf(token.type) !== -1) {
+        this.console.debug('Suppressing completer auto-invoke in', token.type);
+        return;
+      }
     }
 
     const start = editor.getPositionAt(token.offset);
