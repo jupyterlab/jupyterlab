@@ -1,7 +1,8 @@
 // This file is auto-generated from the corresponding file in /dev_mode
 const merge = require('webpack-merge').default;
-const WPPlugin = require('@jupyterlab/builder').WPPlugin;
 const config = require('./webpack.config');
+const LicenseWebpackPlugin = require('license-webpack-plugin')
+  .LicenseWebpackPlugin;
 
 config[0] = merge(config[0], {
   mode: 'production',
@@ -15,7 +16,9 @@ config[0] = merge(config[0], {
     minimize: false
   },
   plugins: [
-    new WPPlugin.JSONLicenseWebpackPlugin({
+    new LicenseWebpackPlugin({
+      perChunkOutput: false,
+      outputFilename: 'third-party-licenses.txt',
       excludedPackageTest: packageName =>
         packageName === '@jupyterlab/application-top'
     })
