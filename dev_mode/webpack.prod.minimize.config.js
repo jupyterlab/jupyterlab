@@ -1,7 +1,6 @@
 const TerserPlugin = require('terser-webpack-plugin');
 const merge = require('webpack-merge').default;
-const LicenseWebpackPlugin = require('license-webpack-plugin')
-  .LicenseWebpackPlugin;
+const WPPlugin = require('@jupyterlab/builder').WPPlugin;
 const config = require('./webpack.config');
 
 config[0] = merge(config[0], {
@@ -28,9 +27,7 @@ config[0] = merge(config[0], {
     ]
   },
   plugins: [
-    new LicenseWebpackPlugin({
-      perChunkOutput: false,
-      outputFilename: 'third-party-licenses.txt',
+    new WPPlugin.JSONLicenseWebpackPlugin({
       excludedPackageTest: packageName =>
         packageName === '@jupyterlab/application-top'
     })

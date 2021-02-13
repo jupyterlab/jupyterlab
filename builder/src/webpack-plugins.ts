@@ -6,6 +6,9 @@
 import DuplicatePackageCheckerPlugin from 'duplicate-package-checker-webpack-plugin';
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
+import { LicenseWebpackPlugin } from 'license-webpack-plugin';
+import { LicenseIdentifiedModule } from 'license-webpack-plugin/dist/LicenseIdentifiedModule';
+import { PluginOptions } from 'license-webpack-plugin/dist/PluginOptions';
 
 // From
 // https://github.com/webpack/webpack/blob/95120bdf98a01649740b104bebc426b0123651ce/lib/WatchIgnorePlugin.js
@@ -165,5 +168,57 @@ export namespace WPPlugin {
     }
 
     options: DuplicatePackageCheckerPlugin.Options;
+  }
+
+  /** A single module's license(s) */
+  export interface ILicenseRecord {
+    version: string;
+    licenseId: string | null;
+    licenseText: string | null;
+  }
+
+  /** A top-level report of the licenses for all code included in a build */
+  export interface ILicenseReport {
+    licenses: {
+      [key: string]: ILicenseRecord;
+    };
+  }
+
+  export const LICENSE_REPORT_FILENAME = 'third-party-licenses.json';
+
+  /**
+   * a plugin that creates a predictable, machine-readable report of licenses for
+   * all modules included in this build
+   */
+  export class JSONLicenseWebpackPlugin extends LicenseWebpackPlugin {
+    constructor(pluginOptions: PluginOptions = {}) {
+      super({
+        ...pluginOptions,
+        renderLicenses: modules => this.renderLicensesJSON(modules),
+        perChunkOutput: false,
+        outputFilename: LICENSE_REPORT_FILENAME
+      });
+    }
+
+    /** render a simple JSON slug */
+    renderLicensesJSON(modules: LicenseIdentifiedModule[]): string {
+      const licenseData: ILicenseReport = {
+        licenses: modules
+          .sort((left, right) => (left.name < right.name ? -1 : 1))
+          .reduce(
+            (memo, module) => ({
+              ...memo,
+              [module.name]: {
+                version: module.packageJson.version,
+                licenseId: module.licenseId || null,
+                licenseText: module.licenseText || null
+              }
+            }),
+            {} as Record<string, ILicenseRecord>
+          )
+      };
+
+      return JSON.stringify(licenseData, null, 2);
+    }
   }
 }

@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as webpack from 'webpack';
 import { Build } from './build';
-import { LicenseWebpackPlugin } from 'license-webpack-plugin';
+import { WPPlugin } from './webpack-plugins';
 import { merge } from 'webpack-merge';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
@@ -227,9 +227,7 @@ function generateConfig({
 
   if (mode === 'production') {
     plugins.push(
-      new LicenseWebpackPlugin({
-        perChunkOutput: false,
-        outputFilename: 'third-party-licenses.txt',
+      new WPPlugin.JSONLicenseWebpackPlugin({
         excludedPackageTest: packageName => packageName === data.name
       })
     );
