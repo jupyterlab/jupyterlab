@@ -180,8 +180,11 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension unlink  @jupyterlab/mock-mime-extension --no-build --debug
 
     # Test with a source package install
-    jupyter labextension install mimeextension  --no-build --debug
+    jupyter labextension install mimeextension --debug
     jupyter labextension list --debug
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep "@jupyterlab/mock-mime-extension.*enabled.*OK"
+    python -m jupyterlab.browser_check
     jupyter labextension disable @jupyterlab/mock-mime-extension --debug
     jupyter labextension enable @jupyterlab/mock-mime-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-mime-extension --no-build --debug

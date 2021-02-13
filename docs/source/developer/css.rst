@@ -69,9 +69,8 @@ is simple:
 CSS variable usage
 ^^^^^^^^^^^^^^^^^^
 
-JupyterLab includes a default set of CSS variables in the file:
-
-``packages/theme-light-extension/style/variables.css``
+JupyterLab includes a default set of CSS variables in the file
+`packages/theme-light-extension/style/variables.css <https://github.com/jupyterlab/jupyterlab/blob/master/packages/theme-light-extension/style/variables.css>`_.
 
 To ensure consistent design in JupyterLab, all built-in and third party
 extensions should use these variables in their styles if at all
