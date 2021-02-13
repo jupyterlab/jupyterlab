@@ -1197,7 +1197,7 @@ export namespace Commands {
     ) => Promise<void> = getCreateConsoleFunction(commands);
     menu.fileMenu.consoleCreators.add({
       tracker,
-      createConsoleLabel: (n: number) => trans.__('Editor'),
+      createConsoleLabel: (n: number) => trans.__('Create Console for Editor'),
       createConsole
     } as IFileMenu.IConsoleCreator<IDocumentWidget<FileEditor>>);
   }
