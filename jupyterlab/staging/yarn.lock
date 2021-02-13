@@ -3788,10 +3788,10 @@ kind-of@^6.0.2:
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
   integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
 
-license-webpack-plugin@^2.3.11:
-  version "2.3.11"
-  resolved "https://registry.yarnpkg.com/license-webpack-plugin/-/license-webpack-plugin-2.3.11.tgz#0d93188a31fce350a44c86212badbaf33dcd29d8"
-  integrity sha512-0iVGoX5vx0WDy8dmwTTpOOMYiGqILyUbDeVMFH52AjgBlS58lHwOlFMSoqg5nY8Kxl6+FRKyUZY/UdlQaOyqDw==
+license-webpack-plugin@^2.3.12:
+  version "2.3.13"
+  resolved "https://registry.yarnpkg.com/license-webpack-plugin/-/license-webpack-plugin-2.3.13.tgz#ce02c193f0a36e28f0310b8849060a7ba11bbc20"
+  integrity sha512-SOjHXLDOOlSlUmzQ6cF7V4JkHIFbM9r9izw5IhnkIiRdVN7UewSu3cqcXv33qZunB3GyZQZ6nv+9cQXAyo31HA==
   dependencies:
     "@types/webpack-sources" "^0.1.5"
     webpack-sources "^1.2.0"
