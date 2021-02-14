@@ -73,9 +73,12 @@ export class GenericCompleterModel<
 
       let matched: boolean;
 
+      let filterText: string = null;
+      let filterMatch: StringExt.IMatchResult;
+
       if (query) {
-        const filterText = this.getFilterText(item);
-        let filterMatch = StringExt.matchSumOfSquares(filterText, query);
+        filterText = this.getFilterText(item);
+        filterMatch = StringExt.matchSumOfSquares(filterText, query);
         matched = !!filterMatch;
       } else {
         matched = true;
@@ -86,25 +89,32 @@ export class GenericCompleterModel<
         // If the matches are substrings of label, highlight them
         // in this part of the label that can be highlighted (must be a prefix),
         // which is intended to avoid highlighting matches in function arguments etc.
-        const labelPrefix = escapeHTML(this.getHighlightableLabelRegion(item));
+        let labelMatch: StringExt.IMatchResult;
+        if (query) {
+          let labelPrefix = escapeHTML(this.getHighlightableLabelRegion(item));
+          if (labelPrefix == filterText) {
+            labelMatch = filterMatch;
+          } else {
+            labelMatch = StringExt.matchSumOfSquares(labelPrefix, query);
+          }
+        }
 
-        let match = StringExt.matchSumOfSquares(labelPrefix, query);
         let label: string;
         let score: number;
 
-        if (match) {
+        if (labelMatch) {
           // Highlight label text if there's a match
           // there won't be a match if filter text includes additional keywords
           // for easier search that are not a part of the label
           let marked = StringExt.highlight(
             escapeHTML(item.label),
-            match.indices,
+            labelMatch.indices,
             this._markFragment
           );
           label = marked.join('');
-          score = match.score;
+          score = labelMatch.score;
         } else {
-          label = item.label;
+          label = escapeHTML(item.label);
           score = 0;
         }
         // preserve getters (allow for lazily retrieved documentation)

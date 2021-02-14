@@ -35,6 +35,16 @@ describe('LSPCompleterModel', () => {
     model = new LSPCompleterModel();
   });
 
+  it('returns escaped when no query', () => {
+    model.setCompletionItems([jupyter_icon_completion]);
+    model.query = '';
+
+    let markedItems = model.completionItems();
+    expect(markedItems[0].label).to.be.equal(
+      '&lt;i class="jp-icon-jupyter"&gt;&lt;/i&gt; Jupyter'
+    );
+  });
+
   it('marks html correctly', () => {
     model.setCompletionItems([jupyter_icon_completion]);
     model.query = 'Jup';
@@ -72,5 +82,24 @@ describe('LSPCompleterModel', () => {
     model.query = 'class';
     filteredItems = model.completionItems();
     expect(filteredItems.length).to.equal(0);
+  });
+
+  it('marks appropriate part of label when filterText matches', () => {
+    model.setCompletionItems([jupyter_icon_completion]);
+    // font is in filterText but not in label
+    model.query = 'font';
+
+    // nothing should get highlighted
+    let markedItems = model.completionItems();
+    expect(markedItems[0].label).to.be.equal(
+      '&lt;i class="jp-icon-jupyter"&gt;&lt;/i&gt; Jupyter'
+    );
+
+    // i is in both label and filterText
+    model.query = 'i';
+    markedItems = model.completionItems();
+    expect(markedItems[0].label).to.be.equal(
+      '&lt;<mark>i</mark> class="jp-icon-jupyter"&gt;&lt;/i&gt; Jupyter'
+    );
   });
 });
