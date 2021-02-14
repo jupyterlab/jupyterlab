@@ -354,9 +354,15 @@ export class LSPConnector
     this.console.debug('Transformed');
     // required to make the repetitive trigger characters like :: or ::: work for R with R languageserver,
     // see https://github.com/krassowski/jupyterlab-lsp/issues/436
-    const prefix_offset = token.value.length;
+    let prefix_offset = token.value.length;
+    // completion of dictionaries for Python with jedi-language-server was
+    // causing an issue for dic['<tab>'] case; to avoid this let's make
+    // sure that prefix.length >= prefix.offset
+    if (all_non_prefixed && prefix_offset > prefix.length) {
+      prefix_offset = prefix.length;
+    }
 
-    return {
+    let response = {
       // note in the ContextCompleter it was:
       // start: token.offset,
       // end: token.offset + token.value.length,
@@ -370,6 +376,14 @@ export class LSPConnector
       end: token.offset + prefix.length,
       items: items
     };
+    if (response.start > response.end) {
+      console.warn(
+        'Response contains start beyond end; this should not happen!',
+        response
+      );
+    }
+
+    return response;
   }
 
   protected icon_for(type: string): LabIcon {
