@@ -65,7 +65,11 @@ export function DocumentLocator(props: {
   let target: HTMLElement = null;
   if (adapter.has_multiple_editors) {
     let first_line = document.virtual_lines.get(0);
-    target = adapter.get_editor_wrapper(first_line.editor);
+    if (first_line) {
+      target = adapter.get_editor_wrapper(first_line.editor);
+    } else {
+      console.warn('Could not get first line of ', document);
+    }
   }
   let breadcrumbs = get_breadcrumbs(document, adapter);
   return (
