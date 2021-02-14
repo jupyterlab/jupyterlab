@@ -17,7 +17,6 @@ from tornado import web, gen
 
 from traitlets import default, Dict, Unicode, Instance
 from traitlets.config import LoggingConfigurable
-from jsonschema import Draft7Validator
 from jupyter_server.base.handlers import APIHandler
 
 from ..commands import AppOptions, get_app_info
@@ -25,9 +24,6 @@ from ..commands import AppOptions, get_app_info
 
 # TODO: maybe better as JSON?
 THIRD_PARTY_LICENSES = "third-party-licenses.json"
-
-# the path for the default schema (relative to the module)
-LICENSE_SCHEMA = "schema/licenses.schema.json"
 
 # The path for lab licenses handler.
 licenses_handler_path = r"/lab/api/licenses"
@@ -41,28 +37,6 @@ class LicensesManager(LoggingConfigurable):
     executor = ThreadPoolExecutor(max_workers=1)
 
     app_info = Dict()
-
-    schema_path = Unicode(
-        config=True, help="a path to a JSON Schema for the license report"
-    )
-
-    bundle_ref = Unicode(
-        "#/definitions/license-bundle",
-        config=True,
-        help="the JSON Pointer within the schema of a license bundle definition",
-    )
-
-    schema = Instance(Draft7Validator)
-
-    @default("schema_path")
-    def _default_schema_path(self):
-        return str(Path(__file__).parent.parent / LICENSE_SCHEMA)
-
-    @default("schema")
-    def _default_schema(self):
-        schema = json.loads(Path(self.schema_path).read_text(encoding="utf-8"))
-        schema["$ref"] = self.bundle_ref
-        return Draft7Validator(schema)
 
     @default("app_info")
     def _default_app_info(self):
@@ -139,7 +113,7 @@ class LicensesManager(LoggingConfigurable):
                         "\t".join(
                             [
                                 f"**{library.strip()}**".ljust(longest_name),
-                                (spec["version"] or "").ljust(20),
+                                f"""`{spec["version"] or ""}`""".ljust(20),
                                 (spec["licenseId"] or ""),
                             ]
                         )
@@ -179,17 +153,6 @@ class LicensesManager(LoggingConfigurable):
         except Exception as err:
             self.log.warn(
                 "Failed to parse third-party licenses for %s: %s\n%s",
-                bundle,
-                licenses_path,
-                err,
-            )
-            return None
-
-        try:
-            self.schema.validate(bundle_json)
-        except Exception as err:
-            self.log.warn(
-                "Failed to validate third-party licenses for %s: %s\n%s",
                 bundle,
                 licenses_path,
                 err,
