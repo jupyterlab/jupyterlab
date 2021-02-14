@@ -417,7 +417,6 @@ class LabWorkspaceApp(JupyterApp):
 
 class LabLicensesApp(JupyterApp):
     version = version
-    app_name = "JupyterLab"
     description = """
     Report frontend licenses
     """

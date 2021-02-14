@@ -123,12 +123,12 @@ class LicensesManager(LoggingConfigurable):
                     lines += [""]
                     if spec["licenseText"]:
                         lines += [
-                            textwrap.indent(spec["licenseText"].strip(), " " * 6),
+                            textwrap.indent(spec["licenseText"], " " * 6),
                             "",
                         ]
         return "\n".join(lines)
 
-    def license_bundle(self, path, bundle, validate=None):
+    def license_bundle(self, path, bundle):
         """Return the content of a path's license bundle, or None if it doesn't exist"""
         licenses_path = path / THIRD_PARTY_LICENSES
         if not licenses_path.exists():
@@ -161,11 +161,13 @@ class LicensesManager(LoggingConfigurable):
 
         return bundle_json
 
-    def app_static(self):
+    def app_static_info(self):
         """get the static directory for this app"""
+        path = Path(self.parent.app_dir) / "static"
         if self.parent.dev_mode:
-            return Path(__file__).parent.parent.parent / "dev_mode/static"
-        return Path(self.parent.app_dir) / "static"
+            path = Path(__file__).parent.parent.parent / "dev_mode/static"
+        name = json.loads((path / "package.json").read_text(encoding="utf-8"))["name"]
+        return path, name
 
     def licenses(self, bundles_pattern=".*") -> dict:
         """Read all of the licenses
@@ -173,14 +175,16 @@ class LicensesManager(LoggingConfigurable):
         """
         licenses = {}
 
-        if re.match(bundles_pattern, self.parent.app_name):
-            licenses[self.parent.app_name] = self.license_bundle(
-                self.app_static(), self.parent.app_name
-            )
+        app_path, app_name = self.app_static_info()
+        if re.match(bundles_pattern, app_name):
+            licenses[app_name] = self.license_bundle(app_path, app_name)
 
         for ext_name, ext_info in self.app_info["federated_extensions"].items():
-            if re.match(bundles_pattern, ext_name):
-                licenses[fed_ext] = ext_info["license_text"]
+            if not re.match(bundles_pattern, ext_name):
+                continue
+            licenses[fed_ext] = self.license_bundle(
+                Path(ext_info["ext_path"]), ext_name
+            )
 
         return licenses
 
