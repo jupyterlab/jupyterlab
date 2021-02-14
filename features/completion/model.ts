@@ -35,12 +35,9 @@ export class GenericCompleterModel<
     let unfilteredItems = super.completionItems() as T[];
     this.query = query;
 
-    //if (query) {
     // always want to sort
     // TODO does this behave strangely with %%<tab> if always sorting?
     return this._sortAndFilter(query, unfilteredItems);
-    //}
-    //return unfilteredItems;
   }
 
   setCompletionItems(newValue: T[]) {
