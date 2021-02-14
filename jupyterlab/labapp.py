@@ -6,7 +6,6 @@
 
 import json
 import os
-import re
 import os.path as osp
 from os.path import join as pjoin
 import sys
@@ -19,7 +18,7 @@ from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin, url_escape
 from jupyter_server.services.config.manager import ConfigManager, recursive_update
 from jupyter_server._version import version_info as jpserver_version_info
-from traitlets import Bool, Instance, Unicode, default
+from traitlets import Bool, Instance, Unicode, Enum, default
 
 from nbclassic.shim import NBClassicConfigShimMixin
 from jupyterlab_server import LabServerApp
@@ -420,28 +419,53 @@ class LabLicensesApp(JupyterApp):
     version = version
     app_name = "JupyterLab"
     description = """
-    List frontend licenses
+    Report frontend licenses
     """
+
+    dev_mode = Bool(False, config=True,
+        help="""Whether to start the app in dev mode. Uses the unpublished local
+        JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
+        show a red stripe at the top of the page.  It can only be used if JupyterLab
+        is installed as `pip install -e .`.
+        """)
 
     app_dir = Unicode('', config=True,
         help='The app directory for which to show licenses')
 
-    json = Bool(False, config=True,
-        help='Print the licenses as JSON')
+    full_text = Bool(False, config=True,
+        help='Also print out full license text (if available)')
+
+    report_format = Enum(["markdown", "json", "csv"], "markdown", config=True,
+        help="Reporter format")
 
     bundles_pattern = Unicode('.*', config=True,
         help='A regular expression of bundles to print')
 
     aliases = {
         **base_aliases,
-        'bundles': 'LabLicensesApp.bundles_pattern'
+        'bundles': 'LabLicensesApp.bundles_pattern',
+        'report-format': 'LabLicensesApp.report_format'
     }
 
-    flags = flags
-    flags['json'] = (
-        {'LabLicensesApp': {'json': True}},
-        'Emit the licenses as JSON.'
-    )
+    flags = {
+        **base_flags,
+        'dev-mode': (
+            {'LabLicensesApp': {'dev_mode': True}},
+            "Start the app in dev mode for running from source."
+        ),
+        'full-text': (
+            {'LabLicensesApp': {'full_text': True}},
+            "Print out full license text (if available)"
+        ),
+        'json': (
+            {'LabLicensesApp': {'report_format': 'json'}},
+            "Print out report as JSON (implies --full-text)"
+        ),
+        'csv': (
+            {'LabLicensesApp': {'report_format': 'csv'}},
+            "Print out report as CSV (implies --full-text)"
+        )
+    }
 
     @default('app_dir')
     def _default_app_dir(self):
@@ -453,17 +477,12 @@ class LabLicensesApp(JupyterApp):
         self.extra_labextensions_path = []
 
         manager = LicensesManager(parent=self)
-        licenses = manager.licenses()
-
-        if self.json:
-            print(json.dumps(licenses, indent=2, sort_keys=True))
-        else:
-            for bundle_name, license_text in licenses.items():
-                if not re.match(self.bundles_pattern, bundle_name):
-                    continue
-                # TODO: parametrize template
-                print(f'''{bundle_name}\n{"="*80}''')
-                print(license_text.strip())
+        report, _mime = manager.report(
+            report_format=self.report_format,
+            full_text=self.full_text,
+            bundles_pattern=self.bundles_pattern
+        )
+        print(report)
 
         self.exit(0)
 
