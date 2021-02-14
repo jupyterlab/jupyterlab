@@ -279,7 +279,16 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     this.adapter.adapterConnected.connect(() =>
       this.switchDiagnosticsPanelSource()
     );
+    this.virtual_document.foreign_document_closed.connect(
+      (document, context) => {
+        this.clearDocumentDiagnostics(context.foreign_document);
+      }
+    );
     super.register();
+  }
+
+  clearDocumentDiagnostics(document: VirtualDocument) {
+    this.diagnostics_db.set(document, []);
   }
 
   private unique_editor_ids: DefaultMap<CodeMirror.Editor, number>;

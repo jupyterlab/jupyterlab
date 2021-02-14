@@ -252,7 +252,7 @@ export class VirtualDocument {
     this.unused_standalone_documents = new DefaultMap(
       () => new Array<VirtualDocument>()
     );
-    this._remaining_lifetime = 10;
+    this._remaining_lifetime = 6;
     this.foreign_document_closed = new Signal(this);
     this.foreign_document_opened = new Signal(this);
     this.changed = new Signal(this);
