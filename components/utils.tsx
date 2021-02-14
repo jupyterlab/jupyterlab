@@ -5,7 +5,8 @@ import React from 'react';
 
 export function get_breadcrumbs(
   document: VirtualDocument,
-  adapter: WidgetAdapter<IDocumentWidget>
+  adapter: WidgetAdapter<IDocumentWidget>,
+  collapse = true
 ): JSX.Element[] {
   return document.ancestry.map((document: VirtualDocument) => {
     if (!document.parent) {
@@ -16,7 +17,18 @@ export function get_breadcrumbs(
       ) {
         path = path.slice(0, -document.file_extension.length - 1);
       }
-      return <span key={document.uri}>{path}</span>;
+      const full_path = path;
+      if (collapse) {
+        let parts = path.split('/');
+        if (parts.length > 2) {
+          path = parts[0] + '/.../' + parts[parts.length - 1];
+        }
+      }
+      return (
+        <span key={document.uri} title={full_path}>
+          {path}
+        </span>
+      );
     }
     if (!document.virtual_lines.size) {
       return <span key={document.uri}>Empty document</span>;
