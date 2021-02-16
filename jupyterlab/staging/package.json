@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application-top",
-  "version": "1.2.16",
+  "version": "1.2.17",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -186,7 +186,7 @@
   },
   "jupyterlab": {
     "name": "JupyterLab",
-    "version": "1.2.18",
+    "version": "1.2.19",
     "extensions": {
       "@jupyterlab/application-extension": "",
       "@jupyterlab/apputils-extension": "",
