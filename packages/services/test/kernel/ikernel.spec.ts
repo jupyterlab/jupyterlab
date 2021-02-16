@@ -12,7 +12,7 @@ import {
   KernelMessage,
   KernelSpec,
   KernelSpecAPI,
-  KernelManager,
+  KernelManager
 } from '../../src';
 
 import {
