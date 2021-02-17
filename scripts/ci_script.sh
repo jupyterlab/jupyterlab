@@ -122,6 +122,10 @@ if [[ $GROUP == integrity2 ]]; then
     python -m build .
     twine check dist/*
 
+fi
+
+
+if [[ $GROUP == integrity3 ]]; then
     # Make sure we can bump the version
     # This must be done at the end so as not to interfere
     # with the other checks
@@ -272,6 +276,11 @@ if [[ $GROUP == usage ]]; then
     python -m jupyterlab.browser_check --dev-mode
     jlpm run remove:package foo
     jlpm run integrity
+
+fi
+
+
+if [[ $GROUP == usage2 ]]; then
 
     ## Test app directory support being a symlink
     mkdir tmp
