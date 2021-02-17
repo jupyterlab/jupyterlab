@@ -16,8 +16,7 @@ v3.0.8
 * Update MANIFEST.in to include package_data files.  (`#9780 <https://github.com/jupyterlab/jupyterlab/pull/9780>`__)
 * Correct synchronization of tags between metadata and tags widget.  (`#9773 <https://github.com/jupyterlab/jupyterlab/pull/9773>`__)
 * Fix use of hyphen in module name.  (`#9655 <https://github.com/jupyterlab/jupyterlab/pull/9655>`__)
-* Add missing default_url fields to more examples.  (`#9737 <https://github.com/jupyterlab/jupyterlab/pull/9737>`__)
-* Add missing default_url fields to examples.  (`#9731 <https://github.com/jupyterlab/jupyterlab/pull/9731>`__)
+* Add missing default_url fields to examples.  (`#9731 <https://github.com/jupyterlab/jupyterlab/pull/9731>`__, `#9737 <https://github.com/jupyterlab/jupyterlab/pull/9737>`__)
 
 v3.0.7
 ^^^^^^
