@@ -12,6 +12,8 @@ milestone on GitHub for the full list of pull requests and issues closed.
 
 v3.0.8
 ^^^^^^
+* Fix Services Tests.  (`#9806 <https://github.com/jupyterlab/jupyterlab/pull/9806>`__)
+* Enable jupyter labextension build/watch to work for custom jupyterlab distributions.  (`#9697 <https://github.com/jupyterlab/jupyterlab/pull/9697>`__)
 * Add hash to webpack requests to enable caching.  (`#9776 <https://github.com/jupyterlab/jupyterlab/pull/9776>`__)
 * Update MANIFEST.in to include package_data files.  (`#9780 <https://github.com/jupyterlab/jupyterlab/pull/9780>`__)
 * Correct synchronization of tags between metadata and tags widget.  (`#9773 <https://github.com/jupyterlab/jupyterlab/pull/9773>`__)
