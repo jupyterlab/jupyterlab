@@ -156,9 +156,10 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=True
     return full_dests
 
 
-def build_labextension(path, logger=None, development=False, static_url=None, source_map = False):
+def build_labextension(path, logger=None, development=False, static_url=None, source_map = False, core_path=None):
     """Build a labextension in the given path"""
-    core_path = osp.join(HERE, 'staging')
+    if core_path is None:
+        core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
 
     if logger:
@@ -177,9 +178,10 @@ def build_labextension(path, logger=None, development=False, static_url=None, so
     subprocess.check_call(arguments, cwd=ext_path)
 
 
-def watch_labextension(path, labextensions_path, logger=None, development=False, source_map=False):
+def watch_labextension(path, labextensions_path, logger=None, development=False, source_map=False, core_path=None):
     """Watch a labextension in a given path"""
-    core_path = osp.join(HERE, 'staging')
+    if core_path is None:
+        core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
 
     if logger:
