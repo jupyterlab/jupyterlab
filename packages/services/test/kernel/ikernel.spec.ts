@@ -12,8 +12,7 @@ import {
   KernelMessage,
   KernelSpec,
   KernelSpecAPI,
-  KernelManager,
-  KernelAPI
+  KernelManager
 } from '../../src';
 
 import {
@@ -57,8 +56,7 @@ describe('Kernel.IKernel', () => {
   });
 
   afterAll(async () => {
-    const models = await KernelAPI.listRunning();
-    await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
+    await kernelManager.shutdownAll();
   });
 
   describe('#disposed', () => {
