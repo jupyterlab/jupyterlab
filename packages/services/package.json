@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "6.0.3",
+  "version": "6.0.4",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -60,7 +60,7 @@
     "ws": "^7.2.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.4",
+    "@jupyterlab/testutils": "^3.0.5",
     "@types/jest": "^26.0.10",
     "@types/node": "^14.6.1",
     "@types/text-encoding": "^0.0.35",
