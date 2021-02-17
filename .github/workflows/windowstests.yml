@@ -10,6 +10,7 @@ jobs:
         group: [integrity, python]
       fail-fast: false
     runs-on: windows-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
