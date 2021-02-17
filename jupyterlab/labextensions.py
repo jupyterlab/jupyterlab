@@ -87,6 +87,7 @@ disable_aliases['level'] = 'DisableLabExtensionsApp.level'
 
 VERSION = get_app_version()
 
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     version = VERSION
@@ -211,15 +212,20 @@ class BuildLabExtensionApp(BaseExtensionApp):
     source_map = Bool(False, config=True,
         help="Generage source maps")
 
+    core_path = Unicode(os.path.join(HERE, 'staging'), config=True,
+        help="Directory containing core application package.json file")
+
     aliases = {
         'static-url': 'BuildLabExtensionApp.static_url',
         'development': 'BuildLabExtensionApp.development',
-        'source-map': 'BuildLabExtensionApp.source_map'
+        'source-map': 'BuildLabExtensionApp.source_map',
+        'core-path': 'BuildLabExtensionApp.core_path'
     }
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(self.extra_args[0], logger=self.log, development=self.development, static_url=self.static_url or None, source_map = self.source_map)
+        build_labextension(self.extra_args[0], logger=self.log, development=self.development, static_url=self.static_url or None, source_map = self.source_map,
+        core_path = self.core_path or None)
 
 
 class WatchLabExtensionApp(BaseExtensionApp):
@@ -231,15 +237,19 @@ class WatchLabExtensionApp(BaseExtensionApp):
     source_map = Bool(False, config=True,
         help="Generage source maps")
 
+    core_path = Unicode(os.path.join(HERE, 'staging'), config=True,
+        help="Directory containing core application package.json file")
+
     aliases = {
         'development': 'BuildLabExtensionApp.development',
-        'source-map': 'BuildLabExtensionApp.source_map'
-
+        'source-map': 'BuildLabExtensionApp.source_map',
+        'core-path': 'BuildLabExtensionApp.core_path'
     }
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         labextensions_path = self.labextensions_path
-        watch_labextension(self.extra_args[0], labextensions_path, logger=self.log, development=self.development, source_map=self.source_map)
+        watch_labextension(self.extra_args[0], labextensions_path, logger=self.log, development=self.development, source_map=self.source_map,
+        core_path = self.core_path or None)
 
 
 class UpdateLabExtensionApp(BaseExtensionApp):
