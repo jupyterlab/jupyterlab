@@ -278,13 +278,22 @@ class SocketTester implements IService {
   protected settings: ServerConnection.ISettings;
 }
 
+export class FakeKernelManager extends KernelManager {
+  // Override requestRunning since we aren't starting kernels
+  // on the server.
+  // This prevents kernel connections from being culled.
+  requestRunning(): Promise<void> {
+    return Promise.resolve(void 0);
+  }
+}
+
 /**
  * Kernel class test rig.
  */
 export class KernelTester extends SocketTester {
   constructor() {
     super();
-    this._kernelManager = new KernelManager({
+    this._kernelManager = new FakeKernelManager({
       serverSettings: this.serverSettings
     });
   }
