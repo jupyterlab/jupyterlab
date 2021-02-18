@@ -156,6 +156,12 @@ if [[ $GROUP == integrity3 ]]; then
 fi
 
 
+if [[ $GROUP == release_check ]]; then
+    jlpm run publish:js --dry-run
+    jlpm run prepare:python-release
+    ./scripts/release_test.sh
+fi
+
 if [[ $GROUP == examples ]]; then
     # Run the integrity script to link binary files
     jlpm integrity

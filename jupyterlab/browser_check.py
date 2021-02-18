@@ -180,6 +180,7 @@ class BrowserApp(LabApp):
     serverapp_config = {
         "base_url": "/foo/"
     }
+    default_url = "/lab?reset"
     ip = '127.0.0.1'
     flags = test_flags
     aliases = test_aliases
