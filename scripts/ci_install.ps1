@@ -13,9 +13,6 @@ if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" 
 pip --version
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
-pip install jupyter_packaging
-if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
-
 # Show a verbose install if the install fails, for debugging
 pip install -e ".[test]" || pip install -v -e ".[test]"
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }

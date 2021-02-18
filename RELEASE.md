@@ -71,15 +71,26 @@ Results:
 
 ## Publishing Packages
 
-Now publish the JS packages and build the python packages
+Now publish the JS packages
 
 ```bash
-npm run publish:all
+npm run publish:js
 ```
 
-If there is a network error during JS publish, run `npm run publish:all --skip-build` to resume publish without requiring another clean and build phase of the JS packages.
+If there is a network error during JS publish, run `npm run publish:js --skip-build` to resume publish without requiring another clean and build phase of the JS packages.
 
 Note that the use of `npm` instead of `jlpm` is [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
+
+Next, prepare the python release by running:
+
+```bash
+npm run prepare:python-release
+```
+
+This will update the Python package to use the new JS packages and
+create the Python release assets. Note: sometimes the npm registry
+is slow to update with the new packages, so this script tries to fetch
+the packages until they are available.
 
 At this point, run the `./scripts/release_test.sh` to test the wheel in
 a fresh conda environment with and without extensions installed. Open and run

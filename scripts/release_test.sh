@@ -26,16 +26,17 @@ jupyter labextension develop extension
 jupyter labextension build extension
 popd
 
-# Install third party widgets - allow to fail
-pip install --pre jupyterlab_widgets; true
-
 pushd $TEST_DIR
 
-conda install --override-channels --strict-channel-priority -c conda-forge -c anaconda -y ipywidgets altair matplotlib vega_datasets
+conda install --override-channels --strict-channel-priority -c conda-forge -c anaconda -y ipywidgets altair matplotlib vega_datasets jupyterlab_widgets
 
 jupyter lab build
 python -m jupyterlab.browser_check
-jupyter lab
+
+# if not running on github actions, start JupyterLab
+if [[ -z "${GITHUB_ACTIONS}" ]]; then
+    jupyter lab
+fi
 
 # undo our environment changes just in case we are sourcing this script
 conda deactivate
