@@ -37,9 +37,13 @@ from .handlers.extension_manager_handler import (
     extensions_handler_path, ExtensionManager, ExtensionHandler
 )
 from .handlers.error_handler import ErrorHandler
-from .handlers.licenses_handler import (
-    licenses_handler_path, LicensesHandler, LicensesManager
-)
+
+
+# TODO: remove when oldest compatible jupyter_server contains license tooling
+try:
+    from jupyterlab_server.licenses_handler import LicensesManager
+except ImportError:
+    LicensesManager = None
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -415,75 +419,79 @@ class LabWorkspaceApp(JupyterApp):
         self.exit(0)
 
 
-class LabLicensesApp(JupyterApp):
-    version = version
-    description = """
-    Report frontend licenses
-    """
+if LicensesManager is not None:
+    # TODO: should this subclass LabConfig? LabApp?
+    class LabLicensesApp(JupyterApp):
+        version = version
+        description = """
+        Report frontend licenses
+        """
 
-    dev_mode = Bool(False, config=True,
-        help="""Whether to start the app in dev mode. Uses the unpublished local
-        JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
-        show a red stripe at the top of the page.  It can only be used if JupyterLab
-        is installed as `pip install -e .`.
-        """)
+        dev_mode = Bool(False, config=True,
+            help="""Whether to start the app in dev mode. Uses the unpublished local
+            JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
+            show a red stripe at the top of the page.  It can only be used if JupyterLab
+            is installed as `pip install -e .`.
+            """)
 
-    app_dir = Unicode('', config=True,
-        help='The app directory for which to show licenses')
+        app_dir = Unicode('', config=True,
+            help='The app directory for which to show licenses')
 
-    full_text = Bool(False, config=True,
-        help='Also print out full license text (if available)')
+        full_text = Bool(False, config=True,
+            help='Also print out full license text (if available)')
 
-    report_format = Enum(["markdown", "json", "csv"], "markdown", config=True,
-        help="Reporter format")
+        report_format = Enum(["markdown", "json", "csv"], "markdown", config=True,
+            help="Reporter format")
 
-    bundles_pattern = Unicode('.*', config=True,
-        help='A regular expression of bundles to print')
+        bundles_pattern = Unicode('.*', config=True,
+            help='A regular expression of bundles to print')
 
-    aliases = {
-        **base_aliases,
-        'bundles': 'LabLicensesApp.bundles_pattern',
-        'report-format': 'LabLicensesApp.report_format'
-    }
+        aliases = {
+            **base_aliases,
+            'bundles': 'LabLicensesApp.bundles_pattern',
+            'report-format': 'LabLicensesApp.report_format'
+        }
 
-    flags = {
-        **base_flags,
-        'dev-mode': (
-            {'LabLicensesApp': {'dev_mode': True}},
-            "Start the app in dev mode for running from source."
-        ),
-        'full-text': (
-            {'LabLicensesApp': {'full_text': True}},
-            "Print out full license text (if available)"
-        ),
-        'json': (
-            {'LabLicensesApp': {'report_format': 'json'}},
-            "Print out report as JSON (implies --full-text)"
-        ),
-        'csv': (
-            {'LabLicensesApp': {'report_format': 'csv'}},
-            "Print out report as CSV (implies --full-text)"
-        )
-    }
+        flags = {
+            **base_flags,
+            'dev-mode': (
+                {'LabLicensesApp': {'dev_mode': True}},
+                "Start the app in dev mode for running from source."
+            ),
+            'full-text': (
+                {'LabLicensesApp': {'full_text': True}},
+                "Print out full license text (if available)"
+            ),
+            'json': (
+                {'LabLicensesApp': {'report_format': 'json'}},
+                "Print out report as JSON (implies --full-text)"
+            ),
+            'csv': (
+                {'LabLicensesApp': {'report_format': 'csv'}},
+                "Print out report as CSV (implies --full-text)"
+            )
+        }
 
-    @default('app_dir')
-    def _default_app_dir(self):
-        return get_app_dir()
+        @default('app_dir')
+        def _default_app_dir(self):
+            # TODO: is this sufficient?
+            return get_app_dir()
 
-    def start(self):
-        # TODO: how do these ever get set?
-        self.labextensions_path = []
-        self.extra_labextensions_path = []
+        def start(self):
+            lab_config = LabConfig()
+            manager = LicensesManager(
+                labextensions_path=sum([
+                    lab_config.labextensions_path +
+                    lab_config.extra_labextensions_path
+                ], [])
+            )
+            report, _mime = manager.report(
+                report_format=self.report_format,
+                full_text=self.full_text,
+                bundles_pattern=self.bundles_pattern
+            )
 
-        manager = LicensesManager(parent=self)
-        report, _mime = manager.report(
-            report_format=self.report_format,
-            full_text=self.full_text,
-            bundles_pattern=self.bundles_pattern
-        )
-        print(report)
-
-        self.exit(0)
+            self.exit(0)
 
 
 aliases = dict(base_aliases)
@@ -569,12 +577,17 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
         clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
-        licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0]),
         path=(LabPathApp, LabPathApp.description.splitlines()[0]),
         paths=(LabPathApp, LabPathApp.description.splitlines()[0]),
         workspace=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
         workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0])
     )
+
+    # TODO: remove when oldest compatible jupyter_server contains license tooling
+    if LicensesManager is not None:
+        subcommands.update(
+            licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0])
+        )
 
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
@@ -779,14 +792,6 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
                 {'manager': ext_manager}
             )
             handlers.append(ext_handler)
-
-        licenses_manager = LicensesManager(parent=self)
-        licenses_handler = (
-            licenses_handler_path,
-            LicensesHandler,
-            {'manager': licenses_manager}
-        )
-        handlers.append(licenses_handler)
 
         # If running under JupyterHub, add more metadata.
         if 'hub_prefix' in self.serverapp.tornado_settings:
