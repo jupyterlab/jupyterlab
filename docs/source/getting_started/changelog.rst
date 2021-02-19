@@ -10,6 +10,17 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.8
+^^^^^^
+* ``@jupyterlab/rendermime``: upgraded `marked` dep past vulnerability.   (`#9809 <https://github.com/jupyterlab/jupyterlab/pull/9809>`__)
+* Fix Services Tests.  (`#9806 <https://github.com/jupyterlab/jupyterlab/pull/9806>`__)
+* Enable jupyter labextension build/watch to work for custom jupyterlab distributions.  (`#9697 <https://github.com/jupyterlab/jupyterlab/pull/9697>`__)
+* Add hash to webpack requests to enable caching.  (`#9776 <https://github.com/jupyterlab/jupyterlab/pull/9776>`__)
+* Update MANIFEST.in to include package_data files.  (`#9780 <https://github.com/jupyterlab/jupyterlab/pull/9780>`__)
+* Correct synchronization of tags between metadata and tags widget.  (`#9773 <https://github.com/jupyterlab/jupyterlab/pull/9773>`__)
+* Fix use of hyphen in module name.  (`#9655 <https://github.com/jupyterlab/jupyterlab/pull/9655>`__)
+* Add missing default_url fields to examples.  (`#9731 <https://github.com/jupyterlab/jupyterlab/pull/9731>`__, `#9737 <https://github.com/jupyterlab/jupyterlab/pull/9737>`__)
+
 v3.0.7
 ^^^^^^
 * Add link for prebuilt extensions too.  (`#9702 <https://github.com/jupyterlab/jupyterlab/pull/9702>`__)

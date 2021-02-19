@@ -7,16 +7,22 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, docs, usage, python, examples, interop, nonode, linkcheck, lint]
+        group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, python, examples, interop, nonode, linkcheck, lint]
         python: [3.6, 3.8]
         exclude:
           - group: integrity
             python: 3.6
           - group: integrity2
             python: 3.6
+          - group: integrity3
+            python: 3.6
+          - group: release_check
+            python: 3.6
           - group: docs
             python: 3.6
           - group: usage
+            python: 3.6
+          - group: usage2
             python: 3.6
           - group: linkcheck
             python: 3.6
@@ -27,7 +33,7 @@ jobs:
           - group: examples
             python: 3.6
       fail-fast: false
-    timeout-minutes: 120
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

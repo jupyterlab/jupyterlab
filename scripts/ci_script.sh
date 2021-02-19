@@ -122,6 +122,10 @@ if [[ $GROUP == integrity2 ]]; then
     python -m build .
     twine check dist/*
 
+fi
+
+
+if [[ $GROUP == integrity3 ]]; then
     # Make sure we can bump the version
     # This must be done at the end so as not to interfere
     # with the other checks
@@ -151,6 +155,12 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm run prepublish:check
 fi
 
+
+if [[ $GROUP == release_check ]]; then
+    jlpm run publish:js --dry-run
+    jlpm run prepare:python-release
+    ./scripts/release_test.sh
+fi
 
 if [[ $GROUP == examples ]]; then
     # Run the integrity script to link binary files
@@ -210,6 +220,7 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
     jupyter labextension build extension --static-url /foo/
+    jupyter labextension build extension --core-path ../../../examples/federated/core_package
     jupyter labextension disable @jupyterlab/mock-extension --debug
     jupyter labextension enable @jupyterlab/mock-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
@@ -271,6 +282,11 @@ if [[ $GROUP == usage ]]; then
     python -m jupyterlab.browser_check --dev-mode
     jlpm run remove:package foo
     jlpm run integrity
+
+fi
+
+
+if [[ $GROUP == usage2 ]]; then
 
     ## Test app directory support being a symlink
     mkdir tmp

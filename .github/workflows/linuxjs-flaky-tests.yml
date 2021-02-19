@@ -1,60 +1,55 @@
-name: Windows Tests
+name: Linux JS Flaky Tests
 
 on: [push, pull_request]
 
 jobs:
-  windowstests:
-    name: Windows
+  linuxjs:
+    name: JS
     strategy:
       matrix:
-        group: [integrity, python]
+        group: [s-apputils]
       fail-fast: false
-    runs-on: windows-latest
-    timeout-minutes: 40
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.6
+          python-version: 3.8
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - name: Cache pip on Windows
-        uses: actions/cache@v2
-        if: startsWith(runner.os, 'Windows')
+      - name: Cache pip on Linux
+        uses: actions/cache@v1
+        if: startsWith(runner.os, 'Linux')
         with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', 'setup.py') }}-2
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python }}-${{ hashFiles('**/requirements.txt', 'setup.py') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-pip-${{ matrix.python }}
 
       # Cache yarn
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
       - name: Cache yarn
-        uses: actions/cache@v2
+        uses: actions/cache@v1
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-2
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-
-      - name: Enable long paths
-        run: Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem -Name LongPathsEnabled -Value 1
-        shell: pwsh
 
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
-        run: .\scripts\ci_install
-        shell: pwsh
-
+        run: |
+          bash ./scripts/ci_install.sh
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
-        run: .\scripts\ci_script
-        shell: pwsh
+        run: |
+          bash ./scripts/ci_script.sh
+
