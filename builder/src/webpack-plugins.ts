@@ -170,21 +170,54 @@ export namespace WPPlugin {
     options: DuplicatePackageCheckerPlugin.Options;
   }
 
-  /** A single module's license(s) */
-  export interface ILicenseRecord {
-    version: string;
-    licenseId: string | null;
-    licenseText: string | null;
-  }
-
-  /** A top-level report of the licenses for all code included in a build */
+  /**
+   * A top-level report of the licenses for all code included in a bundle
+   *
+   * ### Note
+   *
+   * This is roughly informed by the terms defined in the SPDX spec, though is not
+   * an SPDX Document, since there seem to be several (incompatible) specs
+   * in that repo.
+   *
+   * @see https://github.com/spdx/spdx-spec/blob/development/v2.2.1/schemas/spdx-schema.json
+   **/
   export interface ILicenseReport {
-    licenses: {
-      [key: string]: ILicenseRecord;
-    };
+    packages: IPackageLicenseInfo[];
   }
 
-  export const LICENSE_REPORT_FILENAME = 'third-party-licenses.json';
+  /**
+   * A best-effort single bundled package's information.
+   *
+   * ### Note
+   *
+   * This is roughly informed by SPDX `packages` and `hasExtractedLicenseInfos`,
+   * as making it conformant would vastly complicate the structure.
+   *
+   * @see https://github.com/spdx/spdx-spec/blob/development/v2.2.1/schemas/spdx-schema.json
+   **/
+  export interface IPackageLicenseInfo {
+    /** the name of the package as it appears in node_modules */
+    name: string;
+    /** the version of the package, or an empty string if unknown */
+    versionInfo: string;
+    /** an SPDX license or LicenseRef, or an empty string if unknown */
+    licenseId: string;
+    /** the verbatim extracted text of the license, or an empty string if unknown */
+    extractedText: string;
+  }
+
+  /**
+   * A well-known filename for third-party license information.
+   *
+   * ### Note
+   * If an alternate JupyterLab-based ecosystem wanted to implement a different
+   * name, they may _still_ need to handle the presence of this file if reusing
+   * any core files or extensions.
+   *
+   * If multiple files are found by `jupyterlab_server, their `packages` will
+   * be concatenated.
+   */
+  export const DEFAULT_LICENSE_REPORT_FILENAME = 'third-party-licenses.json';
 
   /**
    * a plugin that creates a predictable, machine-readable report of licenses for
@@ -193,32 +226,29 @@ export namespace WPPlugin {
   export class JSONLicenseWebpackPlugin extends LicenseWebpackPlugin {
     constructor(pluginOptions: PluginOptions = {}) {
       super({
+        outputFilename: DEFAULT_LICENSE_REPORT_FILENAME,
         ...pluginOptions,
         renderLicenses: modules => this.renderLicensesJSON(modules),
         perChunkOutput: false,
-        outputFilename: LICENSE_REPORT_FILENAME
       });
     }
 
-    /** render a simple JSON slug */
+    /** render an SPDX-like record */
     renderLicensesJSON(modules: LicenseIdentifiedModule[]): string {
-      const licenseData: ILicenseReport = {
-        licenses: modules
-          .sort((left, right) => (left.name < right.name ? -1 : 1))
-          .reduce(
-            (memo, module) => ({
-              ...memo,
-              [module.name]: {
-                version: module.packageJson.version,
-                licenseId: module.licenseId || null,
-                licenseText: module.licenseText || null
-              }
-            }),
-            {} as Record<string, ILicenseRecord>
-          )
-      };
+      const report: ILicenseReport = {packages: []};
 
-      return JSON.stringify(licenseData, null, 2);
+      modules.sort((left, right) => (left.name < right.name ? -1 : 1));
+
+      for (const mod of modules) {
+        report.packages.push({
+          name: mod.name || '',
+          versionInfo: mod.packageJson.version || '',
+          licenseId: mod.licenseId || '',
+          extractedText: mod.licenseText || ''
+        });
+      }
+
+      return JSON.stringify(report, null, 2);
     }
   }
 }
