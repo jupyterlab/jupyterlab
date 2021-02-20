@@ -229,13 +229,13 @@ export namespace WPPlugin {
         outputFilename: DEFAULT_LICENSE_REPORT_FILENAME,
         ...pluginOptions,
         renderLicenses: modules => this.renderLicensesJSON(modules),
-        perChunkOutput: false,
+        perChunkOutput: false
       });
     }
 
     /** render an SPDX-like record */
     renderLicensesJSON(modules: LicenseIdentifiedModule[]): string {
-      const report: ILicenseReport = {packages: []};
+      const report: ILicenseReport = { packages: [] };
 
       modules.sort((left, right) => (left.name < right.name ? -1 : 1));
 
