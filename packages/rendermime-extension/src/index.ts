@@ -11,6 +11,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ISanitizer } from '@jupyterlab/apputils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -31,7 +32,7 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
   id: '@jupyterlab/rendermime-extension:plugin',
-  requires: [ITranslator],
+  requires: [ITranslator, ISanitizer],
   optional: [IDocumentManager, ILatexTypesetter],
   provides: IRenderMimeRegistry,
   activate: activate,
@@ -50,8 +51,9 @@ function activate(
   app: JupyterFrontEnd,
   translator: ITranslator,
   docManager: IDocumentManager | null,
-  latexTypesetter: ILatexTypesetter | null
-) {
+  latexTypesetter: ILatexTypesetter | null,
+  sanitizer: ISanitizer
+): RenderMimeRegistry {
   const trans = translator.load('jupyterlab');
   if (docManager) {
     app.commands.addCommand(CommandIDs.handleLink, {
@@ -99,6 +101,7 @@ function activate(
           }
         },
     latexTypesetter: latexTypesetter ?? undefined,
-    translator: translator
+    translator: translator,
+    sanitizer: sanitizer
   });
 }

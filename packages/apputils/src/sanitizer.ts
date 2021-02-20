@@ -5,6 +5,17 @@
 // it which acts as a polyfill for browsers.
 import sanitize from 'sanitize-html';
 
+import { Token } from '@lumino/coreutils';
+
+/* tslint:disable */
+/**
+ * The sanitizer token.
+ */
+export const ISanitizer = new Token<ISanitizer>(
+  '@jupyterlab/apputils:ISanitizer'
+);
+/* tslint:enable */
+
 export interface ISanitizer {
   /**
    * Sanitize an HTML string.
@@ -453,7 +464,7 @@ class CssProp {
 /**
  * A class to sanitize HTML strings.
  */
-class Sanitizer implements ISanitizer {
+export class Sanitizer implements ISanitizer {
   /**
    * Sanitize an HTML string.
    *
