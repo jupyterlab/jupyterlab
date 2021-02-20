@@ -3,6 +3,7 @@
 **/lib
 **/package.json
 **/static
+**/.ipynb_checkpoints
 tests/**/coverage
 
 .eggs
