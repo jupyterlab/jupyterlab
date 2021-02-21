@@ -30,9 +30,15 @@ import { KernelMessage } from '@jupyterlab/services';
 
 import { ITranslator } from '@jupyterlab/translation';
 
-import { jupyterIcon, jupyterlabWordmarkIcon } from '@jupyterlab/ui-components';
+import {
+  jupyterIcon,
+  jupyterlabWordmarkIcon,
+  copyrightIcon
+} from '@jupyterlab/ui-components';
 
 import { Menu } from '@lumino/widgets';
+
+import { Licenses } from './licenses';
 
 import * as React from 'react';
 
@@ -51,6 +57,8 @@ namespace CommandIDs {
   export const show = 'help:show';
 
   export const hide = 'help:hide';
+
+  export const licenses = 'help:licenses';
 
   export const launchClassic = 'help:launch-classic-notebook';
 }
@@ -164,7 +172,8 @@ function activate(
   const helpMenu = mainMenu.helpMenu;
   const labGroup = [
     CommandIDs.about,
-    CommandIDs.launchClassic
+    CommandIDs.launchClassic,
+    CommandIDs.licenses
   ].map(command => ({ command }));
   helpMenu.addGroup(labGroup, 0);
 
@@ -390,6 +399,26 @@ function activate(
     }
   });
 
+  const licensesUrl = PageConfig.getOption('licensesUrl');
+
+  if (licensesUrl) {
+    commands.addCommand(CommandIDs.licenses, {
+      label: trans.__('Licenses'),
+      execute: () => {
+        const model = new Licenses.Model({
+          licensesUrl: URLExt.join(baseUrl, licensesUrl) + '/',
+          trans
+        });
+        const content = new Licenses({ model });
+        content.id = `${namespace}-${++counter}`;
+        content.title.label = trans.__('Licenses');
+        content.title.icon = copyrightIcon;
+        const main = new MainAreaWidget({ content });
+        shell.add(main, 'main');
+      }
+    });
+  }
+
   if (palette) {
     resources.forEach(args => {
       palette.addItem({ args, command: CommandIDs.open, category });
@@ -400,5 +429,8 @@ function activate(
       category
     });
     palette.addItem({ command: CommandIDs.launchClassic, category });
+    if (licensesUrl) {
+      palette.addItem({ command: CommandIDs.licenses, category });
+    }
   }
 }

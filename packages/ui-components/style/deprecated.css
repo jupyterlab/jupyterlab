@@ -31,6 +31,7 @@
   --jp-icon-code: url('icons/toolbar/code.svg');
   --jp-icon-console: url('icons/filetype/console.svg');
   --jp-icon-copy: url('icons/toolbar/copy.svg');
+  --jp-icon-copyright: url('icons/licenses/copyright.svg');
   --jp-icon-cut: url('icons/toolbar/cut.svg');
   --jp-icon-download: url('icons/toolbar/download.svg');
   --jp-icon-edit: url('icons/toolbar/edit.svg');
@@ -148,6 +149,9 @@
 }
 .jp-CopyIcon {
   background-image: var(--jp-icon-copy);
+}
+.jp-CopyrightIcon {
+  background-image: var(--jp-icon-copyright);
 }
 .jp-CutIcon {
   background-image: var(--jp-icon-cut);

@@ -46,6 +46,8 @@
     "@jupyterlab/services": "^6.1.0-alpha.3",
     "@jupyterlab/translation": "^3.1.0-alpha.3",
     "@jupyterlab/ui-components": "^3.1.0-alpha.3",
+    "@lumino/coreutils": "^1.5.3",
+    "@lumino/datagrid": "^0.16.1",
     "@lumino/widgets": "^1.16.1",
     "react": "^17.0.1"
   },

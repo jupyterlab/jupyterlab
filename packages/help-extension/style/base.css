@@ -82,3 +82,12 @@
   flex-direction: column;
   margin-left: 16px;
 }
+
+.jp-Licenses {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Licenses-Grid {
+  flex: 1 1 auto;
+}
