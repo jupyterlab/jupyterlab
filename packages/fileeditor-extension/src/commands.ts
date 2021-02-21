@@ -591,6 +591,7 @@ export namespace Commands {
           (widget && PathExt.extname(widget.context.path) === '.md') || false
         );
       },
+      icon: markdownIcon,
       label: trans.__('Show Markdown Preview')
     });
   }
