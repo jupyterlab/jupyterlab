@@ -38,8 +38,9 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import {
-  cutIcon,
+  consoleIcon,
   copyIcon,
+  cutIcon,
   markdownIcon,
   pasteIcon,
   redoIcon,
@@ -443,6 +444,7 @@ export namespace Commands {
         return getCreateConsoleFunction(commands)(widget, args);
       },
       isEnabled,
+      icon: consoleIcon,
       label: trans.__('Create Console for Editor')
     });
   }
