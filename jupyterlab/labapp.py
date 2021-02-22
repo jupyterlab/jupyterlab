@@ -657,12 +657,6 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         # Client-side code assumes notebookVersion is a JSON-encoded string
         page_config['notebookVersion'] = json.dumps(jpserver_version_info)
 
-        if self.serverapp.file_to_run:
-            relpath = os.path.relpath(self.serverapp.file_to_run, self.serverapp.root_dir)
-            uri = url_escape(ujoin('{}/tree'.format(self.app_url), *relpath.split(os.sep)))
-            self.default_url = uri
-            self.serverapp.file_to_run = ''
-
         self.log.info('JupyterLab extension loaded from %s' % HERE)
         self.log.info('JupyterLab application directory is %s' % self.app_dir)
 
