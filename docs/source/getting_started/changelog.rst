@@ -10,6 +10,15 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.9
+^^^^^^
+* Remove the previous ``file_to_run`` logic. (`#9848 <https://github.com/jupyterlab/jupyterlab/pull/9848>`__)
+* Enable Caching in Production Minimized Mode. (`#9834 <https://github.com/jupyterlab/jupyterlab/pull/9834>`__)
+* Remove the auto-switch to “mobile” mode, and behavior switches associated with mobile mode. (`#9832 <https://github.com/jupyterlab/jupyterlab/pull/9832>`__)
+* Fix the display of breakpoints on restore. (`#9828 <https://github.com/jupyterlab/jupyterlab/pull/9828>`__)
+* Update CI script timeouts. (`#9825 <https://github.com/jupyterlab/jupyterlab/pull/9825>`__)
+* Fix mimerender test example and test in CI. (`#9820 <https://github.com/jupyterlab/jupyterlab/pull/9820>`__)
+
 v3.0.8
 ^^^^^^
 * ``@jupyterlab/rendermime``: upgraded `marked` dep past vulnerability.   (`#9809 <https://github.com/jupyterlab/jupyterlab/pull/9809>`__)
