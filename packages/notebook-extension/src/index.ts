@@ -396,6 +396,17 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
 };
 
 /**
+ * The cloned output provider.
+ */
+const clonedOutputsPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:cloned-outputs',
+  requires: [IDocumentManager, INotebookTracker, ITranslator],
+  optional: [ILayoutRestorer],
+  activate: activateClonedOutputs,
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -405,7 +416,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   commandEditItem,
   notebookTrustItem,
   widgetFactoryPlugin,
-  logNotebookOutput
+  logNotebookOutput,
+  clonedOutputsPlugin
 ];
 export default plugins;
 
@@ -555,6 +567,97 @@ function activateWidgetFactory(
 }
 
 /**
+ * Activate the plugin to create and track cloned outputs.
+ */
+function activateClonedOutputs(
+  app: JupyterFrontEnd,
+  docManager: IDocumentManager,
+  notebookTracker: INotebookTracker,
+  translator: ITranslator,
+  restorer: ILayoutRestorer | null
+): void {
+  const trans = translator.load('jupyterlab');
+  const clonedOutputs = new WidgetTracker<
+    MainAreaWidget<Private.ClonedOutputArea>
+  >({
+    namespace: 'cloned-outputs'
+  });
+
+  if (restorer) {
+    void restorer.restore(clonedOutputs, {
+      command: CommandIDs.createOutputView,
+      args: widget => ({
+        path: widget.content.path,
+        index: widget.content.index
+      }),
+      name: widget => `${widget.content.path}:${widget.content.index}`,
+      when: notebookTracker.restored // After the notebook widgets (but not contents).
+    });
+  }
+
+  const { commands, shell } = app;
+
+  const isEnabledAndSingleSelected = (): boolean => {
+    return Private.isEnabledAndSingleSelected(shell, notebookTracker);
+  };
+
+  commands.addCommand(CommandIDs.createOutputView, {
+    label: trans.__('Create New View for Output'),
+    execute: async args => {
+      let cell: CodeCell | undefined;
+      let current: NotebookPanel | undefined | null;
+      // If we are given a notebook path and cell index, then
+      // use that, otherwise use the current active cell.
+      const path = args.path as string | undefined | null;
+      let index = args.index as number | undefined | null;
+      if (path && index !== undefined && index !== null) {
+        current = docManager.findWidget(path, FACTORY) as NotebookPanel;
+        if (!current) {
+          return;
+        }
+      } else {
+        current = notebookTracker.currentWidget;
+        if (!current) {
+          return;
+        }
+        cell = current.content.activeCell as CodeCell;
+        index = current.content.activeCellIndex;
+      }
+      // Create a MainAreaWidget
+      const content = new Private.ClonedOutputArea({
+        notebook: current,
+        cell,
+        index,
+        translator
+      });
+      const widget = new MainAreaWidget({ content });
+      current.context.addSibling(widget, {
+        ref: current.id,
+        mode: 'split-bottom'
+      });
+
+      const updateCloned = () => {
+        void clonedOutputs.save(widget);
+      };
+
+      current.context.pathChanged.connect(updateCloned);
+      current.context.model?.cells.changed.connect(updateCloned);
+
+      // Add the cloned output to the output widget tracker.
+      void clonedOutputs.add(widget);
+
+      // Remove the output view if the parent notebook is closed.
+      current.content.disposed.connect(() => {
+        current!.context.pathChanged.disconnect(updateCloned);
+        current!.context.model?.cells.changed.disconnect(updateCloned);
+        widget.dispose();
+      });
+    },
+    isEnabled: isEnabledAndSingleSelected
+  });
+}
+
+/**
  * Activate the notebook handler extension.
  */
 function activateNotebookHandler(
@@ -575,11 +678,6 @@ function activateNotebookHandler(
 
   const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
-  const clonedOutputs = new WidgetTracker<
-    MainAreaWidget<Private.ClonedOutputArea>
-  >({
-    namespace: 'cloned-outputs'
-  });
 
   // Handle state restoration.
   if (restorer) {
@@ -589,29 +687,13 @@ function activateNotebookHandler(
       name: panel => panel.context.path,
       when: services.ready
     });
-    void restorer.restore(clonedOutputs, {
-      command: CommandIDs.createOutputView,
-      args: widget => ({
-        path: widget.content.path,
-        index: widget.content.index
-      }),
-      name: widget => `${widget.content.path}:${widget.content.index}`,
-      when: tracker.restored // After the notebook widgets (but not contents).
-    });
   }
 
   const registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
 
-  addCommands(
-    app,
-    docManager,
-    services,
-    tracker,
-    clonedOutputs,
-    translator,
-    sessionDialogs
-  );
+  addCommands(app, tracker, translator, sessionDialogs);
+
   if (palette) {
     populatePalette(palette, services, translator);
   }
@@ -928,10 +1010,7 @@ function activateNotebookHandler(
  */
 function addCommands(
   app: JupyterFrontEnd,
-  docManager: IDocumentManager,
-  services: ServiceManager,
   tracker: NotebookTracker,
-  clonedOutputs: WidgetTracker<MainAreaWidget>,
   translator: ITranslator,
   sessionDialogs: ISessionContextDialogs | null
 ): void {
@@ -952,34 +1031,13 @@ function addCommands(
     return widget;
   }
 
-  /**
-   * Whether there is an active notebook.
-   */
-  function isEnabled(): boolean {
-    return (
-      tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
-    );
-  }
+  const isEnabled = (): boolean => {
+    return Private.isEnabled(shell, tracker);
+  };
 
-  /**
-   * Whether there is an notebook active, with a single selected cell.
-   */
-  function isEnabledAndSingleSelected(): boolean {
-    if (!isEnabled()) {
-      return false;
-    }
-    const { content } = tracker.currentWidget!;
-    const index = content.activeCellIndex;
-    // If there are selections that are not the active cell,
-    // this command is confusing, so disable it.
-    for (let i = 0; i < content.widgets.length; ++i) {
-      if (content.isSelected(content.widgets[i]) && i !== index) {
-        return false;
-      }
-    }
-    return true;
-  }
+  const isEnabledAndSingleSelected = (): boolean => {
+    return Private.isEnabledAndSingleSelected(shell, tracker);
+  };
 
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: trans.__('Run Selected Cells'),
@@ -1330,10 +1388,7 @@ function addCommands(
           });
       }
     },
-    isEnabled: () => {
-      // Can't run if there are multiple cells selected
-      return isEnabledAndSingleSelected();
-    }
+    isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: trans.__('Restart Kernel and Run All Cells…'),
@@ -1732,60 +1787,6 @@ function addCommands(
       }
     },
     isEnabled
-  });
-  commands.addCommand(CommandIDs.createOutputView, {
-    label: trans.__('Create New View for Output'),
-    execute: async args => {
-      let cell: CodeCell | undefined;
-      let current: NotebookPanel | undefined | null;
-      // If we are given a notebook path and cell index, then
-      // use that, otherwise use the current active cell.
-      const path = args.path as string | undefined | null;
-      let index = args.index as number | undefined | null;
-      if (path && index !== undefined && index !== null) {
-        current = docManager.findWidget(path, FACTORY) as NotebookPanel;
-        if (!current) {
-          return;
-        }
-      } else {
-        current = getCurrent({ ...args, activate: false });
-        if (!current) {
-          return;
-        }
-        cell = current.content.activeCell as CodeCell;
-        index = current.content.activeCellIndex;
-      }
-      // Create a MainAreaWidget
-      const content = new Private.ClonedOutputArea({
-        notebook: current,
-        cell,
-        index,
-        translator
-      });
-      const widget = new MainAreaWidget({ content });
-      current.context.addSibling(widget, {
-        ref: current.id,
-        mode: 'split-bottom'
-      });
-
-      const updateCloned = () => {
-        void clonedOutputs.save(widget);
-      };
-
-      current.context.pathChanged.connect(updateCloned);
-      current.context.model?.cells.changed.connect(updateCloned);
-
-      // Add the cloned output to the output widget tracker.
-      void clonedOutputs.add(widget);
-
-      // Remove the output view if the parent notebook is closed.
-      current.content.disposed.connect(() => {
-        current!.context.pathChanged.disconnect(updateCloned);
-        current!.context.model?.cells.changed.disconnect(updateCloned);
-        widget.dispose();
-      });
-    },
-    isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.createConsole, {
     label: trans.__('New Console for Notebook'),
@@ -2420,6 +2421,60 @@ namespace Private {
   }
 
   /**
+   * Whether there is an active notebook.
+   */
+  export function isEnabled(
+    shell: JupyterFrontEnd.IShell,
+    tracker: INotebookTracker
+  ): boolean {
+    return (
+      tracker.currentWidget !== null &&
+      tracker.currentWidget === shell.currentWidget
+    );
+  }
+
+  /**
+   * Whether there is an notebook active, with a single selected cell.
+   */
+  export function isEnabledAndSingleSelected(
+    shell: JupyterFrontEnd.IShell,
+    tracker: INotebookTracker
+  ): boolean {
+    if (!Private.isEnabled(shell, tracker)) {
+      return false;
+    }
+    const { content } = tracker.currentWidget!;
+    const index = content.activeCellIndex;
+    // If there are selections that are not the active cell,
+    // this command is confusing, so disable it.
+    for (let i = 0; i < content.widgets.length; ++i) {
+      if (content.isSelected(content.widgets[i]) && i !== index) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * The default Export To ... formats and their human readable labels.
+   */
+  export function getFormatLabels(
+    translator: ITranslator
+  ): { [k: string]: string } {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    return {
+      html: trans.__('HTML'),
+      latex: trans.__('LaTeX'),
+      markdown: trans.__('Markdown'),
+      pdf: trans.__('PDF'),
+      rst: trans.__('ReStructured Text'),
+      script: trans.__('Executable Script'),
+      slides: trans.__('Reveal.js Slides')
+    };
+  }
+
+  /**
    * A widget hosting a cloned output area.
    */
   export class ClonedOutputArea extends Panel {
@@ -2503,29 +2558,5 @@ namespace Private {
        */
       translator?: ITranslator;
     }
-  }
-}
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * The default Export To ... formats and their human readable labels.
-   */
-  export function getFormatLabels(
-    translator: ITranslator
-  ): { [k: string]: string } {
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    return {
-      html: trans.__('HTML'),
-      latex: trans.__('LaTeX'),
-      markdown: trans.__('Markdown'),
-      pdf: trans.__('PDF'),
-      rst: trans.__('ReStructured Text'),
-      script: trans.__('Executable Script'),
-      slides: trans.__('Reveal.js Slides')
-    };
   }
 }
