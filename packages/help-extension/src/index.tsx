@@ -413,7 +413,10 @@ function activate(
         content.id = `${namespace}-${++counter}`;
         content.title.label = trans.__('Licenses');
         content.title.icon = copyrightIcon;
-        const main = new MainAreaWidget({ content });
+        const main = new MainAreaWidget({
+          content,
+          reveal: model.licensesReady
+        });
         shell.add(main, 'main');
       }
     });

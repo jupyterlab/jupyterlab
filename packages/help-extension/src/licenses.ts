@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Panel, PanelLayout } from '@lumino/widgets';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { Panel, PanelLayout, TabBar, Widget } from '@lumino/widgets';
+import { ReadonlyJSONObject, PromiseDelegate } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 import {
   BasicKeyHandler,
   BasicMouseHandler,
@@ -10,6 +11,8 @@ import {
   DataGrid,
   JSONModel
 } from '@lumino/datagrid';
+
+import { VirtualElement, h } from '@lumino/virtualdom';
 
 import { ServerConnection } from '@jupyterlab/services';
 import { TranslationBundle } from '@jupyterlab/translation';
@@ -23,6 +26,31 @@ export class Licenses extends Panel {
     super();
     this.addClass('jp-Licenses');
     this.model = options.model;
+    this.initTabs();
+    this.initGrid();
+    this.model.licensesChanged.connect(this.onLicensesChanged, this);
+    void this.model.initLicenses();
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+  }
+
+  protected initTabs() {
+    const layout = this.layout as PanelLayout;
+    this._tabs = new TabBar({
+      orientation: 'vertical',
+      renderer: new Licenses.BundleTabRenderer(this.model)
+    });
+    this._tabs.addClass('jp-Licenses-Bundles');
+    layout.addWidget(this._tabs);
+    this._tabs.currentChanged.connect(this.onBundleSelected, this);
+  }
+
+  protected initGrid() {
     const layout = this.layout as PanelLayout;
     this._grid = new DataGrid({
       defaultSizes: {
@@ -30,7 +58,9 @@ export class Licenses extends Panel {
         columnWidth: 144,
         rowHeaderWidth: 64,
         columnHeaderHeight: 36
-      }
+      },
+      stretchLastColumn: true,
+      stretchLastRow: true
     });
     this._grid.addClass('jp-Licenses-Grid');
     this._grid.headerVisibility = 'all';
@@ -44,16 +74,37 @@ export class Licenses extends Panel {
     };
 
     layout.addWidget(this._grid);
-    void this._updateGrid();
+  }
+
+  protected onBundleSelected() {
+    if (this._tabs.currentTitle?.label) {
+      this.model.bundle = this._tabs.currentTitle.label;
+    }
+    this._updateGrid();
+  }
+
+  protected onLicensesChanged() {
+    this._updateTabs();
+    this._updateGrid();
+  }
+
+  protected _updateTabs(): void {
+    this._tabs.clearTabs();
+    let i = 0;
+    for (const bundle of this.model.bundles) {
+      const tab = new Widget();
+      tab.title.label = bundle;
+      this._tabs.insertTab(++i, tab.title);
+    }
   }
 
   /**
    * Create the model for the grid.
    */
-  private async _updateGrid(): Promise<void> {
-    const licenses = await this.model.licenses();
+  protected _updateGrid(): void {
+    const licenses = this.model.licenses;
     const bundle = this.model.bundle;
-    const data = bundle ? licenses[bundle]?.packages : [];
+    const data = licenses && bundle ? licenses[bundle]?.packages : [];
     const dataModel = (this._grid.dataModel = new JSONModel({
       data,
       schema: this.model.schema
@@ -61,7 +112,8 @@ export class Licenses extends Panel {
     this._grid.selectionModel = new BasicSelectionModel({ dataModel });
   }
 
-  private _grid: DataGrid;
+  protected _grid: DataGrid;
+  protected _tabs: TabBar<Widget>;
 }
 
 export namespace Licenses {
@@ -80,6 +132,9 @@ export namespace Licenses {
     trans: TranslationBundle;
   }
 
+  /**
+   * The JSON response from the API
+   */
   export interface ILicenseResponse {
     [key: string]: ILicenseReport;
   }
@@ -95,7 +150,7 @@ export namespace Licenses {
    *
    * @see https://github.com/spdx/spdx-spec/blob/development/v2.2.1/schemas/spdx-schema.json
    **/
-  export interface ILicenseReport {
+  export interface ILicenseReport extends ReadonlyJSONObject {
     packages: IPackageLicenseInfo[];
   }
 
@@ -129,19 +184,34 @@ export namespace Licenses {
       this._licensesUrl = options.licensesUrl;
       this._serverSettings =
         options.serverSettings || ServerConnection.makeSettings();
+      this._licensesChanged = new Signal(this);
       this.initSchema();
     }
 
-    private initSchema() {
+    async initLicenses() {
+      const response = await ServerConnection.makeRequest(
+        this._licensesUrl,
+        {},
+        this._serverSettings
+      );
+      this._licenses = await response.json();
+      this._licensesReady.resolve(void 0);
+      this._licensesChanged.emit(void 0);
+    }
+
+    protected initSchema() {
       this._schema = {
         fields: [
           { name: 'name', title: this._trans.__('Name') },
           { name: 'versionInfo', title: this._trans.__('Version') },
           { name: 'licenseId', title: this._trans.__('License ID') },
           { name: 'extractedText', title: this._trans.__('License Text') }
-        ],
-        primaryKey: ['name', 'versionInfo']
+        ]
       };
+    }
+
+    get licensesChanged() {
+      return this._licensesChanged;
     }
 
     get schema() {
@@ -169,24 +239,52 @@ export namespace Licenses {
       this._bundle = bundle;
     }
 
-    async licenses(): Promise<ILicenseResponse> {
-      if (this._licenses != null) {
-        return this._licenses;
-      }
-      const response = await ServerConnection.makeRequest(
-        this._licensesUrl,
-        {},
-        this._serverSettings
-      );
-      const licenses = (this._licenses = (await response.json()) as ILicenseResponse);
-      return licenses;
+    get licenses() {
+      return this._licenses;
     }
 
+    get licensesReady() {
+      return this._licensesReady.promise;
+    }
+
+    private _licensesChanged: Signal<Model, void>;
     private _licenses: ILicenseResponse | null;
     private _licensesUrl: string;
     private _serverSettings: ServerConnection.ISettings;
     private _bundle: string | null;
     private _trans: TranslationBundle;
     private _schema: JSONModel.Schema;
+    private _licensesReady = new PromiseDelegate<void>();
+  }
+
+  export class BundleTabRenderer extends TabBar.Renderer {
+    model: Model;
+
+    readonly closeIconSelector = '.lm-TabBar-tabCloseIcon';
+    constructor(model: Model) {
+      super();
+      this.model = model;
+    }
+    renderTab(data: TabBar.IRenderData<Widget>): VirtualElement {
+      let title = data.title.caption;
+      let key = this.createTabKey(data);
+      let style = this.createTabStyle(data);
+      let className = this.createTabClass(data);
+      let dataset = this.createTabDataset(data);
+      return h.li(
+        { key, className, title, style, dataset },
+        this.renderIcon(data),
+        this.renderLabel(data),
+        this.renderCountBadge(data)
+      );
+    }
+
+    renderCountBadge(data: TabBar.IRenderData<Widget>): VirtualElement {
+      const bundle = data.title.label;
+      const { licenses } = this.model;
+      const packages =
+        (licenses && bundle ? licenses[bundle].packages : []) || [];
+      return h.label({}, `${packages.length}`);
+    }
   }
 }

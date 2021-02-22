@@ -6,7 +6,7 @@
 .jp-Help {
   min-width: 240px;
   min-height: 240px;
-  background: white;
+  background: var(--jp-layout-color0);
   outline: none;
 }
 
@@ -83,9 +83,43 @@
   margin-left: 16px;
 }
 
+/* licenses */
 .jp-Licenses {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: stretch;
+  background-color: var(--jp-layout-color0);
+}
+
+.jp-Licenses-Bundles {
+  flex: 0 1 auto;
+  background-color: var(--jp-layout-color2);
+  overflow-y: auto;
+}
+
+.jp-Licenses-Bundles .lm-TabBar-tab {
+  padding: 0.5em;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-Licenses-Bundles .lm-TabBar-tab label {
+  background-color: var(--jp-layout-color2);
+  border-radius: 1em;
+  width: 2.5em;
+  padding: 0 0.5em;
+  text-align: center;
+  margin-left: 1em;
+}
+
+.jp-Licenses-Bundles .lm-TabBar-tab.lm-mod-current {
+  background-color: var(--jp-brand-color1);
+  color: white;
+}
+
+.jp-Licenses-Bundles .lm-TabBar-tab.lm-mod-current label {
+  background-color: white;
+  color: var(--jp-brand-color1);
 }
 
 .jp-Licenses-Grid {
