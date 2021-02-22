@@ -599,7 +599,7 @@ function activateClonedOutputs(
 
   const isEnabledAndSingleSelected = (): boolean => {
     return Private.isEnabledAndSingleSelected(shell, notebookTracker);
-  }
+  };
 
   commands.addCommand(CommandIDs.createOutputView, {
     label: trans.__('Create New View for Output'),
@@ -1033,11 +1033,11 @@ function addCommands(
 
   const isEnabled = (): boolean => {
     return Private.isEnabled(shell, tracker);
-  }
+  };
 
   const isEnabledAndSingleSelected = (): boolean => {
     return Private.isEnabledAndSingleSelected(shell, tracker);
-  }
+  };
 
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: trans.__('Run Selected Cells'),
@@ -1388,10 +1388,7 @@ function addCommands(
           });
       }
     },
-    isEnabled: () => {
-      // Can't run if there are multiple cells selected
-      return isEnabledAndSingleSelected();
-    }
+    isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: trans.__('Restart Kernel and Run All Cells…'),
@@ -2426,7 +2423,10 @@ namespace Private {
   /**
    * Whether there is an active notebook.
    */
-  export function isEnabled(shell: JupyterFrontEnd.IShell, tracker: INotebookTracker): boolean {
+  export function isEnabled(
+    shell: JupyterFrontEnd.IShell,
+    tracker: INotebookTracker
+  ): boolean {
     return (
       tracker.currentWidget !== null &&
       tracker.currentWidget === shell.currentWidget
@@ -2436,7 +2436,10 @@ namespace Private {
   /**
    * Whether there is an notebook active, with a single selected cell.
    */
-  export function isEnabledAndSingleSelected(shell: JupyterFrontEnd.IShell, tracker: INotebookTracker): boolean {
+  export function isEnabledAndSingleSelected(
+    shell: JupyterFrontEnd.IShell,
+    tracker: INotebookTracker
+  ): boolean {
     if (!Private.isEnabled(shell, tracker)) {
       return false;
     }
