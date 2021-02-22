@@ -21,9 +21,6 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-# For conversion from markdown to html
-from recommonmark.transform import AutoStructify
-
 
 # -- General configuration ------------------------------------------------
 
@@ -35,11 +32,13 @@ from recommonmark.transform import AutoStructify
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'recommonmark',
+    'myst_parser',
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx_copybutton'
 ]
+
+myst_enable_extensions = ["html_image"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -259,24 +258,6 @@ epub_exclude_files = ['search.html']
 intersphinx_mapping = {'https://docs.python.org/': None}
 
 
-# autodoc configuration with AutoStructify
-#
-# See http://recommonmark.readthedocs.io/en/latest/auto_structify.html
-# See the setup function in current conf.py file in the recommonmark repo
-# https://github.com/rtfd/recommonmark/blob/master/docs/conf.py#L296
-github_doc_root = 'https://github.com/jupyterlab/jupyterlab/tree/master/docs/'
-
-# We can't rely on anchors because GitHub dynamically renders them for
-# markdown documents.
-linkcheck_anchors = False
-
 def setup(app):
-    app.add_config_value('recommonmark_config', {
-        'url_resolver': lambda url: github_doc_root + url,
-        'auto_toc_tree_section': 'Contents',
-        'enable_eval_rst': True,
-        'enable_auto_doc_ref': False,
-    }, True)
-    app.add_transform(AutoStructify)
-    app.add_css_file('custom.css')  # may also be an URL
+    app.add_css_file('css/custom.css')  # may also be an URL
     build_api_docs(app.outdir)
