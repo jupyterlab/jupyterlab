@@ -30,8 +30,13 @@ pushd $TEST_DIR
 
 conda install --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y ipywidgets altair matplotlib-base vega_datasets jupyterlab_widgets
 
+popd
+
 # re-install, because pip
 python -m pip install $(ls dist/*.whl)
+
+# back to testing
+pushd $TEST_DIR
 
 jupyter lab build
 python -m jupyterlab.browser_check
