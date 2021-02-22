@@ -47,9 +47,9 @@ export class MathJax3Typesetter implements ILatexTypesetter {
       processEscapes: true,
       processEnvironments: true
     });
-    this._html = mathjax.document(window.document, {
+    this._mathDocument = mathjax.document(window.document, {
       InputJax: tex,
-      OutputJax: chtml
+      OutputJax: chtml,
     });
   }
 
@@ -57,15 +57,12 @@ export class MathJax3Typesetter implements ILatexTypesetter {
    * Typeset the math in a node.
    */
   typeset(node: HTMLElement): void {
-    this._html
-      .clear()
-      .findMath({ elements: [node] })
-      .compile()
-      .getMetrics()
-      .typeset()
-      .updateDocument();
+    this._mathDocument.options.elements = [node];
+    this._mathDocument.clear().render();
+    delete this._mathDocument.options.elements;
   }
-  private _html: any;
+
+  private _mathDocument: ReturnType<typeof mathjax.document>;
 }
 
 /**
