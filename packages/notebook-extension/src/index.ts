@@ -398,7 +398,7 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
 /**
  * The cloned output provider.
  */
-const clonedOutputPlugin: JupyterFrontEndPlugin<void> = {
+const clonedOutputsPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:cloned-outputs',
   requires: [IDocumentManager, INotebookTracker, ITranslator],
   optional: [ILayoutRestorer],
@@ -417,7 +417,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   notebookTrustItem,
   widgetFactoryPlugin,
   logNotebookOutput,
-  clonedOutputPlugin
+  clonedOutputsPlugin
 ];
 export default plugins;
 
