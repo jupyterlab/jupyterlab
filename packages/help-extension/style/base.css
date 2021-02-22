@@ -92,9 +92,10 @@
 }
 
 .jp-Licenses-Bundles {
-  flex: 0 1 auto;
   background-color: var(--jp-layout-color2);
   overflow-y: auto;
+  min-width: 18em;
+  width: 18em;
 }
 
 .jp-Licenses-Bundles .lm-TabBar-tab {
@@ -123,5 +124,39 @@
 }
 
 .jp-Licenses-Grid {
-  flex: 1 1 auto;
+  min-width: 18em;
+}
+
+.jp-Licenses-Text {
+  min-width: 18em;
+  padding: 0 0 0 1em;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Licenses-Text h1 {
+  flex: initial;
+  margin-bottom: 0;
+}
+
+.jp-Licenses-Text h1:empty {
+  display: none;
+}
+
+.jp-Licenses-Text blockquote {
+  flex: initial;
+  font-style: italic;
+}
+
+.jp-Licenses-Text.jp-RenderedHTMLCommon code {
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 1em;
+  margin-bottom: 0;
+  padding-bottom: 1em;
+}
+
+.jp-Licenses-Text code:empty {
+  display: none;
 }
