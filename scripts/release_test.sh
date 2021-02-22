@@ -39,7 +39,9 @@ python -m pip install $(ls dist/*.whl)
 pushd $TEST_DIR
 
 jupyter lab build
-python -m jupyterlab.browser_check
+
+# retry once, much flake
+python -m jupyterlab.browser_check || python -m jupyterlab.browser_check
 
 # if not running on github actions, start JupyterLab
 if [[ -z "${GITHUB_ACTIONS}" ]]; then
