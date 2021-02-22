@@ -245,6 +245,7 @@ namespace Private {
       token: PageConfig.getToken(),
       appUrl: PageConfig.getOption('appUrl'),
       appendToken:
+        PageConfig.getWebsocketTokenAuthEnabled() ||
         typeof window === 'undefined' ||
         process.env.JEST_WORKER_ID !== undefined,
       ...options,

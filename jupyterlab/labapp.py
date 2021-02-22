@@ -720,6 +720,12 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
             page_config['token'] = api_token
 
+        try:
+            page_config['websocketEnableTokenAuth'] = self.serverapp.websocket_enable_token_auth
+        except AttributeError:
+            # in case of elder version of jupyter server
+            page_config['websocketEnableTokenAuth'] = False
+
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings['page_config_data'] = page_config
 

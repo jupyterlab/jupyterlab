@@ -226,6 +226,13 @@ export namespace PageConfig {
   }
 
   /**
+   * Check if use token for websocket auth
+   */
+  export function getWebsocketTokenAuthEnabled(): boolean {
+    return getOption('websocketEnableTokenAuth').toLowerCase() == 'true';
+  }
+
+  /**
    * Get the authorization token for a Jupyter application.
    */
   export function getToken(): string {
