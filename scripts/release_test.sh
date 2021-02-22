@@ -10,7 +10,7 @@ set -ex
 JLAB_TEST_ENV="${CONDA_DEFAULT_ENV}_test"
 TEST_DIR=$(mktemp -d -t ${JLAB_TEST_ENV}XXXXX)
 
-conda create --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y -n "$JLAB_TEST_ENV" nodejs
+conda create --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y -n "$JLAB_TEST_ENV" nodejs pip wheel setuptools
 conda activate "$JLAB_TEST_ENV"
 
 python -m pip install $(ls dist/*.whl)
@@ -28,7 +28,7 @@ popd
 
 pushd $TEST_DIR
 
-conda install --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y ipywidgets altair matplotlib vega_datasets jupyterlab_widgets
+conda install --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y ipywidgets altair matplotlib-base vega_datasets jupyterlab_widgets
 
 jupyter lab build
 python -m jupyterlab.browser_check
