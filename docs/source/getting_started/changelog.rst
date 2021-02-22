@@ -12,12 +12,12 @@ milestone on GitHub for the full list of pull requests and issues closed.
 
 v3.0.9
 ^^^^^^
-* Remove the previous ``file_to_run`` logic. (`9848 <https://github.com/jupyterlab/jupyterlab/pull/9848>`__)
-* Enable Caching in Production Minimized Mode. (`9834 <https://github.com/jupyterlab/jupyterlab/pull/9834>`__)
-* Remove the auto-switch to “mobile” mode, and behavior switches associated with mobile mode. (`9832 <https://github.com/jupyterlab/jupyterlab/pull/9832>`__)
-* Fix the display of breakpoints on restore. (`9828 <https://github.com/jupyterlab/jupyterlab/pull/9828>`__)
-* Update CI script timeouts. (`9825 <https://github.com/jupyterlab/jupyterlab/pull/9825>`__)
-* Fix mimerender test example and test in CI. (`9820 <https://github.com/jupyterlab/jupyterlab/pull/9820>`__)
+* Remove the previous ``file_to_run`` logic. (`#9848 <https://github.com/jupyterlab/jupyterlab/pull/9848>`__)
+* Enable Caching in Production Minimized Mode. (`#9834 <https://github.com/jupyterlab/jupyterlab/pull/9834>`__)
+* Remove the auto-switch to “mobile” mode, and behavior switches associated with mobile mode. (`#9832 <https://github.com/jupyterlab/jupyterlab/pull/9832>`__)
+* Fix the display of breakpoints on restore. (`#9828 <https://github.com/jupyterlab/jupyterlab/pull/9828>`__)
+* Update CI script timeouts. (`#9825 <https://github.com/jupyterlab/jupyterlab/pull/9825>`__)
+* Fix mimerender test example and test in CI. (`#9820 <https://github.com/jupyterlab/jupyterlab/pull/9820>`__)
 
 v3.0.8
 ^^^^^^
