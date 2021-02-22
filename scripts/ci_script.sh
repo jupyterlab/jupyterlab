@@ -72,6 +72,7 @@ if [[ $GROUP == linkcheck ]]; then
 
     # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
     args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
+    args="--ignore docs/source/getting_started/changelog.md ${args}"
     py.test $args --links-ext .md -k .md . || py.test $args --links-ext .md -k .md --lf .
 
     conda deactivate
