@@ -2453,6 +2453,25 @@ namespace Private {
   }
 
   /**
+   * The default Export To ... formats and their human readable labels.
+   */
+  export function getFormatLabels(
+    translator: ITranslator
+  ): { [k: string]: string } {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    return {
+      html: trans.__('HTML'),
+      latex: trans.__('LaTeX'),
+      markdown: trans.__('Markdown'),
+      pdf: trans.__('PDF'),
+      rst: trans.__('ReStructured Text'),
+      script: trans.__('Executable Script'),
+      slides: trans.__('Reveal.js Slides')
+    };
+  }
+
+  /**
    * A widget hosting a cloned output area.
    */
   export class ClonedOutputArea extends Panel {
@@ -2536,29 +2555,5 @@ namespace Private {
        */
       translator?: ITranslator;
     }
-  }
-}
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * The default Export To ... formats and their human readable labels.
-   */
-  export function getFormatLabels(
-    translator: ITranslator
-  ): { [k: string]: string } {
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    return {
-      html: trans.__('HTML'),
-      latex: trans.__('LaTeX'),
-      markdown: trans.__('Markdown'),
-      pdf: trans.__('PDF'),
-      rst: trans.__('ReStructured Text'),
-      script: trans.__('Executable Script'),
-      slides: trans.__('Reveal.js Slides')
-    };
   }
 }
