@@ -9,14 +9,12 @@ import os
 import os.path as osp
 from os.path import join as pjoin
 import sys
-from jinja2 import Environment, FileSystemLoader
 
 from jupyter_core.application import JupyterApp, base_aliases, base_flags
 from jupyter_core.application import NoStart
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
 from jupyter_server.serverapp import flags
-from jupyter_server.utils import url_path_join as ujoin, url_escape
-from jupyter_server.services.config.manager import ConfigManager, recursive_update
+from jupyter_server.utils import url_path_join as ujoin
 from jupyter_server._version import version_info as jpserver_version_info
 from traitlets import Bool, Instance, Unicode, default
 
@@ -28,7 +26,7 @@ from .debuglog import DebugLogFileMixin
 from .commands import (
     DEV_DIR, HERE,
     build, clean, get_app_dir, get_app_version, get_user_settings_dir,
-    get_workspaces_dir, AppOptions, pjoin, get_app_info,
+    get_workspaces_dir, AppOptions, pjoin,
     ensure_core, ensure_dev, watch, watch_dev, ensure_app
 )
 from .coreconfig import CoreConfig
