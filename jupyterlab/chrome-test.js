@@ -30,7 +30,7 @@ async function main() {
   let testError = null;
 
   try {
-    await page.waitForSelector('.completed');
+    await page.waitForSelector('.completed', { timeout: 100000 });
   } catch (e) {
     testError = e;
   }
