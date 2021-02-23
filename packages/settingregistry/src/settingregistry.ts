@@ -949,7 +949,10 @@ export namespace SettingRegistry {
     // disabled shortcuts first). If a shortcut has already been added by the
     // user preferences, filter it out too (this includes shortcuts that are
     // disabled by user preferences).
-    defaults = [...defaults.filter(s => !!s.disabled), ...defaults.filter(s => !s.disabled)].filter(shortcut => {
+    defaults = [
+      ...defaults.filter(s => !!s.disabled),
+      ...defaults.filter(s => !s.disabled)
+    ].filter(shortcut => {
       const keys = CommandRegistry.normalizeKeys(shortcut).join(
         RECORD_SEPARATOR
       );
