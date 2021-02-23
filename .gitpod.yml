@@ -17,5 +17,8 @@ github:
     # add a label once the prebuild is ready to pull requests (defaults to false)
     addLabel: false
 tasks:
-  - init: pip install -e . && yarn install
-    command: jupyter lab --dev-mode --watch
+  - init: pip3 install -e . && yarn install && yarn run build
+    command: jupyter lab --dev-mode --watch --LabApp.token=''
+ports:
+  - port: 8888
+    onOpen: open-browser
