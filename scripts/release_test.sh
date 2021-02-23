@@ -17,8 +17,13 @@ python -m pip install $(ls dist/*.whl)
 
 cp examples/notebooks/*.ipynb $TEST_DIR/
 
-python -m jupyterlab.browser_check
+pushd $TEST_DIR
+
+python -m jupyterlab.browser_check || python -m jupyterlab.browser_check
+
 jupyter lab clean --all
+
+popd
 
 pushd jupyterlab/tests/mock_packages
 jupyter labextension install mimeextension --no-build --debug
