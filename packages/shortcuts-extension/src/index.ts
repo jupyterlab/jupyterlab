@@ -80,7 +80,8 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
           loaded[plugin] = shortcuts;
           return shortcuts;
         })
-        .reduce((acc, val) => acc.concat(val), [])
+        .concat([schema.properties!.shortcuts.default as any[]])
+        .reduce((acc, val) => acc.concat(val), []) // flatten one level
         .sort((a, b) => a.command.localeCompare(b.command));
 
       schema.properties!.shortcuts.description = trans.__(
