@@ -911,7 +911,7 @@ export namespace SettingRegistry {
   ): ISettingRegistry.IShortcut[] {
     const memo: {
       [keys: string]: {
-        [selector: string]: boolean; // If `true`, this is a default shortcut.
+        [selector: string]: boolean; // If `true`, should warn if a default shortcut conflicts.
       };
     } = {};
 
@@ -920,8 +920,6 @@ export namespace SettingRegistry {
       const keys = CommandRegistry.normalizeKeys(shortcut).join(
         RECORD_SEPARATOR
       );
-      const { selector } = shortcut;
-
       if (!keys) {
         console.warn(
           'Skipping this shortcut because there are no actionable keys on this platform',
@@ -932,8 +930,10 @@ export namespace SettingRegistry {
       if (!(keys in memo)) {
         memo[keys] = {};
       }
+
+      const { selector } = shortcut;
       if (!(selector in memo[keys])) {
-        memo[keys][selector] = false; // User shortcuts are `false`.
+        memo[keys][selector] = false; // Do not warn if a default shortcut conflicts.
         return true;
       }
 
@@ -944,33 +944,34 @@ export namespace SettingRegistry {
       return false;
     });
 
-    // If a default shortcut collides with another default, warn and filter.
-    // If a shortcut has already been added by the user preferences, filter it
-    // out too (this includes shortcuts that are disabled by user preferences).
-    defaults = defaults.filter(shortcut => {
-      const { disabled } = shortcut;
+    // If a default shortcut collides with another default, warn and filter,
+    // unless one of the shortcuts is a disabling shortcut (so look through
+    // disabled shortcuts first). If a shortcut has already been added by the
+    // user preferences, filter it out too (this includes shortcuts that are
+    // disabled by user preferences).
+    defaults = [...defaults.filter(s => !!s.disabled), ...defaults.filter(s => !s.disabled)].filter(shortcut => {
       const keys = CommandRegistry.normalizeKeys(shortcut).join(
         RECORD_SEPARATOR
       );
 
-      if (disabled || !keys) {
+      if (!keys) {
         return false;
       }
       if (!(keys in memo)) {
         memo[keys] = {};
       }
 
-      const { selector } = shortcut;
-
+      const { disabled, selector } = shortcut;
       if (!(selector in memo[keys])) {
-        memo[keys][selector] = true; // Default shortcuts are `true`.
+        // Warn of future conflicts if the default shortcut is not disabled.
+        memo[keys][selector] = !disabled;
         return true;
       }
 
-      // Only warn if a default shortcut collides with another default shortcut.
+      // We have a conflict now. Warn the user if we need to do so.
       if (memo[keys][selector]) {
         console.warn(
-          'Skipping this shortcut because it collides with another shortcut.',
+          'Skipping this default shortcut because it collides with another default shortcut.',
           shortcut
         );
       }
@@ -978,8 +979,8 @@ export namespace SettingRegistry {
       return false;
     });
 
-    // Filter out disabled user shortcuts and concat defaults before returning.
-    return user.filter(shortcut => !shortcut.disabled).concat(defaults);
+    // Return all the shortcuts that should be registered
+    return user.concat(defaults).filter(shortcut => !shortcut.disabled);
   }
 }
 
