@@ -145,6 +145,11 @@ export class HighlightsCM extends CodeMirrorIntegration {
       return;
     }
 
+    if (!root_position) {
+      this.console.warn('no root position available');
+      return;
+    }
+
     const token = this.virtual_editor.get_token_at(root_position);
 
     // if token has not changed, no need to update highlight, unless it is an empty token
