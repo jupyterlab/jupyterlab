@@ -10,13 +10,15 @@ import {
   BasicMouseHandler,
   BasicSelectionModel,
   DataGrid,
-  JSONModel
+  JSONModel,
+  TextRenderer
 } from '@lumino/datagrid';
 
 import { VirtualElement, h } from '@lumino/virtualdom';
 
 import { ServerConnection } from '@jupyterlab/services';
 import { TranslationBundle } from '@jupyterlab/translation';
+import { IThemeManager } from '@jupyterlab/apputils';
 
 /**
  * A license viewer
@@ -30,7 +32,7 @@ export class Licenses extends SplitPanel {
     this.initTabs();
     this.initGrid();
     this.initLicenseText();
-    this.setRelativeSizes([1, 2, 2]);
+    this.setRelativeSizes([1, 2, 3]);
     this.model.licensesChanged.connect(this.onLicensesChanged, this);
     void this.model.initLicenses();
   }
@@ -39,6 +41,11 @@ export class Licenses extends SplitPanel {
     if (this.isDisposed) {
       return;
     }
+    this._grid.selectionModel?.changed.disconnect(this.onGridSelectionChanged, this);
+    this._tabs.currentChanged.disconnect(this.onBundleSelected, this);
+    this.model.gridThemeChanged.disconnect(this.onGridThemeChanged, this);
+    this.model.licensesChanged.disconnect(this.onLicensesChanged, this);
+    this.model.dispose();
     super.dispose();
   }
 
@@ -54,16 +61,22 @@ export class Licenses extends SplitPanel {
   }
 
   protected initGrid() {
+    const { style, textRenderer } = this.model.gridTheme;
+
     this._grid = new DataGrid({
       defaultSizes: {
         rowHeight: 24,
         columnWidth: 144,
         rowHeaderWidth: 64,
-        columnHeaderHeight: 36
+        columnHeaderHeight: 24
       },
       stretchLastColumn: true,
-      stretchLastRow: true
+      stretchLastRow: true,
+      ...(style == null ? {} : { style })
     });
+    if (textRenderer != null) {
+      this._grid.cellRenderers.update({}, textRenderer);
+    }
     this._grid.addClass('jp-Licenses-Grid');
     this._grid.headerVisibility = 'all';
     this._grid.keyHandler = new BasicKeyHandler();
@@ -74,6 +87,8 @@ export class Licenses extends SplitPanel {
       headers: 'all',
       warningThreshold: 1e6
     };
+
+    this.model.gridThemeChanged.connect(this.onGridThemeChanged, this);
 
     SplitPanel.setStretch(this._grid, 1);
     this.addWidget(this._grid);
@@ -103,6 +118,16 @@ export class Licenses extends SplitPanel {
       }
     }
     this.model.selectedPackageIndex = index;
+  }
+
+  protected onGridThemeChanged() {
+    const { style, textRenderer } = this.model.gridTheme;
+    if (style != null) {
+      this._grid.style = style;
+    }
+    if (textRenderer != null) {
+      this._grid.cellRenderers.update({}, textRenderer);
+    }
   }
 
   protected onLicensesChanged() {
@@ -155,6 +180,16 @@ export class Licenses extends SplitPanel {
 
 export namespace Licenses {
   /**
+   * License report formats understood by the server (once lower-cased)
+   */
+  export const REPORT_FORMATS = ['Markdown', 'CSV', 'JSON'];
+
+  /**
+   * The default format (most human-readable)
+   */
+  export const DEFAULT_FORMAT = REPORT_FORMATS[0];
+
+  /**
    * Options for instantiating a license viewer
    */
   export interface IOptions {
@@ -167,6 +202,7 @@ export namespace Licenses {
     licensesUrl: string;
     serverSettings?: ServerConnection.ISettings;
     trans: TranslationBundle;
+    themes?: IThemeManager | null;
   }
 
   /**
@@ -212,6 +248,10 @@ export namespace Licenses {
     extractedText: string;
   }
 
+  export interface IDownloadOptions {
+    format: string;
+  }
+
   /**
    * A model for license data
    */
@@ -219,9 +259,20 @@ export namespace Licenses {
     constructor(options: IModelOptions) {
       this._trans = options.trans;
       this._licensesUrl = options.licensesUrl;
+      this._themes = options.themes || null;
       this._serverSettings =
         options.serverSettings || ServerConnection.makeSettings();
       this.initSchema();
+      if (this._themes) {
+        this._themes.themeChanged.connect(this.updateGridTheme, this);
+        this.updateGridTheme();
+      }
+    }
+
+    dispose() {
+      if (this._themes) {
+        this._themes.themeChanged.disconnect(this.updateGridTheme, this);
+      }
     }
 
     async initLicenses() {
@@ -241,13 +292,60 @@ export namespace Licenses {
           { name: 'name', title: this._trans.__('Name') },
           { name: 'versionInfo', title: this._trans.__('Version') },
           { name: 'licenseId', title: this._trans.__('License ID') }
-          // { name: 'extractedText', title: this._trans.__('License Text') }
         ]
       };
     }
 
+    protected updateGridTheme() {
+      if (this._themes == null) {
+        return;
+      }
+
+      const _themes = this._themes as any;
+
+      if (_themes.getCSS == null) {
+        return;
+      }
+
+      this._gridStyle = {
+        ...DataGrid.defaultStyle,
+        voidColor: _themes.getCSS('layout-color0'),
+        backgroundColor: _themes.getCSS('layout-color1'),
+        headerBackgroundColor: _themes.getCSS('layout-color2'),
+        gridLineColor: _themes.getCSS('border-color3'),
+        headerGridLineColor: _themes.getCSS('border-color3')
+      };
+
+      this._gridTextRenderer = new TextRenderer({
+        font: `${_themes.getCSS('content-font-size1')} ${_themes.getCSS(
+          'ui-font-family'
+        )}`,
+        textColor: _themes.getCSS('content-font-color0'),
+        backgroundColor: '',
+        verticalAlignment: 'center',
+        horizontalAlignment: 'left'
+      });
+
+      this.gridThemeChanged.emit(void 0);
+    }
+
+    async download(options: IDownloadOptions) {
+      const url = `${this._licensesUrl}?format=${options.format}&download=1`;
+      const element = document.createElement('a');
+      element.href = url;
+      element.download = '';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      return void 0;
+    }
+
     get licensesChanged() {
       return this._licensesChanged;
+    }
+
+    get gridThemeChanged() {
+      return this._gridStyleChanged;
     }
 
     get selectedPackageChanged() {
@@ -312,8 +410,13 @@ export namespace Licenses {
       return this._trans;
     }
 
+    get gridTheme() {
+      return { style: this._gridStyle, textRenderer: this._gridTextRenderer };
+    }
+
     private _licensesChanged: Signal<Model, void> = new Signal(this);
     private _selectedPackageChanged: Signal<Model, void> = new Signal(this);
+    private _gridStyleChanged: Signal<Model, void> = new Signal(this);
     private _licenses: ILicenseResponse | null;
     private _licensesUrl: string;
     private _serverSettings: ServerConnection.ISettings;
@@ -323,6 +426,9 @@ export namespace Licenses {
     private _licensesReady = new PromiseDelegate<void>();
     private _selectedPackageIndex: number | null;
     private _selectedPackage: IPackageLicenseInfo | null;
+    private _themes: IThemeManager | null;
+    private _gridStyle: DataGrid.Style | null;
+    private _gridTextRenderer: TextRenderer | null;
   }
 
   export class BundleTabRenderer extends TabBar.Renderer {
@@ -381,6 +487,17 @@ export namespace Licenses {
       );
 
       this.onSelectedPackageChanged();
+    }
+
+    dispose() {
+      super.dispose();
+      if (this.isDisposed) {
+        return;
+      }
+      this.model.selectedPackageChanged.disconnect(
+        this.onSelectedPackageChanged,
+        this
+      );
     }
 
     protected onSelectedPackageChanged() {

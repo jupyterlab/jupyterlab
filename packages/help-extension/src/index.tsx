@@ -17,7 +17,9 @@ import {
   IFrame,
   MainAreaWidget,
   showDialog,
-  WidgetTracker
+  WidgetTracker,
+  CommandToolbarButton,
+  IThemeManager
 } from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
@@ -36,7 +38,7 @@ import {
   copyrightIcon
 } from '@jupyterlab/ui-components';
 
-import { Menu } from '@lumino/widgets';
+import { Menu, Widget } from '@lumino/widgets';
 
 import { Licenses } from './licenses';
 
@@ -60,6 +62,8 @@ namespace CommandIDs {
 
   export const licenses = 'help:licenses';
 
+  export const licenseReport = 'help:license-report';
+
   export const launchClassic = 'help:launch-classic-notebook';
 }
 
@@ -80,7 +84,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   activate,
   id: '@jupyterlab/help-extension:plugin',
   requires: [IMainMenu, ITranslator],
-  optional: [ICommandPalette, ILayoutRestorer, IInspector],
+  optional: [ICommandPalette, ILayoutRestorer, IInspector, IThemeManager],
   autoStart: true
 };
 
@@ -102,7 +106,8 @@ function activate(
   translator: ITranslator,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null,
-  inspector: IInspector | null
+  inspector: IInspector | null,
+  themes: IThemeManager | null
 ): void {
   const trans = translator.load('jupyterlab');
   let counter = 0;
@@ -402,22 +407,77 @@ function activate(
   const licensesUrl = PageConfig.getOption('licensesUrl');
 
   if (licensesUrl) {
-    commands.addCommand(CommandIDs.licenses, {
-      label: trans.__('Licenses'),
-      execute: () => {
-        const model = new Licenses.Model({
-          licensesUrl: URLExt.join(baseUrl, licensesUrl) + '/',
-          trans
+    const fullLicensesUrl = URLExt.join(baseUrl, licensesUrl) + '/';
+
+    let licensesModel: Licenses.Model | null;
+
+    function ensureLicensesModel() {
+      if (licensesModel == null) {
+        licensesModel = new Licenses.Model({
+          licensesUrl: fullLicensesUrl,
+          trans,
+          themes
         });
-        const content = new Licenses({ model });
+      }
+      return licensesModel;
+    }
+
+    const downloadAsText = trans.__('Download License Report as');
+    const licensesText = trans.__('Licenses');
+
+    commands.addCommand(CommandIDs.licenses, {
+      label: licensesText,
+      execute: () => {
+        licensesModel = ensureLicensesModel();
+        const content = new Licenses({ model: licensesModel });
         content.id = `${namespace}-${++counter}`;
-        content.title.label = trans.__('Licenses');
+        content.title.label = licensesText;
         content.title.icon = copyrightIcon;
         const main = new MainAreaWidget({
           content,
-          reveal: model.licensesReady
+          reveal: licensesModel.licensesReady
         });
+
+        const label = new Widget({ node: document.createElement('label') });
+        label.addClass('jp-Licenses-ToolbarLabel');
+
+        label.node.textContent = downloadAsText;
+
+        main.toolbar.addItem('download', label);
+
+        for (const format of Licenses.REPORT_FORMATS) {
+          const button = new CommandToolbarButton({
+            id: CommandIDs.licenseReport,
+            args: { format, shortLabel: 1 },
+            commands
+          });
+          main.toolbar.addItem(`download-${format.toLowerCase()}`, button);
+        }
         shell.add(main, 'main');
+
+        const onDisposed = () => {
+          licensesModel?.dispose();
+          licensesModel = null;
+        };
+        main.disposed.connect(onDisposed);
+      }
+    });
+
+    commands.addCommand(CommandIDs.licenseReport, {
+      label: args => {
+        if (args.shortLabel) {
+          return `${args.format}`;
+        }
+        return `${downloadAsText} ${args.format || Licenses.DEFAULT_FORMAT}`;
+      },
+      caption: args => {
+        return `${downloadAsText} ${args.format || Licenses.DEFAULT_FORMAT}`;
+      },
+      execute: args => {
+        const format = `${
+          args.format || Licenses.DEFAULT_FORMAT
+        }`.toLowerCase();
+        void ensureLicensesModel().download({ format });
       }
     });
   }

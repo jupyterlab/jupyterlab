@@ -91,6 +91,12 @@
   background-color: var(--jp-layout-color0);
 }
 
+.jp-Toolbar > .jp-Toolbar-item.jp-Licenses-ToolbarLabel {
+  color: var(--jp-ui-font-color2);
+  line-height: 1.75em;
+  padding: 0 0.25em;
+}
+
 .jp-Licenses-Bundles {
   background-color: var(--jp-layout-color2);
   overflow-y: auto;
@@ -125,6 +131,7 @@
 
 .jp-Licenses-Grid {
   min-width: 18em;
+  border: solid var(--jp-border-width) var(--jp-border-color2);
 }
 
 .jp-Licenses-Text {
