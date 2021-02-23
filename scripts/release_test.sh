@@ -7,6 +7,8 @@
 set -ex
 . $(conda info --base)/etc/profile.d/conda.sh
 
+OUTPUT_DIR=$(pwd)/build/${GROUP}_output
+
 JLAB_TEST_ENV="${CONDA_DEFAULT_ENV}_test"
 TEST_DIR=$(mktemp -d -t ${JLAB_TEST_ENV}XXXXX)
 
@@ -19,7 +21,7 @@ cp examples/notebooks/*.ipynb $TEST_DIR/
 
 pushd $TEST_DIR
 
-JLAB_BROWSER_CHECK_OUTPUT=$(pwd)/build/${GROUP}_output python -m jupyterlab.browser_check
+JLAB_BROWSER_CHECK_OUTPUT=${OUTPUT_DIR} python -m jupyterlab.browser_check
 
 jupyter lab clean --all
 
@@ -45,8 +47,7 @@ pushd $TEST_DIR
 
 jupyter lab build
 
-# retry once, much flake
-JLAB_BROWSER_CHECK_OUTPUT=$(pwd)/build/${GROUP}_output python -m jupyterlab.browser_check
+JLAB_BROWSER_CHECK_OUTPUT=${OUTPUT_DIR} python -m jupyterlab.browser_check
 
 # if not running on github actions, start JupyterLab
 if [[ -z "${GITHUB_ACTIONS}" ]]; then
