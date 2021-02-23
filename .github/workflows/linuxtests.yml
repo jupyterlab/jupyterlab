@@ -18,6 +18,7 @@ jobs:
             python: 3.6
           - group: release_check
             python: 3.6
+            upload-output: true
           - group: docs
             python: 3.6
           - group: usage
@@ -88,3 +89,10 @@ jobs:
           GROUP: ${{ matrix.group }}
         run: |
           bash ./scripts/ci_script.sh
+
+      - name: Upload ${{ matrix.group }} results
+        if: ${{ matrix.upload-output && always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.group }} ${{ github.run_number }}
+          path: ./build/${{ matrix.group }}_output

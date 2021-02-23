@@ -10,6 +10,10 @@ set -ex
 JLAB_TEST_ENV="${CONDA_DEFAULT_ENV}_test"
 TEST_DIR=$(mktemp -d -t ${JLAB_TEST_ENV}XXXXX)
 
+# make a folder for output
+JLAB_BROWSER_CHECK_OUTPUT=$(pwd)/build/${GROUP}_output
+mkdir -p $JLAB_BROWSER_CHECK_OUTPUT
+
 conda create --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y -n "$JLAB_TEST_ENV" 'nodejs>=10,!=13.*,!=15.*,!=17.*' pip wheel setuptools
 conda activate "$JLAB_TEST_ENV"
 

@@ -1,6 +1,12 @@
 const puppeteer = require('puppeteer');
 const inspect = require('util').inspect;
+const path = require('path');
+
 const URL = process.argv[2];
+const OUTPUT_VAR = 'JLAB_BROWSER_CHECK_OUTPUT';
+const OUTPUT = process.env[OUTPUT_VAR];
+
+let nextScreenshot = 0;
 
 async function main() {
   /* eslint-disable no-console */
@@ -8,9 +14,20 @@ async function main() {
 
   const browser = await puppeteer.launch({
     headless: true,
+    dumpio: !!OUTPUT,
     args: ['--no-sandbox']
   });
   const page = await browser.newPage();
+
+  async function screenshot() {
+    if (!OUTPUT) {
+      return;
+    }
+    await page.screenshot({
+      type: 'png',
+      path: path.join(OUTPUT, `screenshot-${++nextScreenshot}.png`)
+    });
+  }
 
   console.info('Navigating to page:', URL);
   await page.goto(URL);
@@ -30,10 +47,13 @@ async function main() {
   let testError = null;
 
   try {
-    await page.waitForSelector('.completed', { timeout: 100000 });
+    await page.waitForSelector('.completed');
   } catch (e) {
     testError = e;
   }
+
+  await screenshot();
+
   const textContent = await el.getProperty('textContent');
   const errors = JSON.parse(await textContent.jsonValue());
 
