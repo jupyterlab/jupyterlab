@@ -18,7 +18,9 @@ github:
     addLabel: false
 tasks:
   - init: pip3 install -e . && yarn install && yarn run build
-    command: pip3 install -e . && jupyter lab --dev-mode --watch --LabApp.token=''
+    command: pip3 install -e . && jupyter lab --dev-mode --watch --LabApp.token='' --LabApp.allow_origin=*
 ports:
   - port: 8888
     onOpen: open-browser
+
+# --LabApp.tornado_settings='{"headers": {"Content-Security-Policy": "frame-ancestors *"}}'
