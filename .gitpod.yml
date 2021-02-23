@@ -18,7 +18,7 @@ github:
     addLabel: false
 tasks:
   - init: pip3 install -e . && yarn install && yarn run build
-    command: jupyter lab --dev-mode --watch --LabApp.token=''
+    command: pip3 install -e . && jupyter lab --dev-mode --watch --LabApp.token=''
 ports:
   - port: 8888
     onOpen: open-browser
