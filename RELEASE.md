@@ -107,7 +107,7 @@ These lines:
 ## Post release candidate checklist
 
 - [ ] Modify and run `python scripts/milestone_check.py` to check the issues assigned to this milestone
-- [ ] Write [release highlights](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/getting_started/changelog.rst), starting with:
+- [ ] Write [release highlights](docs/source/getting_started/changelog.rst), starting with:
   ```bash
   loghub jupyterlab/jupyterlab -m XXX -t $GITHUB_TOKEN --template scripts/release_template.txt
   ```
