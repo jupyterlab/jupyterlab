@@ -10,10 +10,6 @@ set -ex
 JLAB_TEST_ENV="${CONDA_DEFAULT_ENV}_test"
 TEST_DIR=$(mktemp -d -t ${JLAB_TEST_ENV}XXXXX)
 
-# make a folder for output
-JLAB_BROWSER_CHECK_OUTPUT=$(pwd)/build/${GROUP}_output
-mkdir -p $JLAB_BROWSER_CHECK_OUTPUT
-
 conda create --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y -n "$JLAB_TEST_ENV" 'nodejs>=10,!=13.*,!=15.*,!=17.*' pip wheel setuptools
 conda activate "$JLAB_TEST_ENV"
 
@@ -23,7 +19,7 @@ cp examples/notebooks/*.ipynb $TEST_DIR/
 
 pushd $TEST_DIR
 
-python -m jupyterlab.browser_check || python -m jupyterlab.browser_check
+JLAB_BROWSER_CHECK_OUTPUT=$(pwd)/build/${GROUP}_output python -m jupyterlab.browser_check
 
 jupyter lab clean --all
 
@@ -50,7 +46,7 @@ pushd $TEST_DIR
 jupyter lab build
 
 # retry once, much flake
-python -m jupyterlab.browser_check || python -m jupyterlab.browser_check
+JLAB_BROWSER_CHECK_OUTPUT=$(pwd)/build/${GROUP}_output python -m jupyterlab.browser_check
 
 # if not running on github actions, start JupyterLab
 if [[ -z "${GITHUB_ACTIONS}" ]]; then

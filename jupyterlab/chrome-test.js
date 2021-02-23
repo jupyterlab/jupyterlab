@@ -1,12 +1,22 @@
 const puppeteer = require('puppeteer');
 const inspect = require('util').inspect;
 const path = require('path');
+const fs = require('fs');
 
 const URL = process.argv[2];
 const OUTPUT_VAR = 'JLAB_BROWSER_CHECK_OUTPUT';
 const OUTPUT = process.env[OUTPUT_VAR];
 
 let nextScreenshot = 0;
+const screenshotStem = `screenshot-${+new Date()}`;
+
+if (OUTPUT) {
+  console.log(`Screenshots will be saved in ${OUTPUT}...`);
+  if (!fs.existsSync(OUTPUT)) {
+    console.log(`Creating ${OUTPUT}...`);
+    fs.mkdirSync(OUTPUT, { recursive: true });
+  }
+}
 
 async function main() {
   /* eslint-disable no-console */
@@ -23,9 +33,14 @@ async function main() {
     if (!OUTPUT) {
       return;
     }
+    const screenshotPath = path.join(
+      OUTPUT,
+      `${screenshotStem}-${++nextScreenshot}.png`
+    );
+    console.log(`Capturing screenshot ${screenshotPath}...`);
     await page.screenshot({
       type: 'png',
-      path: path.join(OUTPUT, `screenshot-${++nextScreenshot}.png`)
+      path: screenshotPath
     });
   }
 
