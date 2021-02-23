@@ -9,6 +9,9 @@ jobs:
       matrix:
         group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, python, examples, interop, nonode, linkcheck, lint]
         python: [3.6, 3.8]
+        include:
+          - group: release_check
+            upload-output: true
         exclude:
           - group: integrity
             python: 3.6
@@ -18,7 +21,6 @@ jobs:
             python: 3.6
           - group: release_check
             python: 3.6
-            upload-output: true
           - group: docs
             python: 3.6
           - group: usage
