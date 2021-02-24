@@ -32,8 +32,8 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
   id: '@jupyterlab/rendermime-extension:plugin',
-  requires: [ITranslator, ISanitizer],
-  optional: [IDocumentManager, ILatexTypesetter],
+  requires: [ITranslator],
+  optional: [IDocumentManager, ILatexTypesetter, ISanitizer],
   provides: IRenderMimeRegistry,
   activate: activate,
   autoStart: true
@@ -52,7 +52,7 @@ function activate(
   translator: ITranslator,
   docManager: IDocumentManager | null,
   latexTypesetter: ILatexTypesetter | null,
-  sanitizer: ISanitizer
+  sanitizer: ISanitizer | null
 ): RenderMimeRegistry {
   const trans = translator.load('jupyterlab');
   if (docManager) {
@@ -102,6 +102,6 @@ function activate(
         },
     latexTypesetter: latexTypesetter ?? undefined,
     translator: translator,
-    sanitizer: sanitizer
+    sanitizer: sanitizer ?? undefined
   });
 }

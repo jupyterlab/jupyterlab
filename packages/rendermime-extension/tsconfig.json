@@ -12,6 +12,9 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../docmanager"
     },
     {
@@ -19,9 +22,6 @@
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../apputils"
     }
   ]
 }
