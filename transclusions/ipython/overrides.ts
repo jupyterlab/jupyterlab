@@ -42,7 +42,7 @@ function empty_or_escaped(x: string) {
  */
 export const LINE_MAGIC_PREFIX = '^(\\s*|\\s*\\S+\\s*=\\s*)';
 
-export const PYTHON_IDENTIFIER = '([^?s\'"\\(\\)-\\+\\/#]+)';
+export const PYTHON_IDENTIFIER = '([^?\\s\'"\\(\\)-\\+\\/#]+)';
 
 export let overrides: IScopedCodeOverride[] = [
   /**
