@@ -33,7 +33,7 @@
   "dependencies": {
     "@jupyterlab/translation": "^3.1.0-alpha.3",
     "@lumino/coreutils": "^1.5.3",
-    "@lumino/widgets": "^1.16.1"
+    "@lumino/widgets": "^1.18.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
