@@ -1,16 +1,12 @@
-import pytest, shutil, os
-
 import urllib.parse
 
+import pytest
+from jupyter_server.utils import url_path_join
+from jupyterlab_server import LabConfig
 from tornado.escape import url_escape
-
 from traitlets import Unicode
 
 from jupyterlab import LabApp
-from jupyterlab_server import LabConfig
-from jupyterlab_server.tests.utils import here
-from jupyterlab_server.app import LabServerApp
-from jupyter_server.utils import url_path_join
 
 
 def mkdir(tmp_path, *parts):

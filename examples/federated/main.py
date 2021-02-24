@@ -4,7 +4,6 @@
 import os
 import json
 
-from glob import glob
 from jupyterlab_server import LabServerApp
 
 HERE = os.path.abspath(os.path.dirname(__file__))

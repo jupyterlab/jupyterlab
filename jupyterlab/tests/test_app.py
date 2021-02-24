@@ -1,34 +1,30 @@
 # coding: utf-8
 """A lab app that runs a sub process for a demo or a test."""
 
-from os import path as osp
-from os.path import join as pjoin
-from stat import S_IRUSR, S_IRGRP, S_IROTH
 import argparse
 import atexit
 import glob
 import json
 import logging
 import os
-import pkg_resources
 import shutil
 import sys
 import tempfile
+from os import path as osp
+from os.path import join as pjoin
+from stat import S_IRGRP, S_IROTH, S_IRUSR
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from traitlets import Bool, Dict, Unicode, default
-from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
-from jupyter_core.application import base_aliases, base_flags
-
-from jupyter_server.serverapp import ServerApp
-
-from jupyterlab_server import LabConfig
-from jupyterlab_server.process_app import ProcessApp
 import jupyterlab_server
+import pkg_resources
+from ipykernel.kernelspec import write_kernel_spec
+from jupyter_core.application import base_aliases, base_flags
+from jupyter_server.serverapp import ServerApp
 from jupyterlab.utils import deprecated
-
+from jupyterlab_server.process_app import ProcessApp
+from traitlets import Bool, Dict, Unicode, default
 
 HERE = osp.realpath(osp.dirname(__file__))
 

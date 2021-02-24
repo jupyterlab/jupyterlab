@@ -7,27 +7,26 @@ import glob
 import json
 import logging
 import os
-import shutil
-import sys
-import subprocess
-import shutil
-from pathlib import Path
 import platform
+import shutil
+import subprocess
+import sys
 from os.path import join as pjoin
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch
 
 import pytest
 from jupyter_core import paths
-
 from jupyterlab import commands
 from jupyterlab.commands import (
-    install_extension, uninstall_extension, list_extensions,
-    build, link_package, unlink_package, build_check,
-    disable_extension, enable_extension, get_app_info,
-    check_extension, _test_overlap, _compare_ranges, update_extension,
-    AppOptions
+    AppOptions, _compare_ranges, _test_overlap,
+    build, build_check, check_extension,
+    disable_extension, enable_extension,
+    get_app_info, install_extension, link_package,
+    list_extensions, uninstall_extension,
+    unlink_package, update_extension
 )
 from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
 
