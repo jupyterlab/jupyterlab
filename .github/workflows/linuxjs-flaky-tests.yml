@@ -9,7 +9,7 @@ jobs:
       matrix:
         group: [s-apputils]
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -52,4 +52,3 @@ jobs:
           GROUP: ${{ matrix.group }}
         run: |
           bash ./scripts/ci_script.sh
-
