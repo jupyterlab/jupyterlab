@@ -5,27 +5,25 @@ This module is meant to run JupyterLab in a headless browser, making sure
 the application launches and starts up without errors.
 """
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
 import inspect
 import logging
-from os import path as osp
 import os
 import shutil
 import subprocess
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
+from os import path as osp
 
+from jupyter_server.serverapp import aliases, flags
+from jupyter_server.utils import pathname2url, urljoin
 from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
 from tornado.websocket import WebSocketClosedError
-
-from jupyter_server.serverapp import flags, aliases
-from jupyter_server.utils import urljoin, pathname2url
 from traitlets import Bool
 
 from .labapp import LabApp, get_app_dir
 from .tests.test_app import TestEnv
-
 
 here = osp.abspath(osp.dirname(__file__))
 test_flags = dict(flags)

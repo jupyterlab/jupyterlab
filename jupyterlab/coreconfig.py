@@ -2,10 +2,9 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from collections import defaultdict
-from itertools import filterfalse
 import json
 import os.path as osp
+from itertools import filterfalse
 
 from .jlpmapp import HERE
 

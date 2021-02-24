@@ -3,30 +3,25 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-from glob import glob
-import json
-import os
-import shutil
-import sys
-import traceback
 
+import os
+import sys
 from copy import copy
 
-from jupyter_core.application import JupyterApp, base_flags, base_aliases
-from jupyter_core.paths import jupyter_path
-from jupyterlab.coreconfig import CoreConfig
-from jupyterlab.debuglog import DebugLogFileMixin
+from jupyter_core.application import JupyterApp, base_aliases, base_flags
 from traitlets import Bool, Instance, List, Unicode, default
 
-from .commands import (
-    install_extension, uninstall_extension, list_extensions,
-    enable_extension, disable_extension, check_extension,
-    link_package, unlink_package, build, get_app_version, HERE,
-    update_extension, AppOptions,
-)
-from .federated_labextensions import develop_labextension_py, build_labextension, watch_labextension
-from .labapp import LabApp
+from jupyterlab.coreconfig import CoreConfig
+from jupyterlab.debuglog import DebugLogFileMixin
 
+from .commands import (
+    HERE, AppOptions, build, check_extension,
+    disable_extension, enable_extension, get_app_version,
+    install_extension, link_package, list_extensions,
+    uninstall_extension, unlink_package, update_extension
+)
+from .federated_labextensions import build_labextension, develop_labextension_py, watch_labextension
+from .labapp import LabApp
 
 flags = dict(base_flags)
 flags['no-build'] = (
