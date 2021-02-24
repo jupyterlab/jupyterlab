@@ -180,6 +180,7 @@ See the `JupyterLab Light Theme <https://github.com/jupyterlab/jupyterlab/tree/m
 
 See the `TypeScript theme cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`__ for a quick start to developing a theme plugin.
 
+.. _source_extensions:
 
 Source Extensions
 -----------------
@@ -458,7 +459,7 @@ Prebuilt Extensions
 package.json metadata
 ^^^^^^^^^^^^^^^^^^^^^
 
-In addition to the package metadata for source extensions, prebuilt extensions have extra ``jupyterlab`` metadata.
+In addition to the package metadata for :ref:`source extensions <source_extensions>`, prebuilt extensions have extra ``jupyterlab`` metadata.
 
 * ``outputDir``: :ref:`outputDir`
 * ``webpackConfig``: :ref:`webpackConfig`
