@@ -138,14 +138,12 @@ export namespace IThemeManager {
   }
 }
 
-/* tslint:disable */
 /**
  * The sanitizer token.
  */
 export const ISanitizer = new Token<ISanitizer>(
   '@jupyterlab/apputils:ISanitizer'
 );
-/* tslint:enable */
 
 export interface ISanitizer {
   /**
