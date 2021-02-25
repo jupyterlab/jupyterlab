@@ -44,9 +44,9 @@
     "@jupyterlab/documentsearch": "^3.1.0-alpha.3",
     "@jupyterlab/mainmenu": "^3.1.0-alpha.3",
     "@jupyterlab/translation": "^3.1.0-alpha.3",
-    "@lumino/datagrid": "^0.16.1",
+    "@lumino/datagrid": "^0.19.0",
     "@lumino/signaling": "^1.4.3",
-    "@lumino/widgets": "^1.16.1"
+    "@lumino/widgets": "^1.18.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

@@ -2,15 +2,11 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-import logging
-import os
-from os.path import join as pjoin
-import subprocess
-from tempfile import TemporaryDirectory
-from unittest import TestCase
-from unittest.mock import patch
 
-from jupyter_core import paths
+import logging
+import subprocess
+from os.path import join as pjoin
+from unittest.mock import patch
 
 from jupyterlab import commands
 
@@ -29,8 +25,8 @@ class TestAppHandlerRegistry(AppHandlerTest):
             config = commands._yarn_config(logger)
 
             which.assert_called_once_with('node')
-            self.assertDictEqual(config, 
-                {"yarn config": {}, 
+            self.assertDictEqual(config,
+                {"yarn config": {},
                 "npm config": {}}
             )
 
@@ -45,9 +41,9 @@ class TestAppHandlerRegistry(AppHandlerTest):
             ])
             logger = logging.getLogger('jupyterlab')
             config = commands._yarn_config(logger)
-            
-            self.assertDictEqual(config, 
-                {"yarn config": {"registry": yarn_registry}, 
+
+            self.assertDictEqual(config,
+                {"yarn config": {"registry": yarn_registry},
                 "npm config": {"registry": yarn_registry}}
             )
 
@@ -57,9 +53,9 @@ class TestAppHandlerRegistry(AppHandlerTest):
 
             logger = logging.getLogger('jupyterlab')
             config = commands._yarn_config(logger)
-            
-            self.assertDictEqual(config, 
-                {"yarn config": {}, 
+
+            self.assertDictEqual(config,
+                {"yarn config": {},
                 "npm config": {}}
             )
 
@@ -72,7 +68,7 @@ class TestAppHandlerRegistry(AppHandlerTest):
                 b'{"type":"info","data":"npm config"}',
                 b'{"type":"inspect","data":{"registry":"' + bytes(yarn_registry, 'utf-8') + b'"}}'
             ])
-            
+
             handler = commands.AppOptions()
 
             self.assertEqual(handler.registry, yarn_registry)

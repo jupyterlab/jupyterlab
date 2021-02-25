@@ -5,27 +5,25 @@ This module is meant to run JupyterLab in a headless browser, making sure
 the application launches and starts up without errors.
 """
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
 import inspect
 import logging
-from os import path as osp
 import os
 import shutil
 import subprocess
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
+from os import path as osp
 
+from jupyter_server.serverapp import aliases, flags
+from jupyter_server.utils import pathname2url, urljoin
 from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
 from tornado.websocket import WebSocketClosedError
-
-from jupyter_server.serverapp import flags, aliases
-from jupyter_server.utils import urljoin, pathname2url
 from traitlets import Bool
 
 from .labapp import LabApp, get_app_dir
 from .tests.test_app import TestEnv
-
 
 here = osp.abspath(osp.dirname(__file__))
 test_flags = dict(flags)
@@ -154,7 +152,7 @@ async def run_browser(url):
         if not osp.exists(target):
             os.makedirs(osp.join(target))
         await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(["jlpm", "add", "puppeteer@^4"], cwd=target)
+        await run_async_process(["jlpm", "add", "puppeteer@^7"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
     await run_async_process(["node", "chrome-test.js", url], cwd=target)
 
@@ -166,7 +164,7 @@ def run_browser_sync(url):
     if not osp.exists(osp.join(target, 'node_modules')):
         os.makedirs(target)
         subprocess.call(["jlpm", "init", "-y"], cwd=target)
-        subprocess.call(["jlpm", "add", "puppeteer@^2"], cwd=target)
+        subprocess.call(["jlpm", "add", "puppeteer@^7"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
     return subprocess.check_call(["node", "chrome-test.js", url], cwd=target)
 

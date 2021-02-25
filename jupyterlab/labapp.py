@@ -7,35 +7,30 @@
 import json
 import os
 import os.path as osp
-from os.path import join as pjoin
 import sys
+from os.path import join as pjoin
 
-from jupyter_core.application import JupyterApp, base_aliases, base_flags
-from jupyter_core.application import NoStart
-from jupyterlab_server import slugify, WORKSPACE_EXTENSION
+from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
+from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
-from jupyter_server._version import version_info as jpserver_version_info
+
+from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, slugify
+from nbclassic.shim import NBClassicConfigShimMixin
 from traitlets import Bool, Instance, Unicode, Enum, default
 
-from nbclassic.shim import NBClassicConfigShimMixin
-from jupyterlab_server import LabServerApp
-
 from ._version import __version__
-from .debuglog import DebugLogFileMixin
 from .commands import (
-    DEV_DIR, HERE,
-    build, clean, get_app_dir, get_app_version, get_user_settings_dir,
-    get_workspaces_dir, AppOptions, pjoin,
-    ensure_core, ensure_dev, watch, watch_dev, ensure_app
+    DEV_DIR, HERE, AppOptions, build, clean, ensure_app,
+    ensure_core, ensure_dev, get_app_dir, get_app_version,
+    get_user_settings_dir, get_workspaces_dir, pjoin, watch,
+    watch_dev
 )
 from .coreconfig import CoreConfig
-from .handlers.build_handler import build_path, Builder, BuildHandler
-from .handlers.extension_manager_handler import (
-    extensions_handler_path, ExtensionManager, ExtensionHandler
-)
+from .debuglog import DebugLogFileMixin
+from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
-
+from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
 
 # TODO: remove when oldest compatible jupyter_server contains license tooling
 try:

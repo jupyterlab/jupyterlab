@@ -9,6 +9,9 @@ jobs:
       matrix:
         group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, python, examples, interop, nonode, linkcheck, lint]
         python: [3.6, 3.8]
+        include:
+          - group: release_check
+            upload-output: true
         exclude:
           - group: integrity
             python: 3.6
@@ -34,7 +37,7 @@ jobs:
             python: 3.6
       fail-fast: false
     timeout-minutes: 30
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -88,3 +91,10 @@ jobs:
           GROUP: ${{ matrix.group }}
         run: |
           bash ./scripts/ci_script.sh
+
+      - name: Upload ${{ matrix.group }} results
+        if: ${{ matrix.upload-output && always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.group }} ${{ github.run_number }}
+          path: ./build/${{ matrix.group }}_output

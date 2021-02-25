@@ -9,7 +9,7 @@ else
     WORK_DIR=$(mktemp -d -t ${JLAB_REL_ENV}XXXXX)
     cd $WORK_DIR
 
-    conda create --override-channels --strict-channel-priority -c conda-forge -c anaconda -y -n $JLAB_REL_ENV jupyter-packaging nodejs twine
+    conda create --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y -n $JLAB_REL_ENV jupyter-packaging nodejs twine
     conda activate $JLAB_REL_ENV
 
     git clone git@github.com:jupyterlab/jupyterlab.git

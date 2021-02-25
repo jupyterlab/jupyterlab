@@ -41,7 +41,10 @@ export class Licenses extends SplitPanel {
     if (this.isDisposed) {
       return;
     }
-    this._grid.selectionModel?.changed.disconnect(this.onGridSelectionChanged, this);
+    this._grid.selectionModel?.changed.disconnect(
+      this.onGridSelectionChanged,
+      this
+    );
     this._tabs.currentChanged.disconnect(this.onBundleSelected, this);
     this.model.gridThemeChanged.disconnect(this.onGridThemeChanged, this);
     this.model.licensesChanged.disconnect(this.onLicensesChanged, this);

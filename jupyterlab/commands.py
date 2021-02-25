@@ -4,39 +4,41 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 import contextlib
-from copy import deepcopy
-from packaging.version import Version
 import errno
-from glob import glob
 import hashlib
 import itertools
 import json
 import logging
 import os
 import os.path as osp
-from pathlib import Path
 import re
 import shutil
 import site
 import subprocess
 import sys
 import tarfile
+import warnings
+from copy import deepcopy
+from glob import glob
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
-from urllib.request import Request, urlopen, urljoin, quote
 from urllib.error import URLError
-import warnings
+from urllib.request import Request, quote, urljoin, urlopen
 
-from jupyter_core.paths import jupyter_config_path, jupyter_path
-from jupyterlab_server.process import which, Process, WatchHelper, list2cmdline
-from jupyterlab_server.config import LabConfig, get_page_config, get_federated_extensions, get_package_url, get_static_page_config, write_page_config
+from jupyter_core.paths import jupyter_config_path
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
-from traitlets import HasTraits, Bool, Dict, Instance, List, Unicode, default
+from jupyterlab_server.config import (LabConfig, get_federated_extensions,
+                                      get_package_url, get_page_config,
+                                      get_static_page_config,
+                                      write_page_config)
+from jupyterlab_server.process import Process, WatchHelper, list2cmdline, which
+from packaging.version import Version
+from traitlets import Bool, Dict, HasTraits, Instance, List, Unicode, default
 
-from jupyterlab.semver import Range, gte, lt, lte, gt, make_semver
-from jupyterlab.jlpmapp import YARN_PATH, HERE
-from jupyterlab.coreconfig import _get_default_core_data, CoreConfig
-
+from jupyterlab.coreconfig import CoreConfig
+from jupyterlab.jlpmapp import HERE, YARN_PATH
+from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 
 # The regex for expecting the webpack output.
 WEBPACK_EXPECT = re.compile(r'.*theme-light-extension/style/index.css')

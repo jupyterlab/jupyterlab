@@ -5,7 +5,6 @@ import os
 import json
 
 from jupyterlab_server import LabServerApp
-from jupyter_server.utils import url_path_join as ujoin
 
 HERE = os.path.dirname(__file__)
 
