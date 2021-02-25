@@ -5,43 +5,7 @@
 // it which acts as a polyfill for browsers.
 import sanitize from 'sanitize-html';
 
-export interface ISanitizer {
-  /**
-   * Sanitize an HTML string.
-   *
-   * @param dirty - The dirty text.
-   *
-   * @param options - The optional sanitization options.
-   *
-   * @returns The sanitized string.
-   */
-  sanitize(dirty: string, options?: ISanitizer.IOptions): string;
-}
-
-/**
- * The namespace for `ISanitizer` related interfaces.
- */
-export namespace ISanitizer {
-  /**
-   * The options used to sanitize.
-   */
-  export interface IOptions {
-    /**
-     * The allowed tags.
-     */
-    allowedTags?: string[];
-
-    /**
-     * The allowed attributes for a given tag.
-     */
-    allowedAttributes?: { [key: string]: string[] };
-
-    /**
-     * The allowed style values for a given tag.
-     */
-    allowedStyles?: { [key: string]: { [key: string]: RegExp[] } };
-  }
-}
+import { ISanitizer } from './tokens';
 
 /**
  * Helper class that contains regular expressions for inline CSS style validation.
@@ -453,7 +417,7 @@ class CssProp {
 /**
  * A class to sanitize HTML strings.
  */
-class Sanitizer implements ISanitizer {
+export class Sanitizer implements ISanitizer {
   /**
    * Sanitize an HTML string.
    *

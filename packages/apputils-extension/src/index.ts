@@ -22,7 +22,9 @@ import {
   IWindowResolver,
   WindowResolver,
   Printing,
-  sessionContextDialogs
+  sessionContextDialogs,
+  ISanitizer,
+  defaultSanitizer
 } from '@jupyterlab/apputils';
 
 import { URLExt, PageConfig } from '@jupyterlab/coreutils';
@@ -519,6 +521,18 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The default HTML sanitizer.
+ */
+const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
+  id: '@jupyter/apputils-extension:sanitizer',
+  autoStart: true,
+  provides: ISanitizer,
+  activate: () => {
+    return defaultSanitizer;
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -526,6 +540,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   paletteRestorer,
   print,
   resolver,
+  sanitizer,
   settingsPlugin,
   state,
   splash,
