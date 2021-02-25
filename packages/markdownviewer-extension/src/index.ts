@@ -95,7 +95,7 @@ function activate(
       tracker.forEach(widget => {
         updateWidget(widget.content);
       });
-    }
+    };
 
     // Fetch the initial state of the settings.
     settingRegistry
