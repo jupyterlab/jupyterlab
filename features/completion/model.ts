@@ -79,7 +79,8 @@ export class GenericCompleterModel<
       if (query) {
         filterText = this.getFilterText(item);
         filterMatch = StringExt.matchSumOfSquares(filterText, query);
-        matched = !!filterMatch;
+        // ignore perfect matches (those are not useful)
+        matched = !!filterMatch && filterText != query;
       } else {
         matched = true;
       }
