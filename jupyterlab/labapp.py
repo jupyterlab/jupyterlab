@@ -15,7 +15,7 @@ from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
 
-from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, LicensesApp, slugify
+from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, slugify
 from nbclassic.shim import NBClassicConfigShimMixin
 from traitlets import Bool, Instance, Unicode, Enum, default
 
@@ -34,9 +34,9 @@ from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManag
 
 # TODO: remove when oldest compatible jupyter_server contains license tooling
 try:
-    from jupyterlab_server.licenses_handler import LicensesManager
+    from jupyterlab_server import LicensesApp
 except ImportError:
-    LicensesManager = None
+    LicensesApp = None
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -412,8 +412,7 @@ class LabWorkspaceApp(JupyterApp):
         self.exit(0)
 
 
-if LicensesManager is not None:
-    # TODO: should this subclass LabConfig? LabApp?
+if LicensesApp is not None:
     class LabLicensesApp(LicensesApp):
         version = version
 
@@ -446,7 +445,6 @@ if LicensesManager is not None:
 
         @default('app_dir')
         def _default_app_dir(self):
-            # TODO: is this sufficient?
             return get_app_dir()
 
         @default('static_dir')
@@ -544,7 +542,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     )
 
     # TODO: remove when oldest compatible jupyter_server contains license tooling
-    if LicensesManager is not None:
+    if LicensesApp is not None:
         subcommands.update(
             licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0])
         )
