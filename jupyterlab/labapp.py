@@ -15,7 +15,7 @@ from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
 
-from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, slugify
+from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, LicensesApp, slugify
 from nbclassic.shim import NBClassicConfigShimMixin
 from traitlets import Bool, Instance, Unicode, Enum, default
 
@@ -414,55 +414,34 @@ class LabWorkspaceApp(JupyterApp):
 
 if LicensesManager is not None:
     # TODO: should this subclass LabConfig? LabApp?
-    class LabLicensesApp(JupyterApp):
+    class LabLicensesApp(LicensesApp):
         version = version
-        description = """
-        Report frontend licenses
-        """
 
-        dev_mode = Bool(False, config=True,
+        dev_mode = Bool(
+            False,
+            config=True,
             help="""Whether to start the app in dev mode. Uses the unpublished local
             JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
             show a red stripe at the top of the page.  It can only be used if JupyterLab
             is installed as `pip install -e .`.
-            """)
+            """,
+        )
 
-        app_dir = Unicode('', config=True,
-            help='The app directory for which to show licenses')
-
-        full_text = Bool(False, config=True,
-            help='Also print out full license text (if available)')
-
-        report_format = Enum(["markdown", "json", "csv"], "markdown", config=True,
-            help="Reporter format")
-
-        bundles_pattern = Unicode('.*', config=True,
-            help='A regular expression of bundles to print')
+        app_dir = Unicode(
+            "", config=True, help="The app directory for which to show licenses"
+        )
 
         aliases = {
-            **base_aliases,
-            'bundles': 'LabLicensesApp.bundles_pattern',
-            'report-format': 'LabLicensesApp.report_format'
+            **LicensesApp.aliases,
+            "app-dir": "LabLicensesApp.app_dir",
         }
 
         flags = {
-            **base_flags,
-            'dev-mode': (
-                {'LabLicensesApp': {'dev_mode': True}},
-                "Start the app in dev mode for running from source."
+            **LicensesApp.flags,
+            "dev-mode": (
+                {"LabLicensesApp": {"dev_mode": True}},
+                "Start the app in dev mode for running from source.",
             ),
-            'full-text': (
-                {'LabLicensesApp': {'full_text': True}},
-                "Print out full license text (if available)"
-            ),
-            'json': (
-                {'LabLicensesApp': {'report_format': 'json'}},
-                "Print out report as JSON (implies --full-text)"
-            ),
-            'csv': (
-                {'LabLicensesApp': {'report_format': 'csv'}},
-                "Print out report as CSV (implies --full-text)"
-            )
         }
 
         @default('app_dir')
@@ -470,21 +449,9 @@ if LicensesManager is not None:
             # TODO: is this sufficient?
             return get_app_dir()
 
-        def start(self):
-            lab_config = LabConfig()
-            manager = LicensesManager(
-                labextensions_path=sum([
-                    lab_config.labextensions_path +
-                    lab_config.extra_labextensions_path
-                ], [])
-            )
-            report, _mime = manager.report(
-                report_format=self.report_format,
-                full_text=self.full_text,
-                bundles_pattern=self.bundles_pattern
-            )
-
-            self.exit(0)
+        @default('static_dir')
+        def _default_static_dir(self):
+            return pjoin(self.app_dir, 'static')
 
 
 aliases = dict(base_aliases)
