@@ -119,6 +119,7 @@ function activate(
   const baseUrl = PageConfig.getBaseUrl();
   const { commands, shell, serviceManager } = app;
   const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
+
   const resources = [
     {
       text: trans.__('JupyterLab Reference'),
@@ -410,6 +411,18 @@ function activate(
   const licensesUrl = PageConfig.getOption('licensesUrl');
 
   if (licensesUrl) {
+    const licensesNamespace = 'help-licenses';
+    const licensesTracker = new WidgetTracker<MainAreaWidget<Licenses>>({
+      namespace: licensesNamespace
+    });
+
+    if (restorer) {
+      void restorer.restore(licensesTracker, {
+        command: CommandIDs.licenses,
+        name: widget => 'licenses'
+      });
+    }
+
     const fullLicensesUrl = URLExt.join(baseUrl, licensesUrl) + '/';
 
     let licensesModel: Licenses.Model | null;
@@ -434,7 +447,7 @@ function activate(
       execute: () => {
         licensesModel = ensureLicensesModel();
         const content = new Licenses({ model: licensesModel });
-        content.id = `${namespace}-${++counter}`;
+        content.id = `${licensesNamespace}-${++counter}`;
         content.title.label = licensesText;
         content.title.icon = copyrightIcon;
         const main = new MainAreaWidget({
@@ -459,6 +472,7 @@ function activate(
           });
           main.toolbar.addItem(`download-${format}`, button);
         }
+        void licensesTracker.add(main);
         shell.add(main, 'main');
 
         const onDisposed = () => {
@@ -507,6 +521,10 @@ function activate(
         void ensureLicensesModel().download({ format: format.id });
       }
     });
+
+    if (palette) {
+      palette.addItem({ command: CommandIDs.licenses, category });
+    }
   }
 
   if (palette) {
@@ -519,8 +537,5 @@ function activate(
       category
     });
     palette.addItem({ command: CommandIDs.launchClassic, category });
-    if (licensesUrl) {
-      palette.addItem({ command: CommandIDs.licenses, category });
-    }
   }
 }
