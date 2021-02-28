@@ -28,14 +28,7 @@ config[0] = merge(config[0], {
       })
     ]
   },
-  plugins: [
-    new LicenseWebpackPlugin({
-      perChunkOutput: false,
-      outputFilename: 'third-party-licenses.txt',
-      excludedPackageTest: packageName =>
-        packageName === '@jupyterlab/application-top'
-    })
-  ]
+  plugins: [new LicenseWebpackPlugin()]
 });
 
 module.exports = config;

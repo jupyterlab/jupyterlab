@@ -10351,10 +10351,10 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-license-webpack-plugin@^2.3.13:
-  version "2.3.13"
-  resolved "https://registry.yarnpkg.com/license-webpack-plugin/-/license-webpack-plugin-2.3.13.tgz#ce02c193f0a36e28f0310b8849060a7ba11bbc20"
-  integrity sha512-SOjHXLDOOlSlUmzQ6cF7V4JkHIFbM9r9izw5IhnkIiRdVN7UewSu3cqcXv33qZunB3GyZQZ6nv+9cQXAyo31HA==
+license-webpack-plugin@^2.3.14:
+  version "2.3.14"
+  resolved "https://registry.yarnpkg.com/license-webpack-plugin/-/license-webpack-plugin-2.3.14.tgz#daf129c56c52349072be3feb52c566a2c4c8ab90"
+  integrity sha512-AX0K4GOQQfa6ulLOEQtXtgJalVUTq18VoKfJ58wHy8ofXzIT0XfXEydEjZA5pBwfvdGU02Bm0NxBOR3V67BZDQ==
   dependencies:
     "@types/webpack-sources" "^0.1.5"
     webpack-sources "^1.2.0"

@@ -3736,6 +3736,14 @@ license-webpack-plugin@^2.3.11:
     "@types/webpack-sources" "^0.1.5"
     webpack-sources "^1.2.0"
 
+license-webpack-plugin@^2.3.14:
+  version "2.3.14"
+  resolved "https://registry.yarnpkg.com/license-webpack-plugin/-/license-webpack-plugin-2.3.14.tgz#daf129c56c52349072be3feb52c566a2c4c8ab90"
+  integrity sha512-AX0K4GOQQfa6ulLOEQtXtgJalVUTq18VoKfJ58wHy8ofXzIT0XfXEydEjZA5pBwfvdGU02Bm0NxBOR3V67BZDQ==
+  dependencies:
+    "@types/webpack-sources" "^0.1.5"
+    webpack-sources "^1.2.0"
+
 loader-runner@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-4.2.0.tgz#d7022380d66d14c5fb1d496b89864ebcfd478384"
