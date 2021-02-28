@@ -35,10 +35,11 @@ import { ITranslator } from '@jupyterlab/translation';
 import {
   jupyterIcon,
   jupyterlabWordmarkIcon,
-  copyrightIcon
+  copyrightIcon,
+  refreshIcon
 } from '@jupyterlab/ui-components';
 
-import { Menu, Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 
 import { Licenses } from './licenses';
 
@@ -63,6 +64,8 @@ namespace CommandIDs {
   export const licenses = 'help:licenses';
 
   export const licenseReport = 'help:license-report';
+
+  export const refreshLicenses = 'help:licenses-refresh';
 
   export const launchClassic = 'help:launch-classic-notebook';
 }
@@ -424,6 +427,7 @@ function activate(
 
     const downloadAsText = trans.__('Download License Report as');
     const licensesText = trans.__('Licenses');
+    const refreshLicenses = trans.__('Refresh Licenses');
 
     commands.addCommand(CommandIDs.licenses, {
       label: licensesText,
@@ -438,20 +442,22 @@ function activate(
           reveal: licensesModel.licensesReady
         });
 
-        const label = new Widget({ node: document.createElement('label') });
-        label.addClass('jp-Licenses-ToolbarLabel');
+        main.toolbar.addItem(
+          'refresh-licenses',
+          new CommandToolbarButton({
+            id: CommandIDs.refreshLicenses,
+            args: { noLabel: 1 },
+            commands
+          })
+        );
 
-        label.node.textContent = downloadAsText;
-
-        main.toolbar.addItem('download', label);
-
-        for (const format of Licenses.REPORT_FORMATS) {
+        for (const format of Object.keys(Licenses.REPORT_FORMATS)) {
           const button = new CommandToolbarButton({
             id: CommandIDs.licenseReport,
-            args: { format, shortLabel: 1 },
+            args: { format, noLabel: 1 },
             commands
           });
-          main.toolbar.addItem(`download-${format.toLowerCase()}`, button);
+          main.toolbar.addItem(`download-${format}`, button);
         }
         shell.add(main, 'main');
 
@@ -463,21 +469,42 @@ function activate(
       }
     });
 
+    commands.addCommand(CommandIDs.refreshLicenses, {
+      label: args => (args.noLabel ? '' : refreshLicenses),
+      caption: refreshLicenses,
+      icon: refreshIcon,
+      execute: async () => {
+        licensesModel = ensureLicensesModel();
+        await licensesModel.initLicenses();
+      }
+    });
+
+    function formatOrDefault(format: string): Licenses.IReportFormat {
+      return (
+        Licenses.REPORT_FORMATS[format] ||
+        Licenses.REPORT_FORMATS[Licenses.DEFAULT_FORMAT]
+      );
+    }
+
     commands.addCommand(CommandIDs.licenseReport, {
       label: args => {
-        if (args.shortLabel) {
-          return `${args.format}`;
+        if (args.noLabel) {
+          return '';
         }
-        return `${downloadAsText} ${args.format || Licenses.DEFAULT_FORMAT}`;
+        const format = formatOrDefault(`${args.format}`);
+        return `${downloadAsText} ${format.title}`;
       },
       caption: args => {
-        return `${downloadAsText} ${args.format || Licenses.DEFAULT_FORMAT}`;
+        const format = formatOrDefault(`${args.format}`);
+        return `${downloadAsText} ${format.title}`;
+      },
+      icon: args => {
+        const format = formatOrDefault(`${args.format}`);
+        return format.icon;
       },
       execute: args => {
-        const format = `${
-          args.format || Licenses.DEFAULT_FORMAT
-        }`.toLowerCase();
-        void ensureLicensesModel().download({ format });
+        const format = formatOrDefault(`${args.format}`);
+        void ensureLicensesModel().download({ format: format.id });
       }
     });
   }

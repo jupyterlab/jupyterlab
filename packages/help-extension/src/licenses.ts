@@ -19,6 +19,12 @@ import { VirtualElement, h } from '@lumino/virtualdom';
 import { ServerConnection } from '@jupyterlab/services';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { IThemeManager } from '@jupyterlab/apputils';
+import {
+  spreadsheetIcon,
+  jsonIcon,
+  markdownIcon,
+  LabIcon
+} from '@jupyterlab/ui-components';
 
 /**
  * A license viewer
@@ -182,15 +188,37 @@ export class Licenses extends SplitPanel {
 }
 
 export namespace Licenses {
+  export interface IReportFormat {
+    title: string;
+    icon: LabIcon;
+    id: string;
+  }
+
   /**
    * License report formats understood by the server (once lower-cased)
    */
-  export const REPORT_FORMATS = ['Markdown', 'CSV', 'JSON'];
+  export const REPORT_FORMATS: Record<string, IReportFormat> = {
+    markdown: {
+      id: 'markdown',
+      title: 'Markdown',
+      icon: markdownIcon
+    },
+    csv: {
+      id: 'csv',
+      title: 'CSV',
+      icon: spreadsheetIcon
+    },
+    json: {
+      id: 'csv',
+      title: 'JSON',
+      icon: jsonIcon
+    }
+  };
 
   /**
    * The default format (most human-readable)
    */
-  export const DEFAULT_FORMAT = REPORT_FORMATS[0];
+  export const DEFAULT_FORMAT = 'markdown';
 
   /**
    * Options for instantiating a license viewer
