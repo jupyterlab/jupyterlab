@@ -19,7 +19,8 @@ import {
   showDialog,
   WidgetTracker,
   CommandToolbarButton,
-  IThemeManager
+  IThemeManager,
+  Toolbar
 } from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
@@ -455,6 +456,16 @@ function activate(
           reveal: licensesModel.licensesReady
         });
 
+        for (const format of Object.keys(Licenses.REPORT_FORMATS)) {
+          const button = new CommandToolbarButton({
+            id: CommandIDs.licenseReport,
+            args: { format, noLabel: 1 },
+            commands
+          });
+          main.toolbar.addItem(`download-${format}`, button);
+        }
+
+        main.toolbar.addItem('spacer', Toolbar.createSpacerItem());
         main.toolbar.addItem(
           'refresh-licenses',
           new CommandToolbarButton({
@@ -464,14 +475,6 @@ function activate(
           })
         );
 
-        for (const format of Object.keys(Licenses.REPORT_FORMATS)) {
-          const button = new CommandToolbarButton({
-            id: CommandIDs.licenseReport,
-            args: { format, noLabel: 1 },
-            commands
-          });
-          main.toolbar.addItem(`download-${format}`, button);
-        }
         void licensesTracker.add(main);
         shell.add(main, 'main');
 
