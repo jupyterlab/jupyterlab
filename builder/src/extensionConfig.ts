@@ -226,7 +226,11 @@ function generateConfig({
   ];
 
   if (mode === 'production') {
-    plugins.push(new WPPlugin.JSONLicenseWebpackPlugin());
+    plugins.push(
+      new WPPlugin.JSONLicenseWebpackPlugin({
+        excludedPackageTest: packageName => packageName === data.name
+      })
+    );
   }
 
   // Add version argument when in production so the Jupyter server
