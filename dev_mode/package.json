@@ -1,8 +1,8 @@
 {
   "name": "@jupyterlab/application-top",
-  "license": "BSD-3-Clause",
   "version": "3.1.0-alpha.3",
   "private": true,
+  "license": "BSD-3-Clause",
   "scripts": {
     "build": "jlpm run clean && webpack",
     "build:dev": "jlpm run build",
