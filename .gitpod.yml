@@ -20,10 +20,15 @@ tasks:
   - init: pip3 install -e . && yarn install && yarn run build
     # for some reason,have to re-install on start, or else it doesn't find the python package
     # Set no token and allow any origin, so that you can open it in a new tab.
-    command: pip3 install -e . && jupyter lab --dev-mode --watch --LabApp.token='' --LabApp.allow_origin=*
+    command: >
+      pip3 install -e . &&
+      jupyter lab
+      --dev-mode
+      --watch
+      --LabApp.token=''
+      --LabApp.allow_origin=*
+      --LabApp.tornado_settings='{"headers": {"Content-Security-Policy": "frame-ancestors *"}}'
 ports:
   - port: 8888
     # Running it in an iframe doesn't work. Can experiment with iframe ancestors.     
     onOpen: open-browser
-
-# --LabApp.tornado_settings='{"headers": {"Content-Security-Policy": "frame-ancestors *"}}'
