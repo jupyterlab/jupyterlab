@@ -166,21 +166,31 @@ function generateConfig({
 
   class CleanupPlugin {
     apply(compiler: any) {
-      compiler.hooks.done.tap('Cleanup', () => {
-        // Find the remoteEntry file and add it to the package.json metadata
+      compiler.hooks.done.tap('Cleanup', (stats: any) => {
+        const newlyCreatedAssets = stats.compilation.assets;
+
+        // Clear out any remoteEntry files that are stale
+        // https://stackoverflow.com/a/40370750
         const files = glob.sync(path.join(staticPath, 'remoteEntry.*.js'));
-        let newestTime = -1;
-        let newestRemote = '';
-        files.forEach(fpath => {
-          const mtime = fs.statSync(fpath).mtime.getTime();
-          if (mtime > newestTime) {
-            newestRemote = fpath;
-            newestTime = mtime;
+        let newEntry = '';
+        const unlinked: string[] = [];
+        files.forEach(file => {
+          const fileName = path.basename(file);
+          if (!newlyCreatedAssets[fileName]) {
+            fs.unlinkSync(path.resolve(file));
+            unlinked.push(fileName);
+          } else {
+            newEntry = fileName;
           }
         });
+        if (unlinked.length > 0) {
+          console.log('Removed old assets: ', unlinked);
+        }
+
+        // Find the remoteEntry file and add it to the package.json metadata
         const data = readJSONFile(path.join(outputPath, 'package.json'));
         const _build: any = {
-          load: path.join('static', path.basename(newestRemote))
+          load: path.join('static', newEntry)
         };
         if (exposes['./extension'] !== undefined) {
           _build.extension = './extension';
