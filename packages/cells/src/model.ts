@@ -16,6 +16,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
+
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
 /**
@@ -166,6 +167,7 @@ export class CellModel implements ICellModel {
         "You can set either an initialized ymodel or create a new cell using a `cell` property. You can't do both."
       );
     }
+
     const ymodel = options.ymodel || new Y.Map();
     this.ymodel = ymodel;
     this.yawareness = options.yawareness;
@@ -181,7 +183,7 @@ export class CellModel implements ICellModel {
       this.ymeta = new Y.Map();
       ymodel.set('metadata', this.ymeta);
       ymodel.set('cell_type', this.type);
-      const cell = options.cell!;
+      const cell: any = options.cell || {};
       // @todo shouldn't this be join('\n') ?
       const source = Array.isArray(cell.source)
         ? cell.source.join('')
@@ -203,6 +205,7 @@ export class CellModel implements ICellModel {
         this.ymeta.set(key, metadata[key]);
       }
     }
+
     this.ydoc = this.ymodel.doc!;
     this.yUndoManager = options.yUndoManager || null;
     this._onModelChanged = this._onModelChanged.bind(this);
@@ -392,6 +395,7 @@ export namespace CellModel {
     ymodel?: Y.Map<any>;
     yawareness?: any;
     yUndoManager?: Y.UndoManager;
+    ydoc?: Y.Doc;
   }
 }
 

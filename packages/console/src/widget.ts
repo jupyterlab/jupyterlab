@@ -38,6 +38,8 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
+import * as Y from 'yjs';
+
 import { ConsoleHistory, IConsoleHistory } from './history';
 
 /**
@@ -232,6 +234,9 @@ export class CodeConsole extends Widget {
     }
     // Create the banner.
     const model = this.modelFactory.createRawCell({});
+    const ydoc = new Y.Doc();
+    ydoc.getMap('banner').set('model', model.ymodel);
+
     model.setValue('...');
     const banner = (this._banner = new RawCell({
       model,
@@ -730,6 +735,8 @@ export class CodeConsole extends Widget {
     const contentFactory = this.contentFactory;
     const modelFactory = this.modelFactory;
     const model = modelFactory.createCodeCell({});
+    const ydoc = new Y.Doc();
+    ydoc.getMap('banner').set('model', model.ymodel);
     const rendermime = this.rendermime;
     return { model, rendermime, contentFactory };
   }
