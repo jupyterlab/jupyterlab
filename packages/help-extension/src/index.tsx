@@ -118,6 +118,10 @@ function activate(
       url: 'https://jupyter.org/documentation'
     },
     {
+      text: trans.__('Jupyter Forum'),
+      url: 'https://discourse.jupyter.org/c/jupyterlab'
+    },
+    {
       text: trans.__('Markdown Reference'),
       url: 'https://commonmark.org/help/'
     }
