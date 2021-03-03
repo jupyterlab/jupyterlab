@@ -124,7 +124,7 @@ function activate(
     {
       text: trans.__('Markdown Reference'),
       url: 'https://commonmark.org/help/'
-    },
+    }
   ];
 
   resources.sort((a: any, b: any) => {
