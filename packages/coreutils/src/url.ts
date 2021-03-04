@@ -26,6 +26,9 @@ export namespace URLExt {
     return urlparse(url);
   }
 
+  export function getHostName(url: string): string {
+    return urlparse(url).hostname;
+  }
   /**
    * Normalize a url.
    */
