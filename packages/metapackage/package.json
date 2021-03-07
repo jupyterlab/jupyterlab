@@ -99,6 +99,7 @@
     "@jupyterlab/settingeditor": "^3.1.0-alpha.4",
     "@jupyterlab/settingeditor-extension": "^3.1.0-alpha.4",
     "@jupyterlab/settingregistry": "^3.1.0-alpha.4",
+    "@jupyterlab/shared-model": "^3.1.0-alpha.4",
     "@jupyterlab/shortcuts-extension": "^3.1.0-alpha.4",
     "@jupyterlab/statedb": "^3.1.0-alpha.4",
     "@jupyterlab/statusbar": "^3.1.0-alpha.4",
