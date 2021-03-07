@@ -208,6 +208,9 @@
       "path": "../settingregistry"
     },
     {
+      "path": "../shared-model"
+    },
+    {
       "path": "../shortcuts-extension"
     },
     {
