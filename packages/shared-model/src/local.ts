@@ -9,11 +9,9 @@ import {
   MultilineString
 } from '@jupyterlab/nbformat';
 
-import {
-  PartialJSONValue,
-  PartialJSONObject,
-  PartialJSONArray
-} from '@lumino/coreutils';
+import { PartialJSONValue, PartialJSONObject } from '@lumino/coreutils';
+
+import * as nbformat from '@jupyterlab/nbformat';
 
 import * as shared from './api';
 
@@ -27,8 +25,8 @@ export class LocalNotebook implements shared.ISharedNotebook {
   [key: string]: any;
 
   public metadata: shared.ISharedNotebookMetadata;
-  public nbformat_minor: number;
-  public nbformat: number;
+  public nbformat_minor: number = nbformat.MINOR_VERSION;
+  public nbformat: number = nbformat.MAJOR_VERSION;
   public cells: shared.ISharedCell[];
 
   getCell(index: number): shared.ISharedCell {
@@ -57,14 +55,7 @@ export class LocalNotebook implements shared.ISharedNotebook {
 // Local Notebook Metadata.
 
 export class LocalNotebookMetadata implements shared.ISharedNotebookMetadata {
-  [key: string]:
-    | string
-    | number
-    | boolean
-    | PartialJSONObject
-    | PartialJSONArray
-    | null
-    | undefined;
+  [key: string]: any;
 
   public kernelspec?: LocalKernelspecMetadata | undefined;
   public language_info?: LocalLanguageInfoMetadata | undefined;
@@ -73,14 +64,7 @@ export class LocalNotebookMetadata implements shared.ISharedNotebookMetadata {
 
 export class LocalKernelspecMetadata
   implements shared.ISharedKernelspecMetadata {
-  [key: string]:
-    | string
-    | number
-    | boolean
-    | PartialJSONObject
-    | PartialJSONArray
-    | null
-    | undefined;
+  [key: string]: any;
 
   public name: string;
   public display_name: string;
@@ -88,14 +72,7 @@ export class LocalKernelspecMetadata
 
 export class LocalLanguageInfoMetadata
   implements shared.ISharedLanguageInfoMetadata {
-  [key: string]:
-    | string
-    | number
-    | boolean
-    | PartialJSONObject
-    | PartialJSONArray
-    | null
-    | undefined;
+  [key: string]: any;
 
   public name: string;
   public codemirror_mode?: string | PartialJSONObject | undefined;
@@ -107,14 +84,7 @@ export class LocalLanguageInfoMetadata
 // Local Cell.
 
 export class LocalRawCell implements shared.ISharedRawCell {
-  [key: string]:
-    | string
-    | number
-    | boolean
-    | PartialJSONObject
-    | PartialJSONArray
-    | null
-    | undefined;
+  [key: string]: any;
 
   public cell_type: 'raw';
   public metadata: Partial<IRawCellMetadata>;
