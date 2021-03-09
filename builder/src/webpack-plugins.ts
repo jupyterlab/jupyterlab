@@ -110,7 +110,7 @@ export namespace WPPlugin {
         close: () => watcher.close(),
         pause: () => watcher.pause(),
         getContextTimeInfoEntries: () => {
-          const dirTimestamps = watcher.getContextInfoEntries();
+          const dirTimestamps = watcher.getContextTimeInfoEntries();
           for (const path of ignoredDirs) {
             dirTimestamps.set(path, IGNORE_TIME_ENTRY);
           }
