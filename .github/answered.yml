@@ -1,0 +1,20 @@
+# This action automatically schedules issues to be closed that have been
+# labeled as answered if there is no activity on them for 30 days. This takes
+# care of the common usecase of an issue being answered to the best of our
+# ability and no other follow-up from the submitter.
+name: 'Close answered issues'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3
+        with:
+          skip-stale-issue-message: true
+          days-before-stale: 30
+          days-before-close: 7
+          stale-issue-label: 'status:Closing as Answered'
+          only-issue-labels: 'status:Answered'
