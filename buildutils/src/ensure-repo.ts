@@ -443,9 +443,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   // Pick up all the package versions.
   const paths = utils.getLernaPaths();
 
-  // These two are not part of the workspaces but should be kept
-  // in sync.
-  paths.push('./jupyterlab/tests/mock_packages/extension');
+  // This package is not part of the workspaces but should be kept in sync.
   paths.push('./jupyterlab/tests/mock_packages/mimeextension');
 
   const cssImports: Dict<string[]> = {};
