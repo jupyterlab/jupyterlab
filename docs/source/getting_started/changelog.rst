@@ -10,6 +10,11 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.10
+^^^^^^^
+* Fix watch mode for external extensions (`#9916 <https://github.com/jupyterlab/jupyterlab/pull/9916>`__, `#9915 <https://github.com/jupyterlab/jupyterlab/pull/9915>`__, )
+* Bug fix for extension watch mode behavior (`#9889 <https://github.com/jupyterlab/jupyterlab/pull/9889>`__, `#9861 <https://github.com/jupyterlab/jupyterlab/issues/9861>`__)
+
 v3.0.9
 ^^^^^^
 * Remove the previous ``file_to_run`` logic. (`#9848 <https://github.com/jupyterlab/jupyterlab/pull/9848>`__)
