@@ -7,6 +7,30 @@ See the [JupyterLab
 milestone on GitHub for the full list of pull requests and issues
 closed.
 
+### v3.0.10
+
+- Fix watch mode for external extensions
+  ([#9915](https://github.com/jupyterlab/jupyterlab/pull/9915))
+- Bug fix for extension watch mode behavior
+  ([#9889](https://github.com/jupyterlab/jupyterlab/pull/9889),
+  [#9861](https://github.com/jupyterlab/jupyterlab/issues/9861))
+
+### v3.0.9
+
+- Remove the previous `file_to_run` logic.
+  ([#9848](https://github.com/jupyterlab/jupyterlab/pull/9848))
+- Enable Caching in Production Minimized Mode.
+  ([#9834](https://github.com/jupyterlab/jupyterlab/pull/9834))
+- Remove the auto-switch to “mobile” mode, and behavior switches associated
+  with mobile mode.
+  ([#9832](https://github.com/jupyterlab/jupyterlab/pull/9832))
+- Fix the display of breakpoints on restore.
+  ([#9828](https://github.com/jupyterlab/jupyterlab/pull/9828))
+- Update CI script timeouts.
+  ([#9825](https://github.com/jupyterlab/jupyterlab/pull/9825))
+- Fix mimerender test example and test in CI.
+  ([#9820](https://github.com/jupyterlab/jupyterlab/pull/9820))
+
 ### v3.0.8
 
 - `@jupyterlab/rendermime`: upgraded `marked` dep past
