@@ -48,7 +48,7 @@ describe('Bigquery SQL extractors', () => {
     });
   });
 */
-  describe('%bigquery line magic', () => {
+/*  describe('%bigquery line magic', () => {
     it('extracts simple commands', () => {
       let code = wrap_in_python_lines('%bigquery select * from work');
       let { cell_code_kept, foreign_document_map } = extract(code);
@@ -58,7 +58,7 @@ describe('Bigquery SQL extractors', () => {
       let document = get_the_only_virtual(foreign_document_map);
       expect(document.language).to.equal('sql');
       expect(document.value).to.equal('select * from work\n');
-    });
+    });*/
 /*
     it('leaves out the connection specification', () => {
       let code = wrap_in_python_lines(
