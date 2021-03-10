@@ -208,7 +208,7 @@
       "path": "../settingregistry"
     },
     {
-      "path": "../shared-model"
+      "path": "../nbmodel"
     },
     {
       "path": "../shortcuts-extension"
