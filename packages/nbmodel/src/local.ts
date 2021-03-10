@@ -3,39 +3,30 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  IRawCellMetadata,
-  IAttachments,
-  MultilineString
-} from '@jupyterlab/nbformat';
+import { PartialJSONObject } from '@lumino/coreutils';
 
-import { PartialJSONValue, PartialJSONObject } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
+
+import Delta from 'quill-delta';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import * as shared from './api';
+import * as nbmodel from './api';
 
 /**
- * Local implementation of the shared model types.
+ * Local implementation of the nbmodel types.
  */
 
 // Local Notebook.
 
-export class LocalNotebook implements shared.ISharedNotebook {
-  [key: string]: any;
-
-  public metadata: shared.ISharedNotebookMetadata;
-  public nbformat_minor: number = nbformat.MINOR_VERSION;
-  public nbformat: number = nbformat.MAJOR_VERSION;
-  public cells: shared.ISharedCell[];
-
-  getCell(index: number): shared.ISharedCell {
+export class LocalNotebook implements nbmodel.ISharedNotebook {
+  getCell(index: number): nbmodel.ISharedCell {
     return this.cells[index];
   }
-  insertCell(cell: shared.ISharedCell): void {
+  insertCell(cell: nbmodel.ISharedCell): void {
     throw new Error('Method not implemented.');
   }
-  insertCells(cells: shared.ISharedCell[]): void {
+  insertCells(cells: nbmodel.ISharedCell[]): void {
     throw new Error('Method not implemented.');
   }
   moveCell(fromIndex: number, toIndex: number): void {
@@ -50,81 +41,132 @@ export class LocalNotebook implements shared.ISharedNotebook {
   redo(): void {
     throw new Error('Method not implemented.');
   }
+
+  get changed(): ISignal<this, Delta> {
+    return this._changed;
+  }
+
+  dispose(): void {
+    /* no-op */
+  }
+
+  public metadata: nbmodel.ISharedNotebookMetadata;
+  public nbformat_minor: number = nbformat.MINOR_VERSION;
+  public nbformat: number = nbformat.MAJOR_VERSION;
+  public cells: nbmodel.ISharedCell[];
+  public isDisposed = false;
+  private _changed = new Signal<this, Delta>(this);
 }
 
 // Local Notebook Metadata.
 
-export class LocalNotebookMetadata implements shared.ISharedNotebookMetadata {
-  [key: string]: any;
+export class LocalNotebookMetadata implements nbmodel.ISharedNotebookMetadata {
+  get changed(): ISignal<this, Delta> {
+    return this._changed;
+  }
+
+  dispose(): void {
+    /* no-op */
+  }
 
   public kernelspec?: LocalKernelspecMetadata | undefined;
   public language_info?: LocalLanguageInfoMetadata | undefined;
   public orig_nbformat: number;
+  public isDisposed = false;
+  private _changed = new Signal<this, Delta>(this);
 }
 
 export class LocalKernelspecMetadata
-  implements shared.ISharedKernelspecMetadata {
-  [key: string]: any;
+  implements nbmodel.ISharedKernelspecMetadata {
+  dispose(): void {
+    /* no-op */
+  }
 
   public name: string;
   public display_name: string;
+  public isDisposed = false;
 }
 
 export class LocalLanguageInfoMetadata
-  implements shared.ISharedLanguageInfoMetadata {
-  [key: string]: any;
+  implements nbmodel.ISharedLanguageInfoMetadata {
+  dispose(): void {
+    /* no-op */
+  }
 
   public name: string;
   public codemirror_mode?: string | PartialJSONObject | undefined;
   public file_extension?: string | undefined;
   public mimetype?: string | undefined;
   public pygments_lexer?: string | undefined;
+  public isDisposed = false;
 }
 
 // Local Cell.
 
-export class LocalRawCell implements shared.ISharedRawCell {
-  [key: string]: any;
+export class LocalRawCell implements nbmodel.ISharedRawCell {
+  get changed(): ISignal<this, Delta> {
+    return this._changed;
+  }
+
+  dispose(): void {
+    /* no-op */
+  }
 
   public cell_type: 'raw';
-  public metadata: Partial<IRawCellMetadata>;
-  public attachments?: IAttachments | undefined;
-  public source: MultilineString;
+  public metadata: Partial<nbformat.IRawCellMetadata>;
+  public attachments?: nbformat.IAttachments | undefined;
+  public source: nbformat.MultilineString;
+  public isDisposed = false;
+  private _changed = new Signal<this, Delta>(this);
 }
 
 // Local Cell Metadata.
 
-export class LocalCodeCellMetadata implements shared.ISharedCodeCellMetadata {
-  [key: string]: PartialJSONValue;
-
+export class LocalCodeCellMetadata implements nbmodel.ISharedCodeCellMetadata {
   constructor() {
-    this._collapsed = false;
-    this._jupyter = new LocalCodeCellJupyterMetadata();
-    this._scrolled = false;
-    this._trusted = false;
-    this._name = '';
-    this._tags = [];
+    this.collapsed = false;
+    this.jupyter = new LocalCodeCellJupyterMetadata();
+    this.scrolled = false;
+    this.trusted = false;
+    this.name = '';
+    this.tags = [];
+  }
+
+  get changed(): ISignal<this, Delta> {
+    return this._changed;
+  }
+
+  dispose(): void {
+    /* no-op */
   }
 
   public collapsed: boolean;
-  public jupyter: Partial<shared.ISharedCodeCellJupyterMetadata>;
+  public jupyter: Partial<nbmodel.ISharedCodeCellJupyterMetadata>;
   public scrolled: boolean | 'auto';
   public trusted: boolean;
   public name: string;
   public tags: string[];
+  public isDisposed = false;
+  private _changed = new Signal<this, Delta>(this);
 }
 
 export class LocalCodeCellJupyterMetadata
-  implements shared.ISharedCodeCellJupyterMetadata {
-  [key: string]: PartialJSONValue;
+  implements nbmodel.ISharedCodeCellJupyterMetadata {
+  dispose(): void {
+    /* no-op */
+  }
 
   public outputs_hidden: boolean;
   public source_hidden: boolean;
+  public isDisposed = false;
 }
 
 export class LocalCellJupyterMetadata
-  implements shared.ISharedCellJupyterMetadata {
-  [key: string]: PartialJSONValue;
+  implements nbmodel.ISharedCellJupyterMetadata {
+  dispose(): void {
+    /* no-op */
+  }
 
   public source_hidden: boolean = false;
+  public isDisposed = false;
 }
