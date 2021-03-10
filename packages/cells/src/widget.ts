@@ -197,12 +197,12 @@ export class Cell extends Widget {
       model,
       contentFactory,
       updateOnShow: options.updateEditorOnShow,
-      placeholder: options.placeholder
+      placeholder: options.inputPlaceholder
     }));
     input.addClass(CELL_INPUT_AREA_CLASS);
     inputWrapper.addWidget(inputCollapser);
     inputWrapper.addWidget(input);
-    if (options.placeholder) {
+    if (options.inputPlaceholder) {
       input.node.innerHTML = `<div class="jp-Cell-Placeholder">
         <pre>${options.model.value.text}</pre>
       </div>`;
@@ -459,7 +459,8 @@ export class Cell extends Widget {
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory,
-      placeholder: false
+      outputPlaceholder: false,
+      inputPlaceholder: false
     });
   }
 
@@ -576,9 +577,14 @@ export namespace Cell {
     updateEditorOnShow?: boolean;
 
     /**
-     * Whether this cell is a placeholder for future rendering.
+     * Whether this input cell is a placeholder for future rendering.
      */
-    placeholder?: boolean;
+    inputPlaceholder?: boolean;
+
+    /**
+     * Whether this output cell is a placeholder for future rendering.
+     */
+    outputPlaceholder?: boolean;
 
     /**
      * The maximum number of output items to display in cell output.
@@ -712,33 +718,33 @@ export class CodeCell extends Cell {
     const contentFactory = this.contentFactory;
     const model = this.model;
 
-    //    if (!options.placeholder) {
-    // Insert the output before the cell footer.
-    const outputWrapper = (this._outputWrapper = new Panel());
-    outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-    const outputCollapser = new OutputCollapser();
-    outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
-    const output = (this._output = new OutputArea({
-      model: model.outputs,
-      rendermime,
-      contentFactory: contentFactory,
-      maxNumberOutputs: options.maxNumberOutputs
-    }));
-    output.addClass(CELL_OUTPUT_AREA_CLASS);
-    // Set a CSS if there are no outputs, and connect a signal for future
-    // changes to the number of outputs. This is for conditional styling
-    // if there are no outputs.
-    if (model.outputs.length === 0) {
-      this.addClass(NO_OUTPUTS_CLASS);
+    if (!options.outputPlaceholder) {
+      // Insert the output before the cell footer.
+      const outputWrapper = (this._outputWrapper = new Panel());
+      outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
+      const outputCollapser = new OutputCollapser();
+      outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
+      const output = (this._output = new OutputArea({
+        model: model.outputs,
+        rendermime,
+        contentFactory: contentFactory,
+        maxNumberOutputs: options.maxNumberOutputs
+      }));
+      output.addClass(CELL_OUTPUT_AREA_CLASS);
+      // Set a CSS if there are no outputs, and connect a signal for future
+      // changes to the number of outputs. This is for conditional styling
+      // if there are no outputs.
+      if (model.outputs.length === 0) {
+        this.addClass(NO_OUTPUTS_CLASS);
+      }
+      output.outputLengthChanged.connect(this._outputLengthHandler, this);
+      outputWrapper.addWidget(outputCollapser);
+      outputWrapper.addWidget(output);
+      (this.layout as PanelLayout).insertWidget(2, outputWrapper);
+      this._outputPlaceholder = new OutputPlaceholder(() => {
+        this.outputHidden = !this.outputHidden;
+      });
     }
-    output.outputLengthChanged.connect(this._outputLengthHandler, this);
-    outputWrapper.addWidget(outputCollapser);
-    outputWrapper.addWidget(output);
-    (this.layout as PanelLayout).insertWidget(2, outputWrapper);
-    this._outputPlaceholder = new OutputPlaceholder(() => {
-      this.outputHidden = !this.outputHidden;
-    });
-    //    }
     model.stateChanged.connect(this.onStateChanged, this);
   }
 
@@ -935,7 +941,8 @@ export class CodeCell extends Cell {
       model: this.model,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime,
-      placeholder: false
+      inputPlaceholder: false,
+      outputPlaceholder: false
     });
   }
 
@@ -1605,7 +1612,8 @@ export class RawCell extends Cell {
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory,
-      placeholder: false
+      inputPlaceholder: false,
+      outputPlaceholder: false
     });
   }
 

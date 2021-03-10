@@ -632,7 +632,8 @@ export class StaticNotebook extends Widget {
       rendermime,
       contentFactory,
       updateEditorOnShow: false,
-      placeholder: false,
+      inputPlaceholder: false,
+      outputlaceholder: false,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs
     };
     const cell = this.contentFactory.createCodeCell(options, this);
@@ -655,7 +656,8 @@ export class StaticNotebook extends Widget {
       rendermime,
       contentFactory,
       updateEditorOnShow: false,
-      placeholder: false
+      inputPlaceholder: false,
+      outputPlaceholder: false
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
@@ -682,7 +684,8 @@ export class StaticNotebook extends Widget {
           rendermime,
           contentFactory,
           updateEditorOnShow: false,
-          placeholder: true
+          inputPlaceholder: true,
+          outputPlaceholder: !this.notebookConfig.renderWithWindow
         };
         widget = this.contentFactory.createCodeCell(codeOptions, this);
         widget.model.mimeType = this._mimetype;
@@ -694,7 +697,8 @@ export class StaticNotebook extends Widget {
           rendermime,
           contentFactory,
           updateEditorOnShow: false,
-          placeholder: true
+          inputPlaceholder: true,
+          outputPlaceholder: !this.notebookConfig.renderWithWindow
         };
         widget = this.contentFactory.createMarkdownCell(markdownOptions, this);
         if (model.value.text === '') {
@@ -708,24 +712,11 @@ export class StaticNotebook extends Widget {
           rendermime,
           contentFactory,
           updateEditorOnShow: false,
-          placeholder: true
+          inputPlaceholder: true,
+          outputPlaceholder: !this.notebookConfig.renderWithWindow
         };
         widget = this.contentFactory.createRawCell(rawOptions, this);
     }
-    /*
-    widget.node.innerHTML = `<div class="jp-Cell-Placeholder">
-        <pre>${widget.model.value.text}</pre>
-    </div>`
-    */
-    /*
-    cell.node.innerHTML = `
-      <div class="jp-Cell-Placeholder">
-        <div class="jp-Cell-Placeholder-wrapper">
-        </div>
-      </div>
-    </div>`;
-    */
-    //    widget.inputHidden = true;
     widget.syncCollapse = true;
     widget.syncEditable = true;
     return widget;
@@ -742,7 +733,8 @@ export class StaticNotebook extends Widget {
       model,
       contentFactory,
       updateEditorOnShow: false,
-      placeholder: false
+      inputPlaceholder: false,
+      outputPlaceholder: false
     };
     const cell = this.contentFactory.createRawCell(options, this);
     cell.syncCollapse = true;
