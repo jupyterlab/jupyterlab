@@ -3,7 +3,7 @@
 
 import { LocalNotebook, LocalCellJupyterMetadata } from './../src';
 
-describe('@jupyterlab/shared-model', () => {
+describe('@jupyterlab/nbmodel', () => {
   describe('local', () => {
     it('should create a notebook', () => {
       const notebook = new LocalNotebook();

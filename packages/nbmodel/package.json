@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/shared-model",
+  "name": "@jupyterlab/nbmodel",
   "version": "3.1.0-alpha.3",
   "description": "JupyterLab - Shared Model",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
