@@ -39,7 +39,9 @@
   },
   "dependencies": {
     "@jupyterlab/nbformat": "^3.1.0-alpha.3",
-    "@lumino/coreutils": "^1.5.3"
+    "@jupyterlab/observables": "^3.1.0-alpha.3",
+    "@lumino/coreutils": "^1.5.3",
+    "quill-delta": "4.2.2"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.1.0-alpha.3",
