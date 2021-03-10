@@ -212,7 +212,7 @@
       "path": "./packages/settingregistry"
     },
     {
-      "path": "./packages/shared-model"
+      "path": "./packages/nbmodel"
     },
     {
       "path": "./packages/shortcuts-extension"

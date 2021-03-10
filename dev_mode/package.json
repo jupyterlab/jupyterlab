@@ -368,7 +368,7 @@
       "@jupyterlab/settingeditor": "../packages/settingeditor",
       "@jupyterlab/settingeditor-extension": "../packages/settingeditor-extension",
       "@jupyterlab/settingregistry": "../packages/settingregistry",
-      "@jupyterlab/shared-model": "../packages/shared-model",
+      "@jupyterlab/nbmodel": "../packages/nbmodel",
       "@jupyterlab/shortcuts-extension": "../packages/shortcuts-extension",
       "@jupyterlab/statedb": "../packages/statedb",
       "@jupyterlab/statusbar": "../packages/statusbar",
