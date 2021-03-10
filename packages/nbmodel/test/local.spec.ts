@@ -9,6 +9,7 @@ describe('@jupyterlab/nbmodel', () => {
       const notebook = new LocalNotebook();
       expect(notebook.cells).toBe(undefined);
       notebook.cells = [];
+      expect(notebook.cells.length).toBe(0);
       expect(notebook.getCell(0)).toBe(undefined);
     });
     it('should create a jupyter metadata', () => {
