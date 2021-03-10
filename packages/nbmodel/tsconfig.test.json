@@ -12,7 +12,7 @@
       "path": "../../testutils"
     },
     {
-      "path": "../observables"
+      "path": "../nbformat"
     }
   ]
 }
