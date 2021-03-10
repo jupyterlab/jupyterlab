@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { LocalNotebook, LocalCellJupyterMetadata } from './../src';
+import { LocalNotebook, LocalCodeCellJupyterMetadata } from './../src';
 
 describe('@jupyterlab/nbmodel', () => {
   describe('local', () => {
@@ -13,7 +13,7 @@ describe('@jupyterlab/nbmodel', () => {
       expect(notebook.getCell(0)).toBe(undefined);
     });
     it('should create a jupyter metadata', () => {
-      const jupyterMetadata = new LocalCellJupyterMetadata();
+      const jupyterMetadata = new LocalCodeCellJupyterMetadata();
       expect(jupyterMetadata.source_hidden).toBe(false);
     });
   });

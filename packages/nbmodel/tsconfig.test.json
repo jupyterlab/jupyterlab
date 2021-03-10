@@ -6,6 +6,9 @@
       "path": "../nbformat"
     },
     {
+      "path": "../observables"
+    },
+    {
       "path": "."
     },
     {
@@ -13,6 +16,9 @@
     },
     {
       "path": "../nbformat"
+    },
+    {
+      "path": "../observables"
     }
   ]
 }
