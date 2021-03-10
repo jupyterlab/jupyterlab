@@ -163,6 +163,9 @@
       "path": "../nbformat"
     },
     {
+      "path": "../nbmodel"
+    },
+    {
       "path": "../notebook"
     },
     {
@@ -206,9 +209,6 @@
     },
     {
       "path": "../settingregistry"
-    },
-    {
-      "path": "../nbmodel"
     },
     {
       "path": "../shortcuts-extension"
