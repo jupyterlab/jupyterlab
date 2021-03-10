@@ -163,6 +163,9 @@
       "path": "../nbformat"
     },
     {
+      "path": "../nbmodel"
+    },
+    {
       "path": "../notebook"
     },
     {

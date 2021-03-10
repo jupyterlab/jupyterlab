@@ -84,6 +84,7 @@
     "@jupyterlab/mathjax2-extension": "^3.1.0-alpha.3",
     "@jupyterlab/nbconvert-css": "^3.1.0-alpha.3",
     "@jupyterlab/nbformat": "^3.1.0-alpha.3",
+    "@jupyterlab/nbmodel": "^3.1.0-alpha.3",
     "@jupyterlab/notebook": "^3.1.0-alpha.3",
     "@jupyterlab/notebook-extension": "^3.1.0-alpha.3",
     "@jupyterlab/observables": "^4.1.0-alpha.3",
