@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 /**
  * @packageDocumentation
- * @module shared-model
+ * @module nbmodel
  */
 
 export * from './api';
