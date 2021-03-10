@@ -42,7 +42,7 @@ export class LocalNotebook implements nbmodel.ISharedNotebook {
     throw new Error('Method not implemented.');
   }
 
-  get changed(): ISignal<this, Delta> {
+  get changed(): ISignal<this, nbmodel.NotebookChange> {
     return this._changed;
   }
 
@@ -55,13 +55,13 @@ export class LocalNotebook implements nbmodel.ISharedNotebook {
   public nbformat: number = nbformat.MAJOR_VERSION;
   public cells: nbmodel.ISharedCell[];
   public isDisposed = false;
-  private _changed = new Signal<this, Delta>(this);
+  private _changed = new Signal<this, nbmodel.NotebookChange>(this);
 }
 
 // Local Notebook Metadata.
 
 export class LocalNotebookMetadata implements nbmodel.ISharedNotebookMetadata {
-  get changed(): ISignal<this, Delta> {
+  get changed(): ISignal<this, nbmodel.MapChange> {
     return this._changed;
   }
 
@@ -73,7 +73,7 @@ export class LocalNotebookMetadata implements nbmodel.ISharedNotebookMetadata {
   public language_info?: LocalLanguageInfoMetadata | undefined;
   public orig_nbformat: number;
   public isDisposed = false;
-  private _changed = new Signal<this, Delta>(this);
+  private _changed = new Signal<this, nbmodel.MapChange>(this);
 }
 
 export class LocalKernelspecMetadata
@@ -104,7 +104,7 @@ export class LocalLanguageInfoMetadata
 // Local Cell.
 
 export class LocalRawCell implements nbmodel.ISharedRawCell {
-  get changed(): ISignal<this, Delta> {
+  get changed(): ISignal<this, nbmodel.CellChange> {
     return this._changed;
   }
 
@@ -115,9 +115,9 @@ export class LocalRawCell implements nbmodel.ISharedRawCell {
   public cell_type: 'raw';
   public metadata: Partial<nbformat.IRawCellMetadata>;
   public attachments?: nbformat.IAttachments | undefined;
-  public source: nbformat.MultilineString;
+  public source: string;
   public isDisposed = false;
-  private _changed = new Signal<this, Delta>(this);
+  private _changed = new Signal<this, nbmodel.CellChange>(this);
 }
 
 // Local Cell Metadata.
@@ -156,17 +156,7 @@ export class LocalCodeCellJupyterMetadata
     /* no-op */
   }
 
-  public outputs_hidden: boolean;
-  public source_hidden: boolean;
-  public isDisposed = false;
-}
-
-export class LocalCellJupyterMetadata
-  implements nbmodel.ISharedCellJupyterMetadata {
-  dispose(): void {
-    /* no-op */
-  }
-
+  public outputs_hidden: boolean = false;
   public source_hidden: boolean = false;
   public isDisposed = false;
 }
