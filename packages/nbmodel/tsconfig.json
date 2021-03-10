@@ -8,6 +8,9 @@
   "references": [
     {
       "path": "../nbformat"
+    },
+    {
+      "path": "../observables"
     }
   ]
 }
