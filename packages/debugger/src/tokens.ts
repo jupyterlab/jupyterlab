@@ -55,6 +55,11 @@ export interface IDebugger {
   continue(): Promise<void>;
 
   /**
+   * Evaluate an expression.
+   */
+  evaluate(expression: string): Promise<void>;
+
+  /**
    * Computes an id based on the given code.
    */
   getCodeId(code: string): string;

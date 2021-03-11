@@ -14,6 +14,7 @@ import {
 
 import {
   ICommandPalette,
+  InputDialog,
   IThemeManager,
   MainAreaWidget,
   WidgetTracker
@@ -42,6 +43,7 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { Session } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -611,6 +613,61 @@ const main: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to evaluate code when stopped at a breakpoint.
+ */
+const evaluatePlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger-extension:evaluate',
+  requires: [IDebugger, ITranslator],
+  optional: [ICommandPalette],
+  autoStart: true,
+  activate: async (
+    app: JupyterFrontEnd,
+    service: IDebugger,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ): Promise<void> => {
+    const trans = translator.load('jupyterlab');
+    const { commands } = app;
+
+    const getCodeToEvaluate = async () => {
+      return (
+        (
+          await InputDialog.getText({
+            label: trans.__('Code'),
+            placeholder: 'foo = 1',
+            title: trans.__('Evaluate Code'),
+            okLabel: trans.__('Evaluate')
+          })
+        ).value ?? undefined
+      );
+    };
+
+    const command = 'debugger:evaluate';
+    commands.addCommand(command, {
+      label: trans.__('Evaluate Code'),
+      caption: trans.__('Evaluate Code'),
+      // TODO: use a different icon
+      icon: Debugger.Icons.continueIcon,
+      isEnabled: () => {
+        return service.hasStoppedThreads();
+      },
+      execute: async () => {
+        const code = await getCodeToEvaluate();
+        if (!code) {
+          return;
+        }
+        await service.evaluate(code);
+      }
+    });
+
+    if (palette) {
+      const category = trans.__('Debugger');
+      palette.addItem({ command, category });
+    }
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -622,7 +679,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sidebar,
   main,
   sources,
-  configuration
+  configuration,
+  evaluatePlugin
 ];
 
 export default plugins;
