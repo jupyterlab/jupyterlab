@@ -679,26 +679,12 @@ function activateCodeConsole(
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
 
-  // Get the current widget and activate unless the args specify otherwise.
-  const getCurrent = (
-    args: ReadonlyPartialJSONObject
-  ): NotebookPanel | null => {
-    const widget = tracker.currentWidget;
-    const activate = args['activate'] !== false;
-
-    if (activate && widget) {
-      shell.activateById(widget.id);
-    }
-
-    return widget;
-  };
-
   const isEnabled = (): boolean => Private.isEnabled(shell, tracker);
 
   commands.addCommand(CommandIDs.createConsole, {
     label: trans.__('New Console for Notebook'),
     execute: args => {
-      const current = getCurrent({ ...args, activate: false });
+      const current = tracker.currentWidget;
 
       if (!current) {
         return;
@@ -718,7 +704,7 @@ function activateCodeConsole(
     execute: async args => {
       // Default to not activating the notebook (thereby putting the notebook
       // into command mode)
-      const current = getCurrent({ activate: false, ...args });
+      const current = tracker.currentWidget;
 
       if (!current) {
         return;
