@@ -674,13 +674,15 @@ function activateClonedOutputs(
 function activateCodeConsole(
   app: JupyterFrontEnd,
   tracker: INotebookTracker,
-  translator: ITranslator,
+  translator: ITranslator
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
 
   // Get the current widget and activate unless the args specify otherwise.
-  const getCurrent = (args: ReadonlyPartialJSONObject): NotebookPanel | null => {
+  const getCurrent = (
+    args: ReadonlyPartialJSONObject
+  ): NotebookPanel | null => {
     const widget = tracker.currentWidget;
     const activate = args['activate'] !== false;
 
@@ -689,7 +691,7 @@ function activateCodeConsole(
     }
 
     return widget;
-  }
+  };
 
   const isEnabled = (): boolean => Private.isEnabled(shell, tracker);
 
