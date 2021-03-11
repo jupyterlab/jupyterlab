@@ -3,9 +3,4 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import './fonts.css';
-
-.jp-OutputArea-output.jp-RenderedLatex .MJX-DISPLAY {
-  margin: 0;
-  text-align: left;
-}
+@import url('base.css');
