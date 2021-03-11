@@ -46,11 +46,11 @@ js_command = combine_commands(
     ensure_targets(jstargets),
 )
 
-is_repo = (HERE / ".git").exists()
-if is_repo:
-    cmdclass["jsdeps"] = js_command
-else:
+if (HERE / "PKG-INFO").exists():
+    # In an extracted python source package
     cmdclass["jsdeps"] = skip_if_exists(jstargets, js_command)
+else:
+    cmdclass["jsdeps"] = js_command
 
 long_description = (HERE / "README.md").read_text()
 
