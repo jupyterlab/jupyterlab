@@ -16,7 +16,10 @@
     "url": "https://github.com/jupyterlab/jupyter-renderers.git"
   },
   "license": "BSD-3-Clause",
-  "author": "Project Jupyter",
+  "author": {
+    "name": "Project Jupyter",
+    "email": "jupyter@googlegroups.com"
+  },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "style": "style/index.css",
@@ -26,28 +29,46 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js",
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "scripts": {
-    "build": "tsc",
-    "clean": "rimraf lib",
-    "generate:css": "node scripts/generate-css.js",
-    "prepack": "npm run clean && npm run generate:css && npm run build",
-    "watch": "tsc -w"
+    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
+    "build:labextension": "jupyter labextension build .",
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "build:lib": "tsc",
+    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
+    "clean": "jlpm run clean:lib",
+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension && jlpm run clean:dist",
+    "clean:labextension": "rimraf ./jupyterlab-mathjax3/labextension",
+    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
+    "clean:dist": "rimraf dist",
+    "eslint": "eslint . --ext .ts,.tsx --fix",
+    "eslint:check": "eslint . --ext .ts,.tsx",
+    "install:extension": "jupyter labextension develop --overwrite .",
+    "prepack": "npm run clean && npm run build",
+    "prepare": "jlpm run clean && jlpm run build:prod",
+    "watch": "run-p watch:src watch:labextension",
+    "watch:labextension": "jupyter labextension watch .",
+    "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0",
-    "@jupyterlab/rendermime": "^3.0.0",
+    "@jupyterlab/application": "^3.0.6",
+    "@jupyterlab/rendermime": "^3.0.6",
     "mathjax-full": "^3.1.2"
   },
   "devDependencies": {
-    "rimraf": "^2.6.2",
+    "@jupyterlab/builder": "^3.0.0",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
     "typescript": "~4.1.3"
   },
   "jupyterlab": {
     "extension": true,
+    "outputDir": "jupyterlab-mathjax3/labextension",
     "disabledExtensions": [
       "@jupyterlab/mathjax2-extension:plugin"
     ]
-  }
+  },
+  "styleModule": "style/index.js"
 }
