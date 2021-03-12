@@ -594,6 +594,7 @@ export class Sanitizer implements ISanitizer {
       br: ['clear'],
       button: [
         'accesskey',
+        'data-commandlinker-args',
         'data-commandlinker-command',
         'disabled',
         'name',
