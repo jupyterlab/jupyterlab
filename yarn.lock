@@ -7521,7 +7521,7 @@ fast-deep-equal@^3.1.1, fast-deep-equal@~3.1.3:
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
   integrity sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==
 
-fast-diff@1.2.0, fast-diff@^1.1.2:
+fast-diff@^1.1.2:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/fast-diff/-/fast-diff-1.2.0.tgz#73ee11982d86caaf7959828d519cfe927fac5f03"
   integrity sha512-xJuoT5+L99XlZ8twedaRf6Ax2TgQVxvgZOYoPKqZufmJib0tL2tegPBOZb1pVNgIhlqDlA0eO0c3wBvQcmzx4w==
@@ -9517,6 +9517,11 @@ isomorphic-fetch@^2.1.1:
     node-fetch "^1.0.1"
     whatwg-fetch ">=0.10.0"
 
+isomorphic.js@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/isomorphic.js/-/isomorphic.js-0.2.2.tgz#4c76fb70d3e207123dead08675ba97eb75f5615a"
+  integrity sha512-tWhdHK5vam77zCkNKjpI8vWSrcVmlBeJIlxXgTiGaapgifQr0CfLHuPqMiZhjrI/K71X/aXaJZqUbkHZzg06Hg==
+
 isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
@@ -10350,6 +10355,13 @@ levn@~0.3.0:
   dependencies:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
+
+lib0@^0.2.35, lib0@^0.2.38:
+  version "0.2.40"
+  resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.40.tgz#7c89c2a7a89f9caaa0a04eaecb944d8e90a731b3"
+  integrity sha512-bKJxwll8MdwTTL3Siut6L+FjyF5sewXRE7noDTsRquEYy3Xi1UjtdEMZu46iuTvw9nQ/9p+gKkh1GxL2Kdaphw==
+  dependencies:
+    isomorphic.js "^0.2.2"
 
 license-webpack-plugin@^2.3.11:
   version "2.3.11"
@@ -12802,15 +12814,6 @@ quick-lru@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/quick-lru/-/quick-lru-4.0.1.tgz#5b8878f113a58217848c6482026c73e1ba57727f"
   integrity sha512-ARhCpm70fzdcvNQfPoy49IaanKkTlRWF2JMzqhcJbhSFRZv7nPTvZJdcY7301IPmvW+/p0RgIWnQDLJxifsQ7g==
-
-quill-delta@4.2.2:
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/quill-delta/-/quill-delta-4.2.2.tgz#015397d046e0a3bed087cd8a51f98c11a1b8f351"
-  integrity sha512-qjbn82b/yJzOjstBgkhtBjN2TNK+ZHP/BgUQO+j6bRhWQQdmj2lH6hXG7+nwwLF41Xgn//7/83lxs9n2BkTtTg==
-  dependencies:
-    fast-diff "1.2.0"
-    lodash.clonedeep "^4.5.0"
-    lodash.isequal "^4.5.0"
 
 ramda@^0.21.0:
   version "0.21.0"
@@ -16618,6 +16621,13 @@ xterm@~4.8.1:
   resolved "https://registry.yarnpkg.com/xterm/-/xterm-4.8.1.tgz#155a1729a43e1a89b406524e22c5634339e39ca1"
   integrity sha512-ax91ny4tI5eklqIfH79OUSGE2PUX2rGbwONmB6DfqpyhSZO8/cf++sqiaMWEVCMjACyMfnISW7C3gGMoNvNolQ==
 
+y-protocols@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/y-protocols/-/y-protocols-1.0.4.tgz#810978c6172474be87457c3bcd669e529c5ba3a1"
+  integrity sha512-5/Hd6DJ5Y2SlbqLIKq86BictdOS0iAcWJZCVop8MKqx0XWwA+BbMn4538n4Z0CGjFMUGnG1kGzagk3BKGz5SvQ==
+  dependencies:
+    lib0 "^0.2.35"
+
 y18n@^3.2.0:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/y18n/-/y18n-3.2.1.tgz#6d15fba884c08679c0d77e88e7759e811e07fa41"
@@ -16719,3 +16729,10 @@ yarn@1.21.1:
   version "1.21.1"
   resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.21.1.tgz#1d5da01a9a03492dc4a5957befc1fd12da83d89c"
   integrity sha512-dQgmJv676X/NQczpbiDtc2hsE/pppGDJAzwlRiADMTvFzYbdxPj2WO4PcNyriSt2c4jsCMpt8UFRKHUozt21GQ==
+
+yjs@^13.5.2:
+  version "13.5.2"
+  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.2.tgz#b518be0df84164591f4cc774aa24468d288e0e75"
+  integrity sha512-X5vscuAhQIYf77xuNeJSlEiQZq0aUVtvs3x2X3//ZGpDqcWiR3D0H1XMDfEnNzdTMzuhfDBMMxSl70klD+0OXw==
+  dependencies:
+    lib0 "^0.2.38"
