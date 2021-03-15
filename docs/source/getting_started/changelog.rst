@@ -6,6 +6,10 @@ JupyterLab Changelog
 `v1.2.x <https://github.com/jupyterlab/jupyterlab/milestone/54>`__
 ---------------------------------------------------------------------------
 
+v1.2.20
+^^^^^^^
+* feat: CommandLinker Support in Markdown cells (`#9937 <https://github.com/jupyterlab/jupyterlab/pull/9937>`__)
+
 v1.2.19
 ^^^^^^^
 * Add hash to webpack requests to enable caching (`#9787 <https://github.com/jupyterlab/jupyterlab/pull/9787>`__)
