@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/logconsole",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "JupyterLab - Log Console",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,8 +33,8 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^3.2.0",
-    "@jupyterlab/outputarea": "^1.2.10",
-    "@jupyterlab/rendermime": "^1.2.9",
+    "@jupyterlab/outputarea": "^1.2.11",
+    "@jupyterlab/rendermime": "^1.2.10",
     "@jupyterlab/services": "^4.2.3",
     "@phosphor/coreutils": "^1.3.1",
     "@phosphor/disposable": "^1.3.0",
