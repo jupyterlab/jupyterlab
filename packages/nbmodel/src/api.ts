@@ -11,7 +11,7 @@ import { ISignal } from '@lumino/signaling';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import Delta from 'quill-delta';
+import { Delta } from './utils';
 
 /**
  * This class defines of the shared nbmodel types.
@@ -30,13 +30,13 @@ export interface ISharedNotebook
   extends nbformat.INotebookContent,
     IDisposable {
   [key: string]: any;
-  metadata: ISharedNotebookMetadata;
+  metadata: nbformat.INotebookMetadata;
   readonly nbformat_minor: number;
   readonly nbformat: number;
   cells: ISharedCell[];
   getCell(index: number): ISharedCell;
-  insertCell(cell: ISharedCell): void;
-  insertCells(cells: Array<ISharedCell>): void;
+  insertCell(index: number, cell: ISharedCell): void;
+  insertCells(index: number, cells: Array<ISharedCell>): void;
   moveCell(fromIndex: number, toIndex: number): void;
   deleteCell(index: number): void;
   undo(): void;
@@ -45,16 +45,6 @@ export interface ISharedNotebook
 }
 
 // Notebook Metadata Types.
-
-export interface ISharedNotebookMetadata
-  extends nbformat.INotebookMetadata,
-    IDisposable {
-  [key: string]: any;
-  kernelspec?: ISharedKernelspecMetadata;
-  language_info?: ISharedLanguageInfoMetadata;
-  orig_nbformat: number;
-  readonly changed: ISignal<this, MapChange>;
-}
 
 export interface ISharedKernelspecMetadata
   extends nbformat.IKernelspecMetadata,
@@ -80,95 +70,56 @@ export interface ISharedLanguageInfoMetadata
 export type ISharedCell =
   | ISharedCodeCell
   | ISharedRawCell
-  | ISharedMardownCell
+  | ISharedMarkdownCell
   | ISharedUnrecognizedCell;
 
-export interface ISharedBaseCell extends nbformat.IBaseCell, IDisposable {
+export interface ISharedBaseCell<Metadata extends nbformat.IBaseCellMetadata>
+  extends nbformat.IBaseCell,
+    IDisposable {
   [key: string]: any;
   source: string;
-  metadata: Partial<ISharedCellMetadata>;
-  readonly changed: ISignal<this, CellChange>;
+  metadata: Partial<Metadata>;
+  // cell_type: 'code' | 'markdown' | 'raw'
+  readonly changed: ISignal<this, CellChange<Metadata>>;
 }
 
 export interface ISharedCodeCell
-  extends ISharedBaseCell,
+  extends ISharedBaseCell<nbformat.ICodeCellMetadata>,
     nbformat.ICodeCell,
     IDisposable {
   [key: string]: any;
   source: string;
   cell_type: 'code';
-  metadata: Partial<ISharedCodeCellMetadata>;
+  metadata: Partial<nbformat.ICodeCellMetadata>;
 }
 
-export interface ISharedMardownCell
-  extends ISharedBaseCell,
+export interface ISharedMarkdownCell
+  extends ISharedBaseCell<nbformat.IRawCellMetadata>,
     nbformat.IMarkdownCell,
     IDisposable {
   [key: string]: any;
   source: string;
   cell_type: 'markdown';
-  metadata: Partial<ISharedCodeCellMetadata>;
+  metadata: Partial<nbformat.IRawCellMetadata>;
 }
 
 export interface ISharedRawCell
-  extends ISharedBaseCell,
+  extends ISharedBaseCell<nbformat.IRawCellMetadata>,
     nbformat.IRawCell,
     IDisposable {
   [key: string]: any;
   source: string;
   cell_type: 'raw';
-  metadata: Partial<ISharedRawCellMetadata>;
+  metadata: Partial<nbformat.IRawCellMetadata>;
 }
 
 export interface ISharedUnrecognizedCell
-  extends ISharedBaseCell,
+  extends ISharedBaseCell<nbformat.IRawCellMetadata>,
     nbformat.IUnrecognizedCell,
     IDisposable {
   [key: string]: any;
   source: string;
-  metadata: Partial<ISharedCodeCellMetadata>;
-}
-
-// Cell Metadata Types.
-
-export type ISharedCellMetadata =
-  | ISharedBaseCellMetadata
-  | ISharedRawCellMetadata
-  | ISharedCodeCellMetadata;
-
-export interface ISharedCodeCellMetadata
-  extends nbformat.ICodeCellMetadata,
-    IDisposable {
-  [key: string]: any;
-  collapsed: boolean;
-  jupyter: Partial<ISharedCodeCellJupyterMetadata>;
-  scrolled: boolean | 'auto';
-  readonly changed: ISignal<this, Delta>;
-}
-
-export interface ISharedRawCellMetadata
-  extends nbformat.IRawCellMetadata,
-    IDisposable {
-  [key: string]: any;
-  format: string;
-}
-
-export interface ISharedBaseCellMetadata
-  extends nbformat.IBaseCellMetadata,
-    IDisposable {
-  [key: string]: any;
-  trusted: boolean;
-  name: string;
-  jupyter: Partial<ISharedCodeCellJupyterMetadata>;
-  tags: string[];
-}
-
-export interface ISharedCodeCellJupyterMetadata
-  extends nbformat.ICodeCellJupyterMetadata,
-    IDisposable {
-  [key: string]: any;
-  outputs_hidden: boolean;
-  source_hidden: boolean;
+  metadata: Partial<nbformat.IRawCellMetadata>;
 }
 
 /**
@@ -176,13 +127,19 @@ export interface ISharedCodeCellJupyterMetadata
  */
 
 export type NotebookChange = {
-  cellChange?: CellChange;
-  metadataChange?: MapChange;
+  cellsChange?: Delta<ISharedCell[]>;
+  metadataChange?: {
+    oldValue: nbformat.INotebookMetadata;
+    newValue: nbformat.INotebookMetadata | undefined;
+  };
 };
 
-export type CellChange = {
-  sourceChange?: Delta;
-  metadataChange?: MapChange;
+export type CellChange<MetadataType> = {
+  sourceChange?: Delta<string>;
+  metadataChange?: {
+    oldValue: Partial<MetadataType> | undefined;
+    newValue: Partial<MetadataType> | undefined;
+  };
 };
 
 export type MapChange = Map<
