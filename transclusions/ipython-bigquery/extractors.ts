@@ -31,15 +31,5 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
       is_standalone: true,
       file_extension: 'sql'
     })
-/*      
-      ,
-    new RegExpForeignCodeExtractor({
-      language: 'sql',
-      pattern: `(?:^|\n)%bigquery (?:${SQL_URL_PATTERN}|${COMMAND_PATTERN}|(.*))\n?`,
-      extract_to_foreign: '$1',
-      is_standalone: false,
-      file_extension: 'sql'
-    })
-    */
   ]
 };
