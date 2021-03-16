@@ -22,6 +22,7 @@ import diagnosticsSvg from '../../../style/icons/diagnostics.svg';
 import { Menu } from '@lumino/widgets';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { jumpToIcon } from '../jump_to';
+import { TranslationBundle } from '@jupyterlab/translation';
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
@@ -45,6 +46,8 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
 }
 
+let trans: TranslationBundle;
+
 class DiagnosticsPanel {
   private _content: DiagnosticsListing = null;
   private _widget: MainAreaWidget<DiagnosticsListing> = null;
@@ -66,12 +69,12 @@ class DiagnosticsPanel {
   }
 
   protected init_widget() {
-    this._content = new DiagnosticsListing(new DiagnosticsListing.Model());
+    this._content = new DiagnosticsListing(new DiagnosticsListing.Model(trans));
     this._content.model.diagnostics = new DiagnosticsDatabase();
     this._content.addClass('lsp-diagnostics-panel-content');
     const widget = new MainAreaWidget({ content: this._content });
     widget.id = 'lsp-diagnostics-panel';
-    widget.title.label = 'Diagnostics Panel';
+    widget.title.label = trans.__('Diagnostics Panel');
     widget.title.closable = true;
     widget.title.icon = diagnosticsIcon;
     return widget;
@@ -99,7 +102,7 @@ class DiagnosticsPanel {
 
     /** Columns Menu **/
     let columns_menu = new Menu({ commands: app.commands });
-    columns_menu.title.label = 'Panel columns';
+    columns_menu.title.label = trans.__('Panel columns');
 
     app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
       execute: args => {
@@ -128,7 +131,9 @@ class DiagnosticsPanel {
 
     /** Diagnostics Menu **/
     let ignore_diagnostics_menu = new Menu({ commands: app.commands });
-    ignore_diagnostics_menu.title.label = 'Ignore diagnostics like this';
+    ignore_diagnostics_menu.title.label = trans.__(
+      'Ignore diagnostics like this'
+    );
 
     let get_row = (): IDiagnosticsRow => {
       let tr = app.contextMenuHitTest(
@@ -170,7 +175,7 @@ class DiagnosticsPanel {
           return '';
         }
         const diagnostic = row.data.diagnostic;
-        return `Ignore diagnostics with "${diagnostic.code}" code`;
+        return trans.__(`Ignore diagnostics with "%1" code`, diagnostic.code);
       }
     });
     app.commands.addCommand(CMD_IGNORE_DIAGNOSTIC_MSG, {
@@ -199,7 +204,10 @@ class DiagnosticsPanel {
           return '';
         }
         const diagnostic = row.data.diagnostic;
-        return `Ignore diagnostics with "${diagnostic.message}" message`;
+        return trans.__(
+          'Ignore diagnostics with "%1" message',
+          diagnostic.message
+        );
       }
     });
 
@@ -208,7 +216,7 @@ class DiagnosticsPanel {
         const row = get_row();
         this.widget.content.jump_to(row);
       },
-      label: 'Jump to location',
+      label: trans.__('Jump to location'),
       icon: jumpToIcon
     });
 
@@ -223,7 +231,7 @@ class DiagnosticsPanel {
           .writeText(message)
           .then(() => {
             this.content.model.status_message.set(
-              `Successfully copied "${message}" to clipboard`
+              trans.__(`Successfully copied "%1" to clipboard`, message)
             );
           })
           .catch(() => {
@@ -231,12 +239,14 @@ class DiagnosticsPanel {
               'Could not copy with clipboard.writeText interface, falling back'
             );
             window.prompt(
-              'Your browser protects clipboard from write operations; please copy the message manually',
+              trans.__(
+                'Your browser protects clipboard from write operations; please copy the message manually'
+              ),
               message
             );
           });
       },
-      label: "Copy diagnostics' message",
+      label: trans.__("Copy diagnostics' message"),
       icon: copyIcon
     });
 
@@ -311,6 +321,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
   }
 
   switchDiagnosticsPanelSource = () => {
+    trans = this.adapter.trans;
     if (
       diagnostics_panel.content.model.virtual_editor === this.virtual_editor &&
       diagnostics_panel.content.model.diagnostics == this.diagnostics_db

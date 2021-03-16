@@ -18,6 +18,7 @@ import { IFeatureEditorIntegration, IFeature } from '../feature';
 import { EditorAdapter } from '../editor_integration/editor_adapter';
 import IEditor = CodeEditor.IEditor;
 import { LanguageIdentifier } from '../lsp';
+import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 
 export class StatusMessage {
   /**
@@ -91,6 +92,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   public isConnected: boolean;
   public connection_manager: DocumentConnectionManager;
   public status_message: StatusMessage;
+  public trans: TranslationBundle;
   protected isDisposed = false;
   console: ILSPLogConsole;
 
@@ -126,6 +128,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.status_message = new StatusMessage();
     this.isConnected = false;
     this.console = extension.console.scope('WidgetAdapter');
+    this.trans = (extension.translator || nullTranslator).load('jupyterlab-lsp');
 
     // set up signal connections
     this.widget.context.saveState.connect(this.on_save_state, this);

@@ -16,6 +16,11 @@ import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 import { LabIcon } from '@jupyterlab/ui-components';
 import renameSvg from '../../style/icons/rename.svg';
 import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from './diagnostics';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 export const renameIcon = new LabIcon({
   name: 'lsp:rename',
@@ -24,7 +29,7 @@ export const renameIcon = new LabIcon({
 
 const FEATURE_ID = PLUGIN_ID + ':rename';
 
-const COMMANDS: IFeatureCommand[] = [
+const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
   {
     id: 'rename-symbol',
     execute: async ({
@@ -35,6 +40,7 @@ const COMMANDS: IFeatureCommand[] = [
       features
     }) => {
       const rename_feature = features.get(FEATURE_ID) as RenameCM;
+      rename_feature.trans = trans;
       let root_position = rename_feature.transform_virtual_position_to_root_position(
         virtual_position
       );
@@ -56,16 +62,17 @@ const COMMANDS: IFeatureCommand[] = [
         }
 
         if (!status) {
-          status = `Rename failed: ${error}`;
+          status = trans.__(`Rename failed: %1`, error);
         }
 
         rename_feature.setStatus(status, 7.5 * 1000);
       };
 
       const dialog_value = await InputDialog.getText({
-        title: 'Rename to',
+        title: trans.__('Rename to'),
         text: old_value,
-        okLabel: 'Rename'
+        okLabel: trans.__('Rename'),
+        cancelLabel: trans.__('Cancel')
       });
 
       try {
@@ -75,7 +82,7 @@ const COMMANDS: IFeatureCommand[] = [
         }
         let new_value = dialog_value.value;
         rename_feature.setStatus(
-          `Renaming ${old_value} to ${new_value}...`,
+          trans.__('Renaming %1 to %2...', old_value, new_value),
           2 * 1000
         );
         const edit = await connection.rename(
@@ -90,12 +97,13 @@ const COMMANDS: IFeatureCommand[] = [
       }
     },
     is_enabled: ({ connection }) => connection.isRenameSupported(),
-    label: 'Rename symbol',
+    label: trans.__('Rename symbol'),
     icon: renameIcon
   }
 ];
 
 export class RenameCM extends CodeMirrorIntegration {
+  trans: TranslationBundle;
   public setStatus(message: string, timeout: number) {
     return this.status_message.set(message, timeout);
   }
@@ -110,33 +118,40 @@ export class RenameCM extends CodeMirrorIntegration {
     try {
       outcome = await this.apply_edit(workspaceEdit);
     } catch (error) {
-      this.status_message.set(`Rename failed: ${error}`);
+      this.status_message.set(this.trans.__('Rename failed: %1', error));
       return outcome;
     }
 
     try {
       let status: string;
       let is_plural: boolean;
-      const change_text = `${old_value} to ${new_value}`;
+      const change_text = this.trans.__('%1 to %2', old_value, new_value);
 
       if (outcome.appliedChanges === 0) {
-        status = `Could not rename ${change_text} - consult the language server documentation`;
+        status = this.trans.__(
+          'Could not rename %1 - consult the language server documentation',
+          change_text
+        );
       } else if (outcome.wasGranular) {
         is_plural = outcome.appliedChanges > 1;
-        status = `Renamed ${change_text} in ${outcome.appliedChanges} place${
-          is_plural ? 's' : ''
-        }`;
+        status = this.trans.__(
+          `Renamed %1 in %2 place${is_plural ? 's' : ''}`,
+          change_text,
+          outcome.appliedChanges
+        );
       } else if (this.adapter.has_multiple_editors) {
         is_plural = outcome.modifiedCells > 1;
-        status = `Renamed ${change_text} in ${outcome.modifiedCells} cell${
-          is_plural ? 's' : ''
-        }`;
+        status = this.trans.__(
+          `Renamed %1 in %2 cell${is_plural ? 's' : ''}`,
+          change_text,
+          outcome.modifiedCells
+        );
       } else {
-        status = `Renamed ${change_text}`;
+        status = this.trans.__('Renamed %1', change_text);
       }
 
       if (outcome.errors.length !== 0) {
-        status += ` with errors: ${outcome.errors}`;
+        status += this.trans.__(' with errors: %1', outcome.errors);
       }
 
       this.status_message.set(status, 5 * 1000);
@@ -192,26 +207,40 @@ export class RenameCM extends CodeMirrorIntegration {
             let { index: editor_id } = editor.find_editor(diagnostic.editor);
             let cell_number = editor_id + 1;
             // TODO: should we show "code cell" numbers, or just cell number?
-            return `${message} in cell ${cell_number} at line ${start.line}`;
+            return rename_feature.trans.__(
+              '%1 in cell %2 at line %3',
+              message,
+              cell_number,
+              start.line
+            );
           } else {
-            return `${message} at line ${start.line}`;
+            return rename_feature.trans.__(
+              '%1 at line %2',
+              message,
+              start.line
+            );
           }
         })
       )
     ].join(', ');
-    return `Syntax error(s) prevent rename: ${dire_errors}`;
+    return rename_feature.trans.__(
+      'Syntax error(s) prevent rename: %1',
+      dire_errors
+    );
   }
 }
 
 export const RENAME_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
-  requires: [ILSPFeatureManager, ISettingRegistry],
+  requires: [ILSPFeatureManager, ISettingRegistry, ITranslator],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
-    settingRegistry: ISettingRegistry
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
   ) => {
+    const trans = (translator || nullTranslator).load('jupyterlab-lsp');
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
 
     featureManager.register({
@@ -220,7 +249,7 @@ export const RENAME_PLUGIN: JupyterFrontEndPlugin<void> = {
         id: FEATURE_ID,
         name: 'LSP Rename',
         settings: settings,
-        commands: COMMANDS
+        commands: COMMANDS(trans)
       }
     });
   }

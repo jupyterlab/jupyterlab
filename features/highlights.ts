@@ -17,6 +17,7 @@ import highlightTypeSvg from '../../style/icons/highlight-type.svg';
 import { Debouncer } from '@lumino/polling';
 import { CodeHighlights as LSPHighlightsSettings } from '../_highlights';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
 export const highlightIcon = new LabIcon({
   name: 'lsp:highlight',
@@ -28,13 +29,13 @@ export const highlightTypeIcon = new LabIcon({
   svgstr: highlightTypeSvg
 });
 
-const COMMANDS: IFeatureCommand[] = [
+const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
   {
     id: 'highlight-references',
     execute: ({ connection, virtual_position, document }) =>
       connection.getReferences(virtual_position, document.document_info),
     is_enabled: ({ connection }) => connection.isReferencesSupported(),
-    label: 'Highlight references',
+    label: trans.__('Highlight references'),
     icon: highlightIcon
   },
   {
@@ -42,7 +43,7 @@ const COMMANDS: IFeatureCommand[] = [
     execute: ({ connection, virtual_position, document }) =>
       connection.getTypeDefinition(virtual_position, document.document_info),
     is_enabled: ({ connection }) => connection.isTypeDefinitionSupported(),
-    label: 'Highlight type definition',
+    label: trans.__('Highlight type definition'),
     icon: highlightTypeIcon
   }
 ];
@@ -235,14 +236,16 @@ const FEATURE_ID = PLUGIN_ID + ':highlights';
 
 export const HIGHLIGHTS_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
-  requires: [ILSPFeatureManager, ISettingRegistry],
+  requires: [ILSPFeatureManager, ISettingRegistry, ITranslator],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
-    settingRegistry: ISettingRegistry
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
   ) => {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
+    const trans = translator.load('jupyterlab-lsp');
 
     featureManager.register({
       feature: {
@@ -250,7 +253,7 @@ export const HIGHLIGHTS_PLUGIN: JupyterFrontEndPlugin<void> = {
         id: FEATURE_ID,
         name: 'LSP Highlights',
         settings: settings,
-        commands: COMMANDS
+        commands: COMMANDS(trans)
       }
     });
   }
