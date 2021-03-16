@@ -158,21 +158,21 @@ Start from the cookie cutter extension template.
 
     pip install cookiecutter
     cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
-    cd my-cookie-cutter-name
+    cd my_cookie_cutter_name
 
 Install the dependencies. Note that extensions are built against the
 released npm packages, not the development versions.
 
 ::
 
-    npm install --save @jupyterlab/notebook @jupyterlab/application @jupyterlab/apputils @jupyterlab/docregistry @lumino/disposable
+    npm install --save @jupyterlab/notebook @jupyterlab/application @jupyterlab/apputils @jupyterlab/docregistry @lumino/disposable --legacy-peer-deps
 
 Copy the following to ``src/index.ts``:
 
 .. code:: typescript
 
     import {
-      IDisposable, 
+      IDisposable, DisposableDelegate
     } from '@lumino/disposable';
 
     import {
@@ -241,13 +241,23 @@ Copy the following to ``src/index.ts``:
      */
     export default plugin;
 
+
+And the following to ``style/base.css``:
+
+.. code:: css
+
+  .myButton.jp-Button.minimal .jp-Icon {
+      color: black;
+  }
+
+
 Run the following commands:
 
 ::
 
-    npm install
-    npm run build
-    jupyter labextension install .
+    pip install -e .
+    pip install jupyter_packaging
+    jupyter labextension develop . --overwrite
     jupyter lab
 
 Open a notebook and observe the new "Run All" button.
@@ -280,5 +290,3 @@ to render the corresponding model, which returns a JavaScript promise.
 The renderer creates a container *lumino widget* which it hands back
 synchronously to the OutputArea, and then fills the container with the
 rendered *ipywidget* when the promise resolves.
-
-Note: The ipywidgets third party extension has not yet been released.

@@ -8,3 +8,17 @@ include setup.py
 # Documentation
 graft docs
 exclude docs/\#*
+
+# We must include the package_data files since include_package_data=True
+# See https://github.com/pypa/setuptools/issues/1461
+include jupyterlab/staging/*
+include jupyterlab/staging/templates/*
+include jupyterlab/staging/.yarnrc
+graft jupyterlab/static
+graft jupyterlab/tests/mock_packages
+graft jupyterlab/themes
+graft jupyterlab/schemas
+recursive-include jupyterlab *.js
+
+prune jupyterlab/staging/node_modules
+prune jupyterlab/staging/build

@@ -63,7 +63,7 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c anaconda cookiecutter nodejs jupyter-packaging git
+    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=3 cookiecutter nodejs jupyter-packaging git
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
@@ -76,11 +76,6 @@ Note: You'll need to run the command above in each new terminal you open
 before you can work with the tools you installed in the
 ``jupyterlab-ext`` environment.
 
-Now we can install the latest version of JupyterLab.
-
-.. code:: bash
-
-    pip install jupyterlab --pre
 
 Create a repository
 -------------------
@@ -110,6 +105,7 @@ are using to fetch pictures).
 ::
 
     author_name []: Your Name
+    author_email []: your@name.org
     python_name [myextension]: jupyterlab_apod
     labextension_name [myextension]: jupyterlab_apod
     project_short_description [A JupyterLab extension.]: Show a random NASA Astronomy Picture of the Day in a JupyterLab panel
@@ -131,7 +127,8 @@ You should see a list like the following.
 
 ::
 
-    LICENSE          MANIFEST.in      README.md        binder/          jupyterlab_apod/ package.json     pyproject.toml   setup.py         src/             style/           tsconfig.json
+    LICENSE          README.md        jupyterlab_apod/ pyproject.toml   src/             tsconfig.json
+    MANIFEST.in      install.json     package.json     setup.py         style/
 
 Commit what you have to git
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

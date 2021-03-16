@@ -6,13 +6,13 @@ import { ISearchProvider, ISearchMatch } from '../interfaces';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
+export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
 
 export class GenericSearchProvider implements ISearchProvider<Widget> {
   /**
    * We choose opt out as most node types should be searched (e.g. script).
-   * Even nodes like <data>, could have innerText we care about.
+   * Even nodes like <data>, could have textContent we care about.
    *
    * Note: nodeName is capitalized, so we do the same here
    */
@@ -158,14 +158,18 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
         // TODO: support tspan for svg when svg support is added
         const spannedNode = document.createElement('span');
         spannedNode.classList.add(...FOUND_CLASSES);
-        spannedNode.innerText = text;
+        spannedNode.textContent = text;
         // Splice the text out before we add it back in with a span
         node!.textContent = `${node!.textContent!.slice(
           0,
           start
         )}${node!.textContent!.slice(end)}`;
-        // Are we replacing from the start?
-        if (start === 0) {
+        // Are we replacing somewhere in the middle?
+        if (node?.nodeType == Node.TEXT_NODE) {
+          const endText = (node as Text).splitText(start);
+          node!.parentNode!.insertBefore(spannedNode, endText);
+          // Are we replacing from the start?
+        } else if (start === 0) {
           node!.parentNode!.prepend(spannedNode);
           // Are we replacing at the end?
         } else if (end === originalLength) {
@@ -173,11 +177,6 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
           // Are the two results are adjacent to each other?
         } else if (lastNodeAdded && end === subsections[idx + 1].start) {
           node!.parentNode!.insertBefore(spannedNode, lastNodeAdded);
-          // Ok, we are replacing somewhere in the middle
-        } else {
-          // We know this is Text as we filtered for this in the walker above
-          const endText = (node as Text).splitText(start);
-          node!.parentNode!.insertBefore(spannedNode, endText);
         }
         lastNodeAdded = spannedNode;
         newMatches.unshift({
@@ -401,7 +400,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
   private _changed = new Signal<this, void>(this);
 }
 
-interface IGenericSearchMatch extends ISearchMatch {
+export interface IGenericSearchMatch extends ISearchMatch {
   readonly originalNode: Node;
   readonly spanElement: HTMLElement;
   /*

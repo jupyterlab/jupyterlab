@@ -37,6 +37,14 @@ describe('defaultSanitizer', () => {
       expect(defaultSanitizer.sanitize(a)).toBe(expected);
     });
 
+    it('should allow the `data-commandlinker-command` attribute for button tags', () => {
+      const button =
+        '<button data-commandlinker-command="terminal:create-new" onClick={some evil code}>Create Terminal</button>';
+      const expectedButton =
+        '<button data-commandlinker-command="terminal:create-new">Create Terminal</button>';
+      expect(defaultSanitizer.sanitize(button)).toBe(expectedButton);
+    });
+
     it('should allow the class attribute for code tags', () => {
       const code = '<code class="foo">bar</code>';
       expect(defaultSanitizer.sanitize(code)).toBe(code);

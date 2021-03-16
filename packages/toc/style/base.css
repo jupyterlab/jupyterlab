@@ -38,7 +38,7 @@
   height: 100%;
 }
 
-.jp-TableOfContents header {
+.jp-TableOfContents .jp-stack-panel-header {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   flex: 0 0 auto;
   font-size: var(--jp-ui-font-size0);

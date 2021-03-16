@@ -19,8 +19,8 @@ import { INotebookHeading } from '../../utils/headings';
 import { OptionsManager } from './options_manager';
 import { getCodeCellHeading } from './get_code_cell_heading';
 import { getLastHeadingLevel } from './get_last_heading_level';
-import { getMarkdownHeading } from './get_markdown_heading';
-import { getRenderedHTMLHeading } from './get_rendered_html_heading';
+import { getMarkdownHeadings } from './get_markdown_heading';
+import { getRenderedHTMLHeadings } from './get_rendered_html_heading';
 import { appendHeading } from './append_heading';
 import { appendMarkdownHeading } from './append_markdown_heading';
 import { render } from './render';
@@ -148,7 +148,7 @@ function createNotebookGenerator(
               el.scrollIntoView();
             };
           };
-          let heading = getRenderedHTMLHeading(
+          let htmlHeadings = getRenderedHTMLHeadings(
             (cell as CodeCell).outputArea.widgets[j].node,
             onClick,
             sanitizer,
@@ -157,15 +157,17 @@ function createNotebookGenerator(
             options.numbering,
             cell
           );
-          [headings, prev, collapseLevel] = appendMarkdownHeading(
-            heading,
-            headings,
-            prev,
-            collapseLevel,
-            options.filtered,
-            collapsed,
-            options.showMarkdown
-          );
+          for (const heading of htmlHeadings) {
+            [headings, prev, collapseLevel] = appendMarkdownHeading(
+              heading,
+              headings,
+              prev,
+              collapseLevel,
+              options.filtered,
+              collapsed,
+              options.showMarkdown
+            );
+          }
         }
         continue;
       }
@@ -188,7 +190,7 @@ function createNotebookGenerator(
               }
             };
           };
-          heading = getRenderedHTMLHeading(
+          const htmlHeadings = getRenderedHTMLHeadings(
             cell.node,
             onClick,
             sanitizer,
@@ -197,6 +199,17 @@ function createNotebookGenerator(
             options.numbering,
             cell
           );
+          for (heading of htmlHeadings) {
+            [headings, prev, collapseLevel] = appendMarkdownHeading(
+              heading,
+              headings,
+              prev,
+              collapseLevel,
+              options.filtered,
+              collapsed,
+              options.showMarkdown
+            );
+          }
           // If not rendered, generate ToC items from the cell text...
         } else {
           const onClick = (line: number) => {
@@ -205,23 +218,25 @@ function createNotebookGenerator(
               cell.node.scrollIntoView();
             };
           };
-          heading = getMarkdownHeading(
+          const markdownHeadings = getMarkdownHeadings(
             model!.value.text,
             onClick,
             dict,
             lastLevel,
             cell
           );
+          for (heading of markdownHeadings) {
+            [headings, prev, collapseLevel] = appendMarkdownHeading(
+              heading,
+              headings,
+              prev,
+              collapseLevel,
+              options.filtered,
+              collapsed,
+              options.showMarkdown
+            );
+          }
         }
-        [headings, prev, collapseLevel] = appendMarkdownHeading(
-          heading,
-          headings,
-          prev,
-          collapseLevel,
-          options.filtered,
-          collapsed,
-          options.showMarkdown
-        );
       }
     }
     return headings;

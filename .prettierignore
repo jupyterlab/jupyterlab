@@ -3,6 +3,7 @@
 **/lib
 **/package.json
 **/static
+**/.ipynb_checkpoints
 tests/**/coverage
 
 .eggs
@@ -16,6 +17,7 @@ docs/api
 examples/app/build
 examples/app/themes
 examples/app/schemas
+examples/federated/core_package/index.template.js
 jupyterlab/schemas
 jupyterlab/themes
 jupyterlab/geckodriver

@@ -4,7 +4,6 @@
 import os
 import json
 
-from glob import glob
 from jupyterlab_server import LabServerApp
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -27,47 +26,19 @@ def _jupyter_server_extension_points():
 class ExampleApp(LabServerApp):
     name = 'lab'
     load_other_extensions = False
-    app_name = 'JupyterLab Example Federated App'
-    app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
+    app_name = 'JupyterLab Example App with Prebuilt Extensions'
+    app_settings_dir = os.path.join(HERE, 'data', 'application_settings')
     app_version = version
-    schemas_dir = os.path.join(HERE, 'core_package', 'build', 'schemas')
-    static_dir = os.path.join(HERE, 'core_package', 'build')
+    schemas_dir = os.path.join(HERE, 'data', 'schemas')
+    static_dir = os.path.join(HERE, 'core_package', 'static')
     templates_dir = os.path.join(HERE, 'templates')
-    themes_dir = os.path.join(HERE, 'core_package', 'build', 'themes')
-    user_settings_dir = os.path.join(HERE, 'core_package', 'build', 'user_settings')
-    workspaces_dir = os.path.join(HERE, 'core_package', 'build', 'workspaces')
-    labextensions_path =  [os.path.join(HERE, "labextensions")]
+    themes_dir = os.path.join(HERE, 'data', 'themes')
+    user_settings_dir = os.path.join(HERE, 'data', 'user_settings')
+    workspaces_dir = os.path.join(HERE, 'data', 'workspaces')
 
-    def initialize_handlers(self):
-        # Handle labextension assets
-        web_app = self.serverapp.web_app
-        page_config = web_app.settings.get('page_config_data', {})
-        web_app.settings['page_config_data'] = page_config
-
-        # By default, make terminals available.
-        web_app.settings.setdefault('terminals_available', True)
-
-        # Extract the federated extension data from lab_extensions
-        federated_exts = []
-        for ext_path in [path for path in glob('./labextensions/**/package.json', recursive=True)]:
-            with open(ext_path) as fid:
-                data = json.load(fid)
-            extbuild = data['jupyterlab']['_build']
-            ext = {
-                'name': data['name'],
-                'load': extbuild['load'],
-            }
-            if 'extension' in extbuild:
-                ext['extension'] = extbuild['extension']
-            if 'mimeExtension' in extbuild:
-                ext['mimeExtension'] = extbuild['mimeExtension']
-            if 'style' in extbuild:
-                ext['style'] = extbuild['style']
-            federated_exts.append(ext)
-
-        page_config['federated_extensions'] = federated_exts
-
-        super().initialize_handlers()
+    # Set the location for prebuilt extensions, overriding the default
+    # of looking in each of the Jupyter data paths.
+    labextensions_path = [os.path.join(HERE, "labextensions")]
 
 if __name__ == '__main__':
     ExampleApp.launch_instance()

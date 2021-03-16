@@ -5,7 +5,6 @@ import os
 import json
 
 from jupyterlab_server import LabServerApp
-from jupyter_server.utils import url_path_join as ujoin
 
 HERE = os.path.dirname(__file__)
 
@@ -25,7 +24,9 @@ def _jupyter_server_extension_points():
     ]
 
 class ExampleApp(LabServerApp):
+
     extension_url = '/lab'
+    default_url = '/lab'
     name = __name__
     load_other_extensions = False
     app_name = 'JupyterLab Example App'

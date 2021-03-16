@@ -12,25 +12,19 @@ import os
 import os.path as osp
 import shutil
 import sys
-import tarfile
-import zipfile
 from os.path import basename, join as pjoin, normpath
 import subprocess
 import sys
 
-from urllib.parse import urlparse
-from urllib.request import urlretrieve
 from jupyter_core.paths import (
-    jupyter_data_dir, jupyter_config_path, jupyter_path,
-    SYSTEM_JUPYTER_PATH, ENV_JUPYTER_PATH,
+    jupyter_data_dir, SYSTEM_JUPYTER_PATH, ENV_JUPYTER_PATH,
 )
 from jupyter_core.utils import ensure_dir_exists
-from ipython_genutils.py3compat import string_types, cast_unicode_py2
-from ipython_genutils.tempdir import TemporaryDirectory
-from jupyter_server.config_manager import BaseJSONConfigManager
+from ipython_genutils.py3compat import cast_unicode_py2
 from jupyterlab_server.config import get_federated_extensions
+from jupyter_server.extension.serverextension import ArgumentConflict
 
-from .commands import build, AppOptions, _test_overlap
+from .commands import _test_overlap
 
 
 DEPRECATED_ARGUMENT = object()
@@ -163,9 +157,10 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=True
     return full_dests
 
 
-def build_labextension(path, logger=None, development=False, static_url=None, source_map = False):
+def build_labextension(path, logger=None, development=False, static_url=None, source_map = False, core_path=None):
     """Build a labextension in the given path"""
-    core_path = osp.join(HERE, 'staging')
+    if core_path is None:
+        core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
 
     if logger:
@@ -184,9 +179,10 @@ def build_labextension(path, logger=None, development=False, static_url=None, so
     subprocess.check_call(arguments, cwd=ext_path)
 
 
-def watch_labextension(path, labextensions_path, logger=None, development=False, source_map=False):
+def watch_labextension(path, labextensions_path, logger=None, development=False, source_map=False, core_path=None):
     """Watch a labextension in a given path"""
-    core_path = osp.join(HERE, 'staging')
+    if core_path is None:
+        core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
 
     if logger:
@@ -359,41 +355,59 @@ def _get_labextension_metadata(module):
         Importable Python module exposing the
         magic-named `_jupyter_labextension_paths` function
     """
+
+    mod_path = osp.abspath(module)
+    if not osp.exists(mod_path):
+        raise FileNotFoundError('The path `{}` does not exist.'.format(mod_path))
+
+    # Check if the path is a valid labextension
     try:
         m = importlib.import_module(module)
+        if hasattr(m, '_jupyter_labextension_paths') :
+            labexts = m._jupyter_labextension_paths()
+            return m, labexts
+        else :
+            m = None
+
     except Exception:
         m = None
 
-    if not hasattr(m, '_jupyter_labextension_paths'):
-        mod_path = osp.abspath(module)
-        if osp.exists(mod_path):
+    # Try getting the package name from setup.py
+    try:
+        package = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=mod_path).decode('utf8').strip()
+    except subprocess.CalledProcessError:
+        raise FileNotFoundError('The Python package `{}` is not a valid package, '
+                'it is missing the `setup.py` file.'.format(module))
 
-            # Try getting the package name from setup.py
-            try:
-                package = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=mod_path).decode('utf8').strip()
-            except subprocess.CalledProcessError:
-                from setuptools import find_packages
-                package = find_packages(mod_path)[0]
+    # Make sure the package is installed
+    import pkg_resources
+    try:
+        dist = pkg_resources.get_distribution(package)
+    except pkg_resources.DistributionNotFound:
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
+        sys.path.insert(0, mod_path)
 
-            # Replace hyphens with underscores to match Python convention
-            package = package.replace('-', '_')
+    # Importing module with the same name as package
+    try:
+        # Replace hyphens with underscores to match Python convention
+        package = package.replace('-', '_')
+        m = importlib.import_module(package)
+        if hasattr(m, '_jupyter_labextension_paths') :
+            return m, m._jupyter_labextension_paths()
+    except Exception:
+        m = None
 
-            # Make sure the package is installed
-            import pkg_resources
-            try:
-                dist = pkg_resources.get_distribution(package)
-            except pkg_resources.DistributionNotFound:
-                subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
-                sys.path.insert(0, mod_path)
+    # Looking for modules in the package
+    from setuptools import find_packages
+    packages = find_packages(mod_path)
 
+    # Looking for the labextension metadata
+    for package in packages :
+        try:
             m = importlib.import_module(package)
+            if hasattr(m, '_jupyter_labextension_paths') :
+                return m, m._jupyter_labextension_paths()
+        except Exception:
+            m = None
 
-    if not hasattr(m, '_jupyter_labextension_paths'):
-        raise KeyError('The Python module {} is not a valid labextension, '
-                       'it is missing the `_jupyter_labextension_paths()` method.'.format(module))
-    labexts = m._jupyter_labextension_paths()
-    return m, labexts
-
-
-if __name__ == '__main__':
-    main()
+    raise ModuleNotFoundError('There is not a labextensions at {}'.format(module))

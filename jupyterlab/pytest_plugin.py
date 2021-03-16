@@ -1,16 +1,12 @@
-import pytest, shutil, os
-
 import urllib.parse
 
+import pytest
+from jupyter_server.utils import url_path_join
+from jupyterlab_server import LabConfig
 from tornado.escape import url_escape
-
 from traitlets import Unicode
 
 from jupyterlab import LabApp
-from jupyterlab_server import LabConfig
-from jupyterlab_server.tests.utils import here
-from jupyterlab_server.app import LabServerApp
-from jupyter_server.utils import url_path_join
 
 
 def mkdir(tmp_path, *parts):
@@ -103,6 +99,6 @@ def fetch_long(http_server_client, jp_auth_header, jp_base_url):
         headers.update(jp_auth_header)
         # Make request.
         return http_server_client.fetch(
-            url, headers=headers, request_timeout=150, **kwargs
+            url, headers=headers, request_timeout=250, **kwargs
         )
     return client_fetch

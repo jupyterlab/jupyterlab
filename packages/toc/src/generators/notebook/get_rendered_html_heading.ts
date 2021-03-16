@@ -29,7 +29,7 @@ type onClickFactory = (el: Element) => () => void;
  * @param cellRef - cell reference
  * @returns notebook heading
  */
-function getRenderedHTMLHeading(
+function getRenderedHTMLHeadings(
   node: HTMLElement,
   onClick: onClickFactory,
   sanitizer: ISanitizer,
@@ -37,53 +37,55 @@ function getRenderedHTMLHeading(
   lastLevel: number,
   numbering = false,
   cellRef: Cell
-): INotebookHeading | undefined {
+): INotebookHeading[] {
   let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
-  if (nodes.length === 0) {
-    return;
-  }
-  let el = nodes[0];
-  if (el.nodeName.toLowerCase() === 'p') {
-    if (el.innerHTML) {
-      let html = sanitizer.sanitize(el.innerHTML, sanitizerOptions);
-      return {
-        level: lastLevel + 1,
-        html: html.replace('¶', ''),
-        text: el.textContent ? el.textContent : '',
-        onClick: onClick(el),
-        type: 'markdown',
-        cellRef: cellRef,
-        hasChild: false
-      };
-    }
-    return;
-  }
-  if (el.getElementsByClassName('numbering-entry').length > 0) {
-    el.removeChild(el.getElementsByClassName('numbering-entry')[0]);
-  }
-  let html = sanitizer.sanitize(el.innerHTML, sanitizerOptions);
-  html = html.replace('¶', '');
 
-  const level = parseInt(el.tagName[1], 10);
-  let nstr = generateNumbering(dict, level);
-  let nhtml = '';
-  if (numbering) {
-    nhtml = '<span class="numbering-entry">' + nstr + '</span>';
+  let headings: INotebookHeading[] = [];
+  for (const el of nodes) {
+    if (el.nodeName.toLowerCase() === 'p') {
+      if (el.innerHTML) {
+        let html = sanitizer.sanitize(el.innerHTML, sanitizerOptions);
+        headings.push({
+          level: lastLevel + 1,
+          html: html.replace('¶', ''),
+          text: el.textContent ? el.textContent : '',
+          onClick: onClick(el),
+          type: 'markdown',
+          cellRef: cellRef,
+          hasChild: false
+        });
+      }
+      continue;
+    }
+    if (el.getElementsByClassName('numbering-entry').length > 0) {
+      el.removeChild(el.getElementsByClassName('numbering-entry')[0]);
+    }
+    let html = sanitizer.sanitize(el.innerHTML, sanitizerOptions);
+    html = html.replace('¶', '');
+
+    const level = parseInt(el.tagName[1], 10);
+    let nstr = generateNumbering(dict, level);
+    if (numbering) {
+      const nhtml = document.createElement('span');
+      nhtml.classList.add('numbering-entry');
+      nhtml.textContent = nstr ?? '';
+      el.insertBefore(nhtml, el.firstChild);
+    }
+    headings.push({
+      level: level,
+      text: el.textContent ? el.textContent : '',
+      numbering: nstr,
+      html: html,
+      onClick: onClick(el),
+      type: 'header',
+      cellRef: cellRef,
+      hasChild: false
+    });
   }
-  el.innerHTML = nhtml + html;
-  return {
-    level: level,
-    text: el.textContent ? el.textContent : '',
-    numbering: nstr,
-    html: html,
-    onClick: onClick(el),
-    type: 'header',
-    cellRef: cellRef,
-    hasChild: false
-  };
+  return headings;
 }
 
 /**
  * Exports.
  */
-export { getRenderedHTMLHeading };
+export { getRenderedHTMLHeadings };

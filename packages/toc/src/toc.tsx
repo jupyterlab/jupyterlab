@@ -128,7 +128,7 @@ export class TableOfContents extends Widget {
     }
     let jsx = (
       <div className="jp-TableOfContents">
-        <header>{title}</header>
+        <div className="jp-stack-panel-header">{title}</div>
       </div>
     );
     if (this._current && this._current.generator) {

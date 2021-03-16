@@ -10,16 +10,16 @@ Diagnosing an Issue
 
 If you find a problem in JupyterLab, please follow the steps below to diagnose and report the issue. Following these steps helps you diagnose if the problem is likely from JupyterLab or from a different project.
 
-1. Try to reproduce the issue in a new environment with the latest official JupyterLab installed and no extra packages. 
+1. Try to reproduce the issue in a new environment with the latest official JupyterLab installed and no extra packages.
 
    If you are using conda:
 
      1. create a new environment::
 
-         conda create -n jlab-test --override-channels --strict-channel-priority -c conda-forge -c anaconda jupyterlab
+         conda create -n jlab-test --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab
 
      2. Activate the environment::
-       
+
          conda activate jlab-test
 
      3. Start JupyterLab::

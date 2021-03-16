@@ -4,6 +4,7 @@
 import * as path from 'path';
 import * as webpack from 'webpack';
 import { Build } from './build';
+import { LicenseWebpackPlugin } from 'license-webpack-plugin';
 import { merge } from 'webpack-merge';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
@@ -166,21 +167,31 @@ function generateConfig({
 
   class CleanupPlugin {
     apply(compiler: any) {
-      compiler.hooks.done.tap('Cleanup', () => {
-        // Find the remoteEntry file and add it to the package.json metadata
+      compiler.hooks.done.tap('Cleanup', (stats: any) => {
+        const newlyCreatedAssets = stats.compilation.assets;
+
+        // Clear out any remoteEntry files that are stale
+        // https://stackoverflow.com/a/40370750
         const files = glob.sync(path.join(staticPath, 'remoteEntry.*.js'));
-        let newestTime = -1;
-        let newestRemote = '';
-        files.forEach(fpath => {
-          const mtime = fs.statSync(fpath).mtime.getTime();
-          if (mtime > newestTime) {
-            newestRemote = fpath;
-            newestTime = mtime;
+        let newEntry = '';
+        const unlinked: string[] = [];
+        files.forEach(file => {
+          const fileName = path.basename(file);
+          if (!newlyCreatedAssets[fileName]) {
+            fs.unlinkSync(path.resolve(file));
+            unlinked.push(fileName);
+          } else {
+            newEntry = fileName;
           }
         });
+        if (unlinked.length > 0) {
+          console.log('Removed old assets: ', unlinked);
+        }
+
+        // Find the remoteEntry file and add it to the package.json metadata
         const data = readJSONFile(path.join(outputPath, 'package.json'));
         const _build: any = {
-          load: path.join('static', path.basename(newestRemote))
+          load: path.join('static', newEntry)
         };
         if (exposes['./extension'] !== undefined) {
           _build.extension = './extension';
@@ -209,6 +220,38 @@ function generateConfig({
       webpackConfig = require(webpackConfigPath);
     }
   }
+
+  let plugins = [
+    new ModuleFederationPlugin({
+      name: data.name,
+      library: {
+        type: 'var',
+        name: ['_JUPYTERLAB', data.name]
+      },
+      filename: 'remoteEntry.[contenthash].js',
+      exposes,
+      shared
+    }),
+    new CleanupPlugin()
+  ];
+
+  if (mode === 'production') {
+    plugins.push(
+      new LicenseWebpackPlugin({
+        perChunkOutput: false,
+        outputFilename: 'third-party-licenses.txt',
+        excludedPackageTest: packageName => packageName === data.name
+      })
+    );
+  }
+
+  // Add version argument when in production so the Jupyter server
+  // allows caching of files (i.e., does not set the CacheControl header to no-cache to prevent caching static files)
+  let filename = '[name].[contenthash].js';
+  if (mode === 'production') {
+    filename += '?v=[contenthash]';
+  }
+
   const config = [
     merge(
       baseConfig,
@@ -217,26 +260,14 @@ function generateConfig({
         devtool,
         entry: {},
         output: {
-          filename: '[name].[contenthash].js',
+          filename,
           path: staticPath,
           publicPath: staticUrl || 'auto'
         },
         module: {
           rules: [{ test: /\.html$/, use: 'file-loader' }]
         },
-        plugins: [
-          new ModuleFederationPlugin({
-            name: data.name,
-            library: {
-              type: 'var',
-              name: ['_JUPYTERLAB', data.name]
-            },
-            filename: 'remoteEntry.[contenthash].js',
-            exposes,
-            shared
-          }),
-          new CleanupPlugin()
-        ]
+        plugins
       },
       webpackConfig
     )

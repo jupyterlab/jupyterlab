@@ -22,7 +22,9 @@ import {
   IWindowResolver,
   WindowResolver,
   Printing,
-  sessionContextDialogs
+  sessionContextDialogs,
+  ISanitizer,
+  defaultSanitizer
 } from '@jupyterlab/apputils';
 
 import { URLExt, PageConfig } from '@jupyterlab/coreutils';
@@ -308,13 +310,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
   autoStart: true,
   provides: IStateDB,
   requires: [JupyterFrontEnd.IPaths, IRouter, ITranslator],
-  optional: [ISplashScreen, IWindowResolver],
+  optional: [IWindowResolver],
   activate: (
     app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
     router: IRouter,
     translator: ITranslator,
-    splash: ISplashScreen | null,
     resolver: IWindowResolver | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -425,11 +426,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           return;
         }
 
-        // If a splash provider exists, launch the splash screen.
-        const loading = splash
-          ? splash.show()
-          : new DisposableDelegate(() => undefined);
-
         // If the state database has already been resolved, resetting is
         // impossible without reloading.
         if (resolved) {
@@ -454,7 +450,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         } else {
           void cleared.then(() => {
             router.navigate(url);
-            loading.dispose();
           });
         }
 
@@ -519,6 +514,18 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The default HTML sanitizer.
+ */
+const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
+  id: '@jupyter/apputils-extension:sanitizer',
+  autoStart: true,
+  provides: ISanitizer,
+  activate: () => {
+    return defaultSanitizer;
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -526,6 +533,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   paletteRestorer,
   print,
   resolver,
+  sanitizer,
   settingsPlugin,
   state,
   splash,

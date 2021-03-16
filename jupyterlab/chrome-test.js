@@ -1,6 +1,22 @@
 const puppeteer = require('puppeteer');
 const inspect = require('util').inspect;
+const path = require('path');
+const fs = require('fs');
+
 const URL = process.argv[2];
+const OUTPUT_VAR = 'JLAB_BROWSER_CHECK_OUTPUT';
+const OUTPUT = process.env[OUTPUT_VAR];
+
+let nextScreenshot = 0;
+const screenshotStem = `screenshot-${+new Date()}`;
+
+if (OUTPUT) {
+  console.log(`Screenshots will be saved in ${OUTPUT}...`);
+  if (!fs.existsSync(OUTPUT)) {
+    console.log(`Creating ${OUTPUT}...`);
+    fs.mkdirSync(OUTPUT, { recursive: true });
+  }
+}
 
 async function main() {
   /* eslint-disable no-console */
@@ -8,9 +24,25 @@ async function main() {
 
   const browser = await puppeteer.launch({
     headless: true,
+    dumpio: !!OUTPUT,
     args: ['--no-sandbox']
   });
   const page = await browser.newPage();
+
+  async function screenshot() {
+    if (!OUTPUT) {
+      return;
+    }
+    const screenshotPath = path.join(
+      OUTPUT,
+      `${screenshotStem}-${++nextScreenshot}.png`
+    );
+    console.log(`Capturing screenshot ${screenshotPath}...`);
+    await page.screenshot({
+      type: 'png',
+      path: screenshotPath
+    });
+  }
 
   console.info('Navigating to page:', URL);
   await page.goto(URL);
@@ -34,11 +66,15 @@ async function main() {
   } catch (e) {
     testError = e;
   }
+
+  await screenshot();
+
   const textContent = await el.getProperty('textContent');
   const errors = JSON.parse(await textContent.jsonValue());
 
   for (let error of errors) {
     console.error(`Parsed an error from text content: ${error.message}`, error);
+    testError = true;
   }
 
   await browser.close();

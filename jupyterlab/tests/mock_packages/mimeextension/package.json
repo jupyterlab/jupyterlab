@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "private": true,
   "dependencies": {
-    "@lumino/widgets": "^1.16.1"
+    "@lumino/widgets": "^1.19.0"
   },
   "jupyterlab": {
     "mimeExtension": true

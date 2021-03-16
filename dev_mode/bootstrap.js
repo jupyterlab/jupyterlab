@@ -22,7 +22,7 @@
 let _CONFIG_DATA = null;
 function getOption(name) {
   if (_CONFIG_DATA === null) {
-    let configData;
+    let configData = {};
     // Use script tag if available.
     if (typeof document !== 'undefined' && document) {
       const el = document.getElementById('jupyter-config-data');
@@ -31,7 +31,7 @@ function getOption(name) {
         configData = JSON.parse(el.textContent || '{}');
       }
     }
-    _CONFIG_DATA = configData ?? Object.create(null);
+    _CONFIG_DATA = configData;
   }
 
   return _CONFIG_DATA[name] || '';
@@ -75,9 +75,11 @@ async function loadComponent(url, scope) {
   await loadScript(url);
 
   // From https://webpack.js.org/concepts/module-federation/#dynamic-remote-containers
+  // eslint-disable-next-line no-undef
   await __webpack_init_sharing__('default');
   const container = window._JUPYTERLAB[scope];
   // Initialize the container, it may provide shared modules and may need ours
+  // eslint-disable-next-line no-undef
   await container.init(__webpack_share_scopes__.default);
 }
 

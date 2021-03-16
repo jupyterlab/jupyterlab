@@ -7,11 +7,11 @@ dependencies:
 - sphinx>=1.8
 - sphinx-copybutton
 - sphinx_rtd_theme
-- recommonmark
 - pytest
 - pip
 - nodejs
 - pip:
   - jsx-lexer
   - pytest-check-links[cache]>=0.4.3
+  - myst_parser
   - requests_cache

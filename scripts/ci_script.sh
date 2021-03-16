@@ -72,6 +72,7 @@ if [[ $GROUP == linkcheck ]]; then
 
     # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
     args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
+    args="--ignore docs/source/getting_started/changelog.md --ignore CHANGELOG.md ${args}"
     py.test $args --links-ext .md -k .md . || py.test $args --links-ext .md -k .md --lf .
 
     conda deactivate
@@ -122,6 +123,10 @@ if [[ $GROUP == integrity2 ]]; then
     python -m build .
     twine check dist/*
 
+fi
+
+
+if [[ $GROUP == integrity3 ]]; then
     # Make sure we can bump the version
     # This must be done at the end so as not to interfere
     # with the other checks
@@ -152,6 +157,12 @@ if [[ $GROUP == integrity2 ]]; then
 fi
 
 
+if [[ $GROUP == release_check ]]; then
+    jlpm run publish:js --dry-run
+    jlpm run prepare:python-release
+    ./scripts/release_test.sh
+fi
+
 if [[ $GROUP == examples ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
@@ -178,28 +189,47 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension unlink mimeextension --no-build --debug
     jupyter labextension link mimeextension --no-build --debug
     jupyter labextension unlink  @jupyterlab/mock-mime-extension --no-build --debug
-    # Test with a full install
-    jupyter labextension install mimeextension  --no-build --debug
+
+    # Test with a source package install
+    jupyter labextension install mimeextension --debug
     jupyter labextension list --debug
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep "@jupyterlab/mock-mime-extension.*enabled.*OK"
+    python -m jupyterlab.browser_check
     jupyter labextension disable @jupyterlab/mock-mime-extension --debug
     jupyter labextension enable @jupyterlab/mock-mime-extension --debug
-    jupyter labextension disable @jupyterlab/notebook-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-mime-extension --no-build --debug
+
+    # Test enable/disable and uninstall/install a core package
+    jupyter labextension disable @jupyterlab/notebook-extension --debug
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
-    # Test with a dynamic install
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep "Uninstalled core extensions:"
+    jupyter labextension install @jupyterlab/notebook-extension --no-build --debug
+    jupyter labextension enable @jupyterlab/notebook-extension --debug
+
+    # Test with a prebuilt install
     jupyter labextension develop extension --debug
     jupyter labextension build extension
+
+    # Test develop script with hyphens and underscores in the module name
+    jupyter labextension develop test-hyphens --overwrite --debug
+    jupyter labextension develop test_no_hyphens --overwrite --debug
+    jupyter labextension develop test-hyphens-underscore --overwrite --debug
 
     python -m jupyterlab.browser_check
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
     jupyter labextension build extension --static-url /foo/
+    jupyter labextension build extension --core-path ../../../examples/federated/core_package
     jupyter labextension disable @jupyterlab/mock-extension --debug
     jupyter labextension enable @jupyterlab/mock-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
     jupyter labextension list 1>labextensions 2>&1
     # check the federated extension is still listed after jupyter labextension uninstall
     cat labextensions | grep -q "mock-extension"
+    # build it again without a static-url to avoid causing errors
+    jupyter labextension build extension
     popd
 
     jupyter lab workspaces export > workspace.json --debug
@@ -254,13 +284,18 @@ if [[ $GROUP == usage ]]; then
     jlpm run remove:package foo
     jlpm run integrity
 
+fi
+
+
+if [[ $GROUP == usage2 ]]; then
+
     ## Test app directory support being a symlink
     mkdir tmp
     pushd tmp
     mkdir real_app_dir
     ln -s real_app_dir link_app_dir
-    # verify that app directory is not resolved
-    env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep link_app_dir
+    # verify that app directory is resolved
+    env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep real_app_dir
     popd
 
     # Make sure we can successfully load the dev app.
@@ -310,13 +345,14 @@ if [[ $GROUP == usage ]]; then
 
     # Check the labhubapp
     ./test_install/bin/pip install jupyterhub
-    ./test_install/bin/jupyter-labhub --no-browser &
+    export JUPYTERHUB_API_TOKEN="mock_token"
+    ./test_install/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
     TASK_PID=$!
+    unset JUPYTERHUB_API_TOKEN
     # Make sure the task is running
     ps -p $TASK_PID || exit 1
     sleep 5
     kill $TASK_PID
-    wait $TASK_PID
 
     # Make sure we can clean various bits of the app dir
     jupyter lab clean
