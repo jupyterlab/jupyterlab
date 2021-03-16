@@ -207,10 +207,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const headerPanel = (this._headerPanel = new BoxPanel());
     const menuHandler = (this._menuHandler = new Private.PanelHandler());
     menuHandler.panel.node.setAttribute('role', 'navigation');
-    menuHandler.panel.node.setAttribute(
-      'aria-label',
-      trans.__('main')
-    );
+    menuHandler.panel.node.setAttribute('aria-label', trans.__('main'));
     const topHandler = (this._topHandler = new Private.PanelHandler());
     topHandler.panel.node.setAttribute('role', 'banner');
     const bottomPanel = (this._bottomPanel = new BoxPanel());
@@ -239,7 +236,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       'aria-label',
       trans.__('main sidebar')
     );
-    leftHandler.sideBar.contentNode.setAttribute('role', 'navigation');
     leftHandler.sideBar.contentNode.setAttribute(
       'aria-label',
       trans.__('main sidebar')
@@ -248,12 +244,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     rightHandler.sideBar.addClass(SIDEBAR_CLASS);
     rightHandler.sideBar.addClass('jp-mod-right');
-    rightHandler.sideBar.node.setAttribute('role', 'complementary');
     rightHandler.sideBar.node.setAttribute(
       'aria-label',
       trans.__('alternate sidebar')
     );
-    rightHandler.sideBar.contentNode.setAttribute('role', 'navigation');
     rightHandler.sideBar.contentNode.setAttribute(
       'aria-label',
       trans.__('alternate sidebar navigation')
