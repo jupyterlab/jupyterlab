@@ -57,6 +57,7 @@ const UNUSED: Dict<string[]> = {
     'css-loader',
     'file-loader',
     'path-browserify',
+    'process',
     'raw-loader',
     'style-loader',
     'svg-url-loader',
