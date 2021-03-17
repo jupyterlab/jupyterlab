@@ -9,8 +9,9 @@ import JSONTree from 'react-json-tree';
 
 import { JSONArray, JSONObject, JSONValue, JSONExt } from '@lumino/coreutils';
 
-import { InputGroup } from '@jupyterlab/ui-components';
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
+import { InputGroup } from '@jupyterlab/ui-components';
 
 /**
  * The properties for the JSON tree component.
@@ -164,7 +165,8 @@ const theme = {
   base0C: 'invalid',
   base0D: 'invalid',
   base0E: 'invalid',
-  base0F: 'invalid'
+  base0F: 'invalid',
+  author: 'invalid'
 };
 
 function objectIncludes(data: JSONValue, query: string): boolean {
