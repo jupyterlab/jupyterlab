@@ -10,7 +10,7 @@ const single_argument_options = [
   '--use_rest_api',
   '--use_legacy_sql',
   '--verbose',
-    '--params'
+  '--params'
 ];
 const zero_argument_options = ['-l', '--connections'];
 

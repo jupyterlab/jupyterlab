@@ -1,10 +1,7 @@
 import { VirtualDocument } from '../../virtual/document';
 import { expect } from 'chai';
 import { foreign_code_extractors } from './extractors';
-import {
-  extract_code,
-  get_the_only_virtual
-} from '../../extractors/testutils';
+import { extract_code, get_the_only_virtual } from '../../extractors/testutils';
 
 describe('Bigquery SQL extractors', () => {
   let document: VirtualDocument;
@@ -41,7 +38,5 @@ describe('Bigquery SQL extractors', () => {
         "select * from character\nwhere abbrev = 'ALICE'\n"
       );
     });
-
-      
   });
 });
