@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-federated-core",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "private": true,
   "scripts": {
     "build": "npm run clean && webpack",
@@ -143,7 +143,7 @@
     "@jupyterlab/statusbar-extension": "^3.0.6",
     "@jupyterlab/terminal-extension": "^3.0.7",
     "@jupyterlab/theme-light-extension": "^3.0.6",
-    "@jupyterlab/toc-extension": "^5.0.6",
+    "@jupyterlab/toc-extension": "^5.0.7",
     "@jupyterlab/tooltip-extension": "^3.0.6",
     "@jupyterlab/translation": "^3.0.5",
     "@jupyterlab/translation-extension": "^3.0.6",
@@ -152,7 +152,7 @@
     "@jupyterlab/vega5-extension": "^3.0.5"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.0.5",
+    "@jupyterlab/builder": "^3.0.6",
     "copy-webpack-plugin": "^6.0.1",
     "css-loader": "^5.0.1",
     "file-loader": "~6.0.0",
