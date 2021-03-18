@@ -132,7 +132,7 @@ Virtual Notebook
 The cells are rendered based on a *Virtual Notebook* logic. A minimun number of cells will be rendered directly 
 (configurable with the `numberCellsToRenderDirectly` setting), then an intersection observer will render any cells
 being in the observed area, which defaults to rendering the complete notebook. Finally any other non-rendered cells will
-be rendered when the browser is idle. This ensure that the user has	access to cells as soon as possible.
+be rendered when the browser is idle. This ensures that the user has	access to the complete notebook cells as soon as possible.
 This is particulary useful for large notebooks.
 
 Rendering output messages
