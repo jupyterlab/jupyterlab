@@ -13,7 +13,7 @@ milestone on GitHub for the full list of pull requests and issues closed.
 v3.0.11
 ^^^^^^^
 * Fix: use process/browser module as real polyfill  (`#9636 <https://github.com/jupyterlab/jupyterlab/pull/9636>`__)
-* Fix ToC markdown bug for HTML comments  (`#9938 <https://github.com/jupyterlab/jupyterlab/pull/9938>`__)
+* Fix Table of Contents extension markdown bug for HTML comments  (`#9938 <https://github.com/jupyterlab/jupyterlab/pull/9938>`__)
 * Make Table of Contents extension not rewrite all notebook headers  (`#9932 <https://github.com/jupyterlab/jupyterlab/pull/9932>`__)
 
 
