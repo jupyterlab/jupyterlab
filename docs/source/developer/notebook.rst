@@ -151,7 +151,7 @@ notebook-specific widget state.
 Trimmed Output
 ''''''''''''''
 
-A `maxNumberOutputs` setting ensures that large outputs are trimmed down that value. In case of trimmed output,
+The `maxNumberOutputs` setting ensures that large outputs are trimmed down to that value. In case of trimmed output,
 the user can still click on a message to show the complete output.
 
 .. _extend-notebook-plugin:
