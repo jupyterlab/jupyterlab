@@ -129,10 +129,11 @@ object to render ``display_data`` output messages.
 Virtual Notebook
 ''''''''''''''''
 
-The cells are rendered based on a *Virtual Notebook* logic. A minimun number of cells will be rendered directly, then	
-an intersection observer will render any cells being in the observed area (default is the complete notebook panel),	
-and then any other non-rendered cells will be rendered when the browser is idle. This ensure that the user has	
-access to cells as soon as possible. This is particulary useful for large notebooks.
+The cells are rendered based on a *Virtual Notebook* logic. A minimun number of cells will be rendered directly 
+(configurable with the `numberCellsToRenderDirectly` setting), then an intersection observer will render any cells
+being in the observed area, which defaults to rendering the complete notebook. Finally any other non-rendered cells will
+be rendered when the browser is idle. This ensures that the user has	access to the complete notebook cells as soon as possible.
+This is particulary useful for large notebooks.
 
 Rendering output messages
 '''''''''''''''''''''''''
@@ -146,6 +147,12 @@ Rendermime singleton so that notebook-specific renderers can be added.
 The ipywidgets widget manager is an example of an extension that adds a
 notebook-specific renderer, since rendering a widget depends on
 notebook-specific widget state.
+
+Trimmed Output
+''''''''''''''
+
+The `maxNumberOutputs` setting ensures that large outputs are trimmed down to that value. In case of trimmed output,
+the user can still click on a message to show the complete output.
 
 .. _extend-notebook-plugin:
 
