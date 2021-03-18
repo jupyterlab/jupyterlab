@@ -96,7 +96,7 @@ export class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Dispose of the resources held by the document registery.
+   * Dispose of the resources held by the document registry.
    */
   dispose(): void {
     if (this.isDisposed) {
@@ -1113,7 +1113,7 @@ export namespace DocumentRegistry {
     /**
      * Create a new extension for a given widget.
      */
-    createNew(widget: T, context: IContext<U>): IDisposable;
+    createNew(widget: T, context: IContext<U>): IDisposable | void;
   }
 
   /**
@@ -1516,7 +1516,7 @@ namespace Private {
   /**
    * A no-op function.
    */
-  export function noOp() {
+  export function noOp(): void {
     /* no-op */
   }
 }
