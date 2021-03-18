@@ -10,6 +10,13 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.11
+^^^^^^^
+* Fix: use process/browser module as real polyfill  (`#9636 <https://github.com/jupyterlab/jupyterlab/pull/9636>`__)
+* Fix ToC markdown bug for HTML comments  (`#9938 <https://github.com/jupyterlab/jupyterlab/pull/9938>`__)
+* Make Table of Contents extension not rewrite all notebook headers  (`#9932 <https://github.com/jupyterlab/jupyterlab/pull/9932>`__)
+
+
 v3.0.10
 ^^^^^^^
 * Fix watch mode for external extensions (`#9916 <https://github.com/jupyterlab/jupyterlab/pull/9916>`__, `#9915 <https://github.com/jupyterlab/jupyterlab/pull/9915>`__, )
@@ -119,7 +126,7 @@ A new visual debugger
 JupyterLab now ships with a debugger front-end by default, available for kernels that support the new debugging protocol.  See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/debugger.html>`__ for more details.
 
 
-Improvements to Simple Interface mode and Mobile 
+Improvements to Simple Interface mode and Mobile
 """"""""""""""""""""""""""""""""""""""""""""""""
 The Simple Interface mode (previously Single Document Mode) is now more streamlined. JupyterLab now supports showing the current file in use in the browser URL bar, similar to the classic Jupyter Notebook.
 
@@ -130,7 +137,7 @@ Table of Contents is now in core
 The popular Table of Contents extension is now part of core JupyterLab. This core extension makes it easy to see an outline view of notebooks and other documents.
 
 
-Visual filter in file browser 
+Visual filter in file browser
 """""""""""""""""""""""""""""
 
 The file browser now has a filter input which filters the list of files using the same fuzzy matching as the command palette.
@@ -159,9 +166,9 @@ Prebuilt Extensions
 Users will typically consume prebuilt extensions, which are Python packages with static assets built using ``JupyterLab``.
 See the updated APOD tutorial for the workflow of creating a prebuilt extension from scratch.
 For existing extensions, there is a new ``python -m jupyterlab.upgrade_extension`` script that
-can be used to upgrade extensions.  The script will update the relevant dependencies and add the 
+can be used to upgrade extensions.  The script will update the relevant dependencies and add the
 boilerplate to create the Python package.  For extensions that already contained Python packages (typically server extensions),
-the files are not overwritten, and some manual copying of content is required.  See the `example <https://github.com/jupyterlab/extension-examples/pull/119>`__, 
+the files are not overwritten, and some manual copying of content is required.  See the `example <https://github.com/jupyterlab/extension-examples/pull/119>`__,
 which used this script heavily.  There are two highlighted commits that demonstrate upgrading a server extension.
 Prebuilt extensions are also known as federated extensions in the changes below, since they use the federated module capability in Webpack 5.
 
@@ -241,7 +248,7 @@ Prebuilt extensions are also known as federated extensions in the changes below,
 
 Jupyter Server
 """"""""""""""
-JupyterLab 3.0 uses Jupyter Server instead of the classic Notebook server.  Existing server extensions will be shimmed, but it 
+JupyterLab 3.0 uses Jupyter Server instead of the classic Notebook server.  Existing server extensions will be shimmed, but it
 is advised to update extensions to use `jupyter_server <https://github.com/jupyter/jupyter_server>`__.
 
 * Update server(s), nbclassic, pytest fixtures (`#9478 <https://github.com/jupyterlab/jupyterlab/pull/9478>`__, `#9473 <https://github.com/jupyterlab/jupyterlab/issues/9473>`__)
