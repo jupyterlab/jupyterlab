@@ -239,6 +239,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       'aria-label',
       trans.__('main sidebar')
     );
+    leftHandler.sideBar.node.setAttribute('role', 'complementary');
     leftHandler.stackedPanel.id = 'jp-left-stack';
 
     rightHandler.sideBar.addClass(SIDEBAR_CLASS);
@@ -249,8 +250,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     );
     rightHandler.sideBar.contentNode.setAttribute(
       'aria-label',
-      trans.__('alternate sidebar navigation')
+      trans.__('alternate sidebar')
     );
+    rightHandler.sideBar.node.setAttribute('role', 'complementary');
     rightHandler.stackedPanel.id = 'jp-right-stack';
 
     dockPanel.node.setAttribute('role', 'main');
@@ -1334,7 +1336,8 @@ namespace Private {
       this._sideBar = new TabBar<Widget>({
         insertBehavior: 'none',
         removeBehavior: 'none',
-        allowDeselect: true
+        allowDeselect: true,
+        orientation: 'vertical'
       });
       this._stackedPanel = new StackedPanel();
       this._sideBar.hide();
