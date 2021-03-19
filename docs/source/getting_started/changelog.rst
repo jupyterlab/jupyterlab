@@ -10,6 +10,12 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.12
+^^^^^^^
+* Fix support for Safari by changing regular expression for Table of Contents (`#9962 <https://github.com/jupyterlab/jupyterlab/pull/9962>`__)
+* Fix DocRegistry FileType pattern matching (`#9958 <https://github.com/jupyterlab/jupyterlab/pull/9958>`__)
+
+
 v3.0.11
 ^^^^^^^
 * Fix: use process/browser module as real polyfill  (`#9636 <https://github.com/jupyterlab/jupyterlab/pull/9636>`__)
