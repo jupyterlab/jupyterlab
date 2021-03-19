@@ -64,6 +64,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     if (enabled && labShell) {
       view = createView();
+      view.node.setAttribute('role', 'region');
+      view.node.setAttribute(
+        'aria-label',
+        trans.__('Extension Manager section')
+      );
       labShell.add(view, 'left', { rank: 1000 });
     }
 
@@ -80,6 +85,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
               return;
             }
             view = view || createView();
+            view.node.setAttribute('role', 'region');
+            view.node.setAttribute(
+              'aria-label',
+              trans.__('Extension Manager section')
+            );
             if (labShell) {
               labShell.add(view, 'left', { rank: 1000 });
             }

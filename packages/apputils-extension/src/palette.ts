@@ -103,6 +103,11 @@ export namespace Palette {
     const modalPalette = new ModalCommandPalette({ commandPalette: palette });
     let modal = false;
 
+    palette.node.setAttribute('role', 'region');
+    palette.node.setAttribute(
+      'aria-label',
+      trans.__('Command Palette Section')
+    );
     shell.add(palette, 'left', { rank: 300 });
 
     if (settingRegistry) {

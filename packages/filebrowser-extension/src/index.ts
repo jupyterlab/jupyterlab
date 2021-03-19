@@ -167,6 +167,8 @@ const browser: JupyterFrontEndPlugin<void> = {
   ): void => {
     const trans = translator.load('jupyterlab');
     const browser = factory.defaultBrowser;
+    browser.node.setAttribute('role', 'region');
+    browser.node.setAttribute('aria-label', trans.__('File Browser Section'));
 
     // Let the application restorer track the primary file browser (that is
     // automatically created) for restoration of application state (e.g. setting

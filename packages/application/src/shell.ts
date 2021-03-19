@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { classes, DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
 
@@ -90,6 +91,16 @@ export namespace ILabShell {
    * The restorable description of an area within the main dock panel.
    */
   export type AreaConfig = DockLayout.AreaConfig;
+
+  /**
+   * An options object for creating a lab shell object.
+   */
+  export type IOptions = {
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+  };
 
   /**
    * An arguments object for the changed signals.
@@ -185,15 +196,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Construct a new application shell.
    */
-  constructor() {
+  constructor(options?: ILabShell.IOptions) {
     super();
     this.addClass(APPLICATION_SHELL_CLASS);
     this.id = 'main';
 
+    const trans = ((options && options.translator) || nullTranslator).load(
+      'jupyterlab'
+    );
     const headerPanel = (this._headerPanel = new BoxPanel());
     const menuHandler = (this._menuHandler = new Private.PanelHandler());
+    menuHandler.panel.node.setAttribute('role', 'navigation');
+    menuHandler.panel.node.setAttribute('aria-label', trans.__('main'));
     const topHandler = (this._topHandler = new Private.PanelHandler());
+    topHandler.panel.node.setAttribute('role', 'banner');
     const bottomPanel = (this._bottomPanel = new BoxPanel());
+    bottomPanel.node.setAttribute('role', 'contentinfo');
     const hboxPanel = new BoxPanel();
     const dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
@@ -213,11 +231,31 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     leftHandler.sideBar.addClass(SIDEBAR_CLASS);
     leftHandler.sideBar.addClass('jp-mod-left');
+    leftHandler.sideBar.node.setAttribute(
+      'aria-label',
+      trans.__('main sidebar')
+    );
+    leftHandler.sideBar.contentNode.setAttribute(
+      'aria-label',
+      trans.__('main sidebar')
+    );
+    leftHandler.sideBar.node.setAttribute('role', 'complementary');
     leftHandler.stackedPanel.id = 'jp-left-stack';
 
     rightHandler.sideBar.addClass(SIDEBAR_CLASS);
     rightHandler.sideBar.addClass('jp-mod-right');
+    rightHandler.sideBar.node.setAttribute(
+      'aria-label',
+      trans.__('alternate sidebar')
+    );
+    rightHandler.sideBar.contentNode.setAttribute(
+      'aria-label',
+      trans.__('alternate sidebar')
+    );
+    rightHandler.sideBar.node.setAttribute('role', 'complementary');
     rightHandler.stackedPanel.id = 'jp-right-stack';
+
+    dockPanel.node.setAttribute('role', 'main');
 
     hboxPanel.spacing = 0;
     dockPanel.spacing = 5;
@@ -1298,7 +1336,8 @@ namespace Private {
       this._sideBar = new TabBar<Widget>({
         insertBehavior: 'none',
         removeBehavior: 'none',
-        allowDeselect: true
+        allowDeselect: true,
+        orientation: 'vertical'
       });
       this._stackedPanel = new StackedPanel();
       this._sideBar.hide();
