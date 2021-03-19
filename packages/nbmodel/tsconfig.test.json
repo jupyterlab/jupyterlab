@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfigbase.test",
   "include": ["src/*", "test/*"],
+  "paths": {
+    "y-protocols/awareness.js": "y-protocols/dist/awareness.cjs"
+  },
   "references": [
     {
       "path": "../nbformat"
