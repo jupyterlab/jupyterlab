@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@jupyterlab/mathjax2": "^3.0.5",
-    "@jupyterlab/testutils": "^3.0.6",
+    "@jupyterlab/testutils": "^3.0.7",
     "@types/jest": "^26.0.10",
     "@types/lodash.escape": "^4.0.6",
     "@types/marked": "^1.1.0",
