@@ -10,3 +10,4 @@
 export * from './api';
 export * from './ymodel';
 export * from './utils';
+export * from './cellfactory';
