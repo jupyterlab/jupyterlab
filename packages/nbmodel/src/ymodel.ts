@@ -11,7 +11,10 @@ import * as nbmodel from './api';
 
 import * as Y from 'yjs';
 
-import { Awareness } from 'y-protocols/awareness.js';
+// @ts-ignore
+import { Awareness } from 'y-protocols/dist/awareness.cjs';
+
+const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 
 type YCellType = YRawCell | YCodeCell | YRawCell | YMarkdownCell;
 
@@ -28,7 +31,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       return this.ycellMapping.get(ycell) as YCellType;
     });
   }
-  getCell(index: number): nbmodel.ISharedCell {
+  getCell(index: number): YCellType {
     return this.cells[index];
   }
   insertCell(index: number, cell: YCellType): void {
@@ -133,11 +136,15 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     trackedOrigins: new Set([this])
   });
   public ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
-  public get metadata(): nbformat.INotebookMetadata {
-    return this.ymeta.get('metadata');
+  public getMetadata(): nbformat.INotebookMetadata {
+    const meta = this.ymeta.get('metadata');
+    return meta ? deepCopy(meta) : { orig_nbformat: 1 };
   }
-  public set metadata(value: nbformat.INotebookMetadata) {
-    this.ymeta.set('metadata', value);
+  public setMetadata(value: nbformat.INotebookMetadata): void {
+    this.ymeta.set('metadata', deepCopy(value));
+  }
+  public updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
+    this.ymeta.set('metadata', Object.assign({}, this.getMetadata(), value));
   }
   public nbformat_minor: number = nbformat.MINOR_VERSION;
   public nbformat: number = nbformat.MAJOR_VERSION;
@@ -150,15 +157,15 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
   implements nbmodel.ISharedBaseCell<Metadata> {
   constructor(ymodel: Y.Map<any>) {
     this.ymodel = ymodel;
-    this.ysource = ymodel.get('source');
-    this._prevSourceLength = this.ysource.length;
+    const ysource = ymodel.get('source');
+    this._prevSourceLength = ysource ? ysource.length : 0;
     this.ymodel.observeDeep(this._modelObserver);
   }
 
   /**
    * Create a new YRawCell that can be inserted into a YNotebook
    */
-  protected static create(): YCellType {
+  public static create(): YBaseCell<any> {
     const ymodel = new Y.Map();
     const ysource = new Y.Text();
     ymodel.set('source', ysource);
@@ -172,15 +179,26 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
    * inserted into a YNotebook because the Yjs model is already
    * attached to an anonymous Y.Doc instance.
    */
-  public static createStandalone(): YCellType {
+  public static createStandalone(): YBaseCell<any> {
     const cell = this.create();
     new Y.Doc().getArray().insert(0, [cell.ymodel]);
     return cell;
   }
 
+  public clone(): this {
+    const ymodel = new Y.Map();
+    this.ymodel.forEach((value, key) => {
+      this.ymodel.set(key, value);
+    });
+    const Self: any = this.constructor;
+    return new Self(ymodel);
+  }
+
   private _modelObserver = (events: Y.YEvent[]) => {
     const changes: nbmodel.CellChange<Metadata> = {};
-    const sourceEvent = events.find(event => event.target === this.ysource);
+    const sourceEvent = events.find(
+      event => event.target === this.ymodel.get('source')
+    );
     if (sourceEvent) {
       changes.sourceChange = sourceEvent.changes.delta as any;
     }
@@ -191,19 +209,19 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
       const change = modelEvent.changes.keys.get('metadata');
       changes.metadataChange = {
         oldValue: change!.oldValue,
-        newValue: this.metadata
+        newValue: this.getMetadata()
       };
     }
     // The model allows us to replace the complete source with a new string. We express this in the Delta format
     // as a replace of the complete string.
+    const ysource = this.ymodel.get('source');
     if (modelEvent && modelEvent.keysChanged.has('source')) {
-      this.ysource = this.ymodel.get('source');
       changes.sourceChange = [
         { delete: this._prevSourceLength },
-        { insert: this.ysource.toString() }
+        { insert: ysource.toString() }
       ];
     }
-    this._prevSourceLength = this.ysource.length;
+    this._prevSourceLength = ysource.length;
     this._changed.emit(changes);
   };
 
@@ -215,37 +233,43 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
     this.ymodel.observeDeep(this._modelObserver);
   }
 
-  public get attachments(): nbformat.IAttachments | undefined {
+  public getAttachments(): nbformat.IAttachments | undefined {
     return this.ymodel.get('attachments');
   }
-  public set attachments(value: nbformat.IAttachments | undefined) {
+  public setAttachments(value: nbformat.IAttachments | undefined): void {
     if (value == null) {
       this.ymodel.set('attachments', value);
     } else {
       this.ymodel.delete('attachments');
     }
   }
-  public get source(): string {
-    return this.ysource.toString();
+  public getSource(): string {
+    return this.ymodel.get('source').toString();
   }
-  public set source(value: string) {
-    this.ysource = new Y.Text();
-    this.ymodel.set('source', this.ysource);
+  public setSource(value: string): void {
+    this.ymodel.set('source', new Y.Text(value));
   }
 
   public get cell_type(): any {
     throw new Error('A YBaseCell must not be constructed');
   }
 
-  get metadata(): Partial<Metadata> {
-    return this.ymodel.get('metadata');
+  getMetadata(): Partial<Metadata> {
+    return deepCopy(this.ymodel.get('metadata'));
   }
-  set metadata(value: Partial<Metadata>) {
-    this.ymodel.set('metadata', value);
+
+  setMetadata(value: Partial<Metadata>): void {
+    this.ymodel.set('metadata', deepCopy(value));
+  }
+  toJSON(): nbformat.IBaseCell {
+    return {
+      cell_type: this.cell_type,
+      source: this.getSource(),
+      metadata: this.getMetadata()
+    };
   }
   public isDisposed = false;
   public ymodel: Y.Map<any>;
-  public ysource: Y.Text;
   private _changed = new Signal<this, nbmodel.CellChange<Metadata>>(this);
   private _prevSourceLength: number;
 }
@@ -259,9 +283,19 @@ export class YCodeCell
   get execution_count(): number {
     return 1;
   }
-  get outputs(): Array<any> {
-    return [];
+  getOutputs(): Array<nbformat.IOutput> {
+    return this.outputs;
   }
+  toJSON(): nbformat.ICodeCell {
+    return {
+      cell_type: 'code',
+      source: this.getSource(),
+      metadata: this.getMetadata(),
+      outputs: this.getOutputs(),
+      execution_count: this.execution_count
+    };
+  }
+  private outputs: Array<nbformat.IOutput> = [];
 }
 
 export class YRawCell
@@ -269,6 +303,14 @@ export class YRawCell
   implements nbmodel.ISharedRawCell {
   get cell_type(): 'raw' {
     return 'raw';
+  }
+  toJSON(): nbformat.IRawCell {
+    return {
+      cell_type: 'raw',
+      source: this.getSource(),
+      metadata: this.getMetadata(),
+      attachments: this.getAttachments()
+    };
   }
 }
 
@@ -278,4 +320,16 @@ export class YMarkdownCell
   get cell_type(): 'markdown' {
     return 'markdown';
   }
+  toJSON(): nbformat.IMarkdownCell {
+    return {
+      cell_type: 'markdown',
+      source: this.getSource(),
+      metadata: this.getMetadata(),
+      attachments: this.getAttachments()
+    };
+  }
 }
+
+export const createSharedNotebook = (): nbmodel.ISharedNotebook => {
+  return new YNotebook();
+};
