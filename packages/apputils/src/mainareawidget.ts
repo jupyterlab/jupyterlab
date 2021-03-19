@@ -5,7 +5,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
-import { BoxLayout, Widget } from '@lumino/widgets';
+import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
 
 import { Spinner } from './spinner';
 
@@ -44,13 +44,19 @@ export class MainAreaWidget<T extends Widget = Widget>
     const toolbar = (this._toolbar = options.toolbar || new Toolbar());
     toolbar.node.setAttribute('role', 'navigation');
     toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
+
+    const header = (this.header =
+      options.header ||
+      new BoxPanel({ direction: 'top-to-bottom', spacing: 0 }));
     const spinner = this._spinner;
+
+    header.addWidget(toolbar);
 
     const layout = (this.layout = new BoxLayout({ spacing: 0 }));
     layout.direction = 'top-to-bottom';
     BoxLayout.setStretch(toolbar, 0);
     BoxLayout.setStretch(content, 1);
-    layout.addWidget(toolbar);
+    layout.addWidget(header);
     layout.addWidget(content);
 
     if (!content.id) {
@@ -233,6 +239,7 @@ export class MainAreaWidget<T extends Widget = Widget>
 
   private _content: T;
   private _toolbar: Toolbar;
+  public header: BoxPanel;
   private _changeGuard = false;
   private _spinner = new Spinner();
 
@@ -257,6 +264,12 @@ export namespace MainAreaWidget {
      * The toolbar to use for the widget.  Defaults to an empty toolbar.
      */
     toolbar?: Toolbar;
+
+    /**
+     * The layout to contain the toolbar and other bars above content.
+     * Defaults to an empty BoxLayout.
+     */
+    header?: BoxPanel;
 
     /**
      * An optional promise for when the content is ready to be revealed.
