@@ -663,7 +663,7 @@ export class DocumentRegistry implements IDisposable {
 
     // Look for a pattern match first.
     let ft = find(this._fileTypes, ft => {
-      return !!(ft.pattern && ft.pattern.match(name) !== null);
+      return !!(ft.pattern && name.match(ft.pattern) !== null);
     });
     if (ft) {
       fts.push(ft);

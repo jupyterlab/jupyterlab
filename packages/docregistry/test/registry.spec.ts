@@ -655,6 +655,20 @@ describe('docregistry/registry', () => {
         const ft = registry.getFileTypesForPath('foo/bar/baz.PY');
         expect(ft[0].name).toBe('python');
       });
+
+      it('should support pattern matching', () => {
+        registry.addFileType({
+          name: 'test',
+          extensions: ['.temp'],
+          pattern: '.*\\.test$'
+        });
+
+        const ft = registry.getFileTypesForPath('foo/bar/baz.test');
+        expect(ft[0].name).toBe('test');
+
+        const ft2 = registry.getFileTypesForPath('foo/bar/baz.temp');
+        expect(ft2[0].name).toBe('test');
+      });
     });
   });
 });
