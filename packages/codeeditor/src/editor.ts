@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as nbmodel from '@jupyterlab/nbmodel';
+import * as nbformat from '@jupyterlab/nbformat';
 import { JSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
@@ -218,20 +220,73 @@ export namespace CodeEditor {
       }
 
       const value = this.modelDB.createString('value');
-      value.text = value.text || options.value || '';
 
       const mimeType = this.modelDB.createValue('mimeType');
       mimeType.set(options.mimeType || 'text/plain');
       mimeType.changed.connect(this._onMimeTypeChanged, this);
 
       this.modelDB.createMap('selections');
+      this.nbmodel.changed.connect(this.onSharedModelChanged, this);
+      value.changed.connect(this.onModeldbValueChanged, this);
+      value.text = value.text || options.value || '';
     }
+
+    /**
+     * We update the modeldb store when nbmodel changes.
+     * To ensure that we don't run into infinite loops, we wrap this call in a "mutex".
+     * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged hander
+     * or the modeldb change handler.
+     */
+    onSharedModelChanged(
+      _: any,
+      change: nbmodel.CellChange<nbformat.ICodeCellMetadata>
+    ): void {
+      this._mutex(() => {
+        if (change.sourceChange) {
+          const value = this.modelDB.get('value') as IObservableString;
+          let currpos = 0;
+          change.sourceChange.forEach(delta => {
+            if (delta.insert != null) {
+              value.insert(currpos, delta.insert);
+              currpos += delta.insert.length;
+            } else if (delta.delete != null) {
+              value.remove(currpos, currpos + delta.delete);
+            } else if (delta.retain != null) {
+              currpos += delta.retain;
+            }
+          });
+        }
+      });
+    }
+
+    onModeldbValueChanged(
+      value: IObservableString,
+      event: IObservableString.IChangedArgs
+    ): void {
+      this._mutex(() => {
+        switch (event.type) {
+          case 'insert':
+            this.nbmodel.modifySource(event.start, event.start, event.value);
+            break;
+          case 'remove':
+            this.nbmodel.modifySource(event.start, event.end - event.start);
+            break;
+          default:
+            this.nbmodel.setSource(value.text);
+            break;
+        }
+      });
+    }
+
+    readonly nbmodel = nbmodel.StandaloneCellFactory.createCodeCell();
 
     /**
      * The underlying `IModelDB` instance in which model
      * data is stored.
      */
     readonly modelDB: IModelDB;
+
+    private readonly _mutex = nbmodel.createMutex();
 
     /**
      * A signal emitted when a mimetype changes.

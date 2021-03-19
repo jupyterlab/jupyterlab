@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { YNotebook, SharedCellFactory, createSharedNotebook } from '../src';
+import {
+  YNotebook,
+  SharedCellFactory,
+  StandaloneCellFactory,
+  createSharedNotebook
+} from '../src';
 
 describe('@jupyterlab/nbmodel', () => {
   describe('ynotebook', () => {
@@ -11,6 +16,12 @@ describe('@jupyterlab/nbmodel', () => {
       notebook.insertCell(0, codeCell);
       expect(notebook.cells.length).toBe(1);
     });
+    it('should create a cell standalone', () => {
+      const codeCell = StandaloneCellFactory.createCodeCell();
+      codeCell.setSource('test');
+      expect(codeCell.getSource()).toBe('test');
+    });
+
     it('should create a jupyter metadata', () => {
       const notebook = new YNotebook();
       const metadata = notebook.getMetadata();
