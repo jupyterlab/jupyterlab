@@ -7,6 +7,9 @@ import CodeMirror from 'codemirror';
 
 import { showDialog } from '@jupyterlab/apputils';
 
+import * as nbmodel from '@jupyterlab/nbmodel';
+import { CodemirrorBinding } from 'y-codemirror';
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import {
@@ -125,6 +128,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
+    const nbmodel = this.model.nbmodel as nbmodel.YCodeCell;
+    this.yeditorBinding = new CodemirrorBinding(
+      nbmodel.ymodel.get('source'),
+      editor
+    );
 
     const doc = editor.getDoc();
 
@@ -162,9 +170,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }
     });
     CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-    CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
-      this._beforeDocChanged(instance, change);
-    });
     CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
       // Manually refresh after setValue to make sure editor is properly sized.
       if (change.origin === 'setValue' && this.hasFocus()) {
@@ -190,6 +195,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
   }
 
+  private yeditorBinding: CodemirrorBinding;
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
@@ -280,6 +286,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('focus', this, true);
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
+    this.yeditorBinding.destroy();
     this._keydownHandlers.length = 0;
     this._poll.dispose();
     Signal.clearData(this);
@@ -917,31 +924,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         break;
       default:
         break;
-    }
-    this._changeGuard = false;
-  }
-
-  /**
-   * Handles document changes.
-   */
-  private _beforeDocChanged(
-    doc: CodeMirror.Doc,
-    change: CodeMirror.EditorChange
-  ) {
-    if (this._changeGuard) {
-      return;
-    }
-    this._changeGuard = true;
-    const value = this._model.value;
-    const start = doc.indexFromPos(change.from);
-    const end = doc.indexFromPos(change.to);
-    const inserted = change.text.join('\n');
-
-    if (end !== start) {
-      value.remove(start, end);
-    }
-    if (inserted) {
-      value.insert(start, inserted);
     }
     this._changeGuard = false;
   }
