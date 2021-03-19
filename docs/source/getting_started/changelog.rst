@@ -12,7 +12,7 @@ milestone on GitHub for the full list of pull requests and issues closed.
 
 v3.0.12
 ^^^^^^^
-* Remove lookbehind from ToC MD regex for Safari (`#9962 <https://github.com/jupyterlab/jupyterlab/pull/9962>`__)
+* Fix support for Safari by changing regular expression for Table of Contents (`#9962 <https://github.com/jupyterlab/jupyterlab/pull/9962>`__)
 * Fix DocRegistry FileType pattern matching (`#9958 <https://github.com/jupyterlab/jupyterlab/pull/9958>`__)
 
 
