@@ -249,6 +249,13 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
   public setSource(value: string): void {
     this.ymodel.set('source', new Y.Text(value));
   }
+  public modifySource(start: number, end: number, value = ''): void {
+    this.ymodel.doc!.transact(() => {
+      const ysource = this.ymodel.get('source');
+      ysource.delete(start, end - start);
+      ysource.insert(start, value);
+    });
+  }
 
   public get cell_type(): any {
     throw new Error('A YBaseCell must not be constructed');

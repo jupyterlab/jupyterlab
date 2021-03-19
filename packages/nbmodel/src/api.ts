@@ -81,6 +81,10 @@ export interface ISharedBaseCell<Metadata extends nbformat.IBaseCellMetadata>
   extends IDisposable {
   getSource(): string;
   setSource(value: string): void;
+  /**
+   * Replace content from `start' to `end` with `value`.
+   */
+  modifySource(start: number, end: number, value?: string): void;
   getMetadata(): Partial<Metadata>;
   getMetadata(metadata: Partial<Metadata>): void;
   toJSON(): nbformat.IBaseCell;
@@ -103,10 +107,6 @@ export interface ISharedCodeCell
    * Execution, display, or stream outputs.
    */
   getOutputs(): nbformat.IOutput[];
-  getSource(): string;
-  setSource(value: string): void;
-  getMetadata(): Partial<nbformat.ICodeCellMetadata>;
-  setMetadata(metadata: Partial<nbformat.ICodeCellMetadata>): void;
   toJSON(): nbformat.ICodeCell;
 }
 
@@ -120,16 +120,11 @@ export interface ISharedMarkdownCell
    * String identifying the type of cell.
    */
   cell_type: 'markdown';
-
-  getSource(): string;
-  setSource(value: string): void;
   /**
    * Cell attachments.
    */
   getAttachments(): nbformat.IAttachments | undefined;
   setAttachments(attchments: nbformat.IAttachments | undefined): void;
-  getMetadata(): Partial<nbformat.IRawCellMetadata>;
-  setMetadata(metadata: Partial<nbformat.IRawCellMetadata>): void;
   toJSON(): nbformat.IMarkdownCell;
 }
 
@@ -143,12 +138,8 @@ export interface ISharedRawCell
    * String identifying the type of cell.
    */
   cell_type: 'raw';
-  getSource(): string;
-  setSource(value: string): void;
   getAttachments(): nbformat.IAttachments | undefined;
   setAttachments(attchments: nbformat.IAttachments | undefined): void;
-  getMetadata(): Partial<nbformat.IRawCellMetadata>;
-  setMetadata(metadata: Partial<nbformat.IRawCellMetadata>): void;
   toJSON(): nbformat.IRawCell;
 }
 
@@ -161,10 +152,6 @@ export interface ISharedUnrecognizedCell
   extends ISharedBaseCell<nbformat.IRawCellMetadata>,
     IDisposable {
   cell_type: 'raw';
-  getSource(): string;
-  setSource(value: string): void;
-  getMetadata(): Partial<nbformat.IRawCellMetadata>;
-  setMetadata(metadata: Partial<nbformat.IRawCellMetadata>): void;
   toJSON(): nbformat.ICodeCell;
 }
 
