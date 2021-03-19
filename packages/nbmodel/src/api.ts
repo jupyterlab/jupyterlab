@@ -26,14 +26,15 @@ import { Delta } from './utils';
 
 // Notebook Type.
 
-export interface ISharedNotebook
-  extends nbformat.INotebookContent,
-    IDisposable {
-  [key: string]: any;
-  metadata: nbformat.INotebookMetadata;
+/**
+ * Implements an API for nbformat.INotebookContent
+ */
+export interface ISharedNotebook extends IDisposable {
+  getMetadata(): nbformat.INotebookMetadata;
+  setMetadata(metadata: nbformat.INotebookMetadata): void;
   readonly nbformat_minor: number;
   readonly nbformat: number;
-  cells: ISharedCell[];
+  readonly cells: ISharedCell[];
   getCell(index: number): ISharedCell;
   insertCell(index: number, cell: ISharedCell): void;
   insertCells(index: number, cells: Array<ISharedCell>): void;
@@ -73,59 +74,103 @@ export type ISharedCell =
   | ISharedMarkdownCell
   | ISharedUnrecognizedCell;
 
+/**
+ * Implements an API for nbformat.IBaseCell.
+ */
 export interface ISharedBaseCell<Metadata extends nbformat.IBaseCellMetadata>
-  extends nbformat.IBaseCell,
-    IDisposable {
-  [key: string]: any;
-  source: string;
-  metadata: Partial<Metadata>;
-  // cell_type: 'code' | 'markdown' | 'raw'
+  extends IDisposable {
+  getSource(): string;
+  setSource(value: string): void;
+  getMetadata(): Partial<Metadata>;
+  getMetadata(metadata: Partial<Metadata>): void;
+  toJSON(): nbformat.IBaseCell;
+  readonly cell_type: 'code' | 'markdown' | 'raw';
   readonly changed: ISignal<this, CellChange<Metadata>>;
 }
 
+/**
+ * Implements an API for nbformat.ICodeCell.
+ */
 export interface ISharedCodeCell
   extends ISharedBaseCell<nbformat.ICodeCellMetadata>,
-    nbformat.ICodeCell,
     IDisposable {
-  [key: string]: any;
-  source: string;
   cell_type: 'code';
-  metadata: Partial<nbformat.ICodeCellMetadata>;
+  /**
+   * The code cell's prompt number. Will be null if the cell has not been run.
+   */
+  execution_count: nbformat.ExecutionCount;
+  /**
+   * Execution, display, or stream outputs.
+   */
+  getOutputs(): nbformat.IOutput[];
+  getSource(): string;
+  setSource(value: string): void;
+  getMetadata(): Partial<nbformat.ICodeCellMetadata>;
+  setMetadata(metadata: Partial<nbformat.ICodeCellMetadata>): void;
+  toJSON(): nbformat.ICodeCell;
 }
 
+/**
+ * Implements an API for nbformat.IMarkdownCell.
+ */
 export interface ISharedMarkdownCell
   extends ISharedBaseCell<nbformat.IRawCellMetadata>,
-    nbformat.IMarkdownCell,
     IDisposable {
-  [key: string]: any;
-  source: string;
+  /**
+   * String identifying the type of cell.
+   */
   cell_type: 'markdown';
-  metadata: Partial<nbformat.IRawCellMetadata>;
+
+  getSource(): string;
+  setSource(value: string): void;
+  /**
+   * Cell attachments.
+   */
+  getAttachments(): nbformat.IAttachments | undefined;
+  setAttachments(attchments: nbformat.IAttachments | undefined): void;
+  getMetadata(): Partial<nbformat.IRawCellMetadata>;
+  setMetadata(metadata: Partial<nbformat.IRawCellMetadata>): void;
+  toJSON(): nbformat.IMarkdownCell;
 }
 
+/**
+ * Implements an API for nbformat.IRawCell.
+ */
 export interface ISharedRawCell
   extends ISharedBaseCell<nbformat.IRawCellMetadata>,
-    nbformat.IRawCell,
     IDisposable {
-  [key: string]: any;
-  source: string;
+  /**
+   * String identifying the type of cell.
+   */
   cell_type: 'raw';
-  metadata: Partial<nbformat.IRawCellMetadata>;
+  getSource(): string;
+  setSource(value: string): void;
+  getAttachments(): nbformat.IAttachments | undefined;
+  setAttachments(attchments: nbformat.IAttachments | undefined): void;
+  getMetadata(): Partial<nbformat.IRawCellMetadata>;
+  setMetadata(metadata: Partial<nbformat.IRawCellMetadata>): void;
+  toJSON(): nbformat.IRawCell;
 }
 
+/**
+ * Implements an API for nbformat.IUnrecognizedCell.
+ *
+ * @todo Is this needed?
+ */
 export interface ISharedUnrecognizedCell
   extends ISharedBaseCell<nbformat.IRawCellMetadata>,
-    nbformat.IUnrecognizedCell,
     IDisposable {
-  [key: string]: any;
-  source: string;
-  metadata: Partial<nbformat.IRawCellMetadata>;
+  cell_type: 'raw';
+  getSource(): string;
+  setSource(value: string): void;
+  getMetadata(): Partial<nbformat.IRawCellMetadata>;
+  setMetadata(metadata: Partial<nbformat.IRawCellMetadata>): void;
+  toJSON(): nbformat.ICodeCell;
 }
 
 /**
  * Definition of the shared changes.
  */
-
 export type NotebookChange = {
   cellsChange?: Delta<ISharedCell[]>;
   metadataChange?: {
