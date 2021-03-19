@@ -10,6 +10,12 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.12
+^^^^^^^
+* Remove lookbehind from ToC MD regex for Safari (`#9962 <https://github.com/jupyterlab/jupyterlab/pull/9962>`__)
+* DocRegistry FileType pattern matching doesn't work (`#9958 <https://github.com/jupyterlab/jupyterlab/pull/9958>`__)
+
+
 v3.0.11
 ^^^^^^^
 * Fix: use process/browser module as real polyfill  (`#9636 <https://github.com/jupyterlab/jupyterlab/pull/9636>`__)
