@@ -40,7 +40,8 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
       features
     }) => {
       const rename_feature = features.get(FEATURE_ID) as RenameCM;
-      rename_feature.trans = trans;
+      rename_feature.setTrans(trans);
+
       let root_position = rename_feature.transform_virtual_position_to_root_position(
         virtual_position
       );
@@ -103,7 +104,11 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
 ];
 
 export class RenameCM extends CodeMirrorIntegration {
-  trans: TranslationBundle;
+  
+  public setTrans(trans: TranslationBundle){
+    this.trans = trans;
+  }
+
   public setStatus(message: string, timeout: number) {
     return this.status_message.set(message, timeout);
   }
@@ -124,7 +129,6 @@ export class RenameCM extends CodeMirrorIntegration {
 
     try {
       let status: string;
-      let is_plural: boolean;
       const change_text = this.trans.__('%1 to %2', old_value, new_value);
 
       if (outcome.appliedChanges === 0) {
@@ -133,16 +137,18 @@ export class RenameCM extends CodeMirrorIntegration {
           change_text
         );
       } else if (outcome.wasGranular) {
-        is_plural = outcome.appliedChanges > 1;
-        status = this.trans.__(
-          `Renamed %1 in %2 place${is_plural ? 's' : ''}`,
+        status = this.trans._n(
+          'Renamed %2 in %3 place',
+          'Renamed %2 in %3 places',
+          outcome.appliedChanges,
           change_text,
           outcome.appliedChanges
         );
       } else if (this.adapter.has_multiple_editors) {
-        is_plural = outcome.modifiedCells > 1;
-        status = this.trans.__(
-          `Renamed %1 in %2 cell${is_plural ? 's' : ''}`,
+        status = this.trans._n(
+          'Renamed %2 in %3 cell',
+          'Renamed %2 in %3 cells',
+          outcome.modifiedCells,
           change_text,
           outcome.modifiedCells
         );

@@ -109,9 +109,8 @@ class CollapsibleList extends React.Component<
 }
 
 class LSPPopup extends VDomRenderer<LSPStatus.Model> {
-  constructor(model: LSPStatus.Model, trans: TranslationBundle) {
+  constructor(model: LSPStatus.Model) {
     super(model);
-    this.trans = trans;
     this.addClass('lsp-popover');
   }
   render() {
@@ -140,15 +139,15 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
 
           let status = '';
           if (connection?.isInitialized) {
-            status = this.trans.__('initialized');
+            status = this.model.trans.__('initialized');
           } else if (connection?.isConnected) {
-            status = this.trans.__('connected');
+            status = this.model.trans.__('connected');
           } else {
-            status = this.trans.__('not connected');
+            status = this.model.trans.__('not connected');
           }
 
           const icon =
-            status === this.trans.__('initialized')
+            status === this.model.trans.__('initialized')
               ? circleIcon
               : circleEmptyIcon;
 
@@ -197,13 +196,13 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
       <div className={'lsp-popover-content'}>
         <div className={'lsp-servers-menu'}>
           <h3 className={'lsp-servers-title'}>
-            {this.trans.__('LSP servers')}
+            {this.model.trans.__('LSP servers')}
           </h3>
           <div className={'lsp-servers-lists'}>
             {servers_available.length ? (
               <CollapsibleList
                 key={'available'}
-                title={this.trans.__('Available')}
+                title={this.model.trans.__('Available')}
                 list={servers_available}
                 startCollapsed={true}
               />
@@ -213,7 +212,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
             {running_servers.length ? (
               <CollapsibleList
                 key={'running'}
-                title={this.trans.__('Running')}
+                title={this.model.trans.__('Running')}
                 list={running_servers}
               />
             ) : (
@@ -222,7 +221,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
             {missing_languages.length ? (
               <CollapsibleList
                 key={'missing'}
-                title={this.trans.__('Missing')}
+                title={this.model.trans.__('Missing')}
                 list={missing_languages}
               />
             ) : (
@@ -231,7 +230,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
           </div>
         </div>
         <div className={'lsp-popover-status'}>
-          {this.trans.__('Documentation:')}{' '}
+          {this.model.trans.__('Documentation:')}{' '}
           <a
             href={
               'https://jupyterlab-lsp.readthedocs.io/en/latest/Language%20Servers.html'
@@ -239,13 +238,12 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
             target="_blank"
             rel="noreferrer"
           >
-            {this.trans.__('Language Servers')}
+            {this.model.trans.__('Language Servers')}
           </a>
         </div>
       </div>
     );
   }
-  private trans: TranslationBundle;
 }
 
 const SELECTED_CLASS = 'jp-mod-selected';
@@ -338,7 +336,7 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
       }).catch(console.warn);
     } else {
       this._popup = showPopup({
-        body: new LSPPopup(this.model, this.trans),
+        body: new LSPPopup(this.model),
         anchor: this,
         align: 'left'
       });
@@ -446,8 +444,8 @@ export namespace LSPStatus {
   export class Model extends VDomModel {
     server_extension_status: SCHEMA.ServersResponse = null;
     language_server_manager: ILanguageServerManager;
+    trans: TranslationBundle;
     private _connection_manager: DocumentConnectionManager;
-    private trans: TranslationBundle;
 
     constructor(
       widget_adapter_manager: ILSPAdapterManager,
@@ -663,12 +661,13 @@ export namespace LSPStatus {
       }
       let status = this.status;
       let msg = '';
-      const plural = status.detected_documents.size > 1 ? 's' : '';
       if (status.status === 'waiting') {
         msg = this.trans.__('Waiting for documents initialization...');
       } else if (status.status === 'initialized') {
-        msg = this.trans.__(
-          `Fully connected & initialized (%1 virtual document${plural})`,
+        msg = this.trans._n(
+          'Fully connected & initialized (%2 virtual document)',
+          'Fully connected & initialized (%2 virtual document)',
+          status.detected_documents.size,
           status.detected_documents.size
         );
       } else if (status.status === 'initializing') {
@@ -680,7 +679,9 @@ export namespace LSPStatus {
         }
         // servers for n documents did not respond to the initialization request
         msg = this.trans.__(
-          `Fully connected, but %1/%2 virtual document${plural} stuck uninitialized: %3`,
+          'Fully connected, but %2/%3 virtual document stuck uninitialized: %4',
+          'Fully connected, but %2/%3 virtual documents stuck uninitialized: %4',
+          status.detected_documents.size,
           uninitialized.size,
           status.detected_documents.size,
           [...uninitialized].map(document => document.id_path).join(', ')
@@ -692,7 +693,9 @@ export namespace LSPStatus {
         }
 
         msg = this.trans.__(
-          `%1/%2 virtual document${plural} connected (%3 connections; waiting for: %4)`,
+          '%2/%3 virtual document connected (%4 connections; waiting for: %5)',
+          '%2/%3 virtual documents connected (%4 connections; waiting for: %5)',
+          status.detected_documents.size,
           status.connected_documents.size,
           status.detected_documents.size,
           status.open_connections.length,

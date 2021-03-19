@@ -581,7 +581,8 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
         connection: connection,
         status_message: this.status_message,
         settings: feature.settings,
-        adapter: this
+        adapter: this,
+        trans: this.trans
       });
       adapter_features.push(integration);
     }

@@ -10,6 +10,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
+import { TranslationBundle } from '@jupyterlab/translation'
 
 export interface IFeatureCommand {
   /**
@@ -196,6 +197,7 @@ export interface IEditorIntegrationOptions {
   connection: LSPConnection;
   status_message: StatusMessage;
   settings: IFeatureSettings<any>;
+  trans: TranslationBundle;
 }
 
 export interface IFeatureLabIntegration {
