@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/htmlviewer",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "description": "A viewer for HTML documents.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,7 +35,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^3.0.5",
     "@jupyterlab/coreutils": "^5.0.3",
-    "@jupyterlab/docregistry": "^3.0.6",
+    "@jupyterlab/docregistry": "^3.0.7",
     "@jupyterlab/translation": "^3.0.5",
     "@jupyterlab/ui-components": "^3.0.4",
     "@lumino/coreutils": "^1.5.3",

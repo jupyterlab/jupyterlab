@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/cells",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "description": "JupyterLab - Notebook Cells",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -47,7 +47,7 @@
     "@jupyterlab/codeeditor": "^3.0.5",
     "@jupyterlab/codemirror": "^3.0.5",
     "@jupyterlab/coreutils": "^5.0.3",
-    "@jupyterlab/filebrowser": "^3.0.6",
+    "@jupyterlab/filebrowser": "^3.0.7",
     "@jupyterlab/nbformat": "^3.0.3",
     "@jupyterlab/observables": "^4.0.3",
     "@jupyterlab/outputarea": "^3.0.6",
@@ -64,7 +64,7 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.6",
+    "@jupyterlab/testutils": "^3.0.7",
     "@types/jest": "^26.0.10",
     "@types/react": "^17.0.0",
     "jest": "^26.4.2",

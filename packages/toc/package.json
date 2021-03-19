@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc",
-  "version": "5.0.7",
+  "version": "5.0.8",
   "description": "JupyterLab - Table of Contents widget",
   "keywords": [
     "jupyterlab"
@@ -42,13 +42,13 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^3.0.5",
-    "@jupyterlab/cells": "^3.0.6",
+    "@jupyterlab/cells": "^3.0.7",
     "@jupyterlab/coreutils": "^5.0.3",
-    "@jupyterlab/docmanager": "^3.0.6",
-    "@jupyterlab/docregistry": "^3.0.6",
-    "@jupyterlab/fileeditor": "^3.0.6",
-    "@jupyterlab/markdownviewer": "^3.0.6",
-    "@jupyterlab/notebook": "^3.0.6",
+    "@jupyterlab/docmanager": "^3.0.7",
+    "@jupyterlab/docregistry": "^3.0.7",
+    "@jupyterlab/fileeditor": "^3.0.7",
+    "@jupyterlab/markdownviewer": "^3.0.7",
+    "@jupyterlab/notebook": "^3.0.7",
     "@jupyterlab/rendermime": "^3.0.6",
     "@jupyterlab/translation": "^3.0.5",
     "@jupyterlab/ui-components": "^3.0.4",
@@ -62,7 +62,7 @@
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^3.0.6",
+    "@jupyterlab/testutils": "^3.0.7",
     "@types/jest": "^26.0.10",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
