@@ -18,9 +18,7 @@ import * as nbmodel from './api';
  *
  * @source https://quilljs.com/docs/delta/
  */
-export type Delta<T> = Array<
-  { insert: T } | { delete: number } | { retain: number }
->;
+export type Delta<T> = Array<{ insert?: T; delete?: number; retain?: number }>;
 
 /**
  * @deprecated
@@ -62,3 +60,30 @@ export function convertYMapEventToMapChange(
   });
   return changes;
 }
+
+/**
+ * Creates a mutual exclude function with the following property:
+ *
+ * ```js
+ * const mutex = createMutex()
+ * mutex(() => {
+ *   // This function is immediately executed
+ *   mutex(() => {
+ *     // This function is not executed, as the mutex is already active.
+ *   })
+ * })
+ * ```
+ */
+export const createMutex = (): ((f: () => void) => void) => {
+  let token = true;
+  return (f: any): void => {
+    if (token) {
+      token = false;
+      try {
+        f();
+      } finally {
+        token = true;
+      }
+    }
+  };
+};
