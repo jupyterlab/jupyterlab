@@ -3,7 +3,6 @@ import { RegExpForeignCodeExtractor } from '../../extractors/regexp';
 import { extract_r_args, rpy2_args_pattern, RPY2_MAX_ARGS } from './rpy2';
 
 function create_rpy_code_extractor(strip_leading_space: boolean) {
-
   function rpy2_code_extractor(match: string, ...args: string[]) {
     let r = extract_r_args(args, -3);
     let code: string;
@@ -17,7 +16,7 @@ function create_rpy_code_extractor(strip_leading_space: boolean) {
     return code;
   }
 
-  return rpy2_code_extractor
+  return rpy2_code_extractor;
 }
 
 let rpy2_code_extractor_non_stripping = create_rpy_code_extractor(false);

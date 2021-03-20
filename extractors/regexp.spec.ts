@@ -26,7 +26,6 @@ x = """<a href="#">
 </a>""";
 print(x)`;
 
-
 describe('getIndexOfCaptureGroup', () => {
   it('extracts index of a captured group', () => {
     // tests for https://github.com/krassowski/jupyterlab-lsp/issues/559
@@ -100,18 +99,17 @@ describe('RegExpForeignCodeExtractor', () => {
   });
 
   describe('#extract_foreign_code()', () => {
-
     it('should correctly return the range', () => {
-      let results = python_cell_extractor.extract_foreign_code(PYTHON_CELL_MAGIC_WITH_H);
+      let results = python_cell_extractor.extract_foreign_code(
+        PYTHON_CELL_MAGIC_WITH_H
+      );
       expect(results.length).to.equal(1);
 
       let result = results[0];
 
       // test against https://github.com/krassowski/jupyterlab-lsp/issues/559
       expect(result.host_code).to.equal(PYTHON_CELL_MAGIC_WITH_H);
-      expect(result.foreign_code).to.equal(
-        'h'
-      );
+      expect(result.foreign_code).to.equal('h');
 
       expect(result.range.start.line).to.equal(1);
       expect(result.range.start.column).to.equal(0);

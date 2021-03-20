@@ -3,8 +3,11 @@ import { position_at_offset } from '../positioning';
 import { replacer } from '../overrides/tokens';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-
-export function getIndexOfCaptureGroup(expression: RegExp, matched_string: string, value_of_captured_group: string): number {
+export function getIndexOfCaptureGroup(
+  expression: RegExp,
+  matched_string: string,
+  value_of_captured_group: string
+): number {
   // TODO: use https://github.com/tc39/proposal-regexp-match-indices once supported in >95% of browsers
   //  (probably around 2025)
 
@@ -16,7 +19,6 @@ export function getIndexOfCaptureGroup(expression: RegExp, matched_string: strin
   let full_matched = captured_groups[0];
 
   for (let group of captured_groups.slice(1)) {
-
     if (typeof group === 'undefined') {
       continue;
     }
@@ -69,8 +71,14 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
     let match: RegExpExecArray = this.global_expression.exec(code);
     let host_code_fragment: string;
 
-    let new_api_replacer = typeof this.options.foreign_replacer !== 'undefined' ? this.options.foreign_replacer : ('$' + this.options.foreign_capture_group);
-    const replacer = typeof this.options.extract_to_foreign !== 'undefined' ? this.options.extract_to_foreign : new_api_replacer;
+    let new_api_replacer =
+      typeof this.options.foreign_replacer !== 'undefined'
+        ? this.options.foreign_replacer
+        : '$' + this.options.foreign_capture_group;
+    const replacer =
+      typeof this.options.extract_to_foreign !== 'undefined'
+        ? this.options.extract_to_foreign
+        : new_api_replacer;
 
     while (match != null) {
       let matched_string = match[0];
@@ -118,11 +126,12 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
       }
 
       const foreign_group_index_in_match = getIndexOfCaptureGroup(
-          this.expression, matched_string, foreign_code_group_value
+        this.expression,
+        matched_string,
+        foreign_code_group_value
       );
 
-      let start_offset =
-        match.index + foreign_group_index_in_match;
+      let start_offset = match.index + foreign_group_index_in_match;
 
       let start = position_at_offset(start_offset, lines);
       let end = position_at_offset(
