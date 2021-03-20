@@ -26,8 +26,8 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
   python: [
     new RegExpForeignCodeExtractor({
       language: 'sql',
-      pattern: `^%%bigquery(?: (?:${SQL_URL_PATTERN}|${COMMAND_PATTERN}|(?:\\w+ << )|(?:\\w+@\\w+)))?\n?(.+\n)?([^]*)`,
-      extract_to_foreign: '$1$2',
+      pattern: `^%%bigquery(?: (?:${SQL_URL_PATTERN}|${COMMAND_PATTERN}|(?:\\w+ << )|(?:\\w+@\\w+)))?\n?((?:.+\n)?(?:[^]*))`,
+      foreign_capture_group: 1,
       is_standalone: true,
       file_extension: 'sql'
     })
