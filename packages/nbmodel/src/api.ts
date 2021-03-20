@@ -84,7 +84,7 @@ export interface ISharedBaseCell<Metadata extends nbformat.IBaseCellMetadata>
   /**
    * Replace content from `start' to `end` with `value`.
    */
-  modifySource(start: number, end: number, value?: string): void;
+  updateSource(start: number, end: number, value?: string): void;
   getMetadata(): Partial<Metadata>;
   getMetadata(metadata: Partial<Metadata>): void;
   toJSON(): nbformat.IBaseCell;
