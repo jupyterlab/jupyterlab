@@ -126,7 +126,6 @@ describe('IPython rpy2 extractors', () => {
     let { foreign_document_map } = extract(code);
     let { range } = get_the_only_pair(foreign_document_map);
     expect(range.start.line).to.be.equal(1);
-    // note: the space before ggplot() is included in the range
     expect(range.start.column).to.be.equal(0);
 
     expect(range.end.line).to.be.equal(1);
