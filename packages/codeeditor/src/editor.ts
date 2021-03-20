@@ -201,6 +201,7 @@ export namespace CodeEditor {
      * data is stored.
      */
     readonly modelDB: IModelDB;
+    readonly nbcell: nbmodel.ISharedCodeCell;
   }
 
   /**
@@ -226,7 +227,7 @@ export namespace CodeEditor {
       mimeType.changed.connect(this._onMimeTypeChanged, this);
 
       this.modelDB.createMap('selections');
-      this.nbmodel.changed.connect(this.onSharedModelChanged, this);
+      this.nbcell.changed.connect(this.onSharedModelChanged, this);
       value.changed.connect(this.onModeldbValueChanged, this);
       value.text = value.text || options.value || '';
     }
@@ -266,19 +267,19 @@ export namespace CodeEditor {
       this._mutex(() => {
         switch (event.type) {
           case 'insert':
-            this.nbmodel.modifySource(event.start, event.start, event.value);
+            this.nbcell.updateSource(event.start, event.start, event.value);
             break;
           case 'remove':
-            this.nbmodel.modifySource(event.start, event.end - event.start);
+            this.nbcell.updateSource(event.start, event.end - event.start);
             break;
           default:
-            this.nbmodel.setSource(value.text);
+            this.nbcell.setSource(value.text);
             break;
         }
       });
     }
 
-    readonly nbmodel = nbmodel.StandaloneCellFactory.createCodeCell();
+    public readonly nbcell = nbmodel.StandaloneCellFactory.createCodeCell();
 
     /**
      * The underlying `IModelDB` instance in which model
