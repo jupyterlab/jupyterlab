@@ -3,6 +3,38 @@ import { position_at_offset } from '../positioning';
 import { replacer } from '../overrides/tokens';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
+
+export function getIndexOfCaptureGroup(expression: RegExp, matched_string: string, value_of_captured_group: string): number {
+  // TODO: use https://github.com/tc39/proposal-regexp-match-indices once supported in >95% of browsers
+  //  (probably around 2025)
+
+  // get index of the part that is being extracted to foreign document
+  let captured_groups = expression.exec(matched_string);
+  let offset_in_match = 0;
+
+  // first element is full match
+  let full_matched = captured_groups[0];
+
+  for (let group of captured_groups.slice(1)) {
+
+    if (typeof group === 'undefined') {
+      continue;
+    }
+
+    if (group === value_of_captured_group) {
+      offset_in_match += full_matched.indexOf(group);
+      break;
+    }
+
+    let group_end_offset = full_matched.indexOf(group) + group.length;
+
+    full_matched = full_matched.slice(group_end_offset);
+    offset_in_match += group_end_offset;
+  }
+
+  return offset_in_match;
+}
+
 export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
   options: RegExpForeignCodeExtractor.IOptions;
   language: string;
@@ -37,14 +69,18 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
     let match: RegExpExecArray = this.global_expression.exec(code);
     let host_code_fragment: string;
 
+    let new_api_replacer = typeof this.options.foreign_replacer !== 'undefined' ? this.options.foreign_replacer : ('$' + this.options.foreign_capture_group);
+    const replacer = typeof this.options.extract_to_foreign !== 'undefined' ? this.options.extract_to_foreign : new_api_replacer;
+
     while (match != null) {
       let matched_string = match[0];
       let position_shift: CodeEditor.IPosition = null;
+
       let foreign_code_fragment = matched_string.replace(
         this.expression,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        this.options.extract_to_foreign
+        replacer
       );
       let prefix = '';
       if (typeof this.options.extract_arguments !== 'undefined') {
@@ -72,11 +108,22 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
         }
       }
 
-      // TODO: this could be slightly optimized (start at start) by using the match[n],
-      //  where n is the group to be used; while this reduces the flexibility of extract_to_foreign,
-      //  it might be better to enforce such strict requirement
+      let foreign_code_group_value = foreign_code_fragment;
+
+      if (new_api_replacer) {
+        foreign_code_group_value = matched_string.replace(
+          this.expression,
+          '$' + this.options.foreign_capture_group
+        );
+      }
+
+      const foreign_group_index_in_match = getIndexOfCaptureGroup(
+          this.expression, matched_string, foreign_code_group_value
+      );
+
       let start_offset =
-        match.index + matched_string.indexOf(foreign_code_fragment);
+        match.index + foreign_group_index_in_match;
+
       let start = position_at_offset(start_offset, lines);
       let end = position_at_offset(
         start_offset + foreign_code_fragment.length,
@@ -118,16 +165,36 @@ namespace RegExpForeignCodeExtractor {
      * String giving regular expression to test cells for the foreign language presence.
      *
      * For example:
-     *   - %%R( (.*))?\n(.*) will match R cells of rpy2
-     *   - (.*)'<html>(.*)</html>'(.*) will match html documents in strings of any language using single ticks
+     *   - `%%R( (.*))?\n(.*)` will match R cells of rpy2
+     *   - `(.*)'<html>(.*)</html>'(.*)` will match html documents in strings of any language using single ticks
      */
     pattern: string;
     /**
      * String specifying match groups to be extracted from the regular expression match,
      * for the use in virtual document of the foreign language.
-     * For the R example this should be '$3'
+     * For the R example this should be `3`. Please not that these are 1-based, as the 0th index is the full match.
+     *
+     * If more than one capture group is needed to extract the code (which is rarely the case:
+     * usually one can use non-capturing groups rather than multiple adjacent capturing groups),
+     * specify the first capturing group to allow for proper calculation of the start offset,
+     * and handle any additional groups using `foreign_replacer`.
+     *
+     * `foreign_capture_group` is required for proper offset calculation and will no longer be optional in 4.0.
      */
-    extract_to_foreign: string | replacer;
+    foreign_capture_group?: number;
+    /**
+     * Function to compose the foreign document code, in case if using a capture group alone is not sufficient;
+     * If specified, `foreign_capture_group` should be specified as well, so that it points to the first occurrence
+     * of the foreign code. When both are specified, `foreign_replacer` takes precedence.
+     *
+     * See:
+     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_function_as_a_parameter
+     */
+    foreign_replacer?: replacer;
+    /**
+     * @deprecated `extract_to_foreign` will be removed in 4.0; use `foreign_capture_group` or `foreign_replacer` instead
+     */
+    extract_to_foreign?: string | replacer;
     /**
      * If arguments from the cell or line magic are to be extracted and prepended before the extracted code,
      * set extract_arguments to a replacer function taking the code and returning the string to be prepended.
@@ -143,6 +210,8 @@ namespace RegExpForeignCodeExtractor {
      *
      * Setting to false is DEPRECATED as it breaks the edit feature (while it could be fixed,
      * it would make the code considerably more complex).
+     *
+     * @deprecated `keep_in_host` will be removed in 4.0
      */
     keep_in_host?: boolean;
     /**

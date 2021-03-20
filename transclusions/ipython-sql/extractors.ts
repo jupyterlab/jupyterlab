@@ -26,15 +26,15 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
   python: [
     new RegExpForeignCodeExtractor({
       language: 'sql',
-      pattern: `^%%sql(?: (?:${SQL_URL_PATTERN}|${COMMAND_PATTERN}|(?:\\w+ << )|(?:\\w+@\\w+)))?\n?(.+\n)?([^]*)`,
-      extract_to_foreign: '$1$2',
+      pattern: `^%%sql(?: (?:${SQL_URL_PATTERN}|${COMMAND_PATTERN}|(?:\\w+ << )|(?:\\w+@\\w+)))?\n?((?:.+\n)?(?:[^]*))`,
+      foreign_capture_group: 1,
       is_standalone: true,
       file_extension: 'sql'
     }),
     new RegExpForeignCodeExtractor({
       language: 'sql',
       pattern: `(?:^|\n)%sql (?:${SQL_URL_PATTERN}|${COMMAND_PATTERN}|(.*))\n?`,
-      extract_to_foreign: '$1',
+      foreign_capture_group: 1,
       is_standalone: false,
       file_extension: 'sql'
     })
