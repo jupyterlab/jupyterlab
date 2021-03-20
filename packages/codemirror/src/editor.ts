@@ -7,6 +7,9 @@ import CodeMirror from 'codemirror';
 
 import { showDialog } from '@jupyterlab/apputils';
 
+import * as nbmodel from '@jupyterlab/nbmodel';
+import { CodemirrorBinding } from 'y-codemirror';
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import {
@@ -91,6 +94,10 @@ const DOWN_ARROW = 40;
  */
 const HOVER_TIMEOUT = 1000;
 
+// @todo Remove the duality of having a modeldb and a y-codemirror
+// binding as it just introduces a lot of additional complity without gaining anything.
+const USE_YCODEMIRROR_BINDING = true;
+
 /**
  * CodeMirror editor.
  */
@@ -125,11 +132,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
+    const nbmodel = this.model.nbcell as nbmodel.YCodeCell;
+    this.yeditorBinding = USE_YCODEMIRROR_BINDING
+      ? new CodemirrorBinding(nbmodel.ymodel.get('source'), editor)
+      : null;
 
     const doc = editor.getDoc();
 
     // Handle initial values for text, mimetype, and selections.
-    doc.setValue(model.value.text);
+    if (!USE_YCODEMIRROR_BINDING) {
+      doc.setValue(model.value.text);
+    }
     this.clearHistory();
     this._onMimeTypeChanged();
     this._onCursorActivity();
@@ -145,7 +158,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     // Connect to changes.
-    model.value.changed.connect(this._onValueChanged, this);
+    if (!USE_YCODEMIRROR_BINDING) {
+      model.value.changed.connect(this._onValueChanged, this);
+    }
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
@@ -162,9 +177,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }
     });
     CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-    CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
-      this._beforeDocChanged(instance, change);
-    });
+    if (!USE_YCODEMIRROR_BINDING) {
+      CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
+        this._beforeDocChanged(instance, change);
+      });
+    }
     CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
       // Manually refresh after setValue to make sure editor is properly sized.
       if (change.origin === 'setValue' && this.hasFocus()) {
@@ -190,6 +207,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
   }
 
+  private yeditorBinding: CodemirrorBinding;
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
@@ -280,6 +298,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('focus', this, true);
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
+    if (this.yeditorBinding) {
+      this.yeditorBinding.destroy();
+    }
     this._keydownHandlers.length = 0;
     this._poll.dispose();
     Signal.clearData(this);

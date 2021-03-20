@@ -16621,6 +16621,13 @@ xterm@~4.8.1:
   resolved "https://registry.yarnpkg.com/xterm/-/xterm-4.8.1.tgz#155a1729a43e1a89b406524e22c5634339e39ca1"
   integrity sha512-ax91ny4tI5eklqIfH79OUSGE2PUX2rGbwONmB6DfqpyhSZO8/cf++sqiaMWEVCMjACyMfnISW7C3gGMoNvNolQ==
 
+y-codemirror@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/y-codemirror/-/y-codemirror-2.1.0.tgz#905c85fececd6ffa784f9c4bcb69c22ff1ae696e"
+  integrity sha512-lwuXbZoUW1EmhSTFYR7Qkbi01ixn5/L2LpnZ/7/vSRcJL3PKnWLFJOxXdXTx6bNDGUjY8N0VjJe97fYL6ev00Q==
+  dependencies:
+    lib0 "^0.2.35"
+
 y-protocols@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/y-protocols/-/y-protocols-1.0.4.tgz#810978c6172474be87457c3bcd669e529c5ba3a1"
