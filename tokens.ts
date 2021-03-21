@@ -29,6 +29,18 @@ export type TLanguageId = string;
 export type TSessionMap = Map<TLanguageServerId, SCHEMA.LanguageServerSession>;
 
 /**
+ * This is the exposed Extractor API
+ *
+ * See https://github.com/krassowski/jupyterlab-lsp/issues/561
+ */
+export {
+  IForeignCodeExtractorsRegistry,
+  IForeignCodeExtractor,
+  LanguageIdentifier
+};
+export { RegExpForeignCodeExtractor } from './extractors/regexp';
+
+/**
  * TODO: Should this support custom server keys?
  */
 export type TServerKeys =
