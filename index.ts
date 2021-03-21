@@ -1,3 +1,11 @@
+/** The Public API, as exposed in the `main` field of package.json */
+
+/** General public tokens, including lumino Tokens and namespaces */
+export * from './tokens';
+
+/** Component- and feature-specific APIs */
+export * from './api';
+
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -50,8 +58,6 @@ import { plugin as THEME_MATERIAL } from '@krassowski/theme-material';
 import { CODE_OVERRIDES_MANAGER } from './overrides';
 import IPaths = JupyterFrontEnd.IPaths;
 import { LOG_CONSOLE } from './virtual/console';
-
-export * from './tokens';
 
 export interface IFeatureOptions {
   /**
