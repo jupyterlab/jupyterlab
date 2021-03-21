@@ -293,25 +293,26 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
    * Render the status item.
    */
   render() {
-    if (!this.model) {
+    const { model } = this;
+
+    if (model == null) {
       return null;
     }
+
     return (
       <GroupItem
         spacing={this.displayText ? 2 : 0}
-        title={this.model.long_message}
+        title={model.long_message}
         onClick={this.handleClick}
         className={'lsp-status-group'}
       >
-        <this.model.status_icon.react
+        <model.status_icon.react
           top={'2px'}
           kind={'statusBar'}
           title={'LSP Code Intelligence'}
         />
-        {this.displayText ? (
-          <TextItem source={this.model.short_message} />
-        ) : null}
-        <TextItem source={this.model.feature_message} />
+        {this.displayText ? <TextItem source={model.short_message} /> : null}
+        <TextItem source={model.feature_message} />
       </GroupItem>
     );
   }

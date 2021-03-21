@@ -164,6 +164,9 @@ export interface IFeatureEditorIntegration<T extends IVirtualEditor<IEditor>> {
    * position transformation errors).
    */
   afterChange?(change: IEditorChange, root_position: IRootPosition): void;
+
+  /** no-unused-vars rule is hard to disable selectively */
+  __unused_editor_?: T;
 }
 
 export interface IFeatureEditorIntegrationConstructor<
