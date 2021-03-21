@@ -111,7 +111,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     });
 
     this._changed.emit({
-      cellsChange: event.changes.delta
+      cellsChange: event.changes.delta as any
     });
   };
 
@@ -247,7 +247,11 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
     return this.ymodel.get('source').toString();
   }
   public setSource(value: string): void {
-    this.ymodel.set('source', new Y.Text(value));
+    const ytext = this.ymodel.get('source');
+    ytext.delete(0, ytext.length);
+    ytext.insert(0, value);
+    // @todo Do we need proper replace semantic? This leads to issues in editor bindings because they don't switch source.
+    // this.ymodel.set('source', new Y.Text(value));
   }
   public updateSource(start: number, end: number, value = ''): void {
     this.ymodel.doc!.transact(() => {
