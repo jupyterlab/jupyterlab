@@ -30,9 +30,16 @@ describe('LSPCompleterModel', () => {
     label: 'test',
     sortText: 'c'
   });
+  const test_test_completion = create_dummy_item({
+    label: 'test_test',
+    sortText: 'test_test'
+  });
 
   beforeEach(() => {
-    model = new LSPCompleterModel();
+    model = new LSPCompleterModel({
+      caseSensitive: true,
+      includePerfectMatches: true
+    });
   });
 
   it('returns escaped when no query', () => {
@@ -68,6 +75,33 @@ describe('LSPCompleterModel', () => {
       'b',
       'c'
     ]);
+  });
+
+  it('ignores perfect matches when asked', () => {
+    model = new LSPCompleterModel({
+      includePerfectMatches: false
+    });
+
+    model.setCompletionItems([test_a_completion, test_test_completion]);
+    model.query = 'test';
+    let items = model.completionItems();
+    // should not include the perfect match 'test'
+    expect(items.length).to.equal(1);
+    expect(items.map(item => item.sortText)).to.deep.equal(['test_test']);
+  });
+
+  it('case-sensitivity can be changed', () => {
+    model = new LSPCompleterModel();
+    model.setCompletionItems([test_a_completion]);
+    model.query = 'Test';
+
+    model.settings.caseSensitive = true;
+    let items = model.completionItems();
+    expect(items.length).to.equal(0);
+
+    model.settings.caseSensitive = false;
+    items = model.completionItems();
+    expect(items.length).to.equal(1);
   });
 
   it('filters use filterText', () => {

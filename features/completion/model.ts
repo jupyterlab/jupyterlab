@@ -27,7 +27,13 @@ function escapeHTML(text: string) {
 export class GenericCompleterModel<
   T extends CompletionHandler.ICompletionItem
 > extends CompleterModel {
-  public caseSensitive = true;
+  public settings: GenericCompleterModel.IOptions;
+
+  constructor(settings: GenericCompleterModel.IOptions = {}) {
+    super();
+    // TODO: refactor upstream so that it does not block "options"?
+    this.settings = { ...GenericCompleterModel.defaultOptions, ...settings };
+  }
 
   completionItems(): T[] {
     let query = this.query;
@@ -76,11 +82,22 @@ export class GenericCompleterModel<
       let filterText: string = null;
       let filterMatch: StringExt.IMatchResult;
 
+      let lowerCaseQuery = query.toLowerCase();
+
       if (query) {
         filterText = this.getFilterText(item);
-        filterMatch = StringExt.matchSumOfSquares(filterText, query);
-        // ignore perfect matches (those are not useful)
-        matched = !!filterMatch && filterText != query;
+        if (this.settings.caseSensitive) {
+          filterMatch = StringExt.matchSumOfSquares(filterText, query);
+        } else {
+          filterMatch = StringExt.matchSumOfSquares(
+            filterText.toLowerCase(),
+            lowerCaseQuery
+          );
+        }
+        matched = !!filterMatch;
+        if (!this.settings.includePerfectMatches) {
+          matched = matched && filterText != query;
+        }
       } else {
         matched = true;
       }
@@ -152,13 +169,26 @@ export class GenericCompleterModel<
   }
 }
 
+export namespace GenericCompleterModel {
+  export interface IOptions {
+    /**
+     * Whether matching should be case-sensitive (default = true)
+     */
+    caseSensitive?: boolean;
+    /**
+     * Whether perfect matches should be included (default = true)
+     */
+    includePerfectMatches?: boolean;
+  }
+  export const defaultOptions: IOptions = {
+    caseSensitive: true,
+    includePerfectMatches: true
+  };
+}
+
 export class LSPCompleterModel extends GenericCompleterModel<
   LazyCompletionItem
 > {
-  constructor() {
-    super();
-  }
-
   protected getFilterText(item: LazyCompletionItem): string {
     if (item.filterText) {
       return item.filterText;

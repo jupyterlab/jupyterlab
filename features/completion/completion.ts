@@ -111,6 +111,8 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       completionThemeManager.set_icons_overrides(
         this.settings.composite.typesMap
       );
+      this.model.settings.caseSensitive = this.settings.composite.caseSensitive;
+      this.model.settings.includePerfectMatches = this.settings.composite.includePerfectMatches;
     });
   }
 
@@ -195,7 +197,10 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     ) as CompletionHandler;
     let completer = this.completer;
     completer.addClass('lsp-completer');
-    completer.model = new LSPCompleterModel();
+    completer.model = new LSPCompleterModel({
+      caseSensitive: this.settings.composite.caseSensitive,
+      includePerfectMatches: this.settings.composite.includePerfectMatches
+    });
   }
 
   protected get completer() {
