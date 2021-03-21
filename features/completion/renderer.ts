@@ -18,6 +18,19 @@ export class LSPCompletionRenderer
     this.activeChanged = new Signal(this);
   }
 
+  protected getExtraInfo(item: LazyCompletionItem): string {
+    switch (this.options.integrator.settings.composite.labelExtra) {
+      case 'detail':
+        return item.detail;
+      case 'type':
+        return item.type;
+      case 'source':
+        return item.source.name;
+      case 'auto':
+        return [item.detail, item.type, item.source.name].filter(x => !!x)[0];
+    }
+  }
+
   createCompletionItemNode(
     item: LazyCompletionItem,
     orderedTypes: string[]
@@ -45,6 +58,10 @@ export class LSPCompletionRenderer
         attributeFilter: ['class']
       });
     }
+
+    const extraText = this.getExtraInfo(item);
+    const extraElement = li.querySelector('.jp-Completer-typeExtended');
+    extraElement.textContent = extraText;
 
     return li;
   }
