@@ -29,22 +29,20 @@ export type TLanguageId = string;
 export type TSessionMap = Map<TLanguageServerId, SCHEMA.LanguageServerSession>;
 
 /**
- * This is the exposed Extractor API
+ * Extractor API
  *
  * Please note that this APIs can be subject to change and relocation to separate package in the future releases.
  * See https://github.com/krassowski/jupyterlab-lsp/issues/561
  */
-import {ILSPCodeOverridesManager} from './overrides/tokens';
 export {
   IForeignCodeExtractorsRegistry,
   IForeignCodeExtractor,
-  LanguageIdentifier,
-  ILSPCodeOverridesManager,
+  LanguageIdentifier
 };
 export { RegExpForeignCodeExtractor } from './extractors/regexp';
 
 /**
- * Exposed Overrides API
+ * Overrides API
  *
  * Please note that this APIs can be subject to change and relocation to separate package in the future releases.
  * See https://github.com/krassowski/jupyterlab-lsp/issues/561
