@@ -30,7 +30,7 @@ describe('getIndexOfCaptureGroup', () => {
   it('extracts index of a captured group', () => {
     // tests for https://github.com/krassowski/jupyterlab-lsp/issues/559
     let result = getIndexOfCaptureGroup(
-      new RegExp('^%%(python|python2|python3|pypy)( .*?)?\n([^]*)'),
+      new RegExp('^%%(python|python2|python3|pypy)( .*?)?\\n([^]*)'),
       '%%python\nh',
       'h'
     );
@@ -59,7 +59,7 @@ describe('RegExpForeignCodeExtractor', () => {
 
   let python_cell_extractor = new RegExpForeignCodeExtractor({
     language: 'python',
-    pattern: '^%%(python|python2|python3|pypy)( .*?)?\n([^]*)',
+    pattern: '^%%(python|python2|python3|pypy)( .*?)?\\n([^]*)',
     foreign_capture_groups: [3],
     keep_in_host: true,
     is_standalone: true,
