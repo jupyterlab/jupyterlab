@@ -19,6 +19,11 @@ interface IOptions {
   numbering: boolean;
 
   /**
+   * Boolean indicating whether h1 headers should be numbered.
+   */
+  numberingH1: boolean;
+
+  /**
    * HTML sanitizer.
    */
   sanitizer: ISanitizer;
@@ -55,6 +60,7 @@ class OptionsManager extends Registry.IOptionsManager {
   ) {
     super();
     this._numbering = options.numbering;
+    this._numberingH1 = options.numberingH1;
     this._widget = widget;
     this._notebook = notebook;
     this.sanitizer = options.sanitizer;
@@ -101,6 +107,19 @@ class OptionsManager extends Registry.IOptionsManager {
 
   get numbering() {
     return this._numbering;
+  }
+
+  /**
+   * Gets/sets ToC generator numbering h1 headers.
+   */
+  set numberingH1(value: boolean) {
+    this._numberingH1 = value;
+    this._widget.update();
+    this.notebookMetadata = ['toc-autonumbering-h1', this._numberingH1];
+  }
+
+  get numberingH1() {
+    return this._numberingH1;
   }
 
   /**
@@ -206,11 +225,13 @@ class OptionsManager extends Registry.IOptionsManager {
    */
   initializeOptions(
     numbering: boolean,
+    numberingH1: boolean,
     showCode: boolean,
     showMarkdown: boolean,
     showTags: boolean
   ) {
     this._numbering = numbering;
+    this._numberingH1 = numberingH1;
     this._showCode = showCode;
     this._showMarkdown = showMarkdown;
     this._showTags = showTags;
@@ -220,6 +241,7 @@ class OptionsManager extends Registry.IOptionsManager {
   private _preRenderedToolbar: any = null;
   private _filtered: string[] = [];
   private _numbering: boolean;
+  private _numberingH1: boolean;
   private _showCode = false;
   private _showMarkdown = false;
   private _showTags = false;

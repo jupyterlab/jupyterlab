@@ -36,6 +36,7 @@ function getRenderedHTMLHeadings(
   dict: INumberingDictionary,
   lastLevel: number,
   numbering = false,
+  numberingH1 = true,
   cellRef: Cell
 ): INotebookHeading[] {
   let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
@@ -64,7 +65,7 @@ function getRenderedHTMLHeadings(
     html = html.replace('¶', '');
 
     const level = parseInt(el.tagName[1], 10);
-    let nstr = generateNumbering(dict, level);
+    let nstr = generateNumbering(dict, level, numberingH1);
     let nhtml = '';
     if (numbering) {
       nhtml = '<span class="numbering-entry">' + nstr + '</span>';

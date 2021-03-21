@@ -47,6 +47,11 @@ interface IState {
    * Boolean indicating whether to show numbering.
    */
   numbering: boolean;
+
+  /**
+   * Boolean indicating whether to number h1 headers.
+   */
+  numberingH1: boolean;
 }
 
 /**
@@ -73,7 +78,8 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
         showCode: true,
         showMarkdown: false,
         showTags: false,
-        numbering: false
+        numbering: false,
+        numberingH1: false
       };
       if (tracker.currentWidget) {
         // Read saved user settings in notebook meta data:
@@ -84,6 +90,9 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
             });
             const numbering = tracker.currentWidget.model!.metadata.get(
               'toc-autonumbering'
+            ) as boolean;
+            const numberingH1 = tracker.currentWidget.model!.metadata.get(
+              'toc-autonumbering-h1'
             ) as boolean;
             const showCode = tracker.currentWidget.model!.metadata.get(
               'toc-showcode'
@@ -96,6 +105,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
             ) as boolean;
             options.initializeOptions(
               numbering || options.numbering,
+              numberingH1 || options.numberingH1,
               showCode || options.showCode,
               showMarkdown || options.showMarkdown,
               showTags || options.showTags
@@ -104,7 +114,8 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
               showCode: options.showCode,
               showMarkdown: options.showMarkdown,
               showTags: options.showTags,
-              numbering: options.numbering
+              numbering: options.numbering,
+              numberingH1: options.numberingH1
             });
             this.tags = [];
           }

@@ -45,6 +45,7 @@ function createNotebookGenerator(
 ): Registry.IGenerator<NotebookPanel> {
   const options = new OptionsManager(widget, tracker, {
     numbering: false,
+    numberingH1: false,
     sanitizer: sanitizer,
     translator: translator || nullTranslator
   });
@@ -155,6 +156,7 @@ function createNotebookGenerator(
             dict,
             getLastHeadingLevel(headings),
             options.numbering,
+            options.numberingH1,
             cell
           );
           for (const heading of htmlHeadings) {
@@ -197,6 +199,7 @@ function createNotebookGenerator(
             dict,
             lastLevel,
             options.numbering,
+            options.numberingH1,
             cell
           );
           for (heading of htmlHeadings) {
