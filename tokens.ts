@@ -33,10 +33,12 @@ export type TSessionMap = Map<TLanguageServerId, SCHEMA.LanguageServerSession>;
  *
  * See https://github.com/krassowski/jupyterlab-lsp/issues/561
  */
+import {ILSPCodeOverridesManager} from './overrides/tokens';
 export {
   IForeignCodeExtractorsRegistry,
   IForeignCodeExtractor,
-  LanguageIdentifier
+  LanguageIdentifier,
+  ILSPCodeOverridesManager,
 };
 export { RegExpForeignCodeExtractor } from './extractors/regexp';
 
