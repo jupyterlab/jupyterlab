@@ -43,12 +43,13 @@
     "@lumino/coreutils": "^1.5.3",
     "@lumino/disposable": "^1.4.3",
     "@lumino/signaling": "^1.4.3",
-    "y-protocols": "^1.0.4",
-    "yjs": "^13.5.2"
+    "y-protocols": "1.0.2",
+    "yjs": "13.4.12"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.1.0-alpha.3",
     "@types/jest": "^26.0.10",
+    "isomorphic.js": "0.1.5",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
