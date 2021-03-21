@@ -17,7 +17,7 @@ describe('VirtualEditor', () => {
   let r_line_extractor = new RegExpForeignCodeExtractor({
     language: 'R',
     pattern: '(^|\n)%R (.*)\n?',
-    extract_to_foreign: '$2',
+    foreign_capture_groups: [2],
     is_standalone: false,
     file_extension: 'R'
   });
