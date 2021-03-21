@@ -71,14 +71,18 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
     let match: RegExpExecArray = this.global_expression.exec(code);
     let host_code_fragment: string;
 
-    let new_api_replacer =
-      typeof this.options.foreign_replacer !== 'undefined'
-        ? this.options.foreign_replacer
-        : '$' + this.options.foreign_capture_group;
-    const replacer =
-      typeof this.options.extract_to_foreign !== 'undefined'
-        ? this.options.extract_to_foreign
-        : new_api_replacer;
+    let chosen_replacer: string | replacer;
+    let is_new_api_replacer: boolean = false;
+
+    if (typeof this.options.foreign_replacer !== 'undefined') {
+      chosen_replacer = this.options.foreign_replacer;
+      is_new_api_replacer = true;
+    } else if (typeof this.options.foreign_capture_groups !== 'undefined') {
+      chosen_replacer = '$' + this.options.foreign_capture_groups.join('$');
+      is_new_api_replacer = true;
+    } else {
+      chosen_replacer = this.options.extract_to_foreign;
+    }
 
     while (match != null) {
       let matched_string = match[0];
@@ -88,7 +92,7 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
         this.expression,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        replacer
+        chosen_replacer
       );
       let prefix = '';
       if (typeof this.options.extract_arguments !== 'undefined') {
@@ -118,10 +122,10 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
 
       let foreign_code_group_value = foreign_code_fragment;
 
-      if (new_api_replacer) {
+      if (is_new_api_replacer) {
         foreign_code_group_value = matched_string.replace(
           this.expression,
-          '$' + this.options.foreign_capture_group
+          '$' + Math.min(...this.options.foreign_capture_groups)
         );
       }
 
@@ -179,18 +183,17 @@ namespace RegExpForeignCodeExtractor {
      */
     pattern: string;
     /**
-     * String specifying match groups to be extracted from the regular expression match,
+     * Array of numbers specifying match groups to be extracted from the regular expression match,
      * for the use in virtual document of the foreign language.
      * For the R example this should be `3`. Please not that these are 1-based, as the 0th index is the full match.
+     * If multiple groups are given, those will be concatenated.
      *
-     * If more than one capture group is needed to extract the code (which is rarely the case:
-     * usually one can use non-capturing groups rather than multiple adjacent capturing groups),
-     * specify the first capturing group to allow for proper calculation of the start offset,
-     * and handle any additional groups using `foreign_replacer`.
+     * If additional code is needed in between the groups, use `foreign_replacer` in addition to
+     * `foreign_capture_groups` (but not instead!).
      *
-     * `foreign_capture_group` is required for proper offset calculation and will no longer be optional in 4.0.
+     * `foreign_capture_groups` is required for proper offset calculation and will no longer be optional in 4.0.
      */
-    foreign_capture_group?: number;
+    foreign_capture_groups?: number[];
     /**
      * Function to compose the foreign document code, in case if using a capture group alone is not sufficient;
      * If specified, `foreign_capture_group` should be specified as well, so that it points to the first occurrence

@@ -42,7 +42,7 @@ describe('RegExpForeignCodeExtractor', () => {
   let r_cell_extractor = new RegExpForeignCodeExtractor({
     language: 'R',
     pattern: '^%%R( .*?)?\n([^]*)',
-    foreign_capture_group: 2,
+    foreign_capture_groups: [2],
     keep_in_host: true,
     is_standalone: false,
     file_extension: 'R'
@@ -51,7 +51,7 @@ describe('RegExpForeignCodeExtractor', () => {
   let r_line_extractor = new RegExpForeignCodeExtractor({
     language: 'R',
     pattern: '(^|\n)%R (.*)\n?',
-    foreign_capture_group: 2,
+    foreign_capture_groups: [2],
     keep_in_host: true,
     is_standalone: false,
     file_extension: 'R'
@@ -60,7 +60,7 @@ describe('RegExpForeignCodeExtractor', () => {
   let python_cell_extractor = new RegExpForeignCodeExtractor({
     language: 'python',
     pattern: '^%%(python|python2|python3|pypy)( .*?)?\n([^]*)',
-    foreign_capture_group: 3,
+    foreign_capture_groups: [3],
     keep_in_host: true,
     is_standalone: true,
     file_extension: 'py'
@@ -123,7 +123,7 @@ describe('RegExpForeignCodeExtractor', () => {
       let html_extractor = new RegExpForeignCodeExtractor({
         language: 'HTML',
         pattern: '(<(.*?)( .*?)?>([^]*?)</\\2>)',
-        foreign_capture_group: 1,
+        foreign_capture_groups: [1],
         keep_in_host: false,
         is_standalone: false,
         file_extension: 'html'
@@ -160,7 +160,7 @@ describe('RegExpForeignCodeExtractor', () => {
       let extractor = new RegExpForeignCodeExtractor({
         language: 'R',
         pattern: '^%%R( .*?)?\n([^]*)',
-        foreign_capture_group: 2,
+        foreign_capture_groups: [2],
         keep_in_host: false,
         is_standalone: false,
         file_extension: 'R'
@@ -178,7 +178,7 @@ describe('RegExpForeignCodeExtractor', () => {
       let r_line_extractor = new RegExpForeignCodeExtractor({
         language: 'R',
         pattern: '(^|\n)%R (.*)\n?',
-        foreign_capture_group: 2,
+        foreign_capture_groups: [2],
         keep_in_host: false,
         is_standalone: false,
         file_extension: 'R'

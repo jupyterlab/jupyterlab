@@ -41,7 +41,7 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
     new RegExpForeignCodeExtractor({
       language: 'r',
       pattern: '^%%R' + rpy2_args_pattern(RPY2_MAX_ARGS) + '\n([^]*)',
-      foreign_capture_group: RPY2_MAX_ARGS * 2 + 1,
+      foreign_capture_groups: [RPY2_MAX_ARGS * 2 + 1],
       // it is important to not strip any leading spaces
       foreign_replacer: rpy2_code_extractor_non_stripping,
       extract_arguments: rpy2_args,
@@ -53,7 +53,7 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
       // it is very important to not include the space which will be trimmed in the capture group,
       // otherwise the offset will be off by one and the R language server will crash
       pattern: '(?:^|\n)%R' + rpy2_args_pattern(RPY2_MAX_ARGS) + ' ?(.*)?\n?',
-      foreign_capture_group: RPY2_MAX_ARGS * 2 + 1,
+      foreign_capture_groups: [RPY2_MAX_ARGS * 2 + 1],
       foreign_replacer: create_rpy_code_extractor(true),
       extract_arguments: rpy2_args,
       is_standalone: false,
