@@ -151,7 +151,9 @@ export class GenericCompleterModel<
   }
 }
 
-export class LSPCompleterModel extends GenericCompleterModel<LazyCompletionItem> {
+export class LSPCompleterModel extends GenericCompleterModel<
+  LazyCompletionItem
+> {
   constructor() {
     super();
   }
