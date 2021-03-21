@@ -2,6 +2,7 @@ import { CompletionHandler } from '@jupyterlab/completer';
 import { LabIcon } from '@jupyterlab/ui-components';
 import * as lsProtocol from 'vscode-languageserver-types';
 import { LSPConnector } from './completion_handler';
+import { until_ready } from '../../utils';
 
 /**
  * To be upstreamed
@@ -43,6 +44,7 @@ export class LazyCompletionItem implements IExtendedCompletionItem {
    * performed by the JupyterLab completer internals.
    */
   public self: LazyCompletionItem;
+  public element: HTMLLIElement;
   private _currentInsertText: string;
 
   get isDocumentationMarkdown(): boolean {
@@ -137,32 +139,35 @@ export class LazyCompletionItem implements IExtendedCompletionItem {
     return this._resolved;
   }
 
-  public fetchDocumentation(): void {
-    if (!this.needsResolution()) {
-      return;
+  /**
+   * Resolve (fetch) details such as documentation.
+   */
+  public resolve(): Promise<lsProtocol.CompletionItem> {
+    if (this._resolved) {
+      return Promise.resolve(this);
+    }
+    if (!this.supportsResolution()) {
+      return Promise.resolve(this);
+    }
+    if (this._requested_resolution) {
+      return until_ready(() => this._resolved, 100, 50).then(() => this);
     }
 
     const connection = this.connector.get_connection(this.uri);
 
     this._requested_resolution = true;
 
-    connection
+    return connection
       .getCompletionResolve(this.match)
       .then(resolvedCompletionItem => {
-        this.connector.lab_integration.set_doc_panel_placeholder(false);
         if (resolvedCompletionItem === null) {
-          return;
+          return resolvedCompletionItem;
         }
         this._setDocumentation(resolvedCompletionItem.documentation);
         this._detail = resolvedCompletionItem.detail;
         // TODO: implement in pyls and enable with proper LSP communication
         // this.label = resolvedCompletionItem.label;
         this._resolved = true;
-        this.connector.lab_integration.refresh_doc_panel(this);
-      })
-      .catch(e => {
-        this.connector.lab_integration.set_doc_panel_placeholder(false);
-        console.warn(e);
       });
   }
 

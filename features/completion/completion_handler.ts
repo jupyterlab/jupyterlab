@@ -429,7 +429,7 @@ export class LSPConnector
         return {
           label: item.text as string,
           insertText: item.text as string,
-          type: item.type as string,
+          type: item.type === '<unknown>' ? undefined : (item.type as string),
           icon: this.icon_for(item.type as string),
           sortText: this.kernel_completions_first ? 'a' : 'z'
         };
