@@ -131,7 +131,7 @@ export class LSPCompletionRenderer
       });
       this.visibilityObserver.observe(li);
       // TODO: build custom li from ground up
-      // this.updateExtraInfo(lsp_item, li)
+      this.updateExtraInfo(lsp_item, li);
     } else {
       this.updateExtraInfo(item, li);
     }
