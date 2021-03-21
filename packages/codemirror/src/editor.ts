@@ -207,7 +207,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
   }
 
-  private yeditorBinding: CodemirrorBinding;
+  private yeditorBinding: CodemirrorBinding | null;
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
