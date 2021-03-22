@@ -1,29 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  YNotebook,
-  SharedCellFactory,
-  StandaloneCellFactory,
-  createSharedNotebook
-} from '../src';
+import { YNotebook, YCodeCell } from '../src';
 
 describe('@jupyterlab/nbmodel', () => {
   describe('ynotebook', () => {
     it('should create a notebook', () => {
-      const notebook = createSharedNotebook();
-      const codeCell = SharedCellFactory.createCodeCell();
-      notebook.insertCell(0, codeCell);
-      expect(notebook.cells.length).toBe(1);
+      const notebook = YNotebook.create();
+      expect(notebook.cells.length).toBe(0);
     });
-    it('should create a cell standalone', () => {
-      const codeCell = StandaloneCellFactory.createCodeCell();
-      codeCell.setSource('test');
-      expect(codeCell.getSource()).toBe('test');
-    });
+  });
 
-    it('should create a jupyter metadata', () => {
-      const notebook = new YNotebook();
+  describe('ynotebook metadata', () => {
+    it('should update metadata', () => {
+      const notebook = YNotebook.create();
       const metadata = notebook.getMetadata();
       expect(metadata).toBeTruthy();
       metadata.orig_nbformat = 1;
@@ -45,6 +35,55 @@ describe('@jupyterlab/nbmodel', () => {
         expect(metadata.kernelspec!.name).toBe('python');
         expect(metadata.orig_nbformat).toBe(2);
       }
+    });
+  });
+
+  describe('ycell shared', () => {
+    it('should insert a cell', () => {
+      const notebook = YNotebook.create();
+      const codeCell = YCodeCell.create();
+      notebook.insertCell(0, codeCell);
+      expect(notebook.cells.length).toBe(1);
+    });
+    it('should set cell source', () => {
+      const notebook = YNotebook.create();
+      const codeCell = YCodeCell.create();
+      notebook.insertCell(0, codeCell);
+      codeCell.setSource('test');
+      expect(notebook.cells[0].getSource()).toBe('test');
+    });
+    it('should update source', () => {
+      const notebook = YNotebook.create();
+      const codeCell = YCodeCell.create();
+      notebook.insertCell(0, codeCell);
+      codeCell.setSource('test');
+      codeCell.updateSource(0, 0, 'hello');
+      expect(codeCell.getSource()).toBe('hellotest');
+    });
+  });
+
+  describe('ycell standalone', () => {
+    it('should not insert a standalone cell', () => {
+      const notebook = YNotebook.create();
+      const codeCell = YCodeCell.createStandalone();
+      let failed = false;
+      try {
+        notebook.insertCell(0, codeCell);
+      } catch (error) {
+        failed = true;
+      }
+      expect(failed).toBe(true);
+    });
+    it('should set source', () => {
+      const codeCell = YCodeCell.createStandalone();
+      codeCell.setSource('test');
+      expect(codeCell.getSource()).toBe('test');
+    });
+    it('should update source', () => {
+      const codeCell = YCodeCell.createStandalone();
+      codeCell.setSource('test');
+      codeCell.updateSource(0, 0, 'hello');
+      expect(codeCell.getSource()).toBe('hellotest');
     });
   });
 });
