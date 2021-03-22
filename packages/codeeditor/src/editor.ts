@@ -290,7 +290,7 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    readonly nbcell = nbmodel.YNotebook.createStandaloneCodeCell();
+    readonly nbcell = nbmodel.YCodeCell.createStandalone();
 
     /**
      * A mutex to updated the nbcell model.

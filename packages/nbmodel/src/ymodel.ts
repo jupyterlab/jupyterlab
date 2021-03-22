@@ -20,6 +20,13 @@ type YCellType = YRawCell | YCodeCell | YRawCell | YMarkdownCell;
 
 /**
  * Shared implementation of the nbmodel types.
+ *
+ * Shared cells can be inserted into a SharedNotebook.
+ * Shared cells only start emitting events when they are connected to a SharedNotebook.
+ *
+ * "Standalone" cells must not be inserted into a (Shared)Notebook.
+ * Standalone cells emit events immediately after they have been created, but they must not
+ * be included into a (Shared)Notebook.
  */
 export class YNotebook implements nbmodel.ISharedNotebook {
   constructor() {
@@ -67,6 +74,10 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   }
   redo(): void {
     this.undoManager.redo();
+  }
+
+  public static create(): nbmodel.ISharedNotebook {
+    return new YNotebook();
   }
 
   get changed(): ISignal<this, nbmodel.NotebookChange> {
@@ -298,26 +309,18 @@ export class YCodeCell
     return this.outputs;
   }
   /**
-   * Create a new YRawCell that can be inserted into a YNotebook
+   * Create a new YCodeCell that can be inserted into a YNotebook
    */
   public static create(): YCodeCell {
-    const ymodel = new Y.Map();
-    const ysource = new Y.Text();
-    ymodel.set('source', ysource);
-    ymodel.set('metadata', {});
-    ymodel.set('cell_type', this.prototype.cell_type);
-    ymodel.set('execution_count', this.prototype.execution_count);
-    return new this(ymodel);
+    const cell = super.create();
+    cell.ymodel.set('execution_count', 0); // for some default value
+    return cell as any;
   }
   /**
-   * Create a new YRawCell that works standalone. It cannot be
-   * inserted into a YNotebook because the Yjs model is already
-   * attached to an anonymous Y.Doc instance.
+   * @inheritdoc
    */
   public static createStandalone(): YCodeCell {
-    const cell = this.create();
-    new Y.Doc().getArray().insert(0, [cell.ymodel]);
-    return cell;
+    return super.createStandalone() as any;
   }
   toJSON(): nbformat.ICodeCell {
     return {
@@ -361,46 +364,6 @@ export class YMarkdownCell
       attachments: this.getAttachments()
     };
   }
-}
-
-/**
- * Namespace for the factory methods.
- */
-export namespace YNotebook {
-  export const createSharedNotebook = (): nbmodel.ISharedNotebook => {
-    return new YNotebook();
-  };
-
-  /**
-   * Shared cells can be inserted into a SharedNotebook.
-   *
-   * Shared cells only start emitting events when they are connected to a SharedNotebook.
-   */
-  export const createSharedCodeCell = (): nbmodel.ISharedCodeCell => {
-    return YCodeCell.create() as nbmodel.ISharedCodeCell;
-  };
-  export const createSharedMarkdownCell = (): nbmodel.ISharedMarkdownCell => {
-    return YMarkdownCell.create() as nbmodel.ISharedMarkdownCell;
-  };
-  export const createSharedRawCell = (): nbmodel.ISharedRawCell => {
-    return YRawCell.create() as nbmodel.ISharedRawCell;
-  };
-
-  /**
-   * They "standalone" and must not be inserted into a (Shared)Notebook.
-   *
-   * Standalone cells emit events immediately after they have been created, but they must not
-   * be included into a (Shared)Notebook.
-   */
-  export const createStandaloneCodeCell = (): nbmodel.ISharedCodeCell => {
-    return YCodeCell.createStandalone() as nbmodel.ISharedCodeCell;
-  };
-  export const createStandaloneMarkdownCell = (): nbmodel.ISharedMarkdownCell => {
-    return YMarkdownCell.createStandalone() as nbmodel.ISharedMarkdownCell;
-  };
-  export const createStandaloneRawCell = (): nbmodel.ISharedRawCell => {
-    return YRawCell.createStandalone() as nbmodel.ISharedRawCell;
-  };
 }
 
 export default YNotebook;
