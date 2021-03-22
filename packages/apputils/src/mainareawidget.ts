@@ -44,19 +44,21 @@ export class MainAreaWidget<T extends Widget = Widget>
     const toolbar = (this._toolbar = options.toolbar || new Toolbar());
     toolbar.node.setAttribute('role', 'navigation');
     toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
-
-    const header = (this.header =
-      options.header ||
-      new BoxPanel({ direction: 'top-to-bottom', spacing: 0 }));
     const spinner = this._spinner;
-
-    header.addWidget(toolbar);
+    const customHeader = (this._customHeader =
+      options.customHeader ||
+      new BoxPanel({
+        direction: 'top-to-bottom',
+        spacing: 0
+      }));
 
     const layout = (this.layout = new BoxLayout({ spacing: 0 }));
     layout.direction = 'top-to-bottom';
     BoxLayout.setStretch(toolbar, 0);
+    BoxLayout.setStretch(customHeader, 0);
     BoxLayout.setStretch(content, 1);
-    layout.addWidget(header);
+    layout.addWidget(toolbar);
+    layout.addWidget(customHeader);
     layout.addWidget(content);
 
     if (!content.id) {
@@ -135,6 +137,14 @@ export class MainAreaWidget<T extends Widget = Widget>
    */
   get toolbar(): Toolbar {
     return this._toolbar;
+  }
+
+  /**
+   * A panel for widgets that sit between the toolbar and the content.
+   * Imagine a formatting toolbar, notification headers, etc.
+   */
+  get customHeader(): BoxPanel {
+    return this._customHeader;
   }
 
   /**
@@ -237,9 +247,17 @@ export class MainAreaWidget<T extends Widget = Widget>
     this.content.activate();
   }
 
+  /*
+  MainAreaWidget's layout:
+  - this.layout, a BoxLayout, from parent
+    - this._toolbar, a Toolbar
+    - this._customHeader, a BoxPanel, empty by default
+    - this._content
+  */
   private _content: T;
   private _toolbar: Toolbar;
-  public header: BoxPanel;
+  private _customHeader: BoxPanel;
+
   private _changeGuard = false;
   private _spinner = new Spinner();
 
@@ -266,10 +284,10 @@ export namespace MainAreaWidget {
     toolbar?: Toolbar;
 
     /**
-     * The layout to contain the toolbar and other bars above content.
-     * Defaults to an empty BoxLayout.
+     * The layout to sit underneath the toolbar and above the content,
+     * and that extensions can populate. Defaults to an empty BoxPanel.
      */
-    header?: BoxPanel;
+    customHeader?: BoxPanel;
 
     /**
      * An optional promise for when the content is ready to be revealed.
