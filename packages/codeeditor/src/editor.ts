@@ -2,7 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbmodel from '@jupyterlab/nbmodel';
+
 import * as nbformat from '@jupyterlab/nbformat';
+
 import { JSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
@@ -19,6 +21,7 @@ import {
   IObservableMap,
   IObservableString
 } from '@jupyterlab/observables';
+
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -201,6 +204,10 @@ export namespace CodeEditor {
      * data is stored.
      */
     readonly modelDB: IModelDB;
+
+    /**
+     * The shared model for the cell editor.
+     */
     readonly nbcell: nbmodel.ISharedCodeCell;
   }
 
@@ -220,25 +227,26 @@ export namespace CodeEditor {
         this.modelDB = new ModelDB();
       }
 
+      this.nbcell.changed.connect(this._onSharedModelChanged, this);
+
       const value = this.modelDB.createString('value');
+      value.changed.connect(this._onModelDBValueChanged, this);
+      value.text = value.text || options.value || '';
 
       const mimeType = this.modelDB.createValue('mimeType');
+      mimeType.changed.connect(this._onModelDBMimeTypeChanged, this);
       mimeType.set(options.mimeType || 'text/plain');
-      mimeType.changed.connect(this._onMimeTypeChanged, this);
 
       this.modelDB.createMap('selections');
-      this.nbcell.changed.connect(this.onSharedModelChanged, this);
-      value.changed.connect(this.onModeldbValueChanged, this);
-      value.text = value.text || options.value || '';
     }
 
     /**
-     * We update the modeldb store when nbmodel changes.
+     * We update the modeldb store when nbcell changes.
      * To ensure that we don't run into infinite loops, we wrap this call in a "mutex".
      * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged hander
      * or the modeldb change handler.
      */
-    onSharedModelChanged(
+    private _onSharedModelChanged(
       _: any,
       change: nbmodel.CellChange<nbformat.ICodeCellMetadata>
     ): void {
@@ -260,7 +268,7 @@ export namespace CodeEditor {
       });
     }
 
-    onModeldbValueChanged(
+    private _onModelDBValueChanged(
       value: IObservableString,
       event: IObservableString.IChangedArgs
     ): void {
@@ -279,15 +287,21 @@ export namespace CodeEditor {
       });
     }
 
-    public readonly nbcell = nbmodel.StandaloneCellFactory.createCodeCell();
+    /**
+     * The shared model for the cell editor.
+     */
+    readonly nbcell = nbmodel.YNotebook.createStandaloneCodeCell();
+
+    /**
+     * A mutex to updated the nbcell model.
+     */
+    private readonly _mutex = nbmodel.createMutex();
 
     /**
      * The underlying `IModelDB` instance in which model
      * data is stored.
      */
     readonly modelDB: IModelDB;
-
-    private readonly _mutex = nbmodel.createMutex();
 
     /**
      * A signal emitted when a mimetype changes.
@@ -343,7 +357,7 @@ export namespace CodeEditor {
       Signal.clearData(this);
     }
 
-    private _onMimeTypeChanged(
+    private _onModelDBMimeTypeChanged(
       mimeType: IObservableValue,
       args: ObservableValue.IChangedArgs
     ): void {
