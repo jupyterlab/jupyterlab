@@ -190,6 +190,27 @@ function activate(
     tracker.currentWidget !== null &&
     tracker.currentWidget === shell.currentWidget;
 
+  const commonLanguageFileTypes = new Map<string, string[]>([
+    ['python', ['py']],
+    ['julia', ['jl']],
+    ['R', ['r']],
+  ]);
+
+  const getAvailableLanguageExtensions = async () => {
+    const specsManager = app.serviceManager.kernelspecs;
+    await specsManager.ready;
+    let fileExtensions = new Set<string>();
+    const specs = specsManager.specs?.kernelspecs ?? {};
+    Object.keys(specs).forEach(spec => {
+      const specModel = specs[spec];
+      if (specModel){
+        const exts = commonLanguageFileTypes.get(specModel.language);
+        exts?.forEach(ext => fileExtensions.add(ext));
+      }
+    });
+    return fileExtensions;
+  }
+
   // Handle state restoration.
   if (restorer) {
     void restorer.restore(tracker, {
@@ -240,25 +261,33 @@ function activate(
     browserFactory
   );
 
-  // Add a launcher item if the launcher is available.
-  if (launcher) {
-    Commands.addLauncherItems(launcher, trans);
-  }
+  getAvailableLanguageExtensions()
+  .then((availableLanguageExtensions) => {
+    // Add a launcher item if the launcher is available.
+    if (launcher) {
+      Commands.addLauncherItems(launcher, trans, availableLanguageExtensions);
+    }
 
-  if (palette) {
-    Commands.addPaletteItems(palette, trans);
-  }
+    if (palette) {
+      Commands.addPaletteItems(palette, trans, availableLanguageExtensions);
+    }
 
-  if (menu) {
-    Commands.addMenuItems(
-      menu,
-      commands,
-      tracker,
-      trans,
-      consoleTracker,
-      sessionDialogs
-    );
-  }
+    if (menu) {
+      Commands.addMenuItems(
+        menu,
+        commands,
+        tracker,
+        trans,
+        consoleTracker,
+        sessionDialogs,
+        availableLanguageExtensions
+      );
+    }
+  })
+  .catch((reason: Error) => {  // TODO@RE make this useful
+    console.error(reason.message);
+    Commands.updateTracker(tracker);
+  });
 
   Commands.addContextMenuItems(app);
 

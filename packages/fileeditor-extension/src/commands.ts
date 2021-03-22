@@ -43,9 +43,12 @@ import {
   cutIcon,
   markdownIcon,
   pasteIcon,
+  pythonIcon,
   redoIcon,
+  rKernelIcon,
   textEditorIcon,
-  undoIcon
+  undoIcon,
+  LabIcon
 } from '@jupyterlab/ui-components';
 
 import { CommandRegistry } from '@lumino/commands';
@@ -61,7 +64,13 @@ import { TranslationBundle } from '@jupyterlab/translation';
 export namespace CommandIDs {
   export const createNew = 'fileeditor:create-new';
 
+  export const createNewJulia = 'fileeditor:create-new-jl-file';
+
   export const createNewMarkdown = 'fileeditor:create-new-markdown-file';
+
+  export const createNewPython = 'fileeditor:create-new-py-file';
+
+  export const createNewR = 'fileeditor:create-new-r-file';
 
   export const changeFontSize = 'fileeditor:change-font-size';
 
@@ -221,6 +230,9 @@ export namespace Commands {
 
     // Add a command for creating a new Markdown file.
     addCreateNewMarkdownCommand(commands, browserFactory, trans);
+
+    // Add commands for creating new files in common file types (Python, Julia, etc.)
+    addCreateNewCommandsForCommonLanguages(commands, browserFactory, trans);
 
     addUndoCommand(commands, tracker, trans, isEnabled);
 
@@ -904,15 +916,81 @@ export namespace Commands {
   }
 
   /**
+   * Add commands to create new files with the associated filetypes of a known kernel
+   *
+   * @param fileExtensions List of extensions (e.g. 'py') to add commands for.
+   * If omitted, commands will be added for every extension with available data.
+   */
+  export function addCreateNewCommandsForCommonLanguages(
+    commands: CommandRegistry,
+    browserFactory: IFileBrowserFactory,
+    trans: TranslationBundle,
+    availableLanguageExtensions?: Set<string>,
+  ): void {
+    interface IExtensionData {
+      commandId: string;
+      icon?: LabIcon;
+      paletteLabel: string;
+      normalLabel: string;
+      caption: string;
+    }
+
+    const extensionData = new Map<string, IExtensionData>([
+      ['jl', {
+        commandId: CommandIDs.createNewJulia,
+        paletteLabel: trans.__('New Julia File'),
+        normalLabel: trans.__('Julia File'),
+        caption: trans.__('Create a new Julia file')
+      }],
+      ['py', {
+        commandId: CommandIDs.createNewPython,
+        icon: pythonIcon,
+        paletteLabel: trans.__('New Python File'),
+        normalLabel: trans.__('Python File'),
+        caption: trans.__('Create a new Python file')
+      }],
+      ['r', {
+        commandId: CommandIDs.createNewR,
+        icon: rKernelIcon,
+        paletteLabel: trans.__('New R File'),
+        normalLabel: trans.__('R File'),
+        caption: trans.__('Create a new R file')
+      }]
+    ]);
+
+    for (let ext of (availableLanguageExtensions ?? extensionData.keys())){
+      const extData = extensionData.get(ext);
+      if (extData) {
+        commands.addCommand(extData.commandId, {
+          label: args => args['isPalette'] ? extData.paletteLabel : extData.normalLabel,
+          caption: extData.caption,
+          icon: args => (args['isPalette'] ? undefined : extData.icon ?? textEditorIcon),
+          execute: args => {
+            const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
+            return createNew(commands, cwd as string, ext);
+          }
+        });
+      }
+    }
+  }
+
+  /**
    * Wrapper function for adding the default launcher items for File Editor
    */
   export function addLauncherItems(
     launcher: ILauncher,
-    trans: TranslationBundle
+    trans: TranslationBundle,
+    availableLanguageExtensions?: Set<string>
   ): void {
     addCreateNewToLauncher(launcher, trans);
 
     addCreateNewMarkdownToLauncher(launcher, trans);
+
+    if (availableLanguageExtensions) {
+      for (let ext of availableLanguageExtensions) {
+        addCreateNewCommonExtensionToLauncher(launcher, trans, ext);
+      }
+    }
   }
 
   /**
@@ -944,11 +1022,29 @@ export namespace Commands {
   }
 
   /**
+   * Add Create New (language name associated with provided ext) File to Launcher
+   *
+   * @param ext extension for common file type
+   */
+  function addCreateNewCommonExtensionToLauncher(
+    launcher: ILauncher,
+    trans: TranslationBundle,
+    ext: string
+  ): void {
+    launcher.add({
+      command: `fileeditor:create-new-${ext}-file`,
+      category: trans.__('Other'),
+      rank: 3
+    })
+  }
+
+  /**
    * Wrapper function for adding the default items to the File Editor palette
    */
   export function addPaletteItems(
     palette: ICommandPalette,
-    trans: TranslationBundle
+    trans: TranslationBundle,
+    availableLanguageExtensions?: Set<string>
   ): void {
     addChangeTabsCommandsToPalette(palette, trans);
 
@@ -957,6 +1053,12 @@ export namespace Commands {
     addCreateNewMarkdownCommandToPalette(palette, trans);
 
     addChangeFontSizeCommandsToPalette(palette, trans);
+
+    if (availableLanguageExtensions) {
+      for (let ext of availableLanguageExtensions) {
+        addCreateNewCommonExtensionToPalette(palette, trans, ext);
+      }
+    }
   }
 
   /**
@@ -1016,6 +1118,24 @@ export namespace Commands {
   }
 
   /**
+   * Add Create New (language name associated with provided ext) File to Launcher
+   *
+   * @param ext extension for common file type
+   */
+  function addCreateNewCommonExtensionToPalette(
+    palette: ICommandPalette,
+    trans: TranslationBundle,
+    ext: string
+  ): void {
+    const paletteCategory = trans.__('Text Editor');
+    palette.addItem({
+      command: `fileeditor:create-new-${ext}-file`,
+      args: { isPalette: true },
+      category: paletteCategory
+    })
+  }
+
+  /**
    * Add commands to change the font size to the File Editor palette
    */
   export function addChangeFontSizeCommandsToPalette(
@@ -1041,7 +1161,8 @@ export namespace Commands {
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
     trans: TranslationBundle,
     consoleTracker: IConsoleTracker | null,
-    sessionDialogs: ISessionContextDialogs | null
+    sessionDialogs: ISessionContextDialogs | null,
+    availableLanguageExtensions?: Set<string>
   ): void {
     // Add the editing commands to the settings menu.
     addEditingCommandsToSettingsMenu(menu, commands, trans);
@@ -1051,6 +1172,12 @@ export namespace Commands {
 
     // Add new markdown file creation to the file menu.
     addCreateNewMarkdownFileToFileMenu(menu);
+
+    if (availableLanguageExtensions) {
+      for (let ext of availableLanguageExtensions) {
+        addCreateNewCommonExtensionToFileMenu(menu, ext);
+      }
+    }
 
     // Add undo/redo hooks to the edit menu.
     addUndoRedoToEditMenu(menu, tracker);
@@ -1132,6 +1259,16 @@ export namespace Commands {
   export function addCreateNewMarkdownFileToFileMenu(menu: IMainMenu): void {
     menu.fileMenu.newMenu.addGroup(
       [{ command: CommandIDs.createNewMarkdown }],
+      30
+    );
+  }
+
+  /**
+   * Add a Create New Markdown File command to the File menu
+   */
+  export function addCreateNewCommonExtensionToFileMenu(menu: IMainMenu, ext: string): void {
+    menu.fileMenu.newMenu.addGroup(
+      [{ command: `fileeditor:create-new-${ext}-file` }],
       30
     );
   }
