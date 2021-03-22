@@ -32,6 +32,7 @@ import { Delta } from './utils';
 export interface ISharedNotebook extends IDisposable {
   getMetadata(): nbformat.INotebookMetadata;
   setMetadata(metadata: nbformat.INotebookMetadata): void;
+  updateMetadata(value: Partial<nbformat.INotebookMetadata>): void;
   readonly nbformat_minor: number;
   readonly nbformat: number;
   readonly cells: ISharedCell[];
