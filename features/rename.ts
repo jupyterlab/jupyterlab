@@ -104,8 +104,7 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
 ];
 
 export class RenameCM extends CodeMirrorIntegration {
-  
-  public setTrans(trans: TranslationBundle){
+  public setTrans(trans: TranslationBundle) {
     this.trans = trans;
   }
 

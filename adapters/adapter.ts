@@ -128,7 +128,9 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.status_message = new StatusMessage();
     this.isConnected = false;
     this.console = extension.console.scope('WidgetAdapter');
-    this.trans = (extension.translator || nullTranslator).load('jupyterlab-lsp');
+    this.trans = (extension.translator || nullTranslator).load(
+      'jupyterlab-lsp'
+    );
 
     // set up signal connections
     this.widget.context.saveState.connect(this.on_save_state, this);

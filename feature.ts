@@ -10,7 +10,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
-import { TranslationBundle } from '@jupyterlab/translation'
+import { TranslationBundle } from '@jupyterlab/translation';
 
 export interface IFeatureCommand {
   /**
