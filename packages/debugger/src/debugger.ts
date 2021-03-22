@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { runIcon, stopIcon } from '@jupyterlab/ui-components';
+import { codeIcon, runIcon, stopIcon } from '@jupyterlab/ui-components';
 
 import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
 
@@ -108,6 +108,7 @@ export namespace Debugger {
    */
   export namespace Icons {
     export const closeAllIcon = closeAll;
+    export const evaluateIcon = codeIcon;
     export const continueIcon = runIcon;
     export const stepIntoIcon = stepInto;
     export const stepOutIcon = stepOut;

@@ -647,7 +647,7 @@ const evaluatePlugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Evaluate Code'),
       caption: trans.__('Evaluate Code'),
       // TODO: use a different icon
-      icon: Debugger.Icons.continueIcon,
+      icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
