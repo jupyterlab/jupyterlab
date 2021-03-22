@@ -28,13 +28,13 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('customHeader', ()=>{
-      it('should exist and have correct type', ()=>{
+    describe('customHeader', () => {
+      it('should exist and have correct type', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
         expect(widget.customHeader).toBeInstanceOf(BoxPanel);
       });
-    })
+    });
 
     describe('#onActivateRequest()', () => {
       it('should focus on activation', () => {
