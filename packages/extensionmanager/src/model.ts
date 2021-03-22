@@ -746,7 +746,6 @@ export class ListModel extends VDomModel {
    */
   protected async update(refreshInstalled = false) {
     if (ListModel.isDisclaimed()) {
-      // Start both queries before awaiting:
       const [searchMap, installedMap] = await Promise.all([this.performSearch(), this.queryInstalled(refreshInstalled)])
 
       // Map results to attributes:
