@@ -745,32 +745,28 @@ export class ListModel extends VDomModel {
    * Emits the `stateChanged` signal on successful completion.
    */
   protected async update(refreshInstalled = false) {
-    // Start both queries before awaiting:
+    if (ListModel.isDisclaimed()) {
+      // Start both queries before awaiting:
+      const [searchMap, installedMap] = await Promise.all([this.performSearch(), this.queryInstalled(refreshInstalled)])
 
-    const searchMapPromise = this.performSearch();
-    const installedMapPromise = this.queryInstalled(refreshInstalled);
-
-    // Await results:
-    const searchMap = await searchMapPromise;
-    const installedMap = await installedMapPromise;
-
-    // Map results to attributes:
-    const installed: IEntry[] = [];
-    for (const key of Object.keys(installedMap)) {
-      installed.push(installedMap[key]);
-    }
-    this._installed = installed.sort(Private.comparator);
-
-    const searchResult: IEntry[] = [];
-    for (const key of Object.keys(searchMap)) {
-      // Filter out installed entries from search results:
-      if (installedMap[key] === undefined) {
-        searchResult.push(searchMap[key]);
-      } else {
-        searchResult.push(installedMap[key]);
+      // Map results to attributes:
+      const installed: IEntry[] = [];
+      for (const key of Object.keys(installedMap)) {
+        installed.push(installedMap[key]);
       }
+      this._installed = installed.sort(Private.comparator);
+
+      const searchResult: IEntry[] = [];
+      for (const key of Object.keys(searchMap)) {
+        // Filter out installed entries from search results:
+        if (installedMap[key] === undefined) {
+          searchResult.push(searchMap[key]);
+        } else {
+          searchResult.push(installedMap[key]);
+        }
+      }
+      this._searchResult = searchResult.sort(Private.comparator);
     }
-    this._searchResult = searchResult.sort(Private.comparator);
 
     // Signal updated state
     this.stateChanged.emit(undefined);
