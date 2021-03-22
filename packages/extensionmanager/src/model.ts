@@ -889,7 +889,7 @@ export class ListModel extends VDomModel {
 
   protected translator: ITranslator;
   private _app: JupyterFrontEnd;
-  private _query: string | null = null;
+  private _query: string | null = ''; // TODO: we may not need the null case?
   private _page: number = 0;
   private _pagination: number = 250;
   private _totalEntries: number = 0;
