@@ -1,0 +1,14 @@
+{
+  "title": "Table of Contents",
+  "description": "Table of contents settings.",
+  "properties": {
+    "numberingH1": {
+      "title": "Enable h1 numbering",
+      "description": "Specifies whether to number h1 headers",
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

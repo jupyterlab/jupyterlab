@@ -16,6 +16,7 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   TableOfContents,
   ITableOfContentsRegistry,
@@ -42,6 +43,7 @@ import { tocIcon } from '@jupyterlab/ui-components';
  * @param notebookTracker - notebook tracker
  * @param rendermime - rendered MIME registry
  * @param translator - translator
+ * @param settingRegistry - setting registry
  * @returns table of contents registry
  */
 async function activateTOC(
@@ -53,7 +55,8 @@ async function activateTOC(
   markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
-  translator: ITranslator
+  translator: ITranslator,
+  settingRegistry: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
   // Create the ToC widget:
@@ -69,14 +72,25 @@ async function activateTOC(
   labShell.add(toc, 'left', { rank: 400 });
 
   // Add the ToC widget to the application restorer:
-  restorer.add(toc, '@jupyterlab/toc:plugin');
+  restorer.add(toc, '@jupyterlab/toc-extension:plugin');
+
+  // Attempt to load plugin settings:
+  let settings: ISettingRegistry.ISettings | undefined;
+  try {
+    settings = await settingRegistry.load('@jupyterlab/toc-extension:plugin');
+  } catch (error) {
+    console.error(
+      `Failed to load settings for the Table of Contents extension.\n\n${error}`
+    );
+  }
 
   // Create a notebook generator:
   const notebookGenerator = createNotebookGenerator(
     notebookTracker,
     toc,
     rendermime.sanitizer,
-    translator
+    translator,
+    settings
   );
   registry.add(notebookGenerator);
 
@@ -151,7 +165,8 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
     IMarkdownViewerTracker,
     INotebookTracker,
     IRenderMimeRegistry,
-    ITranslator
+    ITranslator,
+    ISettingRegistry
   ],
   activate: activateTOC
 };

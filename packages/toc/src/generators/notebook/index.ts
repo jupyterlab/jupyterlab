@@ -26,6 +26,7 @@ import { appendMarkdownHeading } from './append_markdown_heading';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
 import { ITranslator } from '@jupyterlab/translation';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * Returns a ToC generator for notebooks.
@@ -41,11 +42,16 @@ function createNotebookGenerator(
   tracker: INotebookTracker,
   widget: TableOfContents,
   sanitizer: ISanitizer,
-  translator?: ITranslator
+  translator?: ITranslator,
+  settings?: ISettingRegistry.ISettings
 ): Registry.IGenerator<NotebookPanel> {
+  let numberingH1 = true;
+  if (settings) {
+    numberingH1 = settings.composite.numberingH1 as boolean;
+  }
   const options = new OptionsManager(widget, tracker, {
     numbering: false,
-    numberingH1: false,
+    numberingH1: numberingH1,
     sanitizer: sanitizer,
     translator: translator || nullTranslator
   });
