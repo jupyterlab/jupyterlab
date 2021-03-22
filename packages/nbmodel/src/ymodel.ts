@@ -317,10 +317,14 @@ export class YCodeCell
     return cell as any;
   }
   /**
-   * @inheritdoc
+   * Create a new YCodeCell that works standalone. It cannot be
+   * inserted into a YNotebook because the Yjs model is already
+   * attached to an anonymous Y.Doc instance.
    */
   public static createStandalone(): YCodeCell {
-    return super.createStandalone() as any;
+    const cell = super.createStandalone();
+    cell.ymodel.set('execution_count', 0); // for some default value
+    return cell as any;
   }
   toJSON(): nbformat.ICodeCell {
     return {
