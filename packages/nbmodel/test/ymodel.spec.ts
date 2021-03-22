@@ -13,7 +13,7 @@ describe('@jupyterlab/nbmodel', () => {
 
   describe('ynotebook metadata', () => {
     it('should update metadata', () => {
-      const notebook = new YNotebook();
+      const notebook = YNotebook.create();
       const metadata = notebook.getMetadata();
       expect(metadata).toBeTruthy();
       metadata.orig_nbformat = 1;
