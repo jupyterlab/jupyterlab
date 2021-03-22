@@ -101,6 +101,8 @@ export namespace Debugger {
     export const stepOut = 'debugger:stepOut';
 
     export const inspectVariable = 'debugger:inspect-variable';
+
+    export const evaluate = 'debugger:evaluate';
   }
 
   /**

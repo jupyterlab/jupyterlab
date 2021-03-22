@@ -363,7 +363,8 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       terminate: CommandIDs.terminate,
       next: CommandIDs.next,
       stepIn: CommandIDs.stepIn,
-      stepOut: CommandIDs.stepOut
+      stepOut: CommandIDs.stepOut,
+      evaluate: CommandIDs.evaluate
     };
 
     const sidebar = new Debugger.Sidebar({
@@ -642,11 +643,10 @@ const evaluatePlugin: JupyterFrontEndPlugin<void> = {
       );
     };
 
-    const command = 'debugger:evaluate';
+    const command = Debugger.CommandIDs.evaluate;
     commands.addCommand(command, {
       label: trans.__('Evaluate Code'),
       caption: trans.__('Evaluate Code'),
-      // TODO: use a different icon
       icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
