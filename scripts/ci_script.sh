@@ -432,7 +432,7 @@ if [[ $GROUP == nonode ]]; then
     virtualenv -p $(which python3) test_install
     ./test_install/bin/pip install -v --pre --no-cache-dir --no-deps jupyterlab --no-index --find-links=dist  # Install latest jupyterlab
     ./test_install/bin/pip install jupyterlab  # Install jupyterlab dependencies
-    ./test_install/bin/python -m jupyterlab.browser_check --no-chrome-test
+    ./test_install/bin/python -m jupyterlab.browser_check --no-browser-test
 
     # Make sure we can start and kill the lab server
     ./test_install/bin/jupyter lab --no-browser &
@@ -446,5 +446,5 @@ if [[ $GROUP == nonode ]]; then
     # Make sure we can install the tarball
     virtualenv -p $(which python3) test_sdist
     ./test_sdist/bin/pip install dist/*.tar.gz
-    ./test_sdist/bin/python -m jupyterlab.browser_check --no-chrome-test
+    ./test_sdist/bin/python -m jupyterlab.browser_check --no-browser-test
 fi

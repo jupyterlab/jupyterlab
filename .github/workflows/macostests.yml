@@ -1,43 +1,17 @@
-name: Linux Tests
+name: macOS Tests
 
 on: [push, pull_request]
 
 jobs:
-  linuxtests:
-    name: Linux
+  macostests:
+    name: macOS
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, python, examples, interop, nonode, linkcheck, lint]
-        python: [3.6, 3.8]
-        include:
-          - group: release_check
-            upload-output: true
-        exclude:
-          - group: integrity
-            python: 3.6
-          - group: integrity2
-            python: 3.6
-          - group: integrity3
-            python: 3.6
-          - group: release_check
-            python: 3.6
-          - group: docs
-            python: 3.6
-          - group: usage
-            python: 3.6
-          - group: usage2
-            python: 3.6
-          - group: linkcheck
-            python: 3.6
-          - group: nonode
-            python: 3.6
-          - group: lint
-            python: 3.6
-          - group: examples
-            python: 3.6
+        group: [integrity, python, usage, usage2]
+        python: [3.8]
       fail-fast: false
     timeout-minutes: 30
-    runs-on: ubuntu-20.04
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -92,13 +66,6 @@ jobs:
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
-          JLAB_BROWSER_TYPE: firefox
+          JLAB_BROWSER_TYPE: webkit
         run: |
           bash ./scripts/ci_script.sh
-
-      - name: Upload ${{ matrix.group }} results
-        if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.group }} ${{ github.run_number }}
-          path: ./build/${{ matrix.group }}_output
