@@ -14,14 +14,14 @@ import * as nbformat from '@jupyterlab/nbformat';
 import { Delta } from './utils';
 
 /**
- * This class defines of the shared nbmodel types.
+ * This file defines the shared nbmodel types.
  *
  * - Notebook Type.
  * - Notebook Metadata Types.
  * - Cell Types.
  * - Cell Metadata Types.
  *
- * It also defines the shared changes used to be used in the events.
+ * It also defines the shared changes to be used in the events.
  */
 
 // Notebook Type.

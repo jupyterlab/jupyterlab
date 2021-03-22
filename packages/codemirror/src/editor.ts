@@ -132,9 +132,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
-    const nbmodel = this.model.nbcell as nbmodel.YCodeCell;
     this.yeditorBinding = USE_YCODEMIRROR_BINDING
-      ? new CodemirrorBinding(nbmodel.ymodel.get('source'), editor)
+      ? new CodemirrorBinding(
+          (this.model.nbcell as nbmodel.YCodeCell).ymodel.get('source'),
+          editor
+        )
       : null;
 
     const doc = editor.getDoc();
