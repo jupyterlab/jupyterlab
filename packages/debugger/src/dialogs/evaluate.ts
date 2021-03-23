@@ -8,7 +8,64 @@ import { Message } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
 
-export class EvaluateDialog extends Dialog<string> {
+/**
+ * A namespace for DebuggerEvaluateDialog statics.
+ */
+export namespace DebuggerEvaluateDialog {
+  /**
+   * Instantiation options for the evaluate dialog.
+   */
+  export interface IOptions {
+    /**
+     * The top level text for the dialog. Defaults to an empty string.
+     */
+    title: string;
+
+    /**
+     * The mime renderer for the cell widget.
+     */
+    rendermime: IRenderMimeRegistry;
+
+    /**
+     * The mime type for the cell widget content.
+     */
+    mimeType?: string;
+
+    /**
+     * Label for ok button.
+     */
+    okLabel?: string;
+
+    /**
+     * Label for cancel button.
+     */
+    cancelLabel?: string;
+  }
+
+  /**
+   * Create and show a dialog to prompt user for code.
+   *
+   * @param options - The dialog setup options.
+   *
+   * @returns A promise that resolves with whether the dialog was accepted
+   */
+  export function getCode(options: IOptions): Promise<Dialog.IResult<string>> {
+    const dialog = new EvaluateDialog({
+      ...options,
+      body: new EvaluateDialogBody(options),
+      buttons: [
+        Dialog.cancelButton({ label: options.cancelLabel }),
+        Dialog.okButton({ label: options.okLabel })
+      ]
+    });
+    return dialog.launch();
+  }
+}
+
+/**
+ * A dialog to prompt users for code to evaluate.
+ */
+class EvaluateDialog extends Dialog<string> {
   /**
    * Handle the DOM events for the Evaluate dialog.
    *
@@ -32,20 +89,19 @@ export class EvaluateDialog extends Dialog<string> {
 /**
  * Widget body with a code cell prompt in a dialog
  */
-export class EvaluateDialogBody
-  extends Widget
-  implements Dialog.IBodyWidget<string> {
+class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
   /**
    * CodePromptDialog constructor
    *
    * @param options Constructor options
    */
-  constructor(options: EvaluateDialogBody.IOptions) {
-    const { rendermime, mimeType, ...opts } = options;
-    super(opts);
+  constructor(options: DebuggerEvaluateDialog.IOptions) {
+    super();
+
+    const { rendermime, mimeType } = options;
 
     const model = new CodeCellModel({});
-    model.mimeType = mimeType;
+    model.mimeType = mimeType ?? '';
     this._prompt = new CodeCell({
       rendermime,
       model
@@ -70,24 +126,4 @@ export class EvaluateDialogBody
   }
 
   private _prompt: CodeCell;
-}
-
-/**
- * A namespace for CodePromptDialogBody statics
- */
-export namespace EvaluateDialogBody {
-  /**
-   * The options used to initialize a CodePromptDialogBody object.
-   */
-  export interface IOptions {
-    /**
-     * The mime renderer for the cell widget.
-     */
-    rendermime: IRenderMimeRegistry;
-
-    /**
-     * The mime type for the cell widget content.
-     */
-    mimeType: string;
-  }
 }

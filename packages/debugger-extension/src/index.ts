@@ -13,7 +13,6 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog,
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
@@ -32,8 +31,7 @@ import {
   IDebuggerConfig,
   IDebuggerSources,
   IDebuggerSidebar,
-  EvaluateDialog,
-  EvaluateDialogBody
+  DebuggerEvaluateDialog
 } from '@jupyterlab/debugger';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -445,8 +443,7 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
-    const rendermime = new RenderMimeRegistry({ initialFactories });
-
+    // get the mime type of the kernel language for the current debug session
     const getMimeType = async (): Promise<string> => {
       const kernel = service.session?.connection?.kernel;
       if (!kernel) {
@@ -459,25 +456,7 @@ const main: JupyterFrontEndPlugin<void> = {
       return mimeType;
     };
 
-    const getCodeToEvaluate = async (): Promise<string> => {
-      const mimeType = await getMimeType();
-      const options = {
-        title: trans.__('Evaluate Code'),
-        body: new EvaluateDialogBody({ rendermime, mimeType }),
-        buttons: [
-          Dialog.cancelButton(),
-          Dialog.okButton({ label: trans.__('Evaluate') })
-        ]
-      };
-
-      const dialog = new EvaluateDialog(options);
-      const result = await dialog.launch();
-      if (result.button.accept) {
-        return result.value ?? '';
-      }
-
-      return '';
-    };
+    const rendermime = new RenderMimeRegistry({ initialFactories });
 
     commands.addCommand(CommandIDs.evaluate, {
       label: trans.__('Evaluate Code'),
@@ -487,8 +466,15 @@ const main: JupyterFrontEndPlugin<void> = {
         return service.hasStoppedThreads();
       },
       execute: async () => {
-        const code = await getCodeToEvaluate();
-        if (!code) {
+        const mimeType = await getMimeType();
+        const result = await DebuggerEvaluateDialog.getCode({
+          title: trans.__('Evaluate Code'),
+          okLabel: trans.__('Evaluate'),
+          mimeType,
+          rendermime
+        });
+        const code = result.value;
+        if (!result.button.accept || !code) {
           return;
         }
         await service.evaluate(code);
