@@ -470,6 +470,7 @@ const main: JupyterFrontEndPlugin<void> = {
         const result = await DebuggerEvaluateDialog.getCode({
           title: trans.__('Evaluate Code'),
           okLabel: trans.__('Evaluate'),
+          cancelLabel: trans.__('Cancel'),
           mimeType,
           rendermime
         });
