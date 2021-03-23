@@ -7,6 +7,8 @@ import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
 
 import { DebuggerConfig } from './config';
 
+import { DebuggerEvaluateDialog } from './dialogs/evaluate';
+
 import { ReadOnlyEditorFactory as EditorFactory } from './factory';
 
 import { DebuggerHandler } from './handler';
@@ -118,5 +120,15 @@ export namespace Debugger {
     export const terminateIcon = stopIcon;
     export const variableIcon = variable;
     export const viewBreakpointIcon = viewBreakpoint;
+  }
+
+  /**
+   * The debugger dialog helpers.
+   */
+  export namespace Dialogs {
+    /**
+     * Open a code prompt in a dialog.
+     */
+    export const getCode = DebuggerEvaluateDialog.getCode;
   }
 }

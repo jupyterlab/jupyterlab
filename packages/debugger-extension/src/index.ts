@@ -30,8 +30,7 @@ import {
   IDebugger,
   IDebuggerConfig,
   IDebuggerSources,
-  IDebuggerSidebar,
-  DebuggerEvaluateDialog
+  IDebuggerSidebar
 } from '@jupyterlab/debugger';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -467,7 +466,7 @@ const main: JupyterFrontEndPlugin<void> = {
       },
       execute: async () => {
         const mimeType = await getMimeType();
-        const result = await DebuggerEvaluateDialog.getCode({
+        const result = await Debugger.Dialogs.getCode({
           title: trans.__('Evaluate Code'),
           okLabel: trans.__('Evaluate'),
           cancelLabel: trans.__('Cancel'),

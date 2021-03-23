@@ -13,5 +13,3 @@ export {
   IDebuggerSources,
   IDebuggerSidebar
 } from './tokens';
-
-export { DebuggerEvaluateDialog } from './dialogs/evaluate';
