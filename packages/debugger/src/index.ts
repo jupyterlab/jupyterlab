@@ -14,4 +14,4 @@ export {
   IDebuggerSidebar
 } from './tokens';
 
-export { EvaluateDialog, CodePromptDialogBody } from './dialogs/evaluate';
+export { EvaluateDialog, EvaluateDialogBody } from './dialogs/evaluate';

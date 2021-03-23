@@ -30,9 +30,9 @@ export class EvaluateDialog extends Dialog<string> {
 }
 
 /**
- * Widget body for a code cell prompt in a dialog
+ * Widget body with a code cell prompt in a dialog
  */
-export class CodePromptDialogBody
+export class EvaluateDialogBody
   extends Widget
   implements Dialog.IBodyWidget<string> {
   /**
@@ -40,7 +40,7 @@ export class CodePromptDialogBody
    *
    * @param options Constructor options
    */
-  constructor(options: CodePromptDialogBody.IOptions) {
+  constructor(options: EvaluateDialogBody.IOptions) {
     const { rendermime, mimeType, ...opts } = options;
     super(opts);
 
@@ -75,7 +75,7 @@ export class CodePromptDialogBody
 /**
  * A namespace for CodePromptDialogBody statics
  */
-export namespace CodePromptDialogBody {
+export namespace EvaluateDialogBody {
   /**
    * The options used to initialize a CodePromptDialogBody object.
    */

@@ -32,8 +32,8 @@ import {
   IDebuggerConfig,
   IDebuggerSources,
   IDebuggerSidebar,
-  CodePromptDialogBody,
-  EvaluateDialog
+  EvaluateDialog,
+  EvaluateDialogBody
 } from '@jupyterlab/debugger';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -445,6 +445,56 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
+    const rendermime = new RenderMimeRegistry({ initialFactories });
+
+    const getMimeType = async (): Promise<string> => {
+      const kernel = service.session?.connection?.kernel;
+      if (!kernel) {
+        return '';
+      }
+      const info = (await kernel.info).language_info;
+      const name = info.name;
+      const mimeType =
+        editorServices?.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
+      return mimeType;
+    };
+
+    const getCodeToEvaluate = async (): Promise<string> => {
+      const mimeType = await getMimeType();
+      const options = {
+        title: trans.__('Evaluate Code'),
+        body: new EvaluateDialogBody({ rendermime, mimeType }),
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.okButton({ label: trans.__('Evaluate') })
+        ]
+      };
+
+      const dialog = new EvaluateDialog(options);
+      const result = await dialog.launch();
+      if (result.button.accept) {
+        return result.value ?? '';
+      }
+
+      return '';
+    };
+
+    commands.addCommand(CommandIDs.evaluate, {
+      label: trans.__('Evaluate Code'),
+      caption: trans.__('Evaluate Code'),
+      icon: Debugger.Icons.evaluateIcon,
+      isEnabled: () => {
+        return service.hasStoppedThreads();
+      },
+      execute: async () => {
+        const code = await getCodeToEvaluate();
+        if (!code) {
+          return;
+        }
+        await service.evaluate(code);
+      }
+    });
+
     commands.addCommand(CommandIDs.debugContinue, {
       label: trans.__('Continue'),
       caption: trans.__('Continue'),
@@ -534,7 +584,8 @@ const main: JupyterFrontEndPlugin<void> = {
         CommandIDs.terminate,
         CommandIDs.next,
         CommandIDs.stepIn,
-        CommandIDs.stepOut
+        CommandIDs.stepOut,
+        CommandIDs.evaluate
       ].forEach(command => {
         palette.addItem({ command, category });
       });
@@ -621,82 +672,6 @@ const main: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin to evaluate code when stopped at a breakpoint.
- */
-const evaluatePlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger-extension:evaluate',
-  requires: [IDebugger, ITranslator],
-  optional: [ICommandPalette, IEditorServices],
-  autoStart: true,
-  activate: async (
-    app: JupyterFrontEnd,
-    service: IDebugger,
-    translator: ITranslator,
-    palette: ICommandPalette | null,
-    editorServices: IEditorServices | null
-  ): Promise<void> => {
-    const trans = translator.load('jupyterlab');
-    const { commands } = app;
-
-    const rendermime = new RenderMimeRegistry({ initialFactories });
-
-    const getMimeType = async (): Promise<string> => {
-      const kernel = service.session?.connection?.kernel;
-      if (!kernel) {
-        return '';
-      }
-      const info = (await kernel.info).language_info;
-      const name = info.name;
-      const mimeType =
-        editorServices?.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
-      return mimeType;
-    };
-
-    const getCodeToEvaluate = async (): Promise<string> => {
-      const mimeType = await getMimeType();
-      const options = {
-        title: trans.__('Evaluate Code'),
-        body: new CodePromptDialogBody({ rendermime, mimeType }),
-        buttons: [
-          Dialog.cancelButton(),
-          Dialog.okButton({ label: trans.__('Evaluate') })
-        ]
-      };
-
-      const dialog = new EvaluateDialog(options);
-      const result = await dialog.launch();
-      if (result.button.accept) {
-        return result.value ?? '';
-      }
-
-      return '';
-    };
-
-    const command = Debugger.CommandIDs.evaluate;
-    commands.addCommand(command, {
-      label: trans.__('Evaluate Code'),
-      caption: trans.__('Evaluate Code'),
-      icon: Debugger.Icons.evaluateIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
-      execute: async () => {
-        const code = await getCodeToEvaluate();
-        if (!code) {
-          return;
-        }
-        await service.evaluate(code);
-      }
-    });
-
-    if (palette) {
-      const category = trans.__('Debugger');
-      palette.addItem({ command, category });
-    }
-  }
-};
-
-/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -708,8 +683,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sidebar,
   main,
   sources,
-  configuration,
-  evaluatePlugin
+  configuration
 ];
 
 export default plugins;
