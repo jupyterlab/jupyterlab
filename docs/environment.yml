@@ -10,8 +10,7 @@ dependencies:
 - pytest
 - pip
 - nodejs
-- pip:
-  - jsx-lexer
-  - pytest-check-links[cache]>=0.4.3
-  - myst_parser
-  - requests_cache
+- requests_cache
+- jsx-lexer
+- myst-parser
+- pytest-check-links
