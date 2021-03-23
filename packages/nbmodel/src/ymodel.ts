@@ -38,6 +38,9 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       return this.ycellMapping.get(ycell) as YCellType;
     });
   }
+  transact(f: () => void): void {
+    this.ydoc.transact(f);
+  }
   getCell(index: number): YCellType {
     return this.cells[index];
   }
@@ -59,14 +62,17 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   }
   moveCell(fromIndex: number, toIndex: number): void {
     this.ydoc.transact(() => {
-      const fromCell = this.getCell(fromIndex).clone();
+      const fromCell: any = this.getCell(fromIndex).clone();
       this.deleteCell(fromIndex);
       this.insertCell(toIndex, fromCell);
     }, this);
   }
   deleteCell(index: number): void {
+    this.deleteCellRange(index, index + 1);
+  }
+  deleteCellRange(from: number, to: number): void {
     this.ydoc.transact(() => {
-      this.ycells.delete(index, length);
+      this.ycells.delete(from, to - from);
     }, this);
   }
   undo(): void {
@@ -173,6 +179,8 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
     this.ymodel.observeDeep(this._modelObserver);
   }
 
+  isStandalone = false;
+
   /**
    * Create a new YRawCell that can be inserted into a YNotebook
    */
@@ -192,15 +200,17 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
    */
   public static createStandalone(): YBaseCell<any> {
     const cell = this.create();
+    cell.isStandalone = true;
     new Y.Doc().getArray().insert(0, [cell.ymodel]);
     return cell;
   }
 
-  public clone(): this {
+  public clone(): YBaseCell<any> {
     const ymodel = new Y.Map();
-    this.ymodel.forEach((value, key) => {
-      this.ymodel.set(key, value);
-    });
+    const ysource = new Y.Text(this.getSource());
+    ymodel.set('source', ysource);
+    ymodel.set('metadata', this.getMetadata());
+    ymodel.set('cell_type', this.cell_type);
     const Self: any = this.constructor;
     return new Self(ymodel);
   }
@@ -323,7 +333,15 @@ export class YCodeCell
    */
   public static createStandalone(): YCodeCell {
     const cell = super.createStandalone();
-    cell.ymodel.set('execution_count', 0); // for some default value
+    cell.ymodel.set('execution_count', null); // for some default value
+    return cell as any;
+  }
+  /**
+   * Create a new YCodeCell that can be inserted into a YNotebook
+   */
+  public clone(): YCodeCell {
+    const cell = super.clone();
+    cell.ymodel.set('execution_count', this.execution_count); // for some default value
     return cell as any;
   }
   toJSON(): nbformat.ICodeCell {

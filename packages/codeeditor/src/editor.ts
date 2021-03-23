@@ -209,6 +209,14 @@ export namespace CodeEditor {
      * The shared model for the cell editor.
      */
     readonly nbcell: nbmodel.ISharedCodeCell;
+    /**
+     * When we initialize a cell model, we create a standalone nbcell that cannot be shared in a YNotebook.
+     * Call this function to re-initialize the local representation based on a fresh nbcell.
+     */
+    switchSharedModel(
+      nbcell: nbmodel.ISharedCodeCell,
+      reinitialize: boolean
+    ): void;
   }
 
   /**
@@ -238,6 +246,21 @@ export namespace CodeEditor {
       mimeType.set(options.mimeType || 'text/plain');
 
       this.modelDB.createMap('selections');
+    }
+
+    public switchSharedModel(
+      nbcell: nbmodel.ISharedCodeCell,
+      reinitialize: boolean
+    ): void {
+      if (reinitialize) {
+        // update local modeldb
+        // @todo also change metadata
+        this.value.text = nbcell.getSource();
+      }
+      this.nbcell.changed.disconnect(this._onSharedModelChanged, this);
+      // clone nbcell to retrieve a shared (not standalone) nbcell
+      this.nbcell = this.nbcell.clone();
+      this.nbcell.changed.connect(this._onSharedModelChanged, this);
     }
 
     /**
@@ -290,7 +313,7 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    readonly nbcell = nbmodel.YCodeCell.createStandalone();
+    nbcell = nbmodel.YCodeCell.createStandalone();
 
     /**
      * A mutex to updated the nbcell model.
@@ -353,7 +376,6 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
-      this.value.text = '';
       Signal.clearData(this);
     }
 
