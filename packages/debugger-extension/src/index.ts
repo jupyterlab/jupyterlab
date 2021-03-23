@@ -13,8 +13,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
+  Dialog,
   ICommandPalette,
-  InputDialog,
   IThemeManager,
   MainAreaWidget,
   WidgetTracker
@@ -31,7 +31,9 @@ import {
   IDebugger,
   IDebuggerConfig,
   IDebuggerSources,
-  IDebuggerSidebar
+  IDebuggerSidebar,
+  CodePromptDialogBody,
+  EvaluateDialog
 } from '@jupyterlab/debugger';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -39,6 +41,11 @@ import { DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+
+import {
+  RenderMimeRegistry,
+  standardRendererFactories as initialFactories
+} from '@jupyterlab/rendermime';
 
 import { Session } from '@jupyterlab/services';
 
@@ -619,28 +626,50 @@ const main: JupyterFrontEndPlugin<void> = {
 const evaluatePlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:evaluate',
   requires: [IDebugger, ITranslator],
-  optional: [ICommandPalette],
+  optional: [ICommandPalette, IEditorServices],
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
     service: IDebugger,
     translator: ITranslator,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    editorServices: IEditorServices | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
 
-    const getCodeToEvaluate = async () => {
-      return (
-        (
-          await InputDialog.getText({
-            label: trans.__('Code'),
-            placeholder: 'foo = 1',
-            title: trans.__('Evaluate Code'),
-            okLabel: trans.__('Evaluate')
-          })
-        ).value ?? undefined
-      );
+    const rendermime = new RenderMimeRegistry({ initialFactories });
+
+    const getMimeType = async (): Promise<string> => {
+      const kernel = service.session?.connection?.kernel;
+      if (!kernel) {
+        return '';
+      }
+      const info = (await kernel.info).language_info;
+      const name = info.name;
+      const mimeType =
+        editorServices?.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
+      return mimeType;
+    };
+
+    const getCodeToEvaluate = async (): Promise<string> => {
+      const mimeType = await getMimeType();
+      const options = {
+        title: trans.__('Evaluate Code'),
+        body: new CodePromptDialogBody({ rendermime, mimeType }),
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.okButton({ label: trans.__('Evaluate') })
+        ]
+      };
+
+      const dialog = new EvaluateDialog(options);
+      const result = await dialog.launch();
+      if (result.button.accept) {
+        return result.value ?? '';
+      }
+
+      return '';
     };
 
     const command = Debugger.CommandIDs.evaluate;
