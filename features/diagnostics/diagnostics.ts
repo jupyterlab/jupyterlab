@@ -46,13 +46,12 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
 }
 
-let trans: TranslationBundle;
-
 class DiagnosticsPanel {
   private _content: DiagnosticsListing = null;
   private _widget: MainAreaWidget<DiagnosticsListing> = null;
   feature: DiagnosticsCM;
   is_registered = false;
+  trans: TranslationBundle;
 
   get widget() {
     if (this._widget == null || this._widget.content.model == null) {
@@ -69,12 +68,14 @@ class DiagnosticsPanel {
   }
 
   protected init_widget() {
-    this._content = new DiagnosticsListing(new DiagnosticsListing.Model(trans));
+    this._content = new DiagnosticsListing(
+      new DiagnosticsListing.Model(this.trans)
+    );
     this._content.model.diagnostics = new DiagnosticsDatabase();
     this._content.addClass('lsp-diagnostics-panel-content');
     const widget = new MainAreaWidget({ content: this._content });
     widget.id = 'lsp-diagnostics-panel';
-    widget.title.label = trans.__('Diagnostics Panel');
+    widget.title.label = this.trans?.__('Diagnostics Panel');
     widget.title.closable = true;
     widget.title.icon = diagnosticsIcon;
     return widget;
@@ -102,7 +103,7 @@ class DiagnosticsPanel {
 
     /** Columns Menu **/
     let columns_menu = new Menu({ commands: app.commands });
-    columns_menu.title.label = trans.__('Panel columns');
+    columns_menu.title.label = this.trans.__('Panel columns');
 
     app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
       execute: args => {
@@ -131,7 +132,7 @@ class DiagnosticsPanel {
 
     /** Diagnostics Menu **/
     let ignore_diagnostics_menu = new Menu({ commands: app.commands });
-    ignore_diagnostics_menu.title.label = trans.__(
+    ignore_diagnostics_menu.title.label = this.trans.__(
       'Ignore diagnostics like this'
     );
 
@@ -175,7 +176,10 @@ class DiagnosticsPanel {
           return '';
         }
         const diagnostic = row.data.diagnostic;
-        return trans.__(`Ignore diagnostics with "%1" code`, diagnostic.code);
+        return this.trans.__(
+          'Ignore diagnostics with "%1" code',
+          diagnostic.code
+        );
       }
     });
     app.commands.addCommand(CMD_IGNORE_DIAGNOSTIC_MSG, {
@@ -204,7 +208,7 @@ class DiagnosticsPanel {
           return '';
         }
         const diagnostic = row.data.diagnostic;
-        return trans.__(
+        return this.trans.__(
           'Ignore diagnostics with "%1" message',
           diagnostic.message
         );
@@ -216,7 +220,7 @@ class DiagnosticsPanel {
         const row = get_row();
         this.widget.content.jump_to(row);
       },
-      label: trans.__('Jump to location'),
+      label: this.trans.__('Jump to location'),
       icon: jumpToIcon
     });
 
@@ -231,7 +235,7 @@ class DiagnosticsPanel {
           .writeText(message)
           .then(() => {
             this.content.model.status_message.set(
-              trans.__(`Successfully copied "%1" to clipboard`, message)
+              this.trans.__(`Successfully copied "%1" to clipboard`, message)
             );
           })
           .catch(() => {
@@ -239,14 +243,14 @@ class DiagnosticsPanel {
               'Could not copy with clipboard.writeText interface, falling back'
             );
             window.prompt(
-              trans.__(
+              this.trans.__(
                 'Your browser protects clipboard from write operations; please copy the message manually'
               ),
               message
             );
           });
       },
-      label: trans.__("Copy diagnostics' message"),
+      label: this.trans.__("Copy diagnostics' message"),
       icon: copyIcon
     });
 
@@ -321,7 +325,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
   }
 
   switchDiagnosticsPanelSource = () => {
-    trans = this.adapter.trans;
+    diagnostics_panel.trans = this.adapter.trans;
     if (
       diagnostics_panel.content.model.virtual_editor === this.virtual_editor &&
       diagnostics_panel.content.model.diagnostics == this.diagnostics_db

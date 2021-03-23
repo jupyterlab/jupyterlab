@@ -134,7 +134,7 @@ export abstract class CodeMirrorIntegration
     this.adapter = options.adapter;
     this.console = this.adapter.console.scope(options.feature.name);
     this.trans = options.trans;
-    
+
     this.editor_handlers = new Map();
     this.connection_handlers = new Map();
     this.wrapper_handlers = new Map();
