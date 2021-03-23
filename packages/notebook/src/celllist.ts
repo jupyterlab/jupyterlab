@@ -10,6 +10,8 @@ import {
   ArrayIterator
 } from '@lumino/algorithm';
 
+import * as nbmodel from '@jupyterlab/nbmodel';
+
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { ICellModel } from '@jupyterlab/cells';
@@ -31,15 +33,76 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   /**
    * Construct the cell list.
    */
-  constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
+  constructor(
+    modelDB: IModelDB,
+    factory: NotebookModel.IContentFactory,
+    model: nbmodel.ISharedNotebook
+  ) {
     this._factory = factory;
     this._cellOrder = modelDB.createList<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
 
     this._cellOrder.changed.connect(this._onOrderChanged, this);
+    this.nbmodel = model;
+    this.nbmodel.changed.connect(this.onSharedModelChanged, this);
+    this.changed.connect(this.onModeldbChanged, this);
   }
 
   type: 'List';
+  nbmodel: nbmodel.ISharedNotebook;
+
+  /**
+   * Prevents that the modeldb event handler is executed when the shared-model event handler is executed and vice-versa.
+   */
+  private readonly _mutex = nbmodel.createMutex();
+
+  private onModeldbChanged(
+    self: CellList,
+    change: IObservableList.IChangedArgs<ICellModel>
+  ) {
+    this._mutex(() => {
+      const nbmodel = this.nbmodel;
+      nbmodel.transact(() => {
+        if (change.type === 'set' || change.type === 'remove') {
+          nbmodel.deleteCellRange(
+            change.newIndex,
+            change.newIndex + change.oldValues.length
+          );
+        }
+        if (change.type === 'set' || change.type === 'add') {
+          const cells = change.newValues.map(cell => {
+            cell.switchSharedModel(cell.nbcell.clone() as any, false);
+            return cell.nbcell;
+          });
+          nbmodel.insertCells(change.newIndex, cells);
+        }
+      });
+    });
+  }
+
+  private onSharedModelChanged(
+    self: nbmodel.ISharedNotebook,
+    change: nbmodel.NotebookChange
+  ) {
+    this._mutex(() => {
+      let currpos = 0;
+      change.cellsChange?.forEach(delta => {
+        if (delta.insert != null) {
+          const cells = delta.insert.map(nbcell => {
+            const cell = this._factory.createCell(nbcell.cell_type, {});
+            cell.switchSharedModel(nbcell as any, true);
+            return cell;
+          });
+          this.insertAll(currpos, cells);
+          currpos += delta.insert.length;
+        } else if (delta.delete != null) {
+          this.removeRange(currpos, currpos + delta.delete);
+        } else if (delta.retain != null) {
+          currpos += delta.retain;
+        }
+      });
+    });
+  }
 
   /**
    * A signal emitted when the cell list has changed.
@@ -435,6 +498,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Undo an operation.
    */
   undo(): void {
+    // @todo use this.nbmodel.undo() instead
     this._cellOrder.undo();
   }
 
@@ -470,7 +534,8 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   ): void {
     if (change.type === 'add' || change.type === 'set') {
       each(change.newValues, id => {
-        if (!this._cellMap.has(id)) {
+        const existingCell = this._cellMap.get(id);
+        if (existingCell == null) {
           const cellDB = this._factory.modelDB!;
           const cellType = cellDB.createValue(id + '.type');
           let cell: ICellModel;
@@ -486,6 +551,23 @@ export class CellList implements IObservableUndoableList<ICellModel> {
               break;
           }
           this._cellMap.set(id, cell);
+        } else if (!existingCell.nbcell.isStandalone) {
+          // it does already exist, probably because it was deleted previously and we introduced it
+          // copy it to a fresh codecell instance
+          const cell = existingCell.toJSON();
+          let freshCell = null;
+          switch (cell.cell_type) {
+            case 'code':
+              freshCell = this._factory.createCodeCell({ cell });
+              break;
+            case 'markdown':
+              freshCell = this._factory.createMarkdownCell({ cell });
+              break;
+            default:
+              freshCell = this._factory.createRawCell({ cell });
+              break;
+          }
+          this._cellMap.set(id, freshCell);
         }
       });
     }
