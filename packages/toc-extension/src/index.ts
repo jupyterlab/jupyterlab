@@ -99,7 +99,8 @@ async function activateTOC(
     editorTracker,
     toc,
     rendermime.sanitizer,
-    translator
+    translator,
+    settings
   );
   registry.add(markdownGenerator);
 
@@ -108,7 +109,8 @@ async function activateTOC(
     markdownViewerTracker,
     toc,
     rendermime.sanitizer,
-    translator
+    translator,
+    settings
   );
   registry.add(renderedMarkdownGenerator);
 

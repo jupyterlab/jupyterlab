@@ -18,6 +18,7 @@ import { render } from './render';
 import { toolbar } from './toolbar_generator';
 import { getHeadings } from './get_headings';
 import { getRenderedHeadings } from './get_rendered_headings';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * Returns a boolean indicating whether this ToC generator is enabled.
@@ -29,34 +30,6 @@ import { getRenderedHeadings } from './get_rendered_headings';
 function isEnabled(editor: IDocumentWidget<FileEditor>) {
   // Only enable this if the editor MIME type matches one of a few Markdown variants:
   return isMarkdown(editor.content.model.mimeType);
-}
-
-/**
- * Generates a table of contents.
- *
- * @private
- * @param editor - editor widget
- * @returns a list of headings
- */
-function generate(editor: IDocumentWidget<FileEditor>): INumberedHeading[] {
-  let dict = {};
-  return getHeadings(editor.content.model.value.text, onClick, dict);
-
-  /**
-   * Returns a "click" handler.
-   *
-   * @private
-   * @param line - line number
-   * @returns click handler
-   */
-  function onClick(line: number) {
-    return () => {
-      editor.content.editor.setCursorPosition({
-        line: line,
-        column: 0
-      });
-    };
-  }
 }
 
 /**
@@ -72,10 +45,16 @@ function createMarkdownGenerator(
   tracker: IEditorTracker,
   widget: TableOfContents,
   sanitizer: ISanitizer,
-  translator?: ITranslator
+  translator?: ITranslator,
+  settings?: ISettingRegistry.ISettings
 ): Registry.IGenerator<IDocumentWidget<FileEditor>> {
+  let numberingH1 = true;
+  if (settings) {
+    numberingH1 = settings.composite.numberingH1 as boolean;
+  }
   const options = new OptionsManager(widget, {
     numbering: true,
+    numberingH1: numberingH1,
     sanitizer,
     translator: translator || nullTranslator
   });
@@ -109,6 +88,39 @@ function createMarkdownGenerator(
   function renderItem(item: INumberedHeading) {
     return render(options, item);
   }
+
+  /**
+   * Generates a table of contents.
+   *
+   * @private
+   * @param editor - editor widget
+   * @returns a list of headings
+   */
+  function generate(editor: IDocumentWidget<FileEditor>): INumberedHeading[] {
+    let dict = {};
+    return getHeadings(
+      editor.content.model.value.text,
+      onClick,
+      dict,
+      options.numberingH1
+    );
+
+    /**
+     * Returns a "click" handler.
+     *
+     * @private
+     * @param line - line number
+     * @returns click handler
+     */
+    function onClick(line: number) {
+      return () => {
+        editor.content.editor.setCursorPosition({
+          line: line,
+          column: 0
+        });
+      };
+    }
+  }
 }
 
 /**
@@ -123,10 +135,16 @@ function createRenderedMarkdownGenerator(
   tracker: IMarkdownViewerTracker,
   widget: TableOfContents,
   sanitizer: ISanitizer,
-  translator?: ITranslator
+  translator?: ITranslator,
+  settings?: ISettingRegistry.ISettings
 ): Registry.IGenerator<MarkdownDocument> {
+  let numberingH1 = true;
+  if (settings) {
+    numberingH1 = settings.composite.numberingH1 as boolean;
+  }
   const options = new OptionsManager(widget, {
     numbering: true,
+    numberingH1: numberingH1,
     sanitizer,
     translator: translator || nullTranslator
   });
@@ -173,7 +191,8 @@ function createRenderedMarkdownGenerator(
       widget.content.node,
       sanitizer,
       dict,
-      options.numbering
+      options.numbering,
+      options.numberingH1
     );
   }
 }

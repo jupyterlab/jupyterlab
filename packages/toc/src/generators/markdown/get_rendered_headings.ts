@@ -34,7 +34,8 @@ function getRenderedHeadings(
   node: HTMLElement,
   sanitizer: ISanitizer,
   dict: INumberingDictionary,
-  numbering = true
+  numbering = true,
+  numberingH1 = true
 ): INumberedHeading[] {
   let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
   let headings: INumberedHeading[] = [];
@@ -52,8 +53,7 @@ function getRenderedHeadings(
     html = html.replace('¶', ''); // remove the anchor symbol
 
     // Generate a numbering string:
-    let nstr = generateNumbering(dict, level);
-
+    let nstr = generateNumbering(dict, level, numberingH1);
     // Generate the numbering DOM element:
     let nhtml = '';
     if (!hide) {

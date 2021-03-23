@@ -27,7 +27,8 @@ type onClickFactory = (line: number) => () => void;
 function getHeadings(
   text: string,
   onClick: onClickFactory,
-  dict: INumberingDictionary
+  dict: INumberingDictionary,
+  numberingH1: boolean
 ): INumberedHeading[] {
   // Split the text into lines:
   const lines = text.split('\n');
@@ -50,7 +51,7 @@ function getHeadings(
     if (heading) {
       headings.push({
         text: heading.text,
-        numbering: generateNumbering(dict, heading.level),
+        numbering: generateNumbering(dict, heading.level, numberingH1),
         level: heading.level,
         onClick: onClick(i)
       });
