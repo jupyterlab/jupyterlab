@@ -226,11 +226,14 @@ export class DebuggerService implements IDebugger, IDisposable {
       throw new Error('No active debugger session');
     }
     const frameId = this.model.callstack.frame?.id;
-    await this.session.sendRequest('evaluate', {
+    const reply = await this.session.sendRequest('evaluate', {
       context: 'repl',
       expression,
       frameId
     });
+    if (!reply.success) {
+      return;
+    }
     // get the frames to retrieve the latest state of the variables
     this._clearModel();
     await this._getAllFrames();
