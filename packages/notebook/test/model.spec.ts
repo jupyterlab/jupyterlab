@@ -86,7 +86,8 @@ describe('@jupyterlab/notebook', () => {
         model.cells.undo();
         expect(model.cells.length).toBe(1);
         expect(model.cells.get(0).value.text).toBe('foo');
-        expect(model.cells.get(0)).toBe(cell); // should be ===.
+        // Previous model matches the restored model
+        expect(model.cells.get(0).toJSON()).toEqual(cell.toJSON());
       });
 
       describe('cells `changed` signal', () => {

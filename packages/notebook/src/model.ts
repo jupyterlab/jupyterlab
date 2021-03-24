@@ -3,6 +3,8 @@
 
 import { DocumentModel, DocumentRegistry } from '@jupyterlab/docregistry';
 
+import * as nbmodel from '@jupyterlab/nbmodel';
+
 import {
   ICellModel,
   ICodeCellModel,
@@ -80,7 +82,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
-    this._cells = new CellList(this.modelDB, this.contentFactory);
+    this._cells = new CellList(this.modelDB, this.contentFactory, this.nbmodel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._cells.changed.connect(this._onCellsChanged, this);
 
@@ -99,6 +101,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * The cell model factory for the notebook.
    */
   readonly contentFactory: NotebookModel.IContentFactory;
+  readonly nbmodel = nbmodel.YNotebook.create();
 
   /**
    * The metadata associated with the notebook.

@@ -30,6 +30,11 @@ import { Delta } from './utils';
  * Implements an API for nbformat.INotebookContent
  */
 export interface ISharedNotebook extends IDisposable {
+  /**
+   * Perform a transaction. While the function f is called, all changes to the shared
+   * document are bundled into a single event.
+   */
+  transact(f: () => void): void;
   getMetadata(): nbformat.INotebookMetadata;
   setMetadata(metadata: nbformat.INotebookMetadata): void;
   updateMetadata(value: Partial<nbformat.INotebookMetadata>): void;
@@ -41,6 +46,7 @@ export interface ISharedNotebook extends IDisposable {
   insertCells(index: number, cells: Array<ISharedCell>): void;
   moveCell(fromIndex: number, toIndex: number): void;
   deleteCell(index: number): void;
+  deleteCellRange(from: number, to: number): void;
   undo(): void;
   redo(): void;
   readonly changed: ISignal<this, NotebookChange>;
@@ -80,6 +86,9 @@ export type ISharedCell =
  */
 export interface ISharedBaseCell<Metadata extends nbformat.IBaseCellMetadata>
   extends IDisposable {
+  // @todo clone should only be available in the specific implementations i.e. ISharedCodeCell
+  clone(): ISharedBaseCell<Metadata>;
+  readonly isStandalone: boolean;
   getSource(): string;
   setSource(value: string): void;
   /**
