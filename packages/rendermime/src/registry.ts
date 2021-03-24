@@ -364,14 +364,14 @@ export namespace RenderMimeRegistry {
      * Get the download url of a given absolute url path.
      *
      * #### Notes
-     * This URL may include a query parameter.
+     * The returned URL may include a query parameter.
      */
-    async getDownloadUrl(url: string): Promise<string> {
-      if (this.isLocal(url)) {
+    async getDownloadUrl(urlPath: string): Promise<string> {
+      if (this.isLocal(urlPath)) {
         // decode url->path before passing to contents api
-        return this._contents.getDownloadUrl(decodeURI(url));
+        return this._contents.getDownloadUrl(decodeURIComponent(urlPath));
       }
-      return url;
+      return urlPath;
     }
 
     /**

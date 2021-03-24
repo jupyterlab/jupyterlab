@@ -133,6 +133,7 @@ An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as fol
 
 See :ref:`documentation on enabling and disabling extensions <enable_disable_config>` for more information.
 
+.. _application_directory:
 
 JupyterLab Application Directory
 --------------------------------
@@ -188,12 +189,14 @@ Schemas <http://json-schema.org/>`__ that describe the settings used by
 individual extensions. Users may edit these settings using the
 JupyterLab Advanced Settings Editor.
 
+.. _application_settings_directory:
+
 settings
 ^^^^^^^^
 
-The ``settings`` directory may contain ``page_config.json``, ``overrides.json``, and/or
-``build_config.json`` files, depending on which configurations are
-set on your system.
+The ``settings`` directory inside the :ref:`JupyterLab Application directory
+<application_directory>` may contain ``page_config.json``, ``overrides.json``,
+and/or ``build_config.json`` files.
 
 .. _page_configjson:
 
@@ -221,9 +224,12 @@ overrides.json
 
 You can override default values of the extension settings by defining new
 default values in an ``overrides.json`` file. For example, if you would like
-to override the default theme to be the dark theme, an ``overrides.json`` file
-containing the following lines should be added in the application settings
-directory (by default this is the ``share/jupyter/lab/settings`` folder).
+to override the default theme to be the dark theme, create an
+``overrides.json`` file containing the following lines in the
+:ref:`application settings directory <application_settings_directory>` (for
+example, if the :ref:`application_directory` is
+``<sys.prefix>/local/share/jupyter/lab``, create this file at
+``<sys.prefix>/local/share/jupyter/lab/settings/overrides.json``).
 
 .. code:: json
 

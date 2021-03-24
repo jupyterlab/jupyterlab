@@ -66,11 +66,12 @@ function getRenderedHTMLHeadings(
 
     const level = parseInt(el.tagName[1], 10);
     let nstr = generateNumbering(dict, level, numberingH1);
-    let nhtml = '';
     if (numbering) {
-      nhtml = '<span class="numbering-entry">' + nstr + '</span>';
+      const nhtml = document.createElement('span');
+      nhtml.classList.add('numbering-entry');
+      nhtml.textContent = nstr ?? '';
+      el.insertBefore(nhtml, el.firstChild);
     }
-    el.innerHTML = nhtml + html;
     headings.push({
       level: level,
       text: el.textContent ? el.textContent : '',

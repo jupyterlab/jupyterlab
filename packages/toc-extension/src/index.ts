@@ -69,6 +69,9 @@ async function activateTOC(
   toc.title.icon = tocIcon;
   toc.title.caption = trans.__('Table of Contents');
   toc.id = 'table-of-contents';
+  toc.node.setAttribute('role', 'region');
+  toc.node.setAttribute('aria-label', trans.__('Table of Contents section'));
+
   labShell.add(toc, 'left', { rank: 400 });
 
   // Add the ToC widget to the application restorer:
