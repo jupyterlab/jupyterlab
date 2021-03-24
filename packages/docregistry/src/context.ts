@@ -38,6 +38,8 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 
+import { DOC_PROVIDER_TYPE } from '@jupyterlab/docprovider';
+
 import { DocumentRegistry } from './registry';
 
 /**
@@ -61,6 +63,9 @@ export class Context<
     this._path = this._manager.contents.normalize(options.path);
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
+
+    // @todo user docprovider
+    console.log('Use DocProvider', DOC_PROVIDER_TYPE);
 
     const dbFactory = options.modelDBFactory;
     if (dbFactory) {
