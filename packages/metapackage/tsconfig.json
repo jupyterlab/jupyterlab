@@ -73,6 +73,9 @@
       "path": "../docmanager-extension"
     },
     {
+      "path": "../docprovider"
+    },
+    {
       "path": "../docregistry"
     },
     {
