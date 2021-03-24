@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-const yprovider = 'yprovider';
+import * as yws from 'y-websocket';
+
+const yprovider = yws;
 
 export default yprovider;
