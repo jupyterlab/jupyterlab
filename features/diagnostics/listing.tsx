@@ -169,7 +169,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       name: 'Severity',
       // TODO: use default diagnostic severity
       render_cell: row => (
-        <td key={3}>{DiagnosticSeverity[row.data.diagnostic.severity || 1]}</td>
+        <td key={3}>{trans.__(DiagnosticSeverity[row.data.diagnostic.severity || 1])}</td>
       ),
       sort: (a, b) =>
         a.data.diagnostic.severity > b.data.diagnostic.severity ? 1 : -1

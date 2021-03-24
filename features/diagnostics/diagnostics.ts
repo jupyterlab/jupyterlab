@@ -111,7 +111,7 @@ class DiagnosticsPanel {
         column.is_visible = !column.is_visible;
         widget.update();
       },
-      label: args => args['name'] as string,
+      label: args => this.trans.__(`${args['name']}`) as string,
       isToggled: args => {
         let column = get_column(args['name'] as string);
         return column.is_visible;
