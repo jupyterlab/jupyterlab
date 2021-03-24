@@ -53,6 +53,7 @@
     "@jupyterlab/debugger-extension": "^3.1.0-alpha.5",
     "@jupyterlab/docmanager": "^3.1.0-alpha.5",
     "@jupyterlab/docmanager-extension": "^3.1.0-alpha.5",
+    "@jupyterlab/docprovider": "^3.1.0-alpha.5",
     "@jupyterlab/docregistry": "^3.1.0-alpha.5",
     "@jupyterlab/documentsearch": "^3.1.0-alpha.5",
     "@jupyterlab/documentsearch-extension": "^3.1.0-alpha.5",
