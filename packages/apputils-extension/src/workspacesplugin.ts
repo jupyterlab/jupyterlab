@@ -88,7 +88,7 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
     app.docRegistry.addWidgetFactory(factory);
 
     app.commands.addCommand(CommandIDs.saveWorkspaceAs, {
-      label: trans.__('Save Current Workspace As...'),
+      label: trans.__('Save Current Workspace As…'),
       execute: async () => {
         const data = app.serviceManager.workspaces.fetch(resolver.name);
         await Private.saveAs(
