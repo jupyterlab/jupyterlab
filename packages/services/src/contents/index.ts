@@ -112,7 +112,7 @@ export namespace Contents {
   }
 
   /**
-   * Validates an IModel, thowing an error if it does not pass.
+   * Validates an IModel, throwing an error if it does not pass.
    */
   export function validateContentsModel(contents: IModel): void {
     validate.validateContentsModel(contents);
