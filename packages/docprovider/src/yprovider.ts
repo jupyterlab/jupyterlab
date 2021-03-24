@@ -3,8 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as yws from 'y-websocket';
+import { WebsocketProvider } from 'y-websocket';
 
-const yprovider = yws;
+export const DOC_PROVIDER_TYPE = 'ws_yjs';
 
-export default yprovider;
+class YWebsocketProvider extends WebsocketProvider {}
+
+export default YWebsocketProvider;
