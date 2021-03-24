@@ -23,11 +23,6 @@ interface IState {
    * Boolean indicating whether numbering is enabled.
    */
   numbering: boolean;
-
-  /**
-   * Boolean indicating whether to number h1 headers.
-   */
-  numberingH1: boolean;
 }
 
 /**
@@ -47,13 +42,9 @@ function toolbar(options: OptionsManager) {
      */
     constructor(props: IProperties) {
       super(props);
-      this.state = { numbering: false, numberingH1: false };
-      options.initializeOptions(options.numbering, options.numberingH1);
+      this.state = { numbering: false };
+      options.initializeOptions(false, options.numberingH1);
       this._trans = options.translator.load('jupyterlab');
-      this.setState({
-        numbering: options.numbering,
-        numberingH1: options.numberingH1
-      });
     }
 
     /**
