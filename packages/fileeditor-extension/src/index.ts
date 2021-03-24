@@ -46,7 +46,7 @@ import { JSONObject } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
 
-import { Commands, FACTORY } from './commands';
+import { Commands, FACTORY, IExtensionData } from './commands';
 
 export { Commands } from './commands';
 
@@ -190,25 +190,25 @@ function activate(
     tracker.currentWidget !== null &&
     tracker.currentWidget === shell.currentWidget;
 
-  const commonLanguageFileTypes = new Map<string, string[]>([
-    ['python', ['py']],
-    ['julia', ['jl']],
-    ['R', ['r']],
+  const commonLanguageFileTypeData = new Map<string, IExtensionData[]>([
+    ['python', [{ fileExt: 'py', fileTypeName: 'Python', iconName: 'ui-components:python' }]],
+    ['julia', [{ fileExt: 'jl', fileTypeName: 'Julia' }]],
+    ['R', [{ fileExt: 'r', fileTypeName: 'R', iconName: 'ui-components:r-kernel' }]]
   ]);
 
-  const getAvailableLanguageExtensions = async () => {
+  const getAvailableKernelFileTypes = async () => {
     const specsManager = app.serviceManager.kernelspecs;
     await specsManager.ready;
-    let fileExtensions = new Set<string>();
+    let fileTypes = new Set<IExtensionData>();
     const specs = specsManager.specs?.kernelspecs ?? {};
     Object.keys(specs).forEach(spec => {
       const specModel = specs[spec];
       if (specModel){
-        const exts = commonLanguageFileTypes.get(specModel.language);
-        exts?.forEach(ext => fileExtensions.add(ext));
+        const exts = commonLanguageFileTypeData.get(specModel.language);
+        exts?.forEach(ext => fileTypes.add(ext));
       }
     });
-    return fileExtensions;
+    return fileTypes;
   }
 
   // Handle state restoration.
@@ -261,32 +261,42 @@ function activate(
     browserFactory
   );
 
-  getAvailableLanguageExtensions()
-  .then((availableLanguageExtensions) => {
-    // Add a launcher item if the launcher is available.
+  // Add a launcher item if the launcher is available.
+  if (launcher) {
+    Commands.addLauncherItems(launcher, trans);
+  }
+
+  if (palette) {
+    Commands.addPaletteItems(palette, trans);
+  }
+
+  if (menu) {
+    Commands.addMenuItems(
+      menu,
+      commands,
+      tracker,
+      trans,
+      consoleTracker,
+      sessionDialogs
+    );
+  }
+
+  getAvailableKernelFileTypes()
+  .then((availableKernelFileTypes) => {
     if (launcher) {
-      Commands.addLauncherItems(launcher, trans, availableLanguageExtensions);
+      Commands.addKernelLanguageLauncherItems(launcher, trans, availableKernelFileTypes);
     }
 
     if (palette) {
-      Commands.addPaletteItems(palette, trans, availableLanguageExtensions);
+      Commands.addKernelLanguagePaletteItems(palette, trans, availableKernelFileTypes);
     }
 
     if (menu) {
-      Commands.addMenuItems(
-        menu,
-        commands,
-        tracker,
-        trans,
-        consoleTracker,
-        sessionDialogs,
-        availableLanguageExtensions
-      );
+      Commands.addKernelLanguageMenuItems(menu, availableKernelFileTypes);
     }
   })
-  .catch((reason: Error) => {  // TODO@RE make this useful
+  .catch((reason: Error) => {
     console.error(reason.message);
-    Commands.updateTracker(tracker);
   });
 
   Commands.addContextMenuItems(app);
