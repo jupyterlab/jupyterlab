@@ -6,6 +6,11 @@ JupyterLab Changelog
 `v2.3.x <https://github.com/jupyterlab/jupyterlab/milestone/59>`__
 ------------------------------------------------------------------
 
+v2.3.1
+^^^^^^
+* Add shims for missing functions on Safari used by Virtual Notebook  (`#10001 <https://github.com/jupyterlab/jupyterlab/pull/10001>`__).
+
+
 v2.3.0
 ^^^^^^
 * Trim notebook large output for better performance (`#9594 <https://github.com/jupyterlab/jupyterlab/pull/9594>`__), read more on `the doc <https://jupyterlab.readthedocs.io/en/stable/developer/notebook.html#trimmed-outputs>`__
