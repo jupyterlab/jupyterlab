@@ -152,9 +152,9 @@ async def run_browser(url):
         if not osp.exists(target):
             os.makedirs(osp.join(target))
         await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(["jlpm", "add", "puppeteer@^7"], cwd=target)
-    shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
-    await run_async_process(["node", "chrome-test.js", url], cwd=target)
+        await run_async_process(["jlpm", "add", "playwright@^1.9.2"], cwd=target)
+    shutil.copy(osp.join(here, 'browser-test.js'), osp.join(target, 'browser-test.js'))
+    await run_async_process(["node", "browser-test.js", url], cwd=target)
 
 
 def run_browser_sync(url):
@@ -164,9 +164,9 @@ def run_browser_sync(url):
     if not osp.exists(osp.join(target, 'node_modules')):
         os.makedirs(target)
         subprocess.call(["jlpm", "init", "-y"], cwd=target)
-        subprocess.call(["jlpm", "add", "puppeteer@^7"], cwd=target)
-    shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
-    return subprocess.check_call(["node", "chrome-test.js", url], cwd=target)
+        subprocess.call(["jlpm", "add", "playwright@^1.9.2"], cwd=target)
+    shutil.copy(osp.join(here, 'browser-test.js'), osp.join(target, 'browser-test.js'))
+    return subprocess.check_call(["node", "browser-test.js", url], cwd=target)
 
 class BrowserApp(LabApp):
     """An app the launches JupyterLab and waits for it to start up, checking for
@@ -228,10 +228,11 @@ def _jupyter_server_extension_paths():
 
 
 if __name__ == '__main__':
-    skip_option = "--no-chrome-test"
-    if skip_option in sys.argv:
-        BrowserApp.test_browser = False
-        sys.argv.remove(skip_option)
+    skip_options = ["--no-browser-test", "--no-chrome-test"]
+    for option in skip_options:
+        if option in sys.argv:
+            BrowserApp.test_browser = False
+            sys.argv.remove(option)
 
     if "--notebook" in sys.argv:
         from notebook.notebookapp import NotebookApp
