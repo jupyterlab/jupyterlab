@@ -132,12 +132,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
-    this.yeditorBinding = USE_YCODEMIRROR_BINDING
-      ? new CodemirrorBinding(
-          (this.model.nbcell as nbmodel.YCodeCell).ymodel.get('source'),
-          editor
-        )
-      : null;
+    this.initializeEditorBinding();
+    // every time the nbmodel is switched, we need to re-initialize the editor binding
+    this.model.nbmodelSwitched.connect(this.initializeEditorBinding, this);
 
     const doc = editor.getDoc();
 
@@ -206,6 +203,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         this.refresh();
       }
     });
+  }
+
+  private initializeEditorBinding() {
+    if (USE_YCODEMIRROR_BINDING) {
+      this.yeditorBinding?.destroy();
+      this.yeditorBinding = new CodemirrorBinding(
+        (this.model.nbcell as nbmodel.YCodeCell).ymodel.get('source'),
+        this.editor
+      );
+    }
   }
 
   private yeditorBinding: CodemirrorBinding | null;
