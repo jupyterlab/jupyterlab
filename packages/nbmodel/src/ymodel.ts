@@ -9,6 +9,8 @@ import * as nbformat from '@jupyterlab/nbformat';
 
 import * as nbmodel from './api';
 
+import { Delta } from './utils';
+
 import * as Y from 'yjs';
 
 // @ts-ignore
@@ -111,24 +113,27 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       }
     });
     let index = 0;
+    // this reflects the event.changes.delta, but replaces the content of delta.insert with nbcells.
+    const cellsChange: Delta<nbmodel.ISharedCell[]> = [];
     event.changes.delta.forEach((d: any) => {
       if (d.insert != null) {
-        this.cells.splice(
-          index,
-          0,
-          ...d.insert.map((ycell: Y.Map<any>) => this.ycellMapping.get(ycell))
+        const insertedCells = d.insert.map((ycell: Y.Map<any>) =>
+          this.ycellMapping.get(ycell)
         );
+        cellsChange.push({ insert: insertedCells });
+        this.cells.splice(index, 0, ...insertedCells);
         index += d.insert.length;
-      }
-      if (d.delete != null) {
+      } else if (d.delete != null) {
+        cellsChange.push(d);
         this.cells.splice(index, index + d.delete);
       } else if (d.retain != null) {
+        cellsChange.push(d);
         index += d.retain;
       }
     });
 
     this._changed.emit({
-      cellsChange: event.changes.delta as any
+      cellsChange: cellsChange
     });
   };
 
