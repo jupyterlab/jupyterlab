@@ -11,6 +11,8 @@ import {
   map
 } from '@lumino/algorithm';
 
+import * as nbmodel from '@jupyterlab/nbmodel';
+
 import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
@@ -789,6 +791,7 @@ export namespace DocumentRegistry {
      * is not recommended, and may produce unpredictable results.
      */
     readonly modelDB: IModelDB;
+    readonly nbmodel?: nbmodel.ISharedNotebook;
 
     /**
      * Serialize the model to a string.

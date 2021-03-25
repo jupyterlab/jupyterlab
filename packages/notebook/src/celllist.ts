@@ -71,8 +71,9 @@ export class CellList implements IObservableUndoableList<ICellModel> {
         }
         if (change.type === 'set' || change.type === 'add') {
           const cells = change.newValues.map(cell => {
-            cell.switchSharedModel(cell.nbcell.clone() as any, false);
-            return cell.nbcell;
+            let nbcell = cell.nbcell.clone() as any;
+            cell.switchSharedModel(nbcell, false);
+            return nbcell;
           });
           nbmodel.insertCells(change.newIndex, cells);
         }
@@ -552,22 +553,24 @@ export class CellList implements IObservableUndoableList<ICellModel> {
           }
           this._cellMap.set(id, cell);
         } else if (!existingCell.nbcell.isStandalone) {
-          // it does already exist, probably because it was deleted previously and we introduced it
-          // copy it to a fresh codecell instance
-          const cell = existingCell.toJSON();
-          let freshCell = null;
-          switch (cell.cell_type) {
-            case 'code':
-              freshCell = this._factory.createCodeCell({ cell });
-              break;
-            case 'markdown':
-              freshCell = this._factory.createMarkdownCell({ cell });
-              break;
-            default:
-              freshCell = this._factory.createRawCell({ cell });
-              break;
-          }
-          this._cellMap.set(id, freshCell);
+          this._mutex(() => {
+            // it does already exist, probably because it was deleted previously and we introduced it
+            // copy it to a fresh codecell instance
+            const cell = existingCell.toJSON();
+            let freshCell = null;
+            switch (cell.cell_type) {
+              case 'code':
+                freshCell = this._factory.createCodeCell({ cell });
+                break;
+              case 'markdown':
+                freshCell = this._factory.createMarkdownCell({ cell });
+                break;
+              default:
+                freshCell = this._factory.createRawCell({ cell });
+                break;
+            }
+            this._cellMap.set(id, freshCell);
+          });
         }
       });
     }
