@@ -718,7 +718,7 @@ export class Context<
     );
     const body = this._trans.__(
       `"%1" has changed on disk since the last time it was opened or saved.
-Do you want to overwrite the file on disk with the version open here, 
+Do you want to overwrite the file on disk with the version open here,
 or load the version on disk (revert)?`,
       this.path
     );
