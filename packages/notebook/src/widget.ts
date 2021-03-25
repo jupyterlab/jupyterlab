@@ -152,6 +152,26 @@ type InsertType = 'push' | 'insert' | 'set';
  */
 export type NotebookMode = 'command' | 'edit';
 
+if ((window as any).requestIdleCallback === undefined) {
+  // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
+  // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
+  (window as any).requestIdleCallback = function(handler: Function) {
+    let startTime = Date.now();
+    return setTimeout(function() {
+      handler({
+        didTimeout: false,
+        timeRemaining: function() {
+          return Math.max(0, 50.0 - (Date.now() - startTime));
+        }
+      });
+    }, 1);
+  };
+
+  (window as any).cancelIdleCallback = function(id: number) {
+    clearTimeout(id);
+  };
+}
+
 /**
  * A widget which renders static non-interactive notebooks.
  *
@@ -553,26 +573,6 @@ export class StaticNotebook extends Widget {
     }
 
     if (this._observer && this.notebookConfig.renderCellOnIdle) {
-      // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
-      if ((window as any).requestIdleCallback === undefined) {
-        // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
-        (window as any).requestIdleCallback = function(handler: Function) {
-          let startTime = Date.now();
-          return setTimeout(function() {
-            handler({
-              didTimeout: false,
-              timeRemaining: function() {
-                return Math.max(0, 50.0 - (Date.now() - startTime));
-              }
-            });
-          }, 1);
-        };
-
-        (window as any).cancelIdleCallback = function(id: number) {
-          clearTimeout(id);
-        };
-      }
-
       const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
       (window as any).requestIdleCallback(renderPlaceholderCells, {
         timeout: 1000
