@@ -192,11 +192,12 @@ function activate(
 
   const commonLanguageFileTypeData = new Map<string, IExtensionData[]>([
     ['python', [{ fileExt: 'py', fileTypeName: 'Python', iconName: 'ui-components:python' }]],
-    ['julia', [{ fileExt: 'jl', fileTypeName: 'Julia' }]],
+    ['julia', [{ fileExt: 'jl', fileTypeName: 'Julia', iconName: 'ui-components:text-editor' }]],
     ['R', [{ fileExt: 'r', fileTypeName: 'R', iconName: 'ui-components:r-kernel' }]]
   ]);
 
-  const getAvailableKernelFileTypes = async () => {
+  // Use available kernels to determine which common file types should have 'Create New' options in the Launcher, File Editor palette, and File menu
+  const getAvailableKernelFileTypes = async (): Promise<Set<IExtensionData>> => {
     const specsManager = app.serviceManager.kernelspecs;
     await specsManager.ready;
     let fileTypes = new Set<IExtensionData>();

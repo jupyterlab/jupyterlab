@@ -51,7 +51,7 @@ import {
 
 import { CommandRegistry } from '@lumino/commands';
 
-import { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { JSONObject, ReadonlyJSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
 import { TranslationBundle } from '@jupyterlab/translation';
@@ -99,10 +99,10 @@ export namespace CommandIDs {
   export const selectAll = 'fileeditor:select-all';
 }
 
-export interface IExtensionData {
-  iconName?: string;
+export interface IExtensionData extends ReadonlyJSONObject {
   fileExt: string;
   fileTypeName: string;
+  iconName: string;
 }
 
 /**
@@ -870,6 +870,8 @@ export namespace Commands {
 
   /**
    * Add the New File command
+   *
+   * Defaults to Text/.txt if file type data is not specified
    */
   export function addCreateNewCommand(
     commands: CommandRegistry,
@@ -879,12 +881,12 @@ export namespace Commands {
     commands.addCommand(CommandIDs.createNew, {
       label: args => {
         if (args.isPalette) {
-          return trans.__('New %1 File', args.fileType ?? 'Text');
+          return trans.__('New %1 File', args.fileTypeName ?? 'Text');
         }
-        return trans.__('%1 File', args.fileType ?? 'Text');
+        return trans.__('%1 File', args.fileTypeName ?? 'Text');
       },
-      caption: args => trans.__('Create a new %1 file', args.fileType ?? 'text'),
-      icon: args => (args.isPalette ? undefined : (LabIcon.resolve({ icon: args.iconName as string }) ?? textEditorIcon)),
+      caption: args => trans.__('Create a new %1 file', args.fileTypeName ?? 'text'),
+      icon: args => (args.isPalette ? undefined : LabIcon.resolve({ icon: (args.iconName as string ?? textEditorIcon) })),
       execute: args => {
         const cwd = args.cwd || browserFactory.defaultBrowser.model.path;
         return createNew(commands, cwd as string, args.fileExt as string ?? 'txt');
@@ -955,21 +957,19 @@ export namespace Commands {
   }
 
   /**
-   * Add Create New File items for available languages to the launcher
+   * Add ___ File items to the Launcher for common file types associated with available kernels
    */
   export function addKernelLanguageLauncherItems(
     launcher: ILauncher,
     trans: TranslationBundle,
-    availableLanguageExtensions: Set<IExtensionData>
+    availableKernelFileTypes: Set<IExtensionData>
   ): void {
-    for (let ext of availableLanguageExtensions) {
-      const { iconName, ...otherExtData } = ext;
-      const readOnlyExtData = iconName ? ext : otherExtData;
+    for (let ext of availableKernelFileTypes) {
       launcher.add({
         command: CommandIDs.createNew,
         category: trans.__('Other'),
         rank: 3,
-        args: { ...readOnlyExtData, isPalette: true }
+        args: ext
       });
     }
   }
@@ -1064,20 +1064,18 @@ export namespace Commands {
   }
 
   /**
-   * Add available language items to the File Editor palette
+   * Add New ___ File commands to the File Editor palette for common file types associated with available kernels
    */
   export function addKernelLanguagePaletteItems(
     palette: ICommandPalette,
     trans: TranslationBundle,
-    availableLanguageExtensions: Set<IExtensionData>
+    availableKernelFileTypes: Set<IExtensionData>
   ): void {
     const paletteCategory = trans.__('Text Editor');
-    for (let ext of availableLanguageExtensions) {
-      const { iconName, ...otherExtData } = ext;
-      const readOnlyExtData = iconName ? ext : otherExtData;
+    for (let ext of availableKernelFileTypes) {
       palette.addItem({
         command: CommandIDs.createNew,
-        args: { ...readOnlyExtData, isPalette: true },
+        args: { ...ext, isPalette: true },
         category: paletteCategory
       });
     }
@@ -1188,17 +1186,15 @@ export namespace Commands {
   }
 
   /**
-   * Add available language items to the File menu
+   * Add Create New ___ File commands to the File menu for common file types associated with available kernels
    */
   export function addKernelLanguageMenuItems(
     menu: IMainMenu,
-    availableLanguageExtensions: Set<IExtensionData>
+    availableKernelFileTypes: Set<IExtensionData>
   ): void {
-    for (let ext of availableLanguageExtensions) {
-      const { iconName, ...otherExtData } = ext;
-      const readOnlyExtData = iconName ? ext : otherExtData;
+    for (let ext of availableKernelFileTypes) {
       menu.fileMenu.newMenu.addGroup(
-        [{ command: CommandIDs.createNew, args: { ...readOnlyExtData } }],
+        [{ command: CommandIDs.createNew, args: ext }],
         30
       )
     }
