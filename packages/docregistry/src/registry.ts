@@ -791,7 +791,7 @@ export namespace DocumentRegistry {
      * is not recommended, and may produce unpredictable results.
      */
     readonly modelDB: IModelDB;
-    readonly nbmodel?: nbmodel.ISharedNotebook;
+    readonly nbmodel: nbmodel.ISharedNotebook;
 
     /**
      * Serialize the model to a string.
