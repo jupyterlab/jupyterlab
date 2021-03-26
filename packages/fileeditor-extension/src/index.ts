@@ -46,7 +46,7 @@ import { JSONObject } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
 
-import { Commands, FACTORY, IExtensionData } from './commands';
+import { Commands, FACTORY, IFileTypeData } from './commands';
 
 export { Commands } from './commands';
 
@@ -190,7 +190,7 @@ function activate(
     tracker.currentWidget !== null &&
     tracker.currentWidget === shell.currentWidget;
 
-  const commonLanguageFileTypeData = new Map<string, IExtensionData[]>([
+  const commonLanguageFileTypeData = new Map<string, IFileTypeData[]>([
     [
       'python',
       [
@@ -219,11 +219,11 @@ function activate(
 
   // Use available kernels to determine which common file types should have 'Create New' options in the Launcher, File Editor palette, and File menu
   const getAvailableKernelFileTypes = async (): Promise<
-    Set<IExtensionData>
+    Set<IFileTypeData>
   > => {
     const specsManager = app.serviceManager.kernelspecs;
     await specsManager.ready;
-    let fileTypes = new Set<IExtensionData>();
+    let fileTypes = new Set<IFileTypeData>();
     const specs = specsManager.specs?.kernelspecs ?? {};
     Object.keys(specs).forEach(spec => {
       const specModel = specs[spec];

@@ -103,7 +103,7 @@ export namespace CommandIDs {
   export const selectAll = 'fileeditor:select-all';
 }
 
-export interface IExtensionData extends ReadonlyJSONObject {
+export interface IFileTypeData extends ReadonlyJSONObject {
   fileExt: string;
   fileTypeName: string;
   iconName: string;
@@ -976,7 +976,7 @@ export namespace Commands {
   export function addKernelLanguageLauncherItems(
     launcher: ILauncher,
     trans: TranslationBundle,
-    availableKernelFileTypes: Set<IExtensionData>
+    availableKernelFileTypes: Iterable<IFileTypeData>
   ): void {
     for (let ext of availableKernelFileTypes) {
       launcher.add({
@@ -1083,7 +1083,7 @@ export namespace Commands {
   export function addKernelLanguagePaletteItems(
     palette: ICommandPalette,
     trans: TranslationBundle,
-    availableKernelFileTypes: Set<IExtensionData>
+    availableKernelFileTypes: Iterable<IFileTypeData>
   ): void {
     const paletteCategory = trans.__('Text Editor');
     for (let ext of availableKernelFileTypes) {
@@ -1204,7 +1204,7 @@ export namespace Commands {
    */
   export function addKernelLanguageMenuItems(
     menu: IMainMenu,
-    availableKernelFileTypes: Set<IExtensionData>
+    availableKernelFileTypes: Iterable<IFileTypeData>
   ): void {
     for (let ext of availableKernelFileTypes) {
       menu.fileMenu.newMenu.addGroup(
