@@ -55,9 +55,8 @@ if [[ $GROUP == linkcheck ]]; then
     conda init --all
     source $CONDA/bin/activate jupyterlab_documentation
     make html
+    conda deactivate
     popd
-
-    pip install -e ".[test]"
 
     # Run the link check on the built html files
     CACHE_DIR="${HOME}/.cache/pytest-link-check"
@@ -66,16 +65,17 @@ if [[ $GROUP == linkcheck ]]; then
     ls -ltr ${CACHE_DIR}
     # Expire links after a week
     LINKS_EXPIRE=604800
-    args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
-    args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html --ignore docs/build/html/api --ignore docs/build/html/getting_started/changelog.html ${args}"
+    base_args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
+
+    # Ignore pull requests and issues to the link check doesn't take all day
+    base_args="--check-links-ignore https://github.com/.*/(pull|issues)/.* ${base_args}"
+
+    # Check built html files
+    args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html --ignore docs/build/html/api ${base_args}"
     py.test $args --links-ext .html -k .html docs/build/html || py.test $args --links-ext .html -k .html --lf docs/build/html
 
-    # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
-    args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
-    args="--ignore docs/source/getting_started/changelog.md --ignore CHANGELOG.md ${args}"
-    py.test $args --links-ext .md -k .md . || py.test $args --links-ext .md -k .md --lf .
-
-    conda deactivate
+    # Check markdown files
+    py.test ${base_args} --links-ext .md -k .md . || py.test $args --links-ext .md -k .md --lf .
 fi
 
 
