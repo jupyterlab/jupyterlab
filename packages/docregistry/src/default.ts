@@ -23,6 +23,8 @@ import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 import { DocumentRegistry, IDocumentWidget } from './index';
 
+import * as nbmodel from '@jupyterlab/nbmodel';
+
 /**
  * The default implementation of a document model.
  */
@@ -36,7 +38,12 @@ export class DocumentModel
     super({ modelDB });
     this._defaultLang = languagePreference || '';
     this.value.changed.connect(this.triggerContentChange, this);
+    // A DocumentModel is a CodeCell and a nbmodel in one.
+    const cell = nbmodel.YCodeCell.create();
+    this.nbmodel.insertCell(0, cell);
+    this.switchSharedModel(cell, true);
   }
+  nbmodel = nbmodel.YNotebook.create();
 
   /**
    * A signal emitted when the document content changes.
