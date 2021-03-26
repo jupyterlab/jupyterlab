@@ -159,9 +159,10 @@ setup_args['extras_require'] = {
         'pytest>=6.0',
         'pytest-cov',
         'pytest-console-scripts',
-        'pytest-check-links',
+        'pytest-check-links>=0.5',
         'jupyterlab_server[test]~=2.2',
         'requests',
+        'requests_cache',
         'wheel',
         'virtualenv'
     ],

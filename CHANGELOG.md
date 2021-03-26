@@ -1,3 +1,7 @@
+---
+github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
+---
+
 # JupyterLab Changelog
 
 ## v3.0
@@ -1135,7 +1139,7 @@ closed.
   notebook toolbar
   ([#8024](https://github.com/jupyterlab/jupyterlab/pull/8024))
 
-<img src="changelog_restartrunallbutton.png" class="jp-screenshot">
+<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_restartrunallbutton.png" class="jp-screenshot">
 
 - Added a context menu item for opening a Markdown editor from the
   Markdown preview
@@ -1259,18 +1263,18 @@ closed.
   ([#7407](https://github.com/jupyterlab/jupyterlab/pull/7407),
   [#7786](https://github.com/jupyterlab/jupyterlab/pull/7786))
 
-<img src="changelog_celltags.png" class="jp-screenshot">
+<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_celltags.png" class="jp-screenshot">
 
 - File info display when hovering on a file in the file browser
   ([#7485](https://github.com/jupyterlab/jupyterlab/pull/7485),
   [#7352](https://github.com/jupyterlab/jupyterlab/issues/7352))
 
-<img src="changelog_fileinfo.png" class="jp-screenshot">
+<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_fileinfo.png" class="jp-screenshot">
 
 - Support for searching outputs in notebooks
   ([#7258](https://github.com/jupyterlab/jupyterlab/pull/7258))
 
-<img src="changelog_searchoutput.png" class="jp-screenshot">
+<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_searchoutput.png" class="jp-screenshot">
 
 - `Ctrl Shift .` and `Ctrl Shift ,` shortcuts move focus to the next
   and previous tab bar in the main area, respectively
@@ -1804,7 +1808,7 @@ in 1.0.0, and other 1.0.x milestones for bugs fixed in patch releases.
 
 ### Find and Replace
 
-<img src="find.png" class="jp-screenshot">
+<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/find.png" class="jp-screenshot">
 
 We have added first class support for find and replace across
 JupyterLab. It is currently supported in notebooks and text files and is
@@ -1827,7 +1831,7 @@ extensible for other widgets who wish to support it.
 
 ### Status Bar
 
-<img src="statusbar.png" class="jp-screenshot">
+<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/statusbar.png" class="jp-screenshot">
 
 We have integrated the [JupyterLab Status Bar
 package](https://github.com/jupyterlab/jupyterlab-statusbar) package
