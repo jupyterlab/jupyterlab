@@ -30,6 +30,7 @@ from .debuglog import DebugLogFileMixin
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
+from .handlers.yjs_echo_ws import YJSEchoWS
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -656,6 +657,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         builder = Builder(self.core_mode, app_options=build_handler_options)
         build_handler = (build_path, BuildHandler, {'builder': builder})
         handlers.append(build_handler)
+
+        #YJS_Echo WS Handler
+        yjs_echo_handler = (r"/api/yjs/(.*)", YJSEchoWS)
+        handlers.append(yjs_echo_handler)
 
         errored = False
 
