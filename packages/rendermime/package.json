@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@jupyterlab/mathjax2": "^2.3.0",
-    "@jupyterlab/testutils": "^2.3.0",
+    "@jupyterlab/testutils": "^2.3.1",
     "@types/jest": "^24.0.23",
     "@types/lodash.escape": "^4.0.6",
     "@types/marked": "^0.7.2",

@@ -56,7 +56,7 @@
   "devDependencies": {
     "@babel/core": "^7.5.0",
     "@babel/preset-env": "^7.7.6",
-    "@jupyterlab/testutils": "^2.3.0",
+    "@jupyterlab/testutils": "^2.3.1",
     "@storybook/addon-actions": "^5.2.5",
     "@storybook/react": "^5.2.5",
     "@types/jest": "^24.0.23",

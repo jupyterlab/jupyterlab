@@ -60,7 +60,7 @@
     "ws": "^7.2.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.3.0",
+    "@jupyterlab/testutils": "^2.3.1",
     "@types/jest": "^24.0.23",
     "@types/node": "^12.12.17",
     "@types/text-encoding": "^0.0.35",
