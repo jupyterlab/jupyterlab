@@ -481,7 +481,8 @@ export class DocumentManager implements IDocumentManager {
       kernelPreference,
       modelDBFactory,
       setBusy: this._setBusy,
-      sessionDialogs: this._dialogs
+      sessionDialogs: this._dialogs,
+      collaborative: true
     });
     const handler = new SaveHandler({
       context,
