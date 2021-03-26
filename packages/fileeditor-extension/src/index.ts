@@ -191,26 +191,49 @@ function activate(
     tracker.currentWidget === shell.currentWidget;
 
   const commonLanguageFileTypeData = new Map<string, IExtensionData[]>([
-    ['python', [{ fileExt: 'py', fileTypeName: 'Python', iconName: 'ui-components:python' }]],
-    ['julia', [{ fileExt: 'jl', fileTypeName: 'Julia', iconName: 'ui-components:text-editor' }]],
-    ['R', [{ fileExt: 'r', fileTypeName: 'R', iconName: 'ui-components:r-kernel' }]]
+    [
+      'python',
+      [
+        {
+          fileExt: 'py',
+          fileTypeName: 'Python',
+          iconName: 'ui-components:python'
+        }
+      ]
+    ],
+    [
+      'julia',
+      [
+        {
+          fileExt: 'jl',
+          fileTypeName: 'Julia',
+          iconName: 'ui-components:text-editor'
+        }
+      ]
+    ],
+    [
+      'R',
+      [{ fileExt: 'r', fileTypeName: 'R', iconName: 'ui-components:r-kernel' }]
+    ]
   ]);
 
   // Use available kernels to determine which common file types should have 'Create New' options in the Launcher, File Editor palette, and File menu
-  const getAvailableKernelFileTypes = async (): Promise<Set<IExtensionData>> => {
+  const getAvailableKernelFileTypes = async (): Promise<
+    Set<IExtensionData>
+  > => {
     const specsManager = app.serviceManager.kernelspecs;
     await specsManager.ready;
     let fileTypes = new Set<IExtensionData>();
     const specs = specsManager.specs?.kernelspecs ?? {};
     Object.keys(specs).forEach(spec => {
       const specModel = specs[spec];
-      if (specModel){
+      if (specModel) {
         const exts = commonLanguageFileTypeData.get(specModel.language);
         exts?.forEach(ext => fileTypes.add(ext));
       }
     });
     return fileTypes;
-  }
+  };
 
   // Handle state restoration.
   if (restorer) {
@@ -283,22 +306,30 @@ function activate(
   }
 
   getAvailableKernelFileTypes()
-  .then((availableKernelFileTypes) => {
-    if (launcher) {
-      Commands.addKernelLanguageLauncherItems(launcher, trans, availableKernelFileTypes);
-    }
+    .then(availableKernelFileTypes => {
+      if (launcher) {
+        Commands.addKernelLanguageLauncherItems(
+          launcher,
+          trans,
+          availableKernelFileTypes
+        );
+      }
 
-    if (palette) {
-      Commands.addKernelLanguagePaletteItems(palette, trans, availableKernelFileTypes);
-    }
+      if (palette) {
+        Commands.addKernelLanguagePaletteItems(
+          palette,
+          trans,
+          availableKernelFileTypes
+        );
+      }
 
-    if (menu) {
-      Commands.addKernelLanguageMenuItems(menu, availableKernelFileTypes);
-    }
-  })
-  .catch((reason: Error) => {
-    console.error(reason.message);
-  });
+      if (menu) {
+        Commands.addKernelLanguageMenuItems(menu, availableKernelFileTypes);
+      }
+    })
+    .catch((reason: Error) => {
+      console.error(reason.message);
+    });
 
   Commands.addContextMenuItems(app);
 

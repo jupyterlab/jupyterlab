@@ -51,7 +51,11 @@ import {
 
 import { CommandRegistry } from '@lumino/commands';
 
-import { JSONObject, ReadonlyJSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import {
+  JSONObject,
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
 import { TranslationBundle } from '@jupyterlab/translation';
@@ -885,11 +889,21 @@ export namespace Commands {
         }
         return trans.__('%1 File', args.fileTypeName ?? 'Text');
       },
-      caption: args => trans.__('Create a new %1 file', args.fileTypeName ?? 'text'),
-      icon: args => (args.isPalette ? undefined : LabIcon.resolve({ icon: (args.iconName as string ?? textEditorIcon) })),
+      caption: args =>
+        trans.__('Create a new %1 file', args.fileTypeName ?? 'text'),
+      icon: args =>
+        args.isPalette
+          ? undefined
+          : LabIcon.resolve({
+              icon: (args.iconName as string) ?? textEditorIcon
+            }),
       execute: args => {
         const cwd = args.cwd || browserFactory.defaultBrowser.model.path;
-        return createNew(commands, cwd as string, args.fileExt as string ?? 'txt');
+        return createNew(
+          commands,
+          cwd as string,
+          (args.fileExt as string) ?? 'txt'
+        );
       }
     });
   }
@@ -921,7 +935,7 @@ export namespace Commands {
    */
   export function addLauncherItems(
     launcher: ILauncher,
-    trans: TranslationBundle,
+    trans: TranslationBundle
   ): void {
     addCreateNewToLauncher(launcher, trans);
 
@@ -1196,10 +1210,9 @@ export namespace Commands {
       menu.fileMenu.newMenu.addGroup(
         [{ command: CommandIDs.createNew, args: ext }],
         30
-      )
+      );
     }
   }
-
 
   /**
    * Add File Editor undo and redo widgets to the Edit menu
