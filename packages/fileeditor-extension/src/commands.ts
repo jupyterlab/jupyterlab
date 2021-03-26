@@ -884,13 +884,16 @@ export namespace Commands {
   ): void {
     commands.addCommand(CommandIDs.createNew, {
       label: args => {
+        const fileTypeName = args.fileTypeName ?? trans.__('Text');
         if (args.isPalette) {
-          return trans.__('New %1 File', args.fileTypeName ?? 'Text');
+          return trans.__('New %1 File', fileTypeName);
         }
-        return trans.__('%1 File', args.fileTypeName ?? 'Text');
+        return trans.__('%1 File', fileTypeName);
       },
-      caption: args =>
-        trans.__('Create a new %1 file', args.fileTypeName ?? 'text'),
+      caption: args => {
+        const fileTypeName = args.fileTypeName ?? trans.__('text');
+        return trans.__('Create a new %1 file', fileTypeName);
+      },
       icon: args =>
         args.isPalette
           ? undefined
