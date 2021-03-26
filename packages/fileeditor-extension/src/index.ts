@@ -218,9 +218,7 @@ function activate(
   ]);
 
   // Use available kernels to determine which common file types should have 'Create New' options in the Launcher, File Editor palette, and File menu
-  const getAvailableKernelFileTypes = async (): Promise<
-    Set<IFileTypeData>
-  > => {
+  const getAvailableKernelFileTypes = async (): Promise<Set<IFileTypeData>> => {
     const specsManager = app.serviceManager.kernelspecs;
     await specsManager.ready;
     let fileTypes = new Set<IFileTypeData>();
