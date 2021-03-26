@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/documentsearch",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Document Search",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,7 +37,7 @@
     "@jupyterlab/codeeditor": "^2.3.0",
     "@jupyterlab/codemirror": "^2.3.0",
     "@jupyterlab/fileeditor": "^2.3.0",
-    "@jupyterlab/notebook": "^2.3.0",
+    "@jupyterlab/notebook": "^2.3.1",
     "@jupyterlab/ui-components": "^2.3.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/tooltip-extension",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "JupyterLab - Tooltip Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,7 +41,7 @@
     "@jupyterlab/console": "^2.3.0",
     "@jupyterlab/coreutils": "^4.3.0",
     "@jupyterlab/fileeditor": "^2.3.0",
-    "@jupyterlab/notebook": "^2.3.0",
+    "@jupyterlab/notebook": "^2.3.1",
     "@jupyterlab/rendermime": "^2.3.0",
     "@jupyterlab/services": "^5.3.0",
     "@jupyterlab/tooltip": "^2.3.0",
