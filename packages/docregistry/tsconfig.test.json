@@ -18,6 +18,9 @@
       "path": "../docprovider"
     },
     {
+      "path": "../nbmodel"
+    },
+    {
       "path": "../observables"
     },
     {
@@ -55,6 +58,9 @@
     },
     {
       "path": "../docprovider"
+    },
+    {
+      "path": "../nbmodel"
     },
     {
       "path": "../observables"
