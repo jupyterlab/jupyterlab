@@ -6,10 +6,16 @@
   },
   "references": [
     {
+      "path": "../nbmodel"
+    },
+    {
       "path": "."
     },
     {
       "path": "../../testutils"
+    },
+    {
+      "path": "../nbmodel"
     }
   ]
 }
