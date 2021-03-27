@@ -319,13 +319,13 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
       isToggled: () => {
         const widget = app.shell.currentWidget;
         return widget instanceof MainAreaWidget
-          ? !widget.customHeader.isHidden
+          ? !widget.contentHeader.isHidden
           : false;
       },
       execute: async () => {
         const widget = app.shell.currentWidget;
         if (widget instanceof MainAreaWidget) {
-          widget.customHeader.setHidden(!widget.customHeader.isHidden);
+          widget.contentHeader.setHidden(!widget.contentHeader.isHidden);
         }
       }
     });

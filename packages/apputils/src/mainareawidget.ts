@@ -45,8 +45,8 @@ export class MainAreaWidget<T extends Widget = Widget>
     toolbar.node.setAttribute('role', 'navigation');
     toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
     const spinner = this._spinner;
-    const customHeader = (this._customHeader =
-      options.customHeader ||
+    const contentHeader = (this._contentHeader =
+      options.contentHeader ||
       new BoxPanel({
         direction: 'top-to-bottom',
         spacing: 0
@@ -55,10 +55,10 @@ export class MainAreaWidget<T extends Widget = Widget>
     const layout = (this.layout = new BoxLayout({ spacing: 0 }));
     layout.direction = 'top-to-bottom';
     BoxLayout.setStretch(toolbar, 0);
-    BoxLayout.setStretch(customHeader, 0);
+    BoxLayout.setStretch(contentHeader, 0);
     BoxLayout.setStretch(content, 1);
     layout.addWidget(toolbar);
-    layout.addWidget(customHeader);
+    layout.addWidget(contentHeader);
     layout.addWidget(content);
 
     if (!content.id) {
@@ -143,8 +143,8 @@ export class MainAreaWidget<T extends Widget = Widget>
    * A panel for widgets that sit between the toolbar and the content.
    * Imagine a formatting toolbar, notification headers, etc.
    */
-  get customHeader(): BoxPanel {
-    return this._customHeader;
+  get contentHeader(): BoxPanel {
+    return this._contentHeader;
   }
 
   /**
@@ -251,12 +251,12 @@ export class MainAreaWidget<T extends Widget = Widget>
   MainAreaWidget's layout:
   - this.layout, a BoxLayout, from parent
     - this._toolbar, a Toolbar
-    - this._customHeader, a BoxPanel, empty by default
+    - this._contentHeader, a BoxPanel, empty by default
     - this._content
   */
   private _content: T;
   private _toolbar: Toolbar;
-  private _customHeader: BoxPanel;
+  private _contentHeader: BoxPanel;
 
   private _changeGuard = false;
   private _spinner = new Spinner();
@@ -287,7 +287,7 @@ export namespace MainAreaWidget {
      * The layout to sit underneath the toolbar and above the content,
      * and that extensions can populate. Defaults to an empty BoxPanel.
      */
-    customHeader?: BoxPanel;
+    contentHeader?: BoxPanel;
 
     /**
      * An optional promise for when the content is ready to be revealed.
