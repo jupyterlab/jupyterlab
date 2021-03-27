@@ -196,8 +196,10 @@ function activate(
       [
         {
           fileExt: 'py',
-          fileTypeName: 'Python',
-          iconName: 'ui-components:python'
+          iconName: 'ui-components:python',
+          launcherLabel: trans.__('Python File'),
+          paletteLabel: trans.__('New Python File'),
+          caption: trans.__('Create a new Python file')
         }
       ]
     ],
@@ -206,14 +208,24 @@ function activate(
       [
         {
           fileExt: 'jl',
-          fileTypeName: 'Julia',
-          iconName: 'ui-components:text-editor'
+          iconName: 'ui-components:text-editor',
+          launcherLabel: trans.__('Julia File'),
+          paletteLabel: trans.__('New Julia File'),
+          caption: trans.__('Create a new Julia file')
         }
       ]
     ],
     [
       'R',
-      [{ fileExt: 'r', fileTypeName: 'R', iconName: 'ui-components:r-kernel' }]
+      [
+        {
+          fileExt: 'r',
+          iconName: 'ui-components:r-kernel',
+          launcherLabel: trans.__('R File'),
+          paletteLabel: trans.__('New R File'),
+          caption: trans.__('Create a new R file')
+        }
+      ]
     ]
   ]);
 

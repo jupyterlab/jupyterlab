@@ -105,8 +105,10 @@ export namespace CommandIDs {
 
 export interface IFileTypeData extends ReadonlyJSONObject {
   fileExt: string;
-  fileTypeName: string;
   iconName: string;
+  launcherLabel: string;
+  paletteLabel: string;
+  caption: string;
 }
 
 /**
@@ -884,16 +886,13 @@ export namespace Commands {
   ): void {
     commands.addCommand(CommandIDs.createNew, {
       label: args => {
-        const fileTypeName = args.fileTypeName ?? trans.__('Text');
         if (args.isPalette) {
-          return trans.__('New %1 File', fileTypeName);
+          return (args.paletteLabel as string) ?? trans.__('New Text File');
         }
-        return trans.__('%1 File', fileTypeName);
+        return (args.launcherLabel as string) ?? trans.__('Text File');
       },
-      caption: args => {
-        const fileTypeName = args.fileTypeName ?? trans.__('text');
-        return trans.__('Create a new %1 file', fileTypeName);
-      },
+      caption: args =>
+        (args.caption as string) ?? trans.__('Create a new text file'),
       icon: args =>
         args.isPalette
           ? undefined
