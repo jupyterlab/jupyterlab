@@ -312,7 +312,9 @@ async function updateTabTitle(
   current = current.split(':')[1];
   if (workspace.startsWith('auto-')) {
     const count: number = Object.keys(data).length - 1;
-    document.title = `${current} (${workspace}:${count}) - JupyterLab`;
+    document.title = `${
+      count > 0 ? `${current} (${workspace}:${count}) -` : ''
+    } JupyterLab`;
   } else {
     document.title = `${current} - JupyterLab`;
   }
