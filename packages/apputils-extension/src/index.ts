@@ -314,8 +314,10 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
 
     const category: string = trans.__('Main Area');
     app.commands.addCommand(CommandIDs.toggleHeader, {
-      label: trans.__('Show Header'),
-      isEnabled: () => app.shell.currentWidget instanceof MainAreaWidget,
+      label: trans.__('Show Header Above Content'),
+      isEnabled: () =>
+        app.shell.currentWidget instanceof MainAreaWidget &&
+        app.shell.currentWidget.contentHeader.widgets.length > 0,
       isToggled: () => {
         const widget = app.shell.currentWidget;
         return widget instanceof MainAreaWidget
