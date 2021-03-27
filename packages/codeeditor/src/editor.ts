@@ -217,6 +217,11 @@ export namespace CodeEditor {
       nbcell: nbmodel.ISharedCodeCell,
       reinitialize: boolean
     ): void;
+
+    /**
+     * A signal emitted when the nbmodel/nbcell was switched.
+     */
+    nbmodelSwitched: ISignal<IModel, boolean>;
   }
 
   /**
@@ -247,6 +252,7 @@ export namespace CodeEditor {
 
       this.modelDB.createMap('selections');
     }
+    nbmodelSwitched = new Signal<this, boolean>(this);
 
     public switchSharedModel(
       nbcell: nbmodel.ISharedCodeCell,
@@ -259,8 +265,9 @@ export namespace CodeEditor {
       }
       this.nbcell.changed.disconnect(this._onSharedModelChanged, this);
       // clone nbcell to retrieve a shared (not standalone) nbcell
-      this.nbcell = this.nbcell.clone();
+      this.nbcell = nbcell as any;
       this.nbcell.changed.connect(this._onSharedModelChanged, this);
+      this.nbmodelSwitched.emit(true);
     }
 
     /**
