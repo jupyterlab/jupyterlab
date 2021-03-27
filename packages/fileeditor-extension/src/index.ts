@@ -46,7 +46,7 @@ import { JSONObject } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
 
-import { Commands, FACTORY } from './commands';
+import { Commands, FACTORY, IFileTypeData } from './commands';
 
 export { Commands } from './commands';
 
@@ -190,6 +190,61 @@ function activate(
     tracker.currentWidget !== null &&
     tracker.currentWidget === shell.currentWidget;
 
+  const commonLanguageFileTypeData = new Map<string, IFileTypeData[]>([
+    [
+      'python',
+      [
+        {
+          fileExt: 'py',
+          iconName: 'ui-components:python',
+          launcherLabel: trans.__('Python File'),
+          paletteLabel: trans.__('New Python File'),
+          caption: trans.__('Create a new Python file')
+        }
+      ]
+    ],
+    [
+      'julia',
+      [
+        {
+          fileExt: 'jl',
+          iconName: 'ui-components:text-editor',
+          launcherLabel: trans.__('Julia File'),
+          paletteLabel: trans.__('New Julia File'),
+          caption: trans.__('Create a new Julia file')
+        }
+      ]
+    ],
+    [
+      'R',
+      [
+        {
+          fileExt: 'r',
+          iconName: 'ui-components:r-kernel',
+          launcherLabel: trans.__('R File'),
+          paletteLabel: trans.__('New R File'),
+          caption: trans.__('Create a new R file')
+        }
+      ]
+    ]
+  ]);
+
+  // Use available kernels to determine which common file types should have 'Create New' options in the Launcher, File Editor palette, and File menu
+  const getAvailableKernelFileTypes = async (): Promise<Set<IFileTypeData>> => {
+    const specsManager = app.serviceManager.kernelspecs;
+    await specsManager.ready;
+    let fileTypes = new Set<IFileTypeData>();
+    const specs = specsManager.specs?.kernelspecs ?? {};
+    Object.keys(specs).forEach(spec => {
+      const specModel = specs[spec];
+      if (specModel) {
+        const exts = commonLanguageFileTypeData.get(specModel.language);
+        exts?.forEach(ext => fileTypes.add(ext));
+      }
+    });
+    return fileTypes;
+  };
+
   // Handle state restoration.
   if (restorer) {
     void restorer.restore(tracker, {
@@ -259,6 +314,32 @@ function activate(
       sessionDialogs
     );
   }
+
+  getAvailableKernelFileTypes()
+    .then(availableKernelFileTypes => {
+      if (launcher) {
+        Commands.addKernelLanguageLauncherItems(
+          launcher,
+          trans,
+          availableKernelFileTypes
+        );
+      }
+
+      if (palette) {
+        Commands.addKernelLanguagePaletteItems(
+          palette,
+          trans,
+          availableKernelFileTypes
+        );
+      }
+
+      if (menu) {
+        Commands.addKernelLanguageMenuItems(menu, availableKernelFileTypes);
+      }
+    })
+    .catch((reason: Error) => {
+      console.error(reason.message);
+    });
 
   Commands.addContextMenuItems(app);
 
