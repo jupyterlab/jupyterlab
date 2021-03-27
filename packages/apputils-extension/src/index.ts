@@ -24,7 +24,8 @@ import {
   Printing,
   sessionContextDialogs,
   ISanitizer,
-  defaultSanitizer
+  defaultSanitizer,
+  MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import { URLExt, PageConfig } from '@jupyterlab/coreutils';
@@ -68,6 +69,8 @@ namespace CommandIDs {
   export const resetOnLoad = 'apputils:reset-on-load';
 
   export const runFirstEnabled = 'apputils:run-first-enabled';
+
+  export const toggleHeader = 'apputils:toggle-header';
 }
 
 /**
@@ -294,6 +297,41 @@ const print: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+  }
+};
+
+export const toggleHeader: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:toggle-header',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ) => {
+    const trans = translator.load('jupyterlab');
+
+    const category: string = trans.__('Main Area');
+    app.commands.addCommand(CommandIDs.toggleHeader, {
+      label: trans.__('Show Header'),
+      isEnabled: () => app.shell.currentWidget instanceof MainAreaWidget,
+      isToggled: () => {
+        const widget = app.shell.currentWidget;
+        return widget instanceof MainAreaWidget
+          ? !widget.customHeader.isHidden
+          : false;
+      },
+      execute: async () => {
+        const widget = app.shell.currentWidget;
+        if (widget instanceof MainAreaWidget) {
+          widget.customHeader.setHidden(!widget.customHeader.isHidden);
+        }
+      }
+    });
+    if (palette) {
+      palette.addItem({ command: CommandIDs.toggleHeader, category });
+    }
   }
 };
 
@@ -540,6 +578,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sessionDialogs,
   themesPlugin,
   themesPaletteMenuPlugin,
+  toggleHeader,
   utilityCommands,
   workspacesPlugin
 ];

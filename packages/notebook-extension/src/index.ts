@@ -378,42 +378,6 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   }
 };
 
-export const toggleHeader: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/apputils-extension:toggle-header',
-  autoStart: true,
-  requires: [ITranslator],
-  optional: [ICommandPalette],
-  activate: (
-    app: JupyterFrontEnd,
-    translator: ITranslator,
-    palette: ICommandPalette | null
-  ) => {
-    const trans = translator.load('jupyterlab');
-
-    const command = 'apputils:toggle-header';
-    const category: string = trans.__('Main Area');
-    app.commands.addCommand(command, {
-      label: trans.__('Show Header'),
-      isEnabled: () => app.shell.currentWidget instanceof MainAreaWidget,
-      isToggled: () => {
-        const widget = app.shell.currentWidget;
-        return widget instanceof MainAreaWidget
-          ? !widget.customHeader.isHidden
-          : false;
-      },
-      execute: async () => {
-        const widget = app.shell.currentWidget;
-        if (widget instanceof MainAreaWidget) {
-          widget.customHeader.setHidden(!widget.customHeader.isHidden);
-        }
-      }
-    });
-    if (palette) {
-      palette.addItem({ command, category });
-    }
-  }
-};
-
 /**
  * The notebook widget factory provider.
  */
@@ -464,8 +428,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   widgetFactoryPlugin,
   logNotebookOutput,
   clonedOutputsPlugin,
-  codeConsolePlugin,
-  toggleHeader
+  codeConsolePlugin
 ];
 export default plugins;
 
