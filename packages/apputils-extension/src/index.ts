@@ -313,13 +313,11 @@ async function updateTabTitle(
       workspace.startsWith('auto-') ? ` (${workspace})` : ``
     }`;
   } else {
-    console.log(current);
-
     //First 15 characters of current documnet name
     current = current.split(':')[1].slice(0, 15);
-
     //Number of restorable items, minus the layout restorer data
     const count: number = Object.keys(data).length - 1;
+
     if (workspace.startsWith('auto-')) {
       document.title = `${current} (${workspace}${
         count > 1 ? ` : ${count}` : ``
