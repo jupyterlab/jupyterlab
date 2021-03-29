@@ -11,8 +11,6 @@ import { ISignal } from '@lumino/signaling';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { Delta } from './utils';
-
 /**
  * This file defines the shared nbmodel types.
  *
@@ -152,6 +150,13 @@ export interface ISharedRawCell
   setAttachments(attchments: nbformat.IAttachments | undefined): void;
   toJSON(): nbformat.IRawCell;
 }
+
+/**
+ * Changes on Sequence-like data are expressed as Quill-inspired deltas.
+ *
+ * @source https://quilljs.com/docs/delta/
+ */
+export type Delta<T> = Array<{ insert?: T; delete?: number; retain?: number }>;
 
 /**
  * Implements an API for nbformat.IUnrecognizedCell.
