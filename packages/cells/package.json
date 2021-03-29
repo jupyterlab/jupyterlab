@@ -50,6 +50,7 @@
     "@jupyterlab/coreutils": "^5.1.0-alpha.5",
     "@jupyterlab/filebrowser": "^3.1.0-alpha.5",
     "@jupyterlab/nbformat": "^3.1.0-alpha.5",
+    "@jupyterlab/nbmodel": "^3.1.0-alpha.5",
     "@jupyterlab/observables": "^4.1.0-alpha.5",
     "@jupyterlab/outputarea": "^3.1.0-alpha.5",
     "@jupyterlab/rendermime": "^3.1.0-alpha.5",
