@@ -328,7 +328,7 @@ export namespace CodeEditor {
     nbcell = nbmodel.YCodeCell.createStandalone();
 
     /**
-     * A mutex to updated the nbcell model.
+     * A mutex to update the nbcell model.
      */
     protected readonly _mutex = nbmodel.createMutex();
 
