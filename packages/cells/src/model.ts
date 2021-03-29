@@ -424,7 +424,9 @@ export class RawCellModel extends AttachmentsCellModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IRawCell {
-    return super.toJSON() as nbformat.IRawCell;
+    const cell = super.toJSON() as nbformat.IRawCell;
+    cell.id = this.id;
+    return cell;
   }
 }
 
@@ -452,7 +454,9 @@ export class MarkdownCellModel extends AttachmentsCellModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IMarkdownCell {
-    return super.toJSON() as nbformat.IMarkdownCell;
+    const cell = super.toJSON() as nbformat.IMarkdownCell;
+    cell.id = this.id;
+    return cell;
   }
 }
 
@@ -565,6 +569,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     const cell = super.toJSON() as nbformat.ICodeCell;
     cell.execution_count = this.executionCount || null;
     cell.outputs = this.outputs.toJSON();
+    cell.id = this.id;
     return cell;
   }
 

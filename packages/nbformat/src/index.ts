@@ -219,6 +219,11 @@ export interface IRawCellMetadata extends IBaseCellMetadata {
  */
 export interface IRawCell extends IBaseCell {
   /**
+   * A string field representing the identifier of this particular cell.
+   */
+  id: string;
+
+  /**
    * String identifying the type of cell.
    */
   cell_type: 'raw';
@@ -238,6 +243,11 @@ export interface IRawCell extends IBaseCell {
  * A markdown cell.
  */
 export interface IMarkdownCell extends IBaseCell {
+  /**
+   * A string field representing the identifier of this particular cell.
+   */
+  id: string;
+
   /**
    * String identifying the type of cell.
    */
@@ -283,6 +293,11 @@ export interface ICodeCellMetadata extends IBaseCellMetadata {
  * A code cell.
  */
 export interface ICodeCell extends IBaseCell {
+  /**
+   * A string field representing the identifier of this particular cell.
+   */
+  id: string;
+
   /**
    * String identifying the type of cell.
    */
