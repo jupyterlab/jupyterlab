@@ -295,23 +295,53 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     event: IObservableJSON.IChangedArgs
   ): void {
     const metadata = this.nbcell.getMetadata();
-    this._mutex(() => {
+    this._modeDBMutex(() => {
       switch (event.type) {
         case 'add':
-          metadata[event.key] = event.newValue as any;
+          this._changeCellMetata(metadata, event);
+          break;
+        case 'change':
+          this._changeCellMetata(metadata, event);
           break;
         case 'remove':
           delete metadata[event.key];
           break;
-        case 'change':
-          metadata[event.key] = event.newValue as any;
-          break;
         default:
-          metadata[event.key] = event.newValue as any;
-          break;
+          throw new Error(`Invalid event type: ${event.type}`);
       }
       this.nbcell.setMetadata(metadata);
     });
+  }
+
+  private _changeCellMetata(
+    metadata: Partial<nbmodel.ISharedBaseCellMetada>,
+    event: IObservableJSON.IChangedArgs
+  ) {
+    switch (event.key) {
+      case 'jupyter':
+        metadata.jupyter = event.newValue as any;
+        break;
+      case 'collapsed':
+        metadata.collapsed = event.newValue as any;
+        break;
+      case 'name':
+        metadata.name = event.newValue as any;
+        break;
+      case 'scrolled':
+        metadata.scrolled = event.newValue as any;
+        break;
+      case 'tags':
+        metadata.tags = event.newValue as any;
+        break;
+      case 'trusted':
+        metadata.trusted = event.newValue as any;
+        break;
+      case 'slideshow':
+        metadata.slideshow = event.newValue as any;
+        break;
+      default:
+        throw new Error(`Invalid event key: ${event.key}`);
+    }
   }
 
   /**
@@ -326,20 +356,28 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    */
   protected _onSharedModelChanged(
     sender: nbmodel.ISharedCodeCell,
-    change: nbmodel.CellChange<nbformat.ICodeCellMetadata>
+    change: nbmodel.CellChange<nbmodel.ISharedBaseCellMetada>
   ): void {
     super._onSharedModelChanged(sender, change);
     this._mutex(() => {
       if (change.metadataChange) {
-        const newValue = change.metadataChange?.newValue;
-        if (newValue?.collapsed)
-          this.metadata.set('collapsed', newValue?.collapsed);
-        if (newValue?.jupyter) this.metadata.set('jupyter', newValue?.jupyter);
-        if (newValue?.name) this.metadata.set('name', newValue?.name);
-        if (newValue?.scrolled)
-          this.metadata.set('scrolled', newValue?.scrolled);
-        if (newValue?.tags) this.metadata.set('tags', newValue?.tags);
-        if (newValue?.trusted) this.metadata.set('trusted', newValue?.trusted);
+        const newValue = change.metadataChange
+          ?.newValue as nbmodel.ISharedBaseCellMetada;
+        if (newValue) {
+          if (newValue.collapsed) {
+            if (!this.metadata.get('jupyter')) this.metadata.set('jupyter', {});
+            (this.metadata.get('jupyter') as any)!['outputs_hidden'] =
+              newValue.collapsed;
+          }
+          if (newValue.jupyter) this.metadata.set('jupyter', newValue.jupyter);
+          if (newValue.name) this.metadata.set('name', newValue.name);
+          if (newValue.scrolled)
+            this.metadata.set('scrolled', newValue.scrolled);
+          if (newValue.tags) this.metadata.set('tags', newValue.tags);
+          if (newValue.trusted) this.metadata.set('trusted', newValue.trusted);
+          if (newValue.slideshow)
+            this.metadata.set('slideshow', newValue.slideshow);
+        }
       }
     });
   }
@@ -350,6 +388,11 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   protected onGenericChange(): void {
     this.contentChanged.emit(void 0);
   }
+
+  /**
+   * A mutex to update the nbcell model.
+   */
+  private readonly _modeDBMutex = nbmodel.createMutex();
 }
 
 /**
