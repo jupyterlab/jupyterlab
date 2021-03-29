@@ -5,13 +5,13 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import * as Y from 'yjs';
+
 import * as nbformat from '@jupyterlab/nbformat';
 
 import * as nbmodel from './api';
 
-import { Delta } from './utils';
-
-import * as Y from 'yjs';
+import { Delta } from './api';
 
 // @ts-ignore
 import { Awareness } from 'y-protocols/dist/awareness.cjs';
