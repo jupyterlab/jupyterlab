@@ -40,10 +40,9 @@ export class DocumentModel
     this.value.changed.connect(this.triggerContentChange, this);
     // A DocumentModel is a CodeCell and a nbmodel in one.
     const cell = nbmodel.YCodeCell.create();
-    this.nbmodel.insertCell(0, cell);
+    this.nbnotebook.insertCell(0, cell);
     this.switchSharedModel(cell, true);
   }
-  nbmodel = nbmodel.YNotebook.create();
 
   /**
    * A signal emitted when the document content changes.
@@ -164,6 +163,11 @@ export class DocumentModel
     this._contentChanged.emit(void 0);
     this.dirty = true;
   }
+
+  /**
+   * The shared notebook model.
+   */
+  readonly nbnotebook = nbmodel.YNotebook.create();
 
   private _defaultLang = '';
   private _dirty = false;

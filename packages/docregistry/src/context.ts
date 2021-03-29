@@ -81,7 +81,7 @@ export class Context<
       this._model = this._factory.createNew(lang);
     }
 
-    const ynotebook = this._model.nbmodel as nbmodel.YNotebook;
+    const ynotebook = this._model.nbnotebook as nbmodel.YNotebook;
     const ydoc = ynotebook.ydoc;
     this.ydoc = ydoc;
     this.ycontext = ydoc.getMap('context');
@@ -216,7 +216,7 @@ export class Context<
     }
     this._model.dispose();
     this.provider.destroy();
-    this._model.nbmodel.dispose();
+    this._model.nbnotebook.dispose();
     this.ydoc.destroy();
     this._disposed.emit(void 0);
     Signal.clearData(this);
