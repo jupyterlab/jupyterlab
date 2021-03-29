@@ -28,6 +28,9 @@
       "path": "../nbformat"
     },
     {
+      "path": "../nbmodel"
+    },
+    {
       "path": "../observables"
     },
     {
@@ -41,9 +44,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../nbmodel"
     }
   ]
 }
