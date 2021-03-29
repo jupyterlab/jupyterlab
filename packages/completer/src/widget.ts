@@ -608,10 +608,12 @@ export class Completer extends Widget {
     }
     docPanel.textContent = '';
     if (activeItem.documentation) {
+      let node: HTMLElement;
       if (!this._renderer.createDocumentationNode) {
-        return;
+        node = Completer.defaultRenderer.createDocumentationNode(activeItem);
+      } else {
+        node = this._renderer.createDocumentationNode(activeItem);
       }
-      let node = this._renderer.createDocumentationNode(activeItem);
       docPanel.appendChild(node);
       docPanel.setAttribute('style', '');
     } else {
