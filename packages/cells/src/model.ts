@@ -15,6 +15,8 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
+import * as nbmodel from '@jupyterlab/nbmodel';
+
 import { UUID } from '@lumino/coreutils';
 
 import {
@@ -172,6 +174,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     cellType.set(this.type);
 
     const observableMetadata = this.modelDB.createMap('metadata');
+    observableMetadata.changed.connect(this.onModelDBMetadataChange, this);
     observableMetadata.changed.connect(this.onGenericChange, this);
 
     const cell = options.cell;
@@ -282,6 +285,63 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     args: ObservableValue.IChangedArgs
   ): void {
     /* no-op */
+  }
+
+  /**
+   * Handle a change to the cell metadata.
+   */
+  protected onModelDBMetadataChange(
+    sender: IObservableJSON,
+    event: IObservableJSON.IChangedArgs
+  ): void {
+    const metadata = this.nbcell.getMetadata();
+    this._mutex(() => {
+      switch (event.type) {
+        case 'add':
+          metadata[event.key] = event.newValue as any;
+          break;
+        case 'remove':
+          delete metadata[event.key];
+          break;
+        case 'change':
+          metadata[event.key] = event.newValue as any;
+          break;
+        default:
+          metadata[event.key] = event.newValue as any;
+          break;
+      }
+      this.nbcell.setMetadata(metadata);
+    });
+  }
+
+  /**
+   * We update the modeldb metadata when the nbcell changes.
+   *
+   * This method overrides the CodeEditor protected _onSharedModelChanged
+   * so we first call super._onSharedModelChanged
+   *
+   * @override CodeEditor._onSharedModelChanged
+   *
+   * @todo we miss in nbmodel/nbformat the 'slide_type' metadata shown in the UI.
+   */
+  protected _onSharedModelChanged(
+    sender: nbmodel.ISharedCodeCell,
+    change: nbmodel.CellChange<nbformat.ICodeCellMetadata>
+  ): void {
+    super._onSharedModelChanged(sender, change);
+    this._mutex(() => {
+      if (change.metadataChange) {
+        const newValue = change.metadataChange?.newValue;
+        if (newValue?.collapsed)
+          this.metadata.set('collapsed', newValue?.collapsed);
+        if (newValue?.jupyter) this.metadata.set('jupyter', newValue?.jupyter);
+        if (newValue?.name) this.metadata.set('name', newValue?.name);
+        if (newValue?.scrolled)
+          this.metadata.set('scrolled', newValue?.scrolled);
+        if (newValue?.tags) this.metadata.set('tags', newValue?.tags);
+        if (newValue?.trusted) this.metadata.set('trusted', newValue?.trusted);
+      }
+    });
   }
 
   /**
