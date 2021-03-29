@@ -134,7 +134,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const editor = (this._editor = Private.createEditor(host, fullConfig));
     this.initializeEditorBinding();
     // every time the nbmodel is switched, we need to re-initialize the editor binding
-    this.model.nbmodelSwitched.connect(this.initializeEditorBinding, this);
+    this.model.nbcellSwitched.connect(this.initializeEditorBinding, this);
 
     const doc = editor.getDoc();
 
