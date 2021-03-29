@@ -45,7 +45,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     this._cellOrder.changed.connect(this._onOrderChanged, this);
     this.nbmodel = model;
     this.nbmodel.changed.connect(this.onSharedModelChanged, this);
-    this.changed.connect(this.onModeldbChanged, this);
+    this.changed.connect(this.onModelDBChanged, this);
   }
 
   type: 'List';
@@ -56,7 +56,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    */
   private readonly _mutex = nbmodel.createMutex();
 
-  private onModeldbChanged(
+  private onModelDBChanged(
     self: CellList,
     change: IObservableList.IChangedArgs<ICellModel>
   ) {
