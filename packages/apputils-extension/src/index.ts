@@ -307,16 +307,28 @@ async function updateTabTitle(
   trans: TranslationBundle
 ) {
   const data: any = await db.toJSON();
-  // Number of restorable items, minus the layout restorer data
   let current: string = data['layout-restorer:data']?.main?.current;
-  current = current.split(':')[1];
-  if (workspace.startsWith('auto-')) {
-    const count: number = Object.keys(data).length - 1;
-    document.title = `${
-      count > 0 ? `${current} (${workspace}:${count}) -` : ''
-    } JupyterLab`;
+  if (current === undefined) {
+    document.title = `JupyterLab${
+      workspace.startsWith('auto-') ? ` (${workspace})` : ``
+    }`;
   } else {
-    document.title = `${current} - JupyterLab`;
+    console.log(current);
+
+    //First 15 characters of current documnet name
+    current = current.split(':')[1].slice(0, 15);
+
+    //Number of restorable items, minus the layout restorer data
+    const count: number = Object.keys(data).length - 1;
+    if (workspace.startsWith('auto-')) {
+      document.title = `${current} (${workspace}${
+        count > 1 ? ` : ${count}` : ``
+      }) - JupyterLab`;
+    } else {
+      document.title = `${current}${
+        count - 1 > 1 ? ` (${count - 1})` : ``
+      } - JupyterLab`;
+    }
   }
 }
 
