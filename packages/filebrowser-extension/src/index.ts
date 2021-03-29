@@ -443,14 +443,13 @@ function activateShareFile(
       if (!model) {
         return;
       }
-      const path = encodeURI(model.path);
 
       Clipboard.copyToSystem(
         URLExt.normalize(
           PageConfig.getUrl({
             mode: 'single-document',
             workspace: PageConfig.defaultWorkspace,
-            treePath: path
+            treePath: model.path
           })
         )
       );
