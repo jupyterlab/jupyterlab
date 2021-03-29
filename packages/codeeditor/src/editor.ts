@@ -223,7 +223,6 @@ export namespace CodeEditor {
       nbcell: nbmodel.ISharedCodeCell,
       reinitialize: boolean
     ): void;
-
   }
 
   /**
@@ -275,9 +274,9 @@ export namespace CodeEditor {
      * We update the modeldb store when nbcell changes.
      * To ensure that we don't run into infinite loops, we wrap this call in a "mutex".
      * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged hander
-     * or the modeldb change handler.
+     * or the modelDB change handler.
      */
-    private _onSharedModelChanged(
+    protected _onSharedModelChanged(
       sender: nbmodel.ISharedCodeCell,
       change: nbmodel.CellChange<nbformat.ICodeCellMetadata>
     ): void {
@@ -321,7 +320,7 @@ export namespace CodeEditor {
     /**
      * A signal emitted when the nbcell was switched.
      */
-     nbcellSwitched = new Signal<this, boolean>(this);
+    nbcellSwitched = new Signal<this, boolean>(this);
 
     /**
      * The shared model for the cell editor.
@@ -331,7 +330,7 @@ export namespace CodeEditor {
     /**
      * A mutex to updated the nbcell model.
      */
-    private readonly _mutex = nbmodel.createMutex();
+    protected readonly _mutex = nbmodel.createMutex();
 
     /**
      * The underlying `IModelDB` instance in which model
