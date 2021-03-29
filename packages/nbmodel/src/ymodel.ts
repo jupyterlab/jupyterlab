@@ -175,7 +175,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   private _changed = new Signal<this, nbmodel.NotebookChange>(this);
 }
 
-export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
+export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
   implements nbmodel.ISharedBaseCell<Metadata> {
   constructor(ymodel: Y.Map<any>) {
     this.ymodel = ymodel;
@@ -312,7 +312,7 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
 }
 
 export class YCodeCell
-  extends YBaseCell<nbformat.ICodeCellMetadata>
+  extends YBaseCell<nbmodel.ISharedBaseCellMetada>
   implements nbmodel.ISharedCodeCell {
   get cell_type(): 'code' {
     return 'code';
@@ -362,7 +362,7 @@ export class YCodeCell
 }
 
 export class YRawCell
-  extends YBaseCell<nbformat.IRawCellMetadata>
+  extends YBaseCell<nbmodel.ISharedBaseCellMetada>
   implements nbmodel.ISharedRawCell {
   get cell_type(): 'raw' {
     return 'raw';
@@ -378,7 +378,7 @@ export class YRawCell
 }
 
 export class YMarkdownCell
-  extends YBaseCell<nbformat.IRawCellMetadata>
+  extends YBaseCell<nbmodel.ISharedBaseCellMetada>
   implements nbmodel.ISharedMarkdownCell {
   get cell_type(): 'markdown' {
     return 'markdown';

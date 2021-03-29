@@ -79,10 +79,14 @@ export type ISharedCell =
   | ISharedMarkdownCell
   | ISharedUnrecognizedCell;
 
+export interface ISharedBaseCellMetada extends nbformat.IBaseCellMetadata {
+  slideshow: PartialJSONObject;
+}
+
 /**
  * Implements an API for nbformat.IBaseCell.
  */
-export interface ISharedBaseCell<Metadata extends nbformat.IBaseCellMetadata>
+export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetada>
   extends IDisposable {
   // @todo clone should only be available in the specific implementations i.e. ISharedCodeCell
   clone(): ISharedBaseCell<Metadata>;
@@ -104,8 +108,7 @@ export interface ISharedBaseCell<Metadata extends nbformat.IBaseCellMetadata>
  * Implements an API for nbformat.ICodeCell.
  */
 export interface ISharedCodeCell
-  extends ISharedBaseCell<nbformat.ICodeCellMetadata>,
-    IDisposable {
+  extends ISharedBaseCell<ISharedBaseCellMetada> {
   cell_type: 'code';
   /**
    * The code cell's prompt number. Will be null if the cell has not been run.
@@ -115,15 +118,14 @@ export interface ISharedCodeCell
    * Execution, display, or stream outputs.
    */
   getOutputs(): nbformat.IOutput[];
-  toJSON(): nbformat.ICodeCell;
+  toJSON(): nbformat.IBaseCell;
 }
 
 /**
  * Implements an API for nbformat.IMarkdownCell.
  */
 export interface ISharedMarkdownCell
-  extends ISharedBaseCell<nbformat.IRawCellMetadata>,
-    IDisposable {
+  extends ISharedBaseCell<ISharedBaseCellMetada> {
   /**
    * String identifying the type of cell.
    */
@@ -140,7 +142,7 @@ export interface ISharedMarkdownCell
  * Implements an API for nbformat.IRawCell.
  */
 export interface ISharedRawCell
-  extends ISharedBaseCell<nbformat.IRawCellMetadata>,
+  extends ISharedBaseCell<ISharedBaseCellMetada>,
     IDisposable {
   /**
    * String identifying the type of cell.
@@ -164,7 +166,7 @@ export type Delta<T> = Array<{ insert?: T; delete?: number; retain?: number }>;
  * @todo Is this needed?
  */
 export interface ISharedUnrecognizedCell
-  extends ISharedBaseCell<nbformat.IRawCellMetadata>,
+  extends ISharedBaseCell<ISharedBaseCellMetada>,
     IDisposable {
   cell_type: 'raw';
   toJSON(): nbformat.ICodeCell;
