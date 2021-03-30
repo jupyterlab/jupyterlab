@@ -388,7 +388,8 @@ export class StaticNotebook extends Widget {
     const cells = newValue.cells;
 
     // If there are no cells, create an empty cell
-    if (!cells.length) {
+    console.debug('NBWidget _onModelChanged', newValue.isInitialized);
+    if (!cells.length && !newValue.isInitialized) {
       cells.push(
         newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
       );
