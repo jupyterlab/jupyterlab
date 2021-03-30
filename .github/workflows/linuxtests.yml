@@ -7,7 +7,7 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, python, examples, interop, nonode, linkcheck, lint]
+        group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
         python: [3.6, 3.8]
         include:
           - group: release_check
@@ -34,6 +34,8 @@ jobs:
           - group: lint
             python: 3.6
           - group: examples
+            python: 3.6
+          - group: splice_source
             python: 3.6
       fail-fast: false
     timeout-minutes: 30
