@@ -281,7 +281,7 @@ const print: JupyterFrontEndPlugin<void> = {
   activate: (app: JupyterFrontEnd, translator: ITranslator) => {
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(CommandIDs.print, {
-      label: trans.__('Print...'),
+      label: trans.__('Print…'),
       isEnabled: () => {
         const widget = app.shell.currentWidget;
         return Printing.getPrintFunction(widget) !== null;
