@@ -288,7 +288,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   /**
-   * Handle a change to the cell metadata.
+   * Handle a change to the cell metadata modelDB and reflect it in the shared model.
    */
   protected onModelDBMetadataChange(
     sender: IObservableJSON,
@@ -319,6 +319,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   ) {
     switch (event.key) {
       case 'jupyter':
+        //        if (event.newValue?['outputs_hidden']) {
         metadata.jupyter = event.newValue as any;
         break;
       case 'collapsed':
@@ -336,23 +337,22 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
       case 'trusted':
         metadata.trusted = event.newValue as any;
         break;
-      case 'slideshow':
-        metadata.slideshow = event.newValue as any;
-        break;
       default:
-        throw new Error(`Invalid event key: ${event.key}`);
+        // The default is applied for custom metadata that are not
+        // defined in the official nbformat but which are defined
+        // by the user.
+        metadata[event.key] = event.newValue as any;
     }
   }
 
   /**
+   * Handle a change to the cell shared model and reflect it in modelDB.
    * We update the modeldb metadata when the nbcell changes.
    *
    * This method overrides the CodeEditor protected _onSharedModelChanged
    * so we first call super._onSharedModelChanged
    *
    * @override CodeEditor._onSharedModelChanged
-   *
-   * @todo we miss in nbmodel/nbformat the 'slide_type' metadata shown in the UI.
    */
   protected _onSharedModelChanged(
     sender: nbmodel.ISharedCodeCell,
@@ -364,19 +364,33 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
         const newValue = change.metadataChange
           ?.newValue as nbmodel.ISharedBaseCellMetada;
         if (newValue) {
-          if (newValue.collapsed) {
-            if (!this.metadata.get('jupyter')) this.metadata.set('jupyter', {});
-            (this.metadata.get('jupyter') as any)!['outputs_hidden'] =
-              newValue.collapsed;
-          }
-          if (newValue.jupyter) this.metadata.set('jupyter', newValue.jupyter);
-          if (newValue.name) this.metadata.set('name', newValue.name);
-          if (newValue.scrolled)
-            this.metadata.set('scrolled', newValue.scrolled);
-          if (newValue.tags) this.metadata.set('tags', newValue.tags);
-          if (newValue.trusted) this.metadata.set('trusted', newValue.trusted);
-          if (newValue.slideshow)
-            this.metadata.set('slideshow', newValue.slideshow);
+          Object.keys(newValue).map(key => {
+            switch (key) {
+              case 'collapsed':
+                this.metadata.set('collapsed', newValue.jupyter);
+                break;
+              case 'jupyter':
+                this.metadata.set('jupyter', newValue.jupyter);
+                break;
+              case 'name':
+                this.metadata.set('name', newValue.name);
+                break;
+              case 'scrolled':
+                this.metadata.set('scrolled', newValue.scrolled);
+                break;
+              case 'tags':
+                this.metadata.set('tags', newValue.tags);
+                break;
+              case 'trusted':
+                this.metadata.set('trusted', newValue.trusted);
+                break;
+              default:
+                // The default is applied for custom metadata that are not
+                // defined in the official nbformat but which are defined
+                // by the user.
+                this.metadata.set(key, newValue[key]);
+            }
+          });
         }
       }
     });
