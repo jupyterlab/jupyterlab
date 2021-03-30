@@ -395,6 +395,7 @@ export namespace CodeEditor {
       mimeType: IObservableValue,
       args: ObservableValue.IChangedArgs
     ): void {
+      console.log('--- _onModelDBMimeTypeChanged', mimeType, args);
       this._mimeTypeChanged.emit({
         name: 'mimeType',
         oldValue: args.oldValue as string,
