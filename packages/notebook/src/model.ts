@@ -336,7 +336,6 @@ close the notebook without saving it.`,
    */
   initialize(): void {
     super.initialize();
-    console.debug('NBModel initialize', this._isInitialized);
     if (!this.cells.length && !this._isInitialized) {
       const factory = this.contentFactory;
       this.cells.push(factory.createCodeCell({}));
