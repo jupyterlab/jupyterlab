@@ -69,6 +69,9 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    */
   readonly deletedCells: string[];
 
+  /**
+   * If the model is initialized or not.
+   */
   isInitialized: boolean;
 }
 
@@ -158,6 +161,9 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     return this._deletedCells;
   }
 
+  /**
+   * If the model is initialized or not.
+   */
   get isInitialized(): boolean {
     return this._isInitialized;
   }
