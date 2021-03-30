@@ -39,7 +39,7 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
     "prepublishOnly": "jlpm run build && webpack",
-    "test": "jest",
+    "test": "jest --detectOpenHandles",
     "test:cov": "jest --collect-coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
