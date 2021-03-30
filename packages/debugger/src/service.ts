@@ -250,6 +250,26 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Requests all the defined variables and display them in the
+   * table view.
+   */
+  async displayDefinedVariables(): Promise<void> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
+    const inspectReply = await this.session.sendRequest('inspectVariables', {});
+    const variables = inspectReply.body.variables;
+
+    const variableScopes = [
+      {
+        name: 'Globals',
+        variables: variables
+      }
+    ];
+    this._model.variables.scopes = variableScopes;
+  }
+
+  /**
    * Restart the debugger.
    */
   async restart(): Promise<void> {
