@@ -80,7 +80,7 @@ export type ISharedCell =
   | ISharedUnrecognizedCell;
 
 export interface ISharedBaseCellMetada extends nbformat.IBaseCellMetadata {
-  slideshow: PartialJSONObject;
+  [key: string]: any;
 }
 
 /**

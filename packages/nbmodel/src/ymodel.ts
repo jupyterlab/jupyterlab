@@ -234,7 +234,7 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     if (modelEvent && modelEvent.keysChanged.has('metadata')) {
       const change = modelEvent.changes.keys.get('metadata');
       changes.metadataChange = {
-        oldValue: change!.oldValue,
+        oldValue: change?.oldValue ? change!.oldValue : undefined,
         newValue: this.getMetadata()
       };
     }
