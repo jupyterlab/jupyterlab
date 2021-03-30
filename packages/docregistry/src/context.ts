@@ -62,7 +62,6 @@ export class Context<
    * Construct a new document context.
    */
   constructor(options: Context.IOptions<T>) {
-    console.debug('New context');
     const manager = (this._manager = options.manager);
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
@@ -263,10 +262,6 @@ export class Context<
           // if save/revert completed successfully, we set the inialized content in the rtc server.
           promise = promise.then(() => {
             this.provider.putInitializedState();
-            console.debug(
-              'Context initialize:',
-              (this._model as any).isInitialized
-            );
             this._model.initialize();
           });
           // make sure that the lock is released after the above operations are completed.
