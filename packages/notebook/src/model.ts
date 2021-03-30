@@ -68,6 +68,8 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * The array of deleted cells since the notebook was last run.
    */
   readonly deletedCells: string[];
+
+  isInitialized: boolean;
 }
 
 /**
@@ -154,6 +156,10 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    */
   get deletedCells(): string[] {
     return this._deletedCells;
+  }
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
   }
 
   /**
@@ -330,10 +336,12 @@ close the notebook without saving it.`,
    */
   initialize(): void {
     super.initialize();
-    if (!this.cells.length) {
+    console.debug('NBModel initialize', this._isInitialized);
+    if (!this.cells.length && !this._isInitialized) {
       const factory = this.contentFactory;
       this.cells.push(factory.createCodeCell({}));
     }
+    this._isInitialized = true;
     this.cells.clearUndo();
   }
 
@@ -381,6 +389,7 @@ close the notebook without saving it.`,
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _deletedCells: string[];
+  private _isInitialized: boolean = false;
 }
 
 /**
