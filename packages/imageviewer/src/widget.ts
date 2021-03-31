@@ -105,10 +105,10 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   /**
    * Dispose of resources held by the image viewer.
    */
-   dispose(): void {
+  dispose(): void {
     if (this._img.src) {
-        URL.revokeObjectURL(this._img.src || '');
-      }
+      URL.revokeObjectURL(this._img.src || '');
+    }
     super.dispose();
   }
 
@@ -193,7 +193,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     if (cm.format === 'base64') {
       this._img.src = `data:${this._mimeType};base64,${content}`;
     } else {
-      const a = new Blob([content], {type: this._mimeType});
+      const a = new Blob([content], { type: this._mimeType });
       this._img.src = URL.createObjectURL(a);
     }
     URL.revokeObjectURL(oldurl);
