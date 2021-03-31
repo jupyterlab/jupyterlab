@@ -36,6 +36,13 @@ class LogImage extends ImageViewer {
   }
 }
 
+// jsdom does not have createObjectURL and revokeObjectURL, so we define them.
+function noOp () { }
+if (typeof window.URL.createObjectURL === 'undefined') {
+  Object.defineProperty(window.URL, 'createObjectURL', { value: noOp})
+  Object.defineProperty(window.URL, 'revokeObjectURL', { value: noOp})
+}
+
 /**
  * The common image model.
  */
