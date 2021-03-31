@@ -103,6 +103,16 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   }
 
   /**
+   * Dispose of resources held by the image viewer.
+   */
+   dispose(): void {
+    if (this._img.src) {
+        URL.revokeObjectURL(this._img.src || '');
+      }
+    super.dispose();
+  }
+
+  /**
    * Reset rotation and flip transformations.
    */
   resetRotationFlip(): void {
