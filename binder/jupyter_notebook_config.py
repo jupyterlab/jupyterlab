@@ -26,7 +26,7 @@ lab_splice_command = ' '.join([
     '--minimize=False',
     '--dev-build=True',
     '--debug',
-    '>jupyterlab-spliced.log 2>&1'
+    '>jupyterlab-spliced.log 2>&1',
     '&&',
     'jupyter',
     'lab',
