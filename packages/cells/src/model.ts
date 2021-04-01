@@ -294,8 +294,10 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     sender: IObservableJSON,
     event: IObservableJSON.IChangedArgs
   ): void {
+    return;
+    // todo reintroduce this
     const metadata = this.nbcell.getMetadata();
-    this._modeDBMutex(() => {
+    this._modelDBMutex(() => {
       switch (event.type) {
         case 'add':
           this._changeCellMetata(metadata, event);
@@ -359,7 +361,9 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     change: nbmodel.CellChange<nbmodel.ISharedBaseCellMetada>
   ): void {
     super._onSharedModelChanged(sender, change);
-    this._mutex(() => {
+    return;
+    // @todo reintroduce
+    this._modelDBMutex(() => {
       if (change.metadataChange) {
         const newValue = change.metadataChange
           ?.newValue as nbmodel.ISharedBaseCellMetada;
@@ -406,7 +410,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * A mutex to update the nbcell model.
    */
-  private readonly _modeDBMutex = nbmodel.createMutex();
+  private readonly _modelDBMutex = nbmodel.createMutex();
 }
 
 /**
