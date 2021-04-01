@@ -182,7 +182,6 @@ default web browser.
 .. code:: bash
 
     conda activate jupyterlab-ext
-    jupyter lab build
     jupyter lab
 
 In that browser window, open the JavaScript console
