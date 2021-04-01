@@ -342,7 +342,8 @@ close the notebook without saving it.`,
    */
   initialize(): void {
     super.initialize();
-    if (!this.cells.length && !this._isInitialized) {
+    if (!this.cells.length /* && !this._isInitialized */) {
+      // @todo re-introduce fix of initial content
       const factory = this.contentFactory;
       this.cells.push(factory.createCodeCell({}));
     }
