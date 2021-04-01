@@ -434,6 +434,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     const newValues = toArray(cells);
     each(newValues, cell => {
       this._cellMap.set(cell.id, cell);
+      // @todo it looks like this compound operation shoult start before the `each` loop.
       this._cellOrder.beginCompoundOperation();
       this._cellOrder.insert(index++, cell.id);
       this._cellOrder.endCompoundOperation();

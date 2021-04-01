@@ -303,17 +303,19 @@ export namespace CodeEditor {
       event: IObservableString.IChangedArgs
     ): void {
       this._mutex(() => {
-        switch (event.type) {
-          case 'insert':
-            this.nbcell.updateSource(event.start, event.start, event.value);
-            break;
-          case 'remove':
-            this.nbcell.updateSource(event.start, event.end - event.start);
-            break;
-          default:
-            this.nbcell.setSource(value.text);
-            break;
-        }
+        this.nbcell.ymodel.doc!.transact(() => {
+          switch (event.type) {
+            case 'insert':
+              this.nbcell.updateSource(event.start, event.start, event.value);
+              break;
+            case 'remove':
+              this.nbcell.updateSource(event.start, event.end);
+              break;
+            default:
+              this.nbcell.setSource(value.text);
+              break;
+          }
+        });
       });
     }
 
