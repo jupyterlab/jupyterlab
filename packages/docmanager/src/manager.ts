@@ -482,7 +482,7 @@ export class DocumentManager implements IDocumentManager {
       modelDBFactory,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
-      collaborative: true
+      collaborative: false
     });
     const handler = new SaveHandler({
       context,
