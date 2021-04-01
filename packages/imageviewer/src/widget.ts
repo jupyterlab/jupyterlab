@@ -103,6 +103,16 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   }
 
   /**
+   * Dispose of resources held by the image viewer.
+   */
+  dispose(): void {
+    if (this._img.src) {
+      URL.revokeObjectURL(this._img.src || '');
+    }
+    super.dispose();
+  }
+
+  /**
    * Reset rotation and flip transformations.
    */
   resetRotationFlip(): void {
@@ -178,11 +188,15 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     if (!cm) {
       return;
     }
+    const oldurl = this._img.src || '';
     let content = context.model.toString();
-    if (cm.format !== 'base64') {
-      content = btoa(content);
+    if (cm.format === 'base64') {
+      this._img.src = `data:${this._mimeType};base64,${content}`;
+    } else {
+      const a = new Blob([content], { type: this._mimeType });
+      this._img.src = URL.createObjectURL(a);
     }
-    this._img.src = `data:${this._mimeType};base64,${content}`;
+    URL.revokeObjectURL(oldurl);
   }
 
   /**
