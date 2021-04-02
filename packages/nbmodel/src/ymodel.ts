@@ -103,6 +103,8 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       if (!this.ycellMapping.has(type)) {
         this.ycellMapping.set(type, this._createCellFromType(type));
       }
+      const cell = this.ycellMapping.get(type) as any;
+      cell._notebook = this;
     });
     event.changes.deleted.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
@@ -183,6 +185,14 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     this._prevSourceLength = ysource ? ysource.length : 0;
     this.ymodel.observeDeep(this._modelObserver);
   }
+
+  public get notebook(): YNotebook | null {
+    return this._notebook;
+  }
+  /**
+   * The notebook that this cell belongs to.
+   */
+  protected _notebook: YNotebook | null = null;
 
   isStandalone = false;
 

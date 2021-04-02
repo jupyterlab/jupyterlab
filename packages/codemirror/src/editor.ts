@@ -209,9 +209,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private initializeEditorBinding() {
     if (USE_YCODEMIRROR_BINDING) {
       this.yeditorBinding?.destroy();
+      const nbcell = this.model.nbcell as nbmodel.YCodeCell;
+      const awareness = nbcell.notebook?.awareness;
       this.yeditorBinding = new CodemirrorBinding(
-        (this.model.nbcell as nbmodel.YCodeCell).ymodel.get('source'),
-        this.editor
+        nbcell.ymodel.get('source'),
+        this.editor,
+        awareness
       );
     }
   }
