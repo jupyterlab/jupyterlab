@@ -52,6 +52,11 @@ export interface IDocumentManager extends IDisposable {
   autosaveInterval: number;
 
   /**
+   * Whether to prompt to name file on first save.
+   */
+  nameFileOnSave: boolean;
+
+  /**
    * Clone a widget.
    *
    * @param widget - The source widget.

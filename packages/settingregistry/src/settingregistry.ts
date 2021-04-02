@@ -425,6 +425,7 @@ export class SettingRegistry implements ISettingRegistry {
     await this._ready;
 
     const plugins = this.plugins;
+    console.log('plugins', plugins);
 
     if (!(plugin in plugins)) {
       return this.load(plugin).then(() => this.set(plugin, key, value));

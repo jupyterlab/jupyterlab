@@ -127,6 +127,17 @@ export class DocumentManager implements IDocumentManager {
   }
 
   /**
+   * Whether to prompt to name file on first save.
+   */
+  get nameFileOnSave(): boolean {
+    return this._nameFileOnSave;
+  }
+
+  set nameFileOnSave(value: boolean) {
+    this._nameFileOnSave = value;
+  }
+
+  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
@@ -604,6 +615,7 @@ export class DocumentManager implements IDocumentManager {
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;
   private _autosave = true;
+  private _nameFileOnSave = true;
   private _autosaveInterval = 120;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;

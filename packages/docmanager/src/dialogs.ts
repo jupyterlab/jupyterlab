@@ -81,6 +81,45 @@ export function renameDialog(
 }
 
 /**
+ * Name a file on first save with a dialog.
+ */
+export function nameOnSaveDialog(
+  manager: IDocumentManager,
+  oldPath: string,
+  translator?: ITranslator
+): Promise<Contents.IModel | null> {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
+
+  return showDialog({
+    title: trans.__('Name File'),
+    body: new NameOnSaveHandler(manager, oldPath),
+    focusNodeSelector: 'input',
+    buttons: [Dialog.okButton({ label: trans.__('Enter') })]
+  }).then(result => {
+    if (!result.value) {
+      return renameFile(manager, oldPath, oldPath);
+    }
+
+    if (!isValidFileName(result.value)) {
+      void showErrorMessage(
+        trans.__('Naming Error'),
+        Error(
+          trans.__(
+            '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+            result.value
+          )
+        )
+      );
+      return renameFile(manager, oldPath, oldPath);
+    }
+    const basePath = PathExt.dirname(oldPath);
+    const newPath = PathExt.join(basePath, result.value);
+    return renameFile(manager, oldPath, newPath);
+  });
+}
+
+/**
  * Rename a file, asking for confirmation if it is overwriting another.
  */
 export function renameFile(
@@ -193,6 +232,82 @@ namespace Private {
     body.appendChild(existingPath);
     body.appendChild(nameTitle);
     body.appendChild(name);
+    return body;
+  }
+}
+
+/**
+ * A widget used to name file on first save.
+ */
+class NameOnSaveHandler extends Widget {
+  /**
+   * Construct a new "name notebook file" dialog.
+   */
+  constructor(manager: IDocumentManager, oldPath: string) {
+    super({ node: Private.createNameFileNode(manager) });
+    this.addClass(FILE_DIALOG_CLASS);
+    const ext = PathExt.extname(oldPath);
+    const value = (this.inputNode.value = PathExt.basename(oldPath));
+    this.inputNode.setSelectionRange(0, value.length - ext.length);
+  }
+
+  /**
+   * Get the input text node.
+   */
+  get inputNode(): HTMLInputElement {
+    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
+  }
+
+  /**
+   * Get the value of the input widget.
+   */
+  getValue(): string {
+    return this.inputNode.value;
+  }
+
+  /**
+   * Get the checkbox node.
+   */
+  get checkboxNode(): HTMLInputElement {
+    return this.node.getElementsByTagName('input')[1] as HTMLInputElement;
+  }
+
+  /**
+   * Get checked of the checkbox widget.
+   */
+  getChecked(): boolean {
+    return this.checkboxNode.checked;
+  }
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Create the node for a rename after launch handler.
+   */
+  export function createNameFileNode(
+    manger: IDocumentManager,
+    translator?: ITranslator
+  ): HTMLElement {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    const body = document.createElement('div');
+    const name = document.createElement('input');
+    const checkbox = document.createElement('input');
+    const label = document.createElement('label');
+
+    checkbox.type = 'checkbox';
+    checkbox.addEventListener('change', function () {
+      manger.nameFileOnSave = !this.checked;
+    });
+    // Question: aglin two elements (flexbox?)
+    label.textContent = trans.__("Don't ask me again");
+    body.appendChild(name);
+    body.appendChild(checkbox);
+    body.appendChild(label);
+
     return body;
   }
 }

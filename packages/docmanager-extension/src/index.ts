@@ -23,7 +23,7 @@ import {
 import { IChangedArgs, Time } from '@jupyterlab/coreutils';
 
 import {
-  renameDialog,
+  nameOnSaveDialog,
   DocumentManager,
   IDocumentManager,
   PathStatus,
@@ -68,6 +68,8 @@ namespace CommandIDs {
 
   export const rename = 'docmanager:rename';
 
+  export const nameOnSave = 'docmanager:name-on-save';
+
   export const del = 'docmanager:delete';
 
   export const restoreCheckpoint = 'docmanager:restore-checkpoint';
@@ -81,6 +83,8 @@ namespace CommandIDs {
   export const download = 'docmanager:download';
 
   export const toggleAutosave = 'docmanager:toggle-autosave';
+
+  export const toggleNameFileOnSave = 'docmanager:toggle-name-file-on-save';
 
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
 }
@@ -175,6 +179,16 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
         | number
         | null;
       docManager.autosaveInterval = autosaveInterval || 120;
+
+      // Handle whether to prompt to name file on first save
+      const nameFileOnSave = settings.get('nameFileOnSave').composite as
+        | boolean
+        | null;
+      docManager.nameFileOnSave =
+        nameFileOnSave === true || nameFileOnSave === false
+          ? nameFileOnSave
+          : true;
+      app.commands.notifyCommandChanged(CommandIDs.toggleNameFileOnSave);
 
       // Handle default widget factory overrides.
       const defaultViewers = settings.get('defaultViewers').composite as {
@@ -594,6 +608,10 @@ function addCommands(
     isEnabled: isWritable,
     execute: () => {
       // Checks that shell.currentWidget is valid:
+      if (docManager.nameFileOnSave) {
+        void commands.execute('docmanager:name-on-save');
+      }
+
       if (isEnabled()) {
         const context = docManager.contextForWidget(shell.currentWidget!);
         if (!context) {
@@ -703,6 +721,20 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.toggleNameFileOnSave, {
+    label: trans.__('Name File on First Save'),
+    isToggled: () => docManager.nameFileOnSave,
+    execute: () => {
+      const value = !docManager.nameFileOnSave;
+      const key = 'nameFileOnSave';
+      return settingRegistry
+        .set(pluginId, key, value)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+        });
+    }
+  });
+
   // .jp-mod-current added so that the console-creation command is only shown
   // on the current document.
   // Otherwise it will delegate to the wrong widget.
@@ -726,7 +758,13 @@ function addCommands(
   }
 
   if (mainMenu) {
-    mainMenu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
+    mainMenu.settingsMenu.addGroup(
+      [
+        { command: CommandIDs.toggleAutosave },
+        { command: CommandIDs.toggleNameFileOnSave }
+      ],
+      5
+    );
     mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
   }
 }
@@ -790,7 +828,20 @@ function addLabCommands(
       // Implies contextMenuWidget() !== null
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
-        return renameDialog(docManager, context!.path);
+        return nameOnSaveDialog(docManager, context!.path);
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.nameOnSave, {
+    label: () =>
+      trans.__('Rename %1…', fileType(contextMenuWidget(), docManager)),
+    isEnabled,
+    execute: () => {
+      // Implies contextMenuWidget() !== null
+      if (isEnabled()) {
+        const context = docManager.contextForWidget(contextMenuWidget()!);
+        return nameOnSaveDialog(docManager, context!.path);
       }
     }
   });

@@ -40,6 +40,57 @@ input.jp-mod-styled:focus {
   box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
+input[type='checkbox'] {
+  position: relative;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 30px;
+}
+
+input[type='checkbox']:focus {
+  border: none;
+  box-shadow: none;
+}
+
+input[type='checkbox']:before {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 0;
+  left: 0;
+  background-color: #e9e9e9;
+}
+
+input[type='checkbox']:checked:before {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 0;
+  left: 0;
+  background-color: #1e80ef;
+}
+input[type='checkbox']:checked:after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+  position: absolute;
+  top: 2px;
+  left: 6px;
+}
+
 .jp-select-wrapper {
   display: flex;
   position: relative;
