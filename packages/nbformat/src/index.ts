@@ -19,7 +19,7 @@ export const MAJOR_VERSION: number = 4;
 /**
  * The minor version of the notebook format.
  */
-export const MINOR_VERSION: number = 4;
+export const MINOR_VERSION: number = 5;
 
 /**
  * The kernelspec metadata.
@@ -57,6 +57,16 @@ export interface INotebookContent extends PartialJSONObject {
   nbformat_minor: number;
   nbformat: number;
   cells: ICell[];
+}
+
+/**
+ * The notebook content for format 4.4.
+ */
+export interface INotebookContent44 extends PartialJSONObject {
+  metadata: INotebookMetadata;
+  nbformat_minor: 4;
+  nbformat: 4;
+  cells: Omit<ICell, 'id'>[];
 }
 
 /**
