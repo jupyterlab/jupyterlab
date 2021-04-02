@@ -23,6 +23,7 @@ import {
 import { IChangedArgs, Time } from '@jupyterlab/coreutils';
 
 import {
+  renameDialog,
   nameOnSaveDialog,
   DocumentManager,
   IDocumentManager,
@@ -828,7 +829,7 @@ function addLabCommands(
       // Implies contextMenuWidget() !== null
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
-        return nameOnSaveDialog(docManager, context!.path);
+        return renameDialog(docManager, context!.path);
       }
     }
   });
