@@ -39,21 +39,21 @@ class YJSEchoWS(WebSocketHandler):
         if message[0] == acquireLockMessageType: # tries to acquire lock
             if room.lock == None or time.time() - room.lock > 10:
                 lock = int(time.time())
-                print('Acquired new lock: ', lock)
+                # print('Acquired new lock: ', lock)
                 room.lock = lock
                 # return acquired lock
                 self.write_message(bytes([acquireLockMessageType]) + lock.to_bytes(4, byteorder = 'little'), binary=True)
         elif message[0] == releaseLockMessageType:
             releasedLock = int.from_bytes(message[1:], byteorder = 'little')
-            print("trying release lock: ", releasedLock)
+            # print("trying release lock: ", releasedLock)
             if room.lock == releasedLock:
-                print('released lock: ', room.lock)
+                # print('released lock: ', room.lock)
                 room.lock = None
         elif message[0] == requestInitializedContentMessageType:
-            print("client requested initial content")
+            # print("client requested initial content")
             self.write_message(bytes([requestInitializedContentMessageType]) + room.content, binary=True)
         elif message[0] == putInitializedContentMessageType:
-            print("client put initialized content")
+            # print("client put initialized content")
             room.content = message[1:]
         elif room:
             for client_id, (loop, hook_send_message) in room.clients.items() :
@@ -67,7 +67,7 @@ class YJSEchoWS(WebSocketHandler):
         room.clients.pop(self.id)
         if len(room.clients) == 0 :
             cls.rooms.pop(self.room_id)
-            print("[YJSEchoWS]: close room " + self.room_id)
+            # print("[YJSEchoWS]: close room " + self.room_id)
 
         return True
 

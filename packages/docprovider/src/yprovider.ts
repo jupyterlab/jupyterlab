@@ -20,8 +20,8 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
       emitSynced,
       messageType
     ) => {
+      // acquired lock
       const timestamp = decoding.readUint32(decoder);
-      console.log('Acquired lock!', timestamp);
       const lockRequest = this.currentLockRequest;
       this.currentLockRequest = null;
       if (lockRequest) {
@@ -36,6 +36,7 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
       emitSynced,
       messageType
     ) => {
+      // received initial content
       const initialContent = decoding.readTailAsUint8Array(decoder);
       // Apply data from server
       if (initialContent.byteLength > 0) {
@@ -43,7 +44,6 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
           Y.applyUpdate(this.doc, initialContent);
         }, 0);
       }
-      console.log('Received initial content!', initialContent);
       const initialContentRequest = this.initialContentRequest;
       this.initialContentRequest = null;
       if (initialContentRequest) {
@@ -127,7 +127,7 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     // reply with release lock
     encoding.writeVarUint(encoder, 126);
     encoding.writeUint32(encoder, lock);
-    console.log('Releasing lock!', lock);
+    // releasing lock
     this.ws?.send(encoding.toUint8Array(encoder));
   }
 
