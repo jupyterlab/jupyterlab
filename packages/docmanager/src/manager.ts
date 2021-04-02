@@ -51,6 +51,7 @@ export class DocumentManager implements IDocumentManager {
     this.translator = options.translator || nullTranslator;
     this.registry = options.registry;
     this.services = options.manager;
+    this.collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
 
     this._opener = options.opener;
@@ -64,6 +65,8 @@ export class DocumentManager implements IDocumentManager {
     this._widgetManager = widgetManager;
     this._setBusy = options.setBusy;
   }
+
+  private collaborative: boolean;
 
   /**
    * The registry used by the manager.
@@ -482,7 +485,7 @@ export class DocumentManager implements IDocumentManager {
       modelDBFactory,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
-      collaborative: false
+      collaborative: this.collaborative
     });
     const handler = new SaveHandler({
       context,
@@ -653,6 +656,11 @@ export namespace DocumentManager {
      * The applicaton language translator.
      */
     translator?: ITranslator;
+    /**
+     * Whether the context should be collaborative.
+     * If true, the context will connect through yjs_ws_server to share information if possible.
+     */
+    collaborative?: boolean;
   }
 
   /**
