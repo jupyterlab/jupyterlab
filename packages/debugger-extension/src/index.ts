@@ -37,6 +37,8 @@ import { DocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
+import { ILoggerRegistry } from '@jupyterlab/logconsole';
+
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import {
@@ -404,19 +406,26 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:main',
-  requires: [IDebugger, IEditorServices, ITranslator, IDebuggerSidebar],
-  optional: [ILabShell, ILayoutRestorer, ICommandPalette, IDebuggerSources],
+  requires: [IDebugger, IDebuggerSidebar, IEditorServices, ITranslator],
+  optional: [
+    ICommandPalette,
+    IDebuggerSources,
+    ILabShell,
+    ILayoutRestorer,
+    ILoggerRegistry
+  ],
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
     service: IDebugger,
+    sidebar: IDebugger.ISidebar,
     editorServices: IEditorServices,
     translator: ITranslator,
-    sidebar: IDebugger.ISidebar,
+    palette: ICommandPalette | null,
+    debuggerSources: IDebugger.ISources | null,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
-    palette: ICommandPalette | null,
-    debuggerSources: IDebugger.ISources | null
+    loggerRegistry: ILoggerRegistry | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const { commands, shell, serviceManager } = app;
@@ -479,7 +488,17 @@ const main: JupyterFrontEndPlugin<void> = {
         }
         const reply = await service.evaluate(code);
         if (reply) {
-          console.debug(reply.result);
+          const data = reply.result;
+          const path = service?.session?.connection?.path;
+          const logger = path ? loggerRegistry?.getLogger?.(path) : undefined;
+
+          if (logger) {
+            // print to log console of the notebook currently being debugged
+            logger.log({ type: 'text', data, level: logger.level });
+          } else {
+            // fallback to printing to devtools console
+            console.debug(data);
+          }
         }
       }
     });

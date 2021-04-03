@@ -57,6 +57,7 @@
     "@jupyterlab/debugger": "^3.1.0-alpha.3",
     "@jupyterlab/docregistry": "^3.1.0-alpha.3",
     "@jupyterlab/fileeditor": "^3.1.0-alpha.3",
+    "@jupyterlab/logconsole": "^3.1.0-alpha.3",
     "@jupyterlab/notebook": "^3.1.0-alpha.3",
     "@jupyterlab/rendermime": "^3.1.0-alpha.3",
     "@jupyterlab/services": "^6.1.0-alpha.3",

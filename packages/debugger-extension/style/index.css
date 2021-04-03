@@ -13,3 +13,4 @@
 @import url('~@jupyterlab/fileeditor/style/index.css');
 @import url('~@jupyterlab/notebook/style/index.css');
 @import url('~@jupyterlab/debugger/style/index.css');
+@import url('~@jupyterlab/logconsole/style/index.css');
