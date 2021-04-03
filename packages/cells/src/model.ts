@@ -294,8 +294,6 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     sender: IObservableJSON,
     event: IObservableJSON.IChangedArgs
   ): void {
-    return;
-    // todo reintroduce this
     const metadata = this.nbcell.getMetadata();
     this._modelDBMutex(() => {
       switch (event.type) {
@@ -321,7 +319,6 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   ) {
     switch (event.key) {
       case 'jupyter':
-        //        if (event.newValue?['outputs_hidden']) {
         metadata.jupyter = event.newValue as any;
         break;
       case 'collapsed':
@@ -361,8 +358,6 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     change: nbmodel.CellChange<nbmodel.ISharedBaseCellMetada>
   ): void {
     super._onSharedModelChanged(sender, change);
-    return;
-    // @todo reintroduce
     this._modelDBMutex(() => {
       if (change.metadataChange) {
         const newValue = change.metadataChange
