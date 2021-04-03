@@ -57,7 +57,9 @@ export interface IDebugger {
   /**
    * Evaluate an expression.
    */
-  evaluate(expression: string): Promise<void>;
+  evaluate(
+    expression: string
+  ): Promise<DebugProtocol.EvaluateResponse['body'] | null>;
 
   /**
    * Computes an id based on the given code.

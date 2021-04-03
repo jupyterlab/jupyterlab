@@ -221,7 +221,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    *
    * @param expression The expression to evaluate as a string.
    */
-  async evaluate(expression: string): Promise<void> {
+  async evaluate(
+    expression: string
+  ): Promise<DebugProtocol.EvaluateResponse['body'] | null> {
     if (!this.session) {
       throw new Error('No active debugger session');
     }
@@ -232,11 +234,13 @@ export class DebuggerService implements IDebugger, IDisposable {
       frameId
     });
     if (!reply.success) {
-      return;
+      return null;
     }
     // get the frames to retrieve the latest state of the variables
     this._clearModel();
     await this._getAllFrames();
+
+    return reply.body;
   }
 
   /**

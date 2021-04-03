@@ -477,7 +477,10 @@ const main: JupyterFrontEndPlugin<void> = {
         if (!result.button.accept || !code) {
           return;
         }
-        await service.evaluate(code);
+        const reply = await service.evaluate(code);
+        if (reply) {
+          console.debug(reply.result);
+        }
       }
     });
 
