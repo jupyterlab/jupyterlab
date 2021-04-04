@@ -82,7 +82,8 @@ describe('@jupyterlab/notebook', () => {
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
         model.cells.push(cell);
-        model.fromJSON(utils.DEFAULT_CONTENT);
+        model.cells.clearUndo();
+        model.cells.remove(model.cells.length - 1);
         model.cells.undo();
         expect(model.cells.length).toBe(1);
         expect(model.cells.get(0).value.text).toBe('foo');

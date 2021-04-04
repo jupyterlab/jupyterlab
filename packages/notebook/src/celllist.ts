@@ -69,13 +69,25 @@ export class CellList implements IObservableUndoableList<ICellModel> {
             change.newIndex + change.oldValues.length
           );
         }
-        if (change.type === 'set' || change.type === 'add') {
+        if (
+          change.type === 'set' ||
+          change.type === 'add' ||
+          change.type === 'move'
+        ) {
           const cells = change.newValues.map(cell => {
-            let nbcell = cell.nbcell.clone() as any;
-            cell.switchSharedModel(nbcell, false);
-            return nbcell;
+            return cell.nbcell.clone() as any;
           });
           nbmodel.insertCells(change.newIndex, cells);
+          change.newValues.forEach((cell, index) => {
+            cell.switchSharedModel(cells[index], false);
+          });
+        }
+        if (change.type === 'move') {
+          let from = change.oldIndex;
+          if (from >= change.newIndex) {
+            from += change.oldValues.length;
+          }
+          nbmodel.deleteCellRange(from, from + change.oldValues.length);
         }
       });
     });
@@ -469,14 +481,14 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Whether the object can redo changes.
    */
   get canRedo(): boolean {
-    return this._cellOrder.canRedo;
+    return this.nbmodel.canRedo();
   }
 
   /**
    * Whether the object can undo changes.
    */
   get canUndo(): boolean {
-    return this._cellOrder.canUndo;
+    return this.nbmodel.canUndo();
   }
 
   /**
@@ -500,34 +512,21 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Undo an operation.
    */
   undo(): void {
-    // @todo use this.nbmodel.undo() instead
-    this._cellOrder.undo();
+    this.nbmodel.undo();
   }
 
   /**
    * Redo an operation.
    */
   redo(): void {
-    this._cellOrder.redo();
+    this.nbmodel.redo();
   }
 
   /**
    * Clear the change stack.
    */
   clearUndo(): void {
-    // Dispose of cells not in the current
-    // cell order.
-    for (const key of this._cellMap.keys()) {
-      if (
-        ArrayExt.findFirstIndex(toArray(this._cellOrder), id => id === key) ===
-        -1
-      ) {
-        const cell = this._cellMap.get(key) as ICellModel;
-        cell.dispose();
-        this._cellMap.delete(key);
-      }
-    }
-    this._cellOrder.clearUndo();
+    this.nbmodel.clearUndoHistory();
   }
 
   private _onOrderChanged(
