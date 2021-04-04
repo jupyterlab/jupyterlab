@@ -47,6 +47,9 @@ export interface ISharedNotebook extends IDisposable {
   deleteCellRange(from: number, to: number): void;
   undo(): void;
   redo(): void;
+  clearUndoHistory(): void;
+  canUndo(): boolean;
+  canRedo(): boolean;
   readonly changed: ISignal<this, NotebookChange>;
 }
 
@@ -93,6 +96,11 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetada>
   readonly isStandalone: boolean;
   getSource(): string;
   setSource(value: string): void;
+  undo(): void;
+  redo(): void;
+  canUndo(): boolean;
+  canRedo(): boolean;
+  clearUndoHistory(): void;
   /**
    * Replace content from `start' to `end` with `value`.
    */
