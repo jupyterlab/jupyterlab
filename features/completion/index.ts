@@ -1,21 +1,23 @@
 import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { ICompletionManager } from '@jupyterlab/completer';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { LabIcon } from '@jupyterlab/ui-components';
+import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
+
+import completionSvg from '../../../style/icons/completion.svg';
+import { FeatureSettings } from '../../feature';
+import {
   ILSPAdapterManager,
   ILSPFeatureManager,
   ILSPLogConsole,
   PLUGIN_ID
 } from '../../tokens';
-import {
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ICompletionManager } from '@jupyterlab/completer';
-import { FeatureSettings } from '../../feature';
+
 import { CompletionCM, CompletionLabIntegration } from './completion';
-import { LabIcon } from '@jupyterlab/ui-components';
-import completionSvg from '../../../style/icons/completion.svg';
-import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 export const completionIcon = new LabIcon({
   name: 'lsp:completion',

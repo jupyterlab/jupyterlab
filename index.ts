@@ -11,16 +11,40 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { Signal } from '@lumino/signaling';
-import { LanguageServerManager } from './manager';
-import '../style/index.css';
-import { ContextCommandManager } from './command_manager';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
+import { COMPLETION_THEME_MANAGER } from '@krassowski/completion-theme';
+import { plugin as THEME_MATERIAL } from '@krassowski/theme-material';
+import { plugin as THEME_VSCODE } from '@krassowski/theme-vscode';
+import { Signal } from '@lumino/signaling';
+
+import '../style/index.css';
+
+import { WIDGET_ADAPTER_MANAGER } from './adapter_manager';
+import { FILE_EDITOR_ADAPTER } from './adapters/file_editor';
+import { NOTEBOOK_ADAPTER } from './adapters/notebook';
+import { ContextCommandManager } from './command_manager';
 import { StatusButtonExtension } from './components/statusbar';
 import { DocumentConnectionManager } from './connection_manager';
+import { CODE_EXTRACTORS_MANAGER } from './extractors/manager';
+import { IForeignCodeExtractorsRegistry } from './extractors/types';
+import { IFeature } from './feature';
+import { COMPLETION_PLUGIN } from './features/completion';
+import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
+import { HIGHLIGHTS_PLUGIN } from './features/highlights';
+import { HOVER_PLUGIN } from './features/hover';
+import { JUMP_PLUGIN } from './features/jump_to';
+import { RENAME_PLUGIN } from './features/rename';
+import { SIGNATURE_PLUGIN } from './features/signature';
+import { SYNTAX_HIGHLIGHTING_PLUGIN } from './features/syntax_highlighting';
+import { LanguageServerManager } from './manager';
+import { CODE_OVERRIDES_MANAGER } from './overrides';
+import {
+  ICodeOverridesRegistry,
+  ILSPCodeOverridesManager
+} from './overrides/tokens';
 import {
   IAdapterTypeOptions,
   ILSPAdapterManager,
@@ -31,33 +55,12 @@ import {
   PLUGIN_ID,
   TLanguageServerConfigurations
 } from './tokens';
-import { IFeature } from './feature';
-import { JUMP_PLUGIN } from './features/jump_to';
-import { SIGNATURE_PLUGIN } from './features/signature';
-import { HOVER_PLUGIN } from './features/hover';
-import { RENAME_PLUGIN } from './features/rename';
-import { HIGHLIGHTS_PLUGIN } from './features/highlights';
-import { WIDGET_ADAPTER_MANAGER } from './adapter_manager';
-import { FILE_EDITOR_ADAPTER } from './adapters/file_editor';
-import { NOTEBOOK_ADAPTER } from './adapters/notebook';
-import { VIRTUAL_EDITOR_MANAGER } from './virtual/editor';
-import { CODEMIRROR_VIRTUAL_EDITOR } from './virtual/codemirror_editor';
-import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
-import { COMPLETION_PLUGIN } from './features/completion';
-import { CODE_EXTRACTORS_MANAGER } from './extractors/manager';
-import { IForeignCodeExtractorsRegistry } from './extractors/types';
-import {
-  ICodeOverridesRegistry,
-  ILSPCodeOverridesManager
-} from './overrides/tokens';
 import { DEFAULT_TRANSCLUSIONS } from './transclusions/defaults';
-import { SYNTAX_HIGHLIGHTING_PLUGIN } from './features/syntax_highlighting';
-import { COMPLETION_THEME_MANAGER } from '@krassowski/completion-theme';
-import { plugin as THEME_VSCODE } from '@krassowski/theme-vscode';
-import { plugin as THEME_MATERIAL } from '@krassowski/theme-material';
-import { CODE_OVERRIDES_MANAGER } from './overrides';
-import IPaths = JupyterFrontEnd.IPaths;
+import { CODEMIRROR_VIRTUAL_EDITOR } from './virtual/codemirror_editor';
 import { LOG_CONSOLE } from './virtual/console';
+import { VIRTUAL_EDITOR_MANAGER } from './virtual/editor';
+
+import IPaths = JupyterFrontEnd.IPaths;
 
 export interface IFeatureOptions {
   /**

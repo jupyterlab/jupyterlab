@@ -1,8 +1,9 @@
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
+
+import { IPYTHON_TRANSCLUSIONS } from './ipython';
+import { IPYTHON_BIGQUERY_TRANSCLUSIONS } from './ipython-bigquery';
 import { IPYTHON_RPY2_TRANSCLUSIONS } from './ipython-rpy2';
 import { IPYTHON_SQL_TRANSCLUSIONS } from './ipython-sql';
-import { IPYTHON_BIGQUERY_TRANSCLUSIONS } from './ipython-bigquery';
-import { IPYTHON_TRANSCLUSIONS } from './ipython';
 
 export const DEFAULT_TRANSCLUSIONS: JupyterFrontEndPlugin<void>[] = [
   IPYTHON_RPY2_TRANSCLUSIONS,

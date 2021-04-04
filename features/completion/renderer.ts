@@ -2,10 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Completer } from '@jupyterlab/completer';
-import { CompletionLabIntegration } from './completion';
-import { Signal } from '@lumino/signaling';
 import { IRenderMime } from '@jupyterlab/rendermime';
+import { Signal } from '@lumino/signaling';
+
 import { ILSPLogConsole } from '../../tokens';
+
+import { CompletionLabIntegration } from './completion';
 import { LazyCompletionItem } from './item';
 
 export interface ICompletionData {

@@ -1,43 +1,45 @@
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   CompletionConnector,
   CompletionHandler,
   ContextConnector,
   KernelConnector
 } from '@jupyterlab/completer';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { Session } from '@jupyterlab/services';
+import { LabIcon } from '@jupyterlab/ui-components';
+import {
+  ILSPCompletionThemeManager,
+  KernelKind
+} from '@krassowski/completion-theme/lib/types';
 import { JSONArray, JSONObject } from '@lumino/coreutils';
+import * as lsProtocol from 'vscode-languageserver-types';
+
+import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
+import { LSPConnection } from '../../connection';
+import { PositionConverter } from '../../converter';
+import { FeatureSettings } from '../../feature';
 import {
   AdditionalCompletionTriggerKinds,
   CompletionItemKind,
   CompletionTriggerKind,
   ExtendedCompletionTriggerKind
 } from '../../lsp';
-import * as lsProtocol from 'vscode-languageserver-types';
-import { VirtualDocument } from '../../virtual/document';
-import { IVirtualEditor } from '../../virtual/editor';
 import {
   IEditorPosition,
   IRootPosition,
   IVirtualPosition
 } from '../../positioning';
-import { LSPConnection } from '../../connection';
-import { Session } from '@jupyterlab/services';
-
-import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
-import { FeatureSettings } from '../../feature';
-import { PositionConverter } from '../../converter';
-import {
-  ILSPCompletionThemeManager,
-  KernelKind
-} from '@krassowski/completion-theme/lib/types';
-import { LabIcon } from '@jupyterlab/ui-components';
 import { ILSPLogConsole } from '../../tokens';
+import { VirtualDocument } from '../../virtual/document';
+import { IVirtualEditor } from '../../virtual/editor';
+
 import { CompletionLabIntegration } from './completion';
 import {
   ICompletionsSource,
   IExtendedCompletionItem,
   LazyCompletionItem
 } from './item';
+
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 
 /**

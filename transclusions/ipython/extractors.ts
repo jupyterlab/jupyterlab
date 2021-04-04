@@ -1,5 +1,5 @@
-import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
 import { RegExpForeignCodeExtractor } from '../../extractors/regexp';
+import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
 
 export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
   // general note: to match new lines use [^] instead of dot, unless the target is ES2018, then use /s

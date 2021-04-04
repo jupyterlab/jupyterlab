@@ -1,54 +1,57 @@
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { ICellModel } from '@jupyterlab/cells';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditor,
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
-import { IVirtualEditor, VirtualEditorManager } from '../virtual/editor';
-import { LSPConnection } from '../connection';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { WidgetAdapter } from '../adapters/adapter';
+import {
+  Context,
+  IDocumentWidget,
+  TextModelFactory
+} from '@jupyterlab/docregistry';
+import { FileEditor, FileEditorFactory } from '@jupyterlab/fileeditor';
+import * as nbformat from '@jupyterlab/nbformat';
 import {
   Notebook,
   NotebookModel,
   NotebookModelFactory,
   NotebookPanel
 } from '@jupyterlab/notebook';
+import { ServiceManager } from '@jupyterlab/services';
 import { NBTestUtils } from '@jupyterlab/testutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { ICellModel } from '@jupyterlab/cells';
-import { VirtualDocument } from '../virtual/document';
-import { LanguageServerManager } from '../manager';
+import { Signal } from '@lumino/signaling';
+
+import { WidgetAdapter } from '../adapters/adapter';
+import { FileEditorAdapter } from '../adapters/file_editor/file_editor';
+import { NotebookAdapter } from '../adapters/notebook/notebook';
+import { LSPConnection } from '../connection';
 import { DocumentConnectionManager } from '../connection_manager';
-import {
-  CodeMirrorIntegration,
-  CodeMirrorIntegrationConstructor
-} from './codemirror';
-import { EditorAdapter } from './editor_adapter';
-import IEditor = CodeEditor.IEditor;
-import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
+import { IForeignCodeExtractorsRegistry } from '../extractors/types';
+import { IFeatureSettings } from '../feature';
+import { FeatureManager, ILSPExtension } from '../index';
+import { LanguageServerManager } from '../manager';
+import { ICodeOverridesRegistry } from '../overrides/tokens';
 import {
   ILSPFeatureManager,
   ILSPLogConsole,
   ILSPVirtualEditorManager,
   WidgetAdapterConstructor
 } from '../tokens';
-import { FileEditorAdapter } from '../adapters/file_editor/file_editor';
-import { NotebookAdapter } from '../adapters/notebook/notebook';
-import {
-  Context,
-  IDocumentWidget,
-  TextModelFactory
-} from '@jupyterlab/docregistry';
-import createNotebookPanel = NBTestUtils.createNotebookPanel;
-import { FileEditor, FileEditorFactory } from '@jupyterlab/fileeditor';
-import { ServiceManager } from '@jupyterlab/services';
-import { FeatureManager, ILSPExtension } from '../index';
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import { IFeatureSettings } from '../feature';
-import { IForeignCodeExtractorsRegistry } from '../extractors/types';
-import { ICodeOverridesRegistry } from '../overrides/tokens';
-import { Signal } from '@lumino/signaling';
+import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 import { BrowserConsole } from '../virtual/console';
+import { VirtualDocument } from '../virtual/document';
+import { IVirtualEditor, VirtualEditorManager } from '../virtual/editor';
+
+import {
+  CodeMirrorIntegration,
+  CodeMirrorIntegrationConstructor
+} from './codemirror';
+import { EditorAdapter } from './editor_adapter';
+
+import createNotebookPanel = NBTestUtils.createNotebookPanel;
+import IEditor = CodeEditor.IEditor;
 
 export interface ITestEnvironment {
   document_options: VirtualDocument.IOptions;

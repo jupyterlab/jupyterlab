@@ -1,22 +1,23 @@
-import * as CodeMirror from 'codemirror';
-import * as lsProtocol from 'vscode-languageserver-protocol';
-import { DocumentHighlightKind } from '../lsp';
-import { VirtualDocument } from '../virtual/document';
-import { IRootPosition, IVirtualPosition } from '../positioning';
-import { FeatureSettings, IFeatureCommand } from '../feature';
-import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
-import highlightSvg from '../../style/icons/highlight.svg';
-import highlightTypeSvg from '../../style/icons/highlight-type.svg';
 import { Debouncer } from '@lumino/polling';
+import type * as CodeMirror from 'codemirror';
+import type * as lsProtocol from 'vscode-languageserver-protocol';
+
+import highlightTypeSvg from '../../style/icons/highlight-type.svg';
+import highlightSvg from '../../style/icons/highlight.svg';
 import { CodeHighlights as LSPHighlightsSettings } from '../_highlights';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeMirrorIntegration } from '../editor_integration/codemirror';
+import { FeatureSettings, IFeatureCommand } from '../feature';
+import { DocumentHighlightKind } from '../lsp';
+import { IRootPosition, IVirtualPosition } from '../positioning';
+import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { VirtualDocument } from '../virtual/document';
 
 export const highlightIcon = new LabIcon({
   name: 'lsp:highlight',

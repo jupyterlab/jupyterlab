@@ -2,41 +2,44 @@
 // Distributed under the terms of the Modified BSD License.
 // Based on the @jupyterlab/codemirror-extension statusbar
 
-import React from 'react';
-
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import '../../style/statusbar.css';
-
-import * as SCHEMA from '../_schema';
-
+import {
+  VDomModel,
+  VDomRenderer,
+  Dialog,
+  showDialog
+} from '@jupyterlab/apputils';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import {
   GroupItem,
-  interactiveItem,
   Popup,
-  showPopup,
-  TextItem
+  TextItem,
+  interactiveItem,
+  showPopup
 } from '@jupyterlab/statusbar';
-
 import {
+  LabIcon,
   caretDownIcon,
   caretUpIcon,
   circleEmptyIcon,
   circleIcon,
-  LabIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
+import React from 'react';
+
+import '../../style/statusbar.css';
+import * as SCHEMA from '../_schema';
 import { WidgetAdapter } from '../adapters/adapter';
-import { collect_documents, VirtualDocument } from '../virtual/document';
 import { LSPConnection } from '../connection';
 import { DocumentConnectionManager } from '../connection_manager';
-import { ILanguageServerManager, ILSPAdapterManager } from '../tokens';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { DocumentLocator } from './utils';
-import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
-import { LanguageServerManager } from '../manager';
-import { codeCheckIcon, codeClockIcon, codeWarningIcon } from './icons';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { SERVER_EXTENSION_404 } from '../errors';
+import { LanguageServerManager } from '../manager';
+import { ILSPAdapterManager, ILanguageServerManager } from '../tokens';
+import { VirtualDocument, collect_documents } from '../virtual/document';
+
+import { codeCheckIcon, codeClockIcon, codeWarningIcon } from './icons';
+import { DocumentLocator } from './utils';
+
 import okButton = Dialog.okButton;
 
 interface IServerStatusProps {

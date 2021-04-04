@@ -1,23 +1,25 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { IVirtualEditor } from '../virtual/editor';
-import { IForeignContext, VirtualDocument } from '../virtual/document';
-import { Signal } from '@lumino/signaling';
-import { IRootPosition, IVirtualPosition } from '../positioning';
-import { LSPConnection } from '../connection';
-import { ICommandContext } from '../command_manager';
 import { JSONObject } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
+
+import { ICommandContext } from '../command_manager';
+import { LSPConnection } from '../connection';
 import {
   DocumentConnectionManager,
   IDocumentConnectionData,
   ISocketConnectionOptions
 } from '../connection_manager';
-import { ILSPExtension, ILSPLogConsole } from '../index';
-import { IFeatureEditorIntegration, IFeature } from '../feature';
 import { EditorAdapter } from '../editor_integration/editor_adapter';
-import IEditor = CodeEditor.IEditor;
+import { IFeature, IFeatureEditorIntegration } from '../feature';
+import { ILSPExtension, ILSPLogConsole } from '../index';
 import { LanguageIdentifier } from '../lsp';
+import { IRootPosition, IVirtualPosition } from '../positioning';
+import { IForeignContext, VirtualDocument } from '../virtual/document';
+import { IVirtualEditor } from '../virtual/editor';
+
+import IEditor = CodeEditor.IEditor;
 
 export class StatusMessage {
   /**

@@ -1,33 +1,34 @@
 import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { URLExt } from '@jupyterlab/coreutils';
+import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { LabIcon } from '@jupyterlab/ui-components';
+import {
   CodeJumper,
-  NotebookJumper,
-  FileEditorJumper
+  FileEditorJumper,
+  NotebookJumper
 } from '@krassowski/code-jumpers';
-import { PositionConverter } from '../converter';
-import { IVirtualPosition } from '../positioning';
-import { getModifierState, uri_to_contents_path, uris_equal } from '../utils';
 import { AnyLocation } from 'lsp-ws-connection/lib/types';
+
+import jumpToSvg from '../../style/icons/jump-to.svg';
+import { CodeJump as LSPJumpSettings, ModifierKey } from '../_jump_to';
+import { CommandEntryPoint } from '../command_manager';
+import { PositionConverter } from '../converter';
+import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import {
   FeatureSettings,
   IFeatureCommand,
   IFeatureLabIntegration
 } from '../feature';
-import { CodeMirrorIntegration } from '../editor_integration/codemirror';
-import {
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IVirtualPosition } from '../positioning';
 import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
-import { LabIcon } from '@jupyterlab/ui-components';
-import jumpToSvg from '../../style/icons/jump-to.svg';
-import { URLExt } from '@jupyterlab/coreutils';
-import { CodeJump as LSPJumpSettings, ModifierKey } from '../_jump_to';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { CommandEntryPoint } from '../command_manager';
+import { getModifierState, uri_to_contents_path, uris_equal } from '../utils';
 
 export const jumpToIcon = new LabIcon({
   name: 'lsp:jump-to',

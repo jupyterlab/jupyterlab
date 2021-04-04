@@ -1,12 +1,13 @@
 import { IScopedCodeOverride } from '../../overrides/tokens';
+import { LINE_MAGIC_PREFIX } from '../ipython/overrides';
+
 import {
+  RPY2_MAX_ARGS,
   parse_r_args,
   rpy2_args_pattern,
-  RPY2_MAX_ARGS,
   rpy2_reverse_pattern,
   rpy2_reverse_replacement
 } from './rpy2';
-import { LINE_MAGIC_PREFIX } from '../ipython/overrides';
 
 export let overrides: IScopedCodeOverride[] = [
   {

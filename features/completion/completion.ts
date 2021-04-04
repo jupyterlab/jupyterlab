@@ -1,28 +1,29 @@
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CompletionHandler, ICompletionManager } from '@jupyterlab/completer';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { NotebookPanel } from '@jupyterlab/notebook';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
+import type * as CodeMirror from 'codemirror';
+
+import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
+import { IEditorChangedData, WidgetAdapter } from '../../adapters/adapter';
+import { NotebookAdapter } from '../../adapters/notebook/notebook';
+import { IDocumentConnectionData } from '../../connection_manager';
+import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
+import { FeatureSettings, IFeatureLabIntegration } from '../../feature';
 import {
   AdditionalCompletionTriggerKinds,
   CompletionTriggerKind,
   ExtendedCompletionTriggerKind
 } from '../../lsp';
-import * as CodeMirror from 'codemirror';
-import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import { IEditorChangedData, WidgetAdapter } from '../../adapters/adapter';
-import { LSPConnector } from './completion_handler';
-import { CompletionHandler, ICompletionManager } from '@jupyterlab/completer';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { NotebookPanel } from '@jupyterlab/notebook';
-import { FeatureSettings, IFeatureLabIntegration } from '../../feature';
-
-import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
-import { IDocumentConnectionData } from '../../connection_manager';
 import { ILSPAdapterManager, ILSPLogConsole } from '../../tokens';
-import { NotebookAdapter } from '../../adapters/notebook/notebook';
-import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
-import { ICompletionData, LSPCompletionRenderer } from './renderer';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { LSPCompleterModel } from './model';
+
+import { LSPConnector } from './completion_handler';
 import { LazyCompletionItem } from './item';
+import { LSPCompleterModel } from './model';
+import { ICompletionData, LSPCompletionRenderer } from './renderer';
 
 const DOC_PANEL_SELECTOR = '.jp-Completer-docpanel';
 const DOC_PANEL_PLACEHOLDER_CLASS = 'lsp-completer-placeholder';

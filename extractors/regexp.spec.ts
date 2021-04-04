@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { getIndexOfCaptureGroup, RegExpForeignCodeExtractor } from './regexp';
+
+import { RegExpForeignCodeExtractor, getIndexOfCaptureGroup } from './regexp';
 
 let R_CELL_MAGIC_EXISTS = `%%R
 some text

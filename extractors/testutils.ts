@@ -1,6 +1,7 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IVirtualDocumentBlock, VirtualDocument } from '../virtual/document';
 import { expect } from 'chai';
+
+import { IVirtualDocumentBlock, VirtualDocument } from '../virtual/document';
 
 export function extract_code(document: VirtualDocument, code: string) {
   return document.extract_foreign_code(

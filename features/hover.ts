@@ -1,29 +1,29 @@
-import { getModifierState } from '../utils';
-import { IRootPosition, is_equal, IVirtualPosition } from '../positioning';
-import * as lsProtocol from 'vscode-languageserver-protocol';
-import * as CodeMirror from 'codemirror';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { LabIcon } from '@jupyterlab/ui-components';
 import { Throttler } from '@lumino/polling';
+import type * as CodeMirror from 'codemirror';
+import type * as lsProtocol from 'vscode-languageserver-protocol';
+
+import hoverSvg from '../../style/icons/hover.svg';
+import { CodeHover as LSPHoverSettings, ModifierKey } from '../_hover';
+import { EditorTooltipManager, FreeTooltip } from '../components/free_tooltip';
+import { PositionConverter } from '../converter';
 import {
   CodeMirrorIntegration,
   IEditorRange
 } from '../editor_integration/codemirror';
 import { FeatureSettings, IFeatureLabIntegration } from '../feature';
-import { EditorTooltipManager, FreeTooltip } from '../components/free_tooltip';
-import {
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRootPosition, IVirtualPosition, is_equal } from '../positioning';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { CodeHover as LSPHoverSettings, ModifierKey } from '../_hover';
-import { LabIcon } from '@jupyterlab/ui-components';
-
-import hoverSvg from '../../style/icons/hover.svg';
-import { IEditorChange } from '../virtual/editor';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { PositionConverter } from '../converter';
+import { getModifierState } from '../utils';
 import { VirtualDocument } from '../virtual/document';
+import { IEditorChange } from '../virtual/editor';
 
 export const hoverIcon = new LabIcon({
   name: 'lsp:hover',

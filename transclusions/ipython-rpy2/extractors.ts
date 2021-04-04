@@ -1,6 +1,7 @@
-import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
 import { RegExpForeignCodeExtractor } from '../../extractors/regexp';
-import { extract_r_args, rpy2_args_pattern, RPY2_MAX_ARGS } from './rpy2';
+import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
+
+import { RPY2_MAX_ARGS, extract_r_args, rpy2_args_pattern } from './rpy2';
 
 function create_rpy_code_extractor(strip_leading_space: boolean) {
   function rpy2_code_extractor(match: string, ...args: string[]) {

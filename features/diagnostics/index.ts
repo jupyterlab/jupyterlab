@@ -1,14 +1,16 @@
-import { ILSPFeatureManager, PLUGIN_ID } from '../../tokens';
-import { FeatureSettings, IFeatureCommand } from '../../feature';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { FeatureSettings, IFeatureCommand } from '../../feature';
+import { ILSPFeatureManager, PLUGIN_ID } from '../../tokens';
+
 import {
-  diagnostics_panel,
   DiagnosticsCM,
-  diagnosticsIcon
+  diagnosticsIcon,
+  diagnostics_panel
 } from './diagnostics';
 
 export const FEATURE_ID = PLUGIN_ID + ':diagnostics';

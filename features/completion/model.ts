@@ -3,6 +3,7 @@
 
 import { CompleterModel, CompletionHandler } from '@jupyterlab/completer';
 import { StringExt } from '@lumino/algorithm';
+
 import { LazyCompletionItem } from './item';
 
 interface ICompletionMatch<T extends CompletionHandler.ICompletionItem> {

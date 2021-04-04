@@ -1,7 +1,8 @@
-import { LSPCompleterModel } from './model';
 import { expect } from 'chai';
-import { LazyCompletionItem } from './item';
 import * as lsProtocol from 'vscode-languageserver-types';
+
+import { LazyCompletionItem } from './item';
+import { LSPCompleterModel } from './model';
 
 describe('LSPCompleterModel', () => {
   let model: LSPCompleterModel;

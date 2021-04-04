@@ -1,6 +1,8 @@
-import { ReversibleOverridesMap } from '../../overrides/maps';
-import { overrides } from './overrides';
 import { expect } from 'chai';
+
+import { ReversibleOverridesMap } from '../../overrides/maps';
+
+import { overrides } from './overrides';
 
 let R_CELL_MAGIC = `%%R
 print(1)

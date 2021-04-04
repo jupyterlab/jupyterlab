@@ -1,8 +1,10 @@
 import { CompletionHandler } from '@jupyterlab/completer';
 import { LabIcon } from '@jupyterlab/ui-components';
 import * as lsProtocol from 'vscode-languageserver-types';
-import { LSPConnector } from './completion_handler';
+
 import { until_ready } from '../../utils';
+
+import { LSPConnector } from './completion_handler';
 
 /**
  * To be upstreamed

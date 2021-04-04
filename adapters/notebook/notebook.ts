@@ -1,22 +1,24 @@
-import { WidgetAdapter } from '../adapter';
-import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import { until_ready } from '../../utils';
-import { Cell, ICellModel } from '@jupyterlab/cells';
-import * as nbformat from '@jupyterlab/nbformat';
-import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
-import { Session } from '@jupyterlab/services';
 import { SessionContext } from '@jupyterlab/apputils';
-import { LSPExtension } from '../../index';
-import { PositionConverter } from '../../converter';
-import { IEditorPosition, IVirtualPosition } from '../../positioning';
-import { ICommandContext } from '../../command_manager';
+import { Cell, ICellModel } from '@jupyterlab/cells';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import IEditor = CodeEditor.IEditor;
-import { VirtualDocument } from '../../virtual/document';
+import * as nbformat from '@jupyterlab/nbformat';
+import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import {
-  IObservableUndoableList,
-  IObservableList
+  IObservableList,
+  IObservableUndoableList
 } from '@jupyterlab/observables';
+import { Session } from '@jupyterlab/services';
+
+import { ICommandContext } from '../../command_manager';
+import { PositionConverter } from '../../converter';
+import { LSPExtension } from '../../index';
+import { IEditorPosition, IVirtualPosition } from '../../positioning';
+import { until_ready } from '../../utils';
+import { VirtualDocument } from '../../virtual/document';
+import { WidgetAdapter } from '../adapter';
+
+import IEditor = CodeEditor.IEditor;
+import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 
 export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   editor: Notebook;

@@ -1,17 +1,19 @@
-import { expect } from 'chai';
-import { RegExpForeignCodeExtractor } from '../extractors/regexp';
-import { IRootPosition } from '../positioning';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { PageConfig } from '@jupyterlab/coreutils';
+import { expect } from 'chai';
+
 import { DocumentConnectionManager } from '../connection_manager';
 import {
   FileEditorTestEnvironment,
   MockLanguageServerManager,
   NotebookTestEnvironment
 } from '../editor_integration/testutils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { RegExpForeignCodeExtractor } from '../extractors/regexp';
 import { IForeignCodeExtractorsRegistry } from '../extractors/types';
-import { VirtualDocument } from './document';
+import { IRootPosition } from '../positioning';
+
 import { BrowserConsole } from './console';
+import { VirtualDocument } from './document';
 
 describe('VirtualEditor', () => {
   let r_line_extractor = new RegExpForeignCodeExtractor({

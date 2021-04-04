@@ -1,21 +1,23 @@
-import * as lsProtocol from 'vscode-languageserver-protocol';
-import { InputDialog } from '@jupyterlab/apputils';
-import { DiagnosticsCM } from './diagnostics/diagnostics';
-import { FeatureSettings, IFeatureCommand } from '../feature';
-import {
-  CodeMirrorIntegration,
-  IEditOutcome
-} from '../editor_integration/codemirror';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { InputDialog } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 import { LabIcon } from '@jupyterlab/ui-components';
+import * as lsProtocol from 'vscode-languageserver-protocol';
+
 import renameSvg from '../../style/icons/rename.svg';
+import {
+  CodeMirrorIntegration,
+  IEditOutcome
+} from '../editor_integration/codemirror';
+import { FeatureSettings, IFeatureCommand } from '../feature';
+import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
+
 import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from './diagnostics';
+import { DiagnosticsCM } from './diagnostics/diagnostics';
 
 export const renameIcon = new LabIcon({
   name: 'lsp:rename',

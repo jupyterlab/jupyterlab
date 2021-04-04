@@ -1,7 +1,9 @@
-import { IExtractedCode, IForeignCodeExtractor } from './types';
-import { position_at_offset } from '../positioning';
-import { replacer } from '../overrides/tokens';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+
+import { replacer } from '../overrides/tokens';
+import { position_at_offset } from '../positioning';
+
+import { IExtractedCode, IForeignCodeExtractor } from './types';
 
 export function getIndexOfCaptureGroup(
   expression: RegExp,

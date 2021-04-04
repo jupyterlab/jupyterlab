@@ -1,10 +1,9 @@
-import { Signal } from '@lumino/signaling';
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
+import { Signal } from '@lumino/signaling';
 
-import { ILanguageServerManager, TSessionMap } from './tokens';
 import * as SCHEMA from './_schema';
+import { ILanguageServerManager, TSessionMap } from './tokens';
 
 export class LanguageServerManager implements ILanguageServerManager {
   protected _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal<

@@ -1,23 +1,20 @@
-import { VirtualDocument, IForeignContext } from './virtual/document';
-import { LSPConnection } from './connection';
-
-import { Signal } from '@lumino/signaling';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { sleep, until_ready, expandDottedPaths } from './utils';
+import { Signal } from '@lumino/signaling';
 
-// Name-only import so as to not trigger inclusion in main bundle
-import * as ConnectionModuleType from './connection';
+import type * as ConnectionModuleType from './connection';
 import {
-  TLanguageServerId,
-  ILanguageServerManager,
+  ILSPLogConsole,
   ILanguageServerConfiguration,
+  ILanguageServerManager,
   TLanguageServerConfigurations,
-  ILSPLogConsole
+  TLanguageServerId
 } from './tokens';
+import { expandDottedPaths, sleep, until_ready } from './utils';
+import { IForeignContext, VirtualDocument } from './virtual/document';
 
 export interface IDocumentConnectionData {
   virtual_document: VirtualDocument;
-  connection: LSPConnection;
+  connection: ConnectionModuleType.LSPConnection;
 }
 
 export interface ISocketConnectionOptions {
@@ -38,7 +35,7 @@ export interface ISocketConnectionOptions {
  * as two identical id_paths could be created for two different notebooks.
  */
 export class DocumentConnectionManager {
-  connections: Map<VirtualDocument.uri, LSPConnection>;
+  connections: Map<VirtualDocument.uri, ConnectionModuleType.LSPConnection>;
   documents: Map<VirtualDocument.uri, VirtualDocument>;
   initialized: Signal<DocumentConnectionManager, IDocumentConnectionData>;
   connected: Signal<DocumentConnectionManager, IDocumentConnectionData>;
@@ -126,7 +123,7 @@ export class DocumentConnectionManager {
 
   private async connect_socket(
     options: ISocketConnectionOptions
-  ): Promise<LSPConnection> {
+  ): Promise<ConnectionModuleType.LSPConnection> {
     this.console.log('Connection Socket', options);
     let { virtual_document, language } = options;
 
@@ -185,7 +182,7 @@ export class DocumentConnectionManager {
    * invocation of `.on` (once remaining LSPFeature.connection_handlers are made
    * singletons).
    */
-  on_new_connection = (connection: LSPConnection) => {
+  on_new_connection = (connection: ConnectionModuleType.LSPConnection) => {
     connection.on('error', e => {
       this.console.warn(e);
       // TODO invalid now
@@ -232,7 +229,7 @@ export class DocumentConnectionManager {
   };
 
   private forEachDocumentOfConnection(
-    connection: LSPConnection,
+    connection: ConnectionModuleType.LSPConnection,
     callback: (virtual_document: VirtualDocument) => void
   ) {
     for (const [
@@ -384,10 +381,13 @@ export namespace DocumentConnectionManager {
 }
 
 /**
- * Namespace primarily for language-keyed cache of LSPConnections
+ * Namespace primarily for language-keyed cache of ConnectionModuleType.LSPConnections
  */
 namespace Private {
-  const _connections: Map<TLanguageServerId, LSPConnection> = new Map();
+  const _connections: Map<
+    TLanguageServerId,
+    ConnectionModuleType.LSPConnection
+  > = new Map();
   let _promise: Promise<typeof ConnectionModuleType>;
   let _language_server_manager: ILanguageServerManager;
 
@@ -407,8 +407,8 @@ namespace Private {
     language: string,
     language_server_id: TLanguageServerId,
     uris: DocumentConnectionManager.IURIs,
-    onCreate: (connection: LSPConnection) => void
-  ): Promise<LSPConnection> {
+    onCreate: (connection: ConnectionModuleType.LSPConnection) => void
+  ): Promise<ConnectionModuleType.LSPConnection> {
     if (_promise == null) {
       // TODO: consider lazy-loading _only_ the modules that _must_ be webpacked
       // with custom shims, e.g. `fs`

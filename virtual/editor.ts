@@ -1,22 +1,25 @@
-import { VirtualDocument } from './document';
+import { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { Signal } from '@lumino/signaling';
+
+import { WidgetAdapter } from '../adapters/adapter';
+import { IEditorName } from '../feature';
 import {
   IEditorPosition,
   IRootPosition,
   ISourcePosition,
   IVirtualPosition
 } from '../positioning';
-import { Signal } from '@lumino/signaling';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IEditorName } from '../feature';
-import IEditor = CodeEditor.IEditor;
-import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
-  IVirtualEditorType,
   ILSPVirtualEditorManager,
+  IVirtualEditorType,
   PLUGIN_ID
 } from '../tokens';
-import { WidgetAdapter } from '../adapters/adapter';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+
+import { VirtualDocument } from './document';
+
+import IEditor = CodeEditor.IEditor;
 
 export interface IWindowCoordinates {
   /**

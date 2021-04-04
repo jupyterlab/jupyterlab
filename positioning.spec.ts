@@ -1,5 +1,6 @@
-import { position_at_offset, offset_at_position } from './positioning';
 import { expect } from 'chai';
+
+import { offset_at_position, position_at_offset } from './positioning';
 
 describe('positionAtOffset', () => {
   it('works with single line', () => {

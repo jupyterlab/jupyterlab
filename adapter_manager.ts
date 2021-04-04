@@ -1,15 +1,17 @@
+import type { IClassicShell } from '@jupyterlab-classic/application';
+import { ILabShell, JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { Signal } from '@lumino/signaling';
+
+import { WidgetAdapter } from './adapters/adapter';
 import {
   IAdapterRegistration,
   IAdapterTypeOptions,
   ILSPAdapterManager,
   PLUGIN_ID
 } from './tokens';
-import { Signal } from '@lumino/signaling';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { WidgetAdapter } from './adapters/adapter';
-import { ILabShell, JupyterFrontEndPlugin } from '@jupyterlab/application';
+
 import { LSPExtension } from './index';
-import type { IClassicShell } from '@jupyterlab-classic/application';
 
 export class WidgetAdapterManager implements ILSPAdapterManager {
   adapterTypeAdded: Signal<

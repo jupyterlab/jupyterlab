@@ -1,5 +1,5 @@
-import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
 import { RegExpForeignCodeExtractor } from '../../extractors/regexp';
+import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
 
 export const SQL_URL_PATTERN = '(?:(?:.*?)://(?:.*))';
 // note: -a/--connection_arguments and -f/--file are not supported yet

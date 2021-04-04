@@ -1,7 +1,9 @@
-import { VirtualDocument } from '../../virtual/document';
 import { expect } from 'chai';
-import { foreign_code_extractors } from './extractors';
+
 import { extract_code, get_the_only_virtual } from '../../extractors/testutils';
+import { VirtualDocument } from '../../virtual/document';
+
+import { foreign_code_extractors } from './extractors';
 
 describe('Bigquery SQL extractors', () => {
   let document: VirtualDocument;

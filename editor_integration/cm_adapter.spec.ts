@@ -1,9 +1,11 @@
 import { expect } from 'chai';
+import type * as CodeMirror from 'codemirror';
+
 import { IRootPosition } from '../positioning';
-import * as CodeMirror from 'codemirror';
-import { FileEditorFeatureTestEnvironment } from './testutils';
-import { CodeMirrorIntegration } from './codemirror';
 import { IEditorChange } from '../virtual/editor';
+
+import { CodeMirrorIntegration } from './codemirror';
+import { FileEditorFeatureTestEnvironment } from './testutils';
 
 describe('CodeMirrorAdapter', () => {
   let env: FileEditorFeatureTestEnvironment;

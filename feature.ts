@@ -1,15 +1,17 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CommandEntryPoint, ICommandContext } from './command_manager';
-import { IEditorChange, IVirtualEditor } from './virtual/editor';
-import { VirtualDocument } from './virtual/document';
-import { LSPConnection } from './connection';
-import { IRootPosition } from './positioning';
-import { StatusMessage, WidgetAdapter } from './adapters/adapter';
-import IEditor = CodeEditor.IEditor;
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
+
+import { StatusMessage, WidgetAdapter } from './adapters/adapter';
+import { CommandEntryPoint, ICommandContext } from './command_manager';
+import { LSPConnection } from './connection';
+import { IRootPosition } from './positioning';
+import { VirtualDocument } from './virtual/document';
+import { IEditorChange, IVirtualEditor } from './virtual/editor';
+
+import IEditor = CodeEditor.IEditor;
 
 export interface IFeatureCommand {
   /**

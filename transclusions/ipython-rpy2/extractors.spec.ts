@@ -1,12 +1,14 @@
-import { VirtualDocument } from '../../virtual/document';
 import { expect } from 'chai';
-import { foreign_code_extractors } from './extractors';
+
 import {
   extract_code,
   get_the_only_pair,
   get_the_only_virtual,
   wrap_in_python_lines
 } from '../../extractors/testutils';
+import { VirtualDocument } from '../../virtual/document';
+
+import { foreign_code_extractors } from './extractors';
 
 describe('IPython rpy2 extractors', () => {
   let document: VirtualDocument;

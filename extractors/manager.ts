@@ -1,5 +1,7 @@
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
+
 import { ILSPCodeExtractorsManager } from '../tokens';
+
 import { IForeignCodeExtractor, IForeignCodeExtractorsRegistry } from './types';
 
 export class CodeExtractorsManager implements ILSPCodeExtractorsManager {

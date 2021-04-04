@@ -1,10 +1,22 @@
-import * as CodeMirror from 'codemirror';
-import * as lsProtocol from 'vscode-languageserver-protocol';
-import { PositionConverter } from '../../converter';
-import { IEditorPosition, IVirtualPosition } from '../../positioning';
-import { DiagnosticSeverity } from '../../lsp';
-import { DefaultMap, uris_equal } from '../../utils';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import { MainAreaWidget } from '@jupyterlab/apputils';
+import { LabIcon, copyIcon } from '@jupyterlab/ui-components';
+import { Menu } from '@lumino/widgets';
+import type * as CodeMirror from 'codemirror';
+import type * as lsProtocol from 'vscode-languageserver-protocol';
+
+import diagnosticsSvg from '../../../style/icons/diagnostics.svg';
+import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
+import { PositionConverter } from '../../converter';
+import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
+import { FeatureSettings } from '../../feature';
+import { DiagnosticSeverity } from '../../lsp';
+import { IEditorPosition, IVirtualPosition } from '../../positioning';
+import { DefaultMap, uris_equal } from '../../utils';
+import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
+import { VirtualDocument } from '../../virtual/document';
+import { jumpToIcon } from '../jump_to';
+
 import {
   DIAGNOSTICS_LISTING_CLASS,
   DiagnosticsDatabase,
@@ -12,16 +24,6 @@ import {
   IDiagnosticsRow,
   IEditorDiagnostic
 } from './listing';
-import { VirtualDocument } from '../../virtual/document';
-import { FeatureSettings } from '../../feature';
-import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
-import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
-import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
-import { copyIcon, LabIcon } from '@jupyterlab/ui-components';
-import diagnosticsSvg from '../../../style/icons/diagnostics.svg';
-import { Menu } from '@lumino/widgets';
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import { jumpToIcon } from '../jump_to';
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
