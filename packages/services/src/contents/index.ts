@@ -106,6 +106,13 @@ export namespace Contents {
      * The indices of the matched characters in the name.
      */
     indices?: ReadonlyArray<number> | null;
+
+    /**
+     * Whether file has been renamed.
+     *
+     * The default is `false`.
+     */
+    renamed?: boolean;
   }
 
   /**

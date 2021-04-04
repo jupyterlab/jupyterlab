@@ -609,10 +609,6 @@ function addCommands(
     isEnabled: isWritable,
     execute: () => {
       // Checks that shell.currentWidget is valid:
-      if (docManager.nameFileOnSave) {
-        void commands.execute('docmanager:name-on-save');
-      }
-
       if (isEnabled()) {
         const context = docManager.contextForWidget(shell.currentWidget!);
         if (!context) {
@@ -621,25 +617,36 @@ function addCommands(
             body: trans.__('No context found for current widget!'),
             buttons: [Dialog.okButton({ label: trans.__('Ok') })]
           });
+        } else {
+          const model = context.contentsModel;
+          // console.log("renamed model", model);
+          if (
+            docManager.nameFileOnSave &&
+            model &&
+            model.renamed === undefined
+          ) {
+            void commands.execute('docmanager:name-on-save');
+          }
+          // console.log(context.contentsModel?.renamed);
+          if (context.model.readOnly) {
+            return showDialog({
+              title: trans.__('Cannot Save'),
+              body: trans.__('Document is read-only'),
+              buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+            });
+          }
+          return context
+            .save()
+            .then(() => context!.createCheckpoint())
+            .catch(err => {
+              // If the save was canceled by user-action, do nothing.
+              // FIXME-TRANS: Is this using the text on the button or?
+              if (err.message === 'Cancel') {
+                return;
+              }
+              throw err;
+            });
         }
-        if (context.model.readOnly) {
-          return showDialog({
-            title: trans.__('Cannot Save'),
-            body: trans.__('Document is read-only'),
-            buttons: [Dialog.okButton({ label: trans.__('Ok') })]
-          });
-        }
-        return context
-          .save()
-          .then(() => context!.createCheckpoint())
-          .catch(err => {
-            // If the save was canceled by user-action, do nothing.
-            // FIXME-TRANS: Is this using the text on the button or?
-            if (err.message === 'Cancel') {
-              return;
-            }
-            throw err;
-          });
       }
     }
   });

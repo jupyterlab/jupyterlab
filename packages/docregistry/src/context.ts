@@ -427,6 +427,9 @@ export class Context<
       void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
+      if (this._contentsModel) {
+        this._contentsModel.renamed = true;
+      }
     }
   }
 
@@ -457,10 +460,13 @@ export class Context<
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
-      format: model.format
+      format: model.format,
+      renamed: model.renamed
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
+    // console.log("before", model);
+    // console.log("updated", this._contentsModel);
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
