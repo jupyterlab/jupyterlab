@@ -303,7 +303,7 @@ export namespace CodeEditor {
       event: IObservableString.IChangedArgs
     ): void {
       this._mutex(() => {
-        this.nbcell.ymodel.doc!.transact(() => {
+        this.nbcell.transact(() => {
           switch (event.type) {
             case 'insert':
               this.nbcell.updateSource(event.start, event.start, event.value);

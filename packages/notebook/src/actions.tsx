@@ -998,7 +998,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    notebook.model.cells.undo();
+    notebook.model.nbnotebook.undo();
     notebook.deselectAll();
     Private.handleState(notebook, state);
   }
@@ -1019,7 +1019,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    notebook.model.cells.redo();
+    notebook.model.nbnotebook.redo();
     notebook.deselectAll();
     Private.handleState(notebook, state);
   }

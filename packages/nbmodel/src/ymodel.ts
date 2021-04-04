@@ -40,8 +40,8 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       return this.ycellMapping.get(ycell) as YCellType;
     });
   }
-  transact(f: () => void): void {
-    this.ydoc.transact(f);
+  transact(f: () => void, undoable = true): void {
+    this.ydoc.transact(f, undoable ? this : null);
   }
   getCell(index: number): YCellType {
     return this.cells[index];
@@ -55,33 +55,42 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       // cell.yawareness = this.yawareness;
       // cell.yUndoManager = this.yUndoManager;
     });
-    this.ydoc.transact(() => {
+    this.transact(() => {
       this.ycells.insert(
         index,
         cells.map(cell => cell.ymodel)
       );
-    }, this);
+    });
   }
   moveCell(fromIndex: number, toIndex: number): void {
-    this.ydoc.transact(() => {
+    this.transact(() => {
       const fromCell: any = this.getCell(fromIndex).clone();
       this.deleteCell(fromIndex);
       this.insertCell(toIndex, fromCell);
-    }, this);
+    });
   }
   deleteCell(index: number): void {
     this.deleteCellRange(index, index + 1);
   }
   deleteCellRange(from: number, to: number): void {
-    this.ydoc.transact(() => {
+    this.transact(() => {
       this.ycells.delete(from, to - from);
-    }, this);
+    });
   }
   undo(): void {
     this.undoManager.undo();
   }
   redo(): void {
     this.undoManager.redo();
+  }
+  clearUndoHistory(): void {
+    this.undoManager.clear();
+  }
+  canUndo(): boolean {
+    return this.undoManager.undoStack.length > 0;
+  }
+  canRedo(): boolean {
+    return this.undoManager.redoStack.length > 0;
   }
 
   public static create(): nbmodel.ISharedNotebook {
@@ -105,6 +114,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       }
       const cell = this.ycellMapping.get(type) as any;
       cell._notebook = this;
+      cell._undoManager = this.undoManager;
     });
     event.changes.deleted.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
@@ -127,7 +137,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
         index += d.insert.length;
       } else if (d.delete != null) {
         cellsChange.push(d);
-        this.cells.splice(index, index + d.delete);
+        this.cells.splice(index, d.delete);
       } else if (d.retain != null) {
         cellsChange.push(d);
         index += d.retain;
@@ -156,7 +166,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   public awareness = new Awareness(this.ydoc);
   public ycells: Y.Array<Y.Map<any>> = this.ydoc.getArray('cells');
   public ymeta: Y.Map<any> = this.ydoc.getMap('meta');
-  public undoManager = new Y.UndoManager(this.ycells, {
+  public undoManager = new Y.UndoManager([this.ycells], {
     trackedOrigins: new Set([this])
   });
   public ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
@@ -184,6 +194,34 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     const ysource = ymodel.get('source');
     this._prevSourceLength = ysource ? ysource.length : 0;
     this.ymodel.observeDeep(this._modelObserver);
+  }
+
+  public transact(f: () => void, undoable = true): void {
+    this.notebook && undoable
+      ? this.notebook.transact(f)
+      : this.ymodel.doc!.transact(f, this);
+  }
+
+  public get undoManager(): Y.UndoManager | null {
+    return this.notebook ? this.notebook.undoManager : this._undoManager;
+  }
+
+  public undo(): void {
+    this.undoManager?.undo();
+  }
+
+  public redo(): void {
+    this.undoManager?.redo();
+  }
+  canUndo(): boolean {
+    return !!this.undoManager && this.undoManager.undoStack.length > 0;
+  }
+  canRedo(): boolean {
+    return !!this.undoManager && this.undoManager.redoStack.length > 0;
+  }
+
+  public clearUndoHistory(): void {
+    this.undoManager?.clear();
   }
 
   public get notebook(): YNotebook | null {
@@ -217,6 +255,9 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     const cell = this.create();
     cell.isStandalone = true;
     new Y.Doc().getArray().insert(0, [cell.ymodel]);
+    cell._undoManager = new Y.UndoManager([cell.ymodel], {
+      trackedOrigins: new Set([cell])
+    });
     return cell;
   }
 
@@ -273,24 +314,28 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     return this.ymodel.get('attachments');
   }
   public setAttachments(value: nbformat.IAttachments | undefined): void {
-    if (value == null) {
-      this.ymodel.set('attachments', value);
-    } else {
-      this.ymodel.delete('attachments');
-    }
+    this.transact(() => {
+      if (value == null) {
+        this.ymodel.set('attachments', value);
+      } else {
+        this.ymodel.delete('attachments');
+      }
+    });
   }
   public getSource(): string {
     return this.ymodel.get('source').toString();
   }
   public setSource(value: string): void {
     const ytext = this.ymodel.get('source');
-    ytext.delete(0, ytext.length);
-    ytext.insert(0, value);
+    this.transact(() => {
+      ytext.delete(0, ytext.length);
+      ytext.insert(0, value);
+    });
     // @todo Do we need proper replace semantic? This leads to issues in editor bindings because they don't switch source.
     // this.ymodel.set('source', new Y.Text(value));
   }
   public updateSource(start: number, end: number, value = ''): void {
-    this.ymodel.doc!.transact(() => {
+    this.transact(() => {
       const ysource = this.ymodel.get('source');
       ysource.delete(start, end - start);
       ysource.insert(start, value);
@@ -306,7 +351,9 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
   }
 
   setMetadata(value: Partial<Metadata>): void {
-    this.ymodel.set('metadata', deepCopy(value));
+    this.transact(() => {
+      this.ymodel.set('metadata', deepCopy(value));
+    });
   }
   toJSON(): nbformat.IBaseCell {
     return {
@@ -317,6 +364,7 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
   }
   public isDisposed = false;
   public ymodel: Y.Map<any>;
+  private _undoManager: Y.UndoManager | null = null;
   private _changed = new Signal<this, nbmodel.CellChange<Metadata>>(this);
   private _prevSourceLength: number;
 }
