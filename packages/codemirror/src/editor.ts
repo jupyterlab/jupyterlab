@@ -142,7 +142,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (!USE_YCODEMIRROR_BINDING) {
       doc.setValue(model.value.text);
     }
-    this.clearHistory();
+    // this.clearHistory();
     this._onMimeTypeChanged();
     this._onCursorActivity();
     this._poll = new Poll({
@@ -210,11 +210,15 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (USE_YCODEMIRROR_BINDING) {
       this.yeditorBinding?.destroy();
       const nbcell = this.model.nbcell as nbmodel.YCodeCell;
+      const opts = nbcell.undoManager
+        ? { yUndoManager: nbcell.undoManager }
+        : {};
       const awareness = nbcell.notebook?.awareness;
       this.yeditorBinding = new CodemirrorBinding(
         nbcell.ymodel.get('source'),
         this.editor,
-        awareness
+        awareness,
+        opts
       );
     }
   }
@@ -370,21 +374,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
-    this.doc.undo();
+    this.model.nbcell.undo();
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
-    this.doc.redo();
+    this.model.nbcell.redo();
   }
 
   /**
    * Clear the undo history.
    */
   clearHistory(): void {
-    this.doc.clearHistory();
+    this.yeditorBinding?.yUndoManager?.clear();
   }
 
   /**
