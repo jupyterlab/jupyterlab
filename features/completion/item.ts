@@ -1,9 +1,40 @@
 import { CompletionHandler } from '@jupyterlab/completer';
 import { LabIcon } from '@jupyterlab/ui-components';
 import * as lsProtocol from 'vscode-languageserver-types';
+
+import { until_ready } from '../../utils';
+
 import { LSPConnector } from './completion_handler';
 
-export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
+/**
+ * To be upstreamed
+ */
+export interface ICompletionsSource {
+  /**
+   * The name displayed in the GUI
+   */
+  name: string;
+  /**
+   * The higher the number the higher the priority
+   */
+  priority: number;
+  /**
+   * The icon to be displayed if no type icon is present
+   */
+  fallbackIcon?: LabIcon;
+}
+
+/**
+ * To be upstreamed
+ */
+export interface IExtendedCompletionItem
+  extends CompletionHandler.ICompletionItem {
+  insertText: string;
+  sortText: string;
+  source?: ICompletionsSource;
+}
+
+export class LazyCompletionItem implements IExtendedCompletionItem {
   private _detail: string;
   private _documentation: string;
   private _is_documentation_markdown: boolean;
@@ -15,6 +46,7 @@ export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
    * performed by the JupyterLab completer internals.
    */
   public self: LazyCompletionItem;
+  public element: HTMLLIElement;
   private _currentInsertText: string;
 
   get isDocumentationMarkdown(): boolean {
@@ -26,6 +58,8 @@ export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
    * If insertText is not set, this will be inserted.
    */
   public label: string;
+
+  public source: ICompletionsSource;
 
   constructor(
     /**
@@ -107,32 +141,35 @@ export class LazyCompletionItem implements CompletionHandler.ICompletionItem {
     return this._resolved;
   }
 
-  public fetchDocumentation(): void {
-    if (!this.needsResolution()) {
-      return;
+  /**
+   * Resolve (fetch) details such as documentation.
+   */
+  public resolve(): Promise<lsProtocol.CompletionItem> {
+    if (this._resolved) {
+      return Promise.resolve(this);
+    }
+    if (!this.supportsResolution()) {
+      return Promise.resolve(this);
+    }
+    if (this._requested_resolution) {
+      return until_ready(() => this._resolved, 100, 50).then(() => this);
     }
 
     const connection = this.connector.get_connection(this.uri);
 
     this._requested_resolution = true;
 
-    connection
+    return connection
       .getCompletionResolve(this.match)
       .then(resolvedCompletionItem => {
-        this.connector.lab_integration.set_doc_panel_placeholder(false);
         if (resolvedCompletionItem === null) {
-          return;
+          return resolvedCompletionItem;
         }
         this._setDocumentation(resolvedCompletionItem.documentation);
         this._detail = resolvedCompletionItem.detail;
         // TODO: implement in pyls and enable with proper LSP communication
         // this.label = resolvedCompletionItem.label;
         this._resolved = true;
-        this.connector.lab_integration.refresh_doc_panel(this);
-      })
-      .catch(e => {
-        this.connector.lab_integration.set_doc_panel_placeholder(false);
-        console.warn(e);
       });
   }
 

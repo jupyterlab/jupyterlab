@@ -1,11 +1,13 @@
-import { VirtualDocument } from '../../virtual/document';
 import { expect } from 'chai';
-import { foreign_code_extractors, SQL_URL_PATTERN } from './extractors';
+
 import {
   extract_code,
   get_the_only_virtual,
   wrap_in_python_lines
 } from '../../extractors/testutils';
+import { VirtualDocument } from '../../virtual/document';
+
+import { SQL_URL_PATTERN, foreign_code_extractors } from './extractors';
 
 describe('IPython SQL extractors', () => {
   let document: VirtualDocument;

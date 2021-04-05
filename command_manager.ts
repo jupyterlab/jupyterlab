@@ -1,14 +1,15 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { ICommandPalette, IWidgetTracker } from '@jupyterlab/apputils';
-import { WidgetAdapter } from './adapters/adapter';
-import { IFeatureEditorIntegration, IFeatureCommand } from './feature';
-import { VirtualDocument } from './virtual/document';
-import { LSPConnection } from './connection';
-import { IRootPosition, IVirtualPosition } from './positioning';
-import { IVirtualEditor } from './virtual/editor';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+
+import { WidgetAdapter } from './adapters/adapter';
+import { LSPConnection } from './connection';
+import { IFeatureCommand, IFeatureEditorIntegration } from './feature';
+import { IRootPosition, IVirtualPosition } from './positioning';
 import { ILSPAdapterManager, ILSPLogConsole } from './tokens';
+import { VirtualDocument } from './virtual/document';
+import { IVirtualEditor } from './virtual/editor';
 
 function is_context_menu_over_token(adapter: WidgetAdapter<IDocumentWidget>) {
   let position = adapter.get_position_from_context_menu();

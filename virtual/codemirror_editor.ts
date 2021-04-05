@@ -1,26 +1,28 @@
-import * as CodeMirror from 'codemirror';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IEditorName } from '../feature';
-import {
-  IBlockAddedInfo,
-  ICodeBlockOptions,
-  UpdateManager,
-  VirtualDocument
-} from './document';
-import { IForeignCodeExtractorsRegistry } from '../extractors/types';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Signal } from '@lumino/signaling';
+import type * as CodeMirror from 'codemirror';
+
+import { IEditorChangedData, WidgetAdapter } from '../adapters/adapter';
+import { IForeignCodeExtractorsRegistry } from '../extractors/types';
+import { IEditorName } from '../feature';
 import {
   IEditorPosition,
   IRootPosition,
   ISourcePosition,
   IVirtualPosition
 } from '../positioning';
-import { IEditorChange, IVirtualEditor, IWindowCoordinates } from './editor';
-import { IEditorChangedData, WidgetAdapter } from '../adapters/adapter';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { ILSPLogConsole, ILSPVirtualEditorManager, PLUGIN_ID } from '../tokens';
+
+import {
+  IBlockAddedInfo,
+  ICodeBlockOptions,
+  UpdateManager,
+  VirtualDocument
+} from './document';
+import { IEditorChange, IVirtualEditor, IWindowCoordinates } from './editor';
 
 export type CodeMirrorHandler = (
   instance: CodeMirrorVirtualEditor,

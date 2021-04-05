@@ -1,6 +1,7 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IVirtualDocumentBlock, VirtualDocument } from '../virtual/document';
 import { expect } from 'chai';
+
+import { IVirtualDocumentBlock, VirtualDocument } from '../virtual/document';
 
 export function extract_code(document: VirtualDocument, code: string) {
   return document.extract_foreign_code(
@@ -12,9 +13,14 @@ export function extract_code(document: VirtualDocument, code: string) {
   );
 }
 
+interface IDocumentWithRange {
+  range: CodeEditor.IRange;
+  virtual_document: VirtualDocument;
+}
+
 export function get_the_only_pair(
   foreign_document_map: Map<CodeEditor.IRange, IVirtualDocumentBlock>
-) {
+): IDocumentWithRange {
   expect(foreign_document_map.size).to.equal(1);
 
   let range = foreign_document_map.keys().next().value;

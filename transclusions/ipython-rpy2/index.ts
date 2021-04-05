@@ -1,6 +1,8 @@
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
-import { ILSPCodeExtractorsManager, PLUGIN_ID } from '../../tokens';
+
 import { ILSPCodeOverridesManager } from '../../overrides/tokens';
+import { ILSPCodeExtractorsManager, PLUGIN_ID } from '../../tokens';
+
 import { foreign_code_extractors } from './extractors';
 import { overrides } from './overrides';
 

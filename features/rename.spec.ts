@@ -1,8 +1,10 @@
-import { expect } from 'chai';
-import { RenameCM } from './rename';
-import { FileEditorFeatureTestEnvironment } from '../editor_integration/testutils';
-import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PageConfig } from '@jupyterlab/coreutils';
+import { expect } from 'chai';
+import * as lsProtocol from 'vscode-languageserver-protocol';
+
+import { FileEditorFeatureTestEnvironment } from '../editor_integration/testutils';
+
+import { RenameCM } from './rename';
 
 describe('Rename', () => {
   let env: FileEditorFeatureTestEnvironment;

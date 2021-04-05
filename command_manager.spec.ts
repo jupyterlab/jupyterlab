@@ -1,12 +1,13 @@
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { expect } from 'chai';
+
+import { WidgetAdapter } from './adapters/adapter';
 import {
   CommandEntryPoint,
   ContextCommandManager,
   IContextMenuOptions
 } from './command_manager';
-import { WidgetAdapter } from './adapters/adapter';
 import { IFeatureCommand } from './feature';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { BrowserConsole } from './virtual/console';
 
 describe('ContextMenuCommandManager', () => {

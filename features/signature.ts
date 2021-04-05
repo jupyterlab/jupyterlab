@@ -1,15 +1,16 @@
-import * as lsProtocol from 'vscode-languageserver-protocol';
-import { IRootPosition } from '../positioning';
-import { CodeMirrorIntegration } from '../editor_integration/codemirror';
-import { FeatureSettings, IFeatureLabIntegration } from '../feature';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import * as lsProtocol from 'vscode-languageserver-protocol';
+
 import { EditorTooltipManager } from '../components/free_tooltip';
+import { CodeMirrorIntegration } from '../editor_integration/codemirror';
+import { FeatureSettings, IFeatureLabIntegration } from '../feature';
+import { IRootPosition } from '../positioning';
+import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { IEditorChange } from '../virtual/editor';
 
 export class SignatureCM extends CodeMirrorIntegration {

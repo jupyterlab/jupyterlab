@@ -1,7 +1,9 @@
-import { get_breadcrumbs } from './utils';
-import { VirtualDocument } from '../virtual/document';
-import { WidgetAdapter } from '../adapters/adapter';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+
+import { WidgetAdapter } from '../adapters/adapter';
+import { VirtualDocument } from '../virtual/document';
+
+import { get_breadcrumbs } from './utils';
 
 function create_dummy_document(options: Partial<VirtualDocument.IOptions>) {
   return new VirtualDocument({

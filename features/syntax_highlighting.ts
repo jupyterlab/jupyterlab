@@ -1,25 +1,26 @@
-import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import {
+  IEditorMimeTypeService,
+  IEditorServices
+} from '@jupyterlab/codeeditor';
+import { CodeMirrorEditor, ICodeMirror } from '@jupyterlab/codemirror';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ITranslator } from '@jupyterlab/translation';
 import { LabIcon } from '@jupyterlab/ui-components';
+
 import syntaxSvg from '../../style/icons/syntax-highlight.svg';
+import { CodeSyntax as LSPSyntaxHighlightingSettings } from '../_syntax_highlighting';
+import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import {
   FeatureSettings,
   IEditorIntegrationOptions,
   IFeatureLabIntegration,
   IFeatureSettings
 } from '../feature';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import CodeMirror from 'codemirror';
-import 'codemirror/mode/meta'; // required for  CodeMirror.findModeByMIME
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { IEditorServices } from '@jupyterlab/codeeditor';
-import { CodeSyntax as LSPSyntaxHighlightingSettings } from '../_syntax_highlighting';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 
 export const syntaxHighlightingIcon = new LabIcon({
   name: 'lsp:syntax-highlighting',
@@ -57,7 +58,7 @@ export class CMSyntaxHighlighting extends CodeMirrorIntegration {
       return;
     }
 
-    return CodeMirror.findModeByMIME(mimetype);
+    return this.lab_integration.codeMirror.CodeMirror.findModeByMIME(mimetype);
   }
 
   update_mode() {
@@ -112,7 +113,10 @@ class SyntaxLabIntegration implements IFeatureLabIntegration {
   // TODO: we could accept custom mimetype mapping from settings
   settings: IFeatureSettings<LSPSyntaxHighlightingSettings>;
 
-  constructor(public mimeTypeService: IEditorMimeTypeService) {}
+  constructor(
+    public mimeTypeService: IEditorMimeTypeService,
+    public codeMirror: ICodeMirror
+  ) {}
 }
 
 export const SYNTAX_HIGHLIGHTING_PLUGIN: JupyterFrontEndPlugin<void> = {
@@ -121,6 +125,7 @@ export const SYNTAX_HIGHLIGHTING_PLUGIN: JupyterFrontEndPlugin<void> = {
     ILSPFeatureManager,
     IEditorServices,
     ISettingRegistry,
+    ICodeMirror,
     ITranslator
   ],
   autoStart: true,
@@ -129,6 +134,7 @@ export const SYNTAX_HIGHLIGHTING_PLUGIN: JupyterFrontEndPlugin<void> = {
     featureManager: ILSPFeatureManager,
     editorServices: IEditorServices,
     settingRegistry: ISettingRegistry,
+    codeMirror: ICodeMirror,
     translator: ITranslator
   ) => {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
@@ -143,7 +149,8 @@ export const SYNTAX_HIGHLIGHTING_PLUGIN: JupyterFrontEndPlugin<void> = {
         id: FEATURE_ID,
         name: trans.__('Syntax highlighting'),
         labIntegration: new SyntaxLabIntegration(
-          editorServices.mimeTypeService
+          editorServices.mimeTypeService,
+          codeMirror
         ),
         settings: settings
       }

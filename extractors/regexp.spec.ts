@@ -1,9 +1,13 @@
 import { expect } from 'chai';
-import { RegExpForeignCodeExtractor } from './regexp';
+
+import { RegExpForeignCodeExtractor, getIndexOfCaptureGroup } from './regexp';
 
 let R_CELL_MAGIC_EXISTS = `%%R
 some text
 `;
+
+let PYTHON_CELL_MAGIC_WITH_H = `%%python
+h`;
 
 let NO_CELL_MAGIC = `%R
 some text
@@ -23,11 +27,23 @@ x = """<a href="#">
 </a>""";
 print(x)`;
 
+describe('getIndexOfCaptureGroup', () => {
+  it('extracts index of a captured group', () => {
+    // tests for https://github.com/krassowski/jupyterlab-lsp/issues/559
+    let result = getIndexOfCaptureGroup(
+      new RegExp('^%%(python|python2|python3|pypy)( .*?)?\\n([^]*)'),
+      '%%python\nh',
+      'h'
+    );
+    expect(result).to.be.equal(9);
+  });
+});
+
 describe('RegExpForeignCodeExtractor', () => {
   let r_cell_extractor = new RegExpForeignCodeExtractor({
     language: 'R',
     pattern: '^%%R( .*?)?\n([^]*)',
-    extract_to_foreign: '$2',
+    foreign_capture_groups: [2],
     keep_in_host: true,
     is_standalone: false,
     file_extension: 'R'
@@ -36,10 +52,19 @@ describe('RegExpForeignCodeExtractor', () => {
   let r_line_extractor = new RegExpForeignCodeExtractor({
     language: 'R',
     pattern: '(^|\n)%R (.*)\n?',
-    extract_to_foreign: '$2',
+    foreign_capture_groups: [2],
     keep_in_host: true,
     is_standalone: false,
     file_extension: 'R'
+  });
+
+  let python_cell_extractor = new RegExpForeignCodeExtractor({
+    language: 'python',
+    pattern: '^%%(python|python2|python3|pypy)( .*?)?\\n([^]*)',
+    foreign_capture_groups: [3],
+    keep_in_host: true,
+    is_standalone: true,
+    file_extension: 'py'
   });
 
   describe('#has_foreign_code()', () => {
@@ -75,16 +100,34 @@ describe('RegExpForeignCodeExtractor', () => {
   });
 
   describe('#extract_foreign_code()', () => {
+    it('should correctly return the range', () => {
+      let results = python_cell_extractor.extract_foreign_code(
+        PYTHON_CELL_MAGIC_WITH_H
+      );
+      expect(results.length).to.equal(1);
+
+      let result = results[0];
+
+      // test against https://github.com/krassowski/jupyterlab-lsp/issues/559
+      expect(result.host_code).to.equal(PYTHON_CELL_MAGIC_WITH_H);
+      expect(result.foreign_code).to.equal('h');
+
+      expect(result.range.start.line).to.equal(1);
+      expect(result.range.start.column).to.equal(0);
+      expect(result.range.end.line).to.equal(1);
+      expect(result.range.end.column).to.equal(1);
+    });
+
     it('should work with non-line magic and non-cell magic code snippets as well', () => {
       // Note: in the real application, one should NOT use regular expressions for HTML extraction
 
       let html_extractor = new RegExpForeignCodeExtractor({
         language: 'HTML',
-        pattern: '<(.*?)( .*?)?>([^]*?)</\\1>',
-        extract_to_foreign: '<$1$2>$3</$1>',
+        pattern: '(<(.*?)( .*?)?>([^]*?)</\\2>)',
+        foreign_capture_groups: [1],
         keep_in_host: false,
         is_standalone: false,
-        file_extension: 'R'
+        file_extension: 'html'
       });
 
       let results = html_extractor.extract_foreign_code(HTML_IN_PYTHON);
@@ -118,7 +161,7 @@ describe('RegExpForeignCodeExtractor', () => {
       let extractor = new RegExpForeignCodeExtractor({
         language: 'R',
         pattern: '^%%R( .*?)?\n([^]*)',
-        extract_to_foreign: '$2',
+        foreign_capture_groups: [2],
         keep_in_host: false,
         is_standalone: false,
         file_extension: 'R'
@@ -136,7 +179,7 @@ describe('RegExpForeignCodeExtractor', () => {
       let r_line_extractor = new RegExpForeignCodeExtractor({
         language: 'R',
         pattern: '(^|\n)%R (.*)\n?',
-        extract_to_foreign: '$2',
+        foreign_capture_groups: [2],
         keep_in_host: false,
         is_standalone: false,
         file_extension: 'R'

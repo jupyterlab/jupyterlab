@@ -1,7 +1,8 @@
 import { LabIcon } from '@jupyterlab/ui-components';
+
+import codeCheckSvg from '../../style/icons/code-check.svg';
 import codeClock from '../../style/icons/code-clock.svg';
 import codeWarning from '../../style/icons/code-warning.svg';
-import codeCheckSvg from '../../style/icons/code-check.svg';
 
 export const codeWarningIcon = new LabIcon({
   name: 'lsp:codeWarning',

@@ -1,7 +1,8 @@
-import { VirtualDocument } from '../virtual/document';
-import { WidgetAdapter } from '../adapters/adapter';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import React from 'react';
+
+import { WidgetAdapter } from '../adapters/adapter';
+import { VirtualDocument } from '../virtual/document';
 
 export function get_breadcrumbs(
   document: VirtualDocument,

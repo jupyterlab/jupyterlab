@@ -1,27 +1,28 @@
-import { ISignal, Signal } from '@lumino/signaling';
+import { IWidgetTracker } from '@jupyterlab/apputils';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ServerConnection } from '@jupyterlab/services';
+import { Token } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import * as SCHEMA from './_schema';
 import { WidgetAdapter } from './adapters/adapter';
-import { Token } from '@lumino/coreutils';
-import { IFeatureOptions, ILSPExtension, LSPExtension } from './index';
-import { WidgetAdapterManager } from './adapter_manager';
-import { IEditorName, IFeature } from './feature';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IVirtualEditor } from './virtual/editor';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { IWidgetTracker } from '@jupyterlab/apputils';
 import {
   CommandEntryPoint,
   ContextCommandManager,
   IContextMenuOptions
 } from './command_manager';
-import IEditor = CodeEditor.IEditor;
 import {
   IForeignCodeExtractor,
   IForeignCodeExtractorsRegistry
 } from './extractors/types';
+import { IEditorName, IFeature } from './feature';
 import { LanguageIdentifier } from './lsp';
+import { IVirtualEditor } from './virtual/editor';
+
+import { IFeatureOptions, ILSPExtension, LSPExtension } from './index';
+
+import IEditor = CodeEditor.IEditor;
 
 export type TLanguageServerId = string;
 export type TLanguageId = string;
@@ -130,11 +131,11 @@ export interface IAdapterTypeOptions<T extends IDocumentWidget> {
 
 export interface ILSPAdapterManager {
   adapterTypeAdded: Signal<
-    WidgetAdapterManager,
+    ILSPAdapterManager,
     IAdapterTypeOptions<IDocumentWidget>
   >;
-  adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
-  adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
+  adapterChanged: Signal<ILSPAdapterManager, WidgetAdapter<IDocumentWidget>>;
+  adapterDisposed: Signal<ILSPAdapterManager, WidgetAdapter<IDocumentWidget>>;
   currentAdapter: WidgetAdapter<IDocumentWidget>;
   isAnyActive: () => boolean;
   registerExtension(extension: LSPExtension): void;

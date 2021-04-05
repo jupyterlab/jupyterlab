@@ -1,28 +1,29 @@
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CompletionHandler, ICompletionManager } from '@jupyterlab/completer';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { NotebookPanel } from '@jupyterlab/notebook';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
+import type * as CodeMirror from 'codemirror';
+
+import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
+import { IEditorChangedData, WidgetAdapter } from '../../adapters/adapter';
+import { NotebookAdapter } from '../../adapters/notebook/notebook';
+import { IDocumentConnectionData } from '../../connection_manager';
+import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
+import { FeatureSettings, IFeatureLabIntegration } from '../../feature';
 import {
   AdditionalCompletionTriggerKinds,
   CompletionTriggerKind,
   ExtendedCompletionTriggerKind
 } from '../../lsp';
-import * as CodeMirror from 'codemirror';
-import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import { IEditorChangedData, WidgetAdapter } from '../../adapters/adapter';
-import { LSPConnector } from './completion_handler';
-import { CompletionHandler, ICompletionManager } from '@jupyterlab/completer';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { NotebookPanel } from '@jupyterlab/notebook';
-import { FeatureSettings, IFeatureLabIntegration } from '../../feature';
-
-import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
-import { IDocumentConnectionData } from '../../connection_manager';
 import { ILSPAdapterManager, ILSPLogConsole } from '../../tokens';
-import { NotebookAdapter } from '../../adapters/notebook/notebook';
-import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
-import { LSPCompletionRenderer } from './renderer';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { LSPCompleterModel } from './model';
+
+import { LSPConnector } from './completion_handler';
 import { LazyCompletionItem } from './item';
+import { LSPCompleterModel } from './model';
+import { ICompletionData, LSPCompletionRenderer } from './renderer';
 
 const DOC_PANEL_SELECTOR = '.jp-Completer-docpanel';
 const DOC_PANEL_PLACEHOLDER_CLASS = 'lsp-completer-placeholder';
@@ -105,19 +106,44 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       console: console.scope('renderer')
     });
     this.renderer.activeChanged.connect(this.active_completion_changed, this);
+    this.renderer.itemShown.connect(this.resolve_and_update, this);
     adapterManager.adapterChanged.connect(this.swap_adapter, this);
     settings.changed.connect(() => {
       completionThemeManager.set_theme(this.settings.composite.theme);
       completionThemeManager.set_icons_overrides(
         this.settings.composite.typesMap
       );
+      if (this.current_completion_handler) {
+        this.model.settings.caseSensitive = this.settings.composite.caseSensitive;
+        this.model.settings.includePerfectMatches = this.settings.composite.includePerfectMatches;
+      }
     });
+  }
+
+  protected fetchDocumentation(item: LazyCompletionItem): void {
+    if (!item) {
+      return;
+    }
+    item
+      .resolve()
+      .then(resolvedCompletionItem => {
+        this.set_doc_panel_placeholder(false);
+        if (resolvedCompletionItem === null) {
+          return;
+        }
+        this.refresh_doc_panel(item);
+      })
+      .catch(e => {
+        this.set_doc_panel_placeholder(false);
+        console.warn(e);
+      });
   }
 
   active_completion_changed(
     renderer: LSPCompletionRenderer,
-    item: LazyCompletionItem
+    active_completion: ICompletionData
   ) {
+    let { item } = active_completion;
     if (!item.supportsResolution()) {
       if (item.isDocumentationMarkdown) {
         // TODO: remove once https://github.com/jupyterlab/jupyterlab/pull/9663 is merged and released
@@ -128,7 +154,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
 
     if (item.needsResolution()) {
       this.set_doc_panel_placeholder(true);
-      item.fetchDocumentation();
+      this.fetchDocumentation(item);
     } else if (item.isResolved()) {
       this.refresh_doc_panel(item);
     }
@@ -139,11 +165,46 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
 
     if (index - 1 >= 0) {
       const previous = items[index - 1] as LazyCompletionItem;
-      previous?.self?.fetchDocumentation();
+      this.resolve_and_update_from_item(previous?.self);
     }
     if (index + 1 < items.length) {
       const next = items[index + 1] as LazyCompletionItem;
-      next?.self?.fetchDocumentation();
+      this.resolve_and_update_from_item(next?.self);
+    }
+  }
+
+  private resolve_and_update_from_item(item: LazyCompletionItem) {
+    if (!item) {
+      return;
+    }
+    this.resolve_and_update(this.renderer, {
+      item: item,
+      element: item.element
+    });
+  }
+
+  private resolve_and_update(
+    renderer: LSPCompletionRenderer,
+    active_completion: ICompletionData
+  ) {
+    let { item, element } = active_completion;
+    if (!item.supportsResolution()) {
+      this.renderer.updateExtraInfo(item, element);
+      return;
+    }
+
+    if (item.isResolved()) {
+      this.renderer.updateExtraInfo(item, element);
+    } else {
+      // supportsResolution as otherwise would short-circuit above
+      item
+        .resolve()
+        .then(resolvedCompletionItem => {
+          this.renderer.updateExtraInfo(item, element);
+        })
+        .catch(e => {
+          this.console.warn(e);
+        });
     }
   }
 
@@ -195,7 +256,10 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     ) as CompletionHandler;
     let completer = this.completer;
     completer.addClass('lsp-completer');
-    completer.model = new LSPCompleterModel();
+    completer.model = new LSPCompleterModel({
+      caseSensitive: this.settings.composite.caseSensitive,
+      includePerfectMatches: this.settings.composite.includePerfectMatches
+    });
   }
 
   protected get completer() {

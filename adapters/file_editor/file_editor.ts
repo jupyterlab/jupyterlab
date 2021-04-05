@@ -1,15 +1,17 @@
-import { WidgetAdapter } from '../adapter';
-import { FileEditor } from '@jupyterlab/fileeditor';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { LSPExtension } from '../../index';
-import { PositionConverter } from '../../converter';
-import { IRootPosition, IVirtualPosition } from '../../positioning';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { FileEditor } from '@jupyterlab/fileeditor';
+
 import { ICommandContext } from '../../command_manager';
-import { IVirtualEditor } from '../../virtual/editor';
-import IEditor = CodeEditor.IEditor;
+import { PositionConverter } from '../../converter';
+import { LSPExtension } from '../../index';
+import { IRootPosition, IVirtualPosition } from '../../positioning';
 import { VirtualDocument } from '../../virtual/document';
+import { IVirtualEditor } from '../../virtual/editor';
+import { WidgetAdapter } from '../adapter';
+
+import IEditor = CodeEditor.IEditor;
 
 export class FileEditorAdapter extends WidgetAdapter<
   IDocumentWidget<FileEditor>

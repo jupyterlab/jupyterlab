@@ -1,22 +1,23 @@
-import React, { ReactElement } from 'react';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
-import * as lsProtocol from 'vscode-languageserver-protocol';
-import * as CodeMirror from 'codemirror';
-import { IEditorPosition } from '../../positioning';
-import { VirtualDocument } from '../../virtual/document';
-
-import '../../../style/diagnostics_listing.css';
-import { DiagnosticSeverity } from '../../lsp';
-import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
-import { StatusMessage, WidgetAdapter } from '../../adapters/adapter';
-import { IVirtualEditor } from '../../virtual/editor';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { TranslationBundle } from '@jupyterlab/translation';
+import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
+import type * as CodeMirror from 'codemirror';
+import React, { ReactElement } from 'react';
+import * as lsProtocol from 'vscode-languageserver-protocol';
+
+import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
+import { StatusMessage, WidgetAdapter } from '../../adapters/adapter';
 import { DocumentLocator, focus_on } from '../../components/utils';
 import { FeatureSettings } from '../../feature';
-import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
-import { TranslationBundle } from '@jupyterlab/translation';
+import { DiagnosticSeverity } from '../../lsp';
+import { IEditorPosition } from '../../positioning';
+import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
+import { VirtualDocument } from '../../virtual/document';
+import { IVirtualEditor } from '../../virtual/editor';
+
+import '../../../style/diagnostics_listing.css';
 
 /**
  * Diagnostic which is localized at a specific editor (cell) within a notebook

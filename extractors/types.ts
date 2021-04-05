@@ -1,4 +1,5 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
+
 import { LanguageIdentifier } from '../lsp';
 
 export interface IExtractedCode {

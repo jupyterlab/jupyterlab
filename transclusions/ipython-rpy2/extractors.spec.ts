@@ -1,12 +1,14 @@
-import { VirtualDocument } from '../../virtual/document';
 import { expect } from 'chai';
-import { foreign_code_extractors } from './extractors';
+
 import {
   extract_code,
   get_the_only_pair,
   get_the_only_virtual,
   wrap_in_python_lines
 } from '../../extractors/testutils';
+import { VirtualDocument } from '../../virtual/document';
+
+import { foreign_code_extractors } from './extractors';
 
 describe('IPython rpy2 extractors', () => {
   let document: VirtualDocument;
@@ -32,6 +34,29 @@ describe('IPython rpy2 extractors', () => {
   });
 
   describe('%R line magic', () => {
+    it('correctly gives ranges in source', () => {
+      let code = '%R ggplot()';
+      let { foreign_document_map } = extract(code);
+      let { range } = get_the_only_pair(foreign_document_map);
+      expect(range.start.line).to.be.equal(0);
+      // note: the space before ggplot() should NOT be included in the range
+      expect(range.start.column).to.be.equal(3);
+
+      expect(range.end.line).to.be.equal(0);
+      expect(range.end.column).to.be.equal(3 + 8);
+    });
+
+    it('correctly gives ranges in source when wrapped in lines', () => {
+      let code = wrap_in_python_lines('%R ggplot()');
+      let { foreign_document_map } = extract(code);
+      let { range } = get_the_only_pair(foreign_document_map);
+      expect(range.start.line).to.be.equal(1);
+      expect(range.start.column).to.be.equal(3);
+
+      expect(range.end.line).to.be.equal(1);
+      expect(range.end.column).to.be.equal(3 + 8);
+    });
+
     it('extracts simple commands', () => {
       let code = wrap_in_python_lines('%R ggplot()');
       let { cell_code_kept, foreign_document_map } = extract(code);
@@ -96,5 +121,16 @@ describe('IPython rpy2 extractors', () => {
     let r_document = get_the_only_virtual(foreign_document_map);
     expect(r_document.language).to.equal('r');
     expect(r_document.value).to.equal('df <- data.frame(); ggplot(df)\n');
+  });
+
+  it('correctly gives ranges in source', () => {
+    let code = '%%R\nggplot()';
+    let { foreign_document_map } = extract(code);
+    let { range } = get_the_only_pair(foreign_document_map);
+    expect(range.start.line).to.be.equal(1);
+    expect(range.start.column).to.be.equal(0);
+
+    expect(range.end.line).to.be.equal(1);
+    expect(range.end.column).to.be.equal(8);
   });
 });

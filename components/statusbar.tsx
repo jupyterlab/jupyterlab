@@ -2,42 +2,46 @@
 // Distributed under the terms of the Modified BSD License.
 // Based on the @jupyterlab/codemirror-extension statusbar
 
-import React from 'react';
-
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import '../../style/statusbar.css';
-
-import * as SCHEMA from '../_schema';
-
+import {
+  VDomModel,
+  VDomRenderer,
+  Dialog,
+  showDialog
+} from '@jupyterlab/apputils';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import {
   GroupItem,
-  interactiveItem,
   Popup,
-  showPopup,
-  TextItem
+  TextItem,
+  interactiveItem,
+  showPopup
 } from '@jupyterlab/statusbar';
-
+import { TranslationBundle } from '@jupyterlab/translation';
 import {
+  LabIcon,
   caretDownIcon,
   caretUpIcon,
   circleEmptyIcon,
   circleIcon,
-  LabIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
+import React from 'react';
+
+import '../../style/statusbar.css';
+import * as SCHEMA from '../_schema';
 import { WidgetAdapter } from '../adapters/adapter';
-import { collect_documents, VirtualDocument } from '../virtual/document';
 import { LSPConnection } from '../connection';
 import { DocumentConnectionManager } from '../connection_manager';
-import { ILanguageServerManager, ILSPAdapterManager } from '../tokens';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { DocumentLocator } from './utils';
-import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
-import { LanguageServerManager } from '../manager';
-import { codeCheckIcon, codeClockIcon, codeWarningIcon } from './icons';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { TranslationBundle } from '@jupyterlab/translation';
 import { SERVER_EXTENSION_404 } from '../errors';
+import { LanguageServerManager } from '../manager';
+import { ILSPAdapterManager, ILanguageServerManager } from '../tokens';
+import { VirtualDocument, collect_documents } from '../virtual/document';
+
+import { codeCheckIcon, codeClockIcon, codeWarningIcon } from './icons';
+import { DocumentLocator } from './utils';
+
+
 import okButton = Dialog.okButton;
 
 interface IServerStatusProps {
@@ -301,25 +305,26 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
    * Render the status item.
    */
   render() {
-    if (!this.model) {
+    const { model } = this;
+
+    if (model == null) {
       return null;
     }
+
     return (
       <GroupItem
         spacing={this.displayText ? 2 : 0}
-        title={this.model.long_message}
+        title={model.long_message}
         onClick={this.handleClick}
         className={'lsp-status-group'}
       >
-        <this.model.status_icon.react
+        <model.status_icon.react
           top={'2px'}
           kind={'statusBar'}
           title={this.trans.__('LSP Code Intelligence')}
         />
-        {this.displayText ? (
-          <TextItem source={this.model.short_message} />
-        ) : null}
-        <TextItem source={this.model.feature_message} />
+        {this.displayText ? <TextItem source={model.short_message} /> : null}
+        <TextItem source={model.feature_message} />
       </GroupItem>
     );
   }

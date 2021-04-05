@@ -1,12 +1,13 @@
 import '../../style/console.css';
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
-import { ILogConsoleCore, ILSPLogConsole, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { Signal } from '@lumino/signaling';
+
 import {
   LanguageServer as LSPSettings,
   LoggingConsoleVerbosityLevel
 } from '../_plugin';
-import { Signal } from '@lumino/signaling';
+import { ILSPLogConsole, ILogConsoleCore, PLUGIN_ID } from '../tokens';
 
 interface ILogConsoleImplementation extends ILogConsoleCore {
   dispose(): void;

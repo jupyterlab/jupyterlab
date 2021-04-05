@@ -1,19 +1,21 @@
+import { PageConfig } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
+import { NotebookModel } from '@jupyterlab/notebook';
 import { expect } from 'chai';
+import * as lsProtocol from 'vscode-languageserver-protocol';
+
+import { foreign_code_extractors } from '../transclusions/ipython/extractors';
+import { overrides } from '../transclusions/ipython/overrides';
+
+import { CodeMirrorIntegration } from './codemirror';
 import {
-  code_cell,
   FileEditorFeatureTestEnvironment,
-  getCellsJSON,
   NotebookFeatureTestEnvironment,
+  code_cell,
+  getCellsJSON,
   python_notebook_metadata,
   showAllCells
 } from './testutils';
-import * as lsProtocol from 'vscode-languageserver-protocol';
-import * as nbformat from '@jupyterlab/nbformat';
-import { overrides } from '../transclusions/ipython/overrides';
-import { foreign_code_extractors } from '../transclusions/ipython/extractors';
-import { NotebookModel } from '@jupyterlab/notebook';
-import { PageConfig } from '@jupyterlab/coreutils';
-import { CodeMirrorIntegration } from './codemirror';
 
 const js_fib_code = `function fib(n) {
   return n<2?n:fib(n-1)+fib(n-2);

@@ -1,24 +1,26 @@
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { Signal } from '@lumino/signaling';
+import { IDocumentInfo } from 'lsp-ws-connection/src';
+
+import { DocumentConnectionManager } from '../connection_manager';
 import {
   IForeignCodeExtractor,
   IForeignCodeExtractorsRegistry
 } from '../extractors/types';
+import { LanguageIdentifier } from '../lsp';
+import { ReversibleOverridesMap } from '../overrides/maps';
 import { ICodeOverridesRegistry } from '../overrides/tokens';
-import { DefaultMap, until_ready } from '../utils';
-import { Signal } from '@lumino/signaling';
-import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IEditorPosition,
   ISourcePosition,
   IVirtualPosition
 } from '../positioning';
-import { IDocumentInfo } from 'lsp-ws-connection/src';
-
-import { DocumentConnectionManager } from '../connection_manager';
-import IRange = CodeEditor.IRange;
-import { ReversibleOverridesMap } from '../overrides/maps';
-import { LanguageIdentifier } from '../lsp';
 import { ILSPLogConsole } from '../tokens';
+import { DefaultMap, until_ready } from '../utils';
+
 import { BrowserConsole } from './console';
+
+import IRange = CodeEditor.IRange;
 
 type language = string;
 

@@ -1,4 +1,5 @@
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
+
 import {
   ICodeOverridesRegistry,
   ILSPCodeOverridesManager,

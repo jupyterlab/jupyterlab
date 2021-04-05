@@ -1,9 +1,11 @@
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
-import { ILSPAdapterManager, PLUGIN_ID } from '../../tokens';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { FileEditorAdapter } from './file_editor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
+
 import { CommandEntryPoint } from '../../command_manager';
+import { ILSPAdapterManager, PLUGIN_ID } from '../../tokens';
+
+import { FileEditorAdapter } from './file_editor';
 
 export const FileEditorContextMenuEntryPoint: CommandEntryPoint =
   'file-editor-context-menu';

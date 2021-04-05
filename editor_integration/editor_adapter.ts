@@ -1,11 +1,13 @@
-import IEditor = CodeEditor.IEditor;
-import { IEditorChange, IVirtualEditor } from '../virtual/editor';
-import { IFeatureEditorIntegration } from '../feature';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { VirtualDocument } from '../virtual/document';
-import { until_ready } from '../utils';
+
+import { IFeatureEditorIntegration } from '../feature';
 import { IRootPosition } from '../positioning';
 import { ILSPLogConsole } from '../tokens';
+import { until_ready } from '../utils';
+import { VirtualDocument } from '../virtual/document';
+import { IEditorChange, IVirtualEditor } from '../virtual/editor';
+
+import IEditor = CodeEditor.IEditor;
 
 export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
   features: Map<string, IFeatureEditorIntegration<T>>;

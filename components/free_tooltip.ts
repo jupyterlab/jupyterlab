@@ -1,16 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 // (Parts of the FreeTooltip code are copy-paste from Tooltip, ideally this would be PRed be merged)
-import { Tooltip } from '@jupyterlab/tooltip';
-import { CodeEditor } from '@jupyterlab/codeeditor';
 import { HoverBox } from '@jupyterlab/apputils';
-import * as lsProtocol from 'vscode-languageserver-protocol';
-import { IEditorPosition } from '../positioning';
-import { PositionConverter } from '../converter';
-import { Widget } from '@lumino/widgets';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { WidgetAdapter } from '../adapters/adapter';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Tooltip } from '@jupyterlab/tooltip';
+import { Widget } from '@lumino/widgets';
+import * as lsProtocol from 'vscode-languageserver-protocol';
+
+import { WidgetAdapter } from '../adapters/adapter';
+import { PositionConverter } from '../converter';
+import { IEditorPosition } from '../positioning';
 
 const MIN_HEIGHT = 20;
 const MAX_HEIGHT = 250;

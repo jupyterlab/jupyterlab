@@ -1,6 +1,7 @@
-import { PLUGIN_ID } from '../tokens';
 import { Token } from '@lumino/coreutils';
+
 import { LanguageIdentifier } from '../lsp';
+import { PLUGIN_ID } from '../tokens';
 
 export type replacer = (...args: string[]) => string;
 

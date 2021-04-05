@@ -1,19 +1,21 @@
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { expect } from 'chai';
-import { TextMarker, TextMarkerOptions } from 'codemirror';
-import { DiagnosticsCM, diagnostics_panel } from './diagnostics';
+import type { TextMarker, TextMarkerOptions } from 'codemirror';
+import type * as lsProtocol from 'vscode-languageserver-protocol';
+
+import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
 import {
-  code_cell,
   FileEditorFeatureTestEnvironment,
   MockSettings,
   NotebookFeatureTestEnvironment,
+  code_cell,
   set_notebook_content,
   showAllCells
 } from '../../editor_integration/testutils';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { is_equal } from '../../positioning';
 import { foreign_code_extractors } from '../../transclusions/ipython/extractors';
-import * as lsProtocol from 'vscode-languageserver-protocol';
-import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
+
+import { DiagnosticsCM, diagnostics_panel } from './diagnostics';
 import { message_without_code } from './listing';
 
 describe('Diagnostics', () => {
