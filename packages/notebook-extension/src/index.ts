@@ -33,6 +33,8 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { ILauncher } from '@jupyterlab/launcher';
 
+import { ConsoleHistory } from '@jupyterlab/console';
+
 import {
   IEditMenu,
   IFileMenu,
@@ -184,6 +186,10 @@ namespace CommandIDs {
   export const extendBelow = 'notebook:extend-marked-cells-below';
 
   export const extendBottom = 'notebook:extend-marked-cells-bottom';
+
+  export const accessLast = 'notebook:access-last-history';
+
+  export const accessNext = 'notebook:access-next-history';
 
   export const selectAll = 'notebook:select-all';
 
@@ -1702,6 +1708,34 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.accessLast, {
+    label: trans.__('Access last Ipython command'),
+    execute: async args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        const sessionContext = current.context.sessionContext;
+        const history = new ConsoleHistory({ sessionContext });
+        const cell = current.content.activeCell as CodeCell;
+        console.log('history', history);
+        let result = await history.back('placeholder');
+        console.log('history test:', result);
+        cell.model.value.text = result;
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.accessNext, {
+    label: trans.__('Access next Ipython command'),
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        console.log('access next', current);
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.selectAll, {
     label: trans.__('Select All Cells'),
     execute: args => {
@@ -2100,6 +2134,8 @@ function populatePalette(
     CommandIDs.extendTop,
     CommandIDs.extendBelow,
     CommandIDs.extendBottom,
+    CommandIDs.accessLast,
+    CommandIDs.accessNext,
     CommandIDs.moveDown,
     CommandIDs.moveUp,
     CommandIDs.undoCellAction,

@@ -83,6 +83,16 @@
       "selector": ".jp-Notebook:focus"
     },
     {
+      "command": "notebook:access-last-history",
+      "keys": ["Shift ArrowUp"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:access-next-history",
+      "keys": ["Shift ArrowDown"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
       "command": "notebook:extend-marked-cells-above",
       "keys": ["Shift K"],
       "selector": ".jp-Notebook:focus"
