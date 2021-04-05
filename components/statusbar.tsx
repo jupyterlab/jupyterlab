@@ -142,17 +142,14 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
 
           let status = '';
           if (connection?.isInitialized) {
-            status = this.model.trans.__('initialized');
+            status = 'initialized';
           } else if (connection?.isConnected) {
-            status = this.model.trans.__('connected');
+            status = 'connected';
           } else {
-            status = this.model.trans.__('not connected');
+            status = 'not connected';
           }
 
-          const icon =
-            status === this.model.trans.__('initialized')
-              ? circleIcon
-              : circleEmptyIcon;
+          const icon = status === 'initialized' ? circleIcon : circleEmptyIcon;
 
           return (
             <li key={i}>
@@ -161,7 +158,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
                 adapter={this.model.adapter}
               />
               <span className={'lsp-document-status'}>
-                {status}
+                {this.model.trans.__(status)}
                 <icon.react
                   tag="span"
                   className="lsp-document-status-icon"
