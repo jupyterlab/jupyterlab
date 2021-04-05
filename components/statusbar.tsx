@@ -41,7 +41,6 @@ import { VirtualDocument, collect_documents } from '../virtual/document';
 import { codeCheckIcon, codeClockIcon, codeWarningIcon } from './icons';
 import { DocumentLocator } from './utils';
 
-
 import okButton = Dialog.okButton;
 
 interface IServerStatusProps {

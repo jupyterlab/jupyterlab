@@ -3,6 +3,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
 import { FeatureSettings, IFeatureCommand } from '../../feature';
 import { ILSPFeatureManager, PLUGIN_ID } from '../../tokens';
@@ -12,7 +13,6 @@ import {
   diagnosticsIcon,
   diagnostics_panel
 } from './diagnostics';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
 export const FEATURE_ID = PLUGIN_ID + ':diagnostics';
 

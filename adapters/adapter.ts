@@ -22,7 +22,6 @@ import { IVirtualEditor } from '../virtual/editor';
 
 import IEditor = CodeEditor.IEditor;
 
-
 export class StatusMessage {
   /**
    * The text message to be shown on the statusbar
