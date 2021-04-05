@@ -1710,6 +1710,36 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.accessLast, {
     label: trans.__('Access last Ipython command'),
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        const sessionContext = current.context.sessionContext;
+        const history = new ConsoleHistory({ sessionContext });
+        const cell = current.content.activeCell as CodeCell;
+        const source = cell.model.value.text;
+        history.editor = cell.editor;
+        void history.back(source).then(value => {
+          console.log('history', history);
+          console.log('history value :', value);
+          // cell.model.value.text = "print(\"back\")"
+          if (history.isDisposed) {
+            console.log('history.isDisposed');
+            return;
+          }
+          const text = value || history.placeholder;
+          if (cell.model.value.text === text) {
+            console.log('cell.model.value.text === text');
+            return;
+          }
+          cell.model.value.text = text;
+        });
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.accessNext, {
+    label: trans.__('Access next Ipython command'),
     execute: async args => {
       const current = getCurrent(args);
 
@@ -1718,20 +1748,9 @@ function addCommands(
         const history = new ConsoleHistory({ sessionContext });
         const cell = current.content.activeCell as CodeCell;
         console.log('history', history);
-        let result = await history.back('placeholder');
+        let result = await history.forward('');
         console.log('history test:', result);
-        cell.model.value.text = result;
-      }
-    },
-    isEnabled
-  });
-  commands.addCommand(CommandIDs.accessNext, {
-    label: trans.__('Access next Ipython command'),
-    execute: args => {
-      const current = getCurrent(args);
-
-      if (current) {
-        console.log('access next', current);
+        cell.model.value.text = 'print("forward")';
       }
     },
     isEnabled
