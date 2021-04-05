@@ -19,6 +19,9 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../console"
+    },
+    {
       "path": "../coreutils"
     },
     {
