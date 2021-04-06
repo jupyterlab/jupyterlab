@@ -1752,10 +1752,25 @@ function addCommands(
         const sessionContext = current.context.sessionContext;
         const history = new ConsoleHistory({ sessionContext });
         const cell = current.content.activeCell as CodeCell;
-        console.log('history', history);
-        let result = await history.forward('');
-        console.log('history test:', result);
-        cell.model.value.text = 'print("forward")';
+        const source = cell.model.value.text;
+        const editor = cell.editor;
+        const model = editor.model;
+
+        void history.forward(source).then(value => {
+          if (history.isDisposed) {
+            return;
+          }
+          const text = value || history.placeholder;
+          if (model.value.text === text) {
+            return;
+          }
+          history.setByHistory = true;
+          model.value.text = text;
+          const pos = editor.getPositionAt(text.length);
+          if (pos) {
+            editor.setCursorPosition(pos);
+          }
+        });
       }
     },
     isEnabled
