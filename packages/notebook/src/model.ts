@@ -193,7 +193,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     const cells: nbformat.ICell[] = [];
     for (let i = 0; i < (this.cells?.length ?? 0); i++) {
       const cell = this.cells.get(i).toJSON();
-      if (this._nbformat ===4 && this._nbformatMinor <=4) {
+      if (this._nbformat === 4 && this._nbformatMinor <= 4) {
         // strip cell ids if we have notebook format 4.0-4.4
         delete cell.id;
       }
