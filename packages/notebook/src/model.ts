@@ -84,6 +84,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    */
   constructor(options: NotebookModel.IOptions = {}) {
     super(options.languagePreference, options.modelDB);
+    this._isInitialized = options.isInitialized === false ? false : true;
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
@@ -342,7 +343,7 @@ close the notebook without saving it.`,
    */
   initialize(): void {
     super.initialize();
-    if (!this.cells.length /* && !this._isInitialized */) {
+    if (!this.cells.length) {
       // @todo re-introduce fix of initial content
       const factory = this.contentFactory;
       this.cells.push(factory.createCodeCell({}));
@@ -395,7 +396,7 @@ close the notebook without saving it.`,
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _deletedCells: string[];
-  private _isInitialized: boolean = false;
+  private _isInitialized: boolean;
 }
 
 /**
@@ -427,6 +428,8 @@ export namespace NotebookModel {
      * Language translator.
      */
     translator?: ITranslator;
+
+    isInitialized?: boolean;
   }
 
   /**
