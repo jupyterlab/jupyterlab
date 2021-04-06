@@ -35,7 +35,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
       if (!this.ycellMapping.has(ycell)) {
-        this.ycellMapping.set(ycell, this._createCellFromType(ycell));
+        this.ycellMapping.set(ycell, createCellFromType(ycell));
       }
       return this.ycellMapping.get(ycell) as YCellType;
     });
@@ -110,7 +110,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     event.changes.added.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
       if (!this.ycellMapping.has(type)) {
-        this.ycellMapping.set(type, this._createCellFromType(type));
+        this.ycellMapping.set(type, createCellFromType(type));
       }
       const cell = this.ycellMapping.get(type) as any;
       cell._notebook = this;
@@ -149,19 +149,6 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     });
   };
 
-  private _createCellFromType(type: Y.Map<any>): YCellType {
-    switch (type.get('cell_type')) {
-      case 'code':
-        return new YCodeCell(type);
-      case 'markdown':
-        return new YMarkdownCell(type);
-      case 'raw':
-        return new YRawCell(type);
-      default:
-        throw new Error('Found unknown cell type');
-    }
-  }
-
   public ydoc = new Y.Doc();
   public awareness = new Awareness(this.ydoc);
   public ycells: Y.Array<Y.Map<any>> = this.ydoc.getArray('cells');
@@ -186,6 +173,33 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   public isDisposed = false;
   private _changed = new Signal<this, nbmodel.NotebookChange>(this);
 }
+
+export const createCellFromType = (type: Y.Map<any>): YCellType => {
+  switch (type.get('cell_type')) {
+    case 'code':
+      return new YCodeCell(type);
+    case 'markdown':
+      return new YMarkdownCell(type);
+    case 'raw':
+      return new YRawCell(type);
+    default:
+      throw new Error('Found unknown cell type');
+  }
+};
+
+export const createStandaloneCell = (
+  cellType: 'raw' | 'code' | 'markdown'
+): YCellType => {
+  switch (cellType) {
+    case 'markdown':
+      return YMarkdownCell.createStandalone();
+    case 'code':
+      return YCodeCell.createStandalone();
+    default:
+      // raw
+      return YRawCell.createStandalone();
+  }
+};
 
 export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
   implements nbmodel.ISharedBaseCell<Metadata> {
@@ -422,6 +436,12 @@ export class YCodeCell
 export class YRawCell
   extends YBaseCell<nbmodel.ISharedBaseCellMetada>
   implements nbmodel.ISharedRawCell {
+  public static create(): YRawCell {
+    return super.create() as any;
+  }
+  public static createStandalone(): YRawCell {
+    return super.createStandalone() as any;
+  }
   get cell_type(): 'raw' {
     return 'raw';
   }
@@ -438,6 +458,12 @@ export class YRawCell
 export class YMarkdownCell
   extends YBaseCell<nbmodel.ISharedBaseCellMetada>
   implements nbmodel.ISharedMarkdownCell {
+  public static create(): YMarkdownCell {
+    return super.create() as any;
+  }
+  public static createStandalone(): YMarkdownCell {
+    return super.createStandalone() as any;
+  }
   get cell_type(): 'markdown' {
     return 'markdown';
   }
