@@ -3,15 +3,29 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as Y from 'yjs';
-import { WebsocketProvider } from 'y-websocket';
-import * as decoding from 'lib0/decoding.js';
-import * as encoding from 'lib0/encoding.js';
 import * as nbmodel from '@jupyterlab/nbmodel';
 
+import * as Y from 'yjs';
+
+import { WebsocketProvider } from 'y-websocket';
+
+import * as decoding from 'lib0/decoding.js';
+
+import * as encoding from 'lib0/encoding.js';
+
+/**
+ * A class to provide Yjs synchronization over Websocket.
+ */
 export class WebsocketProviderWithLocks extends WebsocketProvider {
-  constructor(url: string, guid: string, ynotebook: nbmodel.YNotebook) {
-    super(url, guid, ynotebook.ydoc, { awareness: ynotebook.awareness });
+  /**
+   * Construct a new WebsocketProviderWithLocks
+   *
+   * @param options The instantiation options for a WebsocketProviderWithLocks
+   */
+  constructor(options: WebsocketProviderWithLocks.IOptions) {
+    super(options.url, options.guid, options.ynotebook.ydoc, {
+      awareness: options.ynotebook.awareness
+    });
     // Message handler that confirms when a lock has been acquired
     this.messageHandlers[127] = (
       encoder,
@@ -22,8 +36,8 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     ) => {
       // acquired lock
       const timestamp = decoding.readUint32(decoder);
-      const lockRequest = this.currentLockRequest;
-      this.currentLockRequest = null;
+      const lockRequest = this._currentLockRequest;
+      this._currentLockRequest = null;
       if (lockRequest) {
         lockRequest.resolve(timestamp);
       }
@@ -44,34 +58,20 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
           Y.applyUpdate(this.doc, initialContent);
         }, 0);
       }
-      const initialContentRequest = this.initialContentRequest;
-      this.initialContentRequest = null;
+      const initialContentRequest = this._initialContentRequest;
+      this._initialContentRequest = null;
       if (initialContentRequest) {
         initialContentRequest.resolve(initialContent.byteLength > 0);
       }
     };
   }
 
-  private __sendMessage(message: Uint8Array): void {
-    // send once connected
-    const send = () => {
-      setTimeout(() => {
-        if (this.wsconnected) {
-          this.ws!.send(message);
-        } else {
-          this.once('status', send);
-        }
-      }, 0);
-    };
-    send();
-  }
-
   /**
    * Resolves to true if the initial content has been initialized on the server. false otherwise.
    */
-  public requestInitialContent(): Promise<boolean> {
-    if (this.initialContentRequest) {
-      return this.initialContentRequest.promise;
+  requestInitialContent(): Promise<boolean> {
+    if (this._initialContentRequest) {
+      return this._initialContentRequest.promise;
     }
 
     let resolve: any, reject: any;
@@ -79,8 +79,8 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
       resolve = _resolve;
       reject = _reject;
     });
-    this.initialContentRequest = { promise, resolve, reject };
-    this.__sendMessage(new Uint8Array([125]));
+    this._initialContentRequest = { promise, resolve, reject };
+    this._sendMessage(new Uint8Array([125]));
 
     // Resolve with true if the server doesn't respond for some reason.
     // In case of a connection problem, we don't want the user to re-initialize the window.
@@ -90,18 +90,18 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     return promise;
   }
 
-  public putInitializedState(): void {
+  putInitializedState(): void {
     const encoder = encoding.createEncoder();
     encoding.writeVarUint(encoder, 124);
     encoding.writeUint8Array(encoder, Y.encodeStateAsUpdate(this.doc));
-    this.__sendMessage(encoding.toUint8Array(encoder));
+    this._sendMessage(encoding.toUint8Array(encoder));
   }
 
-  public acquireLock(): Promise<number> {
-    if (this.currentLockRequest) {
-      return this.currentLockRequest.promise;
+  acquireLock(): Promise<number> {
+    if (this._currentLockRequest) {
+      return this._currentLockRequest.promise;
     }
-    this.__sendMessage(new Uint8Array([127]));
+    this._sendMessage(new Uint8Array([127]));
     // try to acquire lock in regular interval
     const intervalID = setInterval(() => {
       if (this.wsconnected) {
@@ -114,7 +114,7 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
       resolve = _resolve;
       reject = _reject;
     });
-    this.currentLockRequest = { promise, resolve, reject };
+    this._currentLockRequest = { promise, resolve, reject };
     const _finally = () => {
       clearInterval(intervalID);
     };
@@ -131,14 +131,53 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     this.ws?.send(encoding.toUint8Array(encoder));
   }
 
-  private currentLockRequest: {
+  private _sendMessage(message: Uint8Array): void {
+    // send once connected
+    const send = () => {
+      setTimeout(() => {
+        if (this.wsconnected) {
+          this.ws!.send(message);
+        } else {
+          this.once('status', send);
+        }
+      }, 0);
+    };
+    send();
+  }
+
+  private _currentLockRequest: {
     promise: Promise<number>;
     resolve: (lock: number) => void;
     reject: () => void;
   } | null = null;
-  private initialContentRequest: {
+  private _initialContentRequest: {
     promise: Promise<boolean>;
     resolve: (initialized: boolean) => void;
     reject: () => void;
   } | null = null;
+}
+
+/**
+ * A namespace for WebsocketProviderWithLocks statics.
+ */
+export namespace WebsocketProviderWithLocks {
+  /**
+   * The instantiation options for a WebsocketProviderWithLocks.
+   */
+  export interface IOptions {
+    /**
+     * The server URL.
+     */
+    url: string;
+
+    /**
+     * The name of the room
+     */
+    guid: string;
+
+    /**
+     * The YNotebook.
+     */
+    ynotebook: nbmodel.YNotebook;
+  }
 }
