@@ -1156,10 +1156,16 @@ export namespace DocumentRegistry {
      * Create a new model for a given path.
      *
      * @param languagePreference - An optional kernel language preference.
+     * @param modelDB - An optional modelDB.
+     * @param isInitialized - An optional flag to check if the model is initialized.
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string, modelDB?: IModelDB, isInitialized?: boolean): T;
+    createNew(
+      languagePreference?: string,
+      modelDB?: IModelDB,
+      isInitialized?: boolean
+    ): T;
 
     /**
      * Get the preferred kernel language given a file path.
