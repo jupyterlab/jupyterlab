@@ -232,7 +232,8 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    */
   createNew(
     languagePreference?: string,
-    modelDB?: IModelDB
+    modelDB?: IModelDB,
+    isInitialized?: boolean
   ): DocumentRegistry.ICodeModel {
     return new DocumentModel(languagePreference, modelDB);
   }
