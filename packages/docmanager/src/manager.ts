@@ -51,7 +51,7 @@ export class DocumentManager implements IDocumentManager {
     this.translator = options.translator || nullTranslator;
     this.registry = options.registry;
     this.services = options.manager;
-    this.collaborative = !!options.collaborative;
+    this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
 
     this._opener = options.opener;
@@ -65,8 +65,6 @@ export class DocumentManager implements IDocumentManager {
     this._widgetManager = widgetManager;
     this._setBusy = options.setBusy;
   }
-
-  private collaborative: boolean;
 
   /**
    * The registry used by the manager.
@@ -485,7 +483,7 @@ export class DocumentManager implements IDocumentManager {
       modelDBFactory,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
-      collaborative: this.collaborative
+      collaborative: this._collaborative
     });
     const handler = new SaveHandler({
       context,
@@ -612,6 +610,7 @@ export class DocumentManager implements IDocumentManager {
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
+  private _collaborative: boolean;
 }
 
 /**

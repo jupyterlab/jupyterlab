@@ -254,9 +254,16 @@ export namespace CodeEditor {
       this.modelDB.createMap('selections');
     }
 
+    /**
+     * When we initialize a cell model, we create a standalone nbcell that cannot be shared in a YNotebook.
+     * Call this function to re-initialize the local representation based on a fresh nbcell.
+     *
+     * @param nbcell The nbcell shared model.
+     * @param reinitialize Whether to reinitialize the shared model.
+     */
     public switchSharedModel(
       nbcell: nbmodel.ISharedCodeCell,
-      reinitialize: boolean
+      reinitialize?: boolean
     ): void {
       if (reinitialize) {
         // update local modeldb
@@ -267,7 +274,7 @@ export namespace CodeEditor {
       // clone nbcell to retrieve a shared (not standalone) nbcell
       this.nbcell = nbcell as any;
       this.nbcell.changed.connect(this._onSharedModelChanged, this);
-      this.nbcellSwitched.emit(true);
+      this._nbcellSwitched.emit(true);
     }
 
     /**
@@ -298,6 +305,9 @@ export namespace CodeEditor {
       });
     }
 
+    /**
+     * Handle a change to the modelDB value.
+     */
     private _onModelDBValueChanged(
       value: IObservableString,
       event: IObservableString.IChangedArgs
@@ -324,11 +334,6 @@ export namespace CodeEditor {
     }
 
     /**
-     * A signal emitted when the nbcell was switched.
-     */
-    nbcellSwitched = new Signal<this, boolean>(this);
-
-    /**
      * The shared model for the cell editor.
      */
     nbcell = nbmodel.createStandaloneCell(this.type);
@@ -349,6 +354,13 @@ export namespace CodeEditor {
      */
     get mimeTypeChanged(): ISignal<this, IChangedArgs<string>> {
       return this._mimeTypeChanged;
+    }
+
+    /**
+     * A signal emitted when the nbcell was switched.
+     */
+    get nbcellSwitched(): ISignal<this, boolean> {
+      return this._nbcellSwitched;
     }
 
     /**
@@ -410,6 +422,7 @@ export namespace CodeEditor {
 
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
+    private _nbcellSwitched = new Signal<this, boolean>(this);
   }
 
   /**

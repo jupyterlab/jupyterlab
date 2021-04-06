@@ -8,7 +8,6 @@ import CodeMirror from 'codemirror';
 import { showDialog } from '@jupyterlab/apputils';
 
 import * as nbmodel from '@jupyterlab/nbmodel';
-import { CodemirrorBinding } from 'y-codemirror';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -33,6 +32,8 @@ import { Poll } from '@lumino/polling';
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
+
+import { CodemirrorBinding } from 'y-codemirror';
 
 import { Mode } from './mode';
 
@@ -95,7 +96,7 @@ const DOWN_ARROW = 40;
 const HOVER_TIMEOUT = 1000;
 
 // @todo Remove the duality of having a modeldb and a y-codemirror
-// binding as it just introduces a lot of additional complity without gaining anything.
+// binding as it just introduces a lot of additional complexity without gaining anything.
 const USE_YCODEMIRROR_BINDING = true;
 
 /**
@@ -132,9 +133,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
-    this.initializeEditorBinding();
+    this._initializeEditorBinding();
     // every time the nbmodel is switched, we need to re-initialize the editor binding
-    this.model.nbcellSwitched.connect(this.initializeEditorBinding, this);
+    this.model.nbcellSwitched.connect(this._initializeEditorBinding, this);
 
     const doc = editor.getDoc();
 
@@ -205,24 +206,27 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
   }
 
-  private initializeEditorBinding() {
-    if (USE_YCODEMIRROR_BINDING) {
-      this.yeditorBinding?.destroy();
-      const nbcell = this.model.nbcell as nbmodel.YCodeCell;
-      const opts = nbcell.undoManager
+  /**
+   * Initialize the editor binding.
+   */
+  private _initializeEditorBinding(): void {
+    if (!USE_YCODEMIRROR_BINDING) {
+      return;
+    }
+    this._yeditorBinding?.destroy();
+    const nbcell = this.model.nbcell as nbmodel.YCodeCell;
+    const opts = nbcell.undoManager
         ? { yUndoManager: nbcell.undoManager }
         : {};
-      const awareness = nbcell.notebook?.awareness;
-      this.yeditorBinding = new CodemirrorBinding(
-        nbcell.ymodel.get('source'),
-        this.editor,
-        awareness,
-        opts
-      );
-    }
+    const awareness = nbcell.notebook?.awareness;
+    this._yeditorBinding = new CodemirrorBinding(
+      nbcell.ymodel.get('source'),
+      this.editor,
+      awareness,
+      opts
+    );
   }
 
-  private yeditorBinding: CodemirrorBinding | null;
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
@@ -313,8 +317,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('focus', this, true);
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
-    if (this.yeditorBinding) {
-      this.yeditorBinding.destroy();
+    if (this._yeditorBinding) {
+      this._yeditorBinding.destroy();
     }
     this._keydownHandlers.length = 0;
     this._poll.dispose();
@@ -408,7 +412,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Clear the undo history.
    */
   clearHistory(): void {
-    this.yeditorBinding?.yUndoManager?.clear();
+    this._yeditorBinding?.yUndoManager?.clear();
   }
 
   /**
@@ -1173,6 +1177,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _isDisposed = false;
   private _lastChange: CodeMirror.EditorChange | null = null;
   private _poll: Poll;
+  private _yeditorBinding: CodemirrorBinding | null;
 }
 
 /**

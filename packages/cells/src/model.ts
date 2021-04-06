@@ -313,10 +313,16 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     });
   }
 
+  /**
+   * Change the cell metadata for a given event.
+   *
+   * @param metadata The cell metadata.
+   * @param event The event to handle.
+   */
   private _changeCellMetata(
     metadata: Partial<nbmodel.ISharedBaseCellMetada>,
     event: IObservableJSON.IChangedArgs
-  ) {
+  ): void {
     switch (event.key) {
       case 'jupyter':
         metadata.jupyter = event.newValue as any;
