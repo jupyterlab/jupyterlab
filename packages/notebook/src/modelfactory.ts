@@ -73,9 +73,18 @@ export class NotebookModelFactory
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string, modelDB?: IModelDB, isInitialized?: boolean): INotebookModel {
+  createNew(
+    languagePreference?: string,
+    modelDB?: IModelDB,
+    isInitialized?: boolean
+  ): INotebookModel {
     const contentFactory = this.contentFactory;
-    return new NotebookModel({ languagePreference, contentFactory, modelDB, isInitialized });
+    return new NotebookModel({
+      languagePreference,
+      contentFactory,
+      modelDB,
+      isInitialized
+    });
   }
 
   /**
