@@ -1718,21 +1718,26 @@ function addCommands(
         const history = new ConsoleHistory({ sessionContext });
         const cell = current.content.activeCell as CodeCell;
         const source = cell.model.value.text;
-        history.editor = cell.editor;
+        const editor = cell.editor;
+        const model = editor.model;
+
         void history.back(source).then(value => {
-          console.log('history', history);
-          console.log('history value :', value);
-          // cell.model.value.text = "print(\"back\")"
-          if (history.isDisposed) {
-            console.log('history.isDisposed');
+          console.log('value', value);
+          if (history.isDisposed || !value) {
             return;
           }
-          const text = value || history.placeholder;
-          if (cell.model.value.text === text) {
-            console.log('cell.model.value.text === text');
+          if (model.value.text === value) {
             return;
           }
-          cell.model.value.text = text;
+          history.setByHistory = true;
+          model.value.text = value;
+
+          let columnPos = 0;
+          columnPos = value.indexOf('\n');
+          if (columnPos < 0) {
+            columnPos = value.length;
+          }
+          editor.setCursorPosition({ line: 0, column: columnPos });
         });
       }
     },

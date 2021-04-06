@@ -247,6 +247,10 @@ export class ConsoleHistory implements IConsoleHistory {
     this.reset();
   }
 
+  set setByHistory(v: boolean) {
+    this._setByHistory = v;
+  }
+
   /**
    * Handle an edge requested signal.
    */
