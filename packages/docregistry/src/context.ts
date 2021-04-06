@@ -76,9 +76,9 @@ export class Context<
     if (dbFactory) {
       const localPath = manager.contents.localPath(this._path);
       this._modelDB = dbFactory.createNew(localPath);
-      this._model = this._factory.createNew(lang, this._modelDB);
+      this._model = this._factory.createNew(lang, this._modelDB, false);
     } else {
-      this._model = this._factory.createNew(lang);
+      this._model = this._factory.createNew(lang, undefined, false);
     }
 
     const ynotebook = this._model.nbnotebook as nbmodel.YNotebook;
