@@ -783,8 +783,13 @@ function addLabCommands(
   });
 
   commands.addCommand(CommandIDs.rename, {
-    label: () =>
-      trans.__('Rename %1…', fileType(contextMenuWidget(), docManager)),
+    label: () => {
+      let t = fileType(contextMenuWidget(), docManager);
+      if (t) {
+        t = ' ' + t;
+      }
+      return trans.__('Rename%1…', t);
+    },
     isEnabled,
     execute: () => {
       // Implies contextMenuWidget() !== null
