@@ -213,7 +213,7 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    readonly nbcell: nbmodel.ISharedCodeCell;
+    readonly nbcell: nbmodel.ISharedBaseCell<any>;
 
     /**
      * When we initialize a cell model, we create a standalone nbcell that cannot be shared in a YNotebook.
@@ -277,8 +277,8 @@ export namespace CodeEditor {
      * or the modelDB change handler.
      */
     protected _onSharedModelChanged(
-      sender: nbmodel.ISharedCodeCell,
-      change: nbmodel.CellChange<nbformat.ICodeCellMetadata>
+      sender: nbmodel.ISharedBaseCell<any>,
+      change: nbmodel.CellChange<nbformat.IBaseCellMetadata>
     ): void {
       this._mutex(() => {
         if (change.sourceChange) {
@@ -319,6 +319,10 @@ export namespace CodeEditor {
       });
     }
 
+    get type(): 'code' {
+      return 'code';
+    }
+
     /**
      * A signal emitted when the nbcell was switched.
      */
@@ -327,7 +331,7 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    nbcell = nbmodel.YCodeCell.createStandalone();
+    nbcell = nbmodel.createStandaloneCell(this.type);
 
     /**
      * A mutex to update the nbcell model.
