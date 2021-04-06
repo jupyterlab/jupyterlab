@@ -221,16 +221,21 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   fromJSON(value: nbformat.INotebookContent): void {
     const cells: ICellModel[] = [];
     const factory = this.contentFactory;
+    const useId = value.nbformat === 4 && value.nbformat_minor >= 5;
     for (const cell of value.cells) {
+      const options: CellModel.IOptions = { cell };
+      if (useId) {
+        options.id = (cell as any).id;
+      }
       switch (cell.cell_type) {
         case 'code':
-          cells.push(factory.createCodeCell({ cell }));
+          cells.push(factory.createCodeCell(options));
           break;
         case 'markdown':
-          cells.push(factory.createMarkdownCell({ cell }));
+          cells.push(factory.createMarkdownCell(options));
           break;
         case 'raw':
-          cells.push(factory.createRawCell({ cell }));
+          cells.push(factory.createRawCell(options));
           break;
         default:
           continue;
