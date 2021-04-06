@@ -319,7 +319,7 @@ export namespace CodeEditor {
       });
     }
 
-    get type(): 'code' {
+    get type(): nbformat.CellType {
       return 'code';
     }
 
