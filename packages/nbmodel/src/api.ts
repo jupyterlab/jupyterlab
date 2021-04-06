@@ -22,8 +22,6 @@ import * as nbformat from '@jupyterlab/nbformat';
  * It also defines the shared changes to be used in the events.
  */
 
-// Notebook Type.
-
 /**
  * Implements an API for nbformat.INotebookContent
  */
