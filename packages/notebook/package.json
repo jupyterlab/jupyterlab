@@ -35,6 +35,7 @@
     "docs": "typedoc src",
     "prepublishOnly": "npm run build",
     "test": "jest",
+    "test:watch": "jest --runInBand --watch",
     "test:cov": "jest --collect-coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",

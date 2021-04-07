@@ -220,8 +220,11 @@ export interface IRawCellMetadata extends IBaseCellMetadata {
 export interface IRawCell extends IBaseCell {
   /**
    * A string field representing the identifier of this particular cell.
+   *
+   * Notebook format 4.4 requires no id field, but format 4.5 requires an id
+   * field. We need to handle both cases, so we make id optional here.
    */
-  id: string;
+  id?: string;
 
   /**
    * String identifying the type of cell.
@@ -245,8 +248,11 @@ export interface IRawCell extends IBaseCell {
 export interface IMarkdownCell extends IBaseCell {
   /**
    * A string field representing the identifier of this particular cell.
+   *
+   * Notebook format 4.4 requires no id field, but format 4.5 requires an id
+   * field. We need to handle both cases, so we make id optional here.
    */
-  id: string;
+  id?: string;
 
   /**
    * String identifying the type of cell.
@@ -295,8 +301,11 @@ export interface ICodeCellMetadata extends IBaseCellMetadata {
 export interface ICodeCell extends IBaseCell {
   /**
    * A string field representing the identifier of this particular cell.
+   *
+   * Notebook format 4.4 requires no id field, but format 4.5 requires an id
+   * field. We need to handle both cases, so we make id optional here.
    */
-  id: string;
+  id?: string;
 
   /**
    * String identifying the type of cell.
