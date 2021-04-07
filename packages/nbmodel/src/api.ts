@@ -197,6 +197,10 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetada>
   extends IDisposable {
   /**
    * Whether the cell is standalone or not.
+   *
+   * If the cell is standalone. It cannot be
+   * inserted into a YNotebook because the Yjs model is already
+   * attached to an anonymous Y.Doc instance.
    */
   readonly isStandalone: boolean;
 
