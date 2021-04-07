@@ -51,7 +51,7 @@ fi
 
 # The debugger tests require a kernel that supports debugging
 if [[ $GROUP == js-debugger ]]; then
-    pip install xeus-python">=0.12.3,<0.13.0"
+    pip install xeus-python">=0.9.0,<0.10.0"
 fi
 
 # Pin the jedi dependency to prevent a temporary breakage
