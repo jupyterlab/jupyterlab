@@ -159,7 +159,8 @@ export class DebuggerHandler {
     ): void => {
       if (
         msg.parent_header != {} &&
-        (msg.parent_header as KernelMessage.IHeader).msg_type == 'execute_request' &&
+        (msg.parent_header as KernelMessage.IHeader).msg_type ==
+          'execute_request' &&
         this._service.isStarted &&
         !this._service.hasStoppedThreads()
       ) {
@@ -365,10 +366,7 @@ export class DebuggerHandler {
       this._service.session.connection = connection;
     }
     await this._service.restoreState(false);
-    if (
-      this._service.isStarted &&
-      !this._service.hasStoppedThreads()
-    ) {
+    if (this._service.isStarted && !this._service.hasStoppedThreads()) {
       await this._service.displayDefinedVariables();
     }
     addToolbarButton();
