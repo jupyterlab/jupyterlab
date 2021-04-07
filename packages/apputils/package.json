@@ -64,7 +64,6 @@
     "@lumino/virtualdom": "^1.8.0",
     "@lumino/widgets": "^1.19.0",
     "@types/react": "^17.0.0",
-    "buffer": "^5.6.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "sanitize-html": "~1.27.4",
