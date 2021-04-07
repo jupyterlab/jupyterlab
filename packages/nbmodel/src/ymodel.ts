@@ -41,26 +41,57 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     });
   }
 
+  /**
+   * Whether the object can undo changes.
+   */
   get canUndo(): boolean {
     return this.undoManager.undoStack.length > 0;
   }
 
+  /**
+   * Whether the object can redo changes.
+   */
   get canRedo(): boolean {
     return this.undoManager.redoStack.length > 0;
   }
 
+  /**
+   * Perform a transaction. While the function f is called, all changes to the shared
+   * document are bundled into a single event.
+   */
   transact(f: () => void, undoable = true): void {
     this.ydoc.transact(f, undoable ? this : null);
   }
 
+  /**
+   * Get a shared cell by index.
+   *
+   * @param index: Cell's position.
+   *
+   * @returns The requested shared cell.
+   */
   getCell(index: number): YCellType {
     return this.cells[index];
   }
 
+  /**
+   * Insert a shared cell into a specific position.
+   *
+   * @param index: Cell's position.
+   *
+   * @param cell: Cell to insert.
+   */
   insertCell(index: number, cell: YCellType): void {
     this.insertCells(index, [cell]);
   }
 
+  /**
+   * Insert a list of shared cells into a specific position.
+   *
+   * @param index: Position to insert the cells.
+   *
+   * @param cells: Array of shared cells to insert.
+   */
   insertCells(index: number, cells: YCellType[]): void {
     cells.forEach(cell => {
       this.ycellMapping.set(cell.ymodel, cell);
@@ -75,6 +106,13 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     });
   }
 
+  /**
+   * Move a cell.
+   *
+   * @param fromIndex: Index of the cell to move.
+   *
+   * @param toIndex: New position of the cell.
+   */
   moveCell(fromIndex: number, toIndex: number): void {
     this.transact(() => {
       const fromCell: any = this.getCell(fromIndex).clone();
@@ -83,40 +121,73 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     });
   }
 
+  /**
+   * Remove a cell.
+   *
+   * @param index: Index of the cell to remove.
+   */
   deleteCell(index: number): void {
     this.deleteCellRange(index, index + 1);
   }
 
+  /**
+   * Remove a range of cells.
+   *
+   * @param from: The start index of the range to remove (inclusive).
+   *
+   * @param to: The end index of the range to remove (exclusive).
+   */
   deleteCellRange(from: number, to: number): void {
     this.transact(() => {
       this.ycells.delete(from, to - from);
     });
   }
 
+  /**
+   * Undo an operation.
+   */
   undo(): void {
     this.undoManager.undo();
   }
 
+  /**
+   * Redo an operation.
+   */
   redo(): void {
     this.undoManager.redo();
   }
 
+  /**
+   * Clear the change stack.
+   */
   clearUndoHistory(): void {
     this.undoManager.clear();
   }
 
+  /**
+   * Create a new YNotebook.
+   */
   public static create(): nbmodel.ISharedNotebook {
     return new YNotebook();
   }
 
+  /**
+   * The changed signal.
+   */
   get changed(): ISignal<this, nbmodel.NotebookChange> {
     return this._changed;
   }
 
+  /**
+   * Dispose of the resources.
+   */
   dispose(): void {
     this.ycells.unobserve(this._onYCellsChanged);
   }
 
+  /**
+   * Handle a change to the list of cells.
+   */
   private _onYCellsChanged = (event: Y.YArrayEvent<Y.Map<any>>) => {
     // update the type⇔cell mapping by iterating through the addded/removed types
     event.changes.added.forEach(item => {
@@ -169,16 +240,35 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     trackedOrigins: new Set([this])
   });
   public ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
-  public getMetadata(): nbformat.INotebookMetadata {
+
+  /**
+   * Returns the metadata associated with the notebook.
+   *
+   * @returns Notebook's metadata.
+   */
+  getMetadata(): nbformat.INotebookMetadata {
     const meta = this.ymeta.get('metadata');
     return meta ? deepCopy(meta) : { orig_nbformat: 1 };
   }
-  public setMetadata(value: nbformat.INotebookMetadata): void {
+
+  /**
+   * Sets the metadata associated with the notebook.
+   *
+   * @param metadata: Notebook's metadata.
+   */
+  setMetadata(value: nbformat.INotebookMetadata): void {
     this.ymeta.set('metadata', deepCopy(value));
   }
-  public updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
+
+  /**
+   * Updates the metadata associated with the notebook.
+   *
+   * @param value: Metadata's attribute to update.
+   */
+  updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
     this.ymeta.set('metadata', Object.assign({}, this.getMetadata(), value));
   }
+
   public nbformat_minor: number = nbformat.MINOR_VERSION;
   public nbformat: number = nbformat.MAJOR_VERSION;
   public cells: YCellType[];
@@ -186,6 +276,9 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   private _changed = new Signal<this, nbmodel.NotebookChange>(this);
 }
 
+/**
+ * Create a new shared cell given the type
+ */
 export const createCellFromType = (type: Y.Map<any>): YCellType => {
   switch (type.get('cell_type')) {
     case 'code':
@@ -199,6 +292,9 @@ export const createCellFromType = (type: Y.Map<any>): YCellType => {
   }
 };
 
+/**
+ * Create a new standalone cell given the type
+ */
 export const createStandaloneCell = (
   cellType: 'raw' | 'code' | 'markdown'
 ): YCellType => {
@@ -222,42 +318,77 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     this.ymodel.observeDeep(this._modelObserver);
   }
 
+  /**
+   * Perform a transaction. While the function f is called, all changes to the shared
+   * document are bundled into a single event.
+   */
   public transact(f: () => void, undoable = true): void {
     this.notebook && undoable
       ? this.notebook.transact(f)
       : this.ymodel.doc!.transact(f, this);
   }
 
-  public get undoManager(): Y.UndoManager | null {
+  /**
+   * The notebook that this cell belongs to.
+   */
+  get undoManager(): Y.UndoManager | null {
     return this.notebook ? this.notebook.undoManager : this._undoManager;
   }
 
-  public undo(): void {
+  /**
+   * Undo an operation.
+   */
+  undo(): void {
     this.undoManager?.undo();
   }
 
-  public redo(): void {
+  /**
+   * Redo an operation.
+   */
+  redo(): void {
     this.undoManager?.redo();
   }
+
+  /**
+   * Whether the object can undo changes.
+   */
   canUndo(): boolean {
     return !!this.undoManager && this.undoManager.undoStack.length > 0;
   }
+
+  /**
+   * Whether the object can redo changes.
+   */
   canRedo(): boolean {
     return !!this.undoManager && this.undoManager.redoStack.length > 0;
   }
 
-  public clearUndoHistory(): void {
+  /**
+   * Clear the change stack.
+   */
+  clearUndoHistory(): void {
     this.undoManager?.clear();
   }
 
-  public get notebook(): YNotebook | null {
+  /**
+   * The notebook that this cell belongs to.
+   */
+  get notebook(): YNotebook | null {
     return this._notebook;
   }
+
   /**
    * The notebook that this cell belongs to.
    */
   protected _notebook: YNotebook | null = null;
 
+  /**
+   * Whether the cell is standalone or not.
+   *
+   * If the cell is standalone. It cannot be
+   * inserted into a YNotebook because the Yjs model is already
+   * attached to an anonymous Y.Doc instance.
+   */
   isStandalone = false;
 
   /**
@@ -287,6 +418,11 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     return cell;
   }
 
+  /**
+   * Clone the cell.
+   *
+   * @todo clone should only be available in the specific implementations i.e. ISharedCodeCell
+   */
   public clone(): YBaseCell<any> {
     const ymodel = new Y.Map();
     const ysource = new Y.Text(this.getSource());
@@ -297,6 +433,9 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     return new Self(ymodel);
   }
 
+  /**
+   * Handle a change to the ymodel.
+   */
   private _modelObserver = (events: Y.YEvent[]) => {
     const changes: nbmodel.CellChange<Metadata> = {};
     const sourceEvent = events.find(
@@ -328,17 +467,34 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     this._changed.emit(changes);
   };
 
+  /**
+   * The changed signal.
+   */
   get changed(): ISignal<this, nbmodel.CellChange<Metadata>> {
     return this._changed;
   }
 
+  /**
+   * Dispose of the resources.
+   */
   dispose(): void {
     this.ymodel.observeDeep(this._modelObserver);
   }
 
+  /**
+   * Gets the cell attachments.
+   *
+   * @returns The cell attachments.
+   */
   public getAttachments(): nbformat.IAttachments | undefined {
     return this.ymodel.get('attachments');
   }
+
+  /**
+   * Sets the cell attachments
+   *
+   * @param attchments: The cell attachments.
+   */
   public setAttachments(value: nbformat.IAttachments | undefined): void {
     this.transact(() => {
       if (value == null) {
@@ -348,9 +504,21 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
       }
     });
   }
+
+  /**
+   * Gets cell's source.
+   *
+   * @returns Cell's source.
+   */
   public getSource(): string {
     return this.ymodel.get('source').toString();
   }
+
+  /**
+   * Sets cell's source.
+   *
+   * @param value: New source.
+   */
   public setSource(value: string): void {
     const ytext = this.ymodel.get('source');
     this.transact(() => {
@@ -360,6 +528,16 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     // @todo Do we need proper replace semantic? This leads to issues in editor bindings because they don't switch source.
     // this.ymodel.set('source', new Y.Text(value));
   }
+
+  /**
+   * Replace content from `start' to `end` with `value`.
+   *
+   * @param start: The start index of the range to replace (inclusive).
+   *
+   * @param end: The end index of the range to replace (exclusive).
+   *
+   * @param value: New source (optional).
+   */
   public updateSource(start: number, end: number, value = ''): void {
     this.transact(() => {
       const ysource = this.ymodel.get('source');
@@ -368,19 +546,36 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     });
   }
 
-  public get cell_type(): any {
+  /**
+   * The type of the cell.
+   */
+  get cell_type(): any {
     throw new Error('A YBaseCell must not be constructed');
   }
 
+  /**
+   * Returns the metadata associated with the notebook.
+   *
+   * @returns Notebook's metadata.
+   */
   getMetadata(): Partial<Metadata> {
     return deepCopy(this.ymodel.get('metadata'));
   }
 
+  /**
+   * Sets the metadata associated with the notebook.
+   *
+   * @param metadata: Notebook's metadata.
+   */
   setMetadata(value: Partial<Metadata>): void {
     this.transact(() => {
       this.ymodel.set('metadata', deepCopy(value));
     });
   }
+
+  /**
+   * Serialize the model to JSON.
+   */
   toJSON(): nbformat.IBaseCell {
     return {
       cell_type: this.cell_type,
@@ -388,6 +583,7 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
       metadata: this.getMetadata()
     };
   }
+
   public isDisposed = false;
   public ymodel: Y.Map<any>;
   private _undoManager: Y.UndoManager | null = null;
@@ -398,15 +594,27 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
 export class YCodeCell
   extends YBaseCell<nbmodel.ISharedBaseCellMetada>
   implements nbmodel.ISharedCodeCell {
+  /**
+   * The type of the cell.
+   */
   get cell_type(): 'code' {
     return 'code';
   }
+
+  /**
+   * The code cell's prompt number. Will be null if the cell has not been run.
+   */
   get execution_count(): number {
     return 1;
   }
+
+  /**
+   * Execution, display, or stream outputs.
+   */
   getOutputs(): Array<nbformat.IOutput> {
     return this.outputs;
   }
+
   /**
    * Create a new YCodeCell that can be inserted into a YNotebook
    */
@@ -415,6 +623,7 @@ export class YCodeCell
     cell.ymodel.set('execution_count', 0); // for some default value
     return cell as any;
   }
+
   /**
    * Create a new YCodeCell that works standalone. It cannot be
    * inserted into a YNotebook because the Yjs model is already
@@ -425,14 +634,21 @@ export class YCodeCell
     cell.ymodel.set('execution_count', null); // for some default value
     return cell as any;
   }
+
   /**
    * Create a new YCodeCell that can be inserted into a YNotebook
+   *
+   * @todo clone should only be available in the specific implementations i.e. ISharedCodeCell
    */
   public clone(): YCodeCell {
     const cell = super.clone();
     cell.ymodel.set('execution_count', this.execution_count); // for some default value
     return cell as any;
   }
+
+  /**
+   * Serialize the model to JSON.
+   */
   toJSON(): nbformat.ICodeCell {
     return {
       cell_type: 'code',
@@ -442,21 +658,39 @@ export class YCodeCell
       execution_count: this.execution_count
     };
   }
+
   private outputs: Array<nbformat.IOutput> = [];
 }
 
 export class YRawCell
   extends YBaseCell<nbmodel.ISharedBaseCellMetada>
   implements nbmodel.ISharedRawCell {
+  /**
+   * Create a new YRawCell that can be inserted into a YNotebook
+   */
   public static create(): YRawCell {
     return super.create() as any;
   }
+
+  /**
+   * Create a new YRawCell that works standalone. It cannot be
+   * inserted into a YNotebook because the Yjs model is already
+   * attached to an anonymous Y.Doc instance.
+   */
   public static createStandalone(): YRawCell {
     return super.createStandalone() as any;
   }
+
+  /**
+   * String identifying the type of cell.
+   */
   get cell_type(): 'raw' {
     return 'raw';
   }
+
+  /**
+   * Serialize the model to JSON.
+   */
   toJSON(): nbformat.IRawCell {
     return {
       cell_type: 'raw',
@@ -470,15 +704,32 @@ export class YRawCell
 export class YMarkdownCell
   extends YBaseCell<nbmodel.ISharedBaseCellMetada>
   implements nbmodel.ISharedMarkdownCell {
+  /**
+   * Create a new YMarkdownCell that can be inserted into a YNotebook
+   */
   public static create(): YMarkdownCell {
     return super.create() as any;
   }
+
+  /**
+   * Create a new YMarkdownCell that works standalone. It cannot be
+   * inserted into a YNotebook because the Yjs model is already
+   * attached to an anonymous Y.Doc instance.
+   */
   public static createStandalone(): YMarkdownCell {
     return super.createStandalone() as any;
   }
+
+  /**
+   * String identifying the type of cell.
+   */
   get cell_type(): 'markdown' {
     return 'markdown';
   }
+
+  /**
+   * Serialize the model to JSON.
+   */
   toJSON(): nbformat.IMarkdownCell {
     return {
       cell_type: 'markdown',

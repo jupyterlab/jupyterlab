@@ -47,12 +47,12 @@ export interface ISharedNotebook extends IDisposable {
   readonly changed: ISignal<this, NotebookChange>;
 
   /**
-   * Whether the object can redo changes.
+   * Whether the object can undo changes.
    */
   readonly canUndo: boolean;
 
   /**
-   * Whether the object can undo changes.
+   * Whether the object can redo changes.
    */
   readonly canRedo: boolean;
 
@@ -215,7 +215,7 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetada>
   readonly changed: ISignal<this, CellChange<Metadata>>;
 
   /**
-   * Clone the cell.
+   * Create a new YCodeCell that can be inserted into a YNotebook.
    *
    * @todo clone should only be available in the specific implementations i.e. ISharedCodeCell
    */
