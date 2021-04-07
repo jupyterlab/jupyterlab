@@ -481,14 +481,14 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Whether the object can redo changes.
    */
   get canRedo(): boolean {
-    return this.nbmodel.canRedo();
+    return this.nbmodel.canRedo;
   }
 
   /**
    * Whether the object can undo changes.
    */
   get canUndo(): boolean {
-    return this.nbmodel.canUndo();
+    return this.nbmodel.canUndo;
   }
 
   /**
