@@ -442,7 +442,6 @@ export class DocumentManager implements IDocumentManager {
       if (model.type == 'notebook') {
         model.renamed = true;
       }
-      // console.log("reanmed to true", model);
     }) as Promise<Contents.IModel>;
   }
 

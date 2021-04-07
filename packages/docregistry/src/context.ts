@@ -461,12 +461,10 @@ export class Context<
       last_modified: model.last_modified,
       mimetype: model.mimetype,
       format: model.format,
-      renamed: model.renamed
+      renamed: model.renamed ? true : false
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
-    // console.log("before", model);
-    // console.log("updated", this._contentsModel);
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
@@ -539,6 +537,8 @@ export class Context<
       }
 
       model.dirty = false;
+
+      value.renamed = this._contentsModel?.renamed;
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {

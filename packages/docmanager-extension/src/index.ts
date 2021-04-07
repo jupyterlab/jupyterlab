@@ -618,15 +618,9 @@ function addCommands(
           });
         } else {
           const model = context.contentsModel;
-          // console.log("renamed model", model);
-          if (
-            docManager.nameFileOnSave &&
-            model &&
-            model.renamed === undefined
-          ) {
+          if (docManager.nameFileOnSave && model && model.renamed == false) {
             void commands.execute('docmanager:name-on-save');
           }
-          // console.log(context.contentsModel?.renamed);
           if (context.model.readOnly) {
             return showDialog({
               title: trans.__('Cannot Save'),
@@ -732,7 +726,6 @@ function addCommands(
     label: trans.__('Name File on First Save'),
     isToggled: () => docManager.nameFileOnSave,
     execute: () => {
-      console.log('got here!');
       const value = !docManager.nameFileOnSave;
       const key = 'nameFileOnSave';
       return settingRegistry

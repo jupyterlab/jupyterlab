@@ -297,16 +297,18 @@ namespace Private {
     const name = document.createElement('input');
     const checkbox = document.createElement('input');
     const label = document.createElement('label');
+    const div = document.createElement('div');
 
     checkbox.type = 'checkbox';
     checkbox.addEventListener('change', function () {
       manger.nameFileOnSave = !this.checked;
     });
-    // Question: aglin two elements (flexbox?)
+
     label.textContent = trans.__("Don't ask me again");
     body.appendChild(name);
-    body.appendChild(checkbox);
-    body.appendChild(label);
+    div.appendChild(checkbox);
+    div.appendChild(label);
+    body.appendChild(div);
 
     return body;
   }
