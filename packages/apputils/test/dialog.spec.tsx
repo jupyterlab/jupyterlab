@@ -58,7 +58,7 @@ describe('@jupyterlab/apputils', () => {
     let dialog: TestDialog;
 
     beforeEach(() => {
-      dialog = new TestDialog({hasClose: true});
+      dialog = new TestDialog();
     });
 
     afterEach(() => {

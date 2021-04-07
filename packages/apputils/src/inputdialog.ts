@@ -70,7 +70,6 @@ export namespace InputDialog {
   ): Promise<Dialog.IResult<boolean>> {
     return showDialog({
       ...options,
-      hasClose: true,
       body: new InputBooleanDialog(options),
       buttons: [
         Dialog.cancelButton({ label: options.cancelLabel }),
@@ -102,7 +101,6 @@ export namespace InputDialog {
   ): Promise<Dialog.IResult<number>> {
     return showDialog({
       ...options,
-      hasClose: true,
       body: new InputNumberDialog(options),
       buttons: [
         Dialog.cancelButton({ label: options.cancelLabel }),
@@ -149,7 +147,6 @@ export namespace InputDialog {
   ): Promise<Dialog.IResult<string>> {
     return showDialog({
       ...options,
-      hasClose: true,
       body: new InputItemsDialog(options),
       buttons: [
         Dialog.cancelButton({ label: options.cancelLabel }),
@@ -185,7 +182,6 @@ export namespace InputDialog {
   ): Promise<Dialog.IResult<string>> {
     return showDialog({
       ...options,
-      hasClose: true,
       body: new InputTextDialog(options),
       buttons: [
         Dialog.cancelButton({ label: options.cancelLabel }),
@@ -207,7 +203,6 @@ export namespace InputDialog {
   ): Promise<Dialog.IResult<string>> {
     return showDialog({
       ...options,
-      hasClose: true,
       body: new InputPasswordDialog(options),
       buttons: [
         Dialog.cancelButton({ label: options.cancelLabel }),
