@@ -874,7 +874,7 @@ namespace Private {
       defaultButton,
       renderer: options.renderer || Dialog.defaultRenderer,
       focusNodeSelector: options.focusNodeSelector || '',
-      hasClose: options.hasClose || false
+      hasClose: options.hasClose || true
     };
   }
 
