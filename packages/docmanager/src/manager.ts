@@ -134,7 +134,17 @@ export class DocumentManager implements IDocumentManager {
   }
 
   set nameFileOnSave(value: boolean) {
+    if (this._nameFileOnSave != value) {
+      this._optionChanged.emit({ nameFileOnSave: value });
+    }
     this._nameFileOnSave = value;
+  }
+
+  /**
+   * A signal emitted when option is changed.
+   */
+  get optionChanged(): Signal<this, Object> {
+    return this._optionChanged;
   }
 
   /**
@@ -621,6 +631,7 @@ export class DocumentManager implements IDocumentManager {
   private _isDisposed = false;
   private _autosave = true;
   private _nameFileOnSave = true;
+  private _optionChanged = new Signal<this, Object>(this);
   private _autosaveInterval = 120;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;

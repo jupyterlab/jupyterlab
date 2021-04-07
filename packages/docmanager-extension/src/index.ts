@@ -182,14 +182,13 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       docManager.autosaveInterval = autosaveInterval || 120;
 
       // Handle whether to prompt to name file on first save
-      const nameFileOnSave = settings.get('nameFileOnSave').composite as
-        | boolean
-        | null;
-      docManager.nameFileOnSave =
-        nameFileOnSave === true || nameFileOnSave === false
-          ? nameFileOnSave
-          : true;
-      app.commands.notifyCommandChanged(CommandIDs.toggleNameFileOnSave);
+      const nameFileOnSave = settings.get('nameFileOnSave')
+        .composite as boolean;
+
+      if (docManager.nameFileOnSave != nameFileOnSave) {
+        docManager.nameFileOnSave = nameFileOnSave;
+        // app.commands.notifyCommandChanged(CommandIDs.toggleNameFileOnSave);
+      }
 
       // Handle default widget factory overrides.
       const defaultViewers = settings.get('defaultViewers').composite as {
@@ -733,6 +732,7 @@ function addCommands(
     label: trans.__('Name File on First Save'),
     isToggled: () => docManager.nameFileOnSave,
     execute: () => {
+      console.log('got here!');
       const value = !docManager.nameFileOnSave;
       const key = 'nameFileOnSave';
       return settingRegistry
@@ -740,6 +740,16 @@ function addCommands(
         .catch((reason: Error) => {
           console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
         });
+    }
+  });
+
+  docManager.optionChanged.connect(() => {
+    const key = 'nameFileOnSave';
+    const value = settingRegistry.plugins[pluginId]?.data.user[key];
+    if (value == docManager.nameFileOnSave) {
+      void settingRegistry.set(pluginId, key, !value).catch((reason: Error) => {
+        console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+      });
     }
   });
 
