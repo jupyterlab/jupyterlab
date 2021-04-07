@@ -55,6 +55,13 @@ export interface IDebugger {
   continue(): Promise<void>;
 
   /**
+   * Evaluate an expression.
+   */
+  evaluate(
+    expression: string
+  ): Promise<DebugProtocol.EvaluateResponse['body'] | null>;
+
+  /**
    * Computes an id based on the given code.
    */
   getCodeId(code: string): string;

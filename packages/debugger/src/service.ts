@@ -217,6 +217,33 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Evaluate an expression.
+   *
+   * @param expression The expression to evaluate as a string.
+   */
+  async evaluate(
+    expression: string
+  ): Promise<DebugProtocol.EvaluateResponse['body'] | null> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
+    const frameId = this.model.callstack.frame?.id;
+    const reply = await this.session.sendRequest('evaluate', {
+      context: 'repl',
+      expression,
+      frameId
+    });
+    if (!reply.success) {
+      return null;
+    }
+    // get the frames to retrieve the latest state of the variables
+    this._clearModel();
+    await this._getAllFrames();
+
+    return reply.body;
+  }
+
+  /**
    * Makes the current thread run again for one step.
    */
   async next(): Promise<void> {
