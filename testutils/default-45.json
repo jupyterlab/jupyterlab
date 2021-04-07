@@ -57,11 +57,7 @@
       "metadata": {
         "tags": []
       },
-      "source": [
-        "Raw Cell\n",
-        "\n",
-        "Second line"
-      ]
+      "source": ["Raw Cell\n", "\n", "Second line"]
     },
 
     {
