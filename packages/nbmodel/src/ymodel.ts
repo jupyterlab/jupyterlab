@@ -277,7 +277,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
 }
 
 /**
- * Create a new shared cell given the type
+ * Create a new shared cell given the type.
  */
 export const createCellFromType = (type: Y.Map<any>): YCellType => {
   switch (type.get('cell_type')) {
@@ -293,7 +293,7 @@ export const createCellFromType = (type: Y.Map<any>): YCellType => {
 };
 
 /**
- * Create a new standalone cell given the type
+ * Create a new standalone cell given the type.
  */
 export const createStandaloneCell = (
   cellType: 'raw' | 'code' | 'markdown'
