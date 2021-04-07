@@ -216,9 +216,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
     this._yeditorBinding?.destroy();
     const nbcell = this.model.nbcell as nbmodel.YCodeCell;
-    const opts = nbcell.undoManager
-        ? { yUndoManager: nbcell.undoManager }
-        : {};
+    const opts = nbcell.undoManager ? { yUndoManager: nbcell.undoManager } : {};
     const awareness = nbcell.notebook?.awareness;
     this._yeditorBinding = new CodemirrorBinding(
       nbcell.ymodel.get('source'),
