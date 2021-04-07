@@ -27,28 +27,128 @@ import * as nbformat from '@jupyterlab/nbformat';
  */
 export interface ISharedNotebook extends IDisposable {
   /**
+   * The minor version number of the nbformat.
+   */
+  readonly nbformat_minor: number;
+
+  /**
+   * The major version number of the nbformat.
+   */
+  readonly nbformat: number;
+
+  /**
+   * The list of shared cells in the notebook.
+   */
+  readonly cells: ISharedCell[];
+
+  /**
+   * The changed signal.
+   */
+  readonly changed: ISignal<this, NotebookChange>;
+
+  /**
+   * Whether the object can redo changes.
+   */
+  readonly canUndo: boolean;
+
+  /**
+   * Whether the object can undo changes.
+   */
+  readonly canRedo: boolean;
+
+  /**
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
    */
   transact(f: () => void): void;
+
+  /**
+   * Returns the metadata associated with the notebook.
+   *
+   * @returns Notebook's metadata.
+   */
   getMetadata(): nbformat.INotebookMetadata;
+
+  /**
+   * Sets the metadata associated with the notebook.
+   *
+   * @param metadata: Notebook's metadata.
+   */
   setMetadata(metadata: nbformat.INotebookMetadata): void;
+
+  /**
+   * Updates the metadata associated with the notebook.
+   *
+   * @param value: Metadata's attribute to update.
+   */
   updateMetadata(value: Partial<nbformat.INotebookMetadata>): void;
-  readonly nbformat_minor: number;
-  readonly nbformat: number;
-  readonly cells: ISharedCell[];
+
+  /**
+   * Get a shared cell by index.
+   *
+   * @param index: Cell's position.
+   *
+   * @returns The requested shared cell.
+   */
   getCell(index: number): ISharedCell;
+
+  /**
+   * Insert a shared cell into a specific position.
+   *
+   * @param index: Cell's position.
+   *
+   * @param cell: Cell to insert.
+   */
   insertCell(index: number, cell: ISharedCell): void;
+
+  /**
+   * Insert a list of shared cells into a specific position.
+   *
+   * @param index: Position to insert the cells.
+   *
+   * @param cells: Array of shared cells to insert.
+   */
   insertCells(index: number, cells: Array<ISharedCell>): void;
+
+  /**
+   * Move a cell.
+   *
+   * @param fromIndex: Index of the cell to move.
+   *
+   * @param toIndex: New position of the cell.
+   */
   moveCell(fromIndex: number, toIndex: number): void;
+
+  /**
+   * Remove a cell.
+   *
+   * @param index: Index of the cell to remove.
+   */
   deleteCell(index: number): void;
+
+  /**
+   * Remove a range of cells.
+   *
+   * @param from: The start index of the range to remove (inclusive).
+   *
+   * @param to: The end index of the range to remove (exclusive).
+   */
   deleteCellRange(from: number, to: number): void;
+
+  /**
+   * Undo an operation.
+   */
   undo(): void;
+
+  /**
+   * Redo an operation.
+   */
   redo(): void;
+
+  /**
+   * Clear the change stack.
+   */
   clearUndoHistory(): void;
-  canUndo(): boolean;
-  canRedo(): boolean;
-  readonly changed: ISignal<this, NotebookChange>;
 }
 
 // Notebook Metadata Types.

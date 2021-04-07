@@ -40,15 +40,27 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       return this.ycellMapping.get(ycell) as YCellType;
     });
   }
+
+  get canUndo(): boolean {
+    return this.undoManager.undoStack.length > 0;
+  }
+
+  get canRedo(): boolean {
+    return this.undoManager.redoStack.length > 0;
+  }
+
   transact(f: () => void, undoable = true): void {
     this.ydoc.transact(f, undoable ? this : null);
   }
+
   getCell(index: number): YCellType {
     return this.cells[index];
   }
+
   insertCell(index: number, cell: YCellType): void {
     this.insertCells(index, [cell]);
   }
+
   insertCells(index: number, cells: YCellType[]): void {
     cells.forEach(cell => {
       this.ycellMapping.set(cell.ymodel, cell);
@@ -62,6 +74,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       );
     });
   }
+
   moveCell(fromIndex: number, toIndex: number): void {
     this.transact(() => {
       const fromCell: any = this.getCell(fromIndex).clone();
@@ -69,28 +82,27 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       this.insertCell(toIndex, fromCell);
     });
   }
+
   deleteCell(index: number): void {
     this.deleteCellRange(index, index + 1);
   }
+
   deleteCellRange(from: number, to: number): void {
     this.transact(() => {
       this.ycells.delete(from, to - from);
     });
   }
+
   undo(): void {
     this.undoManager.undo();
   }
+
   redo(): void {
     this.undoManager.redo();
   }
+
   clearUndoHistory(): void {
     this.undoManager.clear();
-  }
-  canUndo(): boolean {
-    return this.undoManager.undoStack.length > 0;
-  }
-  canRedo(): boolean {
-    return this.undoManager.redoStack.length > 0;
   }
 
   public static create(): nbmodel.ISharedNotebook {
