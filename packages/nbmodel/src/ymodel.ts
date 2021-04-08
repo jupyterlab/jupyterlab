@@ -478,7 +478,7 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
    * Dispose of the resources.
    */
   dispose(): void {
-    this.ymodel.observeDeep(this._modelObserver);
+    this.ymodel.unobserveDeep(this._modelObserver);
   }
 
   /**
