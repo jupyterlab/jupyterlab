@@ -650,7 +650,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should clear the existing selection', async () => {
-        const next = widget.widgets[2];
+        const next = widget.widgets[3];
         widget.select(next);
         const result = await NotebookActions.runAndAdvance(
           widget,
