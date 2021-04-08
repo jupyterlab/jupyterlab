@@ -10,6 +10,16 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.13
+^^^^^^^
+* Add cell id per notebook format 4.5 (`#10018 <https://api.github.com/repos/jupyterlab/jupyterlab/pulls/10018>`__)
+* Fix label for “Create Console for Editor”  (`#9794 <https://api.github.com/repos/jupyterlab/jupyterlab/pulls/9794>`__)
+* Use blobs to set the svg source of an image in the image viewer (`#10029 <https://api.github.com/repos/jupyterlab/jupyterlab/pulls/10029>`__)
+* [Fix] Copy shareable link command (`#10021 <https://github.com/jupyterlab/jupyterlab/pull/10021>`__)
+* Clarify where the overrides.json file should be in the docs (`#9996 <https://github.com/jupyterlab/jupyterlab/pull/9996>`__)
+* Do not make unnecessary npm registry requests (`#9974 <https://api.github.com/repos/jupyterlab/jupyterlab/pulls/9974>`__)
+* Fix escaping of urls and paths (`#9978 <https://api.github.com/repos/jupyterlab/jupyterlab/pulls/9978>`__)
+
 v3.0.12
 ^^^^^^^
 * Fix support for Safari by changing regular expression for Table of Contents (`#9962 <https://github.com/jupyterlab/jupyterlab/pull/9962>`__)
