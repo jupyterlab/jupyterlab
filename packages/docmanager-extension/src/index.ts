@@ -336,13 +336,35 @@ export const pathStatusPlugin: JupyterFrontEndPlugin<void> = {
   }
 };
 
+export const downloadPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/docmanager-extension:download',
+  autoStart: true,
+  requires: [IDocumentManager, ISettingRegistry, ITranslator],
+  activate: (
+    _: JupyterFrontEnd,
+    translator: ITranslator,
+    palette: ICommandPalette | null,
+    mainMenu: IMainMenu | null,
+  ) => {
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('File Operations');
+    if (palette) {
+      palette.addItem({ command: CommandIDs.download, category })
+    }
+    if (mainMenu) {
+      mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
+    }
+  }
+}
+
 /**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   docManagerPlugin,
   pathStatusPlugin,
-  savingStatusPlugin
+  savingStatusPlugin,
+  downloadPlugin,
 ];
 export default plugins;
 
@@ -718,7 +740,7 @@ function addCommands(
       CommandIDs.restoreCheckpoint,
       CommandIDs.save,
       CommandIDs.saveAs,
-      CommandIDs.download,
+      // CommandIDs.download,
       CommandIDs.toggleAutosave
     ].forEach(command => {
       palette.addItem({ command, category });
@@ -727,7 +749,7 @@ function addCommands(
 
   if (mainMenu) {
     mainMenu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
-    mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
+    // mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
   }
 }
 
