@@ -18,7 +18,7 @@ closed.
 - Use blobs to set the svg source of an image in the image viewer ([#10029](https://github.com/repos/jupyterlab/jupyterlab/pull/10029))
 - \[Fix\] Copy shareable link command ([#10021](https://github.com/jupyterlab/jupyterlab/pull/10021))
 - Clarify where the overrides.json file should be in the docs ([#9996](https://github.com/jupyterlab/jupyterlab/pull/9996))
-- Do not make unnecessary npm registry requests ([#9974](https://agithub.com/repos/jupyterlab/jupyterlab/pull/9974))
+- Do not make unnecessary npm registry requests ([#9974](https://github.com/repos/jupyterlab/jupyterlab/pull/9974))
 - Fix escaping of urls and paths ([#9978](https://github.com/repos/jupyterlab/jupyterlab/pull/9978))
 
 ### v3.0.12
