@@ -498,7 +498,8 @@ export namespace Dialog {
     focusNodeSelector: string;
 
     /**
-     * When "true", renders a close button for the dialog
+     * When "false", disallows user from dismissing the dialog by clicking outside it
+     * or pressing escape. Defaults to "true", which renders a close button.
      */
     hasClose: boolean;
 
