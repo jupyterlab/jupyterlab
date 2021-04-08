@@ -147,7 +147,7 @@ export const fooIcon = new LabIcon({
 <em>Example svgs with class annotation can be found in <a href="https://github.com/jupyterlab/jupyterlab/tree/f0153e0258b32674c9aec106383ddf7b618cebab/packages/ui-components/style/icons">ui-components/style/icons</a></em>
 
 You can ensure that the colors of your custom `LabIcon` sync up to the
-colors of the current JuptyerLab theme by adding appropriate `class`
+colors of the current JupyterLab theme by adding appropriate `class`
 annotations to each colored element of your icon's svg.
 
 In other words, each element of your svg that a `fill="..."` or a
