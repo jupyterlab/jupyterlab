@@ -13,6 +13,7 @@ import os
 import os.path as osp
 import re
 import shutil
+import stat
 import site
 import subprocess
 import sys
@@ -1306,6 +1307,7 @@ class _AppHandler(object):
                 f.write(template)
         elif not osp.exists(lock_path):
             shutil.copy(lock_template, lock_path)
+            os.chmod(lock_path, stat.S_IWRITE | stat.S_IREAD)
 
     def _get_package_template(self, silent=False):
         """Get the template the for staging package.json file.
