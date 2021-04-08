@@ -339,14 +339,40 @@ export const pathStatusPlugin: JupyterFrontEndPlugin<void> = {
 export const downloadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:download',
   autoStart: true,
-  requires: [IDocumentManager, ISettingRegistry, ITranslator],
+  requires: [ITranslator, ICommandPalette, IMainMenu, IDocumentManager],
   activate: (
-    _: JupyterFrontEnd,
+    app: JupyterFrontEnd,
     translator: ITranslator,
     palette: ICommandPalette | null,
     mainMenu: IMainMenu | null,
+    docManager: IDocumentManager,
   ) => {
     const trans = translator.load('jupyterlab');
+    const { commands, shell } = app;
+    const isEnabled = () => {
+      const { currentWidget } = shell;
+      return !!(currentWidget && docManager.contextForWidget(currentWidget));
+    };
+    commands.addCommand(CommandIDs.download, {
+      label: trans.__('Download'),
+      caption: trans.__('Download the file to your computer'),
+      isEnabled,
+      execute: () => {
+        // Checks that shell.currentWidget is valid:
+        if (isEnabled()) {
+          const context = docManager.contextForWidget(shell.currentWidget!);
+          if (!context) {
+            return showDialog({
+              title: trans.__('Cannot Download'),
+              body: trans.__('No context found for current widget!'),
+              buttons: [Dialog.okButton({ label: trans.__('OK') })]
+            });
+          }
+          return context.download();
+        }
+      }
+    });
+
     const category = trans.__('File Operations');
     if (palette) {
       palette.addItem({ command: CommandIDs.download, category })
@@ -691,26 +717,6 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.download, {
-    label: trans.__('Download'),
-    caption: trans.__('Download the file to your computer'),
-    isEnabled,
-    execute: () => {
-      // Checks that shell.currentWidget is valid:
-      if (isEnabled()) {
-        const context = docManager.contextForWidget(shell.currentWidget!);
-        if (!context) {
-          return showDialog({
-            title: trans.__('Cannot Download'),
-            body: trans.__('No context found for current widget!'),
-            buttons: [Dialog.okButton({ label: trans.__('OK') })]
-          });
-        }
-        return context.download();
-      }
-    }
-  });
-
   commands.addCommand(CommandIDs.toggleAutosave, {
     label: trans.__('Autosave Documents'),
     isToggled: () => docManager.autosave,
@@ -740,7 +746,6 @@ function addCommands(
       CommandIDs.restoreCheckpoint,
       CommandIDs.save,
       CommandIDs.saveAs,
-      // CommandIDs.download,
       CommandIDs.toggleAutosave
     ].forEach(command => {
       palette.addItem({ command, category });
@@ -749,7 +754,6 @@ function addCommands(
 
   if (mainMenu) {
     mainMenu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
-    // mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
   }
 }
 
