@@ -41,6 +41,7 @@ const extensions = [
   import('@jupyterlab/terminal-extension'),
   import('@jupyterlab/theme-dark-extension'),
   import('@jupyterlab/theme-light-extension'),
+  import('@jupyterlab/toc-extension'),
   import('@jupyterlab/tooltip-extension'),
   import('@jupyterlab/translation-extension'),
   import('@jupyterlab/ui-components-extension')

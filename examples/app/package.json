@@ -35,6 +35,7 @@
     "@jupyterlab/terminal-extension": "^3.1.0-alpha.3",
     "@jupyterlab/theme-dark-extension": "^3.1.0-alpha.3",
     "@jupyterlab/theme-light-extension": "^3.1.0-alpha.3",
+    "@jupyterlab/toc-extension": "^5.1.0-alpha.3",
     "@jupyterlab/tooltip-extension": "^3.1.0-alpha.3",
     "@jupyterlab/translation": "^3.1.0-alpha.3",
     "@jupyterlab/translation-extension": "^3.1.0-alpha.3",
@@ -90,6 +91,7 @@
       "@jupyterlab/terminal-extension",
       "@jupyterlab/theme-dark-extension",
       "@jupyterlab/theme-light-extension",
+      "@jupyterlab/toc-extension",
       "@jupyterlab/tooltip-extension",
       "@jupyterlab/translation-extension",
       "@jupyterlab/ui-components-extension"
