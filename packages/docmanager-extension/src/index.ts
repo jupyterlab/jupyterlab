@@ -345,7 +345,7 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
     translator: ITranslator,
     palette: ICommandPalette | null,
     mainMenu: IMainMenu | null,
-    docManager: IDocumentManager,
+    docManager: IDocumentManager
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
@@ -375,13 +375,13 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
 
     const category = trans.__('File Operations');
     if (palette) {
-      palette.addItem({ command: CommandIDs.download, category })
+      palette.addItem({ command: CommandIDs.download, category });
     }
     if (mainMenu) {
       mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
     }
   }
-}
+};
 
 /**
  * Export the plugins as default.
@@ -390,7 +390,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   docManagerPlugin,
   pathStatusPlugin,
   savingStatusPlugin,
-  downloadPlugin,
+  downloadPlugin
 ];
 export default plugins;
 
