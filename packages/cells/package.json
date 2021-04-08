@@ -39,6 +39,7 @@
     "test:cov": "jest --collect-coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:watch": "jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
