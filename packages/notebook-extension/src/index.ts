@@ -342,29 +342,18 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
 export const exportPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:export',
   autoStart: true,
-  requires: [ITranslator, IMainMenu, ICommandPalette],
+  requires: [ITranslator, IMainMenu],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
     mainMenu: IMainMenu,
-    palette: ICommandPalette | null,
+    palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
     const tracker = new NotebookTracker({ namespace: 'notebook' });
     const services = app.serviceManager;
-
-    // Get the current widget and activate unless the args specify otherwise.
-    function getCurrent(args: ReadonlyPartialJSONObject): NotebookPanel | null {
-      const widget = tracker.currentWidget;
-      const activate = args['activate'] !== false;
-
-      if (activate && widget) {
-        shell.activateById(widget.id);
-      }
-
-      return widget;
-    }
 
     const isEnabled = (): boolean => {
       return Private.isEnabled(shell, tracker);
@@ -378,7 +367,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
           : formatLabel;
       },
       execute: args => {
-        const current = getCurrent(args);
+        const current = getCurrent(tracker, shell, args);
 
         if (!current) {
           return;
@@ -453,7 +442,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
   }
-}
+};
 
 /**
  * A plugin that adds a notebook trust status item to the status bar.
@@ -1289,6 +1278,22 @@ function activateNotebookHandler(
   return tracker;
 }
 
+// Get the current widget and activate unless the args specify otherwise.
+function getCurrent(
+  tracker: NotebookTracker,
+  shell: JupyterFrontEnd.IShell,
+  args: ReadonlyPartialJSONObject
+): NotebookPanel | null {
+  const widget = tracker.currentWidget;
+  const activate = args['activate'] !== false;
+
+  if (activate && widget) {
+    shell.activateById(widget.id);
+  }
+
+  return widget;
+}
+
 /**
  * Add the notebook commands to the application's command registry.
  */
@@ -1303,18 +1308,6 @@ function addCommands(
 
   sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
-  // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: ReadonlyPartialJSONObject): NotebookPanel | null {
-    const widget = tracker.currentWidget;
-    const activate = args['activate'] !== false;
-
-    if (activate && widget) {
-      shell.activateById(widget.id);
-    }
-
-    return widget;
-  }
-
   const isEnabled = (): boolean => {
     return Private.isEnabled(shell, tracker);
   };
@@ -1326,7 +1319,7 @@ function addCommands(
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: trans.__('Run Selected Cells'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { context, content } = current;
@@ -1339,7 +1332,7 @@ function addCommands(
   commands.addCommand(CommandIDs.run, {
     label: trans.__("Run Selected Cells and Don't Advance"),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { context, content } = current;
@@ -1352,7 +1345,7 @@ function addCommands(
   commands.addCommand(CommandIDs.runAndInsert, {
     label: trans.__('Run Selected Cells and Insert Below'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { context, content } = current;
@@ -1365,7 +1358,7 @@ function addCommands(
   commands.addCommand(CommandIDs.runAll, {
     label: trans.__('Run All Cells'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { context, content } = current;
@@ -1378,7 +1371,7 @@ function addCommands(
   commands.addCommand(CommandIDs.runAllAbove, {
     label: trans.__('Run All Above Selected Cell'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { context, content } = current;
@@ -1398,7 +1391,7 @@ function addCommands(
   commands.addCommand(CommandIDs.runAllBelow, {
     label: trans.__('Run Selected Cell and All Below'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { context, content } = current;
@@ -1419,7 +1412,7 @@ function addCommands(
   commands.addCommand(CommandIDs.renderAllMarkdown, {
     label: trans.__('Render All Markdown Cells'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
       if (current) {
         const { context, content } = current;
         return NotebookActions.renderAllMarkdown(
@@ -1433,7 +1426,7 @@ function addCommands(
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Kernel…'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return sessionDialogs!.restart(current.sessionContext, translator);
@@ -1444,7 +1437,7 @@ function addCommands(
   commands.addCommand(CommandIDs.closeAndShutdown, {
     label: trans.__('Close and Shut Down'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (!current) {
         return;
@@ -1469,7 +1462,7 @@ function addCommands(
   commands.addCommand(CommandIDs.trust, {
     label: () => trans.__('Trust Notebook'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
       if (current) {
         const { context, content } = current;
         return NotebookActions.trust(content).then(() => context.save());
@@ -1485,7 +1478,7 @@ function addCommands(
   //       : formatLabel;
   //   },
   //   execute: args => {
-  //     const current = getCurrent(args);
+  //     const current = getCurrent(tracker, shell, args);;
 
   //     if (!current) {
   //       return;
@@ -1518,7 +1511,7 @@ function addCommands(
   commands.addCommand(CommandIDs.restartClear, {
     label: trans.__('Restart Kernel and Clear All Outputs…'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { content, sessionContext } = current;
@@ -1533,7 +1526,7 @@ function addCommands(
   commands.addCommand(CommandIDs.restartAndRunToSelected, {
     label: trans.__('Restart Kernel and Run up to Selected Cell…'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
       if (current) {
         const { context, content } = current;
         return sessionDialogs!
@@ -1557,7 +1550,7 @@ function addCommands(
   commands.addCommand(CommandIDs.restartRunAll, {
     label: trans.__('Restart Kernel and Run All Cells…'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { context, content, sessionContext } = current;
@@ -1577,7 +1570,7 @@ function addCommands(
   commands.addCommand(CommandIDs.clearAllOutputs, {
     label: trans.__('Clear All Outputs'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.clearAllOutputs(current.content);
@@ -1588,7 +1581,7 @@ function addCommands(
   commands.addCommand(CommandIDs.clearOutputs, {
     label: trans.__('Clear Outputs'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.clearOutputs(current.content);
@@ -1599,7 +1592,7 @@ function addCommands(
   commands.addCommand(CommandIDs.interrupt, {
     label: trans.__('Interrupt Kernel'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (!current) {
         return;
@@ -1616,7 +1609,7 @@ function addCommands(
   commands.addCommand(CommandIDs.toCode, {
     label: trans.__('Change to Code Cell Type'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.changeCellType(current.content, 'code');
@@ -1627,7 +1620,7 @@ function addCommands(
   commands.addCommand(CommandIDs.toMarkdown, {
     label: trans.__('Change to Markdown Cell Type'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.changeCellType(current.content, 'markdown');
@@ -1638,7 +1631,7 @@ function addCommands(
   commands.addCommand(CommandIDs.toRaw, {
     label: trans.__('Change to Raw Cell Type'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.changeCellType(current.content, 'raw');
@@ -1649,7 +1642,7 @@ function addCommands(
   commands.addCommand(CommandIDs.cut, {
     label: trans.__('Cut Cells'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.cut(current.content);
@@ -1660,7 +1653,7 @@ function addCommands(
   commands.addCommand(CommandIDs.copy, {
     label: trans.__('Copy Cells'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.copy(current.content);
@@ -1671,7 +1664,7 @@ function addCommands(
   commands.addCommand(CommandIDs.pasteBelow, {
     label: trans.__('Paste Cells Below'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.paste(current.content, 'below');
@@ -1682,7 +1675,7 @@ function addCommands(
   commands.addCommand(CommandIDs.pasteAbove, {
     label: trans.__('Paste Cells Above'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.paste(current.content, 'above');
@@ -1693,7 +1686,7 @@ function addCommands(
   commands.addCommand(CommandIDs.pasteAndReplace, {
     label: trans.__('Paste Cells and Replace'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.paste(current.content, 'replace');
@@ -1704,7 +1697,7 @@ function addCommands(
   commands.addCommand(CommandIDs.deleteCell, {
     label: trans.__('Delete Cells'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.deleteCells(current.content);
@@ -1715,7 +1708,7 @@ function addCommands(
   commands.addCommand(CommandIDs.split, {
     label: trans.__('Split Cell'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.splitCell(current.content);
@@ -1726,7 +1719,7 @@ function addCommands(
   commands.addCommand(CommandIDs.merge, {
     label: trans.__('Merge Selected Cells'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.mergeCells(current.content);
@@ -1737,7 +1730,7 @@ function addCommands(
   commands.addCommand(CommandIDs.insertAbove, {
     label: trans.__('Insert Cell Above'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.insertAbove(current.content);
@@ -1748,7 +1741,7 @@ function addCommands(
   commands.addCommand(CommandIDs.insertBelow, {
     label: trans.__('Insert Cell Below'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.insertBelow(current.content);
@@ -1759,7 +1752,7 @@ function addCommands(
   commands.addCommand(CommandIDs.selectAbove, {
     label: trans.__('Select Cell Above'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.selectAbove(current.content);
@@ -1770,7 +1763,7 @@ function addCommands(
   commands.addCommand(CommandIDs.selectBelow, {
     label: trans.__('Select Cell Below'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.selectBelow(current.content);
@@ -1781,7 +1774,7 @@ function addCommands(
   commands.addCommand(CommandIDs.extendAbove, {
     label: trans.__('Extend Selection Above'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.extendSelectionAbove(current.content);
@@ -1792,7 +1785,7 @@ function addCommands(
   commands.addCommand(CommandIDs.extendTop, {
     label: trans.__('Extend Selection to Top'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.extendSelectionAbove(current.content, true);
@@ -1803,7 +1796,7 @@ function addCommands(
   commands.addCommand(CommandIDs.extendBelow, {
     label: trans.__('Extend Selection Below'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.extendSelectionBelow(current.content);
@@ -1814,7 +1807,7 @@ function addCommands(
   commands.addCommand(CommandIDs.extendBottom, {
     label: trans.__('Extend Selection to Bottom'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.extendSelectionBelow(current.content, true);
@@ -1825,7 +1818,7 @@ function addCommands(
   commands.addCommand(CommandIDs.selectAll, {
     label: trans.__('Select All Cells'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.selectAll(current.content);
@@ -1836,7 +1829,7 @@ function addCommands(
   commands.addCommand(CommandIDs.deselectAll, {
     label: trans.__('Deselect All Cells'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.deselectAll(current.content);
@@ -1847,7 +1840,7 @@ function addCommands(
   commands.addCommand(CommandIDs.moveUp, {
     label: trans.__('Move Cells Up'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.moveUp(current.content);
@@ -1858,7 +1851,7 @@ function addCommands(
   commands.addCommand(CommandIDs.moveDown, {
     label: trans.__('Move Cells Down'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.moveDown(current.content);
@@ -1869,7 +1862,7 @@ function addCommands(
   commands.addCommand(CommandIDs.toggleAllLines, {
     label: trans.__('Toggle All Line Numbers'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.toggleAllLineNumbers(current.content);
@@ -1880,7 +1873,7 @@ function addCommands(
   commands.addCommand(CommandIDs.commandMode, {
     label: trans.__('Enter Command Mode'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         current.content.mode = 'command';
@@ -1891,7 +1884,7 @@ function addCommands(
   commands.addCommand(CommandIDs.editMode, {
     label: trans.__('Enter Edit Mode'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         current.content.mode = 'edit';
@@ -1902,7 +1895,7 @@ function addCommands(
   commands.addCommand(CommandIDs.undoCellAction, {
     label: trans.__('Undo Cell Operation'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.undo(current.content);
@@ -1913,7 +1906,7 @@ function addCommands(
   commands.addCommand(CommandIDs.redoCellAction, {
     label: trans.__('Redo Cell Operation'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.redo(current.content);
@@ -1924,7 +1917,7 @@ function addCommands(
   commands.addCommand(CommandIDs.changeKernel, {
     label: trans.__('Change Kernel…'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return sessionDialogs!.selectKernel(
@@ -1938,7 +1931,7 @@ function addCommands(
   commands.addCommand(CommandIDs.reconnectToKernel, {
     label: trans.__('Reconnect To Kernel'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (!current) {
         return;
@@ -1955,7 +1948,7 @@ function addCommands(
   commands.addCommand(CommandIDs.markdown1, {
     label: trans.__('Change to Heading 1'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 1);
@@ -1966,7 +1959,7 @@ function addCommands(
   commands.addCommand(CommandIDs.markdown2, {
     label: trans.__('Change to Heading 2'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 2);
@@ -1977,7 +1970,7 @@ function addCommands(
   commands.addCommand(CommandIDs.markdown3, {
     label: trans.__('Change to Heading 3'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 3);
@@ -1988,7 +1981,7 @@ function addCommands(
   commands.addCommand(CommandIDs.markdown4, {
     label: trans.__('Change to Heading 4'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 4);
@@ -1999,7 +1992,7 @@ function addCommands(
   commands.addCommand(CommandIDs.markdown5, {
     label: trans.__('Change to Heading 5'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 5);
@@ -2010,7 +2003,7 @@ function addCommands(
   commands.addCommand(CommandIDs.markdown6, {
     label: trans.__('Change to Heading 6'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 6);
@@ -2021,7 +2014,7 @@ function addCommands(
   commands.addCommand(CommandIDs.hideCode, {
     label: trans.__('Collapse Selected Code'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.hideCode(current.content);
@@ -2032,7 +2025,7 @@ function addCommands(
   commands.addCommand(CommandIDs.showCode, {
     label: trans.__('Expand Selected Code'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.showCode(current.content);
@@ -2043,7 +2036,7 @@ function addCommands(
   commands.addCommand(CommandIDs.hideAllCode, {
     label: trans.__('Collapse All Code'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.hideAllCode(current.content);
@@ -2054,7 +2047,7 @@ function addCommands(
   commands.addCommand(CommandIDs.showAllCode, {
     label: trans.__('Expand All Code'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.showAllCode(current.content);
@@ -2065,7 +2058,7 @@ function addCommands(
   commands.addCommand(CommandIDs.hideOutput, {
     label: trans.__('Collapse Selected Outputs'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.hideOutput(current.content);
@@ -2076,7 +2069,7 @@ function addCommands(
   commands.addCommand(CommandIDs.showOutput, {
     label: trans.__('Expand Selected Outputs'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.showOutput(current.content);
@@ -2087,7 +2080,7 @@ function addCommands(
   commands.addCommand(CommandIDs.hideAllOutputs, {
     label: trans.__('Collapse All Outputs'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.hideAllOutputs(current.content);
@@ -2098,7 +2091,7 @@ function addCommands(
   commands.addCommand(CommandIDs.showAllOutputs, {
     label: trans.__('Expand All Outputs'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.showAllOutputs(current.content);
@@ -2109,7 +2102,7 @@ function addCommands(
   commands.addCommand(CommandIDs.enableOutputScrolling, {
     label: trans.__('Enable Scrolling for Outputs'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.enableOutputScrolling(current.content);
@@ -2120,7 +2113,7 @@ function addCommands(
   commands.addCommand(CommandIDs.disableOutputScrolling, {
     label: trans.__('Disable Scrolling for Outputs'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.disableOutputScrolling(current.content);
@@ -2131,7 +2124,7 @@ function addCommands(
   commands.addCommand(CommandIDs.selectLastRunCell, {
     label: trans.__('Select current running or last run cell'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.selectLastRunCell(current.content);
@@ -2142,7 +2135,7 @@ function addCommands(
   commands.addCommand(CommandIDs.replaceSelection, {
     label: trans.__('Replace Selection in Notebook Cell'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
       const text: string = (args['text'] as string) || '';
       if (current) {
         return NotebookActions.replaceSelection(current.content, text);
