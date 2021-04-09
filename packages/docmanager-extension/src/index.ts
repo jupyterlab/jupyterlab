@@ -336,6 +336,9 @@ export const pathStatusPlugin: JupyterFrontEndPlugin<void> = {
   }
 };
 
+/**
+ * A plugin providing download commands in the file menu and command palette.
+ */
 export const downloadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:download',
   autoStart: true,
