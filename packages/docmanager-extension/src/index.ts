@@ -342,13 +342,14 @@ export const pathStatusPlugin: JupyterFrontEndPlugin<void> = {
 export const downloadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:download',
   autoStart: true,
-  requires: [ITranslator, ICommandPalette, IMainMenu, IDocumentManager],
+  requires: [ITranslator, IDocumentManager],
+  optional: [ICommandPalette, IMainMenu],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
+    docManager: IDocumentManager,
     palette: ICommandPalette | null,
-    mainMenu: IMainMenu | null,
-    docManager: IDocumentManager
+    mainMenu: IMainMenu | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
