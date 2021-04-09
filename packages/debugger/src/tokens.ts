@@ -88,6 +88,12 @@ export interface IDebugger {
   ): Promise<DebugProtocol.Variable[]>;
 
   /**
+   * Requests all the defined variables and display them in the
+   * table view.
+   */
+  displayDefinedVariables(): Promise<void>;
+
+  /**
    * Request whether debugging is available for the given session connection.
    *
    * @param connection The session connection.
@@ -369,6 +375,7 @@ export namespace IDebugger {
       goto: DebugProtocol.GotoArguments;
       gotoTargets: DebugProtocol.GotoTargetsArguments;
       initialize: DebugProtocol.InitializeRequestArguments;
+      inspectVariables: {};
       launch: DebugProtocol.LaunchRequestArguments;
       loadedSources: DebugProtocol.LoadedSourcesArguments;
       modules: DebugProtocol.ModulesArguments;
@@ -411,6 +418,7 @@ export namespace IDebugger {
       goto: DebugProtocol.GotoResponse;
       gotoTargets: DebugProtocol.GotoTargetsResponse;
       initialize: DebugProtocol.InitializeResponse;
+      inspectVariables: IInspectVariablesResponse;
       launch: DebugProtocol.LaunchResponse;
       loadedSources: DebugProtocol.LoadedSourcesResponse;
       modules: DebugProtocol.ModulesResponse;
@@ -479,6 +487,12 @@ export namespace IDebugger {
     export interface IDumpCellResponse extends DebugProtocol.Response {
       body: {
         sourcePath: string;
+      };
+    }
+
+    export interface IInspectVariablesResponse extends DebugProtocol.Response {
+      body: {
+        variables: DebugProtocol.Variable[];
       };
     }
 
