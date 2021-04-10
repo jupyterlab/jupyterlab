@@ -96,8 +96,9 @@ namespace CommandIDs {
 /**
  * A plugin to register the commands for the main application.
  */
-const commands: JupyterFrontEndPlugin<void> = {
+const mainCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:commands',
+  autoStart: true,
   requires: [ITranslator],
   optional: [ILabShell, ICommandPalette],
   activate: (
@@ -117,7 +118,7 @@ const commands: JupyterFrontEndPlugin<void> = {
       execute: () => void 0
     });
 
-    app.contextMenu.addItem({
+    contextMenu.addItem({
       command: JupyterFrontEndContextMenu.contextMenu,
       selector: 'body',
       rank: Infinity // At the bottom always
@@ -179,13 +180,11 @@ const commands: JupyterFrontEndPlugin<void> = {
     // Find the tab area for a widget within the main dock area.
     const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
       const layout = labShell?.saveLayout();
-      if (
-        !layout?.mainArea ||
-        PageConfig.getOption('mode') !== 'multiple-document'
-      ) {
+      const mainArea = layout?.mainArea;
+      if (!mainArea || PageConfig.getOption('mode') !== 'multiple-document') {
         return null;
       }
-      const area = layout.mainArea.dock?.main;
+      const area = mainArea.dock?.main;
       if (!area) {
         return null;
       }
@@ -403,14 +402,13 @@ const commands: JupyterFrontEndPlugin<void> = {
 const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
   id: '@jupyterlab/application-extension:main',
   requires: [IRouter, IWindowResolver, ITranslator],
-  optional: [ICommandPalette, IConnectionLost],
+  optional: [IConnectionLost],
   provides: ITreePathUpdater,
   activate: (
     app: JupyterFrontEnd,
     router: IRouter,
     resolver: IWindowResolver,
     translator: ITranslator,
-    palette: ICommandPalette | null,
     connectionLost: IConnectionLost | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -977,8 +975,8 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
-  commands,
   main,
+  mainCommands,
   layout,
   router,
   tree,
