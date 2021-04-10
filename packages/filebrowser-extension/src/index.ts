@@ -300,6 +300,67 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
 };
 
 /**
+ * A plugin providing download + copy download link commands in the context menu
+ */
+const downloadPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:download',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const trans = translator.load('jupyterlab');
+    const { commands } = app;
+    const { tracker } = factory;
+    // matches only non-directory items
+    const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+
+    commands.addCommand(CommandIDs.download, {
+      execute: () => {
+        const widget = tracker.currentWidget;
+
+        if (widget) {
+          return widget.download();
+        }
+      },
+      icon: downloadIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: trans.__('Download')
+    });
+
+    commands.addCommand(CommandIDs.copyDownloadLink, {
+      execute: () => {
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        return widget.model.manager.services.contents
+          .getDownloadUrl(widget.selectedItems().next()!.path)
+          .then(url => {
+            Clipboard.copyToSystem(url);
+          });
+      },
+      icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: trans.__('Copy Download Link'),
+      mnemonic: 0
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.download,
+      selector: selectorNotDir,
+      rank: 9
+    });
+    app.contextMenu.addItem({
+      command: CommandIDs.copyDownloadLink,
+      selector: selectorNotDir,
+      rank: 13
+    });
+  }
+};
+
+/**
  * A plugin to add the file browser widget to an ILabShell
  */
 const browserWidget: JupyterFrontEndPlugin<void> = {
@@ -576,18 +637,6 @@ function addCommands(
     label: trans.__('Cut')
   });
 
-  commands.addCommand(CommandIDs.download, {
-    execute: () => {
-      const widget = tracker.currentWidget;
-
-      if (widget) {
-        return widget.download();
-      }
-    },
-    icon: downloadIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Download')
-  });
-
   commands.addCommand(CommandIDs.duplicate, {
     execute: () => {
       const widget = tracker.currentWidget;
@@ -751,24 +800,6 @@ function addCommands(
     },
     icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Open in New Browser Tab'),
-    mnemonic: 0
-  });
-
-  commands.addCommand(CommandIDs.copyDownloadLink, {
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
-
-      return widget.model.manager.services.contents
-        .getDownloadUrl(widget.selectedItems().next()!.path)
-        .then(url => {
-          Clipboard.copyToSystem(url);
-        });
-    },
-    icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Copy Download Link'),
     mnemonic: 0
   });
 
@@ -1097,11 +1128,6 @@ function addCommands(
     rank: 8
   });
   app.contextMenu.addItem({
-    command: CommandIDs.download,
-    selector: selectorNotDir,
-    rank: 9
-  });
-  app.contextMenu.addItem({
     command: CommandIDs.shutdown,
     selector: selectorNotDir,
     rank: 10
@@ -1116,11 +1142,6 @@ function addCommands(
     command: CommandIDs.copyPath,
     selector: selectorItem,
     rank: 12
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.copyDownloadLink,
-    selector: selectorNotDir,
-    rank: 13
   });
   app.contextMenu.addItem({
     command: CommandIDs.toggleLastModified,
@@ -1269,6 +1290,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   browser,
   shareFile,
   fileUploadStatus,
+  downloadPlugin,
   browserWidget,
   launcherToolbarButton
 ];
