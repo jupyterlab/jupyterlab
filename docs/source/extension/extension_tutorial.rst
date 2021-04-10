@@ -357,14 +357,15 @@ called *Tutorial*.
 
 Build your extension again using ``jlpm run build`` (unless you are using
 ``jlpm run watch`` already) and refresh the browser tab. Open the command
-palette on the left side by clicking on *Commands* and type *Astronomy* in the
-search box. Your *Random Astronomy Picture* command should appear. Click it or
-select it with the keyboard and press *Enter*. You should see a new, blank
-panel appear with the tab title *Astronomy Picture*. Click the *x* on the tab
-to close it and activate the command again. The tab should reappear. Finally,
-click one of the launcher tabs so that the *Astronomy Picture* panel is still
-open but no longer active. Now run the *Random Astronomy Picture* command one
-more time. The single *Astronomy Picture* tab should come to the foreground.
+palette by clicking on *Commands* from the View menu or using the keyboard
+shortcut ``Command/Ctrl Shift C`` and type *Astronomy* in the search box. Your
+*Random Astronomy Picture* command should appear. Click it or select it with
+the keyboard and press *Enter*. You should see a new, blank panel appear with
+the tab title *Astronomy Picture*. Click the *x* on the tab to close it and
+activate the command again. The tab should reappear. Finally, click one of the
+launcher tabs so that the *Astronomy Picture* panel is still open but no
+longer active. Now run the *Random Astronomy Picture* command one more time.
+The single *Astronomy Picture* tab should come to the foreground.
 
 .. figure:: images/extension_tutorial_empty.png
    :align: center
@@ -476,7 +477,7 @@ Improve the widget behavior
 Center the image, add attribution, and error messaging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Open ``style/index.css`` in our extension project directory for editing.
+Open ``style/base.css`` in our extension project directory for editing.
 Add the following lines to it.
 
 .. code-block:: css
