@@ -123,6 +123,16 @@
       "selector": ".jp-Notebook:focus"
     },
     {
+      "command": "notebook:merge-cell-above",
+      "keys": ["Ctrl Backspace"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:merge-cell-below",
+      "keys": ["Ctrl Shift M"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
       "command": "notebook:move-cursor-down",
       "keys": ["ArrowDown"],
       "selector": ".jp-Notebook:focus"
