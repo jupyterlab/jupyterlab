@@ -25,6 +25,8 @@ import { DocumentRegistry, IDocumentWidget } from './index';
 
 import * as nbmodel from '@jupyterlab/nbmodel';
 
+import * as Y from 'yjs';
+
 /**
  * The default implementation of a document model.
  */
@@ -38,10 +40,6 @@ export class DocumentModel
     super({ modelDB });
     this._defaultLang = languagePreference || '';
     this.value.changed.connect(this.triggerContentChange, this);
-    // A DocumentModel is a CodeCell and a nbmodel in one.
-    const cell = nbmodel.YCodeCell.create();
-    this.nbnotebook.insertCell(0, cell);
-    this.switchSharedModel(cell, true);
   }
 
   /**
@@ -146,6 +144,15 @@ export class DocumentModel
    * Initialize the model with its current state.
    */
   initialize(): void {
+    // A DocumentModel is a CodeCell and a nbmodel in one.
+    const ynotebook = this.nbnotebook as nbmodel.YNotebook;
+    if (!ynotebook.ymodel.has('source')) {
+      ynotebook.ymodel.set('source', new Y.Text());
+      ynotebook.ymodel.set('metadata', {});
+      ynotebook.ymodel.set('cell_type', this.type);
+    }
+    const cell = new nbmodel.YCodeCell(ynotebook.ymodel);
+    this.switchSharedModel(cell, true);
     return;
   }
 

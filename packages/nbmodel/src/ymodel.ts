@@ -236,6 +236,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   public awareness = new Awareness(this.ydoc);
   public ycells: Y.Array<Y.Map<any>> = this.ydoc.getArray('cells');
   public ymeta: Y.Map<any> = this.ydoc.getMap('meta');
+  public ymodel: Y.Map<any> = this.ydoc.getMap('model');
   public undoManager = new Y.UndoManager([this.ycells], {
     trackedOrigins: new Set([this])
   });
