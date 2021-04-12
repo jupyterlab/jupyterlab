@@ -17,13 +17,13 @@ v3.0.14
 
 v3.0.13
 ^^^^^^^
-* Add cell id per notebook format 4.5 (`#10018 <https://github.com/repos/jupyterlab/jupyterlab/pull/10018>`__)
-* Fix label for “Create Console for Editor”  (`#9794 <https://github.com/repos/jupyterlab/jupyterlab/pull/9794>`__)
-* Use blobs to set the svg source of an image in the image viewer (`#10029 <https://github.com/repos/jupyterlab/jupyterlab/pull/10029>`__)
+* Add cell id per notebook format 4.5 (`#10018 <https://github.com/jupyterlab/jupyterlab/pull/10018>`__)
+* Fix label for “Create Console for Editor”  (`#9794 <https://github.com/jupyterlab/jupyterlab/pull/9794>`__)
+* Use blobs to set the svg source of an image in the image viewer (`#10029 <https://github.com/jupyterlab/jupyterlab/pull/10029>`__)
 * [Fix] Copy shareable link command (`#10021 <https://github.com/jupyterlab/jupyterlab/pull/10021>`__)
 * Clarify where the overrides.json file should be in the docs (`#9996 <https://github.com/jupyterlab/jupyterlab/pull/9996>`__)
-* Do not make unnecessary npm registry requests (`#9974 <https://github.com/repos/jupyterlab/jupyterlab/pull/9974>`__)
-* Fix escaping of urls and paths (`#9978 <https://github.com/repos/jupyterlab/jupyterlab/pull/9978>`__)
+* Do not make unnecessary npm registry requests (`#9974 <https://github.com/jupyterlab/jupyterlab/pull/9974>`__)
+* Fix escaping of urls and paths (`#9978 <https://github.com/jupyterlab/jupyterlab/pull/9978>`__)
 
 v3.0.12
 ^^^^^^^
