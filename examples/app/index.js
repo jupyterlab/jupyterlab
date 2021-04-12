@@ -18,6 +18,7 @@ const styles = import('./build/style.js');
 const extensions = [
   import('@jupyterlab/application-extension'),
   import('@jupyterlab/apputils-extension'),
+  import('@jupyterlab/celltags-extension'),
   import('@jupyterlab/codemirror-extension'),
   import('@jupyterlab/completer-extension'),
   import('@jupyterlab/console-extension'),
