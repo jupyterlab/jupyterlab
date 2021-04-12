@@ -147,7 +147,7 @@ export class DocumentModel
     // A DocumentModel is a CodeCell and a nbmodel in one.
     const ynotebook = this.nbnotebook as nbmodel.YNotebook;
     if (!ynotebook.ymodel.has('source')) {
-      ynotebook.ymodel.set('source', new Y.Text());
+      ynotebook.ymodel.set('source', new Y.Text(this.nbcell.getSource()));
       ynotebook.ymodel.set('metadata', {});
       ynotebook.ymodel.set('cell_type', this.type);
     }
