@@ -10,6 +10,10 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.14
+^^^^^^^
+* Loosen pin on ``jupyter-packaging`` (`#9998 <https://github.com/jupyterlab/jupyterlab/pull/9998>`__)
+
 v3.0.13
 ^^^^^^^
 * Add cell id per notebook format 4.5 (`#10018 <https://github.com/repos/jupyterlab/jupyterlab/pull/10018>`__)
