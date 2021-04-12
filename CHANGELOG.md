@@ -13,7 +13,7 @@ closed.
 
 ### v3.0.14
 
-- Clean up browser check [#10080](https://github.com/jupyterlab/jupyterlab/pull/10080) 
+- Clean up browser check [#10080](https://github.com/jupyterlab/jupyterlab/pull/10080)
 - Loosen pin on jupyter-packaging [#9998](https://github.com/jupyterlab/jupyterlab/pull/9998)
 
 ### v3.0.13
