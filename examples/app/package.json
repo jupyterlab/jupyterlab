@@ -12,6 +12,7 @@
     "@jupyterlab/application-extension": "^3.1.0-alpha.4",
     "@jupyterlab/apputils-extension": "^3.1.0-alpha.4",
     "@jupyterlab/builder": "^3.1.0-alpha.4",
+    "@jupyterlab/celltags-extension": "^3.1.0-alpha.4",
     "@jupyterlab/codemirror-extension": "^3.1.0-alpha.4",
     "@jupyterlab/completer-extension": "^3.1.0-alpha.4",
     "@jupyterlab/console-extension": "^3.1.0-alpha.4",
@@ -66,6 +67,7 @@
     "extensions": [
       "@jupyterlab/application-extension",
       "@jupyterlab/apputils-extension",
+      "@jupyterlab/celltags-extension",
       "@jupyterlab/codemirror-extension",
       "@jupyterlab/completer-extension",
       "@jupyterlab/console-extension",
