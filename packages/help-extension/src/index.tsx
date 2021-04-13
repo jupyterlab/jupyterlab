@@ -66,6 +66,104 @@ const LAB_IS_SECURE = window.location.protocol === 'https:';
 const HELP_CLASS = 'jp-Help';
 
 /**
+ * Add a command to show an About dialog.
+ */
+const about: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:about',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [IMainMenu, ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    menu: IMainMenu | null,
+    palette: ICommandPalette | null
+  ): void => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Help');
+
+    commands.addCommand(CommandIDs.about, {
+      label: trans.__('About %1', app.name),
+      execute: () => {
+        // Create the header of the about dialog
+        const versionNumber = trans.__('Version %1', app.version);
+        const versionInfo = (
+          <span className="jp-About-version-info">
+            <span className="jp-About-version">{versionNumber}</span>
+          </span>
+        );
+        const title = (
+          <span className="jp-About-header">
+            <jupyterIcon.react margin="7px 9.5px" height="auto" width="58px" />
+            <div className="jp-About-header-info">
+              <jupyterlabWordmarkIcon.react height="auto" width="196px" />
+              {versionInfo}
+            </div>
+          </span>
+        );
+
+        // Create the body of the about dialog
+        const jupyterURL = 'https://jupyter.org/about.html';
+        const contributorsURL =
+          'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
+        const externalLinks = (
+          <span className="jp-About-externalLinks">
+            <a
+              href={contributorsURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="jp-Button-flat"
+            >
+              {trans.__('CONTRIBUTOR LIST')}
+            </a>
+            <a
+              href={jupyterURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="jp-Button-flat"
+            >
+              {trans.__('ABOUT PROJECT JUPYTER')}
+            </a>
+          </span>
+        );
+        const copyright = (
+          <span className="jp-About-copyright">
+            {trans.__('© 2015-2021 Project Jupyter Contributors')}
+          </span>
+        );
+        const body = (
+          <div className="jp-About-body">
+            {externalLinks}
+            {copyright}
+          </div>
+        );
+
+        return showDialog({
+          title,
+          body,
+          buttons: [
+            Dialog.createButton({
+              label: trans.__('Dismiss'),
+              className: 'jp-About-button jp-mod-reject jp-mod-styled'
+            })
+          ]
+        });
+      }
+    });
+
+    if (menu) {
+      const helpMenu = menu.helpMenu;
+      helpMenu.addGroup([{ command: CommandIDs.about }], 0);
+    }
+
+    if (palette) {
+      palette.addItem({ command: CommandIDs.about, category });
+    }
+  }
+};
+
+/**
  * A plugin to add a command to open the Classic Notebook interface.
  */
 const launchClassic: JupyterFrontEndPlugin<void> = {
@@ -92,10 +190,7 @@ const launchClassic: JupyterFrontEndPlugin<void> = {
 
     if (menu) {
       const helpMenu = menu.helpMenu;
-      const launchClassicGroup = [CommandIDs.launchClassic].map(command => ({
-        command
-      }));
-      helpMenu.addGroup(launchClassicGroup, 1);
+      helpMenu.addGroup([{ command: CommandIDs.launchClassic }], 1);
     }
 
     if (palette) {
@@ -105,10 +200,10 @@ const launchClassic: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * The help handler extension.
+ * A plugin to add a list of resources to the help menu.
  */
-const plugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/help-extension:plugin',
+const resources: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:resources',
   autoStart: true,
   requires: [IMainMenu, ITranslator],
   optional: [ICommandPalette, ILayoutRestorer, IInspector],
@@ -190,8 +285,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     // Populate the Help menu.
     const helpMenu = mainMenu.helpMenu;
-    const labGroup = [CommandIDs.about].map(command => ({ command }));
-    helpMenu.addGroup(labGroup, 0);
 
     // Contextual help in its own group
     const contextualHelpGroup = [
@@ -319,75 +412,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
       });
     });
 
-    commands.addCommand(CommandIDs.about, {
-      label: trans.__('About %1', app.name),
-      execute: () => {
-        // Create the header of the about dialog
-        const versionNumber = trans.__('Version %1', app.version);
-        const versionInfo = (
-          <span className="jp-About-version-info">
-            <span className="jp-About-version">{versionNumber}</span>
-          </span>
-        );
-        const title = (
-          <span className="jp-About-header">
-            <jupyterIcon.react margin="7px 9.5px" height="auto" width="58px" />
-            <div className="jp-About-header-info">
-              <jupyterlabWordmarkIcon.react height="auto" width="196px" />
-              {versionInfo}
-            </div>
-          </span>
-        );
-
-        // Create the body of the about dialog
-        const jupyterURL = 'https://jupyter.org/about.html';
-        const contributorsURL =
-          'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
-        const externalLinks = (
-          <span className="jp-About-externalLinks">
-            <a
-              href={contributorsURL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="jp-Button-flat"
-            >
-              {trans.__('CONTRIBUTOR LIST')}
-            </a>
-            <a
-              href={jupyterURL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="jp-Button-flat"
-            >
-              {trans.__('ABOUT PROJECT JUPYTER')}
-            </a>
-          </span>
-        );
-        const copyright = (
-          <span className="jp-About-copyright">
-            {trans.__('© 2015-2021 Project Jupyter Contributors')}
-          </span>
-        );
-        const body = (
-          <div className="jp-About-body">
-            {externalLinks}
-            {copyright}
-          </div>
-        );
-
-        return showDialog({
-          title,
-          body,
-          buttons: [
-            Dialog.createButton({
-              label: trans.__('Dismiss'),
-              className: 'jp-About-button jp-mod-reject jp-mod-styled'
-            })
-          ]
-        });
-      }
-    });
-
     commands.addCommand(CommandIDs.open, {
       label: args => args['text'] as string,
       execute: args => {
@@ -424,5 +448,5 @@ const plugin: JupyterFrontEndPlugin<void> = {
   }
 };
 
-const plugins: JupyterFrontEndPlugin<any>[] = [launchClassic, plugin];
+const plugins: JupyterFrontEndPlugin<any>[] = [about, launchClassic, resources];
 export default plugins;
