@@ -24,6 +24,11 @@ export interface INotebookFilters {
    * Should cell output be searched?
    */
   output: boolean;
+
+  /**
+   * Should search be within the active cell?
+   */
+  activeCell: boolean;
 }
 
 export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
@@ -58,12 +63,17 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     filters: INotebookFilters | undefined
   ): Promise<ISearchMatch[]> {
     this._searchTarget = searchTarget;
-    const cells = this._searchTarget.content.widgets;
+    let cells = this._searchTarget.content.widgets;
 
     this._filters =
       !filters || Object.entries(filters).length === 0
-        ? { output: true }
+        ? { output: true, activeCell: false }
         : filters;
+
+    const cell = this._searchTarget.content.activeCell;
+    if (this._filters.activeCell && cell) {
+      cells = [cell];
+    }
 
     // hide the current notebook widget to prevent expensive layout re-calculation operations
     this._searchTarget.hide();

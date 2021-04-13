@@ -296,8 +296,11 @@ class FilterToggle extends React.Component<
 
 interface IFilterSelectionProps {
   searchOutput: boolean;
+  searchActiveCell: boolean;
   canToggleOutput: boolean;
+  canToggleActiveCell: boolean;
   toggleOutput: () => void;
+  toggleActiveCell: () => void;
 }
 
 interface IFilterSelectionState {}
@@ -309,19 +312,38 @@ class FilterSelection extends React.Component<
   render() {
     return (
       <label className={SEARCH_OPTIONS_CLASS}>
-        <span
-          className={
-            this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
-          }
-        >
-          Search Cell Outputs
-        </span>
-        <input
-          type="checkbox"
-          disabled={!this.props.canToggleOutput}
-          checked={this.props.searchOutput}
-          onChange={this.props.toggleOutput}
-        />
+        <div>
+          <span
+            className={
+              this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
+            }
+          >
+            Search Cell Outputs
+          </span>
+          <input
+            type="checkbox"
+            disabled={!this.props.canToggleOutput}
+            checked={this.props.searchOutput}
+            onChange={this.props.toggleOutput}
+          />
+        </div>
+        <div>
+          <span
+            className={
+              this.props.canToggleActiveCell
+                ? ''
+                : SEARCH_OPTIONS_DISABLED_CLASS
+            }
+          >
+            Search Active Cell
+          </span>
+          <input
+            type="checkbox"
+            disabled={!this.props.canToggleActiveCell}
+            checked={this.props.searchActiveCell}
+            onChange={this.props.toggleActiveCell}
+          />
+        </div>
       </label>
     );
   }
@@ -351,6 +373,7 @@ class SearchOverlay extends React.Component<
     this.state = props.overlayState;
     this.replaceEntryRef = React.createRef();
     this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
+    this._toggleSearchActiveCell = this._toggleSearchActiveCell.bind(this);
   }
 
   componentDidMount() {
@@ -459,6 +482,18 @@ class SearchOverlay extends React.Component<
       () => this._executeSearch(true, undefined, true)
     );
   }
+  private _toggleSearchActiveCell() {
+    this.setState(
+      prevState => ({
+        ...prevState,
+        filters: {
+          ...prevState.filters,
+          activeCell: !prevState.filters.activeCell
+        }
+      }),
+      () => this._executeSearch(true, undefined, true)
+    );
+  }
   private _toggleFiltersOpen() {
     this.setState(prevState => ({
       filtersOpen: !prevState.filtersOpen
@@ -478,8 +513,11 @@ class SearchOverlay extends React.Component<
       <FilterSelection
         key={'filter'}
         canToggleOutput={!showReplace}
+        canToggleActiveCell={true}
         searchOutput={this.state.filters.output}
+        searchActiveCell={this.state.filters.activeCell}
         toggleOutput={this._toggleSearchOutput}
+        toggleActiveCell={this._toggleSearchActiveCell}
       />
     ) : null;
     const icon = this.state.replaceEntryShown ? caretDownIcon : caretRightIcon;

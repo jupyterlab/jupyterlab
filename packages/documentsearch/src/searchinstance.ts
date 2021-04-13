@@ -45,6 +45,8 @@ export class SearchInstance implements IDisposable {
     this._widget.disposed.connect(() => {
       this.dispose();
     });
+
+    // console.log("here", this._widget.);
     this._searchWidget.disposed.connect(() => {
       this._widget.activate();
       this.dispose();
@@ -194,6 +196,18 @@ export class SearchInstance implements IDisposable {
     this.updateIndices();
   }
 
+  // private async _activeCellChanged() {
+  //   if (!this._displayState.query|| !(this._widget instanceof NotebookPanel)) {
+  //     return;
+  //   }
+
+  //   this._widget.content.activeCellChanged.connect(() => {
+  //     console.log("acitve cell changed!!");
+  //   })
+
+  //   this.updateIndices();
+  // }
+
   private _onCaseSensitiveToggled() {
     this._displayState.caseSensitive = !this._displayState.caseSensitive;
     this._updateDisplay();
@@ -218,7 +232,7 @@ export class SearchInstance implements IDisposable {
     forceFocus: true,
     replaceText: '',
     replaceEntryShown: false,
-    filters: { output: true },
+    filters: { output: true, activeCell: false },
     filtersOpen: false
   };
 
