@@ -200,10 +200,10 @@ const launchClassic: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * The help handler extension.
+ * A plugin to add a list of resources to the help menu.
  */
-const plugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/help-extension:plugin',
+const resources: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:resources',
   autoStart: true,
   requires: [IMainMenu, ITranslator],
   optional: [ICommandPalette, ILayoutRestorer, IInspector],
@@ -448,5 +448,5 @@ const plugin: JupyterFrontEndPlugin<void> = {
   }
 };
 
-const plugins: JupyterFrontEndPlugin<any>[] = [about, launchClassic, plugin];
+const plugins: JupyterFrontEndPlugin<any>[] = [about, launchClassic, resources];
 export default plugins;
