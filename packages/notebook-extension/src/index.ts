@@ -337,22 +337,22 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin providing export commands in the main menu
+ * A plugin providing export commands in the main menu and command palette
  */
 export const exportPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:export',
   autoStart: true,
-  requires: [ITranslator, IMainMenu],
-  optional: [ICommandPalette],
+  requires: [ITranslator, INotebookTracker],
+  optional: [IMainMenu, ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    mainMenu: IMainMenu,
+    tracker: INotebookTracker,
+    mainMenu: IMainMenu | null,
     palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
-    const tracker = new NotebookTracker({ namespace: 'notebook' });
     const services = app.serviceManager;
 
     const isEnabled = (): boolean => {
@@ -398,49 +398,52 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       isEnabled
     });
 
-    // Add a notebook group to the File menu.
-    const exportTo = new Menu({ commands });
-    exportTo.title.label = trans.__('Export Notebook As…');
-    void services.nbconvert.getExportFormats().then(response => {
-      if (response) {
-        const formatLabels: any = Private.getFormatLabels(translator);
 
-        // Convert export list to palette and menu items.
-        const formatList = Object.keys(response);
-        formatList.forEach(function (key) {
-          const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
-          const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
-          let args = {
-            format: key,
-            label: labelStr,
-            isPalette: false
-          };
-          if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-            exportTo.addItem({
-              command: CommandIDs.exportToFormat,
-              args: args
-            });
-            if (palette) {
-              args = {
-                format: key,
-                label: labelStr,
-                isPalette: true
-              };
-              const category = trans.__('Notebook Operations');
-              palette.addItem({
+    if (mainMenu) {
+      // Add a notebook group to the File menu.
+      const exportTo = new Menu({ commands });
+      exportTo.title.label = trans.__('Export Notebook As…');
+      void services.nbconvert.getExportFormats().then(response => {
+        if (response) {
+          const formatLabels: any = Private.getFormatLabels(translator);
+
+          // Convert export list to palette and menu items.
+          const formatList = Object.keys(response);
+          formatList.forEach(function (key) {
+            const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+            const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
+            let args = {
+              format: key,
+              label: labelStr,
+              isPalette: false
+            };
+            if (FORMAT_EXCLUDE.indexOf(key) === -1) {
+              exportTo.addItem({
                 command: CommandIDs.exportToFormat,
-                category,
-                args
+                args: args
               });
+              if (palette) {
+                args = {
+                  format: key,
+                  label: labelStr,
+                  isPalette: true
+                };
+                const category = trans.__('Notebook Operations');
+                palette.addItem({
+                  command: CommandIDs.exportToFormat,
+                  category,
+                  args
+                });
+              }
             }
-          }
-        });
-        const fileGroup = [
-          { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
-        ];
-        mainMenu.fileMenu.addGroup(fileGroup, 10);
-      }
-    });
+          });
+          const fileGroup = [
+            { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
+          ];
+          mainMenu.fileMenu.addGroup(fileGroup, 10);
+        }
+      });
+    }
   }
 };
 
@@ -530,14 +533,14 @@ const codeConsolePlugin: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   trackerPlugin,
+  exportPlugin,
   tools,
   commandEditItem,
   notebookTrustItem,
   widgetFactoryPlugin,
   logNotebookOutput,
   clonedOutputsPlugin,
-  codeConsolePlugin,
-  exportPlugin
+  codeConsolePlugin
 ];
 export default plugins;
 
@@ -1280,7 +1283,7 @@ function activateNotebookHandler(
 
 // Get the current widget and activate unless the args specify otherwise.
 function getCurrent(
-  tracker: NotebookTracker,
+  tracker: INotebookTracker,
   shell: JupyterFrontEnd.IShell,
   args: ReadonlyPartialJSONObject
 ): NotebookPanel | null {
@@ -1470,44 +1473,6 @@ function addCommands(
     },
     isEnabled
   });
-  // commands.addCommand(CommandIDs.exportToFormat, {
-  //   label: args => {
-  //     const formatLabel = args['label'] as string;
-  //     return args['isPalette']
-  //       ? trans.__('Export Notebook: %1', formatLabel)
-  //       : formatLabel;
-  //   },
-  //   execute: args => {
-  //     const current = getCurrent(tracker, shell, args);;
-
-  //     if (!current) {
-  //       return;
-  //     }
-
-  //     const url = PageConfig.getNBConvertURL({
-  //       format: args['format'] as string,
-  //       download: true,
-  //       path: current.context.path
-  //     });
-  //     const child = window.open('', '_blank');
-  //     const { context } = current;
-
-  //     if (child) {
-  //       child.opener = null;
-  //     }
-  //     if (context.model.dirty && !context.model.readOnly) {
-  //       return context.save().then(() => {
-  //         child?.location.assign(url);
-  //       });
-  //     }
-
-  //     return new Promise<void>(resolve => {
-  //       child?.location.assign(url);
-  //       resolve(undefined);
-  //     });
-  //   },
-  //   isEnabled
-  // });
   commands.addCommand(CommandIDs.restartClear, {
     label: trans.__('Restart Kernel and Clear All Outputs…'),
     execute: args => {
@@ -2303,50 +2268,6 @@ function populateMenus(
       });
     }
   } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
-
-  // // Add a notebook group to the File menu.
-  // const exportTo = new Menu({ commands });
-  // exportTo.title.label = trans.__('Export Notebook As…');
-  // void services.nbconvert.getExportFormats().then(response => {
-  //   if (response) {
-  //     const formatLabels: any = Private.getFormatLabels(translator);
-
-  //     // Convert export list to palette and menu items.
-  //     const formatList = Object.keys(response);
-  //     formatList.forEach(function (key) {
-  //       const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
-  //       const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
-  //       let args = {
-  //         format: key,
-  //         label: labelStr,
-  //         isPalette: false
-  //       };
-  //       if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-  //         exportTo.addItem({
-  //           command: CommandIDs.exportToFormat,
-  //           args: args
-  //         });
-  //         if (palette) {
-  //           args = {
-  //             format: key,
-  //             label: labelStr,
-  //             isPalette: true
-  //           };
-  //           const category = trans.__('Notebook Operations');
-  //           palette.addItem({
-  //             command: CommandIDs.exportToFormat,
-  //             category,
-  //             args
-  //           });
-  //         }
-  //       }
-  //     });
-  //     const fileGroup = [
-  //       { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
-  //     ];
-  //     mainMenu.fileMenu.addGroup(fileGroup, 10);
-  //   }
-  // });
 
   // Add a kernel user to the Kernel menu
   mainMenu.kernelMenu.kernelUsers.add({
