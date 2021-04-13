@@ -382,7 +382,6 @@ describe('session', () => {
         expect(session.kernel).not.toBe(previous);
         expect(session.kernel).not.toBe(kernel);
         previous.dispose();
-        await KernelAPI.shutdownKernel(kernel.id);
       });
 
       it('should update the session path if it has changed', async () => {

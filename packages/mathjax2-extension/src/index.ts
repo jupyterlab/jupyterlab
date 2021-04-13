@@ -2,6 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/**
+ * @packageDocumentation
+ * @module mathjax2-extension
+ */
 
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 
@@ -19,13 +23,14 @@ const plugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   autoStart: true,
   provides: ILatexTypesetter,
   activate: () => {
-    const url = PageConfig.getOption('fullMathjaxUrl');
-    const config = PageConfig.getOption('mathjaxConfig');
+    const [urlParam, configParam] = ['fullMathjaxUrl', 'mathjaxConfig'];
+    const url = PageConfig.getOption(urlParam);
+    const config = PageConfig.getOption(configParam);
 
     if (!url) {
       const message =
-        `${plugin.id} uses 'mathJaxUrl' and 'mathjaxConfig' in PageConfig ` +
-        `to operate but 'mathJaxUrl' was not found.`;
+        `${plugin.id} uses '${urlParam}' and '${configParam}' in PageConfig ` +
+        `to operate but '${urlParam}' was not found.`;
 
       throw new Error(message);
     }

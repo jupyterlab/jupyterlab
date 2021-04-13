@@ -4,6 +4,7 @@
 import * as path from 'path';
 import * as webpack from 'webpack';
 import { Build } from './build';
+import { LicenseWebpackPlugin } from 'license-webpack-plugin';
 import { merge } from 'webpack-merge';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
@@ -40,8 +41,8 @@ function generateConfig({
     process.exit(1);
   }
 
-  let outputPath = data.jupyterlab['outputDir'];
-  outputPath = path.join(packagePath, outputPath);
+  const outputPath = path.join(packagePath, data.jupyterlab['outputDir']);
+  const staticPath = path.join(outputPath, 'static');
 
   // Handle the extension entry point and the lib entry point, if different
   const index = require.resolve(packagePath);
@@ -49,22 +50,23 @@ function generateConfig({
     './index': index
   };
 
-  if (data.jupyterlab.extension === true) {
+  const extension = data.jupyterlab.extension;
+  if (extension === true) {
     exposes['./extension'] = index;
-  } else if (typeof data.jupyterlab.extension === 'string') {
-    exposes['./extension'] = path.join(packagePath, data.jupyterlab.extension);
+  } else if (typeof extension === 'string') {
+    exposes['./extension'] = path.join(packagePath, extension);
   }
 
-  if (data.jupyterlab.mimeExtension === true) {
+  const mimeExtension = data.jupyterlab.mimeExtension;
+  if (mimeExtension === true) {
     exposes['./mimeExtension'] = index;
-  } else if (typeof data.jupyterlab.mimeExtension === 'string') {
-    exposes['./mimeExtension'] = path.join(
-      packagePath,
-      data.jupyterlab.mimeExtension
-    );
+  } else if (typeof mimeExtension === 'string') {
+    exposes['./mimeExtension'] = path.join(packagePath, mimeExtension);
   }
 
-  if (data.style) {
+  if (typeof data.styleModule === 'string') {
+    exposes['./style'] = path.join(packagePath, data.styleModule);
+  } else if (typeof data.style === 'string') {
     exposes['./style'] = path.join(packagePath, data.style);
   }
 
@@ -153,7 +155,9 @@ function generateConfig({
   const extras = Build.ensureAssets({
     packageNames: [],
     packagePaths: [packagePath],
-    output: outputPath
+    output: staticPath,
+    schemaOutput: outputPath,
+    themeOutput: outputPath
   });
 
   fs.copyFileSync(
@@ -163,21 +167,31 @@ function generateConfig({
 
   class CleanupPlugin {
     apply(compiler: any) {
-      compiler.hooks.done.tap('Cleanup', () => {
-        // Find the remoteEntry file and add it to the package.json metadata
-        const files = glob.sync(path.join(outputPath, 'remoteEntry.*.js'));
-        let newestTime = -1;
-        let newestRemote = '';
-        files.forEach(fpath => {
-          const mtime = fs.statSync(fpath).mtime.getTime();
-          if (mtime > newestTime) {
-            newestRemote = fpath;
-            newestTime = mtime;
+      compiler.hooks.done.tap('Cleanup', (stats: any) => {
+        const newlyCreatedAssets = stats.compilation.assets;
+
+        // Clear out any remoteEntry files that are stale
+        // https://stackoverflow.com/a/40370750
+        const files = glob.sync(path.join(staticPath, 'remoteEntry.*.js'));
+        let newEntry = '';
+        const unlinked: string[] = [];
+        files.forEach(file => {
+          const fileName = path.basename(file);
+          if (!newlyCreatedAssets[fileName]) {
+            fs.unlinkSync(path.resolve(file));
+            unlinked.push(fileName);
+          } else {
+            newEntry = fileName;
           }
         });
+        if (unlinked.length > 0) {
+          console.log('Removed old assets: ', unlinked);
+        }
+
+        // Find the remoteEntry file and add it to the package.json metadata
         const data = readJSONFile(path.join(outputPath, 'package.json'));
         const _build: any = {
-          load: path.basename(newestRemote)
+          load: path.join('static', newEntry)
         };
         if (exposes['./extension'] !== undefined) {
           _build.extension = './extension';
@@ -194,33 +208,69 @@ function generateConfig({
     }
   }
 
+  // Allow custom webpack config
+  let webpackConfigPath = data.jupyterlab['webpackConfig'];
+  let webpackConfig = {};
+
+  // Use the custom webpack config only if the path to the config
+  // is specified in package.json (opt-in)
+  if (webpackConfigPath) {
+    webpackConfigPath = path.join(packagePath, webpackConfigPath);
+    if (fs.existsSync(webpackConfigPath)) {
+      webpackConfig = require(webpackConfigPath);
+    }
+  }
+
+  let plugins = [
+    new ModuleFederationPlugin({
+      name: data.name,
+      library: {
+        type: 'var',
+        name: ['_JUPYTERLAB', data.name]
+      },
+      filename: 'remoteEntry.[contenthash].js',
+      exposes,
+      shared
+    }),
+    new CleanupPlugin()
+  ];
+
+  if (mode === 'production') {
+    plugins.push(
+      new LicenseWebpackPlugin({
+        perChunkOutput: false,
+        outputFilename: 'third-party-licenses.txt',
+        excludedPackageTest: packageName => packageName === data.name
+      })
+    );
+  }
+
+  // Add version argument when in production so the Jupyter server
+  // allows caching of files (i.e., does not set the CacheControl header to no-cache to prevent caching static files)
+  let filename = '[name].[contenthash].js';
+  if (mode === 'production') {
+    filename += '?v=[contenthash]';
+  }
+
   const config = [
-    merge(baseConfig, {
-      mode,
-      devtool,
-      entry: {},
-      output: {
-        filename: '[name].[contenthash].js',
-        path: outputPath,
-        publicPath: staticUrl || 'auto'
+    merge(
+      baseConfig,
+      {
+        mode,
+        devtool,
+        entry: {},
+        output: {
+          filename,
+          path: staticPath,
+          publicPath: staticUrl || 'auto'
+        },
+        module: {
+          rules: [{ test: /\.html$/, use: 'file-loader' }]
+        },
+        plugins
       },
-      module: {
-        rules: [{ test: /\.html$/, use: 'file-loader' }]
-      },
-      plugins: [
-        new ModuleFederationPlugin({
-          name: data.name,
-          library: {
-            type: 'var',
-            name: ['_JUPYTERLAB', data.name]
-          },
-          filename: 'remoteEntry.[contenthash].js',
-          exposes,
-          shared
-        }),
-        new CleanupPlugin()
-      ]
-    })
+      webpackConfig
+    )
   ].concat(extras);
 
   if (mode === 'development') {

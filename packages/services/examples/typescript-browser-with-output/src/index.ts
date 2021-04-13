@@ -3,6 +3,10 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/**
+ * @packageDocumentation
+ * @module example-services-outputarea
+ */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 (window as any).__webpack_public_path__ = URLExt.join(
@@ -35,7 +39,7 @@ async function main() {
   const kernelManager = new KernelManager();
   const kernel = await kernelManager.startNew();
   outputArea.future = kernel.requestExecute({ code });
-  document.getElementById('outputarea').appendChild(outputArea.node);
+  document.getElementById('outputarea')?.appendChild(outputArea.node);
   await outputArea.future.done;
   console.debug('Test complete!');
 }

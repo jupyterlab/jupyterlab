@@ -1,49 +1,68 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JupyterLab } from '@jupyterlab/application';
+
+// The webpack public path needs to be set before loading the CSS assets.
 import { PageConfig } from '@jupyterlab/coreutils';
 // eslint-disable-next-line
 __webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 
-// This must be after the public path is set.
-// This cannot be extracted because the public path is dynamic.
-require('./build/imports.css');
+// Load the CSS assets
+const styles = import('./build/style.js');
+
+// These extension and mimeExtension imports should match the list of extensions in package.json. They are listed
+// separately in package.json so the webpack config Build.ensureAssets step can copy
+// extension assets to the build directory. These import statements assume
+// the JupyterLab plugins are the default export from each package.
+const extensions = [
+  import('@jupyterlab/application-extension'),
+  import('@jupyterlab/apputils-extension'),
+  import('@jupyterlab/celltags-extension'),
+  import('@jupyterlab/codemirror-extension'),
+  import('@jupyterlab/completer-extension'),
+  import('@jupyterlab/console-extension'),
+  import('@jupyterlab/csvviewer-extension'),
+  import('@jupyterlab/docmanager-extension'),
+  import('@jupyterlab/filebrowser-extension'),
+  import('@jupyterlab/fileeditor-extension'),
+  import('@jupyterlab/help-extension'),
+  import('@jupyterlab/imageviewer-extension'),
+  import('@jupyterlab/inspector-extension'),
+  import('@jupyterlab/launcher-extension'),
+  import('@jupyterlab/mainmenu-extension'),
+  import('@jupyterlab/markdownviewer-extension'),
+  import('@jupyterlab/mathjax2-extension'),
+  import('@jupyterlab/notebook-extension'),
+  import('@jupyterlab/rendermime-extension'),
+  import('@jupyterlab/running-extension'),
+  import('@jupyterlab/settingeditor-extension'),
+  import('@jupyterlab/shortcuts-extension'),
+  import('@jupyterlab/statusbar-extension'),
+  import('@jupyterlab/terminal-extension'),
+  import('@jupyterlab/theme-dark-extension'),
+  import('@jupyterlab/theme-light-extension'),
+  import('@jupyterlab/toc-extension'),
+  import('@jupyterlab/tooltip-extension'),
+  import('@jupyterlab/translation-extension'),
+  import('@jupyterlab/ui-components-extension')
+];
+
+const mimeExtensions = [
+  import('@jupyterlab/json-extension'),
+  import('@jupyterlab/pdf-extension')
+];
 
 window.addEventListener('load', async function () {
-  const JupyterLab = require('@jupyterlab/application').JupyterLab;
+  // Make sure the styles have loaded
+  await styles;
 
-  const mods = [
-    require('@jupyterlab/application-extension'),
-    require('@jupyterlab/apputils-extension'),
-    require('@jupyterlab/codemirror-extension'),
-    require('@jupyterlab/completer-extension'),
-    require('@jupyterlab/console-extension'),
-    require('@jupyterlab/csvviewer-extension'),
-    require('@jupyterlab/docmanager-extension'),
-    require('@jupyterlab/fileeditor-extension'),
-    require('@jupyterlab/filebrowser-extension'),
-    require('@jupyterlab/help-extension'),
-    require('@jupyterlab/imageviewer-extension'),
-    require('@jupyterlab/inspector-extension'),
-    require('@jupyterlab/launcher-extension'),
-    require('@jupyterlab/mainmenu-extension'),
-    require('@jupyterlab/markdownviewer-extension'),
-    require('@jupyterlab/mathjax2-extension'),
-    require('@jupyterlab/notebook-extension'),
-    require('@jupyterlab/rendermime-extension'),
-    require('@jupyterlab/running-extension'),
-    require('@jupyterlab/settingeditor-extension'),
-    require('@jupyterlab/shortcuts-extension'),
-    require('@jupyterlab/statusbar-extension'),
-    require('@jupyterlab/terminal-extension'),
-    require('@jupyterlab/theme-dark-extension'),
-    require('@jupyterlab/theme-light-extension'),
-    require('@jupyterlab/tooltip-extension'),
-    require('@jupyterlab/translation-extension'),
-    require('@jupyterlab/ui-components-extension')
-  ];
-  const lab = new JupyterLab();
-  lab.registerPluginModules(mods);
+  // Initialize JupyterLab with the mime extensions and application extensions.
+  const lab = new JupyterLab({
+    mimeExtensions: await Promise.all(mimeExtensions)
+  });
+  lab.registerPluginModules(await Promise.all(extensions));
+
   /* eslint-disable no-console */
   console.log('Starting app');
   await lab.start();

@@ -1,7 +1,7 @@
 .. _notebook:
 
 Notebooks
----------
+=========
 
 Jupyter notebooks are documents that combine live runnable code with
 narrative text (Markdown), equations (LaTeX), images, interactive

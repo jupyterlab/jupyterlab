@@ -10,6 +10,7 @@ jobs:
         group: [integrity, python]
       fail-fast: false
     runs-on: windows-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -21,11 +22,11 @@ jobs:
         with:
           node-version: '12.x'
       - name: Cache pip on Windows
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         if: startsWith(runner.os, 'Windows')
         with:
           path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', 'setup.py') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', 'setup.py') }}-2
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -34,25 +35,26 @@ jobs:
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
       - name: Cache yarn
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-2
           restore-keys: |
             ${{ runner.os }}-yarn-
 
       - name: Enable long paths
-        run: powershell Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem -Name LongPathsEnabled -Value 1
+        run: Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem -Name LongPathsEnabled -Value 1
+        shell: pwsh
 
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
-        run: |
-          cmd .\scripts\ci_install.bat
+        run: .\scripts\ci_install
+        shell: pwsh
 
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
-        run: |
-          cmd .\scripts\ci_script.bat
+        run: .\scripts\ci_script
+        shell: pwsh

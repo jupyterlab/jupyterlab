@@ -7,16 +7,25 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, docs, usage, python, examples, nonode, linkcheck, lint]
+        group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
         python: [3.6, 3.8]
+        include:
+          - group: release_check
+            upload-output: true
         exclude:
           - group: integrity
             python: 3.6
           - group: integrity2
             python: 3.6
+          - group: integrity3
+            python: 3.6
+          - group: release_check
+            python: 3.6
           - group: docs
             python: 3.6
           - group: usage
+            python: 3.6
+          - group: usage2
             python: 3.6
           - group: linkcheck
             python: 3.6
@@ -26,9 +35,11 @@ jobs:
             python: 3.6
           - group: examples
             python: 3.6
+          - group: splice_source
+            python: 3.6
       fail-fast: false
-    timeout-minutes: 120
-    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -41,8 +52,11 @@ jobs:
         with:
           node-version: '12.x'
 
+      - name: Setup firefox
+        uses: browser-actions/setup-firefox@latest
+
       - name: Cache pip on Linux
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         if: startsWith(runner.os, 'Linux')
         with:
           path: ~/.cache/pip
@@ -54,7 +68,7 @@ jobs:
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
       - name: Cache yarn
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -63,13 +77,13 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Cache checked links build
-        uses: actions/cache@v1
-        if: ${{ matrix.group == 'docs' }}
+        uses: actions/cache@v2
+        if: ${{ matrix.group == 'linkcheck' }}
         with:
           path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-link-check-${{ hashFiles('**/*.rst') }}
+          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst') }}-changelog
           restore-keys: |
-            ${{ runner.os }}-link-check-
+            ${{ runner.os }}-linkcheck-
 
       - name: Install dependencies
         env:
@@ -80,5 +94,13 @@ jobs:
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
+          JLAB_BROWSER_TYPE: firefox
         run: |
           bash ./scripts/ci_script.sh
+
+      - name: Upload ${{ matrix.group }} results
+        if: ${{ matrix.upload-output && always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.group }} ${{ github.run_number }}
+          path: ./build/${{ matrix.group }}_output

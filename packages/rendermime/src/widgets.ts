@@ -65,7 +65,7 @@ export abstract class RenderedCommon
   readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
 
   /**
-   * The latexTypesetter.
+   * The translator.
    */
   readonly translator: ITranslator;
 

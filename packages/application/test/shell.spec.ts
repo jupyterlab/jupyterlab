@@ -91,9 +91,17 @@ describe('LabShell', () => {
       expect(shell.isEmpty('main')).toBe(false);
     });
 
-    it('should test whether the top area is not empty', () => {
-      // account for builtin sdm slider widget
+    it('should test whether the top area is empty', () => {
+      // top-level menu area is added by default
       expect(shell.isEmpty('top')).toBe(false);
+    });
+
+    it('should test whether the menu area is empty', () => {
+      expect(shell.isEmpty('menu')).toBe(true);
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'menu');
+      expect(shell.isEmpty('menu')).toBe(false);
     });
 
     it('should test whether the left area is empty', () => {
@@ -144,20 +152,41 @@ describe('LabShell', () => {
     });
   });
 
+  describe('#add(widget, "menu")', () => {
+    it('should add a widget to the menu', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'menu');
+      expect(shell.isEmpty('menu')).toBe(false);
+    });
+
+    it('should be a no-op if the widget has no id', () => {
+      const widget = new Widget();
+      shell.add(widget, 'menu');
+      expect(shell.isEmpty('menu')).toBe(true);
+    });
+
+    it('should accept options', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'menu', { rank: 10 });
+      expect(shell.isEmpty('menu')).toBe(false);
+    });
+  });
+
   describe('#add(widget, "top")', () => {
     it('should add a widget to the top area', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top');
-      // the added widget plus the builtin spacer and sdm slider widgets
-      console.log(toArray(shell.widgets('top')));
+      // top-level title and menu area are added by default
       expect(toArray(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'top');
-      // the builtin spacer and sdm slider widgets alone
+      // top-level title and menu area are added by default
       expect(toArray(shell.widgets('top')).length).toEqual(2);
     });
 
@@ -165,7 +194,7 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top', { rank: 10 });
-      // the added widget plus the builtin spacer and sdm slider widgets
+      // top-level title and menu area are added by default
       expect(toArray(shell.widgets('top')).length).toEqual(3);
     });
 
@@ -174,9 +203,13 @@ describe('LabShell', () => {
       const bar = new Widget();
       foo.id = 'foo';
       bar.id = 'bar';
-      shell.add(foo, 'top', { rank: 20 });
-      shell.add(bar, 'top', { rank: 10 });
-      expect(toArray(shell.widgets('top')).slice(0, 2)).toEqual([bar, foo]);
+      shell.add(foo, 'top', { rank: 10001 });
+      shell.add(bar, 'top', { rank: 10000 });
+      expect(
+        toArray(shell.widgets('top'))
+          .slice(-2)
+          .map(v => v.id)
+      ).toEqual(['bar', 'foo']);
     });
   });
 
@@ -405,6 +438,60 @@ describe('LabShell', () => {
       shell.mode = 'single-document';
       shell.restoreLayout(mode, state);
       expect(shell.mode).toBe('multiple-document');
+    });
+  });
+
+  describe('#widgets', () => {
+    it('should list widgets in each area', () => {
+      let widget: Widget;
+
+      widget = new Widget();
+      widget.id = 'header';
+      shell.add(widget, 'header');
+
+      widget = new Widget();
+      widget.id = 'top';
+      shell.add(widget, 'top');
+
+      widget = new Widget();
+      widget.id = 'menu';
+      shell.add(widget, 'menu');
+
+      widget = new Widget();
+      widget.id = 'left';
+      shell.add(widget, 'left');
+
+      widget = new Widget();
+      widget.id = 'right';
+      shell.add(widget, 'right');
+
+      widget = new Widget();
+      widget.id = 'main';
+      shell.add(widget, 'main');
+
+      expect(toArray(shell.widgets('header')).map(v => v.id)).toEqual([
+        'header'
+      ]);
+      expect(
+        toArray(shell.widgets('top'))
+          .slice(-1)
+          .map(v => v.id)
+      ).toEqual(['top']);
+      expect(toArray(shell.widgets('menu')).map(v => v.id)).toEqual(['menu']);
+      expect(toArray(shell.widgets('left')).map(v => v.id)).toEqual(['left']);
+      expect(toArray(shell.widgets('right')).map(v => v.id)).toEqual(['right']);
+      expect(toArray(shell.widgets('main')).map(v => v.id)).toEqual(['main']);
+    });
+
+    it('should default to main area', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      expect(toArray(shell.widgets()).map(v => v.id)).toEqual(['foo']);
+    });
+
+    it('should throw an error when an unrecognized area is given', () => {
+      expect(() => shell.widgets('foo' as any)).toThrowError(/Invalid area/);
     });
   });
 

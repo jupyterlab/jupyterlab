@@ -1,11 +1,12 @@
 import json
 import os
 import os.path as osp
-from pathlib import Path
-import pkg_resources
 import shutil
-import sys
 import subprocess
+import sys
+from pathlib import Path
+
+import pkg_resources
 
 try:
     from cookiecutter.main import cookiecutter
@@ -13,17 +14,19 @@ except ImportError:
     raise RuntimeError("Please install cookiecutter")
 
 
-COOKIECUTTER_BRANCH = "3.0"
+DEFAULT_COOKIECUTTER_BRANCH = "3.0"
 
 
-def update_extension(target, interactive=True):
+def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=True):
     """Update an extension to the current JupyterLab
 
-    target: str 
+    target: str
         Path to the extension directory containing the extension
+    branch: str [default: DEFAULT_COOKIECUTTER_BRANCH]
+        Template branch to checkout
     interactive: bool [default: true]
         Whether to ask before overwriting content
-    
+
     """
     # Input is a directory with a package.json or the current directory
     # Use the cookiecutter as the source
@@ -39,14 +42,14 @@ def update_extension(target, interactive=True):
     # Infer the options from the current directory
     with open(package_file) as fid:
         data = json.load(fid)
-    
+
     if osp.exists(setup_file):
         python_name = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=target).decode('utf8').strip()
     else:
         python_name = data['name']
         if '@' in python_name:
             python_name = python_name[1:].replace('/', '_').replace('-', '_')
-    
+
     output_dir = osp.join(target, '_temp_extension')
     if osp.exists(output_dir):
         shutil.rmtree(output_dir)
@@ -63,7 +66,7 @@ def update_extension(target, interactive=True):
     )
 
     template = 'https://github.com/jupyterlab/extension-cookiecutter-ts'
-    cookiecutter(template=template, checkout=COOKIECUTTER_BRANCH, output_dir=output_dir, 
+    cookiecutter(template=template, checkout=branch, output_dir=output_dir,
                 extra_context=extra_context, no_input=not interactive)
 
     python_name = os.listdir(output_dir)[0]
@@ -73,18 +76,18 @@ def update_extension(target, interactive=True):
     for filename in os.listdir(osp.join(output_dir, '_temp')):
         shutil.move(osp.join(output_dir, '_temp', filename), osp.join(output_dir, filename))
     shutil.rmtree(osp.join(output_dir, '_temp'))
-    
+
     # Check whether there are any phosphor dependencies
     has_phosphor = False
     for name in ['devDependencies', 'dependencies']:
         if name not in data:
             continue
 
-        for (key, value) in data[name].items():
+        for (key, value) in list(data[name].items()):
             if key.startswith('@phosphor/'):
                 has_phosphor = True
                 data[name][key.replace('@phosphor/', '@lumino/')] = value
-        
+
         for key in list(data[name]):
             if key.startswith('@phosphor/'):
                 del data[name][key]
@@ -113,13 +116,13 @@ def update_extension(target, interactive=True):
         warnings.append('package.json scripts must be updated manually')
 
     # Set the output directory
-    data['jupyterlab']['outputDir'] = python_name + '/static'
+    data['jupyterlab']['outputDir'] = temp_data['jupyterlab']['outputDir']
 
     # Look for resolutions in JupyterLab metadata and upgrade those as well
     root_jlab_package = pkg_resources.resource_filename('jupyterlab', 'staging/package.json')
     with open(root_jlab_package) as fid:
         root_jlab_data = json.load(fid)
-    
+
     data.setdefault('dependencies', dict())
     data.setdefault('devDependencies', dict())
     for (key, value) in root_jlab_data['resolutions'].items():
@@ -134,7 +137,14 @@ def update_extension(target, interactive=True):
             data[key] = dict(sorted(data[key].items()))
         else:
             del data[key]
-            
+
+    # Update style settings
+    data.setdefault('styleModule', 'style/index.js')
+    if 'sideEffects' in data and 'style/index.js' not in data['sideEffects']:
+        data['sideEffects'].append('style/index.js')
+    if 'files' in data and 'style/index.js' not in data['files']:
+        data['files'].append('style/index.js')
+
     # Update the root package.json file
     with open(package_file, 'w') as fid:
         json.dump(data, fid, indent=2)
@@ -153,9 +163,9 @@ def update_extension(target, interactive=True):
             os.makedirs(osp.dirname(file_target), exist_ok=True)
             shutil.copy(p, file_target)
         else:
-            with open(p) as fid:
+            with open(p, "rb") as fid:
                 old_data = fid.read()
-            with open(file_target) as fid:
+            with open(file_target, "rb") as fid:
                 new_data = fid.read()
             if old_data == new_data:
                 continue
@@ -191,6 +201,10 @@ if __name__ == "__main__":
                        type=str,
                        help='the target path')
 
+    parser.add_argument('--branch',
+                        help='the template branch to checkout',
+                        default=DEFAULT_COOKIECUTTER_BRANCH)
+
     args = parser.parse_args()
 
-    update_extension(args.path, args.no_input==False)
+    update_extension(args.path, args.branch, args.no_input==False)

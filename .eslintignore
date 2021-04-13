@@ -18,9 +18,11 @@ docs/_build
 docs/api
 docs/build
 examples/chrome-example-test.js
+examples/federated/core_package/index.template.js
 jupyterlab/chrome-test.js
 jupyterlab/geckodriver
 packages/extensionmanager-extension/examples/listings
+packages/nbconvert-css/raw.js
 packages/ui-components/src/icon/iconimports.ts
 packages/ui-components/storybook-static
 jupyterlab/staging/yarn.js

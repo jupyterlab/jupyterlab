@@ -3,39 +3,46 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-from glob import glob
-import json
-import os
-import shutil
-import sys
-import traceback
 
+import os
+import sys
 from copy import copy
 
-from jupyter_core.application import JupyterApp, base_flags, base_aliases
-from jupyter_core.paths import jupyter_path
-from jupyterlab.coreconfig import CoreConfig
-from jupyterlab.debuglog import DebugLogFileMixin
+from jupyter_core.application import JupyterApp, base_aliases, base_flags
 from traitlets import Bool, Instance, List, Unicode, default
 
-from .commands import (
-    install_extension, uninstall_extension, list_extensions,
-    enable_extension, disable_extension, check_extension,
-    link_package, unlink_package, build, get_app_version, HERE,
-    update_extension, AppOptions,
-)
-from .federated_labextensions import develop_labextension_py, build_labextension, watch_labextension
-from .labapp import LabApp
+from jupyterlab.coreconfig import CoreConfig
+from jupyterlab.debuglog import DebugLogFileMixin
 
+from .commands import (
+    HERE, AppOptions, build, check_extension,
+    disable_extension, enable_extension, get_app_version,
+    install_extension, link_package, list_extensions,
+    uninstall_extension, unlink_package, update_extension
+)
+from .federated_labextensions import build_labextension, develop_labextension_py, watch_labextension
+from .labapp import LabApp
 
 flags = dict(base_flags)
 flags['no-build'] = (
     {'BaseExtensionApp': {'should_build': False}},
     "Defer building the app after the action."
 )
+flags['dev-build'] = (
+    {'BaseExtensionApp': {'dev_build': True}},
+    "Build in development mode."
+)
+flags['no-minimize'] = (
+    {'BaseExtensionApp': {'minimize': False}},
+    "Do not minimize a production build."
+)
 flags['clean'] = (
     {'BaseExtensionApp': {'should_clean': True}},
     "Cleanup intermediate files after the action."
+)
+flags['splice-source'] = (
+    {'BaseExtensionApp': {'splice_source': True}},
+    "Splice source packages into app directory."
 )
 
 check_flags = copy(flags)
@@ -71,8 +78,15 @@ aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 install_aliases = copy(aliases)
 install_aliases['pin-version-as'] = 'InstallLabExtensionApp.pin'
 
+enable_aliases = copy(aliases)
+enable_aliases['level'] = 'EnableLabExtensionsApp.level'
+
+disable_aliases = copy(aliases)
+disable_aliases['level'] = 'DisableLabExtensionsApp.level'
+
 VERSION = get_app_version()
 
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     version = VERSION
@@ -93,12 +107,15 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (production mode).")
 
     minimize = Bool(True, config=True,
-        help="Whether to use a minifier during the Webpack build (defaults to True). Only affects production builds.")
+        help="Whether to minimize a production build (defaults to True).")
 
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
 
-    labextensions_path = List(Unicode(), help='The standard paths to look in for federated JupyterLab extensions')
+    splice_source = Bool(False, config=True,
+        help="Splice source packages into app directory.")
+
+    labextensions_path = List(Unicode(), help='The standard paths to look in for prebuilt JupyterLab extensions')
 
     @default('labextensions_path')
     def _default_labextensions_path(self):
@@ -106,23 +123,22 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         lab.load_config_file()
         return lab.extra_labextensions_path + lab.labextensions_path
 
+    @default('splice_source')
+    def _default_splice_source(self):
+        version = get_app_version(AppOptions(app_dir=self.app_dir))
+        return version.endswith('-spliced')
+
     def start(self):
         if self.app_dir and self.app_dir.startswith(HERE):
             raise ValueError('Cannot run lab extension commands in core app')
         with self.debug_logging():
             ans = self.run_task()
             if ans and self.should_build:
-                parts = ['build']
-                parts.append('none' if self.dev_build is None else
-                             'dev' if self.dev_build else
-                             'prod')
-                if self.minimize:
-                    parts.append('minimize')
-                command = ':'.join(parts)
+                production = None if self.dev_build is None else not self.dev_build
                 app_options = AppOptions(app_dir=self.app_dir, logger=self.log,
-                      core_config=self.core_config)
+                      core_config=self.core_config, splice_source=self.splice_source)
                 build(clean_staging=self.should_clean,
-                      command=command, app_options=app_options)
+                      production = production, minimize = self.minimize, app_options=app_options)
 
     def run_task(self):
         pass
@@ -174,7 +190,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
 class DevelopLabExtensionApp(BaseExtensionApp):
     desciption = "Develop labextension"
     flags = develop_flags
-    
+
     user = Bool(False, config=True, help="Whether to do a user install")
     sys_prefix = Bool(True, config=True, help="Use the sys.prefix as the prefix")
     overwrite = Bool(False, config=True, help="Whether to overwrite files")
@@ -203,15 +219,20 @@ class BuildLabExtensionApp(BaseExtensionApp):
     source_map = Bool(False, config=True,
         help="Generage source maps")
 
+    core_path = Unicode(os.path.join(HERE, 'staging'), config=True,
+        help="Directory containing core application package.json file")
+
     aliases = {
         'static-url': 'BuildLabExtensionApp.static_url',
         'development': 'BuildLabExtensionApp.development',
-        'source-map': 'BuildLabExtensionApp.source_map'
+        'source-map': 'BuildLabExtensionApp.source_map',
+        'core-path': 'BuildLabExtensionApp.core_path'
     }
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(self.extra_args[0], logger=self.log, development=self.development, static_url=self.static_url or None, source_map = self.source_map)
+        build_labextension(self.extra_args[0], logger=self.log, development=self.development, static_url=self.static_url or None, source_map = self.source_map,
+        core_path = self.core_path or None)
 
 
 class WatchLabExtensionApp(BaseExtensionApp):
@@ -223,15 +244,19 @@ class WatchLabExtensionApp(BaseExtensionApp):
     source_map = Bool(False, config=True,
         help="Generage source maps")
 
+    core_path = Unicode(os.path.join(HERE, 'staging'), config=True,
+        help="Directory containing core application package.json file")
+
     aliases = {
         'development': 'BuildLabExtensionApp.development',
-        'source-map': 'BuildLabExtensionApp.source_map'
-
+        'source-map': 'BuildLabExtensionApp.source_map',
+        'core-path': 'BuildLabExtensionApp.core_path'
     }
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         labextensions_path = self.labextensions_path
-        watch_labextension(self.extra_args[0], labextensions_path, logger=self.log, development=self.development, source_map=self.source_map)
+        watch_labextension(self.extra_args[0], labextensions_path, logger=self.log, development=self.development, source_map=self.source_map,
+        core_path = self.core_path or None)
 
 
 class UpdateLabExtensionApp(BaseExtensionApp):
@@ -324,28 +349,34 @@ class ListLabExtensionsApp(BaseExtensionApp):
 
     def run_task(self):
         list_extensions(app_options=AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path))
 
 
 class EnableLabExtensionsApp(BaseExtensionApp):
     description = "Enable labextension(s) by name"
+    aliases = enable_aliases
+
+    level = Unicode('sys_prefix', help="Level at which to enable: sys_prefix, user, system").tag(config=True)
 
     def run_task(self):
         app_options = AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path)
-        [enable_extension(arg, app_options=app_options) for arg in self.extra_args]
+        [enable_extension(arg, app_options=app_options, level=self.level) for arg in self.extra_args]
 
 
 class DisableLabExtensionsApp(BaseExtensionApp):
     description = "Disable labextension(s) by name"
+    aliases = disable_aliases
+
+    level = Unicode('sys_prefix', help="Level at which to enable: sys_prefix, user, system").tag(config=True)
 
     def run_task(self):
         app_options = AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path)
-        [disable_extension(arg, app_options=app_options) for arg in self.extra_args]
+        [disable_extension(arg, app_options=app_options, level=self.level) for arg in self.extra_args]
 
 
 class CheckLabExtensionsApp(BaseExtensionApp):
@@ -357,7 +388,7 @@ class CheckLabExtensionsApp(BaseExtensionApp):
 
     def run_task(self):
         app_options = AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path)
         all_enabled = all(
             check_extension(
@@ -371,9 +402,9 @@ class CheckLabExtensionsApp(BaseExtensionApp):
 
 _examples = """
 jupyter labextension list                        # list all configured labextensions
-jupyter labextension develop                     # develop a federated labextension
-jupyter labextension build                       # build a federated labextension
-jupyter labextension watch                       # watch a federated labextension
+jupyter labextension develop                     # develop a prebuilt labextension
+jupyter labextension build                       # build a prebuilt labextension
+jupyter labextension watch                       # watch a prebuilt labextension
 jupyter labextension install <extension name>    # install a labextension
 jupyter labextension uninstall <extension name>  # uninstall a labextension
 """

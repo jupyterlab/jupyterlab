@@ -6,32 +6,25 @@
 
 from __future__ import print_function
 
+import importlib
 import json
 import os
 import os.path as osp
 import shutil
 import sys
-import tarfile
-import zipfile
 from os.path import basename, join as pjoin, normpath
 import subprocess
 import sys
 
-from urllib.parse import urlparse
-from urllib.request import urlretrieve
 from jupyter_core.paths import (
-    jupyter_data_dir, jupyter_config_path, jupyter_path,
-    SYSTEM_JUPYTER_PATH, ENV_JUPYTER_PATH,
+    jupyter_data_dir, SYSTEM_JUPYTER_PATH, ENV_JUPYTER_PATH,
 )
 from jupyter_core.utils import ensure_dir_exists
-from ipython_genutils.py3compat import string_types, cast_unicode_py2
-from ipython_genutils.tempdir import TemporaryDirectory
-from jupyter_server.config_manager import BaseJSONConfigManager
+from ipython_genutils.py3compat import cast_unicode_py2
 from jupyterlab_server.config import get_federated_extensions
+from jupyter_server.extension.serverextension import ArgumentConflict
 
-from traitlets.utils.importstring import import_item
-
-from .commands import build, AppOptions, _test_overlap
+from .commands import _test_overlap
 
 
 DEPRECATED_ARGUMENT = object()
@@ -45,18 +38,18 @@ HERE = osp.abspath(osp.dirname(__file__))
 
 def develop_labextension(path, symlink=True, overwrite=False,
                         user=False, labextensions_dir=None,
-                        destination=None, 
+                        destination=None,
                         logger=None, sys_prefix=False
                         ):
-    """Install a federated extension for JupyterLab
-    
+    """Install a prebuilt extension for JupyterLab
+
     Stages files and/or directories into the labextensions directory.
     By default, this compares modification time, and only stages files that need updating.
     If `overwrite` is specified, matching files are purged before proceeding.
-    
+
     Parameters
     ----------
-    
+
     path : path to file, directory, zip or tarball archive, or URL to install
         By default, the file will be installed with its base name, so '/path/to/foo'
         will install to 'labextensions/foo'. See the destination argument below to change this.
@@ -84,10 +77,10 @@ def develop_labextension(path, symlink=True, overwrite=False,
     labext = _get_labextension_dir(user=user, sys_prefix=sys_prefix, labextensions_dir=labextensions_dir)
     # make sure labextensions dir exists
     ensure_dir_exists(labext)
-    
+
     if isinstance(path, (list, tuple)):
         raise TypeError("path must be a string pointing to a single extension to install; call this function multiple times to install multiple extensions")
-    
+
     path = cast_unicode_py2(path)
 
     if not destination:
@@ -164,9 +157,10 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=True
     return full_dests
 
 
-def build_labextension(path, logger=None, development=False, static_url=None, source_map = False):
+def build_labextension(path, logger=None, development=False, static_url=None, source_map = False, core_path=None):
     """Build a labextension in the given path"""
-    core_path = osp.join(HERE, 'staging')
+    if core_path is None:
+        core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
 
     if logger:
@@ -185,24 +179,25 @@ def build_labextension(path, logger=None, development=False, static_url=None, so
     subprocess.check_call(arguments, cwd=ext_path)
 
 
-def watch_labextension(path, labextensions_path, logger=None, development=False, source_map=False):
+def watch_labextension(path, labextensions_path, logger=None, development=False, source_map=False, core_path=None):
     """Watch a labextension in a given path"""
-    core_path = osp.join(HERE, 'staging')
+    if core_path is None:
+        core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
 
     if logger:
         logger.info('Building extension in %s' % path)
 
     # Check to see if we need to create a symlink
-    federated_exts = get_federated_extensions(labextensions_path)
+    federated_extensions = get_federated_extensions(labextensions_path)
 
     with open(pjoin(ext_path, 'package.json')) as fid:
         ext_data = json.load(fid)
 
-    if ext_data['name'] not in federated_exts:
+    if ext_data['name'] not in federated_extensions:
         develop_labextension_py(ext_path, sys_prefix=True)
     else:
-        full_dest = pjoin(federated_exts[ext_data['name']]['ext_dir'], ext_data['name'])
+        full_dest = pjoin(federated_extensions[ext_data['name']]['ext_dir'], ext_data['name'])
         output_dir = pjoin(ext_path, ext_data['jupyterlab'].get('outputDir', 'static'))
         if not osp.islink(full_dest):
             shutil.rmtree(full_dest)
@@ -257,7 +252,7 @@ def _ensure_builder(ext_path, core_path):
         target = osp.dirname(target)
 
     return osp.join(target, 'node_modules', '@jupyterlab', 'builder', 'lib', 'build-labextension.js')
-    
+
 
 def _should_copy(src, dest, logger=None):
     """Should a file be copied, if it doesn't exist, or is newer?
@@ -360,42 +355,59 @@ def _get_labextension_metadata(module):
         Importable Python module exposing the
         magic-named `_jupyter_labextension_paths` function
     """
+
+    mod_path = osp.abspath(module)
+    if not osp.exists(mod_path):
+        raise FileNotFoundError('The path `{}` does not exist.'.format(mod_path))
+
+    # Check if the path is a valid labextension
     try:
-        m = import_item(module)
+        m = importlib.import_module(module)
+        if hasattr(m, '_jupyter_labextension_paths') :
+            labexts = m._jupyter_labextension_paths()
+            return m, labexts
+        else :
+            m = None
+
     except Exception:
         m = None
 
-    if not hasattr(m, '_jupyter_labextension_paths'):
-        mod_path = osp.abspath(module)
-        if osp.exists(mod_path):
+    # Try getting the package name from setup.py
+    try:
+        package = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=mod_path).decode('utf8').strip()
+    except subprocess.CalledProcessError:
+        raise FileNotFoundError('The Python package `{}` is not a valid package, '
+                'it is missing the `setup.py` file.'.format(module))
 
-            # First see if the module is already installed
-            from setuptools import find_packages
-            packages = find_packages(mod_path)
+    # Make sure the package is installed
+    import pkg_resources
+    try:
+        dist = pkg_resources.get_distribution(package)
+    except pkg_resources.DistributionNotFound:
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
+        sys.path.insert(0, mod_path)
 
-            # If not, get the package name from setup.py
-            if not packages:
-                name = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=mod_path)
-                packages = [name.decode('utf8').strip()]
-            
-            package = packages[0]
+    # Importing module with the same name as package
+    try:
+        # Replace hyphens with underscores to match Python convention
+        package = package.replace('-', '_')
+        m = importlib.import_module(package)
+        if hasattr(m, '_jupyter_labextension_paths') :
+            return m, m._jupyter_labextension_paths()
+    except Exception:
+        m = None
 
-            # Make sure the package is installed
-            import pkg_resources
-            try:
-                dist = pkg_resources.get_distribution(package)
-            except pkg_resources.DistributionNotFound:
-                subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
-                sys.path.insert(0, mod_path)
+    # Looking for modules in the package
+    from setuptools import find_packages
+    packages = find_packages(mod_path)
 
-            m = import_item(package)
+    # Looking for the labextension metadata
+    for package in packages :
+        try:
+            m = importlib.import_module(package)
+            if hasattr(m, '_jupyter_labextension_paths') :
+                return m, m._jupyter_labextension_paths()
+        except Exception:
+            m = None
 
-    if not hasattr(m, '_jupyter_labextension_paths'):
-        raise KeyError('The Python module {} is not a valid labextension, '
-                       'it is missing the `_jupyter_labextension_paths()` method.'.format(module))
-    labexts = m._jupyter_labextension_paths()
-    return m, labexts
-
-
-if __name__ == '__main__':
-    main()
+    raise ModuleNotFoundError('There is not a labextensions at {}'.format(module))

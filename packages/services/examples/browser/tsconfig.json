@@ -4,7 +4,7 @@
     "outDir": "build",
     "rootDir": "src",
     "module": "commonjs",
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "types": ["node"]
   },
   "include": ["src/**/*"],

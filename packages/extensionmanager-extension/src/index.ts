@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module extensionmanager-extension
+ */
 
 import {
   ILabShell,
@@ -44,7 +48,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const settings = await registry.load(plugin.id);
     let enabled = settings.composite['enabled'] === true;
 
-    const { commands, serviceManager, shell } = app;
+    const { commands, serviceManager } = app;
     let view: ExtensionView | undefined;
 
     const createView = () => {
@@ -58,9 +62,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
       return v;
     };
 
-    if (enabled) {
+    if (enabled && labShell) {
       view = createView();
-      shell.add(view, 'left', { rank: 1000 });
+      view.node.setAttribute('role', 'region');
+      view.node.setAttribute(
+        'aria-label',
+        trans.__('Extension Manager section')
+      );
+      labShell.add(view, 'left', { rank: 1000 });
     }
 
     // If the extension is enabled or disabled,
@@ -69,15 +78,22 @@ const plugin: JupyterFrontEndPlugin<void> = {
       .then(([, settings]) => {
         settings.changed.connect(async () => {
           enabled = settings.composite['enabled'] === true;
-          if (enabled && (!view || (view && !view.isAttached))) {
+          if (enabled && !view?.isAttached) {
             const accepted = await Private.showWarning(trans);
             if (!accepted) {
               void settings.set('enabled', false);
               return;
             }
             view = view || createView();
-            shell.add(view, 'left');
-          } else if (!enabled && view && view.isAttached) {
+            view.node.setAttribute('role', 'region');
+            view.node.setAttribute(
+              'aria-label',
+              trans.__('Extension Manager section')
+            );
+            if (labShell) {
+              labShell.add(view, 'left', { rank: 1000 });
+            }
+          } else if (!enabled && view?.isAttached) {
             app.commands.notifyCommandChanged(CommandIDs.toggle);
             view.close();
           }

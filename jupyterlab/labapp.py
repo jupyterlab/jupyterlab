@@ -7,37 +7,29 @@
 import json
 import os
 import os.path as osp
-from os.path import join as pjoin
 import sys
-from jinja2 import Environment, FileSystemLoader
+from os.path import join as pjoin
 
-from jupyter_core.application import JupyterApp, base_aliases, base_flags
-from jupyter_core.application import NoStart
-from jupyterlab_server import slugify, WORKSPACE_EXTENSION
-from jupyter_server.serverapp import flags
-from jupyter_server.utils import url_path_join as ujoin, url_escape
-from jupyter_server.services.config.manager import ConfigManager, recursive_update
+from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
+from jupyter_server.serverapp import flags
+from jupyter_server.utils import url_path_join as ujoin
+from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, slugify
+from nbclassic.shim import NBClassicConfigShimMixin
 from traitlets import Bool, Instance, Unicode, default
 
-from nbclassic.shim import NBClassicConfigShimMixin
-from jupyterlab_server import LabServerApp
-
 from ._version import __version__
-from .debuglog import DebugLogFileMixin
 from .commands import (
-    DEV_DIR, HERE,
-    build, clean, get_app_dir, get_app_version, get_user_settings_dir,
-    get_workspaces_dir, AppOptions, pjoin, get_app_info,
-    ensure_core, ensure_dev, watch, watch_dev, ensure_app
+    DEV_DIR, HERE, AppOptions, build, clean, ensure_app,
+    ensure_core, ensure_dev, get_app_dir, get_app_version,
+    get_user_settings_dir, get_workspaces_dir, pjoin, watch,
+    watch_dev
 )
 from .coreconfig import CoreConfig
-from .handlers.build_handler import build_path, Builder, BuildHandler
-from .handlers.extension_manager_handler import (
-    extensions_handler_path, ExtensionManager, ExtensionHandler
-)
+from .debuglog import DebugLogFileMixin
+from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
-
+from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -62,7 +54,21 @@ build_aliases['dev-build'] = 'LabBuildApp.dev_build'
 build_aliases['minimize'] = 'LabBuildApp.minimize'
 build_aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
-build_flags = dict(flags)
+build_flags = dict(base_flags)
+
+build_flags['dev-build'] = (
+    {'LabBuildApp': {'dev_build': True}},
+    "Build in development mode."
+)
+build_flags['no-minimize'] = (
+    {'LabBuildApp': {'minimize': False}},
+    "Do not minimize a production build."
+)
+build_flags['splice-source'] = (
+    {'LabBuildApp': {'splice_source': True}},
+    "Splice source packages into app directory."
+)
+
 
 version = __version__
 app_version = get_app_version()
@@ -93,7 +99,7 @@ jupyter --paths
 Explanation:
 
 - `dev-build`: This option controls whether a `dev` or a more streamlined
-`production` build is used. This option will default to `False` (ie the
+`production` build is used. This option will default to `False` (i.e., the
 `production` build) for most users. However, if you have any labextensions
 installed from local files, this option will instead default to `True`.
 Explicitly setting `dev-build` to `False` will ensure that the `production`
@@ -131,26 +137,21 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
         help="The version of the built application")
 
     dev_build = Bool(None, allow_none=True, config=True,
-        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (prod mode).")
+        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (production mode).")
 
     minimize = Bool(True, config=True,
-        help="Whether to use a minifier during the Webpack build (defaults to True). Only affects production builds.")
+        help="Whether to minimize a production build (defaults to True).")
 
     pre_clean = Bool(False, config=True,
         help="Whether to clean before building (defaults to False)")
 
-    def start(self):
-        parts = ['build']
-        parts.append('none' if self.dev_build is None else
-                     'dev' if self.dev_build else
-                     'prod')
-        if self.minimize:
-            parts.append('minimize')
-        command = ':'.join(parts)
+    splice_source = Bool(False, config=True,
+        help="Splice source packages into app directory.")
 
+    def start(self):
         app_dir = self.app_dir or get_app_dir()
         app_options = AppOptions(
-            app_dir=app_dir, logger=self.log, core_config=self.core_config
+            app_dir=app_dir, logger=self.log, core_config=self.core_config, splice_source=self.splice_source
         )
         self.log.info('JupyterLab %s', version)
         with self.debug_logging():
@@ -159,8 +160,9 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
                 clean(app_options=app_options)
             self.log.info('Building in %s', app_dir)
             try:
+                production = None if self.dev_build is None else not self.dev_build
                 build(name=self.name, version=self.version,
-                  command=command, app_options=app_options)
+                  app_options=app_options, production = production, minimize=self.minimize)
             except Exception as e:
                 print(buildFailureMsg)
                 raise e
@@ -482,9 +484,17 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         {'LabApp': {'watch': True}},
         "Start the app in watch mode."
     )
+    flags['splice-source'] = (
+        {'LabApp': {'splice_source': True}},
+        "Splice source packages into app directory."
+    )
     flags['expose-app-in-browser'] = (
         {'LabApp': {'expose_app_in_browser': True}},
-        "Expose the global app instance to browser via window.jupyterlab"
+        "Expose the global app instance to browser via window.jupyterlab."
+    )
+    flags['extensions-in-dev-mode'] = (
+        {'LabApp': {'extensions_in_dev_mode': True}},
+        "Load prebuilt extensions in dev-mode."
     )
 
     subcommands = dict(
@@ -527,16 +537,21 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         is installed as `pip install -e .`.
         """)
 
+    extensions_in_dev_mode = Bool(False, config=True,
+        help="""Whether to load prebuilt extensions in dev mode. This may be
+        useful to run and test prebuilt extensions in development installs of
+        JupyterLab. APIs in a JupyterLab development install may be
+        incompatible with published packages, so prebuilt extensions compiled
+        against published packages may not work correctly.""")
+
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
 
+    splice_source = Bool(False, config=True,
+        help="Splice source packages into app directory.")
+
     expose_app_in_browser = Bool(False, config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab")
-
-    # By default, open a browser for JupyterLab
-    serverapp_config = {
-        "open_browser": True
-    }
 
     @default('app_dir')
     def _default_app_dir(self):
@@ -615,8 +630,9 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             dev_static_dir = ujoin(DEV_DIR, 'static')
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
-            self.labextensions_path = []
-            self.extra_labextensions_path = []
+            if not self.extensions_in_dev_mode:
+                self.labextensions_path = []
+                self.extra_labextensions_path = []
         elif self.core_mode:
             dev_static_dir = ujoin(HERE, 'static')
             self.static_paths = [dev_static_dir]
@@ -642,20 +658,16 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         page_config.setdefault('buildCheck', not self.core_mode and not self.dev_mode)
         page_config['devMode'] = self.dev_mode
         page_config['token'] = self.serverapp.token
+        page_config['exposeAppInBrowser'] = self.expose_app_in_browser
+        page_config['quitButton'] = self.serverapp.quit_button
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
         page_config['notebookVersion'] = json.dumps(jpserver_version_info)
 
-        if self.serverapp.file_to_run:
-            relpath = os.path.relpath(self.serverapp.file_to_run, self.serverapp.root_dir)
-            uri = url_escape(ujoin('{}/tree'.format(self.app_url), *relpath.split(os.sep)))
-            self.default_url = uri
-            self.serverapp.file_to_run = ''
-
         self.log.info('JupyterLab extension loaded from %s' % HERE)
         self.log.info('JupyterLab application directory is %s' % self.app_dir)
 
-        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir)
+        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir, labextensions_path = self.extra_labextensions_path + self.labextensions_path, splice_source=self.splice_source)
         builder = Builder(self.core_mode, app_options=build_handler_options)
         build_handler = (build_path, BuildHandler, {'builder': builder})
         handlers.append(build_handler)
@@ -670,6 +682,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
                 ensure_dev(self.log)
                 self.log.info(DEV_NOTE)
         else:
+            if self.splice_source:
+                ensure_dev(self.log)
             msgs = ensure_app(self.app_dir)
             if msgs:
                 [self.log.error(msg) for msg in msgs]
@@ -696,14 +710,16 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             handlers.append(ext_handler)
 
         # If running under JupyterHub, add more metadata.
-        if hasattr(self, 'hub_prefix'):
-            page_config['hubPrefix'] = self.hub_prefix
-            page_config['hubHost'] = self.hub_host
-            page_config['hubUser'] = self.user
-            page_config['shareUrl'] = ujoin(self.hub_prefix, 'user-redirect')
+        if 'hub_prefix' in self.serverapp.tornado_settings:
+            tornado_settings = self.serverapp.tornado_settings
+            hub_prefix = tornado_settings['hub_prefix']
+            page_config['hubPrefix'] = hub_prefix
+            page_config['hubHost'] = tornado_settings['hub_host']
+            page_config['hubUser'] = tornado_settings['user']
+            page_config['shareUrl'] = ujoin(hub_prefix, 'user-redirect')
             # Assume the server_name property indicates running JupyterHub 1.0.
-            if hasattr(self, 'server_name'):
-                page_config['hubServerName'] = self.server_name
+            if hasattr(self.serverapp, 'server_name'):
+                page_config['hubServerName'] = self.serverapp.server_name
             api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
             page_config['token'] = api_token
 
@@ -713,6 +729,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
         super().initialize_handlers()
+
+    def initialize(self, argv=None):
+        """Subclass because the ExtensionApp.initialize() method does not take arguments"""
+        super().initialize()
 
 #-----------------------------------------------------------------------------
 # Main entry point

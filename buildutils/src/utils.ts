@@ -1,10 +1,10 @@
-import path = require('path');
-import glob = require('glob');
-import fs = require('fs-extra');
-import childProcess = require('child_process');
+import path from 'path';
+import glob from 'glob';
+import fs from 'fs-extra';
+import childProcess from 'child_process';
 import { DepGraph } from 'dependency-graph';
-import sortPackageJson = require('sort-package-json');
-import coreutils = require('@lumino/coreutils');
+import sortPackageJson from 'sort-package-json';
+import { JSONExt, JSONObject } from '@lumino/coreutils';
 
 type Dict<T> = { [key: string]: T };
 
@@ -58,7 +58,10 @@ export function getCorePaths(): string[] {
  *
  * @returns Whether the file has changed.
  */
-export function writePackageData(pkgJsonPath: string, data: any): boolean {
+export function writePackageData(
+  pkgJsonPath: string,
+  data: JSONObject
+): boolean {
   const text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
   const orig = fs.readFileSync(pkgJsonPath, 'utf8').split('\r\n').join('\n');
   if (text !== orig) {
@@ -82,7 +85,7 @@ export function readJSONFile(filePath: string): any {
 /**
  * Write a json file.
  */
-export function writeJSONFile(filePath: string, data: any): boolean {
+export function writeJSONFile(filePath: string, data: JSONObject): boolean {
   function sortObjByKey(value: any): any {
     // https://stackoverflow.com/a/35810961
     return typeof value === 'object'
@@ -104,7 +107,7 @@ export function writeJSONFile(filePath: string, data: any): boolean {
   } catch (e) {
     // no-op
   }
-  if (!coreutils.JSONExt.deepEqual(data, orig)) {
+  if (!JSONExt.deepEqual(data, orig)) {
     fs.writeFileSync(filePath, text, 'utf8');
     return true;
   }
@@ -134,7 +137,7 @@ export function fromTemplate(
   templ: string,
   subs: Dict<string>,
   options: { autoindent?: boolean; end?: string } = {}
-) {
+): string {
   // default options values
   const autoindent =
     options.autoindent === undefined ? true : options.autoindent;
@@ -163,7 +166,7 @@ export function fromTemplate(
  *
  * Call a command, checking its status.
  */
-export function checkStatus(cmd: string) {
+export function checkStatus(cmd: string): number | null {
   const data = childProcess.spawnSync(cmd, { shell: true });
   return data.status;
 }
@@ -171,7 +174,7 @@ export function checkStatus(cmd: string) {
 /**
  * Get the current version of JupyterLab
  */
-export function getPythonVersion() {
+export function getPythonVersion(): string {
   const cmd = 'python setup.py --version';
   return run(cmd, { stdio: 'pipe' }, true);
 }
@@ -179,7 +182,7 @@ export function getPythonVersion() {
 /**
  * Get the current version of a package
  */
-export function getJSVersion(pkg: string) {
+export function getJSVersion(pkg: string): string {
   const filePath = path.resolve(
     path.join('.', 'packages', pkg, 'package.json')
   );
@@ -190,7 +193,7 @@ export function getJSVersion(pkg: string) {
 /**
  * Pre-bump.
  */
-export function prebump() {
+export function prebump(): void {
   // Ensure bump2version is installed (active fork of bumpversion)
   run('python -m pip install bump2version');
 
@@ -212,7 +215,7 @@ ${status}`
 /**
  * Post-bump.
  */
-export function postbump() {
+export function postbump(): void {
   // Get the current version.
   const curr = getPythonVersion();
 
@@ -310,7 +313,7 @@ export function getPackageGraph(): DepGraph<Dict<unknown>> {
  * We could just use "require(`${depName}/package.json`)", however this won't work for modules
  * that are not hoisted to the top level.
  */
-function requirePackage(parentModule: string, module: string) {
+function requirePackage(parentModule: string, module: string): NodeRequire {
   const packagePath = `${module}/package.json`;
   let parentModulePath: string;
   // This will fail when the parent module cannot be loaded, like `@jupyterlab/test-root`
@@ -328,7 +331,7 @@ function requirePackage(parentModule: string, module: string) {
 /**
  * Ensure the given path uses '/' as path separator.
  */
-export function ensureUnixPathSep(source: string) {
+export function ensureUnixPathSep(source: string): string {
   if (path.sep === '/') {
     return source;
   }

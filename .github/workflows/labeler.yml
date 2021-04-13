@@ -6,7 +6,7 @@ on:
 jobs:
   triage:
     name: Update PR Labels
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - if: github.repository == 'jupyterlab/jupyterlab'
         uses: paulfantom/periodic-labeler@dffbc90404f371f76444a69221c2f7ad079e2319

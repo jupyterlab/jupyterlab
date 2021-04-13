@@ -24,14 +24,16 @@ type Dict<T> = { [key: string]: T };
 
 // Data to ignore.
 const MISSING: Dict<string[]> = {
+  '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['path', 'webpack'],
-  '@jupyterlab/testutils': ['fs'],
+  '@jupyterlab/builder': ['path'],
+  '@jupyterlab/testutils': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
 const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
-  '@jupyterlab/apputils': ['@types/react', 'buffer', 'url'],
+  '@jupyterlab/apputils': ['@types/react', 'url'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/builder': [
@@ -54,6 +56,8 @@ const UNUSED: Dict<string[]> = {
     'babel-loader',
     'css-loader',
     'file-loader',
+    'path-browserify',
+    'process',
     'raw-loader',
     'style-loader',
     'svg-url-loader',
@@ -63,6 +67,7 @@ const UNUSED: Dict<string[]> = {
     'webpack-cli',
     'worker-loader'
   ],
+  '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testutils': [
@@ -84,7 +89,23 @@ const DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
 const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
   '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
+  '@jupyterlab/builder': [
+    '@lumino/algorithm',
+    '@lumino/application',
+    '@lumino/commands',
+    '@lumino/coreutils',
+    '@lumino/disposable',
+    '@lumino/domutils',
+    '@lumino/dragdrop',
+    '@lumino/messaging',
+    '@lumino/properties',
+    '@lumino/signaling',
+    '@lumino/virtualdom',
+    '@lumino/widgets'
+  ],
+  '@jupyterlab/codemirror-extension': ['codemirror'],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
+  '@jupyterlab/debugger': ['codemirror'],
   '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be used by status reporters
   '@jupyterlab/docregistry': [
     '@jupyterlab/codeeditor', // Only used for model
@@ -96,19 +117,103 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/codeeditor',
     '@jupyterlab/codemirror',
     '@jupyterlab/fileeditor',
-    '@jupyterlab/notebook'
+    '@jupyterlab/notebook',
+    'codemirror'
   ],
   '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
   '@jupyterlab/help-extension': ['@jupyterlab/application'],
-  '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
-  '@jupyterlab/theme-dark-extension': [
+  '@jupyterlab/metapackage': [
+    '@jupyterlab/ui-components',
+    '@jupyterlab/apputils',
+    '@jupyterlab/codeeditor',
+    '@jupyterlab/statusbar',
+    '@jupyterlab/codemirror',
+    '@jupyterlab/rendermime-interfaces',
+    '@jupyterlab/rendermime',
+    '@jupyterlab/docregistry',
     '@jupyterlab/application',
-    '@jupyterlab/apputils'
+    '@jupyterlab/property-inspector',
+    '@jupyterlab/application-extension',
+    '@jupyterlab/docmanager',
+    '@jupyterlab/filebrowser',
+    '@jupyterlab/mainmenu',
+    '@jupyterlab/apputils-extension',
+    '@jupyterlab/attachments',
+    '@jupyterlab/outputarea',
+    '@jupyterlab/cells',
+    '@jupyterlab/notebook',
+    '@jupyterlab/celltags',
+    '@jupyterlab/celltags-extension',
+    '@jupyterlab/fileeditor',
+    '@jupyterlab/codemirror-extension',
+    '@jupyterlab/completer',
+    '@jupyterlab/console',
+    '@jupyterlab/completer-extension',
+    '@jupyterlab/launcher',
+    '@jupyterlab/console-extension',
+    '@jupyterlab/csvviewer',
+    '@jupyterlab/documentsearch',
+    '@jupyterlab/csvviewer-extension',
+    '@jupyterlab/debugger',
+    '@jupyterlab/debugger-extension',
+    '@jupyterlab/docmanager-extension',
+    '@jupyterlab/documentsearch-extension',
+    '@jupyterlab/extensionmanager',
+    '@jupyterlab/extensionmanager-extension',
+    '@jupyterlab/filebrowser-extension',
+    '@jupyterlab/fileeditor-extension',
+    '@jupyterlab/inspector',
+    '@jupyterlab/help-extension',
+    '@jupyterlab/htmlviewer',
+    '@jupyterlab/htmlviewer-extension',
+    '@jupyterlab/hub-extension',
+    '@jupyterlab/imageviewer',
+    '@jupyterlab/imageviewer-extension',
+    '@jupyterlab/inspector-extension',
+    '@jupyterlab/javascript-extension',
+    '@jupyterlab/json-extension',
+    '@jupyterlab/launcher-extension',
+    '@jupyterlab/logconsole',
+    '@jupyterlab/logconsole-extension',
+    '@jupyterlab/mainmenu-extension',
+    '@jupyterlab/markdownviewer',
+    '@jupyterlab/markdownviewer-extension',
+    '@jupyterlab/mathjax2',
+    '@jupyterlab/mathjax2-extension',
+    '@jupyterlab/nbconvert-css',
+    '@jupyterlab/notebook-extension',
+    '@jupyterlab/pdf-extension',
+    '@jupyterlab/rendermime-extension',
+    '@jupyterlab/running',
+    '@jupyterlab/running-extension',
+    '@jupyterlab/settingeditor',
+    '@jupyterlab/settingeditor-extension',
+    '@jupyterlab/statusbar-extension',
+    '@jupyterlab/terminal',
+    '@jupyterlab/terminal-extension',
+    '@jupyterlab/theme-dark-extension',
+    '@jupyterlab/theme-light-extension',
+    '@jupyterlab/toc',
+    '@jupyterlab/toc-extension',
+    '@jupyterlab/tooltip',
+    '@jupyterlab/tooltip-extension',
+    '@jupyterlab/translation-extension',
+    '@jupyterlab/ui-components-extension',
+    '@jupyterlab/vdom',
+    '@jupyterlab/vdom-extension',
+    '@jupyterlab/vega5-extension'
   ],
-  '@jupyterlab/theme-light-extension': [
-    '@jupyterlab/application',
-    '@jupyterlab/apputils'
+  '@jupyterlab/rendermime-interfaces': ['@lumino/widgets'],
+  '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
+  '@jupyterlab/testutils': [
+    '@jupyterlab/apputils',
+    '@jupyterlab/codeeditor',
+    '@jupyterlab/codemirror',
+    '@jupyterlab/rendermime',
+    '@jupyterlab/docregistry',
+    '@jupyterlab/cells',
+    '@jupyterlab/notebook'
   ],
   '@jupyterlab/ui-extension': ['@blueprintjs/icons']
 };
@@ -201,11 +306,6 @@ function ensureJupyterlab(): string[] {
     try {
       data = utils.readJSONFile(dataPath);
     } catch (e) {
-      return;
-    }
-
-    // TODO: reinstate once we update the extension-manager
-    if (data.name === '@jupyterlab/extensionmanager') {
       return;
     }
 
@@ -344,12 +444,11 @@ export async function ensureIntegrity(): Promise<boolean> {
   // Pick up all the package versions.
   const paths = utils.getLernaPaths();
 
-  // These two are not part of the workspaces but should be kept
-  // in sync.
-  paths.push('./jupyterlab/tests/mock_packages/extension');
+  // This package is not part of the workspaces but should be kept in sync.
   paths.push('./jupyterlab/tests/mock_packages/mimeextension');
 
-  const cssImports: Dict<Array<string>> = {};
+  const cssImports: Dict<string[]> = {};
+  const cssModuleImports: Dict<string[]> = {};
 
   // Get the package graph.
   const graph = utils.getPackageGraph();
@@ -376,32 +475,47 @@ export async function ensureIntegrity(): Promise<boolean> {
     const data = pkgData[name];
     const deps: Dict<string> = data.dependencies || {};
     const skip = SKIP_CSS[name] || [];
-    const cssData: Dict<Array<string>> = {};
+    // Initialize cssData with explicit css imports if available
+    const cssData: Dict<string[]> = {
+      ...(data.jupyterlab && data.jupyterlab.extraStyles)
+    };
+    const cssModuleData: Dict<string[]> = {
+      ...(data.jupyterlab && data.jupyterlab.extraStyles)
+    };
 
-    if (data.jupyterlab && data.jupyterlab.extraStyles) {
-      Object.keys(data.jupyterlab.extraStyles).forEach(depName => {
-        cssData[depName] = data.jupyterlab.extraStyles[depName];
+    // Add automatic dependency css if package is not a theme package
+    if (!(data.jupyterlab && data.jupyterlab.themePath)) {
+      Object.keys(deps).forEach(depName => {
+        // Bail for skipped imports and known extra styles.
+        if (skip.includes(depName) || depName in cssData) {
+          return;
+        }
+
+        const depData = graph.getNodeData(depName) as any;
+        if (typeof depData.style === 'string') {
+          cssData[depName] = [depData.style];
+        }
+        if (typeof depData.styleModule === 'string') {
+          cssModuleData[depName] = [depData.styleModule];
+        } else if (typeof depData.style === 'string') {
+          cssModuleData[depName] = [depData.style];
+        }
       });
     }
 
-    Object.keys(deps).forEach(depName => {
-      // Bail for skipped imports and known extra styles.
-      if (skip.indexOf(depName) !== -1 || depName in cssData) {
-        return;
-      }
-      const depData = graph.getNodeData(depName);
-      if (typeof depData.style === 'string') {
-        cssData[depName] = [depData.style];
-      }
-    });
-
     // Get our CSS imports in dependency order.
     cssImports[name] = [];
+    cssModuleImports[name] = [];
 
     graph.dependenciesOf(name).forEach(depName => {
       if (depName in cssData) {
         cssData[depName].forEach(cssPath => {
           cssImports[name].push(`${depName}/${cssPath}`);
+        });
+      }
+      if (depName in cssModuleData) {
+        cssModuleData[depName].forEach(cssModulePath => {
+          cssModuleImports[name].push(`${depName}/${cssModulePath}`);
         });
       }
     });
@@ -437,6 +551,7 @@ export async function ensureIntegrity(): Promise<boolean> {
       unused,
       locals,
       cssImports: cssImports[name],
+      cssModuleImports: cssModuleImports[name],
       differentVersions: DIFFERENT_VERSIONS
     };
 
@@ -468,12 +583,19 @@ export async function ensureIntegrity(): Promise<boolean> {
   }
 
   // Handle the refs in the top level tsconfigdoc.json
+  const tsConfigDocExclude = [
+    'application-extension',
+    'metapackage',
+    'nbconvert-css'
+  ];
   const tsConfigdocPath = path.resolve('.', 'tsconfigdoc.json');
   const tsConfigdocData = utils.readJSONFile(tsConfigdocPath);
-  tsConfigdocData.references = [];
-  utils.getCorePaths().forEach(pth => {
-    tsConfigdocData.references.push({ path: './' + path.relative('.', pth) });
-  });
+  tsConfigdocData.references = utils
+    .getCorePaths()
+    .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
+    .map(pth => {
+      return { path: './' + path.relative('.', pth) };
+    });
   utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
 
   // Handle buildutils

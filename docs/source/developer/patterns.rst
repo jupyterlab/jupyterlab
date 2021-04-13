@@ -1,12 +1,12 @@
 Design Patterns
----------------
+===============
 
 There are several design patterns that are repeated throughout the
 repository. This guide is meant to supplement the `TypeScript Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
 TypeScript
-~~~~~~~~~~
+----------
 
 TypeScript is used in all of the source code. TypeScript is used because
 it provides features from the most recent EMCAScript 6 standards, while
@@ -14,14 +14,14 @@ providing type safety. The TypeScript compiler eliminates an entire
 class of bugs, while making it much easier to refactor code.
 
 Initialization Options
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 Objects will typically have an ``IOptions`` interface for initializing
 the widget. The use of this interface enables options to be later added
 while preserving backward compatibility.
 
 ContentFactory Option
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 | A common option for a widget is a ``IContentFactory``, which is used
   to customize the child content in the widget.
@@ -31,14 +31,14 @@ ContentFactory Option
   nested content.
 
 Static Namespace
-~~~~~~~~~~~~~~~~
+----------------
 
 An object class will typically have an exported static namespace sharing
 the same name as the object. The namespace is used to declutter the
 class definition.
 
 Private Module Namespace
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 The "Private" module namespace is used to group variables and functions
 that are not intended to be exported and may have otherwise existed as
@@ -48,7 +48,7 @@ module itself. Finally, the namespace enables the entire section to be
 collapsed in an editor if desired.
 
 Disposables
-~~~~~~~~~~~
+-----------
 
 | JavaScript does not support "destructors", so the ``IDisposable``
   pattern is used to ensure resources are freed and can be claimed by
@@ -67,7 +67,7 @@ Disposables
   until the base class ``dispose()`` method is called.
 
 Messages
-~~~~~~~~
+--------
 
 Messages are intended for many-to-one communication where outside
 objects influence another object. Messages can be conflated and
@@ -75,7 +75,7 @@ processed as a single message. They can be posted and handled on the
 next animation frame.
 
 Signals
-~~~~~~~
+-------
 
 Signals are intended for one-to-many communication where outside objects
 react to changes on another object. Signals are always emitted with the
@@ -90,7 +90,7 @@ the connection to be properly cleared by ``clearSignalData(this)``.
 Using a private method avoids allocating a closure for each connection.
 
 Models
-~~~~~~
+------
 
 Some of the more advanced widgets have a model associated with them. The
 common pattern used is that the model is settable and must be set
@@ -108,14 +108,14 @@ constructor has finished evaluating, resulting in undefined state.
 .. _getters-vs-methods:
 
 Getters vs. Methods
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Prefer a method when the return value must be computed each time. Prefer
 a getter for simple attribute lookup. A getter should yield the same
 value every time.
 
 Data Structures
-~~~~~~~~~~~~~~~
+---------------
 
 For public API, we have three options: JavaScript ``Array``,
 ``IIterator``, and ``ReadonlyArray`` (an interface defined by
@@ -140,7 +140,7 @@ Prefer an ``IIterator`` for:
 -  A set of return values that can be computed lazily.
 
 DOM Events
-~~~~~~~~~~
+----------
 
 If an object instance should respond to DOM events, create a
 ``handleEvent`` method for the class and register the object instance as
@@ -158,7 +158,7 @@ see the
 API.
 
 Promises
-~~~~~~~~
+--------
 
 We use Promises for asynchronous function calls, and a shim for browsers
 that do not support them. When handling a resolved or rejected Promise,
@@ -166,7 +166,7 @@ make sure to check for the current state (typically by checking an
 ``.isDisposed`` property) before proceeding.
 
 Command Names
-~~~~~~~~~~~~~
+-------------
 
 Commands used in the application command registry should be formatted as
 follows: ``package-name:verb-noun``. They are typically grouped into a

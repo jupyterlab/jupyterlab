@@ -366,7 +366,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Sidebar-related styles */
 
-  --jp-sidebar-min-width: 180px;
+  --jp-sidebar-min-width: 250px;
 
   /* Search-related styles */
 

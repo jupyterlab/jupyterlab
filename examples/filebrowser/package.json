@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-filebrowser",
-  "version": "3.0.0-rc.6",
+  "version": "3.1.0-alpha.4",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,33 +8,33 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-rc.6",
-    "@jupyterlab/codemirror": "^3.0.0-rc.6",
-    "@jupyterlab/docmanager": "^3.0.0-rc.6",
-    "@jupyterlab/docregistry": "^3.0.0-rc.6",
-    "@jupyterlab/filebrowser": "^3.0.0-rc.6",
-    "@jupyterlab/fileeditor": "^3.0.0-rc.6",
-    "@jupyterlab/services": "^6.0.0-rc.6",
-    "@jupyterlab/theme-light-extension": "^3.0.0-rc.6",
+    "@jupyterlab/apputils": "^3.1.0-alpha.4",
+    "@jupyterlab/codemirror": "^3.1.0-alpha.4",
+    "@jupyterlab/docmanager": "^3.1.0-alpha.4",
+    "@jupyterlab/docregistry": "^3.1.0-alpha.4",
+    "@jupyterlab/filebrowser": "^3.1.0-alpha.4",
+    "@jupyterlab/fileeditor": "^3.1.0-alpha.4",
+    "@jupyterlab/services": "^6.1.0-alpha.4",
+    "@jupyterlab/theme-light-extension": "^3.1.0-alpha.4",
     "@lumino/algorithm": "^1.3.3",
-    "@lumino/commands": "^1.11.3",
-    "@lumino/widgets": "^1.14.0",
+    "@lumino/commands": "^1.12.0",
+    "@lumino/widgets": "^1.19.0",
     "es6-promise": "~4.2.8"
   },
   "devDependencies": {
     "@types/codemirror": "^0.0.97",
-    "css-loader": "~3.2.0",
+    "css-loader": "^5.0.1",
     "file-loader": "~6.0.0",
-    "mini-css-extract-plugin": "~0.11.0",
+    "mini-css-extract-plugin": "~1.3.2",
     "raw-loader": "~4.0.0",
     "rimraf": "~3.0.0",
-    "style-loader": "~1.2.1",
+    "style-loader": "~2.0.0",
     "svg-url-loader": "~6.0.0",
-    "typescript": "~4.0.2",
+    "typescript": "~4.1.3",
     "url-loader": "~4.1.0",
     "watch": "~1.0.2",
-    "webpack": "^5.1.3",
-    "webpack-cli": "^3.3.10",
+    "webpack": "^5.3.1",
+    "webpack-cli": "^4.1.0",
     "whatwg-fetch": "^3.0.0"
   }
 }

@@ -2,6 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/**
+ * @packageDocumentation
+ * @module apputils-extension
+ */
 
 import {
   ILayoutRestorer,
@@ -18,12 +22,17 @@ import {
   IWindowResolver,
   WindowResolver,
   Printing,
-  sessionContextDialogs
+  sessionContextDialogs,
+  ISanitizer,
+  defaultSanitizer,
+  MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import { URLExt, PageConfig } from '@jupyterlab/coreutils';
 
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
+
+import { ITranslator } from '@jupyterlab/translation';
 
 import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 
@@ -42,7 +51,6 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { themesPlugin, themesPaletteMenuPlugin } from './themesplugins';
 
 import { workspacesPlugin } from './workspacesplugin';
-import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -62,6 +70,8 @@ namespace CommandIDs {
   export const resetOnLoad = 'apputils:reset-on-load';
 
   export const runFirstEnabled = 'apputils:run-first-enabled';
+
+  export const toggleHeader = 'apputils:toggle-header';
 }
 
 /**
@@ -206,7 +216,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 
         dialog = new Dialog({
           title: trans.__('Loading...'),
-          body: trans.__(`The loading screen is taking a long time. 
+          body: trans.__(`The loading screen is taking a long time.
 Would you like to clear the workspace or keep waiting?`),
           buttons: [
             Dialog.cancelButton({ label: trans.__('Keep Waiting') }),
@@ -275,7 +285,7 @@ const print: JupyterFrontEndPlugin<void> = {
   activate: (app: JupyterFrontEnd, translator: ITranslator) => {
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(CommandIDs.print, {
-      label: trans.__('Print...'),
+      label: trans.__('Print…'),
       isEnabled: () => {
         const widget = app.shell.currentWidget;
         return Printing.getPrintFunction(widget) !== null;
@@ -291,6 +301,72 @@ const print: JupyterFrontEndPlugin<void> = {
   }
 };
 
+export const toggleHeader: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:toggle-header',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ) => {
+    const trans = translator.load('jupyterlab');
+
+    const category: string = trans.__('Main Area');
+    app.commands.addCommand(CommandIDs.toggleHeader, {
+      label: trans.__('Show Header Above Content'),
+      isEnabled: () =>
+        app.shell.currentWidget instanceof MainAreaWidget &&
+        app.shell.currentWidget.contentHeader.widgets.length > 0,
+      isToggled: () => {
+        const widget = app.shell.currentWidget;
+        return widget instanceof MainAreaWidget
+          ? !widget.contentHeader.isHidden
+          : false;
+      },
+      execute: async () => {
+        const widget = app.shell.currentWidget;
+        if (widget instanceof MainAreaWidget) {
+          widget.contentHeader.setHidden(!widget.contentHeader.isHidden);
+        }
+      }
+    });
+    if (palette) {
+      palette.addItem({ command: CommandIDs.toggleHeader, category });
+    }
+  }
+};
+
+/**
+ * Update the browser title based on the workspace and the current
+ * active item.
+ */
+async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
+  const data: any = await db.toJSON();
+  let current: string = data['layout-restorer:data']?.main?.current;
+  if (current === undefined) {
+    document.title = `JupyterLab${
+      workspace.startsWith('auto-') ? ` (${workspace})` : ``
+    }`;
+  } else {
+    // First 15 characters of current document name
+    current = current.split(':')[1].slice(0, 15);
+    // Number of restorable items, minus the layout restorer data
+    const count: number = Object.keys(data).length - 1;
+
+    if (workspace.startsWith('auto-')) {
+      document.title = `${current} (${workspace}${
+        count > 1 ? ` : ${count}` : ``
+      }) - ${name}`;
+    } else {
+      document.title = `${current}${
+        count - 1 > 1 ? ` (${count - 1})` : ``
+      } - ${name}`;
+    }
+  }
+}
+
 /**
  * The default state database for storing application state.
  *
@@ -304,13 +380,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
   autoStart: true,
   provides: IStateDB,
   requires: [JupyterFrontEnd.IPaths, IRouter, ITranslator],
-  optional: [ISplashScreen, IWindowResolver],
+  optional: [IWindowResolver],
   activate: (
     app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
     router: IRouter,
     translator: ITranslator,
-    splash: ISplashScreen | null,
     resolver: IWindowResolver | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -320,7 +395,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     }
 
     let resolved = false;
-    const { commands, serviceManager } = app;
+    const { commands, name, serviceManager } = app;
     const { workspaces } = serviceManager;
     const workspace = resolver.name;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
@@ -334,6 +409,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     // Any time the local state database changes, save the workspace.
     db.changed.connect(() => void save.invoke(), db);
+    db.changed.connect(() => updateTabTitle(workspace, db, name));
 
     commands.addCommand(CommandIDs.loadState, {
       execute: async (args: IRouter.ILocation) => {
@@ -421,11 +497,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           return;
         }
 
-        // If a splash provider exists, launch the splash screen.
-        const loading = splash
-          ? splash.show()
-          : new DisposableDelegate(() => undefined);
-
         // If the state database has already been resolved, resetting is
         // impossible without reloading.
         if (resolved) {
@@ -450,7 +521,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         } else {
           void cleared.then(() => {
             router.navigate(url);
-            loading.dispose();
           });
         }
 
@@ -515,6 +585,18 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The default HTML sanitizer.
+ */
+const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
+  id: '@jupyter/apputils-extension:sanitizer',
+  autoStart: true,
+  provides: ISanitizer,
+  activate: () => {
+    return defaultSanitizer;
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -522,12 +604,14 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   paletteRestorer,
   print,
   resolver,
+  sanitizer,
   settingsPlugin,
   state,
   splash,
   sessionDialogs,
   themesPlugin,
   themesPaletteMenuPlugin,
+  toggleHeader,
   utilityCommands,
   workspacesPlugin
 ];

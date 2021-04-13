@@ -6,6 +6,8 @@ export function log(content: any): void {
   if (typeof content !== 'string') {
     content = JSON.stringify(content);
   }
-  el.textContent = el.textContent + '\n' + content;
+  if (el) {
+    el.textContent = el.textContent + '\n' + content;
+  }
   console.debug(content);
 }

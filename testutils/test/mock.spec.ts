@@ -414,10 +414,11 @@ describe('mock', () => {
         const manager = new Mock.ContentsManagerMock();
         let called = false;
         manager.fileChanged.connect((_, args) => {
-          if (args.type === 'rename') {
-            expect(args.newValue!.path).toBe('foo');
-            called = true;
+          if (args.type !== 'rename') {
+            return;
           }
+          expect(args.newValue!.path).toBe('foo');
+          called = true;
         });
         const contents = await manager.newUntitled();
         await manager.rename(contents.path, 'foo');
@@ -430,10 +431,11 @@ describe('mock', () => {
         const manager = new Mock.ContentsManagerMock();
         let called = false;
         manager.fileChanged.connect((_, args) => {
-          if (args.type === 'delete') {
-            expect(args.newValue).toBe(null);
-            called = true;
+          if (args.type !== 'delete') {
+            return;
           }
+          expect(args.newValue).toBe(null);
+          called = true;
         });
         const contents = await manager.newUntitled();
         await manager.delete(contents.path);
@@ -446,10 +448,11 @@ describe('mock', () => {
         const manager = new Mock.ContentsManagerMock();
         let called = false;
         manager.fileChanged.connect((_, args) => {
-          if (args.type === 'save') {
-            expect(args.newValue!.content).toBe('bar');
-            called = true;
+          if (args.type !== 'save') {
+            return;
           }
+          expect(args.newValue!.content).toBe('bar');
+          called = true;
         });
         const contents = await manager.newUntitled();
         await manager.save(contents.path, { content: 'bar' });

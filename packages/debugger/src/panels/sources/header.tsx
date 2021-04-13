@@ -21,7 +21,9 @@ export class SourcesHeader extends Widget {
    * @param model The model for the Sources.
    */
   constructor(model: IDebugger.Model.ISources, translator?: ITranslator) {
-    super({ node: document.createElement('header') });
+    super({ node: document.createElement('div') });
+    this.node.classList.add('jp-stack-panel-header');
+
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 

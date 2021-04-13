@@ -7,27 +7,26 @@ import glob
 import json
 import logging
 import os
-import shutil
-import sys
-import subprocess
-import shutil
-import pathlib
 import platform
+import shutil
+import subprocess
+import sys
 from os.path import join as pjoin
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch
 
 import pytest
 from jupyter_core import paths
-
 from jupyterlab import commands
 from jupyterlab.commands import (
-    install_extension, uninstall_extension, list_extensions,
-    build, link_package, unlink_package, build_check,
-    disable_extension, enable_extension, get_app_info,
-    check_extension, _test_overlap, _compare_ranges, update_extension,
-    AppOptions
+    AppOptions, _compare_ranges, _test_overlap,
+    build, build_check, check_extension,
+    disable_extension, enable_extension,
+    get_app_info, install_extension, link_package,
+    list_extensions, uninstall_extension,
+    unlink_package, update_extension, get_app_version
 )
 from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
 
@@ -131,8 +130,8 @@ class AppHandlerTest(TestCase):
         self.assertEqual(paths.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(
-            os.path.realpath(commands.get_app_dir()),
-            os.path.realpath(pjoin(self.data_dir, 'lab'))
+            Path(commands.get_app_dir()).resolve(),
+            (Path(self.data_dir) / 'lab').resolve()
         )
 
         self.app_dir = commands.get_app_dir()
@@ -276,7 +275,7 @@ class TestExtension(AppHandlerTest):
         Same as above test, but installs from a local folder instead of from npm.
         """
         # Download each version of the package from NPM:
-        base_dir = pathlib.Path(self.tempdir())
+        base_dir = Path(self.tempdir())
 
         # The archive file names are printed to stdout when run `npm pack`
         packages = [
@@ -436,6 +435,24 @@ class TestExtension(AppHandlerTest):
     def test_build(self):
         assert install_extension(self.mock_extension) is True
         build()
+        # check staging directory.
+        entry = pjoin(self.app_dir, 'staging', 'build', 'index.out.js')
+        with open(entry) as fid:
+            data = fid.read()
+        assert self.pkg_names['extension'] in data
+
+        # check static directory.
+        entry = pjoin(self.app_dir, 'static', 'index.out.js')
+        with open(entry) as fid:
+            data = fid.read()
+        assert self.pkg_names['extension'] in data
+
+    @pytest.mark.slow
+    def test_build_splice_packages(self):
+        app_options = AppOptions(splice_source=True)
+        assert install_extension(self.mock_extension) is True
+        build(app_options=app_options)
+        assert '-spliced' in get_app_version(app_options)
         # check staging directory.
         entry = pjoin(self.app_dir, 'staging', 'build', 'index.out.js')
         with open(entry) as fid:
@@ -778,10 +795,10 @@ class TestExtension(AppHandlerTest):
         assert sorted(updated) == [self.pkg_names['extension'], self.pkg_names['mimeextension']]
 
 
-def test_load_extension(serverapp, make_lab_app):
+def test_load_extension(jp_serverapp, make_lab_app):
     app = make_lab_app()
     stderr = sys.stderr
 #    sys.stderr = self.devnull
-    app._link_jupyter_server_extension(serverapp)
+    app._link_jupyter_server_extension(jp_serverapp)
     app.initialize()
     sys.stderr = stderr

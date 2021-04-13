@@ -193,6 +193,8 @@ export class DebuggerService implements IDebugger, IDisposable {
         threadId: this._currentThread()
       });
       this._model.stoppedThreads.delete(this._currentThread());
+      this._clearModel();
+      this._clearSignals();
     } catch (err) {
       console.error('Error:', err.message);
     }
@@ -212,6 +214,33 @@ export class DebuggerService implements IDebugger, IDisposable {
       sourceReference: source.sourceReference ?? 0
     });
     return { ...reply.body, path: source.path ?? '' };
+  }
+
+  /**
+   * Evaluate an expression.
+   *
+   * @param expression The expression to evaluate as a string.
+   */
+  async evaluate(
+    expression: string
+  ): Promise<DebugProtocol.EvaluateResponse['body'] | null> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
+    const frameId = this.model.callstack.frame?.id;
+    const reply = await this.session.sendRequest('evaluate', {
+      context: 'repl',
+      expression,
+      frameId
+    });
+    if (!reply.success) {
+      return null;
+    }
+    // get the frames to retrieve the latest state of the variables
+    this._clearModel();
+    await this._getAllFrames();
+
+    return reply.body;
   }
 
   /**
@@ -245,6 +274,26 @@ export class DebuggerService implements IDebugger, IDisposable {
       variablesReference
     });
     return reply.body.variables;
+  }
+
+  /**
+   * Requests all the defined variables and display them in the
+   * table view.
+   */
+  async displayDefinedVariables(): Promise<void> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
+    const inspectReply = await this.session.sendRequest('inspectVariables', {});
+    const variables = inspectReply.body.variables;
+
+    const variableScopes = [
+      {
+        name: 'Globals',
+        variables: variables
+      }
+    ];
+    this._model.variables.scopes = variableScopes;
   }
 
   /**
@@ -452,15 +501,15 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   private _convertScopes(
     scopes: DebugProtocol.Scope[],
-    variables: DebugProtocol.Variable[]
+    variables: DebugProtocol.Variable[][]
   ): IDebugger.IScope[] {
     if (!variables || !scopes) {
       return [];
     }
-    return scopes.map(scope => {
+    return scopes.map((scope, i) => {
       return {
         name: scope.name,
-        variables: variables.map(variable => {
+        variables: variables[i].map(variable => {
           return { ...variable };
         })
       };
@@ -615,7 +664,11 @@ export class DebuggerService implements IDebugger, IDisposable {
         const { breakpoints, source } = val;
         map.set(
           source,
-          breakpoints.map(point => ({ ...point, verified: true }))
+          breakpoints.map(point => ({
+            ...point,
+            source: { path: source },
+            verified: true
+          }))
         );
         return map;
       },
@@ -637,7 +690,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       return;
     }
     const scopes = await this._getScopes(frame);
-    const variables = await this._getVariables(scopes[0]);
+    const variables = await Promise.all(
+      scopes.map(scope => this._getVariables(scope))
+    );
     const variableScopes = this._convertScopes(scopes, variables);
     this._model.variables.scopes = variableScopes;
   }

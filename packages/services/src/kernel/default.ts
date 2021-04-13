@@ -31,6 +31,7 @@ import * as restapi from './restapi';
 // Stub for requirejs.
 declare let requirejs: any;
 
+const KERNEL_INFO_TIMEOUT = 3000;
 const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
 
 /**
@@ -375,13 +376,42 @@ export class KernelConnection implements Kernel.IKernelConnection {
    *
    * If queue is true, queue the message for later sending if we cannot send
    * now. Otherwise throw an error.
+   *
+   * #### Notes
+   * As an exception to the queueing, if we are sending a kernel_info_request
+   * message while we think the kernel is restarting, we send the message
+   * immediately without queueing. This is so that we can trigger a message
+   * back, which will then clear the kernel restarting state.
    */
   private _sendMessage(msg: KernelMessage.IMessage, queue = true) {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
 
-    // Send if the ws allows it, otherwise buffer the message.
+    // If we have a kernel_info_request and we are restarting, send the
+    // kernel_info_request immediately if we can, and if not throw an error so
+    // we can retry later. We do this because we must get at least one message
+    // from the kernel to reset the kernel session (thus clearing the restart
+    // status sentinel).
+    if (
+      this._kernelSession === RESTARTING_KERNEL_SESSION &&
+      KernelMessage.isInfoRequestMsg(msg)
+    ) {
+      if (this.connectionStatus === 'connected') {
+        this._ws!.send(serialize.serialize(msg));
+        return;
+      } else {
+        throw new Error('Could not send message: status is not connected');
+      }
+    }
+
+    // If there are pending messages, add to the queue so we keep messages in order
+    if (queue && this._pendingMessages.length > 0) {
+      this._pendingMessages.push(msg);
+      return;
+    }
+
+    // Send if the ws allows it, otherwise queue the message.
     if (
       this.connectionStatus === 'connected' &&
       this._kernelSession !== RESTARTING_KERNEL_SESSION
@@ -436,10 +466,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
-    this._clearKernelState();
     this._updateStatus('restarting');
+    this._clearKernelState();
     this._kernelSession = RESTARTING_KERNEL_SESSION;
     await restapi.restartKernel(this.id, this.serverSettings);
+    // Reconnect to the kernel to address cases where kernel ports
+    // have changed during the restart.
+    await this.reconnect();
   }
 
   /**
@@ -987,27 +1020,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
-   * Handle a restart on the kernel.  This is not part of the `IKernel`
-   * interface.
-   */
-  private async _handleRestart(): Promise<void> {
-    this._clearKernelState();
-    this._updateStatus('restarting');
-
-    // Reconnect to a new websocket and kick off an async kernel request to
-    // eventually reset the kernel status. We do this with a setTimeout so
-    // that it comes after the microtask logic in _handleMessage for
-    // restarting/autostarting status updates.
-    setTimeout(() => {
-      // We must reconnect since the kernel connection information may have
-      // changed, and the server only refreshes its zmq connection when a new
-      // websocket is opened.
-      void this.reconnect();
-      void this.requestKernelInfo();
-    }, 0);
-  }
-
-  /**
    * Forcefully clear the socket state.
    *
    * #### Notes
@@ -1069,6 +1081,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   private _clearKernelState(): void {
     this._kernelSession = '';
+    this._pendingMessages = [];
     this._futures.forEach(future => {
       future.dispose();
     });
@@ -1253,13 +1266,42 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     if (this.status !== 'dead') {
       if (connectionStatus === 'connected') {
-        // Send pending messages, and make sure we send at least one message
-        // to get kernel status back.
-        if (this._pendingMessages.length > 0) {
-          this._sendPending();
-        } else {
-          void this.requestKernelInfo();
-        }
+        let restarting = this._kernelSession === RESTARTING_KERNEL_SESSION;
+
+        // Send a kernel info request to make sure we send at least one
+        // message to get kernel status back. Always request kernel info
+        // first, to get kernel status back and ensure iopub is fully
+        // established. If we are restarting, this message will skip the queue
+        // and be sent immediately.
+        let p = this.requestKernelInfo();
+
+        // Send any pending messages after the kernelInfo resolves, or after a
+        // timeout as a failsafe.
+
+        let sendPendingCalled = false;
+        let sendPendingOnce = () => {
+          if (sendPendingCalled) {
+            return;
+          }
+          sendPendingCalled = true;
+          if (restarting && this._kernelSession === RESTARTING_KERNEL_SESSION) {
+            // We were restarting and a message didn't arrive to set the
+            // session, but we just assume the restart succeeded and send any
+            // pending messages.
+
+            // FIXME: it would be better to retry the kernel_info_request here
+            this._kernelSession = '';
+          }
+          clearTimeout(timeoutHandle);
+          if (this._pendingMessages.length > 0) {
+            this._sendPending();
+          }
+        };
+        void p.then(sendPendingOnce);
+        // FIXME: if sent while zmq subscriptions are not established,
+        // kernelInfo may not resolve, so use a timeout to ensure we don't hang forever.
+        // It may be preferable to retry kernelInfo rather than give up after one timeout.
+        let timeoutHandle = setTimeout(sendPendingOnce, KERNEL_INFO_TIMEOUT);
       } else {
         // If the connection is down, then we do not know what is happening
         // with the kernel, so set the status to unknown.
@@ -1273,11 +1315,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
   private async _handleMessage(msg: KernelMessage.IMessage): Promise<void> {
     let handled = false;
-
-    if (msg.header.msg_type === 'shutdown_reply') {
-      this._kernelSession = msg.header.session;
-      this._sendPending();
-    }
 
     // Check to see if we have a display_id we need to reroute.
     if (
@@ -1317,7 +1354,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
           // Updating the status is synchronous, and we call no async user code
           const executionState = (msg as KernelMessage.IStatusMsg).content
             .execution_state;
-          if (executionState === 'autorestarting') {
+          if (executionState === 'restarting') {
             // The kernel has been auto-restarted by the server. After
             // processing for this message is completely done, we want to
             // handle this restart, so we don't await, but instead schedule
@@ -1325,18 +1362,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
             // schedule this here so that it comes before any microtasks that
             // might be scheduled in the status signal emission below.
             void Promise.resolve().then(async () => {
-              // handleRestart changes the status to 'restarting', so we call it
-              // first so that the status won't flip back and forth between
-              // 'restarting' and 'autorestarting'.
-              await this._handleRestart();
               this._updateStatus('autorestarting');
-            });
-          }
-          if (executionState === 'restarting') {
-            void Promise.resolve().then(async () => {
-              await this._handleRestart();
-              this._kernelSession = msg.header.session;
-              this._updateStatus('restarting');
+              this._clearKernelState();
+
+              // We must reconnect since the kernel connection information may have
+              // changed, and the server only refreshes its zmq connection when a new
+              // websocket is opened.
+              await this.reconnect();
             });
           }
           this._updateStatus(executionState);
@@ -1383,14 +1415,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this._updateConnectionStatus('connecting');
 
       // The first reconnect attempt should happen immediately, and subsequent
-      // attemps should pick a random number in a growing range so that we
+      // attempts should pick a random number in a growing range so that we
       // don't overload the server with synchronized reconnection attempts
       // across multiple kernels.
       const timeout = Private.getRandomIntInclusive(
         0,
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
-      console.error(
+      console.warn(
         `Connection lost, reconnecting in ${Math.floor(
           timeout / 1000
         )} seconds.`

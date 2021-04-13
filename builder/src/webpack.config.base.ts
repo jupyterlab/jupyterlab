@@ -72,18 +72,28 @@ try {
   // no Phosphor shims required
 }
 
+const watch = process.argv.includes('--watch');
+
 module.exports = {
-  bail: true,
+  bail: !watch,
   module: { rules },
-  resolve: { alias: { url: false, buffer: false, ...phosphorAlias } },
+  resolve: {
+    alias: phosphorAlias,
+    fallback: {
+      url: false,
+      buffer: false,
+      // See https://github.com/webpack/webpack/blob/3471c776059ac2d26593ea39f9c47c1874253dbb/lib/ModuleNotFoundError.js#L13-L42
+      path: require.resolve('path-browserify'),
+      process: require.resolve('process/browser')
+    }
+  },
   watchOptions: {
     poll: 500,
     aggregateTimeout: 1000
   },
   plugins: [
-    new webpack.DefinePlugin({
-      'process.env': '{}',
-      process: {}
+    new webpack.ProvidePlugin({
+      process: 'process/browser'
     })
   ]
 };

@@ -1,6 +1,4 @@
 {
-  "excludeNotExported": true,
-  "mode": "file",
   "out": "../../docs/api/application-extension",
   "theme": "../../typedoc-theme"
 }

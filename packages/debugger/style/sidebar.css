@@ -17,7 +17,7 @@
   height: 100%;
 }
 
-.jp-DebuggerSidebar header {
+.jp-DebuggerSidebar .jp-stack-panel-header {
   border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
   box-shadow: var(--jp-toolbar-box-shadow);
   display: flex;
@@ -27,11 +27,11 @@
   height: 24px;
 }
 
-.jp-DebuggerSidebar > header {
+.jp-DebuggerSidebar > .jp-stack-panel-header {
   background-color: var(--jp-layout-color1);
 }
 
-.jp-DebuggerSidebar header h2 {
+.jp-DebuggerSidebar .jp-stack-panel-header h2 {
   text-transform: uppercase;
   font-weight: 600;
   font-size: var(--jp-ui-font-size0);
@@ -40,12 +40,12 @@
   padding-right: 4px;
 }
 
-.jp-DebuggerSidebar-body header {
+.jp-DebuggerSidebar-body .jp-stack-panel-header {
   border-top: solid var(--jp-border-width) var(--jp-border-color1);
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DebuggerSidebar-body .jp-DebuggerVariables header {
+.jp-DebuggerSidebar-body .jp-DebuggerVariables .jp-stack-panel-header {
   border-top: none;
 }
 

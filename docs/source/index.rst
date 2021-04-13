@@ -3,10 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+########################
 JupyterLab Documentation
-========================
+########################
 
-JupyterLab is the next-generation web-based user interface for Project Jupyter. `Try it on Binder <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab/tree/demo>`__.  JupyterLab follows the Jupyter `Community Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
+JupyterLab is the next-generation web-based user interface for Project Jupyter. `Try it on Binder <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/3818244?urlpath=lab/tree/demo>`__.  JupyterLab follows the Jupyter `Community Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
 
 .. image:: ./images/jupyterlab.png
    :align: center
@@ -45,26 +46,30 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
    user/jupyterhub
    user/export
    user/language
+   user/directories
 
 .. toctree::
    :maxdepth: 1
-   :caption: Developer Guide
+   :caption: Extension Developer Guide
 
-   developer/repo
-   developer/extension_dev
-   developer/extension_points
+   extension/extension_dev
+   extension/extension_points
+   extension/ui_components
+   extension/documents
+   extension/notebook
+   extension/virtualdom
+   extension/ui_helpers
+   extension/extension_tutorial
+   extension/extension_migration
+
+.. toctree::
+   :maxdepth: 1
+   :caption: JupyterLab Developer Guide
+
    developer/contributing
+   developer/repo
    developer/components
-   developer/ui_components
-   developer/documents
-   developer/notebook
    developer/patterns
    developer/css
-   developer/virtualdom
-   developer/ui_helpers
-   developer/terminology
-   developer/extension_tutorial
-   developer/extension_migration
-   developer/extension_migration_2_3
    developer/api
 

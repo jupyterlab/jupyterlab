@@ -573,7 +573,7 @@ export class Context<
     const opts: Contents.IFetchOptions = {
       format: this._factory.fileFormat,
       type: this._factory.contentType,
-      content: true
+      content: this._factory.fileFormat !== null
     };
     const path = this._path;
     const model = this._model;

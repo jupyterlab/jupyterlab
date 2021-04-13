@@ -2,7 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
+import {
+  VDomRenderer,
+  ToolbarButtonComponent,
+  Dialog,
+  showDialog
+} from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
@@ -230,9 +235,13 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
-            <a href={entry.url} target="_blank" rel="noopener noreferrer">
-              {entry.name}
-            </a>
+            {entry.url ? (
+              <a href={entry.url} target="_blank" rel="noopener noreferrer">
+                {entry.name}
+              </a>
+            ) : (
+              <div>{entry.name}</div>
+            )}
           </div>
           {entry.blockedExtensionsEntry && (
             <ToolbarButtonComponent
@@ -279,6 +288,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           </div>
           <div className="jp-extensionmanager-entry-buttons">
             {!entry.installed &&
+              entry.pkg_type == 'source' &&
               !entry.blockedExtensionsEntry &&
               !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
               ListModel.isDisclaimed() && (
@@ -291,6 +301,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 </Button>
               )}
             {ListModel.entryHasUpdate(entry) &&
+              entry.pkg_type == 'source' &&
               !entry.blockedExtensionsEntry &&
               !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
               ListModel.isDisclaimed() && (
@@ -302,7 +313,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                   {trans.__('Update')}
                 </Button>
               )}
-            {entry.installed && (
+            {entry.installed && entry.pkg_type == 'source' && (
               <Button
                 onClick={() => props.performAction('uninstall', entry)}
                 minimal
@@ -311,7 +322,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Uninstall')}
               </Button>
             )}
-            {entry.enabled && (
+            {entry.enabled && entry.pkg_type == 'source' && (
               <Button
                 onClick={() => props.performAction('disable', entry)}
                 minimal
@@ -320,7 +331,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Disable')}
               </Button>
             )}
-            {entry.installed && !entry.enabled && (
+            {entry.installed && entry.pkg_type == 'source' && !entry.enabled && (
               <Button
                 onClick={() => props.performAction('enable', entry)}
                 minimal
@@ -329,10 +340,72 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Enable')}
               </Button>
             )}
+            {entry.installed && entry.pkg_type == 'prebuilt' && (
+              <div className="jp-extensionmanager-entry-buttons">
+                <Button
+                  onClick={() =>
+                    showDialog({
+                      title,
+                      body: (
+                        <div>
+                          {getprebuiltUninstallInstruction(entry, trans)}
+                        </div>
+                      ),
+                      buttons: [
+                        Dialog.okButton({
+                          label: trans.__('OK'),
+                          caption: trans.__('OK')
+                        })
+                      ]
+                    }).then(result => {
+                      return result.button.accept;
+                    })
+                  }
+                  minimal
+                  small
+                >
+                  {trans.__('About')}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </li>
+  );
+}
+
+function getprebuiltUninstallInstruction(
+  entry: IEntry,
+  trans: TranslationBundle
+): JSX.Element {
+  if (entry.install?.uninstallInstructions) {
+    return (
+      <div>
+        <p>
+          {trans.__(`This is a prebuilt extension. To uninstall it, please
+    apply following instructions.`)}
+        </p>
+        <p>{trans.__(entry.install?.uninstallInstructions)}</p>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <p>
+        {trans.__(`This is a prebuilt extension. To uninstall it, please
+    read the user guide on:`)}
+      </p>
+      <p>
+        <a
+          href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          https://jupyterlab.readthedocs.io/en/stable/user/extensions.html
+        </a>
+      </p>
+    </div>
   );
 }
 
@@ -509,7 +582,7 @@ export class CollapsibleSection extends React.Component<
     }
     return (
       <>
-        <header>
+        <div className="jp-stack-panel-header">
           <ToolbarButtonComponent
             icon={icon}
             onClick={() => {
@@ -518,7 +591,7 @@ export class CollapsibleSection extends React.Component<
           />
           <span className={className}>{this.props.header}</span>
           {!this.props.disabled && this.props.headerElements}
-        </header>
+        </div>
         <Collapse isOpen={isOpen}>{this.props.children}</Collapse>
       </>
     );

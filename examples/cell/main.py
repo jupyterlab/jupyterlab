@@ -13,11 +13,11 @@ run ``python main.py``.
 """
 import os
 import json
-from jupyter_server.base.handlers import JupyterHandler, FileFindHandler
-from jupyter_server.extension.handler import ExtensionHandlerMixin, ExtensionHandlerJinjaMixin
+
 from jupyterlab_server import LabServerApp
+from jupyter_server.base.handlers import JupyterHandler
+from jupyter_server.extension.handler import ExtensionHandlerMixin, ExtensionHandlerJinjaMixin
 from jupyter_server.utils import url_path_join as ujoin
-from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
 
@@ -63,6 +63,7 @@ class ExampleHandler(
 class ExampleApp(LabServerApp):
 
     extension_url = '/example'
+    default_url = '/example'
     app_url = "/example"
     name = __name__
     load_other_extensions = False

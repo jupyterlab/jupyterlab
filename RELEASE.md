@@ -71,15 +71,26 @@ Results:
 
 ## Publishing Packages
 
-Now publish the JS packages and build the python packages
+Now publish the JS packages
 
 ```bash
-npm run publish:all
+npm run publish:js
 ```
 
-If there is a network error during JS publish, run `npm run publish:all --skip-build` to resume publish without requiring another clean and build phase of the JS packages.
+If there is a network error during JS publish, run `npm run publish:js --skip-build` to resume publish without requiring another clean and build phase of the JS packages.
 
 Note that the use of `npm` instead of `jlpm` is [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
+
+Next, prepare the python release by running:
+
+```bash
+npm run prepare:python-release
+```
+
+This will update the Python package to use the new JS packages and
+create the Python release assets. Note: sometimes the npm registry
+is slow to update with the new packages, so this script tries to fetch
+the packages until they are available.
 
 At this point, run the `./scripts/release_test.sh` to test the wheel in
 a fresh conda environment with and without extensions installed. Open and run
@@ -107,7 +118,7 @@ These lines:
 ## Post release candidate checklist
 
 - [ ] Modify and run `python scripts/milestone_check.py` to check the issues assigned to this milestone
-- [ ] Write [release highlights](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/getting_started/changelog.rst), starting with:
+- [ ] Write [release highlights](CHANGELOG.md), starting with:
   ```bash
   loghub jupyterlab/jupyterlab -m XXX -t $GITHUB_TOKEN --template scripts/release_template.txt
   ```
@@ -127,7 +138,7 @@ These lines:
   - [ ] https://github.com/jupyterlab/jupyter-renderers
 - [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
 - [ ] Update the extension examples:
-  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar)
+  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
 - [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 

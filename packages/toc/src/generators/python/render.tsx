@@ -14,7 +14,14 @@ import { IHeading } from '../../utils/headings';
 function render(item: IHeading) {
   let fontSizeClass = 'toc-level-size-' + item.level;
 
-  return <span className={fontSizeClass}> {item.text} </span>;
+  return (
+    <div className={fontSizeClass + ' toc-entry-holder'}>
+      <div className="jp-Collapser p-Widget lm-Widget">
+        <div className="toc-Collapser-child"></div>
+      </div>
+      <span className="header-cell toc-cell-item"> {item.text} </span>
+    </div>
+  );
 }
 
 /**

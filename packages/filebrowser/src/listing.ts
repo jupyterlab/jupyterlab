@@ -984,9 +984,7 @@ export class DirListing extends Widget {
         );
     } else {
       const path = item.path;
-      this._manager.openOrReveal(path, 'default', undefined, {
-        maybeNewWorkspace: true
-      });
+      this._manager.openOrReveal(path);
     }
   }
 

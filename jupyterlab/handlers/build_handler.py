@@ -29,6 +29,7 @@ class Builder(object):
         self.core_mode = core_mode
         self.app_dir = app_options.app_dir
         self.core_config = app_options.core_config
+        self.labextensions_path = app_options.labextensions_path
 
     @gen.coroutine
     def get_status(self):
@@ -39,7 +40,7 @@ class Builder(object):
 
         try:
             messages = yield self._run_build_check(
-                self.app_dir, self.log, self.core_config)
+                self.app_dir, self.log, self.core_config, self.labextensions_path)
             status = 'needed' if messages else 'stable'
             if messages:
                 self.log.warn('Build recommended')
@@ -66,7 +67,7 @@ class Builder(object):
             self._kill_event = evt = Event()
             try:
                 yield self._run_build(
-                    self.app_dir, self.log, evt, self.core_config)
+                    self.app_dir, self.log, evt, self.core_config, self.labextensions_path)
                 future.set_result(True)
             except Exception as e:
                 if str(e) == 'Aborted':
@@ -90,23 +91,23 @@ class Builder(object):
         self.canceled = True
 
     @run_on_executor
-    def _run_build_check(self, app_dir, logger, core_config):
+    def _run_build_check(self, app_dir, logger, core_config, labextensions_path):
         return build_check(app_options=AppOptions(
-            app_dir=app_dir, logger=logger, core_config=core_config))
+            app_dir=app_dir, logger=logger, core_config=core_config, labextensions_path=labextensions_path))
 
     @run_on_executor
-    def _run_build(self, app_dir, logger, kill_event, core_config):
+    def _run_build(self, app_dir, logger, kill_event, core_config, labextensions_path):
         app_options = AppOptions(
             app_dir=app_dir, logger=logger, kill_event=kill_event,
-            core_config=core_config)
+            core_config=core_config, labextensions_path=labextensions_path)
         try:
-            return build(command='build', app_options=app_options)
+            return build(app_options=app_options)
         except Exception as e:
             if self._kill_event.is_set():
                 return
             self.log.warn('Build failed, running a clean and rebuild')
             clean(app_options=app_options)
-            return build(command='build', app_options=app_options)
+            return build(app_options=app_options)
 
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):

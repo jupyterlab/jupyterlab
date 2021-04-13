@@ -23,7 +23,7 @@ export namespace WPPlugin {
       this._first = true;
     }
 
-    apply(compiler: any) {
+    apply(compiler: webpack.Compiler): void {
       compiler.hooks.afterEmit.tap('FrontEndPlugin', () => {
         // bail if no staticDir
         if (!this.staticDir) {
@@ -44,27 +44,6 @@ export namespace WPPlugin {
     staticDir: string;
 
     private _first: boolean;
-  }
-
-  /**
-   * A WebPack Plugin that ignores files that are filtered by a callback
-   */
-  export class FilterIgnorePlugin extends webpack.IgnorePlugin {
-    constructor(ignored: (path: string) => boolean) {
-      super({});
-
-      // ignored should be a callback function that filters the build files
-      this.ignored = ignored;
-    }
-
-    checkIgnore(result: any): any | null {
-      if (!result) {
-        return result;
-      }
-      return this.ignored(result.resource) ? result : null;
-    }
-
-    ignored: (path: string) => boolean;
   }
 
   /**
@@ -131,7 +110,7 @@ export namespace WPPlugin {
         close: () => watcher.close(),
         pause: () => watcher.pause(),
         getContextTimeInfoEntries: () => {
-          const dirTimestamps = watcher.getContextInfoEntries();
+          const dirTimestamps = watcher.getContextTimeInfoEntries();
           for (const path of ignoredDirs) {
             dirTimestamps.set(path, IGNORE_TIME_ENTRY);
           }
@@ -160,7 +139,7 @@ export namespace WPPlugin {
       this.ignored = ignored;
     }
 
-    apply(compiler: any) {
+    apply(compiler: webpack.Compiler): void {
       compiler.hooks.afterEnvironment.tap('FilterWatchIgnorePlugin', () => {
         compiler.watchFileSystem = new FilterIgnoringWatchFileSystem(
           compiler.watchFileSystem,
@@ -173,12 +152,12 @@ export namespace WPPlugin {
   }
 
   export class NowatchDuplicatePackageCheckerPlugin extends DuplicatePackageCheckerPlugin {
-    apply(compiler: any) {
+    apply(compiler: webpack.Compiler): void {
       const options = this.options;
 
       compiler.hooks.run.tap(
         'NowatchDuplicatePackageCheckerPlugin',
-        (compiler: any) => {
+        compiler => {
           const p = new DuplicatePackageCheckerPlugin(options);
           p.apply(compiler);
         }

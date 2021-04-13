@@ -1,16 +1,12 @@
-import pytest, shutil, os
-
 import urllib.parse
 
+import pytest
+from jupyter_server.utils import url_path_join
+from jupyterlab_server import LabConfig
 from tornado.escape import url_escape
-
 from traitlets import Unicode
 
 from jupyterlab import LabApp
-from jupyterlab_server import LabConfig
-from jupyterlab_server.tests.utils import here
-from jupyterlab_server.app import LabServerApp
-from jupyter_server.utils import url_path_join
 
 
 def mkdir(tmp_path, *parts):
@@ -25,7 +21,7 @@ schemas_dir = pytest.fixture(lambda tmp_path: mkdir(tmp_path, 'schemas'))
 workspaces_dir = pytest.fixture(lambda tmp_path: mkdir(tmp_path, 'workspaces'))
 
 @pytest.fixture
-def make_lab_app(root_dir, template_dir, app_settings_dir, user_settings_dir, schemas_dir, workspaces_dir):
+def make_lab_app(jp_root_dir, jp_template_dir, app_settings_dir, user_settings_dir, schemas_dir, workspaces_dir):
     def _make_lab_app(**kwargs):
         class TestLabApp(LabApp):
             base_url = '/lab'
@@ -34,8 +30,8 @@ def make_lab_app(root_dir, template_dir, app_settings_dir, user_settings_dir, sc
                                 help='The default URL to redirect to from `/`')
             lab_config = LabConfig(
                 app_name = 'JupyterLab Test App',
-                static_dir = str(root_dir),
-                templates_dir = str(template_dir),
+                static_dir = str(jp_root_dir),
+                templates_dir = str(jp_template_dir),
                 app_url = '/lab',
                 app_settings_dir = str(app_settings_dir),
                 user_settings_dir = str(user_settings_dir),
@@ -46,7 +42,7 @@ def make_lab_app(root_dir, template_dir, app_settings_dir, user_settings_dir, sc
         return app
 
     # Create the index files.
-    index = template_dir.joinpath('index.html')
+    index = jp_template_dir.joinpath('index.html')
     index.write_text("""
 <!DOCTYPE html>
 <html>
@@ -56,10 +52,10 @@ def make_lab_app(root_dir, template_dir, app_settings_dir, user_settings_dir, sc
 <body>
     {# Copy so we do not modify the page_config with updates. #}
     {% set page_config_full = page_config.copy() %}
-    
+
     {# Set a dummy variable - we just want the side effect of the update. #}
     {% set _ = page_config_full.update(baseUrl=base_url, wsUrl=ws_url) %}
-    
+
       <script id="jupyter-config-data" type="application/json">
         {{ page_config_full | tojson }}
       </script>
@@ -83,25 +79,26 @@ def make_lab_app(root_dir, template_dir, app_settings_dir, user_settings_dir, sc
 
 
 @pytest.fixture
-def labapp(serverapp, make_lab_app):
+def labapp(jp_serverapp, make_lab_app):
     app = make_lab_app()
-    app._link_jupyter_server_extension(serverapp)
+    app._link_jupyter_server_extension(jp_serverapp)
     app.initialize()
     return app
 
 
 @pytest.fixture
-def fetch_long(http_server_client, auth_header, base_url):
+def fetch_long(http_server_client, jp_auth_header, jp_base_url):
     """fetch fixture that handles auth, base_url, and path"""
     def client_fetch(*parts, headers={}, params={}, **kwargs):
         # Handle URL strings
-        path_url = url_escape(url_path_join(base_url, *parts), plus=False)
+        path_url = url_escape(url_path_join(*parts), plus=False)
+        path_url = url_path_join(jp_base_url, path_url)
         params_url = urllib.parse.urlencode(params)
         url = path_url + "?" + params_url
         # Add auth keys to header
-        headers.update(auth_header)
+        headers.update(jp_auth_header)
         # Make request.
         return http_server_client.fetch(
-            url, headers=headers, request_timeout=150, **kwargs
+            url, headers=headers, request_timeout=250, **kwargs
         )
     return client_fetch

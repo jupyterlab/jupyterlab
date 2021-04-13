@@ -24,8 +24,12 @@ jupyterlab/geckodriver
 jupyterlab/static
 jupyterlab/schemas
 jupyterlab/themes
-jupyterlab/imports.css
+jupyterlab/style.js
 jupyterlab/tests/**/static
+jupyterlab/tests/**/labextension
+
+# Remove after next release
+jupyterlab/imports.css
 
 packages/nbconvert-css/style/
 packages/services/examples/node/config.json
@@ -52,6 +56,8 @@ __pycache__
 *.egg-info
 .ipynb_checkpoints
 pip-wheel-metadata
+Pipfile
+Pipfile.lock
 
 # xeus-python debug logs
 xpython_debug_logs
@@ -89,6 +95,9 @@ iframe_figures/
 
 lerna-debug.log
 yarn-error.log
+
+# copied changelog file
+docs/source/getting_started/changelog.md
 
 junit.xml
 

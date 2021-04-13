@@ -79,6 +79,37 @@ export interface IEntry {
   blockedExtensionsEntry: IListEntry | undefined;
 
   allowedExtensionsEntry: IListEntry | undefined;
+
+  /**
+   * The package type (prebuilt or source).
+   */
+  pkg_type: 'prebuilt' | 'source';
+
+  /**
+   * The information about extension installation.
+   */
+  install: IInstall | undefined;
+}
+
+/**
+ * Information about extension installation.
+ */
+export interface IInstall {
+  /**
+   * The used pacakge manager (e.g. pip, conda...)
+   */
+  packageManager: string | undefined;
+
+  /**
+   * The package name as known by the package manager.
+   */
+  packageName: string | undefined;
+
+  /**
+   * The uninstallation instructions as a comprehensive
+   * text for the end user.
+   */
+  uninstallInstructions: string | undefined;
 }
 
 /**
@@ -124,6 +155,37 @@ export interface IInstalledEntry {
    * A flag indicating the status of an installed extension.
    */
   status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
+
+  /**
+   * The package type (prebuilt or source).
+   */
+  pkg_type: 'prebuilt' | 'source';
+
+  /**
+   * The information about extension installation.
+   */
+  install: IInstallEntry | undefined;
+}
+
+/**
+ * Information about extension installation.
+ */
+export interface IInstallEntry {
+  /**
+   * The used pacakge manager (e.g. pip, conda...)
+   */
+  packageManager: string | undefined;
+
+  /**
+   * The package name as known by the package manager.
+   */
+  packageName: string | undefined;
+
+  /**
+   * The uninstallation instructions as a comprehensive
+   * text for the end user.
+   */
+  uninstallInstructions: string | undefined;
 }
 
 /**
@@ -522,7 +584,9 @@ export class ListModel extends VDomModel {
         latest_version: pkg.version,
         installed_version: '',
         blockedExtensionsEntry: isblockedExtensions,
-        allowedExtensionsEntry: isallowedExtensions
+        allowedExtensionsEntry: isallowedExtensions,
+        pkg_type: 'source',
+        install: undefined
       };
     }
     return entries;
@@ -557,7 +621,13 @@ export class ListModel extends VDomModel {
             allowedExtensionsEntry: this.isListed(
               pkg.name,
               this._allowedExtensionsArray
-            )
+            ),
+            pkg_type: pkg.pkg_type,
+            install: {
+              packageManager: pkg.install?.packageManager,
+              packageName: pkg.install?.packageName,
+              uninstallInstructions: pkg.install?.uninstallInstructions
+            }
           };
         })
       );
@@ -675,32 +745,30 @@ export class ListModel extends VDomModel {
    * Emits the `stateChanged` signal on successful completion.
    */
   protected async update(refreshInstalled = false) {
-    // Start both queries before awaiting:
+    if (ListModel.isDisclaimed()) {
+      const [searchMap, installedMap] = await Promise.all([
+        this.performSearch(),
+        this.queryInstalled(refreshInstalled)
+      ]);
 
-    const searchMapPromise = this.performSearch();
-    const installedMapPromise = this.queryInstalled(refreshInstalled);
-
-    // Await results:
-    const searchMap = await searchMapPromise;
-    const installedMap = await installedMapPromise;
-
-    // Map results to attributes:
-    const installed: IEntry[] = [];
-    for (const key of Object.keys(installedMap)) {
-      installed.push(installedMap[key]);
-    }
-    this._installed = installed.sort(Private.comparator);
-
-    const searchResult: IEntry[] = [];
-    for (const key of Object.keys(searchMap)) {
-      // Filter out installed entries from search results:
-      if (installedMap[key] === undefined) {
-        searchResult.push(searchMap[key]);
-      } else {
-        searchResult.push(installedMap[key]);
+      // Map results to attributes:
+      const installed: IEntry[] = [];
+      for (const key of Object.keys(installedMap)) {
+        installed.push(installedMap[key]);
       }
+      this._installed = installed.sort(Private.comparator);
+
+      const searchResult: IEntry[] = [];
+      for (const key of Object.keys(searchMap)) {
+        // Filter out installed entries from search results:
+        if (installedMap[key] === undefined) {
+          searchResult.push(searchMap[key]);
+        } else {
+          searchResult.push(installedMap[key]);
+        }
+      }
+      this._searchResult = searchResult.sort(Private.comparator);
     }
-    this._searchResult = searchResult.sort(Private.comparator);
 
     // Signal updated state
     this.stateChanged.emit(undefined);
@@ -823,7 +891,7 @@ export class ListModel extends VDomModel {
 
   protected translator: ITranslator;
   private _app: JupyterFrontEnd;
-  private _query: string | null = null;
+  private _query: string | null = ''; // TODO: we may not need the null case?
   private _page: number = 0;
   private _pagination: number = 250;
   private _totalEntries: number = 0;

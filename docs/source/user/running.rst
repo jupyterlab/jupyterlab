@@ -1,7 +1,7 @@
 .. _running:
 
 Managing Kernels and Terminals
-------------------------------
+==============================
 
 The Running panel in the left sidebar shows a list of all the kernels and
 terminals currently running across all notebooks, code consoles, and

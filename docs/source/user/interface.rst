@@ -1,7 +1,7 @@
 .. _interface:
 
 The JupyterLab Interface
-------------------------
+========================
 
 JupyterLab provides flexible building blocks for interactive,
 exploratory computing. While JupyterLab has many features found in
@@ -30,7 +30,7 @@ To learn more about URLs in Jupyterlab, visit :ref:`urls`.
 .. _menu-bar:
 
 Menu Bar
-~~~~~~~~
+--------
 
 The menu bar at the top of JupyterLab has top-level menus that expose
 actions available in JupyterLab with their keyboard shortcuts. The
@@ -53,7 +53,7 @@ bar.
 .. _left-sidebar:
 
 Left Sidebar
-~~~~~~~~~~~~
+------------
 
 The left sidebar contains a number of commonly-used tabs, such as a file
 browser, a list of running kernels and terminals, the command palette,
@@ -80,7 +80,7 @@ JupyterLab extensions can add additional panels to the left sidebar.
 .. _main-area:
 
 Main Work Area
-~~~~~~~~~~~~~~
+--------------
 
 .. _main-area-vid:
 
@@ -101,8 +101,8 @@ marked with a colored top border (blue by default).
 
 .. _tabs:
 
-Tabs and Single-Document Mode
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tabs and Simple Interface Mode
+------------------------------
 
 The Tabs panel in the left sidebar lists the open documents or
 activities in the main work area:
@@ -120,9 +120,9 @@ The same information is also available in the Tabs menu:
 .. _tabs-singledocument:
 
 It is often useful to focus on a single document or activity without closing
-other tabs in the main work area. Single-document mode enable this, while making
-it simple to return to your multi-activity layout in the main work area.
-Toggle single-document mode using the View menu:
+other tabs in the main work area. Simple Interface mode enables this, while making
+it easy to return to your multi-activity layout in the main work area.
+Toggle Simple Interface mode using the View menu:
 
 .. raw:: html
 
@@ -130,11 +130,11 @@ Toggle single-document mode using the View menu:
     <iframe src="https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-When you leave single-document mode, the original layout of the main
+When you leave Simple Interface mode, the original layout of the main
 area is restored.
 
 Context Menus
-~~~~~~~~~~~~~
+-------------
 
 .. _context-menus-rightclick:
 
@@ -162,7 +162,7 @@ The browser’s native context menu can be accessed by holding down
 .. _shortcuts:
 
 Keyboard Shortcuts
-~~~~~~~~~~~~~~~~~~
+------------------
 
 .. _shortcuts-settings:
 

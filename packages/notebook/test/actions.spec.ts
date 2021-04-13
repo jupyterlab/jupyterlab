@@ -625,7 +625,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#runAndAdvance()', () => {
-      it('should run the selected cells ', async () => {
+      it('should run the selected cells', async () => {
         const next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         const cell = widget.activeCell as CodeCell;
@@ -650,7 +650,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should clear the existing selection', async () => {
-        const next = widget.widgets[2];
+        const next = widget.widgets[3];
         widget.select(next);
         const result = await NotebookActions.runAndAdvance(
           widget,
@@ -742,7 +742,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#runAndInsert()', () => {
-      it('should run the selected cells ', async () => {
+      it('should run the selected cells', async () => {
         const next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         const cell = widget.activeCell as CodeCell;

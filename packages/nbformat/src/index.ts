@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module nbformat
+ */
 
 // Notebook format interfaces
 // https://nbformat.readthedocs.io/en/latest/format_description.html
@@ -8,12 +12,12 @@
 import { PartialJSONObject, JSONExt } from '@lumino/coreutils';
 
 /**
- * The major version of the notebook format.
+ * The earliest major version of the notebook format we support.
  */
 export const MAJOR_VERSION: number = 4;
 
 /**
- * The minor version of the notebook format.
+ * The earliest minor version of the notebook format we support.
  */
 export const MINOR_VERSION: number = 4;
 
@@ -215,6 +219,14 @@ export interface IRawCellMetadata extends IBaseCellMetadata {
  */
 export interface IRawCell extends IBaseCell {
   /**
+   * A string field representing the identifier of this particular cell.
+   *
+   * Notebook format 4.4 requires no id field, but format 4.5 requires an id
+   * field. We need to handle both cases, so we make id optional here.
+   */
+  id?: string;
+
+  /**
    * String identifying the type of cell.
    */
   cell_type: 'raw';
@@ -234,6 +246,14 @@ export interface IRawCell extends IBaseCell {
  * A markdown cell.
  */
 export interface IMarkdownCell extends IBaseCell {
+  /**
+   * A string field representing the identifier of this particular cell.
+   *
+   * Notebook format 4.4 requires no id field, but format 4.5 requires an id
+   * field. We need to handle both cases, so we make id optional here.
+   */
+  id?: string;
+
   /**
    * String identifying the type of cell.
    */
@@ -279,6 +299,14 @@ export interface ICodeCellMetadata extends IBaseCellMetadata {
  * A code cell.
  */
 export interface ICodeCell extends IBaseCell {
+  /**
+   * A string field representing the identifier of this particular cell.
+   *
+   * Notebook format 4.4 requires no id field, but format 4.5 requires an id
+   * field. We need to handle both cases, so we make id optional here.
+   */
+  id?: string;
+
   /**
    * String identifying the type of cell.
    */

@@ -5,6 +5,8 @@ import { IThemeManager, ToolbarButton } from '@jupyterlab/apputils';
 
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
+import { tableRowsIcon, treeViewIcon } from '@jupyterlab/ui-components';
+
 import { CommandRegistry } from '@lumino/commands';
 
 import { Panel, Widget } from '@lumino/widgets';
@@ -14,6 +16,8 @@ import { IDebugger } from '../../tokens';
 import { VariablesBodyGrid } from './grid';
 
 import { VariablesHeader } from './header';
+
+import { ScopeSwitcher } from './scope';
 
 import { VariablesBodyTree } from './tree';
 
@@ -37,27 +41,62 @@ export class Variables extends Panel {
     this._table = new VariablesBodyGrid({ model, commands, themeManager });
     this._table.hide();
 
-    const onClick = (): void => {
+    this._header.toolbar.addItem(
+      'scope-switcher',
+      new ScopeSwitcher({
+        translator,
+        model,
+        tree: this._tree,
+        grid: this._table
+      })
+    );
+
+    const onViewChange = (): void => {
       if (this._table.isHidden) {
         this._tree.hide();
         this._table.show();
         this.node.setAttribute('data-jp-table', 'true');
+        markViewButtonSelection('table');
       } else {
         this._tree.show();
         this._table.hide();
         this.node.removeAttribute('data-jp-table');
+        markViewButtonSelection('tree');
       }
       this.update();
     };
 
-    this._header.toolbar.addItem(
-      'view-VariableSwitch',
-      new ToolbarButton({
-        iconClass: 'jp-ToggleSwitch',
-        onClick,
-        tooltip: trans.__('Table / Tree View')
-      })
-    );
+    const treeViewButton = new ToolbarButton({
+      icon: treeViewIcon,
+      className: 'jp-TreeView',
+      onClick: onViewChange,
+      tooltip: trans.__('Tree View')
+    });
+
+    const tableViewButton = new ToolbarButton({
+      icon: tableRowsIcon,
+      className: 'jp-TableView',
+      onClick: onViewChange,
+      tooltip: trans.__('Table View')
+    });
+
+    const markViewButtonSelection = (selectedView: string): void => {
+      const viewModeClassName = 'jp-ViewModeSelected';
+
+      if (selectedView === 'tree') {
+        tableViewButton.removeClass(viewModeClassName);
+        treeViewButton.addClass(viewModeClassName);
+      } else {
+        treeViewButton.removeClass(viewModeClassName);
+        tableViewButton.addClass(viewModeClassName);
+      }
+    };
+
+    markViewButtonSelection(this._table.isHidden ? 'tree' : 'table');
+
+    this._header.toolbar.addItem('view-VariableTreeView', treeViewButton);
+
+    this._header.toolbar.addItem('view-VariableTableView', tableViewButton);
 
     this.addWidget(this._header);
     this.addWidget(this._tree);
@@ -115,7 +154,7 @@ export const convertType = (variable: IDebugger.IVariable): string | number => {
     case 'str':
       return value.slice(1, value.length - 1);
     default:
-      return type ?? '';
+      return type ?? value;
   }
 };
 

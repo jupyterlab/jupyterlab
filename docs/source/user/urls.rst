@@ -1,7 +1,7 @@
 .. _urls:
 
 JupyterLab URLs
----------------
+===============
 
 Like the classic notebook, JupyterLab provides a way for users to copy URLs that
 open a specific notebook or file. Additionally, JupyterLab URLs are an advanced
@@ -12,7 +12,7 @@ specific file in a specific workspace <url-combine>`.
 .. _url-tree:
 
 File Navigation with ``/tree``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 
 JupyterLab's file navigation URLs adopts
 the nomenclature of the classic notebook; these URLs are ``/tree`` URLs:
@@ -38,7 +38,7 @@ directory in the file browser.
 .. _url-workspaces-ui:
 
 Managing Workspaces (UI)
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 JupyterLab sessions always reside in a workspace. Workspaces contain the state
 of JupyterLab: the files that are currently open, the layout of the application
@@ -68,7 +68,7 @@ tabs simultaneously is also not supported.
 .. _url-clone:
 
 Cloning Workspaces
-~~~~~~~~~~~~~~~~~~
+------------------
 
 You can copy the contents of a workspace into another workspace with the ``clone`` url parameter.
 
@@ -93,7 +93,7 @@ To copy the contents of the workspace ``foo`` into the default workspace:
 .. _url-reset:
 
 Resetting a Workspace
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 Use the ``reset`` url parameter to clear a workspace of its contents.
 
@@ -112,7 +112,7 @@ To reset the contents of the default workspace:
 .. _url-combine:
 
 Combining URL Functions
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 These URL functions can be used separately, as above, or in combination.
 
@@ -138,7 +138,7 @@ To reset the contents of the default workspace and load a notebook:
 .. _url-workspaces-cli:
 
 Managing Workspaces (CLI)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 JupyterLab provides a command-line interface for workspace ``import`` and
 ``export``:
@@ -171,7 +171,7 @@ default workspace.
 
 
 Workspace File Format
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 A workspace file in a JSON file with a specific spec.
 

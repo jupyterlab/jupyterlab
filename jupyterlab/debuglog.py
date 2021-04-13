@@ -13,8 +13,9 @@ import sys
 import tempfile
 import traceback
 
-from traitlets import Unicode, default
+from traitlets import Unicode
 from traitlets.config import Configurable
+
 
 class DebugLogFileMixin(Configurable):
     debug_log_path = Unicode('', config=True, help='Path to use for the debug log file')

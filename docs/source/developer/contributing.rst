@@ -1,5 +1,5 @@
 Contributing to JupyterLab
---------------------------
+==========================
 
 If you're reading this section, you're probably interested in
 contributing to JupyterLab. Welcome and thanks for your interest in
@@ -29,7 +29,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
     :depth: 1
 
 General Guidelines for Contributing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 
 For general documentation about contributing to Jupyter projects, see
 the `Project Jupyter Contributor
@@ -57,13 +57,13 @@ configuring it to format your code with a keyboard shortcut or
 automatically on save.
 
 Submitting a Pull Request Contribution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 Generally, an issue should be opened describing a piece of proposed work
 and the issues it solves before a pull request is opened.
 
 Issue Management
-''''''''''''''''
+^^^^^^^^^^^^^^^^
 
 Opening an issue lets community members participate in the design
 discussion, makes others aware of work being done, and sets the stage
@@ -77,27 +77,39 @@ discussion is desired, or if the pull request doesn't fully address the
 locked issue, please open a new issue referencing the locked issue.
 
 Tag Issues with Labels
-''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^
 
 Users without the commit rights to the JupyterLab repository can tag
 issues with labels using the ``@meeseeksdev`` bot. For example: To apply
 the label ``foo`` and ``bar baz`` to an issue, comment
 ``@meeseeksdev tag foo "bar baz"`` on the issue.
 
-Setting Up a Development Environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Contributing from within the browser
+------------------------------------
+Using the https://github.com web interface - documented
+`here <https://docs.github.com/en/free-pro-team@latest/github>`__ - you
+can create and propose a change purely within your browser.
 
-You can launch a binder with the latest JupyterLab master to test
-something (this may take a few minutes to load):
+Using `Binder <https://mybinder.org>`__, you can test the current master branch and your
+changes within the browser as well. We recommend you have at least 8 GB of RAM for this.
+To build and launch an instance of the latest JupyterLab master, open
+`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/>`__
+in a new tab. The build takes about 7 minutes to complete.
 
-.. image:: https://mybinder.org/badge_logo.svg
-   :target: https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/
+To test your own branch hosted on GitHub, enter it on https://mybinder.org.
+If everything goes right, filling out the form takes about 2 minutes, and the build should take
+about 7 minutes again.
+
+Setting up a local development environment
+------------------------------------------
+This section explains how to set up a local development environment. We assume you use GNU/Linux,
+Mac OS X, or Windows Subsystem for Linux.
 
 Installing Node.js and jlpm
-'''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Building JupyterLab from its GitHub source code requires Node.js. The
-development version requires Node.js version 10+, as defined in the
+development version requires Node.js version 12+, as defined in the
 ``engines`` specification in
 `dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/master/dev_mode/package.json>`__.
 
@@ -123,7 +135,7 @@ To check which version of Node.js is installed:
    node -v
 
 Installing JupyterLab
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 JupyterLab requires Jupyter Notebook version 4.3 or later.
 
@@ -217,7 +229,7 @@ For installation instructions to write documentation, please see
 `Writing Documentation <#writing-documentation>`__
 
 Run JupyterLab
-''''''''''''''
+^^^^^^^^^^^^^^
 
 Start JupyterLab in development mode:
 
@@ -233,7 +245,7 @@ When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
 
 Build and Run the Tests
-'''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: bash
 
@@ -256,7 +268,7 @@ scripts in each package accept ``jest`` `cli
 options <https://jestjs.io/docs/en/cli.html>`__.
 
 VSCode Debugging
-^^^^^^^^^^^^^^^^
+""""""""""""""""
 
 To debug in VSCode, open a package folder in VSCode. We provide a launch
 configuration in each package folder. In a terminal, run
@@ -266,14 +278,14 @@ debugging <https://code.visualstudio.com/docs/editor/debugging>`__ for
 more details.
 
 Chrome Debugging
-^^^^^^^^^^^^^^^^
+""""""""""""""""
 
 To debug in Chrome, run ``jlpm test:debug:watch`` in the terminal. Open
 Chrome and go to ``chrome://inspect/``. Select the remote device and
 begin debugging.
 
 Testing Utilities
-^^^^^^^^^^^^^^^^^
+"""""""""""""""""
 
 There are some helper functions in ``testutils`` (which is a public npm
 package called ``@jupyterlab/testutils``) that are used by many of the
@@ -293,7 +305,7 @@ check that the sentinel was set if we need a promise to run without
 blocking.
 
 Performance Testing
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 If you are making a change that might affect how long it takes to load
 JupyterLab in the browser, we recommend doing some performance testing
@@ -322,7 +334,7 @@ Now run Lighthouse against this local server and show the results:
 .. image:: /images/lighthouse.png
 
 Using throttling
-''''''''''''''''
+^^^^^^^^^^^^^^^^
 
 Lighthouse recommends using the system level
 `comcast <https://github.com/tylertreat/comcast>`__ tool to throttle
@@ -356,7 +368,7 @@ Then disable the throttling after you are done:
    jlpm run lighthouse:throttling:stop
 
 Comparing results
-'''''''''''''''''
+^^^^^^^^^^^^^^^^^
 
 Performance results are usually only useful in comparison to other
 results. For that reason, we have included a comparison script that can
@@ -522,7 +534,7 @@ the two reports:
      more <https://developers.google.com/web/tools/lighthouse/audits/dom-size>`__.
 
 Contributing to the debugger front-end
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 To make changes to the debugger extension, a kernel with support for debugging is required.
 
@@ -531,14 +543,14 @@ Check out the user documentation to learn how to install such kernel: :ref:`debu
 Then refresh the page and the debugger sidebar should appear in the right area.
 
 The Debugger Adapter Protocol
-'''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following diagram illustrates the types of messages sent between the JupyterLab extension and the kernel.
 
 .. image:: ./debugger_protocol_diagram.png
 
 Inspecting Debug Messages in VS Code
-''''''''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Inspecting the debug messages in VS Code can be useful to understand when debug requests are made (for example triggered by a UI action), and to compare the behavior of the JupyterLab debugger with the Python debugger in VS Code.
 
@@ -599,7 +611,7 @@ With:
 - Messages follow the `DAP <https://microsoft.github.io/debug-adapter-protocol/specification>`_
 
 References
-''''''''''
+^^^^^^^^^^
 
 - Dump cell and state restoration: https://github.com/jupyterlab/debugger/issues/52
 - Protocol Overview: https://microsoft.github.io/debug-adapter-protocol/overview
@@ -607,7 +619,7 @@ References
 
 
 Build and run the stand-alone examples
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 To install and build the examples in the ``examples`` directory:
 
@@ -623,7 +635,7 @@ To run a specific example, change to the examples directory (i.e.
    python main.py
 
 Debugging in the Browser
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 All methods of building JupyterLab produce source maps. The source maps
 should be available in the source files view of your browser's
@@ -646,7 +658,7 @@ test folder while debugging test options. See
 --------------
 
 High level Architecture
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 The JupyterLab application is made up of two major parts:
 
@@ -658,14 +670,14 @@ documentation <developer-guide>`
 provides additional architecture information.
 
 The NPM Packages
-~~~~~~~~~~~~~~~~
+----------------
 
 The repository consists of many npm packages that are managed using the
 lerna build tool. The npm package source files are in the ``packages/``
 subdirectory.
 
 Build the NPM Packages from Source
-''''''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: bash
 
@@ -683,7 +695,7 @@ Build the NPM Packages from Source
    jlpm run build:packages
 
 Writing Documentation
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 Documentation is written in Markdown and reStructuredText. In
 particular, the documentation on our Read the Docs page is written in
@@ -715,7 +727,7 @@ Or with ``jlpm``:
    jlpm run docs
 
 Writing Style
-'''''''''''''
+^^^^^^^^^^^^^
 
 -  The documentation should be written in the second person, referring
    to the reader as "you" and not using the first person plural "we."
@@ -734,10 +746,10 @@ Writing Style
    permission, whereas "enable" connotes empowerment.
 
 User Interface Naming Conventions
-'''''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Documents, Files, and Activities
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""
 
 Files are referrred to as either files or documents, depending on the
 context.
@@ -757,7 +769,7 @@ or file is an activity in that it is represented by a panel that you can
 interact with.
 
 Element Names
-^^^^^^^^^^^^^
+"""""""""""""
 
 -  The generic content area of a tabbed UI is a panel, but prefer to
    refer to the more specific name, such as “File browser.” Tab bars
@@ -791,7 +803,7 @@ directly quoting a word in the UI:
 -  Files tab
 -  Running panel
 -  Tabs panel
--  Single-Document Mode
+-  Simple Interface mode
 
 The capitalized words match the label of the UI element the user is
 clicking on because there does not exist a good colloquial name for the
@@ -800,14 +812,14 @@ tool, such as “file browser” or “command palette”.
 See :ref:`interface` for descriptions of elements in the UI.
 
 The Jupyter Server Extension
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 The Jupyter server extension source files are in the jupyterlab/
 subdirectory. To use this extension, make sure the Jupyter Notebook
 server version 4.3 or later is installed.
 
 Build the JupyterLab server extension
-'''''''''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When you make a change to JupyterLab npm package source files, run:
 
@@ -824,7 +836,7 @@ To have the system build after each source file change, run:
    jupyter lab --dev-mode --watch
 
 Build Utilities
-~~~~~~~~~~~~~~~
+---------------
 
 There is a range of build utilities for maintaining the repository. To
 get a suggested version for a library use
@@ -857,10 +869,10 @@ metadata are considered to be a core dependency unless they are
 explicitly marked otherwise.
 
 Testing Changes to External Packages
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 
 Linking/Unlinking Packages to JupyterLab
-''''''''''''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you want to make changes to one of JupyterLab's external packages
 (for example, `Lumino <https://github.com/jupyterlab/lumino>`__ and test
@@ -896,7 +908,7 @@ You can then (re)build JupyterLab and everything should be back to
 default.
 
 Possible Linking Pitfalls
-'''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you're working on an external project with more than one package,
 you'll probably have to link in your copies of every package in the
@@ -910,7 +922,7 @@ potential duplication of objects contained in the ``MessageLoop``
 namespace provided by the ``messaging`` package.
 
 Keyboard Shortcuts
-~~~~~~~~~~~~~~~~~~
+------------------
 
 Typeset keyboard shortcuts as follows:
 
@@ -923,7 +935,7 @@ Typeset keyboard shortcuts as follows:
    difficult to display in a platform specific way on Sphinx/RTD.
 
 Screenshots and Animations
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 Our documentation should contain screenshots and animations that
 illustrate and demonstrate the software. Here are some guidelines for
@@ -980,7 +992,7 @@ This will help us to keep track of the images as documentation content
 evolves.
 
 Notes
-~~~~~
+-----
 
 -  By default, the application will load from the JupyterLab staging
    directory (default is ``<sys-prefix>/share/jupyter/lab/build``. If

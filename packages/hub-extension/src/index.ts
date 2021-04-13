@@ -2,6 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/**
+ * @packageDocumentation
+ * @module hub-extension
+ */
 
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 
@@ -60,7 +64,7 @@ function activateHubExtension(
   // If hubServerName is set, use JupyterHub 1.0 URL.
   const restartUrl = hubServerName
     ? hubHost + URLExt.join(hubPrefix, 'spawn', hubUser, hubServerName)
-    : hubHost + URLExt.join(hubPrefix, `spawn?next=${hubPrefix}home`);
+    : hubHost + URLExt.join(hubPrefix, 'spawn');
 
   const { commands } = app;
 
@@ -150,7 +154,7 @@ const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
       }
       showingError = true;
       const result = await showDialog({
-        title: trans.__('Server Not Running'),
+        title: trans.__('Server unavailable or unreachable'),
         body: trans.__(
           'Your server at %1 is not running.\nWould you like to restart it?',
           baseUrl

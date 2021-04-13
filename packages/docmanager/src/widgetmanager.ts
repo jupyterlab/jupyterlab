@@ -100,7 +100,10 @@ export class DocumentWidgetManager implements IDisposable {
     // Handle widget extensions.
     const disposables = new DisposableSet();
     each(this._registry.widgetExtensions(factory.name), extender => {
-      disposables.add(extender.createNew(widget, context));
+      const disposable = extender.createNew(widget, context);
+      if (disposable) {
+        disposables.add(disposable);
+      }
     });
     Private.disposablesProperty.set(widget, disposables);
     widget.disposed.connect(this._onWidgetDisposed, this);

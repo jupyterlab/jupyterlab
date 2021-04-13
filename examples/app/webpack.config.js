@@ -4,13 +4,10 @@ const data = require('./package.json');
 const webpack = require('webpack');
 const Build = require('@jupyterlab/builder').Build;
 
-const names = Object.keys(data.dependencies).filter(function (name) {
-  const packageData = require(name + '/package.json');
-  return packageData.jupyterlab !== undefined;
-});
-
-const extras = Build.ensureAssets({
-  packageNames: names,
+// Generate webpack config to copy extension assets to the build directory,
+// such as setting schema files, theme assets, etc.
+const extensionAssetConfig = Build.ensureAssets({
+  packageNames: data.jupyterlab.extensions,
   output: './build'
 });
 
@@ -21,9 +18,6 @@ module.exports = [
       path: __dirname + '/build',
       filename: 'bundle.js'
     },
-    // node: {
-    //   fs: 'empty'
-    // },
     bail: true,
     devtool: 'source-map',
     mode: 'development',
@@ -69,9 +63,11 @@ module.exports = [
     },
     plugins: [
       new webpack.DefinePlugin({
+        // Needed for Blueprint. See https://github.com/palantir/blueprint/issues/4393
         'process.env': '{}',
-        process: {}
+        // Needed for various packages using cwd(), like the path polyfill
+        process: { cwd: () => '/' }
       })
     ]
   }
-].concat(extras);
+].concat(extensionAssetConfig);

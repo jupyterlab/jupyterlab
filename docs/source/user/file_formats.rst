@@ -1,7 +1,7 @@
 .. _file-and-output-formats:
 
 File and Output Formats
------------------------
+=======================
 
 JupyterLab provides a unified architecture for viewing and editing data
 in a wide variety of formats. This model applies whether the data is in
@@ -54,7 +54,7 @@ other file formats.
 .. _markdown:
 
 Markdown
-~~~~~~~~
+--------
 
 -  File extension: ``.md``
 -  MIME type: ``text/markdown``
@@ -78,7 +78,7 @@ animation, edits to the Markdown source are immediately reflected in the
 rendered version.
 
 Images
-~~~~~~
+------
 
 -  File extensions: ``.bmp``, ``.gif``, ``.jpeg``, ``.jpg``, ``.png``,
    ``.svg``
@@ -106,7 +106,7 @@ submenu:
 .. _csv:
 
 Delimiter-separated Values
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 -  File extension: ``.csv``
 -  MIME type: None
@@ -154,7 +154,7 @@ Below is a table that shows the sizes of the largest test files we successfully 
 The actual maximum size of files that can be successfully loaded will vary depending on the browser version and file content.
 
 JSON
-~~~~
+----
 
 -  File extension: ``.json``
 -  MIME type: ``application/json``
@@ -183,7 +183,7 @@ browser and select the “Editor” item in the “Open With” submenu:
   </div>
 
 HTML
-~~~~
+----
 
 -  File extension: ``.html``
 -  MIME type: ``text/html``
@@ -192,7 +192,7 @@ JupyterLab supports rendering HTML in cell output and editing HTML files
 as text in the file editor.
 
 LaTeX
-~~~~~
+-----
 
 -  File extension: ``.tex``
 -  MIME type: ``text/latex``
@@ -201,7 +201,7 @@ JupyterLab supports rendering LaTeX equations in cell output and editing
 LaTeX files as text in the file editor.
 
 PDF
-~~~
+---
 
 -  File extension: ``.pdf``
 -  MIME type: ``application/pdf``
@@ -220,7 +220,7 @@ in JupyterLab, double-click on the file in the file browser:
 .. _vega-lite:
 
 Vega/Vega-Lite
-~~~~~~~~~~~~~~
+--------------
 
 Vega:
 
@@ -287,7 +287,7 @@ A JupyterLab extension that supports Vega 3.x and Vega-Lite 2.x can be
 found `here <https://github.com/jupyterlab/jupyter-renderers>`__.
 
 Virtual DOM
-~~~~~~~~~~~
+-----------
 
 -  File extensions: ``.vdom``, ``.json``
 -  MIME type: ``application/vdom.v1+json``

@@ -208,7 +208,7 @@ namespace Private {
 
     const configDir = mktempDir('config');
     const configPath = path.join(configDir, 'jupyter_server_config.json');
-    const notebook_dir = createNotebookDir();
+    const root_dir = createNotebookDir();
 
     const app_dir = createAppDir();
     const user_settings_dir = mktempDir('settings');
@@ -219,11 +219,13 @@ namespace Private {
         user_settings_dir,
         workspaces_dir,
         app_dir,
-        open_browser: false
+        open_browser: false,
+        log_level: 'DEBUG'
       },
       ServerApp: {
         token,
-        notebook_dir
+        root_dir,
+        log_level: 'DEBUG'
       },
       MultiKernelManager: {
         default_kernel_name: 'echo'

@@ -397,11 +397,19 @@ export class FileBrowserModel implements IDisposable {
    *
    * #### Notes
    * On Notebook version < 5.1.0, this will fail to upload files that are too
-   * big to be sent in one request to the server. On newer versions, it will
-   * ask for confirmation then upload the file in 1 MB chunks.
+   * big to be sent in one request to the server. On newer versions, or on
+   * Jupyter Server, it will ask for confirmation then upload the file in 1 MB
+   * chunks.
    */
   async upload(file: File): Promise<Contents.IModel> {
-    const supportsChunked = PageConfig.getNotebookVersion() >= [5, 1, 0];
+    // We do not support Jupyter Notebook version less than 4, and Jupyter
+    // Server advertises itself as version 1 and supports chunked
+    // uploading. We assume any version less than 4.0.0 to be Jupyter Server
+    // instead of Jupyter Notebook.
+    const serverVersion = PageConfig.getNotebookVersion();
+    const supportsChunked =
+      serverVersion < [4, 0, 0] /* Jupyter Server */ ||
+      serverVersion >= [5, 1, 0]; /* Jupyter Notebook >= 5.1.0 */
     const largeFile = file.size > LARGE_FILE_SIZE;
 
     if (largeFile && !supportsChunked) {

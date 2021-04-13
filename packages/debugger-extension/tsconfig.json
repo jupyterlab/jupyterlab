@@ -31,7 +31,13 @@
       "path": "../fileeditor"
     },
     {
+      "path": "../logconsole"
+    },
+    {
       "path": "../notebook"
+    },
+    {
+      "path": "../rendermime"
     },
     {
       "path": "../services"

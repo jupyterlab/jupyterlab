@@ -12,8 +12,7 @@ import {
   KernelMessage,
   KernelSpec,
   KernelSpecAPI,
-  KernelManager,
-  KernelAPI
+  KernelManager
 } from '../../src';
 
 import {
@@ -23,7 +22,7 @@ import {
   flakyIt as it
 } from '@jupyterlab/testutils';
 
-import { KernelTester, handleRequest } from '../utils';
+import { FakeKernelManager, KernelTester, handleRequest } from '../utils';
 
 const server = new JupyterServer();
 
@@ -42,7 +41,7 @@ describe('Kernel.IKernel', () => {
 
   beforeAll(async () => {
     jest.setTimeout(20000);
-    kernelManager = new KernelManager();
+    kernelManager = new FakeKernelManager();
     specs = await KernelSpecAPI.getSpecs();
   });
 
@@ -57,8 +56,7 @@ describe('Kernel.IKernel', () => {
   });
 
   afterAll(async () => {
-    const models = await KernelAPI.listRunning();
-    await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
+    await kernelManager.shutdownAll();
   });
 
   describe('#disposed', () => {
@@ -345,11 +343,16 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should get a restarting status', async () => {
-      const emission = testEmission(defaultKernel.statusChanged, {
-        find: () => defaultKernel.status === 'restarting'
+      const kernel = await kernelManager.startNew();
+      await kernel.info;
+      const emission = testEmission(kernel.statusChanged, {
+        find: () => kernel.status === 'restarting'
       });
-      await defaultKernel.restart();
+      await kernel.requestKernelInfo();
+      await kernel.restart();
       await emission;
+      await kernel.requestKernelInfo();
+      await kernel.shutdown();
     });
 
     it('should get a busy status', async () => {
@@ -618,11 +621,16 @@ describe('Kernel.IKernel', () => {
 
   describe('#restart()', () => {
     beforeEach(async () => {
-      await defaultKernel.info;
+      await defaultKernel.requestKernelInfo();
     });
 
     it('should restart and resolve with a valid server response', async () => {
-      await defaultKernel.restart();
+      const kernel = await kernelManager.startNew();
+      await kernel.info;
+      await kernel.requestKernelInfo();
+      await kernel.restart();
+      await kernel.requestKernelInfo();
+      await kernel.shutdown();
     });
 
     it('should fail if the kernel does not restart', async () => {
@@ -653,12 +661,16 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should dispose of existing comm and future objects', async () => {
-      const comm = defaultKernel.createComm('test');
-      const future = defaultKernel.requestExecute({ code: 'foo' });
-      await defaultKernel.restart();
-      await defaultKernel.info;
+      const kernel = await kernelManager.startNew();
+      await kernel.info;
+      await kernel.requestKernelInfo();
+      const comm = kernel.createComm('test');
+      const future = kernel.requestExecute({ code: 'foo' });
+      await kernel.restart();
+      await kernel.requestKernelInfo();
       expect(future.isDisposed).toBe(true);
       expect(comm.isDisposed).toBe(true);
+      await kernel.shutdown();
     });
   });
 
