@@ -200,7 +200,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-layout-color0: white;
   --jp-layout-color1: white;
   --jp-layout-color2: var(--md-grey-200);
-  --jp-layout-color3: var(--md-grey-400);
+  --jp-layout-color3: #27822E;
   --jp-layout-color4: var(--md-grey-600);
 
   /* Inverse Layout
