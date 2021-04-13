@@ -21,7 +21,8 @@ import { OptionsManager } from './options_manager';
 function render(
   options: OptionsManager,
   tracker: INotebookTracker,
-  item: INotebookHeading
+  item: INotebookHeading,
+  toc: INotebookHeading[]
 ) {
   let jsx;
   if (item.type === 'markdown' || item.type === 'header') {
@@ -81,7 +82,11 @@ function render(
             className={
               'toc-entry-holder ' +
               fontSizeClass +
-              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
+              (tracker.activeCell === item.cellRef
+                ? ' toc-active-cell'
+                : previousHeader(tracker, item, toc)
+                ? ' toc-active-cell'
+                : '')
             }
           >
             {button}
@@ -135,7 +140,11 @@ function render(
             className={
               'toc-entry-holder ' +
               fontSizeClass +
-              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
+              (tracker.activeCell === item.cellRef
+                ? ' toc-active-cell'
+                : previousHeader(tracker, item, toc)
+                ? ' toc-active-cell'
+                : '')
             }
           >
             {button}
@@ -189,6 +198,26 @@ function render(
       options.updateWidget();
     }
   }
+}
+
+function previousHeader(
+  tracker: INotebookTracker,
+  item: INotebookHeading,
+  toc: INotebookHeading[]
+) {
+  let activeCellIndex = tracker.currentWidget!.content.activeCellIndex;
+  let headerIndex = item.index;
+  if (headerIndex < activeCellIndex) {
+    let tocIndexOfNextHeader = toc.indexOf(item) + 1;
+    if (tocIndexOfNextHeader >= toc.length) {
+      return true;
+    }
+    let nextHeaderIndex = toc[tocIndexOfNextHeader].index;
+    if (nextHeaderIndex != null && nextHeaderIndex > activeCellIndex) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

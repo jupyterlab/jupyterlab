@@ -164,7 +164,7 @@ export namespace TableOfContentsRegistry {
      * @param item - heading
      * @returns JSX element
      */
-    itemRenderer?: (item: IHeading) => JSX.Element | null;
+    itemRenderer?: (item: IHeading, toc: IHeading[]) => JSX.Element | null;
 
     /**
      * Returns a toolbar component.

@@ -76,6 +76,7 @@ interface INotebookHeading extends INumberedHeading {
    * Boolean indicating whether a heading has a child node.
    */
   hasChild?: boolean;
+  index: number;
 }
 
 /**

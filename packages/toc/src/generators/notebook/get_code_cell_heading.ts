@@ -29,7 +29,8 @@ function getCodeCellHeading(
   onClick: onClickFactory,
   executionCount: string,
   lastLevel: number,
-  cellRef: Cell
+  cellRef: Cell,
+  index: number
 ): INotebookHeading {
   let headings: INotebookHeading[] = [];
   if (text) {
@@ -48,7 +49,8 @@ function getCodeCellHeading(
       type: 'code',
       prompt: executionCount,
       cellRef: cellRef,
-      hasChild: false
+      hasChild: false,
+      index: index
     });
   }
   return headings[0];

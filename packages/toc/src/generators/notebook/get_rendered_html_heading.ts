@@ -36,7 +36,8 @@ function getRenderedHTMLHeadings(
   dict: INumberingDictionary,
   lastLevel: number,
   numbering = false,
-  cellRef: Cell
+  cellRef: Cell,
+  index: number
 ): INotebookHeading[] {
   let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
 
@@ -52,7 +53,8 @@ function getRenderedHTMLHeadings(
           onClick: onClick(el),
           type: 'markdown',
           cellRef: cellRef,
-          hasChild: false
+          hasChild: false,
+          index: index
         });
       }
       continue;
@@ -79,7 +81,8 @@ function getRenderedHTMLHeadings(
       onClick: onClick(el),
       type: 'header',
       cellRef: cellRef,
-      hasChild: false
+      hasChild: false,
+      index: index
     });
   }
   return headings;

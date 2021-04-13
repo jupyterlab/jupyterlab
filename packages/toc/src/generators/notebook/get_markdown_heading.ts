@@ -31,7 +31,8 @@ function getMarkdownHeadings(
   onClick: onClickFactory,
   dict: any,
   lastLevel: number,
-  cellRef: Cell
+  cellRef: Cell,
+  index: number
 ): INotebookHeading[] {
   const clbk = onClick(0);
   let headings: INotebookHeading[] = [];
@@ -45,7 +46,8 @@ function getMarkdownHeadings(
         onClick: clbk,
         type: 'header',
         cellRef: cellRef,
-        hasChild: false
+        hasChild: false,
+        index
       });
     } else {
       headings.push({
@@ -54,7 +56,8 @@ function getMarkdownHeadings(
         onClick: clbk,
         type: 'markdown',
         cellRef: cellRef,
-        hasChild: false
+        hasChild: false,
+        index
       });
     }
   }

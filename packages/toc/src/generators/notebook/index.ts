@@ -78,10 +78,11 @@ function createNotebookGenerator(
    *
    * @private
    * @param item - heading to render
+   * @param toc - list of all headers to render
    * @returns rendered item
    */
-  function renderItem(item: INotebookHeading) {
-    return render(options, tracker, item);
+  function renderItem(item: INotebookHeading, toc: INotebookHeading[]) {
+    return render(options, tracker, item, toc);
   }
 
   /**
@@ -103,7 +104,6 @@ function createNotebookGenerator(
     for (let i = 0; i < panel.content.widgets.length; i++) {
       let cell: Cell = panel.content.widgets[i];
       let model = cell.model;
-
       let collapsed = model.metadata.get('toc-hr-collapsed') as boolean;
       collapsed = collapsed || false;
 
@@ -122,7 +122,8 @@ function createNotebookGenerator(
             onClick,
             executionCount,
             getLastHeadingLevel(headings),
-            cell
+            cell,
+            i
           );
           [headings, prev] = appendHeading(
             headings,
@@ -155,7 +156,8 @@ function createNotebookGenerator(
             dict,
             getLastHeadingLevel(headings),
             options.numbering,
-            cell
+            cell,
+            i
           );
           for (const heading of htmlHeadings) {
             [headings, prev, collapseLevel] = appendMarkdownHeading(
@@ -197,7 +199,8 @@ function createNotebookGenerator(
             dict,
             lastLevel,
             options.numbering,
-            cell
+            cell,
+            i
           );
           for (heading of htmlHeadings) {
             [headings, prev, collapseLevel] = appendMarkdownHeading(
@@ -223,7 +226,8 @@ function createNotebookGenerator(
             onClick,
             dict,
             lastLevel,
-            cell
+            cell,
+            i
           );
           for (heading of markdownHeadings) {
             [headings, prev, collapseLevel] = appendMarkdownHeading(
