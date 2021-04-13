@@ -398,7 +398,6 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       isEnabled
     });
 
-
     if (mainMenu) {
       // Add a notebook group to the File menu.
       const exportTo = new Menu({ commands });
