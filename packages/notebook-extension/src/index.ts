@@ -64,8 +64,6 @@ import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { ServiceManager } from '@jupyterlab/services';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStateDB } from '@jupyterlab/statedb';
@@ -257,7 +255,7 @@ const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory, IDocumentManager, ITranslator],
+  requires: [INotebookWidgetFactory, ITranslator],
   optional: [
     ICommandPalette,
     IFileBrowserFactory,
@@ -938,7 +936,6 @@ function activateCodeConsole(
 function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
-  docManager: IDocumentManager,
   translator: ITranslator,
   palette: ICommandPalette | null,
   browserFactory: IFileBrowserFactory | null,
@@ -970,7 +967,7 @@ function activateNotebookHandler(
   addCommands(app, tracker, translator, sessionDialogs);
 
   if (palette) {
-    populatePalette(palette, services, translator);
+    populatePalette(palette, translator);
   }
 
   let id = 0; // The ID counter for notebook panels.
@@ -1061,15 +1058,7 @@ function activateNotebookHandler(
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(
-      app,
-      mainMenu,
-      tracker,
-      services,
-      translator,
-      palette,
-      sessionDialogs
-    );
+    populateMenus(app, mainMenu, tracker, translator, sessionDialogs);
   }
 
   // Utility function to create a new notebook.
@@ -2114,7 +2103,6 @@ function addCommands(
  */
 function populatePalette(
   palette: ICommandPalette,
-  services: ServiceManager,
   translator: ITranslator
 ): void {
   const trans = translator.load('jupyterlab');
@@ -2209,9 +2197,7 @@ function populateMenus(
   app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
-  services: ServiceManager,
   translator: ITranslator,
-  palette: ICommandPalette | null,
   sessionDialogs: ISessionContextDialogs | null
 ): void {
   const trans = translator.load('jupyterlab');
