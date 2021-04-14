@@ -3,8 +3,8 @@
   "version": "3.1.0-alpha.4",
   "private": true,
   "scripts": {
-    "build": "jlpm run clean && webpack",
-    "build:dev": "jlpm run build",
+    "build": "npm run clean && webpack",
+    "build:dev": "npm run build",
     "build:prod": "webpack --config webpack.prod.config.js",
     "build:prod:minimize": "webpack --config webpack.prod.minimize.config.js",
     "build:prod:release": "webpack --config webpack.prod.release.config.js",
