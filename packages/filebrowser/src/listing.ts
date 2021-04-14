@@ -1790,11 +1790,6 @@ export namespace DirListing {
       trans: TranslationBundle,
       fileType?: DocumentRegistry.IFileType
     ): HTMLElement;
-
-    setColumnVisibility?(
-      name: DirListing.ToggleableColumn,
-      visible: boolean
-    ): void;
   }
 
   /**

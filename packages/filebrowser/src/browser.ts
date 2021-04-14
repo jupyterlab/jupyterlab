@@ -177,8 +177,12 @@ export class FileBrowser extends Widget {
   }
 
   set showLastModifiedColumn(value: boolean) {
-    this._listing.setColumnVisibility('last_modified', value);
-    this._showLastModifiedColumn = value;
+    if (this._listing.setColumnVisibility) {
+      this._listing.setColumnVisibility('last_modified', value);
+      this._showLastModifiedColumn = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
   }
 
   /**
