@@ -37,6 +37,7 @@ interface IProperties extends React.Props<TOCTree> {
    * Renders a heading item.
    *
    * @param item - heading
+   * @param toc - list of headings in toc to use for rendering current position
    * @returns rendered heading
    */
   itemRenderer: (item: IHeading, toc: IHeading[]) => JSX.Element | null;

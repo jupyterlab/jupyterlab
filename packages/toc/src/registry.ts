@@ -162,6 +162,7 @@ export namespace TableOfContentsRegistry {
      * -   If not present, a default renderer will be used.
      *
      * @param item - heading
+     * @param toc - list of headings
      * @returns JSX element
      */
     itemRenderer?: (item: IHeading, toc: IHeading[]) => JSX.Element | null;

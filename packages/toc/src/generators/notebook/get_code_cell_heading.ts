@@ -22,6 +22,7 @@ type onClickFactory = (line: number) => () => void;
  * @param executionCount - execution count
  * @param lastLevel - last heading level
  * @param cellRef - cell reference
+ * @param index - index of referenced cell relative to other cells in the notebook
  * @returns notebook heading
  */
 function getCodeCellHeading(

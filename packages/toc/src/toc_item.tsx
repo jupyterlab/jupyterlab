@@ -14,13 +14,16 @@ interface IProperties {
    * Heading to render.
    */
   heading: IHeading;
-
+  /**
+   * List of headings to use for rendering current position in toc
+   */
   toc: IHeading[];
 
   /**
    * Renders a heading.
    *
    * @param item - heading
+   * @param toc - list of headings
    * @returns rendered heading
    */
   itemRenderer: (item: IHeading, toc: IHeading[]) => JSX.Element | null;

@@ -27,6 +27,7 @@ type onClickFactory = (el: Element) => () => void;
  * @param lastLevel - last level
  * @param numbering - boolean indicating whether to enable numbering
  * @param cellRef - cell reference
+ * @param index - index of referenced cell relative to other cells in the notebook
  * @returns notebook heading
  */
 function getRenderedHTMLHeadings(

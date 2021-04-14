@@ -16,6 +16,7 @@ import { OptionsManager } from './options_manager';
  * @param options - generator options
  * @param tracker - notebook tracker
  * @param item - notebook heading
+ * @param toc - current list of notebook headings
  * @returns rendered item
  */
 function render(
@@ -200,6 +201,15 @@ function render(
   }
 }
 
+/**
+ * Used to find the nearest above heading to an active notebook cell
+ *
+ * @private
+ * @param tracker - notebook tracker
+ * @param item - notebook heading
+ * @param toc - current list of notebook headings
+ * @returns true if heading is nearest above a selected cell, otherwise false
+ */
 function previousHeader(
   tracker: INotebookTracker,
   item: INotebookHeading,
