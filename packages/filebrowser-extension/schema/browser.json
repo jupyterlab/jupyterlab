@@ -27,6 +27,12 @@
       "title": "Filter on file name with a fuzzy search",
       "description": "Whether to apply fuzzy algorithm while filtering on file names",
       "default": true
+    },
+    "showLastModifiedColumn": {
+      "type": "boolean",
+      "title": "Show last modified column",
+      "description": "Whether to show the last modified column",
+      "default": true
     }
   },
   "additionalProperties": false,
