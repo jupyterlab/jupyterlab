@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IDisplayState, ISearchProvider, IFiltersType } from './interfaces';
+import { NotebookSearchProvider } from './providers/notebooksearchprovider';
 import { createSearchOverlay } from './searchoverlay';
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
@@ -46,7 +47,6 @@ export class SearchInstance implements IDisposable {
       this.dispose();
     });
 
-    // console.log("here", this._widget.);
     this._searchWidget.disposed.connect(() => {
       this._widget.activate();
       this.dispose();
@@ -122,6 +122,19 @@ export class SearchInstance implements IDisposable {
     // this signal should get injected when the widget is
     // created and hooked up to react!
     this._activeProvider.changed.connect(this.updateIndices, this);
+
+    if (
+      this._activeProvider instanceof NotebookSearchProvider &&
+      this._displayState.filters.activeCell
+    ) {
+      // this signal should get injected when
+      // active cell changed in notebook
+      this._activeProvider.activeCellChanged.connect(async () => {
+        await this._activeProvider.endQuery();
+        await this._activeProvider.startQuery(query, this._widget, filters);
+        this.updateIndices();
+      });
+    }
   }
 
   private async _replaceCurrent(newText: string) {
@@ -195,18 +208,6 @@ export class SearchInstance implements IDisposable {
     await this._activeProvider.highlightPrevious();
     this.updateIndices();
   }
-
-  // private async _activeCellChanged() {
-  //   if (!this._displayState.query|| !(this._widget instanceof NotebookPanel)) {
-  //     return;
-  //   }
-
-  //   this._widget.content.activeCellChanged.connect(() => {
-  //     console.log("acitve cell changed!!");
-  //   })
-
-  //   this.updateIndices();
-  // }
 
   private _onCaseSensitiveToggled() {
     this._displayState.caseSensitive = !this._displayState.caseSensitive;

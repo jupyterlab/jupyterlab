@@ -412,6 +412,10 @@ class SearchOverlay extends React.Component<
     }
   }
 
+  refreshSearch() {
+    this._executeSearch(true, this.state.searchText, true);
+  }
+
   private _executeSearch(
     goForward: boolean,
     searchText?: string,

@@ -153,6 +153,10 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
         allMatches.concat(matchesFromOutput);
 
         outputProivder.changed.connect(this._onSearchProviderChanged, this);
+        this._searchTarget.content.activeCellChanged.connect(
+          this._onActiveCellChanged,
+          this
+        );
 
         this._searchProviders.push({
           cell: cell,
@@ -370,6 +374,13 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   /**
+   * Signal indicating that the active cell in the notebook has changed
+   */
+  get activeCellChanged(): ISignal<this, void> {
+    return this._activeCellChanged;
+  }
+
+  /**
    * The current index of the selected match.
    */
   get currentMatchIndex(): number | null {
@@ -484,6 +495,10 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     this._changed.emit(undefined);
   }
 
+  private _onActiveCellChanged() {
+    this._activeCellChanged.emit(undefined);
+  }
+
   private _currentMatchIsSelected(cm: CodeMirrorEditor): boolean {
     if (!this._currentMatch) {
       return false;
@@ -509,4 +524,5 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   private _unRenderedMarkdownCells: MarkdownCell[] = [];
   private _cellsWithMatches: Cell[] = [];
   private _changed = new Signal<this, void>(this);
+  private _activeCellChanged = new Signal<this, void>(this);
 }
