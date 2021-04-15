@@ -396,51 +396,51 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       isEnabled
     });
 
-    if (mainMenu) {
-      // Add a notebook group to the File menu.
-      const exportTo = new Menu({ commands });
-      exportTo.title.label = trans.__('Export Notebook As…');
-      void services.nbconvert.getExportFormats().then(response => {
-        if (response) {
-          const formatLabels: any = Private.getFormatLabels(translator);
+    // Add a notebook group to the File menu.
+    const exportTo = new Menu({ commands });
+    exportTo.title.label = trans.__('Export Notebook As…');
+    void services.nbconvert.getExportFormats().then(response => {
+      if (response) {
+        const formatLabels: any = Private.getFormatLabels(translator);
 
-          // Convert export list to palette and menu items.
-          const formatList = Object.keys(response);
-          formatList.forEach(function (key) {
-            const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
-            const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
-            let args = {
-              format: key,
-              label: labelStr,
-              isPalette: false
-            };
-            if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-              exportTo.addItem({
+        // Convert export list to palette and menu items.
+        const formatList = Object.keys(response);
+        formatList.forEach(function (key) {
+          const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+          const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
+          let args = {
+            format: key,
+            label: labelStr,
+            isPalette: false
+          };
+          if (FORMAT_EXCLUDE.indexOf(key) === -1) {
+            exportTo.addItem({
+              command: CommandIDs.exportToFormat,
+              args: args
+            });
+            if (palette) {
+              args = {
+                format: key,
+                label: labelStr,
+                isPalette: true
+              };
+              const category = trans.__('Notebook Operations');
+              palette.addItem({
                 command: CommandIDs.exportToFormat,
-                args: args
+                category,
+                args
               });
-              if (palette) {
-                args = {
-                  format: key,
-                  label: labelStr,
-                  isPalette: true
-                };
-                const category = trans.__('Notebook Operations');
-                palette.addItem({
-                  command: CommandIDs.exportToFormat,
-                  category,
-                  args
-                });
-              }
             }
-          });
+          }
+        });
+        if (mainMenu) {
           const fileGroup = [
             { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
           ];
           mainMenu.fileMenu.addGroup(fileGroup, 10);
         }
-      });
-    }
+      }
+    });
   }
 };
 
