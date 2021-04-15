@@ -496,7 +496,9 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   private _onActiveCellChanged() {
-    this._activeCellChanged.emit(undefined);
+    if (this._searchTarget) {
+      this._activeCellChanged.emit(undefined);
+    }
   }
 
   private _currentMatchIsSelected(cm: CodeMirrorEditor): boolean {
