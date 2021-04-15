@@ -301,6 +301,7 @@ interface IFilterSelectionProps {
   canToggleActiveCell: boolean;
   toggleOutput: () => void;
   toggleActiveCell: () => void;
+  trans: TranslationBundle;
 }
 
 interface IFilterSelectionState {}
@@ -318,7 +319,7 @@ class FilterSelection extends React.Component<
               this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
             }
           >
-            Search Cell Outputs
+            {this.props.trans.__('Search Cell Outputs')}
           </span>
           <input
             type="checkbox"
@@ -335,7 +336,7 @@ class FilterSelection extends React.Component<
                 : SEARCH_OPTIONS_DISABLED_CLASS
             }
           >
-            Search Active Cell
+            {this.props.trans.__('Search Active Cell')}
           </span>
           <input
             type="checkbox"
@@ -522,6 +523,7 @@ class SearchOverlay extends React.Component<
         searchActiveCell={this.state.filters.activeCell}
         toggleOutput={this._toggleSearchOutput}
         toggleActiveCell={this._toggleSearchActiveCell}
+        trans={this.translator.load('jupyterlab')}
       />
     ) : null;
     const icon = this.state.replaceEntryShown ? caretDownIcon : caretRightIcon;
