@@ -22,10 +22,10 @@
       "path": "../docprovider"
     },
     {
-      "path": "../observables"
+      "path": "../nbmodel"
     },
     {
-      "path": "../nbmodel"
+      "path": "../observables"
     },
     {
       "path": "../rendermime"
