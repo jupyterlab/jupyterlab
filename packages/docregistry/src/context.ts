@@ -88,8 +88,9 @@ export class Context<
     // @todo remove websocket provider - this should be handled by a separate plugin
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
+    const guid = this._factory.contentType + ':' + localPath;
     this._provider = options.collaborative
-      ? new WebsocketProviderWithLocks({ url, guid: localPath, ynotebook })
+      ? new WebsocketProviderWithLocks({ url, guid, ynotebook })
       : new ProviderMock();
 
     this._readyPromise = manager.ready.then(() => {
