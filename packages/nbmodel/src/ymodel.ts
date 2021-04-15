@@ -34,10 +34,10 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   constructor() {
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
-      if (!this.ycellMapping.has(ycell)) {
-        this.ycellMapping.set(ycell, createCellFromType(ycell));
+      if (!this._ycellMapping.has(ycell)) {
+        this._ycellMapping.set(ycell, createCellFromType(ycell));
       }
-      return this.ycellMapping.get(ycell) as YCellType;
+      return this._ycellMapping.get(ycell) as YCellType;
     });
   }
 
@@ -94,7 +94,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
    */
   insertCells(index: number, cells: YCellType[]): void {
     cells.forEach(cell => {
-      this.ycellMapping.set(cell.ymodel, cell);
+      this._ycellMapping.set(cell.ymodel, cell);
       // cell.yawareness = this.yawareness;
       // cell.yUndoManager = this.yUndoManager;
     });
@@ -192,19 +192,19 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     // update the type⇔cell mapping by iterating through the addded/removed types
     event.changes.added.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
-      if (!this.ycellMapping.has(type)) {
-        this.ycellMapping.set(type, createCellFromType(type));
+      if (!this._ycellMapping.has(type)) {
+        this._ycellMapping.set(type, createCellFromType(type));
       }
-      const cell = this.ycellMapping.get(type) as any;
+      const cell = this._ycellMapping.get(type) as any;
       cell._notebook = this;
       cell._undoManager = this.undoManager;
     });
     event.changes.deleted.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
-      const model = this.ycellMapping.get(type);
+      const model = this._ycellMapping.get(type);
       if (model) {
         model.dispose();
-        this.ycellMapping.delete(type);
+        this._ycellMapping.delete(type);
       }
     });
     let index = 0;
@@ -213,7 +213,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     event.changes.delta.forEach((d: any) => {
       if (d.insert != null) {
         const insertedCells = d.insert.map((ycell: Y.Map<any>) =>
-          this.ycellMapping.get(ycell)
+          this._ycellMapping.get(ycell)
         );
         cellsChange.push({ insert: insertedCells });
         this.cells.splice(index, 0, ...insertedCells);
@@ -240,7 +240,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   public undoManager = new Y.UndoManager([this.ycells], {
     trackedOrigins: new Set([this])
   });
-  public ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
+  private _ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
 
   /**
    * Returns the metadata associated with the notebook.
