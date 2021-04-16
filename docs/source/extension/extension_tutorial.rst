@@ -891,24 +891,23 @@ Packaging your extension
 JupyterLab extensions for JupyterLab 3.0 can be distributed as Python
 packages. The cookiecutter template we used contains all of the Python
 packaging instructions in the ``setup.py`` file to wrap your extension in a
-Python package. Before generating a package, we first need to install
-``jupyter_packaging``.
+Python package. Before generating a package, we first need to install ``build``.
 
 .. code:: bash
 
-    pip install jupyter_packaging
+    pip install build
 
 To create a Python source package (``.tar.gz``) in the ``dist/`` directory, do:
 
 .. code:: bash
 
-    python setup.py sdist
+    python -m build -s
 
 To create a Python wheel package (``.whl``) in the ``dist/`` directory, do:
 
 .. code:: bash
 
-    python setup.py bdist_wheel
+    python -m build
 
 Both of these commands will build the JavaScript into a bundle in the
 ``jupyterlab_apod/static`` directory, which is then distributed with the
