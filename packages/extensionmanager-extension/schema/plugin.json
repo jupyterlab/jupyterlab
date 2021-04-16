@@ -15,6 +15,18 @@
       "description": "Whether the user understand that extensions managed through this interface run arbitrary code that may be dangerous",
       "default": false,
       "type": "boolean"
+    },
+    "npmRegistry": {
+      "title": "NPM Registry",
+      "description": "The URI of the NPM registry to use for searching for jupyterlab extensions",
+      "default": "https://registry.npmjs.org/-/v1/",
+      "type": "string"
+    },
+    "npmCdn": {
+      "title": "NPM CDN",
+      "description": "The URI of the CDN to use for fetching full package data",
+      "default": "https://unpkg.com",
+      "type": "string"
     }
   },
   "additionalProperties": false,
