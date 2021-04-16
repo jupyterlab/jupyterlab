@@ -153,10 +153,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
         allMatches.concat(matchesFromOutput);
 
         outputProivder.changed.connect(this._onSearchProviderChanged, this);
-        this._searchTarget.content.activeCellChanged.connect(
-          this._onActiveCellChanged,
-          this
-        );
 
         this._searchProviders.push({
           cell: cell,
@@ -493,12 +489,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
   private _onSearchProviderChanged() {
     this._changed.emit(undefined);
-  }
-
-  private _onActiveCellChanged() {
-    if (this._searchTarget) {
-      this._activeCellChanged.emit(undefined);
-    }
   }
 
   private _currentMatchIsSelected(cm: CodeMirrorEditor): boolean {

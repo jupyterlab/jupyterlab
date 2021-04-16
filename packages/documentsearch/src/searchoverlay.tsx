@@ -413,10 +413,6 @@ class SearchOverlay extends React.Component<
     }
   }
 
-  refreshSearch() {
-    this._executeSearch(true, this.state.searchText, true);
-  }
-
   private _executeSearch(
     goForward: boolean,
     searchText?: string,
@@ -499,6 +495,7 @@ class SearchOverlay extends React.Component<
       () => this._executeSearch(true, undefined, true)
     );
   }
+
   private _toggleFiltersOpen() {
     this.setState(prevState => ({
       filtersOpen: !prevState.filtersOpen
