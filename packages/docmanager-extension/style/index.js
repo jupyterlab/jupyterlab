@@ -11,3 +11,4 @@ import '@jupyterlab/docregistry/style/index.js';
 import '@jupyterlab/application/style/index.js';
 import '@jupyterlab/docmanager/style/index.js';
 import '@jupyterlab/mainmenu/style/index.js';
+import '@jupyterlab/notebook/style/index.js';
