@@ -226,6 +226,23 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell!.model.value.text).toBe(source);
       });
 
+      it('should select the previous cell if there is only one cell selected and mergeAbove is true', () => {
+        widget.activeCellIndex = 1
+        let source = widget.activeCell!.model.value.text;
+        const previous = widget.widgets[0];
+        source = previous.model.value.text + '\n\n' + source;
+        NotebookActions.mergeCells(widget, true);
+        expect(widget.activeCell!.model.value.text).toBe(source);
+      });
+
+      it('should do nothing if first cell selected and mergeAbove is true', () => {
+        let source = widget.activeCell!.model.value.text;
+        const cellNumber = widget.widgets.length;
+        NotebookActions.mergeCells(widget, true);
+        expect(widget.widgets.length).toBe(cellNumber)
+        expect(widget.activeCell!.model.value.text).toBe(source);
+      });
+
       it('should clear the outputs of a code cell', () => {
         NotebookActions.mergeCells(widget);
         const cell = widget.activeCell as CodeCell;
