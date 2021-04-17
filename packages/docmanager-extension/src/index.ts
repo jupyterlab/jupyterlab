@@ -43,6 +43,8 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
+import { NotebookPanel } from '@jupyterlab/notebook';
+
 import { each, map, some, toArray } from '@lumino/algorithm';
 
 import { JSONExt } from '@lumino/coreutils';
@@ -617,10 +619,6 @@ function addCommands(
             buttons: [Dialog.okButton({ label: trans.__('Ok') })]
           });
         } else {
-          const model = context.contentsModel;
-          if (docManager.nameFileOnSave && model && model.renamed == false) {
-            void commands.execute('docmanager:name-on-save');
-          }
           if (context.model.readOnly) {
             return showDialog({
               title: trans.__('Cannot Save'),
@@ -742,6 +740,18 @@ function addCommands(
     if (value == docManager.nameFileOnSave) {
       void settingRegistry.set(pluginId, key, !value).catch((reason: Error) => {
         console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+      });
+    }
+  });
+
+  docManager.activateRequested.connect(() => {
+    const widget = shell.currentWidget;
+    if (widget instanceof NotebookPanel) {
+      widget.onNameFile.connect(() => {
+        if (docManager.nameFileOnSave) {
+          const context = docManager.contextForWidget(widget);
+          return nameOnSaveDialog(docManager, context!.path);
+        }
       });
     }
   });

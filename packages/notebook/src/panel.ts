@@ -27,6 +27,7 @@ import {
   ITranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { Signal } from '@lumino/signaling';
 
 /**
  * The class name added to notebook panels.
@@ -69,6 +70,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this
     );
     this.context.saveState.connect(this._onSave, this);
+
     void this.revealed.then(() => {
       if (this.isDisposed) {
         // this widget has already been disposed, bail
@@ -98,6 +100,10 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
           }
         }
       });
+    }
+    const model = sender.contentsModel;
+    if (state === 'completed' && model && !model.renamed == true) {
+      this._onNameFile.emit(undefined);
     }
   }
 
@@ -166,6 +172,13 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         })
       );
     };
+  }
+
+  /**
+   * A signal emitted when should name file.
+   */
+  get onNameFile(): Signal<this, void> {
+    return this._onNameFile;
   }
 
   /**
@@ -247,6 +260,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * notified the user about.
    */
   private _autorestarting = false;
+
+  private _onNameFile = new Signal<this, void>(this);
 }
 
 /**
