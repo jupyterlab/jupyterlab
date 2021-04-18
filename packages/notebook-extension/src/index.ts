@@ -191,6 +191,10 @@ namespace CommandIDs {
 
   export const merge = 'notebook:merge-cells';
 
+  export const mergeAbove = 'notebook:merge-cell-above';
+
+  export const mergeBelow = 'notebook:merge-cell-below';
+
   export const split = 'notebook:split-cell-at-cursor';
 
   export const commandMode = 'notebook:enter-command-mode';
@@ -1192,6 +1196,16 @@ function activateNotebookHandler(
     rank: 8
   });
   app.contextMenu.addItem({
+    command: CommandIDs.mergeAbove,
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 8
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.mergeBelow,
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 8
+  });
+  app.contextMenu.addItem({
     type: 'separator',
     selector: '.jp-Notebook .jp-Cell',
     rank: 9
@@ -1680,6 +1694,28 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.mergeAbove, {
+    label: trans.__('Merge Cell Above'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.mergeCells(current.content, true);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.mergeBelow, {
+    label: trans.__('Merge Cell Below'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.mergeCells(current.content, false);
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.insertAbove, {
     label: trans.__('Insert Cell Above'),
     execute: args => {
@@ -2157,6 +2193,8 @@ function populatePalette(
     CommandIDs.deleteCell,
     CommandIDs.split,
     CommandIDs.merge,
+    CommandIDs.mergeAbove,
+    CommandIDs.mergeBelow,
     CommandIDs.insertAbove,
     CommandIDs.insertBelow,
     CommandIDs.selectAbove,
@@ -2412,7 +2450,12 @@ function populateMenus(
     }
   );
 
-  const splitMergeGroup = [CommandIDs.split, CommandIDs.merge].map(command => {
+  const splitMergeGroup = [
+    CommandIDs.split,
+    CommandIDs.merge,
+    CommandIDs.mergeAbove,
+    CommandIDs.mergeBelow
+  ].map(command => {
     return { command };
   });
 
