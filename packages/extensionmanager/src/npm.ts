@@ -220,7 +220,7 @@ export class Searcher {
    * @param cdnUri The URI of the CDN to use for fetching full package data.
    */
   constructor(
-    repoUri = 'https://registry.npmjs.org/',
+    repoUri = 'https://registry.npmjs.org/-/v1/',
     cdnUri = 'https://unpkg.com'
   ) {
     this.repoUri = repoUri;
@@ -239,7 +239,7 @@ export class Searcher {
     page = 0,
     pageination = 250
   ): Promise<ISearchResult> {
-    const uri = new URL('/-/v1/search', this.repoUri);
+    const uri = new URL('search', this.repoUri);
     // Note: Spaces are encoded to '+' signs!
     const text = `${query} keywords:"jupyterlab-extension"`;
     uri.searchParams.append('text', text);

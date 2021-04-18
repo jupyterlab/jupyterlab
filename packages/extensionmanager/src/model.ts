@@ -232,9 +232,17 @@ export class ListModel extends VDomModel {
     this.serverConnectionSettings = ServerConnection.makeSettings();
     this._debouncedUpdate = new Debouncer(this.update.bind(this), 1000);
     this.lister.listingsLoaded.connect(this._listingIsLoaded, this);
+    this.searcher = new Searcher(
+      settings.composite['npmRegistry'] as string,
+      settings.composite['npmCdn'] as string
+    );
     _isDisclaimed = settings.composite['disclaimed'] === true;
     settings.changed.connect(() => {
       _isDisclaimed = settings.composite['disclaimed'] === true;
+      this.searcher = new Searcher(
+        settings.composite['npmRegistry'] as string,
+        settings.composite['npmCdn'] as string
+      );
       void this.update();
     });
   }
@@ -880,7 +888,7 @@ export class ListModel extends VDomModel {
   /**
    * A helper for performing searches of jupyterlab extensions on the NPM repository.
    */
-  protected searcher = new Searcher();
+  protected searcher: Searcher;
 
   protected lister = new Lister();
 
