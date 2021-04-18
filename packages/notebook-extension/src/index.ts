@@ -1697,7 +1697,7 @@ function addCommands(
   commands.addCommand(CommandIDs.mergeAbove, {
     label: trans.__('Merge Cell Above'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.mergeCells(current.content, true);
@@ -1708,7 +1708,7 @@ function addCommands(
   commands.addCommand(CommandIDs.mergeBelow, {
     label: trans.__('Merge Cell Below'),
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent(tracker, shell, args);
 
       if (current) {
         return NotebookActions.mergeCells(current.content, false);
