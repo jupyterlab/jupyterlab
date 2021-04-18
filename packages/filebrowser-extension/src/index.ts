@@ -300,7 +300,11 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
 };
 
 /**
- * A plugin providing download + copy download link commands in the context menu
+ * A plugin providing download + copy download link commands in the context menu.
+ *
+ * Disabling this plugin will NOT disable downloading files from the server.
+ * Users will still be able to retrieve files from the file download URLs the
+ * server provides.
  */
 const downloadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:download',

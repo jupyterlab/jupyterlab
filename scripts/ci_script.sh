@@ -102,6 +102,9 @@ if [[ $GROUP == integrity2 ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
 
+    # Check the manifest
+    check-manifest -v
+
     # Build the packages individually.
     jlpm run build:src
 
