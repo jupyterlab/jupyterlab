@@ -10,7 +10,7 @@ jobs:
         group: [integrity, python, usage, usage2]
         python: [3.8]
       fail-fast: false
-    timeout-minutes: 30
+    timeout-minutes: 45
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
