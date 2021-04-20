@@ -221,10 +221,12 @@ export class Searcher {
    */
   constructor(
     repoUri = 'https://registry.npmjs.org/-/v1/',
-    cdnUri = 'https://unpkg.com'
+    cdnUri = 'https://unpkg.com',
+    enableCdn = true
   ) {
     this.repoUri = repoUri;
     this.cdnUri = cdnUri;
+    this.enableCdn = enableCdn;
   }
 
   /**
@@ -263,8 +265,12 @@ export class Searcher {
     name: string,
     version: string
   ): Promise<IJupyterLabPackageData | null> {
-    const uri = new URL(`/${name}@${version}/package.json`, this.cdnUri);
-    return fetch(uri.toString()).then((response: Response) => {
+    const uri = this.enableCdn
+      ? new URL(`/${name}@${version}/package.json`, this.cdnUri)
+      : new URL(`/${name}/${version}`, this.repoUri);
+    return fetch(uri.toString(), {
+      mode: 'no-cors'
+    }).then((response: Response) => {
       if (response.ok) {
         return response.json();
       }
@@ -281,6 +287,11 @@ export class Searcher {
    * The URI of the CDN to use for fetching full package data.
    */
   cdnUri: string;
+
+  /**
+   * Whether to use the CDN for fetching full package data. Otherwise, the NPM registry is used.
+   */
+  enableCdn: boolean;
 }
 
 /**

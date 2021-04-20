@@ -27,6 +27,12 @@
       "description": "The URI of the CDN to use for fetching full package data",
       "default": "https://unpkg.com",
       "type": "string"
+    },
+    "enableCdn": {
+      "title": "Enable CDN",
+      "description": "Enables using the CDN to fetch full package data.  Otherwise, the NPM registry will be used",
+      "default": true,
+      "type": "boolean"
     }
   },
   "additionalProperties": false,
