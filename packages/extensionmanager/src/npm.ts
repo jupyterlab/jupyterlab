@@ -268,9 +268,7 @@ export class Searcher {
     const uri = this.enableCdn
       ? new URL(`/${name}@${version}/package.json`, this.cdnUri)
       : new URL(`/${name}/${version}`, this.repoUri);
-    return fetch(uri.toString(), {
-      mode: 'no-cors'
-    }).then((response: Response) => {
+    return fetch(uri.toString()).then((response: Response) => {
       if (response.ok) {
         return response.json();
       }

@@ -30,7 +30,7 @@
     },
     "enableCdn": {
       "title": "Enable CDN",
-      "description": "Enables using the CDN to fetch full package data.  Otherwise, the NPM registry will be used",
+      "description": "Enables using the CDN to fetch full package data.  Otherwise, the configured NPM registry will be used. Due to a lack of CORS support by NPM registry, only disable if supplying a custom registry",
       "default": true,
       "type": "boolean"
     }
