@@ -33,10 +33,15 @@ function getMarkdownHeadings(
   dict: any,
   lastLevel: number,
   cellRef: Cell,
-  index: number
+  index: number = -1
 ): INotebookHeading[] {
   const clbk = onClick(0);
   let headings: INotebookHeading[] = [];
+  if (index == -1) {
+    console.warn(
+      'Deprecation warning! index argument will become mandatory in the next version'
+    );
+  }
   for (const line of text.split('\n')) {
     const heading = parseHeading(line);
     if (heading) {

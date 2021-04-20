@@ -31,9 +31,14 @@ function getCodeCellHeading(
   executionCount: string,
   lastLevel: number,
   cellRef: Cell,
-  index: number
+  index: number = -1
 ): INotebookHeading {
   let headings: INotebookHeading[] = [];
+  if (index == -1) {
+    console.warn(
+      'Deprecation warning! index argument will become mandatory in the next version'
+    );
+  }
   if (text) {
     const lines = text.split('\n');
     const len = Math.min(lines.length, 3);
