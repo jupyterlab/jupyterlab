@@ -143,7 +143,7 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 
 JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
-- Mehmet Bektas, Bloomberg (general development, extensions).
+- Mehmet Bektas, Splunk (general development, extensions).
 - Alex Bozarth, IBM (general development, extensions).
 - Eric Charles, Datalayer, (general development, extensions).
 - Martha Cryan, IBM (general development, extensions).
