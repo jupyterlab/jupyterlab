@@ -234,14 +234,16 @@ export class ListModel extends VDomModel {
     this.lister.listingsLoaded.connect(this._listingIsLoaded, this);
     this.searcher = new Searcher(
       settings.composite['npmRegistry'] as string,
-      settings.composite['npmCdn'] as string
+      settings.composite['npmCdn'] as string,
+      settings.composite['enableCdn'] as boolean
     );
     _isDisclaimed = settings.composite['disclaimed'] === true;
     settings.changed.connect(() => {
       _isDisclaimed = settings.composite['disclaimed'] === true;
       this.searcher = new Searcher(
         settings.composite['npmRegistry'] as string,
-        settings.composite['npmCdn'] as string
+        settings.composite['npmCdn'] as string,
+        settings.composite['enableCdn'] as boolean
       );
       void this.update();
     });
