@@ -53,6 +53,8 @@ const packages = [
   // 'metapackage',
   // 'nbconvert-css',
   'nbformat',
+  'nbmodel',
+  'docprovider',
   'notebook-extension',
   'notebook',
   'observables',
