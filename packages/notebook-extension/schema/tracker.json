@@ -387,11 +387,17 @@
       "type": "boolean",
       "default": true
     },
-    "nonObservedBottomMargin": {
-      "title": "Non-observed bottom margin",
-      "description": "Defines the non-observed bottom margin for the virtual notebook, set a positive number of pixels to render cells below the visible view",
+    "observedTopMargin": {
+      "title": "Observed top margin",
+      "description": "Defines the observed top margin for the virtual notebook, set a positive number of pixels to render cells above the visible view",
       "type": "string",
-      "default": "0px"
+      "default": "1000px"
+    },
+    "observedBottomMargin": {
+      "title": "Observed bottom margin",
+      "description": "Defines the observed bottom margin for the virtual notebook, set a positive number of pixels to render cells below the visible view",
+      "type": "string",
+      "default": "1000px"
     },
     "maxNumberOutputs": {
       "title": "The maximum number of output cells to to be rendered in the output area. Set to 0 to have the complete display.",

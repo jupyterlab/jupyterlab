@@ -277,7 +277,6 @@
 |----------------------------------------------------------------------------*/
 
 .jp-Cell-Placeholder {
-  height: 200px !important;
   padding-left: 55px;
 }
 
@@ -291,7 +290,6 @@
 }
 
 .jp-Cell-Placeholder-wrapper-inner {
-  height: 150px;
   padding: 15px;
   position: relative;
 }
