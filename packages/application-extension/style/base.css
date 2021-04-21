@@ -7,3 +7,27 @@
 #jp-MainLogo {
   width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
 }
+
+.jp-skiplink {
+  position: absolute;
+  top: -100em;
+}
+
+.jp-skiplink--focus {
+  position: absolute;
+  z-index: 10000;
+  top: 0;
+  left: 46%;
+  margin: 0 auto;
+  padding: 1em;
+  width: 15%;
+  box-shadow: var(--jp-elevation-z4);
+  border-radius: 4px;
+  background: var(--jp-layout-color0);
+  text-align: center;
+}
+
+.jp-skiplink--focus a {
+  text-decoration: underline;
+  color: #106ba3;
+}
