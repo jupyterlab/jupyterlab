@@ -81,7 +81,7 @@ function createNotebookGenerator(
    * @param toc - list of all headers to render
    * @returns rendered item
    */
-  function renderItem(item: INotebookHeading, toc: INotebookHeading[]) {
+  function renderItem(item: INotebookHeading, toc: INotebookHeading[] = []) {
     return render(options, tracker, item, toc);
   }
 

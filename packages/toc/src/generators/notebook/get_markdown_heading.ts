@@ -37,7 +37,7 @@ function getMarkdownHeadings(
 ): INotebookHeading[] {
   const clbk = onClick(0);
   let headings: INotebookHeading[] = [];
-  if (index == -1) {
+  if (index === -1) {
     console.warn(
       'Deprecation warning! index argument will become mandatory in the next version'
     );

@@ -42,7 +42,7 @@ function getRenderedHTMLHeadings(
 ): INotebookHeading[] {
   let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
 
-  if (index == -1) {
+  if (index === -1) {
     console.warn(
       'Deprecation warning! index argument will become mandatory in the next version'
     );

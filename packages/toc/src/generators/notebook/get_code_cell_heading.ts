@@ -34,7 +34,7 @@ function getCodeCellHeading(
   index: number = -1
 ): INotebookHeading {
   let headings: INotebookHeading[] = [];
-  if (index == -1) {
+  if (index === -1) {
     console.warn(
       'Deprecation warning! index argument will become mandatory in the next version'
     );

@@ -23,7 +23,7 @@ function render(
   options: OptionsManager,
   tracker: INotebookTracker,
   item: INotebookHeading,
-  toc: INotebookHeading[]
+  toc: INotebookHeading[] = []
 ) {
   let jsx;
   if (item.type === 'markdown' || item.type === 'header') {
@@ -74,8 +74,8 @@ function render(
             <ellipsesIcon.react />
           </div>
         ) : (
-            <div />
-          );
+          <div />
+        );
 
         // Render the heading item:
         jsx = (
@@ -86,8 +86,8 @@ function render(
               (tracker.activeCell === item.cellRef
                 ? ' toc-active-cell'
                 : previousHeader(tracker, item, toc)
-                  ? ' toc-active-cell'
-                  : '')
+                ? ' toc-active-cell'
+                : '')
             }
           >
             {button}
@@ -134,8 +134,8 @@ function render(
             <ellipsesIcon.react />
           </div>
         ) : (
-            <div />
-          );
+          <div />
+        );
         jsx = (
           <div
             className={
@@ -144,8 +144,8 @@ function render(
               (tracker.activeCell === item.cellRef
                 ? ' toc-active-cell'
                 : previousHeader(tracker, item, toc)
-                  ? ' toc-active-cell'
-                  : '')
+                ? ' toc-active-cell'
+                : '')
             }
           >
             {button}
@@ -215,7 +215,7 @@ function previousHeader(
   item: INotebookHeading,
   toc: INotebookHeading[]
 ) {
-  if (item.index > -1) {
+  if (item.index > -1 || toc?.length) {
     let activeCellIndex = tracker.currentWidget!.content.activeCellIndex;
     let headerIndex = item.index;
     // header index has to be less than the active cell index
@@ -226,8 +226,8 @@ function previousHeader(
         return true;
       }
       // return true if the next header cells index is greater than the active cells index
-      let nextHeaderIndex = toc[tocIndexOfNextHeader].index;
-      if (nextHeaderIndex != null && nextHeaderIndex > activeCellIndex) {
+      let nextHeaderIndex = toc?.[tocIndexOfNextHeader].index;
+      if (nextHeaderIndex > activeCellIndex) {
         return true;
       }
     }
