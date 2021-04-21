@@ -81,6 +81,7 @@ describe('@jupyterlab/notebook', () => {
         const model = new NotebookModel();
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
+        const cellJSON = cell.toJSON();
         model.cells.push(cell);
         model.cells.clearUndo();
         model.cells.remove(model.cells.length - 1);
@@ -88,7 +89,7 @@ describe('@jupyterlab/notebook', () => {
         expect(model.cells.length).toBe(1);
         expect(model.cells.get(0).value.text).toBe('foo');
         // Previous model matches the restored model
-        expect(model.cells.get(0).toJSON()).toEqual(cell.toJSON());
+        expect(model.cells.get(0).toJSON()).toEqual(cellJSON);
       });
 
       describe('cells `changed` signal', () => {

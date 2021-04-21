@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import { ISignal, Signal } from '@lumino/signaling';
+import { UUID } from '@lumino/coreutils';
 
 import * as Y from 'yjs';
 
@@ -18,7 +19,7 @@ import { Awareness } from 'y-protocols/dist/awareness.cjs';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 
-type YCellType = YRawCell | YCodeCell | YRawCell | YMarkdownCell;
+export type YCellType = YRawCell | YCodeCell | YRawCell | YMarkdownCell;
 
 /**
  * Shared implementation of the nbmodel types.
@@ -297,16 +298,17 @@ export const createCellFromType = (type: Y.Map<any>): YCellType => {
  * Create a new standalone cell given the type.
  */
 export const createStandaloneCell = (
-  cellType: 'raw' | 'code' | 'markdown'
+  cellType: 'raw' | 'code' | 'markdown',
+  id?: string
 ): YCellType => {
   switch (cellType) {
     case 'markdown':
-      return YMarkdownCell.createStandalone();
+      return YMarkdownCell.createStandalone(id);
     case 'code':
-      return YCodeCell.createStandalone();
+      return YCodeCell.createStandalone(id);
     default:
       // raw
-      return YRawCell.createStandalone();
+      return YRawCell.createStandalone(id);
   }
 };
 
@@ -395,12 +397,13 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
   /**
    * Create a new YRawCell that can be inserted into a YNotebook
    */
-  public static create(): YBaseCell<any> {
+  public static create(id = UUID.uuid4()): YBaseCell<any> {
     const ymodel = new Y.Map();
     const ysource = new Y.Text();
     ymodel.set('source', ysource);
     ymodel.set('metadata', {});
     ymodel.set('cell_type', this.prototype.cell_type);
+    ymodel.set('id', id);
     return new this(ymodel);
   }
 
@@ -409,8 +412,8 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
    * inserted into a YNotebook because the Yjs model is already
    * attached to an anonymous Y.Doc instance.
    */
-  public static createStandalone(): YBaseCell<any> {
-    const cell = this.create();
+  public static createStandalone(id?: string): YBaseCell<any> {
+    const cell = this.create(id);
     cell.isStandalone = true;
     new Y.Doc().getArray().insert(0, [cell.ymodel]);
     cell._undoManager = new Y.UndoManager([cell.ymodel], {
@@ -430,6 +433,7 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     ymodel.set('source', ysource);
     ymodel.set('metadata', this.getMetadata());
     ymodel.set('cell_type', this.cell_type);
+    ymodel.set('id', this.getId());
     const Self: any = this.constructor;
     return new Self(ymodel);
   }
@@ -507,6 +511,15 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
   }
 
   /**
+   * Get cell id.
+   *
+   * @returns Cell id
+   */
+  public getId(): string {
+    return this.ymodel.get('id');
+  }
+
+  /**
    * Gets cell's source.
    *
    * @returns Cell's source.
@@ -579,6 +592,7 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
    */
   toJSON(): nbformat.IBaseCell {
     return {
+      id: this.getId(),
       cell_type: this.cell_type,
       source: this.getSource(),
       metadata: this.getMetadata()
@@ -619,8 +633,8 @@ export class YCodeCell
   /**
    * Create a new YCodeCell that can be inserted into a YNotebook
    */
-  public static create(): YCodeCell {
-    const cell = super.create();
+  public static create(id: string): YCodeCell {
+    const cell = super.create(id);
     cell.ymodel.set('execution_count', 0); // for some default value
     return cell as any;
   }
@@ -630,8 +644,8 @@ export class YCodeCell
    * inserted into a YNotebook because the Yjs model is already
    * attached to an anonymous Y.Doc instance.
    */
-  public static createStandalone(): YCodeCell {
-    const cell = super.createStandalone();
+  public static createStandalone(id?: string): YCodeCell {
+    const cell = super.createStandalone(id);
     cell.ymodel.set('execution_count', null); // for some default value
     return cell as any;
   }
@@ -652,6 +666,7 @@ export class YCodeCell
    */
   toJSON(): nbformat.ICodeCell {
     return {
+      id: this.getId(),
       cell_type: 'code',
       source: this.getSource(),
       metadata: this.getMetadata(),
@@ -669,8 +684,8 @@ export class YRawCell
   /**
    * Create a new YRawCell that can be inserted into a YNotebook
    */
-  public static create(): YRawCell {
-    return super.create() as any;
+  public static create(id: string): YRawCell {
+    return super.create(id) as any;
   }
 
   /**
@@ -678,8 +693,8 @@ export class YRawCell
    * inserted into a YNotebook because the Yjs model is already
    * attached to an anonymous Y.Doc instance.
    */
-  public static createStandalone(): YRawCell {
-    return super.createStandalone() as any;
+  public static createStandalone(id?: string): YRawCell {
+    return super.createStandalone(id) as any;
   }
 
   /**
@@ -694,6 +709,7 @@ export class YRawCell
    */
   toJSON(): nbformat.IRawCell {
     return {
+      id: this.getId(),
       cell_type: 'raw',
       source: this.getSource(),
       metadata: this.getMetadata(),
@@ -708,8 +724,8 @@ export class YMarkdownCell
   /**
    * Create a new YMarkdownCell that can be inserted into a YNotebook
    */
-  public static create(): YMarkdownCell {
-    return super.create() as any;
+  public static create(id?: string): YMarkdownCell {
+    return super.create(id) as any;
   }
 
   /**
@@ -717,8 +733,8 @@ export class YMarkdownCell
    * inserted into a YNotebook because the Yjs model is already
    * attached to an anonymous Y.Doc instance.
    */
-  public static createStandalone(): YMarkdownCell {
-    return super.createStandalone() as any;
+  public static createStandalone(id?: string): YMarkdownCell {
+    return super.createStandalone(id) as any;
   }
 
   /**
@@ -733,6 +749,7 @@ export class YMarkdownCell
    */
   toJSON(): nbformat.IMarkdownCell {
     return {
+      id: this.getId(),
       cell_type: 'markdown',
       source: this.getSource(),
       metadata: this.getMetadata(),

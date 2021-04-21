@@ -222,6 +222,13 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetada>
   clone(): ISharedBaseCell<Metadata>;
 
   /**
+   * Get Cell id.
+   *
+   * @returns Cell id.
+   */
+  getId(): string;
+
+  /**
    * Gets cell's source.
    *
    * @returns Cell's source.
