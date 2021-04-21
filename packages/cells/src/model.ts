@@ -164,9 +164,10 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * Construct a cell model from optional cell content.
    */
   constructor(options: CellModel.IOptions) {
-    super({ modelDB: options.modelDB });
-
-    this.id = options.id || (options.cell?.id as string) || UUID.uuid4();
+    super({
+      modelDB: options.modelDB,
+      id: options.id || (options.cell?.id as string) || UUID.uuid4()
+    });
 
     this.value.changed.connect(this.onGenericChange, this);
 
@@ -229,7 +230,9 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * The id for the cell.
    */
-  readonly id: string;
+  get id(): string {
+    return this.nbcell.getId();
+  }
 
   /**
    * The metadata associated with the cell.

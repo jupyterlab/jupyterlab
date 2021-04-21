@@ -240,7 +240,7 @@ export namespace CodeEditor {
       } else {
         this.modelDB = new ModelDB();
       }
-
+      this.nbcell = nbmodel.createStandaloneCell(this.type, options.id);
       this.nbcell.changed.connect(this._onSharedModelChanged, this);
 
       const value = this.modelDB.createString('value');
@@ -336,8 +336,7 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    nbcell = nbmodel.createStandaloneCell(this.type);
-
+    nbcell: nbmodel.YCellType;
     /**
      * A mutex to update the nbcell model.
      */
@@ -838,6 +837,7 @@ export namespace CodeEditor {
 
   export namespace Model {
     export interface IOptions {
+      id?: string;
       /**
        * The initial value of the model.
        */
