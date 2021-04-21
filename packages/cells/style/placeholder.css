@@ -8,7 +8,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-Placeholder {
-  display: flex;
+  display: block;
   flex-direction: row;
   flex: 1 1 auto;
 }
