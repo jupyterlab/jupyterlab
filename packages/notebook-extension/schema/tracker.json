@@ -375,6 +375,24 @@
       "type": "boolean",
       "default": false
     },
+    "numberCellsToRenderDirectly": {
+      "title": "Number of cells to render directly",
+      "description": "Define the number of cells to render directly when virtual notebook intersection observer is available",
+      "type": "number",
+      "default": 7
+    },
+    "renderCellOnIdle": {
+      "title": "Render cell on browser idle time",
+      "description": "Defines if the placeholder cells should be rendered when the browser is idle",
+      "type": "boolean",
+      "default": true
+    },
+    "nonObservedBottomMargin": {
+      "title": "Non-observed bottom margin",
+      "description": "Defines the non-observed bottom margin for the virtual notebook, set a positive number of pixels to render cells below the visible view",
+      "type": "string",
+      "default": "0px"
+    },
     "maxNumberOutputs": {
       "title": "The maximum number of output cells to to be rendered in the output area. Set to 0 to have the complete display.",
       "description": "Defines the maximum number of output cells to to to be rendered in the output area for cells with many outputs. The output area will have a head and a tail, and the outputs between will be trimmed and not displayed unless the user clicks on the information message.",
