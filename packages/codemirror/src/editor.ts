@@ -131,7 +131,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Handle initial values for text, mimetype, and selections.
     doc.setValue(model.value.text);
     this.clearHistory();
-    this._onMimeTypeChanged();
     this._onCursorActivity();
     this._poll = new Poll({
       factory: async () => {
@@ -306,6 +305,27 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this._config[option] = value;
       Private.setOption(this.editor, option, value, this._config);
     }
+  }
+
+  /**
+   * Set config options for the editor.
+   *
+   * This method is prefered when setting several options. The
+   * options are set within an operation, which only performs
+   * the costly update at the end, and not after every option
+   * is set.
+   */
+  setOptions<K extends keyof CodeMirrorEditor.IConfig>(
+    options: CodeMirrorEditor.IConfigOptions<K>[]
+  ): void {
+    const editor = this._editor;
+    editor.startOperation();
+    for (let key in options) {
+      editor.operation(() => {
+        this.setOption(key as any, options[key]);
+      });
+    }
+    editor.endOperation();
   }
 
   /**
@@ -701,11 +721,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _onMimeTypeChanged(): void {
     const mime = this._model.mimeType;
     const editor = this._editor;
-    // TODO: should we provide a hook for when the
-    // mode is done being set?
-    void Mode.ensure(mime).then(spec => {
-      editor.setOption('mode', spec?.mime ?? 'null');
-    });
     const extraKeys = (editor.getOption('extraKeys' as any) ||
       {}) as CodeMirror.KeyMap;
     const isCode = mime !== 'text/plain' && mime !== 'text/x-ipythongfm';
@@ -714,7 +729,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     } else {
       delete extraKeys['Backspace'];
     }
-    editor.setOption('extraKeys' as any, extraKeys);
+    this.setOption('extraKeys', extraKeys);
+
+    // TODO: should we provide a hook for when the mode is done being set?
+    void Mode.ensure(mime).then(spec => {
+      this.setOption('mode', spec?.mime ?? 'null');
+    });
   }
 
   /**
@@ -1300,6 +1320,13 @@ export namespace CodeMirrorEditor {
     foldGutter: false,
     handlePaste: true
   };
+
+  /**
+   * The options used to set several options at once with setOptions.
+   */
+  export interface IConfigOptions<K extends keyof IConfig> {
+    K: IConfig[K];
+  }
 
   /**
    * Add a command to CodeMirror.
