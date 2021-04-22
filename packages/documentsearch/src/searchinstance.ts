@@ -60,7 +60,10 @@ export class SearchInstance implements IDisposable {
 
     if (this._widget instanceof NotebookPanel) {
       this._widget.content.activeCellChanged.connect(() => {
-        if (this._displayState.query && this._displayState.filters.selectedCells) {
+        if (
+          this._displayState.query &&
+          this._displayState.filters.selectedCells
+        ) {
           void this._startQuery(
             this._displayState.query,
             this._displayState.filters

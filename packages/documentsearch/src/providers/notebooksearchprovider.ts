@@ -70,7 +70,9 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
         ? { output: true, selectedCells: false }
         : filters;
 
-    const selectedCells = cells.filter(cell => this._searchTarget!.content.isSelectedOrActive(cell))
+    const selectedCells = cells.filter(cell =>
+      this._searchTarget!.content.isSelectedOrActive(cell)
+    );
     if (this._filters.selectedCells && selectedCells.length > 0) {
       cells = selectedCells;
     }
