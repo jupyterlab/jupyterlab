@@ -326,7 +326,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Setup single-document-mode title bar
     const titleWidget = (this._titleWidget = new Widget());
     titleWidget.id = 'jp-title-panel-title';
-    titleWidget.node.appendChild(document.createElement('h1'));
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleWidget.node.appendChild(titleInput);
     this.add(titleWidget, 'top', { rank: 100 });
 
     if (this._dockPanel.mode === 'multiple-document') {
@@ -865,9 +867,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
-    const h1 = this._titleWidget.node.children[0] as HTMLHeadElement;
-    h1.textContent = current ? current.title.label : '';
-    h1.title = current ? current.title.caption : '';
+    const inputElement = this._titleWidget.node.children[0] as HTMLInputElement;
+    inputElement.value = current ? current.title.label : ''
+    inputElement.title = current ? current.title.caption : '';
   }
 
   /**
