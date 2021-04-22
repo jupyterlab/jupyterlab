@@ -21,7 +21,7 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "default.json",
+    "default*.json",
     "tsconfigtestbase.json"
   ],
   "scripts": {
