@@ -495,7 +495,9 @@ export class StaticNotebook extends Widget {
       model,
       rendermime,
       contentFactory,
-      updateEditorOnShow: false
+      updateEditorOnShow: false,
+      placeholder: false,
+      maxNumberOutputs: this.notebookConfig.maxNumberOutputs
     };
     const cell = this.contentFactory.createCodeCell(options, this);
     cell.syncCollapse = true;
@@ -773,6 +775,11 @@ export namespace StaticNotebook {
      * Should timing be recorded in metadata
      */
     recordTiming: boolean;
+
+    /**
+     * Defines the maximum number of outputs per cell.
+     */
+    maxNumberOutputs: number;
   }
   /**
    * Default configuration options for notebooks.
@@ -780,7 +787,8 @@ export namespace StaticNotebook {
   export const defaultNotebookConfig: INotebookConfig = {
     scrollPastEnd: true,
     defaultCell: 'code',
-    recordTiming: false
+    recordTiming: false,
+    maxNumberOutputs: 50
   };
 
   /**
