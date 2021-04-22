@@ -60,7 +60,7 @@ export class SearchInstance implements IDisposable {
 
     if (this._widget instanceof NotebookPanel) {
       this._widget.content.activeCellChanged.connect(() => {
-        if (this._displayState.query && this._displayState.filters.activeCell) {
+        if (this._displayState.query && this._displayState.filters.selectedCells) {
           void this._startQuery(
             this._displayState.query,
             this._displayState.filters
@@ -232,7 +232,7 @@ export class SearchInstance implements IDisposable {
     forceFocus: true,
     replaceText: '',
     replaceEntryShown: false,
-    filters: { output: true, activeCell: false },
+    filters: { output: true, selectedCells: false },
     filtersOpen: false
   };
 

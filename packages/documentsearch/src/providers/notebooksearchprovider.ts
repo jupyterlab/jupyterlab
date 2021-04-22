@@ -28,7 +28,7 @@ export interface INotebookFilters {
   /**
    * Should search be within the active cell?
    */
-  activeCell: boolean;
+  selectedCells: boolean;
 }
 
 export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
@@ -67,12 +67,12 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
     this._filters =
       !filters || Object.entries(filters).length === 0
-        ? { output: true, activeCell: false }
+        ? { output: true, selectedCells: false }
         : filters;
 
-    const cell = this._searchTarget.content.activeCell;
-    if (this._filters.activeCell && cell) {
-      cells = [cell];
+    const selectedCells = cells.filter(cell => this._searchTarget!.content.isSelectedOrActive(cell))
+    if (this._filters.selectedCells && selectedCells.length > 0) {
+      cells = selectedCells;
     }
 
     // hide the current notebook widget to prevent expensive layout re-calculation operations
