@@ -324,16 +324,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     );
 
     // Setup single-document-mode title bar
-    const titleWidget = (this._titleWidget = new Widget());
-    titleWidget.id = 'jp-title-panel-title';
-    const titleInput = document.createElement('input');
-    titleInput.type = 'text';
-    titleWidget.node.appendChild(titleInput);
-    this.add(titleWidget, 'top', { rank: 100 });
+    const titleWidgetHandler = (this._titleWidgetHandler = new Private.TitleWidgetHandler());
+    this.add(titleWidgetHandler.titleWidget, 'top', { rank: 100 });
 
     if (this._dockPanel.mode === 'multiple-document') {
       this._topHandler.addWidget(this._menuHandler.panel, 100);
-      titleWidget.hide();
+      titleWidgetHandler.hide();
     } else {
       rootLayout.insertWidget(2, this._menuHandler.panel);
     }
@@ -473,7 +469,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       // Adjust menu and title
       // this.add(this._menuHandler.panel, 'top', {rank: 100});
       (this.layout as BoxLayout).insertWidget(2, this._menuHandler.panel);
-      this._titleWidget.show();
+      this._titleWidgetHandler.show();
       this._updateTitlePanelTitle();
 
       this._modeChanged.emit(mode);
@@ -521,7 +517,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Adjust menu and title
     this.add(this._menuHandler.panel, 'top', { rank: 100 });
     // this._topHandler.addWidget(this._menuHandler.panel, 100)
-    this._titleWidget.hide();
+    this._titleWidgetHandler.hide();
 
     // Emit the mode changed signal
     this._modeChanged.emit(mode);
@@ -697,7 +693,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
     this._layoutDebouncer.dispose();
-    this._titleWidget.dispose();
+    this._titleWidgetHandler.dispose();
     super.dispose();
   }
 
@@ -867,7 +863,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
-    const inputElement = this._titleWidget.node.children[0] as HTMLInputElement;
+    const inputElement = this._titleWidgetHandler.titleWidget.node.children[0] as HTMLInputElement;
     inputElement.value = current ? current.title.label : ''
     inputElement.title = current ? current.title.caption : '';
   }
@@ -1212,7 +1208,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _headerPanel: Panel;
   private _topHandler: Private.PanelHandler;
   private _menuHandler: Private.PanelHandler;
-  private _titleWidget: Widget;
+  private _titleWidgetHandler: Private.TitleWidgetHandler;
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
@@ -1548,5 +1544,60 @@ namespace Private {
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;
+  }
+
+  export class TitleWidgetHandler {
+    /**
+     * Construct a new title widget handler.
+     */
+    constructor() {
+      const titleWidget = (this._titleWidget = new Widget());
+      titleWidget.id = 'jp-title-panel-title';
+      const titleInput = document.createElement('input');
+      titleInput.type = 'text';
+      titleWidget.node.appendChild(titleInput);
+    }
+
+    /**
+     * Get the input element managed by the handler.
+     */
+    get titleWidget(): Widget {
+      return this._titleWidget;
+    }
+
+    /**
+     * Dispose of the handler and the resources it holds.
+     */
+    dispose(): void {
+      if (this.isDisposed) {
+        return;
+      }
+      this._isDisposed = true;
+      this._titleWidget.dispose();
+    }
+
+    /**
+     * Hide the title widget.
+     */
+    hide(): void {
+      this._titleWidget.hide();
+    }
+
+    /**
+     * Show the title widget.
+     */
+    show(): void {
+      this._titleWidget.show();
+    }
+
+    /**
+     * Test whether the handler has been disposed.
+     */
+    get isDisposed(): boolean {
+      return this._isDisposed;
+    }
+
+    private _titleWidget: Widget;
+    private _isDisposed: boolean = false;
   }
 }
