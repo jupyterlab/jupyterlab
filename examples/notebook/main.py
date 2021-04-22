@@ -44,6 +44,10 @@ class ExampleHandler(
     def get(self):
         """Get the main page for the application's interface."""
         # Options set here can be read with PageConfig.getOption
+        mathjax_config = self.settings.get('mathjax_config',
+                                           'TeX-AMS_HTML-full,Safe')
+        mathjax_url = self.settings.get('mathjax_url', 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js')
+
         config_data = {
             # Use camelCase here, since that's what the lab components expect
             'baseUrl': self.base_url,
@@ -51,9 +55,8 @@ class ExampleHandler(
             'notebookPath': 'test.ipynb',
             'fullStaticUrl': ujoin(self.base_url, 'static', self.name),
             'frontendUrl': ujoin(self.base_url, 'example/'),
-            # FIXME: Don't use a CDN here
-            'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
-            'mathjaxConfig': "TeX-AMS_CHTML-full,Safeee"
+            'mathjaxUrl': mathjax_url,
+            'mathjaxConfig': mathjax_config
         }
         return self.write(
             self.render_template(
@@ -72,7 +75,6 @@ class ExampleApp(LabServerApp):
     default_url = '/example'
     app_url = "/example"
     name = __name__
-    load_other_extensions = False
     app_name = 'JupyterLab Example Notebook'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
     schemas_dir = os.path.join(HERE, 'build', 'schemas')
@@ -81,6 +83,12 @@ class ExampleApp(LabServerApp):
     themes_dir = os.path.join(HERE, 'build', 'themes')
     user_settings_dir = os.path.join(HERE, 'build', 'user_settings')
     workspaces_dir = os.path.join(HERE, 'build', 'workspaces')
+
+    serverapp_config = {
+        "jpserver_extensions": {
+            "nbclassic": True
+        }
+    }
 
     def initialize_handlers(self):
         """Add example handler to Lab Server's handler list.
