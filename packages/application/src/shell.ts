@@ -32,6 +32,8 @@ import {
 
 import { JupyterFrontEnd } from './frontend';
 
+import { isValidFileName } from '@jupyterlab/docmanager';
+
 /**
  * The class name added to AppShell instances.
  */
@@ -324,7 +326,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     );
 
     // Setup single-document-mode title bar
-    const titleWidgetHandler = (this._titleWidgetHandler = new Private.TitleWidgetHandler());
+    const titleWidgetHandler = (this._titleWidgetHandler = new Private.TitleWidgetHandler(
+      this
+    ));
     this.add(titleWidgetHandler.titleWidget, 'top', { rank: 100 });
 
     if (this._dockPanel.mode === 'multiple-document') {
@@ -863,8 +867,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
-    const inputElement = this._titleWidgetHandler.titleWidget.node.children[0] as HTMLInputElement;
-    inputElement.value = current ? current.title.label : ''
+    const inputElement = this._titleWidgetHandler.titleWidget.node
+      .children[0] as HTMLInputElement;
+    inputElement.value = current ? current.title.label : '';
     inputElement.title = current ? current.title.caption : '';
   }
 
@@ -1550,12 +1555,84 @@ namespace Private {
     /**
      * Construct a new title widget handler.
      */
-    constructor() {
+    constructor(shell: ILabShell) {
+      this._shell = shell;
       const titleWidget = (this._titleWidget = new Widget());
       titleWidget.id = 'jp-title-panel-title';
       const titleInput = document.createElement('input');
       titleInput.type = 'text';
+      titleInput.addEventListener('keyup', this);
+      titleInput.addEventListener('click', this);
+      titleInput.addEventListener('blur', this);
+
       titleWidget.node.appendChild(titleInput);
+    }
+
+    handleEvent(event: Event): void {
+      switch (event.type) {
+        case 'keyup':
+          void this._evtKeyUp(event as KeyboardEvent);
+          break;
+        case 'click':
+          this._evtClick(event as MouseEvent);
+          break;
+        case 'blur':
+          this._selected = false;
+          break;
+      }
+    }
+
+    /**
+     * Handle `keyup` events on the handler.
+     */
+    private async _evtKeyUp(event: KeyboardEvent): Promise<void> {
+      if (event.key == 'Enter') {
+        const widget = this._shell.currentWidget;
+        if (widget instanceof DocumentWidget) {
+          const oldName = widget.context.path.split('/').pop()!;
+          const inputElement = this.titleWidget.node
+            .children[0] as HTMLInputElement;
+          const newName = inputElement.value;
+          inputElement.blur();
+          if (newName !== oldName && isValidFileName(newName)) {
+            await widget.context.rename(newName);
+          } else {
+            inputElement.value = oldName;
+          }
+        }
+      }
+    }
+
+    /**
+     * Handle `click` events on the handler.
+     */
+    private _evtClick(event: MouseEvent): void {
+      // only handle primary button clicks
+      if (event.button !== 0 || this._selected) {
+        return;
+      }
+
+      const currentWidget = this._shell.currentWidget;
+      const inputElement = this.titleWidget.node
+        .children[0] as HTMLInputElement;
+      if (currentWidget == null || !(currentWidget instanceof DocumentWidget)) {
+        inputElement.readOnly = true;
+        return;
+      } else {
+        inputElement.removeAttribute('readOnly');
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      this._selected = true;
+
+      const selectEnd = inputElement.value.indexOf('.');
+      if (selectEnd === -1) {
+        inputElement.select();
+      } else {
+        inputElement.setSelectionRange(0, selectEnd);
+      }
     }
 
     /**
@@ -1573,6 +1650,9 @@ namespace Private {
         return;
       }
       this._isDisposed = true;
+      this._titleWidget.node.removeEventListener('keyup', this);
+      this._titleWidget.node.removeEventListener('click', this);
+      this._titleWidget.node.removeEventListener('blur', this);
       this._titleWidget.dispose();
     }
 
@@ -1598,6 +1678,8 @@ namespace Private {
     }
 
     private _titleWidget: Widget;
+    private _shell: ILabShell;
     private _isDisposed: boolean = false;
+    private _selected: boolean = false;
   }
 }

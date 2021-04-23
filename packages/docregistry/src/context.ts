@@ -246,16 +246,14 @@ export class Context<
 
   /**
    * Rename the document.
-   * 
+   *
    * @param newName - the new name for the document.
    */
   rename(newName: string): Promise<void> {
-    return this.ready
-      .then(() => {
-        return this._manager.ready
-          .then(() => {
-            return this._rename(newName);
-          })
+    return this.ready.then(() => {
+      return this._manager.ready.then(() => {
+        return this._rename(newName);
+      });
     });
   }
 
@@ -516,7 +514,7 @@ export class Context<
 
   /**
    * Rename the document.
-   * 
+   *
    * @param newName - the new name for the document.
    */
   private async _rename(newName: string): Promise<void> {
@@ -524,7 +522,7 @@ export class Context<
     splitPath[splitPath.length - 1] = newName;
     const newPath = splitPath.join('/');
 
-    await this._manager.contents.rename(this.path, newPath)
+    await this._manager.contents.rename(this.path, newPath);
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newName);
 

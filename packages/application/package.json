@@ -45,6 +45,7 @@
     "@fortawesome/fontawesome-free": "^5.12.0",
     "@jupyterlab/apputils": "^3.1.0-alpha.5",
     "@jupyterlab/coreutils": "^5.1.0-alpha.5",
+    "@jupyterlab/docmanager": "^3.1.0-alpha.5",
     "@jupyterlab/docregistry": "^3.1.0-alpha.5",
     "@jupyterlab/rendermime": "^3.1.0-alpha.5",
     "@jupyterlab/rendermime-interfaces": "^3.1.0-alpha.5",
