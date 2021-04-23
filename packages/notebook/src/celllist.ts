@@ -77,7 +77,11 @@ export class CellList implements IObservableUndoableList<ICellModel> {
           const cells = change.newValues.map(cell => {
             return cell.nbcell.clone() as any;
           });
-          nbmodel.insertCells(change.newIndex, cells);
+          let insertLocation = change.newIndex;
+          if (change.type === 'move' && insertLocation > change.oldIndex) {
+            insertLocation += change.oldValues.length;
+          }
+          nbmodel.insertCells(insertLocation, cells);
           change.newValues.forEach((cell, index) => {
             cell.switchSharedModel(cells[index], false);
           });
