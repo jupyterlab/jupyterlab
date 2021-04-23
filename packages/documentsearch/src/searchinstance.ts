@@ -9,6 +9,7 @@ import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+import { NotebookPanel } from '@jupyterlab/notebook';
 
 /**
  * Represents a search on a single widget.
@@ -45,6 +46,7 @@ export class SearchInstance implements IDisposable {
     this._widget.disposed.connect(() => {
       this.dispose();
     });
+
     this._searchWidget.disposed.connect(() => {
       this._widget.activate();
       this.dispose();
@@ -55,6 +57,21 @@ export class SearchInstance implements IDisposable {
       // Offset the position of the search widget to not cover the toolbar.
       this._searchWidget.node.style.top = `${this._widget.toolbar.node.clientHeight}px`;
     }
+
+    if (this._widget instanceof NotebookPanel) {
+      this._widget.content.activeCellChanged.connect(() => {
+        if (
+          this._displayState.query &&
+          this._displayState.filters.selectedCells
+        ) {
+          void this._startQuery(
+            this._displayState.query,
+            this._displayState.filters
+          );
+        }
+      });
+    }
+
     this._displaySearchWidget();
   }
 
@@ -218,7 +235,7 @@ export class SearchInstance implements IDisposable {
     forceFocus: true,
     replaceText: '',
     replaceEntryShown: false,
-    filters: { output: true },
+    filters: { output: true, selectedCells: false },
     filtersOpen: false
   };
 

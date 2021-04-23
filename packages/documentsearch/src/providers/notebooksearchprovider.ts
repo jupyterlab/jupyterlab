@@ -24,6 +24,11 @@ export interface INotebookFilters {
    * Should cell output be searched?
    */
   output: boolean;
+
+  /**
+   * Should search be within the active cell?
+   */
+  selectedCells: boolean;
 }
 
 export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
@@ -58,12 +63,19 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     filters: INotebookFilters | undefined
   ): Promise<ISearchMatch[]> {
     this._searchTarget = searchTarget;
-    const cells = this._searchTarget.content.widgets;
+    let cells = this._searchTarget.content.widgets;
 
     this._filters =
       !filters || Object.entries(filters).length === 0
-        ? { output: true }
+        ? { output: true, selectedCells: false }
         : filters;
+
+    const selectedCells = cells.filter(cell =>
+      this._searchTarget!.content.isSelectedOrActive(cell)
+    );
+    if (this._filters.selectedCells && selectedCells.length > 0) {
+      cells = selectedCells;
+    }
 
     // hide the current notebook widget to prevent expensive layout re-calculation operations
     this._searchTarget.hide();
@@ -360,6 +372,13 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   /**
+   * Signal indicating that the active cell in the notebook has changed
+   */
+  get activeCellChanged(): ISignal<this, void> {
+    return this._activeCellChanged;
+  }
+
+  /**
    * The current index of the selected match.
    */
   get currentMatchIndex(): number | null {
@@ -499,4 +518,5 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   private _unRenderedMarkdownCells: MarkdownCell[] = [];
   private _cellsWithMatches: Cell[] = [];
   private _changed = new Signal<this, void>(this);
+  private _activeCellChanged = new Signal<this, void>(this);
 }
