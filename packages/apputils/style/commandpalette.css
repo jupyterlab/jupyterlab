@@ -91,13 +91,14 @@
   content: ' ';
   color: white;
   background-color: var(--jp-brand-color1);
+  /*background-color: var(--jp-warn-color1);*/
   position: absolute;
   top: 4px;
   right: 4px;
   height: 30px;
   width: 10px;
   padding: 0px 10px;
-  background-image: var(--jp-icon-search-white);
+  /*background-image: var(--jp-icon-search-white);*/
   background-size: 20px;
   background-repeat: no-repeat;
   background-position: center;
@@ -130,7 +131,8 @@
 }
 
 .lm-CommandPalette-header {
-  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+  /*border-bottom: solid var(--jp-border-width) var(--jp-border-color2);*/
+  border-bottom: solid var(--jp-border-width) var(--jp-warn-color2);
   color: var(--jp-ui-font-color1);
   cursor: pointer;
   display: flex;
@@ -161,19 +163,26 @@
 }
 
 .lm-CommandPalette-item.lm-mod-disabled {
-  color: var(--jp-ui-font-color3);
+  /*color: var(--jp-ui-font-color3);*/
+  color: var(--jp-warn-color3);
 }
 
 .lm-CommandPalette-item.lm-mod-active {
-  background: var(--jp-layout-color3);
+  /*background: var(--jp-layout-color3);*/
+  /*background: var(--jp-brand-color2);*/
+  color: var(--jp-inverse-font-color1);
+  background: var(--jp-brand-color1);
 }
 
 .lm-CommandPalette-item.lm-mod-active:hover:not(.lm-mod-disabled) {
-  background: var(--jp-layout-color4);
+  /*background: var(--jp-layout-color4);*/
+  color: var(--jp-inverse-font-color1);
+  background: var(--jp-brand-color1);
 }
 
 .lm-CommandPalette-item:hover:not(.lm-mod-active):not(.lm-mod-disabled) {
   background: var(--jp-layout-color2);
+  /*background: var(--jp-brand-color3);*/
 }
 
 .lm-CommandPalette-itemContent {
@@ -199,7 +208,8 @@
 }
 
 .lm-CommandPalette-item.lm-mod-disabled .lm-CommandPalette-itemIcon {
-  opacity: 0.4;
+  /*opacity: 0.4;*/
+  opacity: 0.6;
 }
 
 .lm-CommandPalette-item .lm-CommandPalette-itemShortcut {
