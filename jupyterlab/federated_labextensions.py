@@ -410,4 +410,18 @@ def _get_labextension_metadata(module):
         except Exception:
             m = None
 
+    # Looking for namespace packages
+    if m is None:
+        from setuptools import find_namespace_packages
+        packages = find_namespace_packages(mod_path)
+
+        # Looking for the labextension metadata
+        for package in packages:
+            try:
+                m = importlib.import_module(package)
+                if hasattr(m, '_jupyter_labextension_paths') :
+                    return m, m._jupyter_labextension_paths()
+            except Exception:
+                m = None            
+            
     raise ModuleNotFoundError('There is not a labextensions at {}'.format(module))
