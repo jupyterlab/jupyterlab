@@ -196,7 +196,7 @@ darker/lighter, and so forth.
 
 For most simple, one-color icons, it is desirable for the icon's color
 to strongly constrast with that of the application's background. You can
-acheive this using one of the `jp-iconX` classes.
+achieve this using one of the `jp-iconX` classes.
 
 **Example: check icon**
 
