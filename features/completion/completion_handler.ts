@@ -78,6 +78,14 @@ export class LSPConnector
     return this.options.settings.composite.kernelCompletionsFirst;
   }
 
+  protected get use_lsp_completions(): boolean {
+    return this.options.settings.composite.useLspCompletions;
+  }
+
+  protected get use_kernel_completions(): boolean {
+    return this.options.settings.composite.useKernelCompletions;
+  }
+
   protected get suppress_continuous_hinting_in(): string[] {
     return this.options.settings.composite.suppressContinuousHintingIn;
   }
@@ -213,15 +221,19 @@ export class LSPConnector
       cursor_in_root
     );
 
-    const lsp_promise = this.fetch_lsp(
-      token,
-      typed_character,
-      virtual_start,
-      virtual_end,
-      virtual_cursor,
-      document,
-      position_in_token
-    );
+    const lsp_promise: Promise<CompletionHandler.ICompletionItemsReply> = this
+      .use_lsp_completions
+      ? this.fetch_lsp(
+          token,
+          typed_character,
+          virtual_start,
+          virtual_end,
+          virtual_cursor,
+          document,
+          position_in_token
+        )
+      : Promise.resolve(null);
+
     let promise: Promise<CompletionHandler.ICompletionItemsReply> = null;
 
     try {
@@ -271,12 +283,16 @@ export class LSPConnector
           promise = Promise.all([
             kernel_promise.catch(p => p),
             lsp_promise.catch(p => p)
-          ]).then(([kernel, lsp]) =>
-            this.merge_replies(
-              [this.transform_reply(kernel), lsp],
-              this._editor
-            )
-          );
+          ]).then(([kernel, lsp]) => {
+            let replies = [];
+            if (this.use_kernel_completions) {
+              replies.push(this.transform_reply(kernel));
+            }
+            if (this.use_lsp_completions) {
+              replies.push(lsp);
+            }
+            return this.merge_replies(replies, this._editor);
+          });
         }
       }
       if (!promise) {
