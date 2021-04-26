@@ -28,7 +28,7 @@
     "lib": "lib/"
   },
   "files": [
-    "lib/*.{d.ts,js}",
+    "lib/*.{d.ts,js,js.map}",
     "style/*.css",
     "static/*.svg",
     "style/index.js"

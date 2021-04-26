@@ -16,6 +16,10 @@ button {
   border-radius: var(--jp-border-radius);
 }
 
+button:focus-visible {
+  border: 1px solid var(--jp-brand-color1);
+}
+
 button.jp-mod-styled.jp-mod-accept {
   background: var(--md-blue-500);
   border: 0;

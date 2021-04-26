@@ -1027,7 +1027,8 @@ function activateNotebookHandler(
     factory.notebookConfig = {
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
-      recordTiming: settings.get('recordTiming').composite as boolean
+      recordTiming: settings.get('recordTiming').composite as boolean,
+      maxNumberOutputs: settings.get('maxNumberOutputs').composite as number
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
