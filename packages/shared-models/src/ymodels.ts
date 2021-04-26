@@ -267,6 +267,55 @@ export class YNotebook
   }
 
   /**
+   * Returns the metadata associated with the notebook.
+   *
+   * @returns Notebook's metadata.
+   */
+  getMetadata(): nbformat.INotebookMetadata {
+    const meta = this.ymeta.get('metadata');
+    return meta ? deepCopy(meta) : { orig_nbformat: 1 };
+  }
+
+  /**
+   * Sets the metadata associated with the notebook.
+   *
+   * @param metadata: Notebook's metadata.
+   */
+  setMetadata(value: nbformat.INotebookMetadata): void {
+    this.ymeta.set('metadata', deepCopy(value));
+  }
+
+  /**
+   * Updates the metadata associated with the notebook.
+   *
+   * @param value: Metadata's attribute to update.
+   */
+  updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
+    this.ymeta.set('metadata', Object.assign({}, this.getMetadata(), value));
+  }
+
+  /**
+   * Undo an operation.
+   */
+  undo(): void {
+    this.undoManager.undo();
+  }
+
+  /**
+   * Redo an operation.
+   */
+  redo(): void {
+    this.undoManager.redo();
+  }
+
+  /**
+   * Clear the change stack.
+   */
+  clearUndoHistory(): void {
+    this.undoManager.clear();
+  }
+
+  /**
    * Create a new YNotebook.
    */
   public static create(): models.ISharedNotebook {
@@ -334,35 +383,6 @@ export class YNotebook
     trackedOrigins: new Set([this])
   });
   private _ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
-
-  /**
-   * Returns the metadata associated with the notebook.
-   *
-   * @returns Notebook's metadata.
-   */
-  getMetadata(): nbformat.INotebookMetadata {
-    const meta = this.ymeta.get('metadata');
-    return meta ? deepCopy(meta) : { orig_nbformat: 1 };
-  }
-
-  /**
-   * Sets the metadata associated with the notebook.
-   *
-   * @param metadata: Notebook's metadata.
-   */
-  setMetadata(value: nbformat.INotebookMetadata): void {
-    this.ymeta.set('metadata', deepCopy(value));
-  }
-
-  /**
-   * Updates the metadata associated with the notebook.
-   *
-   * @param value: Metadata's attribute to update.
-   */
-  updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
-    this.ymeta.set('metadata', Object.assign({}, this.getMetadata(), value));
-  }
-
   public nbformat_minor: number = nbformat.MINOR_VERSION;
   public nbformat: number = nbformat.MAJOR_VERSION;
   public cells: YCellType[];
@@ -707,6 +727,10 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
 export class YCodeCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
   implements models.ISharedCodeCell {
+  constructor(ymodel: Y.Map<any>) {
+    super(ymodel);
+    this._outputs = ymodel.get('outputs');
+  }
   /**
    * The type of the cell.
    */
@@ -725,7 +749,36 @@ export class YCodeCell
    * Execution, display, or stream outputs.
    */
   getOutputs(): Array<nbformat.IOutput> {
-    return this.outputs;
+    return this._outputs.toArray();
+  }
+
+  /**
+   * Add/Update output.
+   */
+  setOutput(output: nbformat.IOutput): void {
+    let index = -1;
+    this._outputs.forEach((value, i) => {
+      if (value === output) {
+        index = i;
+        return;
+      }
+    });
+    this.transact(() => {
+      if (index === -1) {
+        this._outputs.push([output]);
+      } else {
+        this._outputs.insert(index, [output]);
+      }
+    });
+  }
+
+  /**
+   * Add output at the end.
+   */
+  pushOutput(output: nbformat.IOutput): void {
+    this.transact(() => {
+      this._outputs.push([output]);
+    });
   }
 
   /**
@@ -734,6 +787,7 @@ export class YCodeCell
   public static create(id?: string): YCodeCell {
     const cell = super.create(id);
     cell.ymodel.set('execution_count', 0); // for some default value
+    cell.ymodel.set('outputs', new Y.Array<nbformat.IOutput>());
     return cell as any;
   }
 
@@ -745,6 +799,7 @@ export class YCodeCell
   public static createStandalone(id?: string): YCodeCell {
     const cell = super.createStandalone(id);
     cell.ymodel.set('execution_count', null); // for some default value
+    cell.ymodel.set('outputs', new Y.Array<nbformat.IOutput>());
     return cell as any;
   }
 
@@ -756,6 +811,7 @@ export class YCodeCell
   public clone(): YCodeCell {
     const cell = super.clone();
     cell.ymodel.set('execution_count', this.execution_count); // for some default value
+    cell.ymodel.set('outputs', this._outputs.clone());
     return cell as any;
   }
 
@@ -773,7 +829,7 @@ export class YCodeCell
     };
   }
 
-  private outputs: Array<nbformat.IOutput> = [];
+  private _outputs: Y.Array<nbformat.IOutput>;
 }
 
 export class YRawCell

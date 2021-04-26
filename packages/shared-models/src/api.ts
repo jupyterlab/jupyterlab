@@ -326,6 +326,16 @@ export interface ISharedCodeCell
   getOutputs(): nbformat.IOutput[];
 
   /**
+   * Add/Update output.
+   */
+  setOutput(output: nbformat.IOutput): void;
+
+  /**
+   * Add output at the end.
+   */
+  pushOutput(output: nbformat.IOutput): void;
+
+  /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IBaseCell;
