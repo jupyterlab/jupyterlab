@@ -153,6 +153,7 @@ const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
         return;
       }
       showingError = true;
+      manager.bandwidthSaveMode = true;
       const result = await showDialog({
         title: trans.__('Server unavailable or unreachable'),
         body: trans.__(
@@ -164,6 +165,7 @@ const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
           Dialog.cancelButton({ label: trans.__('Dismiss') })
         ]
       });
+      manager.bandwidthSaveMode = false;
       showingError = false;
       if (result.button.accept) {
         await app.commands.execute(CommandIDs.restart);

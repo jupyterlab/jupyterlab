@@ -37,7 +37,12 @@ export class ServiceManager implements ServiceManager.IManager {
     const defaultDrive = options.defaultDrive;
     const serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    const standby = options.standby ?? 'when-hidden';
+
+    const standby =
+      options.standby ??
+      (() => {
+        return this.bandwidthSaveMode || 'when-hidden';
+      });
     const normalized = { defaultDrive, serverSettings, standby };
 
     const kernelManager = new KernelManager(normalized);
@@ -158,6 +163,23 @@ export class ServiceManager implements ServiceManager.IManager {
     return this._readyPromise;
   }
 
+  /**
+   * Every periodic network polling should be paused while
+   * this is set to true. Extensions should use this value
+   * to decide whether to proceed with the polling.
+   * The extensions may also set this value to true if there is no need
+   * to fetch anything from the server backend basing on some conditions
+   * (e.g. when an error message dialog is displayed).
+   * At the same time, the extensions are responsible for setting
+   * this value back to false.
+   */
+  get bandwidthSaveMode(): boolean {
+    return this._bandwidthSaveMode;
+  }
+  set bandwidthSaveMode(value: boolean) {
+    this._bandwidthSaveMode = value;
+  }
+
   private _onConnectionFailure(sender: any, err: Error): void {
     this._connectionFailure.emit(err);
   }
@@ -166,6 +188,7 @@ export class ServiceManager implements ServiceManager.IManager {
   private _readyPromise: Promise<void>;
   private _connectionFailure = new Signal<this, Error>(this);
   private _isReady = false;
+  private _bandwidthSaveMode = false;
 }
 
 /**
@@ -235,6 +258,18 @@ export namespace ServiceManager {
      * A signal emitted when there is a connection failure with the server.
      */
     readonly connectionFailure: ISignal<IManager, Error>;
+
+    /**
+     * Every periodic network polling should be paused while
+     * this is set to true. Extensions should use this value
+     * to decide whether to proceed with the polling.
+     * The extensions may also set this value to true if there is no need
+     * to fetch anything from the server backend basing on some conditions
+     * (e.g. when an error message dialog is displayed).
+     * At the same time, the extensions are responsible for setting
+     * this value back to false.
+     */
+    bandwidthSaveMode: boolean;
   }
 
   /**
@@ -252,8 +287,8 @@ export namespace ServiceManager {
     readonly defaultDrive?: Contents.IDrive;
 
     /**
-     * When the manager stops polling the API. Defaults to `when-hidden`.
+     * When the manager stops polling the API.
      */
-    standby?: Poll.Standby;
+    standby?: Poll.Standby | (() => boolean | Poll.Standby);
   }
 }
