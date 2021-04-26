@@ -625,7 +625,8 @@ const main: JupyterFrontEndPlugin<void> = {
 
       const onCurrentSourceOpened = (
         _: IDebugger.Model.ISources | null,
-        source: IDebugger.Source
+        source: IDebugger.Source,
+        breakpoint?: IDebugger.IBreakpoint
       ): void => {
         if (!source) {
           return;
@@ -638,6 +639,19 @@ const main: JupyterFrontEndPlugin<void> = {
           source: path
         });
         if (results.length > 0) {
+          if (breakpoint && typeof breakpoint.line !== 'undefined') {
+            results.forEach(editor => {
+              const start = {
+                line: (breakpoint.line as number) - 1,
+                column: breakpoint.column || 0
+              };
+              const end = {
+                line: Math.min(start.line + 25, editor.lineCount - 1),
+                column: start.column
+              };
+              editor.revealSelection({ start, end });
+            });
+          }
           return;
         }
         const editorWrapper = readOnlyEditorFactory.createNewEditor({
@@ -673,7 +687,7 @@ const main: JupyterFrontEndPlugin<void> = {
           sourceReference: 0,
           path
         });
-        onCurrentSourceOpened(null, source);
+        onCurrentSourceOpened(null, source, breakpoint);
       });
     }
   }
