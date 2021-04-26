@@ -63,15 +63,34 @@ const FramesComponent = ({
     };
   }, [model]);
 
+  const toShortLocation = (el: IDebugger.IStackFrame) => {
+    let path = el.source?.path || '';
+    const lastIndex = path.lastIndexOf('/');
+    const secondLastIndex = path.lastIndexOf('/', lastIndex - 1);
+    // If the we end up finding the leading '/', leave it in
+    path = path.substring(secondLastIndex > 0 ? secondLastIndex + 1 : 0);
+    return `${path}:${el.line}`;
+  };
+
   return (
     <ul>
       {frames.map(ele => (
         <li
           key={ele.id}
           onClick={(): void => onSelected(ele)}
-          className={selected?.id === ele.id ? 'selected' : ''}
+          className={
+            selected?.id === ele.id
+              ? 'selected jp-DebuggerCallstackFrame'
+              : 'jp-DebuggerCallstackFrame'
+          }
         >
-          {ele.name} at {ele.source?.name}:{ele.line}
+          <span className={'jp-DebuggerCallstackFrame-name'}>{ele.name}</span>
+          <span
+            className={'jp-DebuggerCallstackFrame-location'}
+            title={ele.source?.path}
+          >
+            {toShortLocation(ele)}
+          </span>
         </li>
       ))}
     </ul>
