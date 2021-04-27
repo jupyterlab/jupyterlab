@@ -352,17 +352,17 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
   } else {
     // First 15 characters of current document name
     current = current.split(':')[1].slice(0, 15);
-    // Number of restorable items, minus the layout restorer data
-    const count: number = Object.keys(data).length - 1;
+    // Number of restorable items that are either notebooks or editors
+    const count: number = Object.keys(data).filter(
+      item => item.startsWith('notebook') || item.startsWith('editor')
+    ).length;
 
     if (workspace.startsWith('auto-')) {
       document.title = `${current} (${workspace}${
         count > 1 ? ` : ${count}` : ``
       }) - ${name}`;
     } else {
-      document.title = `${current}${
-        count - 1 > 1 ? ` (${count - 1})` : ``
-      } - ${name}`;
+      document.title = `${current}${count > 1 ? ` (${count})` : ``} - ${name}`;
     }
   }
 }
