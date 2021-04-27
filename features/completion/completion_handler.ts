@@ -81,7 +81,7 @@ export class LSPConnector
   protected get use_lsp_completions(): boolean {
     return (
       this.options.settings.composite.disableCompletionsFrom.indexOf(
-        'languageServer'
+        'LSP'
       ) == -1
     );
   }
@@ -89,7 +89,7 @@ export class LSPConnector
   protected get use_kernel_completions(): boolean {
     return (
       this.options.settings.composite.disableCompletionsFrom.indexOf(
-        'kernel'
+        'Kernel'
       ) == -1
     );
   }
