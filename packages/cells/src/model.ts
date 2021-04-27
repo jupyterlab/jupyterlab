@@ -15,7 +15,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import * as nbmodel from '@jupyterlab/nbmodel';
+import * as nbmodel from '@jupyterlab/shared-models';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -62,6 +62,8 @@ export interface ICellModel extends CodeEditor.IModel {
    * The metadata associated with the cell.
    */
   readonly metadata: IObservableJSON;
+
+  readonly sharedModel: nbmodel.ISharedCell & nbmodel.ISharedText;
 
   /**
    * Serialize the model to JSON.
@@ -231,7 +233,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * The id for the cell.
    */
   get id(): string {
-    return this.nbcell.getId();
+    return this.sharedModel.getId();
   }
 
   /**
@@ -297,7 +299,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     sender: IObservableJSON,
     event: IObservableJSON.IChangedArgs
   ): void {
-    const metadata = this.nbcell.getMetadata();
+    const metadata = this.sharedModel.getMetadata();
     this._modelDBMutex(() => {
       switch (event.type) {
         case 'add':
@@ -312,7 +314,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
         default:
           throw new Error(`Invalid event type: ${event.type}`);
       }
-      this.nbcell.setMetadata(metadata);
+      this.sharedModel.setMetadata(metadata);
     });
   }
 
@@ -323,7 +325,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * @param event The event to handle.
    */
   private _changeCellMetata(
-    metadata: Partial<nbmodel.ISharedBaseCellMetada>,
+    metadata: Partial<nbmodel.ISharedBaseCellMetadata>,
     event: IObservableJSON.IChangedArgs
   ): void {
     switch (event.key) {
@@ -355,7 +357,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
   /**
    * Handle a change to the cell shared model and reflect it in modelDB.
-   * We update the modeldb metadata when the nbcell changes.
+   * We update the modeldb metadata when the shared model changes.
    *
    * This method overrides the CodeEditor protected _onSharedModelChanged
    * so we first call super._onSharedModelChanged
@@ -364,13 +366,13 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    */
   protected _onSharedModelChanged(
     sender: nbmodel.ISharedCodeCell,
-    change: nbmodel.CellChange<nbmodel.ISharedBaseCellMetada>
+    change: nbmodel.CellChange<nbmodel.ISharedBaseCellMetadata>
   ): void {
     super._onSharedModelChanged(sender, change);
     this._modelDBMutex(() => {
       if (change.metadataChange) {
         const newValue = change.metadataChange
-          ?.newValue as nbmodel.ISharedBaseCellMetada;
+          ?.newValue as nbmodel.ISharedBaseCellMetadata;
         if (newValue) {
           Object.keys(newValue).map(key => {
             switch (key) {
@@ -412,9 +414,10 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   /**
-   * A mutex to update the nbcell model.
+   * A mutex to update the shared model.
    */
   private readonly _modelDBMutex = nbmodel.createMutex();
+  sharedModel: nbmodel.ISharedCell;
 }
 
 /**

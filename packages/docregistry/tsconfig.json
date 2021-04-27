@@ -22,9 +22,6 @@
       "path": "../docprovider"
     },
     {
-      "path": "../nbmodel"
-    },
-    {
       "path": "../observables"
     },
     {
@@ -35,6 +32,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../translation"

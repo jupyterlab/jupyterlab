@@ -13,10 +13,10 @@
       "path": "../nbformat"
     },
     {
-      "path": "../nbmodel"
+      "path": "../observables"
     },
     {
-      "path": "../observables"
+      "path": "../shared-models"
     },
     {
       "path": "../translation"

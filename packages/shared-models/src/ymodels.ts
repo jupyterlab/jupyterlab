@@ -14,12 +14,138 @@ import * as nbmodel from './api';
 
 import { Delta } from './api';
 
-// @ts-ignore
-import { Awareness } from 'y-protocols/dist/awareness.cjs';
+import { Awareness } from 'y-protocols/awareness';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 
-export type YCellType = YRawCell | YCodeCell | YRawCell | YMarkdownCell;
+/**
+ * Abstract interface to define Shared Models that can be bound to a text editor using any existing
+ * Yjs-based editor binding.
+ */
+export interface IYText extends nbmodel.ISharedText {
+  readonly ysource: Y.Text;
+  readonly awareness: Awareness | null;
+  readonly undoManager: Y.UndoManager | null;
+}
+
+export type YCellType = YRawCell | YCodeCell | YMarkdownCell;
+
+export class YDocument<T> implements nbmodel.ISharedDocument {
+  /**
+   * Perform a transaction. While the function f is called, all changes to the shared
+   * document are bundled into a single event.
+   */
+  transact(f: () => void, undoable = true): void {
+    this.ydoc.transact(f, undoable ? this : null);
+  }
+  /**
+   * Dispose of the resources.
+   */
+  dispose(): void {
+    this.isDisposed = true;
+    this.ydoc.destroy();
+  }
+
+  /**
+   * Whether the object can undo changes.
+   */
+  canUndo(): boolean {
+    return this.undoManager.undoStack.length > 0;
+  }
+
+  /**
+   * Whether the object can redo changes.
+   */
+  canRedo(): boolean {
+    return this.undoManager.redoStack.length > 0;
+  }
+
+  /**
+   * Undo an operation.
+   */
+  undo(): void {
+    this.undoManager.undo();
+  }
+
+  /**
+   * Redo an operation.
+   */
+  redo(): void {
+    this.undoManager.redo();
+  }
+
+  /**
+   * Clear the change stack.
+   */
+  clearUndoHistory(): void {
+    this.undoManager.clear();
+  }
+
+  /**
+   * The changed signal.
+   */
+  get changed(): ISignal<this, T> {
+    return this._changed;
+  }
+
+  public isDisposed = false;
+  public ydoc = new Y.Doc();
+  public source = this.ydoc.getText('source');
+  public undoManager = new Y.UndoManager([this.source], {
+    trackedOrigins: new Set([this])
+  });
+  public awareness = new Awareness(this.ydoc);
+  protected _changed = new Signal<this, T>(this);
+}
+
+export class YFile
+  extends YDocument<nbmodel.FileChange>
+  implements nbmodel.ISharedFile, nbmodel.ISharedText, IYText {
+  public static create(): YFile {
+    return new YFile();
+  }
+
+  /**
+   * Gets cell's source.
+   *
+   * @returns Cell's source.
+   */
+  public getSource(): string {
+    return this.ysource.toString();
+  }
+
+  /**
+   * Sets cell's source.
+   *
+   * @param value: New source.
+   */
+  public setSource(value: string): void {
+    this.transact(() => {
+      const ytext = this.ysource;
+      ytext.delete(0, ytext.length);
+      ytext.insert(0, value);
+    });
+  }
+
+  /**
+   * Replace content from `start' to `end` with `value`.
+   *
+   * @param start: The start index of the range to replace (inclusive).
+   *
+   * @param end: The end index of the range to replace (exclusive).
+   *
+   * @param value: New source (optional).
+   */
+  public updateSource(start: number, end: number, value = ''): void {
+    this.transact(() => {
+      const ysource = this.ysource;
+      ysource.delete(start, end - start);
+      ysource.insert(start, value);
+    });
+  }
+
+  public ysource = this.ydoc.getText('source');
+}
 
 /**
  * Shared implementation of the nbmodel types.
@@ -31,8 +157,11 @@ export type YCellType = YRawCell | YCodeCell | YRawCell | YMarkdownCell;
  * Standalone cells emit events immediately after they have been created, but they must not
  * be included into a (Shared)Notebook.
  */
-export class YNotebook implements nbmodel.ISharedNotebook {
+export class YNotebook
+  extends YDocument<nbmodel.NotebookChange>
+  implements nbmodel.ISharedNotebook {
   constructor() {
+    super();
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
       if (!this._ycellMapping.has(ycell)) {
@@ -40,28 +169,6 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       }
       return this._ycellMapping.get(ycell) as YCellType;
     });
-  }
-
-  /**
-   * Whether the object can undo changes.
-   */
-  get canUndo(): boolean {
-    return this.undoManager.undoStack.length > 0;
-  }
-
-  /**
-   * Whether the object can redo changes.
-   */
-  get canRedo(): boolean {
-    return this.undoManager.redoStack.length > 0;
-  }
-
-  /**
-   * Perform a transaction. While the function f is called, all changes to the shared
-   * document are bundled into a single event.
-   */
-  transact(f: () => void, undoable = true): void {
-    this.ydoc.transact(f, undoable ? this : null);
   }
 
   /**
@@ -145,38 +252,10 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   }
 
   /**
-   * Undo an operation.
-   */
-  undo(): void {
-    this.undoManager.undo();
-  }
-
-  /**
-   * Redo an operation.
-   */
-  redo(): void {
-    this.undoManager.redo();
-  }
-
-  /**
-   * Clear the change stack.
-   */
-  clearUndoHistory(): void {
-    this.undoManager.clear();
-  }
-
-  /**
    * Create a new YNotebook.
    */
   public static create(): nbmodel.ISharedNotebook {
     return new YNotebook();
-  }
-
-  /**
-   * The changed signal.
-   */
-  get changed(): ISignal<this, nbmodel.NotebookChange> {
-    return this._changed;
   }
 
   /**
@@ -209,7 +288,7 @@ export class YNotebook implements nbmodel.ISharedNotebook {
       }
     });
     let index = 0;
-    // this reflects the event.changes.delta, but replaces the content of delta.insert with nbcells.
+    // this reflects the event.changes.delta, but replaces the content of delta.insert with ycells
     const cellsChange: Delta<nbmodel.ISharedCell[]> = [];
     event.changes.delta.forEach((d: any) => {
       if (d.insert != null) {
@@ -233,8 +312,6 @@ export class YNotebook implements nbmodel.ISharedNotebook {
     });
   };
 
-  public ydoc = new Y.Doc();
-  public awareness = new Awareness(this.ydoc);
   public ycells: Y.Array<Y.Map<any>> = this.ydoc.getArray('cells');
   public ymeta: Y.Map<any> = this.ydoc.getMap('meta');
   public ymodel: Y.Map<any> = this.ydoc.getMap('model');
@@ -274,8 +351,6 @@ export class YNotebook implements nbmodel.ISharedNotebook {
   public nbformat_minor: number = nbformat.MINOR_VERSION;
   public nbformat: number = nbformat.MAJOR_VERSION;
   public cells: YCellType[];
-  public isDisposed = false;
-  private _changed = new Signal<this, nbmodel.NotebookChange>(this);
 }
 
 /**
@@ -312,8 +387,8 @@ export const createStandaloneCell = (
   }
 };
 
-export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
-  implements nbmodel.ISharedBaseCell<Metadata> {
+export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetadata>
+  implements nbmodel.ISharedBaseCell<Metadata>, IYText {
   constructor(ymodel: Y.Map<any>) {
     this.ymodel = ymodel;
     const ysource = ymodel.get('source');
@@ -321,11 +396,19 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
     this.ymodel.observeDeep(this._modelObserver);
   }
 
+  get ysource(): Y.Text {
+    return this.ymodel.get('source');
+  }
+
+  get awareness(): Awareness | null {
+    return this.notebook?.awareness || null;
+  }
+
   /**
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
    */
-  public transact(f: () => void, undoable = true): void {
+  transact(f: () => void, undoable = true): void {
     this.notebook && undoable
       ? this.notebook.transact(f)
       : this.ymodel.doc!.transact(f, this);
@@ -607,7 +690,7 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetada>
 }
 
 export class YCodeCell
-  extends YBaseCell<nbmodel.ISharedBaseCellMetada>
+  extends YBaseCell<nbmodel.ISharedBaseCellMetadata>
   implements nbmodel.ISharedCodeCell {
   /**
    * The type of the cell.
@@ -679,7 +762,7 @@ export class YCodeCell
 }
 
 export class YRawCell
-  extends YBaseCell<nbmodel.ISharedBaseCellMetada>
+  extends YBaseCell<nbmodel.ISharedBaseCellMetadata>
   implements nbmodel.ISharedRawCell {
   /**
    * Create a new YRawCell that can be inserted into a YNotebook
@@ -719,7 +802,7 @@ export class YRawCell
 }
 
 export class YMarkdownCell
-  extends YBaseCell<nbmodel.ISharedBaseCellMetada>
+  extends YBaseCell<nbmodel.ISharedBaseCellMetadata>
   implements nbmodel.ISharedMarkdownCell {
   /**
    * Create a new YMarkdownCell that can be inserted into a YNotebook
