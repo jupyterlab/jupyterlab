@@ -567,6 +567,14 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     if (sourceEvent) {
       changes.sourceChange = sourceEvent.changes.delta as any;
     }
+
+    const outputEvent = events.find(
+      event => event.target === this.ymodel.get('outputs')
+    );
+    if (outputEvent) {
+      changes.outputsChange = outputEvent.changes.delta as any;
+    }
+
     const modelEvent = events.find(event => event.target === this.ymodel) as
       | undefined
       | Y.YMapEvent<any>;
@@ -577,6 +585,15 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
         newValue: this.getMetadata()
       };
     }
+
+    if (modelEvent && modelEvent.keysChanged.has('execution_count')) {
+      const change = modelEvent.changes.keys.get('execution_count');
+      changes.executionCountChange = {
+        oldValue: change?.oldValue ? change!.oldValue : undefined,
+        newValue: this.ymodel.get('execution_count')
+      };
+    }
+
     // The model allows us to replace the complete source with a new string. We express this in the Delta format
     // as a replace of the complete string.
     const ysource = this.ymodel.get('source');
@@ -727,10 +744,6 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
 export class YCodeCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
   implements models.ISharedCodeCell {
-  constructor(ymodel: Y.Map<any>) {
-    super(ymodel);
-    this._outputs = ymodel.get('outputs');
-  }
   /**
    * The type of the cell.
    */
@@ -741,43 +754,71 @@ export class YCodeCell
   /**
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
-  get execution_count(): number {
-    return 1;
+  get execution_count(): number | null {
+    return deepCopy(this.ymodel.get('outputs').toArray());
+  }
+
+  /**
+   * The code cell's prompt number. Will be null if the cell has not been run.
+   */
+  set execution_count(count: number | null) {
+    this.transact(() => {
+      this.ymodel.set('execution_count', count);
+    });
   }
 
   /**
    * Execution, display, or stream outputs.
    */
   getOutputs(): Array<nbformat.IOutput> {
-    return this._outputs.toArray();
+    return deepCopy(this.ymodel.get('outputs').toArray());
   }
 
   /**
-   * Add/Update output.
+   * Replace all outputs.
    */
-  setOutput(output: nbformat.IOutput): void {
-    let index = -1;
-    this._outputs.forEach((value, i) => {
-      if (value === output) {
-        index = i;
-        return;
-      }
-    });
+  setOutputs(outputs: Array<nbformat.IOutput>): void {
+    const youtputs = this.ymodel.get('outputs') as Y.Array<nbformat.IOutput>;
     this.transact(() => {
-      if (index === -1) {
-        this._outputs.push([output]);
-      } else {
-        this._outputs.insert(index, [output]);
-      }
+      youtputs.delete(0, youtputs.length);
+      youtputs.insert(0, outputs);
     });
   }
 
   /**
-   * Add output at the end.
+   * Insert a list of shared output into a specific position.
+   *
+   * @param index: Position to insert the outputs.
+   *
+   * @param outputs: Array of shared outputs to insert.
    */
-  pushOutput(output: nbformat.IOutput): void {
+  insertOutputs(index: number, outputs: Array<nbformat.IOutput>): void {
+    const youtputs = this.ymodel.get('outputs') as Y.Array<nbformat.IOutput>;
     this.transact(() => {
-      this._outputs.push([output]);
+      youtputs.insert(index, outputs);
+    });
+  }
+
+  /**
+   * Remove an Output.
+   *
+   * @param index: Index of the cell to remove.
+   */
+  deleteOutput(index: number): void {
+    this.deleteOutputsRange(index, index + 1);
+  }
+
+  /**
+   * Remove a range of Outputs.
+   *
+   * @param from: The start index of the range to remove (inclusive).
+   *
+   * @param to: The end index of the range to remove (exclusive).
+   */
+  deleteOutputsRange(from: number, to: number): void {
+    const youtputs = this.ymodel.get('outputs') as Y.Array<nbformat.IOutput>;
+    this.transact(() => {
+      youtputs.delete(from, to - from);
     });
   }
 
@@ -810,8 +851,10 @@ export class YCodeCell
    */
   public clone(): YCodeCell {
     const cell = super.clone();
+    const youtputs = new Y.Array<nbformat.IOutput>();
+    youtputs.insert(0, this.getOutputs());
     cell.ymodel.set('execution_count', this.execution_count); // for some default value
-    cell.ymodel.set('outputs', this._outputs.clone());
+    cell.ymodel.set('outputs', youtputs);
     return cell as any;
   }
 
@@ -828,8 +871,6 @@ export class YCodeCell
       execution_count: this.execution_count
     };
   }
-
-  private _outputs: Y.Array<nbformat.IOutput>;
 }
 
 export class YRawCell

@@ -323,17 +323,37 @@ export interface ISharedCodeCell
   /**
    * Execution, display, or stream outputs.
    */
-  getOutputs(): nbformat.IOutput[];
+  getOutputs(): Array<nbformat.IOutput>;
 
   /**
    * Add/Update output.
    */
-  setOutput(output: nbformat.IOutput): void;
+  setOutputs(outputs: Array<nbformat.IOutput>): void;
 
   /**
-   * Add output at the end.
+   * Insert a list of shared output into a specific position.
+   *
+   * @param index: Position to insert the outputs.
+   *
+   * @param outputs: Array of shared outputs to insert.
    */
-  pushOutput(output: nbformat.IOutput): void;
+  insertOutputs(index: number, outputs: Array<nbformat.IOutput>): void;
+
+  /**
+   * Remove an Output.
+   *
+   * @param index: Index of the cell to remove.
+   */
+  deleteOutput(index: number): void;
+
+  /**
+   * Remove a range of Outputs.
+   *
+   * @param from: The start index of the range to remove (inclusive).
+   *
+   * @param to: The end index of the range to remove (exclusive).
+   */
+  deleteOutputsRange(from: number, to: number): void;
 
   /**
    * Serialize the model to JSON.
@@ -454,6 +474,11 @@ export type FileChange = {
  */
 export type CellChange<MetadataType> = {
   sourceChange?: Delta<string>;
+  outputsChange?: Delta<nbformat.IOutput[]>;
+  executionCountChange?: {
+    oldValue: number | undefined;
+    newValue: number | undefined;
+  };
   metadataChange?: {
     oldValue: Partial<MetadataType> | undefined;
     newValue: Partial<MetadataType> | undefined;
