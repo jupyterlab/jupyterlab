@@ -416,7 +416,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * A mutex to update the shared model.
    */
-  private readonly _modelDBMutex = models.createMutex();
+  protected readonly _modelDBMutex = models.createMutex();
   sharedModel: models.ISharedCell;
 }
 
@@ -612,9 +612,11 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       }
     }
     executionCount.changed.connect(this._onExecutionCountChanged, this);
+    executionCount.changed.connect(this.onModelDBExecutionsCountChange, this);
 
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
     this._outputs.changed.connect(this.onGenericChange, this);
+    this._outputs.changed.connect(this.onModelDBOutputsChange, this);
 
     // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
     // they are redundant in nbformat 4.4. See
@@ -715,6 +717,82 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       name: 'trusted',
       oldValue: args.oldValue,
       newValue: args.newValue
+    });
+  }
+
+  /**
+   * Handle a change to the cell outputs modelDB and reflect it in the shared model.
+   */
+  protected onModelDBOutputsChange(
+    sender: IOutputAreaModel,
+    event: IOutputAreaModel.ChangedArgs
+  ): void {
+    const nbCodeCell = this.sharedModel as models.YCodeCell;
+    this._modelDBMutex(() => {
+      switch (event.type) {
+        case 'add':
+          const outputs = event.newValues.map(output => output.toJSON());
+          nbCodeCell.insertOutputs(event.newIndex, outputs);
+          break;
+        case 'set':
+          const newValues = event.newValues.map(output => output.toJSON());
+          nbCodeCell.setOutputs(newValues);
+          break;
+        case 'remove':
+          nbCodeCell.deleteOutput(event.newIndex);
+          break;
+        default:
+          throw new Error(`Invalid event type: ${event.type}`);
+      }
+    });
+  }
+
+  /**
+   * Handle a change to the cell executions count modelDB and reflect it in the shared model.
+   */
+  protected onModelDBExecutionsCountChange(
+    sender: IObservableValue,
+    event: ObservableValue.IChangedArgs
+  ): void {
+    const nbCodeCell = this.sharedModel as models.YCodeCell;
+    this._modelDBMutex(() => {
+      nbCodeCell.execution_count = event.newValue
+        ? (event.newValue as number)
+        : null;
+    });
+  }
+
+  /**
+   * Handle a change to the output shared model and reflect it in modelDB.
+   * We update the modeldb metadata when the nbcell changes.
+   *
+   * This method overrides the CellModel protected _onSharedModelChanged
+   * so we first call super._onSharedModelChanged
+   *
+   * @override CellModel._onSharedModelChanged
+   */
+  protected _onSharedModelChanged(
+    sender: models.ISharedCodeCell,
+    change: models.CellChange<models.ISharedBaseCellMetadata>
+  ): void {
+    super._onSharedModelChanged(sender, change);
+    this._modelDBMutex(() => {
+      change.outputsChange?.forEach(operation => {
+        if (operation.insert) {
+          this.clearExecution();
+          operation.insert.forEach(output => this._outputs.add(output));
+        }
+
+        if (operation.delete) {
+          this.clearExecution();
+        }
+      });
+
+      if (change.executionCountChange) {
+        this.executionCount = change.executionCountChange.newValue
+          ? change.executionCountChange.newValue
+          : null;
+      }
     });
   }
 

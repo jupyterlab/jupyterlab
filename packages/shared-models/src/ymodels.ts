@@ -755,7 +755,7 @@ export class YCodeCell
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   get execution_count(): number | null {
-    return deepCopy(this.ymodel.get('outputs').toArray());
+    return deepCopy(this.ymodel.get('execution_count'));
   }
 
   /**
@@ -817,6 +817,7 @@ export class YCodeCell
    */
   deleteOutputsRange(from: number, to: number): void {
     const youtputs = this.ymodel.get('outputs') as Y.Array<nbformat.IOutput>;
+    if (youtputs.length <= from) return;
     this.transact(() => {
       youtputs.delete(from, to - from);
     });
