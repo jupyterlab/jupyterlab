@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as nbmodel from '@jupyterlab/nbmodel';
+import * as sharedModels from '@jupyterlab/shared-models';
 
 import * as Y from 'yjs';
 
@@ -23,8 +23,8 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
    * @param options The instantiation options for a WebsocketProviderWithLocks
    */
   constructor(options: WebsocketProviderWithLocks.IOptions) {
-    super(options.url, options.guid, options.ynotebook.ydoc, {
-      awareness: options.ynotebook.awareness
+    super(options.url, options.guid, options.ymodel.ydoc, {
+      awareness: options.ymodel.awareness
     });
     // Message handler that confirms when a lock has been acquired
     this.messageHandlers[127] = (
@@ -178,6 +178,6 @@ export namespace WebsocketProviderWithLocks {
     /**
      * The YNotebook.
      */
-    ynotebook: nbmodel.YNotebook;
+    ymodel: sharedModels.YDocument<sharedModels.DocumentChange>;
   }
 }

@@ -3,7 +3,7 @@
 
 import { DocumentModel, DocumentRegistry } from '@jupyterlab/docregistry';
 
-import * as nbmodel from '@jupyterlab/nbmodel';
+import * as nbmodel from '@jupyterlab/shared-models';
 
 import {
   ICellModel,
@@ -73,6 +73,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * If the model is initialized or not.
    */
   isInitialized: boolean;
+  readonly sharedModel: nbmodel.ISharedNotebook;
 }
 
 /**
@@ -91,7 +92,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     this._cells = new CellList(
       this.modelDB,
       this.contentFactory,
-      this.nbnotebook
+      this.sharedModel
     );
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._cells.changed.connect(this._onCellsChanged, this);
@@ -115,7 +116,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * The shared notebook model.
    */
-  readonly nbnotebook = nbmodel.YNotebook.create();
+  readonly sharedModel = nbmodel.YNotebook.create() as nbmodel.ISharedNotebook;
 
   /**
    * The metadata associated with the notebook.

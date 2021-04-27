@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 /**
- * This file defines the shared nbmodel types.
+ * This file defines the shared shared-models types.
  *
  * - Notebook Type.
  * - Notebook Metadata Types.
@@ -23,9 +23,102 @@ import { ISignal } from '@lumino/signaling';
 import * as nbformat from '@jupyterlab/nbformat';
 
 /**
+ * ISharedBase defines common operations that can be performed on any shared object.
+ */
+export interface ISharedBase extends IDisposable {
+  /**
+   * Undo an operation.
+   */
+  undo(): void;
+
+  /**
+   * Redo an operation.
+   */
+  redo(): void;
+
+  /**
+   * Whether the object can redo changes.
+   */
+  canUndo(): boolean;
+
+  /**
+   * Whether the object can undo changes.
+   */
+  canRedo(): boolean;
+  /**
+   * Clear the change stack.
+   */
+  clearUndoHistory(): void;
+  /**
+   * Perform a transaction. While the function f is called, all changes to the shared
+   * document are bundled into a single event.
+   */
+  transact(f: () => void): void;
+}
+
+/**
+ * Implement an API for Context information on the shared information.
+ * This is used by, for example, docregistry to share the file-path of the edited content.
+ */
+export interface ISharedDocument extends ISharedBase {
+  /**
+   * The changed signal.
+   */
+  readonly changed: ISignal<this, DocumentChange>;
+}
+
+/**
+ * The ISharedText interface defines models that can be bound to a text editor like CodeMirror.
+ */
+export interface ISharedText extends ISharedBase {
+  /**
+   * The changed signal.
+   */
+  readonly changed: ISignal<this, TextChange>;
+  /**
+   * Gets cell's source.
+   *
+   * @returns Cell's source.
+   */
+  getSource(): string;
+
+  /**
+   * Sets cell's source.
+   *
+   * @param value: New source.
+   */
+  setSource(value: string): void;
+
+  /**
+   * Replace content from `start' to `end` with `value`.
+   *
+   * @param start: The start index of the range to replace (inclusive).
+   *
+   * @param end: The end index of the range to replace (exclusive).
+   *
+   * @param value: New source (optional).
+   */
+  updateSource(start: number, end: number, value?: string): void;
+}
+
+/**
+ * Text/Markdown/Code files are represented as ISharedFile
+ */
+export interface ISharedFile extends ISharedDocument, ISharedText {
+  /**
+   * The changed signal.
+   */
+  readonly changed: ISignal<this, FileChange>;
+}
+
+/**
  * Implements an API for nbformat.INotebookContent
  */
-export interface ISharedNotebook extends IDisposable {
+export interface ISharedNotebook extends ISharedDocument {
+  /**
+   * The changed signal.
+   */
+  readonly changed: ISignal<this, NotebookChange>;
   /**
    * The minor version number of the nbformat.
    */
@@ -40,27 +133,6 @@ export interface ISharedNotebook extends IDisposable {
    * The list of shared cells in the notebook.
    */
   readonly cells: ISharedCell[];
-
-  /**
-   * The changed signal.
-   */
-  readonly changed: ISignal<this, NotebookChange>;
-
-  /**
-   * Whether the object can undo changes.
-   */
-  readonly canUndo: boolean;
-
-  /**
-   * Whether the object can redo changes.
-   */
-  readonly canRedo: boolean;
-
-  /**
-   * Perform a transaction. While the function f is called, all changes to the shared
-   * document are bundled into a single event.
-   */
-  transact(f: () => void): void;
 
   /**
    * Returns the metadata associated with the notebook.
@@ -134,21 +206,6 @@ export interface ISharedNotebook extends IDisposable {
    * @param to: The end index of the range to remove (exclusive).
    */
   deleteCellRange(from: number, to: number): void;
-
-  /**
-   * Undo an operation.
-   */
-  undo(): void;
-
-  /**
-   * Redo an operation.
-   */
-  redo(): void;
-
-  /**
-   * Clear the change stack.
-   */
-  clearUndoHistory(): void;
 }
 
 /**
@@ -186,15 +243,15 @@ export type ISharedCell =
 /**
  * Cell-level metadata.
  */
-export interface ISharedBaseCellMetada extends nbformat.IBaseCellMetadata {
+export interface ISharedBaseCellMetadata extends nbformat.IBaseCellMetadata {
   [key: string]: any;
 }
 
 /**
  * Implements an API for nbformat.IBaseCell.
  */
-export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetada>
-  extends IDisposable {
+export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetadata>
+  extends ISharedText {
   /**
    * Whether the cell is standalone or not.
    *
@@ -229,56 +286,6 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetada>
   getId(): string;
 
   /**
-   * Gets cell's source.
-   *
-   * @returns Cell's source.
-   */
-  getSource(): string;
-
-  /**
-   * Sets cell's source.
-   *
-   * @param value: New source.
-   */
-  setSource(value: string): void;
-
-  /**
-   * Undo an operation.
-   */
-  undo(): void;
-
-  /**
-   * Redo an operation.
-   */
-  redo(): void;
-
-  /**
-   * Whether the object can redo changes.
-   */
-  canUndo(): boolean;
-
-  /**
-   * Whether the object can undo changes.
-   */
-  canRedo(): boolean;
-
-  /**
-   * Clear the change stack.
-   */
-  clearUndoHistory(): void;
-
-  /**
-   * Replace content from `start' to `end` with `value`.
-   *
-   * @param start: The start index of the range to replace (inclusive).
-   *
-   * @param end: The end index of the range to replace (exclusive).
-   *
-   * @param value: New source (optional).
-   */
-  updateSource(start: number, end: number, value?: string): void;
-
-  /**
    * Returns the metadata associated with the notebook.
    *
    * @returns Notebook's metadata.
@@ -302,7 +309,7 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetada>
  * Implements an API for nbformat.ICodeCell.
  */
 export interface ISharedCodeCell
-  extends ISharedBaseCell<ISharedBaseCellMetada> {
+  extends ISharedBaseCell<ISharedBaseCellMetadata> {
   /**
    * The type of the cell.
    */
@@ -328,7 +335,7 @@ export interface ISharedCodeCell
  * Implements an API for nbformat.IMarkdownCell.
  */
 export interface ISharedMarkdownCell
-  extends ISharedBaseCell<ISharedBaseCellMetada> {
+  extends ISharedBaseCell<ISharedBaseCellMetadata> {
   /**
    * String identifying the type of cell.
    */
@@ -358,7 +365,7 @@ export interface ISharedMarkdownCell
  * Implements an API for nbformat.IRawCell.
  */
 export interface ISharedRawCell
-  extends ISharedBaseCell<ISharedBaseCellMetada>,
+  extends ISharedBaseCell<ISharedBaseCellMetadata>,
     IDisposable {
   /**
    * String identifying the type of cell.
@@ -398,7 +405,7 @@ export type Delta<T> = Array<{ insert?: T; delete?: number; retain?: number }>;
  * @todo Is this needed?
  */
 export interface ISharedUnrecognizedCell
-  extends ISharedBaseCell<ISharedBaseCellMetada>,
+  extends ISharedBaseCell<ISharedBaseCellMetadata>,
     IDisposable {
   /**
    * The type of the cell.
@@ -411,6 +418,10 @@ export interface ISharedUnrecognizedCell
   toJSON(): nbformat.ICodeCell;
 }
 
+export type TextChange = {
+  sourceChange?: Delta<string>;
+};
+
 /**
  * Definition of the shared Notebook changes.
  */
@@ -420,6 +431,12 @@ export type NotebookChange = {
     oldValue: nbformat.INotebookMetadata;
     newValue: nbformat.INotebookMetadata | undefined;
   };
+  contextChange?: MapChange;
+};
+
+export type FileChange = {
+  sourceChange?: Delta<string>;
+  contextChange?: MapChange;
 };
 
 /**
@@ -431,6 +448,10 @@ export type CellChange<MetadataType> = {
     oldValue: Partial<MetadataType> | undefined;
     newValue: Partial<MetadataType> | undefined;
   };
+};
+
+export type DocumentChange = {
+  contextChange?: MapChange;
 };
 
 /**

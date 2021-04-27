@@ -4,9 +4,9 @@
 |----------------------------------------------------------------------------*/
 /**
  * @packageDocumentation
- * @module nbmodel
+ * @module shared-models
  */
 
 export * from './api';
-export * from './ymodel';
+export * from './ymodels';
 export * from './utils';

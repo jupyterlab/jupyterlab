@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/nbmodel",
+  "name": "@jupyterlab/shared-models",
   "version": "3.1.0-alpha.5",
-  "description": "JupyterLab - Shared Model",
+  "description": "JupyterLab - Shared Models",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"

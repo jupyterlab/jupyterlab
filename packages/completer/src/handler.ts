@@ -192,8 +192,8 @@ export class CompletionHandler implements IDisposable {
     }
 
     const { start, end, value } = patch;
-    // we need to update the nbcell in a single transaction so that the undo manager works as expected
-    editor.model.nbcell.updateSource(start, end, value);
+    // we need to update the shared model in a single transaction so that the undo manager works as expected
+    editor.model.sharedModel.updateSource(start, end, value);
   }
 
   /**

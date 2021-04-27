@@ -7,7 +7,7 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
-import * as nbmodel from '@jupyterlab/nbmodel';
+import * as ymodels from '@jupyterlab/shared-models';
 
 import * as Y from 'yjs';
 
@@ -81,8 +81,8 @@ export class Context<
       this._model = this._factory.createNew(lang, undefined, false);
     }
 
-    const ynotebook = this._model.nbnotebook as nbmodel.YNotebook;
-    const ydoc = ynotebook.ydoc;
+    const ymodel = this._model.sharedModel as ymodels.YDocument<any>; // translate to the concrete Yjs implementation
+    const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('context');
     // @todo remove websocket provider - this should be handled by a separate plugin
@@ -90,7 +90,7 @@ export class Context<
     const url = URLExt.join(server.wsUrl, 'api/yjs');
     const guid = this._factory.contentType + ':' + localPath;
     this._provider = options.collaborative
-      ? new WebsocketProviderWithLocks({ url, guid, ynotebook })
+      ? new WebsocketProviderWithLocks({ url, guid, ymodel })
       : new ProviderMock();
 
     this._readyPromise = manager.ready.then(() => {
@@ -217,7 +217,7 @@ export class Context<
     }
     this._model.dispose();
     this._provider.destroy();
-    this._model.nbnotebook.dispose();
+    this._model.sharedModel.dispose();
     this._ydoc.destroy();
     this._disposed.emit(void 0);
     Signal.clearData(this);

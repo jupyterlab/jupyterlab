@@ -7,7 +7,7 @@ import CodeMirror from 'codemirror';
 
 import { showDialog } from '@jupyterlab/apputils';
 
-import * as nbmodel from '@jupyterlab/nbmodel';
+import * as nbmodel from '@jupyterlab/shared-models';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -135,7 +135,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const editor = (this._editor = Private.createEditor(host, fullConfig));
     this._initializeEditorBinding();
     // every time the nbmodel is switched, we need to re-initialize the editor binding
-    this.model.nbcellSwitched.connect(this._initializeEditorBinding, this);
+    this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
 
     const doc = editor.getDoc();
 
@@ -214,11 +214,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._yeditorBinding?.destroy();
-    const nbcell = this.model.nbcell as nbmodel.YCodeCell;
-    const opts = nbcell.undoManager ? { yUndoManager: nbcell.undoManager } : {};
-    const awareness = nbcell.notebook?.awareness;
+    const sharedModel = this.model.sharedModel as nbmodel.IYText;
+    const opts = sharedModel.undoManager
+      ? { yUndoManager: sharedModel.undoManager }
+      : {};
+    const awareness = sharedModel.awareness;
     this._yeditorBinding = new CodemirrorBinding(
-      nbcell.ymodel.get('source'),
+      sharedModel.ysource,
       this.editor,
       awareness,
       opts
@@ -396,14 +398,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
-    this.model.nbcell.undo();
+    this.model.sharedModel.undo();
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
-    this.model.nbcell.redo();
+    this.model.sharedModel.redo();
   }
 
   /**

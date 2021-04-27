@@ -10,7 +10,7 @@ import {
   ArrayIterator
 } from '@lumino/algorithm';
 
-import * as nbmodel from '@jupyterlab/nbmodel';
+import * as nbmodel from '@jupyterlab/shared-models';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -75,7 +75,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
           change.type === 'move'
         ) {
           const cells = change.newValues.map(cell => {
-            return cell.nbcell.clone() as any;
+            return cell.sharedModel.clone() as any;
           });
           let insertLocation = change.newIndex;
           if (change.type === 'move' && insertLocation > change.oldIndex) {
@@ -485,14 +485,14 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Whether the object can redo changes.
    */
   get canRedo(): boolean {
-    return this.nbmodel.canRedo;
+    return this.nbmodel.canRedo();
   }
 
   /**
    * Whether the object can undo changes.
    */
   get canUndo(): boolean {
-    return this.nbmodel.canUndo;
+    return this.nbmodel.canUndo();
   }
 
   /**
@@ -556,7 +556,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
               break;
           }
           this._cellMap.set(id, cell);
-        } else if (!existingCell.nbcell.isStandalone) {
+        } else if (!existingCell.sharedModel.isStandalone) {
           this._mutex(() => {
             // it does already exist, probably because it was deleted previously and we introduced it
             // copy it to a fresh codecell instance

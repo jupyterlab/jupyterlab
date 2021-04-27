@@ -3,7 +3,7 @@
 
 import { YNotebook, YCodeCell } from '../src';
 
-describe('@jupyterlab/nbmodel', () => {
+describe('@jupyterlab/shared-models', () => {
   describe('ynotebook', () => {
     it('should create a notebook', () => {
       const notebook = YNotebook.create();

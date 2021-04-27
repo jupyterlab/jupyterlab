@@ -369,7 +369,7 @@ fi
 : '
 if [[ $GROUP == splice_source ]];then
     # Run the integrity script to link binary files
-    TODO temporary ci skip - enable when nbmodel and docprovider packages are published
+    TODO temporary ci skip - enable when shared-models and docprovider packages are published
     jlpm integrity
 
     jupyter lab build --minimize=False --debug --dev-build=True --splice-source
