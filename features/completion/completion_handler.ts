@@ -79,11 +79,19 @@ export class LSPConnector
   }
 
   protected get use_lsp_completions(): boolean {
-    return this.options.settings.composite.useLspCompletions;
+    return (
+      this.options.settings.composite.disableCompletionsFrom.indexOf(
+        'languageServer'
+      ) == -1
+    );
   }
 
   protected get use_kernel_completions(): boolean {
-    return this.options.settings.composite.useKernelCompletions;
+    return (
+      this.options.settings.composite.disableCompletionsFrom.indexOf(
+        'kernel'
+      ) == -1
+    );
   }
 
   protected get suppress_continuous_hinting_in(): string[] {
@@ -220,7 +228,6 @@ export class LSPConnector
     let virtual_cursor = virtual_editor.root_position_to_virtual_position(
       cursor_in_root
     );
-
     const lsp_promise: Promise<CompletionHandler.ICompletionItemsReply> = this
       .use_lsp_completions
       ? this.fetch_lsp(
@@ -240,6 +247,7 @@ export class LSPConnector
       const kernelTimeout = this._kernel_timeout;
 
       if (
+        this.use_kernel_completions &&
         this._kernel_connector &&
         this._has_kernel &&
         (this._is_kernel_idle || this._should_wait_for_busy_kernel) &&
@@ -285,10 +293,10 @@ export class LSPConnector
             lsp_promise.catch(p => p)
           ]).then(([kernel, lsp]) => {
             let replies = [];
-            if (this.use_kernel_completions) {
+            if (kernel != null) {
               replies.push(this.transform_reply(kernel));
             }
-            if (this.use_lsp_completions) {
+            if (lsp != null) {
               replies.push(lsp);
             }
             return this.merge_replies(replies, this._editor);
