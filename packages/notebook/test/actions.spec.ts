@@ -78,7 +78,7 @@ describe('@jupyterlab/notebook', () => {
       const model = new NotebookModel();
       model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
-      model.nbnotebook.clearUndoHistory();
+      model.sharedModel.clearUndoHistory();
 
       widget.activeCellIndex = 0;
     });
@@ -1339,7 +1339,7 @@ describe('@jupyterlab/notebook', () => {
         const count = widget.widgets.length;
         NotebookActions.cut(widget);
         widget.activeCellIndex = 1;
-        widget.model?.nbnotebook.clearUndoHistory();
+        widget.model?.sharedModel.clearUndoHistory();
         NotebookActions.paste(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);
