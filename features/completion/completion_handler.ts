@@ -80,9 +80,8 @@ export class LSPConnector
 
   protected get use_lsp_completions(): boolean {
     return (
-      this.options.settings.composite.disableCompletionsFrom.indexOf(
-        'LSP'
-      ) == -1
+      this.options.settings.composite.disableCompletionsFrom.indexOf('LSP') ==
+      -1
     );
   }
 
