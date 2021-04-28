@@ -10,5 +10,6 @@
 @import url('~@jupyterlab/ui-components/style/index.css');
 @import url('~@jupyterlab/apputils/style/index.css');
 @import url('~@jupyterlab/docregistry/style/index.css');
+@import url('~@jupyterlab/docmanager/style/index.css');
 
 @import url('./base.css');

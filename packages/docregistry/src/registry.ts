@@ -902,6 +902,11 @@ export namespace DocumentRegistry {
     readonly ready: Promise<void>;
 
     /**
+     * Rename the document.
+     */
+    rename(newName: string): Promise<void>;
+
+    /**
      * Save the document contents to disk.
      */
     save(): Promise<void>;

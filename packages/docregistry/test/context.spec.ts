@@ -278,6 +278,28 @@ describe('docregistry/context', () => {
       });
     });
 
+    describe('#rename()', () => {
+      it('should change the name of the file to the new name', async () => {
+        await context.initialize(true);
+        context.model.fromString('foo');
+
+        const newName = UUID.uuid4() + '.txt';
+
+        await context.rename(newName);
+        await context.save();
+
+        const opts: Contents.IFetchOptions = {
+          format: factory.fileFormat,
+          type: factory.contentType,
+          content: true
+        };
+
+        const model = await manager.contents.get(newName, opts);
+
+        expect(model.content).toBe('foo');
+      });
+    });
+
     describe('#save()', () => {
       it('should save the contents of the file to disk', async () => {
         await context.initialize(true);
