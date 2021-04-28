@@ -26,7 +26,7 @@ export interface INotebookFilters {
   output: boolean;
 
   /**
-   * Should search be within the active cell?
+   * Should search be within the selected cell(s)?
    */
   selectedCells: boolean;
 }
@@ -372,13 +372,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   /**
-   * Signal indicating that the active cell in the notebook has changed
-   */
-  get activeCellChanged(): ISignal<this, void> {
-    return this._activeCellChanged;
-  }
-
-  /**
    * The current index of the selected match.
    */
   get currentMatchIndex(): number | null {
@@ -518,5 +511,4 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   private _unRenderedMarkdownCells: MarkdownCell[] = [];
   private _cellsWithMatches: Cell[] = [];
   private _changed = new Signal<this, void>(this);
-  private _activeCellChanged = new Signal<this, void>(this);
 }
