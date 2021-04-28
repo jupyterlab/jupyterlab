@@ -37,6 +37,8 @@ export class DocumentModel
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
+    const filemodel = new nbmodel.YFile() as nbmodel.ISharedFile;
+    this.switchSharedModel(filemodel, true);
     this.value.changed.connect(this.triggerContentChange, this);
   }
 
@@ -174,8 +176,7 @@ export class DocumentModel
   /**
    * The shared notebook model.
    */
-  readonly sharedModel = new nbmodel.YFile() as nbmodel.ISharedFile;
-
+  readonly sharedModel: nbmodel.ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
