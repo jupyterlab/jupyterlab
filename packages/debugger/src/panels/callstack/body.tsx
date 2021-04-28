@@ -5,6 +5,8 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import React, { useEffect, useState } from 'react';
 
+import { PathExt } from '@jupyterlab/coreutils';
+
 import { IDebugger } from '../../tokens';
 
 /**
@@ -64,12 +66,11 @@ const FramesComponent = ({
   }, [model]);
 
   const toShortLocation = (el: IDebugger.IStackFrame) => {
-    let path = el.source?.path || '';
-    const lastIndex = path.lastIndexOf('/');
-    const secondLastIndex = path.lastIndexOf('/', lastIndex - 1);
-    // If the we end up finding the leading '/', leave it in
-    path = path.substring(secondLastIndex > 0 ? secondLastIndex + 1 : 0);
-    return `${path}:${el.line}`;
+    const path = el.source?.path || '';
+    const base = PathExt.basename(PathExt.dirname(path));
+    const filename = PathExt.basename(path);
+    const shortname = PathExt.join(base, filename);
+    return `${shortname}:${el.line}`;
   };
 
   return (
