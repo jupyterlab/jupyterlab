@@ -26,7 +26,7 @@ describe('LabShell', () => {
 
   beforeAll(() => {
     console.debug(
-      'Expecting 5 console errors logged in this suite: "Widgets added to app shell must have unique id property."'
+      'Expecting 6 console errors logged in this suite: "Widgets added to app shell must have unique id property."'
     );
   });
 
