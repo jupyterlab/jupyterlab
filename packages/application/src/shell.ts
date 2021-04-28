@@ -336,6 +336,31 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       rootLayout.insertWidget(2, this._menuHandler.panel);
     }
 
+    // Skip Links
+    const skipLinkWidget = (this._skipLinkWidget = new Widget());
+    const skipToFilterFiles = document.createElement('a');
+    const toggleSkipLink = (toShow: boolean) => {
+      skipLinkWidget.node.classList.toggle('jp-skiplink--focus', toShow);
+    };
+    skipToFilterFiles.href = '#';
+    skipToFilterFiles.tabIndex = 1;
+    skipToFilterFiles.text = 'Skip to Filter Files';
+    skipToFilterFiles.className = 'skip-to-content';
+    skipToFilterFiles.addEventListener('focus', e => toggleSkipLink(true));
+    skipToFilterFiles.addEventListener('blur', e => toggleSkipLink(false));
+    skipToFilterFiles.addEventListener('click', e => {
+      const input = document.querySelector(
+        '#filename-searcher .bp3-input'
+      ) as HTMLInputElement;
+      console.log('awesome', input);
+      input.focus();
+    });
+    skipLinkWidget.addClass('jp-skiplink');
+    skipLinkWidget.id = 'jp-skiplink';
+    skipLinkWidget.node.appendChild(skipToFilterFiles);
+    this.add(skipLinkWidget, 'top', { rank: 0 });
+    this._skipLinkWidget.show();
+
     // Wire up signals to update the title panel of the simple interface mode to
     // follow the title of this.currentWidget
     this.currentChanged.connect((sender, args) => {
@@ -1210,6 +1235,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _headerPanel: Panel;
   private _topHandler: Private.PanelHandler;
   private _menuHandler: Private.PanelHandler;
+  private _skipLinkWidget: Widget;
   private _titleWidget: Widget;
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();

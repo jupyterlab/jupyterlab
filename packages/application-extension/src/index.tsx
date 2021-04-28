@@ -972,44 +972,6 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
   }
 };
 
-class SkipLinkWidget extends Widget {
-
-  constructor (){
-    super();
-
-    this.addClass("jp-skiplink");
-    this.a = document.createElement("a");
-    this.node.appendChild(this.a);
-  }
-
-  readonly a: HTMLAnchorElement;
-}
-
-const skipLink: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/application-extension:skip-link',
-  autoStart: true,
-  requires: [ILabShell],
-  activate: (app: JupyterFrontEnd, shell: ILabShell) => {
-    const skipLinkWidget = new SkipLinkWidget();
-
-    skipLinkWidget.a.href = "#";
-    skipLinkWidget.a.text = "Skip to Content";
-    skipLinkWidget.a.tabIndex = 1;
-    skipLinkWidget.a.className = "skip-to-content";
-    skipLinkWidget.a.addEventListener('focus', e => {
-      skipLinkWidget.node.classList.toggle("jp-skiplink--focus", true)
-    })
-    skipLinkWidget.a.addEventListener('blur', e => {
-      skipLinkWidget.node.classList.toggle("jp-skiplink--focus", false)
-    })
-    // skipLinkWidget.node.tabIndex = 1;
-
-    skipLinkWidget.id = 'jp-skiplink';
-
-    shell.add(skipLinkWidget, 'top', { rank: 0 });
-  }
-};
-
 /**
  * Export the plugins as default.
  */
@@ -1022,7 +984,6 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   notfound,
   busy,
   sidebar,
-  skipLink,
   shell,
   status,
   info,

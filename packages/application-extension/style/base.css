@@ -29,5 +29,5 @@
 
 .jp-skiplink--focus a {
   text-decoration: underline;
-  color: #106ba3;
+  color: var(--jp-content-link-color);
 }

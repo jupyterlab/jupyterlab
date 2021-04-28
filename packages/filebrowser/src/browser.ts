@@ -182,6 +182,7 @@ export class FileBrowser extends Widget {
       forceRefresh: true
     });
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
+    this._filenameSearcher.id = 'filename-searcher';
 
     this.layout.removeWidget(this._filenameSearcher);
     this.layout.removeWidget(this._crumbs);
