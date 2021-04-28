@@ -142,6 +142,7 @@ export class DocumentModel
    * Initialize the model with its current state.
    */
   initialize(): void {
+    /** @todo remove
     // A DocumentModel is a CodeCell and a notebook model in one.
     const ymodel = this.sharedModel;
     if (ymodel instanceof nbmodel.YFile) {
@@ -151,6 +152,7 @@ export class DocumentModel
       }
       this.switchSharedModel(ymodel, false);
     }
+    */
     return;
   }
 
@@ -172,7 +174,7 @@ export class DocumentModel
   /**
    * The shared notebook model.
    */
-  readonly sharedModel = new nbmodel.YFile() as nbmodel.ISharedDocument;
+  readonly sharedModel = new nbmodel.YFile() as nbmodel.ISharedFile;
 
   private _defaultLang = '';
   private _dirty = false;
