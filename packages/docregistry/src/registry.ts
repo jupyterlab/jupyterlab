@@ -11,7 +11,7 @@ import {
   map
 } from '@lumino/algorithm';
 
-import * as nbmodel from '@jupyterlab/shared-models';
+import * as models from '@jupyterlab/shared-models';
 
 import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
@@ -795,7 +795,7 @@ export namespace DocumentRegistry {
     /**
      * The shared notebook model.
      */
-    readonly sharedModel: nbmodel.ISharedDocument;
+    readonly sharedModel: models.ISharedDocument;
 
     /**
      * Serialize the model to a string.
@@ -837,7 +837,7 @@ export namespace DocumentRegistry {
    * The interface for a document model that represents code.
    */
   export interface ICodeModel extends IModel, CodeEditor.IModel {
-    sharedModel: nbmodel.ISharedFile;
+    sharedModel: models.ISharedFile;
   }
 
   /**

@@ -10,7 +10,7 @@ import * as Y from 'yjs';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import * as nbmodel from './api';
+import * as models from './api';
 
 import { Delta } from './api';
 
@@ -23,7 +23,7 @@ const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
  * Abstract interface to define Shared Models that can be bound to a text editor using any existing
  * Yjs-based editor binding.
  */
-export interface IYText extends nbmodel.ISharedText {
+export interface IYText extends models.ISharedText {
   readonly ysource: Y.Text;
   readonly awareness: Awareness | null;
   readonly undoManager: Y.UndoManager | null;
@@ -31,7 +31,7 @@ export interface IYText extends nbmodel.ISharedText {
 
 export type YCellType = YRawCell | YCodeCell | YMarkdownCell;
 
-export class YDocument<T> implements nbmodel.ISharedDocument {
+export class YDocument<T> implements models.ISharedDocument {
   /**
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
@@ -100,8 +100,8 @@ export class YDocument<T> implements nbmodel.ISharedDocument {
 }
 
 export class YFile
-  extends YDocument<nbmodel.FileChange>
-  implements nbmodel.ISharedFile, nbmodel.ISharedText, IYText {
+  extends YDocument<models.FileChange>
+  implements models.ISharedFile, models.ISharedText, IYText {
   constructor() {
     super();
     this.ysource.observe(this._modelObserver);
@@ -111,7 +111,7 @@ export class YFile
    * Handle a change to the ymodel.
    */
   private _modelObserver = (event: Y.YTextEvent) => {
-    const changes: nbmodel.FileChange = {};
+    const changes: models.FileChange = {};
     changes.sourceChange = event.changes.delta as any;
     this._changed.emit(changes);
   };
@@ -163,7 +163,7 @@ export class YFile
 }
 
 /**
- * Shared implementation of the nbmodel types.
+ * Shared implementation of the Shared Document types.
  *
  * Shared cells can be inserted into a SharedNotebook.
  * Shared cells only start emitting events when they are connected to a SharedNotebook.
@@ -173,8 +173,8 @@ export class YFile
  * be included into a (Shared)Notebook.
  */
 export class YNotebook
-  extends YDocument<nbmodel.NotebookChange>
-  implements nbmodel.ISharedNotebook {
+  extends YDocument<models.NotebookChange>
+  implements models.ISharedNotebook {
   constructor() {
     super();
     this.ycells.observe(this._onYCellsChanged);
@@ -269,7 +269,7 @@ export class YNotebook
   /**
    * Create a new YNotebook.
    */
-  public static create(): nbmodel.ISharedNotebook {
+  public static create(): models.ISharedNotebook {
     return new YNotebook();
   }
 
@@ -304,7 +304,7 @@ export class YNotebook
     });
     let index = 0;
     // this reflects the event.changes.delta, but replaces the content of delta.insert with ycells
-    const cellsChange: Delta<nbmodel.ISharedCell[]> = [];
+    const cellsChange: Delta<models.ISharedCell[]> = [];
     event.changes.delta.forEach((d: any) => {
       if (d.insert != null) {
         const insertedCells = d.insert.map((ycell: Y.Map<any>) =>
@@ -402,8 +402,8 @@ export const createStandaloneCell = (
   }
 };
 
-export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetadata>
-  implements nbmodel.ISharedBaseCell<Metadata>, IYText {
+export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
+  implements models.ISharedBaseCell<Metadata>, IYText {
   constructor(ymodel: Y.Map<any>) {
     this.ymodel = ymodel;
     const ysource = ymodel.get('source');
@@ -540,7 +540,7 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetadata>
    * Handle a change to the ymodel.
    */
   private _modelObserver = (events: Y.YEvent[]) => {
-    const changes: nbmodel.CellChange<Metadata> = {};
+    const changes: models.CellChange<Metadata> = {};
     const sourceEvent = events.find(
       event => event.target === this.ymodel.get('source')
     );
@@ -573,7 +573,7 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetadata>
   /**
    * The changed signal.
    */
-  get changed(): ISignal<this, nbmodel.CellChange<Metadata>> {
+  get changed(): ISignal<this, models.CellChange<Metadata>> {
     return this._changed;
   }
 
@@ -700,13 +700,13 @@ export class YBaseCell<Metadata extends nbmodel.ISharedBaseCellMetadata>
   public isDisposed = false;
   public ymodel: Y.Map<any>;
   private _undoManager: Y.UndoManager | null = null;
-  private _changed = new Signal<this, nbmodel.CellChange<Metadata>>(this);
+  private _changed = new Signal<this, models.CellChange<Metadata>>(this);
   private _prevSourceLength: number;
 }
 
 export class YCodeCell
-  extends YBaseCell<nbmodel.ISharedBaseCellMetadata>
-  implements nbmodel.ISharedCodeCell {
+  extends YBaseCell<models.ISharedBaseCellMetadata>
+  implements models.ISharedCodeCell {
   /**
    * The type of the cell.
    */
@@ -777,8 +777,8 @@ export class YCodeCell
 }
 
 export class YRawCell
-  extends YBaseCell<nbmodel.ISharedBaseCellMetadata>
-  implements nbmodel.ISharedRawCell {
+  extends YBaseCell<models.ISharedBaseCellMetadata>
+  implements models.ISharedRawCell {
   /**
    * Create a new YRawCell that can be inserted into a YNotebook
    */
@@ -817,8 +817,8 @@ export class YRawCell
 }
 
 export class YMarkdownCell
-  extends YBaseCell<nbmodel.ISharedBaseCellMetadata>
-  implements nbmodel.ISharedMarkdownCell {
+  extends YBaseCell<models.ISharedBaseCellMetadata>
+  implements models.ISharedMarkdownCell {
   /**
    * Create a new YMarkdownCell that can be inserted into a YNotebook
    */

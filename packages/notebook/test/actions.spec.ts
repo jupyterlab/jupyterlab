@@ -286,9 +286,9 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('command');
       });
 
-      it.each(['raw', 'markdown'])(
+      it.each(['raw', 'markdown'] as CellType[])(
         'should merge attachments if the last selected cell is a %s cell',
-        (type: CellType) => {
+        type => {
           for (let i = 0; i < 2; i++) {
             NotebookActions.changeCellType(widget, type);
             const markdownCell = widget.widgets[i] as MarkdownCell;

@@ -5,11 +5,11 @@
 
 import * as Y from 'yjs';
 
-import * as nbmodel from './api';
+import * as models from './api';
 
 export function convertYMapEventToMapChange(
   event: Y.YMapEvent<any>
-): nbmodel.MapChange {
+): models.MapChange {
   let changes = new Map();
   event.changes.keys.forEach((event, key) => {
     changes.set(key, {

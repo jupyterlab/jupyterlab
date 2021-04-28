@@ -23,7 +23,7 @@ import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 import { DocumentRegistry, IDocumentWidget } from './index';
 
-import * as nbmodel from '@jupyterlab/shared-models';
+import * as models from '@jupyterlab/shared-models';
 
 /**
  * The default implementation of a document model.
@@ -37,7 +37,7 @@ export class DocumentModel
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
-    const filemodel = new nbmodel.YFile() as nbmodel.ISharedFile;
+    const filemodel = new models.YFile() as models.ISharedFile;
     this.switchSharedModel(filemodel, true);
     this.value.changed.connect(this.triggerContentChange, this);
   }
@@ -144,17 +144,6 @@ export class DocumentModel
    * Initialize the model with its current state.
    */
   initialize(): void {
-    /** @todo remove
-    // A DocumentModel is a CodeCell and a notebook model in one.
-    const ymodel = this.sharedModel;
-    if (ymodel instanceof nbmodel.YFile) {
-      const currContent = this.sharedModel.getSource();
-      if (ymodel.getSource() !== currContent) {
-        ymodel.setSource(currContent);
-      }
-      this.switchSharedModel(ymodel, false);
-    }
-    */
     return;
   }
 
@@ -176,7 +165,7 @@ export class DocumentModel
   /**
    * The shared notebook model.
    */
-  readonly sharedModel: nbmodel.ISharedFile;
+  readonly sharedModel: models.ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;

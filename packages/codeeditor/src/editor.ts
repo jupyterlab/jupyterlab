@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as nbmodel from '@jupyterlab/shared-models';
+import * as models from '@jupyterlab/shared-models';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
@@ -213,14 +213,14 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    readonly sharedModel: nbmodel.ISharedText;
+    readonly sharedModel: models.ISharedText;
 
     /**
      * When we initialize a cell model, we create a standalone cell model that cannot be shared in a YNotebook.
      * Call this function to re-initialize the local representation based on a fresh shared model (e.g. models.YFile or models.YCodeCell).
      */
     switchSharedModel(
-      sharedModel: nbmodel.ISharedText,
+      sharedModel: models.ISharedText,
       reinitialize: boolean
     ): void;
   }
@@ -240,10 +240,10 @@ export namespace CodeEditor {
       } else {
         this.modelDB = new ModelDB();
       }
-      this.sharedModel = nbmodel.createStandaloneCell(
+      this.sharedModel = models.createStandaloneCell(
         this.type,
         options.id
-      ) as nbmodel.ISharedText;
+      ) as models.ISharedText;
       this.sharedModel.changed.connect(this._onSharedModelChanged, this);
 
       const value = this.modelDB.createString('value');
@@ -265,7 +265,7 @@ export namespace CodeEditor {
      * @param reinitialize Whether to reinitialize the shared model.
      */
     public switchSharedModel(
-      sharedModel: nbmodel.ISharedText,
+      sharedModel: models.ISharedText,
       reinitialize?: boolean
     ): void {
       if (reinitialize) {
@@ -287,8 +287,8 @@ export namespace CodeEditor {
      * or the modelDB change handler.
      */
     protected _onSharedModelChanged(
-      sender: nbmodel.ISharedBaseCell<any>,
-      change: nbmodel.CellChange<nbformat.IBaseCellMetadata>
+      sender: models.ISharedBaseCell<any>,
+      change: models.CellChange<nbformat.IBaseCellMetadata>
     ): void {
       this._mutex(() => {
         if (change.sourceChange) {
@@ -343,12 +343,12 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    sharedModel: nbmodel.ISharedText;
+    sharedModel: models.ISharedText;
 
     /**
      * A mutex to update the shared model.
      */
-    protected readonly _mutex = nbmodel.createMutex();
+    protected readonly _mutex = models.createMutex();
 
     /**
      * The underlying `IModelDB` instance in which model

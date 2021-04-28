@@ -10,7 +10,7 @@ import {
   ArrayIterator
 } from '@lumino/algorithm';
 
-import * as nbmodel from '@jupyterlab/shared-models';
+import * as models from '@jupyterlab/shared-models';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -36,7 +36,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   constructor(
     modelDB: IModelDB,
     factory: NotebookModel.IContentFactory,
-    model: nbmodel.ISharedNotebook
+    model: models.ISharedNotebook
   ) {
     this._factory = factory;
     this._cellOrder = modelDB.createList<string>('cellOrder');
@@ -49,12 +49,12 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   }
 
   type: 'List';
-  nbmodel: nbmodel.ISharedNotebook;
+  nbmodel: models.ISharedNotebook;
 
   /**
    * Prevents that the modeldb event handler is executed when the shared-model event handler is executed and vice-versa.
    */
-  private readonly _mutex = nbmodel.createMutex();
+  private readonly _mutex = models.createMutex();
 
   private onModelDBChanged(
     self: CellList,
@@ -98,8 +98,8 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   }
 
   private onSharedModelChanged(
-    self: nbmodel.ISharedNotebook,
-    change: nbmodel.NotebookChange
+    self: models.ISharedNotebook,
+    change: models.NotebookChange
   ) {
     this._mutex(() => {
       let currpos = 0;

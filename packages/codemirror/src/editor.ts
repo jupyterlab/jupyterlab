@@ -7,7 +7,7 @@ import CodeMirror from 'codemirror';
 
 import { showDialog } from '@jupyterlab/apputils';
 
-import * as nbmodel from '@jupyterlab/shared-models';
+import * as models from '@jupyterlab/shared-models';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -134,7 +134,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
     this._initializeEditorBinding();
-    // every time the nbmodel is switched, we need to re-initialize the editor binding
+    // every time the model is switched, we need to re-initialize the editor binding
     this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
 
     const doc = editor.getDoc();
@@ -214,7 +214,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._yeditorBinding?.destroy();
-    const sharedModel = this.model.sharedModel as nbmodel.IYText;
+    const sharedModel = this.model.sharedModel as models.IYText;
     const opts = sharedModel.undoManager
       ? { yUndoManager: sharedModel.undoManager }
       : {};

@@ -15,7 +15,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import * as nbmodel from '@jupyterlab/shared-models';
+import * as models from '@jupyterlab/shared-models';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -63,7 +63,7 @@ export interface ICellModel extends CodeEditor.IModel {
    */
   readonly metadata: IObservableJSON;
 
-  readonly sharedModel: nbmodel.ISharedCell & nbmodel.ISharedText;
+  readonly sharedModel: models.ISharedCell & models.ISharedText;
 
   /**
    * Serialize the model to JSON.
@@ -325,7 +325,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * @param event The event to handle.
    */
   private _changeCellMetata(
-    metadata: Partial<nbmodel.ISharedBaseCellMetadata>,
+    metadata: Partial<models.ISharedBaseCellMetadata>,
     event: IObservableJSON.IChangedArgs
   ): void {
     switch (event.key) {
@@ -365,14 +365,14 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * @override CodeEditor._onSharedModelChanged
    */
   protected _onSharedModelChanged(
-    sender: nbmodel.ISharedCodeCell,
-    change: nbmodel.CellChange<nbmodel.ISharedBaseCellMetadata>
+    sender: models.ISharedCodeCell,
+    change: models.CellChange<models.ISharedBaseCellMetadata>
   ): void {
     super._onSharedModelChanged(sender, change);
     this._modelDBMutex(() => {
       if (change.metadataChange) {
         const newValue = change.metadataChange
-          ?.newValue as nbmodel.ISharedBaseCellMetadata;
+          ?.newValue as models.ISharedBaseCellMetadata;
         if (newValue) {
           Object.keys(newValue).map(key => {
             switch (key) {
@@ -416,8 +416,8 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * A mutex to update the shared model.
    */
-  private readonly _modelDBMutex = nbmodel.createMutex();
-  sharedModel: nbmodel.ISharedCell;
+  private readonly _modelDBMutex = models.createMutex();
+  sharedModel: models.ISharedCell;
 }
 
 /**
