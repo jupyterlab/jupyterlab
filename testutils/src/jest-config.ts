@@ -1,5 +1,7 @@
 import path from 'path';
 
+const esModules = ['lib0', 'y-protocols'].join('|');
+
 module.exports = function (baseDir: string) {
   return {
     preset: 'ts-jest/presets/js-with-babel',
@@ -24,10 +26,7 @@ module.exports = function (baseDir: string) {
       'mjs',
       'cjs'
     ],
-    transformIgnorePatterns: [
-      '/node_modules/(?![lib0]).+\\.js$',
-      '/node_modules/(?![lib0]).+\\.cjs$'
-    ],
+    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+\\.js`],
     reporters: ['default', 'jest-junit', 'jest-summary-reporter'],
     coverageReporters: ['json', 'lcov', 'text', 'html'],
     coverageDirectory: path.join(baseDir, 'coverage'),

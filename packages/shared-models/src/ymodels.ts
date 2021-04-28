@@ -15,7 +15,7 @@ import * as nbmodel from './api';
 import { Delta } from './api';
 
 // @ts-ignore
-import { Awareness } from 'y-protocols/dist/awareness.cjs';
+import { Awareness } from 'y-protocols/awareness';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 
@@ -731,7 +731,7 @@ export class YCodeCell
   /**
    * Create a new YCodeCell that can be inserted into a YNotebook
    */
-  public static create(id: string): YCodeCell {
+  public static create(id?: string): YCodeCell {
     const cell = super.create(id);
     cell.ymodel.set('execution_count', 0); // for some default value
     return cell as any;
@@ -782,7 +782,7 @@ export class YRawCell
   /**
    * Create a new YRawCell that can be inserted into a YNotebook
    */
-  public static create(id: string): YRawCell {
+  public static create(id?: string): YRawCell {
     return super.create(id) as any;
   }
 
