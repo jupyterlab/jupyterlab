@@ -113,9 +113,7 @@ export class FileBrowserModel implements IDisposable {
         backoff: true,
         max: 300 * 1000
       },
-      standby: () => {
-        return services.bandwidthSaveMode || 'when-hidden';
-      }
+      standby: options.refreshStandby || 'when-hidden'
     });
   }
 
@@ -699,6 +697,11 @@ export namespace FileBrowserModel {
      * The time interval for browser refreshing, in ms.
      */
     refreshInterval?: number;
+
+    /**
+     * When the model stops polling the API. Defaults to `when-hidden`.
+     */
+    refreshStandby?: Poll.Standby | (() => boolean | Poll.Standby);
 
     /**
      * An optional state database. If provided, the model will restore which

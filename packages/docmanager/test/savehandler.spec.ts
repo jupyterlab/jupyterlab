@@ -38,7 +38,7 @@ describe('docregistry/savehandler', () => {
       factory,
       path: UUID.uuid4() + '.txt'
     });
-    handler = new SaveHandler({ context, services: manager });
+    handler = new SaveHandler({ context });
     return context.initialize(true);
   });
 
