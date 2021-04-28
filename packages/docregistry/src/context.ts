@@ -245,6 +245,19 @@ export class Context<
   }
 
   /**
+   * Rename the document.
+   *
+   * @param newName - the new name for the document.
+   */
+  rename(newName: string): Promise<void> {
+    return this.ready.then(() => {
+      return this._manager.ready.then(() => {
+        return this._rename(newName);
+      });
+    });
+  }
+
+  /**
    * Save the document contents to disk.
    */
   save(): Promise<void> {
@@ -497,6 +510,23 @@ export class Context<
         }
       });
     });
+  }
+
+  /**
+   * Rename the document.
+   *
+   * @param newName - the new name for the document.
+   */
+  private async _rename(newName: string): Promise<void> {
+    const splitPath = this.path.split('/');
+    splitPath[splitPath.length - 1] = newName;
+    const newPath = splitPath.join('/');
+
+    await this._manager.contents.rename(this.path, newPath);
+    await this.sessionContext.session?.setPath(newPath);
+    await this.sessionContext.session?.setName(newName);
+
+    this._pathChanged.emit(this._path);
   }
 
   /**
