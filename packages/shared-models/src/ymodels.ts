@@ -14,7 +14,8 @@ import * as nbmodel from './api';
 
 import { Delta } from './api';
 
-import { Awareness } from 'y-protocols/awareness';
+// @ts-ignore
+import { Awareness } from 'y-protocols/dist/awareness.cjs';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 
@@ -101,6 +102,20 @@ export class YDocument<T> implements nbmodel.ISharedDocument {
 export class YFile
   extends YDocument<nbmodel.FileChange>
   implements nbmodel.ISharedFile, nbmodel.ISharedText, IYText {
+  constructor() {
+    super();
+    this.ysource.observe(this._modelObserver);
+  }
+
+  /**
+   * Handle a change to the ymodel.
+   */
+  private _modelObserver = (event: Y.YTextEvent) => {
+    const changes: nbmodel.FileChange = {};
+    changes.sourceChange = event.changes.delta as any;
+    this._changed.emit(changes);
+  };
+
   public static create(): YFile {
     return new YFile();
   }
