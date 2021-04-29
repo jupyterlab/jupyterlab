@@ -444,7 +444,8 @@ namespace Private {
       const connection = new LSPConnection({
         languageId: language,
         serverUri: uris.server,
-        rootUri: uris.base
+        rootUri: uris.base,
+        serverIdentifier: language_server_id
       });
       // TODO: remove remaining unbounded users of connection.on
       connection.setMaxListeners(999);

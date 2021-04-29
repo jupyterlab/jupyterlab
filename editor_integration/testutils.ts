@@ -242,7 +242,8 @@ function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
       return new LSPConnection({
         languageId: this.document_options.language,
         serverUri: 'ws://localhost:8080',
-        rootUri: 'file:///unit-test'
+        rootUri: 'file:///unit-test',
+        serverIdentifier: 'pylsp'
       });
     }
 

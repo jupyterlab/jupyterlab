@@ -493,7 +493,7 @@ export namespace LSPStatus {
         });
         // TODO server.status === "started" ?
         // TODO update once multiple servers are allowed
-        if (matchedServers[0] === id) {
+        if (matchedServers.length && matchedServers[0] === id) {
           return true;
         }
       }
@@ -590,10 +590,11 @@ export namespace LSPStatus {
 
       detected_documents.forEach((document, uri) => {
         let connection = this._connection_manager.connections.get(uri);
-        let server_id = this._connection_manager.language_server_manager.getMatchingServers(
+        let server_ids = this._connection_manager.language_server_manager.getMatchingServers(
           { language: document.language }
         );
-        if (server_id !== null) {
+
+        if (server_ids.length !== 0) {
           documents_with_known_servers.add(document);
         }
         if (!connection) {

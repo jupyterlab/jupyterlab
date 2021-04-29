@@ -12,13 +12,17 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 
 import { until_ready } from './utils';
 
-interface ILSPOptions extends ILspOptions {}
+interface ILSPOptions extends ILspOptions {
+  serverIdentifier?: string;
+}
 
 export class LSPConnection extends LspWsConnection {
   protected documentsToOpen: IDocumentInfo[];
+  public serverIdentifier: string;
 
   constructor(options: ILSPOptions) {
     super(options);
+    this.serverIdentifier = options?.serverIdentifier;
     this.documentsToOpen = [];
   }
 
