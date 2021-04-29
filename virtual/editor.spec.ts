@@ -30,7 +30,9 @@ describe('VirtualEditor', () => {
     '/home/username/project/.virtual_documents'
   );
 
-  const LANGSERVER_MANAGER = new MockLanguageServerManager({});
+  const LANGSERVER_MANAGER = new MockLanguageServerManager({
+    console: new BrowserConsole()
+  });
   const CONNECTION_MANAGER = new DocumentConnectionManager({
     language_server_manager: LANGSERVER_MANAGER,
     console: new BrowserConsole()

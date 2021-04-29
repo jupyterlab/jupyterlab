@@ -3,7 +3,13 @@ import { ServerConnection } from '@jupyterlab/services';
 import { Signal } from '@lumino/signaling';
 
 import * as SCHEMA from './_schema';
-import { ILanguageServerManager, TSessionMap } from './tokens';
+import {
+  ILanguageServerManager,
+  ILSPLogConsole,
+  TLanguageServerConfigurations,
+  TLanguageServerId,
+  TSessionMap
+} from './tokens';
 
 export class LanguageServerManager implements ILanguageServerManager {
   protected _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal<
@@ -16,6 +22,8 @@ export class LanguageServerManager implements ILanguageServerManager {
   private _statusCode: number;
   private _retries: number;
   private _retriesInterval: number;
+  private _configuration: TLanguageServerConfigurations;
+  private console: ILSPLogConsole;
 
   constructor(options: ILanguageServerManager.IOptions) {
     this._settings = options.settings || ServerConnection.makeSettings();
@@ -23,6 +31,8 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._retries = options.retries || 2;
     this._retriesInterval = options.retriesInterval || 10000;
     this._statusCode = null;
+    this._configuration = {};
+    this.console = options.console;
     this.fetchSessions().catch(console.warn);
   }
 
@@ -38,16 +48,44 @@ export class LanguageServerManager implements ILanguageServerManager {
     return this._sessions;
   }
 
-  getServerId(options: ILanguageServerManager.IGetServerIdOptions) {
+  setConfiguration(configuration: TLanguageServerConfigurations): void {
+    this._configuration = configuration;
+  }
+
+  getMatchingServers(options: ILanguageServerManager.IGetServerIdOptions) {
+    const matchingSessionsKeys: TLanguageServerId[] = [];
+    const config = this._configuration;
+
     // most things speak language
+    // if language is not known, it is guessed based on MIME type earlier
+    // so some language should be available by now (which can be not obvious, e.g. "plain" for txt documents)
     for (const [key, session] of this._sessions.entries()) {
       if (options.language) {
-        if (session.spec.languages.indexOf(options.language) !== -1) {
-          return key;
+        if (
+          session.spec.languages.indexOf(
+            options.language.toLocaleLowerCase()
+          ) !== -1
+        ) {
+          matchingSessionsKeys.push(key);
         }
+      } else {
+        this.console.error(
+          'Cannot match server by language: language not available; ensure that kernel and specs provide language and MIME type'
+        );
       }
     }
-    return null;
+
+    return matchingSessionsKeys.sort((a, b) => {
+      const a_priority = config[a]?.priority ?? 50;
+      const b_priority = config[b]?.priority ?? 50;
+      if (a_priority == b_priority) {
+        this.console.warn(
+          `Two matching servers: ${a} and ${b} have the same priority; choose which one to use by changing the priority in Advanced Settings Editor`
+        );
+      }
+      // higher priority = higher in the list (descending order)
+      return b_priority - a_priority;
+    });
   }
 
   get statusCode(): number {
@@ -81,11 +119,12 @@ export class LanguageServerManager implements ILanguageServerManager {
       return;
     }
 
-    for (const key of Object.keys(sessions)) {
-      if (this._sessions.has(key)) {
-        Object.assign(this._sessions.get(key), sessions[key]);
+    for (let key of Object.keys(sessions)) {
+      let id: TLanguageServerId = key as TLanguageServerId;
+      if (this._sessions.has(id)) {
+        Object.assign(this._sessions.get(id), sessions[key]);
       } else {
-        this._sessions.set(key, sessions[key]);
+        this._sessions.set(id, sessions[key]);
       }
     }
 
@@ -93,7 +132,8 @@ export class LanguageServerManager implements ILanguageServerManager {
 
     for (const oldKey in oldKeys) {
       if (!sessions[oldKey]) {
-        this._sessions.delete(oldKey);
+        let oldId = oldKey as TLanguageServerId;
+        this._sessions.delete(oldId);
       }
     }
 

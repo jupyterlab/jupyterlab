@@ -5,6 +5,7 @@ import { ServerConnection } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { LanguageServer2 as LSPLanguageServerSettings } from './_plugin';
 import * as SCHEMA from './_schema';
 import { WidgetAdapter } from './adapters/adapter';
 import {
@@ -24,16 +25,15 @@ import { IFeatureOptions, ILSPExtension, LSPExtension } from './index';
 
 import IEditor = CodeEditor.IEditor;
 
-export type TLanguageServerId = string;
 export type TLanguageId = string;
 
-export type TSessionMap = Map<TLanguageServerId, SCHEMA.LanguageServerSession>;
-
 /**
- * TODO: Should this support custom server keys?
+ * Example server keys==ids that are expected. The list is not exhaustive.
+ * Custom server keys are allowed. Constraining the values helps avoid errors,
+ * but at runtime any value is allowed.
  */
-export type TServerKeys =
-  | 'pyls'
+export type TLanguageServerId =
+  | 'pylsp'
   | 'bash-language-server'
   | 'dockerfile-language-server-nodejs'
   | 'javascript-typescript-langserver'
@@ -43,31 +43,27 @@ export type TServerKeys =
   | 'vscode-json-languageserver-bin'
   | 'yaml-language-server'
   | 'r-languageserver';
+export type TServerKeys = TLanguageServerId;
 
-export type TLanguageServerConfigurations = {
-  [k in TServerKeys]: {
-    serverSettings: any;
-  };
-};
+export type TSessionMap = Map<TServerKeys, SCHEMA.LanguageServerSession>;
+
+export type TLanguageServerConfigurations = Partial<
+  Record<TServerKeys, LSPLanguageServerSettings>
+>;
 
 export interface ILanguageServerManager {
   sessionsChanged: ISignal<ILanguageServerManager, void>;
   sessions: TSessionMap;
-  getServerId(
+  /**
+   * An ordered list of matching servers, with servers of higher priority higher in the list
+   */
+  getMatchingServers(
     options: ILanguageServerManager.IGetServerIdOptions
-  ): TLanguageServerId;
+  ): TLanguageServerId[];
+  setConfiguration(configuration: TLanguageServerConfigurations): void;
   fetchSessions(): Promise<void>;
   statusUrl: string;
   statusCode: number;
-}
-
-export interface ILanguageServerConfiguration {
-  /**
-   * The config params must be nested inside the settings keyword
-   */
-  settings: {
-    [k: string]: any;
-  };
 }
 
 export namespace ILanguageServerManager {
@@ -84,6 +80,7 @@ export namespace ILanguageServerManager {
      * The interval for retries, default 10 seconds.
      */
     retriesInterval?: number;
+    console: ILSPLogConsole;
   }
   export interface IGetServerIdOptions {
     language?: TLanguageId;

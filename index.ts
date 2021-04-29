@@ -146,10 +146,12 @@ export class LSPExtension implements ILSPExtension {
     status_bar: IStatusBar | null
   ) {
     const trans = (translator || nullTranslator).load('jupyterlab-lsp');
-    this.language_server_manager = new LanguageServerManager({});
+    this.language_server_manager = new LanguageServerManager({
+      console: this.console.scope('LanguageServerManager')
+    });
     this.connection_manager = new DocumentConnectionManager({
       language_server_manager: this.language_server_manager,
-      console: this.console
+      console: this.console.scope('DocumentConnectionManager')
     });
 
     const statusButtonExtension = new StatusButtonExtension({

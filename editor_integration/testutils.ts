@@ -71,7 +71,7 @@ export interface ITestEnvironment {
 export class MockLanguageServerManager extends LanguageServerManager {
   async fetchSessions() {
     this._sessions = new Map();
-    this._sessions.set('pyls', {
+    this._sessions.set('pylsp', {
       spec: {
         languages: ['python']
       }
@@ -111,7 +111,9 @@ export class MockExtension implements ILSPExtension {
     this.app = null;
     this.feature_manager = new FeatureManager();
     this.editor_type_manager = new VirtualEditorManager();
-    this.language_server_manager = new MockLanguageServerManager({});
+    this.language_server_manager = new MockLanguageServerManager({
+      console: new BrowserConsole()
+    });
     this.connection_manager = new DocumentConnectionManager({
       language_server_manager: this.language_server_manager,
       console: new BrowserConsole()

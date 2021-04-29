@@ -1,13 +1,14 @@
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { Signal } from '@lumino/signaling';
+import type * as protocol from 'vscode-languageserver-protocol';
 
 import type * as ConnectionModuleType from './connection';
 import {
   ILSPLogConsole,
-  ILanguageServerConfiguration,
   ILanguageServerManager,
   TLanguageServerConfigurations,
-  TLanguageServerId
+  TLanguageServerId,
+  TServerKeys
 } from './tokens';
 import { expandDottedPaths, sleep, until_ready } from './utils';
 import { IForeignContext, VirtualDocument } from './virtual/document';
@@ -134,9 +135,14 @@ export class DocumentConnectionManager {
       language
     );
 
-    const language_server_id = this.language_server_manager.getServerId({
+    const matchingServers = this.language_server_manager.getMatchingServers({
       language
     });
+    this.console.debug('Matching servers: ', matchingServers);
+
+    // for now use only the server with the highest priority.
+    const language_server_id =
+      matchingServers.length === 0 ? null : matchingServers[0];
 
     // lazily load 1) the underlying library (1.5mb) and/or 2) a live WebSocket-
     // like connection: either already connected or potentially in the process
@@ -161,13 +167,21 @@ export class DocumentConnectionManager {
    * "serverSettings" keyword in the setting registry. New keywords can
    * be added and extra functionality implemented here when needed.
    */
-  public updateServerConfigurations(allServerSettings: any) {
-    for (let language_server_id in allServerSettings) {
-      const parsedSettings = expandDottedPaths(
-        allServerSettings[language_server_id].serverSettings
-      );
+  public updateServerConfigurations(
+    allServerSettings: TLanguageServerConfigurations
+  ) {
+    let language_server_id: TServerKeys;
+    this.language_server_manager.setConfiguration(allServerSettings);
 
-      const serverSettings: ILanguageServerConfiguration = {
+    for (language_server_id in allServerSettings) {
+      if (!allServerSettings.hasOwnProperty(language_server_id)) {
+        continue;
+      }
+      const rawSettings = allServerSettings[language_server_id];
+
+      const parsedSettings = expandDottedPaths(rawSettings.serverSettings);
+
+      const serverSettings: protocol.DidChangeConfigurationParams = {
         settings: parsedSettings
       };
 
@@ -351,9 +365,14 @@ export namespace DocumentConnectionManager {
       ? rootUri
       : virtualDocumentsUri;
 
-    const language_server_id = Private.getLanguageServerManager().getServerId({
-      language
-    });
+    // for now take the best match only
+    const matchingServers = Private.getLanguageServerManager().getMatchingServers(
+      {
+        language
+      }
+    );
+    const language_server_id =
+      matchingServers.length === 0 ? null : matchingServers[0];
 
     if (language_server_id === null) {
       throw `No language server installed for language ${language}`;
@@ -441,7 +460,7 @@ namespace Private {
 
   export function updateServerConfiguration(
     language_server_id: TLanguageServerId,
-    settings: ILanguageServerConfiguration
+    settings: protocol.DidChangeConfigurationParams
   ): void {
     const connection = _connections.get(language_server_id);
     if (connection) {

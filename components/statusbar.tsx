@@ -35,7 +35,12 @@ import { LSPConnection } from '../connection';
 import { DocumentConnectionManager } from '../connection_manager';
 import { SERVER_EXTENSION_404 } from '../errors';
 import { LanguageServerManager } from '../manager';
-import { ILSPAdapterManager, ILanguageServerManager } from '../tokens';
+import {
+  ILSPAdapterManager,
+  ILanguageServerManager,
+  TSessionMap,
+  TLanguageServerId
+} from '../tokens';
 import { VirtualDocument, collect_documents } from '../virtual/document';
 
 import { codeCheckIcon, codeClockIcon, codeWarningIcon } from './icons';
@@ -464,13 +469,13 @@ export namespace LSPStatus {
       }, this);
     }
 
-    get available_servers(): Array<SCHEMA.LanguageServerSession> {
-      return Array.from(this.language_server_manager.sessions.values());
+    get available_servers(): TSessionMap {
+      return this.language_server_manager.sessions;
     }
 
     get supported_languages(): Set<string> {
       const languages = new Set<string>();
-      for (let server of this.available_servers) {
+      for (let server of this.available_servers.values()) {
         for (let language of server.spec.languages) {
           languages.add(language.toLocaleLowerCase());
         }
@@ -478,20 +483,30 @@ export namespace LSPStatus {
       return languages;
     }
 
-    private is_server_running(server: SCHEMA.LanguageServerSession): boolean {
-      for (let language of server.spec.languages) {
-        if (this.detected_languages.has(language.toLocaleLowerCase())) {
+    private is_server_running(
+      id: TLanguageServerId,
+      server: SCHEMA.LanguageServerSession
+    ): boolean {
+      for (const language of this.detected_languages) {
+        const matchedServers = this.language_server_manager.getMatchingServers({
+          language
+        });
+        // TODO server.status === "started" ?
+        // TODO update once multiple servers are allowed
+        if (matchedServers[0] === id) {
           return true;
         }
       }
-      return false;
     }
 
     get documents_by_server(): Map<
       SCHEMA.LanguageServerSession,
       Map<string, VirtualDocument[]>
     > {
-      let data = new Map();
+      let data = new Map<
+        SCHEMA.LanguageServerSession,
+        Map<string, VirtualDocument[]>
+      >();
       if (!this.adapter?.virtual_editor) {
         return data;
       }
@@ -501,19 +516,17 @@ export namespace LSPStatus {
 
       for (let document of documents.values()) {
         let language = document.language.toLocaleLowerCase();
-        let servers = this.available_servers.filter(
-          server => server.spec.languages.indexOf(language) !== -1
+        let server_ids = this._connection_manager.language_server_manager.getMatchingServers(
+          { language: document.language }
         );
-        if (servers.length > 1) {
-          console.warn('More than one server per language for', language);
-        }
-        if (servers.length === 0) {
+        if (server_ids.length === 0) {
           continue;
         }
-        let server = servers[0];
+        // For now only use the server with the highest priority
+        let server = this.language_server_manager.sessions.get(server_ids[0]);
 
         if (!data.has(server)) {
-          data.set(server, new Map<string, VirtualDocument>());
+          data.set(server, new Map<string, VirtualDocument[]>());
         }
 
         let documents_map = data.get(server);
@@ -529,9 +542,9 @@ export namespace LSPStatus {
     }
 
     get servers_available_not_in_use(): Array<SCHEMA.LanguageServerSession> {
-      return this.available_servers.filter(
-        server => !this.is_server_running(server)
-      );
+      return [...this.available_servers.entries()]
+        .filter(([id, server]) => !this.is_server_running(id, server))
+        .map(([id, server]) => server);
     }
 
     get detected_languages(): Set<string> {
@@ -577,7 +590,7 @@ export namespace LSPStatus {
 
       detected_documents.forEach((document, uri) => {
         let connection = this._connection_manager.connections.get(uri);
-        let server_id = this._connection_manager.language_server_manager.getServerId(
+        let server_id = this._connection_manager.language_server_manager.getMatchingServers(
           { language: document.language }
         );
         if (server_id !== null) {
