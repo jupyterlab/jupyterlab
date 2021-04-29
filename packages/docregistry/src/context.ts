@@ -538,6 +538,7 @@ export class Context<
 
       model.dirty = false;
 
+      value.renamed = this._contentsModel?.renamed;
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {
