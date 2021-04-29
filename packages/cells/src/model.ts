@@ -612,7 +612,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       }
     }
     executionCount.changed.connect(this._onExecutionCountChanged, this);
-    executionCount.changed.connect(this.onModelDBExecutionsCountChange, this);
 
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
     this._outputs.changed.connect(this.onGenericChange, this);
@@ -727,38 +726,27 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     sender: IOutputAreaModel,
     event: IOutputAreaModel.ChangedArgs
   ): void {
-    const nbCodeCell = this.sharedModel as models.YCodeCell;
+    const codeCell = this.sharedModel as models.YCodeCell;
     this._modelDBMutex(() => {
       switch (event.type) {
         case 'add':
           const outputs = event.newValues.map(output => output.toJSON());
-          nbCodeCell.insertOutputs(event.newIndex, outputs);
+          codeCell.updateOutputs(
+            event.newIndex,
+            event.newIndex + outputs.length,
+            outputs
+          );
           break;
         case 'set':
           const newValues = event.newValues.map(output => output.toJSON());
-          nbCodeCell.setOutputs(newValues);
+          codeCell.setOutputs(newValues);
           break;
         case 'remove':
-          nbCodeCell.deleteOutput(event.newIndex);
+          codeCell.updateOutputs(0, event.oldValues.length);
           break;
         default:
           throw new Error(`Invalid event type: ${event.type}`);
       }
-    });
-  }
-
-  /**
-   * Handle a change to the cell executions count modelDB and reflect it in the shared model.
-   */
-  protected onModelDBExecutionsCountChange(
-    sender: IObservableValue,
-    event: ObservableValue.IChangedArgs
-  ): void {
-    const nbCodeCell = this.sharedModel as models.YCodeCell;
-    this._modelDBMutex(() => {
-      nbCodeCell.execution_count = event.newValue
-        ? (event.newValue as number)
-        : null;
     });
   }
 
@@ -777,16 +765,23 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   ): void {
     super._onSharedModelChanged(sender, change);
     this._modelDBMutex(() => {
-      change.outputsChange?.forEach(operation => {
-        if (operation.insert) {
-          this.clearExecution();
-          operation.insert.forEach(output => this._outputs.add(output));
-        }
+      if (change.outputsChange) {
+        let currpos = 0;
+        const outputs = this._outputs.toJSON();
+        change.outputsChange?.forEach(operation => {
+          if (operation.insert) {
+            outputs.splice(currpos, 0, ...operation.insert);
+            currpos += operation.insert.length;
+          } else if (operation.delete) {
+            outputs.splice(currpos, operation.delete);
+          } else if (operation.retain) {
+            currpos += operation.retain;
+          }
+        });
 
-        if (operation.delete) {
-          this.clearExecution();
-        }
-      });
+        this.clearExecution();
+        outputs.forEach(output => this._outputs.add(output));
+      }
 
       if (change.executionCountChange) {
         this.executionCount = change.executionCountChange.newValue
@@ -803,6 +798,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     count: IObservableValue,
     args: ObservableValue.IChangedArgs
   ): void {
+    const codeCell = this.sharedModel as models.YCodeCell;
+    this._modelDBMutex(() => {
+      codeCell.execution_count = args.newValue
+        ? (args.newValue as number)
+        : null;
+    });
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({
       name: 'executionCount',

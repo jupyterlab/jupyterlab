@@ -589,7 +589,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     if (modelEvent && modelEvent.keysChanged.has('execution_count')) {
       const change = modelEvent.changes.keys.get('execution_count');
       changes.executionCountChange = {
-        oldValue: change?.oldValue ? change!.oldValue : undefined,
+        oldValue: change!.oldValue,
         newValue: this.ymodel.get('execution_count')
       };
     }
@@ -755,7 +755,7 @@ export class YCodeCell
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   get execution_count(): number | null {
-    return deepCopy(this.ymodel.get('execution_count'));
+    return this.ymodel.get('execution_count');
   }
 
   /**
@@ -786,40 +786,24 @@ export class YCodeCell
   }
 
   /**
-   * Insert a list of shared output into a specific position.
+   * Replace content from `start' to `end` with `outputs`.
    *
-   * @param index: Position to insert the outputs.
+   * @param start: The start index of the range to replace (inclusive).
    *
-   * @param outputs: Array of shared outputs to insert.
+   * @param end: The end index of the range to replace (exclusive).
+   *
+   * @param outputs: New outputs (optional).
    */
-  insertOutputs(index: number, outputs: Array<nbformat.IOutput>): void {
+  updateOutputs(
+    start: number,
+    end: number,
+    outputs: Array<nbformat.IOutput> = []
+  ): void {
     const youtputs = this.ymodel.get('outputs') as Y.Array<nbformat.IOutput>;
+    const fin = end < youtputs.length ? end - start : youtputs.length - start;
     this.transact(() => {
-      youtputs.insert(index, outputs);
-    });
-  }
-
-  /**
-   * Remove an Output.
-   *
-   * @param index: Index of the cell to remove.
-   */
-  deleteOutput(index: number): void {
-    this.deleteOutputsRange(index, index + 1);
-  }
-
-  /**
-   * Remove a range of Outputs.
-   *
-   * @param from: The start index of the range to remove (inclusive).
-   *
-   * @param to: The end index of the range to remove (exclusive).
-   */
-  deleteOutputsRange(from: number, to: number): void {
-    const youtputs = this.ymodel.get('outputs') as Y.Array<nbformat.IOutput>;
-    if (youtputs.length <= from) return;
-    this.transact(() => {
-      youtputs.delete(from, to - from);
+      youtputs.delete(start, fin);
+      youtputs.insert(start, outputs);
     });
   }
 

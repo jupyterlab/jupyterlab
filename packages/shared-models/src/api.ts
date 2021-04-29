@@ -331,29 +331,19 @@ export interface ISharedCodeCell
   setOutputs(outputs: Array<nbformat.IOutput>): void;
 
   /**
-   * Insert a list of shared output into a specific position.
+   * Replace content from `start' to `end` with `outputs`.
    *
-   * @param index: Position to insert the outputs.
+   * @param start: The start index of the range to replace (inclusive).
    *
-   * @param outputs: Array of shared outputs to insert.
+   * @param end: The end index of the range to replace (exclusive).
+   *
+   * @param outputs: New outputs (optional).
    */
-  insertOutputs(index: number, outputs: Array<nbformat.IOutput>): void;
-
-  /**
-   * Remove an Output.
-   *
-   * @param index: Index of the cell to remove.
-   */
-  deleteOutput(index: number): void;
-
-  /**
-   * Remove a range of Outputs.
-   *
-   * @param from: The start index of the range to remove (inclusive).
-   *
-   * @param to: The end index of the range to remove (exclusive).
-   */
-  deleteOutputsRange(from: number, to: number): void;
+  updateOutputs(
+    start: number,
+    end: number,
+    outputs: Array<nbformat.IOutput>
+  ): void;
 
   /**
    * Serialize the model to JSON.
