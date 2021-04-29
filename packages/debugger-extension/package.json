@@ -68,7 +68,7 @@
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
     "@jupyterlab/testutils": "^3.1.0-alpha.5",
-    "@types/codemirror": "^0.0.97",
+    "@types/codemirror": "^0.0.109",
     "@types/jest": "^26.0.10",
     "@types/react-dom": "^17.0.0",
     "jest": "^26.4.2",
