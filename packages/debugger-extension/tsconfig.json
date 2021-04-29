@@ -47,6 +47,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../codemirror"
     }
   ]
 }
