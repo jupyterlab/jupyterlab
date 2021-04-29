@@ -4,6 +4,7 @@
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
@@ -85,11 +86,12 @@ export function renameDialog(
  */
 export function nameOnSaveDialog(
   manager: IDocumentManager,
-  oldPath: string,
+  context: DocumentRegistry.Context,
   translator?: ITranslator
 ): Promise<Contents.IModel | null> {
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
+  const oldPath = context.path;
 
   return showDialog({
     title: trans.__('Name File'),
@@ -97,6 +99,8 @@ export function nameOnSaveDialog(
     focusNodeSelector: 'input',
     buttons: [Dialog.okButton({ label: trans.__('Enter') })]
   }).then(result => {
+    context.model.dirty = false;
+    context.contentsModel!.renamed = true;
     if (!result.value) {
       return renameFile(manager, oldPath, oldPath);
     }

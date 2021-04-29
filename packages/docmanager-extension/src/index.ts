@@ -626,6 +626,7 @@ function addCommands(
               buttons: [Dialog.okButton({ label: trans.__('Ok') })]
             });
           }
+
           return context
             .save()
             .then(() => context!.createCheckpoint())
@@ -744,13 +745,14 @@ function addCommands(
     }
   });
 
-  docManager.activateRequested.connect(() => {
-    const widget = shell.currentWidget;
-    if (widget instanceof NotebookPanel) {
-      widget.onNameFile.connect(() => {
-        if (docManager.nameFileOnSave) {
-          const context = docManager.contextForWidget(widget);
-          return nameOnSaveDialog(docManager, context!.path);
+  docManager.activateRequested.connect((sender, args) => {
+    const widget = sender.findWidget(args);
+    if (widget && widget instanceof NotebookPanel) {
+      widget.shouldNameFile.connect(() => {
+        if (sender.nameFileOnSave) {
+          console.log('here saving here', widget?.context.contentsModel);
+          const context = sender.contextForWidget(widget);
+          return nameOnSaveDialog(sender, context!);
         }
       });
     }
@@ -862,7 +864,7 @@ function addLabCommands(
       // Implies contextMenuWidget() !== null
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
-        return nameOnSaveDialog(docManager, context!.path);
+        return nameOnSaveDialog(docManager, context!);
       }
     }
   });

@@ -101,9 +101,15 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         }
       });
     }
+
     const model = sender.contentsModel;
-    if (state === 'completed' && model && !model.renamed == true) {
-      this._onNameFile.emit(undefined);
+    if (
+      state === 'completed' &&
+      model &&
+      !model.renamed == true &&
+      model.name.startsWith('Untitled')
+    ) {
+      this._shouldNameFile.emit(undefined);
     }
   }
 
@@ -177,8 +183,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * A signal emitted when should name file.
    */
-  get onNameFile(): Signal<this, void> {
-    return this._onNameFile;
+  get shouldNameFile(): Signal<this, void> {
+    return this._shouldNameFile;
   }
 
   /**
@@ -261,7 +267,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   private _autorestarting = false;
 
-  private _onNameFile = new Signal<this, void>(this);
+  private _shouldNameFile = new Signal<this, void>(this);
 }
 
 /**
