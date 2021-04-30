@@ -14,7 +14,7 @@
 }
 
 .jp-DebuggerSidebar .jp-DebuggerSidebar-body {
-  height: 100%;
+  height: calc(100% - 24px);
 }
 
 .jp-DebuggerSidebar .jp-stack-panel-header {

@@ -16,6 +16,9 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../codemirror"
+    },
+    {
       "path": "../console"
     },
     {
@@ -47,9 +50,6 @@
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../codemirror"
     }
   ]
 }
