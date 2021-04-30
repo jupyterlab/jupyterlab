@@ -294,27 +294,6 @@ export class YNotebook
   }
 
   /**
-   * Undo an operation.
-   */
-  undo(): void {
-    this.undoManager.undo();
-  }
-
-  /**
-   * Redo an operation.
-   */
-  redo(): void {
-    this.undoManager.redo();
-  }
-
-  /**
-   * Clear the change stack.
-   */
-  clearUndoHistory(): void {
-    this.undoManager.clear();
-  }
-
-  /**
    * Create a new YNotebook.
    */
   public static create(): models.ISharedNotebook {

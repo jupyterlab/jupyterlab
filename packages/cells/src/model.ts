@@ -645,6 +645,17 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
   }
 
+  public switchSharedModel(
+    sharedModel: models.ISharedCodeCell,
+    reinitialize?: boolean
+  ): void {
+    if (reinitialize) {
+      this.clearExecution();
+      sharedModel.getOutputs().forEach(output => this._outputs.add(output));
+    }
+    super.switchSharedModel(sharedModel, reinitialize);
+  }
+
   /**
    * The type of the cell.
    */
@@ -729,7 +740,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     const codeCell = this.sharedModel as models.YCodeCell;
     this._modelDBMutex(() => {
       switch (event.type) {
-        case 'add':
+        case 'add': {
           const outputs = event.newValues.map(output => output.toJSON());
           codeCell.updateOutputs(
             event.newIndex,
@@ -737,12 +748,18 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
             outputs
           );
           break;
-        case 'set':
+        }
+        case 'set': {
           const newValues = event.newValues.map(output => output.toJSON());
-          codeCell.setOutputs(newValues);
+          codeCell.updateOutputs(
+            event.oldIndex,
+            event.oldValues.length,
+            newValues
+          );
           break;
+        }
         case 'remove':
-          codeCell.updateOutputs(0, event.oldValues.length);
+          codeCell.updateOutputs(event.oldIndex, event.oldValues.length);
           break;
         default:
           throw new Error(`Invalid event type: ${event.type}`);
@@ -766,21 +783,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     super._onSharedModelChanged(sender, change);
     this._modelDBMutex(() => {
       if (change.outputsChange) {
-        let currpos = 0;
-        const outputs = this._outputs.toJSON();
-        change.outputsChange?.forEach(operation => {
-          if (operation.insert) {
-            outputs.splice(currpos, 0, ...operation.insert);
-            currpos += operation.insert.length;
-          } else if (operation.delete) {
-            outputs.splice(currpos, operation.delete);
-          } else if (operation.retain) {
-            currpos += operation.retain;
-          }
-        });
-
         this.clearExecution();
-        outputs.forEach(output => this._outputs.add(output));
+        sender.getOutputs().forEach(output => this._outputs.add(output));
       }
 
       if (change.executionCountChange) {
