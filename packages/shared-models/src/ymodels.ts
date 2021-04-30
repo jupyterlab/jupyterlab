@@ -14,7 +14,6 @@ import * as models from './api';
 
 import { Delta } from './api';
 
-// @ts-ignore
 import { Awareness } from 'y-protocols/awareness';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));

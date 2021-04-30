@@ -65,8 +65,8 @@ export class CellList implements IObservableUndoableList<ICellModel> {
       nbmodel.transact(() => {
         if (change.type === 'set' || change.type === 'remove') {
           nbmodel.deleteCellRange(
-            change.newIndex,
-            change.newIndex + change.oldValues.length
+            change.oldIndex,
+            change.oldIndex + change.oldValues.length
           );
         }
         if (

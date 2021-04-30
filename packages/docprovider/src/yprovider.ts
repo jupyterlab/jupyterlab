@@ -9,9 +9,9 @@ import * as Y from 'yjs';
 
 import { WebsocketProvider } from 'y-websocket';
 
-import * as decoding from 'lib0/decoding.js';
+import * as decoding from 'lib0/decoding';
 
-import * as encoding from 'lib0/encoding.js';
+import * as encoding from 'lib0/encoding';
 
 /**
  * A class to provide Yjs synchronization over Websocket.
