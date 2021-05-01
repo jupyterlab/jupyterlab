@@ -610,9 +610,13 @@ export class Completer extends Widget {
     }
     docPanel.textContent = '';
     if (activeItem.documentation) {
-      let pre = document.createElement('pre');
-      pre.textContent = activeItem.documentation;
-      docPanel.appendChild(pre);
+      let node: HTMLElement;
+      if (!this._renderer.createDocumentationNode) {
+        node = Completer.defaultRenderer.createDocumentationNode(activeItem);
+      } else {
+        node = this._renderer.createDocumentationNode(activeItem);
+      }
+      docPanel.appendChild(node);
       docPanel.setAttribute('style', '');
     } else {
       docPanel.setAttribute('style', 'display:none');
@@ -851,6 +855,14 @@ export namespace Completer {
       typeMap: TypeMap,
       orderedTypes: string[]
     ): HTMLLIElement;
+
+    /**
+     * Create a documentation node (a `pre` element by default) for
+     * documentation panel.
+     */
+    createDocumentationNode?(
+      activeItem: CompletionHandler.ICompletionItem
+    ): HTMLElement;
   }
 
   /**
@@ -893,6 +905,17 @@ export namespace Completer {
         typeMap[item.raw] || '',
         orderedTypes
       );
+    }
+
+    /**
+     * Create a documentation node for documentation panel.
+     */
+    createDocumentationNode(
+      activeItem: CompletionHandler.ICompletionItem
+    ): HTMLElement {
+      let pre = document.createElement('pre');
+      pre.textContent = activeItem.documentation || '';
+      return pre;
     }
 
     /**

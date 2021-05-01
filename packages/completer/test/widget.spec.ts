@@ -23,7 +23,11 @@ import { framePromise, sleep } from '@jupyterlab/testutils';
 
 const TEST_ITEM_CLASS = 'jp-TestItem';
 
+const TEST_DOC_CLASS = 'jp-TestDoc';
+
 const ITEM_CLASS = 'jp-Completer-item';
+
+const DOC_PANEL_CLASS = 'jp-Completer-docpanel';
 
 const ACTIVE_CLASS = 'jp-mod-active';
 
@@ -53,6 +57,14 @@ class CustomRenderer extends Completer.Renderer {
     const li = super.createItemNode(item, typeMap, orderedTypes);
     li.classList.add(TEST_ITEM_CLASS);
     return li;
+  }
+
+  createDocumentationNode(
+    item: CompletionHandler.ICompletionItem
+  ): HTMLElement {
+    const element = super.createDocumentationNode!(item);
+    element.classList.add(TEST_DOC_CLASS);
+    return element;
   }
 }
 
@@ -124,7 +136,7 @@ describe('completer/widget', () => {
           renderer: new CustomRenderer()
         };
         options.model!.setCompletionItems!([
-          { label: 'foo' },
+          { label: 'foo', documentation: 'foo does bar' },
           { label: 'bar' }
         ]);
 
@@ -136,6 +148,12 @@ describe('completer/widget', () => {
         expect(items).toHaveLength(2);
         expect(Array.from(items[0].classList)).toEqual(
           expect.arrayContaining([TEST_ITEM_CLASS])
+        );
+
+        let panel = widget.node.querySelector(`.${DOC_PANEL_CLASS}`)!;
+        expect(panel.children).toHaveLength(1);
+        expect(Array.from(panel.firstElementChild!.classList)).toEqual(
+          expect.arrayContaining([TEST_DOC_CLASS])
         );
       });
     });
