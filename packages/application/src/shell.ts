@@ -340,6 +340,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     // Skip Links
     const skipLinkWidget = (this._skipLinkWidget = new Widget());
+    skipLinkWidget.id = 'skip-link-widget';
     const skipToFilterFiles = document.createElement('a');
     const toggleSkipLink = (toShow: boolean) => {
       skipLinkWidget.node.classList.toggle('jp-skiplink--focus', toShow);
@@ -347,7 +348,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     skipToFilterFiles.href = '#';
     skipToFilterFiles.tabIndex = 1;
     skipToFilterFiles.text = 'Skip to Filter Files';
-    skipToFilterFiles.className = 'skip-to-content';
+    skipToFilterFiles.className = 'skip-link';
     skipToFilterFiles.addEventListener('focus', e => toggleSkipLink(true));
     skipToFilterFiles.addEventListener('blur', e => toggleSkipLink(false));
     skipToFilterFiles.addEventListener('click', e => {
