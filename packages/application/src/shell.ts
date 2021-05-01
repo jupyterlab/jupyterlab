@@ -1239,7 +1239,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _topHandler: Private.PanelHandler;
   private _menuHandler: Private.PanelHandler;
   private _skipLinkWidget: Widget;
-  private _titleWidget: Widget;
   private _titleWidgetHandler: Private.TitleWidgetHandler;
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
