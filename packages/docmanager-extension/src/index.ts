@@ -786,7 +786,6 @@ function addCommands(
       ],
       5
     );
-    mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
   }
 }
 
