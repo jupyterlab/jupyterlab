@@ -258,17 +258,18 @@ export class Context<
     } else {
       promise = this._revert();
     }
-    // if save/revert completed successfully, we set the inialized content in the rtc server.
-    promise = promise.then(() => {
-      this._provider.putInitializedState();
-      this._model.initialize();
-    });
     // make sure that the lock is released after the above operations are completed.
     const finally_ = () => {
       this._provider.releaseLock(lock);
     };
-    promise.then(finally_, finally_);
-    return await promise;
+    // if save/revert completed successfully, we set the inialized content in the rtc server.
+    promise
+      .then(() => {
+        this._provider.putInitializedState();
+        this._model.initialize();
+      })
+      .then(finally_, finally_);
+    return promise;
   }
 
   /**

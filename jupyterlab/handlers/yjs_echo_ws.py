@@ -37,12 +37,12 @@ class YJSEchoWS(WebSocketHandler):
         cls = self.__class__
         room = cls.rooms.get(self.room_id)
         if message[0] == acquireLockMessageType: # tries to acquire lock
-            if room.lock == None or time.time() - room.lock > 10:
-                lock = int(time.time())
-                # print('Acquired new lock: ', lock)
-                room.lock = lock
+            now = int(time.time())
+            if room.lock == None or now - room.lock > 15: # no lock or timeout
+                room.lock = now
+                # print('Acquired new lock: ', room.lock)
                 # return acquired lock
-                self.write_message(bytes([acquireLockMessageType]) + lock.to_bytes(4, byteorder = 'little'), binary=True)
+                self.write_message(bytes([acquireLockMessageType]) + room.lock.to_bytes(4, byteorder = 'little'), binary=True)
         elif message[0] == releaseLockMessageType:
             releasedLock = int.from_bytes(message[1:], byteorder = 'little')
             # print("trying release lock: ", releasedLock)
@@ -61,7 +61,7 @@ class YJSEchoWS(WebSocketHandler):
                     loop.add_callback(hook_send_message, message)
 
     def on_close(self):
-        #print("[YJSEchoWS]: close")
+        # print("[YJSEchoWS]: close")
         cls = self.__class__
         room = cls.rooms.get(self.room_id)
         room.clients.pop(self.id)

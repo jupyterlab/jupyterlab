@@ -64,6 +64,9 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
         initialContentRequest.resolve(initialContent.byteLength > 0);
       }
     };
+    this.isInitialized = false;
+    this.onConnectionStatus = this.onConnectionStatus.bind(this);
+    this.on('status', this.onConnectionStatus);
   }
 
   /**
@@ -90,11 +93,25 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     return promise;
   }
 
+  async onConnectionStatus(status: {
+    status: 'connected' | 'disconnected';
+  }): Promise<void> {
+    if (this.isInitialized && status.status === 'connected') {
+      const lock = await this.acquireLock();
+      const contentIsInitialized = await this.requestInitialContent();
+      if (!contentIsInitialized) {
+        this.putInitializedState();
+      }
+      this.releaseLock(lock);
+    }
+  }
+
   putInitializedState(): void {
     const encoder = encoding.createEncoder();
     encoding.writeVarUint(encoder, 124);
     encoding.writeUint8Array(encoder, Y.encodeStateAsUpdate(this.doc));
     this._sendMessage(encoding.toUint8Array(encoder));
+    this.isInitialized = true;
   }
 
   acquireLock(): Promise<number> {
@@ -106,7 +123,7 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     const intervalID = setInterval(() => {
       if (this.wsconnected) {
         // try to acquire lock
-        this.ws!.send(new Uint8Array([127]));
+        this._sendMessage(new Uint8Array([127]));
       }
     }, 500);
     let resolve: any, reject: any;
@@ -128,7 +145,7 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     encoding.writeVarUint(encoder, 126);
     encoding.writeUint32(encoder, lock);
     // releasing lock
-    this.ws?.send(encoding.toUint8Array(encoder));
+    this._sendMessage(encoding.toUint8Array(encoder));
   }
 
   private _sendMessage(message: Uint8Array): void {
@@ -145,6 +162,7 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     send();
   }
 
+  isInitialized: boolean;
   private _currentLockRequest: {
     promise: Promise<number>;
     resolve: (lock: number) => void;
