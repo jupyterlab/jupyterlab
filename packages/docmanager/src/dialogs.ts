@@ -22,6 +22,11 @@ import { IDocumentManager } from './';
 const FILE_DIALOG_CLASS = 'jp-FileDialog';
 
 /**
+ * The class name added to checkboxes in file dialogs.
+ */
+const FILE_DIALOG_CHECKBOX_CLASS = 'jp-FileDialog-Checkbox';
+
+/**
  * The class name added for the new name label in the rename dialog
  */
 const RENAME_NEWNAME_TITLE_CLASS = 'jp-new-name-title';
@@ -304,6 +309,7 @@ namespace Private {
     const div = document.createElement('div');
 
     checkbox.type = 'checkbox';
+    checkbox.classList.add(FILE_DIALOG_CHECKBOX_CLASS);
     checkbox.addEventListener('change', function () {
       manger.nameFileOnSave = !this.checked;
     });
