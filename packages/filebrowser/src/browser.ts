@@ -170,6 +170,22 @@ export class FileBrowser extends Widget {
   }
 
   /**
+   * Whether to show the last modified column
+   */
+  get showLastModifiedColumn(): boolean {
+    return this._showLastModifiedColumn;
+  }
+
+  set showLastModifiedColumn(value: boolean) {
+    if (this._listing.setColumnVisibility) {
+      this._listing.setColumnVisibility('last_modified', value);
+      this._showLastModifiedColumn = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
+  }
+
+  /**
    * Whether to use fuzzy filtering on file names.
    */
   set useFuzzyFilter(value: boolean) {
@@ -361,6 +377,7 @@ export class FileBrowser extends Widget {
   private _manager: IDocumentManager;
   private _directoryPending: boolean;
   private _navigateToCurrentDirectory: boolean;
+  private _showLastModifiedColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
 }
 

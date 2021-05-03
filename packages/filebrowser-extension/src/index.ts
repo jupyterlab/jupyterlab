@@ -21,8 +21,7 @@ import {
   WidgetTracker,
   ICommandPalette,
   InputDialog,
-  showErrorMessage,
-  DOMUtils
+  showErrorMessage
 } from '@jupyterlab/apputils';
 
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
@@ -216,6 +215,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       }
 
       let navigateToCurrentDirectory: boolean = false;
+      let showLastModifiedColumn: boolean = true;
       let useFuzzyFilter: boolean = true;
 
       if (settingRegistry) {
@@ -232,6 +232,17 @@ const browser: JupyterFrontEndPlugin<void> = {
               'navigateToCurrentDirectory'
             ).composite as boolean;
             browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
+
+            settings.changed.connect(settings => {
+              showLastModifiedColumn = settings.get('showLastModifiedColumn')
+                .composite as boolean;
+              browser.showLastModifiedColumn = showLastModifiedColumn;
+            });
+            showLastModifiedColumn = settings.get('showLastModifiedColumn')
+              .composite as boolean;
+
+            browser.showLastModifiedColumn = showLastModifiedColumn;
+
             settings.changed.connect(settings => {
               useFuzzyFilter = settings.get('useFuzzyFilter')
                 .composite as boolean;
@@ -939,23 +950,17 @@ function addCommands(
   }
 
   commands.addCommand(CommandIDs.toggleLastModified, {
-    label: trans.__('Toggle Last Modified Column'),
+    label: trans.__('Show Last Modified Column'),
+    isToggled: () => browser.showLastModifiedColumn,
     execute: () => {
-      const header = DOMUtils.findElement(document.body, 'jp-id-modified');
-      const column = DOMUtils.findElements(
-        document.body,
-        'jp-DirListing-itemModified'
-      );
-      if (header.classList.contains('jp-LastModified-hidden')) {
-        header.classList.remove('jp-LastModified-hidden');
-        for (let i = 0; i < column.length; i++) {
-          column[i].classList.remove('jp-LastModified-hidden');
-        }
-      } else {
-        header.classList.add('jp-LastModified-hidden');
-        for (let i = 0; i < column.length; i++) {
-          column[i].classList.add('jp-LastModified-hidden');
-        }
+      const value = !browser.showLastModifiedColumn;
+      const key = 'showLastModifiedColumn';
+      if (settingRegistry) {
+        return settingRegistry
+          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set showLastModifiedColumn setting`);
+          });
       }
     }
   });

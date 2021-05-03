@@ -10,8 +10,6 @@ import {
 
 import { PathExt, Time } from '@jupyterlab/coreutils';
 
-import {} from '@jupyterlab/apputils';
-
 import {
   IDocumentManager,
   isValidFileName,
@@ -133,6 +131,11 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
 const NARROW_ID_CLASS = 'jp-id-narrow';
 
 /**
+ * The class name added to the modified column header cell and modified item cell when hidden.
+ */
+const MODIFIED_COLUMN_HIDDEN = 'jp-LastModified-hidden';
+
+/**
  * The mime type for a contents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
@@ -228,7 +231,11 @@ export class DirListing extends Widget {
     this._renderer = options.renderer || DirListing.defaultRenderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
-    this._renderer.populateHeaderNode(headerNode, this.translator);
+    this._renderer.populateHeaderNode(
+      headerNode,
+      this.translator,
+      this._hiddenColumns
+    );
     this._manager.activateRequested.connect(this._onActivateRequested, this);
   }
 
@@ -777,7 +784,7 @@ export class DirListing extends Widget {
 
     // Add any missing item nodes.
     while (nodes.length < items.length) {
-      const node = renderer.createItemNode();
+      const node = renderer.createItemNode(this._hiddenColumns);
       node.classList.add(ITEM_CLASS);
       nodes.push(node);
       content.appendChild(node);
@@ -794,7 +801,13 @@ export class DirListing extends Widget {
     items.forEach((item, i) => {
       const node = nodes[i];
       const ft = this._manager.registry.getFileTypeForModel(item);
-      renderer.updateItemNode(node, item, ft, this.translator);
+      renderer.updateItemNode(
+        node,
+        item,
+        ft,
+        this.translator,
+        this._hiddenColumns
+      );
       if (this._selection[item.name]) {
         node.classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
@@ -844,6 +857,21 @@ export class DirListing extends Widget {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
     this.toggleClass('jp-DirListing-narrow', width < 250);
+  }
+
+  setColumnVisibility(name: DirListing.ToggleableColumn, visible: boolean) {
+    if (visible) {
+      this._hiddenColumns.delete(name);
+    } else {
+      this._hiddenColumns.add(name);
+    }
+
+    this.headerNode.innerHTML = '';
+    this._renderer.populateHeaderNode(
+      this.headerNode,
+      this.translator,
+      this._hiddenColumns
+    );
   }
 
   /**
@@ -1611,6 +1639,7 @@ export class DirListing extends Widget {
   private _searchPrefixTimer = -1;
   private _inRename = false;
   private _isDirty = false;
+  private _hiddenColumns = new Set<DirListing.ToggleableColumn>();
 }
 
 /**
@@ -1655,6 +1684,11 @@ export namespace DirListing {
   }
 
   /**
+   * Toggleable columns.
+   */
+  export type ToggleableColumn = 'last_modified';
+
+  /**
    * A file contents model thunk.
    *
    * Note: The content of the model will be empty.
@@ -1687,7 +1721,11 @@ export namespace DirListing {
      *
      * @param node - The header node to populate.
      */
-    populateHeaderNode(node: HTMLElement, translator?: ITranslator): void;
+    populateHeaderNode(
+      node: HTMLElement,
+      translator?: ITranslator,
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
+    ): void;
 
     /**
      * Handle a header click.
@@ -1705,7 +1743,9 @@ export namespace DirListing {
      *
      * @returns A new DOM node to use as a content item.
      */
-    createItemNode(): HTMLElement;
+    createItemNode(
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
+    ): HTMLElement;
 
     /**
      * Update an item node to reflect the current state of a model.
@@ -1720,7 +1760,8 @@ export namespace DirListing {
       node: HTMLElement,
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
-      translator?: ITranslator
+      translator?: ITranslator,
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
     ): void;
 
     /**
@@ -1775,7 +1816,11 @@ export namespace DirListing {
      *
      * @param node - The header node to populate.
      */
-    populateHeaderNode(node: HTMLElement, translator?: ITranslator): void {
+    populateHeaderNode(
+      node: HTMLElement,
+      translator?: ITranslator,
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
+    ): void {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
       const name = this._createHeaderItemNode(trans.__('Name'));
@@ -1789,6 +1834,12 @@ export namespace DirListing {
       node.appendChild(name);
       node.appendChild(narrow);
       node.appendChild(modified);
+
+      if (hiddenColumns?.has?.('last_modified')) {
+        modified.classList.add(MODIFIED_COLUMN_HIDDEN);
+      } else {
+        modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
 
       // set the initial caret icon
       Private.updateCaret(
@@ -1873,7 +1924,9 @@ export namespace DirListing {
      *
      * @returns A new DOM node to use as a content item.
      */
-    createItemNode(): HTMLElement {
+    createItemNode(
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
+    ): HTMLElement {
       const node = document.createElement('li');
       const icon = document.createElement('span');
       const text = document.createElement('span');
@@ -1884,6 +1937,12 @@ export namespace DirListing {
       node.appendChild(icon);
       node.appendChild(text);
       node.appendChild(modified);
+
+      if (hiddenColumns?.has?.('last_modified')) {
+        modified.classList.add(MODIFIED_COLUMN_HIDDEN);
+      } else {
+        modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
       return node;
     }
 
@@ -1901,9 +1960,11 @@ export namespace DirListing {
       node: HTMLElement,
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
-      translator?: ITranslator
+      translator?: ITranslator,
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
     ): void {
       translator = translator || nullTranslator;
+
       fileType =
         fileType || DocumentRegistry.getDefaultTextFileType(translator);
       const { icon, iconClass, name } = fileType;
@@ -1913,6 +1974,12 @@ export namespace DirListing {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+
+      if (hiddenColumns?.has?.('last_modified')) {
+        modified.classList.add(MODIFIED_COLUMN_HIDDEN);
+      } else {
+        modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
 
       // render the file item's icon
       LabIcon.resolveElement({
