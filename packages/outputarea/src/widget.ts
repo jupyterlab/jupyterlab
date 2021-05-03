@@ -1045,7 +1045,7 @@ namespace Private {
     renderModel(model: IRenderMime.IMimeModel): Promise<void> {
       return this._wrapped.renderModel(model).then(() => {
         const win = (this.node as HTMLIFrameElement).contentWindow;
-        if (win) {
+        if (win && win.location.href != window.location.href) {
           win.location.reload();
         }
       });
