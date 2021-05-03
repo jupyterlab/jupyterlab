@@ -70,7 +70,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this
     );
     this.context.saveState.connect(this._onSave, this);
-
     void this.revealed.then(() => {
       if (this.isDisposed) {
         // this widget has already been disposed, bail
@@ -103,6 +102,9 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     }
 
     const model = sender.contentsModel;
+    /* emits shouldNameFile signal 
+       when save is completed, file is not renamed and the name starts with 'Untitled'
+    */
     if (
       state === 'completed' &&
       model &&

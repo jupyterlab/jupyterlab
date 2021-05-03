@@ -69,7 +69,6 @@ export namespace ToolbarItems {
           buttons: [Dialog.okButton({ label: trans.__('Ok') })]
         });
       }
-
       void panel.context.save().then(() => {
         if (!panel.isDisposed) {
           return panel.context.createCheckpoint();

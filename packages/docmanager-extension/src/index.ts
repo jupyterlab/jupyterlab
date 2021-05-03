@@ -189,7 +189,6 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
 
       if (docManager.nameFileOnSave != nameFileOnSave) {
         docManager.nameFileOnSave = nameFileOnSave;
-        // app.commands.notifyCommandChanged(CommandIDs.toggleNameFileOnSave);
       }
 
       // Handle default widget factory overrides.
@@ -750,7 +749,6 @@ function addCommands(
     if (widget && widget instanceof NotebookPanel) {
       widget.shouldNameFile.connect(() => {
         if (sender.nameFileOnSave) {
-          console.log('here saving here', widget?.context.contentsModel);
           const context = sender.contextForWidget(widget);
           return nameOnSaveDialog(sender, context!);
         }
