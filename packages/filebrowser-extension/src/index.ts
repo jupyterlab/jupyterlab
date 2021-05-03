@@ -834,14 +834,11 @@ function addCommands(
 
   commands.addCommand(CommandIDs.createNewFile, {
     execute: () => {
-      const {
-        model: { path }
-      } = browser;
-      void commands.execute('docmanager:new-untitled', {
-        path,
-        type: 'file',
-        ext: 'txt'
-      });
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.createNewFile({ ext: 'txt' });
+      }
     },
     icon: textEditorIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('New File')
@@ -849,14 +846,11 @@ function addCommands(
 
   commands.addCommand(CommandIDs.createNewMarkdownFile, {
     execute: () => {
-      const {
-        model: { path }
-      } = browser;
-      void commands.execute('docmanager:new-untitled', {
-        path,
-        type: 'file',
-        ext: 'md'
-      });
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.createNewFile({ ext: 'md' });
+      }
     },
     icon: markdownIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('New Markdown File')
