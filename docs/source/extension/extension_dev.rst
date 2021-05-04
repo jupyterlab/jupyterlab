@@ -520,7 +520,23 @@ While authoring a prebuilt extension, you can use the ``labextension develop`` c
 
 Then rebuilding your extension and refreshing JupyterLab in the browser should pick up changes in your prebuilt extension source code.
 
-If you are developing your prebuilt extension against the JupyterLab source repo, you can run JupyterLab with ``jupyter lab --dev-mode --extensions-in-dev-mode`` to have the development version of JupyterLab load prebuilt extensions.
+If you are developing your prebuilt extension against the JupyterLab source repo, you can run JupyterLab with ``jupyter lab --dev-mode --extensions-in-dev-mode`` to have the development version of JupyterLab load prebuilt extensions. It would be best if you had in mind that the JupyterLab packages that your extension depends on may differ from those published; this means that your extension doesn’t build with JupyterLab dependencies from your node_modules folder but those in JupyterLab source code.
+
+If you are using TypeScript, the TypeScript compiler would complain because the dependencies of your extension may differ from those in JupyterLab. For that reason, you need to add to your ``tsconfig.json`` the path where to search for these dependencies by adding the option `paths <https://www.typescriptlang.org/tsconfig#paths>`_:
+
+.. code-block:: json
+
+    {
+      "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@jupyterlab/*": ["../jupyterlab/packages/*"],
+            "*": ["node_modules/*"]
+        }
+      },
+    }
+
+When adding the path to find JupyterLab dependencies, it may cause troubles with other dependencies (like lumino or react) in your project because JupyterLab packages will take its dependencies from JupyterLab ``node_modules`` folder. In contrast, your packages will take them from your ``node_modules`` folder. To solve this problem, you’ll need to add the dependencies with conflicts to ``resolutions`` in your ``package.json``. This way, both projects (JupyterLab and your extension) use the same version of the duplicated dependencies.
 
 We provide a `cookiecutter <https://github.com/jupyterlab/extension-cookiecutter-ts>`_ that handles all of the scaffolding for an extension author, including the shipping of appropriate data files, so that when the user installs the package, the prebuilt extension ends up in ``share/jupyter/labextensions``
 
