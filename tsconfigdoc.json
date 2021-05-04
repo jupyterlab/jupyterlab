@@ -1,7 +1,10 @@
 {
   "$schema": "http://json.schemastore.org/tsconfig",
   "extends": "./tsconfigbase",
-  "exclude": ["**/test/**", "**/testutils/**"],
+  "exclude": [
+    "**/test/**",
+    "**/testutils/**"
+  ],
   "compilerOptions": {
     "paths": {
       "@jupyterlab/*": [
@@ -219,6 +222,9 @@
     },
     {
       "path": "./packages/statusbar-extension"
+    },
+    {
+      "path": "./packages/tabmanager-extension"
     },
     {
       "path": "./packages/terminal"

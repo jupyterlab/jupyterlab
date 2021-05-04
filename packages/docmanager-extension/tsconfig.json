@@ -4,7 +4,9 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../application"
@@ -25,9 +27,6 @@
       "path": "../mainmenu"
     },
     {
-      "path": "../notebook"
-    },
-    {
       "path": "../services"
     },
     {
@@ -38,6 +37,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../notebook"
     }
   ]
 }
