@@ -149,25 +149,29 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     const quitButton = PageConfig.getOption('quitButton').toLowerCase();
     menu.fileMenu.quitEntry = quitButton === 'true';
 
-    app.restored.then(async () => {
-      let settings: ISettingRegistry.ISettings | null = null;
-      try {
-        if (settingRegistry) {
-          settings = await settingRegistry.load(plugin.id);
+    app.restored
+      .then(async () => {
+        let settings: ISettingRegistry.ISettings | null = null;
+        try {
+          if (settingRegistry) {
+            settings = await settingRegistry.load(plugin.id);
+          }
+        } catch (reason) {
+          console.warn(`No setting registry for ${plugin.id}`);
+        } finally {
+          // Create the application menus.
+          createEditMenu(app, menu.editMenu, trans, settings);
+          createFileMenu(app, menu.fileMenu, router, trans, settings);
+          createKernelMenu(app, menu.kernelMenu, trans, settings);
+          createRunMenu(app, menu.runMenu, trans, settings);
+          createSettingsMenu(app, menu.settingsMenu, trans);
+          createViewMenu(app, menu.viewMenu, trans, settings);
+          createHelpMenu(app, menu.helpMenu, trans);
         }
-      } catch (reason) {
-        console.warn(`No setting registry for ${plugin.id}`);
-      } finally {
-        // Create the application menus.
-        createEditMenu(app, menu.editMenu, trans, settings);
-        createFileMenu(app, menu.fileMenu, router, trans, settings);
-        createKernelMenu(app, menu.kernelMenu, trans, settings);
-        createRunMenu(app, menu.runMenu, trans, settings);
-        createSettingsMenu(app, menu.settingsMenu, trans);
-        createViewMenu(app, menu.viewMenu, trans, settings);
-        createHelpMenu(app, menu.helpMenu, trans);
-      }
-    });
+      })
+      .catch(reason => {
+        // Ignore app.restored rejection
+      });
 
     // Set the Tabs Title so it's visible also in other shells
     const tabsMenu = menu.tabsMenu;
@@ -296,7 +300,10 @@ export function createEditMenu(
     }
   });
   menu.addGroup(
-    [{ command: CommandIDs.undo, args: {isMenu: true} }, { command: CommandIDs.redo, args: {isMenu: true} }],
+    [
+      { command: CommandIDs.undo, args: { isMenu: true } },
+      { command: CommandIDs.redo, args: { isMenu: true } }
+    ],
     0
   );
 
@@ -356,7 +363,10 @@ export function createEditMenu(
     }
   });
   menu.addGroup(
-    [{ command: CommandIDs.clearCurrent, args: {isMenu: true} }, { command: CommandIDs.clearAll, args: {isMenu: true} }],
+    [
+      { command: CommandIDs.clearCurrent, args: { isMenu: true } },
+      { command: CommandIDs.clearAll, args: { isMenu: true } }
+    ],
     10
   );
 
@@ -374,7 +384,10 @@ export function createEditMenu(
       return !hiddenEntries.includes(CommandIDs.goToLine);
     }
   });
-  menu.addGroup([{ command: CommandIDs.goToLine, args: {isMenu: true} }], 200);
+  menu.addGroup(
+    [{ command: CommandIDs.goToLine, args: { isMenu: true } }],
+    200
+  );
 }
 
 /**
@@ -640,7 +653,11 @@ export function createKernelMenu(
       menu.kernelUsers,
       'reconnectToKernel'
     ),
-    execute: Private.delegateExecute(app, menu.kernelUsers, 'reconnectToKernel'),
+    execute: Private.delegateExecute(
+      app,
+      menu.kernelUsers,
+      'reconnectToKernel'
+    ),
     isVisible: args => {
       if (!args.isMenu) {
         return true;
@@ -771,20 +788,29 @@ export function createKernelMenu(
     CommandIDs.restartAndRunToSelected,
     CommandIDs.restartAndRunAll
   ].map(command => {
-    return { command, args: {isMenu: true} };
+    return { command, args: { isMenu: true } };
   });
 
-  menu.addGroup([{ command: CommandIDs.interruptKernel, args: {isMenu: true} }], 0);
+  menu.addGroup(
+    [{ command: CommandIDs.interruptKernel, args: { isMenu: true } }],
+    0
+  );
   menu.addGroup(restartGroup, 1);
-  menu.addGroup([{ command: CommandIDs.reconnectToKernel, args: {isMenu: true} }], 1.5);
+  menu.addGroup(
+    [{ command: CommandIDs.reconnectToKernel, args: { isMenu: true } }],
+    1.5
+  );
   menu.addGroup(
     [
-      { command: CommandIDs.shutdownKernel, args: {isMenu: true} },
-      { command: CommandIDs.shutdownAllKernels, args: {isMenu: true} }
+      { command: CommandIDs.shutdownKernel, args: { isMenu: true } },
+      { command: CommandIDs.shutdownAllKernels, args: { isMenu: true } }
     ],
     2
   );
-  menu.addGroup([{ command: CommandIDs.changeKernel, args: {isMenu: true} }], 3);
+  menu.addGroup(
+    [{ command: CommandIDs.changeKernel, args: { isMenu: true } }],
+    3
+  );
 }
 
 /**
@@ -902,7 +928,7 @@ export function createViewMenu(
     CommandIDs.matchBrackets,
     CommandIDs.wordWrap
   ].map(command => {
-    return { command, args: {isMenu: true} };
+    return { command, args: { isMenu: true } };
   });
   menu.addGroup(editorViewerGroup, 10);
 }
@@ -1007,11 +1033,11 @@ export function createRunMenu(
 
   const runAllGroup = [CommandIDs.runAll, CommandIDs.restartAndRunAll].map(
     command => {
-      return { command, args: {isMenu: true} };
+      return { command, args: { isMenu: true } };
     }
   );
 
-  menu.addGroup([{ command: CommandIDs.run, args: {isMenu: true} }], 0);
+  menu.addGroup([{ command: CommandIDs.run, args: { isMenu: true } }], 0);
   menu.addGroup(runAllGroup, 999);
 }
 
