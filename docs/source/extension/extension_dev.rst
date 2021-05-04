@@ -528,14 +528,12 @@ If you are using TypeScript, the TypeScript compiler would complain because the 
 
     {
       "compilerOptions": {
-        ...
         "baseUrl": ".",
         "paths": {
             "@jupyterlab/*": ["../jupyterlab/packages/*"],
             "*": ["node_modules/*"]
         }
       },
-      ...
     }
 
 When adding the path to find JupyterLab dependencies, it may cause troubles with other dependencies (like lumino or react) in your project because JupyterLab packages will take its dependencies from JupyterLab ``node_modules`` folder. In contrast, your packages will take them from your ``node_modules`` folder. To solve this problem, you’ll need to add the dependencies with conflicts to ``resolutions`` in your ``package.json``. This way, both projects (JupyterLab and your extension) use the same version of the duplicated dependencies.
