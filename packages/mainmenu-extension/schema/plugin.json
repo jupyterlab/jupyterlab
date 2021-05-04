@@ -78,7 +78,21 @@
       "selector": "body"
     }
   ],
-  "properties": {},
+  "properties": {
+    "hiddenEntries": {
+      "title": "List of command IDs to hide in the main menu",
+      "description": "List of commands IDs for which the menu entry should be hidden - IDs can be found in https://github.com/jupyterlab/jupyterlab/blob/master/packages/mainmenu-extension/src/index.ts.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "examples": [
+        ["notebook:restart-and-run-to-selected", "runmenu:run-below"]
+      ]
+    }
+  },
   "additionalProperties": false,
   "type": "object"
 }

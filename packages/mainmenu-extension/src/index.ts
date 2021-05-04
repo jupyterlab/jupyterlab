@@ -38,6 +38,8 @@ import {
 
 import { ServerConnection } from '@jupyterlab/services';
 
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
 /**
@@ -126,14 +128,15 @@ export namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
   requires: [IRouter, ITranslator],
-  optional: [ICommandPalette, ILabShell],
+  optional: [ICommandPalette, ILabShell, ISettingRegistry],
   provides: IMainMenu,
   activate: (
     app: JupyterFrontEnd,
     router: IRouter,
     translator: ITranslator,
     palette: ICommandPalette | null,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry | null
   ): IMainMenu => {
     const { commands } = app;
     const trans = translator.load('jupyterlab');
@@ -146,14 +149,25 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     const quitButton = PageConfig.getOption('quitButton').toLowerCase();
     menu.fileMenu.quitEntry = quitButton === 'true';
 
-    // Create the application menus.
-    createEditMenu(app, menu.editMenu, trans);
-    createFileMenu(app, menu.fileMenu, router, trans);
-    createKernelMenu(app, menu.kernelMenu, trans);
-    createRunMenu(app, menu.runMenu, trans);
-    createSettingsMenu(app, menu.settingsMenu, trans);
-    createViewMenu(app, menu.viewMenu, trans);
-    createHelpMenu(app, menu.helpMenu, trans);
+    app.restored.then(async () => {
+      let settings: ISettingRegistry.ISettings | null = null;
+      try {
+        if (settingRegistry) {
+          settings = await settingRegistry.load(plugin.id);
+        }
+      } catch (reason) {
+        console.warn(`No setting registry for ${plugin.id}`);
+      } finally {
+        // Create the application menus.
+        createEditMenu(app, menu.editMenu, trans, settings);
+        createFileMenu(app, menu.fileMenu, router, trans, settings);
+        createKernelMenu(app, menu.kernelMenu, trans, settings);
+        createRunMenu(app, menu.runMenu, trans, settings);
+        createSettingsMenu(app, menu.settingsMenu, trans);
+        createViewMenu(app, menu.viewMenu, trans, settings);
+        createHelpMenu(app, menu.helpMenu, trans);
+      }
+    });
 
     // Set the Tabs Title so it's visible also in other shells
     const tabsMenu = menu.tabsMenu;
@@ -246,7 +260,8 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 export function createEditMenu(
   app: JupyterFrontEnd,
   menu: EditMenu,
-  trans: TranslationBundle
+  trans: TranslationBundle,
+  settings: ISettingRegistry.ISettings | null
 ): void {
   const commands = menu.menu.commands;
   menu.menu.title.label = trans.__('Edit');
@@ -255,15 +270,33 @@ export function createEditMenu(
   commands.addCommand(CommandIDs.undo, {
     label: trans.__('Undo'),
     isEnabled: Private.delegateEnabled(app, menu.undoers, 'undo'),
-    execute: Private.delegateExecute(app, menu.undoers, 'undo')
+    execute: Private.delegateExecute(app, menu.undoers, 'undo'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.undo);
+    }
   });
   commands.addCommand(CommandIDs.redo, {
     label: trans.__('Redo'),
     isEnabled: Private.delegateEnabled(app, menu.undoers, 'redo'),
-    execute: Private.delegateExecute(app, menu.undoers, 'redo')
+    execute: Private.delegateExecute(app, menu.undoers, 'redo'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.redo);
+    }
   });
   menu.addGroup(
-    [{ command: CommandIDs.undo }, { command: CommandIDs.redo }],
+    [{ command: CommandIDs.undo, args: {isMenu: true} }, { command: CommandIDs.redo, args: {isMenu: true} }],
     0
   );
 
@@ -286,7 +319,16 @@ export function createEditMenu(
       return localizedLabel;
     },
     isEnabled: Private.delegateEnabled(app, menu.clearers, 'clearCurrent'),
-    execute: Private.delegateExecute(app, menu.clearers, 'clearCurrent')
+    execute: Private.delegateExecute(app, menu.clearers, 'clearCurrent'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.clearCurrent);
+    }
   });
   commands.addCommand(CommandIDs.clearAll, {
     label: () => {
@@ -302,19 +344,37 @@ export function createEditMenu(
       return localizedLabel;
     },
     isEnabled: Private.delegateEnabled(app, menu.clearers, 'clearAll'),
-    execute: Private.delegateExecute(app, menu.clearers, 'clearAll')
+    execute: Private.delegateExecute(app, menu.clearers, 'clearAll'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.clearAll);
+    }
   });
   menu.addGroup(
-    [{ command: CommandIDs.clearCurrent }, { command: CommandIDs.clearAll }],
+    [{ command: CommandIDs.clearCurrent, args: {isMenu: true} }, { command: CommandIDs.clearAll, args: {isMenu: true} }],
     10
   );
 
   commands.addCommand(CommandIDs.goToLine, {
     label: trans.__('Go to Line…'),
     isEnabled: Private.delegateEnabled(app, menu.goToLiners, 'goToLine'),
-    execute: Private.delegateExecute(app, menu.goToLiners, 'goToLine')
+    execute: Private.delegateExecute(app, menu.goToLiners, 'goToLine'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.goToLine);
+    }
   });
-  menu.addGroup([{ command: CommandIDs.goToLine }], 200);
+  menu.addGroup([{ command: CommandIDs.goToLine, args: {isMenu: true} }], 200);
 }
 
 /**
@@ -324,7 +384,8 @@ export function createFileMenu(
   app: JupyterFrontEnd,
   menu: FileMenu,
   router: IRouter,
-  trans: TranslationBundle
+  trans: TranslationBundle,
+  settings: ISettingRegistry.ISettings | null
 ): void {
   const commands = menu.menu.commands;
   menu.menu.title.label = trans.__('File');
@@ -358,6 +419,15 @@ export function createFileMenu(
       }
       // If we have no delegate, call the top-level application close.
       return app.commands.execute('application:close');
+    },
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.closeAndCleanup);
     }
   });
 
@@ -378,7 +448,20 @@ export function createFileMenu(
       menu.consoleCreators,
       'createConsole'
     ),
-    execute: Private.delegateExecute(app, menu.consoleCreators, 'createConsole')
+    execute: Private.delegateExecute(
+      app,
+      menu.consoleCreators,
+      'createConsole'
+    ),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.createConsole);
+    }
   });
 
   commands.addCommand(CommandIDs.shutdown, {
@@ -431,6 +514,15 @@ export function createFileMenu(
             });
         }
       });
+    },
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.shutdown);
     }
   });
 
@@ -439,6 +531,15 @@ export function createFileMenu(
     caption: trans.__('Log out of JupyterLab'),
     execute: () => {
       router.navigate('/logout', { hard: true });
+    },
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.logout);
     }
   });
 
@@ -484,8 +585,8 @@ export function createFileMenu(
 
   // Add the quit group.
   const quitGroup = [
-    { command: 'filemenu:logout' },
-    { command: 'filemenu:shutdown' }
+    { command: CommandIDs.logout },
+    { command: CommandIDs.shutdown }
   ];
   const printGroup = [{ command: 'apputils:print' }];
 
@@ -507,7 +608,8 @@ export function createFileMenu(
 export function createKernelMenu(
   app: JupyterFrontEnd,
   menu: KernelMenu,
-  trans: TranslationBundle
+  trans: TranslationBundle,
+  settings: ISettingRegistry.ISettings | null
 ): void {
   const commands = menu.menu.commands;
   menu.menu.title.label = trans.__('Kernel');
@@ -519,7 +621,16 @@ export function createKernelMenu(
       menu.kernelUsers,
       'interruptKernel'
     ),
-    execute: Private.delegateExecute(app, menu.kernelUsers, 'interruptKernel')
+    execute: Private.delegateExecute(app, menu.kernelUsers, 'interruptKernel'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.interruptKernel);
+    }
   });
 
   commands.addCommand(CommandIDs.reconnectToKernel, {
@@ -529,13 +640,31 @@ export function createKernelMenu(
       menu.kernelUsers,
       'reconnectToKernel'
     ),
-    execute: Private.delegateExecute(app, menu.kernelUsers, 'reconnectToKernel')
+    execute: Private.delegateExecute(app, menu.kernelUsers, 'reconnectToKernel'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.reconnectToKernel);
+    }
   });
 
   commands.addCommand(CommandIDs.restartKernel, {
     label: trans.__('Restart Kernel…'),
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'restartKernel'),
-    execute: Private.delegateExecute(app, menu.kernelUsers, 'restartKernel')
+    execute: Private.delegateExecute(app, menu.kernelUsers, 'restartKernel'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.restartKernel);
+    }
   });
 
   commands.addCommand(CommandIDs.restartKernelAndClear, {
@@ -564,19 +693,46 @@ export function createKernelMenu(
       app,
       menu.kernelUsers,
       'restartKernelAndClear'
-    )
+    ),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.restartKernelAndClear);
+    }
   });
 
   commands.addCommand(CommandIDs.changeKernel, {
     label: trans.__('Change Kernel…'),
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'changeKernel'),
-    execute: Private.delegateExecute(app, menu.kernelUsers, 'changeKernel')
+    execute: Private.delegateExecute(app, menu.kernelUsers, 'changeKernel'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.changeKernel);
+    }
   });
 
   commands.addCommand(CommandIDs.shutdownKernel, {
     label: trans.__('Shut Down Kernel'),
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'shutdownKernel'),
-    execute: Private.delegateExecute(app, menu.kernelUsers, 'shutdownKernel')
+    execute: Private.delegateExecute(app, menu.kernelUsers, 'shutdownKernel'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.shutdownKernel);
+    }
   });
 
   commands.addCommand(CommandIDs.shutdownAllKernels, {
@@ -597,6 +753,15 @@ export function createKernelMenu(
           return app.serviceManager.sessions.shutdownAll();
         }
       });
+    },
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.shutdownAllKernels);
     }
   });
 
@@ -606,20 +771,20 @@ export function createKernelMenu(
     CommandIDs.restartAndRunToSelected,
     CommandIDs.restartAndRunAll
   ].map(command => {
-    return { command };
+    return { command, args: {isMenu: true} };
   });
 
-  menu.addGroup([{ command: CommandIDs.interruptKernel }], 0);
+  menu.addGroup([{ command: CommandIDs.interruptKernel, args: {isMenu: true} }], 0);
   menu.addGroup(restartGroup, 1);
-  menu.addGroup([{ command: CommandIDs.reconnectToKernel }], 1.5);
+  menu.addGroup([{ command: CommandIDs.reconnectToKernel, args: {isMenu: true} }], 1.5);
   menu.addGroup(
     [
-      { command: CommandIDs.shutdownKernel },
-      { command: CommandIDs.shutdownAllKernels }
+      { command: CommandIDs.shutdownKernel, args: {isMenu: true} },
+      { command: CommandIDs.shutdownAllKernels, args: {isMenu: true} }
     ],
     2
   );
-  menu.addGroup([{ command: CommandIDs.changeKernel }], 3);
+  menu.addGroup([{ command: CommandIDs.changeKernel, args: {isMenu: true} }], 3);
 }
 
 /**
@@ -628,7 +793,8 @@ export function createKernelMenu(
 export function createViewMenu(
   app: JupyterFrontEnd,
   menu: ViewMenu,
-  trans: TranslationBundle
+  trans: TranslationBundle,
+  settings: ISettingRegistry.ISettings | null
 ): void {
   const commands = menu.menu.commands;
   menu.menu.title.label = trans.__('View');
@@ -649,7 +815,16 @@ export function createViewMenu(
       app,
       menu.editorViewers,
       'toggleLineNumbers'
-    )
+    ),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.lineNumbering);
+    }
   });
 
   commands.addCommand(CommandIDs.matchBrackets, {
@@ -668,7 +843,16 @@ export function createViewMenu(
       app,
       menu.editorViewers,
       'toggleMatchBrackets'
-    )
+    ),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.matchBrackets);
+    }
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
@@ -683,7 +867,16 @@ export function createViewMenu(
       menu.editorViewers,
       'wordWrapToggled'
     ),
-    execute: Private.delegateExecute(app, menu.editorViewers, 'toggleWordWrap')
+    execute: Private.delegateExecute(app, menu.editorViewers, 'toggleWordWrap'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.wordWrap);
+    }
   });
 
   menu.addGroup([{ command: 'apputils:activate-command-palette' }], 0);
@@ -709,7 +902,7 @@ export function createViewMenu(
     CommandIDs.matchBrackets,
     CommandIDs.wordWrap
   ].map(command => {
-    return { command };
+    return { command, args: {isMenu: true} };
   });
   menu.addGroup(editorViewerGroup, 10);
 }
@@ -720,7 +913,8 @@ export function createViewMenu(
 export function createRunMenu(
   app: JupyterFrontEnd,
   menu: RunMenu,
-  trans: TranslationBundle
+  trans: TranslationBundle,
+  settings: ISettingRegistry.ISettings | null
 ): void {
   const commands = menu.menu.commands;
   menu.menu.title.label = trans.__('Run');
@@ -736,7 +930,16 @@ export function createRunMenu(
       return enabled ? localizedLabel : trans.__('Run Selected');
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'run'),
-    execute: Private.delegateExecute(app, menu.codeRunners, 'run')
+    execute: Private.delegateExecute(app, menu.codeRunners, 'run'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.run);
+    }
   });
 
   commands.addCommand(CommandIDs.runAll, {
@@ -757,7 +960,16 @@ export function createRunMenu(
       return localizedLabel;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
-    execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
+    execute: Private.delegateExecute(app, menu.codeRunners, 'runAll'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.runAll);
+    }
   });
   commands.addCommand(CommandIDs.restartAndRunAll, {
     label: () => {
@@ -781,16 +993,25 @@ export function createRunMenu(
       menu.codeRunners,
       'restartAndRunAll'
     ),
-    execute: Private.delegateExecute(app, menu.codeRunners, 'restartAndRunAll')
+    execute: Private.delegateExecute(app, menu.codeRunners, 'restartAndRunAll'),
+    isVisible: args => {
+      if (!args.isMenu) {
+        return true;
+      }
+      const hiddenEntries: string[] = settings
+        ? (settings.get('hiddenEntries').composite as string[])
+        : [];
+      return !hiddenEntries.includes(CommandIDs.restartAndRunAll);
+    }
   });
 
   const runAllGroup = [CommandIDs.runAll, CommandIDs.restartAndRunAll].map(
     command => {
-      return { command };
+      return { command, args: {isMenu: true} };
     }
   );
 
-  menu.addGroup([{ command: CommandIDs.run }], 0);
+  menu.addGroup([{ command: CommandIDs.run, args: {isMenu: true} }], 0);
   menu.addGroup(runAllGroup, 999);
 }
 
