@@ -11,6 +11,32 @@ See the [JupyterLab
 milestone on GitHub for the full list of pull requests and issues
 closed.
 
+### v3.0.14
+
+- Clean up browser check [#10080](https://github.com/jupyterlab/jupyterlab/pull/10080)
+- Loosen pin on jupyter-packaging [#9998](https://github.com/jupyterlab/jupyterlab/pull/9998)
+
+### v3.0.13
+
+- Add cell id per notebook format 4.5 ([#10018](https://github.com/jupyterlab/jupyterlab/pull/10018))
+- Fix label for "Create Console for Editor" ([#9794](https://github.com/jupyterlab/jupyterlab/pull/9794))
+- Use blobs to set the svg source of an image in the image viewer ([#10029](https://github.com/jupyterlab/jupyterlab/pull/10029))
+- \[Fix\] Copy shareable link command ([#10021](https://github.com/jupyterlab/jupyterlab/pull/10021))
+- Clarify where the overrides.json file should be in the docs ([#9996](https://github.com/jupyterlab/jupyterlab/pull/9996))
+- Do not make unnecessary npm registry requests ([#9974](https://github.com/jupyterlab/jupyterlab/pull/9974))
+- Fix escaping of urls and paths ([#9978](https://github.com/jupyterlab/jupyterlab/pull/9978))
+
+### v3.0.12
+
+- Fix support for Safari by changing regular expression for Table of Contents ([#9962](https://github.com/jupyterlab/jupyterlab/pull/9962))
+- Fix DocRegistry FileType pattern matching ([#9958](https://github.com/jupyterlab/jupyterlab/pull/9958))
+
+### v3.0.11
+
+- Fix: use process/browser module as real polyfill ([#9636](https://github.com/jupyterlab/jupyterlab/pull/9636))
+- Fix Table of Contents extension markdown bug for HTML comments ([#9938](https://github.com/jupyterlab/jupyterlab/pull/9938))
+- Make Table of Contents extension not rewrite all notebook headers ([#9932](https://github.com/jupyterlab/jupyterlab/pull/9932))
+
 ### v3.0.10
 
 - Fix watch mode for external extensions

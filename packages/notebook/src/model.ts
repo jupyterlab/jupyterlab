@@ -191,9 +191,13 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    */
   toJSON(): nbformat.INotebookContent {
     const cells: nbformat.ICell[] = [];
-    for (let i = 0; i < (this.cells?.length || 0); i++) {
-      const cell = this.cells.get(i);
-      cells.push(cell.toJSON());
+    for (let i = 0; i < (this.cells?.length ?? 0); i++) {
+      const cell = this.cells.get(i).toJSON();
+      if (this._nbformat === 4 && this._nbformatMinor <= 4) {
+        // strip cell ids if we have notebook format 4.0-4.4
+        delete cell.id;
+      }
+      cells.push(cell);
     }
     this._ensureMetadata();
     const metadata = Object.create(null) as nbformat.INotebookMetadata;
@@ -217,16 +221,21 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   fromJSON(value: nbformat.INotebookContent): void {
     const cells: ICellModel[] = [];
     const factory = this.contentFactory;
+    const useId = value.nbformat === 4 && value.nbformat_minor >= 5;
     for (const cell of value.cells) {
+      const options: CellModel.IOptions = { cell };
+      if (useId) {
+        options.id = (cell as any).id;
+      }
       switch (cell.cell_type) {
         case 'code':
-          cells.push(factory.createCodeCell({ cell }));
+          cells.push(factory.createCodeCell(options));
           break;
         case 'markdown':
-          cells.push(factory.createMarkdownCell({ cell }));
+          cells.push(factory.createMarkdownCell(options));
           break;
         case 'raw':
-          cells.push(factory.createRawCell({ cell }));
+          cells.push(factory.createRawCell(options));
           break;
         default:
           continue;

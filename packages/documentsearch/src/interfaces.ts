@@ -6,6 +6,7 @@ import { Widget } from '@lumino/widgets';
 
 export interface IFiltersType {
   output: boolean;
+  selectedCells: boolean;
 }
 
 export interface IDisplayState {

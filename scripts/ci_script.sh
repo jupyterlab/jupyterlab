@@ -102,6 +102,9 @@ if [[ $GROUP == integrity2 ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
 
+    # Check the manifest
+    check-manifest -v
+
     # Build the packages individually.
     jlpm run build:src
 
@@ -361,6 +364,37 @@ if [[ $GROUP == usage2 ]]; then
     jupyter lab clean --static
     jupyter lab clean --all
 fi
+
+
+if [[ $GROUP == splice_source ]];then
+    # Run the integrity script to link binary files
+    jlpm integrity
+
+    jupyter lab build --minimize=False --debug --dev-build=True --splice-source
+    jupyter lab --version > version.txt
+    cat version.txt
+    cat version.txt | grep -q "spliced"
+    python -m jupyterlab.browser_check
+
+    cd jupyterlab/tests/mock_packages/mimeextension
+    jupyter labextension install .
+    python -m jupyterlab.browser_check
+
+    jupyter lab --version > version.txt
+    cat version.txt
+    cat version.txt | grep -q "spliced"
+
+    jupyter lab clean --all
+    jupyter lab --version > version.txt
+    cat version.txt
+    cat version.txt | grep -q "spliced" && exit 1
+
+    jupyter labextension install --splice-source .
+    jupyter lab --version > version.txt
+    cat version.txt | grep -q "spliced"
+    python -m jupyterlab.browser_check
+fi
+
 
 if [[ $GROUP == interop ]]; then
     cd jupyterlab/tests/mock_packages/interop

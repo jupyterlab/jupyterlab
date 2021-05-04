@@ -22,6 +22,7 @@ type onClickFactory = (line: number) => () => void;
  * @param executionCount - execution count
  * @param lastLevel - last heading level
  * @param cellRef - cell reference
+ * @param index - index of referenced cell relative to other cells in the notebook
  * @returns notebook heading
  */
 function getCodeCellHeading(
@@ -29,9 +30,15 @@ function getCodeCellHeading(
   onClick: onClickFactory,
   executionCount: string,
   lastLevel: number,
-  cellRef: Cell
+  cellRef: Cell,
+  index: number = -1
 ): INotebookHeading {
   let headings: INotebookHeading[] = [];
+  if (index === -1) {
+    console.warn(
+      'Deprecation warning! index argument will become mandatory in the next version'
+    );
+  }
   if (text) {
     const lines = text.split('\n');
     const len = Math.min(lines.length, 3);
@@ -48,7 +55,8 @@ function getCodeCellHeading(
       type: 'code',
       prompt: executionCount,
       cellRef: cellRef,
-      hasChild: false
+      hasChild: false,
+      index: index
     });
   }
   return headings[0];

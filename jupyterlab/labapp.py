@@ -64,6 +64,11 @@ build_flags['no-minimize'] = (
     {'LabBuildApp': {'minimize': False}},
     "Do not minimize a production build."
 )
+build_flags['splice-source'] = (
+    {'LabBuildApp': {'splice_source': True}},
+    "Splice source packages into app directory."
+)
+
 
 version = __version__
 app_version = get_app_version()
@@ -140,10 +145,13 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
     pre_clean = Bool(False, config=True,
         help="Whether to clean before building (defaults to False)")
 
+    splice_source = Bool(False, config=True,
+        help="Splice source packages into app directory.")
+
     def start(self):
         app_dir = self.app_dir or get_app_dir()
         app_options = AppOptions(
-            app_dir=app_dir, logger=self.log, core_config=self.core_config
+            app_dir=app_dir, logger=self.log, core_config=self.core_config, splice_source=self.splice_source
         )
         self.log.info('JupyterLab %s', version)
         with self.debug_logging():
@@ -476,6 +484,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         {'LabApp': {'watch': True}},
         "Start the app in watch mode."
     )
+    flags['splice-source'] = (
+        {'LabApp': {'splice_source': True}},
+        "Splice source packages into app directory."
+    )
     flags['expose-app-in-browser'] = (
         {'LabApp': {'expose_app_in_browser': True}},
         "Expose the global app instance to browser via window.jupyterlab."
@@ -534,6 +546,9 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
+
+    splice_source = Bool(False, config=True,
+        help="Splice source packages into app directory.")
 
     expose_app_in_browser = Bool(False, config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab")
@@ -652,7 +667,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         self.log.info('JupyterLab extension loaded from %s' % HERE)
         self.log.info('JupyterLab application directory is %s' % self.app_dir)
 
-        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir, labextensions_path = self.extra_labextensions_path + self.labextensions_path)
+        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir, labextensions_path = self.extra_labextensions_path + self.labextensions_path, splice_source=self.splice_source)
         builder = Builder(self.core_mode, app_options=build_handler_options)
         build_handler = (build_path, BuildHandler, {'builder': builder})
         handlers.append(build_handler)
@@ -667,6 +682,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
                 ensure_dev(self.log)
                 self.log.info(DEV_NOTE)
         else:
+            if self.splice_source:
+                ensure_dev(self.log)
             msgs = ensure_app(self.app_dir)
             if msgs:
                 [self.log.error(msg) for msg in msgs]

@@ -220,11 +220,13 @@ export class Searcher {
    * @param cdnUri The URI of the CDN to use for fetching full package data.
    */
   constructor(
-    repoUri = 'https://registry.npmjs.org/',
-    cdnUri = 'https://unpkg.com'
+    repoUri = 'https://registry.npmjs.org/-/v1/',
+    cdnUri = 'https://unpkg.com',
+    enableCdn = true
   ) {
     this.repoUri = repoUri;
     this.cdnUri = cdnUri;
+    this.enableCdn = enableCdn;
   }
 
   /**
@@ -239,7 +241,7 @@ export class Searcher {
     page = 0,
     pageination = 250
   ): Promise<ISearchResult> {
-    const uri = new URL('/-/v1/search', this.repoUri);
+    const uri = new URL('search', this.repoUri);
     // Note: Spaces are encoded to '+' signs!
     const text = `${query} keywords:"jupyterlab-extension"`;
     uri.searchParams.append('text', text);
@@ -263,7 +265,9 @@ export class Searcher {
     name: string,
     version: string
   ): Promise<IJupyterLabPackageData | null> {
-    const uri = new URL(`/${name}@${version}/package.json`, this.cdnUri);
+    const uri = this.enableCdn
+      ? new URL(`/${name}@${version}/package.json`, this.cdnUri)
+      : new URL(`/${name}/${version}`, this.repoUri);
     return fetch(uri.toString()).then((response: Response) => {
       if (response.ok) {
         return response.json();
@@ -281,6 +285,11 @@ export class Searcher {
    * The URI of the CDN to use for fetching full package data.
    */
   cdnUri: string;
+
+  /**
+   * Whether to use the CDN for fetching full package data. Otherwise, the NPM registry is used.
+   */
+  enableCdn: boolean;
 }
 
 /**

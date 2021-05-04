@@ -386,11 +386,14 @@ export class StaticNotebook extends Widget {
     }
     this._updateMimetype();
     const cells = newValue.cells;
+
+    // If there are no cells, create an empty cell
     if (!cells.length) {
       cells.push(
         newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
       );
     }
+
     each(cells, (cell: ICellModel, i: number) => {
       this._insertCell(i, cell);
     });
@@ -492,7 +495,9 @@ export class StaticNotebook extends Widget {
       model,
       rendermime,
       contentFactory,
-      updateEditorOnShow: false
+      updateEditorOnShow: false,
+      placeholder: false,
+      maxNumberOutputs: this.notebookConfig.maxNumberOutputs
     };
     const cell = this.contentFactory.createCodeCell(options, this);
     cell.syncCollapse = true;
@@ -611,9 +616,11 @@ export class StaticNotebook extends Widget {
           config = this._editorConfig.raw;
           break;
       }
+      let editorOptions: any = {};
       Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-        cell.editor.setOption(key, config[key] ?? null);
+        editorOptions[key] = config[key] ?? null;
       });
+      cell.editor.setOptions(editorOptions);
       cell.editor.refresh();
     }
   }
@@ -768,6 +775,11 @@ export namespace StaticNotebook {
      * Should timing be recorded in metadata
      */
     recordTiming: boolean;
+
+    /**
+     * Defines the maximum number of outputs per cell.
+     */
+    maxNumberOutputs: number;
   }
   /**
    * Default configuration options for notebooks.
@@ -775,7 +787,8 @@ export namespace StaticNotebook {
   export const defaultNotebookConfig: INotebookConfig = {
     scrollPastEnd: true,
     defaultCell: 'code',
-    recordTiming: false
+    recordTiming: false,
+    maxNumberOutputs: 50
   };
 
   /**
