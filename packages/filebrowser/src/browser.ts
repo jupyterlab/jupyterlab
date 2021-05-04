@@ -282,10 +282,40 @@ export class FileBrowser extends Widget {
       })
       .then(async model => {
         await this._listing.selectItemByName(model.name);
+        await this.rename();
         this._directoryPending = false;
       })
       .catch(err => {
         this._directoryPending = false;
+      });
+  }
+
+  /**
+   * Create a new file
+   */
+  createNewFile(options: FileBrowser.IFileOptions): void {
+    if (this._filePending === true) {
+      return;
+    }
+    this._filePending = true;
+    // TODO: We should provide a hook into when the
+    // file is done being created. This probably
+    // means storing a pendingFile promise and
+    // returning that if there is already a file
+    // request.
+    void this._manager
+      .newUntitled({
+        path: this.model.path,
+        type: 'file',
+        ext: options.ext
+      })
+      .then(async model => {
+        await this._listing.selectItemByName(model.name);
+        await this.rename();
+        this._filePending = false;
+      })
+      .catch(err => {
+        this._filePending = false;
       });
   }
 
@@ -376,6 +406,7 @@ export class FileBrowser extends Widget {
   private _filenameSearcher: ReactWidget;
   private _manager: IDocumentManager;
   private _directoryPending: boolean;
+  private _filePending: boolean;
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
@@ -420,5 +451,15 @@ export namespace FileBrowser {
      * The application language translator.
      */
     translator?: ITranslator;
+  }
+
+  /**
+   * An options object for creating a file.
+   */
+  export interface IFileOptions {
+    /**
+     * The file extension.
+     */
+    ext: string;
   }
 }

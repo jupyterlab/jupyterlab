@@ -1585,15 +1585,9 @@ export class DirListing extends Widget {
       return;
     }
 
-    void this.selectItemByName(name)
-      .then(() => {
-        if (!this.isDisposed && newValue!.type === 'directory') {
-          return this._doRename();
-        }
-      })
-      .catch(() => {
-        /* Ignore if file does not exist. */
-      });
+    void this.selectItemByName(name).catch(() => {
+      /* Ignore if file does not exist. */
+    });
   }
 
   /**
