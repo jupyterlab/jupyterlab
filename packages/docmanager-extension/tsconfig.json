@@ -27,6 +27,9 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../notebook"
+    },
+    {
       "path": "../services"
     },
     {
@@ -37,9 +40,6 @@
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../notebook"
     }
   ]
 }
