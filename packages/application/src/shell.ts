@@ -1571,8 +1571,6 @@ namespace Private {
       skipToFilterFiles.tabIndex = 1;
       skipToFilterFiles.text = 'Skip to Filter Files';
       skipToFilterFiles.className = 'skip-link';
-      skipToFilterFiles.addEventListener('focus', this);
-      skipToFilterFiles.addEventListener('blur', this);
       skipToFilterFiles.addEventListener('click', this);
       skipLinkWidget.addClass('jp-skiplink');
       skipLinkWidget.id = 'jp-skiplink';
@@ -1581,21 +1579,11 @@ namespace Private {
 
     handleEvent(event: Event): void {
       switch (event.type) {
-        case 'focus':
-          this._toggleSkipLink(true);
-          break;
-        case 'blur':
-          this._toggleSkipLink(false);
-          break;
         case 'click':
           this._focusFileSearch();
           break;
       }
     }
-
-    private _toggleSkipLink = (toShow: boolean) => {
-      this._skipLinkWidget.node.classList.toggle('jp-skiplink--focus', toShow);
-    };
 
     private _focusFileSearch() {
       const input = document.querySelector(
@@ -1619,8 +1607,6 @@ namespace Private {
         return;
       }
       this._isDisposed = true;
-      this._skipLinkWidget.node.removeEventListener('focus', this);
-      this._skipLinkWidget.node.removeEventListener('blur', this);
       this._skipLinkWidget.node.removeEventListener('click', this);
       this._skipLinkWidget.dispose();
     }
