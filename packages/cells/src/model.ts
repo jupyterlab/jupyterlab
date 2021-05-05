@@ -613,6 +613,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
     executionCount.changed.connect(this._onExecutionCountChanged, this);
 
+    this._modelDBMutex(() => {
+      const sharedCell = this.sharedModel as models.ISharedCodeCell;
+      sharedCell.setOutputs(outputs);
+    });
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
     this._outputs.changed.connect(this.onGenericChange, this);
     this._outputs.changed.connect(this.onModelDBOutputsChange, this);
