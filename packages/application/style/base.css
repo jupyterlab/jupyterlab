@@ -43,6 +43,10 @@ body {
   border: none;
 }
 
+#jp-down-stack {
+  padding: 0px 5px 5px 5px;
+}
+
 #jp-top-panel {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
   background: var(--jp-layout-color1);

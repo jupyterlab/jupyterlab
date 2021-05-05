@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
+
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { classes, DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
+import { classes, DockPanelSvg, LabIcon, TabPanelSvg } from '@jupyterlab/ui-components';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
@@ -26,6 +27,7 @@ import {
   SplitPanel,
   StackedPanel,
   TabBar,
+  TabPanel,
   Title,
   Widget
 } from '@lumino/widgets';
@@ -87,7 +89,8 @@ export namespace ILabShell {
     | 'menu'
     | 'left'
     | 'right'
-    | 'bottom';
+    | 'bottom'
+    | 'down';
 
   /**
    * The restorable description of an area within the main dock panel.
@@ -220,10 +223,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const bottomPanel = (this._bottomPanel = new BoxPanel());
     bottomPanel.node.setAttribute('role', 'contentinfo');
     const hboxPanel = new BoxPanel();
+    const vsplitPanel = new SplitPanel();
     const dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     const hsplitPanel = (this._hsplitPanel = new Private.RestorableSplitPanel());
+    const downPanel = (this._downPanel = new TabPanelSvg());
     const leftHandler = (this._leftHandler = new Private.SideBarHandler());
     const rightHandler = (this._rightHandler = new Private.SideBarHandler());
     const rootLayout = new BoxLayout();
@@ -233,8 +238,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     topHandler.panel.id = 'jp-top-panel';
     bottomPanel.id = 'jp-bottom-panel';
     hboxPanel.id = 'jp-main-content-panel';
+    vsplitPanel.id = 'jp-main-down-panel';
     dockPanel.id = 'jp-main-dock-panel';
     hsplitPanel.id = 'jp-main-split-panel';
+    downPanel.id = 'jp-down-stack';
 
     leftHandler.sideBar.addClass(SIDEBAR_CLASS);
     leftHandler.sideBar.addClass('jp-mod-left');
@@ -265,24 +272,31 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     dockPanel.node.setAttribute('role', 'main');
 
     hboxPanel.spacing = 0;
+    vsplitPanel.spacing = 0;
     dockPanel.spacing = 5;
     hsplitPanel.spacing = 1;
 
     headerPanel.direction = 'top-to-bottom';
+    vsplitPanel.orientation = 'vertical';
     hboxPanel.direction = 'left-to-right';
     hsplitPanel.orientation = 'horizontal';
     bottomPanel.direction = 'bottom-to-top';
 
     SplitPanel.setStretch(leftHandler.stackedPanel, 0);
+    SplitPanel.setStretch(downPanel, 0);
     SplitPanel.setStretch(dockPanel, 1);
+    SplitPanel.setStretch(vsplitPanel, 1);
     SplitPanel.setStretch(rightHandler.stackedPanel, 0);
 
     BoxPanel.setStretch(leftHandler.sideBar, 0);
     BoxPanel.setStretch(hsplitPanel, 1);
     BoxPanel.setStretch(rightHandler.sideBar, 0);
 
+    vsplitPanel.addWidget(dockPanel);
+    vsplitPanel.addWidget(downPanel);
+
     hsplitPanel.addWidget(leftHandler.stackedPanel);
-    hsplitPanel.addWidget(dockPanel);
+    hsplitPanel.addWidget(vsplitPanel);
     hsplitPanel.addWidget(rightHandler.stackedPanel);
 
     hboxPanel.addWidget(leftHandler.sideBar);
@@ -294,6 +308,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Use relative sizing to set the width of the side panels.
     // This will still respect the min-size of children widget in the stacked
     // panel. The default sizes will be overwritten during layout restoration.
+    vsplitPanel.setRelativeSizes([3, 1]);
     hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
     BoxLayout.setStretch(headerPanel, 0);
@@ -310,6 +325,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // initially hiding header and bottom panel when no elements inside,
     this._headerPanel.hide();
     this._bottomPanel.hide();
+    this._downPanel.hide();
 
     this.layout = rootLayout;
 
@@ -319,6 +335,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     // Connect main layout change listener.
     this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
+
+    // Connect down panel change listeners
+    this._downPanel.currentChanged.connect(this._onLayoutModified, this);
+    this._downPanel.stackedPanel.widgetRemoved.connect(
+      this._onDownPanelChanged,
+      this
+    );
 
     // Catch current changed events on the side handlers.
     this._leftHandler.sideBar.currentChanged.connect(
@@ -684,6 +707,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._addToMenuArea(widget, options);
       case 'bottom':
         return this._addToBottomArea(widget, options);
+      case 'down':
+        return this._addToDownArea(widget, options);
       default:
         throw new Error(`Invalid area: ${area}`);
     }
@@ -1106,6 +1131,40 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
+  private _addToDownArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+
+    options = options || {};
+
+    const { title } = widget;
+    // Add widget ID to tab so that we can get a handle on the tab's widget
+    // (for context menu support)
+    title.dataset = { ...title.dataset, id: widget.id };
+
+    if (title.icon instanceof LabIcon) {
+      // bind an appropriate style to the icon
+      title.icon = title.icon.bindprops({
+        stylesheet: 'mainAreaTab'
+      });
+    } else if (typeof title.icon === 'string' || !title.icon) {
+      // add some classes to help with displaying css background imgs
+      title.iconClass = classes(title.iconClass, 'jp-Icon');
+    }
+    
+    this._downPanel.addWidget(widget);
+    this._onLayoutModified();
+
+    if (this._downPanel.isHidden) {
+      this._downPanel.show();
+    }
+  }
+
   /*
    * Return the tab bar adjacent to the current TabBar or `null`.
    */
@@ -1185,6 +1244,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Handle a change on the down panel widgets
+   */
+  private _onDownPanelChanged(): void {
+    if (this._downPanel.stackedPanel.widgets.length === 0) {
+      this._downPanel.hide();
+    }
+  }
+
+  /**
    * Handle a change to the layout.
    */
   private _onLayoutModified(): void {
@@ -1223,6 +1291,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   >(this);
   private _modeChanged = new Signal<this, DockPanel.Mode>(this);
   private _dockPanel: DockPanel;
+  private _downPanel: TabPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
   private _layoutDebouncer = new Debouncer(() => {

@@ -198,7 +198,7 @@ function activateLogConsole(
       app.commands.notifyCommandChanged();
     });
 
-    app.shell.add(logConsoleWidget, 'main', {
+    app.shell.add(logConsoleWidget, 'down', {
       ref: options.ref,
       mode: options.insertMode
     });
