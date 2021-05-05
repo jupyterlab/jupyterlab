@@ -532,6 +532,109 @@ const shareFile: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The "Open With" context menu.
+ *
+ * This is its own plugin in case you would like to disable this feature.
+ * e.g. jupyter labextension disable fort_disable_download:open-with
+ */
+const openWithPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-with',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const { docRegistry: registry, commands } = app;
+    const trans = translator.load('jupyterlab');
+    const { tracker } = factory;
+    // matches only non-directory items
+    const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+
+    /**
+     * A menu widget that dynamically populates with different widget factories
+     * based on current filebrowser selection.
+     */
+    class OpenWithMenu extends Menu {
+      protected onBeforeAttach(msg: Message): void {
+        // clear the current menu items
+        this.clearItems();
+
+        // get the widget factories that could be used to open all of the items
+        // in the current filebrowser selection
+        const factories = tracker.currentWidget
+          ? OpenWithMenu._intersection(
+              map(tracker.currentWidget.selectedItems(), i => {
+                return OpenWithMenu._getFactories(i);
+              })
+            )
+          : undefined;
+
+        if (factories) {
+          // make new menu items from the widget factories
+          factories.forEach(factory => {
+            this.addItem({
+              args: { factory: factory },
+              command: CommandIDs.open
+            });
+          });
+        }
+
+        super.onBeforeAttach(msg);
+      }
+
+      static _getFactories(item: Contents.IModel): Array<string> {
+        const factories = registry
+          .preferredWidgetFactories(item.path)
+          .map(f => f.name);
+        const notebookFactory = registry.getWidgetFactory('notebook')?.name;
+        if (
+          notebookFactory &&
+          item.type === 'notebook' &&
+          factories.indexOf(notebookFactory) === -1
+        ) {
+          factories.unshift(notebookFactory);
+        }
+
+        return factories;
+      }
+
+      static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
+        // pop the first element of iter
+        const first = iter.next();
+        // first will be undefined if iter is empty
+        if (!first) {
+          return;
+        }
+
+        // "initialize" the intersection from first
+        const isect = new Set(first);
+        // reduce over the remaining elements of iter
+        return reduce(
+          iter,
+          (isect, subarr) => {
+            // filter out all elements not present in both isect and subarr,
+            // accumulate result in new set
+            return new Set(subarr.filter(x => isect.has(x)));
+          },
+          isect
+        );
+      }
+    }
+
+    const openWith = new OpenWithMenu({ commands });
+    openWith.title.label = trans.__('Open With');
+    app.contextMenu.addItem({
+      type: 'submenu',
+      submenu: openWith,
+      selector: selectorNotDir,
+      rank: 2
+    });
+  }
+};
+
+/**
  * A plugin providing file upload status.
  */
 export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
@@ -978,77 +1081,6 @@ function addCommands(
     });
   }
 
-  /**
-   * A menu widget that dynamically populates with different widget factories
-   * based on current filebrowser selection.
-   */
-  class OpenWithMenu extends Menu {
-    protected onBeforeAttach(msg: Message): void {
-      // clear the current menu items
-      this.clearItems();
-
-      // get the widget factories that could be used to open all of the items
-      // in the current filebrowser selection
-      const factories = tracker.currentWidget
-        ? OpenWithMenu._intersection(
-            map(tracker.currentWidget.selectedItems(), i => {
-              return OpenWithMenu._getFactories(i);
-            })
-          )
-        : undefined;
-
-      if (factories) {
-        // make new menu items from the widget factories
-        factories.forEach(factory => {
-          this.addItem({
-            args: { factory: factory },
-            command: CommandIDs.open
-          });
-        });
-      }
-
-      super.onBeforeAttach(msg);
-    }
-
-    static _getFactories(item: Contents.IModel): Array<string> {
-      const factories = registry
-        .preferredWidgetFactories(item.path)
-        .map(f => f.name);
-      const notebookFactory = registry.getWidgetFactory('notebook')?.name;
-      if (
-        notebookFactory &&
-        item.type === 'notebook' &&
-        factories.indexOf(notebookFactory) === -1
-      ) {
-        factories.unshift(notebookFactory);
-      }
-
-      return factories;
-    }
-
-    static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
-      // pop the first element of iter
-      const first = iter.next();
-      // first will be undefined if iter is empty
-      if (!first) {
-        return;
-      }
-
-      // "initialize" the intersection from first
-      const isect = new Set(first);
-      // reduce over the remaining elements of iter
-      return reduce(
-        iter,
-        (isect, subarr) => {
-          // filter out all elements not present in both isect and subarr,
-          // accumulate result in new set
-          return new Set(subarr.filter(x => isect.has(x)));
-        },
-        isect
-      );
-    }
-  }
-
   // matches anywhere on filebrowser
   const selectorContent = '.jp-DirListing-content';
   // matches all filebrowser items
@@ -1086,15 +1118,6 @@ function addCommands(
     command: CommandIDs.open,
     selector: selectorItem,
     rank: 1
-  });
-
-  const openWith = new OpenWithMenu({ commands });
-  openWith.title.label = trans.__('Open With');
-  app.contextMenu.addItem({
-    type: 'submenu',
-    submenu: openWith,
-    selector: selectorNotDir,
-    rank: 2
   });
 
   app.contextMenu.addItem({
@@ -1295,6 +1318,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   fileUploadStatus,
   downloadPlugin,
   browserWidget,
-  launcherToolbarButton
+  launcherToolbarButton,
+  openWithPlugin
 ];
 export default plugins;
