@@ -959,7 +959,6 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
   requires: [ILabShell],
   activate: (app: JupyterFrontEnd, shell: ILabShell) => {
     const logo = new Widget();
-
     jupyterIcon.element({
       container: logo.node,
       elementPosition: 'center',
