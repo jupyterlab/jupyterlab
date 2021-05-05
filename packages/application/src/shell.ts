@@ -338,6 +338,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       rootLayout.insertWidget(2, this._menuHandler.panel);
     }
 
+    // Skip Links
+    const skipLinkWidgetHandler = (this._skipLinkWidgetHandler = new Private.SkipLinkWidgetHandler(
+      this
+    ));
+
+    this.add(skipLinkWidgetHandler.skipLinkWidget, 'top', { rank: 0 });
+    this._skipLinkWidgetHandler.show();
+
     // Wire up signals to update the title panel of the simple interface mode to
     // follow the title of this.currentWidget
     this.currentChanged.connect((sender, args) => {
@@ -1213,6 +1221,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _headerPanel: Panel;
   private _topHandler: Private.PanelHandler;
   private _menuHandler: Private.PanelHandler;
+  private _skipLinkWidgetHandler: Private.SkipLinkWidgetHandler;
   private _titleWidgetHandler: Private.TitleWidgetHandler;
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
@@ -1549,6 +1558,82 @@ namespace Private {
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;
+  }
+
+  export class SkipLinkWidgetHandler {
+    /**
+     * Construct a new skipLink widget handler.
+     */
+    constructor(shell: ILabShell) {
+      const skipLinkWidget = (this._skipLinkWidget = new Widget());
+      const skipToFilterFiles = document.createElement('a');
+      skipToFilterFiles.href = '#';
+      skipToFilterFiles.tabIndex = 1;
+      skipToFilterFiles.text = 'Skip to Filter Files';
+      skipToFilterFiles.className = 'skip-link';
+      skipToFilterFiles.addEventListener('click', this);
+      skipLinkWidget.addClass('jp-skiplink');
+      skipLinkWidget.id = 'jp-skiplink';
+      skipLinkWidget.node.appendChild(skipToFilterFiles);
+    }
+
+    handleEvent(event: Event): void {
+      switch (event.type) {
+        case 'click':
+          this._focusFileSearch();
+          break;
+      }
+    }
+
+    private _focusFileSearch() {
+      const input = document.querySelector(
+        '#filename-searcher .bp3-input'
+      ) as HTMLInputElement;
+      input.focus();
+    }
+
+    /**
+     * Get the input element managed by the handler.
+     */
+    get skipLinkWidget(): Widget {
+      return this._skipLinkWidget;
+    }
+
+    /**
+     * Dispose of the handler and the resources it holds.
+     */
+    dispose(): void {
+      if (this.isDisposed) {
+        return;
+      }
+      this._isDisposed = true;
+      this._skipLinkWidget.node.removeEventListener('click', this);
+      this._skipLinkWidget.dispose();
+    }
+
+    /**
+     * Hide the skipLink widget.
+     */
+    hide(): void {
+      this._skipLinkWidget.hide();
+    }
+
+    /**
+     * Show the skipLink widget.
+     */
+    show(): void {
+      this._skipLinkWidget.show();
+    }
+
+    /**
+     * Test whether the handler has been disposed.
+     */
+    get isDisposed(): boolean {
+      return this._isDisposed;
+    }
+
+    private _skipLinkWidget: Widget;
+    private _isDisposed: boolean = false;
   }
 
   export class TitleWidgetHandler {
