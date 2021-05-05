@@ -544,7 +544,7 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     factory: IFileBrowserFactory,
-    translator: ITranslator,
+    translator: ITranslator
   ): void => {
     const { docRegistry: registry, commands } = app;
     const trans = translator.load('jupyterlab');
