@@ -1,6 +1,6 @@
 from os import path
 from setuptools import setup
-from jupyter_packaging import npm_builder, wrap_installers
+from jupyter_packaging import get_data_files, npm_builder, wrap_installers
 
 version = "3.0.2"
 name = "test-hyphens-underscore"
@@ -23,5 +23,5 @@ setup(
     version=version,
     packages=[module_name],
     cmdclass=cmdclass,
-    data_files_spec=data_files_spec,
+    data_files=get_data_files(data_files_spec),
 )
