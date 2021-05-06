@@ -1,6 +1,9 @@
 [build-system]
-requires = ["jupyter_packaging~=0.9,<2", "jupyterlab~=3.0"]
+requires = ["jupyter_packaging~=0.10,<2", "jupyterlab~=3.0"]
 build-backend = "jupyter_packaging.build_api"
+
+[tool.jupyter-packaging.options]
+ensured-targets = ["test-hyphens/labextension/package.json"]
 
 [tool.jupyter-packaging.builder]
 factory = "jupyter_packaging.npm_builder"
