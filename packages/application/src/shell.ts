@@ -153,6 +153,11 @@ export namespace ILabShell {
      * The right area of the user interface.
      */
     readonly rightArea: ISideArea | null;
+
+    /**
+     * The relatives sizes of the areas of the user interface.
+     */
+    readonly relativeSizes: number[] | null;
   }
 
   /**
@@ -218,7 +223,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
-    const hsplitPanel = new SplitPanel();
+    const hsplitPanel = (this._hsplitPanel = new Private.RestorableSplitPanel());
     const leftHandler = (this._leftHandler = new Private.SideBarHandler());
     const rightHandler = (this._rightHandler = new Private.SideBarHandler());
     const rootLayout = new BoxLayout();
@@ -288,7 +293,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     rootLayout.spacing = 0; // TODO make this configurable?
     // Use relative sizing to set the width of the side panels.
     // This will still respect the min-size of children widget in the stacked
-    // panel.
+    // panel. The default sizes will be overwritten during layout restoration.
     hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
     BoxLayout.setStretch(headerPanel, 0);
@@ -324,6 +329,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._onLayoutModified,
       this
     );
+
+    // Catch update events on the horizontal split panel
+    this._hsplitPanel.updated.connect(this._onLayoutModified, this);
 
     // Setup single-document-mode title bar
     const titleWidgetHandler = (this._titleWidgetHandler = new Private.TitleWidgetHandler(
@@ -771,7 +779,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Restore the layout state for the application shell.
    */
   restoreLayout(mode: DockPanel.Mode, layout: ILabShell.ILayout): void {
-    const { mainArea, leftArea, rightArea } = layout;
+    const { mainArea, leftArea, rightArea, relativeSizes } = layout;
     // Rehydrate the main area.
     if (mainArea) {
       const { currentWidget, dock } = mainArea;
@@ -810,6 +818,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       }
     }
 
+    // Restore the relative sizes.
+    if (relativeSizes) {
+      this._hsplitPanel.setRelativeSizes(relativeSizes);
+    }
+
     if (!this._isRestored) {
       // Make sure all messages in the queue are finished before notifying
       // any extensions that are waiting for the promise that guarantees the
@@ -834,7 +847,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
             : this._dockPanel.saveLayout()
       },
       leftArea: this._leftHandler.dehydrate(),
-      rightArea: this._rightHandler.dehydrate()
+      rightArea: this._rightHandler.dehydrate(),
+      relativeSizes: this._hsplitPanel.relativeSizes()
     };
     return layout;
   }
@@ -1219,6 +1233,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _rightHandler: Private.SideBarHandler;
   private _tracker = new FocusTracker<Widget>();
   private _headerPanel: Panel;
+  private _hsplitPanel: Private.RestorableSplitPanel;
   private _topHandler: Private.PanelHandler;
   private _menuHandler: Private.PanelHandler;
   private _skipLinkWidgetHandler: Private.SkipLinkWidgetHandler;
@@ -1766,5 +1781,22 @@ namespace Private {
     private _shell: ILabShell;
     private _isDisposed: boolean = false;
     private _selected: boolean = false;
+  }
+
+  export class RestorableSplitPanel extends SplitPanel {
+    updated: Signal<RestorableSplitPanel, void>;
+
+    constructor(options: SplitPanel.IOptions = {}) {
+      super(options);
+      this.updated = new Signal(this);
+    }
+
+    /**
+     * Emit 'updated' signal on 'update' requests.
+     */
+    protected onUpdateRequest(msg: Message): void {
+      super.onUpdateRequest(msg);
+      this.updated.emit();
+    }
   }
 }
