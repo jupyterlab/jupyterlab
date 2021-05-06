@@ -9,7 +9,7 @@ ensured-targets = ["test-hyphens/labextension/package.json"]
 factory = "jupyter_packaging.npm_builder"
 
 [tool.jupyter-packaging.build-args]
-build_cmd = "build:prod"
+build_cmd = "build:labextension"
 npm = ["jlpm"]
 
 [tool.check-manifest]
