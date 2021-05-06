@@ -17,7 +17,8 @@ import {
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
-  WidgetTracker
+  WidgetTracker,
+  InputDialog
 } from '@jupyterlab/apputils';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IFileMenu, IMainMenu } from '@jupyterlab/mainmenu';
@@ -46,6 +47,8 @@ namespace CommandIDs {
   export const decreaseFont = 'terminal:decrease-font';
 
   export const setTheme = 'terminal:set-theme';
+
+  export const openNamedShell = 'terminal:open-named-shell';
 }
 
 /**
@@ -228,7 +231,8 @@ function activate(
       CommandIDs.createNew,
       CommandIDs.refresh,
       CommandIDs.increaseFont,
-      CommandIDs.decreaseFont
+      CommandIDs.decreaseFont,
+      CommandIDs.openNamedShell
     ].forEach(command => {
       palette.addItem({ command, category, args: { isPalette: true } });
     });
@@ -352,10 +356,16 @@ export function addCommands(
       }
 
       const name = args['name'] as string;
+      const serverSettings = { ...serviceManager.terminals.serverSettings };
+      if (args.shell_command != null) {
+        serverSettings.init.body = JSON.stringify({
+          shell_command: [args.shell_command as string]
+        });
+      }
 
       const session = await (name
         ? serviceManager.terminals.connectTo({ model: { name } })
-        : serviceManager.terminals.startNew());
+        : serviceManager.terminals.startNew(serverSettings));
 
       const term = new Terminal(session, options, translator);
 
@@ -367,6 +377,18 @@ export function addCommands(
       void tracker.add(main);
       app.shell.activateById(main.id);
       return main;
+    }
+  });
+
+  commands.addCommand(CommandIDs.openNamedShell, {
+    label: 'Open Named Shell',
+    execute: async args => {
+      const value = await InputDialog.getText({
+        title: 'Enter path to terminal application',
+        placeholder: '/bin/zsh'
+      });
+      const newArgs: typeof args = { ...args, shell_command: value.value };
+      return commands.execute(CommandIDs.createNew, newArgs);
     }
   });
 

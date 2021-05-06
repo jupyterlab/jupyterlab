@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { URLExt, PageConfig } from '@jupyterlab/coreutils';
+
 import { ServerConnection } from '../serverconnection';
 
 /**
@@ -39,7 +40,11 @@ export async function startNew(
 ): Promise<IModel> {
   Private.errorIfNotAvailable();
   const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
-  const init = { method: 'POST' };
+
+  const init: RequestInit = { method: 'POST' };
+  if (settings.init.body != null) {
+    init.body = settings.init.body;
+  }
 
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 200) {
