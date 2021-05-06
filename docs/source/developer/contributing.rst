@@ -137,15 +137,7 @@ To check which version of Node.js is installed:
 Installing JupyterLab
 ---------------------
 
-JupyterLab requires Jupyter Notebook version 4.3 or later.
-
-If you use ``conda``, you can install notebook using:
-
-.. code:: bash
-
-   conda install -c conda-forge notebook
-
-You may also want to install ``nb_conda_kernels`` to have a kernel
+If you use ``conda``, you may also want to install ``nb_conda_kernels`` to have a kernel
 option for different `conda
 environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`__
 
@@ -153,17 +145,10 @@ environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/ma
 
    conda install -c conda-forge nb_conda_kernels
 
-If you use ``pip``, you can install notebook using:
-
-.. code:: bash
-
-   pip install notebook
-
 Fork the JupyterLab
 `repository <https://github.com/jupyterlab/jupyterlab>`__.
 
-Once you have installed the dependencies mentioned above, use the
-following steps:
+Then use the following steps:
 
 .. code:: bash
 
