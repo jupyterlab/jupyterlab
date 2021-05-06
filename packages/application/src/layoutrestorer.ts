@@ -165,6 +165,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     const blank: ILabShell.ILayout = {
       fresh: true,
       mainArea: null,
+      downArea: null,
       leftArea: null,
       rightArea: null,
       relativeSizes: null
@@ -178,13 +179,22 @@ export class LayoutRestorer implements ILayoutRestorer {
         return blank;
       }
 
-      const { main, left, right, relativeSizes } = data as Private.ILayout;
+      const {
+        main,
+        down,
+        left,
+        right,
+        relativeSizes
+      } = data as Private.ILayout;
 
       // If any data exists, then this is not a fresh session.
       const fresh = false;
 
       // Rehydrate main area.
       const mainArea = this._rehydrateMainArea(main);
+
+      // Rehydrate down area.
+      const downArea = this._rehydrateDownArea(down);
 
       // Rehydrate left area.
       const leftArea = this._rehydrateSideArea(left);
@@ -195,6 +205,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       return {
         fresh,
         mainArea,
+        downArea,
         leftArea,
         rightArea,
         relativeSizes: relativeSizes || null
@@ -316,6 +327,17 @@ export class LayoutRestorer implements ILayoutRestorer {
       return null;
     }
     return Private.deserializeMain(area, this._widgets);
+  }
+
+  private _rehydrateDownArea(
+    area?: Private.IDownArea | null
+  ): ILabShell.IDownArea | null {
+    if (!area) {
+      return null;
+    }
+
+    // TODO
+    return null;
   }
 
   /**
@@ -441,6 +463,11 @@ namespace Private {
     main?: IMainArea | null;
 
     /**
+     * The down area of the user interface
+     */
+    down?: IDownArea | null;
+
+    /**
      * The left area of the user interface.
      */
     left?: ISideArea | null;
@@ -514,6 +541,21 @@ namespace Private {
      * The index of the selected tab.
      */
     currentIndex: number;
+  }
+
+  /**
+   *
+   */
+  export interface IDownArea extends PartialJSONObject {
+    /**
+     * The current widget that has application focus.
+     */
+    current?: string | null;
+
+    /**
+     *
+     */
+    stack?: ITabArea | null;
   }
 
   /**

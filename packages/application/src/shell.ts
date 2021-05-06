@@ -148,6 +148,11 @@ export namespace ILabShell {
     readonly mainArea: IMainArea | null;
 
     /**
+     * The down area of the user interface.
+     */
+    readonly downArea: IDownArea | null;
+
+    /**
      * The left area of the user interface.
      */
     readonly leftArea: ISideArea | null;
@@ -176,6 +181,17 @@ export namespace ILabShell {
      * The contents of the main application dock panel.
      */
     readonly dock: DockLayout.ILayoutConfig | null;
+  }
+
+  export interface IDownArea {
+    /**
+     * The current widget that has down area focus.
+     */
+    readonly currentWidget: Widget | null;
+    /**
+     * 
+     */
+    readonly stack: DockLayout.ITabAreaConfig | null;
   }
 
   /**
@@ -870,6 +886,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           this.mode === 'single-document'
             ? this._cachedLayout || this._dockPanel.saveLayout()
             : this._dockPanel.saveLayout()
+      },
+      downArea: {
+        currentWidget: this._downPanel.currentWidget,
+        stack: null // TODO
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate(),
