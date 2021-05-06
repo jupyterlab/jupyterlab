@@ -10,7 +10,9 @@ lab_ext_name = "test-hyphens"
 HERE = path.abspath(path.dirname(__file__))
 lab_path = path.join(HERE, module_name, "labextension")
 
-post_develop = npm_builder(source_dir="src", build_dir=lab_path)
+post_develop = npm_builder(
+    build_cmd="build:labextension", source_dir=".", build_dir=lab_path, npm="jlpm"
+)
 
 data_files_spec = [("share/jupyter/labextensions/" + lab_ext_name, lab_path, "**")]
 
