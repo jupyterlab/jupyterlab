@@ -373,6 +373,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     // Connect down panel change listeners
     this._downPanel.currentChanged.connect(this._onLayoutModified, this);
+    this._downPanel.tabBar.tabMoved.connect(this._onDownPanelChanged, this);
     this._downPanel.stackedPanel.widgetRemoved.connect(
       this._onDownPanelChanged,
       this
@@ -531,9 +532,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     const applicationCurrentWidget = this.currentWidget;
 
+    // Toggle back to multiple document mode.
+    dock.mode = mode;
+
     if (mode === 'single-document') {
       this._cachedLayout = dock.saveLayout();
-      dock.mode = mode;
 
       // In case the active widget in the dock panel is *not* the active widget
       // of the application, defer to the application.
@@ -541,20 +544,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         dock.activateWidget(this.currentWidget);
       }
 
-      // Set the mode data attribute on the application shell node.
-      this.node.dataset.shellMode = mode;
-
       // Adjust menu and title
-      // this.add(this._menuHandler.panel, 'top', {rank: 100});
       (this.layout as BoxLayout).insertWidget(2, this._menuHandler.panel);
       this._titleWidgetHandler.show();
       this._updateTitlePanelTitle();
+
     } else {
       // Cache a reference to every widget currently in the dock panel.
       const widgets = toArray(dock.widgets());
-
-      // Toggle back to multiple document mode.
-      dock.mode = mode;
 
       // Restore the original layout.
       if (this._cachedLayout) {
@@ -585,14 +582,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         dock.activateWidget(applicationCurrentWidget);
       }
 
-      // Set the mode data attribute on the applications shell node.
-      this.node.dataset.shellMode = mode;
-
       // Adjust menu and title
       this.add(this._menuHandler.panel, 'top', { rank: 100 });
       // this._topHandler.addWidget(this._menuHandler.panel, 100)
       this._titleWidgetHandler.hide();
     }
+
+    // Set the mode data attribute on the applications shell node.
+    this.node.dataset.shellMode = mode;
 
     this._downPanel.fit();
     // Emit the mode changed signal
@@ -872,13 +869,45 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     // Rehydrate the down area
     if (downArea) {
-      // TODO activate not working + tab order not working
-      const { currentWidget, size } = downArea;
-      if (currentWidget) {
-        this._downPanel.stackedPanel.widgets
-          .filter(widget => widget.id === currentWidget.id)[0]
-          ?.activate();
+      const { currentWidget, widgets, size } = downArea;
+
+      const widgetIds = widgets?.map(widget => widget.id) ?? [];
+      // Remove absent widgets
+      this._downPanel.tabBar.titles
+        .filter(title => !widgetIds.includes(title.owner.id))
+        .map(title => title.owner.close());
+      // Add new widgets
+      const titleIds = this._downPanel.tabBar.titles.map(
+        title => title.owner.id
+      );
+      widgets
+        ?.filter(widget => !titleIds.includes(widget.id))
+        .map(widget => this._downPanel.addWidget(widget));
+      // Reorder tabs
+      while (
+        !ArrayExt.shallowEqual(
+          widgetIds,
+          this._downPanel.tabBar.titles.map(title => title.owner.id)
+        )
+      ) {
+        this._downPanel.tabBar.titles.forEach((title, index) => {
+          const position = widgetIds.findIndex(id => title.owner.id == id);
+          if (position >= 0 && position != index) {
+            this._downPanel.tabBar.insertTab(position, title);
+          }
+        });
       }
+
+      if (currentWidget) {
+        const index = this._downPanel.stackedPanel.widgets.findIndex(
+          widget => widget.id === currentWidget.id
+        );
+        if (index) {
+          this._downPanel.currentIndex = index;
+          this._downPanel.currentWidget?.activate();
+        }
+      }
+
       if (size && size > 0.0) {
         this._vsplitPanel.setRelativeSizes([1.0 - size, size]);
       } else {
@@ -1319,6 +1348,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     if (this._downPanel.stackedPanel.widgets.length === 0) {
       this._downPanel.hide();
     }
+    this._onLayoutModified();
   }
 
   /**
