@@ -707,25 +707,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
     const contentFactory = this.contentFactory;
     const model = this.model;
 
-<<<<<<< HEAD
-    // Insert the output before the cell footer.
-    const outputWrapper = (this._outputWrapper = new Panel());
-    outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-    const outputCollapser = new OutputCollapser();
-    outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
-    const output = (this._output = new OutputArea({
-      model: model.outputs,
-      rendermime,
-      contentFactory: contentFactory,
-      maxNumberOutputs: options.maxNumberOutputs
-    }));
-    output.addClass(CELL_OUTPUT_AREA_CLASS);
-    // Set a CSS if there are no outputs, and connect a signal for future
-    // changes to the number of outputs. This is for conditional styling
-    // if there are no outputs.
-    if (model.outputs.length === 0) {
-      this.addClass(NO_OUTPUTS_CLASS);
-=======
     if (!options.placeholder) {
       // Insert the output before the cell footer.
       const outputWrapper = (this._outputWrapper = new Panel());
@@ -752,7 +733,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
       this._outputPlaceholder = new OutputPlaceholder(() => {
         this.outputHidden = !this.outputHidden;
       });
->>>>>>> [2.2.x] Virtual notebook
     }
     model.stateChanged.connect(this.onStateChanged, this);
   }
