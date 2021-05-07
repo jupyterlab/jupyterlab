@@ -687,7 +687,6 @@ export class DirListing extends Widget {
         this._evtScroll(event as MouseEvent);
         break;
       case 'lm-dragenter':
-        console.error('DRAGGING ENTER LM');
         this._evtDragEnter(event as IDragEvent);
         break;
       case 'lm-dragleave':
