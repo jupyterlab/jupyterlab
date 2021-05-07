@@ -339,7 +339,7 @@ function activateEditorCommands(
   });
 
   commands.addCommand(CommandIDs.find, {
-    label: trans.__('Find...'),
+    label: trans.__('Find…'),
     execute: () => {
       const widget = tracker.currentWidget;
       if (!widget) {
@@ -352,7 +352,7 @@ function activateEditorCommands(
   });
 
   commands.addCommand(CommandIDs.goToLine, {
-    label: trans.__('Go to Line...'),
+    label: trans.__('Go to Line…'),
     execute: () => {
       const widget = tracker.currentWidget;
       if (!widget) {

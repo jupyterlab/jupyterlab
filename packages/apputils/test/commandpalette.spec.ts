@@ -68,7 +68,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#hideAndReset()', () => {
       it('should become hidden and clear the input when calling hideAndReset', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
-        palette.inputNode.value = 'Search string...';
+        palette.inputNode.value = 'Search string…';
         modalPalette.hideAndReset();
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');
@@ -78,7 +78,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#focus()', () => {
       it('should hide and reset when focus is shifted', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
-        palette.inputNode.value = 'Search string...';
+        palette.inputNode.value = 'Search string…';
         simulate(document.body, 'focus');
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');
@@ -88,7 +88,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#escape()', () => {
       it('should hide and reset when ESC is pressed', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
-        palette.inputNode.value = 'Search string...';
+        palette.inputNode.value = 'Search string…';
         simulate(modalPalette.node, 'keydown', { keyCode: 27 });
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');
