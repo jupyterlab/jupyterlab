@@ -1,5 +1,9 @@
+"""Echo WebSocket handler for real time collaboration with Yjs"""
+
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 import uuid
-import json
 import time
 
 from tornado.ioloop import IOLoop
