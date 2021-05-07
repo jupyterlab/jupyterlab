@@ -18,7 +18,7 @@ const options = {
 };
 
 /* eslint-disable no-console */
-console.log('Starting session...');
+console.log('Starting session…');
 const kernelManager = new services.KernelManager();
 const sessionManager = new services.SessionManager({ kernelManager });
 let session;
