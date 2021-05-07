@@ -1467,60 +1467,62 @@ export class DirListing extends Widget {
     this._editNode.value = original;
     this._selectItem(index, false);
 
-    return Private.doRename(nameNode, this._editNode).then(newName => {
-      this.node.focus();
-      if (!newName || newName === original) {
-        this._inRename = false;
-        return original;
-      }
-      if (!isValidFileName(newName)) {
-        void showErrorMessage(
-          this._trans.__('showErrorMessage', 'Rename Error'),
-          Error(
-            this._trans._p(
-              'showErrorMessage',
-              '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
-              newName
-            )
-          )
-        );
-        this._inRename = false;
-        return original;
-      }
-
-      if (this.isDisposed) {
-        this._inRename = false;
-        throw new Error('File browser is disposed.');
-      }
-
-      const manager = this._manager;
-      const oldPath = PathExt.join(this._model.path, original);
-      const newPath = PathExt.join(this._model.path, newName);
-      const promise = renameFile(manager, oldPath, newPath);
-      return promise
-        .catch(error => {
-          if (error !== 'File not renamed') {
-            void showErrorMessage(
-              this._trans._p('showErrorMessage', 'Rename Error'),
-              error
-            );
-          }
+    return Private.doRename(nameNode, this._editNode, original).then(
+      newName => {
+        this.node.focus();
+        if (!newName || newName === original) {
           this._inRename = false;
           return original;
-        })
-        .then(() => {
-          if (this.isDisposed) {
-            this._inRename = false;
-            throw new Error('File browser is disposed.');
-          }
-          if (this._inRename) {
-            // No need to catch because `newName` will always exit.
-            void this.selectItemByName(newName);
-          }
+        }
+        if (!isValidFileName(newName)) {
+          void showErrorMessage(
+            this._trans.__('showErrorMessage', 'Rename Error'),
+            Error(
+              this._trans._p(
+                'showErrorMessage',
+                '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+                newName
+              )
+            )
+          );
           this._inRename = false;
-          return newName;
-        });
-    });
+          return original;
+        }
+
+        if (this.isDisposed) {
+          this._inRename = false;
+          throw new Error('File browser is disposed.');
+        }
+
+        const manager = this._manager;
+        const oldPath = PathExt.join(this._model.path, original);
+        const newPath = PathExt.join(this._model.path, newName);
+        const promise = renameFile(manager, oldPath, newPath);
+        return promise
+          .catch(error => {
+            if (error !== 'File not renamed') {
+              void showErrorMessage(
+                this._trans._p('showErrorMessage', 'Rename Error'),
+                error
+              );
+            }
+            this._inRename = false;
+            return original;
+          })
+          .then(() => {
+            if (this.isDisposed) {
+              this._inRename = false;
+              throw new Error('File browser is disposed.');
+            }
+            if (this._inRename) {
+              // No need to catch because `newName` will always exit.
+              void this.selectItemByName(newName);
+            }
+            this._inRename = false;
+            return newName;
+          });
+      }
+    );
   }
 
   /**
@@ -2123,7 +2125,8 @@ namespace Private {
    */
   export function doRename(
     text: HTMLElement,
-    edit: HTMLInputElement
+    edit: HTMLInputElement,
+    original: string
   ): Promise<string> {
     const parent = text.parentElement as HTMLElement;
     parent.replaceChild(edit, text);
@@ -2150,6 +2153,7 @@ namespace Private {
           case 27: // Escape
             event.stopPropagation();
             event.preventDefault();
+            edit.value = original;
             edit.blur();
             break;
           case 38: // Up arrow
