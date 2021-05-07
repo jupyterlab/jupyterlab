@@ -229,6 +229,13 @@ dev mode, extensions will not be activated by default.
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
 
+If you want to change the TypeScript code and rebuild on the fly
+(needs page refresh after each rebuild):
+
+.. code:: bash
+
+   jupyter lab --dev-mode --watch
+
 Build and Run the Tests
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -988,4 +995,3 @@ Notes
 -  The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
    omit the type declarations when using a language other than
    TypeScript.
-
