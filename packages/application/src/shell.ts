@@ -5,7 +5,12 @@ import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { classes, DockPanelSvg, LabIcon, TabPanelSvg } from '@jupyterlab/ui-components';
+import {
+  classes,
+  DockPanelSvg,
+  LabIcon,
+  TabPanelSvg
+} from '@jupyterlab/ui-components';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
@@ -188,10 +193,18 @@ export namespace ILabShell {
      * The current widget that has down area focus.
      */
     readonly currentWidget: Widget | null;
+
     /**
-     * 
+     * The collection of widgets held by the panel.
      */
-    readonly stack: DockLayout.ITabAreaConfig | null;
+    readonly widgets: Array<Widget> | null;
+
+    /**
+     * Vertical relative size of the down area
+     *
+     * The main area will take the rest of the height
+     */
+    readonly size: number | null;
   }
 
   /**
@@ -239,12 +252,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const bottomPanel = (this._bottomPanel = new BoxPanel());
     bottomPanel.node.setAttribute('role', 'contentinfo');
     const hboxPanel = new BoxPanel();
-    const vsplitPanel = new SplitPanel();
+    const vsplitPanel = (this._vsplitPanel = new SplitPanel());
     const dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     const hsplitPanel = (this._hsplitPanel = new Private.RestorableSplitPanel());
-    const downPanel = (this._downPanel = new TabPanelSvg());
+    const downPanel = (this._downPanel = new TabPanelSvg({
+      tabsMovable: true
+    }));
     const leftHandler = (this._leftHandler = new Private.SideBarHandler());
     const rightHandler = (this._rightHandler = new Private.SideBarHandler());
     const rootLayout = new BoxLayout();
@@ -351,6 +366,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     // Connect main layout change listener.
     this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
+
+    // Connect vsplit layout change listener
+    // TODO needs change in lumino SplitLayout
+    // this._vsplitPanel.layoutModified.connect(this._onLayoutModified, this);
 
     // Connect down panel change listeners
     this._downPanel.currentChanged.connect(this._onLayoutModified, this);
@@ -530,54 +549,52 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       (this.layout as BoxLayout).insertWidget(2, this._menuHandler.panel);
       this._titleWidgetHandler.show();
       this._updateTitlePanelTitle();
+    } else {
+      // Cache a reference to every widget currently in the dock panel.
+      const widgets = toArray(dock.widgets());
 
-      this._modeChanged.emit(mode);
-      return;
-    }
+      // Toggle back to multiple document mode.
+      dock.mode = mode;
 
-    // Cache a reference to every widget currently in the dock panel.
-    const widgets = toArray(dock.widgets());
-
-    // Toggle back to multiple document mode.
-    dock.mode = mode;
-
-    // Restore the original layout.
-    if (this._cachedLayout) {
-      // Remove any disposed widgets in the cached layout and restore.
-      Private.normalizeAreaConfig(dock, this._cachedLayout.main);
-      dock.restoreLayout(this._cachedLayout);
-      this._cachedLayout = null;
-    }
-
-    // Add any widgets created during single document mode, which have
-    // subsequently been removed from the dock panel after the multiple document
-    // layout has been restored. If the widget has add options cached for
-    // the widget (i.e., if it has been placed with respect to another widget),
-    // then take that into account.
-    widgets.forEach(widget => {
-      if (!widget.parent) {
-        this._addToMainArea(widget, {
-          ...this._mainOptionsCache.get(widget),
-          activate: false
-        });
+      // Restore the original layout.
+      if (this._cachedLayout) {
+        // Remove any disposed widgets in the cached layout and restore.
+        Private.normalizeAreaConfig(dock, this._cachedLayout.main);
+        dock.restoreLayout(this._cachedLayout);
+        this._cachedLayout = null;
       }
-    });
-    this._mainOptionsCache.clear();
 
-    // In case the active widget in the dock panel is *not* the active widget
-    // of the application, defer to the application.
-    if (applicationCurrentWidget) {
-      dock.activateWidget(applicationCurrentWidget);
+      // Add any widgets created during single document mode, which have
+      // subsequently been removed from the dock panel after the multiple document
+      // layout has been restored. If the widget has add options cached for
+      // the widget (i.e., if it has been placed with respect to another widget),
+      // then take that into account.
+      widgets.forEach(widget => {
+        if (!widget.parent) {
+          this._addToMainArea(widget, {
+            ...this._mainOptionsCache.get(widget),
+            activate: false
+          });
+        }
+      });
+      this._mainOptionsCache.clear();
+
+      // In case the active widget in the dock panel is *not* the active widget
+      // of the application, defer to the application.
+      if (applicationCurrentWidget) {
+        dock.activateWidget(applicationCurrentWidget);
+      }
+
+      // Set the mode data attribute on the applications shell node.
+      this.node.dataset.shellMode = mode;
+
+      // Adjust menu and title
+      this.add(this._menuHandler.panel, 'top', { rank: 100 });
+      // this._topHandler.addWidget(this._menuHandler.panel, 100)
+      this._titleWidgetHandler.hide();
     }
 
-    // Set the mode data attribute on the applications shell node.
-    this.node.dataset.shellMode = mode;
-
-    // Adjust menu and title
-    this.add(this._menuHandler.panel, 'top', { rank: 100 });
-    // this._topHandler.addWidget(this._menuHandler.panel, 100)
-    this._titleWidgetHandler.hide();
-
+    this._downPanel.fit();
     // Emit the mode changed signal
     this._modeChanged.emit(mode);
   }
@@ -601,6 +618,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     if (this._rightHandler.has(id)) {
       this._rightHandler.activate(id);
+      return;
+    }
+
+    const downWidget = this._downPanel.stackedPanel.widgets.find(
+      widget => widget.id === id
+    );
+    if (downWidget) {
+      downWidget.activate();
       return;
     }
 
@@ -709,22 +734,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     options?: DocumentRegistry.IOpenOptions
   ): void {
     switch (area || 'main') {
-      case 'main':
-        return this._addToMainArea(widget, options);
-      case 'left':
-        return this._addToLeftArea(widget, options);
-      case 'right':
-        return this._addToRightArea(widget, options);
-      case 'header':
-        return this._addToHeaderArea(widget, options);
-      case 'top':
-        return this._addToTopArea(widget, options);
-      case 'menu':
-        return this._addToMenuArea(widget, options);
       case 'bottom':
         return this._addToBottomArea(widget, options);
       case 'down':
         return this._addToDownArea(widget, options);
+      case 'header':
+        return this._addToHeaderArea(widget, options);
+      case 'left':
+        return this._addToLeftArea(widget, options);
+      case 'main':
+        return this._addToMainArea(widget, options);
+      case 'menu':
+        return this._addToMenuArea(widget, options);
+      case 'right':
+        return this._addToRightArea(widget, options);
+      case 'top':
+        return this._addToTopArea(widget, options);
       default:
         throw new Error(`Invalid area: ${area}`);
     }
@@ -783,13 +808,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * Close all widgets in the main area.
+   * Close all widgets in the main and down area.
    */
   closeAll(): void {
     // Make a copy of all the widget in the dock panel (using `toArray()`)
     // before removing them because removing them while iterating through them
     // modifies the underlying data of the iterator.
     toArray(this._dockPanel.widgets()).forEach(widget => widget.close());
+
+    this._downPanel.stackedPanel.widgets.forEach(widget => widget.close());
   }
 
   /**
@@ -797,20 +824,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   isEmpty(area: ILabShell.Area): boolean {
     switch (area) {
+      case 'bottom':
+        return this._bottomPanel.widgets.length === 0;
+      case 'down':
+        return this._downPanel.stackedPanel.widgets.length === 0;
+      case 'header':
+        return this._headerPanel.widgets.length === 0;
       case 'left':
         return this._leftHandler.stackedPanel.widgets.length === 0;
       case 'main':
         return this._dockPanel.isEmpty;
-      case 'header':
-        return this._headerPanel.widgets.length === 0;
-      case 'top':
-        return this._topHandler.panel.widgets.length === 0;
       case 'menu':
         return this._menuHandler.panel.widgets.length === 0;
-      case 'bottom':
-        return this._bottomPanel.widgets.length === 0;
       case 'right':
         return this._rightHandler.stackedPanel.widgets.length === 0;
+      case 'top':
+        return this._topHandler.panel.widgets.length === 0;
       default:
         return true;
     }
@@ -820,7 +849,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Restore the layout state for the application shell.
    */
   restoreLayout(mode: DockPanel.Mode, layout: ILabShell.ILayout): void {
-    const { mainArea, leftArea, rightArea, relativeSizes } = layout;
+    const { mainArea, downArea, leftArea, rightArea, relativeSizes } = layout;
     // Rehydrate the main area.
     if (mainArea) {
       const { currentWidget, dock } = mainArea;
@@ -838,6 +867,24 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       // This is needed when loading in an empty workspace in single doc mode
       if (mode) {
         this.mode = mode;
+      }
+    }
+
+    // Rehydrate the down area
+    if (downArea) {
+      // TODO activate not working + tab order not working
+      const { currentWidget, size } = downArea;
+      if (currentWidget) {
+        this._downPanel.stackedPanel.widgets
+          .filter(widget => widget.id === currentWidget.id)[0]
+          ?.activate();
+      }
+      if (size && size > 0.0) {
+        this._vsplitPanel.setRelativeSizes([1.0 - size, size]);
+      } else {
+        // Close all tabs and hide the panel
+        this._downPanel.stackedPanel.widgets.forEach(widget => widget.close());
+        this._downPanel.hide();
       }
     }
 
@@ -889,12 +936,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       },
       downArea: {
         currentWidget: this._downPanel.currentWidget,
-        stack: null // TODO
+        widgets: toArray(this._downPanel.stackedPanel.widgets),
+        size: this._vsplitPanel.relativeSizes()[1]
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate(),
       relativeSizes: this._hsplitPanel.relativeSizes()
     };
+
     return layout;
   }
 
@@ -1176,7 +1225,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       // add some classes to help with displaying css background imgs
       title.iconClass = classes(title.iconClass, 'jp-Icon');
     }
-    
+
     this._downPanel.addWidget(widget);
     this._onLayoutModified();
 
@@ -1312,6 +1361,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _modeChanged = new Signal<this, DockPanel.Mode>(this);
   private _dockPanel: DockPanel;
   private _downPanel: TabPanel;
+  private _vsplitPanel: SplitPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
   private _layoutDebouncer = new Debouncer(() => {
