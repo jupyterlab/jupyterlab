@@ -1126,7 +1126,7 @@ export class DirListing extends Widget {
         void showDialog({
           title: this._trans.__('Error Uploading Folder'),
           body: this._trans.__(
-            'Drag and Drop is not currently supported for folders'
+            'Drag and Drop is currently not supported for folders'
           ),
           buttons: [Dialog.cancelButton({ label: this._trans.__('Close') })]
         });
