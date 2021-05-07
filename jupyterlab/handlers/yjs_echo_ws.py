@@ -29,7 +29,7 @@ class YJSEchoWS(WebSocketHandler):
         self.id = str(uuid.uuid4())
         self.room_id = guid
         room = cls.rooms.get(self.room_id)
-        if room == None:
+        if room is None:
             room = YjsRoom()
             cls.rooms[self.room_id] = room
         room.clients[self.id] = ( IOLoop.current(), self.hook_send_message )
@@ -42,7 +42,7 @@ class YJSEchoWS(WebSocketHandler):
         room = cls.rooms.get(self.room_id)
         if message[0] == acquireLockMessageType: # tries to acquire lock
             now = int(time.time())
-            if room.lock == None or now - room.lock > 15: # no lock or timeout
+            if room.lock is None or now - room.lock > 15: # no lock or timeout
                 room.lock = now
                 # print('Acquired new lock: ', room.lock)
                 # return acquired lock
