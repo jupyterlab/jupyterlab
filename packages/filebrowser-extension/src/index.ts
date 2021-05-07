@@ -1081,6 +1081,8 @@ function addCommands(
     });
   }
 
+  // matches the filebrowser itself
+  const selectorBrowser = '.jp-FileBrowser-listing';
   // matches anywhere on filebrowser
   const selectorContent = '.jp-DirListing-content';
   // matches all filebrowser items
@@ -1173,6 +1175,37 @@ function addCommands(
     command: CommandIDs.toggleLastModified,
     selector: '.jp-DirListing-header',
     rank: 14
+  });
+
+  app.commands.addKeyBinding({
+    command: CommandIDs.del,
+    selector: selectorBrowser,
+    keys: ['Delete']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.cut,
+    selector: selectorBrowser,
+    keys: ['Ctrl X']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.copy,
+    selector: selectorBrowser,
+    keys: ['Ctrl C']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.paste,
+    selector: selectorBrowser,
+    keys: ['Ctrl V']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.rename,
+    selector: selectorBrowser,
+    keys: ['F2']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.duplicate,
+    selector: selectorBrowser,
+    keys: ['Ctrl D']
   });
 }
 
