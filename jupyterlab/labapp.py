@@ -497,6 +497,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         {'LabApp': {'extensions_in_dev_mode': True}},
         "Load prebuilt extensions in dev-mode."
     )
+    flags['collaborative'] = (
+        {'LabApp': {'collaborative': True}},
+        "Whether to enable collaborative mode."
+    )
 
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -553,6 +557,9 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
     expose_app_in_browser = Bool(False, config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab")
+    
+    collaborative = Bool(False, config=True,
+        help="Whether to enable collaborative mode.")
 
     @default('app_dir')
     def _default_app_dir(self):
@@ -661,6 +668,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         page_config['token'] = self.serverapp.token
         page_config['exposeAppInBrowser'] = self.expose_app_in_browser
         page_config['quitButton'] = self.serverapp.quit_button
+        page_config['collaborative'] = self.collaborative
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
         page_config['notebookVersion'] = json.dumps(jpserver_version_info)

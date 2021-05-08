@@ -28,7 +28,7 @@ import {
   sessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import { PathExt, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { IModelDB, ModelDB } from '@jupyterlab/observables';
 
@@ -89,7 +89,9 @@ export class Context<
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
     const guid = this._factory.contentType + ':' + localPath;
-    this._provider = options.collaborative
+    const collaborative =
+      PageConfig.getOption('collaborative') == 'true' ? true : false;
+    this._provider = collaborative
       ? new WebsocketProviderWithLocks({ url, guid, ymodel })
       : new ProviderMock();
 
