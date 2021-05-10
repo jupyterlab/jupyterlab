@@ -46,14 +46,14 @@
     "minimist": "~1.2.0",
     "moment": "^2.24.0",
     "path-browserify": "^1.0.0",
-    "url-parse": "~1.4.7"
+    "url-parse": "~1.5.1"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.1.0-alpha.6",
     "@types/jest": "^26.0.10",
     "@types/minimist": "^1.2.0",
     "@types/node": "^14.6.1",
-    "@types/url-parse": "^1.1.0",
+    "@types/url-parse": "^1.4.3",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
