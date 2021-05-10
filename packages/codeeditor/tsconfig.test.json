@@ -9,10 +9,10 @@
       "path": "../nbformat"
     },
     {
-      "path": "../shared-models"
+      "path": "../observables"
     },
     {
-      "path": "../observables"
+      "path": "../shared-models"
     },
     {
       "path": "../translation"
@@ -33,10 +33,10 @@
       "path": "../nbformat"
     },
     {
-      "path": "../shared-models"
+      "path": "../observables"
     },
     {
-      "path": "../observables"
+      "path": "../shared-models"
     },
     {
       "path": "../translation"

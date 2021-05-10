@@ -25,9 +25,6 @@
       "path": "../nbformat"
     },
     {
-      "path": "../shared-models"
-    },
-    {
       "path": "../observables"
     },
     {
@@ -35,6 +32,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../statusbar"
