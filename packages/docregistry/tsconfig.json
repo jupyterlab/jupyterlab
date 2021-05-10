@@ -19,7 +19,13 @@
       "path": "../coreutils"
     },
     {
+      "path": "../docprovider"
+    },
+    {
       "path": "../observables"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../rendermime"

@@ -13,6 +13,9 @@
       "path": "../nbformat"
     },
     {
+      "path": "../shared-models"
+    },
+    {
       "path": "../observables"
     },
     {

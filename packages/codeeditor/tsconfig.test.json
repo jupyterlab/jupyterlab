@@ -9,6 +9,9 @@
       "path": "../nbformat"
     },
     {
+      "path": "../shared-models"
+    },
+    {
       "path": "../observables"
     },
     {
@@ -28,6 +31,9 @@
     },
     {
       "path": "../nbformat"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../observables"

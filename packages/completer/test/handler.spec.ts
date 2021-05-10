@@ -294,6 +294,7 @@ describe('@jupyterlab/completer', () => {
 
         handler.editor = editor;
         handler.editor.model.value.text = text;
+        handler.editor.model.sharedModel.clearUndoHistory();
         handler.editor.setCursorPosition({ line, column: column + 3 });
         model.original = request;
         model.cursor = { start: column, end: column + 3 };

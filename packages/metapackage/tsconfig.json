@@ -73,6 +73,9 @@
       "path": "../docmanager-extension"
     },
     {
+      "path": "../docprovider"
+    },
+    {
       "path": "../docregistry"
     },
     {
@@ -158,6 +161,9 @@
     },
     {
       "path": "../mathjax2-extension"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../nbformat"

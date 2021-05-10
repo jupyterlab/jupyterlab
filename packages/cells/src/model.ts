@@ -15,6 +15,8 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
+import * as models from '@jupyterlab/shared-models';
+
 import { UUID } from '@lumino/coreutils';
 
 import {
@@ -60,6 +62,8 @@ export interface ICellModel extends CodeEditor.IModel {
    * The metadata associated with the cell.
    */
   readonly metadata: IObservableJSON;
+
+  readonly sharedModel: models.ISharedCell & models.ISharedText;
 
   /**
    * Serialize the model to JSON.
@@ -162,9 +166,10 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * Construct a cell model from optional cell content.
    */
   constructor(options: CellModel.IOptions) {
-    super({ modelDB: options.modelDB });
-
-    this.id = options.id || (options.cell?.id as string) || UUID.uuid4();
+    super({
+      modelDB: options.modelDB,
+      id: options.id || (options.cell?.id as string) || UUID.uuid4()
+    });
 
     this.value.changed.connect(this.onGenericChange, this);
 
@@ -172,6 +177,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     cellType.set(this.type);
 
     const observableMetadata = this.modelDB.createMap('metadata');
+    observableMetadata.changed.connect(this.onModelDBMetadataChange, this);
     observableMetadata.changed.connect(this.onGenericChange, this);
 
     const cell = options.cell;
@@ -226,7 +232,9 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * The id for the cell.
    */
-  readonly id: string;
+  get id(): string {
+    return this.sharedModel.getId();
+  }
 
   /**
    * The metadata associated with the cell.
@@ -285,11 +293,131 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   /**
+   * Handle a change to the cell metadata modelDB and reflect it in the shared model.
+   */
+  protected onModelDBMetadataChange(
+    sender: IObservableJSON,
+    event: IObservableJSON.IChangedArgs
+  ): void {
+    const metadata = this.sharedModel.getMetadata();
+    this._modelDBMutex(() => {
+      switch (event.type) {
+        case 'add':
+          this._changeCellMetata(metadata, event);
+          break;
+        case 'change':
+          this._changeCellMetata(metadata, event);
+          break;
+        case 'remove':
+          delete metadata[event.key];
+          break;
+        default:
+          throw new Error(`Invalid event type: ${event.type}`);
+      }
+      this.sharedModel.setMetadata(metadata);
+    });
+  }
+
+  /**
+   * Change the cell metadata for a given event.
+   *
+   * @param metadata The cell metadata.
+   * @param event The event to handle.
+   */
+  private _changeCellMetata(
+    metadata: Partial<models.ISharedBaseCellMetadata>,
+    event: IObservableJSON.IChangedArgs
+  ): void {
+    switch (event.key) {
+      case 'jupyter':
+        metadata.jupyter = event.newValue as any;
+        break;
+      case 'collapsed':
+        metadata.collapsed = event.newValue as any;
+        break;
+      case 'name':
+        metadata.name = event.newValue as any;
+        break;
+      case 'scrolled':
+        metadata.scrolled = event.newValue as any;
+        break;
+      case 'tags':
+        metadata.tags = event.newValue as any;
+        break;
+      case 'trusted':
+        metadata.trusted = event.newValue as any;
+        break;
+      default:
+        // The default is applied for custom metadata that are not
+        // defined in the official nbformat but which are defined
+        // by the user.
+        metadata[event.key] = event.newValue as any;
+    }
+  }
+
+  /**
+   * Handle a change to the cell shared model and reflect it in modelDB.
+   * We update the modeldb metadata when the shared model changes.
+   *
+   * This method overrides the CodeEditor protected _onSharedModelChanged
+   * so we first call super._onSharedModelChanged
+   *
+   * @override CodeEditor._onSharedModelChanged
+   */
+  protected _onSharedModelChanged(
+    sender: models.ISharedCodeCell,
+    change: models.CellChange<models.ISharedBaseCellMetadata>
+  ): void {
+    super._onSharedModelChanged(sender, change);
+    this._modelDBMutex(() => {
+      if (change.metadataChange) {
+        const newValue = change.metadataChange
+          ?.newValue as models.ISharedBaseCellMetadata;
+        if (newValue) {
+          Object.keys(newValue).map(key => {
+            switch (key) {
+              case 'collapsed':
+                this.metadata.set('collapsed', newValue.jupyter);
+                break;
+              case 'jupyter':
+                this.metadata.set('jupyter', newValue.jupyter);
+                break;
+              case 'name':
+                this.metadata.set('name', newValue.name);
+                break;
+              case 'scrolled':
+                this.metadata.set('scrolled', newValue.scrolled);
+                break;
+              case 'tags':
+                this.metadata.set('tags', newValue.tags);
+                break;
+              case 'trusted':
+                this.metadata.set('trusted', newValue.trusted);
+                break;
+              default:
+                // The default is applied for custom metadata that are not
+                // defined in the official nbformat but which are defined
+                // by the user.
+                this.metadata.set(key, newValue[key]);
+            }
+          });
+        }
+      }
+    });
+  }
+
+  /**
    * Handle a change to the observable value.
    */
   protected onGenericChange(): void {
     this.contentChanged.emit(void 0);
   }
+
+  /**
+   * A mutex to update the shared model.
+   */
+  protected readonly _modelDBMutex = models.createMutex();
+  sharedModel: models.ISharedCell;
 }
 
 /**
@@ -485,8 +613,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
     executionCount.changed.connect(this._onExecutionCountChanged, this);
 
+    this._modelDBMutex(() => {
+      const sharedCell = this.sharedModel as models.ISharedCodeCell;
+      sharedCell.setOutputs(outputs ?? []);
+    });
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
     this._outputs.changed.connect(this.onGenericChange, this);
+    this._outputs.changed.connect(this.onModelDBOutputsChange, this);
 
     // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
     // they are redundant in nbformat 4.4. See
@@ -514,6 +647,17 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         });
       }
     }
+  }
+
+  public switchSharedModel(
+    sharedModel: models.ISharedCodeCell,
+    reinitialize?: boolean
+  ): void {
+    if (reinitialize) {
+      this.clearExecution();
+      sharedModel.getOutputs().forEach(output => this._outputs.add(output));
+    }
+    super.switchSharedModel(sharedModel, reinitialize);
   }
 
   /**
@@ -591,12 +735,83 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
+   * Handle a change to the cell outputs modelDB and reflect it in the shared model.
+   */
+  protected onModelDBOutputsChange(
+    sender: IOutputAreaModel,
+    event: IOutputAreaModel.ChangedArgs
+  ): void {
+    const codeCell = this.sharedModel as models.YCodeCell;
+    this._modelDBMutex(() => {
+      switch (event.type) {
+        case 'add': {
+          const outputs = event.newValues.map(output => output.toJSON());
+          codeCell.updateOutputs(
+            event.newIndex,
+            event.newIndex + outputs.length,
+            outputs
+          );
+          break;
+        }
+        case 'set': {
+          const newValues = event.newValues.map(output => output.toJSON());
+          codeCell.updateOutputs(
+            event.oldIndex,
+            event.oldValues.length,
+            newValues
+          );
+          break;
+        }
+        case 'remove':
+          codeCell.updateOutputs(event.oldIndex, event.oldValues.length);
+          break;
+        default:
+          throw new Error(`Invalid event type: ${event.type}`);
+      }
+    });
+  }
+
+  /**
+   * Handle a change to the output shared model and reflect it in modelDB.
+   * We update the modeldb metadata when the nbcell changes.
+   *
+   * This method overrides the CellModel protected _onSharedModelChanged
+   * so we first call super._onSharedModelChanged
+   *
+   * @override CellModel._onSharedModelChanged
+   */
+  protected _onSharedModelChanged(
+    sender: models.ISharedCodeCell,
+    change: models.CellChange<models.ISharedBaseCellMetadata>
+  ): void {
+    super._onSharedModelChanged(sender, change);
+    this._modelDBMutex(() => {
+      if (change.outputsChange) {
+        this.clearExecution();
+        sender.getOutputs().forEach(output => this._outputs.add(output));
+      }
+
+      if (change.executionCountChange) {
+        this.executionCount = change.executionCountChange.newValue
+          ? change.executionCountChange.newValue
+          : null;
+      }
+    });
+  }
+
+  /**
    * Handle a change to the execution count.
    */
   private _onExecutionCountChanged(
     count: IObservableValue,
     args: ObservableValue.IChangedArgs
   ): void {
+    const codeCell = this.sharedModel as models.YCodeCell;
+    this._modelDBMutex(() => {
+      codeCell.execution_count = args.newValue
+        ? (args.newValue as number)
+        : null;
+    });
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({
       name: 'executionCount',
