@@ -45,7 +45,7 @@
     "json5": "^2.1.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.9",
+    "@jupyterlab/testutils": "^3.0.10",
     "@types/jest": "^26.0.10",
     "@types/json5": "^0.0.30",
     "jest": "^26.4.2",
