@@ -10,6 +10,28 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.15
+^^^^^^^
+* Added support for namespace packages in labextensions.
+  `#10150 <https://github.com/jupyterlab/jupyterlab/pull/10150>`__
+* Remove Dependency on Jupyter Packaging
+  `#10218 <https://github.com/jupyterlab/jupyterlab/pull/10218>`__
+* Fix changelong entries for 3.0.13
+  `#10087 <https://github.com/jupyterlab/jupyterlab/pull/10087>`__
+* Update ``extension_tutorial``
+  `#10026 <https://github.com/jupyterlab/jupyterlab/pull/10026>`__
+* Workaround Chromium issue with iframe reload/href
+  `#10185 <https://github.com/jupyterlab/jupyterlab/pull/10185>`__
+* Update to ``sanitize-html~=2.3.3``
+  `#10220 <https://github.com/jupyterlab/jupyterlab/pull/10220>`__
+* Update to ``url-parse~=1.5.1``
+  `#10219 <https://github.com/jupyterlab/jupyterlab/pull/10219>`__
+* Update packaging commands in the extension tutorial
+  `#10104 <https://github.com/jupyterlab/jupyterlab/pull/10104>`__
+* Mention mamba as a means to install JupyterLab
+  `#10093 <https://github.com/jupyterlab/jupyterlab/pull/10093>`__
+
+
 v3.0.14
 ^^^^^^^
 * Clean up browser check (`#10080 <https://github.com/jupyterlab/jupyterlab/pull/10080>`__)
