@@ -71,6 +71,8 @@ namespace CommandIDs {
 
   export const runFirstEnabled = 'apputils:run-first-enabled';
 
+  export const runAllCommands = 'apputils:run-all-commands';
+
   export const toggleHeader = 'apputils:toggle-header';
 }
 
@@ -579,6 +581,20 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
             return app.commands.execute(cmd, arg);
           }
         }
+      }
+    });
+
+    commands.addCommand(CommandIDs.runAllCommands, {
+      label: trans.__('Run All Commands Passed as Args'),
+      execute: async (args) => {
+        const commandsString: string[] = args.commands as string[];
+        for (let i = 0; i < commandsString.length; i++) {
+          const cmd = commandsString[i];
+          await app.commands.execute(cmd);
+        }
+        console.log(
+          `Commands ${commandsString} have completed.`
+        );
       }
     });
   }
