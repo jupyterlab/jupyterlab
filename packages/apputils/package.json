@@ -66,14 +66,14 @@
     "@types/react": "^17.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "sanitize-html": "~1.27.4",
+    "sanitize-html": "~2.3.3",
     "url": "^0.11.0"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.1.0-alpha.6",
     "@types/jest": "^26.0.10",
     "@types/react-dom": "^17.0.0",
-    "@types/sanitize-html": "^1.23.3",
+    "@types/sanitize-html": "^2.3.1",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
