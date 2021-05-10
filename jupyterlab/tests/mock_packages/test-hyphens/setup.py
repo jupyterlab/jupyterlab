@@ -11,7 +11,7 @@ HERE = path.abspath(path.dirname(__file__))
 lab_path = path.join(HERE, module_name, "labextension")
 
 post_develop = npm_builder(
-    build_cmd="build:labextension", source_dir=".", build_dir=lab_path, npm="jlpm"
+    build_cmd="build:labextension", build_dir=lab_path, npm="jlpm"
 )
 
 data_files_spec = [("share/jupyter/labextensions/" + lab_ext_name, lab_path, "**")]
