@@ -83,7 +83,7 @@
 
 /* This is the main application level current tab: only 1 exists. */
 .lm-DockPanel-tabBar .lm-TabBar-tab.jp-mod-current:before,
-.lm-TabPanel-tabBar .lm-TabBar-tab.jp-mod-current:before {
+#jp-down-stack .lm-TabBar-tab.lm-mod-current:before {
   position: absolute;
   top: calc(-1 * var(--jp-border-width) + 1px);
   left: calc(-1 * var(--jp-border-width));

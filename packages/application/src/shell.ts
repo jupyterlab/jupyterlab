@@ -303,7 +303,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     dockPanel.node.setAttribute('role', 'main');
 
     hboxPanel.spacing = 0;
-    vsplitPanel.spacing = 0;
+    vsplitPanel.spacing = 5;
     dockPanel.spacing = 5;
     hsplitPanel.spacing = 1;
 
@@ -373,9 +373,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     // Connect down panel change listeners
     this._downPanel.currentChanged.connect(this._onLayoutModified, this);
-    this._downPanel.tabBar.tabMoved.connect(this._onDownPanelChanged, this);
+    this._downPanel.tabBar.tabMoved.connect(this._onTabPanelChanged, this);
     this._downPanel.stackedPanel.widgetRemoved.connect(
-      this._onDownPanelChanged,
+      this._onTabPanelChanged,
       this
     );
 
@@ -1344,7 +1344,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Handle a change on the down panel widgets
    */
-  private _onDownPanelChanged(): void {
+  private _onTabPanelChanged(): void {
     if (this._downPanel.stackedPanel.widgets.length === 0) {
       this._downPanel.hide();
     }

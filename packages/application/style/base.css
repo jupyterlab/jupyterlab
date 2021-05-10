@@ -31,16 +31,11 @@ body {
   border-top: 4px solid red;
 }
 
-#jp-main-dock-panel {
+#jp-main-down-panel {
   padding: 5px;
 }
 
-#jp-down-stack {
-  padding: 0px 5px 5px 5px;
-}
-
-#jp-main-dock-panel[data-mode='single-document'],
-.jp-LabShell[data-shell-mode='single-document'] #jp-down-stack {
+.jp-LabShell[data-shell-mode='single-document'] #jp-main-down-panel {
   padding: 0;
 }
 
