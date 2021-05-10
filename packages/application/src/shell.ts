@@ -618,11 +618,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
 
-    const downWidget = this._downPanel.stackedPanel.widgets.find(
-      widget => widget.id === id
+    const tabIndex = this._downPanel.tabBar.titles.findIndex(
+      title => title.owner.id === id
     );
-    if (downWidget) {
-      downWidget.activate();
+    if (tabIndex >= 0) {
+      this._downPanel.currentIndex = tabIndex;
       return;
     }
 

@@ -203,6 +203,7 @@ function activateLogConsole(
       mode: options.insertMode
     });
     void tracker.add(logConsoleWidget);
+    app.shell.activateById(logConsoleWidget.id);
 
     logConsoleWidget.update();
     app.commands.notifyCommandChanged();
