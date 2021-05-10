@@ -39,20 +39,26 @@ body {
   padding: 0;
 }
 
-#jp-main-dock-panel[data-mode='single-document'] .jp-MainAreaWidget{
+#jp-main-dock-panel[data-mode='single-document'] .jp-MainAreaWidget {
   border: none;
 }
 
-.jp-LabShell[data-shell-mode='single-document'] #jp-down-stack .lm-TabPanel-stackedPanel {
+.jp-LabShell[data-shell-mode='single-document']
+  #jp-down-stack
+  .lm-TabPanel-stackedPanel {
   border-left: none;
   border-right: none;
 }
 
-.jp-LabShell[data-shell-mode='single-document'] #jp-down-stack .lm-TabBar-tab:first-child {
+.jp-LabShell[data-shell-mode='single-document']
+  #jp-down-stack
+  .lm-TabBar-tab:first-child {
   border-left: none;
 }
 
-.jp-LabShell[data-shell-mode='single-document'] #jp-down-stack .lm-TabBar-tab:last-child {
+.jp-LabShell[data-shell-mode='single-document']
+  #jp-down-stack
+  .lm-TabBar-tab:last-child {
   border-right: none;
 }
 

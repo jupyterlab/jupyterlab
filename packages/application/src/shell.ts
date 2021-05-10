@@ -368,8 +368,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
 
     // Connect vsplit layout change listener
-    // TODO needs change in lumino SplitLayout
-    // this._vsplitPanel.layoutModified.connect(this._onLayoutModified, this);
+    MessageLoop.installMessageHook(vsplitPanel, this._vsplitChangeHook);
 
     // Connect down panel change listeners
     this._downPanel.currentChanged.connect(this._onLayoutModified, this);
@@ -548,7 +547,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       (this.layout as BoxLayout).insertWidget(2, this._menuHandler.panel);
       this._titleWidgetHandler.show();
       this._updateTitlePanelTitle();
-
     } else {
       // Cache a reference to every widget currently in the dock panel.
       const widgets = toArray(dock.widgets());
@@ -1373,6 +1371,24 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       case 'child-removed':
         (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
         this._tracker.remove((msg as Widget.ChildMessage).child);
+        break;
+      default:
+        break;
+    }
+    return true;
+  };
+
+  /**
+   * A message hook for update messages on the main vertical split panel.
+   */
+  private _vsplitChangeHook = (
+    handler: IMessageHandler,
+    msg: Message
+  ): boolean => {
+    switch (msg.type) {
+      case 'update-request':
+        // Save down area size
+        this._onLayoutModified();
         break;
       default:
         break;

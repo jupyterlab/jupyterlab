@@ -342,7 +342,7 @@ export class LayoutRestorer implements ILayoutRestorer {
 
     const dehydrated: Private.IDownArea = {
       size: area.size
-    }
+    };
 
     if (area.currentWidget) {
       const current = Private.nameProperty.get(area.currentWidget);
@@ -356,7 +356,7 @@ export class LayoutRestorer implements ILayoutRestorer {
         .map(widget => Private.nameProperty.get(widget))
         .filter(name => !!name);
     }
-    
+
     return dehydrated;
   }
 
