@@ -252,7 +252,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const bottomPanel = (this._bottomPanel = new BoxPanel());
     bottomPanel.node.setAttribute('role', 'contentinfo');
     const hboxPanel = new BoxPanel();
-    const vsplitPanel = (this._vsplitPanel = new SplitPanel());
+    const vsplitPanel = (this._vsplitPanel = new Private.RestorableSplitPanel());
     const dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
@@ -368,7 +368,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
 
     // Connect vsplit layout change listener
-    MessageLoop.installMessageHook(vsplitPanel, this._vsplitChangeHook);
+    this._vsplitPanel.updated.connect(this._onLayoutModified, this);
 
     // Connect down panel change listeners
     this._downPanel.currentChanged.connect(this._onLayoutModified, this);
@@ -1378,24 +1378,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return true;
   };
 
-  /**
-   * A message hook for update messages on the main vertical split panel.
-   */
-  private _vsplitChangeHook = (
-    handler: IMessageHandler,
-    msg: Message
-  ): boolean => {
-    switch (msg.type) {
-      case 'update-request':
-        // Save down area size
-        this._onLayoutModified();
-        break;
-      default:
-        break;
-    }
-    return true;
-  };
-
   private _activeChanged = new Signal<this, ILabShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
   private _currentChanged = new Signal<this, ILabShell.IChangedArgs>(this);
@@ -1407,7 +1389,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _modeChanged = new Signal<this, DockPanel.Mode>(this);
   private _dockPanel: DockPanel;
   private _downPanel: TabPanel;
-  private _vsplitPanel: SplitPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
   private _layoutDebouncer = new Debouncer(() => {
@@ -1419,6 +1400,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _tracker = new FocusTracker<Widget>();
   private _headerPanel: Panel;
   private _hsplitPanel: Private.RestorableSplitPanel;
+  private _vsplitPanel: Private.RestorableSplitPanel;
   private _topHandler: Private.PanelHandler;
   private _menuHandler: Private.PanelHandler;
   private _skipLinkWidgetHandler: Private.SkipLinkWidgetHandler;

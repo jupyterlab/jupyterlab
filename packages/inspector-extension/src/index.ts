@@ -82,11 +82,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector.content.source = source;
       }
       if (!inspector.isAttached) {
-        shell.add(
-          inspector,
-          shell.mode === 'multiple-document' ? 'main' : 'down',
-          { activate: shell.mode !== 'multiple-document' }
-        );
+        shell.add(inspector, 'down', { activate: false });
       }
       shell.activateById(inspector.id);
       return inspector;
