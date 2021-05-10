@@ -17,7 +17,7 @@ import { Token } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@lumino/widgets';
+import { DockPanel, Widget } from '@lumino/widgets';
 
 /**
  * The type for all JupyterFrontEnd application plugins.
@@ -282,6 +282,11 @@ export namespace JupyterFrontEnd {
      * or "focused" mean, depending on their user interface characteristics.
      */
     readonly currentWidget: Widget | null;
+
+    /**
+     * The user interface mode.
+     */
+    readonly mode: DockPanel.Mode;
 
     /**
      * Returns an iterator for the widgets inside the application shell.
