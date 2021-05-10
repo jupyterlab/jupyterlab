@@ -120,7 +120,7 @@ describe('apputils', () => {
         const dehydrated: ILabShell.ILayout = {
           fresh: false,
           mainArea: { currentWidget: null, dock: null },
-          downArea: { currentWidget: null, widgets: null, size: null },
+          downArea: { currentWidget: null, widgets: null, size: 0 },
           leftArea: {
             currentWidget,
             collapsed: true,
@@ -202,7 +202,7 @@ describe('apputils', () => {
         const dehydrated: ILabShell.ILayout = {
           fresh: false,
           mainArea: { currentWidget: null, dock: null },
-          downArea: { currentWidget: null, widgets: null, size: null },
+          downArea: { currentWidget: null, widgets: null, size: 0 },
           leftArea: {
             currentWidget,
             collapsed: true,
