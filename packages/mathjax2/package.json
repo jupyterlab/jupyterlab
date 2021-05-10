@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mathjax2",
-  "version": "3.1.0-alpha.5",
+  "version": "3.1.0-alpha.6",
   "description": "A MathJax 2 Typesetting provider for JupyterLab",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,7 +34,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^3.1.0-alpha.5",
+    "@jupyterlab/rendermime-interfaces": "^3.1.0-alpha.6",
     "@lumino/coreutils": "^1.5.3"
   },
   "devDependencies": {

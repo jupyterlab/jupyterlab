@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/coreutils",
-  "version": "5.1.0-alpha.5",
+  "version": "5.1.0-alpha.6",
   "description": "JupyterLab - Core Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -49,7 +49,7 @@
     "url-parse": "~1.4.7"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.1.0-alpha.5",
+    "@jupyterlab/testutils": "^3.1.0-alpha.6",
     "@types/jest": "^26.0.10",
     "@types/minimist": "^1.2.0",
     "@types/node": "^14.6.1",

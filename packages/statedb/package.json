@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/statedb",
-  "version": "3.1.0-alpha.5",
+  "version": "3.1.0-alpha.6",
   "description": "Package for managing state in Jupyterlab",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -43,7 +43,7 @@
     "@lumino/signaling": "^1.4.3"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.1.0-alpha.5",
+    "@jupyterlab/testutils": "^3.1.0-alpha.6",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

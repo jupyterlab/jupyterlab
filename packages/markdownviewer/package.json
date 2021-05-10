@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/markdownviewer",
-  "version": "3.1.0-alpha.5",
+  "version": "3.1.0-alpha.6",
   "description": "JupyterLab - Markdown viewer Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,11 +37,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.1.0-alpha.5",
-    "@jupyterlab/coreutils": "^5.1.0-alpha.5",
-    "@jupyterlab/docregistry": "^3.1.0-alpha.5",
-    "@jupyterlab/rendermime": "^3.1.0-alpha.5",
-    "@jupyterlab/translation": "^3.1.0-alpha.5",
+    "@jupyterlab/apputils": "^3.1.0-alpha.6",
+    "@jupyterlab/coreutils": "^5.1.0-alpha.6",
+    "@jupyterlab/docregistry": "^3.1.0-alpha.6",
+    "@jupyterlab/rendermime": "^3.1.0-alpha.6",
+    "@jupyterlab/translation": "^3.1.0-alpha.6",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",
     "@lumino/widgets": "^1.19.0"

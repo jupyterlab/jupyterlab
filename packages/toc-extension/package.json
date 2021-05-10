@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc-extension",
-  "version": "5.1.0-alpha.5",
+  "version": "5.1.0-alpha.6",
   "description": "JupyterLab - Table of Contents widget extension",
   "keywords": [
     "jupyter",
@@ -37,15 +37,15 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0-alpha.5",
-    "@jupyterlab/docmanager": "^3.1.0-alpha.5",
-    "@jupyterlab/fileeditor": "^3.1.0-alpha.5",
-    "@jupyterlab/markdownviewer": "^3.1.0-alpha.5",
-    "@jupyterlab/notebook": "^3.1.0-alpha.5",
-    "@jupyterlab/rendermime": "^3.1.0-alpha.5",
-    "@jupyterlab/toc": "^5.1.0-alpha.5",
-    "@jupyterlab/translation": "^3.1.0-alpha.5",
-    "@jupyterlab/ui-components": "^3.1.0-alpha.5"
+    "@jupyterlab/application": "^3.1.0-alpha.6",
+    "@jupyterlab/docmanager": "^3.1.0-alpha.6",
+    "@jupyterlab/fileeditor": "^3.1.0-alpha.6",
+    "@jupyterlab/markdownviewer": "^3.1.0-alpha.6",
+    "@jupyterlab/notebook": "^3.1.0-alpha.6",
+    "@jupyterlab/rendermime": "^3.1.0-alpha.6",
+    "@jupyterlab/toc": "^5.1.0-alpha.6",
+    "@jupyterlab/translation": "^3.1.0-alpha.6",
+    "@jupyterlab/ui-components": "^3.1.0-alpha.6"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

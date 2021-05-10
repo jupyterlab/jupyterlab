@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation-extension",
-  "version": "3.1.0-alpha.5",
+  "version": "3.1.0-alpha.6",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -40,11 +40,11 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0-alpha.5",
-    "@jupyterlab/apputils": "^3.1.0-alpha.5",
-    "@jupyterlab/mainmenu": "^3.1.0-alpha.5",
-    "@jupyterlab/settingregistry": "^3.1.0-alpha.5",
-    "@jupyterlab/translation": "^3.1.0-alpha.5",
+    "@jupyterlab/application": "^3.1.0-alpha.6",
+    "@jupyterlab/apputils": "^3.1.0-alpha.6",
+    "@jupyterlab/mainmenu": "^3.1.0-alpha.6",
+    "@jupyterlab/settingregistry": "^3.1.0-alpha.6",
+    "@jupyterlab/translation": "^3.1.0-alpha.6",
     "@lumino/widgets": "^1.19.0"
   },
   "devDependencies": {

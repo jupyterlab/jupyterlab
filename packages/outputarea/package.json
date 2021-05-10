@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/outputarea",
-  "version": "3.1.0-alpha.5",
+  "version": "3.1.0-alpha.6",
   "description": "JupyterLab - Notebook Output Area",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -42,12 +42,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.1.0-alpha.5",
-    "@jupyterlab/nbformat": "^3.1.0-alpha.5",
-    "@jupyterlab/observables": "^4.1.0-alpha.5",
-    "@jupyterlab/rendermime": "^3.1.0-alpha.5",
-    "@jupyterlab/rendermime-interfaces": "^3.1.0-alpha.5",
-    "@jupyterlab/services": "^6.1.0-alpha.5",
+    "@jupyterlab/apputils": "^3.1.0-alpha.6",
+    "@jupyterlab/nbformat": "^3.1.0-alpha.6",
+    "@jupyterlab/observables": "^4.1.0-alpha.6",
+    "@jupyterlab/rendermime": "^3.1.0-alpha.6",
+    "@jupyterlab/rendermime-interfaces": "^3.1.0-alpha.6",
+    "@jupyterlab/services": "^6.1.0-alpha.6",
     "@lumino/algorithm": "^1.3.3",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/disposable": "^1.4.3",
@@ -58,7 +58,7 @@
     "resize-observer-polyfill": "^1.5.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.1.0-alpha.5",
+    "@jupyterlab/testutils": "^3.1.0-alpha.6",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
