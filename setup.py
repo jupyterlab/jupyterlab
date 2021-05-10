@@ -9,8 +9,6 @@ import os
 import os.path as osp
 import sys
 
-from jupyter_packaging import wrap_installers, npm_builder, get_data_files, get_version
-from packaging.version import Version
 from setuptools import setup
 
 NAME = "jupyterlab"
@@ -23,21 +21,6 @@ ensured_targets = [
 ]
 ensured_targets = [osp.join(HERE, NAME, t) for t in ensured_targets]
 
-
-def post_dist():
-    target = pjoin(HERE, NAME, 'static', 'package.json')
-    with open(target) as fid:
-        version = json.load(fid)['jupyterlab']['version']
-
-    if Version(version) != Version(get_version(f'{NAME}/_version.py')):
-        raise ValueError('Version mismatch, please run `build:update`')
-
-
-npm = ['node', pjoin(HERE, NAME, 'staging', 'yarn.js')]
-# In develop mode, just run yarn
-builder = npm_builder(build_cmd=None, npm=npm, force=True)
-cmdclass = wrap_installers(post_develop=builder, post_dist=post_dist, ensured_targets=ensured_targets)
-
 data_files_spec = [
     ('share/jupyter/lab/static', f'{NAME}/static', '**'),
     ('share/jupyter/lab/schemas', f'{NAME}/schemas', '**'),
@@ -48,10 +31,34 @@ data_files_spec = [
      'jupyter-config/jupyter_notebook_config.d', f'{NAME}.json'),
 ]
 
-setup_args = dict(
-    cmdclass=cmdclass,
-    data_files=get_data_files(data_files_spec)
-)
+def post_dist():
+    from packaging.version import Version
+    from jupyter_packaging import get_version
+
+    target = pjoin(HERE, NAME, 'static', 'package.json')
+    with open(target) as fid:
+        version = json.load(fid)['jupyterlab']['version']
+
+    if Version(version) != Version(get_version(f'{NAME}/_version.py')):
+        raise ValueError('Version mismatch, please run `build:update`')
+
+
+try:
+    from jupyter_packaging import wrap_installers, npm_builder, get_data_files
+
+    npm = ['node', pjoin(HERE, NAME, 'staging', 'yarn.js')]
+    # In develop mode, just run yarn
+    builder = npm_builder(build_cmd=None, npm=npm, force=True)
+    cmdclass = wrap_installers(post_develop=builder, post_dist=post_dist, ensured_targets=ensured_targets)
+
+
+    setup_args = dict(
+        cmdclass=cmdclass,
+        data_files=get_data_files(data_files_spec)
+    )
+except ImportError:
+    setup_args = dict()
+
 
 if __name__ == '__main__':
     setup(**setup_args)
