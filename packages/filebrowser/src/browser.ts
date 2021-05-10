@@ -115,7 +115,7 @@ export class FileBrowser extends Widget {
     this.toolbar.addItem('upload', uploader);
     this.toolbar.addItem('refresher', refresher);
 
-    this._listing = new DirListing({
+    this._listing = this.createDirListing({
       model,
       renderer,
       translator: this.translator
@@ -377,6 +377,17 @@ export class FileBrowser extends Widget {
    */
   modelForClick(event: MouseEvent): Contents.IModel | undefined {
     return this._listing.modelForClick(event);
+  }
+
+  /**
+   * Create the underlying DirListing instance.
+   *
+   * @param options - The DirListing constructor options.
+   *
+   * @returns The created DirListing instance.
+   */
+  protected createDirListing(options: DirListing.IOptions): DirListing {
+    return new DirListing(options);
   }
 
   protected translator: ITranslator;
