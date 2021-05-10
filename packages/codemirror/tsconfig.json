@@ -19,10 +19,10 @@
       "path": "../nbformat"
     },
     {
-      "path": "../observables"
+      "path": "../shared-models"
     },
     {
-      "path": "../shared-models"
+      "path": "../observables"
     },
     {
       "path": "../statusbar"

@@ -25,6 +25,9 @@
       "path": "../observables"
     },
     {
+      "path": "../shared-models"
+    },
+    {
       "path": "../rendermime"
     },
     {
@@ -32,9 +35,6 @@
     },
     {
       "path": "../services"
-    },
-    {
-      "path": "../shared-models"
     },
     {
       "path": "../translation"

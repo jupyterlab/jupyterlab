@@ -163,6 +163,9 @@
       "path": "../mathjax2-extension"
     },
     {
+      "path": "../shared-models"
+    },
+    {
       "path": "../nbformat"
     },
     {
@@ -209,9 +212,6 @@
     },
     {
       "path": "../settingregistry"
-    },
-    {
-      "path": "../shared-models"
     },
     {
       "path": "../shortcuts-extension"
