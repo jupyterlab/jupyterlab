@@ -359,14 +359,16 @@ def _get_labextension_metadata(module):
     if not osp.exists(mod_path):
         raise FileNotFoundError('The path `{}` does not exist.'.format(mod_path))
 
+    errors = []
+
     # Check if the path is a valid labextension
     try:
         m = importlib.import_module(module)
         if hasattr(m, '_jupyter_labextension_paths') :
             labexts = m._jupyter_labextension_paths()
             return m, labexts
-    except Exception:
-        pass
+    except Exception as exc:
+        errors.append(exc)
 
     # Try getting the package name from setup.py
     try:
@@ -390,8 +392,8 @@ def _get_labextension_metadata(module):
         m = importlib.import_module(package)
         if hasattr(m, '_jupyter_labextension_paths') :
             return m, m._jupyter_labextension_paths()
-    except Exception:
-        pass
+    except Exception as exc:
+        errors.append(exc)
 
     # Looking for modules in the package
     from setuptools import find_packages
@@ -403,8 +405,8 @@ def _get_labextension_metadata(module):
             m = importlib.import_module(package)
             if hasattr(m, '_jupyter_labextension_paths') :
                 return m, m._jupyter_labextension_paths()
-        except Exception:
-            pass
+        except Exception as exc:
+            errors.append(exc)
 
     from setuptools import find_namespace_packages
     packages = find_namespace_packages(mod_path)
@@ -415,7 +417,7 @@ def _get_labextension_metadata(module):
             m = importlib.import_module(package)
             if hasattr(m, '_jupyter_labextension_paths') :
                 return m, m._jupyter_labextension_paths()
-        except Exception:
-            pass
+        except Exception as exc:
+            errors.append(exc)
 
-    raise ModuleNotFoundError('There is not a labextensions at {}'.format(module))
+    raise ModuleNotFoundError('There is no labextension at {}. Errors encountered: {}'.format(module, errors))
