@@ -153,8 +153,10 @@ export class YFile
   public updateSource(start: number, end: number, value = ''): void {
     this.transact(() => {
       const ysource = this.ysource;
-      ysource.delete(start, end - start);
+      // insert and then delete.
+      // This ensures that the cursor position is adjusted after the replaced content.
       ysource.insert(start, value);
+      ysource.delete(start + value.length, end - start);
     });
   }
 
@@ -667,9 +669,11 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    */
   public updateSource(start: number, end: number, value = ''): void {
     this.transact(() => {
-      const ysource = this.ymodel.get('source');
-      ysource.delete(start, end - start);
+      const ysource = this.ysource;
+      // insert and then delete.
+      // This ensures that the cursor position is adjusted after the replaced content.
       ysource.insert(start, value);
+      ysource.delete(start + value.length, end - start);
     });
   }
 
