@@ -365,11 +365,8 @@ def _get_labextension_metadata(module):
         if hasattr(m, '_jupyter_labextension_paths') :
             labexts = m._jupyter_labextension_paths()
             return m, labexts
-        else :
-            m = None
-
     except Exception:
-        m = None
+        pass
 
     # Try getting the package name from setup.py
     try:
@@ -381,7 +378,7 @@ def _get_labextension_metadata(module):
     # Make sure the package is installed
     import pkg_resources
     try:
-        dist = pkg_resources.get_distribution(package)
+        pkg_resources.get_distribution(package)
     except pkg_resources.DistributionNotFound:
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
         sys.path.insert(0, mod_path)
@@ -394,7 +391,7 @@ def _get_labextension_metadata(module):
         if hasattr(m, '_jupyter_labextension_paths') :
             return m, m._jupyter_labextension_paths()
     except Exception:
-        m = None
+        pass
 
     # Looking for modules in the package
     from setuptools import find_packages
@@ -407,20 +404,18 @@ def _get_labextension_metadata(module):
             if hasattr(m, '_jupyter_labextension_paths') :
                 return m, m._jupyter_labextension_paths()
         except Exception:
-            m = None
+            pass
 
-    # Looking for namespace packages
-    if m is None:
-        from setuptools import find_namespace_packages
-        packages = find_namespace_packages(mod_path)
+    from setuptools import find_namespace_packages
+    packages = find_namespace_packages(mod_path)
 
-        # Looking for the labextension metadata
-        for package in packages:
-            try:
-                m = importlib.import_module(package)
-                if hasattr(m, '_jupyter_labextension_paths') :
-                    return m, m._jupyter_labextension_paths()
-            except Exception:
-                m = None
+    # Looking for the labextension metadata
+    for package in packages:
+        try:
+            m = importlib.import_module(package)
+            if hasattr(m, '_jupyter_labextension_paths') :
+                return m, m._jupyter_labextension_paths()
+        except Exception:
+            pass
 
     raise ModuleNotFoundError('There is not a labextensions at {}'.format(module))
