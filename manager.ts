@@ -52,40 +52,45 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._configuration = configuration;
   }
 
+  protected _comparePriorities(a: TLanguageServerId, b: TLanguageServerId) {
+    const DEFAULT_PRIORITY = 50;
+    const a_priority = this._configuration[a]?.priority ?? DEFAULT_PRIORITY;
+    const b_priority = this._configuration[b]?.priority ?? DEFAULT_PRIORITY;
+    if (a_priority == b_priority) {
+      this.console.warn(
+        `Two matching servers: ${a} and ${b} have the same priority; choose which one to use by changing the priority in Advanced Settings Editor`
+      );
+      return a.localeCompare(b);
+    }
+    // higher priority = higher in the list (descending order)
+    return b_priority - a_priority;
+  }
+
   getMatchingServers(options: ILanguageServerManager.IGetServerIdOptions) {
+    if (!options.language) {
+      this.console.error(
+        'Cannot match server by language: language not available; ensure that kernel and specs provide language and MIME type'
+      );
+      return [];
+    }
+
     const matchingSessionsKeys: TLanguageServerId[] = [];
-    const config = this._configuration;
+    const lowerCaseLanguage = options.language.toLocaleLowerCase();
 
     // most things speak language
     // if language is not known, it is guessed based on MIME type earlier
     // so some language should be available by now (which can be not obvious, e.g. "plain" for txt documents)
     for (const [key, session] of this._sessions.entries()) {
-      if (options.language) {
-        if (
-          session.spec.languages.indexOf(
-            options.language.toLocaleLowerCase()
-          ) !== -1
-        ) {
-          matchingSessionsKeys.push(key);
-        }
-      } else {
-        this.console.error(
-          'Cannot match server by language: language not available; ensure that kernel and specs provide language and MIME type'
-        );
+      if (
+        session.spec.languages.some(
+          language => language.toLocaleLowerCase() == lowerCaseLanguage
+        )
+      ) {
+        matchingSessionsKeys.push(key);
       }
     }
 
-    return matchingSessionsKeys.sort((a, b) => {
-      const a_priority = config[a]?.priority ?? 50;
-      const b_priority = config[b]?.priority ?? 50;
-      if (a_priority == b_priority) {
-        this.console.warn(
-          `Two matching servers: ${a} and ${b} have the same priority; choose which one to use by changing the priority in Advanced Settings Editor`
-        );
-      }
-      // higher priority = higher in the list (descending order)
-      return b_priority - a_priority;
-    });
+    return matchingSessionsKeys.sort(this._comparePriorities);
   }
 
   get statusCode(): number {

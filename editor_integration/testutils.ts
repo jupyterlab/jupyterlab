@@ -54,6 +54,8 @@ import { EditorAdapter } from './editor_adapter';
 import createNotebookPanel = NBTestUtils.createNotebookPanel;
 import IEditor = CodeEditor.IEditor;
 
+const DEFAULT_SERVER_ID = 'pylsp';
+
 export interface ITestEnvironment {
   document_options: VirtualDocument.IOptions;
 
@@ -71,7 +73,7 @@ export interface ITestEnvironment {
 export class MockLanguageServerManager extends LanguageServerManager {
   async fetchSessions() {
     this._sessions = new Map();
-    this._sessions.set('pylsp', {
+    this._sessions.set(DEFAULT_SERVER_ID, {
       spec: {
         languages: ['python']
       }
@@ -243,7 +245,7 @@ function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
         languageId: this.document_options.language,
         serverUri: 'ws://localhost:8080',
         rootUri: 'file:///unit-test',
-        serverIdentifier: 'pylsp'
+        serverIdentifier: DEFAULT_SERVER_ID
       });
     }
 
