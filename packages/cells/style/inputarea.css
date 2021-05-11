@@ -9,7 +9,7 @@
 
 /* All input areas */
 .jp-InputArea {
-  display: block;
+  display: flex;
   flex-direction: row;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .jp-InputPrompt {
-  width: var(--jp-cell-prompt-width);
+  flex: 0 0 var(--jp-cell-prompt-width);
   color: var(--jp-cell-inprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
