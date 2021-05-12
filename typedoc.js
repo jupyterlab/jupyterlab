@@ -74,7 +74,6 @@ const packages = [
   'statedb',
   'statusbar-extension',
   'statusbar',
-  'tabmanager-extension',
   'terminal-extension',
   'terminal',
   'theme-dark-extension',
