@@ -43,8 +43,6 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
-import { NotebookPanel } from '@jupyterlab/notebook';
-
 import { each, map, some, toArray } from '@lumino/algorithm';
 
 import { JSONExt } from '@lumino/coreutils';
@@ -779,10 +777,10 @@ function addCommands(
 
   docManager.activateRequested.connect((sender, args) => {
     const widget = sender.findWidget(args);
-    if (widget && widget instanceof NotebookPanel) {
+    if (widget && widget.shouldNameFile) {
       widget.shouldNameFile.connect(() => {
         if (sender.nameFileOnSave) {
-          const context = sender.contextForWidget(widget);
+          const context = sender.contextForWidget(widget!);
           return nameOnSaveDialog(sender, context!);
         }
       });

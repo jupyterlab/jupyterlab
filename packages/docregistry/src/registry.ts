@@ -1498,6 +1498,8 @@ export interface IDocumentWidget<
    * Set URI fragment identifier.
    */
   setFragment(fragment: string): void;
+
+  shouldNameFile?: Signal<this, void>;
 }
 
 /**
