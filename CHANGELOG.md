@@ -11,6 +11,37 @@ See the [JupyterLab
 milestone on GitHub for the full list of pull requests and issues
 closed.
 
+### v3.0.15
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.0.14...e1cda8e2fb69a6a01ec261ce13413acd306df4cb))
+
+### Enhancements made
+
+- Added support for namespace packages in labextensions. [#10150](https://github.com/jupyterlab/jupyterlab/pull/10150) [@mellesies](https://github.com/mellesies)
+
+### Maintenance and upkeep improvements
+
+- [3.0.x] Remove Dependency on Jupyter Packaging [#10218](https://github.com/jupyterlab/jupyterlab/pull/10218) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- [3.0.x] Fix changelong entries for 3.0.13 [#10087](https://github.com/jupyterlab/jupyterlab/pull/10087) ([@blink1073](https://github.com/blink1073))
+- chore: update extension_tutorial [#10026](https://github.com/jupyterlab/jupyterlab/pull/10026) [@0618](https://github.com/0618)
+
+### Other merged PRs
+
+- Workaround Chromium issue with iframe reload/href [#10185](https://github.com/jupyterlab/jupyterlab/pull/10185) [@krassowski](https://github.com/krassowski)
+- Update to `sanitize-html~=2.3.3` [#10220](https://github.com/jupyterlab/jupyterlab/pull/10220) [@jtpio](https://github.com/jtpio)
+- Update to `url-parse~=1.5.1` [#10219](https://github.com/jupyterlab/jupyterlab/pull/10219) [@jtpio](https://github.com/jtpio)
+- Update packaging commands in the extension tutorial [#10104](https://github.com/jupyterlab/jupyterlab/pull/10104) [@jtpio](https://github.com/jtpio)
+- Mention mamba as a means to install JupyterLab [#10093](https://github.com/jupyterlab/jupyterlab/pull/10093) [@SylvainCorlay](https://github.com/SylvainCorlay)
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-04-12&to=2021-05-10&type=c))
+
+[@agoose77](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aagoose77+updated%3A2021-04-12..2021-05-10&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-04-12..2021-05-10&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2021-04-12..2021-05-10&type=Issues) | [@fperez](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afperez+updated%3A2021-04-12..2021-05-10&type=Issues) | [@goanpeca](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agoanpeca+updated%3A2021-04-12..2021-05-10&type=Issues) | [@isabela-pf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aisabela-pf+updated%3A2021-04-12..2021-05-10&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2021-04-12..2021-05-10&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2021-04-12..2021-05-10&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-04-12..2021-05-10&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2021-04-12..2021-05-10&type=Issues) | [@marthacryan](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amarthacryan+updated%3A2021-04-12..2021-05-10&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2021-04-12..2021-05-10&type=Issues) | [@mlucool](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amlucool+updated%3A2021-04-12..2021-05-10&type=Issues) | [@SylvainCorlay](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2021-04-12..2021-05-10&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2021-04-12..2021-05-10&type=Issues)
+
 ### v3.0.14
 
 - Clean up browser check [#10080](https://github.com/jupyterlab/jupyterlab/pull/10080)
