@@ -35,7 +35,6 @@ import {
   filter,
   find,
   IIterator,
-  map,
   toArray
 } from '@lumino/algorithm';
 
@@ -308,7 +307,7 @@ export class DirListing extends Widget {
    */
   selectedItems(): IIterator<Contents.IModel> {
     const items = this._sortedItems;
-    return filter(items, item => this._selection[item.name]);
+    return filter(items, item => this.selection[item.path]);
   }
 
   /**
@@ -405,7 +404,7 @@ export class DirListing extends Widget {
    * @returns A promise that resolves when the operation is complete.
    */
   async delete(): Promise<void> {
-    const items = this._sortedItems.filter(item => this._selection[item.name]);
+    const items = this._sortedItems.filter(item => this.selection[item.path]);
 
     if (!items.length) {
       return;
@@ -447,8 +446,7 @@ export class DirListing extends Widget {
 
     each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
-        const oldPath = PathExt.join(basePath, item.name);
-        promises.push(this._model.manager.copy(oldPath, basePath));
+        promises.push(this._model.manager.copy(item.path, basePath));
       }
     });
     return Promise.all(promises)
@@ -487,7 +485,7 @@ export class DirListing extends Widget {
     const promises = toArray(this._model.sessions())
       .filter(session => {
         const index = ArrayExt.firstIndexOf(paths, session.path);
-        return this._selection[items[index].name];
+        return this.selection[items[index].path];
       })
       .map(session => model.manager.services.sessions.shutdown(session.id));
 
@@ -510,12 +508,12 @@ export class DirListing extends Widget {
    */
   selectNext(keepExisting = false): void {
     let index = -1;
-    const selected = Object.keys(this._selection);
+    const selected = Object.keys(this.selection);
     const items = this._sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the next item.
-      const name = selected[selected.length - 1];
-      index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      const path = selected[selected.length - 1];
+      index = ArrayExt.findFirstIndex(items, value => value.path === path);
       index += 1;
       if (index === this._items.length) {
         index = 0;
@@ -525,8 +523,8 @@ export class DirListing extends Widget {
       index = 0;
     } else {
       // Select the last selected item.
-      const name = selected[selected.length - 1];
-      index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      const path = selected[selected.length - 1];
+      index = ArrayExt.findFirstIndex(items, value => value.path === path);
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
@@ -541,12 +539,12 @@ export class DirListing extends Widget {
    */
   selectPrevious(keepExisting = false): void {
     let index = -1;
-    const selected = Object.keys(this._selection);
+    const selected = Object.keys(this.selection);
     const items = this._sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the previous item.
-      const name = selected[0];
-      index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      const path = selected[0];
+      index = ArrayExt.findFirstIndex(items, value => value.path === path);
       index -= 1;
       if (index === -1) {
         index = this._items.length - 1;
@@ -556,8 +554,8 @@ export class DirListing extends Widget {
       index = this._items.length - 1;
     } else {
       // Select the first selected item.
-      const name = selected[0];
-      index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      const path = selected[0];
+      index = ArrayExt.findFirstIndex(items, value => value.path === path);
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
@@ -590,7 +588,13 @@ export class DirListing extends Widget {
    * @returns Whether the item is selected.
    */
   isSelected(name: string): boolean {
-    return this._selection[name] === true;
+    const items = this._sortedItems;
+
+    return (
+      toArray(
+        filter(items, item => item.name === name && this.selection[item.path])
+      ).length !== 0
+    );
   }
 
   /**
@@ -613,7 +617,7 @@ export class DirListing extends Widget {
    * Clear the selected items.
    */
   clearSelectedItems() {
-    this._selection = Object.create(null);
+    this.selection = Object.create(null);
   }
 
   /**
@@ -808,7 +812,7 @@ export class DirListing extends Widget {
         this.translator,
         this._hiddenColumns
       );
-      if (this._selection[item.name]) {
+      if (this.selection[item.path]) {
         node.classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
           node.classList.add(CUT_CLASS);
@@ -823,7 +827,7 @@ export class DirListing extends Widget {
     });
 
     // Handle the selectors on the widget node.
-    const selected = Object.keys(this._selection).length;
+    const selected = Object.keys(this.selection).length;
     if (selected) {
       this.addClass(SELECTED_CLASS);
       if (selected > 1) {
@@ -957,7 +961,7 @@ export class DirListing extends Widget {
       // See if we need to clear the other selection.
       if (!altered && event.button === 0) {
         this.clearSelectedItems();
-        this._selection[this._softSelection] = true;
+        this.selection[this._softSelection] = true;
         this.update();
       }
       this._softSelection = '';
@@ -1030,7 +1034,7 @@ export class DirListing extends Widget {
         event.preventDefault();
         event.stopPropagation();
 
-        const selected = Object.keys(this._selection);
+        const selected = Object.keys(this.selection);
         const name = selected[0];
         const items = this._sortedItems;
         const i = ArrayExt.findFirstIndex(items, value => value.name === name);
@@ -1148,7 +1152,7 @@ export class DirListing extends Widget {
         return;
       }
       const item = this._sortedItems[index];
-      if (item.type !== 'directory' || this._selection[item.name]) {
+      if (item.type !== 'directory' || this.selection[item.path]) {
         return;
       }
       const target = event.target as HTMLElement;
@@ -1254,7 +1258,7 @@ export class DirListing extends Widget {
    * Start a drag event.
    */
   private _startDrag(index: number, clientX: number, clientY: number): void {
-    let selectedNames = Object.keys(this._selection);
+    let selectedPaths = Object.keys(this.selection);
     const source = this._items[index];
     const items = this._sortedItems;
     let selectedItems: Contents.IModel[];
@@ -1263,11 +1267,11 @@ export class DirListing extends Widget {
     // If the source node is not selected, use just that node.
     if (!source.classList.contains(SELECTED_CLASS)) {
       item = items[index];
-      selectedNames = [item.name];
+      selectedPaths = [item.path];
       selectedItems = [item];
     } else {
-      const name = selectedNames[0];
-      item = find(items, value => value.name === name);
+      const path = selectedPaths[0];
+      item = find(items, value => value.path === path);
       selectedItems = toArray(this.selectedItems());
     }
 
@@ -1279,7 +1283,7 @@ export class DirListing extends Widget {
     const ft = this._manager.registry.getFileTypeForModel(item);
     const dragImage = this.renderer.createDragImage(
       source,
-      selectedNames.length,
+      selectedPaths.length,
       this._trans,
       ft
     );
@@ -1291,14 +1295,8 @@ export class DirListing extends Widget {
       supportedActions: 'move',
       proposedAction: 'move'
     });
-    const basePath = this._model.path;
 
-    const paths = toArray(
-      map(selectedNames, name => {
-        return PathExt.join(basePath, name);
-      })
-    );
-    this._drag.mimeData.setData(CONTENTS_MIME, paths);
+    this._drag.mimeData.setData(CONTENTS_MIME, selectedPaths);
 
     // Add thunks for getting mime data content.
     // We thunk the content so we don't try to make a network call
@@ -1315,7 +1313,7 @@ export class DirListing extends Widget {
     }
 
     if (item && item.type !== 'directory') {
-      const otherPaths = paths.slice(1).reverse();
+      const otherPaths = selectedPaths.slice(1).reverse();
       this._drag.mimeData.setData(FACTORY_MIME, () => {
         if (!item) {
           return;
@@ -1376,15 +1374,15 @@ export class DirListing extends Widget {
     // Clear any existing soft selection.
     this._softSelection = '';
 
-    const name = items[index].name;
-    const selected = Object.keys(this._selection);
+    const path = items[index].path;
+    const selected = Object.keys(this.selection);
 
     // Handle toggling.
     if ((IS_MAC && event.metaKey) || (!IS_MAC && event.ctrlKey)) {
-      if (this._selection[name]) {
-        delete this._selection[name];
+      if (this.selection[path]) {
+        delete this.selection[path];
       } else {
-        this._selection[name] = true;
+        this.selection[path] = true;
       }
 
       // Handle multiple select.
@@ -1392,14 +1390,14 @@ export class DirListing extends Widget {
       this._handleMultiSelect(selected, index);
 
       // Handle a 'soft' selection
-    } else if (name in this._selection && selected.length > 1) {
-      this._softSelection = name;
+    } else if (path in this.selection && selected.length > 1) {
+      this._softSelection = path;
 
       // Default to selecting the only the item.
     } else {
       // Select only the given item.
       this.clearSelectedItems();
-      this._selection[name] = true;
+      this.selection[path] = true;
     }
     this.update();
   }
@@ -1415,8 +1413,8 @@ export class DirListing extends Widget {
       if (i === index) {
         continue;
       }
-      const name = items[i].name;
-      if (selected.indexOf(name) !== -1) {
+      const path = items[i].path;
+      if (selected.indexOf(path) !== -1) {
         if (nearestIndex === -1) {
           nearestIndex = i;
         } else {
@@ -1438,7 +1436,7 @@ export class DirListing extends Widget {
         (nearestIndex >= i && index <= i) ||
         (nearestIndex <= i && index >= i)
       ) {
-        this._selection[items[i].name] = true;
+        this.selection[items[i].path] = true;
       }
     }
   }
@@ -1475,7 +1473,7 @@ export class DirListing extends Widget {
   private _doRename(): Promise<string> {
     this._inRename = true;
     const items = this._sortedItems;
-    const name = Object.keys(this._selection)[0];
+    const name = Object.keys(this.selection)[0];
     const index = ArrayExt.findFirstIndex(items, value => value.name === name);
     const row = this._items[index];
     const item = items[index];
@@ -1552,7 +1550,7 @@ export class DirListing extends Widget {
       this.clearSelectedItems();
     }
     const name = items[index].name;
-    this._selection[name] = true;
+    this.selection[name] = true;
     this.update();
   }
 
@@ -1561,12 +1559,12 @@ export class DirListing extends Widget {
    */
   private _onModelRefreshed(): void {
     // Update the selection.
-    const existing = Object.keys(this._selection);
+    const existing = Object.keys(this.selection);
     this.clearSelectedItems();
     each(this._model.items(), item => {
       const name = item.name;
       if (existing.indexOf(name) !== -1) {
-        this._selection[name] = true;
+        this.selection[name] = true;
       }
     });
     if (this.isVisible) {
@@ -1646,7 +1644,7 @@ export class DirListing extends Widget {
   private _clipboard: string[] = [];
   private _manager: IDocumentManager;
   private _softSelection = '';
-  private _selection: { [key: string]: boolean } = Object.create(null);
+  protected selection: { [key: string]: boolean } = Object.create(null);
   private _renderer: DirListing.IRenderer;
   private _searchPrefix: string = '';
   private _searchPrefixTimer = -1;
