@@ -1834,9 +1834,9 @@ export namespace DirListing {
     ): void {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
-      const name = this._createHeaderItemNode(trans.__('Name'));
+      const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
-      const modified = this._createHeaderItemNode(trans.__('Last Modified'));
+      const modified = this.createHeaderItemNode(trans.__('Last Modified'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
@@ -2109,7 +2109,7 @@ export namespace DirListing {
     /**
      * Create a node for a header item.
      */
-    private _createHeaderItemNode(label: string): HTMLElement {
+    protected createHeaderItemNode(label: string): HTMLElement {
       const node = document.createElement('div');
       const text = document.createElement('span');
       const icon = document.createElement('span');
