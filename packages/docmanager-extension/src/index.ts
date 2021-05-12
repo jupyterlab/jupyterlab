@@ -189,6 +189,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
 
       if (docManager.nameFileOnSave != nameFileOnSave) {
         docManager.nameFileOnSave = nameFileOnSave;
+        app.commands.notifyCommandChanged(CommandIDs.nameOnSave);
       }
 
       // Handle default widget factory overrides.
