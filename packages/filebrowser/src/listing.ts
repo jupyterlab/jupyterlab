@@ -1747,7 +1747,7 @@ export namespace DirListing {
      *
      * @returns The sort state of the header after the click event.
      */
-    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState;
+    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null;
 
     /**
      * Create a new item node for a dir listing.
@@ -1869,7 +1869,7 @@ export namespace DirListing {
      *
      * @returns The sort state of the header after the click event.
      */
-    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState {
+    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null {
       const name = DOMUtils.findElement(node, NAME_ID_CLASS);
       const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
       const state: ISortState = { direction: 'ascending', key: 'name' };
