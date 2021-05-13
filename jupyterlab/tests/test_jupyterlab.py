@@ -448,7 +448,6 @@ class TestExtension(AppHandlerTest):
         assert self.pkg_names['extension'] in data
 
     @pytest.mark.slow
-    @pytest.mark.skip(reason="TODO temporary ci skip - enable when shared-models and docprovider packages are published")
     def test_build_splice_packages(self):
         app_options = AppOptions(splice_source=True)
         assert install_extension(self.mock_extension) is True

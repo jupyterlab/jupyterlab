@@ -369,10 +369,8 @@ if [[ $GROUP == usage2 ]]; then
 fi
 
 
-: '
-if [[ $GROUP == splice_source ]];then
+if [[ $GROUP == splice_source ]]; then
     # Run the integrity script to link binary files
-    TODO temporary ci skip - enable when shared-models and docprovider packages are published
     jlpm integrity
 
     jupyter lab build --minimize=False --debug --dev-build=True --splice-source
@@ -399,7 +397,6 @@ if [[ $GROUP == splice_source ]];then
     cat version.txt | grep -q "spliced"
     python -m jupyterlab.browser_check
 fi
-'
 
 
 if [[ $GROUP == interop ]]; then
