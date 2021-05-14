@@ -83,6 +83,12 @@
       "description": "Option key on macOS can be used as meta key. This enables to use shortcuts such as option + f to move cursor forward one word",
       "type": "boolean",
       "default": false
+    },
+    "additionalTerminals": {
+      "title": "Custom terminal launchers",
+      "description": "Additional terminals (bash, PowerShell, etc) to add to the launcher\ne.g., { \"bash\": \"/bin/bash\" }",
+      "type": "object",
+      "default": {}
     }
   },
   "additionalProperties": false,

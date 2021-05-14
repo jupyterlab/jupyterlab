@@ -28,6 +28,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
 import { ITranslator } from '@jupyterlab/translation';
 import { terminalIcon } from '@jupyterlab/ui-components';
+import { IDisposable } from '@lumino/disposable';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
@@ -48,7 +49,7 @@ namespace CommandIDs {
 
   export const setTheme = 'terminal:set-theme';
 
-  export const openNamedShell = 'terminal:open-named-shell';
+  export const createNewFromPath = 'terminal:create-new-from-path';
 }
 
 /**
@@ -117,6 +118,27 @@ function activate(
   // The cached terminal options from the setting editor.
   const options: Partial<ITerminal.IOptions> = {};
 
+  let launcherEntries: IDisposable[] = [];
+  function createTerminalLauncherEntries(entries: [string, string][]): void {
+    launcherEntries.forEach(entry => entry.dispose());
+    launcherEntries = [];
+
+    for (const [label, shell_command] of entries) {
+      if (launcher != null) {
+        const entry = launcher.add({
+          command: CommandIDs.createNew,
+          category: trans.__('Other'),
+          rank: 0,
+          args: {
+            label,
+            shell_command
+          }
+        });
+        launcherEntries.push(entry);
+      }
+    }
+  }
+
   /**
    * Update the cached option values.
    */
@@ -127,6 +149,11 @@ function activate(
     Object.keys(settings.composite).forEach((key: keyof ITerminal.IOptions) => {
       (options as any)[key] = settings.composite[key];
     });
+
+    const terms = settings.get('additionalTerminals');
+    if (terms.composite != null) {
+      createTerminalLauncherEntries(Object.entries(terms.composite));
+    }
   }
 
   /**
@@ -232,7 +259,7 @@ function activate(
       CommandIDs.refresh,
       CommandIDs.increaseFont,
       CommandIDs.decreaseFont,
-      CommandIDs.openNamedShell
+      CommandIDs.createNewFromPath
     ].forEach(command => {
       palette.addItem({ command, category, args: { isPalette: true } });
     });
@@ -340,9 +367,16 @@ export function addCommands(
   const { commands, serviceManager } = app;
 
   // Add terminal commands.
+
   commands.addCommand(CommandIDs.createNew, {
-    label: args =>
-      args['isPalette'] ? trans.__('New Terminal') : trans.__('Terminal'),
+    label: args => {
+      if (args.label != null) {
+        return args.label as string;
+      }
+      return args['isPalette']
+        ? trans.__('New Terminal')
+        : trans.__('Terminal');
+    },
     caption: trans.__('Start a new terminal session'),
     icon: args => (args['isPalette'] ? undefined : terminalIcon),
     execute: async args => {
@@ -358,8 +392,10 @@ export function addCommands(
       const name = args['name'] as string;
       const serverSettings = { ...serviceManager.terminals.serverSettings };
       if (args.shell_command != null) {
+        // Need to copy init object (or else serviceManager's original copy will be modified)
+        serverSettings.init = { ...serverSettings.init };
         serverSettings.init.body = JSON.stringify({
-          shell_command: [args.shell_command as string]
+          shell_command: (args.shell_command as string).split(' ') // Split into argv
         });
       }
 
@@ -380,15 +416,22 @@ export function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.openNamedShell, {
-    label: 'Open Named Shell',
+  commands.addCommand(CommandIDs.createNewFromPath, {
+    label: 'New Terminal From Path',
     execute: async args => {
-      const value = await InputDialog.getText({
-        title: 'Enter path to terminal application',
-        placeholder: '/bin/zsh'
+      const path = await InputDialog.getText({
+        title: 'Terminal Application Path',
+        placeholder: '/absolute/path'
       });
-      const newArgs: typeof args = { ...args, shell_command: value.value };
-      return commands.execute(CommandIDs.createNew, newArgs);
+
+      if (path.value == null) {
+        return;
+      }
+
+      return commands.execute(CommandIDs.createNew, {
+        ...args,
+        shell_command: path.value
+      });
     }
   });
 

@@ -20,6 +20,11 @@ import {
 import { TerminalConnection } from './default';
 
 /**
+ * Utility type equivalenet to T with K optional.
+ */
+type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+/**
  * A terminal session manager.
  */
 export class TerminalManager extends BaseManager implements Terminal.IManager {
@@ -123,7 +128,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    * The manager `serverSettings` will be used.
    */
   connectTo(
-    options: Terminal.ITerminalConnection.IOptions
+    options: Optional<Terminal.ITerminalConnection.IOptions, 'serverSettings'>
   ): Terminal.ITerminalConnection {
     const serverSettings =
       options.serverSettings != null
