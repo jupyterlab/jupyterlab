@@ -84,7 +84,7 @@ export class FileBrowser extends Widget {
     this.translator = options.translator || nullTranslator;
     this._manager = model.manager;
     this._trans = this.translator.load('jupyterlab');
-    this._crumbs = new BreadCrumbs({ model, translator });
+    this.crumbs = new BreadCrumbs({ model, translator });
     this.toolbar = new Toolbar<Widget>();
     // a11y
     this.toolbar.node.setAttribute('role', 'navigation');
@@ -115,28 +115,28 @@ export class FileBrowser extends Widget {
     this.toolbar.addItem('upload', uploader);
     this.toolbar.addItem('refresher', refresher);
 
-    this._listing = this.createDirListing({
+    this.listing = this.createDirListing({
       model,
       renderer,
       translator: this.translator
     });
 
     this._filenameSearcher = FilenameSearcher({
-      listing: this._listing,
+      listing: this.listing,
       useFuzzyFilter: this._useFuzzyFilter,
       placeholder: this._trans.__('Filter files by name')
     });
 
-    this._crumbs.addClass(CRUMBS_CLASS);
+    this.crumbs.addClass(CRUMBS_CLASS);
     this.toolbar.addClass(TOOLBAR_CLASS);
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
-    this._listing.addClass(LISTING_CLASS);
+    this.listing.addClass(LISTING_CLASS);
 
     this.layout = new PanelLayout();
     this.layout.addWidget(this.toolbar);
     this.layout.addWidget(this._filenameSearcher);
-    this.layout.addWidget(this._crumbs);
-    this.layout.addWidget(this._listing);
+    this.layout.addWidget(this.crumbs);
+    this.layout.addWidget(this.listing);
 
     // We need to make the FileBrowser focusable so that it receives keyboard events
     this.node.tabIndex = 0;
@@ -180,8 +180,8 @@ export class FileBrowser extends Widget {
   }
 
   set showLastModifiedColumn(value: boolean) {
-    if (this._listing.setColumnVisibility) {
-      this._listing.setColumnVisibility('last_modified', value);
+    if (this.listing.setColumnVisibility) {
+      this.listing.setColumnVisibility('last_modified', value);
       this._showLastModifiedColumn = value;
     } else {
       console.warn('Listing does not support toggling column visibility');
@@ -195,7 +195,7 @@ export class FileBrowser extends Widget {
     this._useFuzzyFilter = value;
 
     this._filenameSearcher = FilenameSearcher({
-      listing: this._listing,
+      listing: this.listing,
       useFuzzyFilter: this._useFuzzyFilter,
       placeholder: this._trans.__('Filter files by name'),
       forceRefresh: true
@@ -204,12 +204,12 @@ export class FileBrowser extends Widget {
     this._filenameSearcher.id = 'filename-searcher';
 
     this.layout.removeWidget(this._filenameSearcher);
-    this.layout.removeWidget(this._crumbs);
-    this.layout.removeWidget(this._listing);
+    this.layout.removeWidget(this.crumbs);
+    this.layout.removeWidget(this.listing);
 
     this.layout.addWidget(this._filenameSearcher);
-    this.layout.addWidget(this._crumbs);
-    this.layout.addWidget(this._listing);
+    this.layout.addWidget(this.crumbs);
+    this.layout.addWidget(this.listing);
   }
 
   /**
@@ -218,7 +218,7 @@ export class FileBrowser extends Widget {
    * @returns A new iterator over the listing's selected items.
    */
   selectedItems(): IIterator<Contents.IModel> {
-    return this._listing.selectedItems();
+    return this.listing.selectedItems();
   }
 
   /**
@@ -227,11 +227,11 @@ export class FileBrowser extends Widget {
    * @param name - The name of the item to select.
    */
   async selectItemByName(name: string): Promise<void> {
-    await this._listing.selectItemByName(name);
+    await this.listing.selectItemByName(name);
   }
 
   clearSelectedItems(): void {
-    this._listing.clearSelectedItems();
+    this.listing.clearSelectedItems();
   }
 
   /**
@@ -240,21 +240,21 @@ export class FileBrowser extends Widget {
    * @returns A promise that resolves with the new name of the item.
    */
   rename(): Promise<string> {
-    return this._listing.rename();
+    return this.listing.rename();
   }
 
   /**
    * Cut the selected items.
    */
   cut(): void {
-    this._listing.cut();
+    this.listing.cut();
   }
 
   /**
    * Copy the selected items.
    */
   copy(): void {
-    this._listing.copy();
+    this.listing.copy();
   }
 
   /**
@@ -263,7 +263,7 @@ export class FileBrowser extends Widget {
    * @returns A promise that resolves when the operation is complete.
    */
   paste(): Promise<void> {
-    return this._listing.paste();
+    return this.listing.paste();
   }
 
   /**
@@ -285,7 +285,7 @@ export class FileBrowser extends Widget {
         type: 'directory'
       })
       .then(async model => {
-        await this._listing.selectItemByName(model.name);
+        await this.listing.selectItemByName(model.name);
         await this.rename();
         this._directoryPending = false;
       })
@@ -314,7 +314,7 @@ export class FileBrowser extends Widget {
         ext: options.ext
       })
       .then(async model => {
-        await this._listing.selectItemByName(model.name);
+        await this.listing.selectItemByName(model.name);
         await this.rename();
         this._filePending = false;
       })
@@ -329,7 +329,7 @@ export class FileBrowser extends Widget {
    * @returns A promise that resolves when the operation is complete.
    */
   delete(): Promise<void> {
-    return this._listing.delete();
+    return this.listing.delete();
   }
 
   /**
@@ -338,14 +338,14 @@ export class FileBrowser extends Widget {
    * @returns A promise that resolves when the operation is complete.
    */
   duplicate(): Promise<void> {
-    return this._listing.duplicate();
+    return this.listing.duplicate();
   }
 
   /**
    * Download the currently selected item(s).
    */
   download(): Promise<void> {
-    return this._listing.download();
+    return this.listing.download();
   }
 
   /**
@@ -354,21 +354,21 @@ export class FileBrowser extends Widget {
    * @returns A promise that resolves when the operation is complete.
    */
   shutdownKernels(): Promise<void> {
-    return this._listing.shutdownKernels();
+    return this.listing.shutdownKernels();
   }
 
   /**
    * Select next item.
    */
   selectNext(): void {
-    this._listing.selectNext();
+    this.listing.selectNext();
   }
 
   /**
    * Select previous item.
    */
   selectPrevious(): void {
-    this._listing.selectPrevious();
+    this.listing.selectPrevious();
   }
 
   /**
@@ -379,7 +379,7 @@ export class FileBrowser extends Widget {
    * @returns The model for the selected file.
    */
   modelForClick(event: MouseEvent): Contents.IModel | undefined {
-    return this._listing.modelForClick(event);
+    return this.listing.modelForClick(event);
   }
 
   /**
@@ -415,9 +415,9 @@ export class FileBrowser extends Widget {
     }
   }
 
+  protected listing: DirListing;
+  protected crumbs: BreadCrumbs;
   private _trans: TranslationBundle;
-  private _crumbs: BreadCrumbs;
-  private _listing: DirListing;
   private _filenameSearcher: ReactWidget;
   private _manager: IDocumentManager;
   private _directoryPending: boolean;
