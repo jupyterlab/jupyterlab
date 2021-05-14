@@ -927,7 +927,7 @@ export class DirListing extends Widget {
       return;
     }
 
-    this._handleFileSelect(event);
+    this.handleFileSelect(event);
 
     if (event.button !== 0) {
       clearTimeout(this._selectTimer);
@@ -1002,7 +1002,7 @@ export class DirListing extends Widget {
   /**
    * Handle the opening of an item.
    */
-  private _handleOpen(item: Contents.IModel): void {
+  protected handleOpen(item: Contents.IModel): void {
     this._onItemOpened.emit(item);
     if (item.type === 'directory') {
       const localPath = this._manager.services.contents.localPath(item.path);
@@ -1043,7 +1043,7 @@ export class DirListing extends Widget {
         }
 
         const item = this._sortedItems[i];
-        this._handleOpen(item);
+        this.handleOpen(item);
         break;
       }
       case 38: // Up arrow
@@ -1108,7 +1108,7 @@ export class DirListing extends Widget {
     }
 
     const item = this._sortedItems[i];
-    this._handleOpen(item);
+    this.handleOpen(item);
   }
 
   /**
@@ -1360,7 +1360,7 @@ export class DirListing extends Widget {
   /**
    * Handle selection on a file node.
    */
-  private _handleFileSelect(event: MouseEvent): void {
+  protected handleFileSelect(event: MouseEvent): void {
     // Fetch common variables.
     const items = this._sortedItems;
     const index = Private.hitTestNodes(this._items, event);
@@ -1622,8 +1622,8 @@ export class DirListing extends Widget {
   }
 
   protected translator: ITranslator;
+  protected _model: FilterFileBrowserModel;
   private _trans: TranslationBundle;
-  private _model: FilterFileBrowserModel;
   private _editNode: HTMLInputElement;
   private _items: HTMLElement[] = [];
   private _sortedItems: Contents.IModel[] = [];
