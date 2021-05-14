@@ -93,7 +93,7 @@ export class FileBrowserModel implements IDisposable {
 
     const { services } = options.manager;
     services.contents.fileChanged.connect(this._onFileChanged, this);
-    services.sessions.runningChanged.connect(this._onRunningChanged, this);
+    services.sessions.runningChanged.connect(this.onRunningChanged, this);
 
     this._unloadEventListener = (e: Event) => {
       if (this._uploads.length > 0) {
@@ -278,7 +278,7 @@ export class FileBrowserModel implements IDisposable {
         if (this.isDisposed) {
           return;
         }
-        this._handleContents(contents);
+        this.handleContents(contents);
         this._pendingPath = null;
         this._pending = null;
         if (oldValue !== newValue) {
@@ -294,7 +294,7 @@ export class FileBrowserModel implements IDisposable {
             newValue
           });
         }
-        this._onRunningChanged(services.sessions, services.sessions.running());
+        this.onRunningChanged(services.sessions, services.sessions.running());
         this._refreshed.emit(void 0);
       })
       .catch(error => {
@@ -573,7 +573,7 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Handle an updated contents model.
    */
-  private _handleContents(contents: Contents.IModel): void {
+  protected handleContents(contents: Contents.IModel): void {
     // Update our internal data.
     this._model = {
       name: contents.name,
@@ -596,7 +596,7 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Handle a change to the running sessions.
    */
-  private _onRunningChanged(
+  protected onRunningChanged(
     sender: Session.IManager,
     models: IterableOrArrayLike<Session.IModel>
   ): void {
