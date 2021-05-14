@@ -57,26 +57,22 @@ export class CompletionHandler implements IDisposable {
    * it is acceptable for the other methods to be simple functions that return
    * rejected promises.
    */
-  get connector(): IDataConnector<
-    CompletionHandler.IReply,
-    void,
-    CompletionHandler.IRequest
-  > {
+  get connector():
+    | IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest>
+    | CompletionHandler.ICompletionItemsConnector {
     if ('responseType' in this._connector) {
       return new DummyConnector();
     }
-    return this._connector as IDataConnector<
-      CompletionHandler.IReply,
-      void,
-      CompletionHandler.IRequest
-    >;
+    return this._connector;
   }
   set connector(
-    connector: IDataConnector<
-      CompletionHandler.IReply,
-      void,
-      CompletionHandler.IRequest
-    >
+    connector:
+      | IDataConnector<
+          CompletionHandler.IReply,
+          void,
+          CompletionHandler.IRequest
+        >
+      | CompletionHandler.ICompletionItemsConnector
   ) {
     this._connector = connector;
   }

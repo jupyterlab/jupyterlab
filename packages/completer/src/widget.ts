@@ -76,6 +76,13 @@ export class Completer extends Widget {
   }
 
   /**
+   * The active index.
+   */
+  get activeIndex(): number {
+    return this._activeIndex;
+  }
+
+  /**
    * The editor used by the completion widget.
    */
   get editor(): CodeEditor.IEditor | null {
@@ -101,6 +108,13 @@ export class Completer extends Widget {
    */
   get visibilityChanged(): ISignal<this, void> {
     return this._visibilityChanged;
+  }
+
+  /**
+   * A signal emitted when the active index changes.
+   */
+  get indexChanged(): ISignal<this, number> {
+    return this._indexChanged;
   }
 
   /**
@@ -396,6 +410,7 @@ export class Completer extends Widget {
       '.jp-Completer-list'
     ) as Element;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
+    this._indexChanged.emit(this._activeIndex);
     this._updateDocPanel();
   }
 
@@ -630,6 +645,7 @@ export class Completer extends Widget {
   private _resetFlag = false;
   private _selected = new Signal<this, string>(this);
   private _visibilityChanged = new Signal<this, void>(this);
+  private _indexChanged = new Signal<this, number>(this);
 }
 
 export namespace Completer {
