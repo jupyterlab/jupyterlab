@@ -17,7 +17,7 @@
     {
       "command": "filebrowser:go-up",
       "keys": ["Backspace"],
-      "selector": ".jp-FileBrowser-listing"
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     }
   ],
   "properties": {

@@ -799,6 +799,9 @@ function addCommands(
     label: 'go up',
     execute: async () => {
       const browserForPath = Private.getBrowserForPath('', factory);
+      if (!browserForPath) {
+        return;
+      }
       const { model } = browserForPath;
 
       await model.restored;
@@ -813,16 +816,6 @@ function addCommands(
           reason
         );
       }
-    },
-    isEnabled: args => {
-      const browserForPath = Private.getBrowserForPath('', factory);
-      // @ts-ignore
-      const { _listing } = browserForPath;
-
-      if (_listing._inRename) {
-        return false;
-      }
-      return true;
     }
   });
 
@@ -1114,8 +1107,10 @@ function addCommands(
     });
   }
 
-  // matches the filebrowser itself
-  const selectorBrowser = '.jp-FileBrowser-listing';
+  // matches the text in the filebrowser; relies on an implementation detail
+  // being the text of the listing element being substituted with input
+  // area to deactivate shortcuts when the file name is being edited.
+  const selectorBrowser = '.jp-DirListing-content .jp-DirListing-itemText'
   // matches anywhere on filebrowser
   const selectorContent = '.jp-DirListing-content';
   // matches all filebrowser items
