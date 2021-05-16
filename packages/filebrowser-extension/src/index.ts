@@ -1110,7 +1110,7 @@ function addCommands(
   // matches the text in the filebrowser; relies on an implementation detail
   // being the text of the listing element being substituted with input
   // area to deactivate shortcuts when the file name is being edited.
-  const selectorBrowser = '.jp-DirListing-content .jp-DirListing-itemText'
+  const selectorBrowser = '.jp-DirListing-content .jp-DirListing-itemText';
   // matches anywhere on filebrowser
   const selectorContent = '.jp-DirListing-content';
   // matches all filebrowser items
