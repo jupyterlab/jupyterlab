@@ -1,0 +1,16 @@
+{
+  "name": "jupyterlab-ui-tests",
+  "version": "1.0.0",
+  "description": "JupyterLab UI Tests",
+  "private": true,
+  "scripts": {
+    "start-jlab": "jupyter lab --config ./jupyter_server_config.py",
+    "start-jlab:detached": "yarn run start-jlab&",
+    "test": "galata"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "@jupyterlab/galata": "3.0.7-3"
+  }
+}
