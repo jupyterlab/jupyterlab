@@ -73,6 +73,9 @@
       "path": "../docmanager-extension"
     },
     {
+      "path": "../docprovider"
+    },
+    {
       "path": "../docregistry"
     },
     {
@@ -206,6 +209,9 @@
     },
     {
       "path": "../settingregistry"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../shortcuts-extension"

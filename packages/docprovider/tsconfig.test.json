@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
+  "paths": {
+    "y-protocols/awareness.js": "y-protocols/dist/awareness.cjs"
+  },
+  "references": [
+    {
+      "path": "../shared-models"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../../testutils"
+    },
+    {
+      "path": "../shared-models"
+    }
+  ]
+}

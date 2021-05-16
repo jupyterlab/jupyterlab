@@ -296,8 +296,12 @@ class FilterToggle extends React.Component<
 
 interface IFilterSelectionProps {
   searchOutput: boolean;
+  searchSelectedCells: boolean;
   canToggleOutput: boolean;
+  canToggleSelectedCells: boolean;
   toggleOutput: () => void;
+  toggleSelectedCells: () => void;
+  trans: TranslationBundle;
 }
 
 interface IFilterSelectionState {}
@@ -309,19 +313,38 @@ class FilterSelection extends React.Component<
   render() {
     return (
       <label className={SEARCH_OPTIONS_CLASS}>
-        <span
-          className={
-            this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
-          }
-        >
-          Search Cell Outputs
-        </span>
-        <input
-          type="checkbox"
-          disabled={!this.props.canToggleOutput}
-          checked={this.props.searchOutput}
-          onChange={this.props.toggleOutput}
-        />
+        <div>
+          <span
+            className={
+              this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
+            }
+          >
+            {this.props.trans.__('Search Cell Outputs')}
+          </span>
+          <input
+            type="checkbox"
+            disabled={!this.props.canToggleOutput}
+            checked={this.props.searchOutput}
+            onChange={this.props.toggleOutput}
+          />
+        </div>
+        <div>
+          <span
+            className={
+              this.props.canToggleSelectedCells
+                ? ''
+                : SEARCH_OPTIONS_DISABLED_CLASS
+            }
+          >
+            {this.props.trans.__('Search Selected Cell(s)')}
+          </span>
+          <input
+            type="checkbox"
+            disabled={!this.props.canToggleSelectedCells}
+            checked={this.props.searchSelectedCells}
+            onChange={this.props.toggleSelectedCells}
+          />
+        </div>
       </label>
     );
   }
@@ -351,6 +374,9 @@ class SearchOverlay extends React.Component<
     this.state = props.overlayState;
     this.replaceEntryRef = React.createRef();
     this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
+    this._toggleSearchSelectedCells = this._toggleSearchSelectedCells.bind(
+      this
+    );
   }
 
   componentDidMount() {
@@ -459,6 +485,19 @@ class SearchOverlay extends React.Component<
       () => this._executeSearch(true, undefined, true)
     );
   }
+  private _toggleSearchSelectedCells() {
+    this.setState(
+      prevState => ({
+        ...prevState,
+        filters: {
+          ...prevState.filters,
+          selectedCells: !prevState.filters.selectedCells
+        }
+      }),
+      () => this._executeSearch(true, undefined, true)
+    );
+  }
+
   private _toggleFiltersOpen() {
     this.setState(prevState => ({
       filtersOpen: !prevState.filtersOpen
@@ -478,8 +517,12 @@ class SearchOverlay extends React.Component<
       <FilterSelection
         key={'filter'}
         canToggleOutput={!showReplace}
+        canToggleSelectedCells={true}
         searchOutput={this.state.filters.output}
+        searchSelectedCells={this.state.filters.selectedCells}
         toggleOutput={this._toggleSearchOutput}
+        toggleSelectedCells={this._toggleSearchSelectedCells}
+        trans={this.translator.load('jupyterlab')}
       />
     ) : null;
     const icon = this.state.replaceEntryShown ? caretDownIcon : caretRightIcon;

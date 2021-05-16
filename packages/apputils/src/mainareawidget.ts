@@ -5,7 +5,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
-import { BoxLayout, Widget } from '@lumino/widgets';
+import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
 
 import { Spinner } from './spinner';
 
@@ -45,12 +45,20 @@ export class MainAreaWidget<T extends Widget = Widget>
     toolbar.node.setAttribute('role', 'navigation');
     toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
     const spinner = this._spinner;
+    const contentHeader = (this._contentHeader =
+      options.contentHeader ||
+      new BoxPanel({
+        direction: 'top-to-bottom',
+        spacing: 0
+      }));
 
     const layout = (this.layout = new BoxLayout({ spacing: 0 }));
     layout.direction = 'top-to-bottom';
     BoxLayout.setStretch(toolbar, 0);
+    BoxLayout.setStretch(contentHeader, 0);
     BoxLayout.setStretch(content, 1);
     layout.addWidget(toolbar);
+    layout.addWidget(contentHeader);
     layout.addWidget(content);
 
     if (!content.id) {
@@ -129,6 +137,14 @@ export class MainAreaWidget<T extends Widget = Widget>
    */
   get toolbar(): Toolbar {
     return this._toolbar;
+  }
+
+  /**
+   * A panel for widgets that sit between the toolbar and the content.
+   * Imagine a formatting toolbar, notification headers, etc.
+   */
+  get contentHeader(): BoxPanel {
+    return this._contentHeader;
   }
 
   /**
@@ -231,8 +247,17 @@ export class MainAreaWidget<T extends Widget = Widget>
     this.content.activate();
   }
 
+  /*
+  MainAreaWidget's layout:
+  - this.layout, a BoxLayout, from parent
+    - this._toolbar, a Toolbar
+    - this._contentHeader, a BoxPanel, empty by default
+    - this._content
+  */
   private _content: T;
   private _toolbar: Toolbar;
+  private _contentHeader: BoxPanel;
+
   private _changeGuard = false;
   private _spinner = new Spinner();
 
@@ -257,6 +282,12 @@ export namespace MainAreaWidget {
      * The toolbar to use for the widget.  Defaults to an empty toolbar.
      */
     toolbar?: Toolbar;
+
+    /**
+     * The layout to sit underneath the toolbar and above the content,
+     * and that extensions can populate. Defaults to an empty BoxPanel.
+     */
+    contentHeader?: BoxPanel;
 
     /**
      * An optional promise for when the content is ready to be revealed.

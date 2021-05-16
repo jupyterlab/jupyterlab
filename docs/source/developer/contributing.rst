@@ -137,15 +137,7 @@ To check which version of Node.js is installed:
 Installing JupyterLab
 ---------------------
 
-JupyterLab requires Jupyter Notebook version 4.3 or later.
-
-If you use ``conda``, you can install notebook using:
-
-.. code:: bash
-
-   conda install -c conda-forge notebook
-
-You may also want to install ``nb_conda_kernels`` to have a kernel
+If you use ``conda``, you may also want to install ``nb_conda_kernels`` to have a kernel
 option for different `conda
 environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`__
 
@@ -153,17 +145,10 @@ environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/ma
 
    conda install -c conda-forge nb_conda_kernels
 
-If you use ``pip``, you can install notebook using:
-
-.. code:: bash
-
-   pip install notebook
-
 Fork the JupyterLab
 `repository <https://github.com/jupyterlab/jupyterlab>`__.
 
-Once you have installed the dependencies mentioned above, use the
-following steps:
+Then use the following steps:
 
 .. code:: bash
 
@@ -243,6 +228,13 @@ dev mode, extensions will not be activated by default.
 
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
+
+If you want to change the TypeScript code and rebuild on the fly
+(needs page refresh after each rebuild):
+
+.. code:: bash
+
+   jupyter lab --dev-mode --watch
 
 Build and Run the Tests
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1003,4 +995,3 @@ Notes
 -  The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
    omit the type declarations when using a language other than
    TypeScript.
-

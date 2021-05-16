@@ -10,8 +10,6 @@ import {
 
 import { PathExt, Time } from '@jupyterlab/coreutils';
 
-import {} from '@jupyterlab/apputils';
-
 import {
   IDocumentManager,
   isValidFileName,
@@ -37,7 +35,6 @@ import {
   filter,
   find,
   IIterator,
-  map,
   toArray
 } from '@lumino/algorithm';
 
@@ -131,6 +128,11 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
  * The class name added to the narrow column header cell.
  */
 const NARROW_ID_CLASS = 'jp-id-narrow';
+
+/**
+ * The class name added to the modified column header cell and modified item cell when hidden.
+ */
+const MODIFIED_COLUMN_HIDDEN = 'jp-LastModified-hidden';
 
 /**
  * The mime type for a contents drag object.
@@ -228,7 +230,11 @@ export class DirListing extends Widget {
     this._renderer = options.renderer || DirListing.defaultRenderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
-    this._renderer.populateHeaderNode(headerNode, this.translator);
+    this._renderer.populateHeaderNode(
+      headerNode,
+      this.translator,
+      this._hiddenColumns
+    );
     this._manager.activateRequested.connect(this._onActivateRequested, this);
   }
 
@@ -301,7 +307,7 @@ export class DirListing extends Widget {
    */
   selectedItems(): IIterator<Contents.IModel> {
     const items = this._sortedItems;
-    return filter(items, item => this._selection[item.name]);
+    return filter(items, item => this.selection[item.path]);
   }
 
   /**
@@ -398,7 +404,7 @@ export class DirListing extends Widget {
    * @returns A promise that resolves when the operation is complete.
    */
   async delete(): Promise<void> {
-    const items = this._sortedItems.filter(item => this._selection[item.name]);
+    const items = this._sortedItems.filter(item => this.selection[item.path]);
 
     if (!items.length) {
       return;
@@ -440,8 +446,7 @@ export class DirListing extends Widget {
 
     each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
-        const oldPath = PathExt.join(basePath, item.name);
-        promises.push(this._model.manager.copy(oldPath, basePath));
+        promises.push(this._model.manager.copy(item.path, basePath));
       }
     });
     return Promise.all(promises)
@@ -480,7 +485,7 @@ export class DirListing extends Widget {
     const promises = toArray(this._model.sessions())
       .filter(session => {
         const index = ArrayExt.firstIndexOf(paths, session.path);
-        return this._selection[items[index].name];
+        return this.selection[items[index].path];
       })
       .map(session => model.manager.services.sessions.shutdown(session.id));
 
@@ -503,12 +508,12 @@ export class DirListing extends Widget {
    */
   selectNext(keepExisting = false): void {
     let index = -1;
-    const selected = Object.keys(this._selection);
+    const selected = Object.keys(this.selection);
     const items = this._sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the next item.
-      const name = selected[selected.length - 1];
-      index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      const path = selected[selected.length - 1];
+      index = ArrayExt.findFirstIndex(items, value => value.path === path);
       index += 1;
       if (index === this._items.length) {
         index = 0;
@@ -518,8 +523,8 @@ export class DirListing extends Widget {
       index = 0;
     } else {
       // Select the last selected item.
-      const name = selected[selected.length - 1];
-      index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      const path = selected[selected.length - 1];
+      index = ArrayExt.findFirstIndex(items, value => value.path === path);
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
@@ -534,12 +539,12 @@ export class DirListing extends Widget {
    */
   selectPrevious(keepExisting = false): void {
     let index = -1;
-    const selected = Object.keys(this._selection);
+    const selected = Object.keys(this.selection);
     const items = this._sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the previous item.
-      const name = selected[0];
-      index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      const path = selected[0];
+      index = ArrayExt.findFirstIndex(items, value => value.path === path);
       index -= 1;
       if (index === -1) {
         index = this._items.length - 1;
@@ -549,8 +554,8 @@ export class DirListing extends Widget {
       index = this._items.length - 1;
     } else {
       // Select the first selected item.
-      const name = selected[0];
-      index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      const path = selected[0];
+      index = ArrayExt.findFirstIndex(items, value => value.path === path);
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
@@ -583,7 +588,13 @@ export class DirListing extends Widget {
    * @returns Whether the item is selected.
    */
   isSelected(name: string): boolean {
-    return this._selection[name] === true;
+    const items = this._sortedItems;
+
+    return (
+      toArray(
+        filter(items, item => item.name === name && this.selection[item.path])
+      ).length !== 0
+    );
   }
 
   /**
@@ -606,7 +617,7 @@ export class DirListing extends Widget {
    * Clear the selected items.
    */
   clearSelectedItems() {
-    this._selection = Object.create(null);
+    this.selection = Object.create(null);
   }
 
   /**
@@ -777,7 +788,7 @@ export class DirListing extends Widget {
 
     // Add any missing item nodes.
     while (nodes.length < items.length) {
-      const node = renderer.createItemNode();
+      const node = renderer.createItemNode(this._hiddenColumns);
       node.classList.add(ITEM_CLASS);
       nodes.push(node);
       content.appendChild(node);
@@ -794,8 +805,14 @@ export class DirListing extends Widget {
     items.forEach((item, i) => {
       const node = nodes[i];
       const ft = this._manager.registry.getFileTypeForModel(item);
-      renderer.updateItemNode(node, item, ft, this.translator);
-      if (this._selection[item.name]) {
+      renderer.updateItemNode(
+        node,
+        item,
+        ft,
+        this.translator,
+        this._hiddenColumns
+      );
+      if (this.selection[item.path]) {
         node.classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
           node.classList.add(CUT_CLASS);
@@ -810,7 +827,7 @@ export class DirListing extends Widget {
     });
 
     // Handle the selectors on the widget node.
-    const selected = Object.keys(this._selection).length;
+    const selected = Object.keys(this.selection).length;
     if (selected) {
       this.addClass(SELECTED_CLASS);
       if (selected > 1) {
@@ -844,6 +861,21 @@ export class DirListing extends Widget {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
     this.toggleClass('jp-DirListing-narrow', width < 250);
+  }
+
+  setColumnVisibility(name: DirListing.ToggleableColumn, visible: boolean) {
+    if (visible) {
+      this._hiddenColumns.delete(name);
+    } else {
+      this._hiddenColumns.add(name);
+    }
+
+    this.headerNode.innerHTML = '';
+    this._renderer.populateHeaderNode(
+      this.headerNode,
+      this.translator,
+      this._hiddenColumns
+    );
   }
 
   /**
@@ -895,7 +927,7 @@ export class DirListing extends Widget {
       return;
     }
 
-    this._handleFileSelect(event);
+    this.handleFileSelect(event);
 
     if (event.button !== 0) {
       clearTimeout(this._selectTimer);
@@ -929,7 +961,7 @@ export class DirListing extends Widget {
       // See if we need to clear the other selection.
       if (!altered && event.button === 0) {
         this.clearSelectedItems();
-        this._selection[this._softSelection] = true;
+        this.selection[this._softSelection] = true;
         this.update();
       }
       this._softSelection = '';
@@ -970,7 +1002,7 @@ export class DirListing extends Widget {
   /**
    * Handle the opening of an item.
    */
-  private _handleOpen(item: Contents.IModel): void {
+  protected handleOpen(item: Contents.IModel): void {
     this._onItemOpened.emit(item);
     if (item.type === 'directory') {
       const localPath = this._manager.services.contents.localPath(item.path);
@@ -1002,7 +1034,7 @@ export class DirListing extends Widget {
         event.preventDefault();
         event.stopPropagation();
 
-        const selected = Object.keys(this._selection);
+        const selected = Object.keys(this.selection);
         const name = selected[0];
         const items = this._sortedItems;
         const i = ArrayExt.findFirstIndex(items, value => value.name === name);
@@ -1011,7 +1043,7 @@ export class DirListing extends Widget {
         }
 
         const item = this._sortedItems[i];
-        this._handleOpen(item);
+        this.handleOpen(item);
         break;
       }
       case 38: // Up arrow
@@ -1076,7 +1108,7 @@ export class DirListing extends Widget {
     }
 
     const item = this._sortedItems[i];
-    this._handleOpen(item);
+    this.handleOpen(item);
   }
 
   /**
@@ -1086,6 +1118,23 @@ export class DirListing extends Widget {
     const files = event.dataTransfer?.files;
     if (!files || files.length === 0) {
       return;
+    }
+    const length = event.dataTransfer?.items.length;
+    if (!length) {
+      return;
+    }
+    for (let i = 0; i < length; i++) {
+      let entry = event.dataTransfer?.items[i].webkitGetAsEntry();
+      if (entry.isDirectory) {
+        console.log('currently not supporting drag + drop for folders');
+        void showDialog({
+          title: this._trans.__('Error Uploading Folder'),
+          body: this._trans.__(
+            'Drag and Drop is currently not supported for folders'
+          ),
+          buttons: [Dialog.cancelButton({ label: this._trans.__('Close') })]
+        });
+      }
     }
     event.preventDefault();
     for (let i = 0; i < files.length; i++) {
@@ -1103,7 +1152,7 @@ export class DirListing extends Widget {
         return;
       }
       const item = this._sortedItems[index];
-      if (item.type !== 'directory' || this._selection[item.name]) {
+      if (item.type !== 'directory' || this.selection[item.path]) {
         return;
       }
       const target = event.target as HTMLElement;
@@ -1209,7 +1258,7 @@ export class DirListing extends Widget {
    * Start a drag event.
    */
   private _startDrag(index: number, clientX: number, clientY: number): void {
-    let selectedNames = Object.keys(this._selection);
+    let selectedPaths = Object.keys(this.selection);
     const source = this._items[index];
     const items = this._sortedItems;
     let selectedItems: Contents.IModel[];
@@ -1218,11 +1267,11 @@ export class DirListing extends Widget {
     // If the source node is not selected, use just that node.
     if (!source.classList.contains(SELECTED_CLASS)) {
       item = items[index];
-      selectedNames = [item.name];
+      selectedPaths = [item.path];
       selectedItems = [item];
     } else {
-      const name = selectedNames[0];
-      item = find(items, value => value.name === name);
+      const path = selectedPaths[0];
+      item = find(items, value => value.path === path);
       selectedItems = toArray(this.selectedItems());
     }
 
@@ -1234,7 +1283,7 @@ export class DirListing extends Widget {
     const ft = this._manager.registry.getFileTypeForModel(item);
     const dragImage = this.renderer.createDragImage(
       source,
-      selectedNames.length,
+      selectedPaths.length,
       this._trans,
       ft
     );
@@ -1246,14 +1295,8 @@ export class DirListing extends Widget {
       supportedActions: 'move',
       proposedAction: 'move'
     });
-    const basePath = this._model.path;
 
-    const paths = toArray(
-      map(selectedNames, name => {
-        return PathExt.join(basePath, name);
-      })
-    );
-    this._drag.mimeData.setData(CONTENTS_MIME, paths);
+    this._drag.mimeData.setData(CONTENTS_MIME, selectedPaths);
 
     // Add thunks for getting mime data content.
     // We thunk the content so we don't try to make a network call
@@ -1270,7 +1313,7 @@ export class DirListing extends Widget {
     }
 
     if (item && item.type !== 'directory') {
-      const otherPaths = paths.slice(1).reverse();
+      const otherPaths = selectedPaths.slice(1).reverse();
       this._drag.mimeData.setData(FACTORY_MIME, () => {
         if (!item) {
           return;
@@ -1317,7 +1360,7 @@ export class DirListing extends Widget {
   /**
    * Handle selection on a file node.
    */
-  private _handleFileSelect(event: MouseEvent): void {
+  protected handleFileSelect(event: MouseEvent): void {
     // Fetch common variables.
     const items = this._sortedItems;
     const index = Private.hitTestNodes(this._items, event);
@@ -1331,15 +1374,15 @@ export class DirListing extends Widget {
     // Clear any existing soft selection.
     this._softSelection = '';
 
-    const name = items[index].name;
-    const selected = Object.keys(this._selection);
+    const path = items[index].path;
+    const selected = Object.keys(this.selection);
 
     // Handle toggling.
     if ((IS_MAC && event.metaKey) || (!IS_MAC && event.ctrlKey)) {
-      if (this._selection[name]) {
-        delete this._selection[name];
+      if (this.selection[path]) {
+        delete this.selection[path];
       } else {
-        this._selection[name] = true;
+        this.selection[path] = true;
       }
 
       // Handle multiple select.
@@ -1347,14 +1390,14 @@ export class DirListing extends Widget {
       this._handleMultiSelect(selected, index);
 
       // Handle a 'soft' selection
-    } else if (name in this._selection && selected.length > 1) {
-      this._softSelection = name;
+    } else if (path in this.selection && selected.length > 1) {
+      this._softSelection = path;
 
       // Default to selecting the only the item.
     } else {
       // Select only the given item.
       this.clearSelectedItems();
-      this._selection[name] = true;
+      this.selection[path] = true;
     }
     this.update();
   }
@@ -1370,8 +1413,8 @@ export class DirListing extends Widget {
       if (i === index) {
         continue;
       }
-      const name = items[i].name;
-      if (selected.indexOf(name) !== -1) {
+      const path = items[i].path;
+      if (selected.indexOf(path) !== -1) {
         if (nearestIndex === -1) {
           nearestIndex = i;
         } else {
@@ -1393,7 +1436,7 @@ export class DirListing extends Widget {
         (nearestIndex >= i && index <= i) ||
         (nearestIndex <= i && index >= i)
       ) {
-        this._selection[items[i].name] = true;
+        this.selection[items[i].path] = true;
       }
     }
   }
@@ -1430,7 +1473,7 @@ export class DirListing extends Widget {
   private _doRename(): Promise<string> {
     this._inRename = true;
     const items = this._sortedItems;
-    const name = Object.keys(this._selection)[0];
+    const name = Object.keys(this.selection)[0];
     const index = ArrayExt.findFirstIndex(items, value => value.name === name);
     const row = this._items[index];
     const item = items[index];
@@ -1439,60 +1482,62 @@ export class DirListing extends Widget {
     this._editNode.value = original;
     this._selectItem(index, false);
 
-    return Private.doRename(nameNode, this._editNode).then(newName => {
-      this.node.focus();
-      if (!newName || newName === original) {
-        this._inRename = false;
-        return original;
-      }
-      if (!isValidFileName(newName)) {
-        void showErrorMessage(
-          this._trans.__('showErrorMessage', 'Rename Error'),
-          Error(
-            this._trans._p(
-              'showErrorMessage',
-              '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
-              newName
-            )
-          )
-        );
-        this._inRename = false;
-        return original;
-      }
-
-      if (this.isDisposed) {
-        this._inRename = false;
-        throw new Error('File browser is disposed.');
-      }
-
-      const manager = this._manager;
-      const oldPath = PathExt.join(this._model.path, original);
-      const newPath = PathExt.join(this._model.path, newName);
-      const promise = renameFile(manager, oldPath, newPath);
-      return promise
-        .catch(error => {
-          if (error !== 'File not renamed') {
-            void showErrorMessage(
-              this._trans._p('showErrorMessage', 'Rename Error'),
-              error
-            );
-          }
+    return Private.doRename(nameNode, this._editNode, original).then(
+      newName => {
+        this.node.focus();
+        if (!newName || newName === original) {
           this._inRename = false;
           return original;
-        })
-        .then(() => {
-          if (this.isDisposed) {
-            this._inRename = false;
-            throw new Error('File browser is disposed.');
-          }
-          if (this._inRename) {
-            // No need to catch because `newName` will always exit.
-            void this.selectItemByName(newName);
-          }
+        }
+        if (!isValidFileName(newName)) {
+          void showErrorMessage(
+            this._trans.__('showErrorMessage', 'Rename Error'),
+            Error(
+              this._trans._p(
+                'showErrorMessage',
+                '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+                newName
+              )
+            )
+          );
           this._inRename = false;
-          return newName;
-        });
-    });
+          return original;
+        }
+
+        if (this.isDisposed) {
+          this._inRename = false;
+          throw new Error('File browser is disposed.');
+        }
+
+        const manager = this._manager;
+        const oldPath = PathExt.join(this._model.path, original);
+        const newPath = PathExt.join(this._model.path, newName);
+        const promise = renameFile(manager, oldPath, newPath);
+        return promise
+          .catch(error => {
+            if (error !== 'File not renamed') {
+              void showErrorMessage(
+                this._trans._p('showErrorMessage', 'Rename Error'),
+                error
+              );
+            }
+            this._inRename = false;
+            return original;
+          })
+          .then(() => {
+            if (this.isDisposed) {
+              this._inRename = false;
+              throw new Error('File browser is disposed.');
+            }
+            if (this._inRename) {
+              // No need to catch because `newName` will always exit.
+              void this.selectItemByName(newName);
+            }
+            this._inRename = false;
+            return newName;
+          });
+      }
+    );
   }
 
   /**
@@ -1505,7 +1550,7 @@ export class DirListing extends Widget {
       this.clearSelectedItems();
     }
     const name = items[index].name;
-    this._selection[name] = true;
+    this.selection[name] = true;
     this.update();
   }
 
@@ -1514,12 +1559,12 @@ export class DirListing extends Widget {
    */
   private _onModelRefreshed(): void {
     // Update the selection.
-    const existing = Object.keys(this._selection);
+    const existing = Object.keys(this.selection);
     this.clearSelectedItems();
     each(this._model.items(), item => {
       const name = item.name;
       if (existing.indexOf(name) !== -1) {
-        this._selection[name] = true;
+        this.selection[name] = true;
       }
     });
     if (this.isVisible) {
@@ -1557,15 +1602,9 @@ export class DirListing extends Widget {
       return;
     }
 
-    void this.selectItemByName(name)
-      .then(() => {
-        if (!this.isDisposed && newValue!.type === 'directory') {
-          return this._doRename();
-        }
-      })
-      .catch(() => {
-        /* Ignore if file does not exist. */
-      });
+    void this.selectItemByName(name).catch(() => {
+      /* Ignore if file does not exist. */
+    });
   }
 
   /**
@@ -1583,8 +1622,8 @@ export class DirListing extends Widget {
   }
 
   protected translator: ITranslator;
+  protected _model: FilterFileBrowserModel;
   private _trans: TranslationBundle;
-  private _model: FilterFileBrowserModel;
   private _editNode: HTMLInputElement;
   private _items: HTMLElement[] = [];
   private _sortedItems: Contents.IModel[] = [];
@@ -1605,12 +1644,13 @@ export class DirListing extends Widget {
   private _clipboard: string[] = [];
   private _manager: IDocumentManager;
   private _softSelection = '';
-  private _selection: { [key: string]: boolean } = Object.create(null);
+  protected selection: { [key: string]: boolean } = Object.create(null);
   private _renderer: DirListing.IRenderer;
   private _searchPrefix: string = '';
   private _searchPrefixTimer = -1;
   private _inRename = false;
   private _isDirty = false;
+  private _hiddenColumns = new Set<DirListing.ToggleableColumn>();
 }
 
 /**
@@ -1655,6 +1695,11 @@ export namespace DirListing {
   }
 
   /**
+   * Toggleable columns.
+   */
+  export type ToggleableColumn = 'last_modified';
+
+  /**
    * A file contents model thunk.
    *
    * Note: The content of the model will be empty.
@@ -1687,7 +1732,11 @@ export namespace DirListing {
      *
      * @param node - The header node to populate.
      */
-    populateHeaderNode(node: HTMLElement, translator?: ITranslator): void;
+    populateHeaderNode(
+      node: HTMLElement,
+      translator?: ITranslator,
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
+    ): void;
 
     /**
      * Handle a header click.
@@ -1698,14 +1747,16 @@ export namespace DirListing {
      *
      * @returns The sort state of the header after the click event.
      */
-    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState;
+    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null;
 
     /**
      * Create a new item node for a dir listing.
      *
      * @returns A new DOM node to use as a content item.
      */
-    createItemNode(): HTMLElement;
+    createItemNode(
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
+    ): HTMLElement;
 
     /**
      * Update an item node to reflect the current state of a model.
@@ -1720,7 +1771,8 @@ export namespace DirListing {
       node: HTMLElement,
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
-      translator?: ITranslator
+      translator?: ITranslator,
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
     ): void;
 
     /**
@@ -1775,12 +1827,16 @@ export namespace DirListing {
      *
      * @param node - The header node to populate.
      */
-    populateHeaderNode(node: HTMLElement, translator?: ITranslator): void {
+    populateHeaderNode(
+      node: HTMLElement,
+      translator?: ITranslator,
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
+    ): void {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
-      const name = this._createHeaderItemNode(trans.__('Name'));
+      const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
-      const modified = this._createHeaderItemNode(trans.__('Last Modified'));
+      const modified = this.createHeaderItemNode(trans.__('Last Modified'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
@@ -1789,6 +1845,12 @@ export namespace DirListing {
       node.appendChild(name);
       node.appendChild(narrow);
       node.appendChild(modified);
+
+      if (hiddenColumns?.has?.('last_modified')) {
+        modified.classList.add(MODIFIED_COLUMN_HIDDEN);
+      } else {
+        modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
 
       // set the initial caret icon
       Private.updateCaret(
@@ -1807,7 +1869,7 @@ export namespace DirListing {
      *
      * @returns The sort state of the header after the click event.
      */
-    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState {
+    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null {
       const name = DOMUtils.findElement(node, NAME_ID_CLASS);
       const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
       const state: ISortState = { direction: 'ascending', key: 'name' };
@@ -1873,7 +1935,9 @@ export namespace DirListing {
      *
      * @returns A new DOM node to use as a content item.
      */
-    createItemNode(): HTMLElement {
+    createItemNode(
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
+    ): HTMLElement {
       const node = document.createElement('li');
       const icon = document.createElement('span');
       const text = document.createElement('span');
@@ -1884,6 +1948,12 @@ export namespace DirListing {
       node.appendChild(icon);
       node.appendChild(text);
       node.appendChild(modified);
+
+      if (hiddenColumns?.has?.('last_modified')) {
+        modified.classList.add(MODIFIED_COLUMN_HIDDEN);
+      } else {
+        modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
       return node;
     }
 
@@ -1901,9 +1971,11 @@ export namespace DirListing {
       node: HTMLElement,
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
-      translator?: ITranslator
+      translator?: ITranslator,
+      hiddenColumns?: Set<DirListing.ToggleableColumn>
     ): void {
       translator = translator || nullTranslator;
+
       fileType =
         fileType || DocumentRegistry.getDefaultTextFileType(translator);
       const { icon, iconClass, name } = fileType;
@@ -1913,6 +1985,12 @@ export namespace DirListing {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+
+      if (hiddenColumns?.has?.('last_modified')) {
+        modified.classList.add(MODIFIED_COLUMN_HIDDEN);
+      } else {
+        modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
 
       // render the file item's icon
       LabIcon.resolveElement({
@@ -2031,7 +2109,7 @@ export namespace DirListing {
     /**
      * Create a node for a header item.
      */
-    private _createHeaderItemNode(label: string): HTMLElement {
+    protected createHeaderItemNode(label: string): HTMLElement {
       const node = document.createElement('div');
       const text = document.createElement('span');
       const icon = document.createElement('span');
@@ -2062,7 +2140,8 @@ namespace Private {
    */
   export function doRename(
     text: HTMLElement,
-    edit: HTMLInputElement
+    edit: HTMLInputElement,
+    original: string
   ): Promise<string> {
     const parent = text.parentElement as HTMLElement;
     parent.replaceChild(edit, text);
@@ -2089,6 +2168,7 @@ namespace Private {
           case 27: // Escape
             event.stopPropagation();
             event.preventDefault();
+            edit.value = original;
             edit.blur();
             break;
           case 38: // Up arrow

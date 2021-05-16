@@ -23,6 +23,8 @@ import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 import { DocumentRegistry, IDocumentWidget } from './index';
 
+import * as models from '@jupyterlab/shared-models';
+
 /**
  * The default implementation of a document model.
  */
@@ -35,6 +37,8 @@ export class DocumentModel
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
+    const filemodel = new models.YFile() as models.ISharedFile;
+    this.switchSharedModel(filemodel, true);
     this.value.changed.connect(this.triggerContentChange, this);
   }
 
@@ -158,6 +162,10 @@ export class DocumentModel
     this.dirty = true;
   }
 
+  /**
+   * The shared notebook model.
+   */
+  readonly sharedModel: models.ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
@@ -216,12 +224,15 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * Create a new model.
    *
    * @param languagePreference - An optional kernel language preference.
+   * @param modelDB - An optional modelDB.
+   * @param isInitialized - An optional flag to check if the model is initialized.
    *
    * @returns A new document model.
    */
   createNew(
     languagePreference?: string,
-    modelDB?: IModelDB
+    modelDB?: IModelDB,
+    isInitialized?: boolean
   ): DocumentRegistry.ICodeModel {
     return new DocumentModel(languagePreference, modelDB);
   }

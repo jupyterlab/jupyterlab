@@ -45,13 +45,19 @@ Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.rea
 
 ### Installation
 
-JupyterLab can be installed using `conda` or `pip`. For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html).
+JupyterLab can be installed using [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.readthedocs.io/en/latest/) or [pip](https://docs.python.org/3.6/installing/index.html). For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html).
 
 Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
-### conda
+### mamba and conda
 
-If you use `conda`, you can install it with:
+If you use `mamba` or `conda`, you can install it with:
+
+```shell
+mamba install -c conda-forge jupyterlab
+```
+
+or
 
 ```shell
 conda install -c conda-forge jupyterlab
@@ -137,7 +143,7 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 
 JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
-- Mehmet Bektas, Bloomberg (general development, extensions).
+- Mehmet Bektas, Splunk (general development, extensions).
 - Alex Bozarth, IBM (general development, extensions).
 - Eric Charles, Datalayer, (general development, extensions).
 - Martha Cryan, IBM (general development, extensions).

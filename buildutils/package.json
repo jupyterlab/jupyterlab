@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/buildutils",
-  "version": "3.1.0-alpha.3",
+  "version": "3.1.0-alpha.8",
   "description": "JupyterLab - Build Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -47,6 +47,7 @@
     "fs-extra": "^9.0.1",
     "glob": "~7.1.6",
     "inquirer": "^7.0.0",
+    "minimatch": "~3.0.4",
     "package-json": "^6.5.0",
     "prettier": "^2.1.1",
     "semver": "^7.3.2",

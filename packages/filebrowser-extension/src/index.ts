@@ -21,8 +21,7 @@ import {
   WidgetTracker,
   ICommandPalette,
   InputDialog,
-  showErrorMessage,
-  DOMUtils
+  showErrorMessage
 } from '@jupyterlab/apputils';
 
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
@@ -216,6 +215,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       }
 
       let navigateToCurrentDirectory: boolean = false;
+      let showLastModifiedColumn: boolean = true;
       let useFuzzyFilter: boolean = true;
 
       if (settingRegistry) {
@@ -232,6 +232,17 @@ const browser: JupyterFrontEndPlugin<void> = {
               'navigateToCurrentDirectory'
             ).composite as boolean;
             browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
+
+            settings.changed.connect(settings => {
+              showLastModifiedColumn = settings.get('showLastModifiedColumn')
+                .composite as boolean;
+              browser.showLastModifiedColumn = showLastModifiedColumn;
+            });
+            showLastModifiedColumn = settings.get('showLastModifiedColumn')
+              .composite as boolean;
+
+            browser.showLastModifiedColumn = showLastModifiedColumn;
+
             settings.changed.connect(settings => {
               useFuzzyFilter = settings.get('useFuzzyFilter')
                 .composite as boolean;
@@ -296,6 +307,71 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     void Private.restoreBrowser(defaultBrowser, commands, router, tree);
 
     return { createFileBrowser, defaultBrowser, tracker };
+  }
+};
+
+/**
+ * A plugin providing download + copy download link commands in the context menu.
+ *
+ * Disabling this plugin will NOT disable downloading files from the server.
+ * Users will still be able to retrieve files from the file download URLs the
+ * server provides.
+ */
+const downloadPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:download',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const trans = translator.load('jupyterlab');
+    const { commands } = app;
+    const { tracker } = factory;
+    // matches only non-directory items
+    const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+
+    commands.addCommand(CommandIDs.download, {
+      execute: () => {
+        const widget = tracker.currentWidget;
+
+        if (widget) {
+          return widget.download();
+        }
+      },
+      icon: downloadIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: trans.__('Download')
+    });
+
+    commands.addCommand(CommandIDs.copyDownloadLink, {
+      execute: () => {
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        return widget.model.manager.services.contents
+          .getDownloadUrl(widget.selectedItems().next()!.path)
+          .then(url => {
+            Clipboard.copyToSystem(url);
+          });
+      },
+      icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: trans.__('Copy Download Link'),
+      mnemonic: 0
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.download,
+      selector: selectorNotDir,
+      rank: 9
+    });
+    app.contextMenu.addItem({
+      command: CommandIDs.copyDownloadLink,
+      selector: selectorNotDir,
+      rank: 13
+    });
   }
 };
 
@@ -435,14 +511,13 @@ const shareFile: JupyterFrontEndPlugin<void> = {
         if (!model) {
           return;
         }
-        const path = encodeURI(model.path);
 
         Clipboard.copyToSystem(
           URLExt.normalize(
             PageConfig.getUrl({
               mode: 'single-document',
               workspace: PageConfig.defaultWorkspace,
-              treePath: path
+              treePath: model.path
             })
           )
         );
@@ -452,6 +527,109 @@ const shareFile: JupyterFrontEndPlugin<void> = {
         toArray(tracker.currentWidget.selectedItems()).length === 1,
       icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Copy Shareable Link')
+    });
+  }
+};
+
+/**
+ * The "Open With" context menu.
+ *
+ * This is its own plugin in case you would like to disable this feature.
+ * e.g. jupyter labextension disable fort_disable_download:open-with
+ */
+const openWithPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-with',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const { docRegistry: registry, commands } = app;
+    const trans = translator.load('jupyterlab');
+    const { tracker } = factory;
+    // matches only non-directory items
+    const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+
+    /**
+     * A menu widget that dynamically populates with different widget factories
+     * based on current filebrowser selection.
+     */
+    class OpenWithMenu extends Menu {
+      protected onBeforeAttach(msg: Message): void {
+        // clear the current menu items
+        this.clearItems();
+
+        // get the widget factories that could be used to open all of the items
+        // in the current filebrowser selection
+        const factories = tracker.currentWidget
+          ? OpenWithMenu._intersection(
+              map(tracker.currentWidget.selectedItems(), i => {
+                return OpenWithMenu._getFactories(i);
+              })
+            )
+          : undefined;
+
+        if (factories) {
+          // make new menu items from the widget factories
+          factories.forEach(factory => {
+            this.addItem({
+              args: { factory: factory },
+              command: CommandIDs.open
+            });
+          });
+        }
+
+        super.onBeforeAttach(msg);
+      }
+
+      static _getFactories(item: Contents.IModel): Array<string> {
+        const factories = registry
+          .preferredWidgetFactories(item.path)
+          .map(f => f.name);
+        const notebookFactory = registry.getWidgetFactory('notebook')?.name;
+        if (
+          notebookFactory &&
+          item.type === 'notebook' &&
+          factories.indexOf(notebookFactory) === -1
+        ) {
+          factories.unshift(notebookFactory);
+        }
+
+        return factories;
+      }
+
+      static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
+        // pop the first element of iter
+        const first = iter.next();
+        // first will be undefined if iter is empty
+        if (!first) {
+          return;
+        }
+
+        // "initialize" the intersection from first
+        const isect = new Set(first);
+        // reduce over the remaining elements of iter
+        return reduce(
+          iter,
+          (isect, subarr) => {
+            // filter out all elements not present in both isect and subarr,
+            // accumulate result in new set
+            return new Set(subarr.filter(x => isect.has(x)));
+          },
+          isect
+        );
+      }
+    }
+
+    const openWith = new OpenWithMenu({ commands });
+    openWith.title.label = trans.__('Open With');
+    app.contextMenu.addItem({
+      type: 'submenu',
+      submenu: openWith,
+      selector: selectorNotDir,
+      rank: 2
     });
   }
 };
@@ -575,18 +753,6 @@ function addCommands(
     },
     icon: cutIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Cut')
-  });
-
-  commands.addCommand(CommandIDs.download, {
-    execute: () => {
-      const widget = tracker.currentWidget;
-
-      if (widget) {
-        return widget.download();
-      }
-    },
-    icon: downloadIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Download')
   });
 
   commands.addCommand(CommandIDs.duplicate, {
@@ -755,24 +921,6 @@ function addCommands(
     mnemonic: 0
   });
 
-  commands.addCommand(CommandIDs.copyDownloadLink, {
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
-
-      return widget.model.manager.services.contents
-        .getDownloadUrl(widget.selectedItems().next()!.path)
-        .then(url => {
-          Clipboard.copyToSystem(url);
-        });
-    },
-    icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Copy Download Link'),
-    mnemonic: 0
-  });
-
   commands.addCommand(CommandIDs.paste, {
     execute: () => {
       const widget = tracker.currentWidget;
@@ -800,14 +948,11 @@ function addCommands(
 
   commands.addCommand(CommandIDs.createNewFile, {
     execute: () => {
-      const {
-        model: { path }
-      } = browser;
-      void commands.execute('docmanager:new-untitled', {
-        path,
-        type: 'file',
-        ext: 'txt'
-      });
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.createNewFile({ ext: 'txt' });
+      }
     },
     icon: textEditorIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('New File')
@@ -815,14 +960,11 @@ function addCommands(
 
   commands.addCommand(CommandIDs.createNewMarkdownFile, {
     execute: () => {
-      const {
-        model: { path }
-      } = browser;
-      void commands.execute('docmanager:new-untitled', {
-        path,
-        type: 'file',
-        ext: 'md'
-      });
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.createNewFile({ ext: 'md' });
+      }
     },
     icon: markdownIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('New Markdown File')
@@ -905,23 +1047,17 @@ function addCommands(
   }
 
   commands.addCommand(CommandIDs.toggleLastModified, {
-    label: trans.__('Toggle Last Modified Column'),
+    label: trans.__('Show Last Modified Column'),
+    isToggled: () => browser.showLastModifiedColumn,
     execute: () => {
-      const header = DOMUtils.findElement(document.body, 'jp-id-modified');
-      const column = DOMUtils.findElements(
-        document.body,
-        'jp-DirListing-itemModified'
-      );
-      if (header.classList.contains('jp-LastModified-hidden')) {
-        header.classList.remove('jp-LastModified-hidden');
-        for (let i = 0; i < column.length; i++) {
-          column[i].classList.remove('jp-LastModified-hidden');
-        }
-      } else {
-        header.classList.add('jp-LastModified-hidden');
-        for (let i = 0; i < column.length; i++) {
-          column[i].classList.add('jp-LastModified-hidden');
-        }
+      const value = !browser.showLastModifiedColumn;
+      const key = 'showLastModifiedColumn';
+      if (settingRegistry) {
+        return settingRegistry
+          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set showLastModifiedColumn setting`);
+          });
       }
     }
   });
@@ -945,77 +1081,8 @@ function addCommands(
     });
   }
 
-  /**
-   * A menu widget that dynamically populates with different widget factories
-   * based on current filebrowser selection.
-   */
-  class OpenWithMenu extends Menu {
-    protected onBeforeAttach(msg: Message): void {
-      // clear the current menu items
-      this.clearItems();
-
-      // get the widget factories that could be used to open all of the items
-      // in the current filebrowser selection
-      const factories = tracker.currentWidget
-        ? OpenWithMenu._intersection(
-            map(tracker.currentWidget.selectedItems(), i => {
-              return OpenWithMenu._getFactories(i);
-            })
-          )
-        : undefined;
-
-      if (factories) {
-        // make new menu items from the widget factories
-        factories.forEach(factory => {
-          this.addItem({
-            args: { factory: factory },
-            command: CommandIDs.open
-          });
-        });
-      }
-
-      super.onBeforeAttach(msg);
-    }
-
-    static _getFactories(item: Contents.IModel): Array<string> {
-      const factories = registry
-        .preferredWidgetFactories(item.path)
-        .map(f => f.name);
-      const notebookFactory = registry.getWidgetFactory('notebook')?.name;
-      if (
-        notebookFactory &&
-        item.type === 'notebook' &&
-        factories.indexOf(notebookFactory) === -1
-      ) {
-        factories.unshift(notebookFactory);
-      }
-
-      return factories;
-    }
-
-    static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
-      // pop the first element of iter
-      const first = iter.next();
-      // first will be undefined if iter is empty
-      if (!first) {
-        return;
-      }
-
-      // "initialize" the intersection from first
-      const isect = new Set(first);
-      // reduce over the remaining elements of iter
-      return reduce(
-        iter,
-        (isect, subarr) => {
-          // filter out all elements not present in both isect and subarr,
-          // accumulate result in new set
-          return new Set(subarr.filter(x => isect.has(x)));
-        },
-        isect
-      );
-    }
-  }
-
+  // matches the filebrowser itself
+  const selectorBrowser = '.jp-FileBrowser-listing';
   // matches anywhere on filebrowser
   const selectorContent = '.jp-DirListing-content';
   // matches all filebrowser items
@@ -1055,15 +1122,6 @@ function addCommands(
     rank: 1
   });
 
-  const openWith = new OpenWithMenu({ commands });
-  openWith.title.label = trans.__('Open With');
-  app.contextMenu.addItem({
-    type: 'submenu',
-    submenu: openWith,
-    selector: selectorNotDir,
-    rank: 2
-  });
-
   app.contextMenu.addItem({
     command: CommandIDs.openBrowserTab,
     selector: selectorNotDir,
@@ -1098,11 +1156,6 @@ function addCommands(
     rank: 8
   });
   app.contextMenu.addItem({
-    command: CommandIDs.download,
-    selector: selectorNotDir,
-    rank: 9
-  });
-  app.contextMenu.addItem({
     command: CommandIDs.shutdown,
     selector: selectorNotDir,
     rank: 10
@@ -1119,14 +1172,40 @@ function addCommands(
     rank: 12
   });
   app.contextMenu.addItem({
-    command: CommandIDs.copyDownloadLink,
-    selector: selectorNotDir,
-    rank: 13
-  });
-  app.contextMenu.addItem({
     command: CommandIDs.toggleLastModified,
     selector: '.jp-DirListing-header',
     rank: 14
+  });
+
+  app.commands.addKeyBinding({
+    command: CommandIDs.del,
+    selector: selectorBrowser,
+    keys: ['Delete']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.cut,
+    selector: selectorBrowser,
+    keys: ['Ctrl X']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.copy,
+    selector: selectorBrowser,
+    keys: ['Ctrl C']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.paste,
+    selector: selectorBrowser,
+    keys: ['Ctrl V']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.rename,
+    selector: selectorBrowser,
+    keys: ['F2']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.duplicate,
+    selector: selectorBrowser,
+    keys: ['Ctrl D']
   });
 }
 
@@ -1270,7 +1349,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   browser,
   shareFile,
   fileUploadStatus,
+  downloadPlugin,
   browserWidget,
-  launcherToolbarButton
+  launcherToolbarButton,
+  openWithPlugin
 ];
 export default plugins;

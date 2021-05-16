@@ -214,11 +214,13 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
     // Editor settings
     if (options.editorConfig) {
+      let editorOptions: any = {};
       Object.keys(options.editorConfig).forEach(
         (key: keyof CodeEditor.IConfig) => {
-          this.editor.setOption(key, options.editorConfig?.[key] ?? null);
+          editorOptions[key] = options.editorConfig?.[key] ?? null;
         }
       );
+      this.editor.setOptions(editorOptions);
     }
 
     model.metadata.changed.connect(this.onMetadataChanged, this);
@@ -565,6 +567,11 @@ export namespace Cell {
      * Whether to send an update request to the editor when it is shown.
      */
     updateEditorOnShow?: boolean;
+
+    /**
+     * The maximum number of output items to display in cell output.
+     */
+    maxNumberOutputs?: number;
   }
 
   /**
@@ -701,7 +708,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
     const output = (this._output = new OutputArea({
       model: model.outputs,
       rendermime,
-      contentFactory: contentFactory
+      contentFactory: contentFactory,
+      maxNumberOutputs: options.maxNumberOutputs
     }));
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     // Set a CSS if there are no outputs, and connect a signal for future

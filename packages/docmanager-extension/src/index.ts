@@ -147,7 +147,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       when,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       sessionDialogs: sessionDialogs || undefined,
-      translator
+      translator,
+      collaborative: true
     });
 
     // Register the file operations commands.
@@ -337,12 +338,64 @@ export const pathStatusPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin providing download commands in the file menu and command palette.
+ */
+export const downloadPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/docmanager-extension:download',
+  autoStart: true,
+  requires: [ITranslator, IDocumentManager],
+  optional: [ICommandPalette, IMainMenu],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    docManager: IDocumentManager,
+    palette: ICommandPalette | null,
+    mainMenu: IMainMenu | null
+  ) => {
+    const trans = translator.load('jupyterlab');
+    const { commands, shell } = app;
+    const isEnabled = () => {
+      const { currentWidget } = shell;
+      return !!(currentWidget && docManager.contextForWidget(currentWidget));
+    };
+    commands.addCommand(CommandIDs.download, {
+      label: trans.__('Download'),
+      caption: trans.__('Download the file to your computer'),
+      isEnabled,
+      execute: () => {
+        // Checks that shell.currentWidget is valid:
+        if (isEnabled()) {
+          const context = docManager.contextForWidget(shell.currentWidget!);
+          if (!context) {
+            return showDialog({
+              title: trans.__('Cannot Download'),
+              body: trans.__('No context found for current widget!'),
+              buttons: [Dialog.okButton({ label: trans.__('OK') })]
+            });
+          }
+          return context.download();
+        }
+      }
+    });
+
+    const category = trans.__('File Operations');
+    if (palette) {
+      palette.addItem({ command: CommandIDs.download, category });
+    }
+    if (mainMenu) {
+      mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
+    }
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   docManagerPlugin,
   pathStatusPlugin,
-  savingStatusPlugin
+  savingStatusPlugin,
+  downloadPlugin
 ];
 export default plugins;
 
@@ -669,26 +722,6 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.download, {
-    label: trans.__('Download'),
-    caption: trans.__('Download the file to your computer'),
-    isEnabled,
-    execute: () => {
-      // Checks that shell.currentWidget is valid:
-      if (isEnabled()) {
-        const context = docManager.contextForWidget(shell.currentWidget!);
-        if (!context) {
-          return showDialog({
-            title: trans.__('Cannot Download'),
-            body: trans.__('No context found for current widget!'),
-            buttons: [Dialog.okButton({ label: trans.__('OK') })]
-          });
-        }
-        return context.download();
-      }
-    }
-  });
-
   commands.addCommand(CommandIDs.toggleAutosave, {
     label: trans.__('Autosave Documents'),
     isToggled: () => docManager.autosave,
@@ -718,7 +751,6 @@ function addCommands(
       CommandIDs.restoreCheckpoint,
       CommandIDs.save,
       CommandIDs.saveAs,
-      CommandIDs.download,
       CommandIDs.toggleAutosave
     ].forEach(command => {
       palette.addItem({ command, category });
@@ -727,7 +759,6 @@ function addCommands(
 
   if (mainMenu) {
     mainMenu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
-    mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
   }
 }
 
@@ -783,8 +814,13 @@ function addLabCommands(
   });
 
   commands.addCommand(CommandIDs.rename, {
-    label: () =>
-      trans.__('Rename %1…', fileType(contextMenuWidget(), docManager)),
+    label: () => {
+      let t = fileType(contextMenuWidget(), docManager);
+      if (t) {
+        t = ' ' + t;
+      }
+      return trans.__('Rename%1…', t);
+    },
     isEnabled,
     execute: () => {
       // Implies contextMenuWidget() !== null

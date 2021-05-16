@@ -358,8 +358,8 @@ export class Completer extends Widget {
    *
    * #### Notes
    * When the user cycles all the way `down` to the last index, subsequent
-   * `down` cycles will remain on the last index. When the user cycles `up` to
-   * the first item, subsequent `up` cycles will remain on the first cycle.
+   * `down` cycles will cycle to the first index. When the user cycles `up` to
+   * the first item, subsequent `up` cycles will cycle to the last index.
    */
   private _cycle(direction: Private.scrollType): void {
     const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
@@ -368,9 +368,9 @@ export class Completer extends Widget {
     active.classList.remove(ACTIVE_CLASS);
 
     if (direction === 'up') {
-      this._activeIndex = index === 0 ? index : index - 1;
+      this._activeIndex = index === 0 ? items.length - 1 : index - 1;
     } else if (direction === 'down') {
-      this._activeIndex = index < items.length - 1 ? index + 1 : index;
+      this._activeIndex = index < items.length - 1 ? index + 1 : 0;
     } else {
       // Measure the number of items on a page.
       const boxHeight = this.node.getBoundingClientRect().height;
@@ -439,6 +439,8 @@ export class Completer extends Widget {
         if (populated) {
           this.update();
         }
+
+        this._cycle(event.shiftKey ? 'up' : 'down');
         return;
       }
       case 27: // Esc key
@@ -608,9 +610,13 @@ export class Completer extends Widget {
     }
     docPanel.textContent = '';
     if (activeItem.documentation) {
-      let pre = document.createElement('pre');
-      pre.textContent = activeItem.documentation;
-      docPanel.appendChild(pre);
+      let node: HTMLElement;
+      if (!this._renderer.createDocumentationNode) {
+        node = Completer.defaultRenderer.createDocumentationNode(activeItem);
+      } else {
+        node = this._renderer.createDocumentationNode(activeItem);
+      }
+      docPanel.appendChild(node);
       docPanel.setAttribute('style', '');
     } else {
       docPanel.setAttribute('style', 'display:none');
@@ -849,6 +855,14 @@ export namespace Completer {
       typeMap: TypeMap,
       orderedTypes: string[]
     ): HTMLLIElement;
+
+    /**
+     * Create a documentation node (a `pre` element by default) for
+     * documentation panel.
+     */
+    createDocumentationNode?(
+      activeItem: CompletionHandler.ICompletionItem
+    ): HTMLElement;
   }
 
   /**
@@ -891,6 +905,17 @@ export namespace Completer {
         typeMap[item.raw] || '',
         orderedTypes
       );
+    }
+
+    /**
+     * Create a documentation node for documentation panel.
+     */
+    createDocumentationNode(
+      activeItem: CompletionHandler.ICompletionItem
+    ): HTMLElement {
+      let pre = document.createElement('pre');
+      pre.textContent = activeItem.documentation || '';
+      return pre;
     }
 
     /**

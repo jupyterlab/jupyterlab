@@ -78,6 +78,7 @@ describe('@jupyterlab/notebook', () => {
       const model = new NotebookModel();
       model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
+      model.sharedModel.clearUndoHistory();
 
       widget.activeCellIndex = 0;
     });
@@ -226,6 +227,23 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell!.model.value.text).toBe(source);
       });
 
+      it('should select the previous cell if there is only one cell selected and mergeAbove is true', () => {
+        widget.activeCellIndex = 1;
+        let source = widget.activeCell!.model.value.text;
+        const previous = widget.widgets[0];
+        source = previous.model.value.text + '\n\n' + source;
+        NotebookActions.mergeCells(widget, true);
+        expect(widget.activeCell!.model.value.text).toBe(source);
+      });
+
+      it('should do nothing if first cell selected and mergeAbove is true', () => {
+        let source = widget.activeCell!.model.value.text;
+        const cellNumber = widget.widgets.length;
+        NotebookActions.mergeCells(widget, true);
+        expect(widget.widgets.length).toBe(cellNumber);
+        expect(widget.activeCell!.model.value.text).toBe(source);
+      });
+
       it('should clear the outputs of a code cell', () => {
         NotebookActions.mergeCells(widget);
         const cell = widget.activeCell as CodeCell;
@@ -268,9 +286,9 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('command');
       });
 
-      it.each(['raw', 'markdown'])(
+      it.each(['raw', 'markdown'] as CellType[])(
         'should merge attachments if the last selected cell is a %s cell',
-        (type: CellType) => {
+        type => {
           for (let i = 0; i < 2; i++) {
             NotebookActions.changeCellType(widget, type);
             const markdownCell = widget.widgets[i] as MarkdownCell;
@@ -650,7 +668,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should clear the existing selection', async () => {
-        const next = widget.widgets[2];
+        const next = widget.widgets[3];
         widget.select(next);
         const result = await NotebookActions.runAndAdvance(
           widget,
@@ -1321,6 +1339,7 @@ describe('@jupyterlab/notebook', () => {
         const count = widget.widgets.length;
         NotebookActions.cut(widget);
         widget.activeCellIndex = 1;
+        widget.model?.sharedModel.clearUndoHistory();
         NotebookActions.paste(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);
