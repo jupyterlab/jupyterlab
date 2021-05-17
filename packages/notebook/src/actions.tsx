@@ -1411,12 +1411,6 @@ export namespace NotebookActions {
     }
   }
 
-  export function getCellIndex(cell: Cell, notebook: Notebook): number {
-    return findIndex(notebook.widgets, (possibleCell: Cell, index: number) => {
-      return cell.model.id === possibleCell.model.id;
-    });
-  }
-
   /**
    * Set the given cell and ** all "child" cells **
    * to the given collapse / uncollapse if cell is
@@ -1431,7 +1425,12 @@ export namespace NotebookActions {
     collapsing: boolean,
     notebook: Notebook
   ): number {
-    const which = NotebookActions.getCellIndex(cell, notebook);
+    const which = findIndex(
+      notebook.widgets,
+      (possibleCell: Cell, index: number) => {
+        return cell.model.id === possibleCell.model.id;
+      }
+    );
     if (which === -1) {
       return -1;
     }
