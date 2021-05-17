@@ -11,7 +11,7 @@ import * as decoding from 'lib0/decoding';
 
 import * as encoding from 'lib0/encoding';
 
-import { IProviderFactory } from './tokens';
+import { IDocumentProviderFactory } from './tokens';
 
 /**
  * A class to provide Yjs synchronization over Websocket.
@@ -182,5 +182,5 @@ export namespace WebsocketProviderWithLocks {
   /**
    * The instantiation options for a WebsocketProviderWithLocks.
    */
-  export interface IOptions extends IProviderFactory.IOptions {}
+  export interface IOptions extends IDocumentProviderFactory.IOptions {}
 }

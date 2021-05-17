@@ -31,8 +31,8 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  IProvider,
-  IProviderFactory,
+  IDocumentProvider,
+  IDocumentProviderFactory,
   WebsocketProviderWithLocks
 } from '@jupyterlab/docprovider';
 
@@ -100,11 +100,11 @@ const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
  * The default document provider plugin
  * TODO: move to a docprovider-extension package?
  */
-const docProviderPlugin: JupyterFrontEndPlugin<IProviderFactory> = {
+const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   id: '@jupyterlab/docmanager-extension:docprovider',
-  provides: IProviderFactory,
-  activate: (app: JupyterFrontEnd): IProviderFactory => {
-    const factory = (options: IProviderFactory.IOptions): IProvider => {
+  provides: IDocumentProviderFactory,
+  activate: (app: JupyterFrontEnd): IDocumentProviderFactory => {
+    const factory = (options: IDocumentProviderFactory.IOptions): IDocumentProvider => {
       return new WebsocketProviderWithLocks(options);
     };
     return factory;
@@ -124,7 +124,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     ILabShell,
     IMainMenu,
     ISessionContextDialogs,
-    IProviderFactory
+    IDocumentProviderFactory
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -135,7 +135,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     labShell: ILabShell | null,
     mainMenu: IMainMenu | null,
     sessionDialogs: ISessionContextDialogs | null,
-    docproviderFactory: IProviderFactory | null
+    docProviderFactory: IDocumentProviderFactory | null
   ): IDocumentManager => {
     const trans = translator.load('jupyterlab');
     const manager = app.serviceManager;
@@ -175,7 +175,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       sessionDialogs: sessionDialogs || undefined,
       translator,
       collaborative: true,
-      docproviderFactory: docproviderFactory ?? undefined
+      docProviderFactory: docProviderFactory ?? undefined
     });
 
     // Register the file operations commands.

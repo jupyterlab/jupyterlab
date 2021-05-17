@@ -5,14 +5,14 @@ import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 /**
  * The default document provider token.
  */
-export const IProviderFactory = new Token<IProviderFactory>(
-  '@jupyterlab/docprovider:IProviderFactory'
+export const IDocumentProviderFactory = new Token<IDocumentProviderFactory>(
+  '@jupyterlab/docprovider:IDocumentProviderFactory'
 );
 
 /**
  * An interface for a document provider.
  */
-export interface IProvider {
+export interface IDocumentProvider {
   /**
    * Resolves to true if the initial content has been initialized on the server. false otherwise.
    */
@@ -40,11 +40,11 @@ export interface IProvider {
   destroy(): void;
 }
 
-export type IProviderFactory = (
-  options: IProviderFactory.IOptions
-) => IProvider;
+export type IDocumentProviderFactory = (
+  options: IDocumentProviderFactory.IOptions
+) => IDocumentProvider;
 
-export namespace IProviderFactory {
+export namespace IDocumentProviderFactory {
   export interface IOptions {
     /**
      * The server URL.

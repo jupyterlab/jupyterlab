@@ -11,7 +11,7 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { IProviderFactory } from '@jupyterlab/docprovider';
+import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 
@@ -55,7 +55,7 @@ export class DocumentManager implements IDocumentManager {
     this.services = options.manager;
     this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
-    this._docproviderFactory = options.docproviderFactory;
+    this._docProviderFactory = options.docProviderFactory;
 
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
@@ -487,7 +487,7 @@ export class DocumentManager implements IDocumentManager {
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
       collaborative: this._collaborative,
-      docproviderFactory: this._docproviderFactory
+      docProviderFactory: this._docProviderFactory
     });
     const handler = new SaveHandler({
       context,
@@ -614,7 +614,7 @@ export class DocumentManager implements IDocumentManager {
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
-  private _docproviderFactory: IProviderFactory | undefined;
+  private _docProviderFactory: IDocumentProviderFactory | undefined;
   private _collaborative: boolean;
 }
 
@@ -662,9 +662,9 @@ export namespace DocumentManager {
     translator?: ITranslator;
 
     /**
-     * An factory method for the document provider.
+     * A factory method for the document provider.
      */
-    docproviderFactory?: IProviderFactory;
+    docProviderFactory?: IDocumentProviderFactory;
 
     /**
      * Whether the context should be collaborative.
