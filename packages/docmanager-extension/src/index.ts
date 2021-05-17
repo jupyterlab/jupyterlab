@@ -101,7 +101,7 @@ const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
  * TODO: move to a docprovider-extension package?
  */
 const docProviderPlugin: JupyterFrontEndPlugin<IProviderFactory> = {
-  id: docManagerPluginId,
+  id: '@jupyterlab/docmanager-extension:docprovider',
   provides: IProviderFactory,
   activate: (app: JupyterFrontEnd): IProviderFactory => {
     const factory = (options: IProviderFactory.IOptions): IProvider => {
