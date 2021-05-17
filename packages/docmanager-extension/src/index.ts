@@ -20,7 +20,7 @@ import {
   ISessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import { IChangedArgs, Time } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig, Time } from '@jupyterlab/coreutils';
 
 import {
   renameDialog,
@@ -33,6 +33,7 @@ import {
 import {
   IDocumentProvider,
   IDocumentProviderFactory,
+  ProviderMock,
   WebsocketProviderWithLocks
 } from '@jupyterlab/docprovider';
 
@@ -104,8 +105,14 @@ const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   id: '@jupyterlab/docmanager-extension:docprovider',
   provides: IDocumentProviderFactory,
   activate: (app: JupyterFrontEnd): IDocumentProviderFactory => {
-    const factory = (options: IDocumentProviderFactory.IOptions): IDocumentProvider => {
-      return new WebsocketProviderWithLocks(options);
+    const collaborative =
+      PageConfig.getOption('collaborative') == 'true' ? true : false;
+    const factory = (
+      options: IDocumentProviderFactory.IOptions
+    ): IDocumentProvider => {
+      return collaborative
+        ? new WebsocketProviderWithLocks(options)
+        : new ProviderMock();
     };
     return factory;
   }
