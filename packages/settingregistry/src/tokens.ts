@@ -198,7 +198,7 @@ export namespace ISettingRegistry {
 
     /**
      * Menu title
-     * 
+     *
      * #### Notes
      * Default will be the capitalized id.
      */
@@ -206,7 +206,7 @@ export namespace ISettingRegistry {
 
     /**
      * Whether a menu is disabled. `False` by default.
-     * 
+     *
      * #### Notes
      * This allows an user to suppress a menu.
      */
@@ -249,7 +249,7 @@ export namespace ISettingRegistry {
 
     /**
      * Whether a menu item is disabled. `False` by default.
-     * 
+     *
      * #### Notes
      * This allows an user to suppress menu items.
      */
@@ -340,7 +340,7 @@ export namespace ISettingRegistry {
     /**
      * The JupyterLab menus that are created by a plugin's schema.
      */
-    'jupyter.lab.menus'?: IMenu[];
+    'jupyter.lab.menus'?: { main: IMenu[] };
 
     /**
      * Whether the schema is deprecated.

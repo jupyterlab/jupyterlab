@@ -407,6 +407,7 @@
       "required": [
         "id"
       ],
+      "additionalProperties": false,
       "type": "object"
     },
     "menuItem": {
@@ -444,6 +445,7 @@
           ]
         }
       },
+      "additionalProperties": false,
       "type": "object"
     }
   },

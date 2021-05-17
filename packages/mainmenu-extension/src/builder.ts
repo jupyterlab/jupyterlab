@@ -28,15 +28,18 @@ export async function loadSettingsMenu(
     loaded = {};
     schema.properties!.menus.default = Object.keys(registry.plugins)
       .map(plugin => {
-        const menus =
-          registry.plugins[plugin]!.schema['jupyter.lab.menus'] || [];
-        loaded[plugin] = menus;
-        return menus;
+        const menus = registry.plugins[plugin]!.schema['jupyter.lab.menus'] ?? {
+          main: []
+        };
+        loaded[plugin] = menus.main;
+        return menus.main;
       })
       .concat([schema.properties!.menus.default as any[]])
-      // TODO merge menu tree
-      .reduce((acc, val) => acc.concat(val), []) // flatten one level
-      .sort((a, b) => a.id.localeCompare(b.id));
+      .reduceRight(
+        (acc, val) => SettingRegistry.reconcileMenus(acc, val, true),
+        []
+      ) // flatten one level
+      .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
 
     schema.properties!.menus.description = trans.__(
       `Note: To disable a menu or a menu item,
@@ -156,7 +159,7 @@ function dataToMenu(
   const { id, label } = item;
   const menu = menuFactory({ id, label });
   item.items
-    .filter(item => !item.disabled)
+    ?.filter(item => !item.disabled)
     .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity))
     .map(item => {
       const { command, args, submenu, type } = item;
@@ -172,11 +175,18 @@ function dataToMenu(
 }
 
 async function displayInformation(trans: TranslationBundle): Promise<void> {
-  await showDialog({
+  const result = await showDialog({
     title: trans.__('Information'),
     body: trans.__(
       'Menu customization has changed. You will need to reload JupyterLab to see the changes.'
     ),
-    buttons: [Dialog.okButton()]
+    buttons: [
+      Dialog.cancelButton(),
+      Dialog.okButton({ label: trans.__('RELOAD') })
+    ]
   });
+
+  if (result.button.accept) {
+    location.reload();
+  }
 }
