@@ -47,11 +47,6 @@ export type IDocumentProviderFactory = (
 export namespace IDocumentProviderFactory {
   export interface IOptions {
     /**
-     * The server URL.
-     */
-    url: string;
-
-    /**
      * The name of the room
      */
     guid: string;

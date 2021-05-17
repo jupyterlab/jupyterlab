@@ -30,7 +30,7 @@ import {
   sessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import { PathExt, URLExt } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
 import { IModelDB, ModelDB } from '@jupyterlab/observables';
 
@@ -83,12 +83,10 @@ export class Context<
     const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('context');
-    const server = ServerConnection.makeSettings();
-    const url = URLExt.join(server.wsUrl, 'api/yjs');
     const guid = this._factory.contentType + ':' + localPath;
     const docProviderFactory = options.docProviderFactory;
     this._provider = docProviderFactory
-      ? docProviderFactory({ url, guid, ymodel })
+      ? docProviderFactory({ guid, ymodel })
       : new ProviderMock();
 
     this._readyPromise = manager.ready.then(() => {

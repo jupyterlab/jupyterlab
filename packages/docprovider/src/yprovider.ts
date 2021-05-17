@@ -182,5 +182,10 @@ export namespace WebsocketProviderWithLocks {
   /**
    * The instantiation options for a WebsocketProviderWithLocks.
    */
-  export interface IOptions extends IDocumentProviderFactory.IOptions {}
+  export interface IOptions extends IDocumentProviderFactory.IOptions {
+    /**
+     * The server URL
+     */
+    url: string;
+  }
 }
