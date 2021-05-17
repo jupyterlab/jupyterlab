@@ -55,8 +55,10 @@ describe('@jupyterlab/mainmenu', () => {
         const menu2 = new Menu({ commands });
         mainMenu.addMenu(menu1, { rank: 300 });
         mainMenu.addMenu(menu2, { rank: 200 });
-        expect(ArrayExt.firstIndexOf(mainMenu.menus, menu1)).toBe(6);
-        expect(ArrayExt.firstIndexOf(mainMenu.menus, menu2)).toBe(5);
+        expect(
+          ArrayExt.firstIndexOf(mainMenu.menus, menu1) >
+            ArrayExt.firstIndexOf(mainMenu.menus, menu2)
+        ).toBe(true);
       });
     });
 
@@ -65,10 +67,8 @@ describe('@jupyterlab/mainmenu', () => {
         expect(mainMenu.fileMenu).toBeInstanceOf(FileMenu);
       });
 
-      it('should be the first menu', () => {
-        expect(
-          ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.fileMenu.menu)
-        ).toBe(0);
+      it('has a default rank of 1', () => {
+        expect(mainMenu.fileMenu.rank).toEqual(1);
       });
     });
 
@@ -77,10 +77,8 @@ describe('@jupyterlab/mainmenu', () => {
         expect(mainMenu.editMenu).toBeInstanceOf(EditMenu);
       });
 
-      it('should be the second menu', () => {
-        expect(
-          ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.editMenu.menu)
-        ).toBe(1);
+      it('has a default rank of 2', () => {
+        expect(mainMenu.editMenu.rank).toEqual(2);
       });
     });
 
@@ -89,10 +87,8 @@ describe('@jupyterlab/mainmenu', () => {
         expect(mainMenu.viewMenu).toBeInstanceOf(ViewMenu);
       });
 
-      it('should be the third menu', () => {
-        expect(
-          ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.viewMenu.menu)
-        ).toBe(2);
+      it('has a default rank of 3', () => {
+        expect(mainMenu.viewMenu.rank).toEqual(3);
       });
     });
 
@@ -101,10 +97,8 @@ describe('@jupyterlab/mainmenu', () => {
         expect(mainMenu.runMenu).toBeInstanceOf(RunMenu);
       });
 
-      it('should be the fourth menu', () => {
-        expect(
-          ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.runMenu.menu)
-        ).toBe(3);
+      it('has a default rank of 4', () => {
+        expect(mainMenu.runMenu.rank).toEqual(4);
       });
     });
 
@@ -113,10 +107,8 @@ describe('@jupyterlab/mainmenu', () => {
         expect(mainMenu.kernelMenu).toBeInstanceOf(KernelMenu);
       });
 
-      it('should be the fifth menu', () => {
-        expect(
-          ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.kernelMenu.menu)
-        ).toBe(4);
+      it('has a default rank of 5', () => {
+        expect(mainMenu.kernelMenu.rank).toEqual(5);
       });
     });
 
@@ -125,10 +117,8 @@ describe('@jupyterlab/mainmenu', () => {
         expect(mainMenu.tabsMenu).toBeInstanceOf(TabsMenu);
       });
 
-      it('should be the sixth menu', () => {
-        expect(
-          ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.tabsMenu.menu)
-        ).toBe(5);
+      it('has a default rank of 500', () => {
+        expect(mainMenu.tabsMenu.rank).toEqual(500);
       });
     });
 
@@ -137,10 +127,8 @@ describe('@jupyterlab/mainmenu', () => {
         expect(mainMenu.settingsMenu).toBeInstanceOf(SettingsMenu);
       });
 
-      it('should be the seventh menu', () => {
-        expect(
-          ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.settingsMenu.menu)
-        ).toBe(6);
+      it('has a default rank of 999', () => {
+        expect(mainMenu.settingsMenu.rank).toEqual(999);
       });
     });
 
@@ -149,10 +137,8 @@ describe('@jupyterlab/mainmenu', () => {
         expect(mainMenu.helpMenu).toBeInstanceOf(HelpMenu);
       });
 
-      it('should be the eighth menu', () => {
-        expect(
-          ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.helpMenu.menu)
-        ).toBe(7);
+      it('has a default rank of 1000', () => {
+        expect(mainMenu.helpMenu.rank).toEqual(1000);
       });
     });
   });

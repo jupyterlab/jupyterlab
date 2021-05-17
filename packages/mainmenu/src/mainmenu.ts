@@ -17,7 +17,7 @@ import { HelpMenu } from './help';
 
 import { KernelMenu } from './kernel';
 
-import { JupyterLabMenu } from './labmenu';
+import { IJupyterLabMenu, JupyterLabMenu } from './labmenu';
 
 import { RunMenu } from './run';
 
@@ -164,7 +164,12 @@ export class MainMenu extends MenuBar implements IMainMenu {
       return;
     }
 
-    const rank = 'rank' in options ? options.rank : 100;
+    const rank =
+      'rank' in options
+        ? options.rank
+        : 'rank' in menu
+        ? (menu as any).rank
+        : IJupyterLabMenu.DEFAULT_RANK;
     const rankItem = { menu, rank };
     const index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
 
@@ -229,18 +234,21 @@ export class MainMenu extends MenuBar implements IMainMenu {
    * Dispose of the resources held by the menu bar.
    */
   dispose(): void {
-    this._editMenu.dispose();
-    this._fileMenu.dispose();
-    this._helpMenu.dispose();
-    this._kernelMenu.dispose();
-    this._runMenu.dispose();
-    this._settingsMenu.dispose();
-    this._viewMenu.dispose();
-    this._tabsMenu.dispose();
-    this.dispose();
+    this._editMenu?.dispose();
+    this._fileMenu?.dispose();
+    this._helpMenu?.dispose();
+    this._kernelMenu?.dispose();
+    this._runMenu?.dispose();
+    this._settingsMenu?.dispose();
+    this._viewMenu?.dispose();
+    this._tabsMenu?.dispose();
+    super.dispose();
   }
 
-  static generateMenu(commands: CommandRegistry, options: IMainMenu.IMenuOptions): JupyterLabMenu {
+  static generateMenu(
+    commands: CommandRegistry,
+    options: IMainMenu.IMenuOptions
+  ): JupyterLabMenu {
     let menu: JupyterLabMenu;
     const { id, label, rank } = options;
     switch (id) {

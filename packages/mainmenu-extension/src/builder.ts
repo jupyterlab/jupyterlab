@@ -1,5 +1,5 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { IMainMenu } from '@jupyterlab/mainmenu';
+import { JupyterLabMenu, IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
@@ -13,7 +13,7 @@ export const PLUGIN_ID = '@jupyterlab/mainmenu-extension:plugin';
 export async function loadSettingsMenu(
   registry: ISettingRegistry,
   attachMenu: (menu: Menu) => void,
-  menuFactory: (options: IMainMenu.IMenuOptions) => Menu,
+  menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu,
   translator: ITranslator
 ): Promise<void> {
   const trans = translator.load('jupyterlab');
@@ -136,7 +136,7 @@ Menu description:`
  */
 function createMenus(
   data: ISettingRegistry.IMenu[],
-  menuFactory: (options: IMainMenu.IMenuOptions) => Menu
+  menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu
 ): Menu[] {
   return data
     .filter(item => !item.disabled)
@@ -154,21 +154,22 @@ function createMenus(
  */
 function dataToMenu(
   item: ISettingRegistry.IMenu,
-  menuFactory: (options: IMainMenu.IMenuOptions) => Menu
-): Menu {
-  const { id, label } = item;
-  const menu = menuFactory({ id, label });
+  menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu
+): JupyterLabMenu {
+  const { id, label, rank } = item;
+  const menu = menuFactory({ id, label, rank });
   item.items
     ?.filter(item => !item.disabled)
     .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity))
     .map(item => {
-      const { command, args, submenu, type } = item;
+      const { command, args, submenu, type, rank } = item;
       // Commands may not have been registered yet; so we don't force it to exist
       menu.addItem({
         command,
         args: args as any,
         submenu: submenu ? dataToMenu(submenu, menuFactory) : null,
-        type
+        type,
+        rank
       });
     });
   return menu;

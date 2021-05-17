@@ -74,7 +74,7 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
    * Dispose of the resources held by the file menu.
    */
   dispose(): void {
-    this._newMenu.dispose();
+    this._newMenu?.dispose();
     this.consoleCreators.clear();
     super.dispose();
   }

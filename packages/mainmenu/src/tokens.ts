@@ -93,8 +93,19 @@ export namespace IMainMenu {
   }
 
   export interface IMenuOptions {
+    /**
+     * The unique menu identifier.
+     */
     id: string;
+
+    /**
+     * The menu label.
+     */
     label?: string;
+
+    /**
+     * The menu rank.
+     */
     rank?: number;
   }
 }

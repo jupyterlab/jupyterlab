@@ -129,76 +129,93 @@
                 "id": "jp-mainmenu-file-new",
                 "label": "New",
                 "items": []
-              }
+              },
+              "rank": 0
             },
             {
-              "command": "filebrowser:create-main-launcher"
-            },
-            {
-              "type": "separator"
-            },
-            {
-              "command": "filebrowser:open-path"
+              "command": "filebrowser:create-main-launcher",
+              "rank": 0
             },
             {
               "type": "separator"
             },
             {
-              "command": "docmanager:clone"
-            },
-            {
-              "command": "filemenu:create-console"
-            },
-            {
-              "type": "separator"
-            },
-            {
-              "command": "application:close"
-            },
-            {
-              "command": "filemenu:close-and-cleanup"
-            },
-            {
-              "command": "application:close-all"
+              "command": "filebrowser:open-path",
+              "rank": 1
             },
             {
               "type": "separator"
             },
             {
-              "command": "docmanager:save"
+              "command": "docmanager:clone",
+              "rank": 2
             },
             {
-              "command": "docmanager:save-as"
-            },
-            {
-              "command": "docmanager:save-all"
-            },
-            {
-              "type": "separator"
-            },
-            {
-              "command": "docmanager:reload"
-            },
-            {
-              "command": "docmanager:restore-checkpoint"
-            },
-            {
-              "command": "docmanager:rename"
+              "command": "filemenu:create-console",
+              "rank": 2
             },
             {
               "type": "separator"
             },
             {
-              "command": "apputils:print"
+              "command": "application:close",
+              "rank": 3
+            },
+            {
+              "command": "filemenu:close-and-cleanup",
+              "rank": 3
+            },
+            {
+              "command": "application:close-all",
+              "rank": 3
             },
             {
               "type": "separator"
             },
             {
-              "command": "filemenu:logout"
+              "command": "docmanager:save",
+              "rank": 4
             },
             {
-              "command": "filemenu:shutdown"
+              "command": "docmanager:save-as",
+              "rank": 4
+            },
+            {
+              "command": "docmanager:save-all",
+              "rank": 4
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "docmanager:reload",
+              "rank": 5
+            },
+            {
+              "command": "docmanager:restore-checkpoint",
+              "rank": 5
+            },
+            {
+              "command": "docmanager:rename",
+              "rank": 5
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "apputils:print",
+              "rank": 98
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "filemenu:logout",
+              "rank": 99
+            },
+            {
+              "command": "filemenu:shutdown",
+              "rank": 99
             }
           ],
           "rank": 1
@@ -217,16 +234,19 @@
               "type": "separator"
             },
             {
-              "command": "editmenu:clear-current"
+              "command": "editmenu:clear-current",
+              "rank": 10
             },
             {
-              "command": "editmenu:clear-all"
+              "command": "editmenu:clear-all",
+              "rank": 10
             },
             {
               "type": "separator"
             },
             {
-              "command": "editmenu:go-to-line"
+              "command": "editmenu:go-to-line",
+              "rank": 200
             }
           ],
           "rank": 2
@@ -236,37 +256,45 @@
           "label": "View",
           "items": [
             {
-              "command": "apputils:activate-command-palette"
+              "command": "apputils:activate-command-palette",
+              "rank": 0
             },
             {
               "type": "separator"
             },
             {
-              "command": "application:toggle-mode"
+              "command": "application:toggle-mode",
+              "rank": 1
             },
             {
-              "command": "application:toggle-presentation-mode"
-            },
-            {
-              "type": "separator"
-            },
-            {
-              "command": "application:toggle-left-area"
-            },
-            {
-              "command": "application:toggle-right-area"
+              "command": "application:toggle-presentation-mode",
+              "rank": 1
             },
             {
               "type": "separator"
             },
             {
-              "command": "viewmenu:line-numbering"
+              "command": "application:toggle-left-area",
+              "rank": 2
             },
             {
-              "command": "viewmenu:match-brackets"
+              "command": "application:toggle-right-area",
+              "rank": 2
             },
             {
-              "command": "viewmenu:word-wrap"
+              "type": "separator"
+            },
+            {
+              "command": "viewmenu:line-numbering",
+              "rank": 10
+            },
+            {
+              "command": "viewmenu:match-brackets",
+              "rank": 10
+            },
+            {
+              "command": "viewmenu:word-wrap",
+              "rank": 10
             }
           ],
           "rank": 3
@@ -276,16 +304,19 @@
           "label": "Run",
           "items": [
             {
-              "command": "runmenu:run"
+              "command": "runmenu:run",
+              "rank": 0
             },
             {
               "type": "separator"
             },
             {
-              "command": "runmenu:run-all"
+              "command": "runmenu:run-all",
+              "rank": 999
             },
             {
-              "command": "runmenu:restart-and-run-all"
+              "command": "runmenu:restart-and-run-all",
+              "rank": 999
             }
           ],
           "rank": 4
@@ -295,43 +326,52 @@
           "label": "Kernel",
           "items": [
             {
-              "command": "kernelmenu:interrupt"
+              "command": "kernelmenu:interrupt",
+              "rank": 0
             },
             {
               "type": "separator"
             },
             {
-              "command": "kernelmenu:restart"
+              "command": "kernelmenu:restart",
+              "rank": 1
             },
             {
-              "command": "kernelmenu:restart-and-clear"
+              "command": "kernelmenu:restart-and-clear",
+              "rank": 1
             },
             {
-              "command": "notebook:restart-and-run-to-selected"
+              "command": "notebook:restart-and-run-to-selected",
+              "rank": 1
             },
             {
-              "command": "runmenu:restart-and-run-all"
-            },
-            {
-              "type": "separator"
-            },
-            {
-              "command": "kernelmenu:reconnect-to-kernel"
-            },
-            {
-              "type": "separator"
-            },
-            {
-              "command": "kernelmenu:shutdown"
-            },
-            {
-              "command": "kernelmenu:shutdownAll"
+              "command": "runmenu:restart-and-run-all",
+              "rank": 1
             },
             {
               "type": "separator"
             },
             {
-              "command": "kernelmenu:change"
+              "command": "kernelmenu:reconnect-to-kernel",
+              "rank": 1.5
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "kernelmenu:shutdown",
+              "rank": 2
+            },
+            {
+              "command": "kernelmenu:shutdownAll",
+              "rank": 2
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "kernelmenu:change",
+              "rank": 3
             }
           ],
           "rank": 5
@@ -341,22 +381,24 @@
           "label": "Tabs",
           "items": [
             {
-              "command": "application:activate-next-tab"
+              "command": "application:activate-next-tab",
+              "rank": 0
             },
             {
-              "command": "application:activate-previous-tab"
+              "command": "application:activate-previous-tab",
+              "rank": 0
             },
             {
-              "command": "application:activate-next-tab-bar"
+              "command": "application:activate-next-tab-bar",
+              "rank": 0
             },
             {
-              "command": "application:activate-previous-tab-bar"
+              "command": "application:activate-previous-tab-bar",
+              "rank": 0
             },
             {
-              "command": "tabsmenu:activate-previously-used-tab"
-            },
-            {
-              "type": "separator"
+              "command": "tabsmenu:activate-previously-used-tab",
+              "rank": 0
             }
           ],
           "rank": 500
@@ -366,7 +408,8 @@
           "label": "Settings",
           "items": [
             {
-              "command": "settingeditor:open"
+              "command": "settingeditor:open",
+              "rank": 1000
             }
           ],
           "rank": 999
