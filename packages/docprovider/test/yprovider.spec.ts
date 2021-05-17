@@ -1,12 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { WebsocketProviderWithLocks } from '../src';
+import { WebSocketProviderWithLocks } from '../src';
 
 describe('@jupyterlab/docprovider', () => {
   describe('docprovider', () => {
     it('should have a type', () => {
-      expect(WebsocketProviderWithLocks).not.toBeUndefined();
+      expect(WebSocketProviderWithLocks).not.toBeUndefined();
     });
   });
 });

@@ -16,13 +16,13 @@ import { IDocumentProviderFactory } from './tokens';
 /**
  * A class to provide Yjs synchronization over Websocket.
  */
-export class WebsocketProviderWithLocks extends WebsocketProvider {
+export class WebSocketProviderWithLocks extends WebsocketProvider {
   /**
-   * Construct a new WebsocketProviderWithLocks
+   * Construct a new WebSocketProviderWithLocks
    *
-   * @param options The instantiation options for a WebsocketProviderWithLocks
+   * @param options The instantiation options for a WebSocketProviderWithLocks
    */
-  constructor(options: WebsocketProviderWithLocks.IOptions) {
+  constructor(options: WebSocketProviderWithLocks.IOptions) {
     super(options.url, options.guid, options.ymodel.ydoc, {
       awareness: options.ymodel.awareness
     });
@@ -176,11 +176,11 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
 }
 
 /**
- * A namespace for WebsocketProviderWithLocks statics.
+ * A namespace for WebSocketProviderWithLocks statics.
  */
-export namespace WebsocketProviderWithLocks {
+export namespace WebSocketProviderWithLocks {
   /**
-   * The instantiation options for a WebsocketProviderWithLocks.
+   * The instantiation options for a WebSocketProviderWithLocks.
    */
   export interface IOptions extends IDocumentProviderFactory.IOptions {
     /**

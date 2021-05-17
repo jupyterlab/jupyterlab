@@ -34,7 +34,7 @@ import {
   IDocumentProvider,
   IDocumentProviderFactory,
   ProviderMock,
-  WebsocketProviderWithLocks
+  WebSocketProviderWithLocks
 } from '@jupyterlab/docprovider';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -113,7 +113,7 @@ const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
       options: IDocumentProviderFactory.IOptions
     ): IDocumentProvider => {
       return collaborative
-        ? new WebsocketProviderWithLocks({
+        ? new WebSocketProviderWithLocks({
             ...options,
             url
           })
