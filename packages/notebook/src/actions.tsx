@@ -1387,11 +1387,8 @@ export namespace NotebookActions {
   export function collapseAll(notebook: Notebook): any {
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
-        NotebookActions.setCellCollapse(cell, true, notebook);
-        // setCellCollapse tries to be smart and not change metadata of hidden cells.
-        // that's not the desired behavior of this function though, which wants to act
-        // as if the user clicked collapse on every level.
-        NotebookActions.setCollapsed(cell, true);
+        NotebookActions.setHeadingCollapse(cell, true, notebook);
+        NotebookActions.setCellCollapse(cell, true);
       }
     }
   }
@@ -1404,9 +1401,9 @@ export namespace NotebookActions {
   export function uncollapseAll(notebook: Notebook): any {
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
-        NotebookActions.setCellCollapse(cell, false, notebook);
+        NotebookActions.setHeadingCollapse(cell, false, notebook);
         // similar to collapseAll.
-        NotebookActions.setCollapsed(cell, false);
+        NotebookActions.setCellCollapse(cell, false);
       }
     }
   }
@@ -1420,7 +1417,7 @@ export namespace NotebookActions {
    * @param collapsing - Whether to collapse or uncollapse the cell
    * @param notebook - The target notebook widget.
    */
-  export function setCellCollapse(
+  export function setHeadingCollapse(
     cell: Cell,
     collapsing: boolean,
     notebook: Notebook
@@ -1492,7 +1489,7 @@ export namespace NotebookActions {
     } else {
       cell.numberChildNodes = cellNum - which;
     }
-    NotebookActions.setCollapsed(cell, collapsing);
+    NotebookActions.setCellCollapse(cell, collapsing);
     return cellNum + 1;
   }
 
@@ -1509,7 +1506,7 @@ export namespace NotebookActions {
     let headingInfo = NotebookActions.getHeadingInfo(notebook.activeCell);
     if (headingInfo.isHeading) {
       // Then toggle!
-      NotebookActions.setCellCollapse(
+      NotebookActions.setHeadingCollapse(
         notebook.activeCell,
         !headingInfo.collapsed,
         notebook
@@ -1525,7 +1522,7 @@ export namespace NotebookActions {
    * @param cell - The cell to collapse / uncollapse
    * @param collapsing - Whether to collapse or uncollapse the given cell
    */
-  export function setCollapsed(cell: Cell, collapsing: boolean): any {
+  export function setCellCollapse(cell: Cell, collapsing: boolean): any {
     if (cell instanceof MarkdownCell) {
       cell.headingCollapsed = collapsing;
     } else {

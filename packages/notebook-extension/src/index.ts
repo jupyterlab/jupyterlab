@@ -1336,7 +1336,7 @@ function addCommands(
   const refreshCellCollapsed = (notebook: Notebook): void => {
     for (const cell of notebook.widgets) {
       if (cell instanceof MarkdownCell && cell.headingCollapsed) {
-        NotebookActions.setCellCollapse(cell, true, notebook);
+        NotebookActions.setHeadingCollapse(cell, true, notebook);
       }
     }
   };
@@ -1360,7 +1360,7 @@ function addCommands(
           ) {
             cell.toggleCollapsedSignal.connect(
               (newCell: MarkdownCell, collapsing: boolean) => {
-                NotebookActions.setCellCollapse(
+                NotebookActions.setHeadingCollapse(
                   newCell,
                   collapsing,
                   panel.content
