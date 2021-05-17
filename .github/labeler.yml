@@ -272,6 +272,12 @@ pkg:themes:
   - packages/theme-light-extension/**/*
   - packages/theme-light-extension/*
 
+pkg:toc:
+  - packages/toc/**/*
+  - packages/toc/*
+  - packages/toc-extension/**/*
+  - packages/toc-extension/*
+  
 pkg:tooltip:
   - packages/tooltip/**/*
   - packages/tooltip/*
