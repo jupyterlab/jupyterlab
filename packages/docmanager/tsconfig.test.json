@@ -36,6 +36,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../docprovider"
+    },
+    {
       "path": "../docregistry"
     },
     {
@@ -46,9 +49,6 @@
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../docprovider"
     }
   ]
 }
