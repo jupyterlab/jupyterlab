@@ -23,6 +23,31 @@ export interface IJupyterLabMenu extends IDisposable {
    * plugin.
    */
   addGroup(items: Menu.IItemOptions[], rank?: number): IDisposable;
+
+  /**
+   * 
+   */
+  readonly rank?: number;
+}
+
+/**
+ * 
+ */
+export namespace IJupyterLabMenu{
+  /**
+   * 
+   */
+  export interface IOptions extends Menu.IOptions {
+    /**
+     * 
+     * Default: true
+     */
+    includeSeparators?: boolean
+    /**
+     * 
+     */
+    rank?: number
+  }
 }
 
 /**
@@ -51,7 +76,7 @@ export interface IMenuExtender<T extends Widget> {
 /**
  * An extensible menu for JupyterLab application menus.
  */
-export class JupyterLabMenu implements IJupyterLabMenu {
+export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
   /**
    * Construct a new menu.
    *
@@ -60,9 +85,10 @@ export class JupyterLabMenu implements IJupyterLabMenu {
    * @param includeSeparators - whether to include separators between the
    *   groups that are added to the menu.
    */
-  constructor(options: Menu.IOptions, includeSeparators: boolean = true) {
-    this.menu = new Menu(options);
-    this._includeSeparators = includeSeparators;
+  constructor(options: IJupyterLabMenu.IOptions) {
+    super(options);
+    this.rank = options.rank;
+    this._includeSeparators = options.includeSeparators ?? true;
   }
 
   /**
@@ -104,48 +130,36 @@ export class JupyterLabMenu implements IJupyterLabMenu {
     // Phosphor takes care of superfluous leading,
     // trailing, and duplicate separators.
     if (this._includeSeparators) {
-      added.push(this.menu.insertItem(insertIndex++, { type: 'separator' }));
+      added.push(this.insertItem(insertIndex++, { type: 'separator' }));
     }
     // Insert the group.
     for (const item of items) {
-      added.push(this.menu.insertItem(insertIndex++, item));
+      added.push(this.insertItem(insertIndex++, item));
     }
     // Insert a separator after the group.
     if (this._includeSeparators) {
-      added.push(this.menu.insertItem(insertIndex++, { type: 'separator' }));
+      added.push(this.insertItem(insertIndex++, { type: 'separator' }));
     }
 
     ArrayExt.insert(this._groups, groupIndex, rankGroup);
 
     return new DisposableDelegate(() => {
-      added.forEach(i => this.menu.removeItem(i));
+      added.forEach(i => this.removeItem(i));
       this._groups.splice(groupIndex, 1);
     });
   }
 
-  /**
-   * The underlying Phosphor menu.
-   */
-  readonly menu: Menu;
-
-  /**
-   * Whether the menu has been disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
+  readonly rank?: number;
 
   /**
    * Dispose of the resources held by the menu.
    */
   dispose(): void {
     this._groups.length = 0;
-    this._isDisposed = true;
-    this.menu.dispose();
+    super.dispose();
   }
 
   private _groups: Private.IRankGroup[] = [];
-  private _isDisposed = false;
   private _includeSeparators: boolean;
 }
 

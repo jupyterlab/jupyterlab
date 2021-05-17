@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Menu } from '@lumino/widgets';
-
 import { IJupyterLabMenu, JupyterLabMenu } from './labmenu';
 
 /**
@@ -17,7 +15,7 @@ export class SettingsMenu extends JupyterLabMenu implements ISettingsMenu {
   /**
    * Construct the settings menu.
    */
-  constructor(options: Menu.IOptions) {
+  constructor(options: IJupyterLabMenu.IOptions) {
     super(options);
   }
 }

@@ -91,4 +91,10 @@ export namespace IMainMenu {
      */
     rank?: number;
   }
+
+  export interface IMenuOptions {
+    id: string;
+    label?: string;
+    rank?: number;
+  }
 }

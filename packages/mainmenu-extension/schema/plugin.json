@@ -4,81 +4,448 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "editmenu:clear-all",
-      "keys": [""],
+      "keys": [
+        ""
+      ],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:clear-current",
-      "keys": [""],
+      "keys": [
+        ""
+      ],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:find",
-      "keys": [""],
+      "keys": [
+        ""
+      ],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:find-and-replace",
-      "keys": [""],
+      "keys": [
+        ""
+      ],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:redo",
-      "keys": ["Accel Shift Z"],
+      "keys": [
+        "Accel Shift Z"
+      ],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:undo",
-      "keys": ["Accel Z"],
+      "keys": [
+        "Accel Z"
+      ],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "filemenu:close-and-cleanup",
-      "keys": ["Ctrl Shift Q"],
+      "keys": [
+        "Ctrl Shift Q"
+      ],
       "selector": ".jp-Activity"
     },
     {
       "command": "kernelmenu:interrupt",
-      "keys": ["I", "I"],
+      "keys": [
+        "I",
+        "I"
+      ],
       "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "kernelmenu:restart",
-      "keys": ["0", "0"],
+      "keys": [
+        "0",
+        "0"
+      ],
       "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "kernelmenu:restart-and-clear",
-      "keys": [""],
+      "keys": [
+        ""
+      ],
       "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "kernelmenu:shutdown",
-      "keys": [""],
+      "keys": [
+        ""
+      ],
       "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "runmenu:restart-and-run-all",
-      "keys": [""],
+      "keys": [
+        ""
+      ],
       "selector": "[data-jp-code-runner]"
     },
     {
       "command": "runmenu:run",
-      "keys": ["Shift Enter"],
+      "keys": [
+        "Shift Enter"
+      ],
       "selector": "[data-jp-code-runner]"
     },
     {
       "command": "runmenu:run-all",
-      "keys": [""],
+      "keys": [
+        ""
+      ],
       "selector": "[data-jp-code-runner]"
     },
     {
       "command": "tabsmenu:activate-previously-used-tab",
-      "keys": ["Accel Shift '"],
+      "keys": [
+        "Accel Shift '"
+      ],
       "selector": "body"
     }
   ],
-  "properties": {},
+  "jupyter.lab.transform": true,
+  "properties": {
+    "menus": {
+      "title": "The application menu description.",
+      "items": {
+        "$ref": "#/definitions/menu"
+      },
+      "type": "array",
+      "default": [
+        {
+          "id": "jp-mainmenu-file",
+          "label": "File",
+          "items": [
+            {
+              "type": "submenu",
+              "submenu": {
+                "id": "jp-mainmenu-file-new",
+                "label": "New",
+                "items": []
+              }
+            },
+            {
+              "command": "filebrowser:create-main-launcher"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "filebrowser:open-path"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "docmanager:clone"
+            },
+            {
+              "command": "filemenu:create-console"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "application:close"
+            },
+            {
+              "command": "filemenu:close-and-cleanup"
+            },
+            {
+              "command": "application:close-all"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "docmanager:save"
+            },
+            {
+              "command": "docmanager:save-as"
+            },
+            {
+              "command": "docmanager:save-all"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "docmanager:reload"
+            },
+            {
+              "command": "docmanager:restore-checkpoint"
+            },
+            {
+              "command": "docmanager:rename"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "apputils:print"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "filemenu:logout"
+            },
+            {
+              "command": "filemenu:shutdown"
+            }
+          ],
+          "rank": 1
+        },
+        {
+          "id": "jp-mainmenu-edit",
+          "label": "Edit",
+          "items": [
+            {
+              "command": "editmenu:undo"
+            },
+            {
+              "command": "editmenu:redo"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "editmenu:clear-current"
+            },
+            {
+              "command": "editmenu:clear-all"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "editmenu:go-to-line"
+            }
+          ],
+          "rank": 2
+        },
+        {
+          "id": "jp-mainmenu-view",
+          "label": "View",
+          "items": [
+            {
+              "command": "apputils:activate-command-palette"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "application:toggle-mode"
+            },
+            {
+              "command": "application:toggle-presentation-mode"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "application:toggle-left-area"
+            },
+            {
+              "command": "application:toggle-right-area"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "viewmenu:line-numbering"
+            },
+            {
+              "command": "viewmenu:match-brackets"
+            },
+            {
+              "command": "viewmenu:word-wrap"
+            }
+          ],
+          "rank": 3
+        },
+        {
+          "id": "jp-mainmenu-run",
+          "label": "Run",
+          "items": [
+            {
+              "command": "runmenu:run"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "runmenu:run-all"
+            },
+            {
+              "command": "runmenu:restart-and-run-all"
+            }
+          ],
+          "rank": 4
+        },
+        {
+          "id": "jp-mainmenu-kernel",
+          "label": "Kernel",
+          "items": [
+            {
+              "command": "kernelmenu:interrupt"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "kernelmenu:restart"
+            },
+            {
+              "command": "kernelmenu:restart-and-clear"
+            },
+            {
+              "command": "notebook:restart-and-run-to-selected"
+            },
+            {
+              "command": "runmenu:restart-and-run-all"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "kernelmenu:reconnect-to-kernel"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "kernelmenu:shutdown"
+            },
+            {
+              "command": "kernelmenu:shutdownAll"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "command": "kernelmenu:change"
+            }
+          ],
+          "rank": 5
+        },
+        {
+          "id": "jp-mainmenu-tabs",
+          "label": "Tabs",
+          "items": [
+            {
+              "command": "application:activate-next-tab"
+            },
+            {
+              "command": "application:activate-previous-tab"
+            },
+            {
+              "command": "application:activate-next-tab-bar"
+            },
+            {
+              "command": "application:activate-previous-tab-bar"
+            },
+            {
+              "command": "tabsmenu:activate-previously-used-tab"
+            },
+            {
+              "type": "separator"
+            }
+          ],
+          "rank": 500
+        },
+        {
+          "id": "jp-mainmenu-settings",
+          "label": "Settings",
+          "items": [
+            {
+              "command": "settingeditor:open"
+            }
+          ],
+          "rank": 999
+        },
+        {
+          "id": "jp-mainmenu-help",
+          "label": "Help",
+          "items": [],
+          "rank": 1000
+        }
+      ]
+    }
+  },
   "additionalProperties": false,
+  "definitions": {
+    "menu": {
+      "properties": {
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "id": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/menuItem"
+          }
+        },
+        "label": {
+          "type": "string"
+        },
+        "rank": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "menuItem": {
+      "properties": {
+        "args": {
+          "type": "object"
+        },
+        "command": {
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "command",
+            "submenu",
+            "separator"
+          ],
+          "default": "command"
+        },
+        "rank": {
+          "type": "number"
+        },
+        "submenu": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/menu"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
   "type": "object"
 }

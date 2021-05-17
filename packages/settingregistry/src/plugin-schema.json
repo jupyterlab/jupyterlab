@@ -6,7 +6,25 @@
   "type": "object",
   "additionalProperties": true,
   "properties": {
-    "jupyter.lab.setting-deprecated": { "type": "boolean", "default": false },
+    "jupyter.lab.menus": {
+      "type": "object",
+      "properties": {
+        "main": {
+          "title": "Main menu entries",
+          "description": "List of menu items to add to the main menubar.",
+          "items": {
+            "$ref": "#/definitions/menu"
+          },
+          "type": "array",
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "jupyter.lab.setting-deprecated": {
+      "type": "boolean",
+      "default": false
+    },
     "jupyter.lab.setting-icon": {
       "type": "string",
       "default": ""
@@ -15,28 +33,115 @@
       "type": "string",
       "default": ""
     },
-    "jupyter.lab.setting-icon-label": { "type": "string", "default": "Plugin" },
+    "jupyter.lab.setting-icon-label": {
+      "type": "string",
+      "default": "Plugin"
+    },
     "jupyter.lab.shortcuts": {
-      "items": { "$ref": "#/definitions/shortcut" },
+      "items": {
+        "$ref": "#/definitions/shortcut"
+      },
       "type": "array",
       "default": []
     },
-    "jupyter.lab.transform": { "type": "boolean", "default": false }
+    "jupyter.lab.transform": {
+      "type": "boolean",
+      "default": false
+    }
   },
   "definitions": {
+    "menu": {
+      "properties": {
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "id": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/menuItem"
+          }
+        },
+        "label": {
+          "type": "string"
+        },
+        "rank": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "menuItem": {
+      "properties": {
+        "args": {
+          "type": "object"
+        },
+        "command": {
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "command",
+            "submenu",
+            "separator"
+          ],
+          "default": "command"
+        },
+        "rank": {
+          "type": "number"
+        },
+        "submenu": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/menu"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
     "shortcut": {
       "properties": {
-        "args": { "type": "object" },
-        "command": { "type": "string" },
-        "disabled": { "type": "boolean", "default": false },
+        "args": {
+          "type": "object"
+        },
+        "command": {
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
         "keys": {
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "minItems": 1,
           "type": "array"
         },
-        "selector": { "type": "string" }
+        "selector": {
+          "type": "string"
+        }
       },
-      "required": ["command", "keys", "selector"],
+      "required": [
+        "command",
+        "keys",
+        "selector"
+      ],
       "type": "object"
     }
   }

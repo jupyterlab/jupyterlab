@@ -896,6 +896,14 @@ export namespace SettingRegistry {
     validator?: ISchemaValidator;
   }
 
+  export function reconcileMenus(
+    defaults: ISettingRegistry.IMenu[],
+    user: ISettingRegistry.IMenu[]
+  ): ISettingRegistry.IMenu[] {
+    // TODO
+    return defaults;
+  }
+
   /**
    * Reconcile default and user shortcuts and return the composite list.
    *
