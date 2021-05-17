@@ -101,3 +101,7 @@
 .jp-MarkdownOutput.jp-RenderedHTMLCommon {
   overflow: auto;
 }
+
+.jp-showHiddenCellsButton {
+  margin-left: var(--jp-cell-prompt-width);
+}

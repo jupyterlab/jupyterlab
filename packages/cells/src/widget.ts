@@ -71,6 +71,7 @@ import {
 } from './model';
 
 import { InputPlaceholder, OutputPlaceholder } from './placeholder';
+import { Signal } from '@lumino/signaling';
 
 /**
  * The CSS class added to cell widgets.
@@ -136,6 +137,12 @@ const MARKDOWN_CELL_CLASS = 'jp-MarkdownCell';
  * The class name added to rendered markdown output widgets.
  */
 const MARKDOWN_OUTPUT_CLASS = 'jp-MarkdownOutput';
+
+const MARKDOWN_HEADING_COLLAPSED = 'jp-MarkdownHeadingCollapsed';
+
+const HEADING_COLLAPSER_CLASS = 'jp-collapseHeadingButton';
+
+const SHOW_HIDDEN_CELLS_CLASS = 'jp-showHiddenCellsButton';
 
 /**
  * The class name added to raw cells.
@@ -1395,6 +1402,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     // Stop codemirror handling paste
     this.editor.setOption('handlePaste', false);
 
+    // Check if heading cell is set to be collapsed
+    this._headingCollapsed = (this.model.metadata.get(
+      MARKDOWN_HEADING_COLLAPSED
+    ) ?? false) as boolean;
+
     // Throttle the rendering rate of the widget.
     this._monitor = new ActivityMonitor({
       signal: this.model.contentChanged,
@@ -1420,6 +1432,67 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   /**
+   * Text that represents the heading if cell is a heading.
+   * Returns empty string if not a heading.
+   */
+  get headingInfo(): { text: string; level: number } {
+    let text = this.model.value.text;
+    const lines = text.split('\n');
+    const line = lines[0];
+    const line2 = lines.length > 1 ? lines[1] : undefined;
+
+    let match = line.match(/^([#]{1,6}) (.*)/);
+    let match2 = line2 && line2.match(/^([=]{2,}|[-]{2,})/);
+    let match3 = line.match(/<h([1-6])(.*)>(.*)<\/h\1>/i);
+
+    if (match) {
+      return { text: match[2], level: match[1].length };
+    } else if (match2) {
+      return { text: line, level: match2[1][0] === '=' ? 1 : 2 };
+    } else if (match3) {
+      return { text: match3[3], level: parseInt(match3[1], 10) };
+    }
+    return { text: '', level: -1 };
+  }
+
+  get headingCollapsed(): boolean {
+    return this._headingCollapsed;
+  }
+  set headingCollapsed(value: boolean) {
+    this._headingCollapsed = value;
+    if (value) {
+      this.model.metadata.set(MARKDOWN_HEADING_COLLAPSED, value);
+    } else if (this.model.metadata.has(MARKDOWN_HEADING_COLLAPSED)) {
+      this.model.metadata.delete(MARKDOWN_HEADING_COLLAPSED);
+    }
+    const collapseButton = this.inputArea.promptNode.getElementsByClassName(
+      HEADING_COLLAPSER_CLASS
+    )[0];
+    if (collapseButton) {
+      collapseButton.setAttribute(
+        'style',
+        `background:
+      ${
+        value ? 'var(--jp-icon-caret-right)' : 'var(--jp-icon-caret-down)'
+      } no-repeat center`
+      );
+    }
+    this.renderInput(this._renderer!);
+  }
+
+  get numberChildNodes(): number {
+    return this._numberChildNodes;
+  }
+  set numberChildNodes(value: number) {
+    this._numberChildNodes = value;
+    this.renderInput(this._renderer!);
+  }
+
+  get toggleCollapsedSignal(): Signal<this, boolean> {
+    return this._toggleCollapsedSignal;
+  }
+
+  /**
    * Whether the cell is rendered.
    */
   get rendered(): boolean {
@@ -1439,11 +1512,67 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
   }
 
+  protected maybeCreateCollapseButton(): void {
+    if (
+      this.headingInfo.level > 0 &&
+      this.inputArea.promptNode.getElementsByClassName(HEADING_COLLAPSER_CLASS)
+        .length == 0
+    ) {
+      let collapseButton = this.inputArea.promptNode.appendChild(
+        document.createElement('button')
+      );
+      collapseButton.className = `bp3-button bp3-minimal jp-Button minimal ${HEADING_COLLAPSER_CLASS}`;
+      collapseButton.style.background = `${
+        this._headingCollapsed
+          ? 'var(--jp-icon-caret-right)'
+          : 'var(--jp-icon-caret-down)'
+      } no-repeat center`;
+      collapseButton.onclick = () => {
+        this.headingCollapsed = !this.headingCollapsed;
+        this._toggleCollapsedSignal.emit(this._headingCollapsed);
+      };
+    }
+  }
+
+  protected maybeCreateOrUpdateExpandButton(): void {
+    const expandButton = this.node.getElementsByClassName(
+      SHOW_HIDDEN_CELLS_CLASS
+    );
+    if (
+      this.headingCollapsed &&
+      expandButton.length === 0 &&
+      this._numberChildNodes > 0
+    ) {
+      const numberChildNodes = document.createElement('button');
+      numberChildNodes.className = `bp3-button bp3-minimal jp-Button minimal ${SHOW_HIDDEN_CELLS_CLASS}`;
+      numberChildNodes.textContent = `${this._numberChildNodes} cell${
+        this._numberChildNodes > 1 ? 's' : ''
+      } hidden`;
+      numberChildNodes.onclick = () => {
+        this.headingCollapsed = false;
+        this._toggleCollapsedSignal.emit(this._headingCollapsed);
+      };
+      this.node.appendChild(numberChildNodes);
+    } else if (expandButton.length > 0) {
+      if (this._headingCollapsed) {
+        expandButton[0].textContent = `⮑ ${this._numberChildNodes} cell${
+          this._numberChildNodes > 1 ? 's' : ''
+        } hidden`;
+      } else {
+        for (const el of expandButton) {
+          this.node.removeChild(el);
+        }
+      }
+    }
+  }
+
   /**
    * Render an input instead of the text editor.
    */
   protected renderInput(widget: Widget): void {
     this.addClass(RENDERED_CLASS);
+    this.maybeCreateCollapseButton();
+    this.maybeCreateOrUpdateExpandButton();
     this.inputArea.renderInput(widget);
   }
 
@@ -1523,6 +1652,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   private _monitor: ActivityMonitor<ICellModel, void>;
+  private _numberChildNodes: number;
+  private _headingCollapsed: boolean;
+  private _toggleCollapsedSignal = new Signal<this, boolean>(this);
   private _renderer: IRenderMime.IRenderer | null = null;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
