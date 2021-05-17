@@ -7,6 +7,8 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
+import { IProviderFactory } from '@jupyterlab/docprovider';
+
 import * as ymodels from '@jupyterlab/shared-models';
 
 import * as Y from 'yjs';
@@ -42,11 +44,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 
-import {
-  WebsocketProviderWithLocks,
-  IProvider,
-  ProviderMock
-} from '@jupyterlab/docprovider';
+import { IProvider, ProviderMock } from '@jupyterlab/docprovider';
 
 import { DocumentRegistry } from './registry';
 
@@ -89,11 +87,14 @@ export class Context<
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
     const guid = this._factory.contentType + ':' + localPath;
+    // TODO: move to the plugin?
     const collaborative =
       PageConfig.getOption('collaborative') == 'true' ? true : false;
-    this._provider = collaborative
-      ? new WebsocketProviderWithLocks({ url, guid, ymodel })
-      : new ProviderMock();
+    const docproviderFactory = options.docproviderFactory;
+    this._provider =
+      collaborative && docproviderFactory
+        ? docproviderFactory({ url, guid, ymodel })
+        : new ProviderMock();
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -923,6 +924,11 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: ISessionContext.IKernelPreference;
+
+    /**
+     * An factory method for the document provider.
+     */
+    docproviderFactory?: IProviderFactory;
 
     /**
      * An IModelDB factory method which may be used for the document.

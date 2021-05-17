@@ -3,8 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as sharedModels from '@jupyterlab/shared-models';
-
 import * as Y from 'yjs';
 
 import { WebsocketProvider } from 'y-websocket';
@@ -12,6 +10,8 @@ import { WebsocketProvider } from 'y-websocket';
 import * as decoding from 'lib0/decoding';
 
 import * as encoding from 'lib0/encoding';
+
+import { IProviderFactory } from './tokens';
 
 /**
  * A class to provide Yjs synchronization over Websocket.
@@ -182,20 +182,5 @@ export namespace WebsocketProviderWithLocks {
   /**
    * The instantiation options for a WebsocketProviderWithLocks.
    */
-  export interface IOptions {
-    /**
-     * The server URL.
-     */
-    url: string;
-
-    /**
-     * The name of the room
-     */
-    guid: string;
-
-    /**
-     * The YNotebook.
-     */
-    ymodel: sharedModels.YDocument<sharedModels.DocumentChange>;
-  }
+  export interface IOptions extends IProviderFactory.IOptions {}
 }
