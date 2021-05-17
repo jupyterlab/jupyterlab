@@ -14,6 +14,7 @@ lab_command = ' '.join([
     'lab',
     '--dev-mode',
     '--extensions-in-dev-mode',
+    '--collaborative',
     '--ServerApp.base_url={base_url}lab-dev',
 ] + common + ['>jupyterlab-dev.log 2>&1'])
 
