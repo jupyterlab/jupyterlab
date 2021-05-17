@@ -96,6 +96,10 @@ pkg:docmanager:
   - packages/docmanager-extension/**/*
   - packages/docmanager-extension/*
 
+pkg:docprovider:
+  - packages/docprovider/**/*
+  - packages/docprovider/*
+  
 pkg:docregistry:
   - packages/docregistry/**/*
   - packages/docregistry/*
@@ -237,6 +241,10 @@ pkg:settingeditor:
 pkg:settingregistry:
   - packages/settingregistry/**/*
   - packages/settingregistry/*
+
+pkg:shared-models:
+  - packages/shared-models/**/*
+  - packages/shared-models/*
 
 pkg:shortcuts:
   - packages/shortcuts-extension/**/*
