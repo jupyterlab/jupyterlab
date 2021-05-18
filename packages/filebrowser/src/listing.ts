@@ -814,6 +814,12 @@ export class DirListing extends Widget {
       );
       if (this.selection[item.path]) {
         node.classList.add(SELECTED_CLASS);
+
+        // focus on text to make shortcuts works
+        const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
+        if (text) {
+          text.focus();
+        }
         if (this._isCut && this._model.path === this._prevPath) {
           node.classList.add(CUT_CLASS);
         }
@@ -1064,6 +1070,9 @@ export class DirListing extends Widget {
     // Not all browsers support .key, but it discharges us from reconstructing
     // characters from key codes.
     if (!this._inRename && event.key !== undefined && event.key.length === 1) {
+      if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+        return;
+      }
       this._searchPrefix += event.key;
 
       clearTimeout(this._searchPrefixTimer);
@@ -1948,6 +1957,12 @@ export namespace DirListing {
       node.appendChild(icon);
       node.appendChild(text);
       node.appendChild(modified);
+
+      // Make the text note focusable so that it receives keyboard events;
+      // text node was specifically chosen to receive shortcuts because
+      // text element gets substituted with input area during file name edits
+      // which conveniently deactivate irrelevant shortcuts.
+      text.tabIndex = 0;
 
       if (hiddenColumns?.has?.('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
