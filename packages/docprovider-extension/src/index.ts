@@ -25,7 +25,7 @@ import { ServerConnection } from '@jupyterlab/services';
  * The default document provider plugin
  */
 const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
-  id: '@jupyterlab/docmanager-extension:docprovider',
+  id: '@jupyterlab/docprovider-extension:plugin',
   provides: IDocumentProviderFactory,
   activate: (app: JupyterFrontEnd): IDocumentProviderFactory => {
     const server = ServerConnection.makeSettings();
