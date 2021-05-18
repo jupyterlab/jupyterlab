@@ -72,6 +72,7 @@ import {
 
 import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 import { Signal } from '@lumino/signaling';
+import { addIcon } from '@jupyterlab/ui-components';
 
 /**
  * The CSS class added to cell widgets.
@@ -1538,6 +1539,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     const expandButton = this.node.getElementsByClassName(
       SHOW_HIDDEN_CELLS_CLASS
     );
+    // Create the "show hidden" button if not already created
     if (
       this.headingCollapsed &&
       expandButton.length === 0 &&
@@ -1545,19 +1547,24 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     ) {
       const numberChildNodes = document.createElement('button');
       numberChildNodes.className = `bp3-button bp3-minimal jp-Button minimal ${SHOW_HIDDEN_CELLS_CLASS}`;
-      numberChildNodes.textContent = `${this._numberChildNodes} cell${
+      addIcon.render(numberChildNodes);
+      const numberChildNodesText = document.createElement('p');
+      numberChildNodesText.nodeValue = `${this._numberChildNodes} cell${
         this._numberChildNodes > 1 ? 's' : ''
       } hidden`;
+      numberChildNodes.appendChild(numberChildNodesText);
       numberChildNodes.onclick = () => {
         this.headingCollapsed = false;
         this._toggleCollapsedSignal.emit(this._headingCollapsed);
       };
       this.node.appendChild(numberChildNodes);
-    } else if (expandButton.length > 0) {
+    } else if (expandButton?.[0]?.childNodes?.length > 1) {
+      // If the heading is collapsed, update text
       if (this._headingCollapsed) {
-        expandButton[0].textContent = `⮑ ${this._numberChildNodes} cell${
-          this._numberChildNodes > 1 ? 's' : ''
-        } hidden`;
+        expandButton[0].childNodes[1].textContent = `${
+          this._numberChildNodes
+        } cell${this._numberChildNodes > 1 ? 's' : ''} hidden`;
+        // If the heading isn't collapsed, remove the button
       } else {
         for (const el of expandButton) {
           this.node.removeChild(el);
