@@ -365,8 +365,7 @@ def _get_labextension_metadata(module):
     try:
         m = importlib.import_module(module)
         if hasattr(m, '_jupyter_labextension_paths') :
-            labexts = m._jupyter_labextension_paths()
-            return m, labexts
+            return m, m._jupyter_labextension_paths()
     except Exception as exc:
         errors.append(exc)
 
@@ -385,37 +384,18 @@ def _get_labextension_metadata(module):
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
         sys.path.insert(0, mod_path)
 
-    # Importing module with the same name as package
-    try:
-        # Replace hyphens with underscores to match Python convention
-        package = package.replace('-', '_')
-        m = importlib.import_module(package)
-        if hasattr(m, '_jupyter_labextension_paths') :
-            return m, m._jupyter_labextension_paths()
-    except Exception as exc:
-        errors.append(exc)
+    from setuptools import find_packages, find_namespace_packages
 
-    # Looking for modules in the package
-    from setuptools import find_packages
-    packages = find_packages(mod_path)
+    package_candidates = [
+        package.replace('-', '_'),  # Module with the same name as package
+    ]
+    package_candidates.extend(find_packages(mod_path))  # Packages in the module path
+    package_candidates.extend(find_namespace_packages(mod_path))  # Namespace packages in the module path
 
-    # Looking for the labextension metadata
-    for package in packages :
+    for package in package_candidates:
         try:
             m = importlib.import_module(package)
-            if hasattr(m, '_jupyter_labextension_paths') :
-                return m, m._jupyter_labextension_paths()
-        except Exception as exc:
-            errors.append(exc)
-
-    from setuptools import find_namespace_packages
-    packages = find_namespace_packages(mod_path)
-
-    # Looking for the labextension metadata
-    for package in packages:
-        try:
-            m = importlib.import_module(package)
-            if hasattr(m, '_jupyter_labextension_paths') :
+            if hasattr(m, '_jupyter_labextension_paths'):
                 return m, m._jupyter_labextension_paths()
         except Exception as exc:
             errors.append(exc)
