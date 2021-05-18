@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { INotebookTracker } from '@jupyterlab/notebook';
+import * as React from 'react';
+import { INotebookTracker, NotebookActions } from '@jupyterlab/notebook';
 import { ellipsesIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { INotebookHeading } from '../../utils/headings';
@@ -23,6 +24,7 @@ function render(
   options: OptionsManager,
   tracker: INotebookTracker,
   item: INotebookHeading,
+
   toc: INotebookHeading[] = []
 ) {
   let jsx;
@@ -50,7 +52,7 @@ function render(
             className="jp-Collapser p-Widget lm-Widget"
             onClick={(event: any) => {
               event.stopPropagation();
-              onClick(item);
+              onClick(tracker, item);
             }}
           >
             <div className="toc-Collapser-child" />
@@ -68,7 +70,7 @@ function render(
             className="toc-Ellipses"
             onClick={(event: any) => {
               event.stopPropagation();
-              onClick(item);
+              onClick(tracker, item);
             }}
           >
             <ellipsesIcon.react />
@@ -111,7 +113,7 @@ function render(
             className="jp-Collapser p-Widget lm-Widget"
             onClick={(event: any) => {
               event.stopPropagation();
-              onClick(item);
+              onClick(tracker, item);
             }}
           >
             <div className="toc-Collapser-child" />
@@ -128,7 +130,7 @@ function render(
             className="toc-Ellipses"
             onClick={(event: any) => {
               event.stopPropagation();
-              onClick(item);
+              onClick(tracker, item);
             }}
           >
             <ellipsesIcon.react />
@@ -177,7 +179,7 @@ function render(
    * @private
    * @param heading - notebook heading that was clicked
    */
-  function onClick(heading?: INotebookHeading) {
+  function onClick(tracker: INotebookTracker, heading?: INotebookHeading) {
     let collapsed;
     if (heading!.cellRef!.model.metadata.has('toc-hr-collapsed')) {
       collapsed = heading!.cellRef!.model.metadata.get(
@@ -189,6 +191,13 @@ function render(
       heading!.cellRef!.model.metadata.set('toc-hr-collapsed', true);
     }
     if (heading) {
+      if (tracker.currentWidget) {
+        NotebookActions.setHeadingCollapse(
+          heading!.cellRef!,
+          !collapsed,
+          tracker.currentWidget.content
+        );
+      }
       options.updateAndCollapse({
         heading: heading,
         collapsedState: collapsed,
