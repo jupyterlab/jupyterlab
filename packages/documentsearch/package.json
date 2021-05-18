@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/documentsearch",
   "version": "3.1.0-alpha.8",
-  "description": "Document Search",
+  "description": "JupyterLab - Document Search",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
