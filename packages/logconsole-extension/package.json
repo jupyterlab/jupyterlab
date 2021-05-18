@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/logconsole-extension",
-  "version": "3.0.10",
+  "version": "3.0.11",
   "description": "JupyterLab - Log Console Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,16 +34,16 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.10",
-    "@jupyterlab/apputils": "^3.0.8",
+    "@jupyterlab/application": "^3.0.11",
+    "@jupyterlab/apputils": "^3.0.9",
     "@jupyterlab/coreutils": "^5.0.6",
-    "@jupyterlab/logconsole": "^3.0.9",
-    "@jupyterlab/mainmenu": "^3.0.8",
-    "@jupyterlab/notebook": "^3.0.10",
-    "@jupyterlab/rendermime": "^3.0.9",
-    "@jupyterlab/settingregistry": "^3.0.5",
-    "@jupyterlab/statusbar": "^3.0.8",
-    "@jupyterlab/translation": "^3.0.8",
+    "@jupyterlab/logconsole": "^3.0.10",
+    "@jupyterlab/mainmenu": "^3.0.9",
+    "@jupyterlab/notebook": "^3.0.11",
+    "@jupyterlab/rendermime": "^3.0.10",
+    "@jupyterlab/settingregistry": "^3.0.6",
+    "@jupyterlab/statusbar": "^3.0.9",
+    "@jupyterlab/translation": "^3.0.9",
     "@jupyterlab/ui-components": "^3.0.7",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/signaling": "^1.4.3",
