@@ -179,8 +179,11 @@ export class LSPExtension implements ILSPExtension {
       .then(settings => {
         // Store the initial server settings, to be sent asynchronously
         // when the servers are initialized.
-        this.connection_manager.initial_configurations = (settings.composite
-          .language_servers || {}) as TLanguageServerConfigurations;
+        const initial_configuration = (settings.composite.language_servers ||
+          {}) as TLanguageServerConfigurations;
+        this.connection_manager.initial_configurations = initial_configuration;
+        // update the server-independent part of configuration immediately
+        this.connection_manager.updateConfiguration(initial_configuration);
 
         settings.changed.connect(() => {
           this.updateOptions(settings);
@@ -223,6 +226,10 @@ export class LSPExtension implements ILSPExtension {
 
     const languageServerSettings = (options.language_servers ||
       {}) as TLanguageServerConfigurations;
+
+    this.connection_manager.initial_configurations = languageServerSettings;
+    // TODO: if priorities changed reset connections
+    this.connection_manager.updateConfiguration(languageServerSettings);
     this.connection_manager.updateServerConfigurations(languageServerSettings);
   }
 }
