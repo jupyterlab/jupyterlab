@@ -40,6 +40,12 @@ describe('Notebook Create', () => {
     expect(await galata.notebook.getCellType(2)).toBe('code');
   });
 
+  test("Capture tooolbar", async () => {
+    const toolbar = await galata.notebook.getToolbar();
+    await galata.capture.screenshot('toolbar', toolbar);
+    expect(await galata.capture.compareScreenshot('toolbar')).toBe('same');
+  });
+
   test("Save Notebook", async () => {
     await galata.notebook.save();
     expect(await galata.contents.fileExists(fileName)).toBeTruthy();
