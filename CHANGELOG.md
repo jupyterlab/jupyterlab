@@ -11,6 +11,15 @@ See the [JupyterLab
 milestone on GitHub for the full list of pull requests and issues
 closed.
 
+### v3.0.16
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.0.15...2badf555436063962451599a81b38b80f601a589))
+
+### Maintenance and upkeep improvements
+
+- Fix Shutdown Error in Test App [#10240](https://github.com/jupyterlab/jupyterlab/pull/10240) ([@afshin](https://github.com/afshin))
+- Update to `codemirror~=5.58.0` [#10262](https://github.com/jupyterlab/jupyterlab/pull/10262) ([@jtpio](https://github.com/jtpio))
+
 ### v3.0.15
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.0.14...e1cda8e2fb69a6a01ec261ce13413acd306df4cb))
