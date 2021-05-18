@@ -20,7 +20,7 @@ import {
   ISessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import { IChangedArgs, PageConfig, Time, URLExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, Time } from '@jupyterlab/coreutils';
 
 import {
   renameDialog,
@@ -30,18 +30,13 @@ import {
   SavingStatus
 } from '@jupyterlab/docmanager';
 
-import {
-  IDocumentProvider,
-  IDocumentProviderFactory,
-  ProviderMock,
-  WebSocketProviderWithLocks
-} from '@jupyterlab/docprovider';
+import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Contents, Kernel, ServerConnection } from '@jupyterlab/services';
+import { Contents, Kernel } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
@@ -96,32 +91,6 @@ namespace CommandIDs {
  * The id of the document manager plugin.
  */
 const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
-
-/**
- * The default document provider plugin
- * TODO: move to a docprovider-extension package?
- */
-const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
-  id: '@jupyterlab/docmanager-extension:docprovider',
-  provides: IDocumentProviderFactory,
-  activate: (app: JupyterFrontEnd): IDocumentProviderFactory => {
-    const server = ServerConnection.makeSettings();
-    const url = URLExt.join(server.wsUrl, 'api/yjs');
-    const collaborative =
-      PageConfig.getOption('collaborative') == 'true' ? true : false;
-    const factory = (
-      options: IDocumentProviderFactory.IOptions
-    ): IDocumentProvider => {
-      return collaborative
-        ? new WebSocketProviderWithLocks({
-            ...options,
-            url
-          })
-        : new ProviderMock();
-    };
-    return factory;
-  }
-};
 
 /**
  * The default document manager provider.
@@ -432,7 +401,6 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   docManagerPlugin,
-  docProviderPlugin,
   pathStatusPlugin,
   savingStatusPlugin,
   downloadPlugin
