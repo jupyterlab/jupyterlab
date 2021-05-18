@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/documentsearch-extension",
   "version": "3.1.0-alpha.8",
-  "description": "Search document types",
+  "description": "JupyterLab - Document Search Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
