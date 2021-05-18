@@ -23,7 +23,6 @@ import { ServerConnection } from '@jupyterlab/services';
 
 /**
  * The default document provider plugin
- * TODO: move to a docprovider-extension package?
  */
 const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   id: '@jupyterlab/docmanager-extension:docprovider',
