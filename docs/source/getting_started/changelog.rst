@@ -10,6 +10,11 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.16
+^^^^^^^
+* Update to ``codemirror~=5.58.0``
+  `#10262 <https://github.com/jupyterlab/jupyterlab/pull/10262>`__
+
 v3.0.15
 ^^^^^^^
 * Added support for namespace packages in labextensions.
