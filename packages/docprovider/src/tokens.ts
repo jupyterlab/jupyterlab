@@ -19,23 +19,25 @@ export interface IDocumentProvider {
   requestInitialContent(): Promise<boolean>;
 
   /**
-   * TODO
+   * Put the initialized state.
    */
   putInitializedState(): void;
 
   /**
-   * TODO
+   * Acquire a lock.
+   * Returns a Promise that resolves to the lock number.
    */
   acquireLock(): Promise<number>;
 
   /**
-   * TODO
-   * @param lock TODO
+   * Release a lock.
+   *
+   * @param lock The lock to release.
    */
   releaseLock(lock: number): void;
 
   /**
-   * TODO
+   * Destroy the provider.
    */
   destroy(): void;
 }
