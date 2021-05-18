@@ -104,4 +104,11 @@
 
 .jp-showHiddenCellsButton {
   margin-left: var(--jp-cell-prompt-width);
+  border: 1px solid var(--jp-border-color2);
+  background-color: var(--jp-border-color3) !important;
+  color: var(--jp-content-font-color0) !important;
+}
+
+.jp-showHiddenCellsButton:hover {
+  background-color: var(--jp-border-color2) !important;
 }

@@ -1546,9 +1546,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       this._numberChildNodes > 0
     ) {
       const numberChildNodes = document.createElement('button');
-      numberChildNodes.className = `bp3-button bp3-minimal jp-Button minimal ${SHOW_HIDDEN_CELLS_CLASS}`;
+      numberChildNodes.className = `bp3-button bp3-minimal jp-Button ${SHOW_HIDDEN_CELLS_CLASS}`;
       addIcon.render(numberChildNodes);
-      const numberChildNodesText = document.createElement('p');
+      const numberChildNodesText = document.createElement('div');
       numberChildNodesText.nodeValue = `${this._numberChildNodes} cell${
         this._numberChildNodes > 1 ? 's' : ''
       } hidden`;
