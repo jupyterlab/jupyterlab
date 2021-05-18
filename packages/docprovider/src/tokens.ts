@@ -42,14 +42,23 @@ export interface IDocumentProvider {
   destroy(): void;
 }
 
+/**
+ * The type for the document provider factory.
+ */
 export type IDocumentProviderFactory = (
   options: IDocumentProviderFactory.IOptions
 ) => IDocumentProvider;
 
+/**
+ * A namespace for IDocumentProviderFactory statics.
+ */
 export namespace IDocumentProviderFactory {
+  /**
+   * The instantiation options for a IDocumentProviderFactory.
+   */
   export interface IOptions {
     /**
-     * The name of the room
+     * The name (id) of the room
      */
     guid: string;
 
