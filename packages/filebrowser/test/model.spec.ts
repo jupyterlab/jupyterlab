@@ -197,9 +197,9 @@ describe('filebrowser/model', () => {
 
     describe('#rootPath', () => {
       it('should be and remain the root path of the model', async () => {
-        expect(model.rootPath).to.equal('');
+        expect(model.rootPath).toBe('');
         await model.cd('src/');
-        expect(model.rootPath).to.equal('');
+        expect(model.rootPath).toBe('');
       });
     });
 
