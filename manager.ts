@@ -90,7 +90,7 @@ export class LanguageServerManager implements ILanguageServerManager {
       }
     }
 
-    return matchingSessionsKeys.sort(this._comparePriorities);
+    return matchingSessionsKeys.sort(this._comparePriorities.bind(this));
   }
 
   get statusCode(): number {
