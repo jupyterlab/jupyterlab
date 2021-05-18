@@ -779,7 +779,7 @@ function addCommands(
     const widget = sender.findWidget(args);
     if (widget && widget.shouldNameFile) {
       widget.shouldNameFile.connect(() => {
-        if (sender.nameFileOnSave) {
+        if (sender.nameFileOnSave && widget == shell.currentWidget) {
           const context = sender.contextForWidget(widget!);
           return nameOnSaveDialog(sender, context!);
         }

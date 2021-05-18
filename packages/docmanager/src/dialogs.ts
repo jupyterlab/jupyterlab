@@ -297,7 +297,7 @@ namespace Private {
    * Create the node for a rename after launch handler.
    */
   export function createNameFileNode(
-    manger: IDocumentManager,
+    manager: IDocumentManager,
     translator?: ITranslator
   ): HTMLElement {
     translator = translator || nullTranslator;
@@ -311,7 +311,7 @@ namespace Private {
     checkbox.type = 'checkbox';
     checkbox.classList.add(FILE_DIALOG_CHECKBOX_CLASS);
     checkbox.addEventListener('change', function () {
-      manger.nameFileOnSave = !this.checked;
+      manager.nameFileOnSave = !this.checked;
     });
 
     label.textContent = trans.__("Don't ask me again");
