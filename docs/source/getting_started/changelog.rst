@@ -14,7 +14,9 @@ v3.0.16
 ^^^^^^^
 * Update to ``codemirror~=5.58.0``
   `#10262 <https://github.com/jupyterlab/jupyterlab/pull/10262>`__
-
+* Fix Shutdown Error in Test App
+  `#10240 <https://github.com/jupyterlab/jupyterlab/pull/10240>`__
+   
 v3.0.15
 ^^^^^^^
 * Added support for namespace packages in labextensions.
