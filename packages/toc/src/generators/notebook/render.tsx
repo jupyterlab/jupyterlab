@@ -4,11 +4,11 @@
 import * as React from 'react';
 import { INotebookTracker, NotebookActions } from '@jupyterlab/notebook';
 import { ellipsesIcon } from '@jupyterlab/ui-components';
-import * as React from 'react';
 import { INotebookHeading } from '../../utils/headings';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { CodeComponent } from './codemirror';
 import { OptionsManager } from './options_manager';
+import { headerCollapsedState } from './utils';
 
 /**
  * Renders a notebook table of contents item.
@@ -179,17 +179,10 @@ function render(
    * @private
    * @param heading - notebook heading that was clicked
    */
+
   function onClick(tracker: INotebookTracker, heading?: INotebookHeading) {
     let collapsed;
-    if (heading!.cellRef!.model.metadata.has('toc-hr-collapsed')) {
-      collapsed = heading!.cellRef!.model.metadata.get(
-        'toc-hr-collapsed'
-      ) as boolean;
-      heading!.cellRef!.model.metadata.delete('toc-hr-collapsed');
-    } else {
-      collapsed = false;
-      heading!.cellRef!.model.metadata.set('toc-hr-collapsed', true);
-    }
+    collapsed = headerCollapsedState(heading!.cellRef!);
     if (heading) {
       if (tracker.currentWidget) {
         NotebookActions.setHeadingCollapse(
@@ -203,7 +196,6 @@ function render(
         collapsedState: collapsed,
         tocType: 'notebook'
       });
-      // NOTE: we can imagine a future in which this extension combines with a collapsible-header/ings extension such that we can programmatically close notebook "sections" according to a public API specifically intended for collapsing notebook sections. In the meantime, we need to resort to manually "collapsing" sections...
     } else {
       options.updateWidget();
     }

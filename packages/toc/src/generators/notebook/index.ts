@@ -26,6 +26,7 @@ import { OptionsManager } from './options_manager';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { headerCollapsedState } from './utils';
 
 /**
  * Returns a ToC generator for notebooks.
@@ -120,7 +121,7 @@ function createNotebookGenerator(
     for (let i = 0; i < panel.content.widgets.length; i++) {
       let cell: Cell = panel.content.widgets[i];
       let model = cell.model;
-      let collapsed = model.metadata.get('toc-hr-collapsed') as boolean;
+      let collapsed = headerCollapsedState(cell);
       collapsed = collapsed || false;
 
       if (model.type === 'code') {
