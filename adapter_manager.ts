@@ -1,7 +1,7 @@
-import type { IClassicShell } from '@jupyterlab-classic/application';
 import { ILabShell, JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Signal } from '@lumino/signaling';
+import type { IRetroShell } from '@retrolab/application';
 
 import { WidgetAdapter } from './adapters/adapter';
 import {
@@ -29,7 +29,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     return this.adapterTypes;
   }
 
-  constructor(protected shell: ILabShell | IClassicShell) {
+  constructor(protected shell: ILabShell | IRetroShell) {
     this.adapterChanged = new Signal(this);
     this.adapterDisposed = new Signal(this);
     this.adapterTypeAdded = new Signal(this);
@@ -146,7 +146,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
 export const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
   id: PLUGIN_ID + ':ILSPAdapterManager',
   activate: app => {
-    let shell = app.shell as ILabShell | IClassicShell;
+    let shell = app.shell as ILabShell | IRetroShell;
     return new WidgetAdapterManager(shell);
   },
   provides: ILSPAdapterManager,
