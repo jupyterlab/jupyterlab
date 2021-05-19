@@ -112,3 +112,11 @@
 .jp-showHiddenCellsButton:hover {
   background-color: var(--jp-border-color2) !important;
 }
+
+.jp-collapseHeadingButton {
+  display: none;
+}
+
+.jp-MarkdownCell:hover .jp-collapseHeadingButton {
+  display: initial;
+}

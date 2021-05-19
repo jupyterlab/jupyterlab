@@ -1447,7 +1447,7 @@ export namespace NotebookActions {
     let localCollapsed = false;
     let localCollapsedLevel = 0;
     // iterate through all cells after the active cell.
-    let cellNum = which + 1;
+    let cellNum;
     for (cellNum = which + 1; cellNum < notebook.widgets.length; cellNum++) {
       let subCell = notebook.widgets[cellNum];
       let subCellheadingInfo = NotebookActions.getHeadingInfo(subCell);
