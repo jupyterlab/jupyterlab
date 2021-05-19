@@ -2,7 +2,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 import mergeWith from 'lodash.mergewith';
 
-const RE_PATH_ANCHOR = /^file:\/\/([^\/]+|\/[A-Z]:)/;
+const RE_PATH_ANCHOR = /^file:\/\/([^\/]+|\/[a-zA-Z](?::|%3A))/;
 
 export async function sleep(timeout: number) {
   return new Promise<void>(resolve => {
@@ -142,7 +142,11 @@ export function is_win_path(uri: string) {
  * lowercase the drive component of a URI
  */
 export function normalize_win_path(uri: string) {
-  return uri.replace(RE_PATH_ANCHOR, it => it.toLowerCase());
+  // Pyright encodes colon on Windows, see:
+  // https://github.com/krassowski/jupyterlab-lsp/pull/587#issuecomment-844225253
+  return uri.replace(RE_PATH_ANCHOR, it =>
+    it.replace('%3A', ':').toLowerCase()
+  );
 }
 
 export function uri_to_contents_path(child: string, parent?: string) {
