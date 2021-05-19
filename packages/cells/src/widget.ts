@@ -1578,6 +1578,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   protected renderInput(widget: Widget): void {
     this.addClass(RENDERED_CLASS);
+    this.node.classList.toggle(
+      MARKDOWN_HEADING_COLLAPSED,
+      this._headingCollapsed
+    );
     this.maybeCreateCollapseButton();
     this.maybeCreateOrUpdateExpandButton();
     this.inputArea.renderInput(widget);

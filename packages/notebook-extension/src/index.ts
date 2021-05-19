@@ -250,7 +250,7 @@ namespace CommandIDs {
 
   export const collapseAllCmd = 'Collapsible_Headings:Collapse_All';
 
-  export const uncollapseAllCmd = 'Collapsible_Headings:UnCollapse_All';
+  export const expandAllCmd = 'Collapsible_Headings:Expand_All';
 }
 
 /**
@@ -2206,12 +2206,12 @@ function addCommands(
       }
     }
   });
-  commands.addCommand(CommandIDs.uncollapseAllCmd, {
-    label: 'Un-Collapse All Cells',
+  commands.addCommand(CommandIDs.expandAllCmd, {
+    label: 'Expand All Headings',
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.uncollapseAll(current.content);
+        return NotebookActions.expandAllHeadings(current.content);
       }
     }
   });
@@ -2250,7 +2250,7 @@ function populatePalette(
     CommandIDs.trust,
     CommandIDs.toggleCollapseCmd,
     CommandIDs.collapseAllCmd,
-    CommandIDs.uncollapseAllCmd
+    CommandIDs.expandAllCmd
   ].forEach(command => {
     palette.addItem({ command, category });
   });

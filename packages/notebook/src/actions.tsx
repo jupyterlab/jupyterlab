@@ -1398,7 +1398,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function uncollapseAll(notebook: Notebook): any {
+  export function expandAllHeadings(notebook: Notebook): any {
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
         NotebookActions.setHeadingCollapse(cell, false, notebook);
@@ -1410,11 +1410,11 @@ export namespace NotebookActions {
 
   /**
    * Set the given cell and ** all "child" cells **
-   * to the given collapse / uncollapse if cell is
+   * to the given collapse / expand if cell is
    * a markdown header.
    *
    * @param cell - The cell
-   * @param collapsing - Whether to collapse or uncollapse the cell
+   * @param collapsing - Whether to collapse or expand the cell
    * @param notebook - The target notebook widget.
    */
   export function setHeadingCollapse(
@@ -1480,7 +1480,7 @@ export namespace NotebookActions {
         localCollapsed = true;
         localCollapsedLevel = subCellheadingInfo.headingLevel;
         // but don't collapse the locally collapsed heading, so continue to
-        // uncollapse the heading. This will get noticed in the next round.
+        // expand the heading. This will get noticed in the next round.
       }
       subCell.setHidden(false);
     }
@@ -1519,8 +1519,8 @@ export namespace NotebookActions {
    * If cell is a markdown heading, sets the headingCollapsed field,
    * and otherwise hides the cell.
    *
-   * @param cell - The cell to collapse / uncollapse
-   * @param collapsing - Whether to collapse or uncollapse the given cell
+   * @param cell - The cell to collapse / expand
+   * @param collapsing - Whether to collapse or expand the given cell
    */
   export function setCellCollapse(cell: Cell, collapsing: boolean): any {
     if (cell instanceof MarkdownCell) {

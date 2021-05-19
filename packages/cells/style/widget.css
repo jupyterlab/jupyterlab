@@ -117,6 +117,10 @@
   display: none;
 }
 
+.jp-MarkdownHeadingCollapsed .jp-collapseHeadingButton {
+  display: initial;
+}
+
 .jp-MarkdownCell:hover .jp-collapseHeadingButton {
   display: initial;
 }
