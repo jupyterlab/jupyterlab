@@ -178,4 +178,8 @@ const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
   provides: IConnectionLost
 };
 
-export default [hubExtension, hubExtensionMenu, connectionlost] as JupyterFrontEndPlugin<any>[];
+export default [
+  hubExtension,
+  hubExtensionMenu,
+  connectionlost
+] as JupyterFrontEndPlugin<any>[];

@@ -150,7 +150,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       await loadSettingsMenu(
         registry,
         menu.attachMenu.bind(menu),
-        (options) => MainMenu.generateMenu(commands, options, trans),
+        options => MainMenu.generateMenu(commands, options, trans),
         translator
       );
     }
@@ -240,7 +240,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
         category: trans.__('Main Area')
       });
     }
-    
+
     app.shell.add(menu, 'menu', { rank: 100 });
 
     return menu;

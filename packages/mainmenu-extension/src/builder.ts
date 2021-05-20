@@ -63,7 +63,7 @@ item:
   ]
 }
 
-Menu description:`,
+Menu description:`
     );
   }
 

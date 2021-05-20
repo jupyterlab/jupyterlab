@@ -4,109 +4,77 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "editmenu:clear-all",
-      "keys": [
-        ""
-      ],
+      "keys": [""],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:clear-current",
-      "keys": [
-        ""
-      ],
+      "keys": [""],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:find",
-      "keys": [
-        ""
-      ],
+      "keys": [""],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:find-and-replace",
-      "keys": [
-        ""
-      ],
+      "keys": [""],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:redo",
-      "keys": [
-        "Accel Shift Z"
-      ],
+      "keys": ["Accel Shift Z"],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:undo",
-      "keys": [
-        "Accel Z"
-      ],
+      "keys": ["Accel Z"],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "filemenu:close-and-cleanup",
-      "keys": [
-        "Ctrl Shift Q"
-      ],
+      "keys": ["Ctrl Shift Q"],
       "selector": ".jp-Activity"
     },
     {
       "command": "kernelmenu:interrupt",
-      "keys": [
-        "I",
-        "I"
-      ],
+      "keys": ["I", "I"],
       "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "kernelmenu:restart",
-      "keys": [
-        "0",
-        "0"
-      ],
+      "keys": ["0", "0"],
       "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "kernelmenu:restart-and-clear",
-      "keys": [
-        ""
-      ],
+      "keys": [""],
       "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "kernelmenu:shutdown",
-      "keys": [
-        ""
-      ],
+      "keys": [""],
       "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "runmenu:restart-and-run-all",
-      "keys": [
-        ""
-      ],
+      "keys": [""],
       "selector": "[data-jp-code-runner]"
     },
     {
       "command": "runmenu:run",
-      "keys": [
-        "Shift Enter"
-      ],
+      "keys": ["Shift Enter"],
       "selector": "[data-jp-code-runner]"
     },
     {
       "command": "runmenu:run-all",
-      "keys": [
-        ""
-      ],
+      "keys": [""],
       "selector": "[data-jp-code-runner]"
     },
     {
       "command": "tabsmenu:activate-previously-used-tab",
-      "keys": [
-        "Accel Shift '"
-      ],
+      "keys": ["Accel Shift '"],
       "selector": "body"
     }
   ],
@@ -465,9 +433,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "id"
-      ],
+      "required": ["id"],
       "additionalProperties": false,
       "type": "object"
     },
@@ -485,11 +451,7 @@
         },
         "type": {
           "type": "string",
-          "enum": [
-            "command",
-            "submenu",
-            "separator"
-          ],
+          "enum": ["command", "submenu", "separator"],
           "default": "command"
         },
         "rank": {

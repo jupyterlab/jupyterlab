@@ -163,7 +163,9 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
     // Phosphor takes care of superfluous leading,
     // trailing, and duplicate separators.
     if (this._includeSeparators) {
-      added.push(this.insertItem(insertIndex++, { type: 'separator', rank: defaultRank }));
+      added.push(
+        this.insertItem(insertIndex++, { type: 'separator', rank: defaultRank })
+      );
     }
     // Insert the group.
     added.push(
@@ -174,7 +176,9 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
 
     // Insert a separator after the group.
     if (this._includeSeparators) {
-      added.push(this.insertItem(insertIndex++, { type: 'separator', rank: defaultRank }));
+      added.push(
+        this.insertItem(insertIndex++, { type: 'separator', rank: defaultRank })
+      );
     }
 
     return new DisposableDelegate(() => {

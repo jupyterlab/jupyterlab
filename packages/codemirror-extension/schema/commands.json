@@ -195,10 +195,7 @@
       "default": true
     },
     "styleActiveLine": {
-      "type": [
-        "boolean",
-        "object"
-      ],
+      "type": ["boolean", "object"],
       "title": "Style Active Line",
       "description": "Value is boolean, or { nonEmpty: boolean }",
       "default": false
@@ -210,18 +207,13 @@
       "default": true
     },
     "selectionPointer": {
-      "type": [
-        "boolean",
-        "string"
-      ],
+      "type": ["boolean", "string"],
       "title": "Selection Pointer",
       "description": "Value is boolean or string, e.g. 'pointer'",
       "default": false
     },
     "lineWiseCopyCut": {
-      "type": [
-        "boolean"
-      ],
+      "type": ["boolean"],
       "title": "Ctrl-C",
       "description": "When enabled, which is the default, doing copy or cut when there is no selection will copy or cut the whole lines that have cursors on them.",
       "default": true

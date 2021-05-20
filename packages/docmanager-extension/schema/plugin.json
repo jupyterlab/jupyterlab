@@ -28,16 +28,12 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "docmanager:save",
-      "keys": [
-        "Accel S"
-      ],
+      "keys": ["Accel S"],
       "selector": "body"
     },
     {
       "command": "docmanager:save-as",
-      "keys": [
-        "Accel Shift S"
-      ],
+      "keys": ["Accel Shift S"],
       "selector": "body"
     }
   ],

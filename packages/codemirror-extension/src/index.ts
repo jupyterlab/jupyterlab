@@ -310,8 +310,10 @@ function activateEditorCommands(
 
   commands.addCommand(CommandIDs.changeKeyMap, {
     label: args => {
-      const theKeyMap = args['keyMap'] as string ?? keyMap;
-      return theKeyMap === 'sublime' ? trans.__('Sublime Text') : trans.__(theKeyMap);
+      const theKeyMap = (args['keyMap'] as string) ?? keyMap;
+      return theKeyMap === 'sublime'
+        ? trans.__('Sublime Text')
+        : trans.__(theKeyMap);
     },
     execute: args => {
       const key = 'keyMap';

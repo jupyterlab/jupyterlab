@@ -14,8 +14,8 @@
             "type": "submenu",
             "rank": 1,
             "submenu": {
-                "id": "jp-mainmenu-settings-language",
-                "label": "Language"
+              "id": "jp-mainmenu-settings-language",
+              "label": "Language"
             }
           },
           {

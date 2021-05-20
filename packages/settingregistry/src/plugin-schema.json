@@ -72,9 +72,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "id"
-      ],
+      "required": ["id"],
       "type": "object"
     },
     "menuItem": {
@@ -91,11 +89,7 @@
         },
         "type": {
           "type": "string",
-          "enum": [
-            "command",
-            "submenu",
-            "separator"
-          ],
+          "enum": ["command", "submenu", "separator"],
           "default": "command"
         },
         "rank": {
@@ -137,11 +131,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "command",
-        "keys",
-        "selector"
-      ],
+      "required": ["command", "keys", "selector"],
       "type": "object"
     }
   }

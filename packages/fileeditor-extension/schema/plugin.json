@@ -113,36 +113,22 @@
           "type": "boolean"
         },
         "fontFamily": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         },
         "fontSize": {
-          "type": [
-            "integer",
-            "null"
-          ],
+          "type": ["integer", "null"],
           "minimum": 1,
           "maximum": 100
         },
         "lineHeight": {
-          "type": [
-            "number",
-            "null"
-          ]
+          "type": ["number", "null"]
         },
         "lineNumbers": {
           "type": "boolean"
         },
         "lineWrap": {
           "type": "string",
-          "enum": [
-            "off",
-            "on",
-            "wordWrapColumn",
-            "bounded"
-          ]
+          "enum": ["off", "on", "wordWrapColumn", "bounded"]
         },
         "matchBrackets": {
           "type": "boolean"

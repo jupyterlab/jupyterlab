@@ -9,13 +9,13 @@
           {
             "type": "submenu",
             "submenu": {
-                "id": "jp-mainmenu-file-new",
-                "items": [
-                  {
-                    "command": "notebook:create-new",
-                    "rank": 10
-                  }
-                ]
+              "id": "jp-mainmenu-file-new",
+              "items": [
+                {
+                  "command": "notebook:create-new",
+                  "rank": 10
+                }
+              ]
             }
           }
         ]
@@ -212,7 +212,7 @@
         ]
       }
     ]
-  },  
+  },
   "jupyter.lab.shortcuts": [
     {
       "command": "notebook:change-cell-to-code",

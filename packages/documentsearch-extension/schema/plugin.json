@@ -33,23 +33,17 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "documentsearch:start",
-      "keys": [
-        "Accel F"
-      ],
+      "keys": ["Accel F"],
       "selector": ".jp-mod-searchable"
     },
     {
       "command": "documentsearch:highlightNext",
-      "keys": [
-        "Accel G"
-      ],
+      "keys": ["Accel G"],
       "selector": ".jp-mod-searchable"
     },
     {
       "command": "documentsearch:highlightPrevious",
-      "keys": [
-        "Accel Shift G"
-      ],
+      "keys": ["Accel Shift G"],
       "selector": ".jp-mod-searchable"
     }
   ],
