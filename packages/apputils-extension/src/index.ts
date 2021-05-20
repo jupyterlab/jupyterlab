@@ -71,7 +71,7 @@ namespace CommandIDs {
 
   export const runFirstEnabled = 'apputils:run-first-enabled';
 
-  export const runAllCommands = 'apputils:run-all-commands';
+  export const runAllEnabled = 'apputils:run-all-enabled';
 
   export const toggleHeader = 'apputils:toggle-header';
 }
@@ -584,21 +584,27 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    commands.addCommand(CommandIDs.runAllCommands, {
-      label: trans.__('Run All Commands Passed as Args'),
+    commands.addCommand(CommandIDs.runAllEnabled, {
+      label: trans.__('Run All Enabled Commands Passed as Args'),
       execute: async (args) => {
-        const commandsString: string[] = args.commands as string[];
-        for (let i = 0; i < commandsString.length; i++) {
-          const cmd = commandsString[i];
-          await app.commands.execute(cmd);
+        const commands: string[] = args.commands as string[];
+        const commandArgs: any = args.args;
+        const argList = Array.isArray(args);
+        const errorIfNotEnabled: Boolean = args.errorIfNotEnabled;
+        for (let i = 0; i < commands.length; i++) {
+          const cmd = commands[i];
+          const arg = argList ? commandArgs[i] : commandArgs;
+          if (app.commands.isEnabled(cmd, arg)) {
+            await app.commands.execute(cmd, arg);
+        } else {
+          if (errorIfNotEnabled) {
+            console.error(`${cmd} is not enabled.`);
+            return;
+          }
         }
-        console.log(
-          `Commands ${commandsString} have completed.`
-        );
       }
-    });
-  }
-};
+    }
+  });
 
 /**
  * The default HTML sanitizer.
