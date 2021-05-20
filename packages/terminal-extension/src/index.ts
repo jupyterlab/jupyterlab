@@ -293,7 +293,7 @@ export function addCommands(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   options: Partial<ITerminal.IOptions>
-) {
+): void {
   const trans = translator.load('jupyterlab');
   const { commands, serviceManager } = app;
 

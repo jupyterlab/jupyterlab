@@ -19,13 +19,11 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import {
   EditMenu,
   FileMenu,
-  // HelpMenu,
   IMainMenu,
   IMenuExtender,
   KernelMenu,
   MainMenu,
   RunMenu,
-  // SettingsMenu,
   TabsMenu,
   ViewMenu
 } from '@jupyterlab/mainmenu';

@@ -4,7 +4,7 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
-import { JSONExt, ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
 
@@ -42,13 +42,28 @@ export async function loadSettingsMenu(
     schema.properties!.menus.description = trans.__(
       `Note: To disable a menu or a menu item,
 copy it to User Preferences and add the
-"disabled" key, for example:
+"disabled" key. The following example will disable
+the "Tabs" menu and "Restart Kernel and Run up to Selected Cell"
+item:
 {
-  TODO
-  "disabled": true
+  "menus": [
+    {
+      "id": "jp-mainmenu-tabs",
+      "disabled": true
+    },
+    {
+        "id": "jp-mainmenu-kernel",
+        "items": [
+            {
+                "command": "notebook:restart-and-run-to-selected",
+                "disabled": true
+            }
+        ]
+    }
+  ]
 }
 
-Menu description:`
+Menu description:`,
     );
   }
 

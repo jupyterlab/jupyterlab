@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { TranslationBundle } from '@jupyterlab/translation';
+
 import { MenuSvg } from '@jupyterlab/ui-components';
 
 import { ArrayExt } from '@lumino/algorithm';
@@ -28,7 +30,6 @@ import { ViewMenu } from './view';
 import { TabsMenu } from './tabs';
 
 import { IMainMenu } from './tokens';
-import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The main menu class.  It is intended to be used as a singleton.
