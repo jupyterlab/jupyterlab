@@ -4,10 +4,10 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": ["src/**/*"],
   "references": [
     {
-      "path": "../apputils"
+      "path": "../application"
     },
     {
       "path": "../coreutils"
@@ -16,16 +16,7 @@
       "path": "../docprovider"
     },
     {
-      "path": "../docregistry"
-    },
-    {
       "path": "../services"
-    },
-    {
-      "path": "../statusbar"
-    },
-    {
-      "path": "../translation"
     }
   ]
 }

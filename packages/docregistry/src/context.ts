@@ -7,6 +7,8 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
+import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
+
 import * as ymodels from '@jupyterlab/shared-models';
 
 import * as Y from 'yjs';
@@ -28,7 +30,7 @@ import {
   sessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
 import { IModelDB, ModelDB } from '@jupyterlab/observables';
 
@@ -42,11 +44,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 
-import {
-  WebsocketProviderWithLocks,
-  IProvider,
-  ProviderMock
-} from '@jupyterlab/docprovider';
+import { IDocumentProvider, ProviderMock } from '@jupyterlab/docprovider';
 
 import { DocumentRegistry } from './registry';
 
@@ -85,14 +83,10 @@ export class Context<
     const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('context');
-    // @todo remove websocket provider - this should be handled by a separate plugin
-    const server = ServerConnection.makeSettings();
-    const url = URLExt.join(server.wsUrl, 'api/yjs');
     const guid = this._factory.contentType + ':' + localPath;
-    const collaborative =
-      PageConfig.getOption('collaborative') == 'true' ? true : false;
-    this._provider = collaborative
-      ? new WebsocketProviderWithLocks({ url, guid, ymodel })
+    const docProviderFactory = options.docProviderFactory;
+    this._provider = docProviderFactory
+      ? docProviderFactory({ guid, ymodel })
       : new ProviderMock();
 
     this._readyPromise = manager.ready.then(() => {
@@ -886,7 +880,7 @@ or load the version on disk (revert)?`,
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
-  private _provider: IProvider;
+  private _provider: IDocumentProvider;
   private _ydoc: Y.Doc;
   private _ycontext: Y.Map<string>;
 }
@@ -923,6 +917,11 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: ISessionContext.IKernelPreference;
+
+    /**
+     * An factory method for the document provider.
+     */
+    docProviderFactory?: IDocumentProviderFactory;
 
     /**
      * An IModelDB factory method which may be used for the document.

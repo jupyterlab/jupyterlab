@@ -30,6 +30,8 @@ import {
   SavingStatus
 } from '@jupyterlab/docmanager';
 
+import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
+
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -85,13 +87,16 @@ namespace CommandIDs {
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
 }
 
-const pluginId = '@jupyterlab/docmanager-extension:plugin';
+/**
+ * The id of the document manager plugin.
+ */
+const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 
 /**
  * The default document manager provider.
  */
 const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
-  id: pluginId,
+  id: docManagerPluginId,
   provides: IDocumentManager,
   requires: [ISettingRegistry, ITranslator],
   optional: [
@@ -99,7 +104,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     ICommandPalette,
     ILabShell,
     IMainMenu,
-    ISessionContextDialogs
+    ISessionContextDialogs,
+    IDocumentProviderFactory
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -109,7 +115,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     palette: ICommandPalette | null,
     labShell: ILabShell | null,
     mainMenu: IMainMenu | null,
-    sessionDialogs: ISessionContextDialogs | null
+    sessionDialogs: ISessionContextDialogs | null,
+    docProviderFactory: IDocumentProviderFactory | null
   ): IDocumentManager => {
     const trans = translator.load('jupyterlab');
     const manager = app.serviceManager;
@@ -148,7 +155,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       sessionDialogs: sessionDialogs || undefined,
       translator,
-      collaborative: true
+      collaborative: true,
+      docProviderFactory: docProviderFactory ?? undefined
     });
 
     // Register the file operations commands.
@@ -209,7 +217,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     };
 
     // Fetch the initial state of the settings.
-    Promise.all([settingRegistry.load(pluginId), app.restored])
+    Promise.all([settingRegistry.load(docManagerPluginId), app.restored])
       .then(([settings]) => {
         settings.changed.connect(onSettingsUpdated);
         onSettingsUpdated(settings);
@@ -222,7 +230,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     // allowing us to dynamically populate a help string with the
     // available document viewers and file types for the default
     // viewer overrides.
-    settingRegistry.transform(pluginId, {
+    settingRegistry.transform(docManagerPluginId, {
       fetch: plugin => {
         // Get the available file types.
         const fileTypes = toArray(registry.fileTypes())
@@ -260,7 +268,7 @@ Available file types:
 
     // If the document registry gains or loses a factory or file type,
     // regenerate the settings description with the available options.
-    registry.changed.connect(() => settingRegistry.reload(pluginId));
+    registry.changed.connect(() => settingRegistry.reload(docManagerPluginId));
 
     return docManager;
   }
@@ -729,9 +737,11 @@ function addCommands(
       const value = !docManager.autosave;
       const key = 'autosave';
       return settingRegistry
-        .set(pluginId, key, value)
+        .set(docManagerPluginId, key, value)
         .catch((reason: Error) => {
-          console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+          console.error(
+            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
+          );
         });
     }
   });

@@ -54,6 +54,7 @@
     "@jupyterlab/docmanager": "^3.1.0-alpha.8",
     "@jupyterlab/docmanager-extension": "^3.1.0-alpha.8",
     "@jupyterlab/docprovider": "^3.1.0-alpha.8",
+    "@jupyterlab/docprovider-extension": "^3.1.0-alpha.8",
     "@jupyterlab/docregistry": "^3.1.0-alpha.8",
     "@jupyterlab/documentsearch": "^3.1.0-alpha.8",
     "@jupyterlab/documentsearch-extension": "^3.1.0-alpha.8",
