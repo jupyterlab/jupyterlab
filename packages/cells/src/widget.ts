@@ -1422,6 +1422,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     void this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
     });
+    this.renderCollapseButtons(this._renderer!);
     this.renderInput(this._renderer!);
   }
 
@@ -1478,7 +1479,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       } no-repeat center`
       );
     }
-    this.renderInput(this._renderer!);
+    this.renderCollapseButtons(this._renderer!);
   }
 
   get numberChildNodes(): number {
@@ -1486,7 +1487,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
   set numberChildNodes(value: number) {
     this._numberChildNodes = value;
-    this.renderInput(this._renderer!);
+    this.renderCollapseButtons(this._renderer!);
   }
 
   get toggleCollapsedSignal(): Signal<this, boolean> {
@@ -1574,16 +1575,25 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   /**
-   * Render an input instead of the text editor.
+   * Render the collapse button for heading cells,
+   * and for collapsed heading cells render the "expand hidden cells"
+   * button.
    */
-  protected renderInput(widget: Widget): void {
-    this.addClass(RENDERED_CLASS);
+  protected renderCollapseButtons(widget: Widget): void {
     this.node.classList.toggle(
       MARKDOWN_HEADING_COLLAPSED,
       this._headingCollapsed
     );
     this.maybeCreateCollapseButton();
     this.maybeCreateOrUpdateExpandButton();
+  }
+
+  /**
+   * Render an input instead of the text editor.
+   */
+  protected renderInput(widget: Widget): void {
+    this.addClass(RENDERED_CLASS);
+    this.renderCollapseButtons(widget);
     this.inputArea.renderInput(widget);
   }
 
