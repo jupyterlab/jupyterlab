@@ -152,7 +152,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       await loadSettingsMenu(
         registry,
         menu.attachMenu.bind(menu),
-        (options) => MainMenu.generateMenu(commands, options),
+        (options) => MainMenu.generateMenu(commands, options, trans),
         translator
       );
     }

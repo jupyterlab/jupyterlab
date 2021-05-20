@@ -1011,7 +1011,9 @@ export namespace SettingRegistry {
         case 'command':
           if (item.command) {
             const refIndex = items.findIndex(
-              ref => ref.command === item.command
+              ref =>
+                ref.command === item.command &&
+                JSONExt.deepEqual(ref.args ?? {}, item.args ?? {})
             );
             if (refIndex < 0) {
               items.push({ ...item });

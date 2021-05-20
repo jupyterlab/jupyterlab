@@ -92,13 +92,7 @@ function activateHubExtension(
     }
   });
 
-  // Add palette and menu itmes.
-  if (mainMenu) {
-    mainMenu.fileMenu.addGroup(
-      [{ command: CommandIDs.controlPanel }, { command: CommandIDs.logout }],
-      100
-    );
-  }
+  // Add palette items.
   if (palette) {
     const category = trans.__('Hub');
     palette.addItem({ category, command: CommandIDs.controlPanel });
@@ -114,6 +108,15 @@ const hubExtension: JupyterFrontEndPlugin<void> = {
   id: 'jupyter.extensions.hub-extension',
   requires: [JupyterFrontEnd.IPaths, ITranslator],
   optional: [ICommandPalette, IMainMenu],
+  autoStart: true
+};
+
+/**
+ * Plugin to load menu description based on settings file
+ */
+const hubExtensionMenu: JupyterFrontEndPlugin<void> = {
+  activate: () => void 0,
+  id: 'jupyter.extensions.hub-extension:plugin',
   autoStart: true
 };
 
@@ -175,4 +178,4 @@ const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
   provides: IConnectionLost
 };
 
-export default [hubExtension, connectionlost] as JupyterFrontEndPlugin<any>[];
+export default [hubExtension, hubExtensionMenu, connectionlost] as JupyterFrontEndPlugin<any>[];

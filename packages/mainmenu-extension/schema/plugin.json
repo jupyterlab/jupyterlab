@@ -137,14 +137,16 @@
               "rank": 0
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 1
             },
             {
               "command": "filebrowser:open-path",
               "rank": 1
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 2
             },
             {
               "command": "docmanager:clone",
@@ -155,7 +157,8 @@
               "rank": 2
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 3
             },
             {
               "command": "application:close",
@@ -170,7 +173,8 @@
               "rank": 3
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 4
             },
             {
               "command": "docmanager:save",
@@ -185,7 +189,8 @@
               "rank": 4
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 5
             },
             {
               "command": "docmanager:reload",
@@ -200,14 +205,16 @@
               "rank": 5
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 98
             },
             {
               "command": "apputils:print",
               "rank": 98
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 99
             },
             {
               "command": "filemenu:logout",
@@ -225,13 +232,16 @@
           "label": "Edit",
           "items": [
             {
-              "command": "editmenu:undo"
+              "command": "editmenu:undo",
+              "rank": 0
             },
             {
-              "command": "editmenu:redo"
+              "command": "editmenu:redo",
+              "rank": 0
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 10
             },
             {
               "command": "editmenu:clear-current",
@@ -242,7 +252,8 @@
               "rank": 10
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 200
             },
             {
               "command": "editmenu:go-to-line",
@@ -260,7 +271,8 @@
               "rank": 0
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 1
             },
             {
               "command": "application:toggle-mode",
@@ -271,7 +283,8 @@
               "rank": 1
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 2
             },
             {
               "command": "application:toggle-left-area",
@@ -282,7 +295,8 @@
               "rank": 2
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 10
             },
             {
               "command": "viewmenu:line-numbering",
@@ -330,7 +344,8 @@
               "rank": 0
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 1
             },
             {
               "command": "kernelmenu:restart",
@@ -349,14 +364,16 @@
               "rank": 1
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 1.5
             },
             {
               "command": "kernelmenu:reconnect-to-kernel",
               "rank": 1.5
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 2
             },
             {
               "command": "kernelmenu:shutdown",
@@ -367,7 +384,8 @@
               "rank": 2
             },
             {
-              "type": "separator"
+              "type": "separator",
+              "rank": 3
             },
             {
               "command": "kernelmenu:change",

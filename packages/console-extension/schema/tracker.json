@@ -3,6 +3,62 @@
   "description": "Code Console settings.",
   "jupyter.lab.setting-icon": "ui-components:console",
   "jupyter.lab.setting-icon-label": "Code Console Settings",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-file-new",
+              "items": [
+                {
+                  "command": "console:create",
+                  "rank": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-settings",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 9
+          },
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-settings-consoleexecute",
+              "label": "Console Run Keystroke",
+              "items": [
+                {
+                  "command": "console:interaction-mode",
+                  "args": {
+                    "interactionMode": "terminal"
+                  }
+                },
+                {
+                  "command": "console:interaction-mode",
+                  "args": {
+                    "interactionMode": "notebook"
+                  }
+                }
+              ]
+            },
+            "rank": 9
+          },
+          {
+            "type": "separator",
+            "rank": 9
+          }
+        ]
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
     {
       "command": "console:linebreak",

@@ -4,7 +4,7 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
 
@@ -19,7 +19,6 @@ export async function loadSettingsMenu(
   const trans = translator.load('jupyterlab');
   let canonical: ISettingRegistry.ISchema | null;
   let loaded: { [name: string]: ISettingRegistry.IMenu[] } = {};
-  let currentMenus: ISettingRegistry.IMenu[] = [];
 
   /**
    * Populate the plugin's schema defaults.
@@ -28,11 +27,10 @@ export async function loadSettingsMenu(
     loaded = {};
     schema.properties!.menus.default = Object.keys(registry.plugins)
       .map(plugin => {
-        const menus = registry.plugins[plugin]!.schema['jupyter.lab.menus'] ?? {
-          main: []
-        };
-        loaded[plugin] = menus.main;
-        return menus.main;
+        const menus =
+          registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];
+        loaded[plugin] = menus;
+        return menus;
       })
       .concat([schema.properties!.menus.default as any[]])
       .reduceRight(
@@ -56,12 +54,22 @@ Menu description:`
 
   registry.pluginChanged.connect(async (sender, plugin) => {
     if (plugin !== PLUGIN_ID) {
-      // If the plugin changed its menu, reload everything.
-      const oldMenus = loaded[plugin] || [];
+      // If the plugin changed its menu.
+      const oldMenus = loaded[plugin] ?? [];
       const newMenus =
-        registry.plugins[plugin]!.schema['jupyter.lab.menus'] || [];
+        registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];
       if (!JSONExt.deepEqual(oldMenus, newMenus)) {
-        await displayInformation(trans);
+        if (loaded[plugin]) {
+          // The plugin has changed, request the user to reload the UI - this should not happen
+          await displayInformation(trans);
+        } else {
+          // The plugin was not yet loaded when the menu was built => update the menu
+          loaded[plugin] = newMenus;
+          updateMenus(menus, loaded[plugin], menuFactory).forEach(menu => {
+            attachMenu(menu);
+            menus.push(menu);
+          });
+        }
       }
     }
   });
@@ -113,8 +121,9 @@ Menu description:`
 
   const settings = await registry.load(PLUGIN_ID);
 
-  currentMenus = JSONExt.deepCopy(settings.composite.menus as any) ?? [];
-  createMenus(currentMenus, menuFactory).forEach(menu => {
+  const currentMenus = JSONExt.deepCopy(settings.composite.menus as any) ?? [];
+  const menus = createMenus(currentMenus, menuFactory);
+  menus.forEach(menu => {
     attachMenu(menu);
   });
   settings.changed.connect(() => {
@@ -137,7 +146,7 @@ Menu description:`
 function createMenus(
   data: ISettingRegistry.IMenu[],
   menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu
-): Menu[] {
+): JupyterLabMenu[] {
   return data
     .filter(item => !item.disabled)
     .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity))
@@ -162,17 +171,87 @@ function dataToMenu(
     ?.filter(item => !item.disabled)
     .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity))
     .map(item => {
-      const { command, args, submenu, type, rank } = item;
-      // Commands may not have been registered yet; so we don't force it to exist
-      menu.addItem({
-        command,
-        args: args as any,
-        submenu: submenu ? dataToMenu(submenu, menuFactory) : null,
-        type,
-        rank
-      });
+      addItem(item, menu, menuFactory);
     });
   return menu;
+}
+
+function addItem(
+  item: ISettingRegistry.IMenuItem,
+  menu: JupyterLabMenu,
+  menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu
+) {
+  const { command, args, submenu, type, rank } = item;
+  // Commands may not have been registered yet; so we don't force it to exist
+  menu.addItem({
+    command,
+    args: args as any,
+    submenu: submenu ? dataToMenu(submenu, menuFactory) : null,
+    type,
+    rank
+  });
+}
+
+function updateMenus(
+  menus: JupyterLabMenu[],
+  data: ISettingRegistry.IMenu[],
+  menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu
+): JupyterLabMenu[] {
+  const newMenus: JupyterLabMenu[] = [];
+  data.forEach(item => {
+    const menu = menus.find(menu => menu.id === item.id);
+    if (menu) {
+      mergeMenus(item, menu, menuFactory);
+    } else {
+      newMenus.push(dataToMenu(item, menuFactory));
+    }
+  });
+  return newMenus;
+}
+
+function mergeMenus(
+  item: ISettingRegistry.IMenu,
+  menu: JupyterLabMenu,
+  menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu
+) {
+  if (item.disabled) {
+    menu.dispose();
+  } else {
+    item.items?.forEach(entry => {
+      const existingItem = menu?.items.find(
+        (i, idx) =>
+          i.type === entry.type &&
+          i.command === entry.command &&
+          i.submenu?.id === entry.submenu?.id
+      );
+
+      if (existingItem && entry.type !== 'separator') {
+        if (entry.disabled) {
+          menu.removeItem(existingItem);
+        } else {
+          switch (entry.type ?? 'command') {
+            case 'command':
+              if (entry.command) {
+                if (!JSONExt.deepEqual(existingItem.args, entry.args ?? {})) {
+                  addItem(entry, menu, menuFactory);
+                }
+              }
+              break;
+            case 'submenu':
+              if (entry.submenu) {
+                mergeMenus(
+                  entry.submenu,
+                  existingItem.submenu as JupyterLabMenu,
+                  menuFactory
+                );
+              }
+          }
+        }
+      } else {
+        addItem(entry, menu, menuFactory);
+      }
+    });
+  }
 }
 
 async function displayInformation(trans: TranslationBundle): Promise<void> {

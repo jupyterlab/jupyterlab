@@ -261,9 +261,7 @@ function activateLogConsole(
     command: CommandIDs.open,
     selector: '.jp-Notebook'
   });
-  if (mainMenu) {
-    mainMenu.viewMenu.addGroup([{ command: CommandIDs.open }]);
-  }
+
   if (palette) {
     palette.addItem({
       command: CommandIDs.open,

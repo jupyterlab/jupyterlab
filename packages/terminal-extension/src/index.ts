@@ -6,7 +6,6 @@
  */
 
 import { toArray } from '@lumino/algorithm';
-import { Menu } from '@lumino/widgets';
 
 import {
   ILayoutRestorer,
@@ -87,7 +86,7 @@ function activate(
   runningSessionManagers: IRunningSessionManagers | null
 ): ITerminalTracker {
   const trans = translator.load('jupyterlab');
-  const { serviceManager, commands } = app;
+  const { serviceManager } = app;
   const category = trans.__('Terminal');
   const namespace = 'terminal';
   const tracker = new WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>({
@@ -174,43 +173,6 @@ function activate(
   addCommands(app, tracker, settingRegistry, translator, options);
 
   if (mainMenu) {
-    // Add "Terminal Theme" menu below "JupyterLab Themes" menu.
-    const themeMenu = new Menu({ commands });
-    themeMenu.title.label = trans.__('Terminal Theme');
-    themeMenu.addItem({
-      command: CommandIDs.setTheme,
-      args: {
-        theme: 'inherit',
-        displayName: trans.__('Inherit'),
-        isPalette: false
-      }
-    });
-    themeMenu.addItem({
-      command: CommandIDs.setTheme,
-      args: {
-        theme: 'light',
-        displayName: trans.__('Light'),
-        isPalette: false
-      }
-    });
-    themeMenu.addItem({
-      command: CommandIDs.setTheme,
-      args: { theme: 'dark', displayName: trans.__('Dark'), isPalette: false }
-    });
-
-    // Add some commands to the "View" menu.
-    mainMenu.settingsMenu.addGroup(
-      [
-        { command: CommandIDs.increaseFont },
-        { command: CommandIDs.decreaseFont },
-        { type: 'submenu', submenu: themeMenu }
-      ],
-      40
-    );
-
-    // Add terminal creation to the file menu.
-    mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
-
     // Add terminal close-and-shutdown to the file menu.
     mainMenu.fileMenu.closeAndCleaners.add({
       tracker,
@@ -436,9 +398,19 @@ export function addCommands(
     }
   });
 
+  const themeDisplayedName = {
+    inherit: trans.__('Inherit'),
+    light: trans.__('Light'),
+    dark: trans.__('Dark')
+  };
+
   commands.addCommand(CommandIDs.setTheme, {
     label: args => {
-      const displayName = args['displayName'] as string;
+      const theme = args['theme'] as string;
+      const displayName =
+        theme in themeDisplayedName
+          ? themeDisplayedName[theme as keyof typeof themeDisplayedName]
+          : trans.__(theme[0].toUpperCase() + theme.slice(1));
       return args['isPalette']
         ? trans.__('Use Terminal Theme: %1', displayName)
         : displayName;

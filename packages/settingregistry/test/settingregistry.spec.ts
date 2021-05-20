@@ -416,7 +416,12 @@ describe('@jupyterlab/settingregistry', () => {
       const b: ISettingRegistry.IMenu[] = [
         {
           id: '2',
-          items: [{ command: 'b', args: { input: 'hello' } }, { command: 'c' }]
+          items: [
+            { command: 'b' },
+            { command: 'b', args: { input: 'hello' } },
+            { command: 'b', args: { input: 'world' } },
+            { command: 'c' }
+          ]
         },
         {
           id: '3',
@@ -441,9 +446,13 @@ describe('@jupyterlab/settingregistry', () => {
       expect(merged[0].id).toEqual('1');
       expect(merged[0].items).toHaveLength(1);
       expect(merged[1].id).toEqual('2');
-      expect(merged[1].items).toHaveLength(2);
+      expect(merged[1].items).toHaveLength(4);
       expect((merged[1].items ?? [])[0].command).toEqual('b');
-      expect((merged[1].items ?? [])[0].args?.input).toEqual('hello');
+      expect((merged[1].items ?? [])[0].args).toBeUndefined();
+      expect((merged[1].items ?? [])[1].command).toEqual('b');
+      expect((merged[1].items ?? [])[1].args?.input).toEqual('hello');
+      expect((merged[1].items ?? [])[2].command).toEqual('b');
+      expect((merged[1].items ?? [])[2].args?.input).toEqual('world');
       expect(merged[2].id).toEqual('4');
       expect(merged[2].items).toHaveLength(1);
       expect((merged[2].items ?? [])[0].submenu?.items).toHaveLength(2);

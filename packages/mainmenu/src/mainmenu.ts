@@ -28,6 +28,7 @@ import { ViewMenu } from './view';
 import { TabsMenu } from './tabs';
 
 import { IMainMenu } from './tokens';
+import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The main menu class.  It is intended to be used as a singleton.
@@ -247,7 +248,8 @@ export class MainMenu extends MenuBar implements IMainMenu {
 
   static generateMenu(
     commands: CommandRegistry,
-    options: IMainMenu.IMenuOptions
+    options: IMainMenu.IMenuOptions,
+    translator: TranslationBundle
   ): JupyterLabMenu {
     let menu: JupyterLabMenu;
     const { id, label, rank } = options;
@@ -317,7 +319,7 @@ export class MainMenu extends MenuBar implements IMainMenu {
     }
 
     menu.id = id;
-    menu.title.label = label ?? capitalize(id);
+    menu.title.label = translator.__(label ?? capitalize(id));
     return menu;
   }
 

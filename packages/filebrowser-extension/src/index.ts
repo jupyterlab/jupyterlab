@@ -1134,13 +1134,6 @@ function addCommands(
     execute: () => alert('search')
   });
 
-  if (mainMenu) {
-    mainMenu.settingsMenu.addGroup(
-      [{ command: CommandIDs.toggleNavigateToCurrentDirectory }],
-      5
-    );
-  }
-
   if (commandPalette) {
     commandPalette.addItem({
       command: CommandIDs.toggleNavigateToCurrentDirectory,

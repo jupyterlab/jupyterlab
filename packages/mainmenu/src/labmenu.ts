@@ -34,6 +34,11 @@ export interface IJupyterLabMenu extends IDisposable {
   addItem(options: IJupyterLabMenu.IItemOptions): Menu.IItem;
 
   /**
+   * A read-only array of the menu items in the menu.
+   */
+  readonly items: ReadonlyArray<Menu.IItem>;
+
+  /**
    * Menu rank
    */
   readonly rank?: number;
@@ -146,9 +151,7 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
       .sort((a, b) => a.rank - b.rank);
 
     // Insert the plugin group into the menu.
-    let insertIndex = this._ranks.findIndex(
-      rank => sortedItems[0].rank <= rank
-    );
+    let insertIndex = this._ranks.findIndex(rank => sortedItems[0].rank < rank);
     if (insertIndex < 0) {
       insertIndex = this._ranks.length; // Insert at the end of the menu
     }
@@ -160,7 +163,7 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
     // Phosphor takes care of superfluous leading,
     // trailing, and duplicate separators.
     if (this._includeSeparators) {
-      added.push(this.insertItem(insertIndex++, { type: 'separator' }));
+      added.push(this.insertItem(insertIndex++, { type: 'separator', rank: defaultRank }));
     }
     // Insert the group.
     added.push(
@@ -171,7 +174,7 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
 
     // Insert a separator after the group.
     if (this._includeSeparators) {
-      added.push(this.insertItem(insertIndex++, { type: 'separator' }));
+      added.push(this.insertItem(insertIndex++, { type: 'separator', rank: defaultRank }));
     }
 
     return new DisposableDelegate(() => {
@@ -187,10 +190,11 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
    * @returns The menu item added to the menu.
    */
   addItem(options: IJupyterLabMenu.IItemOptions): Menu.IItem {
-    options.rank = options.rank ?? IJupyterLabMenu.DEFAULT_RANK;
-    let insertIndex = this._ranks.findIndex(
-      rank => options.rank! <= rank
-    );
+    let insertIndex = -1;
+
+    if (options.rank) {
+      insertIndex = this._ranks.findIndex(rank => options.rank! < rank);
+    }
     if (insertIndex < 0) {
       insertIndex = this._ranks.length; // Insert at the end of the menu
     }
@@ -241,7 +245,11 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
     ArrayExt.insert(
       this._ranks,
       clampedIndex,
-      options.rank ?? IJupyterLabMenu.DEFAULT_RANK
+      options.rank ??
+        Math.max(
+          IJupyterLabMenu.DEFAULT_RANK,
+          this._ranks[this._ranks.length - 1] ?? IJupyterLabMenu.DEFAULT_RANK
+        )
     );
     return super.insertItem(clampedIndex, options);
   }

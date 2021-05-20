@@ -4,13 +4,18 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../apputils"
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"

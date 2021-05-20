@@ -78,7 +78,14 @@ export namespace MenuSvg {
     }
 
     // ensure correct renderer on any submenus that get added in the future
-    menu.insertItem = MenuSvg.prototype.insertItem;
+    const originalInsertItem = menu.insertItem.bind(menu);
+    menu.insertItem = (index: number, options: Menu.IItemOptions) => {
+      if (options.submenu) {
+        MenuSvg.overrideDefaultRenderer(options.submenu);
+      }
+
+      return originalInsertItem(index, options);
+    };
 
     // recurse through submenus
     for (const item of (menu as any)._items as Menu.IItem[]) {
