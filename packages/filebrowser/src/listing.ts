@@ -1597,7 +1597,6 @@ export class DirListing extends Widget {
     this.selection[name] = true;
 
     if (!keepExisting && focus) {
-      // focus
       this._focusSelectedFile(index);
     }
     this.update();
