@@ -624,10 +624,11 @@ export class DirListing extends Widget {
    * Select an item by name.
    *
    * @param name - The name of the item to select.
+   * @param focus - Whether to move focus the selected item.
    *
    * @returns A promise that resolves when the name is selected.
    */
-  async selectItemByName(name: string): Promise<void> {
+  async selectItemByName(name: string, focus: boolean = false): Promise<void> {
     // Make sure the file is available.
     await this.model.refresh();
 
@@ -639,7 +640,7 @@ export class DirListing extends Widget {
     if (index === -1) {
       throw new Error('Item does not exist.');
     }
-    this._selectItem(index, false);
+    this._selectItem(index, false, focus);
     MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
     ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
   }
@@ -815,11 +816,6 @@ export class DirListing extends Widget {
       if (this.selection[item.path]) {
         node.classList.add(SELECTED_CLASS);
 
-        // focus on text to make shortcuts works
-        const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
-        if (text) {
-          text.focus();
-        }
         if (this._isCut && this._model.path === this._prevPath) {
           node.classList.add(CUT_CLASS);
         }
@@ -972,6 +968,13 @@ export class DirListing extends Widget {
       }
       this._softSelection = '';
     }
+    // Re-focus the selected file. This is needed because nodes corresponding
+    // to files selected in mousedown handler will not retain the focus
+    // as mousedown event is always followed by a blur/focus event.
+    if (event.button === 0) {
+      this._focusSelectedFile();
+    }
+
     // Remove the drag listeners if necessary.
     if (event.button !== 0 || !this._drag) {
       document.removeEventListener('mousemove', this, true);
@@ -1405,10 +1408,38 @@ export class DirListing extends Widget {
       // Default to selecting the only the item.
     } else {
       // Select only the given item.
-      this.clearSelectedItems();
-      this.selection[path] = true;
+      return this._selectItem(index, false);
     }
     this.update();
+  }
+
+  /**
+   * (Re-)focus on the selected file.
+   *
+   * If index is not given, it will be inferred from the current selection;
+   * providing index saves on the iteration time.
+   */
+  private _focusSelectedFile(index?: number): void {
+    if (typeof index === 'undefined') {
+      const selected = Object.keys(this.selection);
+      if (selected.length > 1) {
+        // Multiselect - do not focus on any single file
+        return;
+      }
+      index = ArrayExt.findFirstIndex(
+        this._sortedItems,
+        value => value.path === selected[0]
+      );
+    }
+    if (index === -1) {
+      return;
+    }
+    // Focus on text to make shortcuts works
+    const node = this._items[index];
+    const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
+    if (text) {
+      text.focus();
+    }
   }
 
   /**
@@ -1552,7 +1583,11 @@ export class DirListing extends Widget {
   /**
    * Select a given item.
    */
-  private _selectItem(index: number, keepExisting: boolean) {
+  private _selectItem(
+    index: number,
+    keepExisting: boolean,
+    focus: boolean = true
+  ) {
     // Selected the given row(s)
     const items = this._sortedItems;
     if (!keepExisting) {
@@ -1560,6 +1595,10 @@ export class DirListing extends Widget {
     }
     const name = items[index].name;
     this.selection[name] = true;
+
+    if (!keepExisting && focus) {
+      this._focusSelectedFile(index);
+    }
     this.update();
   }
 
