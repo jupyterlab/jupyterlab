@@ -506,7 +506,7 @@ export class OutputArea extends Widget {
       this.trimmedOutputModels.push(model);
     }
     if (!this._outputTracker.has(output)) {
-      this._outputTracker.add(output);
+      void this._outputTracker.add(output);
     }
   }
 
