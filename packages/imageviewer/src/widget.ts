@@ -33,7 +33,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   constructor(context: DocumentRegistry.Context) {
     super();
     this.context = context;
-    this.node.tabIndex = -1;
+    this.node.tabIndex = 0;
     this.addClass(IMAGE_CLASS);
 
     this._img = document.createElement('img');

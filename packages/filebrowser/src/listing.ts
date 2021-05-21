@@ -1866,7 +1866,7 @@ export namespace DirListing {
       header.className = HEADER_CLASS;
       node.appendChild(header);
       node.appendChild(content);
-      node.tabIndex = 1;
+      node.tabIndex = 0;
       return node;
     }
 
