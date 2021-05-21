@@ -970,7 +970,7 @@ export class DirListing extends Widget {
     }
     // Re-focus the selected file. This is needed because nodes corresponding
     // to files selected in mousedown handler will not retain the focus
-    // as mousedown events always overrides focus upon exit.
+    // as mousedown event is always followed by a blur/focus event.
     if (event.button === 0) {
       this._focusSelectedFile();
     }
