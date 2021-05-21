@@ -16915,10 +16915,10 @@ y-protocols@^1.0.5:
   dependencies:
     lib0 "^0.2.42"
 
-y-websocket@^1.3.13:
-  version "1.3.13"
-  resolved "https://registry.yarnpkg.com/y-websocket/-/y-websocket-1.3.13.tgz#5ef20f59e3b8d1660db008d1c5df71ee6a388058"
-  integrity sha512-KKz+KsCaWAFk9YblwpyNDROtvTkWq4ObHtPH9ggQB0Crw/Ad1z6SJhdnZkObCyS3vxZBy0gX9EIVmT6RnGpOpA==
+y-websocket@^1.3.14:
+  version "1.3.14"
+  resolved "https://registry.yarnpkg.com/y-websocket/-/y-websocket-1.3.14.tgz#c6b1ba550aad7a3ec0d9c3dea68883e05d4cbcf0"
+  integrity sha512-F/KkUE8BOjG5cr4bxICTtQEVhPqX8RtLcDg0CldHc2r0fsx69jbWMefENmqfDD656WdJeEOk54m9sHN6vck/Bw==
   dependencies:
     lib0 "^0.2.42"
     lodash.debounce "^4.0.8"
