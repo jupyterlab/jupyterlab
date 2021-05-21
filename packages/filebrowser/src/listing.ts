@@ -1044,9 +1044,9 @@ export class DirListing extends Widget {
         event.stopPropagation();
 
         const selected = Object.keys(this.selection);
-        const name = selected[0];
+        const path = selected[0];
         const items = this._sortedItems;
-        const i = ArrayExt.findFirstIndex(items, value => value.name === name);
+        const i = ArrayExt.findFirstIndex(items, value => value.path === path);
         if (i === -1) {
           return;
         }
@@ -1513,8 +1513,8 @@ export class DirListing extends Widget {
   private _doRename(): Promise<string> {
     this._inRename = true;
     const items = this._sortedItems;
-    const name = Object.keys(this.selection)[0];
-    const index = ArrayExt.findFirstIndex(items, value => value.name === name);
+    const path = Object.keys(this.selection)[0];
+    const index = ArrayExt.findFirstIndex(items, value => value.path === path);
     const row = this._items[index];
     const item = items[index];
     const nameNode = this.renderer.getNameNode(row);
@@ -1593,8 +1593,8 @@ export class DirListing extends Widget {
     if (!keepExisting) {
       this.clearSelectedItems();
     }
-    const name = items[index].name;
-    this.selection[name] = true;
+    const path = items[index].path;
+    this.selection[path] = true;
 
     if (!keepExisting && focus) {
       this._focusSelectedFile(index);
@@ -1610,9 +1610,9 @@ export class DirListing extends Widget {
     const existing = Object.keys(this.selection);
     this.clearSelectedItems();
     each(this._model.items(), item => {
-      const name = item.name;
-      if (existing.indexOf(name) !== -1) {
-        this.selection[name] = true;
+      const path = item.path;
+      if (existing.indexOf(path) !== -1) {
+        this.selection[path] = true;
       }
     });
     if (this.isVisible) {
