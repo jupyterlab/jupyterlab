@@ -999,16 +999,6 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
       });
-
-      it('should not skip collapsed cells and in command mode', () => {
-        widget.activeCellIndex = 0;
-        widget.mode = 'command';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).toBe(1);
-      });
     });
 
     describe('#extendSelectionAbove()', () => {
