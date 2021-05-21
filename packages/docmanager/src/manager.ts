@@ -5,19 +5,21 @@ import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { UUID } from '@lumino/coreutils';
-
 import {
   DocumentRegistry,
   Context,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
+import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
+
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 import { ArrayExt, find } from '@lumino/algorithm';
+
+import { UUID } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -53,6 +55,7 @@ export class DocumentManager implements IDocumentManager {
     this.services = options.manager;
     this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
+    this._docProviderFactory = options.docProviderFactory;
 
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
@@ -483,7 +486,8 @@ export class DocumentManager implements IDocumentManager {
       modelDBFactory,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
-      collaborative: this._collaborative
+      collaborative: this._collaborative,
+      docProviderFactory: this._docProviderFactory
     });
     const handler = new SaveHandler({
       context,
@@ -610,6 +614,7 @@ export class DocumentManager implements IDocumentManager {
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
+  private _docProviderFactory: IDocumentProviderFactory | undefined;
   private _collaborative: boolean;
 }
 
@@ -655,6 +660,12 @@ export namespace DocumentManager {
      * The applicaton language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * A factory method for the document provider.
+     */
+    docProviderFactory?: IDocumentProviderFactory;
+
     /**
      * Whether the context should be collaborative.
      * If true, the context will connect through yjs_ws_server to share information if possible.

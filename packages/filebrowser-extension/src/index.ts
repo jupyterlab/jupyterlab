@@ -98,6 +98,8 @@ namespace CommandIDs {
 
   export const goToPath = 'filebrowser:go-to-path';
 
+  export const goUp = 'filebrowser:go-up';
+
   export const openPath = 'filebrowser:open-path';
 
   export const open = 'filebrowser:open';
@@ -793,6 +795,30 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.goUp, {
+    label: 'go up',
+    execute: async () => {
+      const browserForPath = Private.getBrowserForPath('', factory);
+      if (!browserForPath) {
+        return;
+      }
+      const { model } = browserForPath;
+
+      await model.restored;
+      if (model.path === model.rootPath) {
+        return;
+      }
+      try {
+        await model.cd('..');
+      } catch (reason) {
+        console.warn(
+          `${CommandIDs.goUp} failed to go to parent directory of ${model.path}`,
+          reason
+        );
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.openPath, {
     label: args =>
       args.path ? trans.__('Open %1', args.path) : trans.__('Open from Path…'),
@@ -1081,8 +1107,10 @@ function addCommands(
     });
   }
 
-  // matches the filebrowser itself
-  const selectorBrowser = '.jp-FileBrowser-listing';
+  // matches the text in the filebrowser; relies on an implementation detail
+  // being the text of the listing element being substituted with input
+  // area to deactivate shortcuts when the file name is being edited.
+  const selectorBrowser = '.jp-DirListing-content .jp-DirListing-itemText';
   // matches anywhere on filebrowser
   const selectorContent = '.jp-DirListing-content';
   // matches all filebrowser items

@@ -1,6 +1,6 @@
-import { IProvider } from './index';
+import { IDocumentProvider } from './index';
 
-export class ProviderMock implements IProvider {
+export class ProviderMock implements IDocumentProvider {
   requestInitialContent(): Promise<boolean> {
     return Promise.resolve(false);
   }

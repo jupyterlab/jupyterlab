@@ -76,10 +76,9 @@ export class FileBrowserModel implements IDisposable {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._driveName = options.driveName || '';
-    const rootPath = this._driveName ? this._driveName + ':' : '';
     this._model = {
-      path: rootPath,
-      name: PathExt.basename(rootPath),
+      path: this.rootPath,
+      name: PathExt.basename(this.rootPath),
       type: 'directory',
       content: undefined,
       writable: false,
@@ -155,6 +154,13 @@ export class FileBrowserModel implements IDisposable {
    */
   get path(): string {
     return this._model ? this._model.path : '';
+  }
+
+  /**
+   * Get the root path
+   */
+  get rootPath(): string {
+    return this._driveName ? this._driveName + ':' : '';
   }
 
   /**

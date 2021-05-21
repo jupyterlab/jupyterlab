@@ -138,9 +138,6 @@ export class FileBrowser extends Widget {
     this.layout.addWidget(this.crumbs);
     this.layout.addWidget(this.listing);
 
-    // We need to make the FileBrowser focusable so that it receives keyboard events
-    this.node.tabIndex = 0;
-
     if (options.restore !== false) {
       void model.restore(this.id);
     }

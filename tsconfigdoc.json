@@ -80,6 +80,9 @@
       "path": "./packages/docprovider"
     },
     {
+      "path": "./packages/docprovider-extension"
+    },
+    {
       "path": "./packages/docregistry"
     },
     {

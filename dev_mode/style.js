@@ -10,6 +10,7 @@ import '@jupyterlab/console-extension/style/index.js';
 import '@jupyterlab/csvviewer-extension/style/index.js';
 import '@jupyterlab/debugger-extension/style/index.js';
 import '@jupyterlab/docmanager-extension/style/index.js';
+import '@jupyterlab/docprovider-extension/style/index.js';
 import '@jupyterlab/documentsearch-extension/style/index.js';
 import '@jupyterlab/extensionmanager-extension/style/index.js';
 import '@jupyterlab/filebrowser-extension/style/index.js';
