@@ -11,6 +11,6 @@
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@jupyterlab/galata": "3.0.7-3"
+    "@jupyterlab/galata": "3.0.7-4"
   }
 }
