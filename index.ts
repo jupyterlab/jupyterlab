@@ -1,6 +1,8 @@
 /** The Public API, as exposed in the `main` field of package.json */
 
 /** General public tokens, including lumino Tokens and namespaces */
+import { ILoggerRegistry } from '@jupyterlab/logconsole';
+
 export * from './tokens';
 
 /** Component- and feature-specific APIs */
@@ -124,6 +126,7 @@ export interface ILSPExtension {
   code_overrides: ICodeOverridesRegistry;
   console: ILSPLogConsole;
   translator: ITranslator;
+  user_console: ILoggerRegistry | null;
 }
 
 export class LSPExtension implements ILSPExtension {
@@ -143,6 +146,7 @@ export class LSPExtension implements ILSPExtension {
     private code_overrides_manager: ILSPCodeOverridesManager,
     public console: ILSPLogConsole,
     public translator: ITranslator,
+    public user_console: ILoggerRegistry,
     status_bar: IStatusBar | null
   ) {
     const trans = (translator || nullTranslator).load('jupyterlab-lsp');
@@ -251,7 +255,7 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
     ILSPLogConsole,
     ITranslator
   ],
-  optional: [IStatusBar],
+  optional: [ILoggerRegistry, IStatusBar],
   activate: (app, ...args) => {
     let extension = new LSPExtension(
       app,
@@ -266,6 +270,7 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
         ILSPCodeOverridesManager,
         ILSPLogConsole,
         ITranslator,
+        ILoggerRegistry | null,
         IStatusBar | null
       ])
     );

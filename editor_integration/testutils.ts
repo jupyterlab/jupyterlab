@@ -12,6 +12,7 @@ import {
   TextModelFactory
 } from '@jupyterlab/docregistry';
 import { FileEditor, FileEditorFactory } from '@jupyterlab/fileeditor';
+import { ILoggerRegistry } from '@jupyterlab/logconsole';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
   Notebook,
@@ -107,6 +108,7 @@ export class MockExtension implements ILSPExtension {
   foreign_code_extractors: IForeignCodeExtractorsRegistry;
   code_overrides: ICodeOverridesRegistry;
   console: ILSPLogConsole;
+  user_console: ILoggerRegistry;
   translator: ITranslator;
 
   constructor() {
@@ -128,6 +130,7 @@ export class MockExtension implements ILSPExtension {
     this.foreign_code_extractors = {};
     this.code_overrides = {};
     this.console = new BrowserConsole();
+    this.user_console = null;
   }
 }
 

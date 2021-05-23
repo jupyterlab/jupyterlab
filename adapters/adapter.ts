@@ -1,6 +1,7 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { ILogPayload } from '@jupyterlab/logconsole';
 import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
@@ -341,6 +342,44 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
         'have been initialized'
       );
     });
+
+    // Note: the logger extension behaves badly with non-default names
+    // as it changes the source to the active file afterwards anyways
+    const loggerSourceName = virtual_document.uri;
+    const logger = this.extension.user_console.getLogger(loggerSourceName);
+
+    data.connection.notifications.window.logMessage.connect(
+      (connection, message) => {
+        this.console.log(
+          data.connection.serverIdentifier,
+          virtual_document.uri,
+          message
+        );
+        logger.log({
+          type: 'text',
+          data: message.message
+        } as ILogPayload);
+      }
+    );
+
+    data.connection.notifications.window.showMessage.connect(
+      (connection, message) => {
+        this.console.log(
+          data.connection.serverIdentifier,
+          virtual_document.uri,
+          message
+        );
+        logger.log({
+          type: 'text',
+          data: message.message
+        } as ILogPayload);
+        this.extension.app.commands
+          .execute('logconsole:open', {
+            source: loggerSourceName
+          })
+          .catch(console.log);
+      }
+    );
   }
 
   /**

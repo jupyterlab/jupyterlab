@@ -2,13 +2,15 @@
 // ISC licence is, quote, "functionally equivalent to the simplified BSD and MIT licenses,
 // but without language deemed unnecessary following the Berne Convention." (Wikipedia).
 // Introduced modifications are BSD licenced, copyright JupyterLab development team.
+import { Signal } from '@lumino/signaling';
 import {
   IDocumentInfo,
   ILspOptions,
   IPosition,
   LspWsConnection
 } from 'lsp-ws-connection';
-import * as lsProtocol from 'vscode-languageserver-protocol';
+import type * as rpc from 'vscode-jsonrpc';
+import type * as lsProtocol from 'vscode-languageserver-protocol';
 
 import { until_ready } from './utils';
 
@@ -16,14 +18,47 @@ interface ILSPOptions extends ILspOptions {
   serverIdentifier?: string;
 }
 
+interface ConnectionSignal<T> extends Signal<LSPConnection, T> {
+  // empty
+}
+
+interface INamespace {
+  [index: string]: ConnectionSignal<any> | ((params: any) => void);
+}
+
+interface ILSPNotifications {
+  $: {
+    logTrace: ConnectionSignal<rpc.LogTraceParams>;
+    setTrace: (params: rpc.SetTraceParams) => void;
+  };
+  window: {
+    showMessage: ConnectionSignal<lsProtocol.ShowMessageParams>;
+    logMessage: ConnectionSignal<lsProtocol.LogMessageParams>;
+  };
+  [index: string]: INamespace;
+}
+
 export class LSPConnection extends LspWsConnection {
   protected documentsToOpen: IDocumentInfo[];
   public serverIdentifier: string;
+  public notifications: ILSPNotifications;
 
   constructor(options: ILSPOptions) {
     super(options);
     this.serverIdentifier = options?.serverIdentifier;
     this.documentsToOpen = [];
+    this.notifications = {
+      $: {
+        logTrace: new Signal(this),
+        setTrace: params => {
+          this.connection.sendNotification('$/setTrace', params);
+        }
+      },
+      window: {
+        showMessage: new Signal(this),
+        logMessage: new Signal(this)
+      }
+    };
   }
 
   sendOpenWhenReady(documentInfo: IDocumentInfo) {
@@ -38,6 +73,20 @@ export class LSPConnection extends LspWsConnection {
     super.onServerInitialized(params);
     while (this.documentsToOpen.length) {
       this.sendOpen(this.documentsToOpen.pop());
+    }
+    for (const namespaceName in this.notifications) {
+      const namespace = this.notifications[namespaceName];
+      for (const memberName in namespace) {
+        const endpoint = namespace[memberName];
+        if (endpoint instanceof Signal) {
+          this.connection.onNotification(
+            `${namespaceName}/${memberName}`,
+            params => {
+              endpoint.emit(params);
+            }
+          );
+        }
+      }
     }
   }
 
