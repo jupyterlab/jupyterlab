@@ -357,7 +357,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
         );
         logger.log({
           type: 'text',
-          data: message.message
+          data: connection.serverIdentifier + ': ' + message.message
         } as ILogPayload);
       }
     );
@@ -371,7 +371,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
         );
         logger.log({
           type: 'text',
-          data: message.message
+          data: connection.serverIdentifier + ': ' + message.message
         } as ILogPayload);
         this.extension.app.commands
           .execute('logconsole:open', {
