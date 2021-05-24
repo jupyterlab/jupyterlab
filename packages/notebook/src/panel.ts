@@ -105,7 +105,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
        when save is completed, file is not renamed and the name starts with 'Untitled'
     */
     if (
-      state === 'completed' &&
+      state === 'completed-manual' &&
       model &&
       !model.renamed == true &&
       model.name.startsWith('Untitled')

@@ -260,8 +260,11 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  save(): Promise<void> {
+  save(manual?: boolean): Promise<void> {
     return this.ready.then(() => {
+      if (manual) {
+        return this._save(manual);
+      }
       return this._save();
     });
   }
@@ -536,7 +539,7 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  private async _save(): Promise<void> {
+  private async _save(manual?: boolean): Promise<void> {
     this._saveState.emit('started');
     const model = this._model;
     let content: PartialJSONValue;
@@ -575,7 +578,11 @@ export class Context<
       }
 
       // Emit completion.
-      this._saveState.emit('completed');
+      if (manual) {
+        this._saveState.emit('completed-manual');
+      } else {
+        this._saveState.emit('completed');
+      }
     } catch (err) {
       // If the save has been canceled by the user,
       // throw the error so that whoever called save()

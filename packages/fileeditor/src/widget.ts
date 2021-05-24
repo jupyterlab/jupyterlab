@@ -336,7 +336,7 @@ export class FileEditorFactory extends ABCWidgetFactory<
          when save is completed, file is not renamed and the name starts with 'untitled'
       */
       if (
-        state === 'completed' &&
+        state === 'completed-manual' &&
         model &&
         !model.renamed == true &&
         model.name.startsWith('untitled')

@@ -678,7 +678,7 @@ function addCommands(
           }
 
           return context
-            .save()
+            .save(true)
             .then(() => context!.createCheckpoint())
             .catch(err => {
               // If the save was canceled by user-action, do nothing.

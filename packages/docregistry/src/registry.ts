@@ -909,7 +909,7 @@ export namespace DocumentRegistry {
     /**
      * Save the document contents to disk.
      */
-    save(): Promise<void>;
+    save(manual?: boolean): Promise<void>;
 
     /**
      * Save the document to a different path chosen by the user.
@@ -977,7 +977,11 @@ export namespace DocumentRegistry {
     addSibling(widget: Widget, options?: IOpenOptions): IDisposable;
   }
 
-  export type SaveState = 'started' | 'completed' | 'failed';
+  export type SaveState =
+    | 'started'
+    | 'failed'
+    | 'completed'
+    | 'completed-manual';
 
   /**
    * A type alias for a context.
