@@ -11,6 +11,8 @@ import {
   map
 } from '@lumino/algorithm';
 
+import * as models from '@jupyterlab/shared-models';
+
 import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
@@ -791,6 +793,11 @@ export namespace DocumentRegistry {
     readonly modelDB: IModelDB;
 
     /**
+     * The shared notebook model.
+     */
+    readonly sharedModel: models.ISharedDocument;
+
+    /**
      * Serialize the model to a string.
      */
     toString(): string;
@@ -829,7 +836,9 @@ export namespace DocumentRegistry {
   /**
    * The interface for a document model that represents code.
    */
-  export interface ICodeModel extends IModel, CodeEditor.IModel {}
+  export interface ICodeModel extends IModel, CodeEditor.IModel {
+    sharedModel: models.ISharedFile;
+  }
 
   /**
    * The document context object.
@@ -1149,10 +1158,16 @@ export namespace DocumentRegistry {
      * Create a new model for a given path.
      *
      * @param languagePreference - An optional kernel language preference.
+     * @param modelDB - An optional modelDB.
+     * @param isInitialized - An optional flag to check if the model is initialized.
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string, modelDB?: IModelDB): T;
+    createNew(
+      languagePreference?: string,
+      modelDB?: IModelDB,
+      isInitialized?: boolean
+    ): T;
 
     /**
      * Get the preferred kernel language given a file path.

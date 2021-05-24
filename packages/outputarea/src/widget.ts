@@ -1043,12 +1043,7 @@ namespace Private {
      * of the widget to update it if and when new data is available.
      */
     renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-      return this._wrapped.renderModel(model).then(() => {
-        const win = (this.node as HTMLIFrameElement).contentWindow;
-        if (win) {
-          win.location.reload();
-        }
-      });
+      return this._wrapped.renderModel(model);
     }
 
     private _wrapped: IRenderMime.IRenderer;
