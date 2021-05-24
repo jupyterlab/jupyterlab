@@ -99,6 +99,19 @@ const HOVER_TIMEOUT = 1000;
 // binding as it just introduces a lot of additional complexity without gaining anything.
 const USE_YCODEMIRROR_BINDING = true;
 
+export const usercolors = [
+  '#30bced',
+  '#6eeb83',
+  '#ffbc42',
+  '#ecd444',
+  '#ee6352',
+  '#9ac2c9',
+  '#8acb88',
+  '#1be7ff'
+];
+
+export const usernames = ['Io', 'Europa', 'Ganymede', 'Callistco'];
+
 /**
  * CodeMirror editor.
  */
@@ -219,6 +232,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ? { yUndoManager: sharedModel.undoManager }
       : {};
     const awareness = sharedModel.awareness;
+    const myColor = usercolors[Math.floor(Math.random() * usercolors.length)];
+    const myName = usernames[Math.floor(Math.random() * usernames.length)];
+    awareness?.setLocalStateField('user', {
+      name: myName,
+      color: myColor
+    });
     this._yeditorBinding = new CodemirrorBinding(
       sharedModel.ysource,
       this.editor,
