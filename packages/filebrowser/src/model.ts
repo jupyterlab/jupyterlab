@@ -91,7 +91,7 @@ export class FileBrowserModel implements IDisposable {
     const refreshInterval = options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
 
     const { services } = options.manager;
-    services.contents.fileChanged.connect(this._onFileChanged, this);
+    services.contents.fileChanged.connect(this.onFileChanged, this);
     services.sessions.runningChanged.connect(this.onRunningChanged, this);
 
     this._unloadEventListener = (e: Event) => {
@@ -613,7 +613,7 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Handle a change on the contents manager.
    */
-  private _onFileChanged(
+  protected onFileChanged(
     sender: Contents.IManager,
     change: Contents.IChangedArgs
   ): void {
