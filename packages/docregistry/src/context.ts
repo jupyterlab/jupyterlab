@@ -289,10 +289,10 @@ export class Context<
       this._provider.acquireLock(),
       this.ready
     ]);
-    let promise : Promise<void>;
-    if(manual){
+    let promise: Promise<void>;
+    if (manual) {
       promise = this._save(manual);
-    }else{
+    } else {
       promise = this._save();
     }
     // if save completed successfully, we set the inialized content in the rtc server.

@@ -769,20 +769,25 @@ function addCommands(
       const value = !docManager.nameFileOnSave;
       const key = 'nameFileOnSave';
       return settingRegistry
-        .set(pluginId, key, value)
+        .set(docManagerPluginId, key, value)
         .catch((reason: Error) => {
-          console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+          console.error(
+            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
+          );
         });
     }
   });
-
   docManager.optionChanged.connect(() => {
     const key = 'nameFileOnSave';
-    const value = settingRegistry.plugins[pluginId]?.data.user[key];
+    const value = settingRegistry.plugins[docManagerPluginId]?.data.user[key];
     if (value == docManager.nameFileOnSave) {
-      void settingRegistry.set(pluginId, key, !value).catch((reason: Error) => {
-        console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
-      });
+      void settingRegistry
+        .set(docManagerPluginId, key, !value)
+        .catch((reason: Error) => {
+          console.error(
+            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
+          );
+        });
     }
   });
 
