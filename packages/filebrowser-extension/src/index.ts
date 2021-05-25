@@ -98,6 +98,8 @@ namespace CommandIDs {
 
   export const goToPath = 'filebrowser:go-to-path';
 
+  export const goUp = 'filebrowser:go-up';
+
   export const openPath = 'filebrowser:open-path';
 
   export const open = 'filebrowser:open';
@@ -532,6 +534,109 @@ const shareFile: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The "Open With" context menu.
+ *
+ * This is its own plugin in case you would like to disable this feature.
+ * e.g. jupyter labextension disable fort_disable_download:open-with
+ */
+const openWithPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-with',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const { docRegistry: registry, commands } = app;
+    const trans = translator.load('jupyterlab');
+    const { tracker } = factory;
+    // matches only non-directory items
+    const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+
+    /**
+     * A menu widget that dynamically populates with different widget factories
+     * based on current filebrowser selection.
+     */
+    class OpenWithMenu extends Menu {
+      protected onBeforeAttach(msg: Message): void {
+        // clear the current menu items
+        this.clearItems();
+
+        // get the widget factories that could be used to open all of the items
+        // in the current filebrowser selection
+        const factories = tracker.currentWidget
+          ? OpenWithMenu._intersection(
+              map(tracker.currentWidget.selectedItems(), i => {
+                return OpenWithMenu._getFactories(i);
+              })
+            )
+          : undefined;
+
+        if (factories) {
+          // make new menu items from the widget factories
+          factories.forEach(factory => {
+            this.addItem({
+              args: { factory: factory },
+              command: CommandIDs.open
+            });
+          });
+        }
+
+        super.onBeforeAttach(msg);
+      }
+
+      static _getFactories(item: Contents.IModel): Array<string> {
+        const factories = registry
+          .preferredWidgetFactories(item.path)
+          .map(f => f.name);
+        const notebookFactory = registry.getWidgetFactory('notebook')?.name;
+        if (
+          notebookFactory &&
+          item.type === 'notebook' &&
+          factories.indexOf(notebookFactory) === -1
+        ) {
+          factories.unshift(notebookFactory);
+        }
+
+        return factories;
+      }
+
+      static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
+        // pop the first element of iter
+        const first = iter.next();
+        // first will be undefined if iter is empty
+        if (!first) {
+          return;
+        }
+
+        // "initialize" the intersection from first
+        const isect = new Set(first);
+        // reduce over the remaining elements of iter
+        return reduce(
+          iter,
+          (isect, subarr) => {
+            // filter out all elements not present in both isect and subarr,
+            // accumulate result in new set
+            return new Set(subarr.filter(x => isect.has(x)));
+          },
+          isect
+        );
+      }
+    }
+
+    const openWith = new OpenWithMenu({ commands });
+    openWith.title.label = trans.__('Open With');
+    app.contextMenu.addItem({
+      type: 'submenu',
+      submenu: openWith,
+      selector: selectorNotDir,
+      rank: 2
+    });
+  }
+};
+
+/**
  * A plugin providing file upload status.
  */
 export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
@@ -686,6 +791,30 @@ function addCommands(
       }
       if (showBrowser) {
         return commands.execute(CommandIDs.showBrowser, { path });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.goUp, {
+    label: 'go up',
+    execute: async () => {
+      const browserForPath = Private.getBrowserForPath('', factory);
+      if (!browserForPath) {
+        return;
+      }
+      const { model } = browserForPath;
+
+      await model.restored;
+      if (model.path === model.rootPath) {
+        return;
+      }
+      try {
+        await model.cd('..');
+      } catch (reason) {
+        console.warn(
+          `${CommandIDs.goUp} failed to go to parent directory of ${model.path}`,
+          reason
+        );
       }
     }
   });
@@ -978,77 +1107,10 @@ function addCommands(
     });
   }
 
-  /**
-   * A menu widget that dynamically populates with different widget factories
-   * based on current filebrowser selection.
-   */
-  class OpenWithMenu extends Menu {
-    protected onBeforeAttach(msg: Message): void {
-      // clear the current menu items
-      this.clearItems();
-
-      // get the widget factories that could be used to open all of the items
-      // in the current filebrowser selection
-      const factories = tracker.currentWidget
-        ? OpenWithMenu._intersection(
-            map(tracker.currentWidget.selectedItems(), i => {
-              return OpenWithMenu._getFactories(i);
-            })
-          )
-        : undefined;
-
-      if (factories) {
-        // make new menu items from the widget factories
-        factories.forEach(factory => {
-          this.addItem({
-            args: { factory: factory },
-            command: CommandIDs.open
-          });
-        });
-      }
-
-      super.onBeforeAttach(msg);
-    }
-
-    static _getFactories(item: Contents.IModel): Array<string> {
-      const factories = registry
-        .preferredWidgetFactories(item.path)
-        .map(f => f.name);
-      const notebookFactory = registry.getWidgetFactory('notebook')?.name;
-      if (
-        notebookFactory &&
-        item.type === 'notebook' &&
-        factories.indexOf(notebookFactory) === -1
-      ) {
-        factories.unshift(notebookFactory);
-      }
-
-      return factories;
-    }
-
-    static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
-      // pop the first element of iter
-      const first = iter.next();
-      // first will be undefined if iter is empty
-      if (!first) {
-        return;
-      }
-
-      // "initialize" the intersection from first
-      const isect = new Set(first);
-      // reduce over the remaining elements of iter
-      return reduce(
-        iter,
-        (isect, subarr) => {
-          // filter out all elements not present in both isect and subarr,
-          // accumulate result in new set
-          return new Set(subarr.filter(x => isect.has(x)));
-        },
-        isect
-      );
-    }
-  }
-
+  // matches the text in the filebrowser; relies on an implementation detail
+  // being the text of the listing element being substituted with input
+  // area to deactivate shortcuts when the file name is being edited.
+  const selectorBrowser = '.jp-DirListing-content .jp-DirListing-itemText';
   // matches anywhere on filebrowser
   const selectorContent = '.jp-DirListing-content';
   // matches all filebrowser items
@@ -1086,15 +1148,6 @@ function addCommands(
     command: CommandIDs.open,
     selector: selectorItem,
     rank: 1
-  });
-
-  const openWith = new OpenWithMenu({ commands });
-  openWith.title.label = trans.__('Open With');
-  app.contextMenu.addItem({
-    type: 'submenu',
-    submenu: openWith,
-    selector: selectorNotDir,
-    rank: 2
   });
 
   app.contextMenu.addItem({
@@ -1150,6 +1203,37 @@ function addCommands(
     command: CommandIDs.toggleLastModified,
     selector: '.jp-DirListing-header',
     rank: 14
+  });
+
+  app.commands.addKeyBinding({
+    command: CommandIDs.del,
+    selector: selectorBrowser,
+    keys: ['Delete']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.cut,
+    selector: selectorBrowser,
+    keys: ['Ctrl X']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.copy,
+    selector: selectorBrowser,
+    keys: ['Ctrl C']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.paste,
+    selector: selectorBrowser,
+    keys: ['Ctrl V']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.rename,
+    selector: selectorBrowser,
+    keys: ['F2']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.duplicate,
+    selector: selectorBrowser,
+    keys: ['Ctrl D']
   });
 }
 
@@ -1295,6 +1379,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   fileUploadStatus,
   downloadPlugin,
   browserWidget,
-  launcherToolbarButton
+  launcherToolbarButton,
+  openWithPlugin
 ];
 export default plugins;

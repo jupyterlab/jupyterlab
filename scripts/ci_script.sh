@@ -216,8 +216,11 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension build extension
 
     # Test develop script with hyphens and underscores in the module name
+    pip install -e test-hyphens
     jupyter labextension develop test-hyphens --overwrite --debug
+    pip install -e test_no_hyphens
     jupyter labextension develop test_no_hyphens --overwrite --debug
+    pip install -e test-hyphens-underscore
     jupyter labextension develop test-hyphens-underscore --overwrite --debug
 
     python -m jupyterlab.browser_check
@@ -366,7 +369,7 @@ if [[ $GROUP == usage2 ]]; then
 fi
 
 
-if [[ $GROUP == splice_source ]];then
+if [[ $GROUP == splice_source ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
 

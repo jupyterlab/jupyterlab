@@ -76,10 +76,9 @@ export class FileBrowserModel implements IDisposable {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._driveName = options.driveName || '';
-    const rootPath = this._driveName ? this._driveName + ':' : '';
     this._model = {
-      path: rootPath,
-      name: PathExt.basename(rootPath),
+      path: this.rootPath,
+      name: PathExt.basename(this.rootPath),
       type: 'directory',
       content: undefined,
       writable: false,
@@ -92,8 +91,8 @@ export class FileBrowserModel implements IDisposable {
     const refreshInterval = options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
 
     const { services } = options.manager;
-    services.contents.fileChanged.connect(this._onFileChanged, this);
-    services.sessions.runningChanged.connect(this._onRunningChanged, this);
+    services.contents.fileChanged.connect(this.onFileChanged, this);
+    services.sessions.runningChanged.connect(this.onRunningChanged, this);
 
     this._unloadEventListener = (e: Event) => {
       if (this._uploads.length > 0) {
@@ -155,6 +154,13 @@ export class FileBrowserModel implements IDisposable {
    */
   get path(): string {
     return this._model ? this._model.path : '';
+  }
+
+  /**
+   * Get the root path
+   */
+  get rootPath(): string {
+    return this._driveName ? this._driveName + ':' : '';
   }
 
   /**
@@ -278,7 +284,7 @@ export class FileBrowserModel implements IDisposable {
         if (this.isDisposed) {
           return;
         }
-        this._handleContents(contents);
+        this.handleContents(contents);
         this._pendingPath = null;
         this._pending = null;
         if (oldValue !== newValue) {
@@ -294,7 +300,7 @@ export class FileBrowserModel implements IDisposable {
             newValue
           });
         }
-        this._onRunningChanged(services.sessions, services.sessions.running());
+        this.onRunningChanged(services.sessions, services.sessions.running());
         this._refreshed.emit(void 0);
       })
       .catch(error => {
@@ -573,7 +579,7 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Handle an updated contents model.
    */
-  private _handleContents(contents: Contents.IModel): void {
+  protected handleContents(contents: Contents.IModel): void {
     // Update our internal data.
     this._model = {
       name: contents.name,
@@ -596,7 +602,7 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Handle a change to the running sessions.
    */
-  private _onRunningChanged(
+  protected onRunningChanged(
     sender: Session.IManager,
     models: IterableOrArrayLike<Session.IModel>
   ): void {
@@ -607,7 +613,7 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Handle a change on the contents manager.
    */
-  private _onFileChanged(
+  protected onFileChanged(
     sender: Contents.IManager,
     change: Contents.IChangedArgs
   ): void {

@@ -7,6 +7,12 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
+import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
+
+import * as ymodels from '@jupyterlab/shared-models';
+
+import * as Y from 'yjs';
+
 import { PromiseDelegate, PartialJSONValue } from '@lumino/coreutils';
 
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
@@ -38,6 +44,8 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 
+import { IDocumentProvider, ProviderMock } from '@jupyterlab/docprovider';
+
 import { DocumentRegistry } from './registry';
 
 /**
@@ -66,10 +74,20 @@ export class Context<
     if (dbFactory) {
       const localPath = manager.contents.localPath(this._path);
       this._modelDB = dbFactory.createNew(localPath);
-      this._model = this._factory.createNew(lang, this._modelDB);
+      this._model = this._factory.createNew(lang, this._modelDB, false);
     } else {
-      this._model = this._factory.createNew(lang);
+      this._model = this._factory.createNew(lang, undefined, false);
     }
+
+    const ymodel = this._model.sharedModel as ymodels.YDocument<any>; // translate to the concrete Yjs implementation
+    const ydoc = ymodel.ydoc;
+    this._ydoc = ydoc;
+    this._ycontext = ydoc.getMap('context');
+    const guid = this._factory.contentType + ':' + localPath;
+    const docProviderFactory = options.docProviderFactory;
+    this._provider = docProviderFactory
+      ? docProviderFactory({ guid, ymodel })
+      : new ProviderMock();
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -194,6 +212,9 @@ export class Context<
       this._modelDB.dispose();
     }
     this._model.dispose();
+    this._provider.destroy();
+    this._model.sharedModel.dispose();
+    this._ydoc.destroy();
     this._disposed.emit(void 0);
     Signal.clearData(this);
   }
@@ -224,24 +245,27 @@ export class Context<
    *
    * @returns a promise that resolves upon initialization.
    */
-  initialize(isNew: boolean): Promise<void> {
-    if (isNew) {
-      this._model.initialize();
-      return this._save();
-    }
-    if (this._modelDB) {
-      return this._modelDB.connected.then(() => {
-        if (this._modelDB.isPrepopulated) {
-          this._model.initialize();
-          void this._save();
-          return void 0;
-        } else {
-          return this._revert(true);
-        }
-      });
+  async initialize(isNew: boolean): Promise<void> {
+    const lock = await this._provider.acquireLock();
+    const contentIsInitialized = await this._provider.requestInitialContent();
+    let promise;
+    if (isNew || contentIsInitialized) {
+      promise = this._save();
     } else {
-      return this._revert(true);
+      promise = this._revert();
     }
+    // make sure that the lock is released after the above operations are completed.
+    const finally_ = () => {
+      this._provider.releaseLock(lock);
+    };
+    // if save/revert completed successfully, we set the inialized content in the rtc server.
+    promise
+      .then(() => {
+        this._provider.putInitializedState();
+        this._model.initialize();
+      })
+      .then(finally_, finally_);
+    return promise;
   }
 
   /**
@@ -260,13 +284,26 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  save(manual?: boolean): Promise<void> {
-    return this.ready.then(() => {
-      if (manual) {
-        return this._save(manual);
-      }
-      return this._save();
+  async save(manual?: boolean): Promise<void> {
+    const [lock] = await Promise.all([
+      this._provider.acquireLock(),
+      this.ready
+    ]);
+    let promise : Promise<void>;
+    if(manual){
+      promise = this._save(manual);
+    }else{
+      promise = this._save();
+    }
+    // if save completed successfully, we set the inialized content in the rtc server.
+    promise = promise.then(() => {
+      this._provider.putInitializedState();
     });
+    const finally_ = () => {
+      this._provider.releaseLock(lock);
+    };
+    promise.then(finally_, finally_);
+    return await promise;
   }
 
   /**
@@ -323,10 +360,17 @@ export class Context<
   /**
    * Revert the document contents to disk contents.
    */
-  revert(): Promise<void> {
-    return this.ready.then(() => {
-      return this._revert();
-    });
+  async revert(): Promise<void> {
+    const [lock] = await Promise.all([
+      this._provider.acquireLock(),
+      this.ready
+    ]);
+    const promise = this._revert();
+    const finally_ = () => {
+      this._provider.releaseLock(lock);
+    };
+    promise.then(finally_, finally_);
+    return await promise;
   }
 
   /**
@@ -481,6 +525,7 @@ export class Context<
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
+    this._ycontext.set('last_modified', newModel.last_modified);
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
@@ -683,7 +728,9 @@ export class Context<
         // (our last save)
         // In some cases the filesystem reports an inconsistent time,
         // so we allow 0.5 seconds difference before complaining.
-        const modified = this.contentsModel?.last_modified;
+        const ycontextModified = this._ycontext.get('last_modified');
+        // prefer using the timestamp from ycontext because it is more up to date
+        const modified = ycontextModified || this.contentsModel?.last_modified;
         const tClient = modified ? new Date(modified) : new Date();
         const tDisk = new Date(model.last_modified);
         if (modified && tDisk.getTime() - tClient.getTime() > 500) {
@@ -755,7 +802,7 @@ export class Context<
     );
     const body = this._trans.__(
       `"%1" has changed on disk since the last time it was opened or saved.
-Do you want to overwrite the file on disk with the version open here, 
+Do you want to overwrite the file on disk with the version open here,
 or load the version on disk (revert)?`,
       this.path
     );
@@ -847,6 +894,9 @@ or load the version on disk (revert)?`,
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
+  private _provider: IDocumentProvider;
+  private _ydoc: Y.Doc;
+  private _ycontext: Y.Map<string>;
 }
 
 /**
@@ -873,9 +923,19 @@ export namespace Context {
     path: string;
 
     /**
+     * Whether the model is collaborative.
+     */
+    collaborative?: boolean;
+
+    /**
      * The kernel preference associated with the context.
      */
     kernelPreference?: ISessionContext.IKernelPreference;
+
+    /**
+     * An factory method for the document provider.
+     */
+    docProviderFactory?: IDocumentProviderFactory;
 
     /**
      * An IModelDB factory method which may be used for the document.
@@ -935,7 +995,7 @@ namespace Private {
   /**
    * A no-op function.
    */
-  export function noOp() {
+  export function noOp(): void {
     /* no-op */
   }
 

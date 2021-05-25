@@ -40,6 +40,18 @@ const rules = [
     use: {
       loader: 'raw-loader'
     }
+  },
+  {
+    test: /\.m?js/,
+    resolve: {
+      fullySpecified: false
+    }
+  },
+  {
+    test: /\.c?js/,
+    resolve: {
+      fullySpecified: false
+    }
   }
 ];
 

@@ -7,6 +7,8 @@ import CodeMirror from 'codemirror';
 
 import { showDialog } from '@jupyterlab/apputils';
 
+import * as models from '@jupyterlab/shared-models';
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import {
@@ -30,6 +32,8 @@ import { Poll } from '@lumino/polling';
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
+
+import { CodemirrorBinding } from 'y-codemirror';
 
 import { Mode } from './mode';
 
@@ -91,6 +95,10 @@ const DOWN_ARROW = 40;
  */
 const HOVER_TIMEOUT = 1000;
 
+// @todo Remove the duality of having a modeldb and a y-codemirror
+// binding as it just introduces a lot of additional complexity without gaining anything.
+const USE_YCODEMIRROR_BINDING = true;
+
 /**
  * CodeMirror editor.
  */
@@ -125,12 +133,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
+    this._initializeEditorBinding();
+    // every time the model is switched, we need to re-initialize the editor binding
+    this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
 
     const doc = editor.getDoc();
 
     // Handle initial values for text, mimetype, and selections.
-    doc.setValue(model.value.text);
-    this.clearHistory();
+    if (!USE_YCODEMIRROR_BINDING) {
+      doc.setValue(model.value.text);
+    }
+    this._onMimeTypeChanged();
     this._onCursorActivity();
     this._poll = new Poll({
       factory: async () => {
@@ -144,7 +157,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     // Connect to changes.
-    model.value.changed.connect(this._onValueChanged, this);
+    if (!USE_YCODEMIRROR_BINDING) {
+      model.value.changed.connect(this._onValueChanged, this);
+    }
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
@@ -161,9 +176,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }
     });
     CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-    CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
-      this._beforeDocChanged(instance, change);
-    });
+    if (!USE_YCODEMIRROR_BINDING) {
+      CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
+        this._beforeDocChanged(instance, change);
+      });
+    }
     CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
       // Manually refresh after setValue to make sure editor is properly sized.
       if (change.origin === 'setValue' && this.hasFocus()) {
@@ -187,6 +204,27 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         this.refresh();
       }
     });
+  }
+
+  /**
+   * Initialize the editor binding.
+   */
+  private _initializeEditorBinding(): void {
+    if (!USE_YCODEMIRROR_BINDING) {
+      return;
+    }
+    this._yeditorBinding?.destroy();
+    const sharedModel = this.model.sharedModel as models.IYText;
+    const opts = sharedModel.undoManager
+      ? { yUndoManager: sharedModel.undoManager }
+      : {};
+    const awareness = sharedModel.awareness;
+    this._yeditorBinding = new CodemirrorBinding(
+      sharedModel.ysource,
+      this.editor,
+      awareness,
+      opts
+    );
   }
 
   /**
@@ -279,6 +317,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('focus', this, true);
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
+    if (this._yeditorBinding) {
+      this._yeditorBinding.destroy();
+    }
     this._keydownHandlers.length = 0;
     this._poll.dispose();
     Signal.clearData(this);
@@ -357,21 +398,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
-    this.doc.undo();
+    this.model.sharedModel.undo();
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
-    this.doc.redo();
+    this.model.sharedModel.redo();
   }
 
   /**
    * Clear the undo history.
    */
   clearHistory(): void {
-    this.doc.clearHistory();
+    this._yeditorBinding?.yUndoManager?.clear();
   }
 
   /**
@@ -1136,6 +1177,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _isDisposed = false;
   private _lastChange: CodeMirror.EditorChange | null = null;
   private _poll: Poll;
+  private _yeditorBinding: CodemirrorBinding | null;
 }
 
 /**
