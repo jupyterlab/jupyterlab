@@ -38,6 +38,12 @@
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "nameFileOnSave": {
+      "type": "boolean",
+      "title": "Name File On First Save",
+      "description": "Whether to prompt to name file on first save",
+      "default": true
     }
   },
   "additionalProperties": false,

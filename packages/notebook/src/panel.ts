@@ -99,6 +99,19 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         }
       });
     }
+
+    const model = sender.contentsModel;
+    /* emits shouldNameFile signal 
+       when save is completed, file is not renamed and the name starts with 'Untitled'
+    */
+    if (
+      state === 'completed-manual' &&
+      model &&
+      !model.renamed == true &&
+      model.name.startsWith('Untitled')
+    ) {
+      this.shouldNameFile.emit(undefined);
+    }
   }
 
   /**
