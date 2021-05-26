@@ -163,7 +163,7 @@ dependencies and install the extension into the JupyterLab environment.
 
 The above command copies the frontend part of the extension into JupyterLab.
 We can run this ``pip install`` command again every time we make a change to
-copy the change into JupyterLab. Even better, on Linux or macOS, we can use
+copy the change into JupyterLab. Even better, we can use
 the ``develop`` command to create a symbolic link from JupyterLab to our
 source directory. This means our changes are automatically available in
 JupyterLab:
@@ -171,6 +171,13 @@ JupyterLab:
 .. code:: bash
 
     jupyter labextension develop --overwrite .
+
+.. note::
+
+   On Windows, symbolic links can be activated on Windows 10 for Python version 3.8 or higher
+   by activating the 'Developer Mode'. That may not be allowed by your administrators.
+   See `Activate Developer Mode on Windows <https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development>`__
+   for instructions.
 
 See the initial extension in action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
