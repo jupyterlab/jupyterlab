@@ -28,7 +28,9 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
         Tab: 'indentMoreOrinsertTab',
         'Shift-Tab': 'indentLess',
         'Cmd-/': 'toggleComment',
-        'Ctrl-/': 'toggleComment'
+        'Ctrl-/': 'toggleComment',
+        'Ctrl-G': 'find',
+        'Cmd-G': 'find'
       },
       ...defaults
     };
