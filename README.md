@@ -156,7 +156,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Jason Grout, Bloomberg (co-creator, vision, general development).
 - Michał Krassowski, University of Oxford (general development, extensions).
 - Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
-- Gonzalo Peña-Castellanos, QuanSight  (general development, i18n, extensions).
+- Gonzalo Peña-Castellanos, QuanSight (general development, i18n, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
 - Isabela Presedo-Floyd, QuanSight Labs (design/UX).
 - Steven Silvester, Apple (co-creator, release management, packaging,
