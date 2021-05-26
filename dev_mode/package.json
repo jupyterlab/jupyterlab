@@ -119,7 +119,8 @@
     "@lumino/virtualdom": "^1.8.0",
     "@lumino/widgets": "^1.19.0",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "yjs": "^13.5.6"
   },
   "dependencies": {
     "@jupyterlab/application": "~3.1.0-alpha.10",
@@ -299,7 +300,8 @@
       "@lumino/virtualdom",
       "@lumino/widgets",
       "react",
-      "react-dom"
+      "react-dom",
+      "yjs"
     ],
     "linkedPackages": {
       "@jupyterlab/application": "../packages/application",
