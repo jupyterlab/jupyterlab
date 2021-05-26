@@ -491,6 +491,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: IDebugger.IBreakpoint[],
     path?: string
   ): Promise<void> {
+    // console.log("Updating!")
     if (!this.session?.isStarted) {
       return;
     }
@@ -521,7 +522,48 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
-    await this.session.sendRequest('configurationDone', {});
+    // await this.session.sendRequest('configurationDone', {});
+  }
+
+  async pauseOnExceptions(enable : boolean): Promise<void> {
+    if (!this.session?.isStarted) {
+      return
+    }
+
+    console.log("Pause on exceptions", enable);
+    this.session.pausingOnExceptions = enable;
+    let options: DebugProtocol.SetExceptionBreakpointsArguments;
+    if (enable) {
+      options = {
+        filters: ["raised", "uncaught"],
+        exceptionOptions: [
+          { 
+            path: [{names: ["Python Exceptions"]}],
+            breakMode: "always"
+          },
+          { 
+            path: [{names: ["Python Exceptions"]}],
+            breakMode: "always"
+          }
+        ]
+      }
+    } else {
+      options = {
+        filters: ["raised", "uncaught"],
+        exceptionOptions: [
+          { 
+            path: [{names: ["Python Exceptions"]}],
+            breakMode: "never"
+          },
+          { 
+            path: [{names: ["Python Exceptions"]}],
+            breakMode: "never"
+          }
+        ]
+      }
+    }
+    await this.session.sendRequest('setExceptionBreakpoints', options);
+    // console.log(reply);
   }
 
   /**
