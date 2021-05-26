@@ -66,6 +66,13 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Whether the current debugger is pausing on exceptions.
+   */
+  get isPausingOnExceptions(): boolean {
+    return this._session?.pausingOnExceptions ?? false;
+  }
+
+  /**
    * Returns the debugger service's model.
    */
   get model(): IDebugger.Model.IService {
@@ -95,6 +102,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     this._session?.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
+        console.log("EVENT", event)
         this._model.stoppedThreads.add(event.body.threadId);
         void this._getAllFrames();
       } else if (event.event === 'continued') {
@@ -113,6 +121,14 @@ export class DebuggerService implements IDebugger, IDisposable {
   get sessionChanged(): ISignal<IDebugger, IDebugger.ISession | null> {
     return this._sessionChanged;
   }
+
+  /**
+   * TODO Signal emitted upon session changed.
+   */
+     get stateRestored(): ISignal<IDebugger, null> {
+      return this._stateRestored;
+    }
+  
 
   /**
    * Dispose the debug service.
@@ -394,6 +410,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       this._clearModel();
       this._clearSignals();
     }
+    this._stateRestored.emit(null);
   }
 
   /**
@@ -465,6 +482,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: IDebugger.IBreakpoint[],
     path?: string
   ): Promise<void> {
+    // console.log("Updating!")
     if (!this.session?.isStarted) {
       return;
     }
@@ -495,7 +513,48 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
-    await this.session.sendRequest('configurationDone', {});
+    // await this.session.sendRequest('configurationDone', {});
+  }
+
+  async pauseOnExceptions(enable : boolean): Promise<void> {
+    if (!this.session?.isStarted) {
+      return
+    }
+
+    console.log("Pause on exceptions", enable);
+    this.session.pausingOnExceptions = enable;
+    let options: DebugProtocol.SetExceptionBreakpointsArguments;
+    if (enable) {
+      options = {
+        filters: ["raised", "uncaught"],
+        exceptionOptions: [
+          { 
+            path: [{names: ["Python Exceptions"]}],
+            breakMode: "always"
+          },
+          { 
+            path: [{names: ["Python Exceptions"]}],
+            breakMode: "always"
+          }
+        ]
+      }
+    } else {
+      options = {
+        filters: ["raised", "uncaught"],
+        exceptionOptions: [
+          { 
+            path: [{names: ["Python Exceptions"]}],
+            breakMode: "never"
+          },
+          { 
+            path: [{names: ["Python Exceptions"]}],
+            breakMode: "never"
+          }
+        ]
+      }
+    }
+    await this.session.sendRequest('setExceptionBreakpoints', options);
+    // console.log(reply);
   }
 
   /**
@@ -859,6 +918,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession | null>(
     this
   );
+  private _stateRestored = new Signal<IDebugger, null>(this);
   private _specsManager: KernelSpec.IManager | null;
   private _trans: TranslationBundle;
 }
