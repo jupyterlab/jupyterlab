@@ -869,7 +869,7 @@ export class Notebook extends StaticNotebook {
    */
   constructor(options: Notebook.IOptions) {
     super(Private.processNotebookOptions(options));
-    this.node.tabIndex = -1; // Allow the widget to take focus.
+    this.node.tabIndex = 0; // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-lm-dragscroll', 'true');
   }

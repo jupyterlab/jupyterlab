@@ -242,7 +242,6 @@ describe('@jupyterlab/apputils', () => {
           const target = document.createElement('div');
           const dialog = new TestDialog({ host });
 
-          target.tabIndex = -1;
           document.body.appendChild(target);
           document.body.appendChild(host);
           target.focus();

@@ -24,7 +24,7 @@ function createWidget(): Widget {
   const widget = new Widget({ node: document.createElement('button') });
   widget.node.style.minHeight = '20px';
   widget.node.style.minWidth = '20px';
-  widget.node.tabIndex = -1;
+  widget.node.tabIndex = 0;
   widget.node.textContent = 'Test Button';
   return widget;
 }
