@@ -244,4 +244,7 @@ def setup(app):
         'enable_auto_doc_ref': False,
     }, True)
     app.add_transform(AutoStructify)
-    app.add_stylesheet('custom.css')  # may also be an URL
+    try:
+        app.add_stylesheet('custom.css')  # may also be an URL
+    except AttributeError:
+        app.add_css_file('custom.css')  # may also be an URL
