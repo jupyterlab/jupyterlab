@@ -10,11 +10,11 @@ import importlib
 import json
 import os
 import os.path as osp
+import platform
 import shutil
-import sys
-from os.path import basename, join as pjoin, normpath
 import subprocess
 import sys
+from os.path import basename, join as pjoin, normpath
 
 from jupyter_core.paths import (
     jupyter_data_dir, SYSTEM_JUPYTER_PATH, ENV_JUPYTER_PATH,
@@ -104,7 +104,17 @@ def develop_labextension(path, symlink=True, overwrite=False,
         if not os.path.exists(full_dest):
             if logger:
                 logger.info("Symlinking: %s -> %s" % (full_dest, path))
-            os.symlink(path, full_dest)
+            try:
+                os.symlink(path, full_dest)
+            except OSError as e:
+                if platform.platform().startswith("Windows"):
+                    raise OSError(
+                        "Symlinks can be activated on Windows 10 for Python version 3.8 or higher"
+                        " by activating the 'Developer Mode'. That may not be allowed by your administrators.\n"
+                        "See https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development"
+                    ) from e
+                raise
+
         elif not os.path.islink(full_dest):
             raise ValueError("%s exists and is not a symlink" % full_dest)
 
