@@ -1,19 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { caretDownEmptyIcon, ReactWidget } from '@jupyterlab/ui-components';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  caretDownEmptyIcon,
+  ReactWidget,
+  searchIcon
+} from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
-
+import { CommandRegistry } from '@lumino/commands';
 import React, { useEffect, useState } from 'react';
-
 import { DebugProtocol } from 'vscode-debugprotocol';
-
-import { IDebugger } from '../../tokens';
-
-import { VariablesModel } from './model';
-
 import { convertType } from '.';
+import { Debugger } from '../../debugger';
+import { IDebugger } from '../../tokens';
+import { VariablesModel } from './model';
 
 /**
  * The body for tree of variables.
@@ -26,7 +27,9 @@ export class VariablesBodyTree extends ReactWidget {
    */
   constructor(options: VariablesBodyTree.IOptions) {
     super();
+    this._commands = options.commands;
     this._service = options.service;
+    this._translator = options.translator;
 
     const model = options.model;
     model.changed.connect(this._updateScopes, this);
@@ -44,13 +47,25 @@ export class VariablesBodyTree extends ReactWidget {
     return scope ? (
       <VariablesComponent
         key={scope.name}
+        commands={this._commands}
         service={this._service}
         data={scope.variables}
         filter={this._filter}
+        translator={this._translator}
+        handleSelectVariable={variable => {
+          this._latestSelection = variable;
+        }}
       />
     ) : (
       <div></div>
     );
+  }
+
+  /**
+   * Get the latest hit variable
+   */
+  get latestSelection(): IDebugger.IVariableSelection | null {
+    return this._latestSelection;
   }
 
   /**
@@ -82,10 +97,31 @@ export class VariablesBodyTree extends ReactWidget {
     this.update();
   }
 
+  private _commands: CommandRegistry;
   private _scope = '';
   private _scopes: IDebugger.IScope[] = [];
   private _filter = new Set<string>();
+  private _latestSelection: IDebugger.IVariableSelection | null = null;
   private _service: IDebugger;
+  private _translator: ITranslator | undefined;
+}
+
+interface IVariablesComponentProps {
+  /**
+   * The commands registry.
+   */
+  commands: CommandRegistry;
+  data: IDebugger.IVariable[];
+  service: IDebugger;
+  filter?: Set<string>;
+  /**
+   * The application language translator
+   */
+  translator?: ITranslator;
+  /**
+   * Callback on variable selection
+   */
+  handleSelectVariable?: (variable: IDebugger.IVariable) => void;
 }
 
 /**
@@ -96,15 +132,15 @@ export class VariablesBodyTree extends ReactWidget {
  * @param props.service The debugger service.
  * @param props.filter Optional variable filter list.
  */
-const VariablesComponent = ({
-  data,
-  service,
-  filter
-}: {
-  data: IDebugger.IVariable[];
-  service: IDebugger;
-  filter?: Set<string>;
-}): JSX.Element => {
+const VariablesComponent = (props: IVariablesComponentProps): JSX.Element => {
+  const {
+    commands,
+    data,
+    service,
+    filter,
+    translator,
+    handleSelectVariable
+  } = props;
   const [variables, setVariables] = useState(data);
 
   useEffect(() => {
@@ -122,15 +158,48 @@ const VariablesComponent = ({
           return (
             <VariableComponent
               key={key}
+              commands={commands}
               data={variable}
               service={service}
               filter={filter}
+              translator={translator}
+              onSelect={handleSelectVariable}
             />
           );
         })}
     </ul>
   );
 };
+
+/**
+ * VariableComponent properties
+ */
+interface IVariableComponentProps {
+  /**
+   * The commands registry.
+   */
+  commands: CommandRegistry;
+  /**
+   * Variable description
+   */
+  data: IDebugger.IVariable;
+  /**
+   * Filter applied on the variable list
+   */
+  filter?: Set<string>;
+  /**
+   * The Debugger service
+   */
+  service: IDebugger;
+  /**
+   * The application language translator
+   */
+  translator?: ITranslator;
+  /**
+   * Callback on selection
+   */
+  onSelect?: (variable: IDebugger.IVariable) => void;
+}
 
 /**
  * A React component to display one node variable in tree.
@@ -140,15 +209,8 @@ const VariablesComponent = ({
  * @param props.service The debugger service.
  * @param props.filter Optional variable filter list.
  */
-const VariableComponent = ({
-  data,
-  service,
-  filter
-}: {
-  data: IDebugger.IVariable;
-  service: IDebugger;
-  filter?: Set<string>;
-}): JSX.Element => {
+const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
+  const { commands, data, service, filter, translator, onSelect } = props;
   const [variable] = useState(data);
   const [expanded, setExpanded] = useState<boolean>();
   const [variables, setVariables] = useState<DebugProtocol.Variable[]>();
@@ -159,9 +221,12 @@ const VariableComponent = ({
   const styleType = {
     color: 'var(--jp-mirror-editor-string-color)'
   };
+  const onSelection = onSelect ?? (() => void 0);
 
   const expandable =
     variable.variablesReference !== 0 || variable.type === 'function';
+
+  const trans = (translator ?? nullTranslator).load('jupyterlab');
 
   const onVariableClicked = async (e: React.MouseEvent): Promise<void> => {
     if (!expandable) {
@@ -176,7 +241,12 @@ const VariableComponent = ({
   };
 
   return (
-    <li onClick={(e): Promise<void> => onVariableClicked(e)}>
+    <li
+      onClick={(e): Promise<void> => onVariableClicked(e)}
+      onMouseDown={() => {
+        onSelection(variable);
+      }}
+    >
       <caretDownEmptyIcon.react
         visibility={expandable ? 'visible' : 'hidden'}
         stylesheet="menuItem"
@@ -186,12 +256,45 @@ const VariableComponent = ({
       <span style={styleName}>{variable.name}</span>
       <span>: </span>
       <span style={styleType}>{convertType(variable)}</span>
+      <span className="jp-DebuggerVariables-hspacer"></span>
+      {service.model.hasRichVariableRendering && (
+        <button
+          className="jp-DebuggerVariables-renderVariable"
+          disabled={
+            !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, {
+              name: variable.name,
+              variablesReference: variable.variablesReference
+            } as any)
+          }
+          onClick={e => {
+            e.stopPropagation();
+            onSelection(variable);
+            commands
+              .execute(Debugger.CommandIDs.renderMimeVariable, {
+                name: variable.name,
+                variablesReference: variable.variablesReference
+              } as any)
+              .catch(reason => {
+                console.error(
+                  `Failed to render variable ${variable.name}`,
+                  reason
+                );
+              });
+          }}
+          title={trans.__('Render variable')}
+        >
+          <searchIcon.react stylesheet="menuItem" tag="span" />
+        </button>
+      )}
+
       {expanded && variables && (
         <VariablesComponent
           key={variable.name}
+          commands={commands}
           data={variables}
           service={service}
           filter={filter}
+          translator={translator}
         />
       )}
     </li>
@@ -214,5 +317,13 @@ namespace VariablesBodyTree {
      * The debugger service.
      */
     service: IDebugger;
+    /**
+     * The commands registry.
+     */
+    commands: CommandRegistry;
+    /**
+     * The application language translator
+     */
+    translator?: ITranslator;
   }
 }
