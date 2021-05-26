@@ -81,6 +81,14 @@ export class Callstack extends PanelWithToolbar {
       })
     );
 
+    this.toolbar.addItem(
+      'pause',
+      new CommandToolbarButton({
+        commands: commands.registry,
+        id: commands.pause
+      })
+    );
+
     this.addWidget(body);
     this.addClass('jp-DebuggerCallstack');
   }
@@ -128,6 +136,11 @@ export namespace Callstack {
      * The evaluate command ID.
      */
     evaluate: string;
+
+    /**
+     * The puse command ID.
+     */
+    pause: string;
   }
 
   /**

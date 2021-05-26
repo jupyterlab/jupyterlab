@@ -138,6 +138,7 @@ export class DebuggerSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
+    // console.log("start");
     const reply = await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
@@ -175,6 +176,7 @@ export class DebuggerSession implements IDebugger.ISession {
    */
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
     const message = await this.sendRequest('debugInfo', {});
+    // console.log("DEBUG INFO", message)
     this._isStarted = message.body.isStarted;
     this._exceptionPaths = message.body?.exceptionPaths;
     return message;
