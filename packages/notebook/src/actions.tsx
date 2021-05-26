@@ -131,7 +131,7 @@ export namespace NotebookActions {
         offsets.push(start);
       }
     }
-    
+
     offsets.push(orig.length);
 
     const clones: ICellModel[] = [];
@@ -169,7 +169,7 @@ export namespace NotebookActions {
     focusedEditor.focus();
 
     // Move to the end of the cell that now contains the cursor
-    focusedEditor.setCursorPosition({line: editor.lineCount, column: 0});
+    focusedEditor.setCursorPosition({ line: editor.lineCount, column: 0 });
 
     Private.handleState(notebook, state);
   }
