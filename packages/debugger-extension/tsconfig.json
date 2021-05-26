@@ -16,6 +16,9 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../codemirror"
+    },
+    {
       "path": "../console"
     },
     {

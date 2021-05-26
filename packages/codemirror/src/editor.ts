@@ -501,6 +501,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._editor.scrollIntoView(pos, margin);
   }
 
+  scrollIntoViewCentered(pos: CodeMirror.Position): void {
+    const top = this._editor.charCoords(pos, 'local').top;
+    const height = this._editor.getWrapperElement().offsetHeight;
+    this.host.scrollIntoView?.({
+      behavior: 'auto',
+      block: 'center',
+      inline: 'center'
+    });
+    this._editor.scrollTo(null, top - height / 2);
+  }
+
   cursorCoords(
     where: boolean,
     mode?: 'window' | 'page' | 'local'
