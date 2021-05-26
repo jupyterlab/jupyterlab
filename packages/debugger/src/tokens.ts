@@ -32,6 +32,11 @@ export interface IDebugger {
   readonly isStarted: boolean;
 
   /**
+    * Wheter the session is pausing for exceptions.
+    */
+  readonly isPausingOnExceptions: boolean;
+
+  /**
    * The debugger service's model.
    */
   readonly model: IDebugger.Model.IService;
@@ -47,9 +52,17 @@ export interface IDebugger {
   readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession | null>;
 
   /**
+   * TODO: Signal emitted upon session changed.
+   */
+  readonly stateRestored: ISignal<IDebugger, null>;
+
+  /**
    * Removes all the breakpoints from the current notebook or console
    */
   clearBreakpoints(): Promise<void>;
+
+  /** TODO */
+  pauseOnExceptions(enable: boolean): Promise<void>;
 
   /**
    * Continues the execution of the current thread.
@@ -292,9 +305,14 @@ export namespace IDebugger {
     connection: Session.ISessionConnection | null;
 
     /**
-     * Whether the debug session is started
+     * Whether the debug session is started.
      */
     readonly isStarted: boolean;
+
+    /**
+     * Whether the debug session is pausing on exceptions.
+     */
+    pausingOnExceptions: boolean;
 
     /**
      * Signal emitted for debug event messages.
