@@ -1860,9 +1860,9 @@ namespace Private {
           }
           if (sessionContext.pendingInput) {
             void showDialog({
-              title: 'Waiting on User Input',
-              body: `Did not run selected cell because there is a cell waiting on input! Submit your input and try again.`,
-              buttons: [Dialog.okButton()]
+              title: trans.__('Waiting on User Input'),
+              body: trans.__('Did not run selected cell because there is a cell waiting on input! Submit your input and try again.'),
+              buttons: [Dialog.okButton({ label: trans.__('Ok') })]
             });
             return Promise.resolve(false);
           }
