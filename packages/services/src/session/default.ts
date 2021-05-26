@@ -351,10 +351,7 @@ export class SessionConnection implements Session.ISessionConnection {
   /**
    * Handle a change in the pendingInput.
    */
-  protected onPendingInput(
-    sender: Kernel.IKernelConnection,
-    state: boolean
-  ) {
+  protected onPendingInput(sender: Kernel.IKernelConnection, state: boolean) {
     this._pendingInput.emit(state);
   }
 

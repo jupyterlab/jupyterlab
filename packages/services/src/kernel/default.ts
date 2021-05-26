@@ -825,7 +825,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._anyMessage.emit({ msg, direction: 'send' });
 
     this.hasPendingInput = false;
-
   }
 
   /**
