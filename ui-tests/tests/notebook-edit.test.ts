@@ -29,6 +29,7 @@ describe('Notebook Edit', () => {
 
   test("Create a Markdown cell", async () => {
     await galata.notebook.addCell('markdown', '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)');
+    await galata.notebook.runCell(1, true);
     expect(await galata.notebook.getCellCount()).toBe(2);
     expect(await galata.notebook.getCellType(1)).toBe('markdown');
   });
@@ -37,18 +38,6 @@ describe('Notebook Edit', () => {
     await galata.notebook.addCell('code', '2 ** 3');
     expect(await galata.notebook.getCellCount()).toBe(3);
     expect(await galata.notebook.getCellType(2)).toBe('code');
-  });
-
-  test("Save Notebook", async () => {
-    await galata.notebook.save();
-    expect(await galata.contents.fileExists(fileName)).toBeTruthy();
-  });
-
-  test("Capture notebook", async () => {
-    const imageName = 'capture-notebook';
-    const nbPanel = await galata.notebook.getNotebookInPanel();
-    await galata.capture.screenshot(imageName, nbPanel);
-    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
   test("Copy-Paste Cell", async () => {
@@ -155,8 +144,5 @@ describe('Notebook Edit', () => {
   test("Delete Notebook", async () => {
     await galata.contents.deleteFile(fileName);
     expect(await galata.contents.fileExists(fileName)).toBeFalsy();
-
-    const imageName = 'delete-notebook';
-    await galata.capture.screenshot(imageName);
   });
 });

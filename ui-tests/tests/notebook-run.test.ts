@@ -6,6 +6,8 @@ import * as path from 'path';
 
 jest.setTimeout(100000);
 
+const fileName = 'simple_notebook.ipynb';
+
 describe('Notebook Run', () => {
   beforeAll(async () => {
     await galata.resetUI();
@@ -17,8 +19,9 @@ describe('Notebook Run', () => {
   });
 
   test('Upload files to JupyterLab', async () => {
-    await galata.contents.moveDirectoryToServer(path.resolve(__dirname, `./notebooks`), 'uploaded');
-    expect(await galata.contents.fileExists('uploaded/simple_notebook.ipynb')).toBeTruthy();
+    await galata.contents.moveFileToServer(path.resolve(__dirname, `./notebooks/${fileName}`), `uploaded/${fileName}`);
+    await galata.contents.moveFileToServer(path.resolve(__dirname, './notebooks/WidgetArch.png'), 'uploaded/WidgetArch.png');
+    expect(await galata.contents.fileExists(`uploaded/${fileName}`)).toBeTruthy();
     expect(await galata.contents.fileExists('uploaded/WidgetArch.png')).toBeTruthy();
   });
 
@@ -28,15 +31,14 @@ describe('Notebook Run', () => {
 
   test('Open directory uploaded', async () => {
     await galata.filebrowser.openDirectory('uploaded');
-    expect(await galata.filebrowser.isFileListedInBrowser('simple_notebook.ipynb')).toBeTruthy();
+    expect(await galata.filebrowser.isFileListedInBrowser(fileName)).toBeTruthy();
   });
 
-  test('Run notebook simple_notebook.ipynb and capture cell outputs', async () => {
-    const notebook = 'simple_notebook.ipynb';
-    await galata.notebook.open(notebook);
-    expect(await galata.notebook.isOpen(notebook)).toBeTruthy();
-    await galata.notebook.activate(notebook);
-    expect(await galata.notebook.isActive(notebook)).toBeTruthy();
+  test('Run notebook and capture cell outputs', async () => {
+    await galata.notebook.open(fileName);
+    expect(await galata.notebook.isOpen(fileName)).toBeTruthy();
+    await galata.notebook.activate(fileName);
+    expect(await galata.notebook.isActive(fileName)).toBeTruthy();
 
     let numNBImages = 0;
 
@@ -75,7 +77,7 @@ describe('Notebook Run', () => {
     expect(parseFloat(cellOutput[0])).toBeGreaterThan(1.5);
   });
 
-  test('Close notebook simple_notebook.ipynb', async () => {
+  test('Close notebook', async () => {
     await galata.notebook.close(true);
   });
 
