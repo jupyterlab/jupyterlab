@@ -21,9 +21,7 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "apputils:print",
-      "keys": [
-        "Accel P"
-      ],
+      "keys": ["Accel P"],
       "selector": "body"
     }
   ],
