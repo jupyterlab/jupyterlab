@@ -30,6 +30,7 @@ describe('Notebook Create', () => {
 
   test("Create a Markdown cell", async () => {
     await galata.notebook.addCell('markdown', '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)');
+    await galata.notebook.runCell(1, true);
     expect(await galata.notebook.getCellCount()).toBe(2);
     expect(await galata.notebook.getCellType(1)).toBe('markdown');
   });
@@ -40,22 +41,9 @@ describe('Notebook Create', () => {
     expect(await galata.notebook.getCellType(2)).toBe('code');
   });
 
-  test("Capture tooolbar", async () => {
-    const toolbar = await galata.notebook.getToolbar();
-    await galata.capture.screenshot('toolbar', toolbar);
-    expect(await galata.capture.compareScreenshot('toolbar')).toBe('same');
-  });
-
   test("Save Notebook", async () => {
     await galata.notebook.save();
     expect(await galata.contents.fileExists(fileName)).toBeTruthy();
-  });
-
-  test("Capture notebook", async () => {
-    const imageName = 'capture-notebook';
-    const nbPanel = await galata.notebook.getNotebookInPanel();
-    await galata.capture.screenshot(imageName, nbPanel);
-    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
   runMenuOpenTest();
@@ -74,7 +62,8 @@ describe('Notebook Create', () => {
 
   test('Toggle Dark theme', async () => {
     await galata.theme.setDarkTheme();
-    await galata.capture.screenshot('dark-theme');
+    const nbPanel = await galata.notebook.getNotebookInPanel();
+    await galata.capture.screenshot('dark-theme', nbPanel);
     expect(await galata.capture.compareScreenshot('dark-theme')).toBe('same');
   });
 
@@ -85,8 +74,5 @@ describe('Notebook Create', () => {
   test("Delete Notebook", async () => {
     await galata.contents.deleteFile(fileName);
     expect(await galata.contents.fileExists(fileName)).toBeFalsy();
-
-    const imageName = 'delete-notebook';
-    await galata.capture.screenshot(imageName);
   });
 });
