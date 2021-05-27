@@ -4,7 +4,7 @@
 import { galata, describe, test } from '@jupyterlab/galata';
 import { runMenuOpenTest } from './util';
 
-const fileName = "notebook.ipynb";
+const fileName = 'notebook.ipynb';
 
 jest.setTimeout(60000);
 
@@ -18,37 +18,40 @@ describe('Notebook Create', () => {
     galata.context.capturePrefix = '';
   });
 
-  test("Create New Notebook", async () => {
+  test('Create New Notebook', async () => {
     await galata.notebook.createNew(fileName);
   });
 
-  test("Create a Raw cell", async () => {
+  test('Create a Raw cell', async () => {
     await galata.notebook.setCell(0, 'raw', 'Just a raw cell');
     expect(await galata.notebook.getCellCount()).toBe(1);
     expect(await galata.notebook.getCellType(0)).toBe('raw');
   });
 
-  test("Create a Markdown cell", async () => {
-    await galata.notebook.addCell('markdown', '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)');
+  test('Create a Markdown cell', async () => {
+    await galata.notebook.addCell(
+      'markdown',
+      '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)'
+    );
     await galata.notebook.runCell(1, true);
     expect(await galata.notebook.getCellCount()).toBe(2);
     expect(await galata.notebook.getCellType(1)).toBe('markdown');
   });
 
-  test("Create a Code cell", async () => {
+  test('Create a Code cell', async () => {
     await galata.notebook.addCell('code', '2 ** 3');
     expect(await galata.notebook.getCellCount()).toBe(3);
     expect(await galata.notebook.getCellType(2)).toBe('code');
   });
 
-  test("Save Notebook", async () => {
+  test('Save Notebook', async () => {
     await galata.notebook.save();
     expect(await galata.contents.fileExists(fileName)).toBeTruthy();
   });
 
   runMenuOpenTest();
 
-  test("Run Cells", async () => {
+  test('Run Cells', async () => {
     await galata.notebook.run();
     await galata.notebook.save();
     const imageName = 'run-cells';
@@ -71,7 +74,7 @@ describe('Notebook Create', () => {
     await galata.theme.setLightTheme();
   });
 
-  test("Delete Notebook", async () => {
+  test('Delete Notebook', async () => {
     await galata.contents.deleteFile(fileName);
     expect(await galata.contents.fileExists(fileName)).toBeFalsy();
   });

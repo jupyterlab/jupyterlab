@@ -6,7 +6,7 @@ import * as path from 'path';
 
 jest.setTimeout(100000);
 
-const fileName = "toc_notebook.ipynb";
+const fileName = 'toc_notebook.ipynb';
 
 describe('Table of Contents', () => {
   beforeAll(async () => {
@@ -19,10 +19,20 @@ describe('Table of Contents', () => {
   });
 
   test('Upload files to JupyterLab', async () => {
-    await galata.contents.moveFileToServer(path.resolve(__dirname, `./notebooks/${fileName}`), `uploaded/${fileName}`);
-    await galata.contents.moveFileToServer(path.resolve(__dirname, './notebooks/WidgetArch.png'), 'uploaded/WidgetArch.png');
-    expect(await galata.contents.fileExists(`uploaded/${fileName}`)).toBeTruthy();
-    expect(await galata.contents.fileExists('uploaded/WidgetArch.png')).toBeTruthy();
+    await galata.contents.moveFileToServer(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `uploaded/${fileName}`
+    );
+    await galata.contents.moveFileToServer(
+      path.resolve(__dirname, './notebooks/WidgetArch.png'),
+      'uploaded/WidgetArch.png'
+    );
+    expect(
+      await galata.contents.fileExists(`uploaded/${fileName}`)
+    ).toBeTruthy();
+    expect(
+      await galata.contents.fileExists('uploaded/WidgetArch.png')
+    ).toBeTruthy();
   });
 
   test('Refresh File Browser', async () => {
@@ -31,7 +41,9 @@ describe('Table of Contents', () => {
 
   test('Open directory uploaded', async () => {
     await galata.filebrowser.openDirectory('uploaded');
-    expect(await galata.filebrowser.isFileListedInBrowser(fileName)).toBeTruthy();
+    expect(
+      await galata.filebrowser.isFileListedInBrowser(fileName)
+    ).toBeTruthy();
   });
 
   test('Open notebook', async () => {
@@ -104,7 +116,7 @@ describe('Table of Contents', () => {
     const tocPanel = await galata.sidebar.getContentPanel('left');
     const toolbarButtons = await tocPanel.$$('.toc-toolbar .toc-toolbar-icon');
     expect(toolbarButtons.length).toBe(4);
-    
+
     let imageName = 'toggle-code';
     await toolbarButtons[0].click();
     await galata.capture.screenshot(imageName, tocPanel);
@@ -132,7 +144,7 @@ describe('Table of Contents', () => {
     // toggle code and markdown
     await toolbarButtons[0].click();
     await toolbarButtons[1].click();
-    
+
     let imageName = 'show-tags';
     await toolbarButtons[3].click();
     await galata.capture.screenshot(imageName, tocPanel);

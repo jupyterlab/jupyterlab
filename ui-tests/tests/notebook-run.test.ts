@@ -19,10 +19,20 @@ describe('Notebook Run', () => {
   });
 
   test('Upload files to JupyterLab', async () => {
-    await galata.contents.moveFileToServer(path.resolve(__dirname, `./notebooks/${fileName}`), `uploaded/${fileName}`);
-    await galata.contents.moveFileToServer(path.resolve(__dirname, './notebooks/WidgetArch.png'), 'uploaded/WidgetArch.png');
-    expect(await galata.contents.fileExists(`uploaded/${fileName}`)).toBeTruthy();
-    expect(await galata.contents.fileExists('uploaded/WidgetArch.png')).toBeTruthy();
+    await galata.contents.moveFileToServer(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `uploaded/${fileName}`
+    );
+    await galata.contents.moveFileToServer(
+      path.resolve(__dirname, './notebooks/WidgetArch.png'),
+      'uploaded/WidgetArch.png'
+    );
+    expect(
+      await galata.contents.fileExists(`uploaded/${fileName}`)
+    ).toBeTruthy();
+    expect(
+      await galata.contents.fileExists('uploaded/WidgetArch.png')
+    ).toBeTruthy();
   });
 
   test('Refresh File Browser', async () => {
@@ -31,7 +41,9 @@ describe('Notebook Run', () => {
 
   test('Open directory uploaded', async () => {
     await galata.filebrowser.openDirectory('uploaded');
-    expect(await galata.filebrowser.isFileListedInBrowser(fileName)).toBeTruthy();
+    expect(
+      await galata.filebrowser.isFileListedInBrowser(fileName)
+    ).toBeTruthy();
   });
 
   test('Run notebook and capture cell outputs', async () => {
@@ -50,7 +62,12 @@ describe('Notebook Run', () => {
       onBeforeScroll: async () => {
         const nbPanel = await galata.notebook.getNotebookInPanel();
         if (nbPanel) {
-          if (await galata.capture.screenshot(getCaptureImageName(numNBImages), nbPanel)) {
+          if (
+            await galata.capture.screenshot(
+              getCaptureImageName(numNBImages),
+              nbPanel
+            )
+          ) {
             numNBImages++;
           }
         }
@@ -58,12 +75,16 @@ describe('Notebook Run', () => {
     });
 
     const nbPanel = await galata.notebook.getNotebookInPanel();
-    if (await galata.capture.screenshot(getCaptureImageName(numNBImages), nbPanel)) {
+    if (
+      await galata.capture.screenshot(getCaptureImageName(numNBImages), nbPanel)
+    ) {
       numNBImages++;
     }
 
     for (let c = 0; c < numNBImages; ++c) {
-      expect(await galata.capture.compareScreenshot(getCaptureImageName(c))).toBe('same');
+      expect(
+        await galata.capture.compareScreenshot(getCaptureImageName(c))
+      ).toBe('same');
     }
   });
 

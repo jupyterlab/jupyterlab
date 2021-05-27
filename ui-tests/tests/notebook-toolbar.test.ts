@@ -3,7 +3,7 @@
 
 import { galata, describe, test } from '@jupyterlab/galata';
 
-const fileName = "notebook.ipynb";
+const fileName = 'notebook.ipynb';
 
 jest.setTimeout(60000);
 
@@ -17,35 +17,38 @@ describe('Notebook Toolbar', () => {
     galata.context.capturePrefix = '';
   });
 
-  test("Create New Notebook", async () => {
+  test('Create New Notebook', async () => {
     await galata.notebook.createNew(fileName);
   });
 
-  test("Create a Raw cell", async () => {
+  test('Create a Raw cell', async () => {
     await galata.notebook.setCell(0, 'raw', 'Just a raw cell');
     expect(await galata.notebook.getCellCount()).toBe(1);
     expect(await galata.notebook.getCellType(0)).toBe('raw');
   });
 
-  test("Create a Markdown cell", async () => {
-    await galata.notebook.addCell('markdown', '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)');
+  test('Create a Markdown cell', async () => {
+    await galata.notebook.addCell(
+      'markdown',
+      '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)'
+    );
     await galata.notebook.runCell(1, true);
     expect(await galata.notebook.getCellCount()).toBe(2);
     expect(await galata.notebook.getCellType(1)).toBe('markdown');
   });
 
-  test("Create a Code cell", async () => {
+  test('Create a Code cell', async () => {
     await galata.notebook.addCell('code', '2 ** 3');
     expect(await galata.notebook.getCellCount()).toBe(3);
     expect(await galata.notebook.getCellType(2)).toBe('code');
   });
 
-  test("Save Notebook", async () => {
+  test('Save Notebook', async () => {
     await galata.notebook.save();
     expect(await galata.contents.fileExists(fileName)).toBeTruthy();
   });
 
-  test("Insert cells", async () => {
+  test('Insert cells', async () => {
     const imageName = 'insert-cells';
     await galata.notebook.selectCells(0);
     await galata.notebook.clickToolbarItem('insert');
@@ -56,7 +59,7 @@ describe('Notebook Toolbar', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test("Copy-Paste Cell", async () => {
+  test('Copy-Paste Cell', async () => {
     const imageName = 'copy-paste-cell';
     await galata.notebook.selectCells(2);
     await galata.notebook.clickToolbarItem('copy');
@@ -67,7 +70,7 @@ describe('Notebook Toolbar', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test("Cut Cell", async () => {
+  test('Cut Cell', async () => {
     const imageName = 'cut-cell';
     await galata.notebook.selectCells(1);
     await galata.notebook.clickToolbarItem('cut');
@@ -76,7 +79,7 @@ describe('Notebook Toolbar', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test("Paste Cell", async () => {
+  test('Paste Cell', async () => {
     const imageName = 'paste-cell';
     await galata.notebook.selectCells(4);
     await galata.notebook.clickToolbarItem('paste');
@@ -85,7 +88,7 @@ describe('Notebook Toolbar', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test("Delete Cells", async () => {
+  test('Delete Cells', async () => {
     const imageName = 'delete-cell';
     await galata.notebook.selectCells(1, 3);
     await galata.menu.clickMenuItem('Edit>Delete Cells');
@@ -94,7 +97,7 @@ describe('Notebook Toolbar', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test("Run Cell", async () => {
+  test('Run Cell', async () => {
     const imageName = 'run-cell';
     await galata.notebook.selectCells(1);
     await galata.notebook.clickToolbarItem('run');
@@ -104,7 +107,7 @@ describe('Notebook Toolbar', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test("Change Cell Type to Markdown", async () => {
+  test('Change Cell Type to Markdown', async () => {
     const imageName = 'change-to-markdown';
     await galata.notebook.selectCells(1);
     await galata.notebook.clickToolbarItem('cellType');
@@ -116,7 +119,7 @@ describe('Notebook Toolbar', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test("Re-run Cell", async () => {
+  test('Re-run Cell', async () => {
     const imageName = 're-run-cell';
     await galata.notebook.selectCells(1);
     await galata.notebook.clickToolbarItem('run');
@@ -126,7 +129,7 @@ describe('Notebook Toolbar', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test("Delete Notebook", async () => {
+  test('Delete Notebook', async () => {
     await galata.contents.deleteFile(fileName);
     expect(await galata.contents.fileExists(fileName)).toBeFalsy();
   });
