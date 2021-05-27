@@ -219,16 +219,14 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     if (palette) {
       // Add some of the commands defined here to the command palette.
-      if (menu.fileMenu.quitEntry) {
-        palette.addItem({
-          command: CommandIDs.shutdown,
-          category: trans.__('Main Area')
-        });
-        palette.addItem({
-          command: CommandIDs.logout,
-          category: trans.__('Main Area')
-        });
-      }
+      palette.addItem({
+        command: CommandIDs.shutdown,
+        category: trans.__('Main Area')
+      });
+      palette.addItem({
+        command: CommandIDs.logout,
+        category: trans.__('Main Area')
+      });
 
       palette.addItem({
         command: CommandIDs.shutdownAllKernels,
@@ -379,6 +377,8 @@ export function createFileMenu(
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shut Down'),
     caption: trans.__('Shut down JupyterLab'),
+    isVisible: () => menu.quitEntry,
+    isEnabled: () => menu.quitEntry,
     execute: () => {
       return showDialog({
         title: trans.__('Shutdown confirmation'),
@@ -432,15 +432,12 @@ export function createFileMenu(
   commands.addCommand(CommandIDs.logout, {
     label: trans.__('Log Out'),
     caption: trans.__('Log out of JupyterLab'),
+    isVisible: () => menu.quitEntry,
+    isEnabled: () => menu.quitEntry,
     execute: () => {
       router.navigate('/logout', { hard: true });
     }
   });
-
-  // TODO
-  // if (menu.quitEntry) {
-  //   menu.addGroup(quitGroup, 99);
-  // }
 }
 
 /**
