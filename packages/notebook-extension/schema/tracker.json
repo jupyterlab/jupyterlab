@@ -210,6 +210,15 @@
             "rank": 12
           }
         ]
+      },
+      {
+        "id": "jp-mainmenu-kernel",
+        "items": [
+          {
+            "command": "notebook:restart-and-run-to-selected",
+            "rank": 1
+          }
+        ]
       }
     ]
   },

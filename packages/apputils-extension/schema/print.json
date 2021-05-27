@@ -1,10 +1,29 @@
 {
   "title": "Print",
   "description": "Print settings.",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 98
+          },
+          {
+            "command": "apputils:print",
+            "rank": 98
+          }
+        ]
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
     {
       "command": "apputils:print",
-      "keys": ["Accel P"],
+      "keys": [
+        "Accel P"
+      ],
       "selector": "body"
     }
   ],

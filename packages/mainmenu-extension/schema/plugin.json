@@ -101,84 +101,16 @@
               "rank": 0
             },
             {
-              "command": "filebrowser:create-main-launcher",
-              "rank": 0
-            },
-            {
               "type": "separator",
-              "rank": 1
-            },
-            {
-              "command": "filebrowser:open-path",
-              "rank": 1
-            },
-            {
-              "type": "separator",
-              "rank": 2
-            },
-            {
-              "command": "docmanager:clone",
               "rank": 2
             },
             {
               "command": "filemenu:create-console",
-              "rank": 2
-            },
-            {
-              "type": "separator",
-              "rank": 3
-            },
-            {
-              "command": "application:close",
-              "rank": 3
+              "rank": 2.1
             },
             {
               "command": "filemenu:close-and-cleanup",
-              "rank": 3
-            },
-            {
-              "command": "application:close-all",
-              "rank": 3
-            },
-            {
-              "type": "separator",
-              "rank": 4
-            },
-            {
-              "command": "docmanager:save",
-              "rank": 4
-            },
-            {
-              "command": "docmanager:save-as",
-              "rank": 4
-            },
-            {
-              "command": "docmanager:save-all",
-              "rank": 4
-            },
-            {
-              "type": "separator",
-              "rank": 5
-            },
-            {
-              "command": "docmanager:reload",
-              "rank": 5
-            },
-            {
-              "command": "docmanager:restore-checkpoint",
-              "rank": 5
-            },
-            {
-              "command": "docmanager:rename",
-              "rank": 5
-            },
-            {
-              "type": "separator",
-              "rank": 98
-            },
-            {
-              "command": "apputils:print",
-              "rank": 98
+              "rank": 3.1
             },
             {
               "type": "separator",
@@ -234,34 +166,6 @@
           "id": "jp-mainmenu-view",
           "label": "View",
           "items": [
-            {
-              "command": "apputils:activate-command-palette",
-              "rank": 0
-            },
-            {
-              "type": "separator",
-              "rank": 1
-            },
-            {
-              "command": "application:toggle-mode",
-              "rank": 1
-            },
-            {
-              "command": "application:toggle-presentation-mode",
-              "rank": 1
-            },
-            {
-              "type": "separator",
-              "rank": 2
-            },
-            {
-              "command": "application:toggle-left-area",
-              "rank": 2
-            },
-            {
-              "command": "application:toggle-right-area",
-              "rank": 2
-            },
             {
               "type": "separator",
               "rank": 10
@@ -324,12 +228,8 @@
               "rank": 1
             },
             {
-              "command": "notebook:restart-and-run-to-selected",
-              "rank": 1
-            },
-            {
               "command": "runmenu:restart-and-run-all",
-              "rank": 1
+              "rank": 1.1
             },
             {
               "type": "separator",

@@ -4,6 +4,23 @@
   "jupyter.lab.menus": {
     "main": [
       {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "command": "filebrowser:create-main-launcher",
+            "rank": 1
+          },
+          {
+            "type": "separator",
+            "rank": 1
+          },
+          {
+            "command": "filebrowser:open-path",
+            "rank": 1
+          }
+        ]
+      },
+      {
         "id": "jp-mainmenu-settings",
         "items": [
           {
