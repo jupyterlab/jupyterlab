@@ -63,7 +63,9 @@ jobs:
     - name: Launch JupyterLab
       run: |
         cd ui-tests
+        mkdir jlab_root
         jlpm run start-jlab:detached
+        rm -rf jlab_root
     
     - name: Wait for JupyterLab
       uses: ifaxity/wait-on-action@v1
