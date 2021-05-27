@@ -240,6 +240,7 @@ describe('@jupyterlab/apputils', () => {
         it('should focus the default button when focus leaves the dialog', async () => {
           const host = document.createElement('div');
           const target = document.createElement('div');
+          target.tabIndex = 0; // Make the div element focusable
           const dialog = new TestDialog({ host });
 
           document.body.appendChild(target);
