@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         group: [ui_test]
-        python: [3.6, 3.8]
+        python: [3.8]
       fail-fast: false
 
     steps:
@@ -50,6 +50,10 @@ jobs:
         GROUP: ${{ matrix.group }}
       run: |
         bash ./scripts/ci_install.sh
+        jlpm install
+        jlpm run build
+        jlpm run build:core
+        jupyter lab build
 
     - name: Install Galata
       run: |
