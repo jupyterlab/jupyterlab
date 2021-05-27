@@ -52,13 +52,13 @@ item:
       "disabled": true
     },
     {
-        "id": "jp-mainmenu-kernel",
-        "items": [
-            {
-                "command": "notebook:restart-and-run-to-selected",
-                "disabled": true
-            }
-        ]
+      "id": "jp-mainmenu-kernel",
+      "items": [
+        {
+          "command": "notebook:restart-and-run-to-selected",
+          "disabled": true
+        }
+      ]
     }
   ]
 }
@@ -277,7 +277,7 @@ async function displayInformation(trans: TranslationBundle): Promise<void> {
     ),
     buttons: [
       Dialog.cancelButton(),
-      Dialog.okButton({ label: trans.__('RELOAD') })
+      Dialog.okButton({ label: trans.__('Reload') })
     ]
   });
 
