@@ -125,6 +125,20 @@
 
 .jp-Licenses-Grid {
   min-width: 18em;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Licenses-Grid > form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Licenses-Grid > form > table {
+  flex: 1;
+  overflow-y: scroll;
+  width: 100%;
   border: solid var(--jp-border-width) var(--jp-border-color2);
 }
 

@@ -1,24 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as React from 'react';
+
 import { SplitPanel, TabBar, Widget } from '@lumino/widgets';
 import { ReadonlyJSONObject, PromiseDelegate } from '@lumino/coreutils';
-import { toArray } from '@lumino/algorithm';
 import { Signal } from '@lumino/signaling';
-import {
-  BasicKeyHandler,
-  BasicMouseHandler,
-  BasicSelectionModel,
-  DataGrid,
-  JSONModel,
-  TextRenderer
-} from '@lumino/datagrid';
 
 import { VirtualElement, h } from '@lumino/virtualdom';
 
 import { ServerConnection } from '@jupyterlab/services';
 import { TranslationBundle } from '@jupyterlab/translation';
-import { IThemeManager } from '@jupyterlab/apputils';
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import {
   spreadsheetIcon,
   jsonIcon,
@@ -39,7 +32,7 @@ export class Licenses extends SplitPanel {
     this.initGrid();
     this.initLicenseText();
     this.setRelativeSizes([1, 2, 3]);
-    this.model.licensesChanged.connect(this.onLicensesChanged, this);
+    this.model.stateChanged.connect(this.onLicensesChanged, this);
     void this.model.initLicenses();
   }
 
@@ -47,13 +40,8 @@ export class Licenses extends SplitPanel {
     if (this.isDisposed) {
       return;
     }
-    this._grid.selectionModel?.changed.disconnect(
-      this.onGridSelectionChanged,
-      this
-    );
     this._tabs.currentChanged.disconnect(this.onBundleSelected, this);
-    this.model.gridThemeChanged.disconnect(this.onGridThemeChanged, this);
-    this.model.licensesChanged.disconnect(this.onLicensesChanged, this);
+    this.model.stateChanged.disconnect(this.onLicensesChanged, this);
     this.model.dispose();
     super.dispose();
   }
@@ -70,35 +58,7 @@ export class Licenses extends SplitPanel {
   }
 
   protected initGrid() {
-    const { style, textRenderer } = this.model.gridTheme;
-
-    this._grid = new DataGrid({
-      defaultSizes: {
-        rowHeight: 24,
-        columnWidth: 144,
-        rowHeaderWidth: 64,
-        columnHeaderHeight: 24
-      },
-      stretchLastColumn: true,
-      stretchLastRow: true,
-      ...(style == null ? {} : { style })
-    });
-    if (textRenderer != null) {
-      this._grid.cellRenderers.update({}, textRenderer);
-    }
-    this._grid.addClass('jp-Licenses-Grid');
-    this._grid.headerVisibility = 'all';
-    this._grid.keyHandler = new BasicKeyHandler();
-    this._grid.mouseHandler = new BasicMouseHandler();
-    this._grid.copyConfig = {
-      separator: '\t',
-      format: DataGrid.copyFormatGeneric,
-      headers: 'all',
-      warningThreshold: 1e6
-    };
-
-    this.model.gridThemeChanged.connect(this.onGridThemeChanged, this);
-
+    this._grid = new LicenseGrid(this.model);
     SplitPanel.setStretch(this._grid, 1);
     this.addWidget(this._grid);
   }
@@ -113,35 +73,10 @@ export class Licenses extends SplitPanel {
     if (this._tabs.currentTitle?.label) {
       this.model.bundle = this._tabs.currentTitle.label;
     }
-    this._updateGrid();
-  }
-
-  protected onGridSelectionChanged() {
-    const selections = this._grid.selectionModel?.selections();
-    let index: number | null = null;
-
-    if (selections) {
-      const selectionArray = toArray(selections);
-      if (selectionArray.length) {
-        index = selectionArray[0].r1;
-      }
-    }
-    this.model.selectedPackageIndex = index;
-  }
-
-  protected onGridThemeChanged() {
-    const { style, textRenderer } = this.model.gridTheme;
-    if (style != null) {
-      this._grid.style = style;
-    }
-    if (textRenderer != null) {
-      this._grid.cellRenderers.update({}, textRenderer);
-    }
   }
 
   protected onLicensesChanged() {
     this._updateTabs();
-    this._updateGrid();
   }
 
   protected _updateTabs(): void {
@@ -154,37 +89,67 @@ export class Licenses extends SplitPanel {
     }
   }
 
-  /**
-   * Create the model for the grid.
-   */
-  protected _updateGrid(): void {
-    const oldDataModel = this._grid.dataModel;
+  protected _grid: LicenseGrid;
+  protected _tabs: TabBar<Widget>;
+  protected _text: Widget;
+}
 
-    if (oldDataModel != null) {
-      oldDataModel.changed.disconnect(this.onGridSelectionChanged, this);
-    }
-
+export class LicenseGrid extends VDomRenderer<Licenses.Model> {
+  constructor(model: Licenses.Model) {
+    super(model);
+    this.addClass('jp-Licenses-Grid');
+    this.addClass('jp-RenderedHTMLCommon');
+  }
+  protected render(): JSX.Element {
     const licenses = this.model.licenses;
     const bundle = this.model.bundle;
     const data = licenses && bundle ? licenses[bundle]?.packages : [];
-    const dataModel = (this._grid.dataModel = new JSONModel({
-      data,
-      schema: this.model.schema
-    }));
-    this._grid.selectionModel = new BasicSelectionModel({
-      dataModel,
-      selectionMode: 'row'
-    });
 
-    this._grid.selectionModel.changed.connect(
-      this.onGridSelectionChanged,
-      this
+    return (
+      <form>
+        <table>
+          <thead>
+            <tr>
+              <th>{this.model.trans.__('Package')}</th>
+              <th>{this.model.trans.__('Version')}</th>
+              <th>{this.model.trans.__('License ID')}</th>
+            </tr>
+          </thead>
+          <tbody>{data.map(this.renderRow)}</tbody>
+        </table>
+      </form>
     );
   }
 
-  protected _grid: DataGrid;
-  protected _tabs: TabBar<Widget>;
-  protected _text: Widget;
+  protected renderRow = (row: Licenses.IPackageLicenseInfo, index: number) => {
+    const id = `id-license-package-${index}`;
+    return (
+      <tr key={row.name}>
+        <th>
+          <label htmlFor={id}>
+            <input
+              type="radio"
+              name="show-package-license"
+              value={index}
+              id={id}
+              onChange={this.onPackageSelected}
+            />
+            <code>{row.name}</code>
+          </label>
+        </th>
+        <td>
+          <code>{row.versionInfo}</code>
+        </td>
+        <td>
+          <code>{row.licenseId}</code>
+        </td>
+      </tr>
+    );
+  };
+
+  protected onPackageSelected = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    this.model.selectedPackageIndex = parseInt(evt.currentTarget.value);
+  };
 }
 
 export namespace Licenses {
@@ -233,7 +198,6 @@ export namespace Licenses {
     licensesUrl: string;
     serverSettings?: ServerConnection.ISettings;
     trans: TranslationBundle;
-    themes?: IThemeManager | null;
   }
 
   /**
@@ -286,24 +250,13 @@ export namespace Licenses {
   /**
    * A model for license data
    */
-  export class Model {
+  export class Model extends VDomModel {
     constructor(options: IModelOptions) {
+      super();
       this._trans = options.trans;
       this._licensesUrl = options.licensesUrl;
-      this._themes = options.themes || null;
       this._serverSettings =
         options.serverSettings || ServerConnection.makeSettings();
-      this.initSchema();
-      if (this._themes) {
-        this._themes.themeChanged.connect(this.updateGridTheme, this);
-        this.updateGridTheme();
-      }
-    }
-
-    dispose() {
-      if (this._themes) {
-        this._themes.themeChanged.disconnect(this.updateGridTheme, this);
-      }
     }
 
     async initLicenses() {
@@ -315,49 +268,7 @@ export namespace Licenses {
       this._licenses = await response.json();
       this._licensesReady.resolve(void 0);
       this._licensesChanged.emit(void 0);
-    }
-
-    protected initSchema() {
-      this._schema = {
-        fields: [
-          { name: 'name', title: this._trans.__('Name') },
-          { name: 'versionInfo', title: this._trans.__('Version') },
-          { name: 'licenseId', title: this._trans.__('License ID') }
-        ]
-      };
-    }
-
-    protected updateGridTheme() {
-      if (this._themes == null) {
-        return;
-      }
-
-      const _themes = this._themes as any;
-
-      if (_themes.getCSS == null) {
-        return;
-      }
-
-      this._gridStyle = {
-        ...DataGrid.defaultStyle,
-        voidColor: _themes.getCSS('layout-color0'),
-        backgroundColor: _themes.getCSS('layout-color1'),
-        headerBackgroundColor: _themes.getCSS('layout-color2'),
-        gridLineColor: _themes.getCSS('border-color3'),
-        headerGridLineColor: _themes.getCSS('border-color3')
-      };
-
-      this._gridTextRenderer = new TextRenderer({
-        font: `${_themes.getCSS('content-font-size1')} ${_themes.getCSS(
-          'ui-font-family'
-        )}`,
-        textColor: _themes.getCSS('content-font-color0'),
-        backgroundColor: '',
-        verticalAlignment: 'center',
-        horizontalAlignment: 'left'
-      });
-
-      this.gridThemeChanged.emit(void 0);
+      this.stateChanged.emit(void 0);
     }
 
     async download(options: IDownloadOptions) {
@@ -375,16 +286,8 @@ export namespace Licenses {
       return this._licensesChanged;
     }
 
-    get gridThemeChanged() {
-      return this._gridStyleChanged;
-    }
-
     get selectedPackageChanged() {
       return this._selectedPackageChanged;
-    }
-
-    get schema() {
-      return this._schema;
     }
 
     get bundles(): string[] {
@@ -427,6 +330,7 @@ export namespace Licenses {
         this._selectedPackage = null;
       }
       this._selectedPackageChanged.emit(void 0);
+      this.stateChanged.emit(void 0);
     }
 
     get selectedPackage() {
@@ -441,25 +345,16 @@ export namespace Licenses {
       return this._trans;
     }
 
-    get gridTheme() {
-      return { style: this._gridStyle, textRenderer: this._gridTextRenderer };
-    }
-
     private _licensesChanged: Signal<Model, void> = new Signal(this);
     private _selectedPackageChanged: Signal<Model, void> = new Signal(this);
-    private _gridStyleChanged: Signal<Model, void> = new Signal(this);
     private _licenses: ILicenseResponse | null;
     private _licensesUrl: string;
     private _serverSettings: ServerConnection.ISettings;
     private _bundle: string | null;
     private _trans: TranslationBundle;
-    private _schema: JSONModel.Schema;
     private _licensesReady = new PromiseDelegate<void>();
     private _selectedPackageIndex: number | null;
     private _selectedPackage: IPackageLicenseInfo | null;
-    private _themes: IThemeManager | null;
-    private _gridStyle: DataGrid.Style | null;
-    private _gridTextRenderer: TextRenderer | null;
   }
 
   export class BundleTabRenderer extends TabBar.Renderer {
