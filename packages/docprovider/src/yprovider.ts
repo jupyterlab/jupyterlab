@@ -14,7 +14,7 @@ import * as encoding from 'lib0/encoding';
 import { IDocumentProviderFactory } from './tokens';
 
 /**
- * A class to provide Yjs synchronization over Websocket.
+ * A class to provide Yjs synchronization over WebSocket.
  */
 export class WebSocketProviderWithLocks extends WebsocketProvider {
   /**
@@ -64,9 +64,9 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
         initialContentRequest.resolve(initialContent.byteLength > 0);
       }
     };
-    this.isInitialized = false;
-    this.onConnectionStatus = this.onConnectionStatus.bind(this);
-    this.on('status', this.onConnectionStatus);
+    this._isInitialized = false;
+    this._onConnectionStatus = this._onConnectionStatus.bind(this);
+    this.on('status', this._onConnectionStatus);
   }
 
   /**
@@ -93,27 +93,21 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     return promise;
   }
 
-  async onConnectionStatus(status: {
-    status: 'connected' | 'disconnected';
-  }): Promise<void> {
-    if (this.isInitialized && status.status === 'connected') {
-      const lock = await this.acquireLock();
-      const contentIsInitialized = await this.requestInitialContent();
-      if (!contentIsInitialized) {
-        this.putInitializedState();
-      }
-      this.releaseLock(lock);
-    }
-  }
-
+  /**
+   * Put the initialized state.
+   */
   putInitializedState(): void {
     const encoder = encoding.createEncoder();
     encoding.writeVarUint(encoder, 124);
     encoding.writeUint8Array(encoder, Y.encodeStateAsUpdate(this.doc));
     this._sendMessage(encoding.toUint8Array(encoder));
-    this.isInitialized = true;
+    this._isInitialized = true;
   }
 
+  /**
+   * Acquire a lock.
+   * Returns a Promise that resolves to the lock number.
+   */
   acquireLock(): Promise<number> {
     if (this._currentLockRequest) {
       return this._currentLockRequest.promise;
@@ -139,6 +133,11 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     return promise;
   }
 
+  /**
+   * Release a lock.
+   *
+   * @param lock The lock to release.
+   */
   releaseLock(lock: number): void {
     const encoder = encoding.createEncoder();
     // reply with release lock
@@ -148,6 +147,11 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     this._sendMessage(encoding.toUint8Array(encoder));
   }
 
+  /**
+   * Send a new message to WebSocket server.
+   *
+   * @param message The message to send
+   */
   private _sendMessage(message: Uint8Array): void {
     // send once connected
     const send = () => {
@@ -162,7 +166,26 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     send();
   }
 
-  isInitialized: boolean;
+  /**
+   * Handle a change to the connection status.
+   *
+   * @param status The connection status.
+   */
+  private async _onConnectionStatus(status: {
+    status: 'connected' | 'disconnected';
+  }): Promise<void> {
+    if (this._isInitialized && status.status === 'connected') {
+      const lock = await this.acquireLock();
+      const contentIsInitialized = await this.requestInitialContent();
+      if (!contentIsInitialized) {
+        this.putInitializedState();
+      }
+      this.releaseLock(lock);
+    }
+  }
+
+
+  private _isInitialized: boolean;
   private _currentLockRequest: {
     promise: Promise<number>;
     resolve: (lock: number) => void;
