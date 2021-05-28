@@ -457,16 +457,174 @@ The recommended ranges for this rank are:
 Main Menu
 ---------
 
-There are three main ways to extend JupyterLab's main menu.
+There are two ways to extend  JupyterLab's main menu.
+
+1. Using the settings - this is the preferred way as they are configurable by the user.
+2. Using the API - this is for advanced cases like dynamic menu or semantic items.
+
+Settings-defined menu
+^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab provides integration with its settings system for menu definitions.
+Your extension can provide a settings schema with a ``jupyter.lab.menus`` key,
+declaring default menus.
+
+To add a new menu with your extension command:
+
+.. code:: json
+
+    {
+      "jupyter.lab.menus": {
+      "main": [
+        {
+          "id": "jp-mainmenu-myextension",
+          "items": [
+            {
+              "command": "my-command",
+              "rank": 500
+            }
+          ],
+          "rank": 100
+        }
+      ]
+    }
+
+Menu and item have a ``rank`` that will determine the elements order.
+
+
+To add a new entry in an existing menu:
+
+.. code:: json
+
+    {
+      "jupyter.lab.menus": {
+      "main": [
+        {
+          "id": "jp-mainmenu-file",
+          "items": [
+            {
+              "command": "my-command",
+              "rank": 500
+            }
+          ]
+        }
+      ]
+    }
+
+Here is the list of default menu ids:
+
+- File menu: ``jp-mainmenu-file``
+
+  * New file submenu: ``jp-mainmenu-file-new``
+  
+- Edit menu: ``jp-mainmenu-edit``
+- View menu: ``jp-mainmenu-view``
+- Run menu: ``jp-mainmenu-run``
+- Kernel menu: ``jp-mainmenu-kernel``
+- Tabs menu: ``jp-mainmenu-tabs``
+- Settings menu: ``jp-mainmenu-settings``
+- Help menu: ``jp-mainmenu-help``
+
+The default main menu is defined in the ``mainmenu-extension`` package settings.
+
+A menu must respect the following schema:
+
+.. code:: json
+
+    "menu": {
+      "properties": {
+        "disabled": {
+          "description": "Whether the menu is disabled or not",
+          "type": "boolean",
+          "default": false
+        },
+        "id": {
+          "description": "Menu unique id",
+          "type": "string"
+        },
+        "items": {
+          "description": "Menu items",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/menuItem"
+          }
+        },
+        "label": {
+          "description": "Menu label",
+          "type": "string"
+        },
+        "rank": {
+          "description": "Menu rank",
+          "type": "number"
+        }
+      },
+      "required": ["id"],
+      "additionalProperties": false,
+      "type": "object"
+    }
+
+And an item must follow:
+
+.. code:: json
+
+    "menuItem": {
+      "properties": {
+        "args": {
+          "description": "Command arguments",
+          "type": "object"
+        },
+        "command": {
+          "description": "Command id",
+          "type": "string"
+        },
+        "disabled": {
+          "description": "Whether the item is disabled or not",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "description": "Item type",
+          "type": "string",
+          "enum": ["command", "submenu", "separator"],
+          "default": "command"
+        },
+        "rank": {
+          "description": "Item rank",
+          "type": "number"
+        },
+        "submenu": {
+          "description": "Submenu definition",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/menu"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+
+Menus added to the settings system will be editable by users using the ``mainmenu-extension``
+settings. In particular, they can be disabled at the item or the menu level by setting the 
+property ``disabled`` to ``true``.
+
+API-defined menu
+^^^^^^^^^^^^^^^^
+
+To use the API, you should request the ``IMainMenu`` token for your extension.
+
+There are three main ways to extend:
 
 1. You can add your own menu to the menu bar.
 2. You can add new commands to the existing menus.
 3. You can register your extension with one of the existing semantic menu items.
 
-In all three cases, you should request the ``IMainMenu`` token for your extension.
-
 Adding a New Menu
-^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~
 
 To add a new menu to the menu bar, you need to create a new
 `Lumino menu <https://jupyterlab.github.io/lumino/widgets/classes/menu.html>`__.
@@ -489,7 +647,7 @@ rendering and execution behavior of the command in the menu context.
 
 
 Adding a New Command to an Existing Menu
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In many cases you will want to add your commands to the existing JupyterLab menus
 rather than creating a separate menu for your extension.
@@ -514,7 +672,7 @@ to the File menu, you would do the following:
 
 
 Registering a Semantic Menu Item
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There are some commands in the JupyterLab menu system that are considered
 common and important enough that they are treated differently.
