@@ -9,7 +9,6 @@ const menuPaths = [
   'File>Export Notebook As…',
   'Edit',
   'View',
-  'View>Text Editor Syntax Highlighting',
   'Run',
   'Kernel',
   'Tabs',
@@ -39,8 +38,10 @@ export function runMenuOpenTest() {
       await galata.menu.open(menuPath);
       expect(await galata.menu.isOpen(menuPath)).toBeTruthy();
 
+      const imageName = `opened-menu-${menuPath}`;
       const menu = await galata.menu.getOpenMenu();
-      await galata.capture.screenshot(`opened-menu-${menuPath}`, menu);
+      await galata.capture.screenshot(imageName, menu);
+      expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
     }
   });
 
@@ -56,7 +57,11 @@ export function runSidebarOpenTest() {
       await galata.sidebar.openTab(sidebarId);
       expect(await galata.sidebar.isTabOpen(sidebarId)).toBeTruthy();
 
-      await galata.capture.screenshot(`opened-sidebar-${sidebarId}`);
+      const imageName = `opened-sidebar-${sidebarId}`;
+      const position = await galata.sidebar.getTabPosition(sidebarId);
+      const sidebar = await galata.sidebar.getContentPanel(position);
+      await galata.capture.screenshot(imageName, sidebar);
+      expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
     }
   });
 
