@@ -165,14 +165,21 @@ describe('@jupyterlab/mainmenu', () => {
         expect(menu.getRankAt(1)).toEqual(1000);
       });
 
-      it('should use the default rank to position the item', () => {
+      it('should append the item at the end if no rank is provided', () => {
         menu.addItem({ command: 'run1', rank: 10 });
-        menu.addItem({ command: 'run2', rank: 1000 });
 
         menu.addItem({ command: 'run3' });
 
         expect(menu.items[1].command).toEqual('run3');
         expect(menu.getRankAt(1)).toEqual(100);
+
+        menu.addItem({ command: 'run2', rank: 1000 });
+        // Set a rank to n-1 element if it is higher than the default
+
+        menu.addItem({ command: 'run4' });
+
+        expect(menu.items[3].command).toEqual('run4');
+        expect(menu.getRankAt(3)).toEqual(1000);
       });
     });
   });
