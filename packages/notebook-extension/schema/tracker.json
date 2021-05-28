@@ -373,7 +373,7 @@
       "title": "Recording timing",
       "description": "Should timing data be recorded in cell metadata",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "maxNumberOutputs": {
       "title": "The maximum number of output cells to to be rendered in the output area. Set to 0 to have the complete display.",
