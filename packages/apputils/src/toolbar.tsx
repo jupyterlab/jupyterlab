@@ -670,7 +670,13 @@ namespace Private {
     if (!commands.isVisible(id, args)) {
       className += ' lm-mod-hidden';
     }
-    const tooltip = commands.caption(id, args) || label || iconLabel;
+    let tooltip = commands.caption(id, args) || label || iconLabel;
+    // Shows hot keys in tooltips
+    const binding = commands.keyBindings.find(b => b.command === id);
+    if (binding) {
+      const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+      tooltip = `${tooltip} (${ks})`;
+    }
     const onClick = () => {
       void commands.execute(id, args);
     };
