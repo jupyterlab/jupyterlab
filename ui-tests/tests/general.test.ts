@@ -4,7 +4,7 @@
 import { galata, describe, test } from '@jupyterlab/galata';
 import { runMenuOpenTest, runSidebarOpenTest } from './util';
 
-jest.setTimeout(100000);
+jest.setTimeout(60000);
 
 describe('General Tests', () => {
   beforeAll(async () => {
@@ -17,8 +17,9 @@ describe('General Tests', () => {
   });
 
   test('Launch Screen', async () => {
-    await galata.capture.screenshot('launch');
-    expect(await galata.capture.compareScreenshot('launch')).toBe('same');
+    const imageName = 'launch';
+    await galata.capture.screenshot(imageName);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
   runMenuOpenTest();
@@ -29,8 +30,9 @@ describe('General Tests', () => {
     await galata.toggleSimpleMode(true);
     expect(await galata.isInSimpleMode()).toBeTruthy();
 
-    await galata.capture.screenshot('simple-mode');
-    expect(await galata.capture.compareScreenshot('simple-mode')).toBe('same');
+    const imageName = 'simple-mode';
+    await galata.capture.screenshot(imageName);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
   test('Leave Simple Mode', async () => {
@@ -40,53 +42,48 @@ describe('General Tests', () => {
 
   test('Toggle Dark theme', async () => {
     await galata.theme.setDarkTheme();
-    await galata.capture.screenshot('dark-theme');
-    expect(await galata.capture.compareScreenshot('dark-theme')).toBe('same');
+    const imageName = 'dark-theme';
+    await galata.capture.screenshot(imageName);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
   test('Toggle Light theme', async () => {
     await galata.theme.setLightTheme();
   });
 
-  test('Move File Browser to Right', async () => {
+  test('Move File Browser to right', async () => {
     await galata.sidebar.moveTabToRight('filebrowser');
     expect(await galata.sidebar.getTabPosition('filebrowser')).toBe('right');
   });
 
-  test('Open File Browser on Right', async () => {
+  test('Open File Browser on right', async () => {
     await galata.sidebar.openTab('filebrowser');
     expect(await galata.sidebar.isTabOpen('filebrowser')).toBeTruthy();
   });
 
-  test('Close Sidebar on Right', async () => {
+  test('Close Sidebar on right', async () => {
     await galata.sidebar.close('right');
     expect(await galata.sidebar.isOpen('right')).toBeFalsy();
   });
 
-  test('Open Sidebar on Right', async () => {
+  test('Open Sidebar on right', async () => {
     await galata.sidebar.open('right');
     expect(await galata.sidebar.isOpen('right')).toBeTruthy();
   });
 
-  test('Capture File Browser on Right', async () => {
-    const filebrowser = await galata.sidebar.getContentPanel('right');
-    await galata.capture.screenshot('filebrowser-right', filebrowser);
-    await galata.capture.screenshot('filebrowser-right-2');
+  test('Capture File Browser on right', async () => {
+    let imageName = 'filebrowser-right';
+    await galata.capture.screenshot(imageName);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test('Move File Browser to Left', async () => {
+  test('Move File Browser to left', async () => {
     await galata.sidebar.moveTabToLeft('filebrowser');
     expect(await galata.sidebar.getTabPosition('filebrowser')).toBe('left');
   });
 
-  test('Open File Browser on Left', async () => {
+  test('Open File Browser on left', async () => {
     await galata.sidebar.openTab('filebrowser');
     expect(await galata.sidebar.isTabOpen('filebrowser')).toBeTruthy();
-  });
-
-  test('Capture File Browser on Left', async () => {
-    const filebrowser = await galata.sidebar.getContentPanel('left');
-    await galata.capture.screenshot('filebrowser-left', filebrowser);
-    await galata.capture.screenshot('filebrowser-left-2');
   });
 });

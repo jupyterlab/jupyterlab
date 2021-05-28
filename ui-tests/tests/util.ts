@@ -52,7 +52,7 @@ export function runMenuOpenTest() {
 
 // eslint-disable-next-line jest/no-export
 export function runSidebarOpenTest() {
-  test('Open sidebar tabs', async () => {
+  test('Open Sidebar tabs', async () => {
     for (const sidebarId of sidebarIds) {
       await galata.sidebar.openTab(sidebarId);
       expect(await galata.sidebar.isTabOpen(sidebarId)).toBeTruthy();
