@@ -4,7 +4,7 @@
 import { galata, describe, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
-jest.setTimeout(100000);
+jest.setTimeout(60000);
 
 const fileName = 'toc_notebook.ipynb';
 
@@ -46,14 +46,14 @@ describe('Table of Contents', () => {
     ).toBeTruthy();
   });
 
-  test('Open notebook', async () => {
+  test('Open Notebook', async () => {
     await galata.notebook.open(fileName);
     expect(await galata.notebook.isOpen(fileName)).toBeTruthy();
     await galata.notebook.activate(fileName);
     expect(await galata.notebook.isActive(fileName)).toBeTruthy();
   });
 
-  test('Open property inspector', async () => {
+  test('Open Property Inspector', async () => {
     const imageName = 'property-inspector';
     await galata.sidebar.openTab('jp-property-inspector');
     const piPanel = await galata.sidebar.getContentPanel('left');
@@ -101,7 +101,7 @@ describe('Table of Contents', () => {
     await tags[1].click();
   });
 
-  test('Open Table of Contents Panel', async () => {
+  test('Open Table of Contents panel', async () => {
     const imageName = 'toc-panel';
     await galata.notebook.activate(fileName);
     await galata.notebook.selectCells(0);
@@ -112,7 +112,7 @@ describe('Table of Contents', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test('Toggle Code Markdown List', async () => {
+  test('Toggle code-markdown-list', async () => {
     const tocPanel = await galata.sidebar.getContentPanel('left');
     const toolbarButtons = await tocPanel.$$('.toc-toolbar .toc-toolbar-icon');
     expect(toolbarButtons.length).toBe(4);
@@ -136,7 +136,7 @@ describe('Table of Contents', () => {
     await toolbarButtons[2].click();
   });
 
-  test('Toggle Tags', async () => {
+  test('Toggle tags', async () => {
     const tocPanel = await galata.sidebar.getContentPanel('left');
     const toolbarButtons = await tocPanel.$$('.toc-toolbar .toc-toolbar-icon');
     expect(toolbarButtons.length).toBe(4);
@@ -166,7 +166,7 @@ describe('Table of Contents', () => {
     await tags[1].click();
   });
 
-  test('Close notebook', async () => {
+  test('Close Notebook', async () => {
     await galata.notebook.activate(fileName);
     await galata.notebook.close(true);
   });

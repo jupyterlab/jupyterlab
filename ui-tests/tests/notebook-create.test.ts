@@ -18,7 +18,7 @@ describe('Notebook Create', () => {
     galata.context.capturePrefix = '';
   });
 
-  test('Create New Notebook', async () => {
+  test('Create new Notebook', async () => {
     await galata.notebook.createNew(fileName);
   });
 
@@ -51,7 +51,7 @@ describe('Notebook Create', () => {
 
   runMenuOpenTest();
 
-  test('Run Cells', async () => {
+  test('Run cells', async () => {
     await galata.notebook.run();
     await galata.notebook.save();
     const imageName = 'run-cells';
@@ -66,8 +66,9 @@ describe('Notebook Create', () => {
   test('Toggle Dark theme', async () => {
     await galata.theme.setDarkTheme();
     const nbPanel = await galata.notebook.getNotebookInPanel();
-    await galata.capture.screenshot('dark-theme', nbPanel);
-    expect(await galata.capture.compareScreenshot('dark-theme')).toBe('same');
+    const imageName = 'dark-theme';
+    await galata.capture.screenshot(imageName, nbPanel);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
   test('Toggle Light theme', async () => {

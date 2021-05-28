@@ -4,7 +4,7 @@
 import { galata, describe, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
-jest.setTimeout(100000);
+jest.setTimeout(60000);
 
 const fileName = 'simple_notebook.ipynb';
 
@@ -46,7 +46,7 @@ describe('Notebook Run', () => {
     ).toBeTruthy();
   });
 
-  test('Run notebook and capture cell outputs', async () => {
+  test('Run Notebook and capture cell outputs', async () => {
     await galata.notebook.open(fileName);
     expect(await galata.notebook.isOpen(fileName)).toBeTruthy();
     await galata.notebook.activate(fileName);
@@ -98,7 +98,7 @@ describe('Notebook Run', () => {
     expect(parseFloat(cellOutput[0])).toBeGreaterThan(1.5);
   });
 
-  test('Close notebook', async () => {
+  test('Close Notebook', async () => {
     await galata.notebook.close(true);
   });
 
