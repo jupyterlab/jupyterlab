@@ -159,12 +159,12 @@ export class MainMenu extends MenuBar implements IMainMenu {
    * Add a new menu to the main menu bar.
    */
   addMenu(menu: Menu, options: IMainMenu.IAddOptions = {}): void {
-    // override default renderer with svg-supporting renderer
-    MenuSvg.overrideDefaultRenderer(menu);
-
     if (ArrayExt.firstIndexOf(this.menus, menu) > -1) {
       return;
     }
+
+    // override default renderer with svg-supporting renderer
+    MenuSvg.overrideDefaultRenderer(menu);
 
     const rank =
       'rank' in options
@@ -183,11 +183,8 @@ export class MainMenu extends MenuBar implements IMainMenu {
      * Create a new menu.
      */
     this.insertMenu(index, menu);
-  }
 
-  attachMenu(menu: JupyterLabMenu): void {
-    this.addMenu(menu, { rank: menu.rank });
-
+    // Link the menu to the API - backward compatibility when switching to menu description in settings
     switch (menu.id) {
       case 'jp-mainmenu-file':
         if (!this._fileMenu && menu instanceof FileMenu) {

@@ -9,7 +9,8 @@ import {
   ILabShell,
   IRouter,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  MenuFactory
 } from '@jupyterlab/application';
 
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
@@ -21,6 +22,7 @@ import {
   FileMenu,
   IMainMenu,
   IMenuExtender,
+  JupyterLabMenu,
   KernelMenu,
   MainMenu,
   RunMenu,
@@ -35,12 +37,13 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
 import { each, find } from '@lumino/algorithm';
+import { JSONExt } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
 import { Menu, Widget } from '@lumino/widgets';
 
-import { loadSettingsMenu, PLUGIN_ID } from './builder';
+const PLUGIN_ID = '@jupyterlab/mainmenu-extension:plugin';
 
 /**
  * A namespace for command IDs of semantic extension points.
@@ -145,9 +148,11 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     // Built menu from settings
     if (registry) {
-      await loadSettingsMenu(
+      await Private.loadSettingsMenu(
         registry,
-        menu.attachMenu.bind(menu),
+        aMenu => {
+          menu.addMenu(aMenu, { rank: aMenu.rank });
+        },
         options => MainMenu.generateMenu(commands, options, trans),
         translator
       );
@@ -869,5 +874,73 @@ namespace Private {
         !!((extender[toggled] as any) as (w: Widget) => () => boolean)(widget)
       );
     };
+  }
+
+  async function displayInformation(trans: TranslationBundle): Promise<void> {
+    const result = await showDialog({
+      title: trans.__('Information'),
+      body: trans.__(
+        'Menu customization has changed. You will need to reload JupyterLab to see the changes.'
+      ),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.okButton({ label: trans.__('Reload') })
+      ]
+    });
+
+    if (result.button.accept) {
+      location.reload();
+    }
+  }
+
+  export async function loadSettingsMenu(
+    registry: ISettingRegistry,
+    attachMenu: (menu: JupyterLabMenu) => void,
+    menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu,
+    translator: ITranslator
+  ): Promise<void> {
+    const trans = translator.load('jupyterlab');
+    const menus = new Array<JupyterLabMenu>();
+
+    const updateMenus = async (
+      menu: ISettingRegistry.IMenu[],
+      isNew: boolean
+    ) => {
+      if (isNew) {
+        // The plugin has changed, request the user to reload the UI - this should not happen
+        await displayInformation(trans);
+      } else {
+        // The plugin was not yet loaded when the menu was built => update the menu
+        MenuFactory.updateMenus(menus, menu, menuFactory).forEach(menu => {
+          attachMenu(menu);
+        });
+      }
+    };
+
+    await MenuFactory.initializeMenus({
+      registry,
+      updateMenus,
+      pluginID: PLUGIN_ID,
+      schemaKey: 'jupyter.lab.menus',
+      subKey: 'main',
+      property: 'menus'
+    });
+
+    const settings = await registry.load(PLUGIN_ID);
+
+    const currentMenus =
+      JSONExt.deepCopy(settings.composite.menus as any) ?? [];
+    MenuFactory.createMenus(currentMenus, menuFactory).forEach(menu => {
+      menus.push(menu);
+      attachMenu(menu);
+    });
+    settings.changed.connect(() => {
+      // As extension may change menu through API, prompt the user to reload if the
+      // menu has been updated.
+      const newMenus = (settings.composite.menus as any) ?? [];
+      if (!JSONExt.deepEqual(currentMenus, newMenus)) {
+        void displayInformation(trans);
+      }
+    });
   }
 }

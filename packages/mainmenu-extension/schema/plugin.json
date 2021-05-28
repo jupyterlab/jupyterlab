@@ -82,6 +82,7 @@
   "properties": {
     "menus": {
       "title": "The application menu description.",
+      "description": "Note: To disable a menu or a menu item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable\nthe \"Tabs\" menu and \"Restart Kernel and Run up to Selected Cell\"\nitem:\n{\n  \"menus\": [\n    {\n      \"id\": \"jp-mainmenu-tabs\",\n      \"disabled\": true\n    },\n    {\n      \"id\": \"jp-mainmenu-kernel\",\n      \"items\": [\n        {\n          \"command\": \"notebook:restart-and-run-to-selected\",\n          \"disabled\": true\n        }\n      ]\n    }\n  ]\n}\n\nMenu description:",
       "items": {
         "$ref": "#/definitions/menu"
       },
