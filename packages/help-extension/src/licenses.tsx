@@ -32,20 +32,20 @@ export class Licenses extends SplitPanel {
     this.initGrid();
     this.initLicenseText();
     this.setRelativeSizes([1, 2, 3]);
-    this.model.stateChanged.connect(this.onLicensesChanged, this);
-    void this.model.initLicenses();
+    this.model.initLicenses().then(() => this._updateTabs());
   }
 
+  /** Handle disposing of the widget */
   dispose() {
     if (this.isDisposed) {
       return;
     }
     this._tabs.currentChanged.disconnect(this.onBundleSelected, this);
-    this.model.stateChanged.disconnect(this.onLicensesChanged, this);
     this.model.dispose();
     super.dispose();
   }
 
+  /** Initialize the listing of available bundles */
   protected initTabs() {
     this._tabs = new TabBar({
       orientation: 'vertical',
@@ -57,28 +57,28 @@ export class Licenses extends SplitPanel {
     this._tabs.currentChanged.connect(this.onBundleSelected, this);
   }
 
+  /** Initialize the listing of packages within the current bundle */
   protected initGrid() {
-    this._grid = new LicenseGrid(this.model);
+    this._grid = new Licenses.Grid(this.model);
     SplitPanel.setStretch(this._grid, 1);
     this.addWidget(this._grid);
   }
 
+  /** Initialize the full text of the current package */
   protected initLicenseText() {
-    this._text = new Licenses.LicenseText(this.model);
+    this._text = new Licenses.FullText(this.model);
     SplitPanel.setStretch(this._grid, 1);
     this.addWidget(this._text);
   }
 
+  /** Event handler for updating the model with the current bundle */
   protected onBundleSelected() {
     if (this._tabs.currentTitle?.label) {
       this.model.bundle = this._tabs.currentTitle.label;
     }
   }
 
-  protected onLicensesChanged() {
-    this._updateTabs();
-  }
-
+  /** Update the bundle tabs. */
   protected _updateTabs(): void {
     this._tabs.clearTabs();
     let i = 0;
@@ -89,70 +89,19 @@ export class Licenses extends SplitPanel {
     }
   }
 
-  protected _grid: LicenseGrid;
+  /** Tabse reflecting available bundles */
   protected _tabs: TabBar<Widget>;
-  protected _text: Widget;
+
+  /** A grid of the current bundle's packages' license metadata */
+  protected _grid: Licenses.Grid;
+
+  /** The currently-selected package's full license text */
+  protected _text: Licenses.FullText;
 }
 
-export class LicenseGrid extends VDomRenderer<Licenses.Model> {
-  constructor(model: Licenses.Model) {
-    super(model);
-    this.addClass('jp-Licenses-Grid');
-    this.addClass('jp-RenderedHTMLCommon');
-  }
-  protected render(): JSX.Element {
-    const licenses = this.model.licenses;
-    const bundle = this.model.bundle;
-    const data = licenses && bundle ? licenses[bundle]?.packages : [];
-
-    return (
-      <form>
-        <table>
-          <thead>
-            <tr>
-              <th>{this.model.trans.__('Package')}</th>
-              <th>{this.model.trans.__('Version')}</th>
-              <th>{this.model.trans.__('License ID')}</th>
-            </tr>
-          </thead>
-          <tbody>{data.map(this.renderRow)}</tbody>
-        </table>
-      </form>
-    );
-  }
-
-  protected renderRow = (row: Licenses.IPackageLicenseInfo, index: number) => {
-    const id = `id-license-package-${index}`;
-    return (
-      <tr key={row.name}>
-        <th>
-          <label htmlFor={id}>
-            <input
-              type="radio"
-              name="show-package-license"
-              value={index}
-              id={id}
-              onChange={this.onPackageSelected}
-            />
-            <code>{row.name}</code>
-          </label>
-        </th>
-        <td>
-          <code>{row.versionInfo}</code>
-        </td>
-        <td>
-          <code>{row.licenseId}</code>
-        </td>
-      </tr>
-    );
-  };
-
-  protected onPackageSelected = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    this.model.selectedPackageIndex = parseInt(evt.currentTarget.value);
-  };
-}
-
+/** A namespace for license components */
 export namespace Licenses {
+  /** The information about a license report format  */
   export interface IReportFormat {
     title: string;
     icon: LabIcon;
@@ -243,6 +192,7 @@ export namespace Licenses {
     extractedText: string;
   }
 
+  /** The format information for a download */
   export interface IDownloadOptions {
     format: string;
   }
@@ -259,6 +209,9 @@ export namespace Licenses {
         options.serverSettings || ServerConnection.makeSettings();
     }
 
+    /**
+     * Handle the initial request for the licenses from the server.
+     */
     async initLicenses() {
       const response = await ServerConnection.makeRequest(
         this._licensesUrl,
@@ -266,11 +219,14 @@ export namespace Licenses {
         this._serverSettings
       );
       this._licenses = await response.json();
-      this._licensesReady.resolve(void 0);
-      this._licensesChanged.emit(void 0);
+      this._licensesReady.resolve();
       this.stateChanged.emit(void 0);
     }
 
+    /**
+     * Create a temporary download link, and emulate clicking it to trigger a named
+     * file download.
+     */
     async download(options: IDownloadOptions) {
       const url = `${this._licensesUrl}?format=${options.format}&download=1`;
       const element = document.createElement('a');
@@ -282,14 +238,16 @@ export namespace Licenses {
       return void 0;
     }
 
-    get licensesChanged() {
-      return this._licensesChanged;
-    }
-
+    /**
+     * A promise that resolves when the licenses from the server change
+     */
     get selectedPackageChanged() {
       return this._selectedPackageChanged;
     }
 
+    /**
+     * The names of the license bundles available
+     */
     get bundles(): string[] {
       if (this._licenses) {
         return Object.keys(this._licenses);
@@ -297,6 +255,9 @@ export namespace Licenses {
       return [];
     }
 
+    /**
+     * The current license bundle
+     */
     get bundle() {
       if (this._bundle) {
         return this._bundle;
@@ -307,20 +268,36 @@ export namespace Licenses {
       return null;
     }
 
+    /**
+     * Set the current license bundle, and reset the selected index
+     */
     set bundle(bundle: string | null) {
       this._bundle = bundle;
       this.selectedPackageIndex = null;
     }
 
+    /** A promise that resolves when the licenses are available from the server */
+    get licensesReady(): Promise<void> {
+      return this._licensesReady.promise;
+    }
+
+    /**
+     * All the licenses
+     */
     get licenses() {
       return this._licenses;
     }
 
+    /** The index of the currently-selected package within its license bundle */
     get selectedPackageIndex() {
       return this._selectedPackageIndex;
     }
 
+    /** Update the currently-selected package within its license bundle */
     set selectedPackageIndex(selectedPackageIndex: number | null) {
+      if (this._selectedPackageIndex === selectedPackageIndex) {
+        return;
+      }
       this._selectedPackageIndex = selectedPackageIndex;
       if (this.bundle && this.licenses && selectedPackageIndex != null) {
         this._selectedPackage = this.licenses[this.bundle].packages[
@@ -333,30 +310,28 @@ export namespace Licenses {
       this.stateChanged.emit(void 0);
     }
 
+    /** The metadata for the currently-selected package */
     get selectedPackage() {
       return this._selectedPackage;
     }
 
-    get licensesReady() {
-      return this._licensesReady.promise;
-    }
-
+    /** A translation bundle */
     get trans() {
       return this._trans;
     }
 
-    private _licensesChanged: Signal<Model, void> = new Signal(this);
     private _selectedPackageChanged: Signal<Model, void> = new Signal(this);
     private _licenses: ILicenseResponse | null;
     private _licensesUrl: string;
     private _serverSettings: ServerConnection.ISettings;
     private _bundle: string | null;
     private _trans: TranslationBundle;
-    private _licensesReady = new PromiseDelegate<void>();
     private _selectedPackageIndex: number | null;
     private _selectedPackage: IPackageLicenseInfo | null;
+    private _licensesReady = new PromiseDelegate<void>();
   }
 
+  /** A fancy bundle renderer with the package count */
   export class BundleTabRenderer extends TabBar.Renderer {
     model: Model;
 
@@ -365,6 +340,8 @@ export namespace Licenses {
       super();
       this.model = model;
     }
+
+    /** Render a full bundle */
     renderTab(data: TabBar.IRenderData<Widget>): VirtualElement {
       let title = data.title.caption;
       let key = this.createTabKey(data);
@@ -379,6 +356,7 @@ export namespace Licenses {
       );
     }
 
+    /** Render the package count */
     renderCountBadge(data: TabBar.IRenderData<Widget>): VirtualElement {
       const bundle = data.title.label;
       const { licenses } = this.model;
@@ -388,63 +366,109 @@ export namespace Licenses {
     }
   }
 
-  export class LicenseText extends Widget {
-    private model: Model;
+  /**
+   * A grid of licenses
+   */
+  export class Grid extends VDomRenderer<Licenses.Model> {
+    constructor(model: Licenses.Model) {
+      super(model);
+      this.addClass('jp-Licenses-Grid');
+      this.addClass('jp-RenderedHTMLCommon');
+    }
 
+    /** Render a grid of package license information */
+    protected render(): JSX.Element {
+      const licenses = this.model.licenses;
+      const bundle = this.model.bundle;
+      const data = licenses && bundle ? licenses[bundle]?.packages : [];
+
+      return (
+        <form>
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>{this.model.trans.__('Package')}</th>
+                <th>{this.model.trans.__('Version')}</th>
+                <th>{this.model.trans.__('License ID')}</th>
+              </tr>
+            </thead>
+            <tbody>{data.map(this.renderRow)}</tbody>
+          </table>
+        </form>
+      );
+    }
+
+    /** Render a single package's license information */
+    protected renderRow = (
+      row: Licenses.IPackageLicenseInfo,
+      index: number
+    ) => {
+      const id = `id-license-package-${index}`;
+      return (
+        <tr key={row.name}>
+          <th>
+            <input
+              type="radio"
+              name="show-package-license"
+              value={index}
+              id={id}
+              onChange={this.onPackageSelected}
+            />
+          </th>
+          <th>
+            <label htmlFor={id}>
+              <code>{row.name}</code>
+            </label>
+          </th>
+          <td>
+            <code>{row.versionInfo}</code>
+          </td>
+          <td>
+            <code>{row.licenseId}</code>
+          </td>
+        </tr>
+      );
+    };
+
+    /** Event handler for the selection of a package */
+    protected onPackageSelected = (
+      evt: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      this.model.selectedPackageIndex = parseInt(evt.currentTarget.value);
+    };
+  }
+
+  /** A package's full license text */
+  export class FullText extends VDomRenderer<Model> {
     constructor(model: Model) {
-      super();
-      this.model = model;
+      super(model);
       this.addClass('jp-Licenses-Text');
       this.addClass('jp-RenderedHTMLCommon');
       this.addClass('jp-RenderedMarkdown');
-
-      this._head = document.createElement('h1');
-      this.node.appendChild(this._head);
-
-      this._quote = document.createElement('blockquote');
-      this.node.appendChild(this._quote);
-
-      this._code = document.createElement('code');
-      this.node.appendChild(this._code);
-
-      this.model.selectedPackageChanged.connect(
-        this.onSelectedPackageChanged,
-        this
-      );
-
-      this.onSelectedPackageChanged();
     }
 
-    dispose() {
-      super.dispose();
-      if (this.isDisposed) {
-        return;
-      }
-      this.model.selectedPackageChanged.disconnect(
-        this.onSelectedPackageChanged,
-        this
-      );
-    }
-
-    protected onSelectedPackageChanged() {
+    /** Render the license text, or a null state if no package is selected */
+    protected render() {
       const { selectedPackage, trans } = this.model;
-      if (selectedPackage != null) {
+      let head = '';
+      let quote = trans.__('No Package selected');
+      let code = '';
+      if (selectedPackage) {
         const { name, versionInfo, licenseId, extractedText } = selectedPackage;
-        this._head.textContent = `${name} v${versionInfo}`;
-        this._quote.textContent = `${trans.__('License ID')}: ${
+        head = `${name} v${versionInfo}`;
+        quote = `${trans.__('License ID')}: ${
           licenseId || trans.__('No License ID found')
         }`;
-        this._code.textContent =
-          extractedText || trans.__('No License Text found');
-      } else {
-        this._head.textContent = '';
-        this._quote.textContent = trans.__('No Package selected');
-        this._code.textContent = '';
+        code = extractedText || trans.__('No License Text found');
       }
+      return (
+        <article>
+          <h1>{head}</h1>
+          <blockquote>{quote}</blockquote>
+          <code>{code}</code>
+        </article>
+      );
     }
-
-    private _head: HTMLElement;
-    private _code: HTMLElement;
-    private _quote: HTMLElement;
   }
 }
