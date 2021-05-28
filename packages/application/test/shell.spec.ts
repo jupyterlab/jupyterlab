@@ -71,7 +71,6 @@ describe('LabShell', () => {
     it('should be the current widget in the shell main area', () => {
       expect(shell.currentWidget).toBe(null);
       const widget = new Widget();
-      widget.node.tabIndex = -1;
       widget.id = 'foo';
       shell.add(widget, 'main');
       expect(shell.currentWidget).toBe(null);

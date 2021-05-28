@@ -40,6 +40,60 @@ input.jp-mod-styled:focus {
   box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
+input.jp-FileDialog-Checkbox {
+  position: relative;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 13px;
+  height: 13px;
+  margin-top: 35px;
+  margin-right: 10px;
+  top: 5px;
+  left: 0px;
+}
+
+input.jp-FileDialog-Checkbox:focus {
+  border: none;
+  box-shadow: none;
+}
+
+input.jp-FileDialog-Checkbox:before {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  top: 0;
+  left: 0;
+  background-color: #e9e9e9;
+}
+
+input.jp-FileDialog-Checkbox:checked:before {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  top: 0;
+  left: 0;
+  background-color: #1e80ef;
+}
+input.jp-FileDialog-Checkbox:checked:after {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 7px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+  position: absolute;
+  top: 1px;
+  left: 4px;
+}
+
 .jp-select-wrapper {
   display: flex;
   position: relative;

@@ -284,12 +284,17 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  async save(): Promise<void> {
+  async save(manual?: boolean): Promise<void> {
     const [lock] = await Promise.all([
       this._provider.acquireLock(),
       this.ready
     ]);
-    let promise = this._save();
+    let promise: Promise<void>;
+    if (manual) {
+      promise = this._save(manual);
+    } else {
+      promise = this._save();
+    }
     // if save completed successfully, we set the inialized content in the rtc server.
     promise = promise.then(() => {
       this._provider.putInitializedState();
@@ -482,6 +487,9 @@ export class Context<
       void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
+      if (this._contentsModel) {
+        this._contentsModel.renamed = true;
+      }
     }
   }
 
@@ -512,7 +520,8 @@ export class Context<
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
-      format: model.format
+      format: model.format,
+      renamed: model.renamed == true ? true : false
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
@@ -575,7 +584,7 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  private async _save(): Promise<void> {
+  private async _save(manual?: boolean): Promise<void> {
     this._saveState.emit('started');
     const model = this._model;
     let content: PartialJSONValue;
@@ -606,6 +615,7 @@ export class Context<
       }
 
       model.dirty = false;
+      value.renamed = this._contentsModel?.renamed;
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {
@@ -613,7 +623,11 @@ export class Context<
       }
 
       // Emit completion.
-      this._saveState.emit('completed');
+      if (manual) {
+        this._saveState.emit('completed-manual');
+      } else {
+        this._saveState.emit('completed');
+      }
     } catch (err) {
       // If the save has been canceled by the user,
       // throw the error so that whoever called save()

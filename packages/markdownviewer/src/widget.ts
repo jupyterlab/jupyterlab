@@ -54,7 +54,7 @@ export class MarkdownViewer extends Widget {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this.renderer = options.renderer;
-    this.node.tabIndex = -1;
+    this.node.tabIndex = 0;
     this.addClass(MARKDOWNVIEWER_CLASS);
 
     const layout = (this.layout = new StackedLayout());

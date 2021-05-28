@@ -13,7 +13,7 @@
 }
 
 .jp-DebuggerSources-body {
-  height: 100%;
+  height: calc(100% - var(--jp-statusbar-height));
 }
 
 .jp-DebuggerSources-header > div > span {

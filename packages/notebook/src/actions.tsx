@@ -85,8 +85,12 @@ export namespace NotebookActions {
    *
    * #### Notes
    * It will preserve the existing mode.
-   * The last cell will be activated.
+   * The last cell will be activated if no selection is found.
+   * If text was selected, the cell cotaining the selection will
+     be activated.
    * The existing selection will be cleared.
+   * The activated cell will have focus and the cursor will move
+     to the end of the cell.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells will be created.
    * Both cells will have the same type as the original cell.
@@ -110,11 +114,13 @@ export namespace NotebookActions {
 
     const offsets = [0];
 
+    let start: number = -1;
+    let end: number = -1;
     for (let i = 0; i < selections.length; i++) {
       // append start and end to handle selections
       // cursors will have same start and end
-      const start = editor.getOffsetAt(selections[i].start);
-      const end = editor.getOffsetAt(selections[i].end);
+      start = editor.getOffsetAt(selections[i].start);
+      end = editor.getOffsetAt(selections[i].end);
       if (start < end) {
         offsets.push(start);
         offsets.push(end);
@@ -156,7 +162,15 @@ export namespace NotebookActions {
     }
     cells.endCompoundOperation();
 
-    notebook.activeCellIndex = index + clones.length - 1;
+    // If there is a selection the selected cell will be activated
+    const activeCellDelta = start !== end ? 2 : 1;
+    notebook.activeCellIndex = index + clones.length - activeCellDelta;
+    const focusedEditor = notebook.activeCell.editor;
+    focusedEditor.focus();
+
+    // Move to the end of the cell that now contains the cursor
+    focusedEditor.setCursorPosition({ line: editor.lineCount, column: 0 });
+
     Private.handleState(notebook, state);
   }
 
