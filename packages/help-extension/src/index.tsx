@@ -17,10 +17,7 @@ import {
   IFrame,
   MainAreaWidget,
   showDialog,
-  WidgetTracker,
-  CommandToolbarButton,
-  IThemeManager,
-  Toolbar
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
@@ -33,16 +30,9 @@ import { KernelMessage } from '@jupyterlab/services';
 
 import { ITranslator } from '@jupyterlab/translation';
 
-import {
-  jupyterIcon,
-  jupyterlabWordmarkIcon,
-  copyrightIcon,
-  refreshIcon
-} from '@jupyterlab/ui-components';
+import { jupyterIcon, jupyterlabWordmarkIcon } from '@jupyterlab/ui-components';
 
 import { Menu } from '@lumino/widgets';
-
-import { Licenses } from './licenses';
 
 import * as React from 'react';
 
@@ -62,12 +52,6 @@ namespace CommandIDs {
 
   export const hide = 'help:hide';
 
-  export const licenses = 'help:licenses';
-
-  export const licenseReport = 'help:license-report';
-
-  export const refreshLicenses = 'help:licenses-refresh';
-
   export const launchClassic = 'help:launch-classic-notebook';
 }
 
@@ -82,463 +66,387 @@ const LAB_IS_SECURE = window.location.protocol === 'https:';
 const HELP_CLASS = 'jp-Help';
 
 /**
- * The help handler extension.
+ * Add a command to show an About dialog.
  */
-const plugin: JupyterFrontEndPlugin<void> = {
-  activate,
-  id: '@jupyterlab/help-extension:plugin',
-  requires: [IMainMenu, ITranslator],
-  optional: [ICommandPalette, ILayoutRestorer, IInspector, IThemeManager],
-  autoStart: true
+const about: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:about',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [IMainMenu, ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    menu: IMainMenu | null,
+    palette: ICommandPalette | null
+  ): void => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Help');
+
+    commands.addCommand(CommandIDs.about, {
+      label: trans.__('About %1', app.name),
+      execute: () => {
+        // Create the header of the about dialog
+        const versionNumber = trans.__('Version %1', app.version);
+        const versionInfo = (
+          <span className="jp-About-version-info">
+            <span className="jp-About-version">{versionNumber}</span>
+          </span>
+        );
+        const title = (
+          <span className="jp-About-header">
+            <jupyterIcon.react margin="7px 9.5px" height="auto" width="58px" />
+            <div className="jp-About-header-info">
+              <jupyterlabWordmarkIcon.react height="auto" width="196px" />
+              {versionInfo}
+            </div>
+          </span>
+        );
+
+        // Create the body of the about dialog
+        const jupyterURL = 'https://jupyter.org/about.html';
+        const contributorsURL =
+          'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
+        const externalLinks = (
+          <span className="jp-About-externalLinks">
+            <a
+              href={contributorsURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="jp-Button-flat"
+            >
+              {trans.__('CONTRIBUTOR LIST')}
+            </a>
+            <a
+              href={jupyterURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="jp-Button-flat"
+            >
+              {trans.__('ABOUT PROJECT JUPYTER')}
+            </a>
+          </span>
+        );
+        const copyright = (
+          <span className="jp-About-copyright">
+            {trans.__('© 2015-2021 Project Jupyter Contributors')}
+          </span>
+        );
+        const body = (
+          <div className="jp-About-body">
+            {externalLinks}
+            {copyright}
+          </div>
+        );
+
+        return showDialog({
+          title,
+          body,
+          buttons: [
+            Dialog.createButton({
+              label: trans.__('Dismiss'),
+              className: 'jp-About-button jp-mod-reject jp-mod-styled'
+            })
+          ]
+        });
+      }
+    });
+
+    if (menu) {
+      const helpMenu = menu.helpMenu;
+      helpMenu.addGroup([{ command: CommandIDs.about }], 0);
+    }
+
+    if (palette) {
+      palette.addItem({ command: CommandIDs.about, category });
+    }
+  }
 };
 
 /**
- * Export the plugin as default.
+ * A plugin to add a command to open the Classic Notebook interface.
  */
-export default plugin;
+const launchClassic: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:launch-classic',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [IMainMenu, ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    menu: IMainMenu | null,
+    palette: ICommandPalette | null
+  ): void => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Help');
+
+    commands.addCommand(CommandIDs.launchClassic, {
+      label: trans.__('Launch Classic Notebook'),
+      execute: () => {
+        window.open(PageConfig.getBaseUrl() + 'tree');
+      }
+    });
+
+    if (menu) {
+      const helpMenu = menu.helpMenu;
+      helpMenu.addGroup([{ command: CommandIDs.launchClassic }], 1);
+    }
+
+    if (palette) {
+      palette.addItem({ command: CommandIDs.launchClassic, category });
+    }
+  }
+};
 
 /**
- * Activate the help handler extension.
- *
- * @param app - The phosphide application object.
- *
- * returns A promise that resolves when the extension is activated.
+ * A plugin to add a list of resources to the help menu.
  */
-function activate(
-  app: JupyterFrontEnd,
-  mainMenu: IMainMenu,
-  translator: ITranslator,
-  palette: ICommandPalette | null,
-  restorer: ILayoutRestorer | null,
-  inspector: IInspector | null,
-  themes: IThemeManager | null
-): void {
-  const trans = translator.load('jupyterlab');
-  let counter = 0;
-  const category = trans.__('Help');
-  const namespace = 'help-doc';
-  const baseUrl = PageConfig.getBaseUrl();
-  const { commands, shell, serviceManager } = app;
-  const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
+const resources: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:resources',
+  autoStart: true,
+  requires: [IMainMenu, ITranslator],
+  optional: [ICommandPalette, ILayoutRestorer, IInspector],
+  activate: (
+    app: JupyterFrontEnd,
+    mainMenu: IMainMenu,
+    translator: ITranslator,
+    palette: ICommandPalette | null,
+    restorer: ILayoutRestorer | null,
+    inspector: IInspector | null
+  ): void => {
+    const trans = translator.load('jupyterlab');
+    let counter = 0;
+    const category = trans.__('Help');
+    const namespace = 'help-doc';
+    const baseUrl = PageConfig.getBaseUrl();
+    const { commands, shell, serviceManager } = app;
+    const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
+    const resources = [
+      {
+        text: trans.__('JupyterLab Reference'),
+        url: 'https://jupyterlab.readthedocs.io/en/stable/'
+      },
+      {
+        text: trans.__('JupyterLab FAQ'),
+        url:
+          'https://jupyterlab.readthedocs.io/en/stable/getting_started/faq.html'
+      },
+      {
+        text: trans.__('Jupyter Reference'),
+        url: 'https://jupyter.org/documentation'
+      },
+      {
+        text: trans.__('Jupyter Forum'),
+        url: 'https://discourse.jupyter.org/c/jupyterlab'
+      },
+      {
+        text: trans.__('Markdown Reference'),
+        url: 'https://commonmark.org/help/'
+      }
+    ];
 
-  const resources = [
-    {
-      text: trans.__('JupyterLab Reference'),
-      url: 'https://jupyterlab.readthedocs.io/en/stable/'
-    },
-    {
-      text: trans.__('JupyterLab FAQ'),
-      url:
-        'https://jupyterlab.readthedocs.io/en/stable/getting_started/faq.html'
-    },
-    {
-      text: trans.__('Jupyter Reference'),
-      url: 'https://jupyter.org/documentation'
-    },
-    {
-      text: trans.__('Markdown Reference'),
-      url: 'https://commonmark.org/help/'
-    }
-  ];
-
-  resources.sort((a: any, b: any) => {
-    return a.text.localeCompare(b.text);
-  });
-
-  // Handle state restoration.
-  if (restorer) {
-    void restorer.restore(tracker, {
-      command: CommandIDs.open,
-      args: widget => ({
-        url: widget.content.url,
-        text: widget.content.title.label
-      }),
-      name: widget => widget.content.url
-    });
-  }
-
-  /**
-   * Create a new HelpWidget widget.
-   */
-  function newHelpWidget(url: string, text: string): MainAreaWidget<IFrame> {
-    // Allow scripts and forms so that things like
-    // readthedocs can use their search functionality.
-    // We *don't* allow same origin requests, which
-    // can prevent some content from being loaded onto the
-    // help pages.
-    const content = new IFrame({
-      sandbox: ['allow-scripts', 'allow-forms']
-    });
-    content.url = url;
-    content.addClass(HELP_CLASS);
-    content.title.label = text;
-    content.id = `${namespace}-${++counter}`;
-    const widget = new MainAreaWidget({ content });
-    widget.addClass('jp-Help');
-    return widget;
-  }
-
-  // Populate the Help menu.
-  const helpMenu = mainMenu.helpMenu;
-  const labGroup = [
-    CommandIDs.about,
-    CommandIDs.launchClassic,
-    CommandIDs.licenses
-  ].map(command => ({ command }));
-  helpMenu.addGroup(labGroup, 0);
-
-  // Contextual help in its own group
-  const contextualHelpGroup = [
-    inspector ? 'inspector:open' : undefined
-  ].map(command => ({ command }));
-  helpMenu.addGroup(contextualHelpGroup, 0);
-
-  const resourcesGroup = resources.map(args => ({
-    args,
-    command: CommandIDs.open
-  }));
-  helpMenu.addGroup(resourcesGroup, 10);
-
-  // Generate a cache of the kernel help links.
-  const kernelInfoCache = new Map<
-    string,
-    KernelMessage.IInfoReplyMsg['content']
-  >();
-  serviceManager.sessions.runningChanged.connect((m, sessions) => {
-    // If a new session has been added, it is at the back
-    // of the session list. If one has changed or stopped,
-    // it does not hurt to check it.
-    if (!sessions.length) {
-      return;
-    }
-    const sessionModel = sessions[sessions.length - 1];
-    if (!sessionModel.kernel || kernelInfoCache.has(sessionModel.kernel.name)) {
-      return;
-    }
-    const session = serviceManager.sessions.connectTo({
-      model: sessionModel,
-      kernelConnectionOptions: { handleComms: false }
+    resources.sort((a: any, b: any) => {
+      return a.text.localeCompare(b.text);
     });
 
-    void session.kernel?.info.then(kernelInfo => {
-      const name = session.kernel!.name;
-
-      // Check the cache second time so that, if two callbacks get scheduled,
-      // they don't try to add the same commands.
-      if (kernelInfoCache.has(name)) {
-        return;
-      }
-      // Set the Kernel Info cache.
-      kernelInfoCache.set(name, kernelInfo);
-
-      // Utility function to check if the current widget
-      // has registered itself with the help menu.
-      const usesKernel = () => {
-        let result = false;
-        const widget = app.shell.currentWidget;
-        if (!widget) {
-          return result;
-        }
-        helpMenu.kernelUsers.forEach(u => {
-          if (u.tracker.has(widget) && u.getKernel(widget)?.name === name) {
-            result = true;
-          }
-        });
-        return result;
-      };
-
-      // Add the kernel banner to the Help Menu.
-      const bannerCommand = `help-menu-${name}:banner`;
-      const spec = serviceManager.kernelspecs?.specs?.kernelspecs[name];
-      if (!spec) {
-        return;
-      }
-      const kernelName = spec.display_name;
-      let kernelIconUrl = spec.resources['logo-64x64'];
-      if (kernelIconUrl) {
-        const index = kernelIconUrl.indexOf('kernelspecs');
-        kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
-      }
-      commands.addCommand(bannerCommand, {
-        label: trans.__('About the %1 Kernel', kernelName),
-        isVisible: usesKernel,
-        isEnabled: usesKernel,
-        execute: () => {
-          // Create the header of the about dialog
-          const headerLogo = <img src={kernelIconUrl} />;
-          const title = (
-            <span className="jp-About-header">
-              {headerLogo}
-              <div className="jp-About-header-info">{kernelName}</div>
-            </span>
-          );
-          const banner = <pre>{kernelInfo.banner}</pre>;
-          const body = <div className="jp-About-body">{banner}</div>;
-
-          return showDialog({
-            title,
-            body,
-            buttons: [
-              Dialog.createButton({
-                label: trans.__('Dismiss'),
-                className: 'jp-About-button jp-mod-reject jp-mod-styled'
-              })
-            ]
-          });
-        }
+    // Handle state restoration.
+    if (restorer) {
+      void restorer.restore(tracker, {
+        command: CommandIDs.open,
+        args: widget => ({
+          url: widget.content.url,
+          text: widget.content.title.label
+        }),
+        name: widget => widget.content.url
       });
-      helpMenu.addGroup([{ command: bannerCommand }], 20);
+    }
 
-      // Add the kernel info help_links to the Help menu.
-      const kernelGroup: Menu.IItemOptions[] = [];
-      (kernelInfo.help_links || []).forEach(link => {
-        const commandId = `help-menu-${name}:${link.text}`;
-        commands.addCommand(commandId, {
-          label: link.text,
+    /**
+     * Create a new HelpWidget widget.
+     */
+    function newHelpWidget(url: string, text: string): MainAreaWidget<IFrame> {
+      // Allow scripts and forms so that things like
+      // readthedocs can use their search functionality.
+      // We *don't* allow same origin requests, which
+      // can prevent some content from being loaded onto the
+      // help pages.
+      const content = new IFrame({
+        sandbox: ['allow-scripts', 'allow-forms']
+      });
+      content.url = url;
+      content.addClass(HELP_CLASS);
+      content.title.label = text;
+      content.id = `${namespace}-${++counter}`;
+      const widget = new MainAreaWidget({ content });
+      widget.addClass('jp-Help');
+      return widget;
+    }
+
+    // Populate the Help menu.
+    const helpMenu = mainMenu.helpMenu;
+
+    // Contextual help in its own group
+    const contextualHelpGroup = [
+      inspector ? 'inspector:open' : undefined
+    ].map(command => ({ command }));
+    helpMenu.addGroup(contextualHelpGroup, 0);
+
+    const resourcesGroup = resources.map(args => ({
+      args,
+      command: CommandIDs.open
+    }));
+    helpMenu.addGroup(resourcesGroup, 10);
+
+    // Generate a cache of the kernel help links.
+    const kernelInfoCache = new Map<
+      string,
+      KernelMessage.IInfoReplyMsg['content']
+    >();
+    serviceManager.sessions.runningChanged.connect((m, sessions) => {
+      // If a new session has been added, it is at the back
+      // of the session list. If one has changed or stopped,
+      // it does not hurt to check it.
+      if (!sessions.length) {
+        return;
+      }
+      const sessionModel = sessions[sessions.length - 1];
+      if (
+        !sessionModel.kernel ||
+        kernelInfoCache.has(sessionModel.kernel.name)
+      ) {
+        return;
+      }
+      const session = serviceManager.sessions.connectTo({
+        model: sessionModel,
+        kernelConnectionOptions: { handleComms: false }
+      });
+
+      void session.kernel?.info.then(kernelInfo => {
+        const name = session.kernel!.name;
+
+        // Check the cache second time so that, if two callbacks get scheduled,
+        // they don't try to add the same commands.
+        if (kernelInfoCache.has(name)) {
+          return;
+        }
+        // Set the Kernel Info cache.
+        kernelInfoCache.set(name, kernelInfo);
+
+        // Utility function to check if the current widget
+        // has registered itself with the help menu.
+        const usesKernel = () => {
+          let result = false;
+          const widget = app.shell.currentWidget;
+          if (!widget) {
+            return result;
+          }
+          helpMenu.kernelUsers.forEach(u => {
+            if (u.tracker.has(widget) && u.getKernel(widget)?.name === name) {
+              result = true;
+            }
+          });
+          return result;
+        };
+
+        // Add the kernel banner to the Help Menu.
+        const bannerCommand = `help-menu-${name}:banner`;
+        const spec = serviceManager.kernelspecs?.specs?.kernelspecs[name];
+        if (!spec) {
+          return;
+        }
+        const kernelName = spec.display_name;
+        let kernelIconUrl = spec.resources['logo-64x64'];
+        if (kernelIconUrl) {
+          const index = kernelIconUrl.indexOf('kernelspecs');
+          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+        }
+        commands.addCommand(bannerCommand, {
+          label: trans.__('About the %1 Kernel', kernelName),
           isVisible: usesKernel,
           isEnabled: usesKernel,
           execute: () => {
-            return commands.execute(CommandIDs.open, link);
+            // Create the header of the about dialog
+            const headerLogo = <img src={kernelIconUrl} />;
+            const title = (
+              <span className="jp-About-header">
+                {headerLogo}
+                <div className="jp-About-header-info">{kernelName}</div>
+              </span>
+            );
+            const banner = <pre>{kernelInfo.banner}</pre>;
+            const body = <div className="jp-About-body">{banner}</div>;
+
+            return showDialog({
+              title,
+              body,
+              buttons: [
+                Dialog.createButton({
+                  label: trans.__('Dismiss'),
+                  className: 'jp-About-button jp-mod-reject jp-mod-styled'
+                })
+              ]
+            });
           }
         });
-        kernelGroup.push({ command: commandId });
-      });
-      helpMenu.addGroup(kernelGroup, 21);
+        helpMenu.addGroup([{ command: bannerCommand }], 20);
 
-      // Dispose of the session object since we no longer need it.
-      session.dispose();
-    });
-  });
-
-  commands.addCommand(CommandIDs.about, {
-    label: trans.__('About %1', app.name),
-    execute: () => {
-      // Create the header of the about dialog
-      const versionNumber = trans.__('Version %1', app.version);
-      const versionInfo = (
-        <span className="jp-About-version-info">
-          <span className="jp-About-version">{versionNumber}</span>
-        </span>
-      );
-      const title = (
-        <span className="jp-About-header">
-          <jupyterIcon.react margin="7px 9.5px" height="auto" width="58px" />
-          <div className="jp-About-header-info">
-            <jupyterlabWordmarkIcon.react height="auto" width="196px" />
-            {versionInfo}
-          </div>
-        </span>
-      );
-
-      // Create the body of the about dialog
-      const jupyterURL = 'https://jupyter.org/about.html';
-      const contributorsURL =
-        'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
-      const externalLinks = (
-        <span className="jp-About-externalLinks">
-          <a
-            href={contributorsURL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="jp-Button-flat"
-          >
-            {trans.__('CONTRIBUTOR LIST')}
-          </a>
-          <a
-            href={jupyterURL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="jp-Button-flat"
-          >
-            {trans.__('ABOUT PROJECT JUPYTER')}
-          </a>
-        </span>
-      );
-      const copyright = (
-        <span className="jp-About-copyright">
-          {trans.__('© 2015-2020 Project Jupyter Contributors')}
-        </span>
-      );
-      const body = (
-        <div className="jp-About-body">
-          {externalLinks}
-          {copyright}
-        </div>
-      );
-
-      return showDialog({
-        title,
-        body,
-        buttons: [
-          Dialog.createButton({
-            label: trans.__('Dismiss'),
-            className: 'jp-About-button jp-mod-reject jp-mod-styled'
-          })
-        ]
-      });
-    }
-  });
-
-  commands.addCommand(CommandIDs.open, {
-    label: args => args['text'] as string,
-    execute: args => {
-      const url = args['url'] as string;
-      const text = args['text'] as string;
-      const newBrowserTab = (args['newBrowserTab'] as boolean) || false;
-
-      // If help resource will generate a mixed content error, load externally.
-      if (
-        newBrowserTab ||
-        (LAB_IS_SECURE && URLExt.parse(url).protocol !== 'https:')
-      ) {
-        window.open(url);
-        return;
-      }
-
-      const widget = newHelpWidget(url, text);
-      void tracker.add(widget);
-      shell.add(widget, 'main');
-      return widget;
-    }
-  });
-
-  commands.addCommand(CommandIDs.launchClassic, {
-    label: trans.__('Launch Classic Notebook'),
-    execute: () => {
-      window.open(PageConfig.getBaseUrl() + 'tree');
-    }
-  });
-
-  const licensesUrl = PageConfig.getOption('licensesUrl');
-
-  if (licensesUrl) {
-    const licensesNamespace = 'help-licenses';
-    const licensesTracker = new WidgetTracker<MainAreaWidget<Licenses>>({
-      namespace: licensesNamespace
-    });
-
-    if (restorer) {
-      void restorer.restore(licensesTracker, {
-        command: CommandIDs.licenses,
-        name: widget => 'licenses'
-      });
-    }
-
-    const fullLicensesUrl = URLExt.join(baseUrl, licensesUrl) + '/';
-
-    let licensesModel: Licenses.Model | null;
-
-    function ensureLicensesModel() {
-      if (licensesModel == null) {
-        licensesModel = new Licenses.Model({
-          licensesUrl: fullLicensesUrl,
-          trans,
-          themes
-        });
-      }
-      return licensesModel;
-    }
-
-    const downloadAsText = trans.__('Download License Report as');
-    const licensesText = trans.__('Licenses');
-    const refreshLicenses = trans.__('Refresh Licenses');
-
-    commands.addCommand(CommandIDs.licenses, {
-      label: licensesText,
-      execute: () => {
-        licensesModel = ensureLicensesModel();
-        const content = new Licenses({ model: licensesModel });
-        content.id = `${licensesNamespace}-${++counter}`;
-        content.title.label = licensesText;
-        content.title.icon = copyrightIcon;
-        const main = new MainAreaWidget({
-          content,
-          reveal: licensesModel.licensesReady
-        });
-
-        for (const format of Object.keys(Licenses.REPORT_FORMATS)) {
-          const button = new CommandToolbarButton({
-            id: CommandIDs.licenseReport,
-            args: { format, noLabel: 1 },
-            commands
+        // Add the kernel info help_links to the Help menu.
+        const kernelGroup: Menu.IItemOptions[] = [];
+        (kernelInfo.help_links || []).forEach(link => {
+          const commandId = `help-menu-${name}:${link.text}`;
+          commands.addCommand(commandId, {
+            label: link.text,
+            isVisible: usesKernel,
+            isEnabled: usesKernel,
+            execute: () => {
+              return commands.execute(CommandIDs.open, link);
+            }
           });
-          main.toolbar.addItem(`download-${format}`, button);
-        }
+          kernelGroup.push({ command: commandId });
+        });
+        helpMenu.addGroup(kernelGroup, 21);
 
-        main.toolbar.addItem('spacer', Toolbar.createSpacerItem());
-        main.toolbar.addItem(
-          'refresh-licenses',
-          new CommandToolbarButton({
-            id: CommandIDs.refreshLicenses,
-            args: { noLabel: 1 },
-            commands
-          })
-        );
-
-        void licensesTracker.add(main);
-        shell.add(main, 'main');
-
-        const onDisposed = () => {
-          licensesModel?.dispose();
-          licensesModel = null;
-        };
-        main.disposed.connect(onDisposed);
-      }
+        // Dispose of the session object since we no longer need it.
+        session.dispose();
+      });
     });
 
-    commands.addCommand(CommandIDs.refreshLicenses, {
-      label: args => (args.noLabel ? '' : refreshLicenses),
-      caption: refreshLicenses,
-      icon: refreshIcon,
-      execute: async () => {
-        licensesModel = ensureLicensesModel();
-        await licensesModel.initLicenses();
-      }
-    });
-
-    function formatOrDefault(format: string): Licenses.IReportFormat {
-      return (
-        Licenses.REPORT_FORMATS[format] ||
-        Licenses.REPORT_FORMATS[Licenses.DEFAULT_FORMAT]
-      );
-    }
-
-    commands.addCommand(CommandIDs.licenseReport, {
-      label: args => {
-        if (args.noLabel) {
-          return '';
-        }
-        const format = formatOrDefault(`${args.format}`);
-        return `${downloadAsText} ${format.title}`;
-      },
-      caption: args => {
-        const format = formatOrDefault(`${args.format}`);
-        return `${downloadAsText} ${format.title}`;
-      },
-      icon: args => {
-        const format = formatOrDefault(`${args.format}`);
-        return format.icon;
-      },
+    commands.addCommand(CommandIDs.open, {
+      label: args => args['text'] as string,
       execute: args => {
-        const format = formatOrDefault(`${args.format}`);
-        void ensureLicensesModel().download({ format: format.id });
+        const url = args['url'] as string;
+        const text = args['text'] as string;
+        const newBrowserTab = (args['newBrowserTab'] as boolean) || false;
+
+        // If help resource will generate a mixed content error, load externally.
+        if (
+          newBrowserTab ||
+          (LAB_IS_SECURE && URLExt.parse(url).protocol !== 'https:')
+        ) {
+          window.open(url);
+          return;
+        }
+
+        const widget = newHelpWidget(url, text);
+        void tracker.add(widget);
+        shell.add(widget, 'main');
+        return widget;
       }
     });
 
     if (palette) {
-      palette.addItem({ command: CommandIDs.licenses, category });
+      resources.forEach(args => {
+        palette.addItem({ args, command: CommandIDs.open, category });
+      });
+      palette.addItem({
+        args: { reload: true },
+        command: 'apputils:reset',
+        category
+      });
     }
   }
+};
 
-  if (palette) {
-    resources.forEach(args => {
-      palette.addItem({ args, command: CommandIDs.open, category });
-    });
-    palette.addItem({
-      args: { reload: true },
-      command: 'apputils:reset',
-      category
-    });
-    palette.addItem({ command: CommandIDs.launchClassic, category });
-  }
-}
+const plugins: JupyterFrontEndPlugin<any>[] = [about, launchClassic, resources];
+export default plugins;

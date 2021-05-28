@@ -24,6 +24,7 @@ type onClickFactory = (line: number) => () => void;
  * @param dict - numbering dictionary
  * @param lastLevel - last level
  * @param cellRef - cell reference
+ * @param index - index of referenced cell relative to other cells in the notebook
  * @returns notebook heading
  */
 function getMarkdownHeadings(
@@ -31,10 +32,16 @@ function getMarkdownHeadings(
   onClick: onClickFactory,
   dict: any,
   lastLevel: number,
-  cellRef: Cell
+  cellRef: Cell,
+  index: number = -1
 ): INotebookHeading[] {
   const clbk = onClick(0);
   let headings: INotebookHeading[] = [];
+  if (index === -1) {
+    console.warn(
+      'Deprecation warning! index argument will become mandatory in the next version'
+    );
+  }
   for (const line of text.split('\n')) {
     const heading = parseHeading(line);
     if (heading) {
@@ -45,7 +52,8 @@ function getMarkdownHeadings(
         onClick: clbk,
         type: 'header',
         cellRef: cellRef,
-        hasChild: false
+        hasChild: false,
+        index
       });
     } else {
       headings.push({
@@ -54,7 +62,8 @@ function getMarkdownHeadings(
         onClick: clbk,
         type: 'markdown',
         cellRef: cellRef,
-        hasChild: false
+        hasChild: false,
+        index
       });
     }
   }

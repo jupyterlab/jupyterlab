@@ -16,12 +16,14 @@ import { OptionsManager } from './options_manager';
  * @param options - generator options
  * @param tracker - notebook tracker
  * @param item - notebook heading
+ * @param toc - current list of notebook headings
  * @returns rendered item
  */
 function render(
   options: OptionsManager,
   tracker: INotebookTracker,
-  item: INotebookHeading
+  item: INotebookHeading,
+  toc: INotebookHeading[] = []
 ) {
   let jsx;
   if (item.type === 'markdown' || item.type === 'header') {
@@ -81,7 +83,11 @@ function render(
             className={
               'toc-entry-holder ' +
               fontSizeClass +
-              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
+              (tracker.activeCell === item.cellRef
+                ? ' toc-active-cell'
+                : previousHeader(tracker, item, toc)
+                ? ' toc-active-cell'
+                : '')
             }
           >
             {button}
@@ -135,7 +141,11 @@ function render(
             className={
               'toc-entry-holder ' +
               fontSizeClass +
-              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
+              (tracker.activeCell === item.cellRef
+                ? ' toc-active-cell'
+                : previousHeader(tracker, item, toc)
+                ? ' toc-active-cell'
+                : '')
             }
           >
             {button}
@@ -189,6 +199,40 @@ function render(
       options.updateWidget();
     }
   }
+}
+
+/**
+ * Used to find the nearest above heading to an active notebook cell
+ *
+ * @private
+ * @param tracker - notebook tracker
+ * @param item - notebook heading
+ * @param toc - current list of notebook headings
+ * @returns true if heading is nearest above a selected cell, otherwise false
+ */
+function previousHeader(
+  tracker: INotebookTracker,
+  item: INotebookHeading,
+  toc: INotebookHeading[]
+) {
+  if (item.index > -1 || toc?.length) {
+    let activeCellIndex = tracker.currentWidget!.content.activeCellIndex;
+    let headerIndex = item.index;
+    // header index has to be less than the active cell index
+    if (headerIndex < activeCellIndex) {
+      let tocIndexOfNextHeader = toc.indexOf(item) + 1;
+      // return true if header is the last header
+      if (tocIndexOfNextHeader >= toc.length) {
+        return true;
+      }
+      // return true if the next header cells index is greater than the active cells index
+      let nextHeaderIndex = toc?.[tocIndexOfNextHeader].index;
+      if (nextHeaderIndex > activeCellIndex) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 /**

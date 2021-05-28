@@ -95,6 +95,7 @@ export class Dialog<T> extends Widget {
     this._host = normalized.host;
     this._defaultButton = normalized.defaultButton;
     this._buttons = normalized.buttons;
+    this._hasClose = normalized.hasClose;
     this._buttonNodes = toArray(
       map(this._buttons, button => {
         return renderer.createButtonNode(button);
@@ -281,7 +282,9 @@ export class Dialog<T> extends Widget {
     if (!content.contains(event.target as HTMLElement)) {
       event.stopPropagation();
       event.preventDefault();
-      this.reject();
+      if (this._hasClose) {
+        this.reject();
+      }
       return;
     }
     for (const buttonNode of this._buttonNodes) {
@@ -303,7 +306,9 @@ export class Dialog<T> extends Widget {
       case 27: // Escape.
         event.stopPropagation();
         event.preventDefault();
-        this.reject();
+        if (this._hasClose) {
+          this.reject();
+        }
         break;
       case 9: {
         // Tab.
@@ -373,6 +378,7 @@ export class Dialog<T> extends Widget {
   private _promise: PromiseDelegate<Dialog.IResult<T>> | null;
   private _defaultButton: number;
   private _host: HTMLElement;
+  private _hasClose: boolean;
   private _body: Dialog.Body<T>;
   private _focusNodeSelector: string | undefined = '';
 }
@@ -492,7 +498,8 @@ export namespace Dialog {
     focusNodeSelector: string;
 
     /**
-     * When "true", renders a close button for the dialog
+     * When "false", disallows user from dismissing the dialog by clicking outside it
+     * or pressing escape. Defaults to "true", which renders a close button.
      */
     hasClose: boolean;
 
@@ -868,7 +875,7 @@ namespace Private {
       defaultButton,
       renderer: options.renderer || Dialog.defaultRenderer,
       focusNodeSelector: options.focusNodeSelector || '',
-      hasClose: options.hasClose || false
+      hasClose: options.hasClose || true
     };
   }
 

@@ -11,6 +11,8 @@ import {
   map
 } from '@lumino/algorithm';
 
+import * as models from '@jupyterlab/shared-models';
+
 import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
@@ -96,7 +98,7 @@ export class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Dispose of the resources held by the document registery.
+   * Dispose of the resources held by the document registry.
    */
   dispose(): void {
     if (this.isDisposed) {
@@ -663,7 +665,7 @@ export class DocumentRegistry implements IDisposable {
 
     // Look for a pattern match first.
     let ft = find(this._fileTypes, ft => {
-      return !!(ft.pattern && ft.pattern.match(name) !== null);
+      return !!(ft.pattern && name.match(ft.pattern) !== null);
     });
     if (ft) {
       fts.push(ft);
@@ -791,6 +793,11 @@ export namespace DocumentRegistry {
     readonly modelDB: IModelDB;
 
     /**
+     * The shared notebook model.
+     */
+    readonly sharedModel: models.ISharedDocument;
+
+    /**
      * Serialize the model to a string.
      */
     toString(): string;
@@ -829,7 +836,9 @@ export namespace DocumentRegistry {
   /**
    * The interface for a document model that represents code.
    */
-  export interface ICodeModel extends IModel, CodeEditor.IModel {}
+  export interface ICodeModel extends IModel, CodeEditor.IModel {
+    sharedModel: models.ISharedFile;
+  }
 
   /**
    * The document context object.
@@ -902,9 +911,14 @@ export namespace DocumentRegistry {
     readonly ready: Promise<void>;
 
     /**
+     * Rename the document.
+     */
+    rename(newName: string): Promise<void>;
+
+    /**
      * Save the document contents to disk.
      */
-    save(): Promise<void>;
+    save(manual?: boolean): Promise<void>;
 
     /**
      * Save the document to a different path chosen by the user.
@@ -972,7 +986,11 @@ export namespace DocumentRegistry {
     addSibling(widget: Widget, options?: IOpenOptions): IDisposable;
   }
 
-  export type SaveState = 'started' | 'completed' | 'failed';
+  export type SaveState =
+    | 'started'
+    | 'failed'
+    | 'completed'
+    | 'completed-manual';
 
   /**
    * A type alias for a context.
@@ -1113,7 +1131,7 @@ export namespace DocumentRegistry {
     /**
      * Create a new extension for a given widget.
      */
-    createNew(widget: T, context: IContext<U>): IDisposable;
+    createNew(widget: T, context: IContext<U>): IDisposable | void;
   }
 
   /**
@@ -1144,10 +1162,16 @@ export namespace DocumentRegistry {
      * Create a new model for a given path.
      *
      * @param languagePreference - An optional kernel language preference.
+     * @param modelDB - An optional modelDB.
+     * @param isInitialized - An optional flag to check if the model is initialized.
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string, modelDB?: IModelDB): T;
+    createNew(
+      languagePreference?: string,
+      modelDB?: IModelDB,
+      isInitialized?: boolean
+    ): T;
 
     /**
      * Get the preferred kernel language given a file path.
@@ -1493,6 +1517,8 @@ export interface IDocumentWidget<
    * Set URI fragment identifier.
    */
   setFragment(fragment: string): void;
+
+  shouldNameFile?: Signal<this, void>;
 }
 
 /**
@@ -1516,7 +1542,7 @@ namespace Private {
   /**
    * A no-op function.
    */
-  export function noOp() {
+  export function noOp(): void {
     /* no-op */
   }
 }

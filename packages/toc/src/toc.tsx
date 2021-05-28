@@ -118,9 +118,10 @@ export class TableOfContents extends Widget {
         title = PathExt.basename(context.localPath);
       }
     }
-    let itemRenderer: (item: IHeading) => JSX.Element | null = (
-      item: IHeading
-    ) => {
+    let itemRenderer: (
+      item: IHeading,
+      toc: IHeading[]
+    ) => JSX.Element | null = (item: IHeading) => {
       return <span>{item.text}</span>;
     };
     if (this._current && this._current.generator.itemRenderer) {

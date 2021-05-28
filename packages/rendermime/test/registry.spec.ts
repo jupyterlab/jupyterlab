@@ -443,11 +443,11 @@ describe('rendermime/registry', () => {
         });
 
         it('should resolve URLs with escapes', async () => {
-          expect(await resolverSession.resolveUrl('has%20space')).toContain(
-            urlParent + '/has%20space'
-          );
-          expect(await resolverPath.resolveUrl('has%20space')).toContain(
-            urlParent + '/has%20space'
+          expect(
+            await resolverSession.resolveUrl('has%20space%23hash')
+          ).toContain(urlParent + '/has%20space%23hash');
+          expect(await resolverPath.resolveUrl('has%20space%23hash')).toContain(
+            urlParent + '/has%20space%23hash'
           );
         });
       });
@@ -461,8 +461,10 @@ describe('rendermime/registry', () => {
         });
 
         it('should resolve escapes correctly', async () => {
-          const contextPromise = resolverPath.getDownloadUrl('foo%2520test');
-          const contentsPromise = contents.getDownloadUrl('foo%20test');
+          const contextPromise = resolverPath.getDownloadUrl(
+            'foo%20%23%2520test'
+          );
+          const contentsPromise = contents.getDownloadUrl('foo #%20test');
           const values = await Promise.all([contextPromise, contentsPromise]);
           expect(values[0]).toBe(values[1]);
         });

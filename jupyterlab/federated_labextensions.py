@@ -10,11 +10,11 @@ import importlib
 import json
 import os
 import os.path as osp
+import platform
 import shutil
-import sys
-from os.path import basename, join as pjoin, normpath
 import subprocess
 import sys
+from os.path import basename, join as pjoin, normpath
 
 from jupyter_core.paths import (
     jupyter_data_dir, SYSTEM_JUPYTER_PATH, ENV_JUPYTER_PATH,
@@ -104,7 +104,17 @@ def develop_labextension(path, symlink=True, overwrite=False,
         if not os.path.exists(full_dest):
             if logger:
                 logger.info("Symlinking: %s -> %s" % (full_dest, path))
-            os.symlink(path, full_dest)
+            try:
+                os.symlink(path, full_dest)
+            except OSError as e:
+                if platform.platform().startswith("Windows"):
+                    raise OSError(
+                        "Symlinks can be activated on Windows 10 for Python version 3.8 or higher"
+                        " by activating the 'Developer Mode'. That may not be allowed by your administrators.\n"
+                        "See https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development"
+                    ) from e
+                raise
+
         elif not os.path.islink(full_dest):
             raise ValueError("%s exists and is not a symlink" % full_dest)
 
@@ -355,22 +365,19 @@ def _get_labextension_metadata(module):
         Importable Python module exposing the
         magic-named `_jupyter_labextension_paths` function
     """
-
     mod_path = osp.abspath(module)
     if not osp.exists(mod_path):
         raise FileNotFoundError('The path `{}` does not exist.'.format(mod_path))
+
+    errors = []
 
     # Check if the path is a valid labextension
     try:
         m = importlib.import_module(module)
         if hasattr(m, '_jupyter_labextension_paths') :
-            labexts = m._jupyter_labextension_paths()
-            return m, labexts
-        else :
-            m = None
-
-    except Exception:
-        m = None
+            return m, m._jupyter_labextension_paths()
+    except Exception as exc:
+        errors.append(exc)
 
     # Try getting the package name from setup.py
     try:
@@ -382,32 +389,25 @@ def _get_labextension_metadata(module):
     # Make sure the package is installed
     import pkg_resources
     try:
-        dist = pkg_resources.get_distribution(package)
+        pkg_resources.get_distribution(package)
     except pkg_resources.DistributionNotFound:
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
         sys.path.insert(0, mod_path)
 
-    # Importing module with the same name as package
-    try:
-        # Replace hyphens with underscores to match Python convention
-        package = package.replace('-', '_')
-        m = importlib.import_module(package)
-        if hasattr(m, '_jupyter_labextension_paths') :
-            return m, m._jupyter_labextension_paths()
-    except Exception:
-        m = None
+    from setuptools import find_packages, find_namespace_packages
 
-    # Looking for modules in the package
-    from setuptools import find_packages
-    packages = find_packages(mod_path)
+    package_candidates = [
+        package.replace('-', '_'),  # Module with the same name as package
+    ]
+    package_candidates.extend(find_packages(mod_path))  # Packages in the module path
+    package_candidates.extend(find_namespace_packages(mod_path))  # Namespace packages in the module path
 
-    # Looking for the labextension metadata
-    for package in packages :
+    for package in package_candidates:
         try:
             m = importlib.import_module(package)
-            if hasattr(m, '_jupyter_labextension_paths') :
+            if hasattr(m, '_jupyter_labextension_paths'):
                 return m, m._jupyter_labextension_paths()
-        except Exception:
-            m = None
+        except Exception as exc:
+            errors.append(exc)
 
-    raise ModuleNotFoundError('There is not a labextensions at {}'.format(module))
+    raise ModuleNotFoundError('There is no labextension at {}. Errors encountered: {}'.format(module, errors))

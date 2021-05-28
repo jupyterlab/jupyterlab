@@ -1,9 +1,11 @@
-const puppeteer = require('puppeteer');
+const playwright = require('playwright');
 const inspect = require('util').inspect;
 const path = require('path');
 const fs = require('fs');
 
 const URL = process.argv[2];
+const BROWSER_VAR = 'JLAB_BROWSER_TYPE';
+const BROWSER = process.env[BROWSER_VAR] || 'chromium';
 const OUTPUT_VAR = 'JLAB_BROWSER_CHECK_OUTPUT';
 const OUTPUT = process.env[OUTPUT_VAR];
 
@@ -20,14 +22,18 @@ if (OUTPUT) {
 
 async function main() {
   /* eslint-disable no-console */
-  console.info('Starting Chrome Headless');
+  console.info(`Starting headless ${BROWSER}...`);
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    dumpio: !!OUTPUT,
-    args: ['--no-sandbox']
+  const pwBrowser = playwright[BROWSER];
+  const browser = await pwBrowser.launch({
+    logger: {
+      isEnabled: () => !!OUTPUT,
+      log: (name, severity, message, args) => console.log(name, message)
+    }
   });
-  const page = await browser.newPage();
+
+  const context = await browser.newContext();
+  const page = await context.newPage();
 
   async function screenshot() {
     if (!OUTPUT) {
@@ -51,18 +57,26 @@ async function main() {
   // Wait for the local file to redirect on notebook >= 6.0
   await page.waitForNavigation();
 
+  console.log('Waiting for page content..');
   const html = await page.content();
   if (inspect(html).indexOf('jupyter-config-data') === -1) {
     console.error('Error loading JupyterLab page:');
     console.error(html);
   }
 
-  const el = await page.waitForSelector('#browserTest', { timeout: 100000 });
+  console.log('Waiting for #main selector...');
+  await page.waitForSelector('#main', { timeout: 100000 });
+
+  console.log('Waiting for #browserTest selector...');
+  const el = await page.waitForSelector('#browserTest', {
+    timeout: 100000,
+    state: 'attached'
+  });
   console.log('Waiting for application to start...');
   let testError = null;
 
   try {
-    await page.waitForSelector('.completed');
+    await page.waitForSelector('.completed', { state: 'attached' });
   } catch (e) {
     testError = e;
   }
@@ -82,7 +96,7 @@ async function main() {
   if (testError) {
     throw testError;
   }
-  console.info('Chrome test complete');
+  console.info('Browser test complete');
 }
 
 // Stop the process if an error is raised in the async function.
@@ -90,4 +104,4 @@ process.on('unhandledRejection', up => {
   throw up;
 });
 
-main();
+void main();

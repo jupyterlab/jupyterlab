@@ -45,12 +45,17 @@ import {
   pasteIcon,
   redoIcon,
   textEditorIcon,
-  undoIcon
+  undoIcon,
+  LabIcon
 } from '@jupyterlab/ui-components';
 
 import { CommandRegistry } from '@lumino/commands';
 
-import { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import {
+  JSONObject,
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
 import { TranslationBundle } from '@jupyterlab/translation';
@@ -96,6 +101,14 @@ export namespace CommandIDs {
   export const paste = 'fileeditor:paste';
 
   export const selectAll = 'fileeditor:select-all';
+}
+
+export interface IFileTypeData extends ReadonlyJSONObject {
+  fileExt: string;
+  iconName: string;
+  launcherLabel: string;
+  paletteLabel: string;
+  caption: string;
 }
 
 /**
@@ -174,11 +187,13 @@ export namespace Commands {
   export function updateWidget(widget: FileEditor): void {
     const transientConfigs = ['lineNumbers', 'lineWrap', 'matchBrackets'];
     const editor = widget.editor;
+    let editorOptions: any = {};
     Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
       if (!transientConfigs.includes(key)) {
-        editor.setOption(key, config[key]);
+        editorOptions[key] = config[key];
       }
     });
+    editor.setOptions(editorOptions);
   }
 
   /**
@@ -863,6 +878,8 @@ export namespace Commands {
 
   /**
    * Add the New File command
+   *
+   * Defaults to Text/.txt if file type data is not specified
    */
   export function addCreateNewCommand(
     commands: CommandRegistry,
@@ -870,13 +887,27 @@ export namespace Commands {
     trans: TranslationBundle
   ): void {
     commands.addCommand(CommandIDs.createNew, {
-      label: args =>
-        args['isPalette'] ? trans.__('New Text File') : trans.__('Text File'),
-      caption: trans.__('Create a new text file'),
-      icon: args => (args['isPalette'] ? undefined : textEditorIcon),
+      label: args => {
+        if (args.isPalette) {
+          return (args.paletteLabel as string) ?? trans.__('New Text File');
+        }
+        return (args.launcherLabel as string) ?? trans.__('Text File');
+      },
+      caption: args =>
+        (args.caption as string) ?? trans.__('Create a new text file'),
+      icon: args =>
+        args.isPalette
+          ? undefined
+          : LabIcon.resolve({
+              icon: (args.iconName as string) ?? textEditorIcon
+            }),
       execute: args => {
-        const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
-        return createNew(commands, cwd as string);
+        const cwd = args.cwd || browserFactory.defaultBrowser.model.path;
+        return createNew(
+          commands,
+          cwd as string,
+          (args.fileExt as string) ?? 'txt'
+        );
       }
     });
   }
@@ -941,6 +972,24 @@ export namespace Commands {
       category: trans.__('Other'),
       rank: 2
     });
+  }
+
+  /**
+   * Add ___ File items to the Launcher for common file types associated with available kernels
+   */
+  export function addKernelLanguageLauncherItems(
+    launcher: ILauncher,
+    trans: TranslationBundle,
+    availableKernelFileTypes: Iterable<IFileTypeData>
+  ): void {
+    for (let ext of availableKernelFileTypes) {
+      launcher.add({
+        command: CommandIDs.createNew,
+        category: trans.__('Other'),
+        rank: 3,
+        args: ext
+      });
+    }
   }
 
   /**
@@ -1030,6 +1079,24 @@ export namespace Commands {
 
     args = { name: trans.__('Decrease Font Size'), delta: -1 };
     palette.addItem({ command, args, category: paletteCategory });
+  }
+
+  /**
+   * Add New ___ File commands to the File Editor palette for common file types associated with available kernels
+   */
+  export function addKernelLanguagePaletteItems(
+    palette: ICommandPalette,
+    trans: TranslationBundle,
+    availableKernelFileTypes: Iterable<IFileTypeData>
+  ): void {
+    const paletteCategory = trans.__('Text Editor');
+    for (let ext of availableKernelFileTypes) {
+      palette.addItem({
+        command: CommandIDs.createNew,
+        args: { ...ext, isPalette: true },
+        category: paletteCategory
+      });
+    }
   }
 
   /**
@@ -1134,6 +1201,21 @@ export namespace Commands {
       [{ command: CommandIDs.createNewMarkdown }],
       30
     );
+  }
+
+  /**
+   * Add Create New ___ File commands to the File menu for common file types associated with available kernels
+   */
+  export function addKernelLanguageMenuItems(
+    menu: IMainMenu,
+    availableKernelFileTypes: Iterable<IFileTypeData>
+  ): void {
+    for (let ext of availableKernelFileTypes) {
+      menu.fileMenu.newMenu.addGroup(
+        [{ command: CommandIDs.createNew, args: ext }],
+        30
+      );
+    }
   }
 
   /**

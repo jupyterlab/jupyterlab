@@ -5,7 +5,7 @@ import { IWidgetTracker } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
 import { Signal, ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IHeading } from './utils/headings';
+import { IHeading, INotebookHeading } from './utils/headings';
 
 /**
  * Interface describing the table of contents registry.
@@ -162,9 +162,13 @@ export namespace TableOfContentsRegistry {
      * -   If not present, a default renderer will be used.
      *
      * @param item - heading
+     * @param toc - list of headings
      * @returns JSX element
      */
-    itemRenderer?: (item: IHeading) => JSX.Element | null;
+    itemRenderer?: (
+      item: IHeading,
+      toc: INotebookHeading[]
+    ) => JSX.Element | null;
 
     /**
      * Returns a toolbar component.

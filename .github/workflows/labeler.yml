@@ -3,6 +3,9 @@ name: Pull Request Labeler
 on:
   schedule:
     - cron: '*/20 * * * *'
+permissions:
+  pull-requests:
+    write
 jobs:
   triage:
     name: Update PR Labels

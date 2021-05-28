@@ -40,6 +40,22 @@ const rules = [
     use: {
       loader: 'raw-loader'
     }
+  },
+  {
+    test: /\.m?js$/,
+    type: 'javascript/auto'
+  },
+  {
+    test: /\.m?js/,
+    resolve: {
+      fullySpecified: false
+    }
+  },
+  {
+    test: /\.c?js/,
+    resolve: {
+      fullySpecified: false
+    }
   }
 ];
 
@@ -82,7 +98,9 @@ module.exports = {
     fallback: {
       url: false,
       buffer: false,
-      path: require.resolve('path-browserify')
+      // See https://github.com/webpack/webpack/blob/3471c776059ac2d26593ea39f9c47c1874253dbb/lib/ModuleNotFoundError.js#L13-L42
+      path: require.resolve('path-browserify'),
+      process: require.resolve('process/browser')
     }
   },
   watchOptions: {
@@ -90,11 +108,8 @@ module.exports = {
     aggregateTimeout: 1000
   },
   plugins: [
-    new webpack.DefinePlugin({
-      // Needed for Blueprint. See https://github.com/palantir/blueprint/issues/4393
-      'process.env': '{}',
-      // Needed for various packages using cwd(), like the path polyfill
-      process: { cwd: () => '/' }
+    new webpack.ProvidePlugin({
+      process: 'process/browser'
     })
   ]
 };

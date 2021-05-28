@@ -14,14 +14,19 @@ interface IProperties {
    * Heading to render.
    */
   heading: IHeading;
+  /**
+   * List of headings to use for rendering current position in toc
+   */
+  toc: IHeading[];
 
   /**
    * Renders a heading.
    *
    * @param item - heading
+   * @param toc - list of headings
    * @returns rendered heading
    */
-  itemRenderer: (item: IHeading) => JSX.Element | null;
+  itemRenderer: (item: IHeading, toc: IHeading[]) => JSX.Element | null;
 }
 
 /**
@@ -43,7 +48,7 @@ class TOCItem extends React.Component<IProperties, IState> {
    * @returns rendered entry
    */
   render() {
-    const { heading } = this.props;
+    const { heading, toc } = this.props;
 
     // Create an onClick handler for the TOC item
     // that scrolls the anchor into view.
@@ -53,7 +58,7 @@ class TOCItem extends React.Component<IProperties, IState> {
       heading.onClick();
     };
 
-    let content = this.props.itemRenderer(heading);
+    let content = this.props.itemRenderer(heading, toc);
     return content && <li onClick={onClick}>{content}</li>;
   }
 }

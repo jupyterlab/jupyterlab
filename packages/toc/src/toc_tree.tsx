@@ -37,9 +37,10 @@ interface IProperties extends React.Props<TOCTree> {
    * Renders a heading item.
    *
    * @param item - heading
+   * @param toc - list of headings in toc to use for rendering current position
    * @returns rendered heading
    */
-  itemRenderer: (item: IHeading) => JSX.Element | null;
+  itemRenderer: (item: IHeading, toc: IHeading[]) => JSX.Element | null;
 }
 
 /**
@@ -67,6 +68,7 @@ class TOCTree extends React.Component<IProperties, IState> {
       return (
         <TOCItem
           heading={el}
+          toc={this.props.toc}
           itemRenderer={this.props.itemRenderer}
           key={`${el.text}-${el.level}-${i++}`}
         />

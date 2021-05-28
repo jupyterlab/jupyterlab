@@ -331,7 +331,7 @@ export namespace ILauncher {
     /**
      * The category for the launcher item.
      *
-     * The default value is the an empty string.
+     * The default value is an empty string.
      */
     category?: string;
 
@@ -439,7 +439,7 @@ function Card(
       title={title}
       onClick={onclick}
       onKeyPress={onkeypress}
-      tabIndex={100}
+      tabIndex={0}
       data-category={item.category || trans.__('Other')}
       key={Private.keyProperty.get(item)}
     >

@@ -85,8 +85,12 @@ export namespace NotebookActions {
    *
    * #### Notes
    * It will preserve the existing mode.
-   * The last cell will be activated.
+   * The last cell will be activated if no selection is found.
+   * If text was selected, the cell cotaining the selection will
+     be activated.
    * The existing selection will be cleared.
+   * The activated cell will have focus and the cursor will move
+     to the end of the cell.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells will be created.
    * Both cells will have the same type as the original cell.
@@ -110,11 +114,13 @@ export namespace NotebookActions {
 
     const offsets = [0];
 
+    let start: number = -1;
+    let end: number = -1;
     for (let i = 0; i < selections.length; i++) {
       // append start and end to handle selections
       // cursors will have same start and end
-      const start = editor.getOffsetAt(selections[i].start);
-      const end = editor.getOffsetAt(selections[i].end);
+      start = editor.getOffsetAt(selections[i].start);
+      end = editor.getOffsetAt(selections[i].end);
       if (start < end) {
         offsets.push(start);
         offsets.push(end);
@@ -156,7 +162,15 @@ export namespace NotebookActions {
     }
     cells.endCompoundOperation();
 
-    notebook.activeCellIndex = index + clones.length - 1;
+    // If there is a selection the selected cell will be activated
+    const activeCellDelta = start !== end ? 2 : 1;
+    notebook.activeCellIndex = index + clones.length - activeCellDelta;
+    const focusedEditor = notebook.activeCell.editor;
+    focusedEditor.focus();
+
+    // Move to the end of the cell that now contains the cursor
+    focusedEditor.setCursorPosition({ line: editor.lineCount, column: 0 });
+
     Private.handleState(notebook, state);
   }
 
@@ -165,15 +179,22 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
+   * @param mergeAbove - If only one cell is selected, indicates whether to merge it
+   *    with the cell above (true) or below (false, default).
+   *
    * #### Notes
    * The widget mode will be preserved.
-   * If only one cell is selected, the next cell will be selected.
+   * If only one cell is selected and `mergeAbove` is true, the above cell will be selected.
+   * If only one cell is selected and `mergeAbove` is false, the below cell will be selected.
    * If the active cell is a code cell, its outputs will be cleared.
    * This action can be undone.
    * The final cell will have the same type as the active cell.
    * If the active cell is a markdown cell, it will be unrendered.
    */
-  export function mergeCells(notebook: Notebook): void {
+  export function mergeCells(
+    notebook: Notebook,
+    mergeAbove: boolean = false
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -206,16 +227,28 @@ export namespace NotebookActions {
 
     // Check for only a single cell selected.
     if (toMerge.length === 1) {
-      // Bail if it is the last cell.
-      if (active === cells.length - 1) {
-        return;
+      // Merge with the cell above when mergeAbove is true
+      if (mergeAbove === true) {
+        // Bail if it is the first cell.
+        if (active === 0) {
+          return;
+        }
+        // Otherwise merge with the previous cell.
+        const cellModel = cells.get(active - 1);
+
+        toMerge.unshift(cellModel.value.text);
+        toDelete.push(cellModel);
+      } else if (mergeAbove === false) {
+        // Bail if it is the last cell.
+        if (active === cells.length - 1) {
+          return;
+        }
+        // Otherwise merge with the next cell.
+        const cellModel = cells.get(active + 1);
+
+        toMerge.push(cellModel.value.text);
+        toDelete.push(cellModel);
       }
-
-      // Otherwise merge with the next cell.
-      const cellModel = cells.get(active + 1);
-
-      toMerge.push(cellModel.value.text);
-      toDelete.push(cellModel);
     }
 
     notebook.deselectAll();
@@ -979,7 +1012,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    notebook.model.cells.undo();
+    notebook.model.sharedModel.undo();
     notebook.deselectAll();
     Private.handleState(notebook, state);
   }
@@ -1000,7 +1033,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    notebook.model.cells.redo();
+    notebook.model.sharedModel.redo();
     notebook.deselectAll();
     Private.handleState(notebook, state);
   }

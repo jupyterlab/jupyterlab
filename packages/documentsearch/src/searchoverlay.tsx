@@ -128,7 +128,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           value={this.props.searchText}
           onChange={e => this.props.onChange(e)}
           onKeyDown={e => this.props.onKeydown(e)}
-          tabIndex={2}
+          tabIndex={0}
           onFocus={e => this.props.onInputFocus()}
           onBlur={e => this.props.onInputBlur()}
           ref={this.searchInputRef}
@@ -136,7 +136,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onCaseSensitiveToggled()}
-          tabIndex={4}
+          tabIndex={0}
         >
           <caseSensitiveIcon.react
             className={caseButtonToggleClass}
@@ -146,7 +146,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onRegexToggled()}
-          tabIndex={5}
+          tabIndex={0}
         >
           <regexIcon.react className={regexButtonToggleClass} tag="span" />
         </button>
@@ -177,24 +177,24 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
           value={this.props.replaceText}
           onKeyDown={e => this.props.onReplaceKeydown(e)}
           onChange={e => this.props.onChange(e)}
-          tabIndex={3}
+          tabIndex={0}
           ref={this.replaceInputRef}
         />
         <button
           className={REPLACE_BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onReplaceCurrent()}
-          tabIndex={10}
+          tabIndex={0}
         >
           <span
             className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={-1}
+            tabIndex={0}
           >
             {this._trans.__('Replace')}
           </span>
         </button>
         <button
           className={REPLACE_BUTTON_WRAPPER_CLASS}
-          tabIndex={11}
+          tabIndex={0}
           onClick={() => this.props.onReplaceAll()}
         >
           <span
@@ -223,7 +223,7 @@ function UpDownButtons(props: IUpDownProps) {
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightPrevious()}
-        tabIndex={6}
+        tabIndex={0}
       >
         <caretUpEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -233,7 +233,7 @@ function UpDownButtons(props: IUpDownProps) {
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHightlightNext()}
-        tabIndex={7}
+        tabIndex={0}
       >
         <caretDownEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -281,7 +281,7 @@ class FilterToggle extends React.Component<
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => this.props.toggleEnabled()}
-        tabIndex={8}
+        tabIndex={0}
       >
         <ellipsesIcon.react
           className={className}
@@ -296,8 +296,12 @@ class FilterToggle extends React.Component<
 
 interface IFilterSelectionProps {
   searchOutput: boolean;
+  searchSelectedCells: boolean;
   canToggleOutput: boolean;
+  canToggleSelectedCells: boolean;
   toggleOutput: () => void;
+  toggleSelectedCells: () => void;
+  trans: TranslationBundle;
 }
 
 interface IFilterSelectionState {}
@@ -309,19 +313,38 @@ class FilterSelection extends React.Component<
   render() {
     return (
       <label className={SEARCH_OPTIONS_CLASS}>
-        <span
-          className={
-            this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
-          }
-        >
-          Search Cell Outputs
-        </span>
-        <input
-          type="checkbox"
-          disabled={!this.props.canToggleOutput}
-          checked={this.props.searchOutput}
-          onChange={this.props.toggleOutput}
-        />
+        <div>
+          <span
+            className={
+              this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
+            }
+          >
+            {this.props.trans.__('Search Cell Outputs')}
+          </span>
+          <input
+            type="checkbox"
+            disabled={!this.props.canToggleOutput}
+            checked={this.props.searchOutput}
+            onChange={this.props.toggleOutput}
+          />
+        </div>
+        <div>
+          <span
+            className={
+              this.props.canToggleSelectedCells
+                ? ''
+                : SEARCH_OPTIONS_DISABLED_CLASS
+            }
+          >
+            {this.props.trans.__('Search Selected Cell(s)')}
+          </span>
+          <input
+            type="checkbox"
+            disabled={!this.props.canToggleSelectedCells}
+            checked={this.props.searchSelectedCells}
+            onChange={this.props.toggleSelectedCells}
+          />
+        </div>
       </label>
     );
   }
@@ -351,6 +374,9 @@ class SearchOverlay extends React.Component<
     this.state = props.overlayState;
     this.replaceEntryRef = React.createRef();
     this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
+    this._toggleSearchSelectedCells = this._toggleSearchSelectedCells.bind(
+      this
+    );
   }
 
   componentDidMount() {
@@ -459,6 +485,19 @@ class SearchOverlay extends React.Component<
       () => this._executeSearch(true, undefined, true)
     );
   }
+  private _toggleSearchSelectedCells() {
+    this.setState(
+      prevState => ({
+        ...prevState,
+        filters: {
+          ...prevState.filters,
+          selectedCells: !prevState.filters.selectedCells
+        }
+      }),
+      () => this._executeSearch(true, undefined, true)
+    );
+  }
+
   private _toggleFiltersOpen() {
     this.setState(prevState => ({
       filtersOpen: !prevState.filtersOpen
@@ -478,8 +517,12 @@ class SearchOverlay extends React.Component<
       <FilterSelection
         key={'filter'}
         canToggleOutput={!showReplace}
+        canToggleSelectedCells={true}
         searchOutput={this.state.filters.output}
+        searchSelectedCells={this.state.filters.selectedCells}
         toggleOutput={this._toggleSearchOutput}
+        toggleSelectedCells={this._toggleSearchSelectedCells}
+        trans={this.translator.load('jupyterlab')}
       />
     ) : null;
     const icon = this.state.replaceEntryShown ? caretDownIcon : caretRightIcon;
@@ -493,7 +536,7 @@ class SearchOverlay extends React.Component<
           <button
             className={TOGGLE_WRAPPER}
             onClick={() => this._onReplaceToggled()}
-            tabIndex={1}
+            tabIndex={0}
           >
             <icon.react
               className={`${REPLACE_TOGGLE_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -536,7 +579,7 @@ class SearchOverlay extends React.Component<
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this._onClose()}
-          tabIndex={9}
+          tabIndex={0}
         >
           <closeIcon.react
             className="jp-icon-hover"

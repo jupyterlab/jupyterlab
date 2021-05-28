@@ -7,7 +7,7 @@ jobs:
     name: JS
     strategy:
       matrix:
-        group: [s-apputils]
+        group: [js-apputils, js-services]
       fail-fast: false
     runs-on: ubuntu-20.04
     steps:

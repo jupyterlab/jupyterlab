@@ -803,7 +803,7 @@ namespace Private {
       .resolveUrl(href)
       .then(urlPath => {
         // decode encoded url from url to api path
-        const path = decodeURI(urlPath);
+        const path = decodeURIComponent(urlPath);
         // Handle the click override.
         if (linkHandler) {
           linkHandler.handleLink(anchor, path, hash);

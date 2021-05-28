@@ -5,7 +5,7 @@ import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
 
 import { MessageLoop } from '@lumino/messaging';
 
-import { Widget } from '@lumino/widgets';
+import { BoxPanel, Widget } from '@lumino/widgets';
 
 describe('@jupyterlab/apputils', () => {
   describe('MainAreaWidget', () => {
@@ -15,7 +15,6 @@ describe('@jupyterlab/apputils', () => {
         const widget = new MainAreaWidget({ content });
         expect(widget).toBeInstanceOf(MainAreaWidget);
         expect(widget.hasClass('jp-MainAreaWidget')).toBe(true);
-        expect(widget.content.node.tabIndex).toBe(-1);
         expect(widget.title.closable).toBe(true);
       });
 
@@ -24,6 +23,15 @@ describe('@jupyterlab/apputils', () => {
         const toolbar = new Toolbar();
         const widget = new MainAreaWidget({ content, toolbar });
         expect(widget.hasClass('jp-MainAreaWidget')).toBe(true);
+        expect(widget.toolbar).toBe(toolbar);
+      });
+    });
+
+    describe('contentHeader', () => {
+      it('should exist and have correct type', () => {
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
+        expect(widget.contentHeader).toBeInstanceOf(BoxPanel);
       });
     });
 

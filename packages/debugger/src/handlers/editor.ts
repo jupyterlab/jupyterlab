@@ -271,6 +271,7 @@ export namespace EditorHandler {
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
     cmEditor.editor.addLineClass(line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
+    cmEditor.scrollIntoViewCentered({ ch: 0, line: line - 1 });
   }
 
   /**

@@ -1,4 +1,4 @@
-// const git = require('git-rev-sync');
+const fs = require('fs');
 
 const packages = [
   // 'application-extension',
@@ -53,6 +53,8 @@ const packages = [
   // 'metapackage',
   // 'nbconvert-css',
   'nbformat',
+  'shared-models',
+  'docprovider',
   'notebook-extension',
   'notebook',
   'observables',
@@ -72,7 +74,6 @@ const packages = [
   'statedb',
   'statusbar-extension',
   'statusbar',
-  'tabmanager-extension',
   'terminal-extension',
   'terminal',
   'theme-dark-extension',
@@ -86,12 +87,11 @@ const packages = [
   'vega5-extension'
 ];
 
-const entryPoints = packages.flatMap(p => [
-  `packages/${p}/src/index.ts`,
-  `packages/${p}/src/index.tsx`
-  // `${__dirname}/packages/${p}/src/*.d.ts`,
-  // `${__dirname}/packages/${p}/src/index.ts`,
-]);
+const entryPoints = packages
+  .flatMap(p => [`packages/${p}/src/index.ts`, `packages/${p}/src/index.tsx`])
+  .filter(function (path) {
+    return fs.existsSync(path);
+  });
 
 const exclude =
   packages.flatMap(p => [`packages/${p}/test`]) +

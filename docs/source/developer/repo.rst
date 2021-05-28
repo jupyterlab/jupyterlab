@@ -53,6 +53,10 @@ the repository to be tested on `mybinder.org <https://mybinder.org>`__.
 This specification is developer focused.
 For a more user-focused binder see the
 `JupyterLab demo <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab/tree/demo/Lorenz.ipynb>`__
+The binder instance adds two endpoints in addition to ``/lab``: ``/lab-dev`` and ``/lab-spliced``.
+The ``lab-dev`` endpoint is the equivalent of checking out the repo locally and running ``jupyter lab --dev-mode``.
+The ``lab-spliced`` endpoint is the equivalent of building JupyterLab in spliced mode and running ``jupyter lab``.
+See the `Development workflow for source extensions <../extension/extension_dev.html#development-workflow-for-source-extensions>`__ for more information on spliced mode.
 
 Build utilities: ``builtutils/``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -122,5 +126,5 @@ A small ``npm`` package which is aids in running the tests in ``tests/``.
 TypeDoc Theming: ``typedoc-theme``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A small theme used to help render our 
+A small theme used to help render our
 `TypeDoc <../api/index.html>`__ documentation.

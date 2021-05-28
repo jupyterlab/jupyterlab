@@ -33,7 +33,7 @@ const MISSING: Dict<string[]> = {
 
 const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
-  '@jupyterlab/apputils': ['@types/react', 'buffer', 'url'],
+  '@jupyterlab/apputils': ['@types/react', 'url'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/builder': [
@@ -57,6 +57,7 @@ const UNUSED: Dict<string[]> = {
     'css-loader',
     'file-loader',
     'path-browserify',
+    'process',
     'raw-loader',
     'style-loader',
     'svg-url-loader',
@@ -157,6 +158,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/debugger',
     '@jupyterlab/debugger-extension',
     '@jupyterlab/docmanager-extension',
+    '@jupyterlab/docprovider-extension',
     '@jupyterlab/documentsearch-extension',
     '@jupyterlab/extensionmanager',
     '@jupyterlab/extensionmanager-extension',
@@ -443,9 +445,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   // Pick up all the package versions.
   const paths = utils.getLernaPaths();
 
-  // These two are not part of the workspaces but should be kept
-  // in sync.
-  paths.push('./jupyterlab/tests/mock_packages/extension');
+  // This package is not part of the workspaces but should be kept in sync.
   paths.push('./jupyterlab/tests/mock_packages/mimeextension');
 
   const cssImports: Dict<string[]> = {};

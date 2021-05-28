@@ -592,7 +592,16 @@ export class Sanitizer implements ISanitizer {
       bdo: ['dir'],
       blockquote: ['cite'],
       br: ['clear'],
-      button: ['accesskey', 'disabled', 'name', 'tabindex', 'type', 'value'],
+      button: [
+        'accesskey',
+        'data-commandlinker-args',
+        'data-commandlinker-command',
+        'disabled',
+        'name',
+        'tabindex',
+        'type',
+        'value'
+      ],
       canvas: ['height', 'width'],
       caption: ['align'],
       col: ['align', 'char', 'charoff', 'span', 'valign', 'width'],

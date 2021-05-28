@@ -102,7 +102,8 @@ describe('Debugger', () => {
         terminate: '',
         next: '',
         stepIn: '',
-        stepOut: ''
+        stepOut: '',
+        evaluate: ''
       },
       editorServices: {
         factoryService,
@@ -167,7 +168,7 @@ describe('Debugger', () => {
       const node = sidebar.callstack.node;
       const items = node.querySelectorAll('button');
 
-      expect(items.length).toEqual(5);
+      expect(items.length).toEqual(6);
       items.forEach(item => {
         expect(Array.from(items[0].classList)).toEqual(
           expect.arrayContaining(['jp-ToolbarButtonComponent'])

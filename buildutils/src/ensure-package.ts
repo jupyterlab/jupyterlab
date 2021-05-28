@@ -5,6 +5,7 @@
 
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
+import * as minimatch from 'minimatch';
 import * as path from 'path';
 import * as prettier from 'prettier';
 import * as ts from 'typescript';
@@ -437,6 +438,58 @@ export async function ensurePackage(
       }
     }
   }
+
+  // Ensure style and lib are included in files metadata.
+  const filePatterns: string[] = data.files || [];
+
+  // Function to get all of the files in a directory, recursively.
+  function recurseDir(dirname: string, files: string[]) {
+    if (!fs.existsSync(dirname)) {
+      return files;
+    }
+    fs.readdirSync(dirname).forEach(fpath => {
+      const absolute = path.join(dirname, fpath);
+      if (fs.statSync(absolute).isDirectory())
+        return recurseDir(absolute, files);
+      else return files.push(absolute);
+    });
+    return files;
+  }
+
+  // Ensure style files are included by pattern.
+  const styleFiles = recurseDir(path.join(pkgPath, 'style'), []);
+  styleFiles.forEach(fpath => {
+    const basePath = fpath.slice(pkgPath.length + 1);
+    let found = false;
+    filePatterns.forEach(fpattern => {
+      if (minimatch.default(basePath, fpattern)) {
+        found = true;
+      }
+    });
+    if (!found) {
+      messages.push(`File ${basePath} not included in files`);
+    }
+  });
+
+  // Ensure source TS files are included in lib (.js, .js.map, .d.ts)
+  const srcFiles = recurseDir(path.join(pkgPath, 'src'), []);
+  srcFiles.forEach(fpath => {
+    const basePath = fpath.slice(pkgPath.length + 1).replace('src', 'lib');
+    ['.js', '.js.map', '.d.ts'].forEach(ending => {
+      let found = false;
+      const targetPattern = basePath
+        .replace('.tsx', ending)
+        .replace('.ts', ending);
+      filePatterns.forEach(fpattern => {
+        if (minimatch.default(targetPattern, fpattern)) {
+          found = true;
+        }
+      });
+      if (!found) {
+        messages.push(`File ${targetPattern} not included in files`);
+      }
+    });
+  });
 
   // Ensure dependencies and dev dependencies.
   data.dependencies = deps;

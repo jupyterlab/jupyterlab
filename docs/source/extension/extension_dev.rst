@@ -139,7 +139,7 @@ Since consumers will need to import a token used by a provider, the token should
 A pattern in core JupyterLab is to create and export a token from a third package that both the provider and consumer extensions import, rather than defining the token in the provider's package. This enables a user to swap out the provider extension for a different extension that provides the same token with an alternative service implementation. For example, the core JupyterLab ``filebrowser`` package exports a token representing the file browser service (enabling interactions with the file browser). The ``filebrowser-extension`` package contains a plugin that implements the file browser in JupyterLab and provides the file browser service to JupyterLab (identified with the token imported from the ``filebrowser`` package). Extensions in JupyterLab that want to interact with the filebrowser thus do not need to have a JavaScript dependency on the ``filebrowser-extension`` package, but only need to import the token from the ``filebrowser`` package. This pattern enables users to seamlessly change the file browser in JupyterLab by writing their own extension that imports the same token from the ``filebrowser`` package and provides it to the system with their own alternative file browser service.
 
 
-.. 
+..
    We comment out the following, until we can import from a submodule of a package. See https://github.com/jupyterlab/jupyterlab/pull/9475.
 
    A pattern in core JupyterLab is to create and export tokens from a self-contained ``tokens`` JavaScript module in a package. This enables consumers to import a token directly from the package's ``tokens`` module (e.g., ``import { MyToken } from 'provider/tokens';``), thus enabling a tree-shaking bundling optimization to possibly bundle only the tokens and not other code from the package.
@@ -153,7 +153,7 @@ Mime Renderer Plugins
 
 Mime Renderer plugins are a convenience for creating a plugin
 that can render mime data in a notebook and files of the given mime type. Mime renderer plugins are more declarative and more restricted than standard plugins.
-A mime renderer plugin is an object with the fields listed in the 
+A mime renderer plugin is an object with the fields listed in the
 `rendermime-interfaces IExtension <../api/interfaces/rendermime_interfaces.irendermime.iextension.html>`__
 object.
 
@@ -172,7 +172,7 @@ document can then be saved by the user in the usual manner.
 Theme plugins
 ^^^^^^^^^^^^^
 
-A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated. 
+A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated.
 
 The extension package containing the theme plugin must include all static assets that are referenced by ``@import`` in its theme CSS files. Local URLs can be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or ``url('../foo/bar.css')`` can be used to refer local files in the theme. Absolute URLs (starting with a ``/``) or external URLs (e.g. ``https:``) can be used to refer to external assets.
 
@@ -205,7 +205,7 @@ We will talk about each ``jupyterlab`` metadata field in ``package.json`` for so
 * ``sharedPackages``: :ref:`deduplication`
 * ``discovery``: :ref:`ext-author-companion-packages`
 
-A JupyterLab extension must have at least one of ``jupyterlab.extension`` or ``jupyterlab.mimeExtension`` set. 
+A JupyterLab extension must have at least one of ``jupyterlab.extension`` or ``jupyterlab.mimeExtension`` set.
 
 .. _main_entry_point:
 
@@ -353,12 +353,12 @@ When an extension (the "consumer") is optionally using a service identified by a
 .. TODO: fill out the following text to a more complete explanation of how the deduplication works.
 
    Prebuilt extensions need to deduplicate many of their dependencies with other prebuilt extensions and with source extensions. This deduplication happens in two phases:
-   
+
    1. When JupyterLab is initialized in the browser, the core Jupyterlab build (including all source extensions) and each prebuilt extension can share copies of dependencies with a package cache in the browser.
    2. A source or prebuilt extension can import a dependency from the cache while JupyterLab is running.
-   
+
    The main options controlling how things work in this deduplication are as follows. If a package is listed in this sharing config, it will be requested from the package cache.
-   
+
    * ``bundled`` - if true, a copy of this package is also provided to the package cache. If false, we will request a version from the package cache. Set this to false if we know that the package cache will have the package and you do not want to bundle a copy (perhaps to make your prebuilt bundle smaller).
    ``singleton`` - if true, makes sure to use the same copy of a dependency that others are using, even if it is not the right version.
    ``strictVersion`` - if true, throw an error if we would be using the wrong version of a dependency.
@@ -520,7 +520,23 @@ While authoring a prebuilt extension, you can use the ``labextension develop`` c
 
 Then rebuilding your extension and refreshing JupyterLab in the browser should pick up changes in your prebuilt extension source code.
 
-If you are developing your prebuilt extension against the JupyterLab source repo, you can run JupyterLab with ``jupyter lab --dev-mode --extensions-in-dev-mode`` to have the development version of JupyterLab load prebuilt extensions.
+If you are developing your prebuilt extension against the JupyterLab source repo, you can run JupyterLab with ``jupyter lab --dev-mode --extensions-in-dev-mode`` to have the development version of JupyterLab load prebuilt extensions. It would be best if you had in mind that the JupyterLab packages that your extension depends on may differ from those published; this means that your extension doesn’t build with JupyterLab dependencies from your node_modules folder but those in JupyterLab source code.
+
+If you are using TypeScript, the TypeScript compiler would complain because the dependencies of your extension may differ from those in JupyterLab. For that reason, you need to add to your ``tsconfig.json`` the path where to search for these dependencies by adding the option `paths <https://www.typescriptlang.org/tsconfig#paths>`_:
+
+.. code-block:: json
+
+    {
+      "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@jupyterlab/*": ["../jupyterlab/packages/*"],
+            "*": ["node_modules/*"]
+        }
+      },
+    }
+
+When adding the path to find JupyterLab dependencies, it may cause troubles with other dependencies (like lumino or react) in your project because JupyterLab packages will take its dependencies from JupyterLab ``node_modules`` folder. In contrast, your packages will take them from your ``node_modules`` folder. To solve this problem, you’ll need to add the dependencies with conflicts to ``resolutions`` in your ``package.json``. This way, both projects (JupyterLab and your extension) use the same version of the duplicated dependencies.
 
 We provide a `cookiecutter <https://github.com/jupyterlab/extension-cookiecutter-ts>`_ that handles all of the scaffolding for an extension author, including the shipping of appropriate data files, so that when the user installs the package, the prebuilt extension ends up in ``share/jupyter/labextensions``
 
@@ -555,6 +571,8 @@ This ``install.json`` file is used by JupyterLab to help a user know how to mana
 * ``uninstallInstructions``: This is a short block of text giving the user instructions for uninstalling the prebuilt extension. For example, it might instruct them to use a system package manager or talk to a system administrator.
 
 
+
+.. _source_dev_workflow:
 
 Development workflow for source extensions
 ------------------------------------------
@@ -601,23 +619,14 @@ specific patch release of one of the core JupyterLab packages you can
 temporarily pin that requirement to a specific version in your own
 dependencies.
 
-If you must install a source extension into a development branch of JupyterLab, you have to graft it into the source tree of JupyterLab itself. This may be done using the command
+If you want to test a source extension against the unreleased versions of JupyterLab, you can run the command
 
 ::
 
-    jlpm run add:sibling <path-or-url>
+    jupyter lab --watch --splice-source
 
-in the JupyterLab root directory, where ``<path-or-url>`` refers either
-to an extension ``npm`` package on the local file system, or a URL to a git
-repository for an extension ``npm`` package. This operation may be
-subsequently reversed by running
-
-::
-
-    jlpm run remove:package <extension-dir-name>
-
-This will remove the package metadata from the source tree and delete
-all of the package files. Note that :ref:`developing a prebuilt extension <prebuilt_dev_workflow>` against a development version of JupyterLab is generally much easier.
+This command will splice the local ``packages`` directory into the application directory, allowing you to build source extension(s)
+against the current development sources.  To statically build spliced sources, use ``jupyter lab build --splice-source``.  Once a spliced build is created, any subsquent calls to `jupyter labextension build` will be in splice mode by default.  A spliced build can be forced by calling ``jupyter labextension build --splice-source``. Note that :ref:`developing a prebuilt extension <prebuilt_dev_workflow>` against a development version of JupyterLab is generally much easier than source package building.
 
 The package should export EMCAScript 6 compatible JavaScript. It can
 import CSS using the syntax ``require('foo.css')``. The CSS files can

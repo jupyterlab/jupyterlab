@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ToolbarButton } from '@jupyterlab/apputils';
+import { ToolbarButton, Dialog, showDialog } from '@jupyterlab/apputils';
 
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
@@ -39,8 +39,22 @@ export class Breakpoints extends Panel {
       'closeAll',
       new ToolbarButton({
         icon: closeAllIcon,
-        onClick: (): void => {
-          void service.clearBreakpoints();
+        onClick: async (): Promise<void> => {
+          if (model.breakpoints.size === 0) {
+            return;
+          }
+          const result = await showDialog({
+            title: trans.__('Remove All Breakpoints'),
+            body: trans.__('Are you sure you want to remove all breakpoints?'),
+            buttons: [
+              Dialog.okButton({ label: trans.__('Remove breakpoints') }),
+              Dialog.cancelButton({ label: trans.__('Cancel') })
+            ],
+            hasClose: true
+          });
+          if (result.button.accept) {
+            return service.clearBreakpoints();
+          }
         },
         tooltip: trans.__('Remove All Breakpoints')
       })

@@ -40,6 +40,10 @@ flags['clean'] = (
     {'BaseExtensionApp': {'should_clean': True}},
     "Cleanup intermediate files after the action."
 )
+flags['splice-source'] = (
+    {'BaseExtensionApp': {'splice_source': True}},
+    "Splice source packages into app directory."
+)
 
 check_flags = copy(flags)
 check_flags['installed'] = (
@@ -108,6 +112,9 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
 
+    splice_source = Bool(False, config=True,
+        help="Splice source packages into app directory.")
+
     labextensions_path = List(Unicode(), help='The standard paths to look in for prebuilt JupyterLab extensions')
 
     @default('labextensions_path')
@@ -115,6 +122,11 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         lab = LabApp()
         lab.load_config_file()
         return lab.extra_labextensions_path + lab.labextensions_path
+
+    @default('splice_source')
+    def _default_splice_source(self):
+        version = get_app_version(AppOptions(app_dir=self.app_dir))
+        return version.endswith('-spliced')
 
     def start(self):
         if self.app_dir and self.app_dir.startswith(HERE):
@@ -124,7 +136,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
             if ans and self.should_build:
                 production = None if self.dev_build is None else not self.dev_build
                 app_options = AppOptions(app_dir=self.app_dir, logger=self.log,
-                      core_config=self.core_config)
+                      core_config=self.core_config, splice_source=self.splice_source)
                 build(clean_staging=self.should_clean,
                       production = production, minimize = self.minimize, app_options=app_options)
 

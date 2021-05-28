@@ -48,11 +48,47 @@ describe('cells/model', () => {
         const cell: nbformat.IRawCell = {
           cell_type: 'raw',
           source: ['foo\n', 'bar\n', 'baz'],
-          metadata: { trusted: false }
+          metadata: { trusted: false },
+          id: 'cell_id'
         };
         const model = new CellModel({ cell });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.value.text).toBe((cell.source as string[]).join(''));
+      });
+
+      it('should use the id argument', () => {
+        const cell: nbformat.IRawCell = {
+          cell_type: 'raw',
+          source: ['foo\n', 'bar\n', 'baz'],
+          metadata: { trusted: false },
+          id: 'cell_id'
+        };
+        const model = new CellModel({ cell, id: 'my_id' });
+        expect(model).toBeInstanceOf(CellModel);
+        expect(model.id).toBe('my_id');
+      });
+
+      it('should use the cell id if an id is not supplied', () => {
+        const cell: nbformat.IRawCell = {
+          cell_type: 'raw',
+          source: ['foo\n', 'bar\n', 'baz'],
+          metadata: { trusted: false },
+          id: 'cell_id'
+        };
+        const model = new CellModel({ cell });
+        expect(model).toBeInstanceOf(CellModel);
+        expect(model.id).toBe('cell_id');
+      });
+
+      it('should generate an id if an id or cell id is not supplied', () => {
+        const cell = {
+          cell_type: 'raw',
+          source: ['foo\n', 'bar\n', 'baz'],
+          metadata: { trusted: false }
+        };
+        const model = new CellModel({ cell });
+        expect(model).toBeInstanceOf(CellModel);
+        expect(model.id.length).toBeGreaterThan(0);
       });
     });
 
@@ -243,6 +279,20 @@ describe('cells/model', () => {
         expect(model.type).toBe('raw');
       });
     });
+    describe('#toJSON()', () => {
+      it('should return a raw cell encapsulation of the model value', () => {
+        const cell: nbformat.IRawCell = {
+          cell_type: 'raw',
+          source: 'foo',
+          metadata: {},
+          id: 'cell_id'
+        };
+        const model = new RawCellModel({ cell });
+        const serialized = model.toJSON();
+        expect(serialized).not.toBe(cell);
+        expect(serialized).toEqual(cell);
+      });
+    });
   });
 
   describe('MarkdownCellModel', () => {
@@ -250,6 +300,20 @@ describe('cells/model', () => {
       it('should be set with type "markdown"', () => {
         const model = new MarkdownCellModel({});
         expect(model.type).toBe('markdown');
+      });
+    });
+    describe('#toJSON()', () => {
+      it('should return a markdown cell encapsulation of the model value', () => {
+        const cell: nbformat.IMarkdownCell = {
+          cell_type: 'markdown',
+          source: 'foo',
+          metadata: {},
+          id: 'cell_id'
+        };
+        const model = new MarkdownCellModel({ cell });
+        const serialized = model.toJSON();
+        expect(serialized).not.toBe(cell);
+        expect(serialized).toEqual(cell);
       });
     });
   });
@@ -433,7 +497,8 @@ describe('cells/model', () => {
             } as nbformat.IDisplayData
           ],
           source: 'foo',
-          metadata: { trusted: false }
+          metadata: { trusted: false },
+          id: 'cell_id'
         };
         const model = new CodeCellModel({ cell });
         const serialized = model.toJSON();

@@ -61,7 +61,8 @@ describe('apputils', () => {
         const dehydrated: ILabShell.ILayout = {
           mainArea: { currentWidget, dock: null },
           leftArea: { collapsed: true, currentWidget: null, widgets: null },
-          rightArea: { collapsed: true, currentWidget: null, widgets: null }
+          rightArea: { collapsed: true, currentWidget: null, widgets: null },
+          relativeSizes: null
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);
@@ -100,7 +101,8 @@ describe('apputils', () => {
             collapsed: true,
             widgets: [currentWidget]
           },
-          rightArea: { collapsed: true, currentWidget: null, widgets: null }
+          rightArea: { collapsed: true, currentWidget: null, widgets: null },
+          relativeSizes: null
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);
@@ -153,7 +155,8 @@ describe('apputils', () => {
         const dehydrated: ILabShell.ILayout = {
           mainArea: { currentWidget: null, dock: null },
           leftArea: { currentWidget: null, collapsed: true, widgets: null },
-          rightArea: { collapsed: true, currentWidget: null, widgets: null }
+          rightArea: { collapsed: true, currentWidget: null, widgets: null },
+          relativeSizes: null
         };
 
         await expect(restorer.save(dehydrated)).rejects.toBe(
@@ -178,7 +181,8 @@ describe('apputils', () => {
             collapsed: true,
             widgets: [currentWidget]
           },
-          rightArea: { collapsed: true, currentWidget: null, widgets: null }
+          rightArea: { collapsed: true, currentWidget: null, widgets: null },
+          relativeSizes: null
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);

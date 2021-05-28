@@ -58,6 +58,8 @@ function activate(
   running.id = 'jp-running-sessions';
   running.title.caption = trans.__('Running Terminals and Kernels');
   running.title.icon = runningIcon;
+  running.node.setAttribute('role', 'region');
+  running.node.setAttribute('aria-label', trans.__('Running Sessions section'));
 
   // Let the application restorer track the running panel for restoration of
   // application state (e.g. setting the running panel as the current side bar

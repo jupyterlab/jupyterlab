@@ -18,6 +18,7 @@ const styles = import('./build/style.js');
 const extensions = [
   import('@jupyterlab/application-extension'),
   import('@jupyterlab/apputils-extension'),
+  import('@jupyterlab/celltags-extension'),
   import('@jupyterlab/codemirror-extension'),
   import('@jupyterlab/completer-extension'),
   import('@jupyterlab/console-extension'),
@@ -41,6 +42,7 @@ const extensions = [
   import('@jupyterlab/terminal-extension'),
   import('@jupyterlab/theme-dark-extension'),
   import('@jupyterlab/theme-light-extension'),
+  import('@jupyterlab/toc-extension'),
   import('@jupyterlab/tooltip-extension'),
   import('@jupyterlab/translation-extension'),
   import('@jupyterlab/ui-components-extension')

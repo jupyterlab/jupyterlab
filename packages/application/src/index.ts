@@ -17,7 +17,11 @@ export { JupyterLab } from './lab';
 
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 
-export { IMimeDocumentTracker } from './mimerenderers';
+export {
+  IMimeDocumentTracker,
+  createRendermimePlugin,
+  createRendermimePlugins
+} from './mimerenderers';
 
 export { Router } from './router';
 

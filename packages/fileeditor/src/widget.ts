@@ -329,8 +329,21 @@ export class FileEditorFactory extends ABCWidgetFactory<
     });
 
     content.title.icon = textEditorIcon;
-
     const widget = new DocumentWidget({ content, context });
+    widget.context.saveState.connect((sender, state) => {
+      const model = sender.contentsModel;
+      /* emits shouldNameFile signal 
+         when save is completed, file is not renamed and the name starts with 'untitled'
+      */
+      if (
+        state === 'completed-manual' &&
+        model &&
+        !model.renamed == true &&
+        model.name.startsWith('untitled')
+      ) {
+        widget.shouldNameFile.emit(undefined);
+      }
+    });
     return widget;
   }
 

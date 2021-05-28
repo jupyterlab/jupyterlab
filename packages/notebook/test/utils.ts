@@ -69,6 +69,7 @@ export function populateNotebook(notebook: Notebook): void {
 }
 
 export const DEFAULT_CONTENT = NBTestUtils.DEFAULT_CONTENT;
+export const DEFAULT_CONTENT_45 = NBTestUtils.DEFAULT_CONTENT_45;
 export const editorFactory = NBTestUtils.editorFactory;
 export const mimeTypeService = NBTestUtils.mimeTypeService;
 export const defaultEditorConfig = NBTestUtils.defaultEditorConfig;

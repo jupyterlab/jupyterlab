@@ -91,6 +91,12 @@
 
 .jp-FileBrowser-toolbar.jp-Toolbar
   .jp-Toolbar-item:first-child
+  .jp-ToolbarButtonComponent:focus-visible {
+  background-color: var(--jp-brand-color0);
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar
+  .jp-Toolbar-item:first-child
   .jp-ToolbarButtonComponent
   .jp-icon3 {
   fill: white;
@@ -127,6 +133,10 @@
   display: flex;
   flex-direction: column;
   outline: 0;
+}
+
+.jp-DirListing:focus-visible {
+  border: 1px solid var(--jp-brand-color1);
 }
 
 .jp-DirListing-header {

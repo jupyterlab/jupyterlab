@@ -21,6 +21,13 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import os
+import os.path as osp
+import shutil
+from subprocess import check_call
+
+
+HERE = osp.abspath(osp.dirname(__file__))
 
 # -- General configuration ------------------------------------------------
 
@@ -64,8 +71,7 @@ author = 'Project Jupyter'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-import os
-_version_py = os.path.join('..', '..', 'jupyterlab', '_version.py')
+_version_py = osp.join(HERE, '..', '..', 'jupyterlab', '_version.py')
 version_ns = {}
 
 with open(_version_py, mode='r') as version_file:
@@ -97,23 +103,17 @@ todo_include_todos = False
 
 
 # build js docs and stage them to the build directory
-import os
-import shutil
-from subprocess import check_call
-
-
 def build_api_docs(out_dir):
     """build js api docs"""
-    here = os.path.dirname(os.path.abspath(__file__))
-    docs = os.path.join(here, os.pardir)
-    root = os.path.join(docs, os.pardir)
-    docs_api = os.path.join(docs, "api")
-    api_index = os.path.join(docs_api, "index.html")
+    docs = osp.join(HERE, os.pardir)
+    root = osp.join(docs, os.pardir)
+    docs_api = osp.join(docs, "api")
+    api_index = osp.join(docs_api, "index.html")
     # is this an okay way to specify jlpm
     # without installing jupyterlab first?
-    jlpm = ["node", os.path.join(root, "jupyterlab", "staging", "yarn.js")]
+    jlpm = ["node", osp.join(root, "jupyterlab", "staging", "yarn.js")]
 
-    if os.path.exists(api_index):
+    if osp.exists(api_index):
         # avoid rebuilding docs because it takes forever
         # `make clean` to force a rebuild
         print(f"already have {api_index}")
@@ -123,9 +123,9 @@ def build_api_docs(out_dir):
         check_call(jlpm + ["build:packages"], cwd=root)
         check_call(jlpm + ["docs"], cwd=root)
 
-    dest_dir = os.path.join(out_dir, "api")
+    dest_dir = osp.join(out_dir, "api")
     print(f"Copying {docs_api} -> {dest_dir}")
-    if os.path.exists(dest_dir):
+    if osp.exists(dest_dir):
         shutil.rmtree(dest_dir)
     shutil.copytree(docs_api, dest_dir)
 
@@ -259,5 +259,7 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 
 
 def setup(app):
+    dest = osp.join(HERE, 'getting_started/changelog.md')
+    shutil.copy(osp.join(HERE, '..', '..', 'CHANGELOG.md'), dest)
     app.add_css_file('css/custom.css')  # may also be an URL
     build_api_docs(app.outdir)

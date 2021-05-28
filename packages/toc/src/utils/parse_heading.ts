@@ -88,7 +88,7 @@ function parseHeading(str: string): IHeading | null {
   }
   // Case: Markdown heading (alternative style)
   if (lines.length > 1) {
-    match = lines[1].match(/^([=]{2,}|[-]{2,})/);
+    match = lines[1].match(/^ {0,3}([=]{2,}|[-]{2,})\s*$/);
     if (match) {
       return {
         text: lines[0].replace(/\[(.+)\]\(.+\)/g, '$1'), // take special care to parse Markdown links into raw text

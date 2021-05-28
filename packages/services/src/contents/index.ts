@@ -106,10 +106,17 @@ export namespace Contents {
      * The indices of the matched characters in the name.
      */
     indices?: ReadonlyArray<number> | null;
+
+    /**
+     * Whether file has been renamed.
+     *
+     * The default is `false`.
+     */
+    renamed?: boolean;
   }
 
   /**
-   * Validates an IModel, thowing an error if it does not pass.
+   * Validates an IModel, throwing an error if it does not pass.
    */
   export function validateContentsModel(contents: IModel): void {
     validate.validateContentsModel(contents);
@@ -123,7 +130,7 @@ export namespace Contents {
   /**
    * A contents file format.
    */
-  export type FileFormat = 'json' | 'text' | 'base64';
+  export type FileFormat = 'json' | 'text' | 'base64' | null;
 
   /**
    * The options used to fetch a file.

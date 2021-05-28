@@ -5,6 +5,8 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import React, { useEffect, useState } from 'react';
 
+import { PathExt } from '@jupyterlab/coreutils';
+
 import { IDebugger } from '../../tokens';
 
 /**
@@ -63,15 +65,33 @@ const FramesComponent = ({
     };
   }, [model]);
 
+  const toShortLocation = (el: IDebugger.IStackFrame) => {
+    const path = el.source?.path || '';
+    const base = PathExt.basename(PathExt.dirname(path));
+    const filename = PathExt.basename(path);
+    const shortname = PathExt.join(base, filename);
+    return `${shortname}:${el.line}`;
+  };
+
   return (
     <ul>
       {frames.map(ele => (
         <li
           key={ele.id}
           onClick={(): void => onSelected(ele)}
-          className={selected?.id === ele.id ? 'selected' : ''}
+          className={
+            selected?.id === ele.id
+              ? 'selected jp-DebuggerCallstackFrame'
+              : 'jp-DebuggerCallstackFrame'
+          }
         >
-          {ele.name} at {ele.source?.name}:{ele.line}
+          <span className={'jp-DebuggerCallstackFrame-name'}>{ele.name}</span>
+          <span
+            className={'jp-DebuggerCallstackFrame-location'}
+            title={ele.source?.path}
+          >
+            {toShortLocation(ele)}
+          </span>
         </li>
       ))}
     </ul>

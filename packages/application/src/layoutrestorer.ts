@@ -166,7 +166,8 @@ export class LayoutRestorer implements ILayoutRestorer {
       fresh: true,
       mainArea: null,
       leftArea: null,
-      rightArea: null
+      rightArea: null,
+      relativeSizes: null
     };
     const layout = this._connector.fetch(KEY);
 
@@ -177,7 +178,7 @@ export class LayoutRestorer implements ILayoutRestorer {
         return blank;
       }
 
-      const { main, left, right } = data as Private.ILayout;
+      const { main, left, right, relativeSizes } = data as Private.ILayout;
 
       // If any data exists, then this is not a fresh session.
       const fresh = false;
@@ -191,7 +192,13 @@ export class LayoutRestorer implements ILayoutRestorer {
       // Rehydrate right area.
       const rightArea = this._rehydrateSideArea(right);
 
-      return { fresh, mainArea, leftArea, rightArea };
+      return {
+        fresh,
+        mainArea,
+        leftArea,
+        rightArea,
+        relativeSizes: relativeSizes || null
+      };
     } catch (error) {
       return blank;
     }
@@ -278,6 +285,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     dehydrated.main = this._dehydrateMainArea(data.mainArea);
     dehydrated.left = this._dehydrateSideArea(data.leftArea);
     dehydrated.right = this._dehydrateSideArea(data.rightArea);
+    dehydrated.relativeSizes = data.relativeSizes;
 
     return this._connector.save(KEY, dehydrated);
   }
@@ -441,6 +449,11 @@ namespace Private {
      * The right area of the user interface.
      */
     right?: ISideArea | null;
+
+    /**
+     * The relatives sizes of the areas of the user interface.
+     */
+    relativeSizes?: number[] | null;
   }
 
   /**

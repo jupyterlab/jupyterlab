@@ -41,7 +41,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStateDB } from '@jupyterlab/statedb';
 
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator } from '@jupyterlab/translation';
 
 import { buildIcon, jupyterIcon } from '@jupyterlab/ui-components';
 
@@ -94,19 +94,321 @@ namespace CommandIDs {
 }
 
 /**
+ * A plugin to register the commands for the main application.
+ */
+const mainCommands: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:commands',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [ILabShell, ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    labShell: ILabShell | null,
+    palette: ICommandPalette | null
+  ) => {
+    const { commands, contextMenu, shell } = app;
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Main Area');
+
+    // Add Command to override the JLab context menu.
+    commands.addCommand(JupyterFrontEndContextMenu.contextMenu, {
+      label: trans.__('Shift+Right Click for Browser Menu'),
+      isEnabled: () => false,
+      execute: () => void 0
+    });
+
+    contextMenu.addItem({
+      command: JupyterFrontEndContextMenu.contextMenu,
+      selector: 'body',
+      rank: Infinity // At the bottom always
+    });
+
+    // Returns the widget associated with the most recent contextmenu event.
+    const contextMenuWidget = (): Widget | null => {
+      const test = (node: HTMLElement) => !!node.dataset.id;
+      const node = app.contextMenuHitTest(test);
+
+      if (!node) {
+        // Fall back to active widget if path cannot be obtained from event.
+        return shell.currentWidget;
+      }
+
+      const matches = toArray(shell.widgets('main')).filter(
+        widget => widget.id === node.dataset.id
+      );
+
+      if (matches.length < 1) {
+        return shell.currentWidget;
+      }
+
+      return matches[0];
+    };
+
+    // Closes an array of widgets.
+    const closeWidgets = (widgets: Array<Widget>): void => {
+      widgets.forEach(widget => widget.close());
+    };
+
+    // Find the tab area for a widget within a specific dock area.
+    const findTab = (
+      area: DockLayout.AreaConfig,
+      widget: Widget
+    ): DockLayout.ITabAreaConfig | null => {
+      switch (area.type) {
+        case 'split-area': {
+          const iterator = iter(area.children);
+          let tab: DockLayout.ITabAreaConfig | null = null;
+          let value: DockLayout.AreaConfig | undefined;
+          do {
+            value = iterator.next();
+            if (value) {
+              tab = findTab(value, widget);
+            }
+          } while (!tab && value);
+          return tab;
+        }
+        case 'tab-area': {
+          const { id } = widget;
+          return area.widgets.some(widget => widget.id === id) ? area : null;
+        }
+        default:
+          return null;
+      }
+    };
+
+    // Find the tab area for a widget within the main dock area.
+    const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
+      const layout = labShell?.saveLayout();
+      const mainArea = layout?.mainArea;
+      if (!mainArea || PageConfig.getOption('mode') !== 'multiple-document') {
+        return null;
+      }
+      const area = mainArea.dock?.main;
+      if (!area) {
+        return null;
+      }
+      return findTab(area, widget);
+    };
+
+    // Returns an array of all widgets to the right of a widget in a tab area.
+    const widgetsRightOf = (widget: Widget): Array<Widget> => {
+      const { id } = widget;
+      const tabArea = tabAreaFor(widget);
+      const widgets = tabArea ? tabArea.widgets || [] : [];
+      const index = widgets.findIndex(widget => widget.id === id);
+      if (index < 0) {
+        return [];
+      }
+      return widgets.slice(index + 1);
+    };
+
+    // A CSS selector targeting tabs in the main area. This is a very
+    // specific selector since we really only want tabs that are
+    // in the main area, as opposed to those in sidebars, ipywidgets, etc.
+    const tabSelector =
+      '#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab';
+
+    commands.addCommand(CommandIDs.close, {
+      label: () => trans.__('Close Tab'),
+      isEnabled: () => {
+        const widget = contextMenuWidget();
+        return !!widget && widget.title.closable;
+      },
+      execute: () => {
+        const widget = contextMenuWidget();
+        if (widget) {
+          widget.close();
+        }
+      }
+    });
+    contextMenu.addItem({
+      command: CommandIDs.close,
+      selector: tabSelector,
+      rank: 4
+    });
+
+    commands.addCommand(CommandIDs.closeOtherTabs, {
+      label: () => trans.__('Close All Other Tabs'),
+      isEnabled: () => {
+        // Ensure there are at least two widgets.
+        const iterator = shell.widgets('main');
+        return !!iterator.next() && !!iterator.next();
+      },
+      execute: () => {
+        const widget = contextMenuWidget();
+        if (!widget) {
+          return;
+        }
+        const { id } = widget;
+        const otherWidgets = toArray(shell.widgets('main')).filter(
+          widget => widget.id !== id
+        );
+        closeWidgets(otherWidgets);
+      }
+    });
+    contextMenu.addItem({
+      command: CommandIDs.closeOtherTabs,
+      selector: tabSelector,
+      rank: 4
+    });
+
+    commands.addCommand(CommandIDs.closeRightTabs, {
+      label: () => trans.__('Close Tabs to Right'),
+      isEnabled: () =>
+        !!contextMenuWidget() &&
+        widgetsRightOf(contextMenuWidget()!).length > 0,
+      execute: () => {
+        const widget = contextMenuWidget();
+        if (!widget) {
+          return;
+        }
+        closeWidgets(widgetsRightOf(widget));
+      }
+    });
+    contextMenu.addItem({
+      command: CommandIDs.closeRightTabs,
+      selector: tabSelector,
+      rank: 5
+    });
+
+    if (labShell) {
+      commands.addCommand(CommandIDs.activateNextTab, {
+        label: trans.__('Activate Next Tab'),
+        execute: () => {
+          labShell.activateNextTab();
+        }
+      });
+
+      commands.addCommand(CommandIDs.activatePreviousTab, {
+        label: trans.__('Activate Previous Tab'),
+        execute: () => {
+          labShell.activatePreviousTab();
+        }
+      });
+
+      commands.addCommand(CommandIDs.activateNextTabBar, {
+        label: trans.__('Activate Next Tab Bar'),
+        execute: () => {
+          labShell.activateNextTabBar();
+        }
+      });
+
+      commands.addCommand(CommandIDs.activatePreviousTabBar, {
+        label: trans.__('Activate Previous Tab Bar'),
+        execute: () => {
+          labShell.activatePreviousTabBar();
+        }
+      });
+
+      commands.addCommand(CommandIDs.closeAll, {
+        label: trans.__('Close All Tabs'),
+        execute: () => {
+          labShell.closeAll();
+        }
+      });
+
+      commands.addCommand(CommandIDs.toggleLeftArea, {
+        label: () => trans.__('Show Left Sidebar'),
+        execute: () => {
+          if (labShell.leftCollapsed) {
+            labShell.expandLeft();
+          } else {
+            labShell.collapseLeft();
+            if (labShell.currentWidget) {
+              labShell.activateById(labShell.currentWidget.id);
+            }
+          }
+        },
+        isToggled: () => !labShell.leftCollapsed,
+        isVisible: () => !labShell.isEmpty('left')
+      });
+
+      commands.addCommand(CommandIDs.toggleRightArea, {
+        label: () => trans.__('Show Right Sidebar'),
+        execute: () => {
+          if (labShell.rightCollapsed) {
+            labShell.expandRight();
+          } else {
+            labShell.collapseRight();
+            if (labShell.currentWidget) {
+              labShell.activateById(labShell.currentWidget.id);
+            }
+          }
+        },
+        isToggled: () => !labShell.rightCollapsed,
+        isVisible: () => !labShell.isEmpty('right')
+      });
+
+      commands.addCommand(CommandIDs.togglePresentationMode, {
+        label: () => trans.__('Presentation Mode'),
+        execute: () => {
+          labShell.presentationMode = !labShell.presentationMode;
+        },
+        isToggled: () => labShell.presentationMode,
+        isVisible: () => true
+      });
+
+      commands.addCommand(CommandIDs.setMode, {
+        isVisible: args => {
+          const mode = args['mode'] as string;
+          return mode === 'single-document' || mode === 'multiple-document';
+        },
+        execute: args => {
+          const mode = args['mode'] as string;
+          if (mode === 'single-document' || mode === 'multiple-document') {
+            labShell.mode = mode;
+            return;
+          }
+          throw new Error(`Unsupported application shell mode: ${mode}`);
+        }
+      });
+
+      commands.addCommand(CommandIDs.toggleMode, {
+        label: trans.__('Simple Interface'),
+        isToggled: () => labShell.mode === 'single-document',
+        execute: () => {
+          const args =
+            labShell.mode === 'multiple-document'
+              ? { mode: 'single-document' }
+              : { mode: 'multiple-document' };
+          return commands.execute(CommandIDs.setMode, args);
+        }
+      });
+    }
+
+    if (palette) {
+      [
+        CommandIDs.activateNextTab,
+        CommandIDs.activatePreviousTab,
+        CommandIDs.activateNextTabBar,
+        CommandIDs.activatePreviousTabBar,
+        CommandIDs.close,
+        CommandIDs.closeAll,
+        CommandIDs.closeOtherTabs,
+        CommandIDs.closeRightTabs,
+        CommandIDs.toggleLeftArea,
+        CommandIDs.toggleRightArea,
+        CommandIDs.togglePresentationMode,
+        CommandIDs.toggleMode
+      ].forEach(command => palette.addItem({ command, category }));
+    }
+  }
+};
+
+/**
  * The main extension.
  */
 const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
   id: '@jupyterlab/application-extension:main',
   requires: [IRouter, IWindowResolver, ITranslator],
-  optional: [ICommandPalette, IConnectionLost],
+  optional: [IConnectionLost],
   provides: ITreePathUpdater,
   activate: (
     app: JupyterFrontEnd,
     router: IRouter,
     resolver: IWindowResolver,
     translator: ITranslator,
-    palette: ICommandPalette | null,
     connectionLost: IConnectionLost | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -148,8 +450,6 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         message: body
       });
     }
-
-    addCommands(app, palette, trans);
 
     // If the application shell layout is modified,
     // trigger a refresh of the commands.
@@ -557,295 +857,6 @@ const sidebar: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * Add the main application commands.
- */
-function addCommands(
-  app: JupyterLab,
-  palette: ICommandPalette | null,
-  trans: TranslationBundle
-): void {
-  const { commands, contextMenu, shell } = app;
-  const category = trans.__('Main Area');
-
-  // Add Command to override the JLab context menu.
-  commands.addCommand(JupyterFrontEndContextMenu.contextMenu, {
-    label: trans.__('Shift+Right Click for Browser Menu'),
-    isEnabled: () => false,
-    execute: () => void 0
-  });
-
-  app.contextMenu.addItem({
-    command: JupyterFrontEndContextMenu.contextMenu,
-    selector: 'body',
-    rank: Infinity // At the bottom always
-  });
-
-  // Returns the widget associated with the most recent contextmenu event.
-  const contextMenuWidget = (): Widget | null => {
-    const test = (node: HTMLElement) => !!node.dataset.id;
-    const node = app.contextMenuHitTest(test);
-
-    if (!node) {
-      // Fall back to active widget if path cannot be obtained from event.
-      return shell.currentWidget;
-    }
-
-    const matches = toArray(shell.widgets('main')).filter(
-      widget => widget.id === node.dataset.id
-    );
-
-    if (matches.length < 1) {
-      return shell.currentWidget;
-    }
-
-    return matches[0];
-  };
-
-  // Closes an array of widgets.
-  const closeWidgets = (widgets: Array<Widget>): void => {
-    widgets.forEach(widget => widget.close());
-  };
-
-  // Find the tab area for a widget within a specific dock area.
-  const findTab = (
-    area: DockLayout.AreaConfig,
-    widget: Widget
-  ): DockLayout.ITabAreaConfig | null => {
-    switch (area.type) {
-      case 'split-area': {
-        const iterator = iter(area.children);
-        let tab: DockLayout.ITabAreaConfig | null = null;
-        let value: DockLayout.AreaConfig | undefined;
-        do {
-          value = iterator.next();
-          if (value) {
-            tab = findTab(value, widget);
-          }
-        } while (!tab && value);
-        return tab;
-      }
-      case 'tab-area': {
-        const { id } = widget;
-        return area.widgets.some(widget => widget.id === id) ? area : null;
-      }
-      default:
-        return null;
-    }
-  };
-
-  // Find the tab area for a widget within the main dock area.
-  const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
-    const { mainArea } = shell.saveLayout();
-    if (!mainArea || PageConfig.getOption('mode') !== 'multiple-document') {
-      return null;
-    }
-    const area = mainArea.dock?.main;
-    if (!area) {
-      return null;
-    }
-    return findTab(area, widget);
-  };
-
-  // Returns an array of all widgets to the right of a widget in a tab area.
-  const widgetsRightOf = (widget: Widget): Array<Widget> => {
-    const { id } = widget;
-    const tabArea = tabAreaFor(widget);
-    const widgets = tabArea ? tabArea.widgets || [] : [];
-    const index = widgets.findIndex(widget => widget.id === id);
-    if (index < 0) {
-      return [];
-    }
-    return widgets.slice(index + 1);
-  };
-
-  commands.addCommand(CommandIDs.activateNextTab, {
-    label: trans.__('Activate Next Tab'),
-    execute: () => {
-      shell.activateNextTab();
-    }
-  });
-
-  commands.addCommand(CommandIDs.activatePreviousTab, {
-    label: trans.__('Activate Previous Tab'),
-    execute: () => {
-      shell.activatePreviousTab();
-    }
-  });
-
-  commands.addCommand(CommandIDs.activateNextTabBar, {
-    label: trans.__('Activate Next Tab Bar'),
-    execute: () => {
-      shell.activateNextTabBar();
-    }
-  });
-
-  commands.addCommand(CommandIDs.activatePreviousTabBar, {
-    label: trans.__('Activate Previous Tab Bar'),
-    execute: () => {
-      shell.activatePreviousTabBar();
-    }
-  });
-
-  // A CSS selector targeting tabs in the main area. This is a very
-  // specific selector since we really only want tabs that are
-  // in the main area, as opposed to those in sidebars, ipywidgets, etc.
-  const tabSelector =
-    '#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab';
-
-  commands.addCommand(CommandIDs.close, {
-    label: () => trans.__('Close Tab'),
-    isEnabled: () => {
-      const widget = contextMenuWidget();
-      return !!widget && widget.title.closable;
-    },
-    execute: () => {
-      const widget = contextMenuWidget();
-      if (widget) {
-        widget.close();
-      }
-    }
-  });
-  contextMenu.addItem({
-    command: CommandIDs.close,
-    selector: tabSelector,
-    rank: 4
-  });
-
-  commands.addCommand(CommandIDs.closeAll, {
-    label: trans.__('Close All Tabs'),
-    execute: () => {
-      shell.closeAll();
-    }
-  });
-
-  commands.addCommand(CommandIDs.closeOtherTabs, {
-    label: () => trans.__('Close All Other Tabs'),
-    isEnabled: () => {
-      // Ensure there are at least two widgets.
-      const iterator = shell.widgets('main');
-      return !!iterator.next() && !!iterator.next();
-    },
-    execute: () => {
-      const widget = contextMenuWidget();
-      if (!widget) {
-        return;
-      }
-      const { id } = widget;
-      const otherWidgets = toArray(shell.widgets('main')).filter(
-        widget => widget.id !== id
-      );
-      closeWidgets(otherWidgets);
-    }
-  });
-  contextMenu.addItem({
-    command: CommandIDs.closeOtherTabs,
-    selector: tabSelector,
-    rank: 4
-  });
-
-  commands.addCommand(CommandIDs.closeRightTabs, {
-    label: () => trans.__('Close Tabs to Right'),
-    isEnabled: () =>
-      !!contextMenuWidget() && widgetsRightOf(contextMenuWidget()!).length > 0,
-    execute: () => {
-      const widget = contextMenuWidget();
-      if (!widget) {
-        return;
-      }
-      closeWidgets(widgetsRightOf(widget));
-    }
-  });
-  contextMenu.addItem({
-    command: CommandIDs.closeRightTabs,
-    selector: tabSelector,
-    rank: 5
-  });
-
-  app.commands.addCommand(CommandIDs.toggleLeftArea, {
-    label: () => trans.__('Show Left Sidebar'),
-    execute: () => {
-      if (shell.leftCollapsed) {
-        shell.expandLeft();
-      } else {
-        shell.collapseLeft();
-        if (shell.currentWidget) {
-          shell.activateById(shell.currentWidget.id);
-        }
-      }
-    },
-    isToggled: () => !shell.leftCollapsed,
-    isVisible: () => !shell.isEmpty('left')
-  });
-
-  app.commands.addCommand(CommandIDs.toggleRightArea, {
-    label: () => trans.__('Show Right Sidebar'),
-    execute: () => {
-      if (shell.rightCollapsed) {
-        shell.expandRight();
-      } else {
-        shell.collapseRight();
-        if (shell.currentWidget) {
-          shell.activateById(shell.currentWidget.id);
-        }
-      }
-    },
-    isToggled: () => !shell.rightCollapsed,
-    isVisible: () => !shell.isEmpty('right')
-  });
-
-  app.commands.addCommand(CommandIDs.togglePresentationMode, {
-    label: () => trans.__('Presentation Mode'),
-    execute: () => {
-      shell.presentationMode = !shell.presentationMode;
-    },
-    isToggled: () => shell.presentationMode,
-    isVisible: () => true
-  });
-
-  app.commands.addCommand(CommandIDs.setMode, {
-    isVisible: args => {
-      const mode = args['mode'] as string;
-      return mode === 'single-document' || mode === 'multiple-document';
-    },
-    execute: args => {
-      const mode = args['mode'] as string;
-      if (mode === 'single-document' || mode === 'multiple-document') {
-        shell.mode = mode;
-        return;
-      }
-      throw new Error(`Unsupported application shell mode: ${mode}`);
-    }
-  });
-
-  app.commands.addCommand(CommandIDs.toggleMode, {
-    label: trans.__('Simple Interface'),
-    isToggled: () => shell.mode === 'single-document',
-    execute: () => {
-      const args =
-        shell.mode === 'multiple-document'
-          ? { mode: 'single-document' }
-          : { mode: 'multiple-document' };
-      return app.commands.execute(CommandIDs.setMode, args);
-    }
-  });
-
-  if (palette) {
-    palette.addItem({ command: CommandIDs.activateNextTab, category });
-    palette.addItem({ command: CommandIDs.activatePreviousTab, category });
-    palette.addItem({ command: CommandIDs.activateNextTabBar, category });
-    palette.addItem({ command: CommandIDs.activatePreviousTabBar, category });
-    palette.addItem({ command: CommandIDs.close, category });
-    palette.addItem({ command: CommandIDs.closeAll, category });
-    palette.addItem({ command: CommandIDs.closeOtherTabs, category });
-    palette.addItem({ command: CommandIDs.closeRightTabs, category });
-    palette.addItem({ command: CommandIDs.toggleLeftArea, category });
-    palette.addItem({ command: CommandIDs.toggleRightArea, category });
-    palette.addItem({ command: CommandIDs.togglePresentationMode, category });
-    palette.addItem({ command: CommandIDs.toggleMode, category });
-  }
-}
-
-/**
  * The default JupyterLab application shell.
  */
 const shell: JupyterFrontEndPlugin<ILabShell> = {
@@ -965,6 +976,7 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   main,
+  mainCommands,
   layout,
   router,
   tree,

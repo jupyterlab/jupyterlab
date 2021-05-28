@@ -18,6 +18,31 @@
       "command": "debugger:debug-notebook",
       "keys": ["Accel Shift I"],
       "selector": ".jp-Notebook"
+    },
+    {
+      "command": "debugger:continue",
+      "keys": ["F9"],
+      "selector": "body"
+    },
+    {
+      "command": "debugger:terminate",
+      "keys": ["Shift F9"],
+      "selector": "body"
+    },
+    {
+      "command": "debugger:next",
+      "keys": ["F10"],
+      "selector": "body"
+    },
+    {
+      "command": "debugger:stepIn",
+      "keys": ["F11"],
+      "selector": "body"
+    },
+    {
+      "command": "debugger:stepOut",
+      "keys": ["Shift F11"],
+      "selector": "body"
     }
   ],
   "definitions": {

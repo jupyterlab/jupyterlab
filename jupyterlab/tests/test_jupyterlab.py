@@ -26,7 +26,7 @@ from jupyterlab.commands import (
     disable_extension, enable_extension,
     get_app_info, install_extension, link_package,
     list_extensions, uninstall_extension,
-    unlink_package, update_extension
+    unlink_package, update_extension, get_app_version
 )
 from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
 
@@ -435,6 +435,24 @@ class TestExtension(AppHandlerTest):
     def test_build(self):
         assert install_extension(self.mock_extension) is True
         build()
+        # check staging directory.
+        entry = pjoin(self.app_dir, 'staging', 'build', 'index.out.js')
+        with open(entry) as fid:
+            data = fid.read()
+        assert self.pkg_names['extension'] in data
+
+        # check static directory.
+        entry = pjoin(self.app_dir, 'static', 'index.out.js')
+        with open(entry) as fid:
+            data = fid.read()
+        assert self.pkg_names['extension'] in data
+
+    @pytest.mark.slow
+    def test_build_splice_packages(self):
+        app_options = AppOptions(splice_source=True)
+        assert install_extension(self.mock_extension) is True
+        build(app_options=app_options)
+        assert '-spliced' in get_app_version(app_options)
         # check staging directory.
         entry = pjoin(self.app_dir, 'staging', 'build', 'index.out.js')
         with open(entry) as fid:
