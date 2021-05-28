@@ -8,6 +8,7 @@
     "start-jlab:detached": "jlpm run start-jlab&",
     "test:create-references": "galata --skip-visual-regression --skip-html-regression",
     "test:debug": "galata --no-headless --no-discard-matched-captures --slow-mo 200 --result-server --include notebook-edit",
+    "test:launch-last-report": "galata --launch-result-server",
     "test": "galata"
   },
   "author": "Project Jupyter",
