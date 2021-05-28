@@ -469,145 +469,177 @@ const resources: JupyterFrontEndPlugin<void> = {
 const licenses: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:licenses',
   autoStart: true,
-  requires: [IMainMenu, ITranslator],
-  optional: [ICommandPalette, ILayoutRestorer, IInspector],
+  requires: [ITranslator],
+  optional: [IMainMenu, ICommandPalette, ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
-    menu: IMainMenu,
     translator: ITranslator,
+    menu: IMainMenu | null,
     palette: ICommandPalette | null,
     restorer: ILayoutRestorer | null
   ) => {
+    // bail if no license API is available from the server
+    if (!PageConfig.getOption('licensesUrl')) {
+      return;
+    }
+
     const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
+
+    // translation strings
     const category = trans.__('Help');
-    const baseUrl = PageConfig.getBaseUrl();
+    const downloadAsText = trans.__('Download License Report as');
+    const licensesText = trans.__('Licenses');
+    const refreshLicenses = trans.__('Refresh Licenses');
+
+    // an incrementer for license widget ids
     let counter = 0;
 
-    const licensesUrl = PageConfig.getOption('licensesUrl');
+    const licensesUrl =
+      URLExt.join(
+        PageConfig.getBaseUrl(),
+        PageConfig.getOption('licensesUrl')
+      ) + '/';
 
-    if (licensesUrl) {
-      const licensesNamespace = 'help-licenses';
-      const licensesTracker = new WidgetTracker<MainAreaWidget<Licenses>>({
-        namespace: licensesNamespace
+    const licensesNamespace = 'help-licenses';
+    const licensesTracker = new WidgetTracker<MainAreaWidget<Licenses>>({
+      namespace: licensesNamespace
+    });
+
+    /**
+     * A singleton model, the presence of which determines whether commands
+     * are visible.
+     */
+    let licensesModel: Licenses.Model | null;
+
+    /**
+     * Ensure a license model exists, usually only when the license widget is
+     * on-screen.
+     */
+    function ensureLicensesModel() {
+      if (licensesModel == null) {
+        licensesModel = new Licenses.Model({ licensesUrl, trans });
+      }
+      return licensesModel;
+    }
+
+    /**
+     * Return a full report format based on a format name
+     */
+    function formatOrDefault(format: string): Licenses.IReportFormat {
+      return (
+        Licenses.REPORT_FORMATS[format] ||
+        Licenses.REPORT_FORMATS[Licenses.DEFAULT_FORMAT]
+      );
+    }
+
+    /**
+     * Create a MainAreaWidget for a toolbar item
+     */
+    function createLicenseWidget() {
+      licensesModel = ensureLicensesModel();
+      const content = new Licenses({ model: licensesModel });
+      content.id = `${licensesNamespace}-${++counter}`;
+      content.title.label = licensesText;
+      content.title.icon = copyrightIcon;
+      const main = new MainAreaWidget({
+        content,
+        reveal: licensesModel.licensesReady
       });
 
-      if (restorer) {
-        void restorer.restore(licensesTracker, {
-          command: CommandIDs.licenses,
-          name: widget => 'licenses'
+      main.toolbar.addItem(
+        'refresh-licenses',
+        new CommandToolbarButton({
+          id: CommandIDs.refreshLicenses,
+          args: { noLabel: 1 },
+          commands
+        })
+      );
+
+      main.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+
+      for (const format of Object.keys(Licenses.REPORT_FORMATS)) {
+        const button = new CommandToolbarButton({
+          id: CommandIDs.licenseReport,
+          args: { format, noLabel: 1 },
+          commands
         });
+        main.toolbar.addItem(`download-${format}`, button);
       }
 
-      const fullLicensesUrl = URLExt.join(baseUrl, licensesUrl) + '/';
-
-      let licensesModel: Licenses.Model | null;
-
-      // this is a separate license model from one that might drive a widget
-      function ensureLicensesModel() {
-        if (licensesModel == null) {
-          licensesModel = new Licenses.Model({
-            licensesUrl: fullLicensesUrl,
-            trans
-          });
-        }
-        return licensesModel;
-      }
-
-      const downloadAsText = trans.__('Download License Report as');
-      const licensesText = trans.__('Licenses');
-      const refreshLicenses = trans.__('Refresh Licenses');
-
-      commands.addCommand(CommandIDs.licenses, {
-        label: licensesText,
-        execute: () => {
-          licensesModel = ensureLicensesModel();
-          const content = new Licenses({ model: licensesModel });
-          content.id = `${licensesNamespace}-${++counter}`;
-          content.title.label = licensesText;
-          content.title.icon = copyrightIcon;
-          const main = new MainAreaWidget({
-            content,
-            reveal: licensesModel.licensesReady
-          });
-
-          for (const format of Object.keys(Licenses.REPORT_FORMATS)) {
-            const button = new CommandToolbarButton({
-              id: CommandIDs.licenseReport,
-              args: { format, noLabel: 1 },
-              commands
-            });
-            main.toolbar.addItem(`download-${format}`, button);
-          }
-
-          main.toolbar.addItem('spacer', Toolbar.createSpacerItem());
-          main.toolbar.addItem(
-            'refresh-licenses',
-            new CommandToolbarButton({
-              id: CommandIDs.refreshLicenses,
-              args: { noLabel: 1 },
-              commands
-            })
-          );
-
-          void licensesTracker.add(main);
-          shell.add(main, 'main');
-
-          const onDisposed = () => {
-            licensesModel?.dispose();
-            licensesModel = null;
-          };
-          main.disposed.connect(onDisposed);
-        }
+      // dispose of the model if the license widget is disposed
+      main.disposed.connect(() => {
+        licensesModel?.dispose();
+        licensesModel = null;
       });
 
-      commands.addCommand(CommandIDs.refreshLicenses, {
-        label: args => (args.noLabel ? '' : refreshLicenses),
-        caption: refreshLicenses,
-        icon: refreshIcon,
-        execute: async () => {
-          licensesModel = ensureLicensesModel();
-          await licensesModel.initLicenses();
+      // add to tracker so it can be restored
+      void licensesTracker.add(main);
+
+      return main;
+    }
+
+    // register license-related commands
+    commands.addCommand(CommandIDs.licenses, {
+      label: licensesText,
+      execute: () => {
+        const licenseMain = createLicenseWidget();
+        shell.add(licenseMain, 'main');
+        return licenseMain;
+      }
+    });
+
+    commands.addCommand(CommandIDs.refreshLicenses, {
+      // don't show this command if the licenses aren't loaded
+      isVisible: () => !!licensesModel,
+      label: args => (args.noLabel ? '' : refreshLicenses),
+      caption: refreshLicenses,
+      icon: refreshIcon,
+      execute: async () => {
+        licensesModel = ensureLicensesModel();
+        await licensesModel.initLicenses();
+      }
+    });
+
+    commands.addCommand(CommandIDs.licenseReport, {
+      // don't show this command if the licenses aren't loaded
+      isVisible: () => !!licensesModel,
+      label: args => {
+        if (args.noLabel) {
+          return '';
         }
+        const format = formatOrDefault(`${args.format}`);
+        return `${downloadAsText} ${format.title}`;
+      },
+      caption: args => {
+        const format = formatOrDefault(`${args.format}`);
+        return `${downloadAsText} ${format.title}`;
+      },
+      icon: args => {
+        const format = formatOrDefault(`${args.format}`);
+        return format.icon;
+      },
+      execute: args => {
+        const format = formatOrDefault(`${args.format}`);
+        void ensureLicensesModel().download({ format: format.id });
+      }
+    });
+
+    // handle optional integrations
+    if (palette) {
+      palette.addItem({ command: CommandIDs.licenses, category });
+    }
+
+    if (menu) {
+      const helpMenu = menu.helpMenu;
+      helpMenu.addGroup([{ command: CommandIDs.licenses }], 0);
+    }
+
+    if (restorer) {
+      void restorer.restore(licensesTracker, {
+        command: CommandIDs.licenses,
+        name: widget => 'licenses'
       });
-
-      function formatOrDefault(format: string): Licenses.IReportFormat {
-        return (
-          Licenses.REPORT_FORMATS[format] ||
-          Licenses.REPORT_FORMATS[Licenses.DEFAULT_FORMAT]
-        );
-      }
-
-      commands.addCommand(CommandIDs.licenseReport, {
-        label: args => {
-          if (args.noLabel) {
-            return '';
-          }
-          const format = formatOrDefault(`${args.format}`);
-          return `${downloadAsText} ${format.title}`;
-        },
-        caption: args => {
-          const format = formatOrDefault(`${args.format}`);
-          return `${downloadAsText} ${format.title}`;
-        },
-        icon: args => {
-          const format = formatOrDefault(`${args.format}`);
-          return format.icon;
-        },
-        execute: args => {
-          const format = formatOrDefault(`${args.format}`);
-          void ensureLicensesModel().download({ format: format.id });
-        }
-      });
-
-      if (palette) {
-        palette.addItem({ command: CommandIDs.licenses, category });
-      }
-
-      if (menu) {
-        const helpMenu = menu.helpMenu;
-        helpMenu.addGroup([{ command: CommandIDs.licenses }], 0);
-      }
     }
   }
 };

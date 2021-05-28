@@ -91,6 +91,10 @@
   background-color: var(--jp-layout-color0);
 }
 
+.jp-Licenses .lm-SplitPanel-handle:hover {
+  background-color: var(--jp-brand-color2);
+}
+
 .jp-Licenses-Bundles {
   background-color: var(--jp-layout-color2);
   overflow-y: auto;
@@ -115,37 +119,65 @@
 
 .jp-Licenses-Bundles .lm-TabBar-tab.lm-mod-current {
   background-color: var(--jp-brand-color1);
-  color: white;
+  color: #fff;
 }
 
 .jp-Licenses-Bundles .lm-TabBar-tab.lm-mod-current label {
-  background-color: white;
+  background-color: #fff;
   color: var(--jp-brand-color1);
 }
 
-.jp-Licenses-Grid {
-  min-width: 18em;
+/* license grid */
+.jp-Licenses-Grid.jp-RenderedHTMLCommon {
+  min-width: 32em;
   display: flex;
   flex-direction: column;
+  padding: 0;
 }
 
-.jp-Licenses-Grid form {
+.jp-Licenses-Grid.jp-RenderedHTMLCommon form {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
+  margin: 0;
+  padding: 0;
 }
 
-.jp-Licenses-Grid table {
+.jp-RenderedHTMLCommon.jp-Licenses-Grid table {
   flex: 1;
-  width: 100%;
+  max-width: 100%;
   border: solid var(--jp-border-width) var(--jp-border-color2);
+  margin: 0;
 }
 
-.jp-Licenses-Grid code {
-  white-space: nowrap;
+.jp-Licenses-Grid.jp-RenderedHTMLCommon td,
+.jp-Licenses-Grid.jp-RenderedHTMLCommon th {
+  text-align: left;
 }
 
+.jp-Licenses-Grid table td:nth-child(1) {
+  max-width: 2em;
+}
+
+.jp-Licenses-Grid label {
+  width: 100%;
+}
+
+.jp-Licenses-Grid.jp-RenderedHTMLCommon code {
+  background-color: transparent;
+}
+
+.jp-Licenses-Grid table tr.jp-mod-selected {
+  background-color: var(--jp-brand-color1);
+  color: #fff;
+}
+
+.jp-Licenses-Grid.jp-RenderedHTMLCommon .jp-mod-selected code {
+  color: #fff;
+}
+
+/* license text */
 .jp-Licenses-Text {
   min-width: 18em;
   padding: 0 0 0 1em;
