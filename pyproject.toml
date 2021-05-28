@@ -1,5 +1,5 @@
 [build-system]
-requires=["jupyter_packaging~=0.9"]
+requires=["jupyter_packaging~=0.9,<2"]
 build-backend = "jupyter_packaging.build_api"
 
 [license]

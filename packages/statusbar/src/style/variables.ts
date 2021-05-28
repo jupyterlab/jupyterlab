@@ -6,7 +6,7 @@ export default {
   hoverColor: 'var(--jp-layout-color3)',
   clickColor: 'var(--jp-brand-color1)',
   backgroundColor: 'var(--jp-layout-color2)',
-  height: '24px',
+  height: 'var(--jp-statusbar-height)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontFamily: 'var(--jp-ui-font-family)',
   textColor: 'var(--jp-ui-font-color1)',

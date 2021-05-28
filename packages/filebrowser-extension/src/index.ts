@@ -98,6 +98,8 @@ namespace CommandIDs {
 
   export const goToPath = 'filebrowser:go-to-path';
 
+  export const goUp = 'filebrowser:go-up';
+
   export const openPath = 'filebrowser:open-path';
 
   export const open = 'filebrowser:open';
@@ -115,7 +117,7 @@ namespace CommandIDs {
   export const rename = 'filebrowser:rename';
 
   // For main browser only.
-  export const share = 'filebrowser:share-main';
+  export const copyShareableLink = 'filebrowser:share-main';
 
   // For main browser only.
   export const copyPath = 'filebrowser:copy-path';
@@ -504,7 +506,7 @@ const shareFile: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     const { tracker } = factory;
 
-    commands.addCommand(CommandIDs.share, {
+    commands.addCommand(CommandIDs.copyShareableLink, {
       execute: () => {
         const widget = tracker.currentWidget;
         const model = widget?.selectedItems().next();
@@ -789,6 +791,30 @@ function addCommands(
       }
       if (showBrowser) {
         return commands.execute(CommandIDs.showBrowser, { path });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.goUp, {
+    label: 'go up',
+    execute: async () => {
+      const browserForPath = Private.getBrowserForPath('', factory);
+      if (!browserForPath) {
+        return;
+      }
+      const { model } = browserForPath;
+
+      await model.restored;
+      if (model.path === model.rootPath) {
+        return;
+      }
+      try {
+        await model.cd('..');
+      } catch (reason) {
+        console.warn(
+          `${CommandIDs.goUp} failed to go to parent directory of ${model.path}`,
+          reason
+        );
       }
     }
   });
@@ -1081,6 +1107,10 @@ function addCommands(
     });
   }
 
+  // matches the text in the filebrowser; relies on an implementation detail
+  // being the text of the listing element being substituted with input
+  // area to deactivate shortcuts when the file name is being edited.
+  const selectorBrowser = '.jp-DirListing-content .jp-DirListing-itemText';
   // matches anywhere on filebrowser
   const selectorContent = '.jp-DirListing-content';
   // matches all filebrowser items
@@ -1090,6 +1120,12 @@ function addCommands(
 
   // If the user did not click on any file, we still want to show paste and new folder,
   // so target the content rather than an item.
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: selectorContent,
+    rank: 0
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.createNewDirectory,
     selector: selectorContent,
@@ -1127,52 +1163,106 @@ function addCommands(
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.rename,
+    type: 'separator',
     selector: selectorItem,
     rank: 4
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.del,
+    command: CommandIDs.rename,
     selector: selectorItem,
     rank: 5
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.cut,
+    command: CommandIDs.del,
     selector: selectorItem,
     rank: 6
   });
 
   app.contextMenu.addItem({
+    command: CommandIDs.cut,
+    selector: selectorItem,
+    rank: 7
+  });
+
+  app.contextMenu.addItem({
     command: CommandIDs.copy,
     selector: selectorNotDir,
-    rank: 7
+    rank: 8
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.duplicate,
     selector: selectorNotDir,
-    rank: 8
+    rank: 9
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.shutdown,
-    selector: selectorNotDir,
+    type: 'separator',
+    selector: selectorItem,
     rank: 10
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.share,
-    selector: selectorItem,
+    command: CommandIDs.shutdown,
+    selector: selectorNotDir,
     rank: 11
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.copyPath,
+    type: 'separator',
     selector: selectorItem,
     rank: 12
   });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.copyShareableLink,
+    selector: selectorItem,
+    rank: 15
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.copyPath,
+    selector: selectorItem,
+    rank: 14
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.toggleLastModified,
     selector: '.jp-DirListing-header',
     rank: 14
+  });
+
+  app.commands.addKeyBinding({
+    command: CommandIDs.del,
+    selector: selectorBrowser,
+    keys: ['Delete']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.cut,
+    selector: selectorBrowser,
+    keys: ['Ctrl X']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.copy,
+    selector: selectorBrowser,
+    keys: ['Ctrl C']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.paste,
+    selector: selectorBrowser,
+    keys: ['Ctrl V']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.rename,
+    selector: selectorBrowser,
+    keys: ['F2']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.duplicate,
+    selector: selectorBrowser,
+    keys: ['Ctrl D']
   });
 }
 

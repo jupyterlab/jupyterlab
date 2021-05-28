@@ -15,7 +15,6 @@ describe('@jupyterlab/apputils', () => {
         const widget = new MainAreaWidget({ content });
         expect(widget).toBeInstanceOf(MainAreaWidget);
         expect(widget.hasClass('jp-MainAreaWidget')).toBe(true);
-        expect(widget.content.node.tabIndex).toBe(-1);
         expect(widget.title.closable).toBe(true);
       });
 

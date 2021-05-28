@@ -140,7 +140,7 @@ export class Tooltip extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.node.tabIndex = -1;
+    this.node.tabIndex = 0;
     this.node.focus();
   }
 

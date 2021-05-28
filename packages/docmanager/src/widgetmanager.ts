@@ -317,7 +317,7 @@ export class DocumentWidgetManager implements IDisposable {
           return true;
         }
         if (context.contentsModel?.writable) {
-          await context.save();
+          await context.save(true);
         } else {
           await context.saveAs();
         }
