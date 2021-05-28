@@ -10591,10 +10591,10 @@ lib0@^0.2.31, lib0@^0.2.41, lib0@^0.2.42:
   dependencies:
     isomorphic.js "^0.2.4"
 
-license-webpack-plugin@^2.3.11:
-  version "2.3.11"
-  resolved "https://registry.yarnpkg.com/license-webpack-plugin/-/license-webpack-plugin-2.3.11.tgz#0d93188a31fce350a44c86212badbaf33dcd29d8"
-  integrity sha512-0iVGoX5vx0WDy8dmwTTpOOMYiGqILyUbDeVMFH52AjgBlS58lHwOlFMSoqg5nY8Kxl6+FRKyUZY/UdlQaOyqDw==
+license-webpack-plugin@^2.3.14:
+  version "2.3.18"
+  resolved "https://registry.yarnpkg.com/license-webpack-plugin/-/license-webpack-plugin-2.3.18.tgz#03bfe916634ecb845c0899a37443e6869b08b83c"
+  integrity sha512-a6tSN07AgKkX9nVntBd9MP7OAzt7gKAcnXOy6xegH5y0012vVPNiglLdR0qrEIagg7TMAGhZi1WONiNOg8pe8w==
   dependencies:
     "@types/webpack-sources" "^0.1.5"
     webpack-sources "^1.2.0"

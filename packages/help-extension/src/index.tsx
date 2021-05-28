@@ -17,7 +17,9 @@ import {
   IFrame,
   MainAreaWidget,
   showDialog,
-  WidgetTracker
+  WidgetTracker,
+  CommandToolbarButton,
+  Toolbar
 } from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
@@ -30,7 +32,14 @@ import { KernelMessage } from '@jupyterlab/services';
 
 import { ITranslator } from '@jupyterlab/translation';
 
-import { jupyterIcon, jupyterlabWordmarkIcon } from '@jupyterlab/ui-components';
+import { Licenses } from './licenses';
+
+import {
+  jupyterIcon,
+  jupyterlabWordmarkIcon,
+  copyrightIcon,
+  refreshIcon
+} from '@jupyterlab/ui-components';
 
 import { Menu } from '@lumino/widgets';
 
@@ -53,6 +62,12 @@ namespace CommandIDs {
   export const hide = 'help:hide';
 
   export const launchClassic = 'help:launch-classic-notebook';
+
+  export const licenses = 'help:licenses';
+
+  export const licenseReport = 'help:license-report';
+
+  export const refreshLicenses = 'help:licenses-refresh';
 }
 
 /**
@@ -448,5 +463,159 @@ const resources: JupyterFrontEndPlugin<void> = {
   }
 };
 
-const plugins: JupyterFrontEndPlugin<any>[] = [about, launchClassic, resources];
+/**
+ * A plugin to add a licenses reporting tools.
+ */
+const licenses: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:licenses',
+  autoStart: true,
+  requires: [IMainMenu, ITranslator],
+  optional: [ICommandPalette, ILayoutRestorer, IInspector],
+  activate: (
+    app: JupyterFrontEnd,
+    menu: IMainMenu,
+    translator: ITranslator,
+    palette: ICommandPalette | null,
+    restorer: ILayoutRestorer | null
+  ) => {
+    const { commands, shell } = app;
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Help');
+    const baseUrl = PageConfig.getBaseUrl();
+    let counter = 0;
+
+    const licensesUrl = PageConfig.getOption('licensesUrl');
+
+    if (licensesUrl) {
+      const licensesNamespace = 'help-licenses';
+      const licensesTracker = new WidgetTracker<MainAreaWidget<Licenses>>({
+        namespace: licensesNamespace
+      });
+
+      if (restorer) {
+        void restorer.restore(licensesTracker, {
+          command: CommandIDs.licenses,
+          name: widget => 'licenses'
+        });
+      }
+
+      const fullLicensesUrl = URLExt.join(baseUrl, licensesUrl) + '/';
+
+      let licensesModel: Licenses.Model | null;
+
+      function ensureLicensesModel() {
+        if (licensesModel == null) {
+          licensesModel = new Licenses.Model({
+            licensesUrl: fullLicensesUrl,
+            trans
+          });
+        }
+        return licensesModel;
+      }
+
+      const downloadAsText = trans.__('Download License Report as');
+      const licensesText = trans.__('Licenses');
+      const refreshLicenses = trans.__('Refresh Licenses');
+
+      commands.addCommand(CommandIDs.licenses, {
+        label: licensesText,
+        execute: () => {
+          licensesModel = ensureLicensesModel();
+          const content = new Licenses({ model: licensesModel });
+          content.id = `${licensesNamespace}-${++counter}`;
+          content.title.label = licensesText;
+          content.title.icon = copyrightIcon;
+          const main = new MainAreaWidget({
+            content,
+            reveal: licensesModel.licensesReady
+          });
+
+          for (const format of Object.keys(Licenses.REPORT_FORMATS)) {
+            const button = new CommandToolbarButton({
+              id: CommandIDs.licenseReport,
+              args: { format, noLabel: 1 },
+              commands
+            });
+            main.toolbar.addItem(`download-${format}`, button);
+          }
+
+          main.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+          main.toolbar.addItem(
+            'refresh-licenses',
+            new CommandToolbarButton({
+              id: CommandIDs.refreshLicenses,
+              args: { noLabel: 1 },
+              commands
+            })
+          );
+
+          void licensesTracker.add(main);
+          shell.add(main, 'main');
+
+          const onDisposed = () => {
+            licensesModel?.dispose();
+            licensesModel = null;
+          };
+          main.disposed.connect(onDisposed);
+        }
+      });
+
+      commands.addCommand(CommandIDs.refreshLicenses, {
+        label: args => (args.noLabel ? '' : refreshLicenses),
+        caption: refreshLicenses,
+        icon: refreshIcon,
+        execute: async () => {
+          licensesModel = ensureLicensesModel();
+          await licensesModel.initLicenses();
+        }
+      });
+
+      function formatOrDefault(format: string): Licenses.IReportFormat {
+        return (
+          Licenses.REPORT_FORMATS[format] ||
+          Licenses.REPORT_FORMATS[Licenses.DEFAULT_FORMAT]
+        );
+      }
+
+      commands.addCommand(CommandIDs.licenseReport, {
+        label: args => {
+          if (args.noLabel) {
+            return '';
+          }
+          const format = formatOrDefault(`${args.format}`);
+          return `${downloadAsText} ${format.title}`;
+        },
+        caption: args => {
+          const format = formatOrDefault(`${args.format}`);
+          return `${downloadAsText} ${format.title}`;
+        },
+        icon: args => {
+          const format = formatOrDefault(`${args.format}`);
+          return format.icon;
+        },
+        execute: args => {
+          const format = formatOrDefault(`${args.format}`);
+          void ensureLicensesModel().download({ format: format.id });
+        }
+      });
+
+      if (palette) {
+        palette.addItem({ command: CommandIDs.licenses, category });
+      }
+
+      if (menu) {
+        const helpMenu = menu.helpMenu;
+        helpMenu.addGroup([{ command: CommandIDs.licenses }], 0);
+      }
+    }
+  }
+};
+
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  about,
+  launchClassic,
+  resources,
+  licenses
+];
+
 export default plugins;
