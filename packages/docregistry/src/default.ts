@@ -11,7 +11,7 @@ import * as models from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import { Widget, Title } from '@lumino/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
 
 /**
@@ -488,6 +488,9 @@ export class DocumentWidget<
     });
 
     this.shouldNameFile = new Signal<this, void>(this);
+
+    // listen for changes to the title object
+    this.title.changed.connect(this._onTitleChanged, this);
   }
 
   /**
@@ -495,6 +498,18 @@ export class DocumentWidget<
    */
   setFragment(fragment: string): void {
     /* no-op */
+  }
+
+  /**
+   * Handle a title change.
+   */
+  private _onTitleChanged(_sender: Title<this>) {
+    const validNameExp = /[\/\\:]/;
+    const name = this.title.label;
+    const filename = this.context.path.split('/').pop()!;
+    if (name !== filename && name.length > 0 && !validNameExp.test(name)) {
+      void this.context.rename(name);
+    }
   }
 
   /**
