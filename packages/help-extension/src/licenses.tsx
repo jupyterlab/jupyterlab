@@ -405,8 +405,9 @@ export namespace Licenses {
       index: number
     ) => {
       const id = `id-license-package-${index}`;
+      const selected = index === this.model.selectedPackageIndex;
       return (
-        <tr key={row.name}>
+        <tr key={row.name} className={selected ? 'jp-mod-selected' : ''}>
           <th>
             <input
               type="radio"
@@ -462,13 +463,11 @@ export namespace Licenses {
         }`;
         code = extractedText || trans.__('No License Text found');
       }
-      return (
-        <article>
-          <h1>{head}</h1>
-          <blockquote>{quote}</blockquote>
-          <code>{code}</code>
-        </article>
-      );
+      return [
+        <h1>{head}</h1>,
+        <blockquote>{quote}</blockquote>,
+        <code>{code}</code>
+      ];
     }
   }
 }

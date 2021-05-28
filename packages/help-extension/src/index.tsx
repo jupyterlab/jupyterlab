@@ -503,6 +503,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
 
       let licensesModel: Licenses.Model | null;
 
+      // this is a separate license model from one that might drive a widget
       function ensureLicensesModel() {
         if (licensesModel == null) {
           licensesModel = new Licenses.Model({

@@ -129,17 +129,21 @@
   flex-direction: column;
 }
 
-.jp-Licenses-Grid > form {
+.jp-Licenses-Grid form {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
 }
 
-.jp-Licenses-Grid > form > table {
+.jp-Licenses-Grid table {
   flex: 1;
-  overflow-y: scroll;
   width: 100%;
   border: solid var(--jp-border-width) var(--jp-border-color2);
+}
+
+.jp-Licenses-Grid code {
+  white-space: nowrap;
 }
 
 .jp-Licenses-Text {
