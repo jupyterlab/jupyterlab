@@ -870,6 +870,50 @@ export namespace NotebookTools {
     }
   }
 
+   /**
+   * Create a cell-type selector.
+   */
+    export function createCellTypeSelector(
+      translator?: ITranslator
+    ): KeySelector {
+      translator = translator || nullTranslator;
+      const trans = translator.load('jupyterlab');
+      trans.__('');
+      const options: KeySelector.IOptions = {
+        key: 'celltype',
+        title: trans.__('Cell Type'),
+        optionValueArray: [
+          ['-', null],
+          [trans.__('Read-Only'), 'readOnly'],
+          [trans.__('Non-Deletable'), 'nonDeletable'],
+          [trans.__('Collapsed'), 'collapsed'],
+          [trans.__('Scrolled'), 'scrolled']
+        ],
+        getter: cell => {
+          const value = cell.model.metadata.get('celltype') as
+            | ReadonlyPartialJSONObject
+            | undefined;
+          return value && value['cell_type'];
+        },
+        setter: (cell, value) => {
+          let data = cell.model.metadata.get('celltype') || Object.create(null);
+          if (value === null) {
+            // Make a shallow copy so we aren't modifying the original metadata.
+            data = { ...data };
+            delete data.cell_type;
+          } else {
+            data = { ...data, cell_type: value };
+          }
+          if (Object.keys(data).length > 0) {
+            cell.model.metadata.set('celltype', data);
+          } else {
+            cell.model.metadata.delete('celltype');
+          }
+        }
+      };
+      return new KeySelector(options);
+    }
+
   /**
    * Create a slideshow selector.
    */
