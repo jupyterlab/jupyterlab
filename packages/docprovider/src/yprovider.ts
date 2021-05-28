@@ -184,7 +184,6 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     }
   }
 
-
   private _isInitialized: boolean;
   private _currentLockRequest: {
     promise: Promise<number>;
