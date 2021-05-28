@@ -17,8 +17,6 @@ export { JupyterLab } from './lab';
 
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 
-export { MenuFactory } from './menufactory';
-
 export {
   IMimeDocumentTracker,
   createRendermimePlugin,

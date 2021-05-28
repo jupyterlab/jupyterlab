@@ -15,6 +15,7 @@ export * from './hoverbox';
 export * from './iframe';
 export * from './inputdialog';
 export * from './mainareawidget';
+export * from './menufactory';
 export * from './printing';
 export * from './sanitizer';
 export * from './sessioncontext';

@@ -9,11 +9,15 @@ import {
   ILabShell,
   IRouter,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  MenuFactory
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  ICommandPalette,
+  MenuFactory,
+  showDialog
+} from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
@@ -32,11 +36,12 @@ import {
 
 import { ServerConnection } from '@jupyterlab/services';
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
 import { each, find } from '@lumino/algorithm';
+
 import { JSONExt } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
@@ -150,7 +155,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     if (registry) {
       await Private.loadSettingsMenu(
         registry,
-        aMenu => {
+        (aMenu: JupyterLabMenu) => {
           menu.addMenu(aMenu, { rank: aMenu.rank });
         },
         options => MainMenu.generateMenu(commands, options, trans),
@@ -895,44 +900,110 @@ namespace Private {
 
   export async function loadSettingsMenu(
     registry: ISettingRegistry,
-    attachMenu: (menu: JupyterLabMenu) => void,
+    addMenu: (menu: Menu) => void,
     menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu,
     translator: ITranslator
   ): Promise<void> {
     const trans = translator.load('jupyterlab');
-    const menus = new Array<JupyterLabMenu>();
+    let canonical: ISettingRegistry.ISchema | null;
+    let loaded: { [name: string]: ISettingRegistry.IMenu[] } = {};
 
-    const updateMenus = async (
-      menu: ISettingRegistry.IMenu[],
-      isNew: boolean
-    ) => {
-      if (isNew) {
-        // The plugin has changed, request the user to reload the UI - this should not happen
-        await displayInformation(trans);
-      } else {
-        // The plugin was not yet loaded when the menu was built => update the menu
-        MenuFactory.updateMenus(menus, menu, menuFactory).forEach(menu => {
-          attachMenu(menu);
-        });
+    /**
+     * Populate the plugin's schema defaults.
+     */
+    function populate(schema: ISettingRegistry.ISchema) {
+      loaded = {};
+      schema.properties!.menus.default = Object.keys(registry.plugins)
+        .map(plugin => {
+          const menus =
+            registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];
+          loaded[plugin] = menus;
+          return menus;
+        })
+        .concat([schema.properties!.menus.default as any[]])
+        .reduceRight(
+          (acc, val) => SettingRegistry.reconcileMenus(acc, val, true),
+          []
+        ) // flatten one level
+        .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
+    }
+
+    registry.pluginChanged.connect(async (sender, plugin) => {
+      if (plugin !== PLUGIN_ID) {
+        // If the plugin changed its menu.
+        const oldMenus = loaded[plugin] ?? [];
+        const newMenus =
+          registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];
+        if (!JSONExt.deepEqual(oldMenus, newMenus)) {
+          if (loaded[plugin]) {
+            // The plugin has changed, request the user to reload the UI - this should not happen
+            await displayInformation(trans);
+          } else {
+            // The plugin was not yet loaded when the menu was built => update the menu
+            loaded[plugin] = newMenus;
+            MenuFactory.updateMenus(menus, loaded[plugin], menuFactory).forEach(
+              menu => {
+                addMenu(menu);
+              }
+            );
+          }
+        }
       }
-    };
-
-    await MenuFactory.initializeMenus({
-      registry,
-      updateMenus,
-      pluginID: PLUGIN_ID,
-      schemaKey: 'jupyter.lab.menus',
-      subKey: 'main',
-      property: 'menus'
     });
+
+    // Transform the plugin object to return different schema than the default.
+    registry.transform(PLUGIN_ID, {
+      compose: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        const defaults = canonical.properties?.menus?.default ?? [];
+        const user = {
+          menus: plugin.data.user.menus ?? []
+        };
+        const composite = {
+          menus: SettingRegistry.reconcileMenus(
+            defaults as ISettingRegistry.IMenu[],
+            user.menus as ISettingRegistry.IMenu[]
+          )
+        };
+
+        plugin.data = { composite, user };
+
+        return plugin;
+      },
+      fetch: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        return {
+          data: plugin.data,
+          id: plugin.id,
+          raw: plugin.raw,
+          schema: canonical,
+          version: plugin.version
+        };
+      }
+    });
+
+    // Repopulate the canonical variable after the setting registry has
+    // preloaded all initial plugins.
+    canonical = null;
 
     const settings = await registry.load(PLUGIN_ID);
 
     const currentMenus =
       JSONExt.deepCopy(settings.composite.menus as any) ?? [];
+    const menus = new Array<Menu>();
     MenuFactory.createMenus(currentMenus, menuFactory).forEach(menu => {
       menus.push(menu);
-      attachMenu(menu);
+      addMenu(menu);
     });
     settings.changed.connect(() => {
       // As extension may change menu through API, prompt the user to reload if the

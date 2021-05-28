@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { MenuFactory } from '@jupyterlab/apputils';
+
 import { Token } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
@@ -92,20 +94,5 @@ export namespace IMainMenu {
     rank?: number;
   }
 
-  export interface IMenuOptions {
-    /**
-     * The unique menu identifier.
-     */
-    id: string;
-
-    /**
-     * The menu label.
-     */
-    label?: string;
-
-    /**
-     * The menu rank.
-     */
-    rank?: number;
-  }
+  export interface IMenuOptions extends MenuFactory.IMenuOptions {}
 }
