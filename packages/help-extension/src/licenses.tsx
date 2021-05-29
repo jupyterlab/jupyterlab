@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 
-import { SplitPanel, TabBar, Widget } from '@lumino/widgets';
+import { Panel, SplitPanel, TabBar, Widget } from '@lumino/widgets';
 import { ReadonlyJSONObject, PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 
@@ -28,11 +28,13 @@ export class Licenses extends SplitPanel {
     super();
     this.addClass('jp-Licenses');
     this.model = options.model;
-    this.initTabs();
+    this.initLeftPanel();
+    this.initFilters();
+    this.initBundles();
     this.initGrid();
     this.initLicenseText();
     this.setRelativeSizes([1, 2, 3]);
-    this.model.initLicenses().then(() => this._updateTabs());
+    this.model.initLicenses().then(() => this._updateBundles());
   }
 
   /**
@@ -42,23 +44,43 @@ export class Licenses extends SplitPanel {
     if (this.isDisposed) {
       return;
     }
-    this._tabs.currentChanged.disconnect(this.onBundleSelected, this);
+    this._bundles.currentChanged.disconnect(this.onBundleSelected, this);
     this.model.dispose();
     super.dispose();
   }
 
   /**
+   * Initialize the left area for filters and bundles
+   */
+  protected initLeftPanel() {
+    this._leftPanel = new Panel();
+    this._leftPanel.addClass('jp-Licenses-FormArea');
+    this.addWidget(this._leftPanel);
+    SplitPanel.setStretch(this._leftPanel, 1);
+  }
+
+  /**
+   * Initialize the filters
+   */
+  protected initFilters() {
+    this._filters = new Licenses.Filters(this.model);
+    SplitPanel.setStretch(this._filters, 1);
+    this._leftPanel.addWidget(this._filters);
+  }
+
+  /**
    * Initialize the listing of available bundles
    */
-  protected initTabs() {
-    this._tabs = new TabBar({
+  protected initBundles() {
+    this._bundles = new TabBar({
       orientation: 'vertical',
       renderer: new Licenses.BundleTabRenderer(this.model)
     });
-    this._tabs.addClass('jp-Licenses-Bundles');
-    this.addWidget(this._tabs);
-    SplitPanel.setStretch(this._tabs, 1);
-    this._tabs.currentChanged.connect(this.onBundleSelected, this);
+    this._bundles.addClass('jp-Licenses-Bundles');
+    SplitPanel.setStretch(this._bundles, 1);
+    this._leftPanel.addWidget(this._bundles);
+    this._bundles.currentChanged.connect(this.onBundleSelected, this);
+    this.model.stateChanged.connect(() => this._bundles.update());
   }
 
   /**
@@ -74,37 +96,47 @@ export class Licenses extends SplitPanel {
    * Initialize the full text of the current package
    */
   protected initLicenseText() {
-    this._text = new Licenses.FullText(this.model);
+    this._licenseText = new Licenses.FullText(this.model);
     SplitPanel.setStretch(this._grid, 1);
-    this.addWidget(this._text);
+    this.addWidget(this._licenseText);
   }
 
   /**
    * Event handler for updating the model with the current bundle
    */
   protected onBundleSelected() {
-    if (this._tabs.currentTitle?.label) {
-      this.model.currentBundleName = this._tabs.currentTitle.label;
+    if (this._bundles.currentTitle?.label) {
+      this.model.currentBundleName = this._bundles.currentTitle.label;
     }
   }
 
   /**
    * Update the bundle tabs.
    */
-  protected _updateTabs(): void {
-    this._tabs.clearTabs();
+  protected _updateBundles(): void {
+    this._bundles.clearTabs();
     let i = 0;
     for (const bundle of this.model.bundleNames) {
       const tab = new Widget();
       tab.title.label = bundle;
-      this._tabs.insertTab(++i, tab.title);
+      this._bundles.insertTab(++i, tab.title);
     }
   }
 
   /**
+   * An area for selecting licenses by bundle and filters
+   */
+  protected _leftPanel: Panel;
+
+  /**
+   * Filters on visible licenses
+   */
+  protected _filters: Licenses.Filters;
+
+  /**
    * Tabs reflecting available bundles
    */
-  protected _tabs: TabBar<Widget>;
+  protected _bundles: TabBar<Widget>;
 
   /**
    * A grid of the current bundle's packages' license metadata
@@ -114,7 +146,7 @@ export class Licenses extends SplitPanel {
   /**
    * The currently-selected package's full license text
    */
-  protected _text: Licenses.FullText;
+  protected _licenseText: Licenses.FullText;
 }
 
 /** A namespace for license components */
@@ -220,10 +252,17 @@ export namespace Licenses {
     extractedText: string;
   }
 
-  /** The format information for a download */
+  /**
+   * The format information for a download
+   */
   export interface IDownloadOptions {
     format: string;
   }
+
+  /**
+   * The fields which can be filtered
+   */
+  export type TFilterKey = 'name' | 'versionInfo' | 'licenseId';
 
   /**
    * A model for license data
@@ -362,6 +401,48 @@ export namespace Licenses {
       return this._trans;
     }
 
+    /**
+     * The current grid filter
+     */
+    get gridFilter() {
+      return this._gridFilter;
+    }
+
+    set gridFilter(gridFilter) {
+      this._gridFilter = gridFilter;
+      this.stateChanged.emit(void 0);
+    }
+
+    /**
+     * Get filtered packages from current bundle where at least one token of each
+     * key is present.
+     */
+    getFilteredPackages(allRows: IPackageLicenseInfo[]) {
+      let rows: IPackageLicenseInfo[] = [];
+      let filters: [string, string[]][] = Object.entries(this._gridFilter)
+        .filter(([k, v]) => v && `${v}`.trim().length)
+        .map(([k, v]) => [k, `${v}`.toLowerCase().trim().split(' ')]);
+      for (const row of allRows) {
+        let keyHits = 0;
+        for (const [key, bits] of filters) {
+          let bitHits = 0;
+          let rowKeyValue = `${row[key]}`.toLowerCase();
+          for (const bit of bits) {
+            if (rowKeyValue.includes(bit)) {
+              bitHits += 1;
+            }
+          }
+          if (bitHits) {
+            keyHits += 1;
+          }
+        }
+        if (keyHits === filters.length) {
+          rows.push(row);
+        }
+      }
+      return Object.values(rows);
+    }
+
     private _selectedPackageChanged: Signal<Model, void> = new Signal(this);
     private _serverResponse: ILicenseResponse | null;
     private _licensesUrl: string;
@@ -371,6 +452,77 @@ export namespace Licenses {
     private _selectedPackageIndex: number | null;
     private _selectedPackage: IPackageLicenseInfo | null;
     private _licensesReady = new PromiseDelegate<void>();
+    private _gridFilter: Partial<IPackageLicenseInfo> = {};
+  }
+
+  /**
+   * A filter form for limiting the packages displayed
+   */
+  export class Filters extends VDomRenderer<Model> {
+    constructor(model: Model) {
+      super(model);
+      this.addClass('jp-Licenses-Filters');
+      this.addClass('jp-RenderedHTMLCommon');
+    }
+
+    protected render() {
+      const { trans } = this.model;
+      return (
+        <div>
+          <label>
+            <strong>{trans.__('Filter Licenses By')}</strong>
+          </label>
+          <ul>
+            <li>
+              <label>
+                {trans.__('Package')}
+                {this.renderFilter('name')}
+              </label>
+            </li>
+            <li>
+              <label>
+                {trans.__('Version')}
+                {this.renderFilter('versionInfo')}
+              </label>
+            </li>
+            <li>
+              <label>
+                {trans.__('License')}
+                {this.renderFilter('licenseId')}
+              </label>
+            </li>
+          </ul>
+          <label>
+            <strong>{trans.__('Distributions')}</strong>
+          </label>
+        </div>
+      );
+    }
+
+    /**
+     * Render a filter input
+     */
+    protected renderFilter = (key: TFilterKey) => {
+      const value = this.model.gridFilter[key] || '';
+      return (
+        <input
+          type="text"
+          name={key}
+          defaultValue={value}
+          className="jp-mod-styled"
+          onInput={this.onFilterInput}
+        />
+      );
+    };
+
+    /**
+     * Handle a filter input changing
+     */
+    protected onFilterInput = (evt: React.ChangeEvent<HTMLInputElement>) => {
+      const input = evt.currentTarget;
+      const { name, value } = input;
+      this.model.gridFilter = { ...this.model.gridFilter, [name]: value };
+    };
   }
 
   /**
@@ -412,8 +564,9 @@ export namespace Licenses {
     renderCountBadge(data: TabBar.IRenderData<Widget>): VirtualElement {
       const bundle = data.title.label;
       const { bundles } = this.model;
-      const packages =
-        (bundles && bundle ? bundles[bundle].packages : []) || [];
+      const packages = this.model.getFilteredPackages(
+        (bundles && bundle ? bundles[bundle].packages : []) || []
+      );
       return h.label({}, `${packages.length}`);
     }
   }
@@ -433,11 +586,10 @@ export namespace Licenses {
      */
     protected render(): JSX.Element {
       const { bundles, currentBundleName } = this.model;
-      const data =
+      const filteredPackages =
         bundles && currentBundleName
-          ? bundles[currentBundleName]?.packages
+          ? this.model.getFilteredPackages(bundles[currentBundleName]?.packages)
           : [];
-
       return (
         <form>
           <table>
@@ -446,10 +598,10 @@ export namespace Licenses {
                 <td></td>
                 <th>{this.model.trans.__('Package')}</th>
                 <th>{this.model.trans.__('Version')}</th>
-                <th>{this.model.trans.__('License ID')}</th>
+                <th>{this.model.trans.__('License')}</th>
               </tr>
             </thead>
-            <tbody>{data.map(this.renderRow)}</tbody>
+            <tbody>{filteredPackages.map(this.renderRow)}</tbody>
           </table>
         </form>
       );
@@ -513,7 +665,7 @@ export namespace Licenses {
       if (selectedPackage) {
         const { name, versionInfo, licenseId, extractedText } = selectedPackage;
         head = `${name} v${versionInfo}`;
-        quote = `${trans.__('License ID')}: ${
+        quote = `${trans.__('License')}: ${
           licenseId || trans.__('No License ID found')
         }`;
         code = extractedText || trans.__('No License Text found');

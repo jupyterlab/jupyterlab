@@ -488,7 +488,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
 
     // translation strings
     const category = trans.__('Help');
-    const downloadAsText = trans.__('Download License Report as');
+    const downloadAsText = trans.__('Download All Licenses as');
     const licensesText = trans.__('Licenses');
     const refreshLicenses = trans.__('Refresh Licenses');
 

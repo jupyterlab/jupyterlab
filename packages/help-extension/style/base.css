@@ -91,15 +91,53 @@
   background-color: var(--jp-layout-color0);
 }
 
+.jp-Licenses-FormArea {
+  display: flex;
+  flex-direction: column;
+  min-width: 18em;
+  width: 18em;
+}
+
 .jp-Licenses .lm-SplitPanel-handle:hover {
   background-color: var(--jp-brand-color2);
 }
 
+/* filters */
+.jp-Licenses-Filters {
+  padding: 1em 0 0 1em;
+}
+
+.jp-Licenses-Filters label {
+  display: block;
+}
+
+.jp-Licenses-Filters label strong {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
+}
+
+.jp-RenderedHTMLCommon.jp-Licenses-Filters ul,
+.jp-RenderedHTMLCommon.jp-Licenses-Filters li {
+  list-style: none;
+}
+
+.jp-Licenses-Filters input {
+  width: 100%;
+}
+
+.jp-RenderedHTMLCommon.jp-Licenses-Filters ul {
+  padding: 0 0 1em 0;
+  margin: 0;
+  padding-bottom: 1em;
+}
+
+/* bundles */
 .jp-Licenses-Bundles {
   background-color: var(--jp-layout-color2);
   overflow-y: auto;
-  min-width: 18em;
-  width: 18em;
+  flex: 1;
 }
 
 .jp-Licenses-Bundles .lm-TabBar-tab {
