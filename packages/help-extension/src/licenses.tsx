@@ -23,7 +23,7 @@ import {
  * A license viewer
  */
 export class Licenses extends SplitPanel {
-  protected readonly model: Licenses.Model;
+  readonly model: Licenses.Model;
   constructor(options: Licenses.IOptions) {
     super();
     this.addClass('jp-Licenses');
@@ -43,6 +43,7 @@ export class Licenses extends SplitPanel {
       return;
     }
     this._tabs.currentChanged.disconnect(this.onBundleSelected, this);
+    this.model.dispose();
     super.dispose();
   }
 
@@ -461,7 +462,6 @@ export namespace Licenses {
       row: Licenses.IPackageLicenseInfo,
       index: number
     ) => {
-      const id = `id-license-package-${index}`;
       const selected = index === this.model.selectedPackageIndex;
       const onCheck = () => (this.model.selectedPackageIndex = index);
       return (
@@ -475,7 +475,6 @@ export namespace Licenses {
               type="radio"
               name="show-package-license"
               value={index}
-              id={id}
               onChange={onCheck}
               checked={selected}
             />

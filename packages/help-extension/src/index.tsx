@@ -507,23 +507,6 @@ const licenses: JupyterFrontEndPlugin<void> = {
     });
 
     /**
-     * A singleton model, the presence of which determines whether commands
-     * are visible.
-     */
-    let licensesModel: Licenses.Model | null;
-
-    /**
-     * Ensure a license model exists, usually only when the license widget is
-     * on-screen.
-     */
-    function ensureLicensesModel() {
-      if (licensesModel == null) {
-        licensesModel = new Licenses.Model({ licensesUrl, trans });
-      }
-      return licensesModel;
-    }
-
-    /**
      * Return a full report format based on a format name
      */
     function formatOrDefault(format: string): Licenses.IReportFormat {
@@ -537,7 +520,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
      * Create a MainAreaWidget for a toolbar item
      */
     function createLicenseWidget() {
-      licensesModel = ensureLicensesModel();
+      const licensesModel = new Licenses.Model({ licensesUrl, trans });
       const content = new Licenses({ model: licensesModel });
       content.id = `${licensesNamespace}-${++counter}`;
       content.title.label = licensesText;
@@ -567,12 +550,6 @@ const licenses: JupyterFrontEndPlugin<void> = {
         main.toolbar.addItem(`download-${format}`, button);
       }
 
-      // dispose of the model if the license widget is disposed
-      main.disposed.connect(() => {
-        licensesModel?.dispose();
-        licensesModel = null;
-      });
-
       // add to tracker so it can be restored
       void licensesTracker.add(main);
 
@@ -590,20 +567,15 @@ const licenses: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.refreshLicenses, {
-      // don't show this command if the licenses aren't loaded
-      isVisible: () => !!licensesModel,
       label: args => (args.noLabel ? '' : refreshLicenses),
       caption: refreshLicenses,
       icon: refreshIcon,
       execute: async () => {
-        licensesModel = ensureLicensesModel();
-        await licensesModel.initLicenses();
+        return licensesTracker.currentWidget?.content.model.initLicenses();
       }
     });
 
     commands.addCommand(CommandIDs.licenseReport, {
-      // don't show this command if the licenses aren't loaded
-      isVisible: () => !!licensesModel,
       label: args => {
         if (args.noLabel) {
           return '';
@@ -619,9 +591,11 @@ const licenses: JupyterFrontEndPlugin<void> = {
         const format = formatOrDefault(`${args.format}`);
         return format.icon;
       },
-      execute: args => {
+      execute: async args => {
         const format = formatOrDefault(`${args.format}`);
-        void ensureLicensesModel().download({ format: format.id });
+        return await licensesTracker.currentWidget?.content.model.download({
+          format: format.id
+        });
       }
     });
 
