@@ -295,9 +295,12 @@ export namespace Licenses {
     /**
      * Set the current license bundle, and reset the selected index
      */
-    set currentBundleName(bundleName: string | null) {
-      this._currentBundleName = bundleName;
-      this.selectedPackageIndex = null;
+    set currentBundleName(currentBundleName: string | null) {
+      if (this._currentBundleName !== currentBundleName) {
+        this._currentBundleName = currentBundleName;
+        this.selectedPackageIndex = null;
+        this.stateChanged.emit(void 0);
+      }
     }
 
     /**
