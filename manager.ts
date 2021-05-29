@@ -23,6 +23,7 @@ export class LanguageServerManager implements ILanguageServerManager {
   private _retries: number;
   private _retriesInterval: number;
   private _configuration: TLanguageServerConfigurations;
+  private _warningsEmitted = new Set<string>();
   private console: ILSPLogConsole;
 
   constructor(options: ILanguageServerManager.IOptions) {
@@ -52,12 +53,19 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._configuration = configuration;
   }
 
+  protected warnOnce(arg: string) {
+    if (!this._warningsEmitted.has(arg)) {
+      this._warningsEmitted.add(arg);
+      this.console.warn(arg);
+    }
+  }
+
   protected _comparePriorities(a: TLanguageServerId, b: TLanguageServerId) {
     const DEFAULT_PRIORITY = 50;
     const a_priority = this._configuration[a]?.priority ?? DEFAULT_PRIORITY;
     const b_priority = this._configuration[b]?.priority ?? DEFAULT_PRIORITY;
     if (a_priority == b_priority) {
-      this.console.warn(
+      this.warnOnce(
         `Two matching servers: ${a} and ${b} have the same priority; choose which one to use by changing the priority in Advanced Settings Editor`
       );
       return a.localeCompare(b);
