@@ -151,7 +151,10 @@ export interface IServerRequestHandler<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > {
   setHandler(
-    handler: (params: IServerRequestParams[T]) => Promise<IServerResult[T]>
+    handler: (
+      params: IServerRequestParams[T],
+      connection?: LSPConnection
+    ) => Promise<IServerResult[T]>
   ): void;
   clearHandler(): void;
 }
@@ -183,10 +186,15 @@ class ServerRequestHandler<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > implements IServerRequestHandler {
   private _handler: (
-    params: IServerRequestParams[T]
+    params: IServerRequestParams[T],
+    connection?: LSPConnection
   ) => Promise<IServerResult[T]>;
 
-  constructor(protected connection: MessageConnection, protected method: T) {
+  constructor(
+    protected connection: MessageConnection,
+    protected method: T,
+    protected emitter: LSPConnection
+  ) {
     // on request accepts "thenable"
     this.connection.onRequest(method, this.handle);
     this._handler = null;
@@ -196,11 +204,14 @@ class ServerRequestHandler<
     if (!this._handler) {
       return;
     }
-    return this._handler(request);
+    return this._handler(request, this.emitter);
   }
 
   setHandler(
-    handler: (params: IServerRequestParams[T]) => Promise<IServerResult[T]>
+    handler: (
+      params: IServerRequestParams[T],
+      connection?: LSPConnection
+    ) => Promise<IServerResult[T]>
   ) {
     this._handler = handler;
   }
@@ -281,7 +292,8 @@ export class LSPConnection extends LspWsConnection {
     for (let method of Object.values(methods)) {
       result[method as U] = new ServerRequestHandler(
         this.connection,
-        (method as U) as any
+        (method as U) as any,
+        this
       );
     }
     return result as T;
