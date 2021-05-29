@@ -23,6 +23,11 @@ import { IVirtualEditor } from '../virtual/editor';
 
 import IEditor = CodeEditor.IEditor;
 
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+
+import IButton = Dialog.IButton;
+import createButton = Dialog.createButton;
+
 export class StatusMessage {
   /**
    * The text message to be shown on the statusbar
@@ -348,7 +353,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     const loggerSourceName = virtual_document.uri;
     const logger = this.extension.user_console.getLogger(loggerSourceName);
 
-    data.connection.notifications.window.logMessage.connect(
+    data.connection.serverNotifications['window/logMessage'].connect(
       (connection, message) => {
         this.console.log(
           data.connection.serverIdentifier,
@@ -362,22 +367,44 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       }
     );
 
-    data.connection.notifications.window.showMessage.connect(
+    data.connection.serverNotifications['window/showMessage'].connect(
       (connection, message) => {
         this.console.log(
           data.connection.serverIdentifier,
           virtual_document.uri,
-          message
+          message.message
         );
-        logger.log({
-          type: 'text',
-          data: connection.serverIdentifier + ': ' + message.message
-        } as ILogPayload);
-        this.extension.app.commands
-          .execute('logconsole:open', {
-            source: loggerSourceName
-          })
-          .catch(console.log);
+        void showDialog({
+          title: this.trans.__('Message from ') + connection.serverIdentifier,
+          body: message.message
+        });
+      }
+    );
+
+    data.connection.serverRequests['window/showMessageRequest'].setHandler(
+      async params => {
+        this.console.log(
+          data.connection.serverIdentifier,
+          virtual_document.uri,
+          params
+        );
+        const actionItems = params.actions;
+        const buttons = actionItems.map(action => {
+          return createButton({
+            label: action.title
+          });
+        });
+        const result = await showDialog<IButton>({
+          title:
+            this.trans.__('Message from ') + data.connection.serverIdentifier,
+          body: params.message,
+          buttons: buttons
+        });
+        const choice = buttons.indexOf(result.button);
+        if (choice === -1) {
+          return;
+        }
+        return actionItems[choice];
       }
     );
   }
