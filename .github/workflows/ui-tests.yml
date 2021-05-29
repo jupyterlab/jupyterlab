@@ -51,9 +51,8 @@ jobs:
       run: |
         bash ./scripts/ci_install.sh
         pip install ipywidgets
-        jlpm install
-        jlpm run build
-        jlpm run build:core
+        jlpm
+        jlpm build
         jupyter lab build
 
     - name: Install Galata
