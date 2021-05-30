@@ -1,8 +1,6 @@
 /** The Public API, as exposed in the `main` field of package.json */
 
 /** General public tokens, including lumino Tokens and namespaces */
-import { ILoggerRegistry } from '@jupyterlab/logconsole';
-
 export * from './tokens';
 
 /** Component- and feature-specific APIs */
@@ -15,6 +13,7 @@ import {
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { ILoggerRegistry } from '@jupyterlab/logconsole';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -25,6 +24,7 @@ import { Signal } from '@lumino/signaling';
 
 import '../style/index.css';
 
+import { LanguageServer } from './_plugin';
 import { WIDGET_ADAPTER_MANAGER } from './adapter_manager';
 import { FILE_EDITOR_ADAPTER } from './adapters/file_editor';
 import { NOTEBOOK_ADAPTER } from './adapters/notebook';
@@ -181,13 +181,18 @@ export class LSPExtension implements ILSPExtension {
     this.setting_registry
       .load(plugin.id)
       .then(settings => {
+        const options = settings.composite as LanguageServer;
         // Store the initial server settings, to be sent asynchronously
         // when the servers are initialized.
-        const initial_configuration = (settings.composite.language_servers ||
+        const initial_configuration = (options.language_servers ||
           {}) as TLanguageServerConfigurations;
         this.connection_manager.initial_configurations = initial_configuration;
         // update the server-independent part of configuration immediately
         this.connection_manager.updateConfiguration(initial_configuration);
+        this.connection_manager.updateLogging(
+          options.logAllCommunication,
+          options.setTrace
+        );
 
         settings.changed.connect(() => {
           this.updateOptions(settings);
@@ -226,7 +231,7 @@ export class LSPExtension implements ILSPExtension {
   }
 
   private updateOptions(settings: ISettingRegistry.ISettings) {
-    const options = settings.composite;
+    const options = settings.composite as LanguageServer;
 
     const languageServerSettings = (options.language_servers ||
       {}) as TLanguageServerConfigurations;
@@ -235,6 +240,10 @@ export class LSPExtension implements ILSPExtension {
     // TODO: if priorities changed reset connections
     this.connection_manager.updateConfiguration(languageServerSettings);
     this.connection_manager.updateServerConfigurations(languageServerSettings);
+    this.connection_manager.updateLogging(
+      options.logAllCommunication,
+      options.setTrace
+    );
   }
 }
 

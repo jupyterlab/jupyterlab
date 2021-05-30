@@ -1,4 +1,5 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ILogPayload } from '@jupyterlab/logconsole';
@@ -22,9 +23,6 @@ import { IForeignContext, VirtualDocument } from '../virtual/document';
 import { IVirtualEditor } from '../virtual/editor';
 
 import IEditor = CodeEditor.IEditor;
-
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-
 import IButton = Dialog.IButton;
 import createButton = Dialog.createButton;
 
@@ -352,6 +350,17 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     // as it changes the source to the active file afterwards anyways
     const loggerSourceName = virtual_document.uri;
     const logger = this.extension.user_console.getLogger(loggerSourceName);
+
+    data.connection.serverNotifications['$/logTrace'].connect(
+      (connection, message) => {
+        this.console.log(
+          data.connection.serverIdentifier,
+          'trace',
+          virtual_document.uri,
+          message
+        );
+      }
+    );
 
     data.connection.serverNotifications['window/logMessage'].connect(
       (connection, message) => {

@@ -19,10 +19,12 @@ import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
 
+import { ILSPLogConsole } from './tokens';
 import { until_ready } from './utils';
 
 interface ILSPOptions extends ILspOptions {
   serverIdentifier?: string;
+  console: ILSPLogConsole;
 }
 
 /**
@@ -49,7 +51,7 @@ export namespace Method {
   }
 
   /** Server requests */
-  export enum ServerRequests {
+  export enum ServerRequest {
     REGISTER_CAPABILITY = 'client/registerCapability',
     SHOW_MESSAGE_REQUEST = 'window/showMessageRequest',
     UNREGISTER_CAPABILITY = 'client/unregisterCapability'
@@ -90,15 +92,15 @@ export interface IClientNotifyParams {
 }
 
 export interface IServerRequestParams {
-  [Method.ServerRequests.REGISTER_CAPABILITY]: lsp.RegistrationParams;
-  [Method.ServerRequests.SHOW_MESSAGE_REQUEST]: lsp.ShowMessageRequestParams;
-  [Method.ServerRequests.UNREGISTER_CAPABILITY]: lsp.UnregistrationParams;
+  [Method.ServerRequest.REGISTER_CAPABILITY]: lsp.RegistrationParams;
+  [Method.ServerRequest.SHOW_MESSAGE_REQUEST]: lsp.ShowMessageRequestParams;
+  [Method.ServerRequest.UNREGISTER_CAPABILITY]: lsp.UnregistrationParams;
 }
 
 export interface IServerResult {
-  [Method.ServerRequests.REGISTER_CAPABILITY]: void;
-  [Method.ServerRequests.SHOW_MESSAGE_REQUEST]: lsp.MessageActionItem | null;
-  [Method.ServerRequests.UNREGISTER_CAPABILITY]: void;
+  [Method.ServerRequest.REGISTER_CAPABILITY]: void;
+  [Method.ServerRequest.SHOW_MESSAGE_REQUEST]: lsp.MessageActionItem | null;
+  [Method.ServerRequest.UNREGISTER_CAPABILITY]: void;
 }
 
 export interface IClientRequestParams {
@@ -134,14 +136,14 @@ export interface IClientResult {
 export type ServerNotifications<
   T extends keyof IServerNotifyParams = keyof IServerNotifyParams
 > = {
-  // ISignal does not have emit, which is intended - client cannot emit server notifications.
+  readonly // ISignal does not have emit, which is intended - client cannot emit server notifications.
   [key in T]: ISignal<LSPConnection, IServerNotifyParams[key]>;
 };
 
 export type ClientNotifications<
   T extends keyof IClientNotifyParams = keyof IClientNotifyParams
 > = {
-  // Signal has emit.
+  readonly // Signal has emit.
   [key in T]: Signal<LSPConnection, IClientNotifyParams[key]>;
 };
 
@@ -166,23 +168,39 @@ export interface IServerRequestHandler<
 export type ClientRequests<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
 > = {
-  // has async request(params) returning a promise with result.
+  readonly // has async request(params) returning a promise with result.
   [key in T]: IClientRequestHandler<key>;
 };
 
 export type ServerRequests<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > = {
-  // has async request(params) returning a promise with result.
+  readonly // has async request(params) returning a promise with result.
   [key in T]: IServerRequestHandler<key>;
 };
 
 class ClientRequestHandler<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
 > implements IClientRequestHandler {
-  constructor(protected connection: MessageConnection, protected method: T) {}
+  constructor(
+    protected connection: MessageConnection,
+    protected method: T,
+    protected emitter: LSPConnection
+  ) {}
   request(params: IClientRequestParams[T]): Promise<IClientResult[T]> {
-    return this.connection.sendRequest(this.method, params);
+    this.emitter.log(MessageKind.client_requested, {
+      method: this.method,
+      message: params
+    });
+    return this.connection
+      .sendRequest(this.method, params)
+      .then((result: IClientResult[T]) => {
+        this.emitter.log(MessageKind.result_for_client, {
+          method: this.method,
+          message: params
+        });
+        return result;
+      });
   }
 }
 
@@ -205,10 +223,20 @@ class ServerRequestHandler<
   }
 
   private handle(request: IServerRequestParams[T]): Promise<IServerResult[T]> {
+    this.emitter.log(MessageKind.server_requested, {
+      method: this.method,
+      message: request
+    });
     if (!this._handler) {
       return;
     }
-    return this._handler(request, this.emitter);
+    return this._handler(request, this.emitter).then(result => {
+      this.emitter.log(MessageKind.response_for_server, {
+        method: this.method,
+        message: result
+      });
+      return result;
+    });
   }
 
   setHandler(
@@ -252,67 +280,104 @@ export const Provider: { [key: string]: keyof lsp.ServerCapabilities } = {
   WORKSPACE: 'workspace'
 };
 
+type AnyMethodType =
+  | typeof Method.ServerNotification
+  | typeof Method.ClientNotification
+  | typeof Method.ClientRequest
+  | typeof Method.ServerRequest;
+type AnyMethod =
+  | Method.ServerNotification
+  | Method.ClientNotification
+  | Method.ClientRequest
+  | Method.ServerRequest;
+
+function createMethodMap<T, H, U extends keyof T = keyof T>(
+  methods: AnyMethodType,
+  handlerFactory: (method: U) => H
+) {
+  const result: { [key in U]?: H } = {};
+  for (let method of Object.values(methods)) {
+    result[method as U] = handlerFactory(method as U);
+  }
+  return result as T;
+}
+
+enum MessageKind {
+  client_notified_server,
+  server_notified_client,
+  server_requested,
+  client_requested,
+  result_for_client,
+  response_for_server
+}
+
+interface IMessageLog<T extends AnyMethod = AnyMethod> {
+  method: T;
+  message: any;
+}
+
 export class LSPConnection extends LspWsConnection {
   protected documentsToOpen: IDocumentInfo[];
   public serverIdentifier: string;
 
-  public serverNotifications: ServerNotifications;
   public clientNotifications: ClientNotifications;
+  public serverNotifications: ServerNotifications;
   public clientRequests: ClientRequests;
   public serverRequests: ServerRequests;
+  protected console: ILSPLogConsole;
+  public logAllCommunication: boolean;
+
+  public log(kind: MessageKind, message: IMessageLog) {
+    if (this.logAllCommunication) {
+      this.console.log(kind, message);
+    }
+  }
 
   protected constructNotificationHandlers<
-    T extends ServerNotifications | ClientNotifications,
-    U extends keyof T = keyof T
+    T extends ServerNotifications | ClientNotifications
   >(
     methods: typeof Method.ServerNotification | typeof Method.ClientNotification
   ) {
-    const result: { [key in U]?: Signal<any, any> } = {};
-    for (let method of Object.values(methods)) {
-      result[method as U] = new Signal<any, any>(this);
-    }
-    return result as T;
+    return createMethodMap<T, Signal<any, any>>(
+      methods,
+      () => new Signal<any, any>(this)
+    );
   }
 
   protected constructClientRequestHandler<
     T extends ClientRequests,
     U extends keyof T = keyof T
   >(methods: typeof Method.ClientRequest) {
-    const result: { [key in U]?: IClientRequestHandler } = {};
-    for (let method of Object.values(methods)) {
-      result[method as U] = new ClientRequestHandler(
-        this.connection,
-        (method as U) as any
-      );
-    }
-    return result as T;
+    return createMethodMap<T, IClientRequestHandler>(
+      methods,
+      method =>
+        new ClientRequestHandler(this.connection, (method as U) as any, this)
+    );
   }
 
   protected constructServerRequestHandler<
     T extends ServerRequests,
     U extends keyof T = keyof T
-  >(methods: typeof Method.ServerRequests) {
-    const result: { [key in U]?: IServerRequestHandler } = {};
-    for (let method of Object.values(methods)) {
-      result[method as U] = new ServerRequestHandler(
-        this.connection,
-        (method as U) as any,
-        this
-      );
-    }
-    return result as T;
+  >(methods: typeof Method.ServerRequest) {
+    return createMethodMap<T, IServerRequestHandler>(
+      methods,
+      method =>
+        new ServerRequestHandler(this.connection, (method as U) as any, this)
+    );
   }
 
   constructor(options: ILSPOptions) {
     super(options);
+    this.logAllCommunication = false;
     this.serverIdentifier = options?.serverIdentifier;
+    this.console = options.console.scope(this.serverIdentifier + ' connection');
     this.documentsToOpen = [];
-    this.serverNotifications = this.constructNotificationHandlers<
-      ServerNotifications
-    >(Method.ServerNotification);
     this.clientNotifications = this.constructNotificationHandlers<
       ClientNotifications
     >(Method.ClientNotification);
+    this.serverNotifications = this.constructNotificationHandlers<
+      ServerNotifications
+    >(Method.ServerNotification);
   }
 
   sendOpenWhenReady(documentInfo: IDocumentInfo) {
@@ -323,18 +388,12 @@ export class LSPConnection extends LspWsConnection {
     }
   }
 
-  sendInitialize() {
-    super.sendInitialize();
-  }
-
   protected onServerInitialized(params: lsp.InitializeResult) {
+    this.afterInitialized();
     super.onServerInitialized(params);
     while (this.documentsToOpen.length) {
       this.sendOpen(this.documentsToOpen.pop());
     }
-    // TODO: move to send Initialize after disabling overwrites in ws-connection
-    //  or maybe move the code there? How to handle logging without bringing in lumino signals?
-    this.afterInitialized();
   }
 
   protected afterInitialized() {
@@ -343,6 +402,10 @@ export class LSPConnection extends LspWsConnection {
     ) as (keyof ServerNotifications)[]) {
       const signal = this.serverNotifications[method] as Signal<any, any>;
       this.connection.onNotification(method, params => {
+        this.log(MessageKind.server_notified_client, {
+          method,
+          message: params
+        });
         signal.emit(params);
       });
     }
@@ -352,6 +415,10 @@ export class LSPConnection extends LspWsConnection {
     ) as (keyof ClientNotifications)[]) {
       const signal = this.clientNotifications[method] as Signal<any, any>;
       signal.connect((emitter, params) => {
+        this.log(MessageKind.client_notified_server, {
+          method,
+          message: params
+        });
         this.connection.sendNotification(method, params);
       });
     }
@@ -360,7 +427,7 @@ export class LSPConnection extends LspWsConnection {
       Method.ClientRequest
     );
     this.serverRequests = this.constructServerRequestHandler<ServerRequests>(
-      Method.ServerRequests
+      Method.ServerRequest
     );
 
     this.serverRequests['client/registerCapability'].setHandler(
@@ -377,8 +444,6 @@ export class LSPConnection extends LspWsConnection {
             }
           }
         );
-
-        // TODO log event
       }
     );
 
@@ -392,8 +457,6 @@ export class LSPConnection extends LspWsConnection {
             );
           }
         );
-
-        // TODO log event
       }
     );
   }

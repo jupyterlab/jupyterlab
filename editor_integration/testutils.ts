@@ -248,7 +248,8 @@ function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
         languageId: this.document_options.language,
         serverUri: 'ws://localhost:8080',
         rootUri: 'file:///unit-test',
-        serverIdentifier: DEFAULT_SERVER_ID
+        serverIdentifier: DEFAULT_SERVER_ID,
+        console: new BrowserConsole()
       });
     }
 
