@@ -33,6 +33,15 @@ const sidebarIds: galata.SidebarTabId[] = [
 
 // eslint-disable-next-line jest/no-export
 export function runMenuOpenTest() {
+  // wait for Export menu since it is populated async from server
+  test('Wait for Export menu to populate', async () => {
+    await galata.menu.open('File');
+    await galata.waitFor(async (): Promise<boolean> => {
+      return await galata.menu.getMenuItem('File>Export Notebook As…') !== null;
+    });
+    await galata.menu.closeAll();
+  });
+
   test('Open menu items', async () => {
     for (const menuPath of menuPaths) {
       await galata.menu.open(menuPath);

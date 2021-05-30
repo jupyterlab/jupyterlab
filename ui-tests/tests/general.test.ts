@@ -22,8 +22,6 @@ describe('General Tests', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  runMenuOpenTest();
-
   runSidebarOpenTest();
 
   test('Enter Simple Mode', async () => {
@@ -86,4 +84,6 @@ describe('General Tests', () => {
     await galata.sidebar.openTab('filebrowser');
     expect(await galata.sidebar.isTabOpen('filebrowser')).toBeTruthy();
   });
+
+  runMenuOpenTest();
 });
