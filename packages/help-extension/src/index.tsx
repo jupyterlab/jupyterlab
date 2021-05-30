@@ -44,6 +44,7 @@ import {
 import { Menu } from '@lumino/widgets';
 
 import * as React from 'react';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
 /**
  * The command IDs used by the help plugin.
@@ -519,8 +520,8 @@ const licenses: JupyterFrontEndPlugin<void> = {
     /**
      * Create a MainAreaWidget for a toolbar item
      */
-    function createLicenseWidget() {
-      const licensesModel = new Licenses.Model({ licensesUrl, trans });
+    function createLicenseWidget(args: Licenses.ICreateArgs) {
+      const licensesModel = new Licenses.Model({ licensesUrl, trans, ...args });
       const content = new Licenses({ model: licensesModel });
       content.id = `${licensesNamespace}-${++counter}`;
       content.title.label = licensesText;
@@ -550,18 +551,21 @@ const licenses: JupyterFrontEndPlugin<void> = {
         main.toolbar.addItem(`download-${format}`, button);
       }
 
-      // add to tracker so it can be restored
-      void licensesTracker.add(main);
-
       return main;
     }
 
     // register license-related commands
     commands.addCommand(CommandIDs.licenses, {
       label: licensesText,
-      execute: () => {
-        const licenseMain = createLicenseWidget();
+      execute: (args: any) => {
+        const licenseMain = createLicenseWidget(args as Licenses.ICreateArgs);
         shell.add(licenseMain, 'main');
+
+        // add to tracker so it can be restored, and update when choices change
+        void licensesTracker.add(licenseMain);
+        licenseMain.content.model.trackerDataChanged.connect(() => {
+          licensesTracker.save(licenseMain);
+        });
         return licenseMain;
       }
     });
@@ -612,7 +616,21 @@ const licenses: JupyterFrontEndPlugin<void> = {
     if (restorer) {
       void restorer.restore(licensesTracker, {
         command: CommandIDs.licenses,
-        name: widget => 'licenses'
+        name: widget => 'licenses',
+        args: widget => {
+          const {
+            currentBundleName,
+            currentPackageIndex,
+            packageFilter
+          } = widget.content.model;
+
+          const args: Licenses.ICreateArgs = {
+            currentBundleName,
+            currentPackageIndex,
+            packageFilter
+          };
+          return args as ReadonlyJSONObject;
+        }
       });
     }
   }

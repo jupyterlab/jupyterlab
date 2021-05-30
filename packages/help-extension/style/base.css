@@ -94,8 +94,8 @@
 .jp-Licenses-FormArea {
   display: flex;
   flex-direction: column;
-  min-width: 18em;
-  width: 18em;
+  min-width: calc(18 * var(--jp-ui-font-size1));
+  width: calc(18 * var(--jp-ui-font-size1));
 }
 
 .jp-Licenses .lm-SplitPanel-handle:hover {
@@ -104,7 +104,8 @@
 
 /* filters */
 .jp-Licenses-Filters {
-  padding: 1em 0 0 1em;
+  padding: var(--jp-ui-font-size1) calc(var(--jp-ui-font-size1) / 2) 0
+    var(--jp-ui-font-size1);
 }
 
 .jp-Licenses-Filters label {
@@ -128,9 +129,9 @@
 }
 
 .jp-RenderedHTMLCommon.jp-Licenses-Filters ul {
-  padding: 0 0 1em 0;
+  padding: 0 0 var(--jp-ui-font-size1) 0;
   margin: 0;
-  padding-bottom: 1em;
+  padding-bottom: var(--jp-ui-font-size1);
 }
 
 /* bundles */
@@ -141,18 +142,18 @@
 }
 
 .jp-Licenses-Bundles .lm-TabBar-tab {
-  padding: 0.5em;
+  padding: calc(var(--jp-ui-font-size1) / 2);
   background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
 }
 
 .jp-Licenses-Bundles .lm-TabBar-tab label {
   background-color: var(--jp-layout-color2);
-  border-radius: 1em;
-  width: 2.5em;
-  padding: 0 0.5em;
+  border-radius: var(--jp-ui-font-size1);
+  width: calc(2.5 * var(--jp-ui-font-size1));
+  padding: 0 calc(var(--jp-ui-font-size1) / 2);
   text-align: center;
-  margin-left: 1em;
+  margin-left: var(--jp-ui-font-size1);
 }
 
 .jp-Licenses-Bundles .lm-TabBar-tab.lm-mod-current {
@@ -167,7 +168,7 @@
 
 /* license grid */
 .jp-Licenses-Grid.jp-RenderedHTMLCommon {
-  min-width: 32em;
+  min-width: calc(var(--jp-ui-font-size1) * 32);
   display: flex;
   flex-direction: column;
   padding: 0;
@@ -186,6 +187,8 @@
   flex: 1;
   max-width: 100%;
   border: solid var(--jp-border-width) var(--jp-border-color2);
+  border-top: 0;
+  border-bottom: 0;
   margin: 0;
 }
 
@@ -195,7 +198,7 @@
 }
 
 .jp-Licenses-Grid table td:nth-child(1) {
-  max-width: 2em;
+  max-width: calc(2 * var(--jp-ui-font-size1));
 }
 
 .jp-Licenses-Grid label {
@@ -217,8 +220,8 @@
 
 /* license text */
 .jp-Licenses-Text {
-  min-width: 18em;
-  padding: 0 0 0 1em;
+  min-width: calc(18 * var(--jp-ui-font-size1));
+  padding: 0 0 0 var(--jp-ui-font-size1);
   display: flex;
   flex-direction: column;
 }
@@ -234,16 +237,15 @@
 
 .jp-Licenses-Text blockquote {
   flex: initial;
-  font-style: italic;
 }
 
 .jp-Licenses-Text.jp-RenderedHTMLCommon code {
   overflow-wrap: anywhere;
   overflow-y: auto;
   flex: 1;
-  padding-right: 1em;
+  padding-right: var(--jp-ui-font-size1);
   margin-bottom: 0;
-  padding-bottom: 1em;
+  padding-bottom: var(--jp-ui-font-size1);
 }
 
 .jp-Licenses-Text code:empty {

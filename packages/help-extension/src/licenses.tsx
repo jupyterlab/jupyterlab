@@ -193,7 +193,7 @@ export namespace Licenses {
   /**
    * Options for instantiating a license model
    */
-  export interface IModelOptions {
+  export interface IModelOptions extends ICreateArgs {
     licensesUrl: string;
     serverSettings?: ServerConnection.ISettings;
     trans: TranslationBundle;
@@ -264,16 +264,31 @@ export namespace Licenses {
    */
   export type TFilterKey = 'name' | 'versionInfo' | 'licenseId';
 
+  export interface ICreateArgs {
+    currentBundleName?: string | null;
+    packageFilter?: Partial<IPackageLicenseInfo> | null;
+    currentPackageIndex?: number | null;
+  }
+
   /**
    * A model for license data
    */
-  export class Model extends VDomModel {
+  export class Model extends VDomModel implements ICreateArgs {
     constructor(options: IModelOptions) {
       super();
       this._trans = options.trans;
       this._licensesUrl = options.licensesUrl;
       this._serverSettings =
         options.serverSettings || ServerConnection.makeSettings();
+      if (options.currentBundleName) {
+        this._currentBundleName = options.currentBundleName;
+      }
+      if (options.packageFilter) {
+        this._packageFilter = options.packageFilter;
+      }
+      if (options.currentPackageIndex) {
+        this._currentPackageIndex = options.currentPackageIndex;
+      }
     }
 
     /**
@@ -313,6 +328,13 @@ export namespace Licenses {
     }
 
     /**
+     * A promise that resolves when the trackable data changes
+     */
+    get trackerDataChanged() {
+      return this._trackerDataChanged;
+    }
+
+    /**
      * The names of the license bundles available
      */
     get bundleNames(): string[] {
@@ -338,8 +360,8 @@ export namespace Licenses {
     set currentBundleName(currentBundleName: string | null) {
       if (this._currentBundleName !== currentBundleName) {
         this._currentBundleName = currentBundleName;
-        this.selectedPackageIndex = null;
         this.stateChanged.emit(void 0);
+        this.trackerDataChanged.emit(void 0);
       }
     }
 
@@ -360,38 +382,38 @@ export namespace Licenses {
     /**
      * The index of the currently-selected package within its license bundle
      */
-    get selectedPackageIndex() {
-      return this._selectedPackageIndex;
+    get currentPackageIndex() {
+      return this._currentPackageIndex;
     }
 
     /**
      * Update the currently-selected package within its license bundle
      */
-    set selectedPackageIndex(selectedPackageIndex: number | null) {
-      if (this._selectedPackageIndex === selectedPackageIndex) {
+    set currentPackageIndex(currentPackageIndex: number | null) {
+      if (this._currentPackageIndex === currentPackageIndex) {
         return;
       }
-      this._selectedPackageIndex = selectedPackageIndex;
-      if (
-        this.currentBundleName &&
-        this.bundles &&
-        selectedPackageIndex != null
-      ) {
-        this._selectedPackage = this.bundles[this.currentBundleName].packages[
-          selectedPackageIndex
-        ];
-      } else {
-        this._selectedPackage = null;
-      }
+      this._currentPackageIndex = currentPackageIndex;
       this._selectedPackageChanged.emit(void 0);
       this.stateChanged.emit(void 0);
+      this.trackerDataChanged.emit(void 0);
     }
 
     /**
      * The license data for the currently-selected package
      */
-    get selectedPackage() {
-      return this._selectedPackage;
+    get currentPackage() {
+      if (
+        this.currentBundleName &&
+        this.bundles &&
+        this._currentPackageIndex != null
+      ) {
+        return this.getFilteredPackages(
+          this.bundles[this.currentBundleName]?.packages || []
+        )[this._currentPackageIndex];
+      }
+
+      return null;
     }
 
     /**
@@ -402,15 +424,16 @@ export namespace Licenses {
     }
 
     /**
-     * The current grid filter
+     * The current package filter
      */
-    get gridFilter() {
-      return this._gridFilter;
+    get packageFilter() {
+      return this._packageFilter;
     }
 
-    set gridFilter(gridFilter) {
-      this._gridFilter = gridFilter;
+    set packageFilter(packageFilter) {
+      this._packageFilter = packageFilter;
       this.stateChanged.emit(void 0);
+      this.trackerDataChanged.emit(void 0);
     }
 
     /**
@@ -419,7 +442,7 @@ export namespace Licenses {
      */
     getFilteredPackages(allRows: IPackageLicenseInfo[]) {
       let rows: IPackageLicenseInfo[] = [];
-      let filters: [string, string[]][] = Object.entries(this._gridFilter)
+      let filters: [string, string[]][] = Object.entries(this._packageFilter)
         .filter(([k, v]) => v && `${v}`.trim().length)
         .map(([k, v]) => [k, `${v}`.toLowerCase().trim().split(' ')]);
       for (const row of allRows) {
@@ -444,15 +467,15 @@ export namespace Licenses {
     }
 
     private _selectedPackageChanged: Signal<Model, void> = new Signal(this);
+    private _trackerDataChanged: Signal<Model, void> = new Signal(this);
     private _serverResponse: ILicenseResponse | null;
     private _licensesUrl: string;
     private _serverSettings: ServerConnection.ISettings;
     private _currentBundleName: string | null;
     private _trans: TranslationBundle;
-    private _selectedPackageIndex: number | null;
-    private _selectedPackage: IPackageLicenseInfo | null;
+    private _currentPackageIndex: number | null = 0;
     private _licensesReady = new PromiseDelegate<void>();
-    private _gridFilter: Partial<IPackageLicenseInfo> = {};
+    private _packageFilter: Partial<IPackageLicenseInfo> = {};
   }
 
   /**
@@ -474,22 +497,16 @@ export namespace Licenses {
           </label>
           <ul>
             <li>
-              <label>
-                {trans.__('Package')}
-                {this.renderFilter('name')}
-              </label>
+              <label>{trans.__('Package')}</label>
+              {this.renderFilter('name')}
             </li>
             <li>
-              <label>
-                {trans.__('Version')}
-                {this.renderFilter('versionInfo')}
-              </label>
+              <label>{trans.__('Version')}</label>
+              {this.renderFilter('versionInfo')}
             </li>
             <li>
-              <label>
-                {trans.__('License')}
-                {this.renderFilter('licenseId')}
-              </label>
+              <label>{trans.__('License')}</label>
+              {this.renderFilter('licenseId')}
             </li>
           </ul>
           <label>
@@ -503,7 +520,7 @@ export namespace Licenses {
      * Render a filter input
      */
     protected renderFilter = (key: TFilterKey) => {
-      const value = this.model.gridFilter[key] || '';
+      const value = this.model.packageFilter[key] || '';
       return (
         <input
           type="text"
@@ -521,7 +538,7 @@ export namespace Licenses {
     protected onFilterInput = (evt: React.ChangeEvent<HTMLInputElement>) => {
       const input = evt.currentTarget;
       const { name, value } = input;
-      this.model.gridFilter = { ...this.model.gridFilter, [name]: value };
+      this.model.packageFilter = { ...this.model.packageFilter, [name]: value };
     };
   }
 
@@ -585,20 +602,28 @@ export namespace Licenses {
      * Render a grid of package license information
      */
     protected render(): JSX.Element {
-      const { bundles, currentBundleName } = this.model;
-      const filteredPackages =
+      const { bundles, currentBundleName, trans } = this.model;
+      const filteredPackages = this.model.getFilteredPackages(
         bundles && currentBundleName
-          ? this.model.getFilteredPackages(bundles[currentBundleName]?.packages)
-          : [];
+          ? bundles[currentBundleName]?.packages || []
+          : []
+      );
+      if (!filteredPackages.length) {
+        return (
+          <blockquote>
+            <em>{trans.__('No Packages found')}</em>
+          </blockquote>
+        );
+      }
       return (
         <form>
           <table>
             <thead>
               <tr>
                 <td></td>
-                <th>{this.model.trans.__('Package')}</th>
-                <th>{this.model.trans.__('Version')}</th>
-                <th>{this.model.trans.__('License')}</th>
+                <th>{trans.__('Package')}</th>
+                <th>{trans.__('Version')}</th>
+                <th>{trans.__('License')}</th>
               </tr>
             </thead>
             <tbody>{filteredPackages.map(this.renderRow)}</tbody>
@@ -614,8 +639,8 @@ export namespace Licenses {
       row: Licenses.IPackageLicenseInfo,
       index: number
     ) => {
-      const selected = index === this.model.selectedPackageIndex;
-      const onCheck = () => (this.model.selectedPackageIndex = index);
+      const selected = index === this.model.currentPackageIndex;
+      const onCheck = () => (this.model.currentPackageIndex = index);
       return (
         <tr
           key={row.name}
@@ -658,12 +683,12 @@ export namespace Licenses {
      * Render the license text, or a null state if no package is selected
      */
     protected render() {
-      const { selectedPackage, trans } = this.model;
+      const { currentPackage, trans } = this.model;
       let head = '';
       let quote = trans.__('No Package selected');
       let code = '';
-      if (selectedPackage) {
-        const { name, versionInfo, licenseId, extractedText } = selectedPackage;
+      if (currentPackage) {
+        const { name, versionInfo, licenseId, extractedText } = currentPackage;
         head = `${name} v${versionInfo}`;
         quote = `${trans.__('License')}: ${
           licenseId || trans.__('No License ID found')
@@ -672,7 +697,9 @@ export namespace Licenses {
       }
       return [
         <h1>{head}</h1>,
-        <blockquote>{quote}</blockquote>,
+        <blockquote>
+          <em>{quote}</em>
+        </blockquote>,
         <code>{code}</code>
       ];
     }
