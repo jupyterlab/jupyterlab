@@ -1,6 +1,8 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { ILogPayload } from '@jupyterlab/logconsole';
 import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
@@ -21,6 +23,8 @@ import { IForeignContext, VirtualDocument } from '../virtual/document';
 import { IVirtualEditor } from '../virtual/editor';
 
 import IEditor = CodeEditor.IEditor;
+import IButton = Dialog.IButton;
+import createButton = Dialog.createButton;
 
 export class StatusMessage {
   /**
@@ -341,6 +345,77 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
         'have been initialized'
       );
     });
+
+    // Note: the logger extension behaves badly with non-default names
+    // as it changes the source to the active file afterwards anyways
+    const loggerSourceName = virtual_document.uri;
+    const logger = this.extension.user_console.getLogger(loggerSourceName);
+
+    data.connection.serverNotifications['$/logTrace'].connect(
+      (connection, message) => {
+        this.console.log(
+          data.connection.serverIdentifier,
+          'trace',
+          virtual_document.uri,
+          message
+        );
+      }
+    );
+
+    data.connection.serverNotifications['window/logMessage'].connect(
+      (connection, message) => {
+        this.console.log(
+          data.connection.serverIdentifier,
+          virtual_document.uri,
+          message
+        );
+        logger.log({
+          type: 'text',
+          data: connection.serverIdentifier + ': ' + message.message
+        } as ILogPayload);
+      }
+    );
+
+    data.connection.serverNotifications['window/showMessage'].connect(
+      (connection, message) => {
+        this.console.log(
+          data.connection.serverIdentifier,
+          virtual_document.uri,
+          message.message
+        );
+        void showDialog({
+          title: this.trans.__('Message from ') + connection.serverIdentifier,
+          body: message.message
+        });
+      }
+    );
+
+    data.connection.serverRequests['window/showMessageRequest'].setHandler(
+      async params => {
+        this.console.log(
+          data.connection.serverIdentifier,
+          virtual_document.uri,
+          params
+        );
+        const actionItems = params.actions;
+        const buttons = actionItems.map(action => {
+          return createButton({
+            label: action.title
+          });
+        });
+        const result = await showDialog<IButton>({
+          title:
+            this.trans.__('Message from ') + data.connection.serverIdentifier,
+          body: params.message,
+          buttons: buttons
+        });
+        const choice = buttons.indexOf(result.button);
+        if (choice === -1) {
+          return;
+        }
+        return actionItems[choice];
+      }
+    );
   }
 
   /**

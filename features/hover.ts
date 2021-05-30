@@ -218,12 +218,25 @@ export class HoverCM extends CodeMirrorIntegration {
   }
 
   protected on_hover = async () => {
-    return await this.connection.getHoverTooltip(
-      this.virtual_position,
-      // this might be wrong - should not it be using the specific virtual document?
-      this.virtual_document.document_info,
-      false
-    );
+    if (
+      !(
+        this.connection.isReady &&
+        this.connection.serverCapabilities?.hoverProvider
+      )
+    ) {
+      return;
+    }
+    let position = this.virtual_position;
+    return await this.connection.clientRequests['textDocument/hover'].request({
+      textDocument: {
+        // this might be wrong - should not it be using the specific virtual document?
+        uri: this.virtual_document.document_info.uri
+      },
+      position: {
+        line: position.line,
+        character: position.ch
+      }
+    });
   };
 
   protected static get_markup_for_hover(

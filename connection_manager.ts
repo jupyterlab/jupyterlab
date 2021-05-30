@@ -2,6 +2,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { Signal } from '@lumino/signaling';
 import type * as protocol from 'vscode-languageserver-protocol';
 
+import { AskServersToSendTraceNotifications } from './_plugin';
 import type * as ConnectionModuleType from './connection';
 import {
   ILSPLogConsole,
@@ -58,7 +59,7 @@ export class DocumentConnectionManager {
   language_server_manager: ILanguageServerManager;
   initial_configurations: TLanguageServerConfigurations;
   private ignored_languages: Set<string>;
-  private console: ILSPLogConsole;
+  private readonly console: ILSPLogConsole;
 
   constructor(options: DocumentConnectionManager.IOptions) {
     this.connections = new Map();
@@ -151,7 +152,8 @@ export class DocumentConnectionManager {
       language,
       language_server_id,
       uris,
-      this.on_new_connection
+      this.on_new_connection,
+      this.console
     );
 
     // if connecting for the first time, all documents subsequent documents will
@@ -357,6 +359,18 @@ export class DocumentConnectionManager {
     this.connections.delete(virtual_document.uri);
     this.documents_changed.emit(this.documents);
   }
+
+  updateLogging(
+    logAllCommunication: boolean,
+    setTrace: AskServersToSendTraceNotifications
+  ) {
+    for (const connection of this.connections.values()) {
+      connection.logAllCommunication = logAllCommunication;
+      if (setTrace !== null) {
+        connection.clientNotifications['$/setTrace'].emit({ value: setTrace });
+      }
+    }
+  }
 }
 
 export namespace DocumentConnectionManager {
@@ -453,7 +467,8 @@ namespace Private {
     language: string,
     language_server_id: TLanguageServerId,
     uris: DocumentConnectionManager.IURIs,
-    onCreate: (connection: ConnectionModuleType.LSPConnection) => void
+    onCreate: (connection: ConnectionModuleType.LSPConnection) => void,
+    console: ILSPLogConsole
   ): Promise<ConnectionModuleType.LSPConnection> {
     if (_promise == null) {
       // TODO: consider lazy-loading _only_ the modules that _must_ be webpacked
@@ -472,7 +487,8 @@ namespace Private {
         languageId: language,
         serverUri: uris.server,
         rootUri: uris.base,
-        serverIdentifier: language_server_id
+        serverIdentifier: language_server_id,
+        console: console
       });
       // TODO: remove remaining unbounded users of connection.on
       connection.setMaxListeners(999);

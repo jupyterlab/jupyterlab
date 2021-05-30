@@ -8,6 +8,7 @@ import type * as lsProtocol from 'vscode-languageserver-protocol';
 
 import diagnosticsSvg from '../../../style/icons/diagnostics.svg';
 import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
+import { LSPConnection } from '../../connection';
 import { PositionConverter } from '../../converter';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 import { FeatureSettings } from '../../feature';
@@ -288,7 +289,12 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
   }
 
   register(): void {
-    this.connection_handlers.set('diagnostic', this.handleDiagnostic);
+    // this.connection_handlers.set('diagnostic', this.handleDiagnostic);
+    // TODO: unregister
+    this.connection.serverNotifications[
+      'textDocument/publishDiagnostics'
+    ].connect(this.handleDiagnostic);
+
     this.wrapper_handlers.set('focusin', this.switchDiagnosticsPanelSource);
     this.unique_editor_ids = new DefaultMap(() => this.unique_editor_ids.size);
     this.settings.changed.connect(this.refreshDiagnostics, this);
@@ -606,7 +612,10 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     this.diagnostics_db.set(this.virtual_document, diagnostics_list);
   }
 
-  public handleDiagnostic = (response: lsProtocol.PublishDiagnosticsParams) => {
+  public handleDiagnostic = (
+    connection: LSPConnection,
+    response: lsProtocol.PublishDiagnosticsParams
+  ) => {
     if (!uris_equal(response.uri, this.virtual_document.document_info.uri)) {
       return;
     }
