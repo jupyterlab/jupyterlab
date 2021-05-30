@@ -35,6 +35,9 @@ export class Licenses extends SplitPanel {
     this.initLicenseText();
     this.setRelativeSizes([1, 2, 3]);
     this.model.initLicenses().then(() => this._updateBundles());
+    this.model.trackerDataChanged.connect(() => {
+      this.title.label = this.model.title;
+    });
   }
 
   /**
@@ -116,11 +119,17 @@ export class Licenses extends SplitPanel {
   protected _updateBundles(): void {
     this._bundles.clearTabs();
     let i = 0;
+    const { currentBundleName } = this.model;
+    let currentIndex = 0;
     for (const bundle of this.model.bundleNames) {
       const tab = new Widget();
       tab.title.label = bundle;
+      if (bundle === currentBundleName) {
+        currentIndex = i;
+      }
       this._bundles.insertTab(++i, tab.title);
     }
+    this._bundles.currentIndex = currentIndex;
   }
 
   /**
@@ -421,6 +430,12 @@ export namespace Licenses {
      */
     get trans() {
       return this._trans;
+    }
+
+    get title() {
+      return `${this._currentBundleName || ''} ${this._trans.__(
+        'Licenses'
+      )}`.trim();
     }
 
     /**
