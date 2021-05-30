@@ -36,9 +36,13 @@ export function runMenuOpenTest() {
   // wait for Export menu since it is populated async from server
   test('Wait for Export menu to populate', async () => {
     await galata.menu.open('File');
-    await galata.waitFor(async (): Promise<boolean> => {
-      return await galata.menu.getMenuItem('File>Export Notebook As…') !== null;
-    });
+    await galata.waitFor(
+      async (): Promise<boolean> => {
+        return (
+          (await galata.menu.getMenuItem('File>Export Notebook As…')) !== null
+        );
+      }
+    );
     await galata.menu.closeAll();
   });
 
