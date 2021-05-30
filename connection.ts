@@ -11,6 +11,10 @@ import {
   IPosition,
   LspWsConnection
 } from 'lsp-ws-connection';
+import {
+  registerServerCapability,
+  unregisterServerCapability
+} from 'lsp-ws-connection/lib/server-capability-registration';
 import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
@@ -196,7 +200,7 @@ class ServerRequestHandler<
     protected emitter: LSPConnection
   ) {
     // on request accepts "thenable"
-    this.connection.onRequest(method, this.handle);
+    this.connection.onRequest(method, this.handle.bind(this));
     this._handler = null;
   }
 
@@ -319,12 +323,21 @@ export class LSPConnection extends LspWsConnection {
     }
   }
 
+  sendInitialize() {
+    super.sendInitialize();
+  }
+
   protected onServerInitialized(params: lsp.InitializeResult) {
     super.onServerInitialized(params);
     while (this.documentsToOpen.length) {
       this.sendOpen(this.documentsToOpen.pop());
     }
+    // TODO: move to send Initialize after disabling overwrites in ws-connection
+    //  or maybe move the code there? How to handle logging without bringing in lumino signals?
+    this.afterInitialized();
+  }
 
+  protected afterInitialized() {
     for (const method of Object.values(
       Method.ServerNotification
     ) as (keyof ServerNotifications)[]) {
@@ -348,6 +361,40 @@ export class LSPConnection extends LspWsConnection {
     );
     this.serverRequests = this.constructServerRequestHandler<ServerRequests>(
       Method.ServerRequests
+    );
+
+    this.serverRequests['client/registerCapability'].setHandler(
+      async (params: lsp.RegistrationParams) => {
+        params.registrations.forEach(
+          (capabilityRegistration: lsp.Registration) => {
+            try {
+              this.serverCapabilities = registerServerCapability(
+                this.serverCapabilities,
+                capabilityRegistration
+              );
+            } catch (err) {
+              console.error(err);
+            }
+          }
+        );
+
+        // TODO log event
+      }
+    );
+
+    this.serverRequests['client/unregisterCapability'].setHandler(
+      async (params: lsp.UnregistrationParams) => {
+        params.unregisterations.forEach(
+          (capabilityUnregistration: lsp.Unregistration) => {
+            this.serverCapabilities = unregisterServerCapability(
+              this.serverCapabilities,
+              capabilityUnregistration
+            );
+          }
+        );
+
+        // TODO log event
+      }
     );
   }
 

@@ -77,7 +77,7 @@ describe('Diagnostics', () => {
       markers = env.ce_editor.editor.getDoc().getAllMarks();
       expect(markers.length).to.equal(0);
 
-      feature.handleDiagnostic({
+      feature.handleDiagnostic(null, {
         uri: env.document_options.path,
         diagnostics: diagnostics
       });
@@ -99,7 +99,7 @@ describe('Diagnostics', () => {
       env.ce_editor.model.value.text = text;
       await env.adapter.update_documents();
 
-      feature.handleDiagnostic({
+      feature.handleDiagnostic(null, {
         uri: env.document_options.path,
         diagnostics: diagnostics
       });
@@ -124,7 +124,7 @@ describe('Diagnostics', () => {
       env.ce_editor.model.value.text = text;
       await env.adapter.update_documents();
 
-      feature.handleDiagnostic({
+      feature.handleDiagnostic(null, {
         uri: env.document_options.path,
         diagnostics: diagnostics
       });
@@ -167,7 +167,7 @@ describe('Diagnostics', () => {
       let document = env.virtual_editor.virtual_document;
       let uri = env.virtual_editor.virtual_document.uri;
 
-      feature.handleDiagnostic({
+      feature.handleDiagnostic(null, {
         uri: uri,
         diagnostics: [
           {
@@ -285,7 +285,7 @@ describe('Diagnostics', () => {
       } as lsProtocol.PublishDiagnosticsParams;
 
       // test guards against wrongly propagated responses:
-      feature.handleDiagnostic(response);
+      feature.handleDiagnostic(null, response);
       let cm_editors = env.adapter.editors.map(
         ce_editor => (ce_editor as CodeMirrorEditor).editor
       );
@@ -297,7 +297,7 @@ describe('Diagnostics', () => {
       expect(marks_cell_2.length).to.equal(0);
 
       // correct propagation
-      foreign_feature.handleDiagnostic(response);
+      foreign_feature.handleDiagnostic(null, response);
 
       marks_cell_1 = cm_editors[0].getDoc().getAllMarks();
       marks_cell_2 = cm_editors[1].getDoc().getAllMarks();
@@ -314,7 +314,7 @@ describe('Diagnostics', () => {
       expect(is_equal(mark_position.to, { line: 2, ch: 1 })).to.be.true;
 
       // the silenced diagnostic for the %%python magic should be ignored
-      feature.handleDiagnostic({
+      feature.handleDiagnostic(null, {
         uri: document.uri,
         diagnostics: [
           {
