@@ -54,9 +54,15 @@ describe('Table of Contents', () => {
   });
 
   test('Open Property Inspector', async () => {
-    const imageName = 'property-inspector';
     await galata.sidebar.openTab('jp-property-inspector');
+
+    // wait for raw nbconvert format selector, since it is populated async
+    const rawNBConvertFormatLabel = 'Raw NBConvert Format';
+    const labelSelector = `//div[${galata.xpContainsClass('jp-NotebookTools-tool')}]/label[text()="${rawNBConvertFormatLabel}"]`;
+    await galata.context.page.waitForSelector(labelSelector);
+
     const piPanel = await galata.sidebar.getContentPanel('left');
+    const imageName = 'property-inspector';
     await galata.capture.screenshot(imageName, piPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
