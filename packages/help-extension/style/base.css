@@ -94,7 +94,7 @@
 .jp-Licenses-FormArea {
   display: flex;
   flex-direction: column;
-  min-width: calc(18 * var(--jp-ui-font-size1));
+  min-width: calc(10 * var(--jp-ui-font-size1));
   width: calc(18 * var(--jp-ui-font-size1));
 }
 
@@ -168,7 +168,7 @@
 
 /* license grid */
 .jp-Licenses-Grid.jp-RenderedHTMLCommon {
-  min-width: calc(var(--jp-ui-font-size1) * 32);
+  min-width: calc(var(--jp-ui-font-size1) * 10);
   display: flex;
   flex-direction: column;
   padding: 0;
@@ -220,7 +220,7 @@
 
 /* license text */
 .jp-Licenses-Text {
-  min-width: calc(18 * var(--jp-ui-font-size1));
+  min-width: calc(10 * var(--jp-ui-font-size1));
   padding: 0 0 0 var(--jp-ui-font-size1);
   display: flex;
   flex-direction: column;
