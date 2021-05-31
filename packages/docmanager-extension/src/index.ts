@@ -423,7 +423,6 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:open-browser-tab',
   autoStart: true,
   requires: [ITranslator, IDocumentManager],
-  optional: [],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
