@@ -104,6 +104,11 @@ export interface ICodeCellModel extends ICellModel {
   executionCount: nbformat.ExecutionCount;
 
   /**
+   * Whether the code cell has been edited since the last run.
+   */
+  isDirty: boolean;
+
+  /**
    * The cell outputs.
    */
   readonly outputs: IOutputAreaModel;
@@ -772,6 +777,25 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
+   * Handle a change to the observable value.
+   */
+  protected onGenericChange(): void {
+    if (
+      !this.isDirty &&
+      this._executedCode !== null &&
+      this._executedCode != this.value.text.trim()
+    ) {
+      this.isDirty = true;
+      this.stateChanged.emit({
+        name: 'isDirty',
+        oldValue: false,
+        newValue: true
+      });
+    }
+    this.contentChanged.emit(void 0);
+  }
+
+  /**
    * Handle a change to the output shared model and reflect it in modelDB.
    * We update the modeldb metadata when the nbcell changes.
    *
@@ -807,19 +831,30 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     args: ObservableValue.IChangedArgs
   ): void {
     const codeCell = this.sharedModel as models.YCodeCell;
+    const oldIsDirty = this.isDirty;
     this._modelDBMutex(() => {
       codeCell.execution_count = args.newValue
         ? (args.newValue as number)
         : null;
     });
+    this.isDirty = false;
+    this._executedCode = this.value.text.trim();
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({
       name: 'executionCount',
       oldValue: args.oldValue,
       newValue: args.newValue
     });
+
+    this.stateChanged.emit({
+      name: 'isDirty',
+      oldValue: oldIsDirty,
+      newValue: this.isDirty
+    });
   }
 
+  isDirty = false;
+  private _executedCode: string | null = null;
   private _outputs: IOutputAreaModel;
 }
 
