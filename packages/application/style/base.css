@@ -57,7 +57,7 @@ body {
 }
 
 .jp-LabShell[data-shell-mode='single-document'] #jp-top-panel {
-  border-bottom: none;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color3);
 }
 
 .jp-LabShell[data-shell-mode='single-document'] #jp-menu-panel {
