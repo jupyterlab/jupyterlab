@@ -910,10 +910,23 @@ export namespace NotebookTools {
           } else {
             cell.model.metadata.delete('celltool');
           }
+
+          /**
+           * Make the cell non-editable
+           */
           if( value === 'readOnly'){
             cell.model.metadata.set('editable', false);
           } else {
             cell.model.metadata.delete('editable');
+          }
+
+          /**
+           * Make the cell non-deletable
+           */
+           if( value === 'nonDeletable'){
+            cell.model.metadata.set('deletable', false);
+          } else {
+            cell.model.metadata.delete('deletable');
           }
         }
       };
