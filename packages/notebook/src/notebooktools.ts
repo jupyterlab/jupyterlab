@@ -880,8 +880,8 @@ export namespace NotebookTools {
       const trans = translator.load('jupyterlab');
       trans.__('');
       const options: KeySelector.IOptions = {
-        key: 'celltype',
-        title: trans.__('Cell Type'),
+        key: 'celltool',
+        title: trans.__('Cell Tool'),
         optionValueArray: [
           ['-', null],
           [trans.__('Read-Only'), 'readOnly'],
@@ -890,13 +890,13 @@ export namespace NotebookTools {
           [trans.__('Scrolled'), 'scrolled']
         ],
         getter: cell => {
-          const value = cell.model.metadata.get('celltype') as
+          const value = cell.model.metadata.get('celltool') as
             | ReadonlyPartialJSONObject
             | undefined;
           return value && value['cell_type'];
         },
         setter: (cell, value) => {
-          let data = cell.model.metadata.get('celltype') || Object.create(null);
+          let data = cell.model.metadata.get('celltool') || Object.create(null);
           if (value === null) {
             // Make a shallow copy so we aren't modifying the original metadata.
             data = { ...data };
@@ -905,9 +905,9 @@ export namespace NotebookTools {
             data = { ...data, cell_type: value };
           }
           if (Object.keys(data).length > 0) {
-            cell.model.metadata.set('celltype', data);
+            cell.model.metadata.set('celltool', data);
           } else {
-            cell.model.metadata.delete('celltype');
+            cell.model.metadata.delete('celltool');
           }
         }
       };
