@@ -901,13 +901,19 @@ export namespace NotebookTools {
             // Make a shallow copy so we aren't modifying the original metadata.
             data = { ...data };
             delete data.cell_type;
-          } else {
+          }
+          else {
             data = { ...data, cell_type: value };
           }
           if (Object.keys(data).length > 0) {
             cell.model.metadata.set('celltool', data);
           } else {
             cell.model.metadata.delete('celltool');
+          }
+          if( value === 'readOnly'){
+            cell.model.metadata.set('editable', false);
+          } else {
+            cell.model.metadata.delete('editable');
           }
         }
       };
