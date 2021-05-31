@@ -53,21 +53,8 @@ describe('Table of Contents', () => {
     expect(await galata.notebook.isActive(fileName)).toBeTruthy();
   });
 
-  test('Open Property Inspector', async () => {
-    await galata.sidebar.openTab('jp-property-inspector');
-
-    // wait for raw nbconvert format selector, since it is populated async
-    const rawNBConvertFormatLabel = 'Raw NBConvert Format';
-    const labelSelector = `//div[${galata.xpContainsClass('jp-NotebookTools-tool')}]/label[text()="${rawNBConvertFormatLabel}"]`;
-    await galata.context.page.waitForSelector(labelSelector);
-
-    const piPanel = await galata.sidebar.getContentPanel('left');
-    const imageName = 'property-inspector';
-    await galata.capture.screenshot(imageName, piPanel);
-    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
-  });
-
   test('Add tags', async () => {
+    await galata.sidebar.openTab('jp-property-inspector');
     const imageName = 'add-tags';
     const tagInputSelector = 'div.tag-holder input.add-tag';
     let piPanel = await galata.sidebar.getContentPanel('left');
@@ -79,7 +66,8 @@ describe('Table of Contents', () => {
     await addTagInput.click();
     await galata.context.page.keyboard.insertText('tag2');
     await galata.context.page.keyboard.press('Enter');
-    await galata.capture.screenshot(imageName, piPanel);
+    const cellTagsPanel = await piPanel.$('.jp-NotebookTools-tool.jp-TagTool');
+    await galata.capture.screenshot(imageName, cellTagsPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
