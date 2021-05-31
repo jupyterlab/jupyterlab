@@ -791,6 +791,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         oldValue: false,
         newValue: true
       });
+    } else if (this.isDirty && this._executedCode == this.value.text.trim()) {
+      this.isDirty = false;
+      this.stateChanged.emit({
+        name: 'isDirty',
+        oldValue: true,
+        newValue: false
+      });
     }
     this.contentChanged.emit(void 0);
   }
@@ -846,11 +853,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       newValue: args.newValue
     });
 
-    this.stateChanged.emit({
-      name: 'isDirty',
-      oldValue: oldIsDirty,
-      newValue: this.isDirty
-    });
+    if (oldIsDirty != this.isDirty) {
+      this.stateChanged.emit({
+        name: 'isDirty',
+        oldValue: oldIsDirty,
+        newValue: this.isDirty
+      });
+    }
   }
 
   isDirty = false;
