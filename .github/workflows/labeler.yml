@@ -9,5 +9,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/labeler@main
-      env:
+      with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
