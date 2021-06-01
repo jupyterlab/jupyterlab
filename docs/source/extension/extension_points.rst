@@ -479,6 +479,7 @@ To add a new menu with your extension command:
       "main": [
         {
           "id": "jp-mainmenu-myextension",
+          "label": "My Menu",
           "items": [
             {
               "command": "my-command",
