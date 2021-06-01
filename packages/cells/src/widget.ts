@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import marked from 'marked';
+
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { ISessionContext } from '@jupyterlab/apputils';
@@ -1439,20 +1441,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   get headingInfo(): { text: string; level: number } {
     let text = this.model.value.text;
-    const lines = text.split('\n');
-    const line = lines[0];
-    const line2 = lines.length > 1 ? lines[1] : undefined;
-
-    let match = line.match(/^([#]{1,6}) (.*)/);
-    let match2 = line2 && line2.match(/^([=]{2,}|[-]{2,})/);
-    let match3 = line.match(/<h([1-6])(.*)>(.*)<\/h\1>/i);
-
-    if (match) {
-      return { text: match[2], level: match[1].length };
-    } else if (match2) {
-      return { text: line, level: match2[1][0] === '=' ? 1 : 2 };
-    } else if (match3) {
-      return { text: match3[3], level: parseInt(match3[1], 10) };
+    const lines = marked.lexer(text);
+    let line: any;
+    for (line of lines) {
+      if (line.type === 'heading') {
+        return { text: line.text, level: line.depth };
+      } else if (line.type === 'html') {
+        return { text: line.raw, level: 1 };
+      }
     }
     return { text: '', level: -1 };
   }
@@ -1529,7 +1525,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
           ? 'var(--jp-icon-caret-right)'
           : 'var(--jp-icon-caret-down)'
       } no-repeat center`;
-      collapseButton.onclick = () => {
+      collapseButton.onclick = (event: Event) => {
         this.headingCollapsed = !this.headingCollapsed;
         this._toggleCollapsedSignal.emit(this._headingCollapsed);
       };
