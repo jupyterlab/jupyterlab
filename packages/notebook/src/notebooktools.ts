@@ -871,9 +871,9 @@ export namespace NotebookTools {
   }
 
    /**
-   * Create a cell-type selector.
+   * Create a cell-tool selector.
    */
-    export function createCellTypeSelector(
+    export function createCellToolSelector(
       translator?: ITranslator
     ): KeySelector {
       translator = translator || nullTranslator;
