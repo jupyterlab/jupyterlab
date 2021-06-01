@@ -923,10 +923,21 @@ export namespace NotebookTools {
           /**
            * Make the cell non-deletable
            */
-           if( value === 'nonDeletable'){
+          if( value === 'nonDeletable'){
             cell.model.metadata.set('deletable', false);
           } else {
             cell.model.metadata.delete('deletable');
+          }
+
+          /**
+           * Make the cell's input collapsed
+           */
+          if( value === 'collapsed'){
+            let jupyter = cell.model.metadata.get('jupyter') || Object.create(null);
+            jupyter = { ...jupyter, source_hidden: true};    
+            cell.model.metadata.set('jupyter', jupyter);
+          } else{
+            cell.model.metadata.delete('jupyter');
           }
         }
       };
