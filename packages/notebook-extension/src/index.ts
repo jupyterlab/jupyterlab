@@ -21,7 +21,7 @@ import {
   sessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import { CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -57,8 +57,13 @@ import {
   NotebookWidgetFactory,
   StaticNotebook,
   CommandEditStatus,
-  NotebookTrustStatus
+  NotebookTrustStatus,
+  Notebook
 } from '@jupyterlab/notebook';
+import {
+  IObservableList,
+  IObservableUndoableList
+} from '@jupyterlab/observables';
 
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
 
@@ -240,6 +245,12 @@ namespace CommandIDs {
   export const selectLastRunCell = 'notebook:select-last-run-cell';
 
   export const replaceSelection = 'notebook:replace-selection';
+
+  export const toggleCollapseCmd = 'Collapsible_Headings:Toggle_Collapse';
+
+  export const collapseAllCmd = 'Collapsible_Headings:Collapse_All';
+
+  export const expandAllCmd = 'Collapsible_Headings:Expand_All';
 }
 
 /**
@@ -1322,6 +1333,55 @@ function addCommands(
     return Private.isEnabledAndSingleSelected(shell, tracker);
   };
 
+  const refreshCellCollapsed = (notebook: Notebook): void => {
+    for (const cell of notebook.widgets) {
+      if (cell instanceof MarkdownCell && cell.headingCollapsed) {
+        NotebookActions.setHeadingCollapse(cell, true, notebook);
+        NotebookActions.expandParent(cell, notebook);
+      }
+    }
+  };
+
+  const isEnabledAndHeadingSelected = (): boolean => {
+    return Private.isEnabledAndHeadingSelected(shell, tracker);
+  };
+
+  // Set up collapse signal for each header cell in a notebook
+  tracker.currentChanged.connect(
+    (sender: INotebookTracker, panel: NotebookPanel) => {
+      panel.content.model?.cells.changed.connect(
+        (
+          list: IObservableUndoableList<ICellModel>,
+          args: IObservableList.IChangedArgs<ICellModel>
+        ) => {
+          const cell = panel.content.widgets[args.newIndex];
+          if (
+            cell instanceof MarkdownCell &&
+            (args.type === 'add' || args.type === 'set')
+          ) {
+            cell.toggleCollapsedSignal.connect(
+              (newCell: MarkdownCell, collapsing: boolean) => {
+                NotebookActions.setHeadingCollapse(
+                  newCell,
+                  collapsing,
+                  panel.content
+                );
+              }
+            );
+          }
+          // Might be overkill to refresh this every time, but
+          // it helps to keep the collapse state consistent.
+          refreshCellCollapsed(panel.content);
+        }
+      );
+      panel.content.activeCellChanged.connect(
+        (notebook: Notebook, cell: Cell) => {
+          NotebookActions.expandParent(cell, notebook);
+        }
+      );
+    }
+  );
+
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: trans.__('Run Selected Cells'),
     execute: args => {
@@ -2133,6 +2193,34 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.toggleCollapseCmd, {
+    label: 'Toggle Collapse Notebook Heading',
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        return NotebookActions.toggleCurrentHeadingCollapse(current.content);
+      }
+    },
+    isEnabled: isEnabledAndHeadingSelected
+  });
+  commands.addCommand(CommandIDs.collapseAllCmd, {
+    label: 'Collapse All Cells',
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        return NotebookActions.collapseAll(current.content);
+      }
+    }
+  });
+  commands.addCommand(CommandIDs.expandAllCmd, {
+    label: 'Expand All Headings',
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        return NotebookActions.expandAllHeadings(current.content);
+      }
+    }
+  });
 }
 
 /**
@@ -2165,7 +2253,10 @@ function populatePalette(
     CommandIDs.reconnectToKernel,
     CommandIDs.createConsole,
     CommandIDs.closeAndShutdown,
-    CommandIDs.trust
+    CommandIDs.trust,
+    CommandIDs.toggleCollapseCmd,
+    CommandIDs.collapseAllCmd,
+    CommandIDs.expandAllCmd
   ].forEach(command => {
     palette.addItem({ command, category });
   });
@@ -2535,6 +2626,31 @@ namespace Private {
     }
     const { content } = tracker.currentWidget!;
     const index = content.activeCellIndex;
+    // If there are selections that are not the active cell,
+    // this command is confusing, so disable it.
+    for (let i = 0; i < content.widgets.length; ++i) {
+      if (content.isSelected(content.widgets[i]) && i !== index) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Whether there is an notebook active, with a single selected cell.
+   */
+  export function isEnabledAndHeadingSelected(
+    shell: JupyterFrontEnd.IShell,
+    tracker: INotebookTracker
+  ): boolean {
+    if (!Private.isEnabled(shell, tracker)) {
+      return false;
+    }
+    const { content } = tracker.currentWidget!;
+    const index = content.activeCellIndex;
+    if (!(content.activeCell instanceof MarkdownCell)) {
+      return false;
+    }
     // If there are selections that are not the active cell,
     // this command is confusing, so disable it.
     for (let i = 0; i < content.widgets.length; ++i) {

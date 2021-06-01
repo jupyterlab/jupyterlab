@@ -49,6 +49,7 @@
     "@jupyterlab/mainmenu": "^3.1.0-alpha.10",
     "@jupyterlab/nbformat": "^3.1.0-alpha.10",
     "@jupyterlab/notebook": "^3.1.0-alpha.10",
+    "@jupyterlab/observables": "^4.1.0-alpha.10",
     "@jupyterlab/property-inspector": "^3.1.0-alpha.10",
     "@jupyterlab/rendermime": "^3.1.0-alpha.10",
     "@jupyterlab/services": "^6.1.0-alpha.10",
