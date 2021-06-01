@@ -583,7 +583,6 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
         }
       }
     });
-
     commands.addCommand(CommandIDs.runAllEnabled, {
       label: trans.__('Run All Enabled Commands Passed as Args'),
       execute: async (args) => {
@@ -604,7 +603,9 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
         }
       }
     }
-  });
+    });
+  }
+};
 
 /**
  * The default HTML sanitizer.
