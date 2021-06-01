@@ -558,7 +558,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0])
     )
 
-    # TODO: remove when oldest compatible jupyter_server contains license tooling
+    # TODO: remove when oldest compatible jupyterlab_server contains license tooling
     if LicensesApp is not None:
         subcommands.update(
             licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0])
