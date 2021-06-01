@@ -1447,7 +1447,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       if (line.type === 'heading') {
         return { text: line.text, level: line.depth };
       } else if (line.type === 'html') {
-        return { text: line.raw, level: 1 };
+        let match = line.raw.match(/<h([1-6])(.*?)>(.*?)<\/h\1>/);
+        if (match?.[3]) {
+          return { text: match[3], level: parseInt(match[1]) };
+        }
+        return { text: '', level: -1 };
       }
     }
     return { text: '', level: -1 };

@@ -1422,6 +1422,65 @@ export namespace NotebookActions {
     }
   }
 
+  function findNearestParentHeader(
+    cell: Cell,
+    notebook: Notebook
+  ): Cell | undefined {
+    const index = findIndex(
+      notebook.widgets,
+      (possibleCell: Cell, index: number) => {
+        return cell.model.id === possibleCell.model.id;
+      }
+    );
+    if (index === -1) {
+      return;
+    }
+    // Finds the nearest header above the given cell. If the cell is a header itself, it does not return itself;
+    // this can be checked directly by calling functions.
+    if (index >= notebook.widgets.length) {
+      return;
+    }
+    let childHeaderInfo = getHeadingInfo(notebook.widgets[index]);
+    for (let cellN = index - 1; cellN >= 0; cellN--) {
+      if (cellN < notebook.widgets.length) {
+        let hInfo = getHeadingInfo(notebook.widgets[cellN]);
+        if (
+          hInfo.isHeading &&
+          hInfo.headingLevel < childHeaderInfo.headingLevel
+        ) {
+          return notebook.widgets[cellN];
+        }
+      }
+    }
+    // else no parent header found.
+    return;
+  }
+
+  /**
+   * Finds the "parent" heading of the given cell and expands.
+   * Used for the case that a cell becomes active that is within a collapsed heading.
+   * @param cell - "Child" cell that has become the active cell
+   * @param notebook - The target notebook widget.
+   */
+  export function expandParent(cell: Cell, notebook: Notebook): void {
+    let nearestParentCell = findNearestParentHeader(cell, notebook);
+    if (!nearestParentCell) {
+      return;
+    }
+    if (
+      !getHeadingInfo(nearestParentCell).collapsed &&
+      !nearestParentCell.isHidden
+    ) {
+      return;
+    }
+    if (nearestParentCell.isHidden) {
+      expandParent(nearestParentCell, notebook);
+    }
+    if (getHeadingInfo(nearestParentCell).collapsed) {
+      setHeadingCollapse(nearestParentCell, false, notebook);
+    }
+  }
+
   /**
    * Set the given cell and ** all "child" cells **
    * to the given collapse / expand if cell is

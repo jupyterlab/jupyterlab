@@ -118,10 +118,11 @@
   display: none;
 }
 
-.jp-MarkdownHeadingCollapsed .jp-collapseHeadingButton {
-  display: initial;
-}
-
 .jp-MarkdownCell:hover .jp-collapseHeadingButton {
-  display: initial;
+  display: flex;
+  min-height: var(--jp-cell-collapser-min-height);
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
 }
