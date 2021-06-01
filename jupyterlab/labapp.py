@@ -17,7 +17,7 @@ from jupyter_server.utils import url_path_join as ujoin
 
 from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, slugify
 from nbclassic.shim import NBClassicConfigShimMixin
-from traitlets import Bool, Instance, Unicode, Enum, default
+from traitlets import Bool, Instance, Unicode, default
 
 from ._version import __version__
 from .commands import (
@@ -33,7 +33,7 @@ from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
 from .handlers.yjs_echo_ws import YJSEchoWS
 
-# TODO: remove when oldest compatible jupyter_server contains license tooling
+# TODO: remove when oldest compatible jupyterlab_server contains license tooling
 try:
     from jupyterlab_server import LicensesApp
 except ImportError:
@@ -610,7 +610,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
     expose_app_in_browser = Bool(False, config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab")
-    
+
     collaborative = Bool(False, config=True,
         help="Whether to enable collaborative mode.")
 
