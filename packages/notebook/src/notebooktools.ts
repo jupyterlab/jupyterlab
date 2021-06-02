@@ -887,7 +887,7 @@ export namespace NotebookTools {
           [trans.__('Read-Only'), 'readOnly'],
           [trans.__('Non-Deletable'), 'nonDeletable'],
           [trans.__('Collapsed'), 'collapsed'],
-          [trans.__('Scrolled'), 'scrolled']
+          [trans.__('Output-Scrolled'), 'outputScrolled']
         ],
         getter: cell => {
           const value = cell.model.metadata.get('celltool') as
@@ -938,6 +938,15 @@ export namespace NotebookTools {
             cell.model.metadata.set('jupyter', jupyter);
           } else{
             cell.model.metadata.delete('jupyter');
+          }
+
+          /**
+           * Make the cell scrollable
+           */
+           if( value === 'outputScrolled'){
+            cell.model.metadata.set('scrolled', true);
+          } else {
+            cell.model.metadata.delete('scrolled');
           }
         }
       };
