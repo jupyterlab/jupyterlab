@@ -319,7 +319,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
         }
         break;
       case 'disconnect':
-        this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
+        this._term.write('\r\n\r\n[Finished… Term Session]\r\n');
         break;
       default:
         break;

@@ -215,7 +215,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
         }
 
         dialog = new Dialog({
-          title: trans.__('Loading...'),
+          title: trans.__('Loading…'),
           body: trans.__(`The loading screen is taking a long time.
 Would you like to clear the workspace or keep waiting?`),
           buttons: [
