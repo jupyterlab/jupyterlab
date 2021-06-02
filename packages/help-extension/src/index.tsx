@@ -564,7 +564,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
         // add to tracker so it can be restored, and update when choices change
         void licensesTracker.add(licenseMain);
         licenseMain.content.model.trackerDataChanged.connect(() => {
-          licensesTracker.save(licenseMain);
+          void licensesTracker.save(licenseMain);
         });
         return licenseMain;
       }

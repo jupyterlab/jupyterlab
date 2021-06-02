@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import { Panel, SplitPanel, TabBar, Widget } from '@lumino/widgets';
 import { ReadonlyJSONObject, PromiseDelegate } from '@lumino/coreutils';
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { VirtualElement, h } from '@lumino/virtualdom';
 
@@ -24,6 +24,7 @@ import {
  */
 export class Licenses extends SplitPanel {
   readonly model: Licenses.Model;
+
   constructor(options: Licenses.IOptions) {
     super();
     this.addClass('jp-Licenses');
@@ -34,7 +35,7 @@ export class Licenses extends SplitPanel {
     this.initGrid();
     this.initLicenseText();
     this.setRelativeSizes([1, 2, 3]);
-    this.model.initLicenses().then(() => this._updateBundles());
+    void this.model.initLicenses().then(() => this._updateBundles());
     this.model.trackerDataChanged.connect(() => {
       this.title.label = this.model.title;
     });
@@ -43,7 +44,7 @@ export class Licenses extends SplitPanel {
   /**
    * Handle disposing of the widget
    */
-  dispose() {
+  dispose(): void {
     if (this.isDisposed) {
       return;
     }
@@ -55,7 +56,7 @@ export class Licenses extends SplitPanel {
   /**
    * Initialize the left area for filters and bundles
    */
-  protected initLeftPanel() {
+  protected initLeftPanel(): void {
     this._leftPanel = new Panel();
     this._leftPanel.addClass('jp-Licenses-FormArea');
     this.addWidget(this._leftPanel);
@@ -65,7 +66,7 @@ export class Licenses extends SplitPanel {
   /**
    * Initialize the filters
    */
-  protected initFilters() {
+  protected initFilters(): void {
     this._filters = new Licenses.Filters(this.model);
     SplitPanel.setStretch(this._filters, 1);
     this._leftPanel.addWidget(this._filters);
@@ -74,7 +75,7 @@ export class Licenses extends SplitPanel {
   /**
    * Initialize the listing of available bundles
    */
-  protected initBundles() {
+  protected initBundles(): void {
     this._bundles = new TabBar({
       orientation: 'vertical',
       renderer: new Licenses.BundleTabRenderer(this.model)
@@ -89,7 +90,7 @@ export class Licenses extends SplitPanel {
   /**
    * Initialize the listing of packages within the current bundle
    */
-  protected initGrid() {
+  protected initGrid(): void {
     this._grid = new Licenses.Grid(this.model);
     SplitPanel.setStretch(this._grid, 1);
     this.addWidget(this._grid);
@@ -98,7 +99,7 @@ export class Licenses extends SplitPanel {
   /**
    * Initialize the full text of the current package
    */
-  protected initLicenseText() {
+  protected initLicenseText(): void {
     this._licenseText = new Licenses.FullText(this.model);
     SplitPanel.setStretch(this._grid, 1);
     this.addWidget(this._licenseText);
@@ -107,7 +108,7 @@ export class Licenses extends SplitPanel {
   /**
    * Event handler for updating the model with the current bundle
    */
-  protected onBundleSelected() {
+  protected onBundleSelected(): void {
     if (this._bundles.currentTitle?.label) {
       this.model.currentBundleName = this._bundles.currentTitle.label;
     }
@@ -303,22 +304,26 @@ export namespace Licenses {
     /**
      * Handle the initial request for the licenses from the server.
      */
-    async initLicenses() {
-      const response = await ServerConnection.makeRequest(
-        this._licensesUrl,
-        {},
-        this._serverSettings
-      );
-      this._serverResponse = await response.json();
-      this._licensesReady.resolve();
-      this.stateChanged.emit(void 0);
+    async initLicenses(): Promise<void> {
+      try {
+        const response = await ServerConnection.makeRequest(
+          this._licensesUrl,
+          {},
+          this._serverSettings
+        );
+        this._serverResponse = await response.json();
+        this._licensesReady.resolve();
+        this.stateChanged.emit(void 0);
+      } catch (err) {
+        this._licensesReady.reject(err);
+      }
     }
 
     /**
      * Create a temporary download link, and emulate clicking it to trigger a named
      * file download.
      */
-    async download(options: IDownloadOptions) {
+    async download(options: IDownloadOptions): Promise<void> {
       const url = `${this._licensesUrl}?format=${options.format}&download=1`;
       const element = document.createElement('a');
       element.href = url;
@@ -332,7 +337,7 @@ export namespace Licenses {
     /**
      * A promise that resolves when the licenses from the server change
      */
-    get selectedPackageChanged() {
+    get selectedPackageChanged(): ISignal<Model, void> {
       return this._selectedPackageChanged;
     }
 
@@ -353,7 +358,7 @@ export namespace Licenses {
     /**
      * The current license bundle
      */
-    get currentBundleName() {
+    get currentBundleName(): string | null {
       if (this._currentBundleName) {
         return this._currentBundleName;
       }
@@ -382,16 +387,16 @@ export namespace Licenses {
     }
 
     /**
-     * All the license bundles
+     * All the license bundles, keyed by the distributing packages
      */
-    get bundles() {
+    get bundles(): null | { [key: string]: ILicenseBundle } {
       return this._serverResponse?.bundles || {};
     }
 
     /**
      * The index of the currently-selected package within its license bundle
      */
-    get currentPackageIndex() {
+    get currentPackageIndex(): number | null {
       return this._currentPackageIndex;
     }
 
@@ -411,7 +416,7 @@ export namespace Licenses {
     /**
      * The license data for the currently-selected package
      */
-    get currentPackage() {
+    get currentPackage(): IPackageLicenseInfo | null {
       if (
         this.currentBundleName &&
         this.bundles &&
@@ -428,11 +433,11 @@ export namespace Licenses {
     /**
      * A translation bundle
      */
-    get trans() {
+    get trans(): TranslationBundle {
       return this._trans;
     }
 
-    get title() {
+    get title(): string {
       return `${this._currentBundleName || ''} ${this._trans.__(
         'Licenses'
       )}`.trim();
@@ -441,11 +446,11 @@ export namespace Licenses {
     /**
      * The current package filter
      */
-    get packageFilter() {
+    get packageFilter(): Partial<IPackageLicenseInfo> {
       return this._packageFilter;
     }
 
-    set packageFilter(packageFilter) {
+    set packageFilter(packageFilter: Partial<IPackageLicenseInfo>) {
       this._packageFilter = packageFilter;
       this.stateChanged.emit(void 0);
       this.trackerDataChanged.emit(void 0);
@@ -455,7 +460,7 @@ export namespace Licenses {
      * Get filtered packages from current bundle where at least one token of each
      * key is present.
      */
-    getFilteredPackages(allRows: IPackageLicenseInfo[]) {
+    getFilteredPackages(allRows: IPackageLicenseInfo[]): IPackageLicenseInfo[] {
       let rows: IPackageLicenseInfo[] = [];
       let filters: [string, string[]][] = Object.entries(this._packageFilter)
         .filter(([k, v]) => v && `${v}`.trim().length)
@@ -503,7 +508,7 @@ export namespace Licenses {
       this.addClass('jp-RenderedHTMLCommon');
     }
 
-    protected render() {
+    protected render(): JSX.Element {
       const { trans } = this.model;
       return (
         <div>
@@ -534,7 +539,7 @@ export namespace Licenses {
     /**
      * Render a filter input
      */
-    protected renderFilter = (key: TFilterKey) => {
+    protected renderFilter = (key: TFilterKey): JSX.Element => {
       const value = this.model.packageFilter[key] || '';
       return (
         <input
@@ -550,7 +555,9 @@ export namespace Licenses {
     /**
      * Handle a filter input changing
      */
-    protected onFilterInput = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    protected onFilterInput = (
+      evt: React.ChangeEvent<HTMLInputElement>
+    ): void => {
       const input = evt.currentTarget;
       const { name, value } = input;
       this.model.packageFilter = { ...this.model.packageFilter, [name]: value };
@@ -653,7 +660,7 @@ export namespace Licenses {
     protected renderRow = (
       row: Licenses.IPackageLicenseInfo,
       index: number
-    ) => {
+    ): JSX.Element => {
       const selected = index === this.model.currentPackageIndex;
       const onCheck = () => (this.model.currentPackageIndex = index);
       return (
@@ -697,7 +704,7 @@ export namespace Licenses {
     /**
      * Render the license text, or a null state if no package is selected
      */
-    protected render() {
+    protected render(): JSX.Element[] {
       const { currentPackage, trans } = this.model;
       let head = '';
       let quote = trans.__('No Package selected');
@@ -711,11 +718,11 @@ export namespace Licenses {
         code = extractedText || trans.__('No License Text found');
       }
       return [
-        <h1>{head}</h1>,
-        <blockquote>
+        <h1 key="h1">{head}</h1>,
+        <blockquote key="quote">
           <em>{quote}</em>
         </blockquote>,
-        <code>{code}</code>
+        <code key="code">{code}</code>
       ];
     }
   }
