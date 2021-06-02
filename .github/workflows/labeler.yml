@@ -1,19 +1,16 @@
-name: Pull Request Labeler
-# This workflow is supposed to run every 5 minutes
+# https://github.com/marketplace/actions/labeler
+name: "Pull Request Labeler"
 on:
-  schedule:
-    - cron: '*/20 * * * *'
+- pull_request_target
+
 permissions:
-  pull-requests:
-    write
+  pull-requests: write
+
 jobs:
   triage:
     name: Update PR Labels
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - if: github.repository == 'jupyterlab/jupyterlab'
-        uses: paulfantom/periodic-labeler@dffbc90404f371f76444a69221c2f7ad079e2319
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          LABEL_MAPPINGS_FILE: .github/labeler.yml
+    - uses: actions/labeler@main
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"

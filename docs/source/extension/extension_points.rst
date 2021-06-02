@@ -146,12 +146,12 @@ Here is a sample block of code that adds a command to the application (given by 
 .. code:: typescript
 
     const commandID = 'my-command';
-    const toggled = false;
+    let toggled = false;
 
     app.commands.addCommand(commandID, {
       label: 'My Cool Command',
-      isEnabled: true,
-      isVisible: true,
+      isEnabled: () => true,
+      isVisible: () => true,
       isToggled: () => toggled,
       iconClass: 'some-css-icon-class',
       execute: () => {

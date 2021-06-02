@@ -43,6 +43,9 @@
       "path": "../notebook"
     },
     {
+      "path": "../observables"
+    },
+    {
       "path": "../property-inspector"
     },
     {

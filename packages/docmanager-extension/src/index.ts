@@ -411,13 +411,59 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin providing open-browser-tab commands.
+ *
+ * This is its own plugin in case you would like to disable this feature.
+ * e.g. jupyter labextension disable @jupyterlab/docmanager-extension:open-browser-tab
+ *
+ * Note: If disabling this, you may also want to disable:
+ * @jupyterlab/filebrowser-extension:open-browser-tab
+ */
+export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/docmanager-extension:open-browser-tab',
+  autoStart: true,
+  requires: [ITranslator, IDocumentManager],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    docManager: IDocumentManager
+  ) => {
+    const trans = translator.load('jupyterlab');
+    const { commands } = app;
+    commands.addCommand(CommandIDs.openBrowserTab, {
+      execute: args => {
+        const path =
+          typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
+
+        if (!path) {
+          return;
+        }
+
+        return docManager.services.contents.getDownloadUrl(path).then(url => {
+          const opened = window.open();
+          if (opened) {
+            opened.opener = null;
+            opened.location.href = url;
+          } else {
+            throw new Error('Failed to open new browser tab.');
+          }
+        });
+      },
+      icon: args => (args['icon'] as string) || '',
+      label: () => trans.__('Open in New Browser Tab')
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   docManagerPlugin,
   pathStatusPlugin,
   savingStatusPlugin,
-  downloadPlugin
+  downloadPlugin,
+  openBrowserTabPlugin
 ];
 export default plugins;
 
@@ -540,29 +586,6 @@ function addCommands(
     icon: args => (args['icon'] as string) || '',
     label: args => (args['label'] || args['factory']) as string,
     mnemonic: args => (args['mnemonic'] as number) || -1
-  });
-
-  commands.addCommand(CommandIDs.openBrowserTab, {
-    execute: args => {
-      const path =
-        typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
-
-      if (!path) {
-        return;
-      }
-
-      return docManager.services.contents.getDownloadUrl(path).then(url => {
-        const opened = window.open();
-        if (opened) {
-          opened.opener = null;
-          opened.location.href = url;
-        } else {
-          throw new Error('Failed to open new browser tab.');
-        }
-      });
-    },
-    icon: args => (args['icon'] as string) || '',
-    label: () => trans.__('Open in New Browser Tab')
   });
 
   commands.addCommand(CommandIDs.reload, {
