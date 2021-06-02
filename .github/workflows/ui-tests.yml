@@ -74,7 +74,7 @@ jobs:
     - name: Run UI Tests
       run: |
         cd ui-tests
-        jlpm run test
+        jlpm run test:create-references
         rm -rf jlab_root
 
     - name: Upload UI Test artifacts
