@@ -101,7 +101,8 @@
 |----------------------------------------------------------------------------*/
 
 .jp-FileDialog.jp-mod-conflict input {
-  color: red;
+  /*color: red;*/
+  color: var(--jp-error-color1);
 }
 
 .jp-FileDialog .jp-new-name-title {
@@ -219,9 +220,7 @@
 }
 
 .jp-DirListing-item.jp-mod-selected {
-  /*color: white;*/
-  color: var(--jp-inverse-font-color1);
-  /*color: fuchsia;*/
+  color: var(--jp-ui-inverse-font-color1);
   background: var(--jp-brand-color1);
 }
 
@@ -231,7 +230,6 @@
 
 .jp-DirListing-item:hover:not(.jp-mod-selected) {
   background: var(--jp-layout-color2);
-  /*background: var(--jp-warn-color2);*/
 }
 
 .jp-DirListing-itemIcon {
@@ -259,8 +257,7 @@
 }
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon:before {
-  color: limegreen;
-  /*color:fuchsia;*/
+  color: var(--jp-success-color1);
   content: '\25CF';
   font-size: 8px;
   position: absolute;
