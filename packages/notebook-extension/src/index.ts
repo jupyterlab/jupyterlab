@@ -1065,28 +1065,34 @@ function activateNotebookHandler(
         updateConfig(settings);
       });
       commands.addCommand(CommandIDs.autoClosingBrackets, {
-        execute: () => {
-          let codeConfig = settings.get('codeCellConfig')
+        execute: args => {
+          const codeConfig = settings.get('codeCellConfig')
             .composite as JSONObject;
-          let markdownConfig = settings.get('markdownCellConfig')
+          const markdownConfig = settings.get('markdownCellConfig')
             .composite as JSONObject;
-          let rawConfig = settings.get('rawCellConfig').composite as JSONObject;
+          const rawConfig = settings.get('rawCellConfig')
+            .composite as JSONObject;
 
-          const state = !codeConfig.autoClosingBrackets;
+          const anyToggled =
+            codeConfig.autoClosingBrackets ||
+            markdownConfig.autoClosingBrackets ||
+            rawConfig.autoClosingBrackets;
+          const toggled = !!(args['force'] ?? !anyToggled);
           [
             codeConfig.autoClosingBrackets,
             markdownConfig.autoClosingBrackets,
             rawConfig.autoClosingBrackets
-          ] = [state, state, state];
+          ] = [toggled, toggled, toggled];
 
           void settings.set('codeCellConfig', codeConfig);
           void settings.set('markdownCellConfig', markdownConfig);
           void settings.set('rawCellConfig', rawConfig);
         },
-        label: trans.__('Auto Close Brackets for All Cell Types'),
+        label: trans.__('Auto Close Brackets for All Notebook Cell Types'),
         isToggled: () =>
-          (settings.get('codeCellConfig').composite as JSONObject)
-            .autoClosingBrackets as boolean
+          ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
+            x => (settings.get(x).composite as JSONObject).autoClosingBrackets
+          )
       });
     })
     .catch((reason: Error) => {

@@ -60,6 +60,8 @@ import {
 import { Menu } from '@lumino/widgets';
 import { TranslationBundle } from '@jupyterlab/translation';
 
+const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
+
 /**
  * The command IDs used by the fileeditor plugin.
  */
@@ -79,6 +81,9 @@ export namespace CommandIDs {
   export const matchBrackets = 'fileeditor:toggle-match-brackets';
 
   export const autoClosingBrackets = 'fileeditor:toggle-autoclosing-brackets';
+
+  export const autoClosingBracketsUniversal =
+    'fileeditor:toggle-autoclosing-brackets-universal';
 
   export const createConsole = 'fileeditor:create-console';
 
@@ -403,8 +408,10 @@ export namespace Commands {
     id: string
   ): void {
     commands.addCommand(CommandIDs.autoClosingBrackets, {
-      execute: () => {
-        config.autoClosingBrackets = !config.autoClosingBrackets;
+      execute: args => {
+        config.autoClosingBrackets = !!(
+          args['force'] ?? !config.autoClosingBrackets
+        );
         return settingRegistry
           .set(id, 'editorConfig', (config as unknown) as JSONObject)
           .catch((reason: Error) => {
@@ -413,6 +420,31 @@ export namespace Commands {
       },
       label: trans.__('Auto Close Brackets for Text Editor'),
       isToggled: () => config.autoClosingBrackets
+    });
+
+    commands.addCommand(CommandIDs.autoClosingBracketsUniversal, {
+      execute: () => {
+        const anyToggled =
+          commands.isToggled(CommandIDs.autoClosingBrackets) ||
+          commands.isToggled(autoClosingBracketsNotebook);
+        // if any auto closing brackets options is toggled, toggle both off
+        if (anyToggled) {
+          void commands.execute(CommandIDs.autoClosingBrackets, {
+            force: false
+          });
+          void commands.execute(autoClosingBracketsNotebook, { force: false });
+        } else {
+          // both are off, turn them on
+          void commands.execute(CommandIDs.autoClosingBrackets, {
+            force: true
+          });
+          void commands.execute(autoClosingBracketsNotebook, { force: true });
+        }
+      },
+      label: trans.__('Auto Close Brackets'),
+      isToggled: () =>
+        commands.isToggled(CommandIDs.autoClosingBrackets) ||
+        commands.isToggled(autoClosingBracketsNotebook)
     });
   }
 
@@ -1180,7 +1212,7 @@ export namespace Commands {
           args: { name: trans.__('Decrease Text Editor Font Size'), delta: -1 }
         },
         { type: 'submenu', submenu: tabMenu },
-        { command: CommandIDs.autoClosingBrackets }
+        { command: CommandIDs.autoClosingBracketsUniversal }
       ],
       30
     );
