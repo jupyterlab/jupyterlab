@@ -50,7 +50,6 @@ jobs:
         GROUP: ${{ matrix.group }}
       run: |
         bash ./scripts/ci_install.sh
-        pip install ipywidgets
         jlpm
         jlpm build
         jupyter lab build

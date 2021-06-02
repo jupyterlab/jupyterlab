@@ -55,7 +55,7 @@ describe('Notebook Run', () => {
     let numNBImages = 0;
 
     const getCaptureImageName = (id: number): string => {
-      return `cell-${id}`;
+      return `page-${id}`;
     };
 
     await galata.notebook.runCellByCell({
