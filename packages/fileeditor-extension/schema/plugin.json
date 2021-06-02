@@ -65,7 +65,7 @@
       "description": "The configuration for all text editors.\nIf `fontFamily`, `fontSize` or `lineHeight` are `null`,\nvalues from current theme are used.",
       "$ref": "#/definitions/editorConfig",
       "default": {
-        "autoClosingBrackets": true,
+        "autoClosingBrackets": false,
         "codeFolding": false,
         "fontFamily": null,
         "fontSize": null,

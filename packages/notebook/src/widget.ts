@@ -744,7 +744,7 @@ export namespace StaticNotebook {
       ...CodeEditor.defaultConfig,
       lineWrap: 'off',
       matchBrackets: true,
-      autoClosingBrackets: true
+      autoClosingBrackets: false
     },
     markdown: {
       ...CodeEditor.defaultConfig,

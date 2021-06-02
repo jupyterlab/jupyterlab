@@ -807,7 +807,7 @@ export namespace CodeEditor {
     tabSize: 4,
     insertSpaces: true,
     matchBrackets: true,
-    autoClosingBrackets: true,
+    autoClosingBrackets: false,
     handlePaste: true,
     rulers: [],
     codeFolding: false
