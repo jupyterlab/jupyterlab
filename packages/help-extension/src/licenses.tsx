@@ -344,7 +344,7 @@ export namespace Licenses {
     /**
      * A promise that resolves when the trackable data changes
      */
-    get trackerDataChanged() {
+    get trackerDataChanged(): ISignal<Model, void> {
       return this._trackerDataChanged;
     }
 
@@ -375,7 +375,7 @@ export namespace Licenses {
       if (this._currentBundleName !== currentBundleName) {
         this._currentBundleName = currentBundleName;
         this.stateChanged.emit(void 0);
-        this.trackerDataChanged.emit(void 0);
+        this._trackerDataChanged.emit(void 0);
       }
     }
 
@@ -410,7 +410,7 @@ export namespace Licenses {
       this._currentPackageIndex = currentPackageIndex;
       this._selectedPackageChanged.emit(void 0);
       this.stateChanged.emit(void 0);
-      this.trackerDataChanged.emit(void 0);
+      this._trackerDataChanged.emit(void 0);
     }
 
     /**
@@ -453,7 +453,7 @@ export namespace Licenses {
     set packageFilter(packageFilter: Partial<IPackageLicenseInfo>) {
       this._packageFilter = packageFilter;
       this.stateChanged.emit(void 0);
-      this.trackerDataChanged.emit(void 0);
+      this._trackerDataChanged.emit(void 0);
     }
 
     /**
