@@ -269,7 +269,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     topHandler.panel.id = 'jp-top-panel';
     bottomPanel.id = 'jp-bottom-panel';
     hboxPanel.id = 'jp-main-content-panel';
-    vsplitPanel.id = 'jp-main-down-panel';
+    vsplitPanel.id = 'jp-main-vsplit-panel';
     dockPanel.id = 'jp-main-dock-panel';
     hsplitPanel.id = 'jp-main-split-panel';
     downPanel.id = 'jp-down-stack';
@@ -303,7 +303,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     dockPanel.node.setAttribute('role', 'main');
 
     hboxPanel.spacing = 0;
-    vsplitPanel.spacing = 5;
+    vsplitPanel.spacing = 1;
     dockPanel.spacing = 5;
     hsplitPanel.spacing = 1;
 
@@ -316,22 +316,23 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     SplitPanel.setStretch(leftHandler.stackedPanel, 0);
     SplitPanel.setStretch(downPanel, 0);
     SplitPanel.setStretch(dockPanel, 1);
-    SplitPanel.setStretch(vsplitPanel, 1);
     SplitPanel.setStretch(rightHandler.stackedPanel, 0);
 
     BoxPanel.setStretch(leftHandler.sideBar, 0);
     BoxPanel.setStretch(hsplitPanel, 1);
     BoxPanel.setStretch(rightHandler.sideBar, 0);
 
-    vsplitPanel.addWidget(dockPanel);
-    vsplitPanel.addWidget(downPanel);
+    SplitPanel.setStretch(vsplitPanel, 1);
 
     hsplitPanel.addWidget(leftHandler.stackedPanel);
-    hsplitPanel.addWidget(vsplitPanel);
+    hsplitPanel.addWidget(dockPanel);
     hsplitPanel.addWidget(rightHandler.stackedPanel);
 
+    vsplitPanel.addWidget(hsplitPanel);
+    vsplitPanel.addWidget(downPanel);
+
     hboxPanel.addWidget(leftHandler.sideBar);
-    hboxPanel.addWidget(hsplitPanel);
+    hboxPanel.addWidget(vsplitPanel);
     hboxPanel.addWidget(rightHandler.sideBar);
 
     rootLayout.direction = 'top-to-bottom';
