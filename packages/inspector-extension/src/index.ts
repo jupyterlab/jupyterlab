@@ -82,7 +82,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector.content.source = source;
       }
       if (!inspector.isAttached) {
-        shell.add(inspector, 'down', { activate: false });
+        shell.add(inspector, 'main', { activate: false });
       }
       shell.activateById(inspector.id);
       return inspector;
