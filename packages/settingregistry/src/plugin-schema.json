@@ -57,7 +57,23 @@
           "default": false
         },
         "id": {
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "jp-menu-file",
+                "jp-menu-file-new",
+                "jp-menu-edit",
+                "jp-menu-help",
+                "jp-menu-kernel",
+                "jp-menu-run",
+                "jp-menu-settings",
+                "jp-menu-view",
+                "jp-menu-tabs"
+              ]
+            },
+            { "type": "string", "pattern": "[a-z][a-z0-9\\-_]+" }
+          ]
         },
         "items": {
           "type": "array",
@@ -69,7 +85,8 @@
           "type": "string"
         },
         "rank": {
-          "type": "number"
+          "type": "number",
+          "minimum": 0
         }
       },
       "required": ["id"],
@@ -93,7 +110,8 @@
           "default": "command"
         },
         "rank": {
-          "type": "number"
+          "type": "number",
+          "minimum": 0
         },
         "submenu": {
           "oneOf": [

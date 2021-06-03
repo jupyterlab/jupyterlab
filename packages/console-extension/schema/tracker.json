@@ -15,7 +15,7 @@
               "items": [
                 {
                   "command": "console:create",
-                  "rank": 0
+                  "rank": 1
                 }
               ]
             }

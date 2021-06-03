@@ -457,7 +457,7 @@ The recommended ranges for this rank are:
 Main Menu
 ---------
 
-There are two ways to extend  JupyterLab's main menu.
+There are two ways to extend JupyterLab's main menu.
 
 1. Using the settings - this is the preferred way as they are configurable by the user.
 2. Using the API - this is for advanced cases like dynamic menu or semantic items.
@@ -535,84 +535,15 @@ The default main menu is defined in the ``mainmenu-extension`` package settings.
 
 A menu must respect the following schema:
 
-.. code:: json
-
-    "menu": {
-      "properties": {
-        "disabled": {
-          "description": "Whether the menu is disabled or not",
-          "type": "boolean",
-          "default": false
-        },
-        "id": {
-          "description": "Menu unique id",
-          "type": "string"
-        },
-        "items": {
-          "description": "Menu items",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/menuItem"
-          }
-        },
-        "label": {
-          "description": "Menu label",
-          "type": "string"
-        },
-        "rank": {
-          "description": "Menu rank",
-          "type": "number"
-        }
-      },
-      "required": ["id"],
-      "additionalProperties": false,
-      "type": "object"
-    }
+.. literalinclude:: ../snippets/packages/mainmenu-extension/schema/plugin.json
+   :language: json
+   :lines: 315-345
 
 And an item must follow:
 
-.. code:: json
-
-    "menuItem": {
-      "properties": {
-        "args": {
-          "description": "Command arguments",
-          "type": "object"
-        },
-        "command": {
-          "description": "Command id",
-          "type": "string"
-        },
-        "disabled": {
-          "description": "Whether the item is disabled or not",
-          "type": "boolean",
-          "default": false
-        },
-        "type": {
-          "description": "Item type",
-          "type": "string",
-          "enum": ["command", "submenu", "separator"],
-          "default": "command"
-        },
-        "rank": {
-          "description": "Item rank",
-          "type": "number"
-        },
-        "submenu": {
-          "description": "Submenu definition",
-          "oneOf": [
-            {
-              "$ref": "#/definitions/menu"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    }
+.. literalinclude:: ../snippets/packages/mainmenu-extension/schema/plugin.json
+   :language: json
+   :lines: 346-385
 
 Menus added to the settings system will be editable by users using the ``mainmenu-extension``
 settings. In particular, they can be disabled at the item or the menu level by setting the 

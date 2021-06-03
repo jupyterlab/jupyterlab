@@ -174,17 +174,27 @@ export namespace ISettingRegistry {
     | 'string';
 
   /**
+   * The menu ids defined by default.
+   */
+  export type DefaultMenuId =
+    | 'jp-menu-file'
+    | 'jp-menu-file-new'
+    | 'jp-menu-edit'
+    | 'jp-menu-help'
+    | 'jp-menu-kernel'
+    | 'jp-menu-run'
+    | 'jp-menu-settings'
+    | 'jp-menu-view'
+    | 'jp-menu-tabs';
+
+  /**
    * Menu defined by a specific plugin
    */
   export interface IMenu extends PartialJSONObject {
     /**
      * Unique menu identifier
-     *
-     * #### Notes
-     * Standard menu ids are: jp-menu-file, jp-menu-edit, jp-menu-help, jp-menu-kernel,
-     * jp-menu-run, jp-menu-settings, jp-menu-view, jp-menu-tabs
      */
-    id: string;
+    id: DefaultMenuId | string;
 
     /**
      * Menu items
@@ -248,7 +258,7 @@ export namespace ISettingRegistry {
     submenu?: IMenu | null;
 
     /**
-     * Whether a menu item is disabled. `False` by default.
+     * Whether a menu item is disabled. `false` by default.
      *
      * #### Notes
      * This allows an user to suppress menu items.
