@@ -508,7 +508,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
     });
 
     /**
-     * Return a full report format based on a format name
+     * Return a full license report format based on a format name
      */
     function formatOrDefault(format: string): Licenses.IReportFormat {
       return (
@@ -518,10 +518,15 @@ const licenses: JupyterFrontEndPlugin<void> = {
     }
 
     /**
-     * Create a MainAreaWidget for a toolbar item
+     * Create a MainAreaWidget for a license viewer
      */
     function createLicenseWidget(args: Licenses.ICreateArgs) {
-      const licensesModel = new Licenses.Model({ licensesUrl, trans, ...args });
+      const licensesModel = new Licenses.Model({
+        ...args,
+        licensesUrl,
+        trans,
+        serverSettings: app.serviceManager.serverSettings
+      });
       const content = new Licenses({ model: licensesModel });
       content.id = `${licensesNamespace}-${++counter}`;
       content.title.label = licensesText;
