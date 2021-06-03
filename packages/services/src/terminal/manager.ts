@@ -20,6 +20,11 @@ import {
 import { TerminalConnection } from './default';
 
 /**
+ * Utility type equivalenet to T with K optional.
+ */
+type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+/**
  * A terminal session manager.
  */
 export class TerminalManager extends BaseManager implements Terminal.IManager {
@@ -123,11 +128,15 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    * The manager `serverSettings` will be used.
    */
   connectTo(
-    options: Omit<Terminal.ITerminalConnection.IOptions, 'serverSettings'>
+    options: Optional<Terminal.ITerminalConnection.IOptions, 'serverSettings'>
   ): Terminal.ITerminalConnection {
+    const serverSettings =
+      options.serverSettings != null
+        ? options.serverSettings
+        : this.serverSettings;
     const terminalConnection = new TerminalConnection({
       ...options,
-      serverSettings: this.serverSettings
+      serverSettings
     });
     this._onStarted(terminalConnection);
     if (!this._names.includes(options.model.name)) {
@@ -172,10 +181,12 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    * The manager `serverSettings` will be used unless overridden in the
    * options.
    */
-  async startNew(): Promise<Terminal.ITerminalConnection> {
-    const model = await startNew(this.serverSettings);
+  async startNew(
+    serverSettings: ServerConnection.ISettings = this.serverSettings
+  ): Promise<Terminal.ITerminalConnection> {
+    const model = await startNew(serverSettings);
     await this.refreshRunning();
-    return this.connectTo({ model });
+    return this.connectTo({ model, serverSettings });
   }
 
   /**

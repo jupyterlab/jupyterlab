@@ -152,9 +152,7 @@ export interface IManager extends IBaseManager {
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  startNew(
-    options?: ITerminalConnection.IOptions
-  ): Promise<ITerminalConnection>;
+  startNew(options?: ServerConnection.ISettings): Promise<ITerminalConnection>;
 
   /*
    * Connect to a running session.
@@ -163,9 +161,7 @@ export interface IManager extends IBaseManager {
    *
    * @returns A promise that resolves with the new session instance.
    */
-  connectTo(
-    options: Omit<ITerminalConnection.IOptions, 'serverSettings'>
-  ): ITerminalConnection;
+  connectTo(options: ITerminalConnection.IOptions): ITerminalConnection;
 
   /**
    * Shut down a terminal session by name.
