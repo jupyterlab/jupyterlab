@@ -64,7 +64,7 @@ const CSS_CLASS = 'jp-HTMLViewer';
  * since it can execute Javascript, and make same-origin requests
  * to the server, thereby executing arbitrary Javascript.
  *
- * Here, we sandbox the iframe so that it can't execute Javsacript
+ * Here, we sandbox the iframe so that it can't execute Javascript
  * or launch any popups. We allow one exception: 'allow-same-origin'
  * requests, so that local HTML documents can access CSS, images,
  * etc from the files system.
