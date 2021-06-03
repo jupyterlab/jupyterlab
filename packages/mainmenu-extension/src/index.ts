@@ -22,16 +22,16 @@ import {
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import {
-  EditMenu,
-  FileMenu,
+  IEditMenu,
+  IFileMenu,
+  IKernelMenu,
   IMainMenu,
   IMenuExtender,
+  IRunMenu,
+  ITabsMenu,
+  IViewMenu,
   JupyterLabMenu,
-  KernelMenu,
   MainMenu,
-  RunMenu,
-  TabsMenu,
-  ViewMenu
 } from '@jupyterlab/mainmenu';
 
 import { ServerConnection } from '@jupyterlab/services';
@@ -258,10 +258,10 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
  */
 export function createEditMenu(
   app: JupyterFrontEnd,
-  menu: EditMenu,
+  menu: IEditMenu,
   trans: TranslationBundle
 ): void {
-  const commands = menu.commands;
+  const commands = app.commands;
 
   // Add the undo/redo commands the the Edit menu.
   commands.addCommand(CommandIDs.undo, {
@@ -325,11 +325,11 @@ export function createEditMenu(
  */
 export function createFileMenu(
   app: JupyterFrontEnd,
-  menu: FileMenu,
+  menu: IFileMenu,
   router: IRouter,
   trans: TranslationBundle
 ): void {
-  const commands = menu.commands;
+  const commands = app.commands;
 
   // Add a delegator command for closing and cleaning up an activity.
   // This one is a bit different, in that we consider it enabled
@@ -453,10 +453,10 @@ export function createFileMenu(
  */
 export function createKernelMenu(
   app: JupyterFrontEnd,
-  menu: KernelMenu,
+  menu: IKernelMenu,
   trans: TranslationBundle
 ): void {
-  const commands = menu.commands;
+  const commands = app.commands;
 
   commands.addCommand(CommandIDs.interruptKernel, {
     label: trans.__('Interrupt Kernel'),
@@ -552,10 +552,10 @@ export function createKernelMenu(
  */
 export function createViewMenu(
   app: JupyterFrontEnd,
-  menu: ViewMenu,
+  menu: IViewMenu,
   trans: TranslationBundle
 ): void {
-  const commands = menu.commands;
+  const commands = app.commands;
 
   commands.addCommand(CommandIDs.lineNumbering, {
     label: trans.__('Show Line Numbers'),
@@ -616,10 +616,10 @@ export function createViewMenu(
  */
 export function createRunMenu(
   app: JupyterFrontEnd,
-  menu: RunMenu,
+  menu: IRunMenu,
   trans: TranslationBundle
 ): void {
-  const commands = menu.commands;
+  const commands = app.commands;
 
   commands.addCommand(CommandIDs.run, {
     label: () => {
@@ -686,7 +686,7 @@ export function createRunMenu(
  */
 export function createTabsMenu(
   app: JupyterFrontEnd,
-  menu: TabsMenu,
+  menu: ITabsMenu,
   labShell: ILabShell | null,
   trans: TranslationBundle
 ): void {
