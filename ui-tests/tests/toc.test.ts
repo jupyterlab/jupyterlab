@@ -53,15 +53,8 @@ describe('Table of Contents', () => {
     expect(await galata.notebook.isActive(fileName)).toBeTruthy();
   });
 
-  test('Open Property Inspector', async () => {
-    const imageName = 'property-inspector';
-    await galata.sidebar.openTab('jp-property-inspector');
-    const piPanel = await galata.sidebar.getContentPanel('left');
-    await galata.capture.screenshot(imageName, piPanel);
-    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
-  });
-
   test('Add tags', async () => {
+    await galata.sidebar.openTab('jp-property-inspector');
     const imageName = 'add-tags';
     const tagInputSelector = 'div.tag-holder input.add-tag';
     let piPanel = await galata.sidebar.getContentPanel('left');
@@ -73,7 +66,8 @@ describe('Table of Contents', () => {
     await addTagInput.click();
     await galata.context.page.keyboard.insertText('tag2');
     await galata.context.page.keyboard.press('Enter');
-    await galata.capture.screenshot(imageName, piPanel);
+    const cellTagsPanel = await piPanel.$('.jp-NotebookTools-tool.jp-TagTool');
+    await galata.capture.screenshot(imageName, cellTagsPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
