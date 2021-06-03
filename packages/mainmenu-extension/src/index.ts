@@ -31,7 +31,7 @@ import {
   ITabsMenu,
   IViewMenu,
   JupyterLabMenu,
-  MainMenu,
+  MainMenu
 } from '@jupyterlab/mainmenu';
 
 import { ServerConnection } from '@jupyterlab/services';
