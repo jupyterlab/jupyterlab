@@ -285,6 +285,7 @@
       "@jupyterlab/statedb",
       "@jupyterlab/statusbar",
       "@jupyterlab/terminal",
+      "@jupyterlab/toc",
       "@jupyterlab/tooltip",
       "@jupyterlab/translation",
       "@jupyterlab/ui-components",
