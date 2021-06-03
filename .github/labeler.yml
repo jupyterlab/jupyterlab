@@ -1,6 +1,10 @@
 Design System CSS:
   - '**/*.css'
   - '*.css'
+  
+documentation:
+  - docs/**/*
+  - docs/*
 
 tag:CSS:
   - '**/*.css'
@@ -9,10 +13,6 @@ tag:CSS:
 'tag:Design and UX':
   - design/**/*
   - design/*
-
-tag:Documentation:
-  - docs/**/*
-  - docs/*
 
 tag:Examples:
   - examples/**/*
