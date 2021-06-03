@@ -416,6 +416,7 @@ In JupyterLab, the application shell consists of:
 -  A ``menu`` area for top-level menus, which is collapsed into the ``top`` area in multiple-document mode and put below it in single-document mode.
 -  ``left`` and ``right`` sidebar areas for collapsible content.
 -  A ``main`` work area for user activity.
+-  A ``down`` area for information content; like log console, contextual help.
 -  A ``bottom`` area for things like status bars.
 -  A ``header`` area for custom elements.
 

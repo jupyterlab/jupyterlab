@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { hpass, VirtualElement } from '@lumino/virtualdom';
-import { DockPanel, TabBar, Widget } from '@lumino/widgets';
+import { DockPanel, TabBar, TabPanel, Widget } from '@lumino/widgets';
 
 import { closeIcon } from '../iconimports';
 import { LabIconStyle } from '../../style';
@@ -92,4 +92,20 @@ export namespace DockPanelSvg {
   }
 
   export const defaultRenderer = new Renderer();
+}
+
+/**
+ * A widget which combines a `TabBar` and a `StackedPanel`.
+ * Tweaked to use an inline svg as the close icon
+ */
+export class TabPanelSvg extends TabPanel {
+  /**
+   * Construct a new tab panel.
+   *
+   * @param options - The options for initializing the tab panel.
+   */
+  constructor(options: TabPanel.IOptions = {}) {
+    options.renderer = options.renderer || TabBarSvg.defaultRenderer;
+    super(options);
+  }
 }
