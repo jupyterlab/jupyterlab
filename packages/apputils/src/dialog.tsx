@@ -310,9 +310,40 @@ export class Dialog<T> extends Widget {
           this.reject();
         }
         break;
+      case 37: {
+        // Left arrow
+        const activeEl = document.activeElement;
+        let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) - 1;
+
+        // Handle a left arros on the first button
+        if (idx < 0) {
+          idx = this._buttonNodes.length - 1;
+        }
+
+        const node = this._buttonNodes[idx];
+        event.stopPropagation();
+        event.preventDefault();
+        node.focus();
+        break;
+      }
+      case 39: {
+        // Right arrow
+        const activeEl = document.activeElement;
+        let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) + 1;
+
+        // Handle a right arros on the last button
+        if (idx == this._buttons.length) {
+          idx = 0;
+        }
+
+        const node = this._buttonNodes[idx];
+        event.stopPropagation();
+        event.preventDefault();
+        node.focus();
+        break;
+      }
       case 9: {
         // Tab.
-
         // Handle a tab on the last button.
         const node = this._buttonNodes[this._buttons.length - 1];
         if (document.activeElement === node && !event.shiftKey) {
