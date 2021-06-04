@@ -202,6 +202,7 @@ export class CompleterModel implements Completer.IModel {
 
   /**
    * The list of visible items in the completer menu.
+   * @deprecated use `completionItems` instead
    *
    * #### Notes
    * This is a read-only property.

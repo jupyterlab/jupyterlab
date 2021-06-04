@@ -51,6 +51,7 @@ export class CompletionHandler implements IDisposable {
 
   /**
    * The data connector used to populate completion requests.
+   * @deprecated use `CompletionHandler.ICompletionItesConnector` instead of `IDataConnector`
    *
    * #### Notes
    * The only method of this connector that will ever be called is `fetch`, so
@@ -642,6 +643,8 @@ export namespace CompletionHandler {
   export const ICompletionItemsResponseType = 'ICompletionItemsReply' as const;
 
   /**
+   * @deprecated use `ICompletionItemsReply` instead
+   *
    * A reply to a completion request.
    */
   export interface IReply {
