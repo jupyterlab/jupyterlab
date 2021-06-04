@@ -24,8 +24,6 @@ import {
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
-import { IInspector } from '@jupyterlab/inspector';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { KernelMessage } from '@jupyterlab/services';
@@ -212,14 +210,13 @@ const resources: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:resources',
   autoStart: true,
   requires: [IMainMenu, ITranslator],
-  optional: [ICommandPalette, ILayoutRestorer, IInspector],
+  optional: [ICommandPalette, ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
     mainMenu: IMainMenu,
     translator: ITranslator,
     palette: ICommandPalette | null,
-    restorer: ILayoutRestorer | null,
-    inspector: IInspector | null
+    restorer: ILayoutRestorer | null
   ): void => {
     const trans = translator.load('jupyterlab');
     let counter = 0;
@@ -291,11 +288,6 @@ const resources: JupyterFrontEndPlugin<void> = {
 
     // Populate the Help menu.
     const helpMenu = mainMenu.helpMenu;
-
-    // Contextual help in its own group
-    if (inspector) {
-      helpMenu.addGroup([{ command: 'inspector:open' }], 0);
-    }
 
     const resourcesGroup = resources.map(args => ({
       args,
