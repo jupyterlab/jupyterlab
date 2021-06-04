@@ -1,5 +1,5 @@
 {
-  "name": "jupyterlab-ui-tests",
+  "name": "@jupyterlab/ui-tests",
   "version": "1.0.0",
   "description": "JupyterLab UI Tests",
   "private": true,
