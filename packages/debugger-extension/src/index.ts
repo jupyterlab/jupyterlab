@@ -20,6 +20,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
@@ -625,7 +626,8 @@ const main: JupyterFrontEndPlugin<void> = {
 
       const onCurrentSourceOpened = (
         _: IDebugger.Model.ISources | null,
-        source: IDebugger.Source
+        source: IDebugger.Source,
+        breakpoint?: IDebugger.IBreakpoint
       ): void => {
         if (!source) {
           return;
@@ -638,6 +640,21 @@ const main: JupyterFrontEndPlugin<void> = {
           source: path
         });
         if (results.length > 0) {
+          if (breakpoint && typeof breakpoint.line !== 'undefined') {
+            results.forEach(editor => {
+              if (editor instanceof CodeMirrorEditor) {
+                (editor as CodeMirrorEditor).scrollIntoViewCentered({
+                  line: (breakpoint.line as number) - 1,
+                  ch: breakpoint.column || 0
+                });
+              } else {
+                editor.revealPosition({
+                  line: (breakpoint.line as number) - 1,
+                  column: breakpoint.column || 0
+                });
+              }
+            });
+          }
           return;
         }
         const editorWrapper = readOnlyEditorFactory.createNewEditor({
@@ -673,7 +690,7 @@ const main: JupyterFrontEndPlugin<void> = {
           sourceReference: 0,
           path
         });
-        onCurrentSourceOpened(null, source);
+        onCurrentSourceOpened(null, source, breakpoint);
       });
     }
   }

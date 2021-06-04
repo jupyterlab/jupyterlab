@@ -24,6 +24,7 @@ import { IChangedArgs, Time } from '@jupyterlab/coreutils';
 
 import {
   renameDialog,
+  nameOnSaveDialog,
   DocumentManager,
   IDocumentManager,
   PathStatus,
@@ -70,6 +71,8 @@ namespace CommandIDs {
 
   export const rename = 'docmanager:rename';
 
+  export const nameOnSave = 'docmanager:name-on-save';
+
   export const del = 'docmanager:delete';
 
   export const restoreCheckpoint = 'docmanager:restore-checkpoint';
@@ -83,6 +86,8 @@ namespace CommandIDs {
   export const download = 'docmanager:download';
 
   export const toggleAutosave = 'docmanager:toggle-autosave';
+
+  export const toggleNameFileOnSave = 'docmanager:toggle-name-file-on-save';
 
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
 }
@@ -184,6 +189,15 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
         | number
         | null;
       docManager.autosaveInterval = autosaveInterval || 120;
+
+      // Handle whether to prompt to name file on first save
+      const nameFileOnSave = settings.get('nameFileOnSave')
+        .composite as boolean;
+
+      if (docManager.nameFileOnSave != nameFileOnSave) {
+        docManager.nameFileOnSave = nameFileOnSave;
+        app.commands.notifyCommandChanged(CommandIDs.nameOnSave);
+      }
 
       // Handle default widget factory overrides.
       const defaultViewers = settings.get('defaultViewers').composite as {
@@ -397,13 +411,59 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin providing open-browser-tab commands.
+ *
+ * This is its own plugin in case you would like to disable this feature.
+ * e.g. jupyter labextension disable @jupyterlab/docmanager-extension:open-browser-tab
+ *
+ * Note: If disabling this, you may also want to disable:
+ * @jupyterlab/filebrowser-extension:open-browser-tab
+ */
+export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/docmanager-extension:open-browser-tab',
+  autoStart: true,
+  requires: [ITranslator, IDocumentManager],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    docManager: IDocumentManager
+  ) => {
+    const trans = translator.load('jupyterlab');
+    const { commands } = app;
+    commands.addCommand(CommandIDs.openBrowserTab, {
+      execute: args => {
+        const path =
+          typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
+
+        if (!path) {
+          return;
+        }
+
+        return docManager.services.contents.getDownloadUrl(path).then(url => {
+          const opened = window.open();
+          if (opened) {
+            opened.opener = null;
+            opened.location.href = url;
+          } else {
+            throw new Error('Failed to open new browser tab.');
+          }
+        });
+      },
+      icon: args => (args['icon'] as string) || '',
+      label: () => trans.__('Open in New Browser Tab')
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   docManagerPlugin,
   pathStatusPlugin,
   savingStatusPlugin,
-  downloadPlugin
+  downloadPlugin,
+  openBrowserTabPlugin
 ];
 export default plugins;
 
@@ -528,29 +588,6 @@ function addCommands(
     mnemonic: args => (args['mnemonic'] as number) || -1
   });
 
-  commands.addCommand(CommandIDs.openBrowserTab, {
-    execute: args => {
-      const path =
-        typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
-
-      if (!path) {
-        return;
-      }
-
-      return docManager.services.contents.getDownloadUrl(path).then(url => {
-        const opened = window.open();
-        if (opened) {
-          opened.opener = null;
-          opened.location.href = url;
-        } else {
-          throw new Error('Failed to open new browser tab.');
-        }
-      });
-    },
-    icon: args => (args['icon'] as string) || '',
-    label: () => trans.__('Open in New Browser Tab')
-  });
-
   commands.addCommand(CommandIDs.reload, {
     label: () =>
       trans.__(
@@ -663,25 +700,27 @@ function addCommands(
             body: trans.__('No context found for current widget!'),
             buttons: [Dialog.okButton({ label: trans.__('Ok') })]
           });
+        } else {
+          if (context.model.readOnly) {
+            return showDialog({
+              title: trans.__('Cannot Save'),
+              body: trans.__('Document is read-only'),
+              buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+            });
+          }
+
+          return context
+            .save(true)
+            .then(() => context!.createCheckpoint())
+            .catch(err => {
+              // If the save was canceled by user-action, do nothing.
+              // FIXME-TRANS: Is this using the text on the button or?
+              if (err.message === 'Cancel') {
+                return;
+              }
+              throw err;
+            });
         }
-        if (context.model.readOnly) {
-          return showDialog({
-            title: trans.__('Cannot Save'),
-            body: trans.__('Document is read-only'),
-            buttons: [Dialog.okButton({ label: trans.__('Ok') })]
-          });
-        }
-        return context
-          .save()
-          .then(() => context!.createCheckpoint())
-          .catch(err => {
-            // If the save was canceled by user-action, do nothing.
-            // FIXME-TRANS: Is this using the text on the button or?
-            if (err.message === 'Cancel') {
-              return;
-            }
-            throw err;
-          });
       }
     }
   });
@@ -746,6 +785,47 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.toggleNameFileOnSave, {
+    label: trans.__('Name File on First Save'),
+    isToggled: () => docManager.nameFileOnSave,
+    execute: () => {
+      const value = !docManager.nameFileOnSave;
+      const key = 'nameFileOnSave';
+      return settingRegistry
+        .set(docManagerPluginId, key, value)
+        .catch((reason: Error) => {
+          console.error(
+            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
+          );
+        });
+    }
+  });
+  docManager.optionChanged.connect(() => {
+    const key = 'nameFileOnSave';
+    const value = settingRegistry.plugins[docManagerPluginId]?.data.user[key];
+    if (value == docManager.nameFileOnSave) {
+      void settingRegistry
+        .set(docManagerPluginId, key, !value)
+        .catch((reason: Error) => {
+          console.error(
+            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
+          );
+        });
+    }
+  });
+
+  docManager.activateRequested.connect((sender, args) => {
+    const widget = sender.findWidget(args);
+    if (widget && widget.shouldNameFile) {
+      widget.shouldNameFile.connect(() => {
+        if (sender.nameFileOnSave && widget == shell.currentWidget) {
+          const context = sender.contextForWidget(widget!);
+          return nameOnSaveDialog(sender, context!);
+        }
+      });
+    }
+  });
+
   // .jp-mod-current added so that the console-creation command is only shown
   // on the current document.
   // Otherwise it will delegate to the wrong widget.
@@ -768,7 +848,13 @@ function addCommands(
   }
 
   if (mainMenu) {
-    mainMenu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
+    mainMenu.settingsMenu.addGroup(
+      [
+        { command: CommandIDs.toggleAutosave },
+        { command: CommandIDs.toggleNameFileOnSave }
+      ],
+      5
+    );
   }
 }
 
@@ -837,6 +923,19 @@ function addLabCommands(
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
         return renameDialog(docManager, context!.path);
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.nameOnSave, {
+    label: () =>
+      trans.__('Rename %1…', fileType(contextMenuWidget(), docManager)),
+    isEnabled,
+    execute: () => {
+      // Implies contextMenuWidget() !== null
+      if (isEnabled()) {
+        const context = docManager.contextForWidget(contextMenuWidget()!);
+        return nameOnSaveDialog(docManager, context!);
       }
     }
   });

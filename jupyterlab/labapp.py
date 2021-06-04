@@ -14,6 +14,7 @@ from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_fla
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
+
 from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, slugify
 from nbclassic.shim import NBClassicConfigShimMixin
 from traitlets import Bool, Instance, Unicode, default
@@ -31,6 +32,12 @@ from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
 from .handlers.yjs_echo_ws import YJSEchoWS
+
+# TODO: remove when oldest compatible jupyterlab_server contains license tooling
+try:
+    from jupyterlab_server import LicensesApp
+except ImportError:
+    LicensesApp = None
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -414,6 +421,46 @@ class LabWorkspaceApp(JupyterApp):
         self.exit(0)
 
 
+if LicensesApp is not None:
+    class LabLicensesApp(LicensesApp):
+        version = version
+
+        dev_mode = Bool(
+            False,
+            config=True,
+            help="""Whether to start the app in dev mode. Uses the unpublished local
+            JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
+            show a red stripe at the top of the page.  It can only be used if JupyterLab
+            is installed as `pip install -e .`.
+            """,
+        )
+
+        app_dir = Unicode(
+            "", config=True, help="The app directory for which to show licenses"
+        )
+
+        aliases = {
+            **LicensesApp.aliases,
+            "app-dir": "LabLicensesApp.app_dir",
+        }
+
+        flags = {
+            **LicensesApp.flags,
+            "dev-mode": (
+                {"LabLicensesApp": {"dev_mode": True}},
+                "Start the app in dev mode for running from source.",
+            ),
+        }
+
+        @default('app_dir')
+        def _default_app_dir(self):
+            return get_app_dir()
+
+        @default('static_dir')
+        def _default_static_dir(self):
+            return pjoin(self.app_dir, 'static')
+
+
 aliases = dict(base_aliases)
 aliases.update({
     'ip': 'ServerApp.ip',
@@ -511,6 +558,12 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0])
     )
 
+    # TODO: remove when oldest compatible jupyterlab_server contains license tooling
+    if LicensesApp is not None:
+        subcommands.update(
+            licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0])
+        )
+
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
 
@@ -557,7 +610,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
     expose_app_in_browser = Bool(False, config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab")
-    
+
     collaborative = Bool(False, config=True,
         help="Whether to enable collaborative mode.")
 

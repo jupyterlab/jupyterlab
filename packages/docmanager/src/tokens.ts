@@ -5,7 +5,7 @@ import { Token } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Widget } from '@lumino/widgets';
 
@@ -50,6 +50,16 @@ export interface IDocumentManager extends IDisposable {
    * Determines the time interval for autosave in seconds.
    */
   autosaveInterval: number;
+
+  /**
+   * Whether to prompt to name file on first save.
+   */
+  nameFileOnSave: boolean;
+
+  /**
+   * Singal on option changed.
+   */
+  readonly optionChanged: Signal<object, object>;
 
   /**
    * Clone a widget.

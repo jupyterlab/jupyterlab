@@ -541,7 +541,7 @@ export namespace CodeEditor {
     readonly charWidth: number;
 
     /**
-     * Get the number of lines in the eidtor.
+     * Get the number of lines in the editor.
      */
     readonly lineCount: number;
 

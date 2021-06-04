@@ -198,11 +198,12 @@ function activateLogConsole(
       app.commands.notifyCommandChanged();
     });
 
-    app.shell.add(logConsoleWidget, 'main', {
+    app.shell.add(logConsoleWidget, 'down', {
       ref: options.ref,
       mode: options.insertMode
     });
     void tracker.add(logConsoleWidget);
+    app.shell.activateById(logConsoleWidget.id);
 
     logConsoleWidget.update();
     app.commands.notifyCommandChanged();

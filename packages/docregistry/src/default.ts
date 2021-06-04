@@ -497,6 +497,8 @@ export class DocumentWidget<
     void this.context.ready.then(() => {
       this._handleDirtyState();
     });
+
+    this.shouldNameFile = new Signal<this, void>(this);
   }
 
   /**
@@ -540,6 +542,7 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
+  shouldNameFile: Signal<any, void>;
 }
 
 export namespace DocumentWidget {

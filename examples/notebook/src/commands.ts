@@ -81,7 +81,7 @@ export const SetupCommands = (
 
   let searchInstance: SearchInstance | undefined;
   commands.addCommand(cmdIds.startSearch, {
-    label: 'Find...',
+    label: 'Find…',
     execute: () => {
       if (searchInstance) {
         searchInstance.focusInput();

@@ -145,6 +145,11 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 const DRAG_THRESHOLD = 5;
 
 /**
+ * The class attached to the heading collapser button
+ */
+const HEADING_COLLAPSER_CLASS = 'jp-collapseHeadingButton';
+
+/**
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
@@ -869,7 +874,7 @@ export class Notebook extends StaticNotebook {
    */
   constructor(options: Notebook.IOptions) {
     super(Private.processNotebookOptions(options));
-    this.node.tabIndex = -1; // Allow the widget to take focus.
+    this.node.tabIndex = 0; // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-lm-dragscroll', 'true');
   }
@@ -2134,6 +2139,11 @@ export class Notebook extends StaticNotebook {
 
     const [target, index] = this._findEventTargetAndCell(event);
 
+    if (
+      (event.target as HTMLElement).classList.contains(HEADING_COLLAPSER_CLASS)
+    ) {
+      return;
+    }
     if (index === -1) {
       return;
     }

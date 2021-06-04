@@ -27,6 +27,7 @@ import closeSvgstr from '../../style/icons/toolbar/close.svg';
 import codeSvgstr from '../../style/icons/toolbar/code.svg';
 import consoleSvgstr from '../../style/icons/filetype/console.svg';
 import copySvgstr from '../../style/icons/toolbar/copy.svg';
+import copyrightSvgstr from '../../style/icons/licenses/copyright.svg';
 import cutSvgstr from '../../style/icons/toolbar/cut.svg';
 import downloadSvgstr from '../../style/icons/toolbar/download.svg';
 import editSvgstr from '../../style/icons/toolbar/edit.svg';
@@ -105,6 +106,7 @@ export const closeIcon = new LabIcon({ name: 'ui-components:close', svgstr: clos
 export const codeIcon = new LabIcon({ name: 'ui-components:code', svgstr: codeSvgstr });
 export const consoleIcon = new LabIcon({ name: 'ui-components:console', svgstr: consoleSvgstr });
 export const copyIcon = new LabIcon({ name: 'ui-components:copy', svgstr: copySvgstr });
+export const copyrightIcon = new LabIcon({ name: 'ui-components:copyright', svgstr: copyrightSvgstr });
 export const cutIcon = new LabIcon({ name: 'ui-components:cut', svgstr: cutSvgstr });
 export const downloadIcon = new LabIcon({ name: 'ui-components:download', svgstr: downloadSvgstr });
 export const editIcon = new LabIcon({ name: 'ui-components:edit', svgstr: editSvgstr });

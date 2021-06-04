@@ -18,14 +18,16 @@
 | Tabs in the dock panel
 |----------------------------------------------------------------------------*/
 
-.lm-DockPanel-tabBar {
+.lm-DockPanel-tabBar,
+.lm-TabPanel-tabBar {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   overflow: visible;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
 }
 
-.lm-DockPanel-tabBar[data-orientation='horizontal'] {
+.lm-DockPanel-tabBar[data-orientation='horizontal'],
+.lm-TabPanel-tabBar[data-orientation='horizontal'] {
   min-height: calc(
     var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
   );
@@ -35,14 +37,17 @@
   min-width: 80px;
 }
 
-.lm-DockPanel-tabBar > .lm-TabBar-content {
+.lm-DockPanel-tabBar > .lm-TabBar-content,
+.lm-TabPanel-tabBar > .lm-TabBar-content {
   align-items: flex-end;
   min-width: 0;
   min-height: 0;
 }
 
-.lm-DockPanel-tabBar .lm-TabBar-tab {
+.lm-DockPanel-tabBar .lm-TabBar-tab,
+.lm-TabPanel-tabBar .lm-TabBar-tab {
   flex: 0 1 var(--jp-private-horizontal-tab-width);
+  align-items: center;
   min-height: calc(
     var(--jp-private-horizontal-tab-height) + var(--jp-border-width)
   );
@@ -56,11 +61,13 @@
   position: relative;
 }
 
-.lm-DockPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current) {
+.lm-DockPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current),
+.lm-TabPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current) {
   background: var(--jp-layout-color1);
 }
 
-.lm-DockPanel-tabBar .lm-TabBar-tab:first-child {
+.lm-DockPanel-tabBar .lm-TabBar-tab:first-child,
+.lm-TabPanel-tabBar .lm-TabBar-tab:first-child {
   margin-left: 0;
 }
 
@@ -72,6 +79,11 @@
     var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
   );
   transform: translateY(var(--jp-border-width));
+}
+
+.lm-TabPanel-tabBar .lm-TabBar-tab.lm-mod-current {
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color0);
 }
 
 /* This is the main application level current tab: only 1 exists. */
@@ -126,7 +138,8 @@
 }
 
 .lm-DockPanel-tabBar .lm-TabBar-tab .lm-TabBar-tabIcon,
-.lm-TabBar-tab.lm-mod-drag-image .lm-TabBar-tabIcon {
+.lm-TabBar-tab.lm-mod-drag-image .lm-TabBar-tabIcon,
+.lm-TabPanel-tabBar .lm-TabBar-tab .lm-TabBar-tabIcon {
   width: 14px;
   background-position: left center;
   background-repeat: no-repeat;
@@ -134,7 +147,8 @@
   margin-right: 4px;
 }
 
-.lm-DockPanel-tabBar .lm-TabBar-tab.lm-mod-current .lm-TabBar-tabIcon {
+.lm-DockPanel-tabBar .lm-TabBar-tab.lm-mod-current .lm-TabBar-tabIcon,
+.lm-TabPanel-tabBar .lm-TabBar-tab.lm-mod-current .lm-TabBar-tabIcon {
   margin-bottom: var(--jp-border-width);
 }
 

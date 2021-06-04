@@ -117,7 +117,7 @@ namespace CommandIDs {
   export const rename = 'filebrowser:rename';
 
   // For main browser only.
-  export const share = 'filebrowser:share-main';
+  export const copyShareableLink = 'filebrowser:share-main';
 
   // For main browser only.
   export const copyPath = 'filebrowser:copy-path';
@@ -135,6 +135,21 @@ namespace CommandIDs {
   export const toggleLastModified = 'filebrowser:toggle-last-modified';
 
   export const search = 'filebrowser:search';
+}
+
+namespace Selectors {
+  // matches the text in the filebrowser; relies on an implementation detail
+  // being the text of the listing element being substituted with input
+  // area to deactivate shortcuts when the file name is being edited.
+  export const selectorBrowser =
+    '.jp-DirListing-content .jp-DirListing-itemText';
+  // matches anywhere on filebrowser
+  export const selectorContent = '.jp-DirListing-content';
+  // matches all filebrowser items
+  export const selectorItem = '.jp-DirListing-item[data-isdir]';
+  // matches only non-directory items
+  export const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+  export const selectorHeader = '.jp-DirListing-header';
 }
 
 /**
@@ -331,8 +346,6 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
     const { tracker } = factory;
-    // matches only non-directory items
-    const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
 
     commands.addCommand(CommandIDs.download, {
       execute: () => {
@@ -366,12 +379,12 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
 
     app.contextMenu.addItem({
       command: CommandIDs.download,
-      selector: selectorNotDir,
+      selector: Selectors.selectorNotDir,
       rank: 9
     });
     app.contextMenu.addItem({
       command: CommandIDs.copyDownloadLink,
-      selector: selectorNotDir,
+      selector: Selectors.selectorNotDir,
       rank: 13
     });
   }
@@ -506,7 +519,7 @@ const shareFile: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     const { tracker } = factory;
 
-    commands.addCommand(CommandIDs.share, {
+    commands.addCommand(CommandIDs.copyShareableLink, {
       execute: () => {
         const widget = tracker.currentWidget;
         const model = widget?.selectedItems().next();
@@ -537,7 +550,7 @@ const shareFile: JupyterFrontEndPlugin<void> = {
  * The "Open With" context menu.
  *
  * This is its own plugin in case you would like to disable this feature.
- * e.g. jupyter labextension disable fort_disable_download:open-with
+ * e.g. jupyter labextension disable @jupyterlab/filebrowser-extension:open-with
  */
 const openWithPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:open-with',
@@ -551,8 +564,6 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
     const { docRegistry: registry, commands } = app;
     const trans = translator.load('jupyterlab');
     const { tracker } = factory;
-    // matches only non-directory items
-    const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
 
     /**
      * A menu widget that dynamically populates with different widget factories
@@ -630,8 +641,61 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
     app.contextMenu.addItem({
       type: 'submenu',
       submenu: openWith,
-      selector: selectorNotDir,
+      selector: Selectors.selectorNotDir,
       rank: 2
+    });
+  }
+};
+
+/**
+ * The "Open in New Browser Tab" context menu.
+ *
+ * This is its own plugin in case you would like to disable this feature.
+ * e.g. jupyter labextension disable @jupyterlab/filebrowser-extension:open-browser-tab
+ *
+ * Note: If disabling this, you may also want to disable:
+ * @jupyterlab/docmanager-extension:open-browser-tab
+ */
+const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-browser-tab',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const { tracker } = factory;
+
+    commands.addCommand(CommandIDs.openBrowserTab, {
+      execute: () => {
+        const widget = tracker.currentWidget;
+
+        if (!widget) {
+          return;
+        }
+
+        return Promise.all(
+          toArray(
+            map(widget.selectedItems(), item => {
+              return commands.execute('docmanager:open-browser-tab', {
+                path: item.path
+              });
+            })
+          )
+        );
+      },
+      icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: trans.__('Open in New Browser Tab'),
+      mnemonic: 0
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.openBrowserTab,
+      selector: Selectors.selectorNotDir,
+      rank: 3
     });
   }
 };
@@ -924,29 +988,6 @@ function addCommands(
     mnemonic: 0
   });
 
-  commands.addCommand(CommandIDs.openBrowserTab, {
-    execute: () => {
-      const widget = tracker.currentWidget;
-
-      if (!widget) {
-        return;
-      }
-
-      return Promise.all(
-        toArray(
-          map(widget.selectedItems(), item => {
-            return commands.execute('docmanager:open-browser-tab', {
-              path: item.path
-            });
-          })
-        )
-      );
-    },
-    icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Open in New Browser Tab'),
-    mnemonic: 0
-  });
-
   commands.addCommand(CommandIDs.paste, {
     execute: () => {
       const widget = tracker.currentWidget;
@@ -1107,132 +1148,144 @@ function addCommands(
     });
   }
 
-  // matches the text in the filebrowser; relies on an implementation detail
-  // being the text of the listing element being substituted with input
-  // area to deactivate shortcuts when the file name is being edited.
-  const selectorBrowser = '.jp-DirListing-content .jp-DirListing-itemText';
-  // matches anywhere on filebrowser
-  const selectorContent = '.jp-DirListing-content';
-  // matches all filebrowser items
-  const selectorItem = '.jp-DirListing-item[data-isdir]';
-  // matches only non-directory items
-  const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
-
   // If the user did not click on any file, we still want to show paste and new folder,
   // so target the content rather than an item.
   app.contextMenu.addItem({
+    type: 'separator',
+    selector: Selectors.selectorContent,
+    rank: 0
+  });
+
+  app.contextMenu.addItem({
     command: CommandIDs.createNewDirectory,
-    selector: selectorContent,
+    selector: Selectors.selectorContent,
     rank: 1
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.createNewFile,
-    selector: selectorContent,
+    selector: Selectors.selectorContent,
     rank: 2
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.createNewMarkdownFile,
-    selector: selectorContent,
+    selector: Selectors.selectorContent,
     rank: 3
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.paste,
-    selector: selectorContent,
+    selector: Selectors.selectorContent,
     rank: 4
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.open,
-    selector: selectorItem,
+    selector: Selectors.selectorItem,
     rank: 1
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.openBrowserTab,
-    selector: selectorNotDir,
-    rank: 3
+    type: 'separator',
+    selector: Selectors.selectorItem,
+    rank: 4
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.rename,
-    selector: selectorItem,
-    rank: 4
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.del,
-    selector: selectorItem,
+    selector: Selectors.selectorItem,
     rank: 5
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.cut,
-    selector: selectorItem,
+    command: CommandIDs.del,
+    selector: Selectors.selectorItem,
     rank: 6
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.copy,
-    selector: selectorNotDir,
+    command: CommandIDs.cut,
+    selector: Selectors.selectorItem,
     rank: 7
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.duplicate,
-    selector: selectorNotDir,
+    command: CommandIDs.copy,
+    selector: Selectors.selectorNotDir,
     rank: 8
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.shutdown,
-    selector: selectorNotDir,
+    command: CommandIDs.duplicate,
+    selector: Selectors.selectorNotDir,
+    rank: 9
+  });
+
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: Selectors.selectorItem,
     rank: 10
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.share,
-    selector: selectorItem,
+    command: CommandIDs.shutdown,
+    selector: Selectors.selectorNotDir,
     rank: 11
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.copyPath,
-    selector: selectorItem,
+    type: 'separator',
+    selector: Selectors.selectorItem,
     rank: 12
   });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.copyShareableLink,
+    selector: Selectors.selectorItem,
+    rank: 15
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.copyPath,
+    selector: Selectors.selectorItem,
+    rank: 14
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.toggleLastModified,
-    selector: '.jp-DirListing-header',
+    selector: Selectors.selectorHeader,
     rank: 14
   });
 
   app.commands.addKeyBinding({
     command: CommandIDs.del,
-    selector: selectorBrowser,
+    selector: Selectors.selectorBrowser,
     keys: ['Delete']
   });
   app.commands.addKeyBinding({
     command: CommandIDs.cut,
-    selector: selectorBrowser,
+    selector: Selectors.selectorBrowser,
     keys: ['Ctrl X']
   });
   app.commands.addKeyBinding({
     command: CommandIDs.copy,
-    selector: selectorBrowser,
+    selector: Selectors.selectorBrowser,
     keys: ['Ctrl C']
   });
   app.commands.addKeyBinding({
     command: CommandIDs.paste,
-    selector: selectorBrowser,
+    selector: Selectors.selectorBrowser,
     keys: ['Ctrl V']
   });
   app.commands.addKeyBinding({
     command: CommandIDs.rename,
-    selector: selectorBrowser,
+    selector: Selectors.selectorBrowser,
     keys: ['F2']
   });
   app.commands.addKeyBinding({
     command: CommandIDs.duplicate,
-    selector: selectorBrowser,
+    selector: Selectors.selectorBrowser,
     keys: ['Ctrl D']
   });
 }
@@ -1380,6 +1433,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   downloadPlugin,
   browserWidget,
   launcherToolbarButton,
-  openWithPlugin
+  openWithPlugin,
+  openBrowserTabPlugin
 ];
 export default plugins;
