@@ -315,7 +315,7 @@ export class Dialog<T> extends Widget {
         const activeEl = document.activeElement;
         let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) - 1;
 
-        // Handle a left arros on the first button
+        // Handle a left arrows on the first button
         if (idx < 0) {
           idx = this._buttonNodes.length - 1;
         }
