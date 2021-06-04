@@ -1,0 +1,57 @@
+{
+  "title": "Application Commands",
+  "description": "Application commands settings.",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 3
+          },
+          {
+            "command": "application:close",
+            "rank": 3
+          },
+          {
+            "command": "application:close-all",
+            "rank": 3.2
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 1
+          },
+          {
+            "command": "application:toggle-mode",
+            "rank": 1
+          },
+          {
+            "command": "application:toggle-presentation-mode",
+            "rank": 1
+          },
+          {
+            "type": "separator",
+            "rank": 2
+          },
+          {
+            "command": "application:toggle-left-area",
+            "rank": 2
+          },
+          {
+            "command": "application:toggle-right-area",
+            "rank": 2
+          }
+        ]
+      }
+    ]
+  },
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}

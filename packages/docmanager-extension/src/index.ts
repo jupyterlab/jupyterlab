@@ -172,8 +172,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       settingRegistry,
       translator,
       labShell,
-      palette,
-      mainMenu
+      palette
     );
 
     // Keep up to date with the settings registry.
@@ -404,9 +403,6 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
     if (palette) {
       palette.addItem({ command: CommandIDs.download, category });
     }
-    if (mainMenu) {
-      mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
-    }
   }
 };
 
@@ -506,8 +502,7 @@ function addCommands(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   labShell: ILabShell | null,
-  palette: ICommandPalette | null,
-  mainMenu: IMainMenu | null
+  palette: ICommandPalette | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -845,16 +840,6 @@ function addCommands(
     ].forEach(command => {
       palette.addItem({ command, category });
     });
-  }
-
-  if (mainMenu) {
-    mainMenu.settingsMenu.addGroup(
-      [
-        { command: CommandIDs.toggleAutosave },
-        { command: CommandIDs.toggleNameFileOnSave }
-      ],
-      5
-    );
   }
 }
 

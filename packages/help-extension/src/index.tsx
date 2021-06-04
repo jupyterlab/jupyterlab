@@ -168,11 +168,6 @@ const about: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    if (menu) {
-      const helpMenu = menu.helpMenu;
-      helpMenu.addGroup([{ command: CommandIDs.about }], 0);
-    }
-
     if (palette) {
       palette.addItem({ command: CommandIDs.about, category });
     }
@@ -203,11 +198,6 @@ const launchClassic: JupyterFrontEndPlugin<void> = {
         window.open(PageConfig.getBaseUrl() + 'tree');
       }
     });
-
-    if (menu) {
-      const helpMenu = menu.helpMenu;
-      helpMenu.addGroup([{ command: CommandIDs.launchClassic }], 1);
-    }
 
     if (palette) {
       palette.addItem({ command: CommandIDs.launchClassic, category });
@@ -303,10 +293,9 @@ const resources: JupyterFrontEndPlugin<void> = {
     const helpMenu = mainMenu.helpMenu;
 
     // Contextual help in its own group
-    const contextualHelpGroup = [
-      inspector ? 'inspector:open' : undefined
-    ].map(command => ({ command }));
-    helpMenu.addGroup(contextualHelpGroup, 0);
+    if (inspector) {
+      helpMenu.addGroup([{ command: 'inspector:open' }], 0);
+    }
 
     const resourcesGroup = resources.map(args => ({
       args,

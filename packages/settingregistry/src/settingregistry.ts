@@ -897,6 +897,142 @@ export namespace SettingRegistry {
   }
 
   /**
+   *
+   * @param reference
+   * @param addition
+   * @param warn Warn if the command items are duplicated within the same menu
+   * @returns
+   */
+  export function reconcileMenus(
+    reference: ISettingRegistry.IMenu[] | null,
+    addition: ISettingRegistry.IMenu[] | null,
+    warn: boolean = false
+  ): ISettingRegistry.IMenu[] {
+    if (!reference) {
+      return addition ? JSONExt.deepCopy(addition) : [];
+    }
+    if (!addition) {
+      return JSONExt.deepCopy(reference);
+    }
+
+    const merged = JSONExt.deepCopy(reference);
+
+    addition.forEach(menu => {
+      const refIndex = merged.findIndex(ref => ref.id === menu.id);
+      if (refIndex >= 0) {
+        merged[refIndex] = {
+          ...merged[refIndex],
+          ...menu,
+          items: reconcileItems(merged[refIndex].items, menu.items, warn)
+        };
+      } else {
+        merged.push(menu);
+      }
+    });
+
+    // Remove disabled menus
+    return merged
+      .filter(menu => !menu.disabled)
+      .map(menu => filterDisableEntries(menu));
+  }
+
+  function filterDisableEntries(
+    menu: ISettingRegistry.IMenu
+  ): ISettingRegistry.IMenu {
+    return {
+      ...menu,
+      items: (menu.items ?? []).reduce<ISettingRegistry.IMenuItem[]>(
+        (final, value) => {
+          if (!value.disabled) {
+            if (value.type === 'submenu') {
+              const { submenu, ...others } = value;
+              final.push({
+                ...others,
+                submenu:
+                  submenu && !submenu.disabled
+                    ? filterDisableEntries(submenu)
+                    : null
+              });
+            } else {
+              final.push(value);
+            }
+          }
+
+          return final;
+        },
+        []
+      )
+    };
+  }
+
+  function reconcileItems(
+    reference?: ISettingRegistry.IMenuItem[],
+    addition?: ISettingRegistry.IMenuItem[],
+    warn: boolean = false
+  ): ISettingRegistry.IMenuItem[] | undefined {
+    if (!reference) {
+      return addition ? JSONExt.deepCopy(addition) : undefined;
+    }
+    if (!addition) {
+      return JSONExt.deepCopy(reference);
+    }
+
+    const items = JSONExt.deepCopy(reference);
+
+    // Merge array element depending on the type
+    addition.forEach(item => {
+      switch (item.type ?? 'command') {
+        case 'separator':
+          items.push({ ...item });
+          break;
+        case 'submenu':
+          if (item.submenu) {
+            const refIndex = items.findIndex(
+              ref =>
+                ref.type === 'submenu' && ref.submenu?.id === item.submenu?.id
+            );
+            if (refIndex < 0) {
+              items.push(JSONExt.deepCopy(item));
+            } else {
+              items[refIndex] = {
+                ...items[refIndex],
+                ...item,
+                submenu: reconcileMenus(
+                  items[refIndex].submenu
+                    ? [items[refIndex].submenu as any]
+                    : null,
+                  [item.submenu],
+                  warn
+                )[0]
+              };
+            }
+          }
+          break;
+        case 'command':
+          if (item.command) {
+            const refIndex = items.findIndex(
+              ref =>
+                ref.command === item.command &&
+                JSONExt.deepEqual(ref.args ?? {}, item.args ?? {})
+            );
+            if (refIndex < 0) {
+              items.push({ ...item });
+            } else {
+              if (warn) {
+                console.warn(
+                  `Menu entry for command '${item.command}' is duplicated.`
+                );
+              }
+              items[refIndex] = { ...items[refIndex], ...item };
+            }
+          }
+      }
+    });
+
+    return items;
+  }
+
+  /**
    * Reconcile default and user shortcuts and return the composite list.
    *
    * @param defaults - The list of default shortcuts.

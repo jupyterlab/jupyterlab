@@ -1,6 +1,44 @@
 {
   "jupyter.lab.setting-icon": "ui-components:folder",
   "jupyter.lab.setting-icon-label": "File Browser",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "command": "filebrowser:create-main-launcher",
+            "rank": 1
+          },
+          {
+            "type": "separator",
+            "rank": 1
+          },
+          {
+            "command": "filebrowser:open-path",
+            "rank": 1
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-settings",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 5
+          },
+          {
+            "command": "filebrowser:toggle-navigate-to-current-directory",
+            "rank": 5
+          },
+          {
+            "type": "separator",
+            "rank": 5
+          }
+        ]
+      }
+    ]
+  },
   "title": "File Browser",
   "description": "File Browser settings.",
   "jupyter.lab.shortcuts": [

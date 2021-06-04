@@ -226,17 +226,6 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         category: trans.__('Main Area')
       });
     }
-    // Add main menu notebook menu.
-    if (mainMenu) {
-      mainMenu.editMenu.addGroup(
-        [
-          { command: startCommand },
-          { command: nextCommand },
-          { command: prevCommand }
-        ],
-        10
-      );
-    }
 
     // Provide the registry to the system.
     return registry;

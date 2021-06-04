@@ -120,14 +120,6 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
-
-    menu.fileMenu.addGroup(
-      [
-        { command: CommandIDs.saveWorkspaceAs },
-        { command: CommandIDs.saveWorkspace }
-      ],
-      40
-    );
   }
 };
 
