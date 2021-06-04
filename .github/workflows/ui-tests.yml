@@ -1,0 +1,86 @@
+name: UI Tests
+
+on: [push, pull_request]
+
+jobs:
+  ui-test:
+    name: Visual Regression
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        group: [ui_test]
+        python: [3.8]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Set up Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+
+    - name: Cache pip on Linux
+      uses: actions/cache@v2
+      if: startsWith(runner.os, 'Linux')
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python }}-${{ hashFiles('**/requirements.txt', 'setup.py') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python }}
+
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: Cache yarn
+      uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - name: Install dependencies
+      env:
+        GROUP: ${{ matrix.group }}
+      run: |
+        bash ./scripts/ci_install.sh
+        jlpm
+        jlpm build
+        jupyter lab build
+
+    - name: Install Galata
+      run: |
+        cd ui-tests
+        jlpm install --frozen-lockfile
+    
+    - name: Launch JupyterLab
+      run: |
+        cd ui-tests
+        mkdir jlab_root
+        jlpm run start-jlab:detached
+    
+    - name: Wait for JupyterLab
+      uses: ifaxity/wait-on-action@v1
+      with:
+        resource: http-get://localhost:8888/api
+        timeout: 20000
+    
+    - name: Run UI Tests
+      run: |
+        cd ui-tests
+        jlpm run test
+        rm -rf jlab_root
+
+    - name: Upload UI Test artifacts
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: ui-test-output
+        path: |
+          ui-tests/test-output
