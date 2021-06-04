@@ -1835,7 +1835,7 @@ function addCommands(
       if (current) {
         NotebookActions.moveUp(current.content);
         Private.raiseSilentNotification(
-          'Notebook cell shifted up successfully',
+          trans.__('Notebook cell shifted up successfully'),
           current.node
         );
       }
@@ -1850,7 +1850,7 @@ function addCommands(
       if (current) {
         NotebookActions.moveDown(current.content);
         Private.raiseSilentNotification(
-          'Notebook cell shifted down successfully',
+          trans.__('Notebook cell shifted down successfully'),
           current.node
         );
       }
