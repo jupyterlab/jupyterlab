@@ -331,7 +331,7 @@ export class Dialog<T> extends Widget {
         const activeEl = document.activeElement;
         let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) + 1;
 
-        // Handle a right arros on the last button
+        // Handle a right arrows on the last button
         if (idx == this._buttons.length) {
           idx = 0;
         }
