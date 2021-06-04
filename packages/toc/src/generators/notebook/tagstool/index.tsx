@@ -137,6 +137,10 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
     }
   }
 
+  /**
+   * Select all the cells that contains all of the current tags and activates the first of those cells.
+   */
+
   selectAllCellsWithCurrentTags = (): void => {
     const tags = this.state.selected;
     const panel = this.props.tracker.currentWidget;
