@@ -234,20 +234,21 @@ function activateEditorCommands(
       (settings.get('lineWiseCopyCut').composite as boolean) ?? lineWiseCopyCut;
   }
 
-  const editorOptions: any = {
-    keyMap,
-    theme,
-    scrollPastEnd,
-    styleActiveLine,
-    styleSelectedText,
-    selectionPointer,
-    lineWiseCopyCut
-  };
+
 
   /**
    * Update the settings of the current tracker instances.
    */
   function updateTracker(): void {
+    const editorOptions: any = {
+      keyMap,
+      theme,
+      scrollPastEnd,
+      styleActiveLine,
+      styleSelectedText,
+      selectionPointer,
+      lineWiseCopyCut
+    };
     tracker.forEach(widget => {
       if (widget.content.editor instanceof CodeMirrorEditor) {
         widget.content.editor.setOptions(editorOptions);
@@ -274,6 +275,15 @@ function activateEditorCommands(
    * Handle the settings of new widgets.
    */
   tracker.widgetAdded.connect((sender, widget) => {
+    const editorOptions: any = {
+      keyMap,
+      theme,
+      scrollPastEnd,
+      styleActiveLine,
+      styleSelectedText,
+      selectionPointer,
+      lineWiseCopyCut
+    };
     if (widget.content.editor instanceof CodeMirrorEditor) {
       widget.content.editor.setOptions(editorOptions);
     }
