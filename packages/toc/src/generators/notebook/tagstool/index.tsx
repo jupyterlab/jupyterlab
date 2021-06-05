@@ -246,17 +246,25 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
 
     if (this.state.selected.length === 0) {
       command = (
-        <span className={'toc-filter-button-na'}>
-          Select All Cells With Current Tags
+        <span className={'toc-filter-button-na'}
+          role="text"
+          aria-label={this._trans.__('Select All Cells With Current Tags')}
+          title={this._trans.__('Select All Cells With Current Tags')}
+        >
+          {this._trans.__('Select All Cells With Current Tags')}
         </span>
       );
     } else {
       command = (
         <span
           className={'toc-filter-button'}
+          role="button"
+          aria-label={this._trans.__('Select All Cells With Current Tags')}
+          title={this._trans.__('Select All Cells With Current Tags')}
           onClick={this.selectAllCellsWithCurrentTags}
+          onKeyDown={this.selectAllCellsWithCurrentTags}
         >
-          Select All Cells With Current Tags
+          {this._trans.__('Select All Cells With Current Tags')}
         </span>
       );
     }
