@@ -101,7 +101,6 @@
 |----------------------------------------------------------------------------*/
 
 .jp-FileDialog.jp-mod-conflict input {
-  /*color: red;*/
   color: var(--jp-error-color1);
 }
 

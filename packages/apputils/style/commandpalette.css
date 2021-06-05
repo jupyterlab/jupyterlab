@@ -165,21 +165,17 @@
 }
 
 .lm-CommandPalette-item.lm-mod-active {
-  /*background: var(--jp-layout-color3);*/
-  /*background: var(--jp-brand-color2);*/
   color: var(--jp-ui-inverse-font-color1);
   background: var(--jp-brand-color1);
 }
 
 .lm-CommandPalette-item.lm-mod-active:hover:not(.lm-mod-disabled) {
-  /*background: var(--jp-layout-color4);*/
   color: var(--jp-ui-inverse-font-color1);
   background: var(--jp-brand-color1);
 }
 
 .lm-CommandPalette-item:hover:not(.lm-mod-active):not(.lm-mod-disabled) {
   background: var(--jp-layout-color2);
-  /*background: var(--jp-brand-color3);*/
 }
 
 .lm-CommandPalette-itemContent {
@@ -205,7 +201,6 @@
 }
 
 .lm-CommandPalette-item.lm-mod-disabled .lm-CommandPalette-itemIcon {
-  /*opacity: 0.4;*/
   opacity: 0.6;
 }
 
