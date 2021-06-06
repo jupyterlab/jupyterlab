@@ -246,7 +246,8 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
 
     if (this.state.selected.length === 0) {
       command = (
-        <span className={'toc-filter-button-na'}
+        <span
+          className={'toc-filter-button-na'}
           role="text"
           aria-label={this._trans.__('Select All Cells With Current Tags')}
           title={this._trans.__('Select All Cells With Current Tags')}
