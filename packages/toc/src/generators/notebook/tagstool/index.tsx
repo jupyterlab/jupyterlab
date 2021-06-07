@@ -138,6 +138,34 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
   }
 
   /**
+   * Select all the cells that contains all of the current tags and activates the first of those cells.
+   */
+
+  selectAllCellsWithCurrentTags = (): void => {
+    const tags = this.state.selected;
+    const panel = this.props.tracker.currentWidget;
+    const widgets = panel?.content.widgets;
+
+    panel?.content.deselectAll();
+
+    let changedActive = false;
+
+    widgets?.forEach((cell, ix) => {
+      const hasAllCurrentTags = tags.every(tag => this.containsTag(tag, cell));
+
+      if (hasAllCurrentTags) {
+        if (!changedActive) {
+          if (panel) {
+            panel.content.activeCellIndex = ix;
+          }
+          changedActive = true;
+        }
+        panel?.content.select(cell);
+      }
+    });
+  };
+
+  /**
    * Filters the ToC by according to selected tags.
    *
    * @param selected - selected tags
@@ -214,6 +242,34 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
         </span>
       );
     }
+    let command;
+
+    if (this.state.selected.length === 0) {
+      command = (
+        <span
+          className={'toc-filter-button-na'}
+          role="text"
+          aria-label={this._trans.__('Select All Cells With Current Tags')}
+          title={this._trans.__('Select All Cells With Current Tags')}
+        >
+          {this._trans.__('Select All Cells With Current Tags')}
+        </span>
+      );
+    } else {
+      command = (
+        <span
+          className={'toc-filter-button'}
+          role="button"
+          aria-label={this._trans.__('Select All Cells With Current Tags')}
+          title={this._trans.__('Select All Cells With Current Tags')}
+          onClick={this.selectAllCellsWithCurrentTags}
+          onKeyDown={this.selectAllCellsWithCurrentTags}
+        >
+          {this._trans.__('Select All Cells With Current Tags')}
+        </span>
+      );
+    }
+
     if (this.props.tags && this.props.tags.length > 0) {
       jsx = (
         <div className={'toc-tags-container'}>
@@ -223,6 +279,7 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
             selectedTags={this.state.selected}
           />
           {text}
+          {command}
         </div>
       );
     }
