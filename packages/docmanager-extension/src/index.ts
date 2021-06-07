@@ -527,7 +527,7 @@ function addCommands(
 
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
-    addLabCommands(app, docManager, labShell, opener, translator, palette);
+    addLabCommands(app, docManager, labShell, opener, translator);
   }
 
   commands.addCommand(CommandIDs.deleteFile, {
@@ -848,8 +848,7 @@ function addLabCommands(
   docManager: IDocumentManager,
   labShell: ILabShell,
   opener: DocumentManager.IWidgetOpener,
-  translator: ITranslator,
-  palette: ICommandPalette | null
+  translator: ITranslator
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands } = app;
