@@ -18,8 +18,6 @@ import {
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 
@@ -41,8 +39,7 @@ function activateHubExtension(
   app: JupyterFrontEnd,
   paths: JupyterFrontEnd.IPaths,
   translator: ITranslator,
-  palette: ICommandPalette | null,
-  mainMenu: IMainMenu | null
+  palette: ICommandPalette | null
 ): void {
   const trans = translator.load('jupyterlab');
   const hubHost = paths.urls.hubHost || '';
@@ -107,7 +104,7 @@ const hubExtension: JupyterFrontEndPlugin<void> = {
   activate: activateHubExtension,
   id: 'jupyter.extensions.hub-extension',
   requires: [JupyterFrontEnd.IPaths, ITranslator],
-  optional: [ICommandPalette, IMainMenu],
+  optional: [ICommandPalette],
   autoStart: true
 };
 

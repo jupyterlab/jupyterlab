@@ -86,11 +86,10 @@ const about: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:about',
   autoStart: true,
   requires: [ITranslator],
-  optional: [IMainMenu, ICommandPalette],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    menu: IMainMenu | null,
     palette: ICommandPalette | null
   ): void => {
     const { commands } = app;
@@ -179,11 +178,10 @@ const launchClassic: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:launch-classic',
   autoStart: true,
   requires: [ITranslator],
-  optional: [IMainMenu, ICommandPalette],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    menu: IMainMenu | null,
     palette: ICommandPalette | null
   ): void => {
     const { commands } = app;

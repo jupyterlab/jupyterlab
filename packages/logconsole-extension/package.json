@@ -38,7 +38,6 @@
     "@jupyterlab/apputils": "^3.1.0-alpha.11",
     "@jupyterlab/coreutils": "^5.1.0-alpha.11",
     "@jupyterlab/logconsole": "^3.1.0-alpha.11",
-    "@jupyterlab/mainmenu": "^3.1.0-alpha.11",
     "@jupyterlab/notebook": "^3.1.0-alpha.11",
     "@jupyterlab/rendermime": "^3.1.0-alpha.11",
     "@jupyterlab/settingregistry": "^3.1.0-alpha.11",

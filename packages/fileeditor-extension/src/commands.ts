@@ -1131,7 +1131,7 @@ export namespace Commands {
     addUndoRedoToEditMenu(menu, tracker);
 
     // Add editor view options.
-    addEditorViewerToViewMenu(menu, tracker, trans);
+    addEditorViewerToViewMenu(menu, tracker);
 
     // Add a console creator the the file menu.
     addConsoleCreatorToFileMenu(menu, commands, tracker, trans);
@@ -1188,8 +1188,7 @@ export namespace Commands {
    */
   export function addEditorViewerToViewMenu(
     menu: IMainMenu,
-    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    trans: TranslationBundle
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>
   ): void {
     menu.viewMenu.editorViewers.add({
       tracker,

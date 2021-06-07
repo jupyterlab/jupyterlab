@@ -21,7 +21,6 @@ import {
   NotebookSearchProvider
 } from '@jupyterlab/documentsearch';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
@@ -78,13 +77,12 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   id: '@jupyterlab/documentsearch:plugin',
   provides: ISearchProviderRegistry,
   requires: [ITranslator],
-  optional: [ICommandPalette, IMainMenu],
+  optional: [ICommandPalette],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    palette: ICommandPalette,
-    mainMenu: IMainMenu | null
+    palette: ICommandPalette
   ) => {
     const trans = translator.load('jupyterlab');
 
