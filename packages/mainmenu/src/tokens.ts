@@ -94,5 +94,8 @@ export namespace IMainMenu {
     rank?: number;
   }
 
+  /**
+   * The instantiation options for an IMainMenu.
+   */
   export interface IMenuOptions extends MenuFactory.IMenuOptions {}
 }

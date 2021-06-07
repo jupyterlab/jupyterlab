@@ -468,7 +468,7 @@ Settings-defined menu
 
 JupyterLab provides integration with its settings system for menu definitions.
 Your extension can provide a settings schema with a ``jupyter.lab.menus`` key,
-declaring default menus. You don't need to set anything in the typescript code
+declaring default menus. You don't need to set anything in the TypeScript code
 (except the command definitions).
 
 To add a new menu with your extension command:
@@ -493,7 +493,7 @@ To add a new menu with your extension command:
     }
 
 The menu item label will be set with the command label. For menus (and
-submenus), the label needs to be set explicitly with the ``label`` 
+submenus), the label needs to be set explicitly with the ``label``
 property.
 
 Menu and item have a ``rank`` that will determine the elements order.
@@ -523,7 +523,7 @@ Here is the list of default menu ids:
 - File menu: ``jp-mainmenu-file``
 
   * New file submenu: ``jp-mainmenu-file-new``
-  
+
 - Edit menu: ``jp-mainmenu-edit``
 - View menu: ``jp-mainmenu-view``
 - Run menu: ``jp-mainmenu-run``
@@ -547,7 +547,7 @@ And an item must follow:
    :lines: 346-385
 
 Menus added to the settings system will be editable by users using the ``mainmenu-extension``
-settings. In particular, they can be disabled at the item or the menu level by setting the 
+settings. In particular, they can be disabled at the item or the menu level by setting the
 property ``disabled`` to ``true``.
 
 API-defined menu
