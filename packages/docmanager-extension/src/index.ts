@@ -35,8 +35,6 @@ import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { Contents, Kernel } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -108,7 +106,6 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     ILabStatus,
     ICommandPalette,
     ILabShell,
-    IMainMenu,
     ISessionContextDialogs,
     IDocumentProviderFactory
   ],
@@ -119,7 +116,6 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     status: ILabStatus | null,
     palette: ICommandPalette | null,
     labShell: ILabShell | null,
-    mainMenu: IMainMenu | null,
     sessionDialogs: ISessionContextDialogs | null,
     docProviderFactory: IDocumentProviderFactory | null
   ): IDocumentManager => {
@@ -365,13 +361,12 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:download',
   autoStart: true,
   requires: [ITranslator, IDocumentManager],
-  optional: [ICommandPalette, IMainMenu],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
     docManager: IDocumentManager,
-    palette: ICommandPalette | null,
-    mainMenu: IMainMenu | null
+    palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
