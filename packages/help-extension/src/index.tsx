@@ -24,8 +24,6 @@ import {
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
-import { IInspector } from '@jupyterlab/inspector';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { KernelMessage } from '@jupyterlab/services';
@@ -168,11 +166,6 @@ const about: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    if (menu) {
-      const helpMenu = menu.helpMenu;
-      helpMenu.addGroup([{ command: CommandIDs.about }], 0);
-    }
-
     if (palette) {
       palette.addItem({ command: CommandIDs.about, category });
     }
@@ -204,11 +197,6 @@ const launchClassic: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    if (menu) {
-      const helpMenu = menu.helpMenu;
-      helpMenu.addGroup([{ command: CommandIDs.launchClassic }], 1);
-    }
-
     if (palette) {
       palette.addItem({ command: CommandIDs.launchClassic, category });
     }
@@ -222,14 +210,13 @@ const resources: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:resources',
   autoStart: true,
   requires: [IMainMenu, ITranslator],
-  optional: [ICommandPalette, ILayoutRestorer, IInspector],
+  optional: [ICommandPalette, ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
     mainMenu: IMainMenu,
     translator: ITranslator,
     palette: ICommandPalette | null,
-    restorer: ILayoutRestorer | null,
-    inspector: IInspector | null
+    restorer: ILayoutRestorer | null
   ): void => {
     const trans = translator.load('jupyterlab');
     let counter = 0;
@@ -301,12 +288,6 @@ const resources: JupyterFrontEndPlugin<void> = {
 
     // Populate the Help menu.
     const helpMenu = mainMenu.helpMenu;
-
-    // Contextual help in its own group
-    const contextualHelpGroup = [
-      inspector ? 'inspector:open' : undefined
-    ].map(command => ({ command }));
-    helpMenu.addGroup(contextualHelpGroup, 0);
 
     const resourcesGroup = resources.map(args => ({
       args,
@@ -508,7 +489,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
     });
 
     /**
-     * Return a full report format based on a format name
+     * Return a full license report format based on a format name
      */
     function formatOrDefault(format: string): Licenses.IReportFormat {
       return (
@@ -518,10 +499,15 @@ const licenses: JupyterFrontEndPlugin<void> = {
     }
 
     /**
-     * Create a MainAreaWidget for a toolbar item
+     * Create a MainAreaWidget for a license viewer
      */
     function createLicenseWidget(args: Licenses.ICreateArgs) {
-      const licensesModel = new Licenses.Model({ licensesUrl, trans, ...args });
+      const licensesModel = new Licenses.Model({
+        ...args,
+        licensesUrl,
+        trans,
+        serverSettings: app.serviceManager.serverSettings
+      });
       const content = new Licenses({ model: licensesModel });
       content.id = `${licensesNamespace}-${++counter}`;
       content.title.label = licensesText;

@@ -43,14 +43,14 @@ describe('@jupyterlab/mainmenu', () => {
       it('should construct a new file menu', () => {
         expect(menu).toBeInstanceOf(FileMenu);
         // For localization this is now defined when on the mainmenu-extension.
-        expect(menu.menu.title.label).toBe('');
+        expect(menu.title.label).toBe('');
       });
     });
 
     describe('#newMenu', () => {
       it('should be a submenu for `New...` commands', () => {
         // For localization this is now defined when on the mainmenu-extension.
-        expect(menu.newMenu.menu.title.label).toBe('');
+        expect(menu.newMenu.title.label).toBe('');
       });
     });
 

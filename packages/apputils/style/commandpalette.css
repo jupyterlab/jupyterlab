@@ -117,7 +117,7 @@
 .lm-CommandPalette-input::-webkit-input-placeholder,
 .lm-CommandPalette-input::-moz-placeholder,
 .lm-CommandPalette-input:-ms-input-placeholder {
-  color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color2);
   font-size: var(--jp-ui-font-size1);
 }
 
@@ -161,15 +161,17 @@
 }
 
 .lm-CommandPalette-item.lm-mod-disabled {
-  color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color2);
 }
 
 .lm-CommandPalette-item.lm-mod-active {
-  background: var(--jp-layout-color3);
+  color: var(--jp-ui-inverse-font-color1);
+  background: var(--jp-brand-color1);
 }
 
 .lm-CommandPalette-item.lm-mod-active:hover:not(.lm-mod-disabled) {
-  background: var(--jp-layout-color4);
+  color: var(--jp-ui-inverse-font-color1);
+  background: var(--jp-brand-color1);
 }
 
 .lm-CommandPalette-item:hover:not(.lm-mod-active):not(.lm-mod-disabled) {
@@ -187,7 +189,7 @@
 }
 
 .lm-CommandPalette-item.lm-mod-disabled mark {
-  color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color2);
 }
 
 .lm-CommandPalette-item .lm-CommandPalette-itemIcon {
@@ -199,7 +201,7 @@
 }
 
 .lm-CommandPalette-item.lm-mod-disabled .lm-CommandPalette-itemIcon {
-  opacity: 0.4;
+  opacity: 0.6;
 }
 
 .lm-CommandPalette-item .lm-CommandPalette-itemShortcut {

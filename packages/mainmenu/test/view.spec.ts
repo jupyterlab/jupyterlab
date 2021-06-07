@@ -45,7 +45,7 @@ describe('@jupyterlab/mainmenu', () => {
       it('should construct a new view menu', () => {
         expect(menu).toBeInstanceOf(ViewMenu);
         // For localization this is now defined when on the mainmenu-extension.
-        expect(menu.menu.title.label).toBe('');
+        expect(menu.title.label).toBe('');
       });
     });
 

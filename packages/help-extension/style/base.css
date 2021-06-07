@@ -141,10 +141,18 @@
   flex: 1;
 }
 
+.jp-Licenses-Bundles .lm-TabBar-content {
+  width: 100%;
+}
+
 .jp-Licenses-Bundles .lm-TabBar-tab {
   padding: calc(var(--jp-ui-font-size1) / 2);
   background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
+}
+
+.jp-Licenses-Bundles .lm-TabBar-tabLabel {
+  text-overflow: ellipsis;
 }
 
 .jp-Licenses-Bundles .lm-TabBar-tab label {
@@ -153,7 +161,7 @@
   width: calc(2.5 * var(--jp-ui-font-size1));
   padding: 0 calc(var(--jp-ui-font-size1) / 2);
   text-align: center;
-  margin-left: var(--jp-ui-font-size1);
+  margin-left: calc(var(--jp-ui-font-size1) / 2);
 }
 
 .jp-Licenses-Bundles .lm-TabBar-tab.lm-mod-current {

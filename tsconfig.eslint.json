@@ -20,6 +20,7 @@
     "scripts/*",
     "jupyterlab/*",
     "jupyterlab/staging/*",
-    "testutils/**/*"
+    "testutils/**/*",
+    "ui-tests/**/*"
   ]
 }

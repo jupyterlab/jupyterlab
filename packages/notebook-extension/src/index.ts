@@ -412,8 +412,15 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
     });
 
     // Add a notebook group to the File menu.
-    const exportTo = new Menu({ commands });
-    exportTo.title.label = trans.__('Export Notebook As…');
+    let exportTo: Menu | null | undefined;
+    if (mainMenu) {
+      exportTo = mainMenu.fileMenu.items.find(
+        item =>
+          item.type === 'submenu' &&
+          item.submenu?.id === 'jp-mainmenu-file-notebookexport'
+      )?.submenu;
+    }
+
     void services.nbconvert.getExportFormats().then(response => {
       if (response) {
         const formatLabels: any = Private.getFormatLabels(translator);
@@ -429,10 +436,12 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
             isPalette: false
           };
           if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-            exportTo.addItem({
-              command: CommandIDs.exportToFormat,
-              args: args
-            });
+            if (exportTo) {
+              exportTo.addItem({
+                command: CommandIDs.exportToFormat,
+                args: args
+              });
+            }
             if (palette) {
               args = {
                 format: key,
@@ -448,12 +457,6 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
             }
           }
         });
-        if (mainMenu) {
-          const fileGroup = [
-            { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
-          ];
-          mainMenu.fileMenu.addGroup(fileGroup, 10);
-        }
       }
     });
   }
@@ -2360,9 +2363,6 @@ function populateMenus(
     }
   } as IEditMenu.IClearer<NotebookPanel>);
 
-  // Add new notebook creation to the file menu.
-  mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 10);
-
   // Add a close and shutdown command to the file menu.
   mainMenu.fileMenu.closeAndCleaners.add({
     tracker,
@@ -2427,27 +2427,6 @@ function populateMenus(
     createConsole: current => Private.createConsole(commands, current, true)
   } as IFileMenu.IConsoleCreator<NotebookPanel>);
 
-  // Add some commands to the application view menu.
-  const collapseGroup = [
-    CommandIDs.hideCode,
-    CommandIDs.hideOutput,
-    CommandIDs.hideAllCode,
-    CommandIDs.hideAllOutputs
-  ].map(command => {
-    return { command };
-  });
-  mainMenu.viewMenu.addGroup(collapseGroup, 10);
-
-  const expandGroup = [
-    CommandIDs.showCode,
-    CommandIDs.showOutput,
-    CommandIDs.showAllCode,
-    CommandIDs.showAllOutputs
-  ].map(command => {
-    return { command };
-  });
-  mainMenu.viewMenu.addGroup(expandGroup, 11);
-
   // Add an IEditorViewer to the application view menu
   mainMenu.viewMenu.editorViewers.add({
     tracker,
@@ -2496,76 +2475,6 @@ function populateMenus(
         });
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
-
-  // Add a renderAllMarkdown group to the run menu.
-  const renderAllMarkdown = [CommandIDs.renderAllMarkdown].map(command => {
-    return { command };
-  });
-  // Add a run+insert and run+don't advance group to the run menu.
-  const runExtras = [
-    CommandIDs.runAndInsert,
-    CommandIDs.run,
-    CommandIDs.runInConsole
-  ].map(command => {
-    return { command };
-  });
-
-  // Add a run all above/below group to the run menu.
-  const runAboveBelowGroup = [
-    CommandIDs.runAllAbove,
-    CommandIDs.runAllBelow
-  ].map(command => {
-    return { command };
-  });
-
-  // Add commands to the application edit menu.
-  const undoCellActionGroup = [
-    CommandIDs.undoCellAction,
-    CommandIDs.redoCellAction
-  ].map(command => {
-    return { command };
-  });
-
-  const copyGroup = [
-    CommandIDs.cut,
-    CommandIDs.copy,
-    CommandIDs.pasteBelow,
-    CommandIDs.pasteAbove,
-    CommandIDs.pasteAndReplace
-  ].map(command => {
-    return { command };
-  });
-
-  const selectGroup = [CommandIDs.selectAll, CommandIDs.deselectAll].map(
-    command => {
-      return { command };
-    }
-  );
-
-  const splitMergeGroup = [
-    CommandIDs.split,
-    CommandIDs.merge,
-    CommandIDs.mergeAbove,
-    CommandIDs.mergeBelow
-  ].map(command => {
-    return { command };
-  });
-
-  const moveCellsGroup = [CommandIDs.moveUp, CommandIDs.moveDown].map(
-    command => {
-      return { command };
-    }
-  );
-
-  mainMenu.editMenu.addGroup(undoCellActionGroup, 4);
-  mainMenu.editMenu.addGroup(copyGroup, 5);
-  mainMenu.editMenu.addGroup([{ command: CommandIDs.deleteCell }], 6);
-  mainMenu.editMenu.addGroup(selectGroup, 7);
-  mainMenu.editMenu.addGroup(moveCellsGroup, 8);
-  mainMenu.editMenu.addGroup(splitMergeGroup, 9);
-  mainMenu.runMenu.addGroup(runExtras, 10);
-  mainMenu.runMenu.addGroup(runAboveBelowGroup, 11);
-  mainMenu.runMenu.addGroup(renderAllMarkdown, 12);
 
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({

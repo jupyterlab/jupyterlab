@@ -466,7 +466,7 @@ all jupyterlab organization extensions.
       {
          "name": "@jupyterlab/*",
          "type": "jupyterlab",
-         "reason": "All @jupyterlab org extensions are allowlisted, of course...",
+         "reason": "All @jupyterlab org extensions are allowlisted, of course…",
          "creation_date": "2020-03-11T03:28:56.782Z",
          "last_update_date":  "2020-03-11T03:28:56.782Z"
       }

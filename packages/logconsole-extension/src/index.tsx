@@ -198,11 +198,12 @@ function activateLogConsole(
       app.commands.notifyCommandChanged();
     });
 
-    app.shell.add(logConsoleWidget, 'main', {
+    app.shell.add(logConsoleWidget, 'down', {
       ref: options.ref,
       mode: options.insertMode
     });
     void tracker.add(logConsoleWidget);
+    app.shell.activateById(logConsoleWidget.id);
 
     logConsoleWidget.update();
     app.commands.notifyCommandChanged();
@@ -261,9 +262,7 @@ function activateLogConsole(
     command: CommandIDs.open,
     selector: '.jp-Notebook'
   });
-  if (mainMenu) {
-    mainMenu.viewMenu.addGroup([{ command: CommandIDs.open }]);
-  }
+
   if (palette) {
     palette.addItem({
       command: CommandIDs.open,

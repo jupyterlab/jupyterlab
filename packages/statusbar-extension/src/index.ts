@@ -107,9 +107,6 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
     if (palette) {
       palette.addItem({ command, category });
     }
-    if (mainMenu) {
-      mainMenu.viewMenu.addGroup([{ command }], 1);
-    }
 
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(STATUSBAR_PLUGIN_ID);

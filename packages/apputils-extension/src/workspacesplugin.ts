@@ -120,14 +120,6 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
-
-    menu.fileMenu.addGroup(
-      [
-        { command: CommandIDs.saveWorkspaceAs },
-        { command: CommandIDs.saveWorkspace }
-      ],
-      40
-    );
   }
 };
 
@@ -285,7 +277,7 @@ namespace Private {
     const trans = translator.load('jupyterlab');
     const saveBtn = Dialog.okButton({ label: trans.__('Save') });
     const result = await showDialog({
-      title: trans.__('Save Current Workspace As...'),
+      title: trans.__('Save Current Workspace As…'),
       body: new SaveWidget(defaultPath),
       buttons: [Dialog.cancelButton({ label: trans.__('Cancel') }), saveBtn]
     });

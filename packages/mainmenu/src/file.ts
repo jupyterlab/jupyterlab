@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Menu, Widget } from '@lumino/widgets';
+import { find } from '@lumino/algorithm';
+
+import { Widget } from '@lumino/widgets';
 
 import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
 
@@ -34,12 +36,11 @@ export interface IFileMenu extends IJupyterLabMenu {
  * An extensible FileMenu for the application.
  */
 export class FileMenu extends JupyterLabMenu implements IFileMenu {
-  constructor(options: Menu.IOptions) {
+  constructor(options: IJupyterLabMenu.IOptions) {
     super(options);
     this.quitEntry = false;
 
     // Create the "New" submenu.
-    this.newMenu = new JupyterLabMenu(options, false);
     this.closeAndCleaners = new Set<IFileMenu.ICloseAndCleaner<Widget>>();
     this.consoleCreators = new Set<IFileMenu.IConsoleCreator<Widget>>();
   }
@@ -47,7 +48,17 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
   /**
    * The New submenu.
    */
-  readonly newMenu: JupyterLabMenu;
+  get newMenu(): JupyterLabMenu {
+    if (!this._newMenu) {
+      this._newMenu =
+        (find(this.items, menu => menu.submenu?.id === 'jp-mainmenu-file-new')
+          ?.submenu as JupyterLabMenu) ??
+        new JupyterLabMenu({
+          commands: this.commands
+        });
+    }
+    return this._newMenu;
+  }
 
   /**
    * The close and cleanup extension point.
@@ -63,7 +74,7 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
    * Dispose of the resources held by the file menu.
    */
   dispose(): void {
-    this.newMenu.dispose();
+    this._newMenu?.dispose();
     this.consoleCreators.clear();
     super.dispose();
   }
@@ -72,6 +83,8 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
    * Option to add a `Quit` entry in File menu
    */
   public quitEntry: boolean;
+
+  private _newMenu: JupyterLabMenu;
 }
 
 /**

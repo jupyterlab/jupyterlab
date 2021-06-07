@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Menu, Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { IJupyterLabMenu, JupyterLabMenu, IMenuExtender } from './labmenu';
 
@@ -22,7 +22,7 @@ export class KernelMenu extends JupyterLabMenu implements IKernelMenu {
   /**
    * Construct the kernel menu.
    */
-  constructor(options: Menu.IOptions) {
+  constructor(options: IJupyterLabMenu.IOptions) {
     super(options);
     this.kernelUsers = new Set<IKernelMenu.IKernelUser<Widget>>();
   }
