@@ -234,8 +234,6 @@ function activateEditorCommands(
       (settings.get('lineWiseCopyCut').composite as boolean) ?? lineWiseCopyCut;
   }
 
-
-
   /**
    * Update the settings of the current tracker instances.
    */
