@@ -686,9 +686,35 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     this.modelDB.setValue('executionCount', newValue || null);
   }
 
+  /**
+   * Whether the cell is dirty or not.
+   *
+   * A cell is dirty if it is output is not empty and does not
+   * result of the input code execution.
+   */
+  get isDirty(): boolean {
+    // Test could be done dynamically with this._executedCode
+    // but for performance reason, the diff status is stored in a boolean.
+    return this._isDirty;
+  }
+  set isDirty(v: boolean) {
+    if (v !== this._isDirty) {
+      if (!v) {
+        this._executedCode = this.value.text.trim();
+      }
+      this._isDirty = v;
+      this.stateChanged.emit({
+        name: 'isDirty',
+        oldValue: !v,
+        newValue: v
+      });
+    }
+  }
+
   clearExecution() {
     this.outputs.clear();
     this.executionCount = null;
+    this.isDirty = false;
     this.metadata.delete('execution');
   }
 
@@ -780,24 +806,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * Handle a change to the observable value.
    */
   protected onGenericChange(): void {
-    if (
-      !this.isDirty &&
-      this._executedCode !== null &&
-      this._executedCode != this.value.text.trim()
-    ) {
-      this.isDirty = true;
-      this.stateChanged.emit({
-        name: 'isDirty',
-        oldValue: false,
-        newValue: true
-      });
-    } else if (this.isDirty && this._executedCode == this.value.text.trim()) {
-      this.isDirty = false;
-      this.stateChanged.emit({
-        name: 'isDirty',
-        oldValue: true,
-        newValue: false
-      });
+    if ((this.sharedModel as models.YCodeCell).execution_count !== null) {
+      this.isDirty = this._executedCode !== this.value.text.trim();
     }
     this.contentChanged.emit(void 0);
   }
@@ -838,32 +848,24 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     args: ObservableValue.IChangedArgs
   ): void {
     const codeCell = this.sharedModel as models.YCodeCell;
-    const oldIsDirty = this.isDirty;
     this._modelDBMutex(() => {
       codeCell.execution_count = args.newValue
         ? (args.newValue as number)
         : null;
     });
-    this.isDirty = false;
-    this._executedCode = this.value.text.trim();
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({
       name: 'executionCount',
       oldValue: args.oldValue,
       newValue: args.newValue
     });
-
-    if (oldIsDirty != this.isDirty) {
-      this.stateChanged.emit({
-        name: 'isDirty',
-        oldValue: oldIsDirty,
-        newValue: this.isDirty
-      });
+    if (args.newValue && this.isDirty) {
+      this.isDirty = false;
     }
   }
 
-  isDirty = false;
-  private _executedCode: string | null = null;
+  private _executedCode: string = '';
+  private _isDirty = false;
   private _outputs: IOutputAreaModel;
 }
 
