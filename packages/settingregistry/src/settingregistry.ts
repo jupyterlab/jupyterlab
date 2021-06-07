@@ -897,11 +897,12 @@ export namespace SettingRegistry {
   }
 
   /**
+   * Reconcile the menus.
    *
-   * @param reference
-   * @param addition
-   * @param warn Warn if the command items are duplicated within the same menu
-   * @returns
+   * @param reference The reference list of menus.
+   * @param addition The list of menus to add.
+   * @param warn Warn if the command items are duplicated within the same menu.
+   * @returns The reconciled list of menus.
    */
   export function reconcileMenus(
     reference: ISettingRegistry.IMenu[] | null,

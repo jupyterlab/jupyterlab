@@ -244,6 +244,13 @@ export class MainMenu extends MenuBar implements IMainMenu {
     super.dispose();
   }
 
+  /**
+   * Generate the menu.
+   *
+   * @param commands The command registry
+   * @param options The main menu options.
+   * @param translator - The application language translator.
+   */
   static generateMenu(
     commands: CommandRegistry,
     options: IMainMenu.IMenuOptions,
