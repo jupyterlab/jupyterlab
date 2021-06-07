@@ -928,29 +928,6 @@ namespace Private {
         .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
     }
 
-    registry.pluginChanged.connect(async (sender, plugin) => {
-      if (plugin !== PLUGIN_ID) {
-        // If the plugin changed its menu.
-        const oldMenus = loaded[plugin] ?? [];
-        const newMenus =
-          registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];
-        if (!JSONExt.deepEqual(oldMenus, newMenus)) {
-          if (loaded[plugin]) {
-            // The plugin has changed, request the user to reload the UI - this should not happen
-            await displayInformation(trans);
-          } else {
-            // The plugin was not yet loaded when the menu was built => update the menu
-            loaded[plugin] = newMenus;
-            MenuFactory.updateMenus(menus, loaded[plugin], menuFactory).forEach(
-              menu => {
-                addMenu(menu);
-              }
-            );
-          }
-        }
-      }
-    });
-
     // Transform the plugin object to return different schema than the default.
     registry.transform(PLUGIN_ID, {
       compose: plugin => {
@@ -1005,12 +982,36 @@ namespace Private {
       menus.push(menu);
       addMenu(menu);
     });
+
     settings.changed.connect(() => {
       // As extension may change menu through API, prompt the user to reload if the
       // menu has been updated.
       const newMenus = (settings.composite.menus as any) ?? [];
       if (!JSONExt.deepEqual(currentMenus, newMenus)) {
         void displayInformation(trans);
+      }
+    });
+
+    registry.pluginChanged.connect(async (sender, plugin) => {
+      if (plugin !== PLUGIN_ID) {
+        // If the plugin changed its menu.
+        const oldMenus = loaded[plugin] ?? [];
+        const newMenus =
+          registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];
+        if (!JSONExt.deepEqual(oldMenus, newMenus)) {
+          if (loaded[plugin]) {
+            // The plugin has changed, request the user to reload the UI - this should not happen
+            await displayInformation(trans);
+          } else {
+            // The plugin was not yet loaded when the menu was built => update the menu
+            loaded[plugin] = newMenus;
+            MenuFactory.updateMenus(menus, loaded[plugin], menuFactory).forEach(
+              menu => {
+                addMenu(menu);
+              }
+            );
+          }
+        }
       }
     });
   }
