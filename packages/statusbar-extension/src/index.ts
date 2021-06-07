@@ -30,8 +30,6 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import {
   INotebookTracker,
   Notebook,
@@ -71,7 +69,6 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
     translator: ITranslator,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null,
-    mainMenu: IMainMenu | null,
     palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -129,7 +126,7 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
 
     return statusBar;
   },
-  optional: [ILabShell, ISettingRegistry, IMainMenu, ICommandPalette]
+  optional: [ILabShell, ISettingRegistry, ICommandPalette]
 };
 
 /**

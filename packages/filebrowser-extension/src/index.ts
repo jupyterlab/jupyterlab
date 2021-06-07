@@ -37,8 +37,6 @@ import {
 
 import { Launcher } from '@jupyterlab/launcher';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { Contents } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -167,8 +165,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     ILayoutRestorer,
     ISettingRegistry,
     ITreePathUpdater,
-    ICommandPalette,
-    IMainMenu
+    ICommandPalette
   ],
   autoStart: true,
   activate: (
@@ -178,8 +175,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer | null,
     settingRegistry: ISettingRegistry | null,
     treePathUpdater: ITreePathUpdater | null,
-    commandPalette: ICommandPalette | null,
-    mainMenu: IMainMenu | null
+    commandPalette: ICommandPalette | null
   ): void => {
     const trans = translator.load('jupyterlab');
     const browser = factory.defaultBrowser;
@@ -196,14 +192,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       restorer.add(browser, namespace);
     }
 
-    addCommands(
-      app,
-      factory,
-      translator,
-      settingRegistry,
-      commandPalette,
-      mainMenu
-    );
+    addCommands(app, factory, translator, settingRegistry, commandPalette);
 
     browser.title.icon = folderIcon;
     // Show the current file browser shortcut in its title.
@@ -776,8 +765,7 @@ function addCommands(
   factory: IFileBrowserFactory,
   translator: ITranslator,
   settingRegistry: ISettingRegistry | null,
-  commandPalette: ICommandPalette | null,
-  mainMenu: IMainMenu | null
+  commandPalette: ICommandPalette | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { docRegistry: registry, commands } = app;

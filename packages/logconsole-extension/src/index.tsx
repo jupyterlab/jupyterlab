@@ -29,8 +29,6 @@ import {
   LogLevel
 } from '@jupyterlab/logconsole';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -80,13 +78,7 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   id: LOG_CONSOLE_PLUGIN_ID,
   provides: ILoggerRegistry,
   requires: [ILabShell, IRenderMimeRegistry, INotebookTracker, ITranslator],
-  optional: [
-    ICommandPalette,
-    ILayoutRestorer,
-    IMainMenu,
-    ISettingRegistry,
-    IStatusBar
-  ],
+  optional: [ICommandPalette, ILayoutRestorer, ISettingRegistry, IStatusBar],
   autoStart: true
 };
 
@@ -101,7 +93,6 @@ function activateLogConsole(
   translator: ITranslator,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null,
-  mainMenu: IMainMenu | null,
   settingRegistry: ISettingRegistry | null,
   statusBar: IStatusBar | null
 ): ILoggerRegistry {

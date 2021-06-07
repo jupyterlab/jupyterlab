@@ -18,8 +18,6 @@ import {
 
 import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import {
   ContentsManager,
   Workspace,
@@ -49,17 +47,10 @@ const ICON_NAME = 'jp-JupyterIcon';
 export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:workspaces',
   autoStart: true,
-  requires: [
-    IMainMenu,
-    IFileBrowserFactory,
-    IWindowResolver,
-    IStateDB,
-    ITranslator
-  ],
+  requires: [IFileBrowserFactory, IWindowResolver, IStateDB, ITranslator],
   optional: [IRouter],
   activate: (
     app: JupyterFrontEnd,
-    menu: IMainMenu,
     fbf: IFileBrowserFactory,
     resolver: IWindowResolver,
     state: IStateDB,

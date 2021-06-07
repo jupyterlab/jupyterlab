@@ -8,4 +8,3 @@ import '@lumino/widgets/style/index.js';
 import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/application/style/index.js';
 import '@jupyterlab/documentsearch/style/index.js';
-import '@jupyterlab/mainmenu/style/index.js';
