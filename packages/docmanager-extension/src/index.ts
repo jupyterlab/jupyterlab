@@ -527,7 +527,7 @@ function addCommands(
 
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
-    addLabCommands(app, docManager, labShell, opener, translator, palette);
+    addLabCommands(app, docManager, labShell, opener, translator);
   }
 
   commands.addCommand(CommandIDs.deleteFile, {
@@ -541,6 +541,18 @@ function addCommands(
         throw new Error(`A non-empty path is required for ${command}.`);
       }
       return docManager.deleteFile(path);
+    }
+  });
+
+  commands.addCommand(CommandIDs.nameOnSave, {
+    label: () =>
+      trans.__('Rename %1…', fileType(shell.currentWidget, docManager)),
+    isEnabled,
+    execute: () => {
+      if (isEnabled()) {
+        const context = docManager.contextForWidget(shell.currentWidget!);
+        return nameOnSaveDialog(docManager, context!);
+      }
     }
   });
 
@@ -848,8 +860,7 @@ function addLabCommands(
   docManager: IDocumentManager,
   labShell: ILabShell,
   opener: DocumentManager.IWidgetOpener,
-  translator: ITranslator,
-  palette: ICommandPalette | null
+  translator: ITranslator
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands } = app;
@@ -908,19 +919,6 @@ function addLabCommands(
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
         return renameDialog(docManager, context!.path);
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.nameOnSave, {
-    label: () =>
-      trans.__('Rename %1…', fileType(contextMenuWidget(), docManager)),
-    isEnabled,
-    execute: () => {
-      // Implies contextMenuWidget() !== null
-      if (isEnabled()) {
-        const context = docManager.contextForWidget(contextMenuWidget()!);
-        return nameOnSaveDialog(docManager, context!);
       }
     }
   });
