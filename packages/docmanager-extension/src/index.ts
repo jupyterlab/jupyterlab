@@ -544,6 +544,18 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.nameOnSave, {
+    label: () =>
+      trans.__('Rename %1…', fileType(shell.currentWidget, docManager)),
+    isEnabled,
+    execute: () => {
+      if (isEnabled()) {
+        const context = docManager.contextForWidget(shell.currentWidget!);
+        return nameOnSaveDialog(docManager, context!);
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.newUntitled, {
     execute: args => {
       // FIXME-TRANS: Localizing args['error']?
@@ -907,19 +919,6 @@ function addLabCommands(
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
         return renameDialog(docManager, context!.path);
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.nameOnSave, {
-    label: () =>
-      trans.__('Rename %1…', fileType(contextMenuWidget(), docManager)),
-    isEnabled,
-    execute: () => {
-      // Implies contextMenuWidget() !== null
-      if (isEnabled()) {
-        const context = docManager.contextForWidget(contextMenuWidget()!);
-        return nameOnSaveDialog(docManager, context!);
       }
     }
   });
