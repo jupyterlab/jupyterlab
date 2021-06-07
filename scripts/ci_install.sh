@@ -50,8 +50,8 @@ if [[ $GROUP == nonode ]]; then
     ! node
 fi
 
-# The debugger tests require a kernel that supports debugging
-if [[ $GROUP == js-debugger ]]; then
+# The debugger and ui tests require a kernel that supports debugging
+if [[ $GROUP == js-debugger ]] || [[ $GROUP == ui_test ]]; then
     pip install xeus-python">=0.9.0,<0.10.0"
 fi
 
