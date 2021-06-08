@@ -16,6 +16,16 @@ commander
     // Get the previous version.
     const prev = utils.getPythonVersion();
 
+    // For patch, defer to `patch:release` command
+    if (spec === 'patch') {
+      let cmd = 'jlpm run patch:release';
+      if (opts.force) {
+        cmd += ' --force';
+      }
+      utils.run(cmd);
+      process.exit(0);
+    }
+
     // Make sure we have a valid version spec.
     const options = ['major', 'minor', 'release', 'build'];
     if (options.indexOf(spec) === -1) {
