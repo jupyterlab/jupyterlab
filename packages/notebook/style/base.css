@@ -47,12 +47,21 @@
   min-height: var(--jp-notebook-scroll-padding);
 }
 
+.jp-MainAreaWidget-ContainStrict .jp-Notebook * {
+  contain: strict;
+}
+
+.jp-Notebook-render * {
+  contain: none !important;
+}
+
 .jp-Notebook .jp-Cell {
   overflow: visible;
 }
 
 .jp-Notebook .jp-Cell .jp-InputPrompt {
   cursor: move;
+  float: left;
 }
 
 /*-----------------------------------------------------------------------------
@@ -121,6 +130,14 @@
 }
 
 /*-----------------------------------------------------------------------------
+| Notebook cell
+|----------------------------------------------------------------------------*/
+
+.jp-Notebook-cell {
+  content-visibility: auto;
+}
+
+/*-----------------------------------------------------------------------------
 | Notebook drag and drop
 |----------------------------------------------------------------------------*/
 
@@ -137,7 +154,7 @@
 }
 
 .jp-dragImage {
-  display: flex;
+  display: block;
   flex-direction: row;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
