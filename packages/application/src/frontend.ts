@@ -284,11 +284,6 @@ export namespace JupyterFrontEnd {
     readonly currentWidget: Widget | null;
 
     /**
-     * The user interface mode.
-     */
-    readonly mode: DockPanel.Mode;
-
-    /**
      * Returns an iterator for the widgets inside the application shell.
      *
      * @param area - Optional regions in the shell whose widgets are iterated.
