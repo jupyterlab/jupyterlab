@@ -173,11 +173,6 @@ function activate(
     label: trans.__('Show Markdown Editor')
   });
 
-  app.contextMenu.addItem({
-    command: CommandIDs.markdownEditor,
-    selector: '.jp-RenderedMarkdown'
-  });
-
   return tracker;
 }
 

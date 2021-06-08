@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
-import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
+import { IMenuExtender } from './tokens';
 
 /**
  * An interface for a View menu.
  */
-export interface IViewMenu extends IJupyterLabMenu {
+export interface IViewMenu extends IRankedMenu {
   /**
    * A set storing IKernelUsers for the Kernel menu.
    */
@@ -17,11 +18,11 @@ export interface IViewMenu extends IJupyterLabMenu {
 /**
  * An extensible View menu for the application.
  */
-export class ViewMenu extends JupyterLabMenu implements IViewMenu {
+export class ViewMenu extends RankedMenu implements IViewMenu {
   /**
    * Construct the view menu.
    */
-  constructor(options: IJupyterLabMenu.IOptions) {
+  constructor(options: IRankedMenu.IOptions) {
     super(options);
     this.editorViewers = new Set<IViewMenu.IEditorViewer<Widget>>();
   }

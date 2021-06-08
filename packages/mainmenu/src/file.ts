@@ -1,14 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
-import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
+import { IMenuExtender } from './tokens';
 
 /**
  * An interface for a File menu.
  */
-export interface IFileMenu extends IJupyterLabMenu {
+export interface IFileMenu extends IRankedMenu {
   /**
    * Option to add a `Quit` entry in the File menu
    */
@@ -17,7 +18,7 @@ export interface IFileMenu extends IJupyterLabMenu {
   /**
    * A submenu for creating new files/launching new activities.
    */
-  readonly newMenu: IJupyterLabMenu;
+  readonly newMenu: IRankedMenu;
 
   /**
    * The close and cleanup extension point.
@@ -33,8 +34,8 @@ export interface IFileMenu extends IJupyterLabMenu {
 /**
  * An extensible FileMenu for the application.
  */
-export class FileMenu extends JupyterLabMenu implements IFileMenu {
-  constructor(options: IJupyterLabMenu.IOptions) {
+export class FileMenu extends RankedMenu implements IFileMenu {
+  constructor(options: IRankedMenu.IOptions) {
     super(options);
     this.quitEntry = false;
 
@@ -46,12 +47,12 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
   /**
    * The New submenu.
    */
-  get newMenu(): JupyterLabMenu {
+  get newMenu(): RankedMenu {
     if (!this._newMenu) {
       this._newMenu =
         (find(this.items, menu => menu.submenu?.id === 'jp-mainmenu-file-new')
-          ?.submenu as JupyterLabMenu) ??
-        new JupyterLabMenu({
+          ?.submenu as RankedMenu) ??
+        new RankedMenu({
           commands: this.commands
         });
     }
@@ -82,7 +83,7 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
    */
   public quitEntry: boolean;
 
-  private _newMenu: JupyterLabMenu;
+  private _newMenu: RankedMenu;
 }
 
 /**

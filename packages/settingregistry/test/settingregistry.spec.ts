@@ -414,7 +414,7 @@ describe('@jupyterlab/settingregistry', () => {
         {
           id: '2',
           items: [
-            { command: 'b' },
+            { command: 'b', disabled: true },
             { command: 'b', args: { input: 'hello' } },
             { command: 'b', args: { input: 'world' } },
             { command: 'c' }
@@ -431,7 +431,10 @@ describe('@jupyterlab/settingregistry', () => {
               type: 'submenu',
               submenu: {
                 id: 'sub',
-                items: [{ command: 'sub-2' }]
+                items: [
+                  { command: 'sub-1', disabled: true },
+                  { command: 'sub-2' }
+                ]
               }
             }
           ]
@@ -444,20 +447,23 @@ describe('@jupyterlab/settingregistry', () => {
       expect(merged[0].items).toHaveLength(1);
       expect(merged[1].id).toEqual('2');
       expect(merged[1].items).toHaveLength(4);
-      expect((merged[1].items ?? [])[0].command).toEqual('b');
-      expect((merged[1].items ?? [])[0].args).toBeUndefined();
-      expect((merged[1].items ?? [])[1].command).toEqual('b');
-      expect((merged[1].items ?? [])[1].args?.input).toEqual('hello');
-      expect((merged[1].items ?? [])[2].command).toEqual('b');
-      expect((merged[1].items ?? [])[2].args?.input).toEqual('world');
+      expect(merged[1].items![0].command).toEqual('b');
+      expect(merged[1].items![0].args).toBeUndefined();
+      expect(merged[1].items![0].disabled).toEqual(true);
+      expect(merged[1].items![1].command).toEqual('b');
+      expect(merged[1].items![1].args?.input).toEqual('hello');
+      expect(merged[1].items![2].command).toEqual('b');
+      expect(merged[1].items![2].args?.input).toEqual('world');
       expect(merged[2].id).toEqual('4');
       expect(merged[2].items).toHaveLength(1);
-      expect((merged[2].items ?? [])[0].submenu?.items).toHaveLength(2);
+      expect(merged[2].items![0].submenu?.items).toHaveLength(2);
+      expect(merged[2].items![0].submenu?.items![0].command).toEqual('sub-1');
+      expect(merged[2].items![0].submenu?.items![0].disabled).toEqual(true);
       expect(merged[3].id).toEqual('3');
       expect(merged[3].items).toHaveLength(1);
     });
 
-    it('should remove disabled menu', () => {
+    it('should merge menu tree without adding new items', () => {
       const a: ISettingRegistry.IMenu[] = [
         {
           id: '1',
@@ -466,75 +472,178 @@ describe('@jupyterlab/settingregistry', () => {
         {
           id: '2',
           items: [{ command: 'b' }]
+        },
+        {
+          id: '4',
+          items: [
+            {
+              type: 'submenu',
+              submenu: {
+                id: 'sub',
+                items: [{ command: 'sub-1' }]
+              }
+            }
+          ]
         }
       ];
       const b: ISettingRegistry.IMenu[] = [
         {
           id: '2',
+          items: [
+            { command: 'b', disabled: true },
+            { command: 'b', args: { input: 'hello' } },
+            { command: 'b', args: { input: 'world' } },
+            { command: 'c' }
+          ]
+        },
+        {
+          id: '3',
+          items: [{ command: 'd' }]
+        },
+        {
+          id: '4',
+          items: [
+            {
+              type: 'submenu',
+              submenu: {
+                id: 'sub',
+                items: [
+                  { command: 'sub-1', disabled: true },
+                  { command: 'sub-2' }
+                ]
+              }
+            }
+          ],
           disabled: true
         }
       ];
 
-      const merged = SettingRegistry.reconcileMenus(a, b);
-      expect(merged).toHaveLength(1);
-      expect(merged[0].id).toEqual('1');
-      expect(merged[0].items).toHaveLength(1);
-    });
-
-    it('should remove disabled menu item', () => {
-      const a: ISettingRegistry.IMenu[] = [
-        {
-          id: '1',
-          items: [{ command: 'a' }]
-        },
-        {
-          id: '2',
-          items: [{ command: 'b' }]
-        },
-        {
-          id: '4',
-          items: [
-            {
-              type: 'submenu',
-              submenu: {
-                id: 'sub',
-                items: [{ command: 'sub-1' }, { command: 'sub-2' }]
-              }
-            }
-          ]
-        }
-      ];
-      const b: ISettingRegistry.IMenu[] = [
-        {
-          id: '2',
-          items: [{ command: 'b', disabled: true }]
-        },
-        {
-          id: '4',
-          items: [
-            {
-              type: 'submenu',
-              submenu: {
-                id: 'sub',
-                items: [{ command: 'sub-2', disabled: true }]
-              }
-            }
-          ]
-        }
-      ];
-
-      const merged = SettingRegistry.reconcileMenus(a, b);
+      const merged = SettingRegistry.reconcileMenus(a, b, false, false);
       expect(merged).toHaveLength(3);
-      expect(merged[0].id).toEqual('1');
-      expect(merged[0].items).toHaveLength(1);
-      expect(merged[1].id).toEqual('2');
-      expect(merged[1].items).toHaveLength(0);
+      expect(merged![0].id).toEqual('1');
+      expect(merged![0].items).toHaveLength(1);
+      expect(merged![1].id).toEqual('2');
+      expect(merged![1].items).toHaveLength(1);
+      expect(merged[1].items![0].command).toEqual('b');
+      expect(merged[1].items![0].args).toBeUndefined();
+      expect(merged[1].items![0].disabled).toEqual(true);
       expect(merged[2].id).toEqual('4');
       expect(merged[2].items).toHaveLength(1);
-      expect((merged[2].items ?? [])[0].submenu?.items).toHaveLength(1);
-      expect(
-        ((merged[2].items ?? [])[0].submenu?.items ?? [])[0].command
-      ).toEqual('sub-1');
+      expect(merged[2].items![0].submenu?.items).toHaveLength(1);
+      expect(merged[2].items![0].submenu?.items![0].command).toEqual('sub-1');
+      expect(merged[2].items![0].submenu?.items![0].disabled).toEqual(true);
+      expect(merged[2].disabled).toEqual(true);
+    });
+  });
+
+  describe('reconcileItems', () => {
+    it('should merge items list', () => {
+      const a: ISettingRegistry.IContextMenuItem[] = [
+        { command: 'a', selector: '.a' },
+        { command: 'b', selector: '.b' },
+        {
+          type: 'submenu',
+          submenu: {
+            id: 'sub',
+            items: [{ command: 'sub-1' }]
+          },
+          selector: '.sub'
+        }
+      ];
+      const b: ISettingRegistry.IContextMenuItem[] = [
+        { command: 'b', selector: '.b', disabled: true },
+        { command: 'b', selector: '.bb' },
+        { command: 'b', selector: '.b1', args: { input: 'hello' } },
+        { command: 'b', selector: '.b2', args: { input: 'world' } },
+        { command: 'c', selector: '.c' },
+        { command: 'd', selector: '.d' },
+        {
+          type: 'submenu',
+          submenu: {
+            id: 'sub',
+            items: [{ command: 'sub-1', disabled: true }, { command: 'sub-2' }]
+          },
+          selector: '.s'
+        }
+      ];
+
+      const merged = SettingRegistry.reconcileItems(a, b);
+      expect(merged).toHaveLength(8);
+      expect(merged![1].command).toEqual('b');
+      expect(merged![1].selector).toEqual('.b');
+      expect(merged![1].disabled).toEqual(true);
+      expect(merged![2].submenu?.items).toHaveLength(2);
+      expect(merged![3].command).toEqual('b');
+      expect(merged![3].selector).toEqual('.bb');
+      expect(merged![4].command).toEqual('b');
+      expect(merged![4].args?.input).toEqual('hello');
+      expect(merged![5].command).toEqual('b');
+      expect(merged![5].args?.input).toEqual('world');
+    });
+
+    it('should merge items list without adding new ones', () => {
+      const a: ISettingRegistry.IContextMenuItem[] = [
+        { command: 'a', selector: '.a' },
+        { command: 'b', selector: '.b' },
+        {
+          type: 'submenu',
+          submenu: {
+            id: 'sub',
+            items: [{ command: 'sub-1' }]
+          },
+          selector: '.sub'
+        }
+      ];
+      const b: ISettingRegistry.IContextMenuItem[] = [
+        { command: 'b', selector: '.b', disabled: true },
+        { command: 'b', selector: '.b1', args: { input: 'hello' } },
+        { command: 'b', selector: '.b2', args: { input: 'world' } },
+        { command: 'c', selector: '.c' },
+        { command: 'd', selector: '.d' },
+        {
+          type: 'submenu',
+          submenu: {
+            id: 'sub',
+            items: [{ command: 'sub-1', disabled: true }, { command: 'sub-2' }]
+          },
+          selector: '.s'
+        }
+      ];
+
+      const merged = SettingRegistry.reconcileItems(a, b, false, false);
+      expect(merged).toHaveLength(3);
+      expect(merged![1].command).toEqual('b');
+      expect(merged![1].selector).toEqual('.b');
+      expect(merged![1].disabled).toEqual(true);
+      expect(merged![2].submenu?.items).toHaveLength(1);
+      expect(merged![2].submenu?.items![0].command).toEqual('sub-1');
+      expect(merged![2].submenu?.items![0].disabled).toEqual(true);
+    });
+  });
+
+  describe('filterDisabledItems', () => {
+    it('should remove disabled menu item', () => {
+      const a: ISettingRegistry.IContextMenuItem[] = [
+        { command: 'a', selector: '.a' },
+        { type: 'separator', selector: '.a' },
+        { command: 'b', disabled: true, selector: '.a' },
+        {
+          type: 'submenu',
+          submenu: {
+            id: 'sub',
+            items: [{ command: 'sub-1', disabled: true }, { command: 'sub-2' }]
+          },
+          selector: '.s'
+        }
+      ];
+
+      const filtered = SettingRegistry.filterDisabledItems(a);
+      expect(filtered).toHaveLength(3);
+      expect(filtered[0]?.command).toEqual('a');
+      expect(filtered[1]?.type).toEqual('separator');
+      expect(filtered[2]?.type).toEqual('submenu');
+      expect(filtered[2]?.submenu?.items).toHaveLength(1);
+      expect(filtered[2]?.submenu?.items![0].command).toEqual('sub-2');
     });
   });
 
@@ -579,7 +688,7 @@ describe('@jupyterlab/settingregistry', () => {
         settings = (await registry.load(id)) as Settings;
         const promise = signalToPromise(settings.changed);
         await settings.set('foo', 'bar');
-        await promise;
+        await expect(promise).resolves.toContain(settings);
       });
     });
 

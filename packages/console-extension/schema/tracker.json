@@ -57,6 +57,16 @@
           }
         ]
       }
+    ],
+    "context": [
+      {
+        "command": "console:clear",
+        "selector": ".jp-CodeConsole-content"
+      },
+      {
+        "command": "console:restart-kernel",
+        "selector": ".jp-CodeConsole"
+      }
     ]
   },
   "jupyter.lab.shortcuts": [

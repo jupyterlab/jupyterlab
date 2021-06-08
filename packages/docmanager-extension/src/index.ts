@@ -827,15 +827,6 @@ function addCommands(
     });
   });
 
-  // .jp-mod-current added so that the console-creation command is only shown
-  // on the current document.
-  // Otherwise it will delegate to the wrong widget.
-  app.contextMenu.addItem({
-    command: 'filemenu:create-console',
-    selector: '[data-type="document-title"].jp-mod-current',
-    rank: 6
-  });
-
   if (palette) {
     [
       CommandIDs.reload,
@@ -960,27 +951,6 @@ function addLabCommands(
       await commands.execute('filebrowser:activate', { path: context.path });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
     }
-  });
-
-  app.contextMenu.addItem({
-    command: CommandIDs.rename,
-    selector: '[data-type="document-title"]',
-    rank: 1
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.del,
-    selector: '[data-type="document-title"]',
-    rank: 2
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.clone,
-    selector: '[data-type="document-title"]',
-    rank: 3
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.showInFileBrowser,
-    selector: '[data-type="document-title"]',
-    rank: 4
   });
 }
 

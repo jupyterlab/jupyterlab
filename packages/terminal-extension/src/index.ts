@@ -227,12 +227,6 @@ function activate(
     addRunningSessionManager(runningSessionManagers, app, translator);
   }
 
-  app.contextMenu.addItem({
-    command: CommandIDs.refresh,
-    selector: '.jp-Terminal',
-    rank: 1
-  });
-
   return tracker;
 }
 

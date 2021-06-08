@@ -262,6 +262,20 @@ export namespace ISettingRegistry {
     disabled?: boolean;
   }
 
+  export interface IContextMenuItem extends IMenuItem {
+    /**
+     * The CSS selector for the context menu item.
+     *
+     * The context menu item will only be displayed in the context menu
+     * when the selector matches a node on the propagation path of the
+     * contextmenu event. This allows the menu item to be restricted to
+     * user-defined contexts.
+     *
+     * The selector must not contain commas.
+     */
+    selector: string;
+  }
+
   /**
    * The settings for a specific plugin.
    */
@@ -346,7 +360,10 @@ export namespace ISettingRegistry {
     /**
      * The JupyterLab menus that are created by a plugin's schema.
      */
-    'jupyter.lab.menus'?: { main: IMenu[] };
+    'jupyter.lab.menus'?: {
+      main: IMenu[];
+      context: IContextMenuItem[];
+    };
 
     /**
      * Whether the schema is deprecated.

@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Clipboard,
   ICommandPalette,
@@ -1257,105 +1256,5 @@ export namespace Commands {
         }
       }
     } as IRunMenu.ICodeRunner<IDocumentWidget<FileEditor>>);
-  }
-
-  /**
-   * Wrapper function for adding the default items to the File Editor context menu
-   */
-  export function addContextMenuItems(app: JupyterFrontEnd): void {
-    addCreateConsoleToContextMenu(app);
-    addMarkdownPreviewToContextMenu(app);
-    addUndoCommandToContextMenu(app);
-    addRedoCommandToContextMenu(app);
-    addCutCommandToContextMenu(app);
-    addCopyCommandToContextMenu(app);
-    addPasteCommandToContextMenu(app);
-    addSelectAllCommandToContextMenu(app);
-  }
-
-  /**
-   * Add a Create Console item to the File Editor context menu
-   */
-  export function addCreateConsoleToContextMenu(app: JupyterFrontEnd): void {
-    app.contextMenu.addItem({
-      command: CommandIDs.createConsole,
-      selector: '.jp-FileEditor'
-    });
-  }
-
-  /**
-   * Add a Markdown Preview item to the File Editor context menu
-   */
-  export function addMarkdownPreviewToContextMenu(app: JupyterFrontEnd): void {
-    app.contextMenu.addItem({
-      command: CommandIDs.markdownPreview,
-      selector: '.jp-FileEditor'
-    });
-  }
-
-  /**
-   * Add a Undo item to the File Editor context menu
-   */
-  export function addUndoCommandToContextMenu(app: JupyterFrontEnd): void {
-    app.contextMenu.addItem({
-      command: CommandIDs.undo,
-      selector: '.jp-FileEditor',
-      rank: 1
-    });
-  }
-
-  /**
-   * Add a Redo item to the File Editor context menu
-   */
-  export function addRedoCommandToContextMenu(app: JupyterFrontEnd): void {
-    app.contextMenu.addItem({
-      command: CommandIDs.redo,
-      selector: '.jp-FileEditor',
-      rank: 2
-    });
-  }
-
-  /**
-   * Add a Cut item to the File Editor context menu
-   */
-  export function addCutCommandToContextMenu(app: JupyterFrontEnd): void {
-    app.contextMenu.addItem({
-      command: CommandIDs.cut,
-      selector: '.jp-FileEditor',
-      rank: 3
-    });
-  }
-
-  /**
-   * Add a Copy item to the File Editor context menu
-   */
-  export function addCopyCommandToContextMenu(app: JupyterFrontEnd): void {
-    app.contextMenu.addItem({
-      command: CommandIDs.copy,
-      selector: '.jp-FileEditor',
-      rank: 4
-    });
-  }
-
-  /**
-   * Add a Paste item to the File Editor context menu
-   */
-  export function addPasteCommandToContextMenu(app: JupyterFrontEnd): void {
-    app.contextMenu.addItem({
-      command: CommandIDs.paste,
-      selector: '.jp-FileEditor',
-      rank: 5
-    });
-  }
-
-  /**
-   * Add a Select All item to the File Editor context menu
-   */
-  export function addSelectAllCommandToContextMenu(app: JupyterFrontEnd): void {
-    app.contextMenu.addItem({
-      command: CommandIDs.selectAll,
-      selector: '.jp-FileEditor',
-      rank: 6
-    });
   }
 }

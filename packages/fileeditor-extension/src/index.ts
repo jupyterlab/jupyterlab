@@ -327,7 +327,5 @@ function activate(
       console.error(reason.message);
     });
 
-  Commands.addContextMenuItems(app);
-
   return tracker;
 }

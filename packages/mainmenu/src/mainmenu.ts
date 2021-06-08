@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { TranslationBundle } from '@jupyterlab/translation';
-import { MenuSvg } from '@jupyterlab/ui-components';
+import { IRankedMenu, MenuSvg, RankedMenu } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu, MenuBar } from '@lumino/widgets';
@@ -10,7 +10,6 @@ import { EditMenu } from './edit';
 import { FileMenu } from './file';
 import { HelpMenu } from './help';
 import { KernelMenu } from './kernel';
-import { IJupyterLabMenu, JupyterLabMenu } from './labmenu';
 import { RunMenu } from './run';
 import { SettingsMenu } from './settings';
 import { TabsMenu } from './tabs';
@@ -157,7 +156,7 @@ export class MainMenu extends MenuBar implements IMainMenu {
         ? options.rank
         : 'rank' in menu
         ? (menu as any).rank
-        : IJupyterLabMenu.DEFAULT_RANK;
+        : IRankedMenu.DEFAULT_RANK;
     const rankItem = { menu, rank };
     const index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
 
@@ -241,8 +240,8 @@ export class MainMenu extends MenuBar implements IMainMenu {
     commands: CommandRegistry,
     options: IMainMenu.IMenuOptions,
     translator: TranslationBundle
-  ): JupyterLabMenu {
-    let menu: JupyterLabMenu;
+  ): RankedMenu {
+    let menu: RankedMenu;
     const { id, label, rank } = options;
     switch (id) {
       case 'jp-mainmenu-file':
@@ -302,15 +301,16 @@ export class MainMenu extends MenuBar implements IMainMenu {
         });
         break;
       default:
-        menu = new JupyterLabMenu({
+        menu = new RankedMenu({
           commands,
           rank,
           renderer: MenuSvg.defaultRenderer
         });
     }
 
-    menu.id = id;
-    menu.title.label = translator.__(label ?? capitalize(id));
+    if (label) {
+      menu.title.label = translator.__(label);
+    }
     return menu;
   }
 
@@ -338,21 +338,6 @@ export class MainMenu extends MenuBar implements IMainMenu {
   private _settingsMenu: SettingsMenu;
   private _viewMenu: ViewMenu;
   private _tabsMenu: TabsMenu;
-}
-
-/**
- * Capitalize a string
- *
- * @param s String to capitalize
- * @returns The capitalized string
- */
-export function capitalize(s: string): string {
-  return s
-    .trim()
-    .split(' ')
-    .filter(part => part.trim().length > 0)
-    .map(part => part.replace(/^\w/, c => c.toLocaleUpperCase()))
-    .join(' ');
 }
 
 /**

@@ -68,6 +68,28 @@
           }
         ]
       }
+    ],
+    "context": [
+      {
+        "command": "docmanager:rename",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 1
+      },
+      {
+        "command": "docmanager:delete",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 2
+      },
+      {
+        "command": "docmanager:clone",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 3
+      },
+      {
+        "command": "docmanager:show-in-file-browser",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 4
+      }
     ]
   },
   "jupyter.lab.shortcuts": [

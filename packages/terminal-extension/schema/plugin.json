@@ -72,6 +72,13 @@
           }
         ]
       }
+    ],
+    "context": [
+      {
+        "command": "terminal:refresh",
+        "selector": ".jp-Terminal",
+        "rank": 1
+      }
     ]
   },
   "title": "Terminal",

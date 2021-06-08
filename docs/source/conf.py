@@ -128,7 +128,7 @@ def build_api_docs(out_dir):
 
 # Copy frontend files for snippet inclusion
 FILES_LIST = [  # File paths should be relative to jupyterlab root folder
-    'packages/mainmenu-extension/schema/plugin.json'
+    'packages/settingregistry/src/plugin-schema.json'
 ]
 SNIPPETS_FOLDER = 'snippets'
 
