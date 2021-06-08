@@ -17,7 +17,7 @@ import { Token } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { DockPanel, Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The type for all JupyterFrontEnd application plugins.
