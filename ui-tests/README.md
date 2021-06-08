@@ -18,6 +18,9 @@ import { galata, describe, test } from '@jupyterlab/galata';
 ```bash
 # inside ui-tests directory:
 
+# install dependencies
+jlpm install --frozen-lockfile
+
 # launch JupyterLab
 #   create empty working directory
 mkdir jlab_root
