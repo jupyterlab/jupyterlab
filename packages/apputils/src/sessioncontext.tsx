@@ -1106,12 +1106,9 @@ export class SessionContext implements ISessionContext {
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
     this
   );
-
   private translator: ITranslator;
   private _trans: TranslationBundle;
-
   private _pendingInput = false;
-
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);

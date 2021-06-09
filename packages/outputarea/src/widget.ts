@@ -898,9 +898,10 @@ export class Stdin extends Widget implements IStdin {
   }
 
   /**
-   * Submit and get the  value of the Stdin widget.
+   * Submit and get the value of the Stdin widget.
    */
   getValue(): Promise<string> {
+    console.log('WHAT THE FUCK!');
     this.submit();
     return this.value;
   }
@@ -924,6 +925,9 @@ export class Stdin extends Widget implements IStdin {
     }
   }
 
+  /*
+   * Submit input value.
+   */
   submit() {
     const input = this._input;
     this._future.sendInputReply({
