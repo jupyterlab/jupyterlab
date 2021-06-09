@@ -94,6 +94,11 @@ export interface ICodeCellModel extends ICellModel {
   readonly type: 'code';
 
   /**
+   * Whether the code cell has been edited since the last run.
+   */
+  readonly isDirty: boolean;
+
+  /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.ICodeCell;
@@ -102,11 +107,6 @@ export interface ICodeCellModel extends ICellModel {
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   executionCount: nbformat.ExecutionCount;
-
-  /**
-   * Whether the code cell has been edited since the last run.
-   */
-  isDirty: boolean;
 
   /**
    * The cell outputs.
