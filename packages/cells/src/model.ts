@@ -697,7 +697,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     // but for performance reason, the diff status is stored in a boolean.
     return this._isDirty;
   }
-  set isDirty(v: boolean) {
+
+  private setDirty(v: boolean) {
     if (v !== this._isDirty) {
       if (!v) {
         this._executedCode = this.value.text.trim();
@@ -714,7 +715,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   clearExecution() {
     this.outputs.clear();
     this.executionCount = null;
-    this.isDirty = false;
+    this.setDirty(false);
     this.metadata.delete('execution');
   }
 
@@ -807,7 +808,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   protected onGenericChange(): void {
     if ((this.sharedModel as models.YCodeCell).execution_count !== null) {
-      this.isDirty = this._executedCode !== this.value.text.trim();
+      this.setDirty(this._executedCode !== this.value.text.trim());
     }
     this.contentChanged.emit(void 0);
   }
@@ -860,7 +861,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       newValue: args.newValue
     });
     if (args.newValue && this.isDirty) {
-      this.isDirty = false;
+      this.setDirty(false);
     }
   }
 
