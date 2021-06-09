@@ -698,7 +698,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     return this._isDirty;
   }
 
-  private setDirty(v: boolean) {
+  /**
+   * Set whether the cell is dirty or not.
+   */
+  private _setDirty(v: boolean) {
     if (v !== this._isDirty) {
       if (!v) {
         this._executedCode = this.value.text.trim();
@@ -715,7 +718,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   clearExecution() {
     this.outputs.clear();
     this.executionCount = null;
-    this.setDirty(false);
+    this._setDirty(false);
     this.metadata.delete('execution');
   }
 
@@ -808,7 +811,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   protected onGenericChange(): void {
     if ((this.sharedModel as models.YCodeCell).execution_count !== null) {
-      this.setDirty(this._executedCode !== this.value.text.trim());
+      this._setDirty(this._executedCode !== this.value.text.trim());
     }
     this.contentChanged.emit(void 0);
   }
@@ -861,7 +864,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       newValue: args.newValue
     });
     if (args.newValue && this.isDirty) {
-      this.setDirty(false);
+      this._setDirty(false);
     }
   }
 
