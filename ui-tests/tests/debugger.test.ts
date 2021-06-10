@@ -17,7 +17,9 @@ describe('Debugger Tests', () => {
 
   test('Move Debugger to right', async () => {
     await galata.sidebar.moveTabToRight('jp-debugger-sidebar');
-    expect(await galata.sidebar.getTabPosition('jp-debugger-sidebar')).toBe('right');
+    expect(await galata.sidebar.getTabPosition('jp-debugger-sidebar')).toBe(
+      'right'
+    );
   });
 
   test('Open Debugger on right', async () => {
