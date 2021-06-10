@@ -89,6 +89,7 @@ jobs:
         if: ${{ failure() }}
         run: |
           cd ui-tests
+          [ -d "jlab_root" ] && rm -rf jlab_root
           mkdir jlab_root
           jlpm run test:create-references
           rm -rf jlab_root
