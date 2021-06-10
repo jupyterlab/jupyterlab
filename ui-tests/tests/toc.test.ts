@@ -172,6 +172,7 @@ describe('Table of Contents', () => {
 
   test('Toggle tag 2', async () => {
     const tocPanel = await galata.sidebar.getContentPanel('left');
+    const tags = await tocPanel.$$('.toc-tag');
 
     const imageName = 'toggle-tag-2';
     await tags[1].click();
