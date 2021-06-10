@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { find } from '@lumino/algorithm';
-
 import { Widget } from '@lumino/widgets';
-
 import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
 
 /**

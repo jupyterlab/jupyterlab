@@ -1,13 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt } from '@lumino/algorithm';
-
-import { CommandRegistry } from '@lumino/commands';
-
-import { Menu } from '@lumino/widgets';
-
 import { JupyterLabMenu } from '@jupyterlab/mainmenu';
+import { ArrayExt } from '@lumino/algorithm';
+import { CommandRegistry } from '@lumino/commands';
+import { Menu } from '@lumino/widgets';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('JupyterLabMenu', () => {

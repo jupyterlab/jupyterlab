@@ -2,15 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IDisposable } from '@lumino/disposable';
-
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
-
 import * as React from 'react';
-
 import * as ReactDOM from 'react-dom';
 
 type ReactRenderElement =

@@ -3,7 +3,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { UUID, JSONExt, JSONObject, PromiseDelegate } from '@lumino/coreutils';
+import { JSONExt, JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -16,9 +16,9 @@ import * as Kernel from './kernel';
 import * as KernelMessage from './messages';
 
 import {
+  KernelControlFutureHandler,
   KernelFutureHandler,
-  KernelShellFutureHandler,
-  KernelControlFutureHandler
+  KernelShellFutureHandler
 } from './future';
 
 import * as serialize from './serialize';

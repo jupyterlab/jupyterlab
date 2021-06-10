@@ -1,6 +1,5 @@
-import { Token } from '@lumino/coreutils';
-
 import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
+import { Token } from '@lumino/coreutils';
 
 /**
  * The default document provider token.

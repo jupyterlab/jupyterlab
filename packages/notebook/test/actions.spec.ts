@@ -2,32 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
-
-import { IMimeBundle, CellType } from '@jupyterlab/nbformat';
-
+import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import {
   acceptDialog,
   createSessionContext,
   dismissDialog,
   sleep
 } from '@jupyterlab/testutils';
-
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-
 import { each } from '@lumino/algorithm';
-
-import { JSONObject, JSONArray, UUID } from '@lumino/coreutils';
-
-import { NotebookModel } from '../src';
-
-import { NotebookActions } from '../src';
-
-import { Notebook } from '../src';
-
+import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
+import { Notebook, NotebookActions, NotebookModel } from '../src';
 import * as utils from './utils';
 
 const ERROR_INPUT = 'a = foo';

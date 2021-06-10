@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-
 import { PathExt } from '@jupyterlab/coreutils';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { Mode } from './mode';
 
 /**

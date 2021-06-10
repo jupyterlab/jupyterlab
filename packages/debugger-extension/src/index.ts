@@ -11,46 +11,33 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
-
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
-
 import {
   Debugger,
   IDebugger,
   IDebuggerConfig,
-  IDebuggerSources,
-  IDebuggerSidebar
+  IDebuggerSidebar,
+  IDebuggerSources
 } from '@jupyterlab/debugger';
-
 import { DocumentWidget } from '@jupyterlab/docregistry';
-
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-
 import { ILoggerRegistry } from '@jupyterlab/logconsole';
-
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
 import {
-  RenderMimeRegistry,
-  standardRendererFactories as initialFactories
+  standardRendererFactories as initialFactories,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-
 import { Session } from '@jupyterlab/services';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator } from '@jupyterlab/translation';
 
 /**

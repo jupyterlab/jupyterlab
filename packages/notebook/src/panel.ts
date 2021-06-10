@@ -1,32 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { isMarkdownCellModel } from '@jupyterlab/cells';
-
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-
-import { each } from '@lumino/algorithm';
-
-import { Token } from '@lumino/coreutils';
-
 import {
+  Dialog,
   ISessionContext,
   Printing,
-  showDialog,
-  Dialog
+  showDialog
 } from '@jupyterlab/apputils';
-
-import { DocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
-
-import { INotebookModel } from './model';
-
-import { Notebook, StaticNotebook } from './widget';
+import { isMarkdownCellModel } from '@jupyterlab/cells';
 import { PageConfig } from '@jupyterlab/coreutils';
+import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { each } from '@lumino/algorithm';
+import { Token } from '@lumino/coreutils';
+import { INotebookModel } from './model';
+import { Notebook, StaticNotebook } from './widget';
 
 /**
  * The class name added to notebook panels.

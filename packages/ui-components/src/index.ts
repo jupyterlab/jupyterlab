@@ -5,9 +5,8 @@
  * @module ui-components
  */
 
+export * from './blueprint';
 export * from './components';
 export * from './icon';
-
-export * from './blueprint';
 export * from './tokens';
 export * from './utils';

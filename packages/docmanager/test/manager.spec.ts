@@ -1,23 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ServiceManager } from '@jupyterlab/services';
-
-import { Widget } from '@lumino/widgets';
-
-import { DocumentManager } from '../src';
-
 import {
-  DocumentRegistry,
-  TextModelFactory,
   ABCWidgetFactory,
+  DocumentRegistry,
   DocumentWidget,
-  IDocumentWidget
+  IDocumentWidget,
+  TextModelFactory
 } from '@jupyterlab/docregistry';
-
+import { ServiceManager } from '@jupyterlab/services';
 import { dismissDialog } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { Widget } from '@lumino/widgets';
+import { DocumentManager } from '../src';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(

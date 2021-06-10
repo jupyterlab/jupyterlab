@@ -2,11 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-
-import * as React from 'react';
-
 import { KernelSpec } from '@jupyterlab/services';
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import * as React from 'react';
 
 /**
  * An object representing a companion installation info.

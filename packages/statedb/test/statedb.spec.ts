@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { StateDB } from '@jupyterlab/statedb';
-
 import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 
 describe('StateDB', () => {

@@ -5,23 +5,17 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { ICommandPalette } from '@jupyterlab/apputils';
-
 import {
   CodeConsole,
   ConsolePanel,
-  IConsoleTracker,
-  ForeignHandler
+  ForeignHandler,
+  IConsoleTracker
 } from '@jupyterlab/console';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator } from '@jupyterlab/translation';
-
-import { AttachedProperty } from '@lumino/properties';
-
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { AttachedProperty } from '@lumino/properties';
 
 /**
  * The console widget tracker provider.

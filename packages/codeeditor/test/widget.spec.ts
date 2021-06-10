@@ -1,17 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message, MessageLoop } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { simulate } from 'simulate-event';
-
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-
 import { framePromise } from '@jupyterlab/testutils';
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 
 class LogEditor extends CodeMirrorEditor {
   methods: string[] = [];

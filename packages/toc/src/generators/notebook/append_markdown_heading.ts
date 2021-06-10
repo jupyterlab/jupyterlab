@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { INotebookHeading } from '../../utils/headings';
-import { appendHeading } from './append_heading';
 import { appendCollapsibleHeading } from './append_collapsible_heading';
+import { appendHeading } from './append_heading';
 
 /**
  * Appends a Markdown notebook heading to a list of headings.

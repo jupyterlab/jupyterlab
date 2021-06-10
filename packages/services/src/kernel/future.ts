@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { DisposableDelegate } from '@lumino/disposable';
-
 import * as Kernel from './kernel';
-
 import * as KernelMessage from './messages';
 
 declare let setImmediate: any;

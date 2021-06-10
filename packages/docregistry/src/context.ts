@@ -2,50 +2,38 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents,
-  ServiceManager,
-  ServerConnection
-} from '@jupyterlab/services';
-
-import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
-
-import * as ymodels from '@jupyterlab/shared-models';
-
-import * as Y from 'yjs';
-
-import { PromiseDelegate, PartialJSONValue } from '@lumino/coreutils';
-
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
-import {
-  showDialog,
-  SessionContext,
   Dialog,
   ISessionContext,
-  showErrorMessage,
-  sessionContextDialogs
+  SessionContext,
+  sessionContextDialogs,
+  showDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
-
 import { PathExt } from '@jupyterlab/coreutils';
-
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
-
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import {
-  nullTranslator,
+  IDocumentProvider,
+  IDocumentProviderFactory,
+  ProviderMock
+} from '@jupyterlab/docprovider';
+import { IModelDB, ModelDB } from '@jupyterlab/observables';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import {
+  Contents,
+  ServerConnection,
+  ServiceManager
+} from '@jupyterlab/services';
+import * as ymodels from '@jupyterlab/shared-models';
+import {
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { IDocumentProvider, ProviderMock } from '@jupyterlab/docprovider';
-
+import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
+import * as Y from 'yjs';
 import { DocumentRegistry } from './registry';
 
 /**

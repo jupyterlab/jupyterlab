@@ -2,37 +2,23 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
-
 import { PathExt } from '@jupyterlab/coreutils';
-
+import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 import {
-  DocumentRegistry,
   Context,
+  DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-
-import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
-
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, find } from '@lumino/algorithm';
-
 import { UUID } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
-
 import { SaveHandler } from './savehandler';
-
 import { IDocumentManager } from './tokens';
-
 import { DocumentWidgetManager } from './widgetmanager';
 
 /**

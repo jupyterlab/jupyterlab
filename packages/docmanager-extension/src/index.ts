@@ -11,44 +11,31 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
-  showDialog,
-  showErrorMessage,
   Dialog,
   ICommandPalette,
-  ISessionContextDialogs
+  ISessionContextDialogs,
+  showDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
-
 import { IChangedArgs, Time } from '@jupyterlab/coreutils';
-
 import {
-  renameDialog,
-  nameOnSaveDialog,
   DocumentManager,
   IDocumentManager,
+  nameOnSaveDialog,
   PathStatus,
+  renameDialog,
   SavingStatus
 } from '@jupyterlab/docmanager';
-
 import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import { Contents, Kernel } from '@jupyterlab/services';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-
 import { each, map, some, toArray } from '@lumino/algorithm';
-
 import { JSONExt } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { Widget } from '@lumino/widgets';
 
 /**

@@ -6,19 +6,19 @@
  */
 
 import {
+  ILabShell,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  ILabShell
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
 
 import {
-  ISearchProviderRegistry,
-  SearchInstance,
-  SearchProviderRegistry,
   CodeMirrorSearchProvider,
-  NotebookSearchProvider
+  ISearchProviderRegistry,
+  NotebookSearchProvider,
+  SearchInstance,
+  SearchProviderRegistry
 } from '@jupyterlab/documentsearch';
 
 import { ITranslator } from '@jupyterlab/translation';

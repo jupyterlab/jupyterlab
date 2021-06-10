@@ -7,11 +7,8 @@ import {
   SettingRegistry,
   Settings
 } from '@jupyterlab/settingregistry';
-
 import { StateDB } from '@jupyterlab/statedb';
-
 import { signalToPromise } from '@jupyterlab/testutils';
-
 import { JSONObject } from '@lumino/coreutils';
 
 class TestConnector extends StateDB {

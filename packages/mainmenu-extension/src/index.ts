@@ -11,16 +11,13 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   Dialog,
   ICommandPalette,
   MenuFactory,
   showDialog
 } from '@jupyterlab/apputils';
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-
 import {
   IEditMenu,
   IFileMenu,
@@ -33,19 +30,12 @@ import {
   JupyterLabMenu,
   MainMenu
 } from '@jupyterlab/mainmenu';
-
 import { ServerConnection } from '@jupyterlab/services';
-
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-
 import { each, find } from '@lumino/algorithm';
-
 import { JSONExt } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { Menu, Widget } from '@lumino/widgets';
 
 const PLUGIN_ID = '@jupyterlab/mainmenu-extension:plugin';

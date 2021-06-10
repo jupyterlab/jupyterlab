@@ -3,18 +3,14 @@
 
 import {
   IIterator,
-  IterableOrArrayLike,
   iter,
+  IterableOrArrayLike,
   map,
+  StringExt,
   toArray
 } from '@lumino/algorithm';
-
 import { JSONExt, ReadonlyPartialJSONArray } from '@lumino/coreutils';
-
-import { StringExt } from '@lumino/algorithm';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { CompletionHandler } from './handler';
 import { Completer } from './widget';
 

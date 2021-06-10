@@ -4,14 +4,12 @@
 import {
   ArrayExt,
   ArrayIterator,
+  each,
   IIterator,
   IterableOrArrayLike,
-  each,
   toArray
 } from '@lumino/algorithm';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { ISignal, Signal } from '@lumino/signaling';
 
 /**

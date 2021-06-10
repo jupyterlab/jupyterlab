@@ -1,47 +1,30 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each } from '@lumino/algorithm';
-
-import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
-
-import { Message } from '@lumino/messaging';
-
-import { MimeData } from '@lumino/coreutils';
-
-import { AttachedProperty } from '@lumino/properties';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Drag, IDragEvent } from '@lumino/dragdrop';
-
-import { PanelLayout, Widget } from '@lumino/widgets';
-
-import { h, VirtualDOM } from '@lumino/virtualdom';
-
-import { ElementExt } from '@lumino/domutils';
-
 import {
-  ICellModel,
   Cell,
-  IMarkdownCellModel,
   CodeCell,
-  MarkdownCell,
+  ICellModel,
   ICodeCellModel,
-  RawCell,
-  IRawCellModel
+  IMarkdownCellModel,
+  IRawCellModel,
+  MarkdownCell,
+  RawCell
 } from '@jupyterlab/cells';
-
-import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
-
+import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { IObservableMap, IObservableList } from '@jupyterlab/observables';
-
+import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
+import { ArrayExt, each } from '@lumino/algorithm';
+import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { ElementExt } from '@lumino/domutils';
+import { Drag, IDragEvent } from '@lumino/dragdrop';
+import { Message } from '@lumino/messaging';
+import { AttachedProperty } from '@lumino/properties';
+import { ISignal, Signal } from '@lumino/signaling';
+import { h, VirtualDOM } from '@lumino/virtualdom';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
 
 /**

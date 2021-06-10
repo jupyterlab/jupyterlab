@@ -1,41 +1,30 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each, chain } from '@lumino/algorithm';
-
-import {
-  ReadonlyPartialJSONValue,
-  ReadonlyPartialJSONObject
-} from '@lumino/coreutils';
-
-import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
-
-import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
-
-import { PanelLayout, Widget } from '@lumino/widgets';
-
 import { Collapse, Styling } from '@jupyterlab/apputils';
-
 import { Cell, ICellModel } from '@jupyterlab/cells';
-
 import {
   CodeEditor,
   CodeEditorWrapper,
   JSONEditor
 } from '@jupyterlab/codeeditor';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { NotebookPanel } from './panel';
+import { ArrayExt, chain, each } from '@lumino/algorithm';
+import {
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
+import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
+import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
+import { NotebookPanel } from './panel';
 import { INotebookTools, INotebookTracker } from './tokens';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {

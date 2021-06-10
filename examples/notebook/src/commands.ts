@@ -4,10 +4,10 @@
 import { CommandRegistry } from '@lumino/commands';
 import { sessionContextDialogs } from '@jupyterlab/apputils';
 import { CompletionHandler } from '@jupyterlab/completer';
-import { NotebookPanel, NotebookActions } from '@jupyterlab/notebook';
+import { NotebookActions, NotebookPanel } from '@jupyterlab/notebook';
 import {
-  SearchInstance,
-  NotebookSearchProvider
+  NotebookSearchProvider,
+  SearchInstance
 } from '@jupyterlab/documentsearch';
 import { CommandPalette } from '@lumino/widgets';
 

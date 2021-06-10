@@ -18,8 +18,8 @@ import { KernelSpecManager, Session } from '@jupyterlab/services';
 
 import {
   createSession,
-  signalToPromise,
-  JupyterServer
+  JupyterServer,
+  signalToPromise
 } from '@jupyterlab/testutils';
 
 import { toArray } from '@lumino/algorithm';

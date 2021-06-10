@@ -10,39 +10,30 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
+  CommandToolbarButton,
   Dialog,
   ICommandPalette,
   IFrame,
   MainAreaWidget,
   showDialog,
-  WidgetTracker,
-  CommandToolbarButton,
-  Toolbar
+  Toolbar,
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { KernelMessage } from '@jupyterlab/services';
-
 import { ITranslator } from '@jupyterlab/translation';
-
-import { Licenses } from './licenses';
-
 import {
+  copyrightIcon,
   jupyterIcon,
   jupyterlabWordmarkIcon,
-  copyrightIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
-
-import { Menu } from '@lumino/widgets';
-
-import * as React from 'react';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { Menu } from '@lumino/widgets';
+import * as React from 'react';
+import { Licenses } from './licenses';
 
 /**
  * The command IDs used by the help plugin.

@@ -15,24 +15,17 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/apputils';
-
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-
 import {
   ABCWidgetFactory,
   DocumentRegistry,
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { refreshIcon } from '@jupyterlab/ui-components';
-
 import { Token } from '@lumino/coreutils';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import * as React from 'react';
 
 /**

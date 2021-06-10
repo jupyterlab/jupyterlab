@@ -1,15 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisplayState, ISearchProvider, IFiltersType } from './interfaces';
-import { createSearchOverlay } from './searchoverlay';
-
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { NotebookPanel } from '@jupyterlab/notebook';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { NotebookPanel } from '@jupyterlab/notebook';
+import { IDisplayState, IFiltersType, ISearchProvider } from './interfaces';
+import { createSearchOverlay } from './searchoverlay';
 
 /**
  * Represents a search on a single widget.

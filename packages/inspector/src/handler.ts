@@ -2,21 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { Text } from '@jupyterlab/coreutils';
-
+import { IRenderMimeRegistry, MimeModel } from '@jupyterlab/rendermime';
 import { IDataConnector } from '@jupyterlab/statedb';
-
-import { MimeModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ReadonlyJSONObject } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { Debouncer } from '@lumino/polling';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { IInspector } from './tokens';
 
 /**

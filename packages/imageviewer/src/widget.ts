@@ -8,8 +8,8 @@ import { Printing } from '@jupyterlab/apputils';
 import {
   ABCWidgetFactory,
   DocumentRegistry,
-  IDocumentWidget,
-  DocumentWidget
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import { PromiseDelegate } from '@lumino/coreutils';

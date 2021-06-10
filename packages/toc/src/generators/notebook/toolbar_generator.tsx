@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { TranslationBundle } from '@jupyterlab/translation';
 import {
@@ -10,8 +9,8 @@ import {
   numberingIcon,
   tagIcon
 } from '@jupyterlab/ui-components';
-
 import { JSONValue } from '@lumino/coreutils';
+import * as React from 'react';
 import { OptionsManager } from './options_manager';
 import { TagsToolComponent } from './tagstool';
 

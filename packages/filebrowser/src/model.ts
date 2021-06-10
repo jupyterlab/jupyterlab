@@ -1,38 +1,29 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { showDialog, Dialog } from '@jupyterlab/apputils';
-
-import { IChangedArgs, PathExt, PageConfig } from '@jupyterlab/coreutils';
-
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { IChangedArgs, PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
-
 import { Contents, KernelSpec, Session } from '@jupyterlab/services';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
 import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
+  ArrayExt,
   ArrayIterator,
   each,
+  filter,
   find,
   IIterator,
-  IterableOrArrayLike,
-  ArrayExt,
-  filter
+  IterableOrArrayLike
 } from '@lumino/algorithm';
-
 import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { Poll } from '@lumino/polling';
-
 import { ISignal, Signal } from '@lumino/signaling';
-import {
-  nullTranslator,
-  TranslationBundle,
-  ITranslator
-} from '@jupyterlab/translation';
 
 /**
  * The default duration of the auto-refresh in ms

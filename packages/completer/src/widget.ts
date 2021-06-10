@@ -1,26 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
-
+import { defaultSanitizer, HoverBox } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { LabIcon } from '@jupyterlab/ui-components';
-
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
-
-import { JSONObject, JSONExt } from '@lumino/coreutils';
-
+import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-
 import { ElementExt } from '@lumino/domutils';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
-
 import { CompletionHandler } from './handler';
 
 /**

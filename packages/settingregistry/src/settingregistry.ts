@@ -1,32 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import Ajv from 'ajv';
-
-import * as json5 from 'json5';
-
+import { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
-
 import {
   JSONExt,
   JSONObject,
   JSONValue,
-  ReadonlyJSONObject,
+  PartialJSONObject,
   PartialJSONValue,
+  ReadonlyJSONObject,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue,
-  PartialJSONObject
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { IDataConnector } from '@jupyterlab/statedb';
-
-import { ISettingRegistry } from './tokens';
-
+import Ajv from 'ajv';
+import * as json5 from 'json5';
 import SCHEMA from './plugin-schema.json';
+import { ISettingRegistry } from './tokens';
 
 /**
  * An alias for the JSON deep copy function.

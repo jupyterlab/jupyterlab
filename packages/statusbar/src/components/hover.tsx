@@ -2,13 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { HoverBox } from '@jupyterlab/apputils';
-
 import { Message } from '@lumino/messaging';
-
-import { Widget, PanelLayout } from '@lumino/widgets';
-
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { style } from 'typestyle/lib';
-
 import { clickedItem, interactiveItem } from '../style/statusbar';
 
 const hoverItem = style({

@@ -1,13 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
-
-import { h, VirtualNode, VirtualDOM } from '@lumino/virtualdom';
-
-import { simulate } from 'simulate-event';
-
 import { CommandLinker } from '@jupyterlab/apputils';
+import { CommandRegistry } from '@lumino/commands';
+import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
+import { simulate } from 'simulate-event';
 
 describe('@jupyterlab/apputils', () => {
   describe('CommandLinker', () => {

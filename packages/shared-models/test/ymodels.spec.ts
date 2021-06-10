@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { YNotebook, YCodeCell } from '../src';
+import { YCodeCell, YNotebook } from '../src';
 
 describe('@jupyterlab/shared-models', () => {
   describe('ynotebook', () => {

@@ -8,45 +8,34 @@
 import {
   ILabShell,
   ILayoutRestorer,
-  ITreePathUpdater,
   IRouter,
+  ITreePathUpdater,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   Clipboard,
-  MainAreaWidget,
-  ToolbarButton,
-  WidgetTracker,
   ICommandPalette,
   InputDialog,
-  showErrorMessage
+  MainAreaWidget,
+  showErrorMessage,
+  ToolbarButton,
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
-
 import { IDocumentManager } from '@jupyterlab/docmanager';
-
 import {
-  FilterFileBrowserModel,
   FileBrowser,
   FileUploadStatus,
+  FilterFileBrowserModel,
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
-
 import { Launcher } from '@jupyterlab/launcher';
-
 import { Contents } from '@jupyterlab/services';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import {
   addIcon,
   closeIcon,
@@ -63,13 +52,9 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
-
-import { IIterator, map, reduce, toArray, find } from '@lumino/algorithm';
-
+import { find, IIterator, map, reduce, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-
 import { Message } from '@lumino/messaging';
-
 import { Menu } from '@lumino/widgets';
 
 /**

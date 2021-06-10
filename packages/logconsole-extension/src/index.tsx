@@ -11,51 +11,38 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   CommandToolbarButton,
   ICommandPalette,
   MainAreaWidget,
-  WidgetTracker,
-  ReactWidget
+  ReactWidget,
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import {
   ILoggerRegistry,
   LogConsolePanel,
   LoggerRegistry,
   LogLevel
 } from '@jupyterlab/logconsole';
-
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import {
   addIcon,
   clearIcon,
   HTMLSelect,
   listIcon
 } from '@jupyterlab/ui-components';
-
 import { UUID } from '@lumino/coreutils';
-
 import { DockLayout, Widget } from '@lumino/widgets';
-
 import * as React from 'react';
-
 import { LogConsoleStatus } from './status';
 
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';

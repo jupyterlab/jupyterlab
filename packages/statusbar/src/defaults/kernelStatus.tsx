@@ -1,23 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React from 'react';
-
-import { ISessionContext, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-
+import { ISessionContext, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { Text } from '@jupyterlab/coreutils';
-
 import { Session } from '@jupyterlab/services';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
+import { JSONArray, JSONExt } from '@lumino/coreutils';
+import React from 'react';
 import { interactiveItem, TextItem } from '..';
-
-import { JSONExt, JSONArray } from '@lumino/coreutils';
 
 /**
  * A pure functional component for rendering kernel status.

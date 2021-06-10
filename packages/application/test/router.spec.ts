@@ -2,12 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Router } from '@jupyterlab/application';
-
-import { CommandRegistry } from '@lumino/commands';
-
-import { Token } from '@lumino/coreutils';
-
 import { signalToPromise } from '@jupyterlab/testutils';
+import { CommandRegistry } from '@lumino/commands';
+import { Token } from '@lumino/coreutils';
 
 const base = '/';
 

@@ -3,16 +3,16 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
-  VDomRenderer,
-  ToolbarButtonComponent,
   Dialog,
-  showDialog
+  showDialog,
+  ToolbarButtonComponent,
+  VDomRenderer
 } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
@@ -25,12 +25,10 @@ import {
   listingsInfoIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
-
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
-
-import { ListModel, IEntry, Action } from './model';
+import { Action, IEntry, ListModel } from './model';
 import { isJupyterOrg } from './npm';
 
 // TODO: Replace pagination with lazy loading of lower search results

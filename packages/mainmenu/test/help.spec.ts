@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
-
 import { HelpMenu } from '@jupyterlab/mainmenu';
+import { CommandRegistry } from '@lumino/commands';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('HelpMenu', () => {

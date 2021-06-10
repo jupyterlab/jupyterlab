@@ -2,13 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { IObservableDisposable } from '@lumino/disposable';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { IObjectPool, IRestorable } from './interfaces';
 
 /**

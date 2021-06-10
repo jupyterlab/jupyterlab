@@ -2,23 +2,18 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+import * as nbformat from '@jupyterlab/nbformat';
+import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
   JSONExt,
   JSONObject,
   JSONValue,
+  PartialJSONObject,
   PartialJSONValue,
-  ReadonlyPartialJSONObject,
-  PartialJSONObject
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import * as nbformat from '@jupyterlab/nbformat';
-
-import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import { MimeModel } from './mimemodel';
 
 /**

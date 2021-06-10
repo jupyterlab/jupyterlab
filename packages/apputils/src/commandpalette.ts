@@ -4,12 +4,9 @@
 |----------------------------------------------------------------------------*/
 
 import { Token } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { Message } from '@lumino/messaging';
-
-import { CommandPalette, Widget, Panel } from '@lumino/widgets';
+import { CommandPalette, Panel, Widget } from '@lumino/widgets';
 
 /* tslint:disable */
 /**

@@ -9,16 +9,13 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-
 import {
   IDocumentProvider,
   IDocumentProviderFactory,
   ProviderMock,
   WebSocketProviderWithLocks
 } from '@jupyterlab/docprovider';
-
 import { ServerConnection } from '@jupyterlab/services';
 
 /**

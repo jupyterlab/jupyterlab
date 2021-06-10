@@ -2,27 +2,21 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-
-import { UUID } from '@lumino/coreutils';
-
-import { PromiseDelegate } from '@lumino/coreutils';
-
-import {
-  Kernel,
-  KernelMessage,
-  KernelSpec,
-  KernelSpecAPI,
-  KernelManager
-} from '../../src';
-
 import {
   expectFailure,
-  testEmission,
+  flakyIt as it,
   JupyterServer,
-  flakyIt as it
+  testEmission
 } from '@jupyterlab/testutils';
-
-import { FakeKernelManager, KernelTester, handleRequest } from '../utils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import {
+  Kernel,
+  KernelManager,
+  KernelMessage,
+  KernelSpec,
+  KernelSpecAPI
+} from '../../src';
+import { FakeKernelManager, handleRequest, KernelTester } from '../utils';
 
 const server = new JupyterServer();
 

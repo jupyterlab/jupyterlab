@@ -1,19 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
-
-import { Widget } from '@lumino/widgets';
-
 import { WidgetTracker } from '@jupyterlab/apputils';
-
-import { RunMenu, IRunMenu } from '@jupyterlab/mainmenu';
+import { IRunMenu, RunMenu } from '@jupyterlab/mainmenu';
+import { CommandRegistry } from '@lumino/commands';
+import { Widget } from '@lumino/widgets';
+import { delegateExecute } from './util';
 
 class Wodget extends Widget {
   state: string;
 }
-
-import { delegateExecute } from './util';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('RunMenu', () => {

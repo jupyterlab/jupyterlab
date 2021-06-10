@@ -9,26 +9,19 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
-  CompleterModel,
   Completer,
+  CompleterModel,
   CompletionConnector,
   CompletionHandler,
   ContextConnector,
   ICompletionManager
 } from '@jupyterlab/completer';
-
 import { IConsoleTracker } from '@jupyterlab/console';
-
 import { IEditorTracker } from '@jupyterlab/fileeditor';
-
 import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { Session } from '@jupyterlab/services';
-
 import { find, toArray } from '@lumino/algorithm';
-
 import { Widget } from '@lumino/widgets';
 
 /**

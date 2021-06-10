@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Widget, Panel, PanelLayout, Title } from '@lumino/widgets';
-import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
+import { Panel, PanelLayout, Title, Widget } from '@lumino/widgets';
 
 /**
  * A panel that supports a collapsible header made from the widget's title.

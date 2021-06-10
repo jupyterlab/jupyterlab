@@ -5,8 +5,6 @@
  * @module terminal-extension
  */
 
-import { toArray } from '@lumino/algorithm';
-
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
@@ -23,12 +21,12 @@ import { IFileMenu, IMainMenu } from '@jupyterlab/mainmenu';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { Terminal } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
-import { ITranslator } from '@jupyterlab/translation';
-import { terminalIcon } from '@jupyterlab/ui-components';
-
+import { ITerminal, ITerminalTracker } from '@jupyterlab/terminal';
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
+import { ITranslator } from '@jupyterlab/translation';
+import { terminalIcon } from '@jupyterlab/ui-components';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * The command IDs used by the terminal plugin.

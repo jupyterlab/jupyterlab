@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JSONExt } from '@lumino/coreutils';
-
 import minimist from 'minimist';
-
 import { URLExt } from './url';
 
 /**

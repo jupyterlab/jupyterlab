@@ -16,9 +16,9 @@ import {
   ICommandPalette,
   ISessionContextDialogs,
   MainAreaWidget,
+  sessionContextDialogs,
   showDialog,
-  WidgetTracker,
-  sessionContextDialogs
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
@@ -46,19 +46,19 @@ import {
 import * as nbformat from '@jupyterlab/nbformat';
 
 import {
-  NotebookTools,
+  CommandEditStatus,
   INotebookTools,
   INotebookTracker,
   INotebookWidgetFactory,
+  Notebook,
   NotebookActions,
   NotebookModelFactory,
   NotebookPanel,
+  NotebookTools,
   NotebookTracker,
-  NotebookWidgetFactory,
-  StaticNotebook,
-  CommandEditStatus,
   NotebookTrustStatus,
-  Notebook
+  NotebookWidgetFactory,
+  StaticNotebook
 } from '@jupyterlab/notebook';
 import {
   IObservableList,
@@ -75,7 +75,7 @@ import { IStateDB } from '@jupyterlab/statedb';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { buildIcon, notebookIcon } from '@jupyterlab/ui-components';
 
@@ -87,8 +87,8 @@ import {
   JSONExt,
   JSONObject,
   JSONValue,
-  ReadonlyPartialJSONObject,
   ReadonlyJSONValue,
+  ReadonlyPartialJSONObject,
   UUID
 } from '@lumino/coreutils';
 
@@ -96,7 +96,7 @@ import { DisposableSet } from '@lumino/disposable';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Panel, Menu } from '@lumino/widgets';
+import { Menu, Panel } from '@lumino/widgets';
 
 import { logNotebookOutput } from './nboutput';
 

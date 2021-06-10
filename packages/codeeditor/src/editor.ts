@@ -1,28 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as models from '@jupyterlab/shared-models';
-
-import * as nbformat from '@jupyterlab/nbformat';
-
-import { JSONObject } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
+import * as nbformat from '@jupyterlab/nbformat';
 import {
   IModelDB,
-  ModelDB,
-  IObservableValue,
-  ObservableValue,
   IObservableMap,
-  IObservableString
+  IObservableString,
+  IObservableValue,
+  ModelDB,
+  ObservableValue
 } from '@jupyterlab/observables';
-
+import * as models from '@jupyterlab/shared-models';
 import { ITranslator } from '@jupyterlab/translation';
+import { JSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * A namespace for code editors.

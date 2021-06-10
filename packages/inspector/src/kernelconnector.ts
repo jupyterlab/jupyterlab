@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext } from '@jupyterlab/apputils';
-
-import { DataConnector } from '@jupyterlab/statedb';
-
 import { KernelMessage } from '@jupyterlab/services';
-
+import { DataConnector } from '@jupyterlab/statedb';
 import { InspectionHandler } from './handler';
 
 /**

@@ -3,61 +3,49 @@
 // / <reference types="codemirror"/>
 // / <reference types="codemirror/searchcursor"/>
 
-import CodeMirror from 'codemirror';
-
 import { showDialog } from '@jupyterlab/apputils';
-
-import * as models from '@jupyterlab/shared-models';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import {
+  ICollaborator,
   IObservableMap,
-  IObservableString,
-  ICollaborator
+  IObservableString
 } from '@jupyterlab/observables';
-
+import * as models from '@jupyterlab/shared-models';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { ArrayExt } from '@lumino/algorithm';
-
 import { JSONExt, UUID } from '@lumino/coreutils';
-
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
-
 import { Signal } from '@lumino/signaling';
-
-import { CodemirrorBinding } from 'y-codemirror';
-
-import { Mode } from './mode';
-
+import CodeMirror from 'codemirror';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/display/rulers.js';
-import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/fold/brace-fold.js';
+import 'codemirror/addon/fold/comment-fold.js';
 import 'codemirror/addon/fold/foldcode.js';
 import 'codemirror/addon/fold/foldgutter.js';
-import 'codemirror/addon/fold/brace-fold.js';
 import 'codemirror/addon/fold/indent-fold.js';
 import 'codemirror/addon/fold/markdown-fold.js';
 import 'codemirror/addon/fold/xml-fold.js';
-import 'codemirror/addon/fold/comment-fold.js';
+import 'codemirror/addon/mode/simple';
 import 'codemirror/addon/scroll/scrollpastend.js';
-import 'codemirror/addon/search/searchcursor';
-import 'codemirror/addon/search/search';
 import 'codemirror/addon/search/jump-to-line';
+import 'codemirror/addon/search/search';
+import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/selection/active-line';
 import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/addon/selection/selection-pointer';
-import 'codemirror/addon/mode/simple';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
+import { CodemirrorBinding } from 'y-codemirror';
+import { Mode } from './mode';
+
 // import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
 
 /**

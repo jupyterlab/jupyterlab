@@ -2,41 +2,31 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ISessionContext,
   Clipboard,
   Dialog,
+  ISessionContext,
   showDialog
 } from '@jupyterlab/apputils';
-
 import {
+  Cell,
+  CodeCell,
   ICellModel,
   ICodeCellModel,
-  CodeCell,
-  Cell,
-  MarkdownCell,
+  isCodeCellModel,
   isMarkdownCellModel,
   isRawCellModel,
-  isCodeCellModel
+  MarkdownCell
 } from '@jupyterlab/cells';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { KernelMessage } from '@jupyterlab/services';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, each, findIndex, toArray } from '@lumino/algorithm';
-
-import { JSONObject, JSONExt } from '@lumino/coreutils';
-
+import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import * as React from 'react';
-
 import { INotebookModel } from './model';
-
 import { Notebook } from './widget';
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 /**
  * The mimetype used for Jupyter cell data.

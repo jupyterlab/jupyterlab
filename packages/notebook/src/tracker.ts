@@ -3,11 +3,9 @@
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { INotebookTracker } from './tokens';
 import { NotebookPanel } from './panel';
+import { INotebookTracker } from './tokens';
 import { Notebook } from './widget';
 
 export class NotebookTracker

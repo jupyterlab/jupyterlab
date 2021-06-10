@@ -11,14 +11,14 @@ import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 
 import {
+  Contents,
+  ContentsManager,
   Kernel,
   KernelMessage,
   KernelSpec,
-  Session,
-  ServiceManager,
-  Contents,
   ServerConnection,
-  ContentsManager
+  ServiceManager,
+  Session
 } from '@jupyterlab/services';
 
 import { ArrayIterator } from '@lumino/algorithm';

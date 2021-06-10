@@ -1,27 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { isValidFileName } from '@jupyterlab/docmanager';
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
-
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
 import {
   classes,
   DockPanelSvg,
   LabIcon,
   TabPanelSvg
 } from '@jupyterlab/ui-components';
-
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
-
 import { PromiseDelegate, Token } from '@lumino/coreutils';
-
-import { Message, MessageLoop, IMessageHandler } from '@lumino/messaging';
-
+import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import {
   BoxLayout,
   BoxPanel,
@@ -36,10 +29,7 @@ import {
   Title,
   Widget
 } from '@lumino/widgets';
-
 import { JupyterFrontEnd } from './frontend';
-
-import { isValidFileName } from '@jupyterlab/docmanager';
 
 /**
  * The class name added to AppShell instances.

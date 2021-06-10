@@ -4,23 +4,18 @@
 import {
   CodeEditor,
   CodeEditorWrapper,
-  IEditorServices,
-  IEditorMimeTypeService
+  IEditorMimeTypeService,
+  IEditorServices
 } from '@jupyterlab/codeeditor';
-
 import {
   ABCWidgetFactory,
   DocumentRegistry,
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-
 import { textEditorIcon } from '@jupyterlab/ui-components';
-
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { StackedLayout, Widget } from '@lumino/widgets';
 
 /**

@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
 import { Widget } from '@lumino/widgets';
-import { IHeading } from './utils/headings';
+import * as React from 'react';
 import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCItem } from './toc_item';
+import { IHeading } from './utils/headings';
 
 /**
  * Interface describing component properties.

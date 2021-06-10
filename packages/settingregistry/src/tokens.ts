@@ -3,20 +3,16 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { IDataConnector } from '@jupyterlab/statedb';
 import {
   PartialJSONObject,
-  Token,
   PartialJSONValue,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue
+  ReadonlyPartialJSONValue,
+  Token
 } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { ISignal } from '@lumino/signaling';
-
-import { IDataConnector } from '@jupyterlab/statedb';
-
 import { ISchemaValidator } from './settingregistry';
 
 /* tslint:disable */

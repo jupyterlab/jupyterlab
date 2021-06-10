@@ -5,22 +5,15 @@
  * @module json-extension
  */
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import { Printing } from '@jupyterlab/apputils';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-
 import { Widget } from '@lumino/widgets';
-
 import * as React from 'react';
-
 import * as ReactDOM from 'react-dom';
-
 import { Component } from './component';
-import { JSONValue, JSONObject } from '@lumino/coreutils';
 
 /**
  * The CSS class to add to the JSON Widget.

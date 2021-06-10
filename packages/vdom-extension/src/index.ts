@@ -6,22 +6,16 @@
  */
 
 import {
+  ILayoutRestorer,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  ILayoutRestorer
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { WidgetTracker } from '@jupyterlab/apputils';
-
-import { MimeDocumentFactory, MimeDocument } from '@jupyterlab/docregistry';
-
+import { MimeDocument, MimeDocumentFactory } from '@jupyterlab/docregistry';
 import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { reactIcon } from '@jupyterlab/ui-components';
-
-import { RenderedVDOM, IVDOMTracker } from '@jupyterlab/vdom';
+import { IVDOMTracker, RenderedVDOM } from '@jupyterlab/vdom';
 
 /**
  * The MIME type for VDOM.

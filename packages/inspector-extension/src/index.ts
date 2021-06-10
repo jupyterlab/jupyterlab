@@ -11,28 +11,21 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IConsoleTracker } from '@jupyterlab/console';
-
 import {
   IInspector,
   InspectionHandler,
   InspectorPanel,
   KernelConnector
 } from '@jupyterlab/inspector';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { inspectorIcon } from '@jupyterlab/ui-components';
 
 /**

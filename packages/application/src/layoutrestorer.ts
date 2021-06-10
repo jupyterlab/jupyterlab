@@ -4,25 +4,19 @@
 |----------------------------------------------------------------------------*/
 
 import { WidgetTracker } from '@jupyterlab/apputils';
-
 import { IDataConnector, IRestorer } from '@jupyterlab/statedb';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import {
   JSONExt,
   JSONObject,
-  PromiseDelegate,
   PartialJSONObject,
-  ReadonlyPartialJSONValue,
+  PromiseDelegate,
   ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue,
   Token
 } from '@lumino/coreutils';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { DockPanel, Widget } from '@lumino/widgets';
-
 import { ILabShell } from './shell';
 
 /**

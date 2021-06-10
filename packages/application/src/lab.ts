@@ -2,19 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-
 import { Base64ModelFactory } from '@jupyterlab/docregistry';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import { Token } from '@lumino/coreutils';
-
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
-
 import { createRendermimePlugins } from './mimerenderers';
-
 import { ILabShell, LabShell } from './shell';
-
 import { LabStatus } from './status';
 
 /**
