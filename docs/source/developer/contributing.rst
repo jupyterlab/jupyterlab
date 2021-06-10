@@ -549,8 +549,7 @@ Good Practices for Integration tests
 
 Here are some good practices to follow when writing integration tests:
 
-- Don't compare multiple screenshots in the same test; if the first comparison breaks, it will required to run multiple time the CI
-to fix all tests.
+- Don't compare multiple screenshots in the same test; if the first comparison breaks, it will required to run multiple time the CI to fix all tests.
 
 Contributing to the debugger front-end
 --------------------------------------
