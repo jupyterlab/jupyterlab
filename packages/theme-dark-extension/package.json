@@ -15,7 +15,6 @@
   "sideEffects": true,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
@@ -47,7 +46,6 @@
   },
   "jupyterlab": {
     "extension": true,
-    "themePath": "style/index.css"
-  },
-  "styleModule": "style/index.js"
+    "themePath": "style/theme.css"
+  }
 }

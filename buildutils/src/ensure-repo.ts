@@ -484,25 +484,23 @@ export async function ensureIntegrity(): Promise<boolean> {
       ...(data.jupyterlab && data.jupyterlab.extraStyles)
     };
 
-    // Add automatic dependency css if package is not a theme package
-    if (!(data.jupyterlab && data.jupyterlab.themePath)) {
-      Object.keys(deps).forEach(depName => {
-        // Bail for skipped imports and known extra styles.
-        if (skip.includes(depName) || depName in cssData) {
-          return;
-        }
+    // Add automatic dependency css
+    Object.keys(deps).forEach(depName => {
+      // Bail for skipped imports and known extra styles.
+      if (skip.includes(depName) || depName in cssData) {
+        return;
+      }
 
-        const depData = graph.getNodeData(depName) as any;
-        if (typeof depData.style === 'string') {
-          cssData[depName] = [depData.style];
-        }
-        if (typeof depData.styleModule === 'string') {
-          cssModuleData[depName] = [depData.styleModule];
-        } else if (typeof depData.style === 'string') {
-          cssModuleData[depName] = [depData.style];
-        }
-      });
-    }
+      const depData = graph.getNodeData(depName) as any;
+      if (typeof depData.style === 'string') {
+        cssData[depName] = [depData.style];
+      }
+      if (typeof depData.styleModule === 'string') {
+        cssModuleData[depName] = [depData.styleModule];
+      } else if (typeof depData.style === 'string') {
+        cssModuleData[depName] = [depData.style];
+      }
+    });
 
     // Get our CSS imports in dependency order.
     cssImports[name] = [];
