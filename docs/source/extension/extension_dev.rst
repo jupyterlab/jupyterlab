@@ -172,7 +172,7 @@ document can then be saved by the user in the usual manner.
 Theme plugins
 ^^^^^^^^^^^^^
 
-A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated.
+A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated. Since CSS files referenced by the ``style`` or ``styleModule`` keys are automatically bundled and loaded on the page, the theme files should not be referenced by these keys. 
 
 The extension package containing the theme plugin must include all static assets that are referenced by ``@import`` in its theme CSS files. Local URLs can be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or ``url('../foo/bar.css')`` can be used to refer local files in the theme. Absolute URLs (starting with a ``/``) or external URLs (e.g. ``https:``) can be used to refer to external assets.
 
@@ -234,10 +234,10 @@ Theme plugin assets (e.g., CSS files) need to bundled separately from a typical 
 
         "jupyterlab": {
           "extension": true,
-          "themePath": "style/index.css"
+          "themePath": "style/theme.css"
         }
 
-An extension cannot bundle multiple theme plugins, and any other CSS in the package is ignored (so any other application or mimeRenderer plugins in the package cannot have associated CSS).
+An extension cannot bundle multiple theme plugins.
 
 Ensure that the theme path files are included in the ``files`` metadata in ``package.json``.  If you want to use SCSS, SASS, or LESS files, you must compile them to CSS and point ``jupyterlab.themePath`` to the CSS files.
 
@@ -448,9 +448,9 @@ Currently supported package managers are ``pip`` and ``conda``.
 Extension CSS
 ^^^^^^^^^^^^^
 
-If your extension has a top-level ``style`` key in ``package.json``, and is not a theme extension (i.e., has no ``jupyterlab.themePath`` key), the CSS file it points to will be included on the page automatically.
+If your extension has a top-level ``style`` key in ``package.json``, the CSS file it points to will be included on the page automatically.
 
-A convention in JupyterLab for deduplicating CSS on the page is that if your extension has a top-level ``styleModule`` key in ``package.json`` giving a JavaScript module that can be imported, it will be preferred over the ``style`` key CSS file.
+A convention in JupyterLab for deduplicating CSS on the page is that if your extension has a top-level ``styleModule`` key in ``package.json`` giving a JavaScript module that can be imported, it will be imported (as a JavaScript module) instead of importing the ``style`` key CSS file as a CSS file.
 
 
 Prebuilt Extensions
