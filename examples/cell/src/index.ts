@@ -10,6 +10,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/cells/style/index.css';
 import '@jupyterlab/theme-light-extension/style/theme.css';
+import '@jupyterlab/completer/style/index.css';
 import '../index.css';
 
 import { SessionContext, Toolbar } from '@jupyterlab/apputils';
@@ -91,11 +92,19 @@ function main(): void {
   const connector = new KernelConnector({ session: sessionContext.session });
   const handler = new CompletionHandler({ completer, connector });
 
+  //sessionContext.session?.kernel.
+  void sessionContext.ready.then(() => {
+    handler.connector = new KernelConnector({
+      session: sessionContext.session
+    });
+  });
+
   // Set the handler's editor.
   handler.editor = editor;
 
   // Hide the widget when it first loads.
   completer.hide();
+  completer.addClass('jp-Completer-Cell');
 
   // Create a toolbar for the cell.
   const toolbar = new Toolbar();
@@ -110,7 +119,6 @@ function main(): void {
   panel.id = 'main';
   panel.direction = 'top-to-bottom';
   panel.spacing = 0;
-  panel.addWidget(completer);
   panel.addWidget(toolbar);
   panel.addWidget(cellWidget);
   BoxPanel.setStretch(toolbar, 0);
@@ -118,6 +126,7 @@ function main(): void {
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
+  Widget.attach(completer, document.body);
 
   // Handle widget state.
   window.addEventListener('resize', () => {
