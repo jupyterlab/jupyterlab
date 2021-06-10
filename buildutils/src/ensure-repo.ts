@@ -216,6 +216,14 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/cells',
     '@jupyterlab/notebook'
   ],
+  '@jupyterlab/theme-light-extension': [
+    '@jupyterlab/application',
+    '@jupyterlab/apputils'
+  ],
+  '@jupyterlab/theme-dark-extension': [
+    '@jupyterlab/application',
+    '@jupyterlab/apputils'
+  ],
   '@jupyterlab/ui-extension': ['@blueprintjs/icons']
 };
 
