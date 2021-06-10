@@ -6,9 +6,9 @@
  */
 
 export * from './interfaces';
+export * from './providers/codemirrorsearchprovider';
+export * from './providers/genericsearchprovider';
+export * from './providers/notebooksearchprovider';
 export * from './searchinstance';
 export * from './searchproviderregistry';
 export * from './tokens';
-export * from './providers/genericsearchprovider';
-export * from './providers/codemirrorsearchprovider';
-export * from './providers/notebooksearchprovider';

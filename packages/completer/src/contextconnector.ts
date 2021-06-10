@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { DataConnector } from '@jupyterlab/statedb';
-
 import { CompletionHandler } from './handler';
 
 /**

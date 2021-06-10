@@ -11,17 +11,13 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import {
   ITranslator,
-  TranslationManager,
-  requestTranslationsAPI
+  requestTranslationsAPI,
+  TranslationManager
 } from '@jupyterlab/translation';
 
 /**

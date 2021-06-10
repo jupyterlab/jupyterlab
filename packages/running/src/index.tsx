@@ -12,17 +12,11 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/apputils';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { closeIcon, LabIcon, refreshIcon } from '@jupyterlab/ui-components';
-
 import { Token } from '@lumino/coreutils';
-
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
 import { ISignal } from '@lumino/signaling';
-
 import * as React from 'react';
 
 /**

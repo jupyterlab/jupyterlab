@@ -10,32 +10,26 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
-  ISessionContext,
   ICommandPalette,
+  ISessionContext,
   ISessionContextDialogs,
   sessionContextDialogs
 } from '@jupyterlab/apputils';
-
 import { Cell, CodeCell } from '@jupyterlab/cells';
-
 import {
   CodeConsole,
   ConsolePanel,
   IConsoleTracker
 } from '@jupyterlab/console';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-
 import {
   INotebookTracker,
   Notebook,
   NotebookPanel
 } from '@jupyterlab/notebook';
-
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   IStatusBar,
   KernelStatus,
@@ -43,15 +37,9 @@ import {
   RunningSessions,
   StatusBar
 } from '@jupyterlab/statusbar';
-
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { Switch } from '@jupyterlab/ui-components';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import { Title, Widget } from '@lumino/widgets';
 
 export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';

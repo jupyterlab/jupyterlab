@@ -7,57 +7,43 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-
 import { PathExt, Time } from '@jupyterlab/coreutils';
-
 import {
   IDocumentManager,
   isValidFileName,
   renameFile
 } from '@jupyterlab/docmanager';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import { Contents } from '@jupyterlab/services';
-
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import {
   caretDownIcon,
   caretUpIcon,
   classes,
   LabIcon
 } from '@jupyterlab/ui-components';
-
 import {
   ArrayExt,
   ArrayIterator,
-  StringExt,
   each,
   filter,
   find,
   IIterator,
+  StringExt,
   toArray
 } from '@lumino/algorithm';
-
 import { MimeData, PromiseDelegate } from '@lumino/coreutils';
-
 import { ElementExt } from '@lumino/domutils';
-
 import { Drag, IDragEvent } from '@lumino/dragdrop';
-
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
+import { h, VirtualDOM } from '@lumino/virtualdom';
 import { Widget } from '@lumino/widgets';
-
-import { VirtualDOM, h } from '@lumino/virtualdom';
-
 import { FilterFileBrowserModel } from './model';
-import {
-  nullTranslator,
-  TranslationBundle,
-  ITranslator
-} from '@jupyterlab/translation';
 
 /**
  * The class name added to DirListing widget.

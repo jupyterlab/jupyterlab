@@ -1,24 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
-import { toArray } from '@lumino/algorithm';
-
-import { KernelAPI } from '../../src';
-
 import {
   expectFailure,
-  testEmission,
+  flakyIt as it,
   JupyterServer,
-  flakyIt as it
+  testEmission
 } from '@jupyterlab/testutils';
-
+import { toArray } from '@lumino/algorithm';
+import { UUID } from '@lumino/coreutils';
+import { KernelAPI } from '../../src';
 import {
+  getRequestHandler,
   KernelTester,
   makeSettings,
-  PYTHON_SPEC,
-  getRequestHandler
+  PYTHON_SPEC
 } from '../utils';
 
 const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));

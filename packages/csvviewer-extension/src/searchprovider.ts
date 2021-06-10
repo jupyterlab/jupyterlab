@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { ISearchProvider, ISearchMatch } from '@jupyterlab/documentsearch';
 import { CSVViewer } from '@jupyterlab/csvviewer';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import { Signal, ISignal } from '@lumino/signaling';
+import { ISearchMatch, ISearchProvider } from '@jupyterlab/documentsearch';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 // The type for which canSearchFor returns true

@@ -1,7 +1,5 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { JSONExt } from '@lumino/coreutils';
-
 import { Menu } from '@lumino/widgets';
 
 /**

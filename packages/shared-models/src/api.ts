@@ -14,13 +14,10 @@
  * It also defines the shared changes to be used in the events.
  */
 
-import { PartialJSONObject } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { ISignal } from '@lumino/signaling';
-
 import * as nbformat from '@jupyterlab/nbformat';
+import { PartialJSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal } from '@lumino/signaling';
 
 /**
  * ISharedBase defines common operations that can be performed on any shared object.

@@ -3,29 +3,28 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 import {
+  Cell,
   CodeCell,
   CodeCellModel,
-  MarkdownCell,
-  Cell,
-  ICellModel
+  ICellModel,
+  MarkdownCell
 } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { nullTranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
-import { isMarkdown } from '../../utils/is_markdown';
-import { isDOM } from '../../utils/is_dom';
 import { INotebookHeading } from '../../utils/headings';
-import { OptionsManager } from './options_manager';
+import { isDOM } from '../../utils/is_dom';
+import { isMarkdown } from '../../utils/is_markdown';
+import { appendHeading } from './append_heading';
+import { appendMarkdownHeading } from './append_markdown_heading';
 import { getCodeCellHeading } from './get_code_cell_heading';
 import { getLastHeadingLevel } from './get_last_heading_level';
 import { getMarkdownHeadings } from './get_markdown_heading';
 import { getRenderedHTMLHeadings } from './get_rendered_html_heading';
-import { appendHeading } from './append_heading';
-import { appendMarkdownHeading } from './append_markdown_heading';
+import { OptionsManager } from './options_manager';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
-import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * Returns a ToC generator for notebooks.

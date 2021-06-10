@@ -2,15 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ILabShell, LayoutRestorer } from '@jupyterlab/application';
-
 import { WidgetTracker } from '@jupyterlab/apputils';
-
 import { StateDB } from '@jupyterlab/statedb';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
 
 describe('apputils', () => {

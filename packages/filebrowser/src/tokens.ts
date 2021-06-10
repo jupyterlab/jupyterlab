@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { WidgetTracker } from '@jupyterlab/apputils';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
 import { Token } from '@lumino/coreutils';
-
 import { FileBrowser } from './browser';
 
 /* tslint:disable */

@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
 import { ISanitizer } from '@jupyterlab/apputils';
-import { sanitizerOptions } from '../../utils/sanitizer_options';
+import * as React from 'react';
 import { INotebookHeading } from '../../utils/headings';
+import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 /**
  * Interface describing code component properties.

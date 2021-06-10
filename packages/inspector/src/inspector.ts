@@ -2,15 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Printing } from '@jupyterlab/apputils';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-
 import { IInspector } from './tokens';
 
 /**

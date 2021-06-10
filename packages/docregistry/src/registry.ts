@@ -1,49 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt,
-  ArrayIterator,
-  IIterator,
-  each,
-  empty,
-  find,
-  map
-} from '@lumino/algorithm';
-
-import * as models from '@jupyterlab/shared-models';
-
-import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
-
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { DockLayout, Widget } from '@lumino/widgets';
-
 import { ISessionContext, Toolbar } from '@jupyterlab/apputils';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import {
   IChangedArgs as IChangedArgsGeneric,
   PathExt
 } from '@jupyterlab/coreutils';
-
 import { IModelDB } from '@jupyterlab/observables';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import { Contents, Kernel } from '@jupyterlab/services';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import * as models from '@jupyterlab/shared-models';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   fileIcon,
   folderIcon,
   imageIcon,
-  LabIcon,
   jsonIcon,
+  LabIcon,
   markdownIcon,
   notebookIcon,
   pdfIcon,
@@ -52,7 +26,19 @@ import {
   spreadsheetIcon,
   yamlIcon
 } from '@jupyterlab/ui-components';
-
+import {
+  ArrayExt,
+  ArrayIterator,
+  each,
+  empty,
+  find,
+  IIterator,
+  map
+} from '@lumino/algorithm';
+import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
+import { DockLayout, Widget } from '@lumino/widgets';
 import { TextModelFactory } from './default';
 
 /**

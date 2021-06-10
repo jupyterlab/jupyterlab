@@ -2,17 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { Token } from '@lumino/coreutils';
-
-import { ISignal } from '@lumino/signaling';
 import { IDisposable } from '@lumino/disposable';
+import { ISignal } from '@lumino/signaling';
 
 /* tslint:disable */
 /**

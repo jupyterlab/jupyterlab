@@ -2,32 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IRouter,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  IRouter
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
-import { showDialog, Dialog, IWindowResolver } from '@jupyterlab/apputils';
-
+import { Dialog, IWindowResolver, showDialog } from '@jupyterlab/apputils';
 import {
-  DocumentRegistry,
   ABCWidgetFactory,
-  IDocumentWidget,
-  DocumentWidget
+  DocumentRegistry,
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
-
 import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import {
   ContentsManager,
   Workspace,
   WorkspaceManager
 } from '@jupyterlab/services';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
 namespace CommandIDs {

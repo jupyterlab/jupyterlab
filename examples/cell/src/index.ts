@@ -14,26 +14,26 @@ import '../index.css';
 
 import { SessionContext, Toolbar } from '@jupyterlab/apputils';
 
-import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
 
 import { CodeMirrorMimeTypeService } from '@jupyterlab/codemirror';
 
 import {
-  CompleterModel,
   Completer,
+  CompleterModel,
   CompletionHandler,
   KernelConnector
 } from '@jupyterlab/completer';
 
 import {
-  RenderMimeRegistry,
-  standardRendererFactories as initialFactories
+  standardRendererFactories as initialFactories,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {
-  SessionManager,
   KernelManager,
-  KernelSpecManager
+  KernelSpecManager,
+  SessionManager
 } from '@jupyterlab/services';
 
 import { CommandRegistry } from '@lumino/commands';

@@ -7,7 +7,7 @@ import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { IAttachmentsModel, AttachmentsModel } from '@jupyterlab/attachments';
+import { AttachmentsModel, IAttachmentsModel } from '@jupyterlab/attachments';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -20,11 +20,11 @@ import * as models from '@jupyterlab/shared-models';
 import { UUID } from '@lumino/coreutils';
 
 import {
-  IObservableJSON,
   IModelDB,
+  IObservableJSON,
+  IObservableMap,
   IObservableValue,
-  ObservableValue,
-  IObservableMap
+  ObservableValue
 } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';

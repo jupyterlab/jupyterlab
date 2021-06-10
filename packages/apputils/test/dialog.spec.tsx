@@ -5,22 +5,16 @@
 // import { expect } from 'chai';
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-
-import { each } from '@lumino/algorithm';
-
-import { Message } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { generate, simulate } from 'simulate-event';
-
-import * as React from 'react';
-
 import {
   acceptDialog,
   dismissDialog,
   waitForDialog
 } from '@jupyterlab/testutils';
+import { each } from '@lumino/algorithm';
+import { Message } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import * as React from 'react';
+import { generate, simulate } from 'simulate-event';
 
 class TestDialog extends Dialog<any> {
   methods: string[] = [];

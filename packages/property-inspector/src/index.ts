@@ -6,21 +6,15 @@
  */
 
 import { ILabShell } from '@jupyterlab/application';
-
 import { ReactWidget } from '@jupyterlab/apputils';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { Signal, ISignal } from '@lumino/signaling';
-
-import { Widget, FocusTracker, SingletonLayout } from '@lumino/widgets';
-
+import { ISignal, Signal } from '@lumino/signaling';
+import { FocusTracker, SingletonLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-
 import { IPropertyInspector, IPropertyInspectorProvider } from './token';
 
 export { IPropertyInspector, IPropertyInspectorProvider };

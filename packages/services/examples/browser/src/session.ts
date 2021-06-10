@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  KernelManager,
   Session,
   SessionAPI,
-  KernelManager,
   SessionManager
 } from '@jupyterlab/services';
 

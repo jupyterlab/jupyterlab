@@ -2,31 +2,21 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import {
+  Clipboard,
   ICommandPalette,
-  WidgetTracker,
   ISessionContextDialogs,
   sessionContextDialogs,
-  Clipboard
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-
 import { IConsoleTracker } from '@jupyterlab/console';
-
 import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import { FileEditor } from '@jupyterlab/fileeditor';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import {
   IEditMenu,
   IFileMenu,
@@ -34,30 +24,25 @@ import {
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
+import { TranslationBundle } from '@jupyterlab/translation';
 import {
   consoleIcon,
   copyIcon,
   cutIcon,
+  LabIcon,
   markdownIcon,
   pasteIcon,
   redoIcon,
   textEditorIcon,
-  undoIcon,
-  LabIcon
+  undoIcon
 } from '@jupyterlab/ui-components';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import {
   JSONObject,
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-
-import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The command IDs used by the fileeditor plugin.

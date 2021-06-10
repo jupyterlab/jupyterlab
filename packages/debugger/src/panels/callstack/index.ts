@@ -3,7 +3,7 @@
 
 import { CommandToolbarButton } from '@jupyterlab/apputils';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { CommandRegistry } from '@lumino/commands';
 

@@ -1,17 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@lumino/algorithm';
-
-import { KernelManager, Kernel, KernelAPI } from '../../src';
-
 import {
-  testEmission,
-  sleep,
+  flakyIt as it,
   JupyterServer,
-  flakyIt as it
+  sleep,
+  testEmission
 } from '@jupyterlab/testutils';
-
+import { toArray } from '@lumino/algorithm';
+import { Kernel, KernelAPI, KernelManager } from '../../src';
 import { makeSettings } from '../utils';
 
 const server = new JupyterServer();

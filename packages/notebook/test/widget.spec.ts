@@ -1,29 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MessageLoop, Message } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { generate, simulate } from 'simulate-event';
-
 import {
-  CodeCellModel,
+  Cell,
   CodeCell,
-  MarkdownCellModel,
+  CodeCellModel,
   MarkdownCell,
-  RawCellModel,
+  MarkdownCellModel,
   RawCell,
-  Cell
+  RawCellModel
 } from '@jupyterlab/cells';
-
-import { INotebookModel, NotebookModel } from '../src';
-
-import { Notebook, StaticNotebook } from '../src';
-
 import { framePromise, signalToPromise } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { generate, simulate } from 'simulate-event';
+import {
+  INotebookModel,
+  Notebook,
+  NotebookModel,
+  StaticNotebook
+} from '../src';
 import * as utils from './utils';
 
 const server = new JupyterServer();

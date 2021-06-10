@@ -3,7 +3,7 @@
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-import { Signal, ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { IHeading, INotebookHeading } from './utils/headings';
 

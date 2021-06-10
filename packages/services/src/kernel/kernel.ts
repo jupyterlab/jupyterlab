@@ -16,7 +16,7 @@ import * as KernelMessage from './messages';
 import { KernelSpec } from '../kernelspec';
 import { IManager as IBaseManager } from '../basemanager';
 
-import { IModel, IKernelOptions } from './restapi';
+import { IKernelOptions, IModel } from './restapi';
 
 export { Status } from './messages';
 export { IModel, IKernelOptions };

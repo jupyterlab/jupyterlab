@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, describe, test } from '@jupyterlab/galata';
+import { describe, galata, test } from '@jupyterlab/galata';
 import { runMenuOpenTest } from './util';
 
 const fileName = 'notebook.ipynb';

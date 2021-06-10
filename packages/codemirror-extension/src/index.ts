@@ -5,35 +5,26 @@
  * @module codemirror-extension
  */
 
-import CodeMirror from 'codemirror';
-
 import {
   ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
-import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
-
 import {
+  CodeMirrorEditor,
   editorServices,
   EditorSyntaxStatus,
-  CodeMirrorEditor,
-  Mode,
-  ICodeMirror
+  ICodeMirror,
+  Mode
 } from '@jupyterlab/codemirror';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
-import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
-
+import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import { ITranslator } from '@jupyterlab/translation';
+import CodeMirror from 'codemirror';
 
 /**
  * The command IDs used by the codemirror plugin.

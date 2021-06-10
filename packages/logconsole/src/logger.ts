@@ -2,23 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
-
 import {
-  IRenderMimeRegistry,
   IOutputModel,
+  IRenderMimeRegistry,
   OutputModel
 } from '@jupyterlab/rendermime';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import {
-  ILogger,
   IContentChange,
-  IStateChange,
+  ILogger,
   ILoggerOutputAreaModel,
   ILogPayload,
+  IStateChange,
   LogLevel
 } from './tokens';
 

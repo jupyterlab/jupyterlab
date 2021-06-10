@@ -2,34 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { TranslationBundle } from '@jupyterlab/translation';
-
 import { MenuSvg } from '@jupyterlab/ui-components';
-
 import { ArrayExt } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import { Menu, MenuBar } from '@lumino/widgets';
-
-import { FileMenu } from './file';
-
 import { EditMenu } from './edit';
-
+import { FileMenu } from './file';
 import { HelpMenu } from './help';
-
 import { KernelMenu } from './kernel';
-
 import { IJupyterLabMenu, JupyterLabMenu } from './labmenu';
-
 import { RunMenu } from './run';
-
 import { SettingsMenu } from './settings';
-
-import { ViewMenu } from './view';
-
 import { TabsMenu } from './tabs';
-
 import { IMainMenu } from './tokens';
+import { ViewMenu } from './view';
 
 /**
  * The main menu class.  It is intended to be used as a singleton.

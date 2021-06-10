@@ -3,8 +3,13 @@
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import {
-  caretDownIcon,
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
   caretDownEmptyThinIcon,
+  caretDownIcon,
   caretRightIcon,
   caretUpEmptyThinIcon,
   caseSensitiveIcon,
@@ -13,19 +18,12 @@ import {
   ellipsesIcon,
   regexIcon
 } from '@jupyterlab/ui-components';
-
 import { Debouncer } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-
 import { IDisplayState } from './interfaces';
 import { SearchInstance } from './searchinstance';
-import {
-  nullTranslator,
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';

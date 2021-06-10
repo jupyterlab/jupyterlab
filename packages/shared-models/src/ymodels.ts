@@ -3,18 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ISignal, Signal } from '@lumino/signaling';
-import { UUID } from '@lumino/coreutils';
-
-import * as Y from 'yjs';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
-import * as models from './api';
-
-import { Delta } from './api';
-
+import { UUID } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
+import * as Y from 'yjs';
+import * as models from './api';
+import { Delta } from './api';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 

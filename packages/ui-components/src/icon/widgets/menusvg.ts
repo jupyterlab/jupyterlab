@@ -2,11 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { h, VirtualElement } from '@lumino/virtualdom';
-import { Menu, ContextMenu } from '@lumino/widgets';
-
-import { caretRightIcon, checkIcon } from '../iconimports';
+import { ContextMenu, Menu } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
+import { caretRightIcon, checkIcon } from '../iconimports';
 
 const submenuIcon = caretRightIcon.bindprops({
   stylesheet: 'menuItem'

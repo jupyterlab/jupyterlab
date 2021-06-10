@@ -9,7 +9,7 @@ import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { ISessionContext } from '@jupyterlab/apputils';
 
-import { IChangedArgs, ActivityMonitor, URLExt } from '@jupyterlab/coreutils';
+import { ActivityMonitor, IChangedArgs, URLExt } from '@jupyterlab/coreutils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
@@ -17,52 +17,52 @@ import { DirListing } from '@jupyterlab/filebrowser';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { IObservableMap, IObservableJSON } from '@jupyterlab/observables';
+import { IObservableJSON, IObservableMap } from '@jupyterlab/observables';
 
 import {
-  OutputArea,
-  SimplifiedOutputArea,
   IOutputPrompt,
-  OutputPrompt,
   IStdin,
+  OutputArea,
+  OutputPrompt,
+  SimplifiedOutputArea,
   Stdin
 } from '@jupyterlab/outputarea';
 
 import {
+  imageRendererFactory,
   IRenderMime,
-  MimeModel,
   IRenderMimeRegistry,
-  imageRendererFactory
+  MimeModel
 } from '@jupyterlab/rendermime';
 
-import { KernelMessage, Kernel } from '@jupyterlab/services';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import {
-  JSONValue,
-  PromiseDelegate,
   JSONObject,
-  UUID,
-  PartialJSONValue
+  JSONValue,
+  PartialJSONValue,
+  PromiseDelegate,
+  UUID
 } from '@lumino/coreutils';
 
-import { some, filter, toArray } from '@lumino/algorithm';
+import { filter, some, toArray } from '@lumino/algorithm';
 
 import { IDragEvent } from '@lumino/dragdrop';
 
 import { Message } from '@lumino/messaging';
 
-import { PanelLayout, Panel, Widget } from '@lumino/widgets';
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { InputCollapser, OutputCollapser } from './collapser';
 
 import {
-  CellHeader,
   CellFooter,
-  ICellHeader,
-  ICellFooter
+  CellHeader,
+  ICellFooter,
+  ICellHeader
 } from './headerfooter';
 
-import { InputArea, IInputPrompt, InputPrompt } from './inputarea';
+import { IInputPrompt, InputArea, InputPrompt } from './inputarea';
 
 import {
   IAttachmentsCellModel,

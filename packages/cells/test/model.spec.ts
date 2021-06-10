@@ -7,9 +7,9 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import {
   CellModel,
-  RawCellModel,
+  CodeCellModel,
   MarkdownCellModel,
-  CodeCellModel
+  RawCellModel
 } from '@jupyterlab/cells';
 
 import * as nbformat from '@jupyterlab/nbformat';

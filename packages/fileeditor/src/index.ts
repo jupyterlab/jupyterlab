@@ -5,6 +5,6 @@
  * @module fileeditor
  */
 
-export * from './tokens';
 export * from './tabspacestatus';
+export * from './tokens';
 export * from './widget';

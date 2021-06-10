@@ -3,7 +3,7 @@
 
 import { Toolbar } from '@jupyterlab/apputils';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 

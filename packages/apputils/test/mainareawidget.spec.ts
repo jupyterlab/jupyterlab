@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
-
 import { MessageLoop } from '@lumino/messaging';
-
 import { BoxPanel, Widget } from '@lumino/widgets';
 
 describe('@jupyterlab/apputils', () => {

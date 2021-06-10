@@ -1,18 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { each, map, toArray } from '@lumino/algorithm';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
-
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
+import { each, map, toArray } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * The model for an output area.

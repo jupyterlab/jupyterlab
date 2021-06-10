@@ -1,16 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
-
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
-
 import { ITranslator } from '@jupyterlab/translation';
-
-import { Token, ReadonlyPartialJSONObject } from '@lumino/coreutils';
-
+import { CommandRegistry } from '@lumino/commands';
+import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-
 import { ISignal } from '@lumino/signaling';
 
 /**

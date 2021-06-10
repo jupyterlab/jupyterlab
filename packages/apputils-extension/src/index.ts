@@ -13,43 +13,30 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
+  defaultSanitizer,
   Dialog,
   ICommandPalette,
+  ISanitizer,
   ISessionContextDialogs,
   ISplashScreen,
   IWindowResolver,
-  WindowResolver,
+  MainAreaWidget,
   Printing,
   sessionContextDialogs,
-  ISanitizer,
-  defaultSanitizer,
-  MainAreaWidget
+  WindowResolver
 } from '@jupyterlab/apputils';
-
-import { URLExt, PageConfig } from '@jupyterlab/coreutils';
-
-import { IStateDB, StateDB } from '@jupyterlab/statedb';
-
-import { ITranslator } from '@jupyterlab/translation';
-
-import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
-
-import { PromiseDelegate } from '@lumino/coreutils';
-
-import { DisposableDelegate } from '@lumino/disposable';
-
-import { Debouncer, Throttler } from '@lumino/polling';
-
-import { Palette } from './palette';
-
-import { settingsPlugin } from './settingsplugin';
-
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { themesPlugin, themesPaletteMenuPlugin } from './themesplugins';
-
+import { IStateDB, StateDB } from '@jupyterlab/statedb';
+import { ITranslator } from '@jupyterlab/translation';
+import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
+import { PromiseDelegate } from '@lumino/coreutils';
+import { DisposableDelegate } from '@lumino/disposable';
+import { Debouncer, Throttler } from '@lumino/polling';
+import { Palette } from './palette';
+import { settingsPlugin } from './settingsplugin';
+import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { workspacesPlugin } from './workspacesplugin';
 
 /**

@@ -10,34 +10,25 @@ import {
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/apputils';
-
 import {
+  ITranslator,
   nullTranslator,
-  TranslationBundle,
-  ITranslator
+  TranslationBundle
 } from '@jupyterlab/translation';
-
 import { classes, LabIcon } from '@jupyterlab/ui-components';
-
 import {
   ArrayExt,
   ArrayIterator,
+  each,
   IIterator,
   map,
-  each,
   toArray
 } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
-
-import { Token, ReadonlyJSONObject } from '@lumino/coreutils';
-
+import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { Widget } from '@lumino/widgets';
-
 import * as React from 'react';
 
 /**

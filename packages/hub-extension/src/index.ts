@@ -7,17 +7,14 @@
  * @module hub-extension
  */
 
-import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
-
 import {
   ConnectionLost,
   IConnectionLost,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
+import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 

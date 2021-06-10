@@ -1,14 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ToolbarButton, showErrorMessage } from '@jupyterlab/apputils';
+import { showErrorMessage, ToolbarButton } from '@jupyterlab/apputils';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import { fileUploadIcon } from '@jupyterlab/ui-components';
-
 import { FileBrowserModel } from './model';
 
 /**

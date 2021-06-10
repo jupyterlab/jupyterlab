@@ -1,27 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@lumino/widgets';
-import * as React from 'react';
-
 import {
-  showDialog,
-  Dialog,
-  Toolbar,
-  ToolbarButtonComponent,
-  UseSignal,
   addToolbarButtonClass,
-  ReactWidget,
-  ToolbarButton,
-  ISessionContextDialogs,
+  Dialog,
   ISessionContext,
-  sessionContextDialogs
+  ISessionContextDialogs,
+  ReactWidget,
+  sessionContextDialogs,
+  showDialog,
+  Toolbar,
+  ToolbarButton,
+  ToolbarButtonComponent,
+  UseSignal
 } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
@@ -34,7 +31,8 @@ import {
   runIcon,
   saveIcon
 } from '@jupyterlab/ui-components';
-
+import { Widget } from '@lumino/widgets';
+import * as React from 'react';
 import { NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';

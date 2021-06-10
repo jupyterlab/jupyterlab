@@ -2,9 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 /// <reference types="../typings/codemirror/codemirror" />
 
-import CodeMirror from 'codemirror';
-
 import { Mode } from '@jupyterlab/codemirror';
+import CodeMirror from 'codemirror';
 
 function fakeMode(name: string) {
   return {

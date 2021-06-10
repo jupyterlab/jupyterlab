@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext } from '@jupyterlab/apputils';
-
 import {
   Cell,
   CellDragUtils,
@@ -10,34 +9,22 @@ import {
   CodeCell,
   CodeCellModel,
   ICodeCellModel,
-  isCodeCellModel,
   IRawCellModel,
+  isCodeCellModel,
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-
-import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
-
+import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { KernelMessage } from '@jupyterlab/services';
-
 import { each } from '@lumino/algorithm';
-
-import { MimeData, JSONObject } from '@lumino/coreutils';
-
+import { JSONObject, MimeData } from '@lumino/coreutils';
 import { Drag } from '@lumino/dragdrop';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-
 import { ConsoleHistory, IConsoleHistory } from './history';
 
 /**

@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ISerializer, ObservableUndoableList } from '@jupyterlab/observables';
 import { JSONObject } from '@lumino/coreutils';
-
-import { ObservableUndoableList, ISerializer } from '@jupyterlab/observables';
 
 class Test {
   constructor(value: JSONObject) {

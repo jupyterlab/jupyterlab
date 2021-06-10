@@ -1,14 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
-
-import { Widget } from '@lumino/widgets';
-
 import { WidgetTracker } from '@jupyterlab/apputils';
-
-import { KernelMenu, IKernelMenu } from '@jupyterlab/mainmenu';
-
+import { IKernelMenu, KernelMenu } from '@jupyterlab/mainmenu';
+import { CommandRegistry } from '@lumino/commands';
+import { Widget } from '@lumino/widgets';
 import { delegateExecute } from './util';
 
 class Wodget extends Widget {

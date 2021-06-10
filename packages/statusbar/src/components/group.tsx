@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-
-import { style, classes } from 'typestyle/lib';
-
+import { classes, style } from 'typestyle/lib';
 import { centeredFlex, leftToRight } from '../style/layout';
 
 const groupItemLayout = style(centeredFlex, leftToRight);

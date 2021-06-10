@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { generate, simulate } from 'simulate-event';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { generate, simulate } from 'simulate-event';
 
 const UP_ARROW = 38;
 

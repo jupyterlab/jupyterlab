@@ -1,30 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import { PathExt } from '@jupyterlab/coreutils';
 import { ArrayExt } from '@lumino/algorithm';
 import { JSONValue } from '@lumino/coreutils';
-
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-
 import CodeMirror from 'codemirror';
-
-import 'codemirror/mode/meta';
 import 'codemirror/addon/runmode/runmode';
-
-import './codemirror-ipython';
-import './codemirror-ipythongfm';
-
+import 'codemirror/mode/clike/clike';
+import 'codemirror/mode/css/css';
 // Bundle other common modes
 import 'codemirror/mode/javascript/javascript';
-import 'codemirror/mode/css/css';
 import 'codemirror/mode/julia/julia';
-import 'codemirror/mode/r/r';
 import 'codemirror/mode/markdown/markdown';
-import 'codemirror/mode/clike/clike';
+import 'codemirror/mode/meta';
+import 'codemirror/mode/r/r';
 import 'codemirror/mode/shell/shell';
 import 'codemirror/mode/sql/sql';
-
-import { PathExt } from '@jupyterlab/coreutils';
+import './codemirror-ipython';
+import './codemirror-ipythongfm';
 
 // Stub for the require function.
 declare let require: any;

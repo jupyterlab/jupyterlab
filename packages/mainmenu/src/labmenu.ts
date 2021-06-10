@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
-
 import { ArrayExt } from '@lumino/algorithm';
-
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
 import { Menu, Widget } from '@lumino/widgets';
 
 /**

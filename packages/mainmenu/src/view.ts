@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Widget } from '@lumino/widgets';
-
 import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
 
 /**

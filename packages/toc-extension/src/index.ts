@@ -17,14 +17,14 @@ import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
-  TableOfContents,
+  createLatexGenerator,
+  createMarkdownGenerator,
+  createNotebookGenerator,
+  createPythonGenerator,
+  createRenderedMarkdownGenerator,
   ITableOfContentsRegistry,
   TableOfContentsRegistry as Registry,
-  createLatexGenerator,
-  createNotebookGenerator,
-  createMarkdownGenerator,
-  createPythonGenerator,
-  createRenderedMarkdownGenerator
+  TableOfContents
 } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';

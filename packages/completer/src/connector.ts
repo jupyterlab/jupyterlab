@@ -2,12 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { DataConnector } from '@jupyterlab/statedb';
-
-import { KernelConnector } from './kernelconnector';
-
 import { ContextConnector } from './contextconnector';
-
 import { CompletionHandler } from './handler';
+import { KernelConnector } from './kernelconnector';
 
 /**
  * A context+kernel connector for completion handlers.

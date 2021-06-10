@@ -11,27 +11,20 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   Dialog,
+  ICommandPalette,
   ISessionContext,
   ISessionContextDialogs,
-  ICommandPalette,
   sessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
-
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import {
   IEditMenu,
   IFileMenu,
@@ -40,29 +33,20 @@ import {
   IMainMenu,
   IRunMenu
 } from '@jupyterlab/mainmenu';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { consoleIcon } from '@jupyterlab/ui-components';
-
 import { find } from '@lumino/algorithm';
-
 import {
   JSONExt,
   JSONObject,
+  ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
-  UUID,
-  ReadonlyJSONValue
+  UUID
 } from '@lumino/coreutils';
-
 import { DisposableSet } from '@lumino/disposable';
-
 import { DockLayout } from '@lumino/widgets';
-
 import foreign from './foreign';
 
 /**

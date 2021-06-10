@@ -3,22 +3,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import marked from 'marked';
-
 import { ISanitizer } from '@jupyterlab/apputils';
-
-import { Mode, CodeMirrorEditor } from '@jupyterlab/codemirror';
-
+import { CodeMirrorEditor, Mode } from '@jupyterlab/codemirror';
 import { URLExt } from '@jupyterlab/coreutils';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { toArray } from '@lumino/algorithm';
-
 import escape from 'lodash.escape';
-
+import marked from 'marked';
 import { removeMath, replaceMath } from './latex';
 
 /**

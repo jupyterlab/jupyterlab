@@ -1,10 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PathExt, IChangedArgs } from '@jupyterlab/coreutils';
-
-import { UUID } from '@lumino/coreutils';
-
+import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import {
   Kernel,
   KernelMessage,
@@ -12,25 +9,18 @@ import {
   ServerConnection,
   Session
 } from '@jupyterlab/services';
-
-import { IterableOrArrayLike, each, find } from '@lumino/algorithm';
-
-import { PromiseDelegate } from '@lumino/coreutils';
-
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
-import * as React from 'react';
-
-import { showDialog, Dialog } from './dialog';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { each, find, IterableOrArrayLike } from '@lumino/algorithm';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
+import * as React from 'react';
+import { Dialog, showDialog } from './dialog';
 
 /**
  * A context object to manage a widget's kernel session connection.

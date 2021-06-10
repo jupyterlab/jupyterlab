@@ -23,8 +23,8 @@ import { editorServices } from '@jupyterlab/codemirror';
 import { ConsolePanel } from '@jupyterlab/console';
 
 import {
-  RenderMimeRegistry,
-  standardRendererFactories as initialFactories
+  standardRendererFactories as initialFactories,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {

@@ -2,17 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Context } from '@jupyterlab/docregistry';
-
+import { Mock, NBTestUtils } from '@jupyterlab/testutils';
+import { UUID } from '@lumino/coreutils';
 import {
   INotebookModel,
-  NotebookPanel,
   Notebook,
   NotebookModel,
-  NotebookModelFactory
+  NotebookModelFactory,
+  NotebookPanel
 } from '../src';
-
-import { NBTestUtils, Mock } from '@jupyterlab/testutils';
-import { UUID } from '@lumino/coreutils';
 
 /**
  * Local versions of the NBTestUtils that import from `src` instead of `lib`.

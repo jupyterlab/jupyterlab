@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ellipsesIcon } from '@jupyterlab/ui-components';
-import { sanitizerOptions } from '../../utils/sanitizer_options';
+import * as React from 'react';
 import { INotebookHeading } from '../../utils/headings';
+import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { CodeComponent } from './codemirror';
 import { OptionsManager } from './options_manager';
 

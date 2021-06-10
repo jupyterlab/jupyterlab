@@ -1,33 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React from 'react';
-
-import { VDomRenderer, VDomModel, ReactWidget } from '@jupyterlab/apputils';
-
+import { ReactWidget, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { lineFormIcon } from '@jupyterlab/ui-components';
-
+import React from 'react';
 import { classes } from 'typestyle/lib';
-
 import { interactiveItem, Popup, showPopup, TextItem } from '..';
-
 import {
-  lineFormWrapper,
-  lineFormInput,
-  lineFormSearch,
-  lineFormWrapperFocusWithin,
-  lineFormCaption,
+  lineFormButton,
   lineFormButtonDiv,
   lineFormButtonIcon,
-  lineFormButton
+  lineFormCaption,
+  lineFormInput,
+  lineFormSearch,
+  lineFormWrapper,
+  lineFormWrapperFocusWithin
 } from '../style/lineForm';
 
 /**

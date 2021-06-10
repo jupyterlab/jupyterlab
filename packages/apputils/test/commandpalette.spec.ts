@@ -3,22 +3,13 @@
 
 // import { expect } from 'chai';
 
-import { CommandRegistry } from '@lumino/commands';
-
-import { JSONObject } from '@lumino/coreutils';
-
-import { MessageLoop } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { CommandPalette } from '@lumino/widgets';
-
-import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
-
 import { ModalCommandPalette } from '@jupyterlab/apputils';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
+import { CommandRegistry } from '@lumino/commands';
+import { JSONObject } from '@lumino/coreutils';
+import { MessageLoop } from '@lumino/messaging';
+import { CommandPalette, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 describe('@jupyterlab/apputils', () => {

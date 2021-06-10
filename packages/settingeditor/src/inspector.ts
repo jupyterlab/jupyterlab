@@ -3,26 +3,20 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { DataConnector } from '@jupyterlab/statedb';
-
 import { InspectionHandler, InspectorPanel } from '@jupyterlab/inspector';
-
 import {
   IRenderMimeRegistry,
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
-
 import { ISchemaValidator } from '@jupyterlab/settingregistry';
-
+import { DataConnector } from '@jupyterlab/statedb';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { ReadonlyJSONObject } from '@lumino/coreutils';
-
 import { RawEditor } from './raweditor';
 
 /**

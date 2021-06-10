@@ -1,28 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ServiceManager } from '@jupyterlab/services';
-
-import { DocumentWidgetManager } from '../src';
-
 import {
-  DocumentRegistry,
-  TextModelFactory,
   ABCWidgetFactory,
   Context,
+  DocumentRegistry,
   DocumentWidget,
-  IDocumentWidget
+  IDocumentWidget,
+  TextModelFactory
 } from '@jupyterlab/docregistry';
-
-import { PromiseDelegate, UUID } from '@lumino/coreutils';
-
-import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
+import { ServiceManager } from '@jupyterlab/services';
 import { dangerDialog, dismissDialog } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { DocumentWidgetManager } from '../src';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(

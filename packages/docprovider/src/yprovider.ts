@@ -3,14 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as Y from 'yjs';
-
-import { WebsocketProvider } from 'y-websocket';
-
 import * as decoding from 'lib0/decoding';
-
 import * as encoding from 'lib0/encoding';
-
+import { WebsocketProvider } from 'y-websocket';
+import * as Y from 'yjs';
 import { IDocumentProviderFactory } from './tokens';
 
 /**

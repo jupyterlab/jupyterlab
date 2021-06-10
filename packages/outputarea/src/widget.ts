@@ -1,35 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import ResizeObserver from 'resize-observer-polyfill';
-
+import { ISessionContext } from '@jupyterlab/apputils';
+import * as nbformat from '@jupyterlab/nbformat';
+import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 import {
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { Signal } from '@lumino/signaling';
-
-import { Panel, PanelLayout } from '@lumino/widgets';
-
-import { Widget } from '@lumino/widgets';
-
-import { ISessionContext } from '@jupyterlab/apputils';
-
-import * as nbformat from '@jupyterlab/nbformat';
-
-import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { Kernel, KernelMessage } from '@jupyterlab/services';
-
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
+import ResizeObserver from 'resize-observer-polyfill';
 import { IOutputAreaModel } from './model';
 
 /**
