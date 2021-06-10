@@ -10,7 +10,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/codemirror/style/index.css';
 import '@jupyterlab/filebrowser/style/index.css';
-import '@jupyterlab/theme-light-extension/style/index.css';
+import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
 import { each } from '@lumino/algorithm';
