@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+// Modified from jupyterlab/packages/completer/src/contextconnector.ts
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { DataConnector } from '@jupyterlab/statedb';
 import { CompletionHandler } from '@jupyterlab/completer';
@@ -73,7 +75,11 @@ namespace Private {
     const token = editor.getTokenForPosition(cursor);
 
     // Get the list of matching tokens.
-    const tokenList = getCompletionTokens(token, editor);
+    const tokenList = [
+      { value: token.value + 'Magic', offset: token.offset, type: 'magic' },
+      { value: token.value + 'Science', offset: token.offset, type: 'science' },
+      { value: token.value + 'Neither', offset: token.offset }
+    ];
 
     // Only choose the ones that have a non-empty type
     // field, which are likely to be of interest.
@@ -87,21 +93,5 @@ namespace Private {
       matches,
       metadata: {}
     };
-  }
-
-  /**
-   * Get a list of tokens that match the completion request,
-   * but are not identical to the completion request.
-   */
-  function getCompletionTokens(
-    token: CodeEditor.IToken,
-    editor: CodeEditor.IEditor
-  ): CodeEditor.IToken[] {
-    const candidates = editor.getTokens();
-    // Only get the tokens that have a common start, but
-    // are not identical.
-    return candidates.filter(
-      t => t.value.indexOf(token.value) === 0 && t.value !== token.value
-    );
   }
 }
