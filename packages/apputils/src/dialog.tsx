@@ -337,8 +337,8 @@ export class Dialog<T> extends Widget {
           event.stopPropagation();
           event.preventDefault();
           node.focus();
-          break;
         }
+        break;
       }
       case 9: {
         // Tab.
