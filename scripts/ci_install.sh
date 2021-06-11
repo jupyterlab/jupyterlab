@@ -50,9 +50,15 @@ if [[ $GROUP == nonode ]]; then
     ! node
 fi
 
-# The debugger and ui tests require a kernel that supports debugging
-if [[ $GROUP == js-debugger ]] || [[ $GROUP == ui_test ]]; then
+# The debugger tests require a kernel that supports debugging
+if [[ $GROUP == js-debugger ]]; then
     pip install xeus-python">=0.9.0,<0.10.0"
+fi
+
+# The UI tests use ipykernel with support for debugging, to not
+# extra launcher items and other UI elements to the reference screenshots
+if [[ $GROUP == ui_test ]]; then
+    pip install --pre --upgrade ipykernel
 fi
 
 # Pin the jedi dependency to prevent a temporary breakage
