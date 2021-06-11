@@ -10,6 +10,8 @@ import {
   KernelConnector
 } from '@jupyterlab/completer';
 
+import { CustomConnector } from './customconnector';
+
 /**
  * A context+kernel connector for completion handlers.
  */
@@ -27,6 +29,7 @@ export class CompletionConnector extends DataConnector<
     super();
     this._kernel = new KernelConnector(options);
     this._context = new ContextConnector(options);
+    this._custom = new CustomConnector(options);
   }
 
   /**
@@ -39,12 +42,16 @@ export class CompletionConnector extends DataConnector<
   ): Promise<CompletionHandler.IReply> {
     return Promise.all([
       this._kernel.fetch(request),
-      this._context.fetch(request)
-    ]).then(([kernel, context]) => Private.mergeReplies(kernel, context));
+      this._context.fetch(request),
+      this._custom.fetch(request)
+    ]).then(([kernel, context, custom]) =>
+      Private.mergeReplies(kernel, context, custom)
+    );
   }
 
   private _kernel: KernelConnector;
   private _context: ContextConnector;
+  private _custom: CustomConnector;
 }
 
 /**
@@ -54,7 +61,9 @@ export namespace CompletionConnector {
   /**
    * The instantiation options for cell completion handlers.
    */
-  export type IOptions = KernelConnector.IOptions & ContextConnector.IOptions;
+  export type IOptions = KernelConnector.IOptions &
+    ContextConnector.IOptions &
+    CustomConnector.IOptions;
 }
 
 /**
@@ -68,6 +77,8 @@ namespace Private {
    *
    * @param context - The context reply being merged.
    *
+   * @param custom - The custom reply being merged.
+   *
    * @returns A reply with a superset of kernel and context matches.
    *
    * #### Notes
@@ -78,10 +89,13 @@ namespace Private {
    */
   export function mergeReplies(
     kernel: CompletionHandler.IReply,
-    context: CompletionHandler.IReply
+    context: CompletionHandler.IReply,
+    custom: CompletionHandler.IReply
   ): CompletionHandler.IReply {
-    // If one is empty, return the other.
-    if (kernel.matches.length === 0) {
+    // If two are empty, return the third.
+    if (kernel.matches.length === 0 && context.matches.length === 0) {
+      return custom;
+    } else if (kernel.matches.length === 0) {
       return context;
     } else if (context.matches.length === 0) {
       return kernel;
@@ -98,6 +112,13 @@ namespace Private {
 
     // Add each context match that is not in the memo to the result.
     context.matches.forEach(match => {
+      if (!(match in memo)) {
+        matches.push(match);
+      }
+    });
+
+    // Add each custom match that is not in the memo to the result.
+    custom.matches.forEach(match => {
       if (!(match in memo)) {
         matches.push(match);
       }
