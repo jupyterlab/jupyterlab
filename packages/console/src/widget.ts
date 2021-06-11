@@ -222,7 +222,8 @@ export class CodeConsole extends Widget {
     model.value.text = '...';
     const banner = (this._banner = new RawCell({
       model,
-      contentFactory: this.contentFactory
+      contentFactory: this.contentFactory,
+      placeholder: false
     })).initializeState();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
@@ -718,7 +719,7 @@ export class CodeConsole extends Widget {
     const modelFactory = this.modelFactory;
     const model = modelFactory.createCodeCell({});
     const rendermime = this.rendermime;
-    return { model, rendermime, contentFactory };
+    return { model, rendermime, contentFactory, placeholder: false };
   }
 
   /**

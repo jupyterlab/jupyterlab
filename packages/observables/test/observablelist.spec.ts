@@ -145,7 +145,7 @@ describe('@jupyterlab/observables', () => {
           expect(sender).toBe(value);
           expect(args.type).toBe('add');
           expect(args.newIndex).toBe(1);
-          expect(args.oldIndex).toBe(-1);
+          expect(args.oldIndex).toBe(-2);
           expect(args.oldValues.length).toBe(0);
           expect(args.newValues[0]).toBe(4);
           called = true;
@@ -323,7 +323,7 @@ describe('@jupyterlab/observables', () => {
           expect(sender).toBe(value);
           expect(args.type).toBe('add');
           expect(args.newIndex).toBe(1);
-          expect(args.oldIndex).toBe(-1);
+          expect(args.oldIndex).toBe(-2);
           expect(toArray(args.newValues)).toEqual([4, 5, 6]);
           expect(args.oldValues.length).toBe(0);
           called = true;
