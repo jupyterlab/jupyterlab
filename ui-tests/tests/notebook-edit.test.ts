@@ -43,6 +43,30 @@ describe('Notebook Edit', () => {
     expect(await galata.notebook.getCellType(2)).toBe('code');
   });
 
+  test('Execute Code cell', async () => {
+    await galata.notebook.runCell(2, true);
+    const imageName = 'run-cell';
+    const nbPanel = await galata.notebook.getNotebookInPanel();
+    await galata.capture.screenshot(imageName, nbPanel);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
+  });
+
+  test('Re-edit after execution', async () => {
+    await galata.notebook.setCell(2, 'code', '2 ** 6');
+    const imageName = 'reedit-cell';
+    const nbPanel = await galata.notebook.getNotebookInPanel();
+    await galata.capture.screenshot(imageName, nbPanel);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
+  });
+
+  test('Execute again', async () => {
+    await galata.notebook.runCell(2, true);
+    const imageName = 'execute-again';
+    const nbPanel = await galata.notebook.getNotebookInPanel();
+    await galata.capture.screenshot(imageName, nbPanel);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
+  });
+
   test('Copy-Paste cell', async () => {
     let imageName = 'copy-paste-cell';
     await galata.notebook.selectCells(1);
