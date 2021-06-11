@@ -3,12 +3,12 @@ name: UI Tests
 on: [push, pull_request]
 
 jobs:
-  ui-test:
+  ui-tests:
     name: Visual Regression
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        group: [ui_test]
+        group: [ui-tests]
         python: [3.8]
       fail-fast: false
 
