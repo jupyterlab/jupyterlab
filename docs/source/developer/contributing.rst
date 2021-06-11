@@ -544,6 +544,13 @@ Main reasons for UI test failures are:
 
 For more information on UI Testing, please read the `UI Testing developer documentation <.https://github.com/jupyterlab/jupyterlab/blob/master/ui-tests/README.md>`__ and `Galata documentation <https://github.com/jupyterlab/galata/blob/main/README.md>`__.
 
+Good Practices for Integration tests
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here are some good practices to follow when writing integration tests:
+
+- Don't compare multiple screenshots in the same test; if the first comparison breaks, it will require running multiple times the CI workflow to fix all tests.
+
 Contributing to the debugger front-end
 --------------------------------------
 

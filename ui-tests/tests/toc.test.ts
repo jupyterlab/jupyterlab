@@ -106,31 +106,43 @@ describe('Table of Contents', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test('Toggle code-markdown-list', async () => {
+  test('Toggle code', async () => {
     const tocPanel = await galata.sidebar.getContentPanel('left');
     const toolbarButtons = await tocPanel.$$('.toc-toolbar .toc-toolbar-icon');
     expect(toolbarButtons.length).toBe(4);
 
-    let imageName = 'toggle-code';
+    const imageName = 'toggle-code';
     await toolbarButtons[0].click();
     await galata.capture.screenshot(imageName, tocPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
     await toolbarButtons[0].click();
+  });
 
-    imageName = 'toggle-markdown';
+  test('Toggle markdown', async () => {
+    const tocPanel = await galata.sidebar.getContentPanel('left');
+    const toolbarButtons = await tocPanel.$$('.toc-toolbar .toc-toolbar-icon');
+    expect(toolbarButtons.length).toBe(4);
+
+    const imageName = 'toggle-markdown';
     await toolbarButtons[1].click();
     await galata.capture.screenshot(imageName, tocPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
     await toolbarButtons[1].click();
+  });
 
-    imageName = 'toggle-numbered-list';
+  test('Toggle list', async () => {
+    const tocPanel = await galata.sidebar.getContentPanel('left');
+    const toolbarButtons = await tocPanel.$$('.toc-toolbar .toc-toolbar-icon');
+    expect(toolbarButtons.length).toBe(4);
+
+    const imageName = 'toggle-numbered-list';
     await toolbarButtons[2].click();
     await galata.capture.screenshot(imageName, tocPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
     await toolbarButtons[2].click();
   });
 
-  test('Toggle tags', async () => {
+  test('Toggle show tags', async () => {
     const tocPanel = await galata.sidebar.getContentPanel('left');
     const toolbarButtons = await tocPanel.$$('.toc-toolbar .toc-toolbar-icon');
     expect(toolbarButtons.length).toBe(4);
@@ -139,21 +151,30 @@ describe('Table of Contents', () => {
     await toolbarButtons[0].click();
     await toolbarButtons[1].click();
 
-    let imageName = 'show-tags';
+    const imageName = 'show-tags';
     await toolbarButtons[3].click();
     await galata.capture.screenshot(imageName, tocPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
+  });
+
+  test('Toggle tag 1', async () => {
+    const tocPanel = await galata.sidebar.getContentPanel('left');
 
     const tags = await tocPanel.$$('.toc-tag');
     expect(tags.length).toBe(2);
 
-    imageName = 'toggle-tag-1';
+    const imageName = 'toggle-tag-1';
     await tags[0].click();
     await galata.capture.screenshot(imageName, tocPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
     await tags[0].click();
+  });
 
-    imageName = 'toggle-tag-2';
+  test('Toggle tag 2', async () => {
+    const tocPanel = await galata.sidebar.getContentPanel('left');
+    const tags = await tocPanel.$$('.toc-tag');
+
+    const imageName = 'toggle-tag-2';
     await tags[1].click();
     await galata.capture.screenshot(imageName, tocPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
