@@ -57,7 +57,7 @@ fi
 
 # The UI tests use ipykernel with support for debugging, to not
 # extra launcher items and other UI elements to the reference screenshots
-if [[ $GROUP == ui_test ]]; then
+if [[ $GROUP == ui-tests ]]; then
     pip install --pre --upgrade ipykernel
 fi
 
