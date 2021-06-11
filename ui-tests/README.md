@@ -16,6 +16,9 @@ import { galata, describe, test } from '@jupyterlab/galata';
 5. If you added visual regression tests, make sure you tested them locally enough number of times to make sure they do not produce false positives due to async nature of UI actions. Use the following steps to test locally.
 
 ```bash
+# install the ipykernel pre-release with support for debugging
+python -m pip install --pre --upgrade ipykernel
+
 # inside ui-tests directory:
 
 # install dependencies
