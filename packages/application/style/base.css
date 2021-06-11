@@ -31,6 +31,14 @@ body {
   border-top: 4px solid red;
 }
 
+#jp-main-dock-panel {
+  padding: 5px;
+}
+
+#jp-main-dock-panel[data-mode='single-document'] {
+  padding: 0;
+}
+
 #jp-main-dock-panel[data-mode='single-document'] .jp-MainAreaWidget {
   border: none;
 }
