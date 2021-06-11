@@ -21,6 +21,8 @@ tag:Examples:
 tag:Testing:
   - tests/**/*
   - tests/*
+  - ui-tests/**/*
+  - ui-tests/*
 
 ######################
 #   Package Labels   #
