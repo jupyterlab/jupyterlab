@@ -969,8 +969,28 @@ function activateNotebookHandler(
   const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
+  // Fetch settings if possible.
+  const fetchSettings = settingRegistry
+    ? settingRegistry.load(trackerPlugin.id)
+    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
+
   // Handle state restoration.
   if (restorer) {
+    fetchSettings
+      .then(settings => {
+        updateConfig(settings);
+        settings.changed.connect(() => {
+          updateConfig(settings);
+        });
+      })
+      .catch((reason: Error) => {
+        console.warn(reason.message);
+        updateTracker({
+          editorConfig: factory.editorConfig,
+          notebookConfig: factory.notebookConfig,
+          kernelShutdown: factory.shutdownOnClose
+        });
+      });
     void restorer.restore(tracker, {
       command: 'docmanager:open',
       args: panel => ({ path: panel.context.path, factory: FACTORY }),
@@ -1042,6 +1062,12 @@ function activateNotebookHandler(
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
+      numberCellsToRenderDirectly: settings.get('numberCellsToRenderDirectly')
+        .composite as number,
+      renderCellOnIdle: settings.get('renderCellOnIdle').composite as boolean,
+      observedTopMargin: settings.get('observedTopMargin').composite as string,
+      observedBottomMargin: settings.get('observedBottomMargin')
+        .composite as string,
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
@@ -1053,27 +1079,6 @@ function activateNotebookHandler(
       kernelShutdown: factory.shutdownOnClose
     });
   }
-
-  // Fetch settings if possible.
-  const fetchSettings = settingRegistry
-    ? settingRegistry.load(trackerPlugin.id)
-    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
-  app.restored
-    .then(() => fetchSettings)
-    .then(settings => {
-      updateConfig(settings);
-      settings.changed.connect(() => {
-        updateConfig(settings);
-      });
-    })
-    .catch((reason: Error) => {
-      console.warn(reason.message);
-      updateTracker({
-        editorConfig: factory.editorConfig,
-        notebookConfig: factory.notebookConfig,
-        kernelShutdown: factory.shutdownOnClose
-      });
-    });
 
   // Add main menu notebook menu.
   if (mainMenu) {
