@@ -194,7 +194,7 @@ function activate(
       [
         {
           fileExt: 'jl',
-          iconName: 'ui-components:text-editor',
+          iconName: 'ui-components:julia',
           launcherLabel: trans.__('Julia File'),
           paletteLabel: trans.__('New Julia File'),
           caption: trans.__('Create a new Julia file')
