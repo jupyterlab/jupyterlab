@@ -115,7 +115,6 @@ class OptionsManager extends Registry.IOptionsManager {
   set numberingH1(value: boolean) {
     this._numberingH1 = value;
     this._widget.update();
-    this.notebookMetadata = ['toc-autonumbering-h1', this._numberingH1];
   }
 
   get numberingH1() {
