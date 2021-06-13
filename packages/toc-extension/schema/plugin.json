@@ -4,7 +4,7 @@
   "properties": {
     "numberingH1": {
       "title": "Enable h1 numbering",
-      "description": "Specifies whether to number h1 headers",
+      "description": "Specifies whether to number first level headers",
       "type": "boolean",
       "default": true
     }
