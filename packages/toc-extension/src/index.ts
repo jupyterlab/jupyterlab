@@ -170,9 +170,9 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
     IMarkdownViewerTracker,
     INotebookTracker,
     IRenderMimeRegistry,
-    ITranslator,
-    ISettingRegistry
+    ITranslator
   ],
+  optional: [ISettingRegistry],
   activate: activateTOC
 };
 
