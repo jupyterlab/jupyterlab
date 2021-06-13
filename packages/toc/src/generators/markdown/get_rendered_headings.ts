@@ -28,6 +28,7 @@ function onClick(heading: Element) {
  * @param sanitizer - HTML sanitizer
  * @param dict - numbering dictionary
  * @param numbering - boolean indicating whether to enable numbering
+ * @param numberingH1 - whether first level header should be numbered
  * @returns list of headings
  */
 function getRenderedHeadings(

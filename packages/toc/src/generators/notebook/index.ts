@@ -36,6 +36,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
  * @param widget - table of contents widget
  * @param sanitizer - HTML sanitizer
  * @param translator - Language translator
+ * @param settings - advanced settings for toc extension
  * @returns ToC generator capable of parsing notebooks
  */
 function createNotebookGenerator(

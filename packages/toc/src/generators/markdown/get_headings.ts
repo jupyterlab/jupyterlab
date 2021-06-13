@@ -22,6 +22,7 @@ type onClickFactory = (line: number) => () => void;
  * @param text - input text
  * @param onClick - callback which returns a "click" handler
  * @param dict - numbering dictionary
+ * @param numberingH1 - whether first level header should be numbered
  * @returns list of headings
  */
 function getHeadings(

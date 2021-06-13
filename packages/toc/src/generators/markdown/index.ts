@@ -37,6 +37,7 @@ function isEnabled(editor: IDocumentWidget<FileEditor>) {
  *
  * @private
  * @param editor - editor widget
+ * @param options - manage Markdown ToC generator options
  * @returns a list of headings
  */
 function generate(
@@ -79,6 +80,7 @@ function generate(
  * @param tracker - file editor tracker
  * @param widget - table of contents widget
  * @param sanitizer - HTML sanitizer
+ * @param settings - advanced settings for toc extension
  * @returns ToC generator capable of parsing Markdown files
  */
 function createMarkdownGenerator(
@@ -136,6 +138,7 @@ function createMarkdownGenerator(
  * @param tracker - Markdown viewer tracker
  * @param sanitizer - HTML sanitizer
  * @param widget - table of contents widget
+ * @param settings - advanced settings for toc extension
  * @returns ToC generator capable of parsing rendered Markdown files
  */
 function createRenderedMarkdownGenerator(

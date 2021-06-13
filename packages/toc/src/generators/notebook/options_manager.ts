@@ -218,6 +218,7 @@ class OptionsManager extends Registry.IOptionsManager {
    * -  This will **not** change notebook meta-data.
    *
    * @param numbering - boolean indicating whether to number items
+   * @param numberingH1 - boolean indicating whether to number first level items
    * @param showCode - boolean indicating whether to show code previews
    * @param showMarkdown - boolean indicating whether to show Markdown previews
    * @param showTags - boolean indicating whether to show tags

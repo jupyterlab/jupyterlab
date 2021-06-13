@@ -26,6 +26,7 @@ type onClickFactory = (el: Element) => () => void;
  * @param dict - numbering dictionary
  * @param lastLevel - last level
  * @param numbering - boolean indicating whether to enable numbering
+ * @param numberingH1 - boolean indicating whether to enable first level headers numbering
  * @param cellRef - cell reference
  * @returns notebook heading
  */
