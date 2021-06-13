@@ -75,7 +75,7 @@ async function activateTOC(
   labShell.add(toc, 'left', { rank: 400 });
 
   // Add the ToC widget to the application restorer:
-  restorer.add(toc, '@jupyterlab/toc-extension:plugin');
+  restorer.add(toc, '@jupyterlab/toc:plugin');
 
   // Attempt to load plugin settings:
   let settings: ISettingRegistry.ISettings | undefined;
@@ -170,9 +170,9 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
     IMarkdownViewerTracker,
     INotebookTracker,
     IRenderMimeRegistry,
-    ITranslator,
-    ISettingRegistry
+    ITranslator
   ],
+  optional: [ISettingRegistry],
   activate: activateTOC
 };
 
