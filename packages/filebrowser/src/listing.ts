@@ -413,7 +413,10 @@ export class DirListing extends Widget {
       buttons: [
         Dialog.cancelButton({ label: this._trans.__('Cancel') }),
         Dialog.warnButton({ label: this._trans.__('Delete') })
-      ]
+      ],
+      // By default focus on "Cancel" to protect from accidental deletion
+      // ("delete" and "Enter" are next to each other on many keyboards).
+      defaultButton: 0
     });
 
     if (!this.isDisposed && result.button.accept) {
