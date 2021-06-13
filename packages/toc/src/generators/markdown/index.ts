@@ -33,6 +33,46 @@ function isEnabled(editor: IDocumentWidget<FileEditor>) {
 }
 
 /**
+ * Generates a table of contents.
+ *
+ * @private
+ * @param editor - editor widget
+ * @returns a list of headings
+ */
+function generate(
+  editor: IDocumentWidget<FileEditor>,
+  options?: OptionsManager
+): INumberedHeading[] {
+  let dict = {};
+  let numberingH1 = true;
+  if (options !== undefined) {
+    numberingH1 = options.numberingH1;
+  }
+  return getHeadings(
+    editor.content.model.value.text,
+    onClick,
+    dict,
+    numberingH1
+  );
+
+  /**
+   * Returns a "click" handler.
+   *
+   * @private
+   * @param line - line number
+   * @returns click handler
+   */
+  function onClick(line: number) {
+    return () => {
+      editor.content.editor.setCursorPosition({
+        line: line,
+        column: 0
+      });
+    };
+  }
+}
+
+/**
  * Returns a ToC generator for Markdown files.
  *
  * @private
@@ -87,39 +127,6 @@ function createMarkdownGenerator(
    */
   function renderItem(item: INumberedHeading) {
     return render(options, item);
-  }
-
-  /**
-   * Generates a table of contents.
-   *
-   * @private
-   * @param editor - editor widget
-   * @returns a list of headings
-   */
-  function generate(editor: IDocumentWidget<FileEditor>): INumberedHeading[] {
-    let dict = {};
-    return getHeadings(
-      editor.content.model.value.text,
-      onClick,
-      dict,
-      options.numberingH1
-    );
-
-    /**
-     * Returns a "click" handler.
-     *
-     * @private
-     * @param line - line number
-     * @returns click handler
-     */
-    function onClick(line: number) {
-      return () => {
-        editor.content.editor.setCursorPosition({
-          line: line,
-          column: 0
-        });
-      };
-    }
   }
 }
 

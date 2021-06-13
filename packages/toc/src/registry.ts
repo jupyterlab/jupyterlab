@@ -183,6 +183,6 @@ export namespace TableOfContentsRegistry {
      * @param widget - widget
      * @returns list of headings
      */
-    generate(widget: W): IHeading[];
+    generate(widget: W, options?: IOptionsManager): IHeading[];
   }
 }
