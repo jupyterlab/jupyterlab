@@ -56,7 +56,7 @@ async function activateTOC(
   notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
-  settingRegistry: ISettingRegistry
+  settingRegistry?: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
   // Create the ToC widget:
@@ -79,12 +79,14 @@ async function activateTOC(
 
   // Attempt to load plugin settings:
   let settings: ISettingRegistry.ISettings | undefined;
-  try {
-    settings = await settingRegistry.load('@jupyterlab/toc-extension:plugin');
-  } catch (error) {
-    console.error(
-      `Failed to load settings for the Table of Contents extension.\n\n${error}`
-    );
+  if (settingRegistry) {
+    try {
+      settings = await settingRegistry.load('@jupyterlab/toc-extension:plugin');
+    } catch (error) {
+      console.error(
+        `Failed to load settings for the Table of Contents extension.\n\n${error}`
+      );
+    }
   }
 
   // Create a notebook generator:
