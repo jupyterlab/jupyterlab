@@ -42,16 +42,12 @@ function update(dict: any, level: number) {
  */
 function generateNumbering(
   dict: INumberingDictionary,
-  level: number,
-  numberingH1 = true
+  level: number
 ): string | undefined {
   if (dict === null) {
     return;
   }
   let numbering = '';
-  if (!numberingH1) {
-    level -= 1;
-  }
   dict = update(dict, level);
   if (level >= 1) {
     for (let j = 1; j <= level; j++) {

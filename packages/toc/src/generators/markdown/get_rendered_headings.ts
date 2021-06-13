@@ -41,7 +41,7 @@ function getRenderedHeadings(
   let headings: INumberedHeading[] = [];
   for (let i = 0; i < nodes.length; i++) {
     const heading = nodes[i];
-    const level = parseInt(heading.tagName[1], 10);
+    let level = parseInt(heading.tagName[1], 10);
     let text = heading.textContent ? heading.textContent : '';
     let hide = !numbering;
 
@@ -53,7 +53,10 @@ function getRenderedHeadings(
     html = html.replace('¶', ''); // remove the anchor symbol
 
     // Generate a numbering string:
-    let nstr = generateNumbering(dict, level, numberingH1);
+    if (!numberingH1) {
+      level -= 1;
+    }
+    let nstr = generateNumbering(dict, level);
     // Generate the numbering DOM element:
     let nhtml = '';
     if (!hide) {

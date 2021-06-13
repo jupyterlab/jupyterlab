@@ -64,8 +64,11 @@ function getRenderedHTMLHeadings(
     let html = sanitizer.sanitize(el.innerHTML, sanitizerOptions);
     html = html.replace('¶', '');
 
-    const level = parseInt(el.tagName[1], 10);
-    let nstr = generateNumbering(dict, level, numberingH1);
+    let level = parseInt(el.tagName[1], 10);
+    if (!numberingH1) {
+      level -= 1;
+    }
+    let nstr = generateNumbering(dict, level);
     if (numbering) {
       const nhtml = document.createElement('span');
       nhtml.classList.add('numbering-entry');

@@ -49,9 +49,13 @@ function getHeadings(
     line += lines[i + 1] ? '\n' + lines[i + 1] : '';
     const heading = parseHeading(line); // append the next line to capture alternative style Markdown headings
     if (heading) {
+      let level = heading.level;
+      if (!numberingH1) {
+        level -= 1;
+      }
       headings.push({
         text: heading.text,
-        numbering: generateNumbering(dict, heading.level, numberingH1),
+        numbering: generateNumbering(dict, level),
         level: heading.level,
         onClick: onClick(i)
       });
