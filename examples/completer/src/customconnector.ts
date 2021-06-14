@@ -8,7 +8,7 @@ import { DataConnector } from '@jupyterlab/statedb';
 import { CompletionHandler } from '@jupyterlab/completer';
 
 /**
- * A context connector for completion handlers.
+ * A custom connector for completion handlers.
  */
 export class CustomConnector extends DataConnector<
   CompletionHandler.IReply,
@@ -16,9 +16,9 @@ export class CustomConnector extends DataConnector<
   CompletionHandler.IRequest
 > {
   /**
-   * Create a new context connector for completion requests.
+   * Create a new custom connector for completion requests.
    *
-   * @param options - The instatiation options for the context connector.
+   * @param options - The instatiation options for the custom connector.
    */
   constructor(options: CustomConnector.IOptions) {
     super();
@@ -45,7 +45,7 @@ export class CustomConnector extends DataConnector<
 }
 
 /**
- * A namespace for context connector statics.
+ * A namespace for custom connector statics.
  */
 export namespace CustomConnector {
   /**
@@ -53,7 +53,7 @@ export namespace CustomConnector {
    */
   export interface IOptions {
     /**
-     * The session used by the context connector.
+     * The session used by the custom connector.
      */
     editor: CodeEditor.IEditor | null;
   }
@@ -64,8 +64,7 @@ export namespace CustomConnector {
  */
 namespace Private {
   /**
-   * Get a list of completion hints from a tokenization
-   * of the editor.
+   * Get a list of mocked completion hints.
    */
   export function contextHint(
     editor: CodeEditor.IEditor
@@ -81,8 +80,7 @@ namespace Private {
       { value: token.value + 'Neither', offset: token.offset }
     ];
 
-    // Only choose the ones that have a non-empty type
-    // field, which are likely to be of interest.
+    // Only choose the ones that have a non-empty type field, which are likely to be of interest.
     const completionList = tokenList.filter(t => t.type).map(t => t.value);
     // Remove duplicate completsions from the list
     const matches = Array.from(new Set<string>(completionList));

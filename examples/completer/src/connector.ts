@@ -13,7 +13,7 @@ import {
 import { CustomConnector } from './customconnector';
 
 /**
- * A context+kernel connector for completion handlers.
+ * A multi-connector connector for completion handlers.
  */
 export class CompletionConnector extends DataConnector<
   CompletionHandler.IReply,
@@ -82,10 +82,10 @@ namespace Private {
    * @returns A reply with a superset of kernel and context matches.
    *
    * #### Notes
-   * The kernel and context matches are merged with a preference for kernel
-   * results. Both lists are known to contain unique, non-repeating items;
+   * The kernel, context, and custom matches are merged with a preference for kernel
+   * results. All lists are known to contain unique, non-repeating items;
    * so this function returns a non-repeating superset by filtering out
-   * duplicates from the context list that appear in the kernel list.
+   * duplicates from the context and custom lists that appear in the kernel list.
    */
   export function mergeReplies(
     kernel: CompletionHandler.IReply,

@@ -96,7 +96,6 @@ function main(): void {
   });
   const handler = new CompletionHandler({ completer, connector });
 
-  //sessionContext.session?.kernel.
   void sessionContext.ready.then(() => {
     handler.connector = new CompletionConnector({
       session: sessionContext.session,
