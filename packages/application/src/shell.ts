@@ -578,11 +578,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Set the mode data attribute on the applications shell node.
     this.node.dataset.shellMode = mode;
 
-    // Adjust menu and title
-    this.add(this._menuHandler.panel, 'top', { rank: 100 });
-    // this._topHandler.addWidget(this._menuHandler.panel, 100)
-    this._titleHandler.hide();
-
     this._downPanel.fit();
     // Emit the mode changed signal
     this._modeChanged.emit(mode);
@@ -768,7 +763,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
     this._layoutDebouncer.dispose();
-    this._titleHandler.dispose();
     super.dispose();
   }
 

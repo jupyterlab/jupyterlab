@@ -503,13 +503,24 @@ export class DocumentWidget<
   /**
    * Handle a title change.
    */
-  private _onTitleChanged(_sender: Title<this>) {
+  private async _onTitleChanged(_sender: Title<this>) {
     const validNameExp = /[\/\\:]/;
     const name = this.title.label;
     const filename = this.context.path.split('/').pop()!;
-    if (name !== filename && name.length > 0 && !validNameExp.test(name)) {
-      void this.context.rename(name);
+
+    if (name === filename) {
+      return;
     }
+    if (name.length > 0 && !validNameExp.test(name)) {
+      const oldPath = this.context.path;
+      await this.context.rename(name);
+      if (this.context.path !== oldPath) {
+        // Rename succeeded
+        return;
+      }
+    }
+    // Reset title if name is invalid or rename fails
+    this.title.label = filename;
   }
 
   /**
