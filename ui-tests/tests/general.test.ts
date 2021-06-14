@@ -46,7 +46,7 @@ describe('General Tests', () => {
   });
 
   test('Toggle Light theme', async () => {
-    await galata.theme.setLightTheme();
+    await expect(galata.theme.setLightTheme()).resolves.toBeUndefined();
   });
 
   test('Move File Browser to right', async () => {

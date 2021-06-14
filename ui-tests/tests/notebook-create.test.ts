@@ -19,7 +19,7 @@ describe('Notebook Create', () => {
   });
 
   test('Create new Notebook', async () => {
-    await galata.notebook.createNew(fileName);
+    await expect(galata.notebook.createNew(fileName)).resolves.toEqual(true);
   });
 
   test('Create a Raw cell', async () => {
@@ -72,7 +72,7 @@ describe('Notebook Create', () => {
   });
 
   test('Toggle Light theme', async () => {
-    await galata.theme.setLightTheme();
+    await expect(galata.theme.setLightTheme()).resolves.toBeUndefined();
   });
 
   test('Delete Notebook', async () => {

@@ -36,7 +36,7 @@ describe('Table of Contents', () => {
   });
 
   test('Refresh File Browser', async () => {
-    await galata.filebrowser.refresh();
+    await expect(galata.filebrowser.refresh()).resolves.toBeUndefined();
   });
 
   test('Open directory uploaded', async () => {
@@ -182,16 +182,20 @@ describe('Table of Contents', () => {
   });
 
   test('Close Notebook', async () => {
-    await galata.notebook.activate(fileName);
-    await galata.notebook.close(true);
+    await expect(galata.notebook.activate(fileName)).resolves.toEqual(true);
+    await expect(galata.notebook.close(true)).resolves.toEqual(true);
   });
 
   test('Open home directory', async () => {
-    await galata.sidebar.openTab('filebrowser');
-    await galata.filebrowser.openHomeDirectory();
+    await expect(
+      galata.sidebar.openTab('filebrowser')
+    ).resolves.toBeUndefined();
+    await expect(galata.filebrowser.openHomeDirectory()).resolves.toEqual(true);
   });
 
   test('Delete uploaded directory', async () => {
-    await galata.contents.deleteDirectory('uploaded');
+    await expect(galata.contents.deleteDirectory('uploaded')).resolves.toEqual(
+      true
+    );
   });
 });
