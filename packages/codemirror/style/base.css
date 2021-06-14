@@ -238,9 +238,9 @@
 
 .jp-CodeMirrorEditor .remote-caret > div {
   position: absolute;
-  top: -1.05em;
+  top: -1.1em;
   left: -2px;
-  font-size: 0.8em;
+  font-size: 0.95em;
   background-color: rgb(250, 129, 0);
   font-family: serif;
   font-style: normal;
@@ -252,7 +252,6 @@
   padding-right: 2px;
   z-index: 3;
   transition: opacity 0.3s ease-in-out;
-  opacity: 0;
 }
 
 .jp-CodeMirrorEditor .remote-caret.hide-name > div {
