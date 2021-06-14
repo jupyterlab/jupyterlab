@@ -17,6 +17,7 @@ import {
   folderIcon,
   imageIcon,
   jsonIcon,
+  juliaIcon,
   LabIcon,
   markdownIcon,
   notebookIcon,
@@ -1391,6 +1392,13 @@ export namespace DocumentRegistry {
         extensions: ['.json'],
         mimeTypes: ['application/json'],
         icon: jsonIcon
+      },
+      {
+        name: 'julia',
+        displayName: trans.__('Julia File'),
+        extensions: ['.jl'],
+        mimeTypes: ['text/x-julia'],
+        icon: juliaIcon
       },
       {
         name: 'csv',

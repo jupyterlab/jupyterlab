@@ -42,6 +42,7 @@ import html5Svgstr from '../../style/icons/filetype/html5.svg';
 import imageSvgstr from '../../style/icons/filetype/image.svg';
 import inspectorSvgstr from '../../style/icons/filetype/inspector.svg';
 import jsonSvgstr from '../../style/icons/filetype/json.svg';
+import juliaSvgstr from '../../style/icons/filetype/julia.svg';
 import jupyterFaviconSvgstr from '../../style/icons/jupyter/jupyter-favicon.svg';
 import jupyterSvgstr from '../../style/icons/jupyter/jupyter.svg';
 import jupyterlabWordmarkSvgstr from '../../style/icons/jupyter/jupyterlab-wordmark.svg';
@@ -121,6 +122,7 @@ export const html5Icon = new LabIcon({ name: 'ui-components:html5', svgstr: html
 export const imageIcon = new LabIcon({ name: 'ui-components:image', svgstr: imageSvgstr });
 export const inspectorIcon = new LabIcon({ name: 'ui-components:inspector', svgstr: inspectorSvgstr });
 export const jsonIcon = new LabIcon({ name: 'ui-components:json', svgstr: jsonSvgstr });
+export const juliaIcon = new LabIcon({ name: 'ui-components:julia', svgstr: juliaSvgstr });
 export const jupyterFaviconIcon = new LabIcon({ name: 'ui-components:jupyter-favicon', svgstr: jupyterFaviconSvgstr });
 export const jupyterIcon = new LabIcon({ name: 'ui-components:jupyter', svgstr: jupyterSvgstr });
 export const jupyterlabWordmarkIcon = new LabIcon({ name: 'ui-components:jupyterlab-wordmark', svgstr: jupyterlabWordmarkSvgstr });
