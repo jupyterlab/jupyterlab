@@ -1118,7 +1118,7 @@ namespace Private {
      */
     constructor(options?: Panel.IOptions) {
       super(options);
-      this.node.tabIndex = -1;
+      this.node.tabIndex = 0;
     }
 
     /**
