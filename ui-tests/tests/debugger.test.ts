@@ -23,7 +23,7 @@ describe('Debugger Tests', () => {
   });
 
   test('Open Debugger on right', async () => {
-    const imageName = 'debugger-sidebar';
+    const imageName = 'sidebar';
     await galata.sidebar.openTab('jp-debugger-sidebar');
 
     const debuggerSidebar = await galata.sidebar.getContentPanel('right');
