@@ -237,6 +237,7 @@
 }
 
 .jp-CodeMirrorEditor .remote-caret > div {
+  white-space: nowrap;
   position: absolute;
   top: -1.1em;
   left: -2px;
