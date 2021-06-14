@@ -3,7 +3,7 @@
 Installation
 ============
 
-JupyterLab can be installed using ``conda``, ``pip``, ``pipenv`` or ``docker``.
+JupyterLab can be installed using ``conda``, ``mamba``, ``pip``, ``pipenv`` or ``docker``.
 
 conda
 -----
@@ -13,6 +13,15 @@ If you use ``conda``, you can install it with:
 .. code:: bash
 
     conda install -c conda-forge jupyterlab
+
+mamba
+-----
+
+If you use ``mamba``, you can install it with:
+
+.. code:: bash
+
+    mamba install -c conda-forge jupyterlab
 
 pip
 ---

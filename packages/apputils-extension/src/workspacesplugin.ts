@@ -2,34 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IRouter,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  IRouter
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
-import { showDialog, Dialog, IWindowResolver } from '@jupyterlab/apputils';
-
+import { Dialog, IWindowResolver, showDialog } from '@jupyterlab/apputils';
 import {
-  DocumentRegistry,
   ABCWidgetFactory,
-  IDocumentWidget,
-  DocumentWidget
+  DocumentRegistry,
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
-
 import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import {
   ContentsManager,
   Workspace,
   WorkspaceManager
 } from '@jupyterlab/services';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
 namespace CommandIDs {
@@ -49,17 +40,10 @@ const ICON_NAME = 'jp-JupyterIcon';
 export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:workspaces',
   autoStart: true,
-  requires: [
-    IMainMenu,
-    IFileBrowserFactory,
-    IWindowResolver,
-    IStateDB,
-    ITranslator
-  ],
+  requires: [IFileBrowserFactory, IWindowResolver, IStateDB, ITranslator],
   optional: [IRouter],
   activate: (
     app: JupyterFrontEnd,
-    menu: IMainMenu,
     fbf: IFileBrowserFactory,
     resolver: IWindowResolver,
     state: IStateDB,
@@ -88,7 +72,7 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
     app.docRegistry.addWidgetFactory(factory);
 
     app.commands.addCommand(CommandIDs.saveWorkspaceAs, {
-      label: trans.__('Save Current Workspace As...'),
+      label: trans.__('Save Current Workspace As…'),
       execute: async () => {
         const data = app.serviceManager.workspaces.fetch(resolver.name);
         await Private.saveAs(
@@ -120,14 +104,6 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
-
-    menu.fileMenu.addGroup(
-      [
-        { command: CommandIDs.saveWorkspaceAs },
-        { command: CommandIDs.saveWorkspace }
-      ],
-      40
-    );
   }
 };
 
@@ -285,7 +261,7 @@ namespace Private {
     const trans = translator.load('jupyterlab');
     const saveBtn = Dialog.okButton({ label: trans.__('Save') });
     const result = await showDialog({
-      title: trans.__('Save Current Workspace As...'),
+      title: trans.__('Save Current Workspace As…'),
       body: new SaveWidget(defaultPath),
       buttons: [Dialog.cancelButton({ label: trans.__('Cancel') }), saveBtn]
     });

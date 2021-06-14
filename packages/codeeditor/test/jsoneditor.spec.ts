@@ -1,18 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
-
-import { ObservableJSON } from '@jupyterlab/observables';
-
 import { JSONEditor } from '@jupyterlab/codeeditor';
-
+import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
+import { ObservableJSON } from '@jupyterlab/observables';
 import { framePromise } from '@jupyterlab/testutils';
-
 import { Message } from '@lumino/messaging';
-
 import { Widget } from '@lumino/widgets';
-
 import { simulate } from 'simulate-event';
 
 class LogEditor extends JSONEditor {

@@ -1,6 +1,10 @@
 Design System CSS:
   - '**/*.css'
   - '*.css'
+  
+documentation:
+  - docs/**/*
+  - docs/*
 
 tag:CSS:
   - '**/*.css'
@@ -10,10 +14,6 @@ tag:CSS:
   - design/**/*
   - design/*
 
-tag:Documentation:
-  - docs/**/*
-  - docs/*
-
 tag:Examples:
   - examples/**/*
   - examples/*
@@ -21,6 +21,8 @@ tag:Examples:
 tag:Testing:
   - tests/**/*
   - tests/*
+  - ui-tests/**/*
+  - ui-tests/*
 
 ######################
 #   Package Labels   #
@@ -96,6 +98,12 @@ pkg:docmanager:
   - packages/docmanager-extension/**/*
   - packages/docmanager-extension/*
 
+pkg:docprovider:
+  - packages/docprovider/**/*
+  - packages/docprovider/*
+  - packages/docprovider-extension/**/*
+  - packages/docprovider-extension/*
+  
 pkg:docregistry:
   - packages/docregistry/**/*
   - packages/docregistry/*
@@ -238,6 +246,10 @@ pkg:settingregistry:
   - packages/settingregistry/**/*
   - packages/settingregistry/*
 
+pkg:shared-models:
+  - packages/shared-models/**/*
+  - packages/shared-models/*
+
 pkg:shortcuts:
   - packages/shortcuts-extension/**/*
   - packages/shortcuts-extension/*
@@ -264,6 +276,12 @@ pkg:themes:
   - packages/theme-light-extension/**/*
   - packages/theme-light-extension/*
 
+pkg:toc:
+  - packages/toc/**/*
+  - packages/toc/*
+  - packages/toc-extension/**/*
+  - packages/toc-extension/*
+  
 pkg:tooltip:
   - packages/tooltip/**/*
   - packages/tooltip/*

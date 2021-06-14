@@ -45,13 +45,19 @@ Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.rea
 
 ### Installation
 
-JupyterLab can be installed using `conda` or `pip`. For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html).
+JupyterLab can be installed using [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.readthedocs.io/en/latest/) or [pip](https://docs.python.org/3.6/installing/index.html). For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html).
 
 Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
-### conda
+### mamba and conda
 
-If you use `conda`, you can install it with:
+If you use `mamba` or `conda`, you can install it with:
+
+```shell
+mamba install -c conda-forge jupyterlab
+```
+
+or
 
 ```shell
 conda install -c conda-forge jupyterlab
@@ -137,31 +143,36 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 
 JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
-- Mehmet Bektas, Bloomberg (general development, extensions).
+- Mehmet Bektas, Splunk (general development, extensions).
 - Alex Bozarth, IBM (general development, extensions).
 - Eric Charles, Datalayer, (general development, extensions).
+- Frédéric Collonval, QuantStack (general development, extensions).
 - Martha Cryan, IBM (general development, extensions).
 - Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
-- Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
 - Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 - Jason Grout, Bloomberg (co-creator, vision, general development).
+- Michał Krassowski, University of Oxford (general development, extensions).
 - Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
+- Gonzalo Peña-Castellanos, QuanSight (general development, i18n, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
-- Ian Rose, Quansight/City of LA (general core development, extensions).
-- Andrew Schlaepfer, Bloomberg (general development, extensions).
-- Saul Shanabrook, Quansight (general development, extensions)
+- Isabela Presedo-Floyd, QuanSight Labs (design/UX).
 - Steven Silvester, Apple (co-creator, release management, packaging,
   prolific contributions throughout the code base).
+- Jeremy Tuloup, QuantStack (general development, extensions).
 
 Maintainer emeritus:
 
 - Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
   technical leadership, vision, PhosphorJS)
 - Jessica Forde, Project Jupyter (demo, documentation)
+- Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis).
 - Cameron Oelsen, Cal Poly (UI/UX design).
+- Ian Rose, Quansight/City of LA (general core development, extensions).
+- Andrew Schlaepfer, Bloomberg (general development, extensions).
+- Saul Shanabrook, Quansight (general development, extensions)
 
 This list is provided to give the reader context on who we are and how our team functions.
 To be listed, please submit a pull request with your information.

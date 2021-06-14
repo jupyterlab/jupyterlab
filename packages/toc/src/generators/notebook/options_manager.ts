@@ -3,11 +3,11 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ISignal, Signal } from '@lumino/signaling';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { TagsToolComponent } from './tagstool';
-import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * Interface describing constructor options.

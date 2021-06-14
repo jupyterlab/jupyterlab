@@ -320,6 +320,10 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-toolbar-header-margin: 4px 4px 0px 4px;
   --jp-toolbar-active-background: var(--jp-layout-color0);
 
+  /* Statusbar specific styles */
+
+  --jp-statusbar-height: 24px;
+
   /* Input field styles */
 
   --jp-input-box-shadow: inset 0 0 2px var(--md-blue-300);

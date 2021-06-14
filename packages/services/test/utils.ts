@@ -1,27 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import encoding from 'text-encoding';
-
-import WebSocket from 'ws';
-
-import { UUID } from '@lumino/coreutils';
-
-import { JSONObject, JSONPrimitive, PromiseDelegate } from '@lumino/coreutils';
-
+import {
+  JSONObject,
+  JSONPrimitive,
+  PromiseDelegate,
+  UUID
+} from '@lumino/coreutils';
 import { Response } from 'node-fetch';
-
+import encoding from 'text-encoding';
+import WebSocket from 'ws';
 import {
   Contents,
-  Terminal,
-  ServerConnection,
-  KernelManager,
-  SessionManager,
-  KernelMessage,
   Kernel,
-  Session
+  KernelManager,
+  KernelMessage,
+  ServerConnection,
+  Session,
+  SessionManager,
+  Terminal
 } from '../src';
-
 import { deserialize, serialize } from '../src/kernel/serialize';
 
 // stub for node global

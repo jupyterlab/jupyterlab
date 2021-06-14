@@ -7,7 +7,7 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, python, examples, interop, nonode, linkcheck, lint]
+        group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
         python: [3.6, 3.8]
         include:
           - group: release_check
@@ -35,6 +35,8 @@ jobs:
             python: 3.6
           - group: examples
             python: 3.6
+          - group: splice_source
+            python: 3.6
       fail-fast: false
     timeout-minutes: 30
     runs-on: ubuntu-20.04
@@ -49,6 +51,9 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+
+      - name: Setup firefox
+        uses: browser-actions/setup-firefox@latest
 
       - name: Cache pip on Linux
         uses: actions/cache@v2
@@ -89,6 +94,7 @@ jobs:
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
+          JLAB_BROWSER_TYPE: firefox
         run: |
           bash ./scripts/ci_script.sh
 

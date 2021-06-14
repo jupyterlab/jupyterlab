@@ -4,35 +4,20 @@
 |----------------------------------------------------------------------------*/
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { jupyterIcon } from '@jupyterlab/ui-components';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal } from '@lumino/signaling';
-
 import { PanelLayout, Widget } from '@lumino/widgets';
-
 import * as React from 'react';
-
 import * as ReactDOM from 'react-dom';
-
 import { PluginEditor } from './plugineditor';
-
 import { PluginList } from './pluginlist';
-
 import { SplitPanel } from './splitpanel';
 
 /**

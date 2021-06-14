@@ -30,17 +30,14 @@
   THE SOFTWARE.
 */
 
-import { ISearchProvider, ISearchMatch } from '../interfaces';
-
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { FileEditor } from '@jupyterlab/fileeditor';
-
-import * as CodeMirror from 'codemirror';
-
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+import * as CodeMirror from 'codemirror';
+import { ISearchMatch, ISearchProvider } from '../interfaces';
 
 // The type for which canSearchFor returns true
 export type CMMainAreaWidget = MainAreaWidget<FileEditor> & {

@@ -1,7 +1,5 @@
-import { Widget } from '@lumino/widgets';
-
 import { checkIcon } from '@jupyterlab/ui-components';
-
+import { Widget } from '@lumino/widgets';
 import { TagTool } from './tool';
 
 /**

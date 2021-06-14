@@ -46,7 +46,7 @@ commander
     const cmds = await Promise.all(paths.map(handlePackage));
     cmds.forEach(cmdList => {
       cmdList.forEach(cmd => {
-        if (options.dryRun) {
+        if (!options.dryRun) {
           utils.run(cmd);
         } else {
           throw new Error(`Tag is out of sync: ${cmd}`);

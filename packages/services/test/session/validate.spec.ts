@@ -2,10 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Session } from '../../src';
-
 import {
-  validateModel,
-  updateLegacySessionModel
+  updateLegacySessionModel,
+  validateModel
 } from '../../src/session/validate';
 
 describe('session/validate', () => {

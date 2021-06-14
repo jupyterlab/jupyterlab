@@ -1,18 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, toArray } from '@lumino/algorithm';
-
 import { CodeCellModel } from '@jupyterlab/cells';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { NotebookModel } from '../src';
-
 import { ModelDB } from '@jupyterlab/observables';
-
 import { acceptDialog } from '@jupyterlab/testutils';
-
+import { ArrayExt, toArray } from '@lumino/algorithm';
+import { NotebookModel } from '../src';
 import * as utils from './utils';
 
 describe('@jupyterlab/notebook', () => {
@@ -74,19 +68,22 @@ describe('@jupyterlab/notebook', () => {
         model.cells.push(cell);
         model.fromJSON(utils.DEFAULT_CONTENT);
         expect(ArrayExt.firstIndexOf(toArray(model.cells), cell)).toBe(-1);
-        expect(model.cells.length).toBe(6);
+        expect(model.cells.length).toBe(7);
       });
 
       it('should allow undoing a change', () => {
         const model = new NotebookModel();
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
+        const cellJSON = cell.toJSON();
         model.cells.push(cell);
-        model.fromJSON(utils.DEFAULT_CONTENT);
+        model.cells.clearUndo();
+        model.cells.remove(model.cells.length - 1);
         model.cells.undo();
         expect(model.cells.length).toBe(1);
         expect(model.cells.get(0).value.text).toBe('foo');
-        expect(model.cells.get(0)).toBe(cell); // should be ===.
+        // Previous model matches the restored model
+        expect(model.cells.get(0).toJSON()).toEqual(cellJSON);
       });
 
       describe('cells `changed` signal', () => {
@@ -259,7 +256,7 @@ describe('@jupyterlab/notebook', () => {
         model.fromJSON(utils.DEFAULT_CONTENT);
         const text = model.toString();
         const data = JSON.parse(text);
-        expect(data.cells.length).toBe(6);
+        expect(data.cells.length).toBe(7);
       });
     });
 
@@ -267,7 +264,7 @@ describe('@jupyterlab/notebook', () => {
       it('should deserialize the model from a string', () => {
         const model = new NotebookModel();
         model.fromString(JSON.stringify(utils.DEFAULT_CONTENT));
-        expect(model.cells.length).toBe(6);
+        expect(model.cells.length).toBe(7);
       });
 
       it('should set the dirty flag', () => {
@@ -283,17 +280,43 @@ describe('@jupyterlab/notebook', () => {
         const model = new NotebookModel();
         model.fromJSON(utils.DEFAULT_CONTENT);
         const data = model.toJSON();
-        expect(data.cells.length).toBe(6);
+        expect(data.cells.length).toBe(7);
+      });
+      it('should serialize format 4.4 or earlier without cell ids', () => {
+        const model = new NotebookModel();
+        model.fromJSON(utils.DEFAULT_CONTENT);
+        const data = model.toJSON();
+        expect(data.nbformat).toBe(4);
+        expect(data.nbformat_minor).toBeLessThanOrEqual(4);
+        expect(data.cells.length).toBe(7);
+        expect(data.cells[0].id).toBeUndefined();
+      });
+      it('should serialize format 4.5 or later with cell ids', () => {
+        const model = new NotebookModel();
+        model.fromJSON(utils.DEFAULT_CONTENT_45);
+        const data = model.toJSON();
+        expect(data.cells.length).toBe(7);
+        expect(data.cells[0].id).toBe('cell_1');
       });
     });
 
     describe('#fromJSON()', () => {
-      it('should serialize the model from JSON', () => {
+      it('should serialize the model from format<=4.4 JSON', () => {
         const model = new NotebookModel();
         model.fromJSON(utils.DEFAULT_CONTENT);
-        expect(model.cells.length).toBe(6);
+        expect(model.cells.length).toBe(7);
         expect(model.nbformat).toBe(utils.DEFAULT_CONTENT.nbformat);
         expect(model.nbformatMinor).toBe(nbformat.MINOR_VERSION);
+      });
+
+      it('should serialize the model from format 4.5 JSON', () => {
+        const model = new NotebookModel();
+        const json = utils.DEFAULT_CONTENT_45;
+        model.fromJSON(json);
+        expect(model.cells.length).toBe(7);
+        expect(model.nbformat).toBe(json.nbformat);
+        expect(model.nbformatMinor).toBe(json.nbformat_minor);
+        expect(model.cells.get(0).id).toBe('cell_1');
       });
 
       it('should set the dirty flag', () => {

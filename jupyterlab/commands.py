@@ -13,6 +13,7 @@ import os
 import os.path as osp
 import re
 import shutil
+import stat
 import site
 import subprocess
 import sys
@@ -39,12 +40,18 @@ from traitlets import Bool, Dict, HasTraits, Instance, List, Unicode, default
 from jupyterlab.coreconfig import CoreConfig
 from jupyterlab.jlpmapp import HERE, YARN_PATH
 from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
+from jupyterlab._version import __version__
 
 # The regex for expecting the webpack output.
 WEBPACK_EXPECT = re.compile(r'.*theme-light-extension/style/index.css')
 
+
+# The repo root directory
+REPO_ROOT = osp.abspath(osp.join(HERE, '..'))
+
+
 # The dev mode directory.
-DEV_DIR = osp.abspath(os.path.join(HERE, '..', 'dev_mode'))
+DEV_DIR = osp.join(REPO_ROOT, 'dev_mode')
 
 
 # If we are pinning the package, rename it `pin@<alias>`
@@ -207,8 +214,7 @@ def ensure_node_modules(cwd, logger=None):
     if ret != 0:
         yarn_proc = ProgressProcess(['node', YARN_PATH], cwd=cwd, logger=logger)
         yarn_proc.wait()
-        parent = pjoin(HERE, '..')
-        dedupe_yarn(parent, logger)
+        dedupe_yarn(REPO_ROOT, logger)
 
     return ret != 0
 
@@ -216,13 +222,12 @@ def ensure_node_modules(cwd, logger=None):
 def ensure_dev(logger=None):
     """Ensure that the dev assets are available.
     """
-    parent = pjoin(HERE, '..')
     logger = _ensure_logger(logger)
-    target = pjoin(parent, 'dev_mode', 'static')
+    target = pjoin(DEV_DIR, 'static')
 
     # Determine whether to build.
-    if ensure_node_modules(parent, logger) or not osp.exists(target):
-        yarn_proc = ProgressProcess(['node', YARN_PATH, 'build'], cwd=parent,
+    if ensure_node_modules(REPO_ROOT, logger) or not osp.exists(target):
+        yarn_proc = ProgressProcess(['node', YARN_PATH, 'build'], cwd=REPO_ROOT,
                             logger=logger)
         yarn_proc.wait()
 
@@ -267,11 +272,10 @@ def watch_packages(logger=None):
     -------
     A list of `WatchHelper` objects.
     """
-    parent = pjoin(HERE, '..')
     logger = _ensure_logger(logger)
-    ensure_node_modules(parent, logger)
+    ensure_node_modules(REPO_ROOT, logger)
 
-    ts_dir = osp.abspath(osp.join(HERE, '..', 'packages', 'metapackage'))
+    ts_dir = osp.abspath(osp.join(REPO_ROOT, 'packages', 'metapackage'))
 
     # Run typescript watch and wait for the string indicating it is done.
     ts_regex = r'.* Found 0 errors\. Watching for file changes\.'
@@ -337,6 +341,8 @@ class AppOptions(HasTraits):
 
     registry = Unicode(help="NPM packages registry URL")
 
+    splice_source = Bool(False, help="Splice source packages into app directory.")
+
     @default('logger')
     def _default_logger(self):
         return logging.getLogger('jupyterlab')
@@ -372,10 +378,8 @@ def watch(app_options=None):
 
     Parameters
     ----------
-    app_dir: string, optional
-        The application directory.
-    logger: :class:`~logger.Logger`, optional
-        The logger instance.
+    app_options: :class:`AppOptions`, optional
+        The application options.
 
     Returns
     -------
@@ -384,7 +388,13 @@ def watch(app_options=None):
     app_options = _ensure_options(app_options)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
-    return handler.watch()
+
+    if app_options.splice_source:
+        package_procs = watch_packages(app_options.logger)
+    else:
+        package_procs = []
+
+    return package_procs + handler.watch()
 
 
 
@@ -650,6 +660,11 @@ class _AppHandler(object):
         if not production:
             minimize = False
 
+        # If splicing, make sure the source packages are built
+        if self._options.splice_source:
+            ensure_node_modules(REPO_ROOT, logger=self.logger)
+            self._run(['node', YARN_PATH, 'build:packages'], cwd=REPO_ROOT)
+
         info = ['production' if production else 'development']
         if production:
             info.append('minimized' if minimize else 'not minimized')
@@ -786,10 +801,11 @@ class _AppHandler(object):
 
         # Look for mismatched version.
         static_version = old_jlab.get('version', '')
-        core_version = old_jlab['version']
-        if Version(static_version) != Version(core_version):
-            msg = 'Version mismatch: %s (built), %s (current)'
-            return [msg % (static_version, core_version)]
+        if not static_version.endswith('-spliced'):
+            core_version = old_jlab['version']
+            if Version(static_version) != Version(core_version):
+                msg = 'Version mismatch: %s (built), %s (current)'
+                return [msg % (static_version, core_version)]
 
         shadowed_exts = self.info['shadowed_exts']
 
@@ -814,7 +830,10 @@ class _AppHandler(object):
                     messages.append('%s needs to be removed from build' % ext)
 
         # Look for mismatched dependencies
+        src_pkg_dir = pjoin(REPO_ROOT, 'packages')
         for (pkg, dep) in new_deps.items():
+            if old_deps.get(pkg, '').startswith(src_pkg_dir):
+                continue
             if pkg not in old_deps:
                 continue
             # Skip local and linked since we pick them up separately.
@@ -1157,6 +1176,14 @@ class _AppHandler(object):
         if not version:
             version = self.info['core_data']['jupyterlab']['version']
 
+        splice_source = self._options.splice_source
+        if splice_source:
+            self.logger.debug('Splicing dev packages into app directory.')
+            source_dir = DEV_DIR
+            version = __version__ + '-spliced'
+        else:
+            source_dir = pjoin(HERE, 'staging')
+
         # Look for mismatched version.
         pkg_path = pjoin(staging, 'package.json')
 
@@ -1170,8 +1197,11 @@ class _AppHandler(object):
         for fname in ['index.js', 'bootstrap.js', 'publicpath.js',
                       'webpack.config.js',
                       'webpack.prod.config.js',
-                      'webpack.prod.minimize.config.js',
-                      '.yarnrc', 'yarn.js']:
+                      'webpack.prod.minimize.config.js']:
+            target = pjoin(staging, fname)
+            shutil.copy(pjoin(source_dir, fname), target)
+
+        for fname in ['.yarnrc', 'yarn.js']:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, 'staging', fname), target)
 
@@ -1181,7 +1211,7 @@ class _AppHandler(object):
             _rmtree(templates, self.logger)
 
         try:
-            shutil.copytree(pjoin(HERE, 'staging', 'templates'), templates)
+            shutil.copytree(pjoin(source_dir, 'templates'), templates)
         except shutil.Error as error:
             # `copytree` throws an error if copying to + from NFS even though
             # the copy is successful (see https://bugs.python.org/issue24564
@@ -1227,16 +1257,41 @@ class _AppHandler(object):
 
         # Then get the package template.
         data = self._get_package_template()
+        jlab = data['jupyterlab']
 
         if version:
-            data['jupyterlab']['version'] = version
+            jlab['version'] = version
 
         if name:
-            data['jupyterlab']['name'] = name
+            jlab['name'] = name
 
         if static_url:
-            data['jupyterlab']['staticUrl'] = static_url
+            jlab['staticUrl'] = static_url
 
+        # Handle splicing of packages
+        if splice_source:
+            # Splice workspace tree as linked dependencies
+            for path in glob(pjoin(REPO_ROOT, 'packages', '*', 'package.json')):
+                local_path = osp.dirname(osp.abspath(path))
+                pkg_data = json.loads(Path(path).read_text(encoding='utf-8'))
+                name = pkg_data['name']
+                if name in data['dependencies']:
+                    data['dependencies'][name] = local_path
+                    jlab['linkedPackages'][name] = local_path
+                if name in data['resolutions']:
+                    data['resolutions'][name] = local_path
+
+            # splice the builder as well
+            local_path = osp.abspath(pjoin(REPO_ROOT, 'builder'))
+            data['devDependencies']['@jupyterlab/builder'] = local_path
+            target = osp.join(staging, 'node_modules', '@jupyterlab', 'builder')
+
+            # Remove node_modules so it gets re-populated
+            node_modules = pjoin(staging, 'node_modules')
+            if osp.exists(node_modules):
+                shutil.rmtree(node_modules, ignore_errors=True)
+
+        # Write the package file
         pkg_path = pjoin(staging, 'package.json')
         with open(pkg_path, 'w') as fid:
             json.dump(data, fid, indent=4)
@@ -1252,6 +1307,7 @@ class _AppHandler(object):
                 f.write(template)
         elif not osp.exists(lock_path):
             shutil.copy(lock_template, lock_path)
+            os.chmod(lock_path, stat.S_IWRITE | stat.S_IREAD)
 
     def _get_package_template(self, silent=False):
         """Get the template the for staging package.json file.
@@ -1812,7 +1868,7 @@ class _AppHandler(object):
 
             for key in keys:
                 fname = key[0].replace('@', '') + key[1:].replace('@', '-').replace('/', '-') + '.tgz'
-                data = read_package(os.path.join(tempdir, fname))
+                data = read_package(osp.join(tempdir, fname))
                 # Verify that the version is a valid extension.
                 if not _validate_extension(data):
                     # Valid
@@ -1964,10 +2020,10 @@ def _unlink(path, logger):
 def _rmtree_star(path, logger):
     """Remove all files/trees within a dir, logging errors"""
     for filename in os.listdir(path):
-        file_path = os.path.join(path, filename)
-        if os.path.isfile(file_path) or os.path.islink(file_path):
+        file_path = osp.join(path, filename)
+        if osp.isfile(file_path) or osp.islink(file_path):
             _unlink(file_path, logger)
-        elif os.path.isdir(file_path):
+        elif osp.isdir(file_path):
             _rmtree(file_path, logger)
 
 
@@ -2047,7 +2103,7 @@ def _get_static_data(app_dir):
     """Get the data for the app static dir.
     """
     target = pjoin(app_dir, 'static', 'package.json')
-    if os.path.exists(target):
+    if osp.exists(target):
         with open(target) as fid:
             return json.load(fid)
     else:

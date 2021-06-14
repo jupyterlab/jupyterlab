@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IIterator, iter, every } from '@lumino/algorithm';
+import { every, IIterator, iter } from '@lumino/algorithm';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -10,7 +10,7 @@ import { ServerConnection } from '../serverconnection';
 import * as Session from './session';
 import { BaseManager } from '../basemanager';
 import { SessionConnection } from './default';
-import { startSession, shutdownSession, listRunning } from './restapi';
+import { listRunning, shutdownSession, startSession } from './restapi';
 import { Kernel } from '../kernel';
 
 /**

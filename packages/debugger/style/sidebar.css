@@ -4,6 +4,10 @@
 |----------------------------------------------------------------------------*/
 
 .jp-DebuggerSidebar {
+  --jp-debugger-header-height: 24px;
+}
+
+.jp-DebuggerSidebar {
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size1);
@@ -14,7 +18,7 @@
 }
 
 .jp-DebuggerSidebar .jp-DebuggerSidebar-body {
-  height: 100%;
+  height: calc(100% - var(--jp-debugger-header-height));
 }
 
 .jp-DebuggerSidebar .jp-stack-panel-header {
@@ -24,7 +28,7 @@
   flex-direction: row;
   align-items: center;
   min-height: 24px;
-  height: 24px;
+  height: var(--jp-debugger-header-height);
 }
 
 .jp-DebuggerSidebar > .jp-stack-panel-header {

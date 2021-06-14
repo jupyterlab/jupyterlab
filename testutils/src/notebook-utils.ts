@@ -13,9 +13,9 @@ import { Context } from '@jupyterlab/docregistry';
 
 import {
   INotebookModel,
-  NotebookPanel,
   Notebook,
   NotebookModel,
+  NotebookPanel,
   StaticNotebook
 } from '@jupyterlab/notebook';
 
@@ -75,6 +75,7 @@ export namespace NBTestUtils {
   ];
 
   export const DEFAULT_CONTENT: nbformat.INotebookContent = require('../default.json') as nbformat.INotebookContent;
+  export const DEFAULT_CONTENT_45: nbformat.INotebookContent = require('../default-45.json') as nbformat.INotebookContent;
 
   export const defaultEditorConfig = { ...StaticNotebook.defaultEditorConfig };
 

@@ -1,6 +1,35 @@
 {
   "title": "Document Search",
   "description": "Document search plugin.",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-edit",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 10
+          },
+          {
+            "command": "documentsearch:start",
+            "rank": 10
+          },
+          {
+            "command": "documentsearch:highlightNext",
+            "rank": 10
+          },
+          {
+            "command": "documentsearch:highlightPrevious",
+            "rank": 10
+          },
+          {
+            "type": "separator",
+            "rank": 10
+          }
+        ]
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
     {
       "command": "documentsearch:start",

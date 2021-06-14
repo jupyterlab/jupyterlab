@@ -8,9 +8,7 @@
  */
 
 import { ITranslator } from '@jupyterlab/translation';
-
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
 
 /**

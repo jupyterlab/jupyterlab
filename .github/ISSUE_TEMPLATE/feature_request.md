@@ -1,7 +1,7 @@
 ---
 name: Feature Request
 about: Suggest something to add to JupyterLab
-labels: type:Enhancement
+labels: enhancement
 ---
 
 <!--

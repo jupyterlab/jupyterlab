@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Kernel } from '@jupyterlab/services';
-
-import { Menu, Widget } from '@lumino/widgets';
-
+import { Widget } from '@lumino/widgets';
 import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
 
 /**
@@ -26,7 +24,7 @@ export class HelpMenu extends JupyterLabMenu implements IHelpMenu {
   /**
    * Construct the help menu.
    */
-  constructor(options: Menu.IOptions) {
+  constructor(options: IJupyterLabMenu.IOptions) {
     super(options);
     this.kernelUsers = new Set<IHelpMenu.IKernelUser<Widget>>();
   }

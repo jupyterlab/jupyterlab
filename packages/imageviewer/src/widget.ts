@@ -8,8 +8,8 @@ import { Printing } from '@jupyterlab/apputils';
 import {
   ABCWidgetFactory,
   DocumentRegistry,
-  IDocumentWidget,
-  DocumentWidget
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -33,7 +33,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   constructor(context: DocumentRegistry.Context) {
     super();
     this.context = context;
-    this.node.tabIndex = -1;
+    this.node.tabIndex = 0;
     this.addClass(IMAGE_CLASS);
 
     this._img = document.createElement('img');
@@ -100,6 +100,16 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     }
     this._colorinversion = value;
     this._updateStyle();
+  }
+
+  /**
+   * Dispose of resources held by the image viewer.
+   */
+  dispose(): void {
+    if (this._img.src) {
+      URL.revokeObjectURL(this._img.src || '');
+    }
+    super.dispose();
   }
 
   /**
@@ -178,11 +188,15 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     if (!cm) {
       return;
     }
+    const oldurl = this._img.src || '';
     let content = context.model.toString();
-    if (cm.format !== 'base64') {
-      content = btoa(content);
+    if (cm.format === 'base64') {
+      this._img.src = `data:${this._mimeType};base64,${content}`;
+    } else {
+      const a = new Blob([content], { type: this._mimeType });
+      this._img.src = URL.createObjectURL(a);
     }
-    this._img.src = `data:${this._mimeType};base64,${content}`;
+    URL.revokeObjectURL(oldurl);
   }
 
   /**

@@ -1,11 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { runIcon, stopIcon } from '@jupyterlab/ui-components';
+import { codeIcon, runIcon, stopIcon } from '@jupyterlab/ui-components';
 
 import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
 
 import { DebuggerConfig } from './config';
+
+import { DebuggerEvaluateDialog } from './dialogs/evaluate';
 
 import { ReadOnlyEditorFactory as EditorFactory } from './factory';
 
@@ -14,8 +16,8 @@ import { DebuggerHandler } from './handler';
 import {
   closeAllIcon as closeAll,
   stepIntoIcon as stepInto,
-  stepOverIcon as stepOver,
   stepOutIcon as stepOut,
+  stepOverIcon as stepOver,
   variableIcon as variable,
   viewBreakpointIcon as viewBreakpoint
 } from './icons';
@@ -101,6 +103,8 @@ export namespace Debugger {
     export const stepOut = 'debugger:stepOut';
 
     export const inspectVariable = 'debugger:inspect-variable';
+
+    export const evaluate = 'debugger:evaluate';
   }
 
   /**
@@ -108,6 +112,7 @@ export namespace Debugger {
    */
   export namespace Icons {
     export const closeAllIcon = closeAll;
+    export const evaluateIcon = codeIcon;
     export const continueIcon = runIcon;
     export const stepIntoIcon = stepInto;
     export const stepOutIcon = stepOut;
@@ -115,5 +120,15 @@ export namespace Debugger {
     export const terminateIcon = stopIcon;
     export const variableIcon = variable;
     export const viewBreakpointIcon = viewBreakpoint;
+  }
+
+  /**
+   * The debugger dialog helpers.
+   */
+  export namespace Dialogs {
+    /**
+     * Open a code prompt in a dialog.
+     */
+    export const getCode = DebuggerEvaluateDialog.getCode;
   }
 }

@@ -111,3 +111,5 @@ junit.xml
 *.code-workspace
 .history
 .vscode
+
+ui-tests/test-output

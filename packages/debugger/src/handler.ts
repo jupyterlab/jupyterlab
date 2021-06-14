@@ -19,9 +19,9 @@ import { FileEditor } from '@jupyterlab/fileeditor';
 
 import { NotebookPanel } from '@jupyterlab/notebook';
 
-import { Kernel, Session } from '@jupyterlab/services';
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { bugIcon, Switch } from '@jupyterlab/ui-components';
 
@@ -122,6 +122,7 @@ export class DebuggerHandler {
     if (!connection) {
       delete this._kernelChangedHandlers[widget.id];
       delete this._statusChangedHandlers[widget.id];
+      delete this._iopubMessageHandlers[widget.id];
       return this._update(widget, connection);
     }
 
@@ -151,6 +152,27 @@ export class DebuggerHandler {
     }
     connection.statusChanged.connect(statusChanged);
     this._statusChangedHandlers[widget.id] = statusChanged;
+
+    const iopubMessage = (
+      _: Session.ISessionConnection,
+      msg: KernelMessage.IIOPubMessage
+    ): void => {
+      if (
+        msg.parent_header != {} &&
+        (msg.parent_header as KernelMessage.IHeader).msg_type ==
+          'execute_request' &&
+        this._service.isStarted &&
+        !this._service.hasStoppedThreads()
+      ) {
+        void this._service.displayDefinedVariables();
+      }
+    };
+    const iopubMessageHandler = this._iopubMessageHandlers[widget.id];
+    if (iopubMessageHandler) {
+      connection.iopubMessage.disconnect(iopubMessageHandler);
+    }
+    connection.iopubMessage.connect(iopubMessage);
+    this._iopubMessageHandlers[widget.id] = iopubMessage;
 
     return this._update(widget, connection);
   }
@@ -249,6 +271,7 @@ export class DebuggerHandler {
       delete this._handlers[widget.id];
       delete this._kernelChangedHandlers[widget.id];
       delete this._statusChangedHandlers[widget.id];
+      delete this._iopubMessageHandlers[widget.id];
       delete this._contextKernelChangedHandlers[widget.id];
 
       // Clear the model if the handler being removed corresponds
@@ -321,6 +344,7 @@ export class DebuggerHandler {
         this._service.session!.connection = connection;
         this._previousConnection = connection;
         await this._service.restoreState(true);
+        await this._service.displayDefinedVariables();
         createHandler();
       }
     };
@@ -342,6 +366,9 @@ export class DebuggerHandler {
       this._service.session.connection = connection;
     }
     await this._service.restoreState(false);
+    if (this._service.isStarted && !this._service.hasStoppedThreads()) {
+      await this._service.displayDefinedVariables();
+    }
     addToolbarButton();
 
     // check the state of the debug session
@@ -392,6 +419,12 @@ export class DebuggerHandler {
     [id: string]: (
       sender: Session.ISessionConnection,
       status: Kernel.Status
+    ) => void;
+  } = {};
+  private _iopubMessageHandlers: {
+    [id: string]: (
+      sender: Session.ISessionConnection,
+      msg: KernelMessage.IIOPubMessage
     ) => void;
   } = {};
   private _iconButtons: {

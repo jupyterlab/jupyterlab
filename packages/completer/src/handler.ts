@@ -2,23 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { Text } from '@jupyterlab/coreutils';
-
-import { LabIcon } from '@jupyterlab/ui-components';
-
 import { IDataConnector } from '@jupyterlab/statedb';
-
-import { ReadonlyJSONObject, JSONObject, JSONArray } from '@lumino/coreutils';
-
+import { LabIcon } from '@jupyterlab/ui-components';
+import { JSONArray, JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { Signal } from '@lumino/signaling';
-
-import { Completer } from './widget';
 import { DummyConnector } from './dummyconnector';
+import { Completer } from './widget';
 
 /**
  * A class added to editors that can host a completer.
@@ -192,8 +184,8 @@ export class CompletionHandler implements IDisposable {
     }
 
     const { start, end, value } = patch;
-    editor.model.value.remove(start, end);
-    editor.model.value.insert(start, value);
+    // we need to update the shared model in a single transaction so that the undo manager works as expected
+    editor.model.sharedModel.updateSource(start, end, value);
   }
 
   /**

@@ -41,7 +41,8 @@ fi
 
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
-    python setup.py bdist_wheel sdist
+    pip install build
+    python -m build .
 
     # Remove NodeJS, twice to take care of system and locally installed node versions.
     sudo rm -rf $(which node)
@@ -52,6 +53,12 @@ fi
 # The debugger tests require a kernel that supports debugging
 if [[ $GROUP == js-debugger ]]; then
     pip install xeus-python">=0.9.0,<0.10.0"
+fi
+
+# The UI tests use ipykernel with support for debugging, to not
+# extra launcher items and other UI elements to the reference screenshots
+if [[ $GROUP == ui-tests ]]; then
+    pip install --pre --upgrade ipykernel
 fi
 
 # Pin the jedi dependency to prevent a temporary breakage

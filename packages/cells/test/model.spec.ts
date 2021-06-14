@@ -7,9 +7,9 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import {
   CellModel,
-  RawCellModel,
+  CodeCellModel,
   MarkdownCellModel,
-  CodeCellModel
+  RawCellModel
 } from '@jupyterlab/cells';
 
 import * as nbformat from '@jupyterlab/nbformat';
@@ -48,11 +48,47 @@ describe('cells/model', () => {
         const cell: nbformat.IRawCell = {
           cell_type: 'raw',
           source: ['foo\n', 'bar\n', 'baz'],
-          metadata: { trusted: false }
+          metadata: { trusted: false },
+          id: 'cell_id'
         };
         const model = new CellModel({ cell });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.value.text).toBe((cell.source as string[]).join(''));
+      });
+
+      it('should use the id argument', () => {
+        const cell: nbformat.IRawCell = {
+          cell_type: 'raw',
+          source: ['foo\n', 'bar\n', 'baz'],
+          metadata: { trusted: false },
+          id: 'cell_id'
+        };
+        const model = new CellModel({ cell, id: 'my_id' });
+        expect(model).toBeInstanceOf(CellModel);
+        expect(model.id).toBe('my_id');
+      });
+
+      it('should use the cell id if an id is not supplied', () => {
+        const cell: nbformat.IRawCell = {
+          cell_type: 'raw',
+          source: ['foo\n', 'bar\n', 'baz'],
+          metadata: { trusted: false },
+          id: 'cell_id'
+        };
+        const model = new CellModel({ cell });
+        expect(model).toBeInstanceOf(CellModel);
+        expect(model.id).toBe('cell_id');
+      });
+
+      it('should generate an id if an id or cell id is not supplied', () => {
+        const cell = {
+          cell_type: 'raw',
+          source: ['foo\n', 'bar\n', 'baz'],
+          metadata: { trusted: false }
+        };
+        const model = new CellModel({ cell });
+        expect(model).toBeInstanceOf(CellModel);
+        expect(model.id.length).toBeGreaterThan(0);
       });
     });
 
@@ -74,8 +110,10 @@ describe('cells/model', () => {
         const model = new CodeCellModel({});
         let called = false;
         const listener = (sender: any, args: IChangedArgs<any>) => {
-          expect(args.newValue).toBe(1);
-          called = true;
+          if (args.name == 'executionCount') {
+            expect(args.newValue).toBe(1);
+            called = true;
+          }
         };
         model.stateChanged.connect(listener);
         model.executionCount = 1;
@@ -85,8 +123,10 @@ describe('cells/model', () => {
       it('should not signal when model state has not changed', () => {
         const model = new CodeCellModel({});
         let called = 0;
-        model.stateChanged.connect(() => {
-          called++;
+        model.stateChanged.connect((model, args) => {
+          if (args.name == 'executionCount') {
+            called++;
+          }
         });
         expect(called).toBe(0);
         model.executionCount = 1;
@@ -243,6 +283,20 @@ describe('cells/model', () => {
         expect(model.type).toBe('raw');
       });
     });
+    describe('#toJSON()', () => {
+      it('should return a raw cell encapsulation of the model value', () => {
+        const cell: nbformat.IRawCell = {
+          cell_type: 'raw',
+          source: 'foo',
+          metadata: {},
+          id: 'cell_id'
+        };
+        const model = new RawCellModel({ cell });
+        const serialized = model.toJSON();
+        expect(serialized).not.toBe(cell);
+        expect(serialized).toEqual(cell);
+      });
+    });
   });
 
   describe('MarkdownCellModel', () => {
@@ -250,6 +304,20 @@ describe('cells/model', () => {
       it('should be set with type "markdown"', () => {
         const model = new MarkdownCellModel({});
         expect(model.type).toBe('markdown');
+      });
+    });
+    describe('#toJSON()', () => {
+      it('should return a markdown cell encapsulation of the model value', () => {
+        const cell: nbformat.IMarkdownCell = {
+          cell_type: 'markdown',
+          source: 'foo',
+          metadata: {},
+          id: 'cell_id'
+        };
+        const model = new MarkdownCellModel({ cell });
+        const serialized = model.toJSON();
+        expect(serialized).not.toBe(cell);
+        expect(serialized).toEqual(cell);
       });
     });
   });
@@ -381,8 +449,10 @@ describe('cells/model', () => {
       it('should not signal when state has not changed', () => {
         const model = new CodeCellModel({});
         let called = 0;
-        model.stateChanged.connect(() => {
-          called++;
+        model.stateChanged.connect((model, args) => {
+          if (args.name == 'executionCount') {
+            called++;
+          }
         });
         expect(model.executionCount).toBeNull();
         expect(called).toBe(0);
@@ -390,6 +460,31 @@ describe('cells/model', () => {
         expect(model.executionCount).toBe(1);
         model.executionCount = 1;
         expect(called).toBe(1);
+      });
+
+      it('should set dirty flag and signal', () => {
+        const model = new CodeCellModel({});
+        let called = 0;
+        model.stateChanged.connect((model, args) => {
+          if (args.name == 'isDirty') {
+            called++;
+          }
+        });
+        expect(model.executionCount).toBeNull();
+        expect(model.isDirty).toBe(false);
+        expect(called).toBe(0);
+
+        model.executionCount = 1;
+        expect(model.isDirty).toBe(false);
+        expect(called).toBe(0);
+
+        model.value.text = 'foo';
+        expect(model.isDirty).toBe(true);
+        expect(called).toBe(1);
+
+        model.executionCount = 2;
+        expect(model.isDirty).toBe(false);
+        expect(called).toBe(2);
       });
     });
 
@@ -433,7 +528,8 @@ describe('cells/model', () => {
             } as nbformat.IDisplayData
           ],
           source: 'foo',
-          metadata: { trusted: false }
+          metadata: { trusted: false },
+          id: 'cell_id'
         };
         const model = new CodeCellModel({ cell });
         const serialized = model.toJSON();

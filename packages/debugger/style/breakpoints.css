@@ -39,6 +39,20 @@
   margin-left: auto;
 }
 
+.jp-DebuggerCallstackFrame {
+  display: flex;
+  align-items: center;
+}
+
+.jp-DebuggerCallstackFrame-name {
+  white-space: nowrap;
+  margin-right: 5px;
+}
+
+.jp-DebuggerCallstackFrame-location {
+  margin-left: auto;
+}
+
 [data-jp-debugger='true'] .CodeMirror-gutter-wrapper::after {
   content: '●';
   color: var(--jp-error-color1);

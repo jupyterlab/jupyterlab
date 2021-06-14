@@ -3,7 +3,7 @@
 
 import { CommandToolbarButton } from '@jupyterlab/apputils';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -71,6 +71,14 @@ export class Callstack extends Panel {
       })
     );
 
+    header.toolbar.addItem(
+      'evaluate',
+      new CommandToolbarButton({
+        commands: commands.registry,
+        id: commands.evaluate
+      })
+    );
+
     this.addWidget(header);
     this.addWidget(body);
 
@@ -115,6 +123,11 @@ export namespace Callstack {
      * The stepOut command ID.
      */
     stepOut: string;
+
+    /**
+     * The evaluate command ID.
+     */
+    evaluate: string;
   }
 
   /**

@@ -4,31 +4,20 @@
 |----------------------------------------------------------------------------*/
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import { JSONExt } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget, StackedLayout } from '@lumino/widgets';
-
+import { StackedLayout, Widget } from '@lumino/widgets';
 import { RawEditor } from './raweditor';
-
 import { SettingEditor } from './settingeditor';
 
 /**

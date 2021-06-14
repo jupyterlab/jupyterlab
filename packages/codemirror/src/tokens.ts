@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@lumino/coreutils';
-
 import CodeMirror from 'codemirror';
 
 /* tslint:disable */

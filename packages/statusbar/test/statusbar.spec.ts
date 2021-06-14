@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
 import { StatusBar } from '@jupyterlab/statusbar';
+import { Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 describe('@jupyterlab/statusbar', () => {
   describe('StatusBar', () => {

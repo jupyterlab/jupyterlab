@@ -5,37 +5,26 @@
  * @module codemirror-extension
  */
 
-import CodeMirror from 'codemirror';
-
-import { Menu } from '@lumino/widgets';
-
 import {
   ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
-import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
-
 import {
+  CodeMirrorEditor,
   editorServices,
   EditorSyntaxStatus,
-  CodeMirrorEditor,
-  Mode,
-  ICodeMirror
+  ICodeMirror,
+  Mode
 } from '@jupyterlab/codemirror';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
-import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
-
+import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import { ITranslator } from '@jupyterlab/translation';
+import CodeMirror from 'codemirror';
 
 /**
  * The command IDs used by the codemirror plugin.
@@ -240,16 +229,18 @@ function activateEditorCommands(
    * Update the settings of the current tracker instances.
    */
   function updateTracker(): void {
+    const editorOptions: any = {
+      keyMap,
+      theme,
+      scrollPastEnd,
+      styleActiveLine,
+      styleSelectedText,
+      selectionPointer,
+      lineWiseCopyCut
+    };
     tracker.forEach(widget => {
       if (widget.content.editor instanceof CodeMirrorEditor) {
-        const { editor } = widget.content;
-        editor.setOption('keyMap', keyMap);
-        editor.setOption('lineWiseCopyCut', lineWiseCopyCut);
-        editor.setOption('scrollPastEnd', scrollPastEnd);
-        editor.setOption('selectionPointer', selectionPointer);
-        editor.setOption('styleActiveLine', styleActiveLine);
-        editor.setOption('styleSelectedText', styleSelectedText);
-        editor.setOption('theme', theme);
+        widget.content.editor.setOptions(editorOptions);
       }
     });
   }
@@ -273,15 +264,17 @@ function activateEditorCommands(
    * Handle the settings of new widgets.
    */
   tracker.widgetAdded.connect((sender, widget) => {
+    const editorOptions: any = {
+      keyMap,
+      theme,
+      scrollPastEnd,
+      styleActiveLine,
+      styleSelectedText,
+      selectionPointer,
+      lineWiseCopyCut
+    };
     if (widget.content.editor instanceof CodeMirrorEditor) {
-      const { editor } = widget.content;
-      editor.setOption('keyMap', keyMap);
-      editor.setOption('lineWiseCopyCut', lineWiseCopyCut);
-      editor.setOption('selectionPointer', selectionPointer);
-      editor.setOption('scrollPastEnd', scrollPastEnd);
-      editor.setOption('styleActiveLine', styleActiveLine);
-      editor.setOption('styleSelectedText', styleSelectedText);
-      editor.setOption('theme', theme);
+      widget.content.editor.setOptions(editorOptions);
     }
   });
 
@@ -298,25 +291,14 @@ function activateEditorCommands(
   /**
    * Create a menu for the editor.
    */
-  const themeMenu = new Menu({ commands });
-  const keyMapMenu = new Menu({ commands });
-  const modeMenu = new Menu({ commands });
-
-  themeMenu.title.label = trans.__('Text Editor Theme');
-  keyMapMenu.title.label = trans.__('Text Editor Key Map');
-  modeMenu.title.label = trans.__('Text Editor Syntax Highlighting');
-
   commands.addCommand(CommandIDs.changeTheme, {
-    label: args => {
-      if (args['theme'] === 'default') {
-        return trans.__('codemirror');
-      } else {
-        return args['displayName'] as string;
-      }
-    },
+    label: args =>
+      args.theme === 'default'
+        ? trans.__('codemirror')
+        : trans.__((args.theme as string) ?? theme),
     execute: args => {
       const key = 'theme';
-      const value = (theme = (args['theme'] as string) || theme);
+      const value = (theme = (args['theme'] as string) ?? theme);
 
       return settingRegistry.set(id, key, value).catch((reason: Error) => {
         console.error(`Failed to set ${id}:${key} - ${reason.message}`);
@@ -327,13 +309,14 @@ function activateEditorCommands(
 
   commands.addCommand(CommandIDs.changeKeyMap, {
     label: args => {
-      const title = args['displayName'] as string;
-      const keyMap = args['keyMap'] as string;
-      return keyMap === 'sublime' ? trans.__('Sublime Text') : title;
+      const theKeyMap = (args['keyMap'] as string) ?? keyMap;
+      return theKeyMap === 'sublime'
+        ? trans.__('Sublime Text')
+        : trans.__(theKeyMap);
     },
     execute: args => {
       const key = 'keyMap';
-      const value = (keyMap = (args['keyMap'] as string) || keyMap);
+      const value = (keyMap = (args['keyMap'] as string) ?? keyMap);
 
       return settingRegistry.set(id, key, value).catch((reason: Error) => {
         console.error(`Failed to set ${id}:${key} - ${reason.message}`);
@@ -343,7 +326,7 @@ function activateEditorCommands(
   });
 
   commands.addCommand(CommandIDs.find, {
-    label: trans.__('Find...'),
+    label: trans.__('Find…'),
     execute: () => {
       const widget = tracker.currentWidget;
       if (!widget) {
@@ -356,7 +339,7 @@ function activateEditorCommands(
   });
 
   commands.addCommand(CommandIDs.goToLine, {
-    label: trans.__('Go to Line...'),
+    label: trans.__('Go to Line…'),
     execute: () => {
       const widget = tracker.currentWidget;
       if (!widget) {
@@ -393,73 +376,31 @@ function activateEditorCommands(
     }
   });
 
-  Mode.getModeInfo()
-    .sort((a, b) => {
-      const aName = a.name || '';
-      const bName = b.name || '';
-      return aName.localeCompare(bName);
-    })
-    .forEach(spec => {
-      // Avoid mode name with a curse word.
-      if (spec.mode.indexOf('brainf') === 0) {
-        return;
-      }
-      modeMenu.addItem({
-        command: CommandIDs.changeMode,
-        args: { ...spec } as any // TODO: Casting to `any` until lumino typings are fixed
-      });
-    });
-
-  // FIXME-TRANS: Check this is working as expected
-  [
-    ['jupyter', trans.__('jupyter')],
-    ['default', trans.__('default')],
-    ['abcdef', trans.__('abcdef')],
-    ['base16-dark', trans.__('base16-dark')],
-    ['base16-light', trans.__('base16-light')],
-    ['hopscotch', trans.__('hopscotch')],
-    ['material', trans.__('material')],
-    ['mbo', trans.__('mbo')],
-    ['mdn-like', trans.__('mdn-like')],
-    ['seti', trans.__('seti')],
-    ['solarized dark', trans.__('solarized dark')],
-    ['solarized light', trans.__('solarized light')],
-    ['the-matrix', trans.__('the-matrix')],
-    ['xq-light', trans.__('xq-light')],
-    ['zenburn', trans.__('zenburn')]
-  ].forEach(([name, displayName]) =>
-    themeMenu.addItem({
-      command: CommandIDs.changeTheme,
-      args: { theme: name, displayName: displayName }
-    })
-  );
-
-  // FIXME-TRANS: Check this is working as expected
-  [
-    ['default', trans.__('default')],
-    ['sublime', trans.__('sublime')],
-    ['vim', trans.__('vim')],
-    ['emacs', trans.__('emacs')]
-  ].forEach(([name, displayName]) => {
-    keyMapMenu.addItem({
-      command: CommandIDs.changeKeyMap,
-      args: { keyMap: name, displayName: displayName }
-    });
-  });
-
   if (mainMenu) {
-    // Add some of the editor settings to the settings menu.
-    mainMenu.settingsMenu.addGroup(
-      [
-        { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },
-        { type: 'submenu' as Menu.ItemType, submenu: themeMenu }
-      ],
-      10
-    );
+    const modeMenu = mainMenu.viewMenu.items.find(
+      item =>
+        item.type === 'submenu' &&
+        item.submenu?.id === 'jp-mainmenu-view-codemirror-theme'
+    )?.submenu;
 
-    // Add the syntax highlighting submenu to the `View` menu.
-    mainMenu.viewMenu.addGroup([{ type: 'submenu', submenu: modeMenu }], 40);
-
+    if (modeMenu) {
+      Mode.getModeInfo()
+        .sort((a, b) => {
+          const aName = a.name || '';
+          const bName = b.name || '';
+          return aName.localeCompare(bName);
+        })
+        .forEach(spec => {
+          // Avoid mode name with a curse word.
+          if (spec.mode.indexOf('brainf') === 0) {
+            return;
+          }
+          modeMenu.addItem({
+            command: CommandIDs.changeMode,
+            args: { ...spec } as any // TODO: Casting to `any` until lumino typings are fixed
+          });
+        });
+    }
     // Add go to line capabilities to the edit menu.
     mainMenu.editMenu.goToLiners.add({
       tracker,

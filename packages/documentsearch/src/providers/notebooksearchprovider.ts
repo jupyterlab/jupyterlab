@@ -1,18 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { ISearchProvider, ISearchMatch } from '../index';
-import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
-import { GenericSearchProvider } from './genericsearchprovider';
-
-import { Cell, MarkdownCell, CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell, MarkdownCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { NotebookPanel } from '@jupyterlab/notebook';
-
 import { ArrayExt } from '@lumino/algorithm';
-import { Signal, ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-
 import CodeMirror from 'codemirror';
+import { ISearchMatch, ISearchProvider } from '../index';
+import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
+import { GenericSearchProvider } from './genericsearchprovider';
 
 interface ICellSearchPair {
   cell: Cell;
@@ -24,6 +21,11 @@ export interface INotebookFilters {
    * Should cell output be searched?
    */
   output: boolean;
+
+  /**
+   * Should search be within the selected cell(s)?
+   */
+  selectedCells: boolean;
 }
 
 export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
@@ -58,12 +60,19 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     filters: INotebookFilters | undefined
   ): Promise<ISearchMatch[]> {
     this._searchTarget = searchTarget;
-    const cells = this._searchTarget.content.widgets;
+    let cells = this._searchTarget.content.widgets;
 
     this._filters =
       !filters || Object.entries(filters).length === 0
-        ? { output: true }
+        ? { output: true, selectedCells: false }
         : filters;
+
+    const selectedCells = cells.filter(cell =>
+      this._searchTarget!.content.isSelectedOrActive(cell)
+    );
+    if (this._filters.selectedCells && selectedCells.length > 0) {
+      cells = selectedCells;
+    }
 
     // hide the current notebook widget to prevent expensive layout re-calculation operations
     this._searchTarget.hide();

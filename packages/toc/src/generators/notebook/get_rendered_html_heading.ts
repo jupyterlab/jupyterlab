@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell } from '@jupyterlab/cells';
 import { ISanitizer } from '@jupyterlab/apputils';
-import { INumberingDictionary } from '../../utils/numbering_dictionary';
-import { INotebookHeading } from '../../utils/headings';
+import { Cell } from '@jupyterlab/cells';
 import { generateNumbering } from '../../utils/generate_numbering';
+import { INotebookHeading } from '../../utils/headings';
+import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 /**
@@ -28,6 +28,7 @@ type onClickFactory = (el: Element) => () => void;
  * @param numbering - boolean indicating whether to enable numbering
  * @param numberingH1 - boolean indicating whether to enable first level headers numbering
  * @param cellRef - cell reference
+ * @param index - index of referenced cell relative to other cells in the notebook
  * @returns notebook heading
  */
 function getRenderedHTMLHeadings(
@@ -38,10 +39,16 @@ function getRenderedHTMLHeadings(
   lastLevel: number,
   numbering = false,
   numberingH1 = true,
-  cellRef: Cell
+  cellRef: Cell,
+  index: number = -1
 ): INotebookHeading[] {
   let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
 
+  if (index === -1) {
+    console.warn(
+      'Deprecation warning! index argument will become mandatory in the next version'
+    );
+  }
   let headings: INotebookHeading[] = [];
   for (const el of nodes) {
     if (el.nodeName.toLowerCase() === 'p') {
@@ -54,7 +61,8 @@ function getRenderedHTMLHeadings(
           onClick: onClick(el),
           type: 'markdown',
           cellRef: cellRef,
-          hasChild: false
+          hasChild: false,
+          index: index
         });
       }
       continue;
@@ -84,7 +92,8 @@ function getRenderedHTMLHeadings(
       onClick: onClick(el),
       type: 'header',
       cellRef: cellRef,
-      hasChild: false
+      hasChild: false,
+      index: index
     });
   }
   return headings;

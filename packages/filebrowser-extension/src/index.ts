@@ -8,48 +8,34 @@
 import {
   ILabShell,
   ILayoutRestorer,
-  ITreePathUpdater,
   IRouter,
+  ITreePathUpdater,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   Clipboard,
-  MainAreaWidget,
-  ToolbarButton,
-  WidgetTracker,
   ICommandPalette,
   InputDialog,
+  MainAreaWidget,
   showErrorMessage,
-  DOMUtils
+  ToolbarButton,
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
-
 import { IDocumentManager } from '@jupyterlab/docmanager';
-
 import {
-  FilterFileBrowserModel,
   FileBrowser,
   FileUploadStatus,
+  FilterFileBrowserModel,
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
-
 import { Launcher } from '@jupyterlab/launcher';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { Contents } from '@jupyterlab/services';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import {
   addIcon,
   closeIcon,
@@ -66,13 +52,9 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
-
-import { IIterator, map, reduce, toArray, find } from '@lumino/algorithm';
-
+import { find, IIterator, map, reduce, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-
 import { Message } from '@lumino/messaging';
-
 import { Menu } from '@lumino/widgets';
 
 /**
@@ -99,6 +81,8 @@ namespace CommandIDs {
 
   export const goToPath = 'filebrowser:go-to-path';
 
+  export const goUp = 'filebrowser:go-up';
+
   export const openPath = 'filebrowser:open-path';
 
   export const open = 'filebrowser:open';
@@ -116,7 +100,7 @@ namespace CommandIDs {
   export const rename = 'filebrowser:rename';
 
   // For main browser only.
-  export const share = 'filebrowser:share-main';
+  export const copyShareableLink = 'filebrowser:share-main';
 
   // For main browser only.
   export const copyPath = 'filebrowser:copy-path';
@@ -136,6 +120,21 @@ namespace CommandIDs {
   export const search = 'filebrowser:search';
 }
 
+namespace Selectors {
+  // matches the text in the filebrowser; relies on an implementation detail
+  // being the text of the listing element being substituted with input
+  // area to deactivate shortcuts when the file name is being edited.
+  export const selectorBrowser =
+    '.jp-DirListing-content .jp-DirListing-itemText';
+  // matches anywhere on filebrowser
+  export const selectorContent = '.jp-DirListing-content';
+  // matches all filebrowser items
+  export const selectorItem = '.jp-DirListing-item[data-isdir]';
+  // matches only non-directory items
+  export const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+  export const selectorHeader = '.jp-DirListing-header';
+}
+
 /**
  * The file browser namespace token.
  */
@@ -151,8 +150,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     ILayoutRestorer,
     ISettingRegistry,
     ITreePathUpdater,
-    ICommandPalette,
-    IMainMenu
+    ICommandPalette
   ],
   autoStart: true,
   activate: (
@@ -162,8 +160,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer | null,
     settingRegistry: ISettingRegistry | null,
     treePathUpdater: ITreePathUpdater | null,
-    commandPalette: ICommandPalette | null,
-    mainMenu: IMainMenu | null
+    commandPalette: ICommandPalette | null
   ): void => {
     const trans = translator.load('jupyterlab');
     const browser = factory.defaultBrowser;
@@ -180,14 +177,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       restorer.add(browser, namespace);
     }
 
-    addCommands(
-      app,
-      factory,
-      translator,
-      settingRegistry,
-      commandPalette,
-      mainMenu
-    );
+    addCommands(app, factory, translator, settingRegistry, commandPalette);
 
     browser.title.icon = folderIcon;
     // Show the current file browser shortcut in its title.
@@ -216,6 +206,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       }
 
       let navigateToCurrentDirectory: boolean = false;
+      let showLastModifiedColumn: boolean = true;
       let useFuzzyFilter: boolean = true;
 
       if (settingRegistry) {
@@ -232,6 +223,17 @@ const browser: JupyterFrontEndPlugin<void> = {
               'navigateToCurrentDirectory'
             ).composite as boolean;
             browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
+
+            settings.changed.connect(settings => {
+              showLastModifiedColumn = settings.get('showLastModifiedColumn')
+                .composite as boolean;
+              browser.showLastModifiedColumn = showLastModifiedColumn;
+            });
+            showLastModifiedColumn = settings.get('showLastModifiedColumn')
+              .composite as boolean;
+
+            browser.showLastModifiedColumn = showLastModifiedColumn;
+
             settings.changed.connect(settings => {
               useFuzzyFilter = settings.get('useFuzzyFilter')
                 .composite as boolean;
@@ -296,6 +298,69 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     void Private.restoreBrowser(defaultBrowser, commands, router, tree);
 
     return { createFileBrowser, defaultBrowser, tracker };
+  }
+};
+
+/**
+ * A plugin providing download + copy download link commands in the context menu.
+ *
+ * Disabling this plugin will NOT disable downloading files from the server.
+ * Users will still be able to retrieve files from the file download URLs the
+ * server provides.
+ */
+const downloadPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:download',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const trans = translator.load('jupyterlab');
+    const { commands } = app;
+    const { tracker } = factory;
+
+    commands.addCommand(CommandIDs.download, {
+      execute: () => {
+        const widget = tracker.currentWidget;
+
+        if (widget) {
+          return widget.download();
+        }
+      },
+      icon: downloadIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: trans.__('Download')
+    });
+
+    commands.addCommand(CommandIDs.copyDownloadLink, {
+      execute: () => {
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        return widget.model.manager.services.contents
+          .getDownloadUrl(widget.selectedItems().next()!.path)
+          .then(url => {
+            Clipboard.copyToSystem(url);
+          });
+      },
+      icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: trans.__('Copy Download Link'),
+      mnemonic: 0
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.download,
+      selector: Selectors.selectorNotDir,
+      rank: 9
+    });
+    app.contextMenu.addItem({
+      command: CommandIDs.copyDownloadLink,
+      selector: Selectors.selectorNotDir,
+      rank: 13
+    });
   }
 };
 
@@ -428,21 +493,20 @@ const shareFile: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     const { tracker } = factory;
 
-    commands.addCommand(CommandIDs.share, {
+    commands.addCommand(CommandIDs.copyShareableLink, {
       execute: () => {
         const widget = tracker.currentWidget;
         const model = widget?.selectedItems().next();
         if (!model) {
           return;
         }
-        const path = encodeURI(model.path);
 
         Clipboard.copyToSystem(
           URLExt.normalize(
             PageConfig.getUrl({
               mode: 'single-document',
               workspace: PageConfig.defaultWorkspace,
-              treePath: path
+              treePath: model.path
             })
           )
         );
@@ -452,6 +516,160 @@ const shareFile: JupyterFrontEndPlugin<void> = {
         toArray(tracker.currentWidget.selectedItems()).length === 1,
       icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Copy Shareable Link')
+    });
+  }
+};
+
+/**
+ * The "Open With" context menu.
+ *
+ * This is its own plugin in case you would like to disable this feature.
+ * e.g. jupyter labextension disable @jupyterlab/filebrowser-extension:open-with
+ */
+const openWithPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-with',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const { docRegistry: registry, commands } = app;
+    const trans = translator.load('jupyterlab');
+    const { tracker } = factory;
+
+    /**
+     * A menu widget that dynamically populates with different widget factories
+     * based on current filebrowser selection.
+     */
+    class OpenWithMenu extends Menu {
+      protected onBeforeAttach(msg: Message): void {
+        // clear the current menu items
+        this.clearItems();
+
+        // get the widget factories that could be used to open all of the items
+        // in the current filebrowser selection
+        const factories = tracker.currentWidget
+          ? OpenWithMenu._intersection(
+              map(tracker.currentWidget.selectedItems(), i => {
+                return OpenWithMenu._getFactories(i);
+              })
+            )
+          : undefined;
+
+        if (factories) {
+          // make new menu items from the widget factories
+          factories.forEach(factory => {
+            this.addItem({
+              args: { factory: factory },
+              command: CommandIDs.open
+            });
+          });
+        }
+
+        super.onBeforeAttach(msg);
+      }
+
+      static _getFactories(item: Contents.IModel): Array<string> {
+        const factories = registry
+          .preferredWidgetFactories(item.path)
+          .map(f => f.name);
+        const notebookFactory = registry.getWidgetFactory('notebook')?.name;
+        if (
+          notebookFactory &&
+          item.type === 'notebook' &&
+          factories.indexOf(notebookFactory) === -1
+        ) {
+          factories.unshift(notebookFactory);
+        }
+
+        return factories;
+      }
+
+      static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
+        // pop the first element of iter
+        const first = iter.next();
+        // first will be undefined if iter is empty
+        if (!first) {
+          return;
+        }
+
+        // "initialize" the intersection from first
+        const isect = new Set(first);
+        // reduce over the remaining elements of iter
+        return reduce(
+          iter,
+          (isect, subarr) => {
+            // filter out all elements not present in both isect and subarr,
+            // accumulate result in new set
+            return new Set(subarr.filter(x => isect.has(x)));
+          },
+          isect
+        );
+      }
+    }
+
+    const openWith = new OpenWithMenu({ commands });
+    openWith.title.label = trans.__('Open With');
+    app.contextMenu.addItem({
+      type: 'submenu',
+      submenu: openWith,
+      selector: Selectors.selectorNotDir,
+      rank: 2
+    });
+  }
+};
+
+/**
+ * The "Open in New Browser Tab" context menu.
+ *
+ * This is its own plugin in case you would like to disable this feature.
+ * e.g. jupyter labextension disable @jupyterlab/filebrowser-extension:open-browser-tab
+ *
+ * Note: If disabling this, you may also want to disable:
+ * @jupyterlab/docmanager-extension:open-browser-tab
+ */
+const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-browser-tab',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const { tracker } = factory;
+
+    commands.addCommand(CommandIDs.openBrowserTab, {
+      execute: () => {
+        const widget = tracker.currentWidget;
+
+        if (!widget) {
+          return;
+        }
+
+        return Promise.all(
+          toArray(
+            map(widget.selectedItems(), item => {
+              return commands.execute('docmanager:open-browser-tab', {
+                path: item.path
+              });
+            })
+          )
+        );
+      },
+      icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: trans.__('Open in New Browser Tab'),
+      mnemonic: 0
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.openBrowserTab,
+      selector: Selectors.selectorNotDir,
+      rank: 3
     });
   }
 };
@@ -532,8 +750,7 @@ function addCommands(
   factory: IFileBrowserFactory,
   translator: ITranslator,
   settingRegistry: ISettingRegistry | null,
-  commandPalette: ICommandPalette | null,
-  mainMenu: IMainMenu | null
+  commandPalette: ICommandPalette | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { docRegistry: registry, commands } = app;
@@ -577,18 +794,6 @@ function addCommands(
     label: trans.__('Cut')
   });
 
-  commands.addCommand(CommandIDs.download, {
-    execute: () => {
-      const widget = tracker.currentWidget;
-
-      if (widget) {
-        return widget.download();
-      }
-    },
-    icon: downloadIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Download')
-  });
-
   commands.addCommand(CommandIDs.duplicate, {
     execute: () => {
       const widget = tracker.currentWidget;
@@ -623,6 +828,30 @@ function addCommands(
       }
       if (showBrowser) {
         return commands.execute(CommandIDs.showBrowser, { path });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.goUp, {
+    label: 'go up',
+    execute: async () => {
+      const browserForPath = Private.getBrowserForPath('', factory);
+      if (!browserForPath) {
+        return;
+      }
+      const { model } = browserForPath;
+
+      await model.restored;
+      if (model.path === model.rootPath) {
+        return;
+      }
+      try {
+        await model.cd('..');
+      } catch (reason) {
+        console.warn(
+          `${CommandIDs.goUp} failed to go to parent directory of ${model.path}`,
+          reason
+        );
       }
     }
   });
@@ -732,47 +961,6 @@ function addCommands(
     mnemonic: 0
   });
 
-  commands.addCommand(CommandIDs.openBrowserTab, {
-    execute: () => {
-      const widget = tracker.currentWidget;
-
-      if (!widget) {
-        return;
-      }
-
-      return Promise.all(
-        toArray(
-          map(widget.selectedItems(), item => {
-            return commands.execute('docmanager:open-browser-tab', {
-              path: item.path
-            });
-          })
-        )
-      );
-    },
-    icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Open in New Browser Tab'),
-    mnemonic: 0
-  });
-
-  commands.addCommand(CommandIDs.copyDownloadLink, {
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
-
-      return widget.model.manager.services.contents
-        .getDownloadUrl(widget.selectedItems().next()!.path)
-        .then(url => {
-          Clipboard.copyToSystem(url);
-        });
-    },
-    icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Copy Download Link'),
-    mnemonic: 0
-  });
-
   commands.addCommand(CommandIDs.paste, {
     execute: () => {
       const widget = tracker.currentWidget;
@@ -800,14 +988,11 @@ function addCommands(
 
   commands.addCommand(CommandIDs.createNewFile, {
     execute: () => {
-      const {
-        model: { path }
-      } = browser;
-      void commands.execute('docmanager:new-untitled', {
-        path,
-        type: 'file',
-        ext: 'txt'
-      });
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.createNewFile({ ext: 'txt' });
+      }
     },
     icon: textEditorIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('New File')
@@ -815,14 +1000,11 @@ function addCommands(
 
   commands.addCommand(CommandIDs.createNewMarkdownFile, {
     execute: () => {
-      const {
-        model: { path }
-      } = browser;
-      void commands.execute('docmanager:new-untitled', {
-        path,
-        type: 'file',
-        ext: 'md'
-      });
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.createNewFile({ ext: 'md' });
+      }
     },
     icon: markdownIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('New Markdown File')
@@ -905,23 +1087,17 @@ function addCommands(
   }
 
   commands.addCommand(CommandIDs.toggleLastModified, {
-    label: trans.__('Toggle Last Modified Column'),
+    label: trans.__('Show Last Modified Column'),
+    isToggled: () => browser.showLastModifiedColumn,
     execute: () => {
-      const header = DOMUtils.findElement(document.body, 'jp-id-modified');
-      const column = DOMUtils.findElements(
-        document.body,
-        'jp-DirListing-itemModified'
-      );
-      if (header.classList.contains('jp-LastModified-hidden')) {
-        header.classList.remove('jp-LastModified-hidden');
-        for (let i = 0; i < column.length; i++) {
-          column[i].classList.remove('jp-LastModified-hidden');
-        }
-      } else {
-        header.classList.add('jp-LastModified-hidden');
-        for (let i = 0; i < column.length; i++) {
-          column[i].classList.add('jp-LastModified-hidden');
-        }
+      const value = !browser.showLastModifiedColumn;
+      const key = 'showLastModifiedColumn';
+      if (settingRegistry) {
+        return settingRegistry
+          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set showLastModifiedColumn setting`);
+          });
       }
     }
   });
@@ -931,13 +1107,6 @@ function addCommands(
     execute: () => alert('search')
   });
 
-  if (mainMenu) {
-    mainMenu.settingsMenu.addGroup(
-      [{ command: CommandIDs.toggleNavigateToCurrentDirectory }],
-      5
-    );
-  }
-
   if (commandPalette) {
     commandPalette.addItem({
       command: CommandIDs.toggleNavigateToCurrentDirectory,
@@ -945,188 +1114,145 @@ function addCommands(
     });
   }
 
-  /**
-   * A menu widget that dynamically populates with different widget factories
-   * based on current filebrowser selection.
-   */
-  class OpenWithMenu extends Menu {
-    protected onBeforeAttach(msg: Message): void {
-      // clear the current menu items
-      this.clearItems();
-
-      // get the widget factories that could be used to open all of the items
-      // in the current filebrowser selection
-      const factories = tracker.currentWidget
-        ? OpenWithMenu._intersection(
-            map(tracker.currentWidget.selectedItems(), i => {
-              return OpenWithMenu._getFactories(i);
-            })
-          )
-        : undefined;
-
-      if (factories) {
-        // make new menu items from the widget factories
-        factories.forEach(factory => {
-          this.addItem({
-            args: { factory: factory },
-            command: CommandIDs.open
-          });
-        });
-      }
-
-      super.onBeforeAttach(msg);
-    }
-
-    static _getFactories(item: Contents.IModel): Array<string> {
-      const factories = registry
-        .preferredWidgetFactories(item.path)
-        .map(f => f.name);
-      const notebookFactory = registry.getWidgetFactory('notebook')?.name;
-      if (
-        notebookFactory &&
-        item.type === 'notebook' &&
-        factories.indexOf(notebookFactory) === -1
-      ) {
-        factories.unshift(notebookFactory);
-      }
-
-      return factories;
-    }
-
-    static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
-      // pop the first element of iter
-      const first = iter.next();
-      // first will be undefined if iter is empty
-      if (!first) {
-        return;
-      }
-
-      // "initialize" the intersection from first
-      const isect = new Set(first);
-      // reduce over the remaining elements of iter
-      return reduce(
-        iter,
-        (isect, subarr) => {
-          // filter out all elements not present in both isect and subarr,
-          // accumulate result in new set
-          return new Set(subarr.filter(x => isect.has(x)));
-        },
-        isect
-      );
-    }
-  }
-
-  // matches anywhere on filebrowser
-  const selectorContent = '.jp-DirListing-content';
-  // matches all filebrowser items
-  const selectorItem = '.jp-DirListing-item[data-isdir]';
-  // matches only non-directory items
-  const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
-
   // If the user did not click on any file, we still want to show paste and new folder,
   // so target the content rather than an item.
   app.contextMenu.addItem({
+    type: 'separator',
+    selector: Selectors.selectorContent,
+    rank: 0
+  });
+
+  app.contextMenu.addItem({
     command: CommandIDs.createNewDirectory,
-    selector: selectorContent,
+    selector: Selectors.selectorContent,
     rank: 1
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.createNewFile,
-    selector: selectorContent,
+    selector: Selectors.selectorContent,
     rank: 2
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.createNewMarkdownFile,
-    selector: selectorContent,
+    selector: Selectors.selectorContent,
     rank: 3
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.paste,
-    selector: selectorContent,
+    selector: Selectors.selectorContent,
     rank: 4
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.open,
-    selector: selectorItem,
+    selector: Selectors.selectorItem,
     rank: 1
   });
 
-  const openWith = new OpenWithMenu({ commands });
-  openWith.title.label = trans.__('Open With');
   app.contextMenu.addItem({
-    type: 'submenu',
-    submenu: openWith,
-    selector: selectorNotDir,
-    rank: 2
-  });
-
-  app.contextMenu.addItem({
-    command: CommandIDs.openBrowserTab,
-    selector: selectorNotDir,
-    rank: 3
+    type: 'separator',
+    selector: Selectors.selectorItem,
+    rank: 4
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.rename,
-    selector: selectorItem,
-    rank: 4
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.del,
-    selector: selectorItem,
+    selector: Selectors.selectorItem,
     rank: 5
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.cut,
-    selector: selectorItem,
+    command: CommandIDs.del,
+    selector: Selectors.selectorItem,
     rank: 6
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.copy,
-    selector: selectorNotDir,
+    command: CommandIDs.cut,
+    selector: Selectors.selectorItem,
     rank: 7
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.duplicate,
-    selector: selectorNotDir,
+    command: CommandIDs.copy,
+    selector: Selectors.selectorNotDir,
     rank: 8
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.download,
-    selector: selectorNotDir,
+    command: CommandIDs.duplicate,
+    selector: Selectors.selectorNotDir,
     rank: 9
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.shutdown,
-    selector: selectorNotDir,
+    type: 'separator',
+    selector: Selectors.selectorItem,
     rank: 10
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.share,
-    selector: selectorItem,
+    command: CommandIDs.shutdown,
+    selector: Selectors.selectorNotDir,
     rank: 11
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.copyPath,
-    selector: selectorItem,
+    type: 'separator',
+    selector: Selectors.selectorItem,
     rank: 12
   });
+
   app.contextMenu.addItem({
-    command: CommandIDs.copyDownloadLink,
-    selector: selectorNotDir,
-    rank: 13
+    command: CommandIDs.copyShareableLink,
+    selector: Selectors.selectorItem,
+    rank: 15
   });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.copyPath,
+    selector: Selectors.selectorItem,
+    rank: 14
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.toggleLastModified,
-    selector: '.jp-DirListing-header',
+    selector: Selectors.selectorHeader,
     rank: 14
+  });
+
+  app.commands.addKeyBinding({
+    command: CommandIDs.del,
+    selector: Selectors.selectorBrowser,
+    keys: ['Delete']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.cut,
+    selector: Selectors.selectorBrowser,
+    keys: ['Ctrl X']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.copy,
+    selector: Selectors.selectorBrowser,
+    keys: ['Ctrl C']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.paste,
+    selector: Selectors.selectorBrowser,
+    keys: ['Ctrl V']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.rename,
+    selector: Selectors.selectorBrowser,
+    keys: ['F2']
+  });
+  app.commands.addKeyBinding({
+    command: CommandIDs.duplicate,
+    selector: Selectors.selectorBrowser,
+    keys: ['Ctrl D']
   });
 }
 
@@ -1270,7 +1396,10 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   browser,
   shareFile,
   fileUploadStatus,
+  downloadPlugin,
   browserWidget,
-  launcherToolbarButton
+  launcherToolbarButton,
+  openWithPlugin,
+  openBrowserTabPlugin
 ];
 export default plugins;

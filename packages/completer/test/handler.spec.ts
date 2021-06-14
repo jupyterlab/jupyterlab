@@ -1,19 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext, ISessionContext } from '@jupyterlab/apputils';
-
+import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-
 import {
   Completer,
-  CompletionHandler,
   CompleterModel,
+  CompletionHandler,
   KernelConnector
 } from '@jupyterlab/completer';
-
 import { createSessionContext } from '@jupyterlab/testutils';
 
 function createEditorWidget(): CodeEditorWrapper {
@@ -294,6 +290,7 @@ describe('@jupyterlab/completer', () => {
 
         handler.editor = editor;
         handler.editor.model.value.text = text;
+        handler.editor.model.sharedModel.clearUndoHistory();
         handler.editor.setCursorPosition({ line, column: column + 3 });
         model.original = request;
         model.cursor = { start: column, end: column + 3 };

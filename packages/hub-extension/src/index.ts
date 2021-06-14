@@ -7,19 +7,14 @@
  * @module hub-extension
  */
 
-import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
-
 import {
   ConnectionLost,
   IConnectionLost,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
+import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 
@@ -41,8 +36,7 @@ function activateHubExtension(
   app: JupyterFrontEnd,
   paths: JupyterFrontEnd.IPaths,
   translator: ITranslator,
-  palette: ICommandPalette | null,
-  mainMenu: IMainMenu | null
+  palette: ICommandPalette | null
 ): void {
   const trans = translator.load('jupyterlab');
   const hubHost = paths.urls.hubHost || '';
@@ -64,7 +58,7 @@ function activateHubExtension(
   // If hubServerName is set, use JupyterHub 1.0 URL.
   const restartUrl = hubServerName
     ? hubHost + URLExt.join(hubPrefix, 'spawn', hubUser, hubServerName)
-    : hubHost + URLExt.join(hubPrefix, `spawn?next=${hubPrefix}home`);
+    : hubHost + URLExt.join(hubPrefix, 'spawn');
 
   const { commands } = app;
 
@@ -92,13 +86,7 @@ function activateHubExtension(
     }
   });
 
-  // Add palette and menu itmes.
-  if (mainMenu) {
-    mainMenu.fileMenu.addGroup(
-      [{ command: CommandIDs.controlPanel }, { command: CommandIDs.logout }],
-      100
-    );
-  }
+  // Add palette items.
   if (palette) {
     const category = trans.__('Hub');
     palette.addItem({ category, command: CommandIDs.controlPanel });
@@ -113,7 +101,16 @@ const hubExtension: JupyterFrontEndPlugin<void> = {
   activate: activateHubExtension,
   id: 'jupyter.extensions.hub-extension',
   requires: [JupyterFrontEnd.IPaths, ITranslator],
-  optional: [ICommandPalette, IMainMenu],
+  optional: [ICommandPalette],
+  autoStart: true
+};
+
+/**
+ * Plugin to load menu description based on settings file
+ */
+const hubExtensionMenu: JupyterFrontEndPlugin<void> = {
+  activate: () => void 0,
+  id: 'jupyter.extensions.hub-extension:plugin',
   autoStart: true
 };
 
@@ -175,4 +172,8 @@ const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
   provides: IConnectionLost
 };
 
-export default [hubExtension, connectionlost] as JupyterFrontEndPlugin<any>[];
+export default [
+  hubExtension,
+  hubExtensionMenu,
+  connectionlost
+] as JupyterFrontEndPlugin<any>[];

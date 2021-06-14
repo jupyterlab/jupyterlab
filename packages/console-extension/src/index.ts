@@ -11,27 +11,20 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   Dialog,
+  ICommandPalette,
   ISessionContext,
   ISessionContextDialogs,
-  ICommandPalette,
   sessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
-
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import {
   IEditMenu,
   IFileMenu,
@@ -40,29 +33,20 @@ import {
   IMainMenu,
   IRunMenu
 } from '@jupyterlab/mainmenu';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { consoleIcon } from '@jupyterlab/ui-components';
-
 import { find } from '@lumino/algorithm';
-
 import {
   JSONExt,
   JSONObject,
+  ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
-  UUID,
-  ReadonlyJSONValue
+  UUID
 } from '@lumino/coreutils';
-
 import { DisposableSet } from '@lumino/disposable';
-
-import { DockLayout, Menu } from '@lumino/widgets';
-
+import { DockLayout } from '@lumino/widgets';
 import foreign from './foreign';
 
 /**
@@ -572,9 +556,6 @@ async function activateConsole(
   }
 
   if (mainMenu) {
-    // Add a console creator to the File menu
-    mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.create }], 0);
-
     // Add a close and shutdown command to the file menu.
     mainMenu.fileMenu.closeAndCleaners.add({
       tracker,
@@ -676,27 +657,7 @@ async function activateConsole(
     isToggled: args => args['interactionMode'] === interactionMode
   });
 
-  const executeMenu = new Menu({ commands });
-  executeMenu.title.label = trans.__('Console Run Keystroke');
-
-  ['terminal', 'notebook'].forEach(name =>
-    executeMenu.addItem({
-      command: CommandIDs.interactionMode,
-      args: { interactionMode: name }
-    })
-  );
-
   if (mainMenu) {
-    mainMenu.settingsMenu.addGroup(
-      [
-        {
-          type: 'submenu' as Menu.ItemType,
-          submenu: executeMenu
-        }
-      ],
-      10
-    );
-
     // Add kernel information to the application help menu.
     mainMenu.helpMenu.kernelUsers.add({
       tracker,

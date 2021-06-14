@@ -2,29 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  SessionManager,
-  KernelManager,
-  KernelSpecManager
-} from '@jupyterlab/services';
-
-import {
-  SessionContext,
   Dialog,
   ISessionContext,
+  SessionContext,
   sessionContextDialogs
 } from '@jupyterlab/apputils';
-
-import { UUID, PromiseDelegate } from '@lumino/coreutils';
-
+import {
+  KernelManager,
+  KernelSpecManager,
+  SessionAPI,
+  SessionManager
+} from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
-  testEmission,
+  flakyIt as it,
   JupyterServer,
-  flakyIt as it
+  testEmission
 } from '@jupyterlab/testutils';
-
-import { SessionAPI } from '@jupyterlab/services';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 const server = new JupyterServer();
 
@@ -70,7 +66,9 @@ describe('@jupyterlab/apputils', () => {
     afterEach(async () => {
       Dialog.flush();
       try {
-        await sessionContext.shutdown();
+        if (sessionContext.session) {
+          await sessionContext.shutdown();
+        }
       } catch (error) {
         console.warn('Session shutdown failed.', error);
       }
@@ -296,6 +294,32 @@ describe('@jupyterlab/apputils', () => {
         expect(result).toBe(false);
         expect(sessionContext.session?.kernel).toBeFalsy();
       });
+
+      it('should handle an error during startup', async () => {
+        // Give it a mock manager that errors on connectTo
+        const mockManager = new SessionManager({ kernelManager });
+
+        sessionContext = new SessionContext({
+          path,
+          sessionManager: mockManager,
+          specsManager,
+          kernelPreference: { name: specsManager.specs?.default }
+        });
+
+        (mockManager as any).running = () => {
+          return [{ path }];
+        };
+        (mockManager as any).connectTo = () => {
+          throw new Error('mock error');
+        };
+
+        let caught = false;
+        const promise = sessionContext.initialize().catch(() => {
+          caught = true;
+        });
+        await Promise.all([promise, acceptDialog()]);
+        expect(caught).toBe(true);
+      });
     });
 
     describe('#kernelDisplayName', () => {
@@ -441,24 +465,6 @@ describe('@jupyterlab/apputils', () => {
         // We can't know which of the two was launched first, so the result
         // could be either, just make sure it isn't the original kernel.
         expect([results[0], results[1]]).toContain(lastKernel);
-      });
-
-      it('should handle an error during kernel change', async () => {
-        await sessionContext.initialize();
-        await sessionContext.session?.kernel?.info;
-        let status = 'idle';
-        sessionContext.statusChanged.connect(() => {
-          status = sessionContext.kernelDisplayStatus;
-        });
-        let caught = false;
-        const promise = sessionContext
-          .changeKernel({ name: 'does-not-exist' })
-          .catch(() => {
-            caught = true;
-          });
-        await Promise.all([promise, acceptDialog()]);
-        expect(caught).toBe(true);
-        expect(status).toBe('unknown');
       });
     });
 

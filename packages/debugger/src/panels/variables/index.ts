@@ -3,7 +3,7 @@
 
 import { IThemeManager, ToolbarButton } from '@jupyterlab/apputils';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { tableRowsIcon, treeViewIcon } from '@jupyterlab/ui-components';
 

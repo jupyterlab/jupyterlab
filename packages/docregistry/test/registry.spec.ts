@@ -1,14 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
-import { toArray } from '@lumino/algorithm';
-
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
-import { Widget } from '@lumino/widgets';
-
 import {
   ABCWidgetFactory,
   Base64ModelFactory,
@@ -16,6 +8,10 @@ import {
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
+import { toArray } from '@lumino/algorithm';
+import { UUID } from '@lumino/coreutils';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { Widget } from '@lumino/widgets';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(

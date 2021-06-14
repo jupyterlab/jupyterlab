@@ -3,57 +3,49 @@
 // / <reference types="codemirror"/>
 // / <reference types="codemirror/searchcursor"/>
 
-import CodeMirror from 'codemirror';
-
 import { showDialog } from '@jupyterlab/apputils';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import {
+  ICollaborator,
   IObservableMap,
-  IObservableString,
-  ICollaborator
+  IObservableString
 } from '@jupyterlab/observables';
-
+import * as models from '@jupyterlab/shared-models';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { ArrayExt } from '@lumino/algorithm';
-
 import { JSONExt, UUID } from '@lumino/coreutils';
-
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
-
 import { Signal } from '@lumino/signaling';
-
-import { Mode } from './mode';
-
+import CodeMirror from 'codemirror';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/display/rulers.js';
-import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/fold/brace-fold.js';
+import 'codemirror/addon/fold/comment-fold.js';
 import 'codemirror/addon/fold/foldcode.js';
 import 'codemirror/addon/fold/foldgutter.js';
-import 'codemirror/addon/fold/brace-fold.js';
 import 'codemirror/addon/fold/indent-fold.js';
 import 'codemirror/addon/fold/markdown-fold.js';
 import 'codemirror/addon/fold/xml-fold.js';
-import 'codemirror/addon/fold/comment-fold.js';
+import 'codemirror/addon/mode/simple';
 import 'codemirror/addon/scroll/scrollpastend.js';
-import 'codemirror/addon/search/searchcursor';
-import 'codemirror/addon/search/search';
 import 'codemirror/addon/search/jump-to-line';
+import 'codemirror/addon/search/search';
+import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/selection/active-line';
 import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/addon/selection/selection-pointer';
-import 'codemirror/addon/mode/simple';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
+import { CodemirrorBinding } from 'y-codemirror';
+import { Mode } from './mode';
+
 // import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
 
 /**
@@ -91,6 +83,10 @@ const DOWN_ARROW = 40;
  */
 const HOVER_TIMEOUT = 1000;
 
+// @todo Remove the duality of having a modeldb and a y-codemirror
+// binding as it just introduces a lot of additional complexity without gaining anything.
+const USE_YCODEMIRROR_BINDING = true;
+
 /**
  * CodeMirror editor.
  */
@@ -125,12 +121,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
+    this._initializeEditorBinding();
+    // every time the model is switched, we need to re-initialize the editor binding
+    this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
 
     const doc = editor.getDoc();
 
     // Handle initial values for text, mimetype, and selections.
-    doc.setValue(model.value.text);
-    this.clearHistory();
+    if (!USE_YCODEMIRROR_BINDING) {
+      doc.setValue(model.value.text);
+    }
     this._onMimeTypeChanged();
     this._onCursorActivity();
     this._poll = new Poll({
@@ -145,7 +145,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     // Connect to changes.
-    model.value.changed.connect(this._onValueChanged, this);
+    if (!USE_YCODEMIRROR_BINDING) {
+      model.value.changed.connect(this._onValueChanged, this);
+    }
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
@@ -162,9 +164,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }
     });
     CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-    CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
-      this._beforeDocChanged(instance, change);
-    });
+    if (!USE_YCODEMIRROR_BINDING) {
+      CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
+        this._beforeDocChanged(instance, change);
+      });
+    }
     CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
       // Manually refresh after setValue to make sure editor is properly sized.
       if (change.origin === 'setValue' && this.hasFocus()) {
@@ -188,6 +192,27 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         this.refresh();
       }
     });
+  }
+
+  /**
+   * Initialize the editor binding.
+   */
+  private _initializeEditorBinding(): void {
+    if (!USE_YCODEMIRROR_BINDING) {
+      return;
+    }
+    this._yeditorBinding?.destroy();
+    const sharedModel = this.model.sharedModel as models.IYText;
+    const opts = sharedModel.undoManager
+      ? { yUndoManager: sharedModel.undoManager }
+      : {};
+    const awareness = sharedModel.awareness;
+    this._yeditorBinding = new CodemirrorBinding(
+      sharedModel.ysource,
+      this.editor,
+      awareness,
+      opts
+    );
   }
 
   /**
@@ -280,6 +305,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('focus', this, true);
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
+    if (this._yeditorBinding) {
+      this._yeditorBinding.destroy();
+    }
     this._keydownHandlers.length = 0;
     this._poll.dispose();
     Signal.clearData(this);
@@ -306,6 +334,27 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this._config[option] = value;
       Private.setOption(this.editor, option, value, this._config);
     }
+  }
+
+  /**
+   * Set config options for the editor.
+   *
+   * This method is prefered when setting several options. The
+   * options are set within an operation, which only performs
+   * the costly update at the end, and not after every option
+   * is set.
+   */
+  setOptions<K extends keyof CodeMirrorEditor.IConfig>(
+    options: CodeMirrorEditor.IConfigOptions<K>[]
+  ): void {
+    const editor = this._editor;
+    editor.startOperation();
+    for (let key in options) {
+      editor.operation(() => {
+        this.setOption(key as any, options[key]);
+      });
+    }
+    editor.endOperation();
   }
 
   /**
@@ -337,21 +386,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
-    this.doc.undo();
+    this.model.sharedModel.undo();
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
-    this.doc.redo();
+    this.model.sharedModel.redo();
   }
 
   /**
    * Clear the undo history.
    */
   clearHistory(): void {
-    this.doc.clearHistory();
+    this._yeditorBinding?.yUndoManager?.clear();
   }
 
   /**
@@ -438,6 +487,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     margin: number
   ): void {
     this._editor.scrollIntoView(pos, margin);
+  }
+
+  scrollIntoViewCentered(pos: CodeMirror.Position): void {
+    const top = this._editor.charCoords(pos, 'local').top;
+    const height = this._editor.getWrapperElement().offsetHeight;
+    this.host.scrollIntoView?.({
+      behavior: 'auto',
+      block: 'center',
+      inline: 'center'
+    });
+    this._editor.scrollTo(null, top - height / 2);
   }
 
   cursorCoords(
@@ -701,11 +761,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _onMimeTypeChanged(): void {
     const mime = this._model.mimeType;
     const editor = this._editor;
-    // TODO: should we provide a hook for when the
-    // mode is done being set?
-    void Mode.ensure(mime).then(spec => {
-      editor.setOption('mode', spec?.mime ?? 'null');
-    });
     const extraKeys = (editor.getOption('extraKeys' as any) ||
       {}) as CodeMirror.KeyMap;
     const isCode = mime !== 'text/plain' && mime !== 'text/x-ipythongfm';
@@ -714,7 +769,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     } else {
       delete extraKeys['Backspace'];
     }
-    editor.setOption('extraKeys' as any, extraKeys);
+    this.setOption('extraKeys', extraKeys);
+
+    // TODO: should we provide a hook for when the mode is done being set?
+    void Mode.ensure(mime).then(spec => {
+      this.setOption('mode', spec?.mime ?? 'null');
+    });
   }
 
   /**
@@ -1116,6 +1176,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _isDisposed = false;
   private _lastChange: CodeMirror.EditorChange | null = null;
   private _poll: Poll;
+  private _yeditorBinding: CodemirrorBinding | null;
 }
 
 /**
@@ -1300,6 +1361,13 @@ export namespace CodeMirrorEditor {
     foldGutter: false,
     handlePaste: true
   };
+
+  /**
+   * The options used to set several options at once with setOptions.
+   */
+  export interface IConfigOptions<K extends keyof IConfig> {
+    K: IConfig[K];
+  }
 
   /**
    * Add a command to CodeMirror.

@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Signal } from '@lumino/signaling';
-
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-
 import { sleep } from '@jupyterlab/testutils';
+import { Signal } from '@lumino/signaling';
 
 class TestObject {
   one = new Signal<TestObject, number>(this);

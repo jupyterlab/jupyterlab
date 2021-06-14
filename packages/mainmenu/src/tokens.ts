@@ -1,25 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { MenuFactory } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-
 import { Menu } from '@lumino/widgets';
-
-import { IFileMenu } from './file';
-
 import { IEditMenu } from './edit';
-
+import { IFileMenu } from './file';
 import { IHelpMenu } from './help';
-
 import { IKernelMenu } from './kernel';
-
 import { IRunMenu } from './run';
-
 import { ISettingsMenu } from './settings';
-
-import { IViewMenu } from './view';
-
 import { ITabsMenu } from './tabs';
+import { IViewMenu } from './view';
 
 /* tslint:disable */
 /**
@@ -91,4 +83,9 @@ export namespace IMainMenu {
      */
     rank?: number;
   }
+
+  /**
+   * The instantiation options for an IMainMenu.
+   */
+  export interface IMenuOptions extends MenuFactory.IMenuOptions {}
 }

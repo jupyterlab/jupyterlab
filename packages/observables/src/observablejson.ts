@@ -7,9 +7,7 @@ import {
   PartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { IObservableMap, ObservableMap } from './observablemap';
 
 /**

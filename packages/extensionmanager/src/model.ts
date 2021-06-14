@@ -2,35 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import { VDomModel } from '@jupyterlab/apputils';
-
 import {
   KernelSpec,
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Debouncer } from '@lumino/polling';
-
 import * as semver from 'semver';
-
 import { doBuild } from './build-helper';
-
 import {
-  presentCompanions,
   IKernelInstallInfo,
-  KernelCompanion
+  KernelCompanion,
+  presentCompanions
 } from './companions';
-
 import { reportInstallError } from './dialog';
-
-import { Searcher, ISearchResult, isJupyterOrg } from './npm';
-
-import { Lister, ListResult, IListEntry } from './listings';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { IListEntry, Lister, ListResult } from './listings';
+import { ISearchResult, isJupyterOrg, Searcher } from './npm';
 
 /**
  * Information about an extension.
@@ -232,9 +222,19 @@ export class ListModel extends VDomModel {
     this.serverConnectionSettings = ServerConnection.makeSettings();
     this._debouncedUpdate = new Debouncer(this.update.bind(this), 1000);
     this.lister.listingsLoaded.connect(this._listingIsLoaded, this);
+    this.searcher = new Searcher(
+      settings.composite['npmRegistry'] as string,
+      settings.composite['npmCdn'] as string,
+      settings.composite['enableCdn'] as boolean
+    );
     _isDisclaimed = settings.composite['disclaimed'] === true;
     settings.changed.connect(() => {
       _isDisclaimed = settings.composite['disclaimed'] === true;
+      this.searcher = new Searcher(
+        settings.composite['npmRegistry'] as string,
+        settings.composite['npmCdn'] as string,
+        settings.composite['enableCdn'] as boolean
+      );
       void this.update();
     });
   }
@@ -880,7 +880,7 @@ export class ListModel extends VDomModel {
   /**
    * A helper for performing searches of jupyterlab extensions on the NPM repository.
    */
-  protected searcher = new Searcher();
+  protected searcher: Searcher;
 
   protected lister = new Lister();
 

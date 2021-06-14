@@ -1,27 +1,18 @@
-import React from 'react';
-
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import {
   interactiveItem,
   Popup,
   showPopup,
   TextItem
 } from '@jupyterlab/statusbar';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
-import { Mode } from '.';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
-
 import { JSONObject } from '@lumino/coreutils';
-
 import { Menu } from '@lumino/widgets';
+import React from 'react';
+import { Mode } from '.';
 
 /**
  * A namespace for `EditorSyntaxComponentStatics`.

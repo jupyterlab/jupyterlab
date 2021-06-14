@@ -19,10 +19,10 @@
       "path": "../docmanager"
     },
     {
-      "path": "../docregistry"
+      "path": "../docprovider"
     },
     {
-      "path": "../mainmenu"
+      "path": "../docregistry"
     },
     {
       "path": "../services"

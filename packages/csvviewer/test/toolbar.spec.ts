@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Widget } from '@lumino/widgets';
-
 import { simulate } from 'simulate-event';
-
 import { CSVDelimiter } from '../src';
 
 const DELIMITERS = [',', ';', '\t'];

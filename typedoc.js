@@ -1,4 +1,4 @@
-// const git = require('git-rev-sync');
+const fs = require('fs');
 
 const packages = [
   // 'application-extension',
@@ -19,6 +19,10 @@ const packages = [
   'coreutils',
   'csvviewer-extension',
   'csvviewer',
+  'debugger-extension',
+  'debugger',
+  'docprovider-extension',
+  'docprovider',
   'docmanager-extension',
   'docmanager',
   'docregistry',
@@ -68,17 +72,21 @@ const packages = [
   'settingeditor-extension',
   'settingeditor',
   'settingregistry',
+  'shared-models',
   'shortcuts-extension',
   'statedb',
   'statusbar-extension',
   'statusbar',
-  'tabmanager-extension',
   'terminal-extension',
   'terminal',
   'theme-dark-extension',
   'theme-light-extension',
+  'toc',
+  'toc-extension',
   'tooltip-extension',
   'tooltip',
+  'translation-extension',
+  'translation',
   'ui-components-extension',
   'ui-components',
   'vdom-extension',
@@ -86,17 +94,17 @@ const packages = [
   'vega5-extension'
 ];
 
-const entryPoints = packages.flatMap(p => [
-  `packages/${p}/src/index.ts`,
-  `packages/${p}/src/index.tsx`
-  // `${__dirname}/packages/${p}/src/*.d.ts`,
-  // `${__dirname}/packages/${p}/src/index.ts`,
-]);
+const entryPoints = packages
+  .flatMap(p => [`packages/${p}/src/index.ts`, `packages/${p}/src/index.tsx`])
+  .filter(function (path) {
+    return fs.existsSync(path);
+  });
 
 const exclude =
   packages.flatMap(p => [`packages/${p}/test`]) +
   [
-    'packages/application-extension/src/index.tsx'
+    'packages/application-extension/src/index.tsx',
+    'ui-tests/**/*'
     //'packages/*/test/*.spec.ts',
   ];
 

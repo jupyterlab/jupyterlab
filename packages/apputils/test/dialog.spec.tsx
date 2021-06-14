@@ -5,22 +5,16 @@
 // import { expect } from 'chai';
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-
-import { each } from '@lumino/algorithm';
-
-import { Message } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { generate, simulate } from 'simulate-event';
-
-import * as React from 'react';
-
 import {
   acceptDialog,
   dismissDialog,
   waitForDialog
 } from '@jupyterlab/testutils';
+import { each } from '@lumino/algorithm';
+import { Message } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import * as React from 'react';
+import { generate, simulate } from 'simulate-event';
 
 class TestDialog extends Dialog<any> {
   methods: string[] = [];
@@ -240,9 +234,9 @@ describe('@jupyterlab/apputils', () => {
         it('should focus the default button when focus leaves the dialog', async () => {
           const host = document.createElement('div');
           const target = document.createElement('div');
+          target.tabIndex = 0; // Make the div element focusable
           const dialog = new TestDialog({ host });
 
-          target.tabIndex = -1;
           document.body.appendChild(target);
           document.body.appendChild(host);
           target.focus();

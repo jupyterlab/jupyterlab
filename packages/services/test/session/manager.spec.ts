@@ -1,23 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
-import { toArray } from '@lumino/algorithm';
-
 import {
+  flakyIt as it,
+  JupyterServer,
+  testEmission
+} from '@jupyterlab/testutils';
+import { toArray } from '@lumino/algorithm';
+import { UUID } from '@lumino/coreutils';
+import {
+  KernelManager,
   ServerConnection,
-  SessionManager,
   Session,
   SessionAPI,
-  KernelManager
+  SessionManager
 } from '../../src';
-
-import {
-  testEmission,
-  JupyterServer,
-  flakyIt as it
-} from '@jupyterlab/testutils';
 
 /**
  * Start a new session on with a default name.

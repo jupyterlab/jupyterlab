@@ -1,12 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISearchProvider, ISearchProviderConstructor } from './interfaces';
-import { ISearchProviderRegistry } from './tokens';
-
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+import { ISearchProvider, ISearchProviderConstructor } from './interfaces';
+import { ISearchProviderRegistry } from './tokens';
 
 export class SearchProviderRegistry implements ISearchProviderRegistry {
   /**

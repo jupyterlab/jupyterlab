@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-
 import { framePromise } from '@jupyterlab/testutils';
-
 import { Widget } from '@lumino/widgets';
-
 import * as React from 'react';
 
 class TestModel extends VDomModel {

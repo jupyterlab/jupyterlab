@@ -1,28 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@lumino/algorithm';
-
-import { UUID } from '@lumino/coreutils';
-
-import { Widget } from '@lumino/widgets';
-
 import {
   ABCWidgetFactory,
   Base64ModelFactory,
+  Context,
   DocumentModel,
   DocumentRegistry,
   DocumentWidget,
   IDocumentWidget,
-  TextModelFactory,
-  Context
+  TextModelFactory
 } from '@jupyterlab/docregistry';
-
 import { ServiceManager } from '@jupyterlab/services';
-
 import { sleep } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { toArray } from '@lumino/algorithm';
+import { UUID } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(

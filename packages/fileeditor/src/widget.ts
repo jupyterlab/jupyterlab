@@ -4,23 +4,18 @@
 import {
   CodeEditor,
   CodeEditorWrapper,
-  IEditorServices,
-  IEditorMimeTypeService
+  IEditorMimeTypeService,
+  IEditorServices
 } from '@jupyterlab/codeeditor';
-
 import {
   ABCWidgetFactory,
   DocumentRegistry,
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-
 import { textEditorIcon } from '@jupyterlab/ui-components';
-
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { StackedLayout, Widget } from '@lumino/widgets';
 
 /**
@@ -329,8 +324,21 @@ export class FileEditorFactory extends ABCWidgetFactory<
     });
 
     content.title.icon = textEditorIcon;
-
     const widget = new DocumentWidget({ content, context });
+    widget.context.saveState.connect((sender, state) => {
+      const model = sender.contentsModel;
+      /* emits shouldNameFile signal 
+         when save is completed, file is not renamed and the name starts with 'untitled'
+      */
+      if (
+        state === 'completed-manual' &&
+        model &&
+        !model.renamed == true &&
+        model.name.startsWith('untitled')
+      ) {
+        widget.shouldNameFile.emit(undefined);
+      }
+    });
     return widget;
   }
 

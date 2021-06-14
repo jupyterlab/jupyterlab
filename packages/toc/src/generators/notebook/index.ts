@@ -3,26 +3,26 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 import {
+  Cell,
   CodeCell,
   CodeCellModel,
-  MarkdownCell,
-  Cell,
-  ICellModel
+  ICellModel,
+  MarkdownCell
 } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { nullTranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
-import { isMarkdown } from '../../utils/is_markdown';
-import { isDOM } from '../../utils/is_dom';
 import { INotebookHeading } from '../../utils/headings';
-import { OptionsManager } from './options_manager';
+import { isDOM } from '../../utils/is_dom';
+import { isMarkdown } from '../../utils/is_markdown';
+import { appendHeading } from './append_heading';
+import { appendMarkdownHeading } from './append_markdown_heading';
 import { getCodeCellHeading } from './get_code_cell_heading';
 import { getLastHeadingLevel } from './get_last_heading_level';
 import { getMarkdownHeadings } from './get_markdown_heading';
 import { getRenderedHTMLHeadings } from './get_rendered_html_heading';
-import { appendHeading } from './append_heading';
-import { appendMarkdownHeading } from './append_markdown_heading';
+import { OptionsManager } from './options_manager';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
 import { ITranslator } from '@jupyterlab/translation';
@@ -86,10 +86,11 @@ function createNotebookGenerator(
    *
    * @private
    * @param item - heading to render
+   * @param toc - list of all headers to render
    * @returns rendered item
    */
-  function renderItem(item: INotebookHeading) {
-    return render(options, tracker, item);
+  function renderItem(item: INotebookHeading, toc: INotebookHeading[] = []) {
+    return render(options, tracker, item, toc);
   }
 
   /**
@@ -111,7 +112,6 @@ function createNotebookGenerator(
     for (let i = 0; i < panel.content.widgets.length; i++) {
       let cell: Cell = panel.content.widgets[i];
       let model = cell.model;
-
       let collapsed = model.metadata.get('toc-hr-collapsed') as boolean;
       collapsed = collapsed || false;
 
@@ -130,7 +130,8 @@ function createNotebookGenerator(
             onClick,
             executionCount,
             getLastHeadingLevel(headings),
-            cell
+            cell,
+            i
           );
           [headings, prev] = appendHeading(
             headings,
@@ -164,7 +165,8 @@ function createNotebookGenerator(
             getLastHeadingLevel(headings),
             options.numbering,
             options.numberingH1,
-            cell
+            cell,
+            i
           );
           for (const heading of htmlHeadings) {
             [headings, prev, collapseLevel] = appendMarkdownHeading(
@@ -207,7 +209,8 @@ function createNotebookGenerator(
             lastLevel,
             options.numbering,
             options.numberingH1,
-            cell
+            cell,
+            i
           );
           for (heading of htmlHeadings) {
             [headings, prev, collapseLevel] = appendMarkdownHeading(
@@ -233,7 +236,8 @@ function createNotebookGenerator(
             onClick,
             dict,
             lastLevel,
-            cell
+            cell,
+            i
           );
           for (heading of markdownHeadings) {
             [headings, prev, collapseLevel] = appendMarkdownHeading(

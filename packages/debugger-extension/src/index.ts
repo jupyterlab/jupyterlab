@@ -11,36 +11,32 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
-
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
-
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
-
 import {
   Debugger,
   IDebugger,
   IDebuggerConfig,
-  IDebuggerSources,
-  IDebuggerSidebar
+  IDebuggerSidebar,
+  IDebuggerSources
 } from '@jupyterlab/debugger';
-
 import { DocumentWidget } from '@jupyterlab/docregistry';
-
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-
+import { ILoggerRegistry } from '@jupyterlab/logconsole';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
+import {
+  standardRendererFactories as initialFactories,
+  RenderMimeRegistry
+} from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 
@@ -361,7 +357,8 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       terminate: CommandIDs.terminate,
       next: CommandIDs.next,
       stepIn: CommandIDs.stepIn,
-      stepOut: CommandIDs.stepOut
+      stepOut: CommandIDs.stepOut,
+      evaluate: CommandIDs.evaluate
     };
 
     const sidebar = new Debugger.Sidebar({
@@ -397,19 +394,26 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:main',
-  requires: [IDebugger, IEditorServices, ITranslator, IDebuggerSidebar],
-  optional: [ILabShell, ILayoutRestorer, ICommandPalette, IDebuggerSources],
+  requires: [IDebugger, IDebuggerSidebar, IEditorServices, ITranslator],
+  optional: [
+    ICommandPalette,
+    IDebuggerSources,
+    ILabShell,
+    ILayoutRestorer,
+    ILoggerRegistry
+  ],
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
     service: IDebugger,
+    sidebar: IDebugger.ISidebar,
     editorServices: IEditorServices,
     translator: ITranslator,
-    sidebar: IDebugger.ISidebar,
+    palette: ICommandPalette | null,
+    debuggerSources: IDebugger.ISources | null,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
-    palette: ICommandPalette | null,
-    debuggerSources: IDebugger.ISources | null
+    loggerRegistry: ILoggerRegistry | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const { commands, shell, serviceManager } = app;
@@ -434,6 +438,58 @@ const main: JupyterFrontEndPlugin<void> = {
         return;
       }
     }
+
+    // get the mime type of the kernel language for the current debug session
+    const getMimeType = async (): Promise<string> => {
+      const kernel = service.session?.connection?.kernel;
+      if (!kernel) {
+        return '';
+      }
+      const info = (await kernel.info).language_info;
+      const name = info.name;
+      const mimeType =
+        editorServices?.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
+      return mimeType;
+    };
+
+    const rendermime = new RenderMimeRegistry({ initialFactories });
+
+    commands.addCommand(CommandIDs.evaluate, {
+      label: trans.__('Evaluate Code'),
+      caption: trans.__('Evaluate Code'),
+      icon: Debugger.Icons.evaluateIcon,
+      isEnabled: () => {
+        return service.hasStoppedThreads();
+      },
+      execute: async () => {
+        const mimeType = await getMimeType();
+        const result = await Debugger.Dialogs.getCode({
+          title: trans.__('Evaluate Code'),
+          okLabel: trans.__('Evaluate'),
+          cancelLabel: trans.__('Cancel'),
+          mimeType,
+          rendermime
+        });
+        const code = result.value;
+        if (!result.button.accept || !code) {
+          return;
+        }
+        const reply = await service.evaluate(code);
+        if (reply) {
+          const data = reply.result;
+          const path = service?.session?.connection?.path;
+          const logger = path ? loggerRegistry?.getLogger?.(path) : undefined;
+
+          if (logger) {
+            // print to log console of the notebook currently being debugged
+            logger.log({ type: 'text', data, level: logger.level });
+          } else {
+            // fallback to printing to devtools console
+            console.debug(data);
+          }
+        }
+      }
+    });
 
     commands.addCommand(CommandIDs.debugContinue, {
       label: trans.__('Continue'),
@@ -524,7 +580,8 @@ const main: JupyterFrontEndPlugin<void> = {
         CommandIDs.terminate,
         CommandIDs.next,
         CommandIDs.stepIn,
-        CommandIDs.stepOut
+        CommandIDs.stepOut,
+        CommandIDs.evaluate
       ].forEach(command => {
         palette.addItem({ command, category });
       });
@@ -556,7 +613,8 @@ const main: JupyterFrontEndPlugin<void> = {
 
       const onCurrentSourceOpened = (
         _: IDebugger.Model.ISources | null,
-        source: IDebugger.Source
+        source: IDebugger.Source,
+        breakpoint?: IDebugger.IBreakpoint
       ): void => {
         if (!source) {
           return;
@@ -569,6 +627,21 @@ const main: JupyterFrontEndPlugin<void> = {
           source: path
         });
         if (results.length > 0) {
+          if (breakpoint && typeof breakpoint.line !== 'undefined') {
+            results.forEach(editor => {
+              if (editor instanceof CodeMirrorEditor) {
+                (editor as CodeMirrorEditor).scrollIntoViewCentered({
+                  line: (breakpoint.line as number) - 1,
+                  ch: breakpoint.column || 0
+                });
+              } else {
+                editor.revealPosition({
+                  line: (breakpoint.line as number) - 1,
+                  column: breakpoint.column || 0
+                });
+              }
+            });
+          }
           return;
         }
         const editorWrapper = readOnlyEditorFactory.createNewEditor({
@@ -604,7 +677,7 @@ const main: JupyterFrontEndPlugin<void> = {
           sourceReference: 0,
           path
         });
-        onCurrentSourceOpened(null, source);
+        onCurrentSourceOpened(null, source, breakpoint);
       });
     }
   }

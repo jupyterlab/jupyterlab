@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@lumino/disposable';
-
 import { Token } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 
 /* tslint:disable */
 /**

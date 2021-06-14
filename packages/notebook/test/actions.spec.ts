@@ -2,32 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
-
-import { IMimeBundle, CellType } from '@jupyterlab/nbformat';
-
+import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import {
   acceptDialog,
   createSessionContext,
   dismissDialog,
   sleep
 } from '@jupyterlab/testutils';
-
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-
 import { each } from '@lumino/algorithm';
-
-import { JSONObject, JSONArray, UUID } from '@lumino/coreutils';
-
-import { NotebookModel } from '../src';
-
-import { NotebookActions } from '../src';
-
-import { Notebook } from '../src';
-
+import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
+import { Notebook, NotebookActions, NotebookModel } from '../src';
 import * as utils from './utils';
 
 const ERROR_INPUT = 'a = foo';
@@ -78,6 +65,7 @@ describe('@jupyterlab/notebook', () => {
       const model = new NotebookModel();
       model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
+      model.sharedModel.clearUndoHistory();
 
       widget.activeCellIndex = 0;
     });
@@ -226,6 +214,23 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell!.model.value.text).toBe(source);
       });
 
+      it('should select the previous cell if there is only one cell selected and mergeAbove is true', () => {
+        widget.activeCellIndex = 1;
+        let source = widget.activeCell!.model.value.text;
+        const previous = widget.widgets[0];
+        source = previous.model.value.text + '\n\n' + source;
+        NotebookActions.mergeCells(widget, true);
+        expect(widget.activeCell!.model.value.text).toBe(source);
+      });
+
+      it('should do nothing if first cell selected and mergeAbove is true', () => {
+        let source = widget.activeCell!.model.value.text;
+        const cellNumber = widget.widgets.length;
+        NotebookActions.mergeCells(widget, true);
+        expect(widget.widgets.length).toBe(cellNumber);
+        expect(widget.activeCell!.model.value.text).toBe(source);
+      });
+
       it('should clear the outputs of a code cell', () => {
         NotebookActions.mergeCells(widget);
         const cell = widget.activeCell as CodeCell;
@@ -268,9 +273,9 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('command');
       });
 
-      it.each(['raw', 'markdown'])(
+      it.each(['raw', 'markdown'] as CellType[])(
         'should merge attachments if the last selected cell is a %s cell',
-        (type: CellType) => {
+        type => {
           for (let i = 0; i < 2; i++) {
             NotebookActions.changeCellType(widget, type);
             const markdownCell = widget.widgets[i] as MarkdownCell;
@@ -650,7 +655,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should clear the existing selection', async () => {
-        const next = widget.widgets[2];
+        const next = widget.widgets[3];
         widget.select(next);
         const result = await NotebookActions.runAndAdvance(
           widget,
@@ -945,24 +950,6 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectAbove(widget);
         expect(widget.activeCellIndex).toBe(0);
       });
-
-      it('should not change if in edit mode and no non-collapsed cells above', () => {
-        widget.activeCellIndex = 1;
-        widget.mode = 'edit';
-        widget.widgets[0].inputHidden = true;
-        NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).toBe(1);
-      });
-
-      it('should not skip collapsed cells and in command mode', () => {
-        widget.activeCellIndex = 3;
-        widget.mode = 'command';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).toBe(2);
-      });
     });
 
     describe('#selectBelow()', () => {
@@ -992,32 +979,12 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('edit');
       });
 
-      it('should skip collapsed cells in edit mode', () => {
-        widget.activeCellIndex = 0;
-        widget.mode = 'edit';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).toBe(3);
-      });
-
       it('should not change if in edit mode and no non-collapsed cells below', () => {
         widget.activeCellIndex = widget.widgets.length - 2;
         widget.mode = 'edit';
         widget.widgets[widget.widgets.length - 1].inputHidden = true;
         NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
-      });
-
-      it('should not skip collapsed cells and in command mode', () => {
-        widget.activeCellIndex = 0;
-        widget.mode = 'command';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).toBe(1);
       });
     });
 
@@ -1321,6 +1288,7 @@ describe('@jupyterlab/notebook', () => {
         const count = widget.widgets.length;
         NotebookActions.cut(widget);
         widget.activeCellIndex = 1;
+        widget.model?.sharedModel.clearUndoHistory();
         NotebookActions.paste(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);

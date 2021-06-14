@@ -2,10 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeCellModel } from '@jupyterlab/cells';
-
-import { NotebookModel } from '../src';
-
-import { NotebookModelFactory } from '../src';
+import { NotebookModel, NotebookModelFactory } from '../src';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModelFactory', () => {

@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CodeMirrorEditor } from './editor';
 
 /**
@@ -28,7 +26,9 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
         Tab: 'indentMoreOrinsertTab',
         'Shift-Tab': 'indentLess',
         'Cmd-/': 'toggleComment',
-        'Ctrl-/': 'toggleComment'
+        'Ctrl-/': 'toggleComment',
+        'Ctrl-G': 'find',
+        'Cmd-G': 'find'
       },
       ...defaults
     };

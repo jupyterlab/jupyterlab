@@ -2,25 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-
 import {
+  IModelDB,
   IObservableMap,
-  ObservableMap,
   IObservableValue,
-  ObservableValue,
-  IModelDB
+  ObservableMap,
+  ObservableValue
 } from '@jupyterlab/observables';
-
 import {
-  IAttachmentModel,
   AttachmentModel,
+  IAttachmentModel,
   imageRendererFactory
 } from '@jupyterlab/rendermime';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { ISignal, Signal } from '@lumino/signaling';
 
 /**

@@ -185,7 +185,7 @@
   padding: 0 8px;
   margin-left: 3px;
   width: 200px;
-  display: block;
+  display: grid;
 }
 .jp-DocumentSearch-search-options-disabled {
   color: var(--jp-ui-font-color2);
@@ -247,4 +247,14 @@
 
 .jp-DocumentSearch-replace-toggle:hover {
   background-color: var(--jp-layout-color2);
+}
+
+.jp-DocumentSearch-document-loaded .jp-DocumentSearch-document-loading {
+  display: block !important;
+}
+
+.jp-DocumentSearch-document-loading {
+  display: none;
+  margin: 5px;
+  color: var(--jp-ui-font-color2);
 }

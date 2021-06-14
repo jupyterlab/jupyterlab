@@ -10,34 +10,25 @@ import {
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/apputils';
-
 import {
+  ITranslator,
   nullTranslator,
-  TranslationBundle,
-  ITranslator
+  TranslationBundle
 } from '@jupyterlab/translation';
-
 import { classes, LabIcon } from '@jupyterlab/ui-components';
-
 import {
   ArrayExt,
   ArrayIterator,
+  each,
   IIterator,
   map,
-  each,
   toArray
 } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
-
-import { Token, ReadonlyJSONObject } from '@lumino/coreutils';
-
+import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { Widget } from '@lumino/widgets';
-
 import * as React from 'react';
 
 /**
@@ -331,7 +322,7 @@ export namespace ILauncher {
     /**
      * The category for the launcher item.
      *
-     * The default value is the an empty string.
+     * The default value is an empty string.
      */
     category?: string;
 
@@ -439,7 +430,7 @@ function Card(
       title={title}
       onClick={onclick}
       onKeyPress={onkeypress}
-      tabIndex={100}
+      tabIndex={0}
       data-category={item.category || trans.__('Other')}
       key={Private.keyProperty.get(item)}
     >

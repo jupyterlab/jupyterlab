@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { InputDialog } from '@jupyterlab/apputils';
-
 import {
   acceptDialog,
   dismissDialog,

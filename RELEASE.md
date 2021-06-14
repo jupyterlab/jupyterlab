@@ -42,7 +42,7 @@ Choose and run an appropriate command to bump version numbers for this release.
 | `jlpm bumpversion release` | x.y.z.a1-> x.y.z.b0   | All a.b.c-alpha.1 -> a.b.c-beta.0  |
 | `jlpm bumpversion release` | x.y.z.a1-> x.y.z.rc0  | All a.b.c-alpha.1 -> a.b.c-rc.0    |
 | `jlpm bumpversion release` | x.y.z.rc0-> x.y.z     | All a.b.c-rc0 -> a.b.c             |
-| `jlpm patch:release`       | x.y.z -> x.y.(z+1)    | Changed a.b.c -> a.b.(c+1)         |
+| `jlpm bumpversion patch`   | x.y.z -> x.y.(z+1)    | Changed a.b.c -> a.b.(c+1)         |
 
 Note: For a minor release, we bump the JS packages by 10 versions so that
 we are not competing amongst the minor releases for version numbers.
@@ -118,7 +118,7 @@ These lines:
 ## Post release candidate checklist
 
 - [ ] Modify and run `python scripts/milestone_check.py` to check the issues assigned to this milestone
-- [ ] Write [release highlights](docs/source/getting_started/changelog.md), starting with:
+- [ ] Write [release highlights](CHANGELOG.md), starting with:
   ```bash
   loghub jupyterlab/jupyterlab -m XXX -t $GITHUB_TOKEN --template scripts/release_template.txt
   ```

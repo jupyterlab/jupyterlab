@@ -12,19 +12,14 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import {
   HTMLViewer,
   HTMLViewerFactory,
   IHTMLViewerTracker
 } from '@jupyterlab/htmlviewer';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { html5Icon } from '@jupyterlab/ui-components';
 
 /**

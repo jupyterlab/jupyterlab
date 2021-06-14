@@ -2,8 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-
-import { progressBarItem, fillerItem } from '../style/progressBar';
+import { fillerItem, progressBarItem } from '../style/progressBar';
 
 /**
  * A namespace for ProgressBar statics.

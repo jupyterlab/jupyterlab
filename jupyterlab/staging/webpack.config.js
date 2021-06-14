@@ -1,4 +1,5 @@
 // This file is auto-generated from the corresponding file in /dev_mode
+// This file is auto-generated from the corresponding file in /dev_mode
 /* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
@@ -87,7 +88,12 @@ Object.keys(jlab.linkedPackages).forEach(function (name) {
   if (name in watched) {
     return;
   }
-  const localPkgPath = require.resolve(path.join(name, 'package.json'));
+  let localPkgPath = '';
+  try {
+    localPkgPath = require.resolve(path.join(name, 'package.json'));
+  } catch (e) {
+    return;
+  }
   watched[name] = path.dirname(localPkgPath);
   if (localPkgPath.indexOf('node_modules') !== -1) {
     watchNodeModules = true;
@@ -106,7 +112,13 @@ const sourceMapRes = Object.values(watched).reduce((res, name) => {
  * and has no effect in `jupyter lab --dev-mode --watch`.
  */
 function maybeSync(localPath, name, rest) {
-  const stats = fs.statSync(localPath);
+  let stats;
+  try {
+    stats = fs.statSync(localPath);
+  } catch (e) {
+    return;
+  }
+
   if (!stats.isFile(localPath)) {
     return;
   }

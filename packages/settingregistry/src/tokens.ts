@@ -3,20 +3,16 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { IDataConnector } from '@jupyterlab/statedb';
 import {
   PartialJSONObject,
-  Token,
   PartialJSONValue,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue
+  ReadonlyPartialJSONValue,
+  Token
 } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { ISignal } from '@lumino/signaling';
-
-import { IDataConnector } from '@jupyterlab/statedb';
-
 import { ISchemaValidator } from './settingregistry';
 
 /* tslint:disable */
@@ -174,6 +170,99 @@ export namespace ISettingRegistry {
     | 'string';
 
   /**
+   * The menu ids defined by default.
+   */
+  export type DefaultMenuId =
+    | 'jp-menu-file'
+    | 'jp-menu-file-new'
+    | 'jp-menu-edit'
+    | 'jp-menu-help'
+    | 'jp-menu-kernel'
+    | 'jp-menu-run'
+    | 'jp-menu-settings'
+    | 'jp-menu-view'
+    | 'jp-menu-tabs';
+
+  /**
+   * Menu defined by a specific plugin
+   */
+  export interface IMenu extends PartialJSONObject {
+    /**
+     * Unique menu identifier
+     */
+    id: DefaultMenuId | string;
+
+    /**
+     * Menu items
+     */
+    items?: IMenuItem[];
+
+    /**
+     * The rank order of the menu among its siblings.
+     */
+    rank?: number;
+
+    /**
+     * Menu title
+     *
+     * #### Notes
+     * Default will be the capitalized id.
+     */
+    label?: string;
+
+    /**
+     * Whether a menu is disabled. `False` by default.
+     *
+     * #### Notes
+     * This allows an user to suppress a menu.
+     */
+    disabled?: boolean;
+  }
+
+  export interface IMenuItem extends PartialJSONObject {
+    /**
+     * The type of the menu item.
+     *
+     * The default value is `'command'`.
+     */
+    type?: 'command' | 'submenu' | 'separator';
+
+    /**
+     * The command to execute when the item is triggered.
+     *
+     * The default value is an empty string.
+     */
+    command?: string;
+
+    /**
+     * The arguments for the command.
+     *
+     * The default value is an empty object.
+     */
+    args?: PartialJSONObject;
+
+    /**
+     * The rank order of the menu item among its siblings.
+     */
+    rank?: number;
+
+    /**
+     * The submenu for a `'submenu'` type item.
+     *
+     * The default value is `null`.
+     */
+    submenu?: IMenu | null;
+
+    /**
+     * Whether a menu item is disabled. `false` by default.
+     *
+     * #### Notes
+     * This allows an user to suppress menu items.
+     */
+    disabled?: boolean;
+  }
+
+  /**
    * The settings for a specific plugin.
    */
   export interface IPlugin extends PartialJSONObject {
@@ -254,6 +343,11 @@ export namespace ISettingRegistry {
    * optional JupyterLab rendering hints.
    */
   export interface ISchema extends IProperty {
+    /**
+     * The JupyterLab menus that are created by a plugin's schema.
+     */
+    'jupyter.lab.menus'?: { main: IMenu[] };
+
     /**
      * Whether the schema is deprecated.
      *

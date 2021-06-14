@@ -1,27 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@lumino/widgets';
-import * as React from 'react';
-
 import {
-  showDialog,
-  Dialog,
-  Toolbar,
-  ToolbarButtonComponent,
-  UseSignal,
   addToolbarButtonClass,
-  ReactWidget,
-  ToolbarButton,
-  ISessionContextDialogs,
+  Dialog,
   ISessionContext,
-  sessionContextDialogs
+  ISessionContextDialogs,
+  ReactWidget,
+  sessionContextDialogs,
+  showDialog,
+  Toolbar,
+  ToolbarButton,
+  ToolbarButtonComponent,
+  UseSignal
 } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
@@ -34,7 +31,8 @@ import {
   runIcon,
   saveIcon
 } from '@jupyterlab/ui-components';
-
+import { Widget } from '@lumino/widgets';
+import * as React from 'react';
 import { NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
@@ -69,7 +67,7 @@ export namespace ToolbarItems {
           buttons: [Dialog.okButton({ label: trans.__('Ok') })]
         });
       }
-      void panel.context.save().then(() => {
+      void panel.context.save(true).then(() => {
         if (!panel.isDisposed) {
           return panel.context.createCheckpoint();
         }
@@ -338,6 +336,7 @@ export class CellTypeSwitcher extends ReactWidget {
         onKeyDown={this.handleKeyDown}
         value={value}
         aria-label={this._trans.__('Cell type')}
+        title={this._trans.__('Select the cell type')}
       >
         <option value="-">-</option>
         <option value="code">{this._trans.__('Code')}</option>
