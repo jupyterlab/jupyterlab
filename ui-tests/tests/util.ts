@@ -29,9 +29,9 @@ const sidebarIds: galata.SidebarTabId[] = [
 ];
 
 // eslint-disable-next-line jest/no-export
-export function runMenuOpenTest() {
-  test('Open menu items', async () => {
-    for (const menuPath of menuPaths) {
+export function runMenuOpenTest(): void {
+  menuPaths.forEach(menuPath => {
+    test(`Open menu item ${menuPath}`, async () => {
       await galata.menu.open(menuPath);
       expect(await galata.menu.isOpen(menuPath)).toBeTruthy();
 
@@ -39,18 +39,18 @@ export function runMenuOpenTest() {
       const menu = await galata.menu.getOpenMenu();
       await galata.capture.screenshot(imageName, menu);
       expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
-    }
+    });
   });
 
   test('Close all menus', async () => {
-    await galata.menu.closeAll();
+    await expect(galata.menu.closeAll()).resolves.toBeUndefined();
   });
 }
 
 // eslint-disable-next-line jest/no-export
-export function runSidebarOpenTest() {
-  test('Open Sidebar tabs', async () => {
-    for (const sidebarId of sidebarIds) {
+export function runSidebarOpenTest(): void {
+  sidebarIds.forEach(sidebarId => {
+    test(`Open Sidebar tab ${sidebarId}`, async () => {
       await galata.sidebar.openTab(sidebarId);
       expect(await galata.sidebar.isTabOpen(sidebarId)).toBeTruthy();
 
@@ -59,10 +59,12 @@ export function runSidebarOpenTest() {
       const sidebar = await galata.sidebar.getContentPanel(position);
       await galata.capture.screenshot(imageName, sidebar);
       expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
-    }
+    });
   });
 
   test('Open file browser tab', async () => {
-    await galata.sidebar.openTab('filebrowser');
+    await expect(
+      galata.sidebar.openTab('filebrowser')
+    ).resolves.toBeUndefined();
   });
 }
