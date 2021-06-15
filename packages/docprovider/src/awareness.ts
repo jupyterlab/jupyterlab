@@ -90,14 +90,14 @@ export const getAnonymousUserName = (): string =>
   moonsOfJupyter[Math.floor(Math.random() * moonsOfJupyter.length)];
 
 export const usercolors = [
-  '#30bced',
-  '#6eeb83',
-  '#ffbc42',
-  '#ecd444',
+  '#12A0D3',
+  '#17AB30',
+  '#CC8500',
+  '#A79011',
   '#ee6352',
-  '#9ac2c9',
-  '#8acb88',
-  '#1be7ff'
+  '#609DA9',
+  '#4BA749',
+  '#00A1B3'
 ];
 
 export const getRandomColor = (): string =>
