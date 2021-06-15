@@ -812,7 +812,7 @@ function addCommands(
     }
 
     widget.context.saveState.connect((doc, state) => {
-      if (sender.nameFileOnSave && widget == shell.currentWidget) {
+      if (sender.nameFileOnSave && widget === shell.currentWidget) {
         const model = doc.contentsModel;
         if (
           state === 'completed-manual' &&
