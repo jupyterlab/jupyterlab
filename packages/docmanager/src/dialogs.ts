@@ -267,20 +267,6 @@ class NameOnSaveHandler extends Widget {
   getValue(): string {
     return this.inputNode.value;
   }
-
-  /**
-   * Get the checkbox node.
-   */
-  get checkboxNode(): HTMLInputElement {
-    return this.node.getElementsByTagName('input')[1] as HTMLInputElement;
-  }
-
-  /**
-   * Get checked of the checkbox widget.
-   */
-  getChecked(): boolean {
-    return this.checkboxNode.checked;
-  }
 }
 
 /**
@@ -288,7 +274,7 @@ class NameOnSaveHandler extends Widget {
  */
 namespace Private {
   /**
-   * Create the node for a rename after launch handler.
+   * Create the node for the name file dialog handler.
    */
   export function createNameFileNode(
     manager: IDocumentManager,
