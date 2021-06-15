@@ -22,7 +22,9 @@ import { CodeMirrorMimeTypeService } from '@jupyterlab/codemirror';
 import {
   Completer,
   CompleterModel,
-  CompletionHandler
+  CompletionHandler,
+  ContextConnector,
+  KernelConnector
 } from '@jupyterlab/completer';
 
 import { CompletionConnector } from './connector';
@@ -41,6 +43,7 @@ import {
 import { CommandRegistry } from '@lumino/commands';
 
 import { BoxPanel, Widget } from '@lumino/widgets';
+import { CustomConnector } from './customconnector';
 
 function main(): void {
   const kernelManager = new KernelManager();
@@ -90,17 +93,16 @@ function main(): void {
   const editor = cellWidget.editor;
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
-  const connector = new CompletionConnector({
-    session: sessionContext.session,
-    editor
-  });
+  let options = { session: sessionContext.session, editor };
+  const connector = new CompletionConnector([new CustomConnector(options)]);
   const handler = new CompletionHandler({ completer, connector });
 
   void sessionContext.ready.then(() => {
-    handler.connector = new CompletionConnector({
-      session: sessionContext.session,
-      editor
-    });
+    options.session = sessionContext.session;
+    const kernel = new KernelConnector(options);
+    const context = new ContextConnector(options);
+    const custom = new CustomConnector(options);
+    handler.connector = new CompletionConnector([kernel, context, custom]);
   });
 
   // Set the handler's editor.

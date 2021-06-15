@@ -4,13 +4,7 @@
 // Modified from jupyterlab/packages/completer/src/connector.ts
 
 import { DataConnector } from '@jupyterlab/statedb';
-import {
-  CompletionHandler,
-  ContextConnector,
-  KernelConnector
-} from '@jupyterlab/completer';
-
-import { CustomConnector } from './customconnector';
+import { CompletionHandler } from '@jupyterlab/completer';
 
 /**
  * A multi-connector connector for completion handlers.
@@ -23,13 +17,17 @@ export class CompletionConnector extends DataConnector<
   /**
    * Create a new connector for completion requests.
    *
-   * @param options - The instatiation options for the connector.
+   * @param connectors - Connectors to request matches from, ordered by metadata preference (descending).
    */
-  constructor(options: CompletionConnector.IOptions) {
+  constructor(
+    connectors: DataConnector<
+      CompletionHandler.IReply,
+      void,
+      CompletionHandler.IRequest
+    >[]
+  ) {
     super();
-    this._kernel = new KernelConnector(options);
-    this._context = new ContextConnector(options);
-    this._custom = new CustomConnector(options);
+    this._connectors = connectors;
   }
 
   /**
@@ -40,30 +38,21 @@ export class CompletionConnector extends DataConnector<
   fetch(
     request: CompletionHandler.IRequest
   ): Promise<CompletionHandler.IReply> {
-    return Promise.all([
-      this._kernel.fetch(request),
-      this._context.fetch(request),
-      this._custom.fetch(request)
-    ]).then(([kernel, context, custom]) =>
-      Private.mergeReplies(kernel, context, custom)
+    return Promise.all(this._connectors.map(con => con.fetch(request))).then(
+      replies => {
+        const definedReplies = replies.filter(
+          (reply): reply is CompletionHandler.IReply => !!reply
+        );
+        return Private.mergeReplies(definedReplies);
+      }
     );
   }
 
-  private _kernel: KernelConnector;
-  private _context: ContextConnector;
-  private _custom: CustomConnector;
-}
-
-/**
- * A namespace for completion connector statics.
- */
-export namespace CompletionConnector {
-  /**
-   * The instantiation options for cell completion handlers.
-   */
-  export type IOptions = KernelConnector.IOptions &
-    ContextConnector.IOptions &
-    CustomConnector.IOptions;
+  private _connectors: DataConnector<
+    CompletionHandler.IReply,
+    void,
+    CompletionHandler.IRequest
+  >[];
 }
 
 /**
@@ -71,58 +60,33 @@ export namespace CompletionConnector {
  */
 namespace Private {
   /**
-   * Merge results from kernel and context completions.
+   * Merge results from multiple connectors.
    *
-   * @param kernel - The kernel reply being merged.
+   * @param replies - Array of completion results.
    *
-   * @param context - The context reply being merged.
-   *
-   * @param custom - The custom reply being merged.
-   *
-   * @returns A reply with a superset of kernel and context matches.
-   *
-   * #### Notes
-   * The kernel, context, and custom matches are merged with a preference for kernel
-   * results. All lists are known to contain unique, non-repeating items;
-   * so this function returns a non-repeating superset by filtering out
-   * duplicates from the context and custom lists that appear in the kernel list.
+   * @returns IReply with a superset of all matches.
    */
   export function mergeReplies(
-    kernel: CompletionHandler.IReply,
-    context: CompletionHandler.IReply,
-    custom: CompletionHandler.IReply
+    replies: Array<CompletionHandler.IReply>
   ): CompletionHandler.IReply {
-    // If two are empty, return the third.
-    if (kernel.matches.length === 0 && context.matches.length === 0) {
-      return custom;
-    } else if (kernel.matches.length === 0) {
-      return context;
-    } else if (context.matches.length === 0) {
-      return kernel;
+    // Filter replies with matches.
+    const repliesWithMatches = replies.filter(rep => rep.matches.length > 0);
+    // If no replies contain matches, return an empty IReply.
+    if (repliesWithMatches.length === 0) {
+      return replies[0];
+    }
+    // If only one reply contains matches, return it.
+    if (repliesWithMatches.length === 1) {
+      return repliesWithMatches[0];
     }
 
-    // Populate the result with a copy of the kernel matches.
-    const matches = kernel.matches.slice();
-
-    // Cache all the kernel matches in a memo.
-    const memo = matches.reduce((acc, val) => {
-      acc[val] = null;
-      return acc;
-    }, {} as { [key: string]: string | null });
-
-    // Add each context match that is not in the memo to the result.
-    context.matches.forEach(match => {
-      if (!(match in memo)) {
-        matches.push(match);
-      }
+    // Collect unique matches from all replies.
+    let matches: Set<string> = new Set();
+    repliesWithMatches.forEach(reply => {
+      reply.matches.forEach(match => matches.add(match));
     });
 
-    // Add each custom match that is not in the memo to the result.
-    custom.matches.forEach(match => {
-      if (!(match in memo)) {
-        matches.push(match);
-      }
-    });
-    return { ...kernel, matches };
+    // Note that the returned metadata field only contains items in the first member of repliesWithMatches.
+    return { ...repliesWithMatches[0], matches: [...matches] };
   }
 }
