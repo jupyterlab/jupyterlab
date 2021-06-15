@@ -133,7 +133,7 @@ export class DocumentManager implements IDocumentManager {
   /**
    * A signal emitted when option is changed.
    */
-  get optionChanged(): Signal<this, Object> {
+  get optionChanged(): ISignal<this, any> {
     return this._optionChanged;
   }
 
