@@ -93,11 +93,7 @@
       "pre-push": "jlpm run integrity --force"
     }
   },
-  "dependencies": {
-    "dependency-graph": "^0.11.0",
-    "sort-package-json": "^1.50.0",
-    "y-codemirror": "^2.1.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",
