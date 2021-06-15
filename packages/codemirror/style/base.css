@@ -239,7 +239,8 @@
 .jp-CodeMirrorEditor .remote-caret > div {
   white-space: nowrap;
   position: absolute;
-  top: -1.1em;
+  top: -1.15em;
+  padding-bottom: 0.05em;
   left: -2px;
   font-size: 0.95em;
   background-color: rgb(250, 129, 0);
