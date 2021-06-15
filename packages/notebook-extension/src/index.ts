@@ -251,6 +251,8 @@ namespace CommandIDs {
   export const collapseAllCmd = 'Collapsible_Headings:Collapse_All';
 
   export const expandAllCmd = 'Collapsible_Headings:Expand_All';
+
+  export const copyToClipboard = 'notebook:copy-to-clipboard';
 }
 
 /**
@@ -543,6 +545,16 @@ const codeConsolePlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to copy CodeCell outputs.
+ */
+const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extensions:copy-output',
+  activate: activateCopyOutput,
+  requires: [ITranslator, INotebookTracker],
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -555,7 +567,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   widgetFactoryPlugin,
   logNotebookOutput,
   clonedOutputsPlugin,
-  codeConsolePlugin
+  codeConsolePlugin,
+  copyOutputPlugin
 ];
 export default plugins;
 
@@ -945,6 +958,76 @@ function activateCodeConsole(
       });
     },
     isEnabled
+  });
+}
+
+/**
+ * Activate the output copying extension
+ */
+function activateCopyOutput(
+  app: JupyterFrontEnd,
+  translator: ITranslator,
+  tracker: INotebookTracker
+): void {
+  const trans = translator.load('jupyterlab');
+
+  /**
+   * Copy the contents of an HTMLElement to the system clipboard
+   */
+  function copyElement(e: HTMLElement): void {
+    const sel = window.getSelection();
+
+    if (sel == null) {
+      return;
+    }
+
+    // Save the current selection.
+    const savedRanges: Range[] = [];
+    for (let i = 0; i < sel.rangeCount; ++i) {
+      savedRanges[i] = sel.getRangeAt(i).cloneRange();
+    }
+
+    const range = document.createRange();
+    range.selectNodeContents(e);
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    document.execCommand('copy');
+
+    // Restore the saved selection.
+    sel.removeAllRanges();
+    savedRanges.forEach(r => sel.addRange(r));
+  }
+
+  app.commands.addCommand(CommandIDs.copyToClipboard, {
+    label: trans.__('Copy Output to Clipboard'),
+    execute: args => {
+      const cell = tracker.currentWidget?.content.activeCell as CodeCell;
+
+      if (cell == null) {
+        return;
+      }
+
+      const output = cell.outputArea.outputTracker.currentWidget;
+
+      if (output == null) {
+        return;
+      }
+
+      const outputAreaAreas = output.node.getElementsByClassName(
+        'jp-OutputArea-output'
+      );
+      if (outputAreaAreas.length > 0) {
+        const area = outputAreaAreas[0];
+        copyElement(area as HTMLElement);
+      }
+    }
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.copyToClipboard,
+    selector: '.jp-OutputArea-child',
+    rank: 0
   });
 }
 

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, ISessionContext } from '@jupyterlab/apputils';
+import { Dialog, ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
@@ -10,7 +10,8 @@ import {
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject,
-  ReadonlyPartialJSONObject
+  ReadonlyPartialJSONObject,
+  UUID
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
@@ -218,6 +219,7 @@ export class OutputArea extends Widget {
       this._future = null!;
     }
     this._displayIdMap.clear();
+    this._outputTracker.dispose();
     super.dispose();
   }
 
@@ -503,6 +505,9 @@ export class OutputArea extends Widget {
     if (index >= this.headTailNumberOutputs && this.maxNumberOutputs !== 0) {
       this.trimmedOutputModels.push(model);
     }
+    if (!this._outputTracker.has(output)) {
+      void this._outputTracker.add(output);
+    }
   }
 
   private _createOutput(model: IOutputModel): Widget {
@@ -513,6 +518,13 @@ export class OutputArea extends Widget {
       output = new Widget();
     }
     return output;
+  }
+
+  /**
+   * A widget tracker for individual output widgets in the output area.
+   */
+  get outputTracker(): WidgetTracker<Widget> {
+    return this._outputTracker;
   }
 
   /**
@@ -545,7 +557,7 @@ export class OutputArea extends Widget {
       return null;
     }
 
-    const panel = new Panel();
+    const panel = new Private.OutputPanel();
 
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
@@ -671,6 +683,9 @@ export class OutputArea extends Widget {
     KernelMessage.IExecuteReplyMsg
   >;
   private _displayIdMap = new Map<string, number[]>();
+  private _outputTracker = new WidgetTracker<Widget>({
+    namespace: UUID.uuid4()
+  });
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -1093,4 +1108,40 @@ namespace Private {
     name: 'preferredMimetype',
     create: owner => ''
   });
+
+  /**
+   * A `Panel` that's focused by a `contextmenu` event.
+   */
+  export class OutputPanel extends Panel {
+    /**
+     * Construct a new `OutputPanel` widget.
+     */
+    constructor(options?: Panel.IOptions) {
+      super(options);
+      this.node.tabIndex = 0;
+    }
+
+    /**
+     * A callback that focuses on the widget.
+     */
+    private _onContext(_: Event): void {
+      this.node.focus();
+    }
+
+    /**
+     * Handle `after-attach` messages sent to the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('contextmenu', this._onContext.bind(this));
+    }
+
+    /**
+     * Handle `before-detach` messages sent to the widget.
+     */
+    protected onBeforeDetach(msg: Message): void {
+      super.onAfterDetach(msg);
+      this.node.removeEventListener('contextmenu', this._onContext.bind(this));
+    }
+  }
 }
