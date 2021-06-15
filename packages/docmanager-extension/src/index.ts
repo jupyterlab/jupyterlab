@@ -803,6 +803,8 @@ function addCommands(
     }
   });
 
+  const newFileRegex = new RegExp('^untitled', 'i');
+
   docManager.activateRequested.connect((sender, args) => {
     const widget = sender.findWidget(args);
     if (!widget) {
@@ -816,7 +818,7 @@ function addCommands(
           state === 'completed-manual' &&
           model &&
           !model.renamed == true &&
-          model.name.startsWith('Untitled')
+          newFileRegex.test(model.name)
         ) {
           const context = sender.contextForWidget(widget!);
           return nameOnSaveDialog(sender, context!);
