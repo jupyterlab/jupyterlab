@@ -25,7 +25,6 @@ import { getRenderedHTMLHeadings } from './get_rendered_html_heading';
 import { OptionsManager } from './options_manager';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
-import { ITranslator } from '@jupyterlab/translation';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
