@@ -243,7 +243,7 @@
   left: -2px;
   font-size: 0.95em;
   background-color: rgb(250, 129, 0);
-  font-family: serif;
+  font-family: var(--jp-ui-font-family);
   font-style: normal;
   font-weight: normal;
   line-height: normal;
