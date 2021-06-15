@@ -43,7 +43,8 @@ export function runMenuOpenTest(): void {
   });
 
   test('Close all menus', async () => {
-    await expect(galata.menu.closeAll()).resolves.toBeUndefined();
+    await galata.menu.closeAll();
+    await expect(galata.menu.isAnyOpen()).resolves.toEqual(false);
   });
 }
 
@@ -63,8 +64,9 @@ export function runSidebarOpenTest(): void {
   });
 
   test('Open file browser tab', async () => {
-    await expect(
-      galata.sidebar.openTab('filebrowser')
-    ).resolves.toBeUndefined();
+    await galata.sidebar.openTab('filebrowser');
+    await expect(galata.sidebar.isTabOpen('filebrowser')).resolves.toEqual(
+      true
+    );
   });
 }

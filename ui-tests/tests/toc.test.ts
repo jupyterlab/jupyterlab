@@ -187,9 +187,10 @@ describe('Table of Contents', () => {
   });
 
   test('Open home directory', async () => {
-    await expect(
-      galata.sidebar.openTab('filebrowser')
-    ).resolves.toBeUndefined();
+    await galata.sidebar.openTab('filebrowser');
+    await expect(galata.sidebar.isTabOpen('filebrowser')).resolves.toEqual(
+      true
+    );
     await expect(galata.filebrowser.openHomeDirectory()).resolves.toEqual(true);
   });
 

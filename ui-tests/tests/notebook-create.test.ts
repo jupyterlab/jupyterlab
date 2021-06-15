@@ -72,7 +72,8 @@ describe('Notebook Create', () => {
   });
 
   test('Toggle Light theme', async () => {
-    await expect(galata.theme.setLightTheme()).resolves.toBeUndefined();
+    await galata.theme.setLightTheme();
+    await expect(galata.theme.getTheme()).resolves.toEqual('JupyterLab Light');
   });
 
   test('Delete Notebook', async () => {

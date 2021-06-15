@@ -46,7 +46,8 @@ describe('General Tests', () => {
   });
 
   test('Toggle Light theme', async () => {
-    await expect(galata.theme.setLightTheme()).resolves.toBeUndefined();
+    await galata.theme.setLightTheme();
+    await expect(galata.theme.getTheme()).resolves.toEqual('JupyterLab Light');
   });
 
   test('Move File Browser to right', async () => {
