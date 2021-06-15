@@ -76,7 +76,9 @@ async function getVersion(pkg: string, specifier: string) {
     const { version } = await packageJson(pkg, { version: match[2] });
     specifier = `${match[1] ?? ''}${version}`;
     if (semver.validRange(specifier) === null) {
-      throw Error(`Could not find valid version range for ${pkg}: ${specifier}`);
+      throw Error(
+        `Could not find valid version range for ${pkg}: ${specifier}`
+      );
     }
   }
   versionCache.set(key, specifier);
