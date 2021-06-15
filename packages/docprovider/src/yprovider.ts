@@ -8,7 +8,7 @@ import * as encoding from 'lib0/encoding';
 import { WebsocketProvider } from 'y-websocket';
 import * as Y from 'yjs';
 import { IDocumentProviderFactory } from './tokens';
-import { getRandomColor, getRandomUserName } from './awareness';
+import { getAnonymousUserName, getRandomColor } from './awareness';
 import * as env from 'lib0/environment';
 
 /**
@@ -28,9 +28,8 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     super(options.url, options.guid, options.ymodel.ydoc, {
       awareness: options.ymodel.awareness
     });
-    const color =
-      '#' + env.getParam('--usercolor', getRandomColor().color.slice(1));
-    const name = env.getParam('--username', 'Anonymous ' + getRandomUserName());
+    const color = '#' + env.getParam('--usercolor', getRandomColor().slice(1));
+    const name = env.getParam('--username', getAnonymousUserName());
     const awareness = options.ymodel.awareness;
     const currState = awareness.getLocalState();
     // only set if this was not already set by another plugin
