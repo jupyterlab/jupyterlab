@@ -815,7 +815,7 @@ function addCommands(
       if (sender.nameFileOnSave && widget === shell.currentWidget) {
         const model = doc.contentsModel;
         if (
-          state === 'completed-manual' &&
+          state === 'completed manually' &&
           model &&
           !model.renamed == true &&
           newFileRegex.test(model.name)
