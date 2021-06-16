@@ -94,12 +94,17 @@ function createMarkdownGenerator(
   if (settings) {
     numberingH1 = settings.composite.numberingH1 as boolean;
   }
-  const options = new OptionsManager(widget, {
+  let options = new OptionsManager(widget, {
     numbering: true,
     numberingH1: numberingH1,
     sanitizer,
     translator: translator || nullTranslator
   });
+  if (settings) {
+    settings.changed.connect(() => {
+      options.numberingH1 = settings.composite.numberingH1 as boolean;
+    });
+  }
   return {
     tracker,
     usesLatex: true,
@@ -152,12 +157,17 @@ function createRenderedMarkdownGenerator(
   if (settings) {
     numberingH1 = settings.composite.numberingH1 as boolean;
   }
-  const options = new OptionsManager(widget, {
+  let options = new OptionsManager(widget, {
     numbering: true,
     numberingH1: numberingH1,
     sanitizer,
     translator: translator || nullTranslator
   });
+  if (settings) {
+    settings.changed.connect(() => {
+      options.numberingH1 = settings.composite.numberingH1 as boolean;
+    });
+  }
   return {
     tracker,
     usesLatex: true,

@@ -49,12 +49,17 @@ function createNotebookGenerator(
   if (settings) {
     numberingH1 = settings.composite.numberingH1 as boolean;
   }
-  const options = new OptionsManager(widget, tracker, {
+  let options = new OptionsManager(widget, tracker, {
     numbering: false,
     numberingH1: numberingH1,
     sanitizer: sanitizer,
     translator: translator || nullTranslator
   });
+  if (settings) {
+    settings.changed.connect(() => {
+      options.numberingH1 = settings.composite.numberingH1 as boolean;
+    });
+  }
   tracker.activeCellChanged.connect(
     (sender: INotebookTracker, args: Cell<ICellModel>) => {
       widget.update();

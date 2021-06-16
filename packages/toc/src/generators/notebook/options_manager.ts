@@ -113,8 +113,10 @@ class OptionsManager extends Registry.IOptionsManager {
    * Gets/sets ToC generator numbering h1 headers.
    */
   set numberingH1(value: boolean) {
-    this._numberingH1 = value;
-    this._widget.update();
+    if (this._numberingH1 != value) {
+      this._numberingH1 = value;
+      this._widget.update();
+    }
   }
 
   get numberingH1() {
