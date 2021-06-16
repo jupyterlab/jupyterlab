@@ -50,7 +50,9 @@ export const SERVER_EXTENSION_404 = (
     <p>
       Please ensure that <code>jupyter server extension list</code> includes
       jupyter-lsp and that it is enabled. If it is enabled please try to restart
-      JupyterLab.
+      JupyterLab. If the server extension is installed but not enabled and all
+      other suggestions listed above failed try the following:
+      <code>jupyter server extension enable --user --py jupyter_lsp</code>
     </p>
   </div>
 );
