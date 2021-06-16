@@ -5,7 +5,7 @@ import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 /* tslint:disable */
@@ -37,6 +37,11 @@ export interface IDocumentManager extends IDisposable {
   readonly activateRequested: ISignal<this, string>;
 
   /**
+   * A signal emitted when an option has changed.
+   */
+  readonly optionChanged: ISignal<this, any>;
+
+  /**
    * Whether to autosave documents.
    */
   autosave: boolean;
@@ -50,11 +55,6 @@ export interface IDocumentManager extends IDisposable {
    * Whether to prompt to name file on first save.
    */
   nameFileOnSave: boolean;
-
-  /**
-   * Singal on option changed.
-   */
-  readonly optionChanged: Signal<object, object>;
 
   /**
    * Clone a widget.

@@ -18,7 +18,7 @@ describe('Notebook Edit', () => {
   });
 
   test('Create new Notebook', async () => {
-    await galata.notebook.createNew(fileName);
+    await expect(galata.notebook.createNew(fileName)).resolves.toEqual(true);
   });
 
   test('Create a Raw cell', async () => {
@@ -127,18 +127,20 @@ describe('Notebook Edit', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test('Move cells', async () => {
-    let imageName = 'move-cell-up';
+  test('Move cells up', async () => {
+    const imageName = 'move-cell-up';
     await galata.notebook.selectCells(1);
     await galata.menu.clickMenuItem('Edit>Move Cells Up');
-    let nbPanel = await galata.notebook.getNotebookInPanel();
+    const nbPanel = await galata.notebook.getNotebookInPanel();
     await galata.capture.screenshot(imageName, nbPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
+  });
 
-    imageName = 'move-cell-down';
+  test('Move cells down', async () => {
+    const imageName = 'move-cell-down';
     await galata.notebook.selectCells(0);
     await galata.menu.clickMenuItem('Edit>Move Cells Down');
-    nbPanel = await galata.notebook.getNotebookInPanel();
+    const nbPanel = await galata.notebook.getNotebookInPanel();
     await galata.capture.screenshot(imageName, nbPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
