@@ -1440,7 +1440,10 @@ function addCommands(
   // Set up collapse signal for each header cell in a notebook
   tracker.currentChanged.connect(
     (sender: INotebookTracker, panel: NotebookPanel) => {
-      panel.content.model?.cells.changed.connect(
+      if (!panel?.content?.model?.cells) {
+        return;
+      }
+      panel.content.model.cells.changed.connect(
         (
           list: IObservableUndoableList<ICellModel>,
           args: IObservableList.IChangedArgs<ICellModel>
