@@ -25,6 +25,9 @@
       "path": "../rendermime"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../toc"
     },
     {
@@ -32,9 +35,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../settingregistry"
     }
   ]
 }
