@@ -8,9 +8,15 @@ import * as encoding from 'lib0/encoding';
 import { WebsocketProvider } from 'y-websocket';
 import * as Y from 'yjs';
 import { IDocumentProviderFactory } from './tokens';
+import { getAnonymousUserName, getRandomColor } from './awareness';
+import * as env from 'lib0/environment';
 
 /**
  * A class to provide Yjs synchronization over WebSocket.
+ *
+ * The user can specify their own user-name and user-color by adding urlparameters:
+ *   ?username=Alice&usercolor=007007
+ * wher usercolor must be a six-digit hexadicimal encoded RGB value without the hash token.
  */
 export class WebSocketProviderWithLocks extends WebsocketProvider {
   /**
@@ -22,6 +28,18 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     super(options.url, options.guid, options.ymodel.ydoc, {
       awareness: options.ymodel.awareness
     });
+    const color = '#' + env.getParam('--usercolor', getRandomColor().slice(1));
+    const name = env.getParam('--username', getAnonymousUserName());
+    const awareness = options.ymodel.awareness;
+    const currState = awareness.getLocalState();
+    // only set if this was not already set by another plugin
+    if (currState && currState.name == null) {
+      options.ymodel.awareness.setLocalStateField('user', {
+        name,
+        color
+      });
+    }
+
     // Message handler that confirms when a lock has been acquired
     this.messageHandlers[127] = (
       encoder,
