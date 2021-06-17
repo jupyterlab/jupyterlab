@@ -49,7 +49,7 @@ function createNotebookGenerator(
   if (settings) {
     numberingH1 = settings.composite.numberingH1 as boolean;
   }
-  let options = new OptionsManager(widget, tracker, {
+  const options = new OptionsManager(widget, tracker, {
     numbering: false,
     numberingH1: numberingH1,
     sanitizer: sanitizer,

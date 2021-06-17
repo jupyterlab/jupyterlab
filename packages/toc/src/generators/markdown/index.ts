@@ -94,7 +94,7 @@ function createMarkdownGenerator(
   if (settings) {
     numberingH1 = settings.composite.numberingH1 as boolean;
   }
-  let options = new OptionsManager(widget, {
+  const options = new OptionsManager(widget, {
     numbering: true,
     numberingH1: numberingH1,
     sanitizer,
@@ -157,7 +157,7 @@ function createRenderedMarkdownGenerator(
   if (settings) {
     numberingH1 = settings.composite.numberingH1 as boolean;
   }
-  let options = new OptionsManager(widget, {
+  const options = new OptionsManager(widget, {
     numbering: true,
     numberingH1: numberingH1,
     sanitizer,
