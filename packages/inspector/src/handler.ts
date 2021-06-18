@@ -112,7 +112,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
    * #### Notes
    * Update the hints inspector based on a text change.
    */
-  protected onEditorChange(): void {
+  onEditorChange(customText?: string): void {
     // If the handler is in standby mode, bail.
     if (this._standby) {
       return;
@@ -123,8 +123,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     if (!editor) {
       return;
     }
-
-    const text = editor.model.value.text;
+    const text = customText ? customText : editor.model.value.text;
     const position = editor.getCursorPosition();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const update: IInspector.IInspectorUpdate = { content: null };
