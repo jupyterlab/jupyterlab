@@ -7,7 +7,7 @@
  * @module apputils-extension
  */
 
- import {
+import {
   ILayoutRestorer,
   IRouter,
   JupyterFrontEnd,
