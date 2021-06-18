@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import { Dialog, ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
@@ -10,7 +10,8 @@ import {
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject,
-  ReadonlyPartialJSONObject
+  ReadonlyPartialJSONObject,
+  UUID
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
@@ -218,6 +219,7 @@ export class OutputArea extends Widget {
       this._future = null!;
     }
     this._displayIdMap.clear();
+    this._outputTracker.dispose();
     super.dispose();
   }
 
@@ -381,6 +383,40 @@ export class OutputArea extends Widget {
     const layout = this.layout as PanelLayout;
     layout.addWidget(panel);
 
+    const buttons = [
+      Dialog.cancelButton({ label: 'Cancel' }),
+      Dialog.okButton({ label: 'Select' })
+    ];
+
+    const modalInput = factory.createStdin({
+      prompt: stdinPrompt,
+      password,
+      future
+    });
+
+    const dialog = new Dialog<Promise<string>>({
+      title: 'Your input is requested',
+      body: modalInput,
+      buttons
+    });
+
+    void dialog.launch().then(result => {
+      if (result.button.accept) {
+        const value = result.value;
+        if (value) {
+          void value.then(v => {
+            // Use stdin as the stream so it does not get combined with stdout.
+            this.model.add({
+              output_type: 'stream',
+              name: 'stdin',
+              text: v + '\n'
+            });
+            panel.dispose();
+          });
+        }
+      }
+    });
+
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
      * and remove the stdin widget.
@@ -469,6 +505,9 @@ export class OutputArea extends Widget {
     if (index >= this.headTailNumberOutputs && this.maxNumberOutputs !== 0) {
       this.trimmedOutputModels.push(model);
     }
+    if (!this._outputTracker.has(output)) {
+      void this._outputTracker.add(output);
+    }
   }
 
   private _createOutput(model: IOutputModel): Widget {
@@ -479,6 +518,13 @@ export class OutputArea extends Widget {
       output = new Widget();
     }
     return output;
+  }
+
+  /**
+   * A widget tracker for individual output widgets in the output area.
+   */
+  get outputTracker(): WidgetTracker<Widget> {
+    return this._outputTracker;
   }
 
   /**
@@ -511,7 +557,7 @@ export class OutputArea extends Widget {
       return null;
     }
 
-    const panel = new Panel();
+    const panel = new Private.OutputPanel();
 
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
@@ -637,6 +683,9 @@ export class OutputArea extends Widget {
     KernelMessage.IExecuteReplyMsg
   >;
   private _displayIdMap = new Map<string, number[]>();
+  private _outputTracker = new WidgetTracker<Widget>({
+    namespace: UUID.uuid4()
+  });
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -859,8 +908,17 @@ export class Stdin extends Widget implements IStdin {
   /**
    * The value of the widget.
    */
-  get value() {
+  get value(): Promise<string> {
     return this._promise.promise.then(() => this._value);
+  }
+
+  /**
+   * Submit and get the value of the Stdin widget.
+   */
+  getValue(): Promise<string> {
+    console.log('WHAT THE FUCK!');
+    this.submit();
+    return this.value;
   }
 
   /**
@@ -874,22 +932,29 @@ export class Stdin extends Widget implements IStdin {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
-    const input = this._input;
     if (event.type === 'keydown') {
       if ((event as KeyboardEvent).keyCode === 13) {
         // Enter
-        this._future.sendInputReply({
-          status: 'ok',
-          value: input.value
-        });
-        if (input.type === 'password') {
-          this._value += Array(input.value.length + 1).join('·');
-        } else {
-          this._value += input.value;
-        }
-        this._promise.resolve(void 0);
+        this.submit();
       }
     }
+  }
+
+  /*
+   * Submit input value.
+   */
+  submit() {
+    const input = this._input;
+    this._future.sendInputReply({
+      status: 'ok',
+      value: input.value
+    });
+    if (input.type === 'password') {
+      this._value += Array(input.value.length + 1).join('·');
+    } else {
+      this._value += input.value;
+    }
+    this._promise.resolve(void 0);
   }
 
   /**
@@ -1043,4 +1108,40 @@ namespace Private {
     name: 'preferredMimetype',
     create: owner => ''
   });
+
+  /**
+   * A `Panel` that's focused by a `contextmenu` event.
+   */
+  export class OutputPanel extends Panel {
+    /**
+     * Construct a new `OutputPanel` widget.
+     */
+    constructor(options?: Panel.IOptions) {
+      super(options);
+      this.node.tabIndex = 0;
+    }
+
+    /**
+     * A callback that focuses on the widget.
+     */
+    private _onContext(_: Event): void {
+      this.node.focus();
+    }
+
+    /**
+     * Handle `after-attach` messages sent to the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('contextmenu', this._onContext.bind(this));
+    }
+
+    /**
+     * Handle `before-detach` messages sent to the widget.
+     */
+    protected onBeforeDetach(msg: Message): void {
+      super.onAfterDetach(msg);
+      this.node.removeEventListener('contextmenu', this._onContext.bind(this));
+    }
+  }
 }

@@ -97,6 +97,19 @@
   background: var(--jp-brand-color1);
 }
 
+/* cell is dirty */
+.jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt {
+  color: var(--jp-warn-color1);
+}
+.jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt:before {
+  color: var(--jp-warn-color1);
+  content: '•';
+}
+
+.jp-Notebook .jp-Cell.jp-mod-active.jp-mod-dirty .jp-Collapser {
+  background: var(--jp-warn-color1);
+}
+
 /* collapser is hovered */
 .jp-Notebook .jp-Cell .jp-Collapser:hover {
   box-shadow: var(--jp-elevation-z2);

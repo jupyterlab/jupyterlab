@@ -18,7 +18,7 @@ describe('Notebook Edit', () => {
   });
 
   test('Create new Notebook', async () => {
-    await galata.notebook.createNew(fileName);
+    await expect(galata.notebook.createNew(fileName)).resolves.toEqual(true);
   });
 
   test('Create a Raw cell', async () => {
@@ -41,6 +41,30 @@ describe('Notebook Edit', () => {
     await galata.notebook.addCell('code', '2 ** 3');
     expect(await galata.notebook.getCellCount()).toBe(3);
     expect(await galata.notebook.getCellType(2)).toBe('code');
+  });
+
+  test('Execute Code cell', async () => {
+    await galata.notebook.runCell(2, true);
+    const imageName = 'run-cell';
+    const nbPanel = await galata.notebook.getNotebookInPanel();
+    await galata.capture.screenshot(imageName, nbPanel);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
+  });
+
+  test('Re-edit after execution', async () => {
+    await galata.notebook.setCell(2, 'code', '2 ** 6');
+    const imageName = 'reedit-cell';
+    const nbPanel = await galata.notebook.getNotebookInPanel();
+    await galata.capture.screenshot(imageName, nbPanel);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
+  });
+
+  test('Execute again', async () => {
+    await galata.notebook.runCell(2, true);
+    const imageName = 'execute-again';
+    const nbPanel = await galata.notebook.getNotebookInPanel();
+    await galata.capture.screenshot(imageName, nbPanel);
+    expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
   test('Copy-Paste cell', async () => {
@@ -103,18 +127,20 @@ describe('Notebook Edit', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
-  test('Move cells', async () => {
-    let imageName = 'move-cell-up';
+  test('Move cells up', async () => {
+    const imageName = 'move-cell-up';
     await galata.notebook.selectCells(1);
     await galata.menu.clickMenuItem('Edit>Move Cells Up');
-    let nbPanel = await galata.notebook.getNotebookInPanel();
+    const nbPanel = await galata.notebook.getNotebookInPanel();
     await galata.capture.screenshot(imageName, nbPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
+  });
 
-    imageName = 'move-cell-down';
+  test('Move cells down', async () => {
+    const imageName = 'move-cell-down';
     await galata.notebook.selectCells(0);
     await galata.menu.clickMenuItem('Edit>Move Cells Down');
-    nbPanel = await galata.notebook.getNotebookInPanel();
+    const nbPanel = await galata.notebook.getNotebookInPanel();
     await galata.capture.screenshot(imageName, nbPanel);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });

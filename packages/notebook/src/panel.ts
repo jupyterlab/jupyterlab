@@ -84,7 +84,10 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     });
   }
 
-  _onSave(sender: DocumentRegistry.Context, state: DocumentRegistry.SaveState) {
+  _onSave(
+    sender: DocumentRegistry.Context,
+    state: DocumentRegistry.SaveState
+  ): void {
     if (state === 'started' && this.model) {
       // Find markdown cells
       const { cells } = this.model;
@@ -97,19 +100,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
           }
         }
       });
-    }
-
-    const model = sender.contentsModel;
-    /* emits shouldNameFile signal 
-       when save is completed, file is not renamed and the name starts with 'Untitled'
-    */
-    if (
-      state === 'completed-manual' &&
-      model &&
-      !model.renamed == true &&
-      model.name.startsWith('Untitled')
-    ) {
-      this.shouldNameFile.emit(undefined);
     }
   }
 

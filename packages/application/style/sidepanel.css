@@ -219,11 +219,6 @@
   min-width: var(--jp-sidebar-min-width);
 }
 
-.jp-LabShell[data-shell-mode='multiple-document'] #jp-left-stack > .lm-Widget,
-.jp-LabShell[data-shell-mode='multiple-document'] #jp-right-stack > .lm-Widget {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
-}
-
 #jp-right-stack {
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
 }

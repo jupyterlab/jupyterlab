@@ -94,6 +94,11 @@ export interface ICodeCellModel extends ICellModel {
   readonly type: 'code';
 
   /**
+   * Whether the code cell has been edited since the last run.
+   */
+  readonly isDirty: boolean;
+
+  /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.ICodeCell;
@@ -681,9 +686,39 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     this.modelDB.setValue('executionCount', newValue || null);
   }
 
+  /**
+   * Whether the cell is dirty or not.
+   *
+   * A cell is dirty if it is output is not empty and does not
+   * result of the input code execution.
+   */
+  get isDirty(): boolean {
+    // Test could be done dynamically with this._executedCode
+    // but for performance reason, the diff status is stored in a boolean.
+    return this._isDirty;
+  }
+
+  /**
+   * Set whether the cell is dirty or not.
+   */
+  private _setDirty(v: boolean) {
+    if (v !== this._isDirty) {
+      if (!v) {
+        this._executedCode = this.value.text.trim();
+      }
+      this._isDirty = v;
+      this.stateChanged.emit({
+        name: 'isDirty',
+        oldValue: !v,
+        newValue: v
+      });
+    }
+  }
+
   clearExecution() {
     this.outputs.clear();
     this.executionCount = null;
+    this._setDirty(false);
     this.metadata.delete('execution');
   }
 
@@ -772,6 +807,16 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
+   * Handle a change to the observable value.
+   */
+  protected onGenericChange(): void {
+    if ((this.sharedModel as models.YCodeCell).execution_count !== null) {
+      this._setDirty(this._executedCode !== this.value.text.trim());
+    }
+    this.contentChanged.emit(void 0);
+  }
+
+  /**
    * Handle a change to the output shared model and reflect it in modelDB.
    * We update the modeldb metadata when the nbcell changes.
    *
@@ -818,8 +863,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       oldValue: args.oldValue,
       newValue: args.newValue
     });
+    if (args.newValue && this.isDirty) {
+      this._setDirty(false);
+    }
   }
 
+  private _executedCode: string = '';
+  private _isDirty = false;
   private _outputs: IOutputAreaModel;
 }
 

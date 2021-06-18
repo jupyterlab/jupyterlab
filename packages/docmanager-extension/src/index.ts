@@ -803,16 +803,28 @@ function addCommands(
     }
   });
 
+  const newFileRegex = new RegExp('^untitled', 'i');
+
   docManager.activateRequested.connect((sender, args) => {
     const widget = sender.findWidget(args);
-    if (widget && widget.shouldNameFile) {
-      widget.shouldNameFile.connect(() => {
-        if (sender.nameFileOnSave && widget == shell.currentWidget) {
+    if (!widget) {
+      return;
+    }
+
+    widget.context.saveState.connect((doc, state) => {
+      if (sender.nameFileOnSave && widget === shell.currentWidget) {
+        const model = doc.contentsModel;
+        if (
+          state === 'completed manually' &&
+          model &&
+          !model.renamed == true &&
+          newFileRegex.test(model.name)
+        ) {
           const context = sender.contextForWidget(widget!);
           return nameOnSaveDialog(sender, context!);
         }
-      });
-    }
+      }
+    });
   });
 
   // .jp-mod-current added so that the console-creation command is only shown

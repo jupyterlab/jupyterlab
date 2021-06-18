@@ -18,7 +18,7 @@ describe('Notebook Toolbar', () => {
   });
 
   test('Create new Notebook', async () => {
-    await galata.notebook.createNew(fileName);
+    await expect(galata.notebook.createNew(fileName)).resolves.toEqual(true);
   });
 
   test('Create a Raw cell', async () => {

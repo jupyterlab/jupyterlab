@@ -127,6 +127,11 @@ const CELL_OUTPUT_COLLAPSER_CLASS = 'jp-Cell-outputCollapser';
 const READONLY_CLASS = 'jp-mod-readOnly';
 
 /**
+ * The class name added to the cell when dirty.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
+
+/**
  * The class name added to code cells.
  */
 const CODE_CELL_CLASS = 'jp-CodeCell';
@@ -726,7 +731,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       const output = (this._output = new OutputArea({
         model: model.outputs,
         rendermime,
-        contentFactory: contentFactory
+        contentFactory: contentFactory,
+        maxNumberOutputs: options.maxNumberOutputs
       }));
       output.addClass(CELL_OUTPUT_AREA_CLASS);
       // Set a CSS if there are no outputs, and connect a signal for future
@@ -739,6 +745,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
       outputWrapper.addWidget(outputCollapser);
       outputWrapper.addWidget(output);
       (this.layout as PanelLayout).insertWidget(2, outputWrapper);
+
+      if (model.isDirty) {
+        this.addClass(DIRTY_CLASS);
+      }
 
       this._outputPlaceholder = new OutputPlaceholder(() => {
         this.outputHidden = !this.outputHidden;
@@ -975,6 +985,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
     switch (args.name) {
       case 'executionCount':
         this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
+        break;
+      case 'isDirty':
+        if ((model as ICodeCellModel).isDirty) {
+          this.addClass(DIRTY_CLASS);
+        } else {
+          this.removeClass(DIRTY_CLASS);
+        }
         break;
       default:
         break;

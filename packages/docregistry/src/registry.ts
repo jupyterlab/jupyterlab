@@ -17,6 +17,7 @@ import {
   folderIcon,
   imageIcon,
   jsonIcon,
+  juliaIcon,
   LabIcon,
   markdownIcon,
   notebookIcon,
@@ -976,7 +977,7 @@ export namespace DocumentRegistry {
     | 'started'
     | 'failed'
     | 'completed'
-    | 'completed-manual';
+    | 'completed manually';
 
   /**
    * A type alias for a context.
@@ -1393,6 +1394,13 @@ export namespace DocumentRegistry {
         icon: jsonIcon
       },
       {
+        name: 'julia',
+        displayName: trans.__('Julia File'),
+        extensions: ['.jl'],
+        mimeTypes: ['text/x-julia'],
+        icon: juliaIcon
+      },
+      {
         name: 'csv',
         displayName: trans.__('CSV File'),
         extensions: ['.csv'],
@@ -1503,8 +1511,6 @@ export interface IDocumentWidget<
    * Set URI fragment identifier.
    */
   setFragment(fragment: string): void;
-
-  shouldNameFile?: Signal<this, void>;
 }
 
 /**
