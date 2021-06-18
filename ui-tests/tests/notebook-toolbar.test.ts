@@ -3,7 +3,7 @@
 
 import { describe, galata, test } from '@jupyterlab/galata';
 
-const fileName = 'notebook.ipynb';
+const fileName = 'notebook-toolbar.ipynb';
 
 jest.setTimeout(60000);
 

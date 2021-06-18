@@ -4,7 +4,7 @@
 import { describe, galata, test } from '@jupyterlab/galata';
 import { runMenuOpenTest } from './util';
 
-const fileName = 'notebook.ipynb';
+const fileName = 'notebook-create.ipynb';
 
 jest.setTimeout(60000);
 
