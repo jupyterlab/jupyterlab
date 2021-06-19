@@ -804,7 +804,10 @@ function addCommands(
   });
 
   const newFileRegex = new RegExp('^untitled', 'i');
-
+  /**
+   * An array of activated file names used as a naive implemetation of lock for Name File
+   */
+  let activatedDocs: string[] = [];
   docManager.activateRequested.connect((sender, args) => {
     const widget = sender.findWidget(args);
     if (!widget) {
@@ -812,17 +815,26 @@ function addCommands(
     }
 
     widget.context.saveState.connect((doc, state) => {
-      if (sender.nameFileOnSave && widget === shell.currentWidget) {
-        const model = doc.contentsModel;
+      if (state === 'completed manually') {
         if (
-          state === 'completed manually' &&
-          model &&
-          !model.renamed == true &&
-          newFileRegex.test(model.name)
+          sender.nameFileOnSave &&
+          widget === shell.currentWidget &&
+          activatedDocs.indexOf(args) == -1
         ) {
-          const context = sender.contextForWidget(widget!);
-          return nameOnSaveDialog(sender, context!);
+          const model = doc.contentsModel;
+          activatedDocs.push(args);
+          if (
+            model &&
+            !model.renamed == true &&
+            newFileRegex.test(model.name)
+          ) {
+            const context = sender.contextForWidget(widget!);
+            return nameOnSaveDialog(sender, context!).then(() => {
+              activatedDocs = activatedDocs.filter(file => file != args);
+            });
+          }
         }
+        activatedDocs.push(args);
       }
     });
   });
