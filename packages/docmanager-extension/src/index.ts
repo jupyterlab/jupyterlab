@@ -528,7 +528,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.nameOnSave, {
     label: () =>
-      trans.__('Rename %1…', fileType(shell.currentWidget, docManager)),
+      trans.__('Name %1… on first save', fileType(shell.currentWidget, docManager)),
     isEnabled,
     execute: () => {
       if (isEnabled()) {
