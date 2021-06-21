@@ -85,8 +85,7 @@ export class YDocument<T> implements models.ISharedDocument {
 
   public isDisposed = false;
   public ydoc = new Y.Doc();
-  public source = this.ydoc.getText('source');
-  public undoManager = new Y.UndoManager([this.source], {
+  public undoManager = new Y.UndoManager([this.ydoc.getText('source')], {
     trackedOrigins: new Set([this])
   });
   public awareness = new Awareness(this.ydoc);
