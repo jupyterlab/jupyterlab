@@ -53,7 +53,7 @@
   "properties": {
     "contextMenu": {
       "title": "The application context menu.",
-      "description": "Note: To disable a context menu item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable Download item on files:\n{\n  \"contextMenu\": [\n    {\n        \"command\": \"filebrowser:download\",\n        \"selector\": \".jp-DirListing-item[data-isdir=\\\"false\\\"]\",        \"disabled\": true\n        }\n      ]\n\n}\n\nContext menu description:",
+      "description": "Note: To disable a context menu item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable Download item on files:\n{\n  \"contextMenu\": [\n    {\n      \"command\": \"filebrowser:download\",\n      \"selector\": \".jp-DirListing-item[data-isdir=\\\"false\\\"]\",\n      \"disabled\": true\n    }\n  ]\n}\n\nContext menu description:",
       "items": {
         "allOf": [
           { "$ref": "#/definitions/menuItem" },
