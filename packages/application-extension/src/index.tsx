@@ -75,6 +75,8 @@ namespace CommandIDs {
 
   export const showPropertyPanel: string = 'property-inspector:show-panel';
 
+  export const resetLayout: string = 'application:reset-layout';
+
   export const toggleMode: string = 'application:toggle-mode';
 
   export const toggleLeftArea: string = 'application:toggle-left-area';
@@ -368,6 +370,36 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           return commands.execute(CommandIDs.setMode, args);
         }
       });
+
+      commands.addCommand(CommandIDs.resetLayout, {
+        label: trans.__('Reset Default Layout'),
+        execute: () => {
+          // Turn off presentation mode
+          if (labShell.presentationMode) {
+            commands
+              .execute(CommandIDs.togglePresentationMode)
+              .catch(reason => {
+                console.error('Failed to undo presentation mode.', reason);
+              });
+          }
+          // Display side tabbar
+          (['left', 'right'] as ('left' | 'right')[]).forEach(side => {
+            if (
+              !labShell.isSideTabBarVisible(side) &&
+              !labShell.isEmpty(side)
+            ) {
+              commands
+                .execute(CommandIDs.toggleSideTabBar, { side })
+                .catch(reason => {
+                  console.error(`Failed to show ${side} activity bar.`, reason);
+                });
+            }
+          });
+
+          // Some actions are also trigger indirectly
+          // - by listening to this command execution.
+        }
+      });
     }
 
     if (palette) {
@@ -383,7 +415,8 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
         CommandIDs.togglePresentationMode,
-        CommandIDs.toggleMode
+        CommandIDs.toggleMode,
+        CommandIDs.resetLayout
       ].forEach(command => palette.addItem({ command, category }));
 
       ['right', 'left'].forEach(side => {
@@ -1212,6 +1245,14 @@ namespace Private {
         return settingRegistry.set(setting, 'overrides', {
           ...overrides,
           [id]: side
+        });
+      }
+    });
+
+    app.commands.commandExecuted.connect((registry, executed) => {
+      if (executed.id === CommandIDs.resetLayout) {
+        settingRegistry.set(setting, 'overrides', {}).catch(reason => {
+          console.error('Failed to reset sidebar sides.', reason);
         });
       }
     });
