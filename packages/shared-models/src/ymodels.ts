@@ -27,6 +27,44 @@ export type YCellType = YRawCell | YCodeCell | YMarkdownCell;
 
 export class YDocument<T> implements models.ISharedDocument {
   /**
+   * Get/Set the isDisposed attribute to know whether this model
+   * has been disposed or not.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+  set isDisposed(value: boolean) {
+    this._isDisposed = value;
+  }
+
+  /**
+   * The Yjs document.
+   */
+  readonly ydoc = new Y.Doc();
+
+  /**
+   * The Yjs document.
+   */
+  readonly ysource = this.ydoc.getText('source');
+
+  /**
+   * The awareness attribute to access the user's state.
+   */
+  readonly awareness = new Awareness(this.ydoc);
+
+  /**
+   * The undoManager that handles the change history.
+   */
+  readonly undoManager = new Y.UndoManager([this.ysource], {
+    trackedOrigins: new Set([this])
+  });
+
+  /**
+   * The changed signal.
+   */
+  readonly changed = new Signal<this, T>(this);
+
+  /**
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
    */
@@ -37,7 +75,7 @@ export class YDocument<T> implements models.ISharedDocument {
    * Dispose of the resources.
    */
   dispose(): void {
-    this.isDisposed = true;
+    this._isDisposed = true;
     this.ydoc.destroy();
   }
 
@@ -76,20 +114,7 @@ export class YDocument<T> implements models.ISharedDocument {
     this.undoManager.clear();
   }
 
-  /**
-   * The changed signal.
-   */
-  get changed(): ISignal<this, T> {
-    return this._changed;
-  }
-
-  public isDisposed = false;
-  public ydoc = new Y.Doc();
-  public undoManager = new Y.UndoManager([this.ydoc.getText('source')], {
-    trackedOrigins: new Set([this])
-  });
-  public awareness = new Awareness(this.ydoc);
-  protected _changed = new Signal<this, T>(this);
+  private _isDisposed = false;
 }
 
 export class YFile
@@ -106,7 +131,7 @@ export class YFile
   private _modelObserver = (event: Y.YTextEvent) => {
     const changes: models.FileChange = {};
     changes.sourceChange = event.changes.delta as any;
-    this._changed.emit(changes);
+    this.changed.emit(changes);
   };
 
   public static create(): YFile {
@@ -153,8 +178,6 @@ export class YFile
       ysource.delete(start + value.length, end - start);
     });
   }
-
-  public ysource = this.ydoc.getText('source');
 }
 
 /**
@@ -172,6 +195,7 @@ export class YNotebook
   implements models.ISharedNotebook {
   constructor() {
     super();
+    this._ycellMapping = new Map();
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
       if (!this._ycellMapping.has(ycell)) {
@@ -182,6 +206,48 @@ export class YNotebook
   }
 
   /**
+   * The minor version number of the nbformat.
+   */
+  readonly nbformat_minor: number = nbformat.MINOR_VERSION;
+
+  /**
+   * The major version number of the nbformat.
+   */
+  readonly nbformat: number = nbformat.MAJOR_VERSION;
+
+  /**
+   * The list of shared cells in the notebook.
+   */
+  readonly ycells: Y.Array<Y.Map<any>> = this.ydoc.getArray('cells');
+
+  /**
+   * Notebook's metadata.
+   */
+  readonly ymeta: Y.Map<any> = this.ydoc.getMap('meta');
+
+  /**
+   * The list of shared cells in the notebook.
+   */
+  readonly ymodel: Y.Map<any> = this.ydoc.getMap('model');
+
+  /**
+   * The undoManager that handles the change history.
+   */
+  readonly undoManager = new Y.UndoManager([this.ycells], {
+    trackedOrigins: new Set([this])
+  });
+
+  /**
+   * Get/Set the list of cells.
+   */
+  get cells(): YCellType[] {
+    return this._cells;
+  }
+  set cells(cells: YCellType[]) {
+    this._cells = cells;
+  }
+
+  /**
    * Get a shared cell by index.
    *
    * @param index: Cell's position.
@@ -189,7 +255,7 @@ export class YNotebook
    * @returns The requested shared cell.
    */
   getCell(index: number): YCellType {
-    return this.cells[index];
+    return this._cells[index];
   }
 
   /**
@@ -334,32 +400,24 @@ export class YNotebook
           this._ycellMapping.get(ycell)
         );
         cellsChange.push({ insert: insertedCells });
-        this.cells.splice(index, 0, ...insertedCells);
+        this._cells.splice(index, 0, ...insertedCells);
         index += d.insert.length;
       } else if (d.delete != null) {
         cellsChange.push(d);
-        this.cells.splice(index, d.delete);
+        this._cells.splice(index, d.delete);
       } else if (d.retain != null) {
         cellsChange.push(d);
         index += d.retain;
       }
     });
 
-    this._changed.emit({
+    this.changed.emit({
       cellsChange: cellsChange
     });
   };
 
-  public ycells: Y.Array<Y.Map<any>> = this.ydoc.getArray('cells');
-  public ymeta: Y.Map<any> = this.ydoc.getMap('meta');
-  public ymodel: Y.Map<any> = this.ydoc.getMap('model');
-  public undoManager = new Y.UndoManager([this.ycells], {
-    trackedOrigins: new Set([this])
-  });
-  private _ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
-  public nbformat_minor: number = nbformat.MINOR_VERSION;
-  public nbformat: number = nbformat.MAJOR_VERSION;
-  public cells: YCellType[];
+  private _ycellMapping: Map<Y.Map<any>, YCellType>;
+  private _cells: YCellType[];
 }
 
 /**
