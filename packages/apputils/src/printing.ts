@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@lumino/widgets';
-
 import { ServerConnection } from '@jupyterlab/services';
+import { Widget } from '@lumino/widgets';
 
 /**
  * Any object is "printable" if it implements the `IPrintable` interface.

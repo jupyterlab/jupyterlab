@@ -1,19 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
-
-import { Widget } from '@lumino/widgets';
-
 import { WidgetTracker } from '@jupyterlab/apputils';
-
-import { RunMenu, IRunMenu } from '@jupyterlab/mainmenu';
+import { IRunMenu, RunMenu } from '@jupyterlab/mainmenu';
+import { CommandRegistry } from '@lumino/commands';
+import { Widget } from '@lumino/widgets';
+import { delegateExecute } from './util';
 
 class Wodget extends Widget {
   state: string;
 }
-
-import { delegateExecute } from './util';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('RunMenu', () => {
@@ -43,7 +39,7 @@ describe('@jupyterlab/mainmenu', () => {
       it('should construct a new run menu', () => {
         expect(menu).toBeInstanceOf(RunMenu);
         // For localization this is now defined when on the mainmenu-extension.
-        expect(menu.menu.title.label).toBe('');
+        expect(menu.title.label).toBe('');
       });
     });
 

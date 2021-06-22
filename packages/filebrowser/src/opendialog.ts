@@ -1,18 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@lumino/algorithm';
-import { PanelLayout, Widget } from '@lumino/widgets';
-import { PathExt } from '@jupyterlab/coreutils';
-
 import { Dialog } from '@jupyterlab/apputils';
+import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { toArray } from '@lumino/algorithm';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { FileBrowser } from './browser';
 import { FilterFileBrowserModel } from './model';
 import { IFileBrowserFactory } from './tokens';
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 /**
  * The class name added to open file dialog

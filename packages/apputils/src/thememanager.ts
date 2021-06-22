@@ -2,27 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IChangedArgs, URLExt } from '@jupyterlab/coreutils';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { each } from '@lumino/algorithm';
-
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
-import { Widget } from '@lumino/widgets';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
+import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from './dialog';
-
 import { ISplashScreen } from './splash';
-
 import { IThemeManager } from './tokens';
 
 /**

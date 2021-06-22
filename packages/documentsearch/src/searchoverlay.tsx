@@ -3,8 +3,13 @@
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import {
-  caretDownIcon,
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
   caretDownEmptyThinIcon,
+  caretDownIcon,
   caretRightIcon,
   caretUpEmptyThinIcon,
   caseSensitiveIcon,
@@ -13,19 +18,12 @@ import {
   ellipsesIcon,
   regexIcon
 } from '@jupyterlab/ui-components';
-
 import { Debouncer } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-
 import { IDisplayState } from './interfaces';
 import { SearchInstance } from './searchinstance';
-import {
-  nullTranslator,
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
@@ -43,6 +41,7 @@ const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
 const SEARCH_OPTIONS_DISABLED_CLASS =
   'jp-DocumentSearch-search-options-disabled';
+const SEARCH_DOCUMENT_LOADING = 'jp-DocumentSearch-document-loading';
 const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
@@ -128,7 +127,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           value={this.props.searchText}
           onChange={e => this.props.onChange(e)}
           onKeyDown={e => this.props.onKeydown(e)}
-          tabIndex={2}
+          tabIndex={0}
           onFocus={e => this.props.onInputFocus()}
           onBlur={e => this.props.onInputBlur()}
           ref={this.searchInputRef}
@@ -136,7 +135,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onCaseSensitiveToggled()}
-          tabIndex={4}
+          tabIndex={0}
         >
           <caseSensitiveIcon.react
             className={caseButtonToggleClass}
@@ -146,7 +145,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onRegexToggled()}
-          tabIndex={5}
+          tabIndex={0}
         >
           <regexIcon.react className={regexButtonToggleClass} tag="span" />
         </button>
@@ -177,24 +176,24 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
           value={this.props.replaceText}
           onKeyDown={e => this.props.onReplaceKeydown(e)}
           onChange={e => this.props.onChange(e)}
-          tabIndex={3}
+          tabIndex={0}
           ref={this.replaceInputRef}
         />
         <button
           className={REPLACE_BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onReplaceCurrent()}
-          tabIndex={10}
+          tabIndex={0}
         >
           <span
             className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={-1}
+            tabIndex={0}
           >
             {this._trans.__('Replace')}
           </span>
         </button>
         <button
           className={REPLACE_BUTTON_WRAPPER_CLASS}
-          tabIndex={11}
+          tabIndex={0}
           onClick={() => this.props.onReplaceAll()}
         >
           <span
@@ -223,7 +222,7 @@ function UpDownButtons(props: IUpDownProps) {
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightPrevious()}
-        tabIndex={6}
+        tabIndex={0}
       >
         <caretUpEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -233,7 +232,7 @@ function UpDownButtons(props: IUpDownProps) {
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHightlightNext()}
-        tabIndex={7}
+        tabIndex={0}
       >
         <caretDownEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -281,7 +280,7 @@ class FilterToggle extends React.Component<
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => this.props.toggleEnabled()}
-        tabIndex={8}
+        tabIndex={0}
       >
         <ellipsesIcon.react
           className={className}
@@ -536,7 +535,7 @@ class SearchOverlay extends React.Component<
           <button
             className={TOGGLE_WRAPPER}
             onClick={() => this._onReplaceToggled()}
-            tabIndex={1}
+            tabIndex={0}
           >
             <icon.react
               className={`${REPLACE_TOGGLE_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -579,7 +578,7 @@ class SearchOverlay extends React.Component<
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this._onClose()}
-          tabIndex={9}
+          tabIndex={0}
         >
           <closeIcon.react
             className="jp-icon-hover"
@@ -619,6 +618,10 @@ class SearchOverlay extends React.Component<
         key={3}
       >
         {this.state.errorMessage}
+      </div>,
+      <div className={SEARCH_DOCUMENT_LOADING} key={4}>
+        This document is still loading. Only loaded content will appear in
+        search results until the entire document loads.
       </div>
     ];
   }

@@ -10,17 +10,13 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
-
-import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
-
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
+  IImageTracker,
   ImageViewer,
-  ImageViewerFactory,
-  IImageTracker
+  ImageViewerFactory
 } from '@jupyterlab/imageviewer';
-
 import { ITranslator } from '@jupyterlab/translation';
 
 /**

@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ToolbarButton, Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog, ToolbarButton } from '@jupyterlab/apputils';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { Signal } from '@lumino/signaling';
 

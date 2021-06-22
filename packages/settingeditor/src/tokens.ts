@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
-
 import { Token } from '@lumino/coreutils';
-
 import { SettingEditor } from './settingeditor';
 
 /* tslint:disable */

@@ -3,9 +3,9 @@
 import { ILayoutRestorer } from '@jupyterlab/application';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import {
+  IMarkdownViewerTracker,
   MarkdownViewer,
-  MarkdownViewerFactory,
-  IMarkdownViewerTracker
+  MarkdownViewerFactory
 } from '@jupyterlab/markdownviewer';
 import {
   IRenderMimeRegistry,

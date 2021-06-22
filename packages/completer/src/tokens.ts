@@ -2,13 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { IDataConnector } from '@jupyterlab/statedb';
-
 import { Token } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
-
 import { CompletionHandler } from './handler';
 import { Completer } from './widget';
 

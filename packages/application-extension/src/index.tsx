@@ -6,22 +6,21 @@
  */
 
 import {
+  ConnectionLost,
   IConnectionLost,
   ILabShell,
   ILabStatus,
   ILayoutRestorer,
   IRouter,
   ITreePathUpdater,
-  ConnectionLost,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
   JupyterFrontEndContextMenu,
+  JupyterFrontEndPlugin,
   JupyterLab,
   LabShell,
   LayoutRestorer,
   Router
 } from '@jupyterlab/application';
-
 import {
   Dialog,
   ICommandPalette,
@@ -29,30 +28,19 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-
-import { URLExt, PageConfig } from '@jupyterlab/coreutils';
-
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import {
   IPropertyInspectorProvider,
   SideBarPropertyInspectorProvider
 } from '@jupyterlab/property-inspector';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { buildIcon, jupyterIcon } from '@jupyterlab/ui-components';
-
 import { each, iter, toArray } from '@lumino/algorithm';
-
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
-
-import { Widget, DockLayout, DockPanel } from '@lumino/widgets';
-
+import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**

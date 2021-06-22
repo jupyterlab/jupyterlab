@@ -4,6 +4,72 @@
   "jupyter.lab.setting-icon": "ui-components:file",
   "jupyter.lab.setting-icon-label": "Document Manager",
   "jupyter.lab.transform": true,
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "command": "docmanager:clone",
+            "rank": 2
+          },
+          {
+            "type": "separator",
+            "rank": 4
+          },
+          {
+            "command": "docmanager:save",
+            "rank": 4
+          },
+          {
+            "command": "docmanager:save-as",
+            "rank": 4
+          },
+          {
+            "command": "docmanager:save-all",
+            "rank": 4
+          },
+          {
+            "type": "separator",
+            "rank": 5
+          },
+          {
+            "command": "docmanager:reload",
+            "rank": 5
+          },
+          {
+            "command": "docmanager:restore-checkpoint",
+            "rank": 5
+          },
+          {
+            "command": "docmanager:rename",
+            "rank": 5
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-settings",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 4
+          },
+          {
+            "command": "docmanager:toggle-autosave",
+            "rank": 4
+          },
+          {
+            "command": "docmanager:toggle-name-file-on-save",
+            "rank": 4
+          },
+          {
+            "type": "separator",
+            "rank": 4
+          }
+        ]
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
     {
       "command": "docmanager:save",
@@ -38,6 +104,12 @@
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "nameFileOnSave": {
+      "type": "boolean",
+      "title": "Name File On First Save",
+      "description": "Whether to prompt to name file on first save",
+      "default": true
     }
   },
   "additionalProperties": false,

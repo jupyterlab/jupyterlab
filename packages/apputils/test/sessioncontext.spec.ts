@@ -2,29 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  SessionManager,
-  KernelManager,
-  KernelSpecManager
-} from '@jupyterlab/services';
-
-import {
-  SessionContext,
   Dialog,
   ISessionContext,
+  SessionContext,
   sessionContextDialogs
 } from '@jupyterlab/apputils';
-
-import { UUID, PromiseDelegate } from '@lumino/coreutils';
-
+import {
+  KernelManager,
+  KernelSpecManager,
+  SessionAPI,
+  SessionManager
+} from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
-  testEmission,
+  flakyIt as it,
   JupyterServer,
-  flakyIt as it
+  testEmission
 } from '@jupyterlab/testutils';
-
-import { SessionAPI } from '@jupyterlab/services';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 const server = new JupyterServer();
 

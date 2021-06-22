@@ -1,6 +1,19 @@
 {
   "title": "Command Palette",
   "description": "Command palette settings.",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "command": "apputils:activate-command-palette",
+            "rank": 0
+          }
+        ]
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
     {
       "command": "apputils:activate-command-palette",

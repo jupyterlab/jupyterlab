@@ -91,7 +91,7 @@ class TagListComponent extends React.Component<IProperties, IState> {
           onClick={event => {
             selectedTagWithName(tag);
           }}
-          tabIndex={-1}
+          tabIndex={0}
         >
           <TagComponent
             selectionStateHandler={this.props.selectionStateHandler}

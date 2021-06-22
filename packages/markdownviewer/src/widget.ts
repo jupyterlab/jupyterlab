@@ -2,33 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-
 import {
   ABCWidgetFactory,
   DocumentRegistry,
   DocumentWidget
 } from '@jupyterlab/docregistry';
-
 import {
   IRenderMime,
   IRenderMimeRegistry,
   MimeModel
 } from '@jupyterlab/rendermime';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { PromiseDelegate } from '@lumino/coreutils';
-
+import { JSONObject, PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-
-import { JSONObject } from '@lumino/coreutils';
-
 import { StackedLayout, Widget } from '@lumino/widgets';
 
 /**
@@ -54,7 +45,7 @@ export class MarkdownViewer extends Widget {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this.renderer = options.renderer;
-    this.node.tabIndex = -1;
+    this.node.tabIndex = 0;
     this.addClass(MARKDOWNVIEWER_CLASS);
 
     const layout = (this.layout = new StackedLayout());

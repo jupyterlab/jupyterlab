@@ -1,19 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@lumino/algorithm';
-
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import { PathExt } from '@jupyterlab/coreutils';
-
-import { IRunningSessions, IRunningSessionManagers } from '@jupyterlab/running';
-
+import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { Session } from '@jupyterlab/services';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { consoleIcon, fileIcon, notebookIcon } from '@jupyterlab/ui-components';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.

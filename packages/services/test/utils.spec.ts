@@ -1,15 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PromiseDelegate } from '@lumino/coreutils';
-
-import { Signal } from '@lumino/signaling';
-
 import {
   expectFailure,
   isFulfilled,
   testEmission
 } from '@jupyterlab/testutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 
 describe('test/utils', () => {
   describe('testEmission', () => {

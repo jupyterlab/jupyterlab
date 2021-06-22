@@ -5,32 +5,21 @@
  * @module tooltip-extension
  */
 
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-
-import { find, toArray } from '@lumino/algorithm';
-
-import { JSONObject } from '@lumino/coreutils';
-
-import { Widget } from '@lumino/widgets';
-
-import { Text } from '@jupyterlab/coreutils';
-
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { IConsoleTracker } from '@jupyterlab/console';
-
+import { Text } from '@jupyterlab/coreutils';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
-
 import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import { ITooltipManager, Tooltip } from '@jupyterlab/tooltip';
+import { find, toArray } from '@lumino/algorithm';
+import { JSONObject } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the tooltip plugin.

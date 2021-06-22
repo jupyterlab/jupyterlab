@@ -2,11 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { h, VirtualElement } from '@lumino/virtualdom';
-import { Menu, ContextMenu } from '@lumino/widgets';
-
-import { caretRightIcon, checkIcon } from '../iconimports';
+import { ContextMenu, Menu } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
+import { caretRightIcon, checkIcon } from '../iconimports';
 
 const submenuIcon = caretRightIcon.bindprops({
   stylesheet: 'menuItem'
@@ -78,7 +77,14 @@ export namespace MenuSvg {
     }
 
     // ensure correct renderer on any submenus that get added in the future
-    menu.insertItem = MenuSvg.prototype.insertItem;
+    const originalInsertItem = menu.insertItem.bind(menu);
+    menu.insertItem = (index: number, options: Menu.IItemOptions) => {
+      if (options.submenu) {
+        MenuSvg.overrideDefaultRenderer(options.submenu);
+      }
+
+      return originalInsertItem(index, options);
+    };
 
     // recurse through submenus
     for (const item of (menu as any)._items as Menu.IItem[]) {

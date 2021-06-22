@@ -6,25 +6,20 @@
  */
 
 import {
-  ILayoutRestorer,
   ILabShell,
+  ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   IRunningSessionManagers,
   RunningSessionManagers,
   RunningSessions
 } from '@jupyterlab/running';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { runningIcon } from '@jupyterlab/ui-components';
-
-import { addOpenTabsSessionManager } from './opentabs';
-
 import { addKernelRunningSessionManager } from './kernels';
+import { addOpenTabsSessionManager } from './opentabs';
 
 /**
  * The default running sessions extension.

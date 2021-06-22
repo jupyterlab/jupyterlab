@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DataConnector } from '@jupyterlab/statedb';
-
 import { KernelMessage, Session } from '@jupyterlab/services';
-
+import { DataConnector } from '@jupyterlab/statedb';
 import { CompletionHandler } from './handler';
 
 /**

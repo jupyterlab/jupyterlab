@@ -3,6 +3,11 @@
 
 import { Text } from '@jupyterlab/coreutils';
 import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
   Button,
   circleEmptyIcon,
   circleIcon,
@@ -12,22 +17,15 @@ import {
   refreshIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
-
-import { IIterator, find, map, some } from '@lumino/algorithm';
+import { find, IIterator, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-
 import { ISessionContext, sessionContextDialogs } from './sessioncontext';
-import { UseSignal, ReactWidget } from './vdom';
-import {
-  nullTranslator,
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import { ReactWidget, UseSignal } from './vdom';
 
 /**
  * The class name added to toolbars.
@@ -670,7 +668,13 @@ namespace Private {
     if (!commands.isVisible(id, args)) {
       className += ' lm-mod-hidden';
     }
-    const tooltip = commands.caption(id, args) || label || iconLabel;
+    let tooltip = commands.caption(id, args) || label || iconLabel;
+    // Shows hot keys in tooltips
+    const binding = commands.keyBindings.find(b => b.command === id);
+    if (binding) {
+      const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+      tooltip = `${tooltip} (${ks})`;
+    }
     const onClick = () => {
       void commands.execute(id, args);
     };

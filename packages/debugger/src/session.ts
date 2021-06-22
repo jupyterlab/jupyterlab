@@ -3,7 +3,7 @@
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 

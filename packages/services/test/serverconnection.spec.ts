@@ -2,11 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-
-import { ServerConnection } from '../src';
-
-import { getRequestHandler } from './utils';
 import { JupyterServer } from '@jupyterlab/testutils';
+import { ServerConnection } from '../src';
+import { getRequestHandler } from './utils';
 
 const server = new JupyterServer();
 

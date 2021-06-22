@@ -7,11 +7,8 @@ import {
   SettingRegistry,
   Settings
 } from '@jupyterlab/settingregistry';
-
 import { StateDB } from '@jupyterlab/statedb';
-
 import { signalToPromise } from '@jupyterlab/testutils';
-
 import { JSONObject } from '@lumino/coreutils';
 
 class TestConnector extends StateDB {
@@ -386,6 +383,158 @@ describe('@jupyterlab/settingregistry', () => {
         }
         expect(failed).toBe(true);
       });
+    });
+  });
+
+  describe('reconcileMenus', () => {
+    it('should merge menu tree', () => {
+      const a: ISettingRegistry.IMenu[] = [
+        {
+          id: '1',
+          items: [{ command: 'a' }]
+        },
+        {
+          id: '2',
+          items: [{ command: 'b' }]
+        },
+        {
+          id: '4',
+          items: [
+            {
+              type: 'submenu',
+              submenu: {
+                id: 'sub',
+                items: [{ command: 'sub-1' }]
+              }
+            }
+          ]
+        }
+      ];
+      const b: ISettingRegistry.IMenu[] = [
+        {
+          id: '2',
+          items: [
+            { command: 'b' },
+            { command: 'b', args: { input: 'hello' } },
+            { command: 'b', args: { input: 'world' } },
+            { command: 'c' }
+          ]
+        },
+        {
+          id: '3',
+          items: [{ command: 'd' }]
+        },
+        {
+          id: '4',
+          items: [
+            {
+              type: 'submenu',
+              submenu: {
+                id: 'sub',
+                items: [{ command: 'sub-2' }]
+              }
+            }
+          ]
+        }
+      ];
+
+      const merged = SettingRegistry.reconcileMenus(a, b);
+      expect(merged).toHaveLength(4);
+      expect(merged[0].id).toEqual('1');
+      expect(merged[0].items).toHaveLength(1);
+      expect(merged[1].id).toEqual('2');
+      expect(merged[1].items).toHaveLength(4);
+      expect((merged[1].items ?? [])[0].command).toEqual('b');
+      expect((merged[1].items ?? [])[0].args).toBeUndefined();
+      expect((merged[1].items ?? [])[1].command).toEqual('b');
+      expect((merged[1].items ?? [])[1].args?.input).toEqual('hello');
+      expect((merged[1].items ?? [])[2].command).toEqual('b');
+      expect((merged[1].items ?? [])[2].args?.input).toEqual('world');
+      expect(merged[2].id).toEqual('4');
+      expect(merged[2].items).toHaveLength(1);
+      expect((merged[2].items ?? [])[0].submenu?.items).toHaveLength(2);
+      expect(merged[3].id).toEqual('3');
+      expect(merged[3].items).toHaveLength(1);
+    });
+
+    it('should remove disabled menu', () => {
+      const a: ISettingRegistry.IMenu[] = [
+        {
+          id: '1',
+          items: [{ command: 'a' }]
+        },
+        {
+          id: '2',
+          items: [{ command: 'b' }]
+        }
+      ];
+      const b: ISettingRegistry.IMenu[] = [
+        {
+          id: '2',
+          disabled: true
+        }
+      ];
+
+      const merged = SettingRegistry.reconcileMenus(a, b);
+      expect(merged).toHaveLength(1);
+      expect(merged[0].id).toEqual('1');
+      expect(merged[0].items).toHaveLength(1);
+    });
+
+    it('should remove disabled menu item', () => {
+      const a: ISettingRegistry.IMenu[] = [
+        {
+          id: '1',
+          items: [{ command: 'a' }]
+        },
+        {
+          id: '2',
+          items: [{ command: 'b' }]
+        },
+        {
+          id: '4',
+          items: [
+            {
+              type: 'submenu',
+              submenu: {
+                id: 'sub',
+                items: [{ command: 'sub-1' }, { command: 'sub-2' }]
+              }
+            }
+          ]
+        }
+      ];
+      const b: ISettingRegistry.IMenu[] = [
+        {
+          id: '2',
+          items: [{ command: 'b', disabled: true }]
+        },
+        {
+          id: '4',
+          items: [
+            {
+              type: 'submenu',
+              submenu: {
+                id: 'sub',
+                items: [{ command: 'sub-2', disabled: true }]
+              }
+            }
+          ]
+        }
+      ];
+
+      const merged = SettingRegistry.reconcileMenus(a, b);
+      expect(merged).toHaveLength(3);
+      expect(merged[0].id).toEqual('1');
+      expect(merged[0].items).toHaveLength(1);
+      expect(merged[1].id).toEqual('2');
+      expect(merged[1].items).toHaveLength(0);
+      expect(merged[2].id).toEqual('4');
+      expect(merged[2].items).toHaveLength(1);
+      expect((merged[2].items ?? [])[0].submenu?.items).toHaveLength(1);
+      expect(
+        ((merged[2].items ?? [])[0].submenu?.items ?? [])[0].command
+      ).toEqual('sub-1');
     });
   });
 

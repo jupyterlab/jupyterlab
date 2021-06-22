@@ -9,7 +9,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/console/style/index.css';
-import '@jupyterlab/theme-light-extension/style/index.css';
+import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
 import { CommandRegistry } from '@lumino/commands';
@@ -23,8 +23,8 @@ import { editorServices } from '@jupyterlab/codemirror';
 import { ConsolePanel } from '@jupyterlab/console';
 
 import {
-  RenderMimeRegistry,
-  standardRendererFactories as initialFactories
+  standardRendererFactories as initialFactories,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {

@@ -1,26 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React from 'react';
-
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import {
   ServiceManager,
-  Terminal,
-  TerminalManager,
+  Session,
   SessionManager,
-  Session
+  Terminal,
+  TerminalManager
 } from '@jupyterlab/services';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { kernelIcon, terminalIcon } from '@jupyterlab/ui-components';
-
+import React from 'react';
 import { GroupItem, interactiveItem, TextItem } from '..';
 
 /**

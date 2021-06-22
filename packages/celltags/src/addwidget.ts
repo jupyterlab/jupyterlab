@@ -1,11 +1,11 @@
-import { Widget } from '@lumino/widgets';
-import { addIcon } from '@jupyterlab/ui-components';
-import { TagTool } from './tool';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { addIcon } from '@jupyterlab/ui-components';
+import { Widget } from '@lumino/widgets';
+import { TagTool } from './tool';
 
 /**
  * A widget which hosts a cell tags area.

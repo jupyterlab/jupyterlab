@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { IDataConnector } from './interfaces';
-
 import { IStateDB } from './tokens';
 
 /**

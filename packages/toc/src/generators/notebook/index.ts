@@ -3,29 +3,29 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 import {
+  Cell,
   CodeCell,
   CodeCellModel,
-  MarkdownCell,
-  Cell,
-  ICellModel
+  ICellModel,
+  MarkdownCell
 } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { nullTranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
-import { isMarkdown } from '../../utils/is_markdown';
-import { isDOM } from '../../utils/is_dom';
 import { INotebookHeading } from '../../utils/headings';
-import { OptionsManager } from './options_manager';
+import { isDOM } from '../../utils/is_dom';
+import { isMarkdown } from '../../utils/is_markdown';
+import { appendHeading } from './append_heading';
+import { appendMarkdownHeading } from './append_markdown_heading';
 import { getCodeCellHeading } from './get_code_cell_heading';
 import { getLastHeadingLevel } from './get_last_heading_level';
 import { getMarkdownHeadings } from './get_markdown_heading';
 import { getRenderedHTMLHeadings } from './get_rendered_html_heading';
-import { appendHeading } from './append_heading';
-import { appendMarkdownHeading } from './append_markdown_heading';
+import { OptionsManager } from './options_manager';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
-import { ITranslator } from '@jupyterlab/translation';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * Returns a ToC generator for notebooks.
@@ -35,19 +35,31 @@ import { ITranslator } from '@jupyterlab/translation';
  * @param widget - table of contents widget
  * @param sanitizer - HTML sanitizer
  * @param translator - Language translator
+ * @param settings - advanced settings for toc extension
  * @returns ToC generator capable of parsing notebooks
  */
 function createNotebookGenerator(
   tracker: INotebookTracker,
   widget: TableOfContents,
   sanitizer: ISanitizer,
-  translator?: ITranslator
+  translator?: ITranslator,
+  settings?: ISettingRegistry.ISettings
 ): Registry.IGenerator<NotebookPanel> {
+  let numberingH1 = true;
+  if (settings) {
+    numberingH1 = settings.composite.numberingH1 as boolean;
+  }
   const options = new OptionsManager(widget, tracker, {
     numbering: false,
+    numberingH1: numberingH1,
     sanitizer: sanitizer,
     translator: translator || nullTranslator
   });
+  if (settings) {
+    settings.changed.connect(() => {
+      options.numberingH1 = settings.composite.numberingH1 as boolean;
+    });
+  }
   tracker.activeCellChanged.connect(
     (sender: INotebookTracker, args: Cell<ICellModel>) => {
       widget.update();
@@ -156,6 +168,7 @@ function createNotebookGenerator(
             dict,
             getLastHeadingLevel(headings),
             options.numbering,
+            options.numberingH1,
             cell,
             i
           );
@@ -199,6 +212,7 @@ function createNotebookGenerator(
             dict,
             lastLevel,
             options.numbering,
+            options.numberingH1,
             cell,
             i
           );

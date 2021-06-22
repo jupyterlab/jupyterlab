@@ -16,8 +16,8 @@ import { DebuggerHandler } from './handler';
 import {
   closeAllIcon as closeAll,
   stepIntoIcon as stepInto,
-  stepOverIcon as stepOver,
   stepOutIcon as stepOut,
+  stepOverIcon as stepOver,
   variableIcon as variable,
   viewBreakpointIcon as viewBreakpoint
 } from './icons';

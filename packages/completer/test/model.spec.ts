@@ -1,17 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@lumino/algorithm';
-
-import { JSONExt } from '@lumino/coreutils';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import {
-  CompleterModel,
   Completer,
+  CompleterModel,
   CompletionHandler
 } from '@jupyterlab/completer';
+import { toArray } from '@lumino/algorithm';
+import { JSONExt } from '@lumino/coreutils';
 
 function makeState(text: string): Completer.ITextState {
   return {

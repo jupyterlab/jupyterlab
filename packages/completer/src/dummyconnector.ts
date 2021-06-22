@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { DataConnector } from '@jupyterlab/statedb';
-
 import { CompletionHandler } from './handler';
 
 /**

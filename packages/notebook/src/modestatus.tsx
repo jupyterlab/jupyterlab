@@ -1,17 +1,13 @@
-import * as React from 'react';
-
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { Text } from '@jupyterlab/coreutils';
-
-import { Notebook, NotebookMode } from '.';
-
 import { TextItem } from '@jupyterlab/statusbar';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import * as React from 'react';
+import { Notebook, NotebookMode } from '.';
 
 /**
  * A pure function for rendering a Command/Edit mode component.

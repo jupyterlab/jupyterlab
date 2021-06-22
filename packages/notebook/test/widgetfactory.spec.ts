@@ -1,16 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@lumino/algorithm';
-
 import { ToolbarButton } from '@jupyterlab/apputils';
-
-import { DocumentRegistry, Context } from '@jupyterlab/docregistry';
-
-import { INotebookModel, NotebookPanel, NotebookWidgetFactory } from '../src';
-
+import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+import { toArray } from '@lumino/algorithm';
+import { INotebookModel, NotebookPanel, NotebookWidgetFactory } from '../src';
 import * as utils from './utils';
 
 const contentFactory = utils.createNotebookPanelFactory();

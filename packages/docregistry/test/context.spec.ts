@@ -1,30 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
-import { Contents, ServiceManager } from '@jupyterlab/services';
-
-import { Widget } from '@lumino/widgets';
-
+import { SessionContext } from '@jupyterlab/apputils';
 import {
   Context,
   DocumentRegistry,
   TextModelFactory
 } from '@jupyterlab/docregistry';
-
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-
+import { Contents, ServiceManager } from '@jupyterlab/services';
 import {
-  waitForDialog,
   acceptDialog,
   dismissDialog,
   initNotebookContext,
-  NBTestUtils
+  NBTestUtils,
+  waitForDialog
 } from '@jupyterlab/testutils';
-import { SessionContext } from '@jupyterlab/apputils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { UUID } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 
 describe('docregistry/context', () => {
   let manager: ServiceManager.IManager;

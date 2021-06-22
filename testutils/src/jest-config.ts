@@ -1,5 +1,7 @@
 import path from 'path';
 
+const esModules = ['lib0', 'y\\-protocols', 'y\\-websocket', 'yjs'].join('|');
+
 module.exports = function (baseDir: string) {
   return {
     preset: 'ts-jest/presets/js-with-babel',
@@ -14,7 +16,17 @@ module.exports = function (baseDir: string) {
     testTimeout: 10000,
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
     testPathIgnorePatterns: ['/lib/', '/node_modules/'],
-    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+    moduleFileExtensions: [
+      'ts',
+      'tsx',
+      'js',
+      'jsx',
+      'json',
+      'node',
+      'mjs',
+      'cjs'
+    ],
+    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
     reporters: ['default', 'jest-junit', 'jest-summary-reporter'],
     coverageReporters: ['json', 'lcov', 'text', 'html'],
     coverageDirectory: path.join(baseDir, 'coverage'),

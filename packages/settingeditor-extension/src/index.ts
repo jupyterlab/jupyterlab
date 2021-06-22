@@ -8,10 +8,10 @@
  */
 
 import {
+  ILabStatus,
   ILayoutRestorer,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  ILabStatus
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
   ICommandPalette,
@@ -19,13 +19,13 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { IStateDB } from '@jupyterlab/statedb';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   ISettingEditorTracker,
   SettingEditor
 } from '@jupyterlab/settingeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
 import { saveIcon, settingsIcon, undoIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';

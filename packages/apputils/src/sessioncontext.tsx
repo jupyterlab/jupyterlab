@@ -1,10 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PathExt, IChangedArgs } from '@jupyterlab/coreutils';
-
-import { UUID } from '@lumino/coreutils';
-
+import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import {
   Kernel,
   KernelMessage,
@@ -12,25 +9,18 @@ import {
   ServerConnection,
   Session
 } from '@jupyterlab/services';
-
-import { IterableOrArrayLike, each, find } from '@lumino/algorithm';
-
-import { PromiseDelegate } from '@lumino/coreutils';
-
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
-import * as React from 'react';
-
-import { showDialog, Dialog } from './dialog';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { each, find, IterableOrArrayLike } from '@lumino/algorithm';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
+import * as React from 'react';
+import { Dialog, showDialog } from './dialog';
 
 /**
  * A context object to manage a widget's kernel session connection.
@@ -115,6 +105,11 @@ export interface ISessionContext extends IObservableDisposable {
    * A signal emitted when the kernel connection status changes, proxied from the session connection.
    */
   readonly connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
+
+  /**
+   * A flag indicating if session is has pending input, proxied from the session connection.
+   */
+  readonly pendingInput: boolean;
 
   /**
    * A signal emitted for a kernel messages, proxied from the session connection.
@@ -402,6 +397,13 @@ export class SessionContext implements ISessionContext {
    */
   get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
     return this._connectionStatusChanged;
+  }
+
+  /**
+   * A flag indicating if the session has ending input, proxied from the kernel.
+   */
+  get pendingInput(): boolean {
+    return this._pendingInput;
   }
 
   /**
@@ -891,6 +893,7 @@ export class SessionContext implements ISessionContext {
         this._onConnectionStatusChanged,
         this
       );
+      session.pendingInput.connect(this._onPendingInput, this);
       session.iopubMessage.connect(this._onIopubMessage, this);
       session.unhandledMessage.connect(this._onUnhandledMessage, this);
 
@@ -1042,6 +1045,17 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
+   * Handle a change to the pending input.
+   */
+  private _onPendingInput(
+    sender: Session.ISessionConnection,
+    value: boolean
+  ): void {
+    // Set the signal value
+    this._pendingInput = value;
+  }
+
+  /**
    * Handle an iopub message.
    */
   private _onIopubMessage(
@@ -1092,9 +1106,9 @@ export class SessionContext implements ISessionContext {
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
     this
   );
-
   private translator: ITranslator;
   private _trans: TranslationBundle;
+  private _pendingInput = false;
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);

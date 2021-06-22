@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { URLExt, PathExt } from '@jupyterlab/coreutils';
+import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { ModelDB } from '@jupyterlab/observables';
 
@@ -106,6 +106,13 @@ export namespace Contents {
      * The indices of the matched characters in the name.
      */
     indices?: ReadonlyArray<number> | null;
+
+    /**
+     * Whether file has been renamed.
+     *
+     * The default is `false`.
+     */
+    renamed?: boolean;
   }
 
   /**

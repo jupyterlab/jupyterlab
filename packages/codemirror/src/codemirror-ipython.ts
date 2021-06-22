@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import CodeMirror from 'codemirror';
-
 import 'codemirror/mode/meta';
 import 'codemirror/mode/python/python';
 

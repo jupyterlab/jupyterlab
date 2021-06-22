@@ -2,31 +2,21 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import {
+  Clipboard,
   ICommandPalette,
-  WidgetTracker,
   ISessionContextDialogs,
   sessionContextDialogs,
-  Clipboard
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-
 import { IConsoleTracker } from '@jupyterlab/console';
-
 import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import { FileEditor } from '@jupyterlab/fileeditor';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import {
   IEditMenu,
   IFileMenu,
@@ -34,31 +24,25 @@ import {
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
+import { TranslationBundle } from '@jupyterlab/translation';
 import {
   consoleIcon,
   copyIcon,
   cutIcon,
+  LabIcon,
   markdownIcon,
   pasteIcon,
   redoIcon,
   textEditorIcon,
-  undoIcon,
-  LabIcon
+  undoIcon
 } from '@jupyterlab/ui-components';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import {
   JSONObject,
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-
-import { Menu } from '@lumino/widgets';
-import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The command IDs used by the fileeditor plugin.
@@ -281,7 +265,17 @@ export namespace Commands {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
       },
-      label: args => args['name'] as string
+      label: args => {
+        if ((args.delta ?? 0) > 0) {
+          return args.isMenu
+            ? trans.__('Increase Text Editor Font Size')
+            : trans.__('Increase Font Size');
+        } else {
+          return args.isMenu
+            ? trans.__('Decrease Text Editor Font Size')
+            : trans.__('Decrease Font Size');
+        }
+      }
     });
   }
 
@@ -350,7 +344,17 @@ export namespace Commands {
     id: string
   ): void {
     commands.addCommand(CommandIDs.changeTabs, {
-      label: args => args['name'] as string,
+      label: args => {
+        if (args.insertSpaces) {
+          return trans._n(
+            'Spaces: %1',
+            'Spaces: %1',
+            (args.size as number) ?? 0
+          );
+        } else {
+          return trans.__('Indent with Tab');
+        }
+      },
       execute: args => {
         config.tabSize = (args['size'] as number) || 4;
         config.insertSpaces = !!args['insertSpaces'];
@@ -1018,17 +1022,15 @@ export namespace Commands {
     const paletteCategory = trans.__('Text Editor');
     const args: JSONObject = {
       insertSpaces: false,
-      size: 4,
-      name: trans.__('Indent with Tab')
+      size: 4
     };
-    const command = 'fileeditor:change-tabs';
+    const command = CommandIDs.changeTabs;
     palette.addItem({ command, args, category: paletteCategory });
 
     for (const size of [1, 2, 4, 8]) {
       const args: JSONObject = {
         insertSpaces: true,
-        size,
-        name: trans._n('Spaces: %1', 'Spaces: %1', size)
+        size
       };
       palette.addItem({ command, args, category: paletteCategory });
     }
@@ -1074,10 +1076,10 @@ export namespace Commands {
     const paletteCategory = trans.__('Text Editor');
     const command = CommandIDs.changeFontSize;
 
-    let args = { name: trans.__('Increase Font Size'), delta: 1 };
+    let args = { delta: 1 };
     palette.addItem({ command, args, category: paletteCategory });
 
-    args = { name: trans.__('Decrease Font Size'), delta: -1 };
+    args = { delta: -1 };
     palette.addItem({ command, args, category: paletteCategory });
   }
 
@@ -1110,20 +1112,11 @@ export namespace Commands {
     consoleTracker: IConsoleTracker | null,
     sessionDialogs: ISessionContextDialogs | null
   ): void {
-    // Add the editing commands to the settings menu.
-    addEditingCommandsToSettingsMenu(menu, commands, trans);
-
-    // Add new text file creation to the file menu.
-    addCreateNewFileToFileMenu(menu);
-
-    // Add new markdown file creation to the file menu.
-    addCreateNewMarkdownFileToFileMenu(menu);
-
     // Add undo/redo hooks to the edit menu.
     addUndoRedoToEditMenu(menu, tracker);
 
     // Add editor view options.
-    addEditorViewerToViewMenu(menu, tracker, trans);
+    addEditorViewerToViewMenu(menu, tracker);
 
     // Add a console creator the the file menu.
     addConsoleCreatorToFileMenu(menu, commands, tracker, trans);
@@ -1142,68 +1135,6 @@ export namespace Commands {
   }
 
   /**
-   * Add File Editor editing commands to the Settings menu, including:
-   * Indent with Tab, Tab Spaces, Change Font Size, and auto closing brackets
-   */
-  export function addEditingCommandsToSettingsMenu(
-    menu: IMainMenu,
-    commands: CommandRegistry,
-    trans: TranslationBundle
-  ): void {
-    const tabMenu = new Menu({ commands });
-    tabMenu.title.label = trans.__('Text Editor Indentation');
-    const args: JSONObject = {
-      insertSpaces: false,
-      size: 4,
-      name: trans.__('Indent with Tab')
-    };
-    const command = 'fileeditor:change-tabs';
-    tabMenu.addItem({ command, args });
-
-    for (const size of [1, 2, 4, 8]) {
-      const args: JSONObject = {
-        insertSpaces: true,
-        size,
-        name: trans._n('Spaces: %1', 'Spaces: %1', size)
-      };
-      tabMenu.addItem({ command, args });
-    }
-
-    menu.settingsMenu.addGroup(
-      [
-        {
-          command: CommandIDs.changeFontSize,
-          args: { name: trans.__('Increase Text Editor Font Size'), delta: +1 }
-        },
-        {
-          command: CommandIDs.changeFontSize,
-          args: { name: trans.__('Decrease Text Editor Font Size'), delta: -1 }
-        },
-        { type: 'submenu', submenu: tabMenu },
-        { command: CommandIDs.autoClosingBrackets }
-      ],
-      30
-    );
-  }
-
-  /**
-   * Add a Create New File command to the File menu
-   */
-  export function addCreateNewFileToFileMenu(menu: IMainMenu): void {
-    menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
-  }
-
-  /**
-   * Add a Create New Markdown File command to the File menu
-   */
-  export function addCreateNewMarkdownFileToFileMenu(menu: IMainMenu): void {
-    menu.fileMenu.newMenu.addGroup(
-      [{ command: CommandIDs.createNewMarkdown }],
-      30
-    );
-  }
-
-  /**
    * Add Create New ___ File commands to the File menu for common file types associated with available kernels
    */
   export function addKernelLanguageMenuItems(
@@ -1211,10 +1142,11 @@ export namespace Commands {
     availableKernelFileTypes: Iterable<IFileTypeData>
   ): void {
     for (let ext of availableKernelFileTypes) {
-      menu.fileMenu.newMenu.addGroup(
-        [{ command: CommandIDs.createNew, args: ext }],
-        30
-      );
+      menu.fileMenu.newMenu.addItem({
+        command: CommandIDs.createNew,
+        args: ext,
+        rank: 30
+      });
     }
   }
 
@@ -1241,8 +1173,7 @@ export namespace Commands {
    */
   export function addEditorViewerToViewMenu(
     menu: IMainMenu,
-    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    trans: TranslationBundle
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>
   ): void {
     menu.viewMenu.editorViewers.add({
       tracker,

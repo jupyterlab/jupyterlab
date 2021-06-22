@@ -1,21 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import { ActivityMonitor, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import { IHeading } from './utils/headings';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCTree } from './toc_tree';
+import { IHeading } from './utils/headings';
 
 /**
  * Timeout for throttling ToC rendering.
@@ -112,7 +112,10 @@ export class TableOfContents extends Widget {
     let toc: IHeading[] = [];
     let title = this._trans.__('Table of Contents');
     if (this._current) {
-      toc = this._current.generator.generate(this._current.widget);
+      toc = this._current.generator.generate(
+        this._current.widget,
+        this._current.generator.options
+      );
       const context = this._docmanager.contextForWidget(this._current.widget);
       if (context) {
         title = PathExt.basename(context.localPath);

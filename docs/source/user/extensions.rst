@@ -420,12 +420,12 @@ Listing Configuration
 
 You or your administrator can use the following traits to define the listings loading.
 
-- ``blocklist_uris``: A list of comma-separated URIs to fetch a blocklist file from
-- ``allowlist_uris``: A list of comma-separated URIs to fetch an allowlist file from
+- ``blocked_extensions_uris``: A list of comma-separated URIs to fetch a blocklist file from
+- ``allowed_extensions_uris``: A list of comma-separated URIs to fetch an allowlist file from
 - ``listings_refresh_seconds``: The interval delay in seconds to refresh the lists
 - ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
 
-For example, to enable blocklist, launch the server with ``--LabServerApp.blocklist_uris=http://example.com/blocklist.json`` where ``http://example.com/blocklist.json`` is a blocklist JSON file as described below.
+For example, to set blocked extensions, launch the server with ``--LabServerApp.blocked_extensions_uris=http://example.com/blocklist.json`` where ``http://example.com/blocklist.json`` is a JSON file as described below.
 
 The details for the listings_request_options are listed
 on `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__  
@@ -444,33 +444,33 @@ This is an example of a blocklist file.
 .. code:: json
 
    {
-   "blocklist": [
-      {
+     "blocked_extensions": [
+       {
          "name": "@jupyterlab-examples/launcher",
          "type": "jupyterlab",
          "reason": "@jupyterlab-examples/launcher is blocklisted for test purpose - Do NOT take this for granted!!!",
          "creation_date": "2020-03-11T03:28:56.782Z",
          "last_update_date":  "2020-03-11T03:28:56.782Z"
-      }
-   ]
+       }
+     ]
    }
 
 
-In the following allowlist example a ``@jupyterlab/*`` will allowlist 
+In the following allowed extensions ``@jupyterlab/*`` will allow 
 all jupyterlab organization extensions.
 
 .. code:: json
 
    {
-   "allowlist": [
-      {
+     "allowed_extensions": [
+       {
          "name": "@jupyterlab/*",
          "type": "jupyterlab",
-         "reason": "All @jupyterlab org extensions are allowlisted, of course...",
+         "reason": "All @jupyterlab org extensions are allowed, of course…",
          "creation_date": "2020-03-11T03:28:56.782Z",
          "last_update_date":  "2020-03-11T03:28:56.782Z"
-      }
-   ]
+       }
+     ]
    }
 
 

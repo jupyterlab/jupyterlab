@@ -15,6 +15,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../docprovider"
+    },
+    {
       "path": "../observables"
     },
     {
@@ -25,6 +28,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../translation"
@@ -51,6 +57,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../docprovider"
+    },
+    {
       "path": "../observables"
     },
     {
@@ -61,6 +70,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../translation"

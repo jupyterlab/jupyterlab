@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IRestorable, RestorablePool } from '@jupyterlab/statedb';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { FocusTracker, Widget } from '@lumino/widgets';
 
 /**

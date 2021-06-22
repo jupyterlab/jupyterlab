@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Session, KernelSpec } from '@jupyterlab/services';
+import { KernelSpec, Session } from '@jupyterlab/services';
 
 import { IDisposable } from '@lumino/disposable';
 

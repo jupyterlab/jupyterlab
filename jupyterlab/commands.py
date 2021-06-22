@@ -43,7 +43,7 @@ from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 from jupyterlab._version import __version__
 
 # The regex for expecting the webpack output.
-WEBPACK_EXPECT = re.compile(r'.*theme-light-extension/style/index.css')
+WEBPACK_EXPECT = re.compile(r'.*theme-light-extension/style/theme.css')
 
 
 # The repo root directory
