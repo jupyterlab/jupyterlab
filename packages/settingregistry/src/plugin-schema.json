@@ -20,7 +20,7 @@
         },
         "context": {
           "title": "The application context menu.",
-          "description": "Note: To disable a menu or a menu item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable ... item:\n{\n  \"contextMenu\": [\n    {\n        \"command\": \"\",\n        \"disabled\": true\n        }\n      ]\n\n}\n\nContext menu description:",
+          "description": "List of context menu items.",
           "items": {
             "allOf": [
               { "$ref": "#/definitions/menuItem" },
