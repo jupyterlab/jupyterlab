@@ -13,9 +13,11 @@ import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { CommandRegistry } from '@lumino/commands';
+import { IHeading, INotebookHeading } from './utils/headings';
 import { TableOfContentsRegistry as Registry } from './registry';
-import { TOCTree } from './toc_tree';
-import { IHeading } from './utils/headings';
+import { TOCTree, CommandIDs } from './toc_tree';
+import { NestedCodeCells } from './toc_item';
 
 /**
  * Timeout for throttling ToC rendering.
@@ -40,7 +42,36 @@ export class TableOfContents extends Widget {
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
     this._trans = this.translator.load('jupyterlab');
+    this.toc = [];
+    if (this._current) {
+      this.toc = this._current.generator.generate(
+        this._current.widget,
+        this._current.generator.options
+      );
+    }
+    this._commands = options.commands;
+    this.addCommands();
   }
+
+  /**
+   * Adds commands to command registry.
+   *
+   * @param commands - command registry
+   * @param toc - List of headings
+   * @returns
+   */
+  addCommands = () => {
+    this._commands.addCommand(CommandIDs.runCells, {
+      execute: args => {
+        const pos = args['position'] as number;
+        const heading = this.toc[pos];
+        let code: INotebookHeading[];
+        code = [];
+        return NestedCodeCells(this.toc, heading, code);
+      },
+      label: this._trans.__('Run Cell(s)')
+    });
+  };
 
   /**
    * Current widget-generator tuple for the ToC.
@@ -109,10 +140,9 @@ export class TableOfContents extends Widget {
    * @param msg - message
    */
   protected onUpdateRequest(msg: Message): void {
-    let toc: IHeading[] = [];
     let title = this._trans.__('Table of Contents');
     if (this._current) {
-      toc = this._current.generator.generate(
+      this.toc = this._current.generator.generate(
         this._current.widget,
         this._current.generator.options
       );
@@ -139,7 +169,8 @@ export class TableOfContents extends Widget {
       jsx = (
         <TOCTree
           title={title}
-          toc={toc}
+          toc={this.toc}
+          commands={this._commands}
           generator={this.generator}
           itemRenderer={itemRenderer}
           toolbar={this._toolbar}
@@ -173,6 +204,8 @@ export class TableOfContents extends Widget {
   private _docmanager: IDocumentManager;
   private _current: TableOfContents.ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
+  private _commands: CommandRegistry;
+  toc: IHeading[];
 }
 
 /**
@@ -197,6 +230,11 @@ export namespace TableOfContents {
      * Application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Application command registry.
+     */
+    commands: CommandRegistry;
   }
 
   /**

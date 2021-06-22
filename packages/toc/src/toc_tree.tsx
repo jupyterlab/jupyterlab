@@ -1,11 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { CommandRegistry } from '@lumino/commands';
+import { Widget, Menu } from '@lumino/widgets';
+import { IHeading } from './utils/headings';
 import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCItem } from './toc_item';
-import { IHeading } from './utils/headings';
+
+/**
+ * The command IDs used by TOC item.
+ */
+export namespace CommandIDs {
+  export const runCells = 'toc:run-cells';
+}
 
 /**
  * Interface describing component properties.
@@ -22,6 +30,11 @@ interface IProperties extends React.Props<TOCTree> {
    * List of headings to render.
    */
   toc: IHeading[];
+
+  /**
+   * Command registry
+   */
+  commands: CommandRegistry;
 
   /**
    * Toolbar.
@@ -65,10 +78,16 @@ class TOCTree extends React.Component<IProperties, IState> {
     // Map the heading objects onto a list of JSX elements...
     let i = 0;
     let list: JSX.Element[] = this.props.toc.map(el => {
+      const contextMenu = new Menu({ commands: this.props.commands });
+      contextMenu.addItem({
+        args: { position: i },
+        command: CommandIDs.runCells
+      });
       return (
         <TOCItem
           heading={el}
           toc={this.props.toc}
+          contextMenu={contextMenu}
           itemRenderer={this.props.itemRenderer}
           key={`${el.text}-${el.level}-${i++}`}
         />

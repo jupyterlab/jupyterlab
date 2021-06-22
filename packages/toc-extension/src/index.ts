@@ -59,8 +59,14 @@ async function activateTOC(
   settingRegistry?: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
+  const commands = app.commands;
   // Create the ToC widget:
-  const toc = new TableOfContents({ docmanager, rendermime, translator });
+  const toc = new TableOfContents({
+    docmanager,
+    rendermime,
+    translator,
+    commands
+  });
 
   // Create the ToC registry:
   const registry = new Registry();
