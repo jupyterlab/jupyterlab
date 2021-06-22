@@ -755,6 +755,11 @@ export namespace DocumentRegistry {
     dirty: boolean;
 
     /**
+     * The renamed state of the model.
+     */
+    renamed: boolean;
+
+    /**
      * The read-only state of the model.
      */
     readOnly: boolean;

@@ -138,6 +138,19 @@ export class NotebookModel implements INotebookModel {
   }
 
   /**
+   * The renamed state of the document.
+   */
+  get renamed(): boolean {
+    if (!this.metadata.has('renamed')) {
+      return false;
+    }
+    return this.metadata.get('renamed') as boolean;
+  }
+  set renamed(v: boolean) {
+    this.metadata.set('renamed', v);
+  }
+
+  /**
    * The read only state of the document.
    */
   get readOnly(): boolean {

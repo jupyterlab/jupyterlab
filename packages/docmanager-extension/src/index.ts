@@ -528,7 +528,10 @@ function addCommands(
 
   commands.addCommand(CommandIDs.nameOnSave, {
     label: () =>
-      trans.__('Name %1… on first save', fileType(shell.currentWidget, docManager)),
+      trans.__(
+        'Name %1… on first save',
+        fileType(shell.currentWidget, docManager)
+      ),
     isEnabled,
     execute: () => {
       if (isEnabled()) {
@@ -821,12 +824,14 @@ function addCommands(
           widget === shell.currentWidget &&
           activatedDocs.indexOf(args) == -1
         ) {
-          const model = doc.contentsModel;
+          const model = doc.model;
+          const contentsModel = doc.contentsModel;
           activatedDocs.push(args);
           if (
             model &&
+            contentsModel &&
             !model.renamed == true &&
-            newFileRegex.test(model.name)
+            newFileRegex.test(contentsModel.name)
           ) {
             const context = sender.contextForWidget(widget!);
             return nameOnSaveDialog(sender, context!).then(() => {

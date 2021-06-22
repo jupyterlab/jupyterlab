@@ -491,10 +491,9 @@ export class Context<
       const localPath = this._manager.contents.localPath(newPath);
       void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
+      this._model.renamed = true;
+      this._contentsModel!.renamed = true;
       this._pathChanged.emit(this._path);
-      if (this._contentsModel) {
-        this._contentsModel.renamed = true;
-      }
     }
   }
 
@@ -525,8 +524,7 @@ export class Context<
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
-      format: model.format,
-      renamed: model.renamed == true ? true : false
+      format: model.format
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
@@ -583,6 +581,8 @@ export class Context<
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newName);
 
+    this._model.renamed = true;
+    this._contentsModel!.renamed = true;
     this._pathChanged.emit(this._path);
   }
 
@@ -620,7 +620,6 @@ export class Context<
       }
 
       model.dirty = false;
-      value.renamed = this._contentsModel?.renamed;
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {
@@ -872,6 +871,8 @@ or load the version on disk (revert)?`,
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
     await this.save();
+    this._model.renamed = true;
+    this._contentsModel!.renamed = true;
     this._pathChanged.emit(this._path);
     await this._maybeCheckpoint(true);
   }

@@ -98,10 +98,10 @@ export function nameOnSaveDialog(
     focusNodeSelector: 'input',
     buttons: [Dialog.okButton({ label: trans.__('Enter') })]
   }).then(result => {
+    context.model.renamed = true;
     context.model.dirty = false;
-    context.contentsModel!.renamed = true;
     if (!result.value) {
-      return renameFile(manager, oldPath, oldPath);
+      return null;
     }
 
     if (!isValidFileName(result.value)) {
@@ -114,7 +114,7 @@ export function nameOnSaveDialog(
           )
         )
       );
-      return renameFile(manager, oldPath, oldPath);
+      return null;
     }
     const basePath = PathExt.dirname(oldPath);
     const newPath = PathExt.join(basePath, result.value);

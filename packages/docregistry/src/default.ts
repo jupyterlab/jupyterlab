@@ -61,6 +61,16 @@ export class DocumentModel
   }
 
   /**
+   * The renamed state of the document.
+   */
+  get renamed(): boolean {
+    return this._renamed;
+  }
+  set renamed(v: boolean) {
+    this._renamed = v;
+  }
+
+  /**
    * The read only state of the document.
    */
   get readOnly(): boolean {
@@ -157,6 +167,7 @@ export class DocumentModel
   readonly sharedModel: models.ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
+  private _renamed = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
