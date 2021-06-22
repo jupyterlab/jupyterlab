@@ -297,6 +297,11 @@ namespace Private {
     });
 
     label.textContent = trans.__("Don't ask me again");
+    label.addEventListener('click', function () {
+      checkbox.checked = !checkbox.checked;
+      manager.nameFileOnSave = !checkbox.checked;
+    });
+
     body.appendChild(name);
     div.appendChild(checkbox);
     div.appendChild(label);
