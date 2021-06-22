@@ -30,7 +30,8 @@
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
-    "style/index.js"
+    "style/index.js",
+    "schema/*.json"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -46,6 +47,7 @@
     "@jupyterlab/markdownviewer": "^3.1.0-alpha.13",
     "@jupyterlab/notebook": "^3.1.0-alpha.13",
     "@jupyterlab/rendermime": "^3.1.0-alpha.13",
+    "@jupyterlab/settingregistry": "^3.1.0-alpha.13",
     "@jupyterlab/toc": "^5.1.0-alpha.13",
     "@jupyterlab/translation": "^3.1.0-alpha.13",
     "@jupyterlab/ui-components": "^3.1.0-alpha.13"
@@ -59,7 +61,8 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
 }

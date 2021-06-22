@@ -43,7 +43,7 @@ function toolbar(options: OptionsManager) {
     constructor(props: IProperties) {
       super(props);
       this.state = { numbering: false };
-      options.initializeOptions(false);
+      options.initializeOptions(false, options.numberingH1);
       this._trans = options.translator.load('jupyterlab');
     }
 
