@@ -45,6 +45,11 @@ export * from './sanitizer';
 export * from './sessioncontext';
 export * from './thememanager';
 export * from './tokens';
+export {
+  ToolbarWidgetRegistry,
+  createDefaultFactory,
+  createToolbarFactory
+} from './toolbar';
 export * from './widgettracker';
 export * from './windowresolver';
 

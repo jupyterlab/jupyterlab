@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ISessionContext, sessionContextDialogs } from './sessioncontext';
+import { ISessionContext, sessionContextDialogs } from '../sessioncontext';
 
 /**
  * The class name added to toolbar kernel name text.
@@ -38,6 +38,9 @@ const TOOLBAR_KERNEL_STATUS_CLASS = 'jp-Toolbar-kernelStatus';
 export namespace Toolbar {
   /**
    * Create an interrupt toolbar item.
+   *
+   * @deprecated since version v3.2
+   * This is dead code now.
    */
   export function createInterruptButton(
     sessionContext: ISessionContext,
@@ -56,6 +59,9 @@ export namespace Toolbar {
 
   /**
    * Create a restart toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createRestartButton(
     sessionContext: ISessionContext,
@@ -116,7 +122,7 @@ export namespace Toolbar {
 }
 
 /**
- * The namespace for module private data.
+ * A namespace for private data.
  */
 namespace Private {
   /**

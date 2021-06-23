@@ -1210,7 +1210,7 @@ export namespace Commands {
       menu.fileMenu.newMenu.addItem({
         command: CommandIDs.createNew,
         args: ext,
-        rank: 30
+        rank: 31
       });
     }
   }
