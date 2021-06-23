@@ -194,7 +194,7 @@ export class DebuggerHandler {
    * @param widget The widget to update.
    * @param connection The session connection.
    */
-  private async _update(
+  public async _update(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     connection: Session.ISessionConnection | null
   ): Promise<void> {
