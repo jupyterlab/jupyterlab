@@ -104,6 +104,9 @@ interface IProperties {
    */
   toc: IHeading[];
 
+  /**
+   * Optional signal that emits when a toc entry is clicked
+   */
   entryClicked?: Signal<TableOfContents, TOCItem>;
 
   /**

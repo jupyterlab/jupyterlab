@@ -170,13 +170,24 @@ export class TableOfContents extends Widget {
     });
   }
 
+  /**
+   * Current active entry.
+   *
+   * @returns table of contents active entry
+   */
   get activeEntry(): IHeading {
     return this._activeEntry;
   }
+
   set activeEntry(value: IHeading) {
     this._activeEntry = value;
   }
 
+  /**
+   * List of headings.
+   *
+   * @returns table of contents list of headings
+   */
   get headings(): IHeading[] {
     return this._headings;
   }
