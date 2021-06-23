@@ -1047,37 +1047,6 @@ function addCommands(
       category: trans.__('File Operations')
     });
   }
-
-  app.commands.addKeyBinding({
-    command: CommandIDs.del,
-    selector: Selectors.selectorBrowser,
-    keys: ['Delete']
-  });
-  app.commands.addKeyBinding({
-    command: CommandIDs.cut,
-    selector: Selectors.selectorBrowser,
-    keys: ['Ctrl X']
-  });
-  app.commands.addKeyBinding({
-    command: CommandIDs.copy,
-    selector: Selectors.selectorBrowser,
-    keys: ['Ctrl C']
-  });
-  app.commands.addKeyBinding({
-    command: CommandIDs.paste,
-    selector: Selectors.selectorBrowser,
-    keys: ['Ctrl V']
-  });
-  app.commands.addKeyBinding({
-    command: CommandIDs.rename,
-    selector: Selectors.selectorBrowser,
-    keys: ['F2']
-  });
-  app.commands.addKeyBinding({
-    command: CommandIDs.duplicate,
-    selector: Selectors.selectorBrowser,
-    keys: ['Ctrl D']
-  });
 }
 
 /**

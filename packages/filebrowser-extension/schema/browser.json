@@ -148,6 +148,36 @@
       "command": "filebrowser:go-up",
       "keys": ["Backspace"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:delete",
+      "keys": ["Delete"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:cut",
+      "keys": ["Accel X"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:copy",
+      "keys": ["Accel C"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:paste",
+      "keys": ["Accel V"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:rename",
+      "keys": ["F2"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:duplicate",
+      "keys": ["Accel D"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     }
   ],
   "properties": {
