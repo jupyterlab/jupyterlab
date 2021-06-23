@@ -42,13 +42,13 @@ export class TableOfContents extends Widget {
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
     this._trans = this.translator.load('jupyterlab');
-    this._toc = [];
+    this._headings = [];
     this._entryClicked = new Signal<TableOfContents, TOCItem>(this);
     this._entryClicked.connect((toc, item) => {
       this.activeEntry = item.props.heading;
     });
     if (this._current) {
-      this._toc = this._current.generator.generate(
+      this._headings = this._current.generator.generate(
         this._current.widget,
         this._current.generator.options
       );
@@ -124,7 +124,7 @@ export class TableOfContents extends Widget {
   protected onUpdateRequest(msg: Message): void {
     let title = this._trans.__('Table of Contents');
     if (this._current) {
-      this._toc = this._current.generator.generate(
+      this._headings = this._current.generator.generate(
         this._current.widget,
         this._current.generator.options
       );
@@ -151,7 +151,7 @@ export class TableOfContents extends Widget {
       jsx = (
         <TOCTree
           title={title}
-          toc={this._toc}
+          toc={this._headings}
           entryClicked={this._entryClicked}
           generator={this.generator}
           itemRenderer={itemRenderer}
@@ -178,7 +178,7 @@ export class TableOfContents extends Widget {
   }
 
   get headings(): IHeading[] {
-    return this._toc;
+    return this._headings;
   }
 
   /**
@@ -199,7 +199,7 @@ export class TableOfContents extends Widget {
   private _docmanager: IDocumentManager;
   private _current: TableOfContents.ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
-  private _toc: IHeading[];
+  private _headings: IHeading[];
 }
 
 /**
