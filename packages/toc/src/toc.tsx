@@ -16,7 +16,7 @@ import * as ReactDOM from 'react-dom';
 import { CommandRegistry } from '@lumino/commands';
 import { IHeading, INotebookHeading } from './utils/headings';
 import { TableOfContentsRegistry as Registry } from './registry';
-import { TOCTree, CommandIDs } from './toc_tree';
+import { CommandIDs, TOCTree } from './toc_tree';
 import { NestedCodeCells } from './toc_item';
 
 /**
@@ -42,9 +42,9 @@ export class TableOfContents extends Widget {
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
     this._trans = this.translator.load('jupyterlab');
-    this.toc = [];
+    this._toc = [];
     if (this._current) {
-      this.toc = this._current.generator.generate(
+      this._toc = this._current.generator.generate(
         this._current.widget,
         this._current.generator.options
       );
@@ -64,10 +64,10 @@ export class TableOfContents extends Widget {
     this._commands.addCommand(CommandIDs.runCells, {
       execute: args => {
         const pos = args['position'] as number;
-        const heading = this.toc[pos];
+        const heading = this._toc[pos];
         let code: INotebookHeading[];
         code = [];
-        return NestedCodeCells(this.toc, heading, code);
+        return NestedCodeCells(this._toc, heading, code);
       },
       label: this._trans.__('Run Cell(s)')
     });
@@ -142,7 +142,7 @@ export class TableOfContents extends Widget {
   protected onUpdateRequest(msg: Message): void {
     let title = this._trans.__('Table of Contents');
     if (this._current) {
-      this.toc = this._current.generator.generate(
+      this._toc = this._current.generator.generate(
         this._current.widget,
         this._current.generator.options
       );
@@ -169,7 +169,7 @@ export class TableOfContents extends Widget {
       jsx = (
         <TOCTree
           title={title}
-          toc={this.toc}
+          toc={this._toc}
           commands={this._commands}
           generator={this.generator}
           itemRenderer={itemRenderer}
@@ -205,7 +205,7 @@ export class TableOfContents extends Widget {
   private _current: TableOfContents.ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
   private _commands: CommandRegistry;
-  toc: IHeading[];
+  private _toc: IHeading[];
 }
 
 /**

@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { CommandRegistry } from '@lumino/commands';
-import { Widget, Menu } from '@lumino/widgets';
+import { Menu, Widget } from '@lumino/widgets';
 import { IHeading } from './utils/headings';
 import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCItem } from './toc_item';
