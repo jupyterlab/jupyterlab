@@ -1,6 +1,6 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { JSONExt } from '@lumino/coreutils';
-import { Menu } from '@lumino/widgets';
+import { ContextMenu, Menu } from '@lumino/widgets';
 
 /**
  * Helper functions to build a menu from the settings
@@ -56,6 +56,9 @@ export namespace MenuFactory {
     menuFactory: (options: IMenuOptions) => Menu
   ): Menu {
     const menu = menuFactory(item);
+    menu.id = item.id;
+    menu.title.label = item.label ?? capitalize(menu.id);
+
     item.items
       ?.filter(item => !item.disabled)
       .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity))
@@ -63,6 +66,26 @@ export namespace MenuFactory {
         addItem(item, menu, menuFactory);
       });
     return menu;
+  }
+
+  /**
+   * Convert an item description in a context menu item object
+   *
+   * @param item Context menu item
+   * @param menu Context menu to populate
+   * @param menuFactory Empty menu factory
+   */
+  export function addContextItem(
+    item: ISettingRegistry.IContextMenuItem,
+    menu: ContextMenu,
+    menuFactory: (options: IMenuOptions) => Menu
+  ): void {
+    const { submenu, ...newItem } = item;
+    // Commands may not have been registered yet; so we don't force it to exist
+    menu.addItem({
+      ...newItem,
+      submenu: submenu ? dataToMenu(submenu, menuFactory) : null
+    } as any);
   }
 
   /**
@@ -76,7 +99,7 @@ export namespace MenuFactory {
     item: ISettingRegistry.IMenuItem,
     menu: Menu,
     menuFactory: (options: IMenuOptions) => Menu
-  ) {
+  ): void {
     const { submenu, ...newItem } = item;
     // Commands may not have been registered yet; so we don't force it to exist
     menu.addItem({
@@ -108,7 +131,9 @@ export namespace MenuFactory {
       if (menu) {
         mergeMenus(item, menu, menuFactory);
       } else {
-        newMenus.push(dataToMenu(item, menuFactory));
+        if (!item.disabled) {
+          newMenus.push(dataToMenu(item, menuFactory));
+        }
       }
     });
     menus.push(...newMenus);
@@ -154,5 +179,20 @@ export namespace MenuFactory {
         }
       });
     }
+  }
+
+  /**
+   * Capitalize a string
+   *
+   * @param s String to capitalize
+   * @returns The capitalized string
+   */
+  function capitalize(s: string): string {
+    return s
+      .trim()
+      .split(' ')
+      .filter(part => part.trim().length > 0)
+      .map(part => part.replace(/^\w/, c => c.toLocaleUpperCase()))
+      .join(' ');
   }
 }

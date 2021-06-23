@@ -49,6 +49,28 @@
           }
         ]
       }
+    ],
+    "context": [
+      {
+        "command": "application:close",
+        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab",
+        "rank": 4
+      },
+      {
+        "command": "application:close-other-tabs",
+        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab",
+        "rank": 4
+      },
+      {
+        "command": "application:close-right-tabs",
+        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab",
+        "rank": 5
+      },
+      {
+        "command": "__internal:context-menu-info",
+        "selector": "body",
+        "rank": 9007199254740991
+      }
     ]
   },
   "properties": {},

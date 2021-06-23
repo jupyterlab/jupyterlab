@@ -236,11 +236,6 @@ function activateLogConsole(
       trans.__('Set Log Level to %1', toTitleCase(args.level as string))
   });
 
-  app.contextMenu.addItem({
-    command: CommandIDs.open,
-    selector: '.jp-Notebook'
-  });
-
   if (palette) {
     palette.addItem({
       command: CommandIDs.open,

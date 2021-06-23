@@ -222,8 +222,47 @@ The context menu system determines which items to show based on
 It propagates up the DOM tree and tests whether a given HTML element
 matches the CSS selector provided by a given command.
 
+Items can be added in the context menu in two ways:
+
+1. Using the settings - this is the preferred way as they are configurable by the user.
+2. Using the API - this is for advanced cases like dynamic menu or semantic items.
+
 Here is an example showing how to add a command to the application context
-menu.  See the Lumino `docs
+menu using the settings.
+
+
+.. code:: json
+
+    {
+      "jupyter.lab.menus": {
+      "context": [
+        {
+          "command": "my-command",
+          "selector": ".jp-Notebook",
+          "rank": 500
+        }
+      ]
+    }
+
+In this example, the command with id ``my-command`` is shown whenever the user
+right-clicks on a DOM element matching ``.jp-Notebook`` (that is to say, a notebook).
+The selector can be any valid CSS selector, and may target your own UI elements, or existing ones.
+A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
+
+Item must follow this definition:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+   :language: json
+   :lines: 21-39
+
+where ``menuItem`` definition is:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+   :language: json
+   :lines: 119-157
+
+
+The same example using the API is shown below. See the Lumino `docs
 <https://jupyterlab.github.io/lumino/widgets/interfaces/contextmenu.iitemoptions.html>`__
 for the item creation options.
 
@@ -233,11 +272,6 @@ for the item creation options.
       command: commandID,
       selector: '.jp-Notebook'
     })
-
-In this example, the command indicated by ``commandID`` is shown whenever the user
-right-clicks on a DOM element matching ``.jp-Notebook`` (that is to say, a notebook).
-The selector can be any valid CSS selector, and may target your own UI elements, or existing ones.
-A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
 
 If you don't want JupyterLab's custom context menu to appear for your element, because you have
 your own right click behavior that you want to trigger, you can add the `data-jp-suppress-context-menu` data attribute
@@ -536,15 +570,15 @@ The default main menu is defined in the ``mainmenu-extension`` package settings.
 
 A menu must respect the following schema:
 
-.. literalinclude:: ../snippets/packages/mainmenu-extension/schema/plugin.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 315-345
+   :lines: 72-118
 
 And an item must follow:
 
-.. literalinclude:: ../snippets/packages/mainmenu-extension/schema/plugin.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 346-385
+   :lines: 119-157
 
 Menus added to the settings system will be editable by users using the ``mainmenu-extension``
 settings. In particular, they can be disabled at the item or the menu level by setting the

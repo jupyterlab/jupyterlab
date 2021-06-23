@@ -179,11 +179,6 @@ const consoles: JupyterFrontEndPlugin<void> = {
         manager.source = source;
       }
     });
-
-    app.contextMenu.addItem({
-      command: CommandIDs.open,
-      selector: '.jp-CodeConsole-promptCell'
-    });
   }
 };
 
@@ -239,11 +234,6 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (source) {
         manager.source = source;
       }
-    });
-
-    app.contextMenu.addItem({
-      command: CommandIDs.open,
-      selector: '.jp-Notebook'
     });
   }
 };

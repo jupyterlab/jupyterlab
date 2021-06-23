@@ -102,6 +102,46 @@
           }
         ]
       }
+    ],
+    "context": [
+      {
+        "command": "fileeditor:create-console",
+        "selector": ".jp-FileEditor"
+      },
+      {
+        "command": "fileeditor:markdown-preview",
+        "selector": ".jp-FileEditor"
+      },
+      {
+        "command": "fileeditor:undo",
+        "selector": ".jp-FileEditor",
+        "rank": 1
+      },
+      {
+        "command": "fileeditor:redo",
+        "selector": ".jp-FileEditor",
+        "rank": 2
+      },
+      {
+        "command": "fileeditor:cut",
+        "selector": ".jp-FileEditor",
+        "rank": 3
+      },
+      {
+        "command": "fileeditor:copy",
+        "selector": ".jp-FileEditor",
+        "rank": 4
+      },
+      {
+        "command": "fileeditor:paste",
+        "selector": ".jp-FileEditor",
+        "rank": 5
+      },
+      {
+        "command": "fileeditor:select-all",
+        "selector": ".jp-FileEditor",
+        "rank": 6
+      }
     ]
   },
   "title": "Text Editor",

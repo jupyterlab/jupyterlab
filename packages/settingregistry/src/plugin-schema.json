@@ -17,6 +17,25 @@
           },
           "type": "array",
           "default": []
+        },
+        "context": {
+          "title": "The application context menu.",
+          "description": "List of context menu items.",
+          "items": {
+            "allOf": [
+              { "$ref": "#/definitions/menuItem" },
+              {
+                "properties": {
+                  "selector": {
+                    "description": "The CSS selector for the context menu item.",
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          },
+          "type": "array",
+          "default": []
         }
       },
       "additionalProperties": false
@@ -53,10 +72,12 @@
     "menu": {
       "properties": {
         "disabled": {
+          "description": "Whether the menu is disabled or not",
           "type": "boolean",
           "default": false
         },
         "id": {
+          "description": "Menu unique id",
           "oneOf": [
             {
               "type": "string",
@@ -76,15 +97,18 @@
           ]
         },
         "items": {
+          "description": "Menu items",
           "type": "array",
           "items": {
             "$ref": "#/definitions/menuItem"
           }
         },
         "label": {
+          "description": "Menu label",
           "type": "string"
         },
         "rank": {
+          "description": "Menu rank",
           "type": "number",
           "minimum": 0
         }
@@ -95,21 +119,26 @@
     "menuItem": {
       "properties": {
         "args": {
+          "description": "Command arguments",
           "type": "object"
         },
         "command": {
+          "description": "Command id",
           "type": "string"
         },
         "disabled": {
+          "description": "Whether the item is disabled or not",
           "type": "boolean",
           "default": false
         },
         "type": {
+          "description": "Item type",
           "type": "string",
           "enum": ["command", "submenu", "separator"],
           "default": "command"
         },
         "rank": {
+          "description": "Item rank",
           "type": "number",
           "minimum": 0
         },

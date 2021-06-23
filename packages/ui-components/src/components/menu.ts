@@ -1,10 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker } from '@jupyterlab/apputils';
 import { ArrayExt } from '@lumino/algorithm';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { Menu, Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 
 /**
  * A common interface for extensible JupyterLab application menus.
@@ -14,7 +13,7 @@ import { Menu, Widget } from '@lumino/widgets';
  * application menus that may be extended by plugins as well,
  * such as "Edit" and "View"
  */
-export interface IJupyterLabMenu extends IDisposable {
+export interface IRankedMenu extends IDisposable {
   /**
    * Add a group of menu items specific to a particular
    * plugin.
@@ -28,7 +27,7 @@ export interface IJupyterLabMenu extends IDisposable {
    *
    * @returns The menu item added to the menu.
    */
-  addItem(options: IJupyterLabMenu.IItemOptions): Menu.IItem;
+  addItem(options: IRankedMenu.IItemOptions): Menu.IItem;
 
   /**
    * A read-only array of the menu items in the menu.
@@ -44,7 +43,7 @@ export interface IJupyterLabMenu extends IDisposable {
 /**
  * Namespace for JupyterLabMenu interfaces
  */
-export namespace IJupyterLabMenu {
+export namespace IRankedMenu {
   /**
    * Default menu item rank
    */
@@ -77,32 +76,9 @@ export namespace IJupyterLabMenu {
 }
 
 /**
- * A base interface for a consumer of one of the menu
- * semantic extension points. The IMenuExtender gives
- * a widget tracker which is checked when the menu
- * is deciding which IMenuExtender to delegate to upon
- * selection of the menu item.
- */
-export interface IMenuExtender<T extends Widget> {
-  /**
-   * A widget tracker for identifying the appropriate extender.
-   */
-  tracker: IWidgetTracker<T>;
-
-  /**
-   * An additional function that determines whether the extender
-   * is enabled. By default it is considered enabled if the application
-   * active widget is contained in the `tracker`. If this is also
-   * provided, the criterion is equivalent to
-   * `tracker.has(widget) && extender.isEnabled(widget)`
-   */
-  isEnabled?: (widget: T) => boolean;
-}
-
-/**
  * An extensible menu for JupyterLab application menus.
  */
-export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
+export class RankedMenu extends Menu implements IRankedMenu {
   /**
    * Construct a new menu.
    *
@@ -111,7 +87,7 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
    * @param includeSeparators - whether to include separators between the
    *   groups that are added to the menu.
    */
-  constructor(options: IJupyterLabMenu.IOptions) {
+  constructor(options: IRankedMenu.IOptions) {
     super(options);
     this._rank = options.rank;
     this._includeSeparators = options.includeSeparators ?? true;
@@ -135,11 +111,11 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
    *
    * @param rank - the default rank in the menu in which to insert the group.
    */
-  addGroup(items: IJupyterLabMenu.IItemOptions[], rank?: number): IDisposable {
+  addGroup(items: IRankedMenu.IItemOptions[], rank?: number): IDisposable {
     if (items.length === 0) {
       return new DisposableDelegate(() => void 0);
     }
-    const defaultRank = rank ?? IJupyterLabMenu.DEFAULT_RANK;
+    const defaultRank = rank ?? IRankedMenu.DEFAULT_RANK;
 
     const sortedItems = items
       .map(item => {
@@ -190,7 +166,7 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
    *
    * @returns The menu item added to the menu.
    */
-  addItem(options: IJupyterLabMenu.IItemOptions): Menu.IItem {
+  addItem(options: IRankedMenu.IItemOptions): Menu.IItem {
     let insertIndex = -1;
 
     if (options.rank) {
@@ -241,15 +217,15 @@ export class JupyterLabMenu extends Menu implements IJupyterLabMenu {
    * #### Notes
    * The index will be clamped to the bounds of the items.
    */
-  insertItem(index: number, options: IJupyterLabMenu.IItemOptions): Menu.IItem {
+  insertItem(index: number, options: IRankedMenu.IItemOptions): Menu.IItem {
     const clampedIndex = Math.max(0, Math.min(index, this._ranks.length));
     ArrayExt.insert(
       this._ranks,
       clampedIndex,
       options.rank ??
         Math.max(
-          IJupyterLabMenu.DEFAULT_RANK,
-          this._ranks[this._ranks.length - 1] ?? IJupyterLabMenu.DEFAULT_RANK
+          IRankedMenu.DEFAULT_RANK,
+          this._ranks[this._ranks.length - 1] ?? IRankedMenu.DEFAULT_RANK
         )
     );
     return super.insertItem(clampedIndex, options);

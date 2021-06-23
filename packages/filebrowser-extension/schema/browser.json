@@ -37,6 +37,98 @@
           }
         ]
       }
+    ],
+    "context": [
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-content",
+        "rank": 0
+      },
+      {
+        "command": "filebrowser:create-new-directory",
+        "selector": ".jp-DirListing-content",
+        "rank": 1
+      },
+      {
+        "command": "filebrowser:open",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 1
+      },
+      {
+        "command": "filebrowser:create-new-file",
+        "selector": ".jp-DirListing-content",
+        "rank": 2
+      },
+      {
+        "command": "filebrowser:create-new-markdown-file",
+        "selector": ".jp-DirListing-content",
+        "rank": 3
+      },
+      {
+        "command": "filebrowser:paste",
+        "selector": ".jp-DirListing-content",
+        "rank": 4
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 4
+      },
+      {
+        "command": "filebrowser:rename",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 5
+      },
+      {
+        "command": "filebrowser:delete",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 6
+      },
+      {
+        "command": "filebrowser:cut",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 7
+      },
+      {
+        "command": "filebrowser:copy",
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "rank": 8
+      },
+      {
+        "command": "filebrowser:duplicate",
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "rank": 9
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 10
+      },
+      {
+        "command": "filebrowser:shutdown",
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "rank": 11
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 12
+      },
+      {
+        "command": "filebrowser:copy-path",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 14
+      },
+      {
+        "command": "filebrowser:toggle-last-modified",
+        "selector": ".jp-DirListing-header",
+        "rank": 14
+      },
+      {
+        "command": "filebrowser:share-main",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 15
+      }
     ]
   },
   "title": "File Browser",
