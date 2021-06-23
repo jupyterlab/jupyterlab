@@ -29,7 +29,6 @@ import { ServiceManager } from '@jupyterlab/services';
 import { defaultRenderMime, Mock, NBTestUtils } from '@jupyterlab/testutils';
 import * as ToC from '@jupyterlab/toc';
 import { UUID } from '@lumino/coreutils';
-import { CommandRegistry } from '@lumino/commands';
 
 let manager: DocumentManager;
 let tocWidget: ToC.TableOfContents;
@@ -97,8 +96,7 @@ describe('@jupyterlab/toc', () => {
       it('should construct a new ToC widget', () => {
         tocWidget = new ToC.TableOfContents({
           docmanager: manager,
-          rendermime: new RenderMimeRegistry(),
-          commands: new CommandRegistry()
+          rendermime: new RenderMimeRegistry()
         });
         expect(tocWidget).toBeInstanceOf(ToC.TableOfContents);
       });
