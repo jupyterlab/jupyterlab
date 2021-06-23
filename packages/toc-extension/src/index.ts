@@ -29,6 +29,14 @@ import {
 } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
+import { NestedCodeCells } from '@jupyterlab/toc';
+
+/**
+ * The command IDs used by TOC item.
+ */
+namespace CommandIDs {
+  export const runCells = 'toc:run-cells';
+}
 
 /**
  * Activates the ToC extension.
@@ -59,13 +67,11 @@ async function activateTOC(
   settingRegistry?: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
-  const commands = app.commands;
   // Create the ToC widget:
   const toc = new TableOfContents({
     docmanager,
     rendermime,
-    translator,
-    commands
+    translator
   });
 
   // Create the ToC registry:
@@ -79,6 +85,18 @@ async function activateTOC(
   toc.node.setAttribute('aria-label', trans.__('Table of Contents section'));
 
   labShell.add(toc, 'left', { rank: 400 });
+
+  app.commands.addCommand(CommandIDs.runCells, {
+    execute: args => {
+      return NestedCodeCells(toc.headings, toc.activeEntry, []);
+    },
+    label: trans.__('Run Cell(s)')
+  });
+
+  app.contextMenu.addItem({
+    selector: '.jp-tocItem',
+    command: CommandIDs.runCells
+  });
 
   // Add the ToC widget to the application restorer:
   restorer.add(toc, '@jupyterlab/toc:plugin');

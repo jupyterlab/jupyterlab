@@ -2,18 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { CommandRegistry } from '@lumino/commands';
-import { Menu, Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 import { IHeading } from './utils/headings';
 import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCItem } from './toc_item';
-
-/**
- * The command IDs used by TOC item.
- */
-export namespace CommandIDs {
-  export const runCells = 'toc:run-cells';
-}
+import { Signal } from '@lumino/signaling';
+import { TableOfContents } from './toc';
 
 /**
  * Interface describing component properties.
@@ -32,14 +26,11 @@ interface IProperties extends React.Props<TOCTree> {
   toc: IHeading[];
 
   /**
-   * Command registry
-   */
-  commands: CommandRegistry;
-
-  /**
    * Toolbar.
    */
   toolbar: any;
+
+  entryClicked?: Signal<TableOfContents, TOCItem>;
 
   /**
    * Table of contents generator.
@@ -78,16 +69,11 @@ class TOCTree extends React.Component<IProperties, IState> {
     // Map the heading objects onto a list of JSX elements...
     let i = 0;
     let list: JSX.Element[] = this.props.toc.map(el => {
-      const contextMenu = new Menu({ commands: this.props.commands });
-      contextMenu.addItem({
-        args: { position: i },
-        command: CommandIDs.runCells
-      });
       return (
         <TOCItem
           heading={el}
           toc={this.props.toc}
-          contextMenu={contextMenu}
+          entryClicked={this.props.entryClicked}
           itemRenderer={this.props.itemRenderer}
           key={`${el.text}-${el.level}-${i++}`}
         />

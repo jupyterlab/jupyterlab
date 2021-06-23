@@ -3,9 +3,10 @@
 
 import * as React from 'react';
 import { IHeading, INotebookHeading } from './utils/headings';
-import { Menu } from '@lumino/widgets';
 import { CodeCell } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
+import { Signal } from '@lumino/signaling';
+import { TableOfContents } from './toc';
 
 /**
  * Tests whether a heading is a notebook heading.
@@ -102,10 +103,8 @@ interface IProperties {
    * List of headings to use for rendering current position in toc
    */
   toc: IHeading[];
-  /**
-   * Context menu
-   */
-  contextMenu: Menu;
+
+  entryClicked?: Signal<TableOfContents, TOCItem>;
 
   /**
    * Renders a heading.
@@ -143,22 +142,23 @@ class TOCItem extends React.Component<IProperties, IState> {
     const onClick = (event: React.SyntheticEvent<HTMLSpanElement>) => {
       event.preventDefault();
       event.stopPropagation();
+      this.props.entryClicked?.emit(this);
       heading.onClick();
-    };
-
-    const onContextMenu = (event: React.MouseEvent) => {
-      event.preventDefault();
-      heading.onClick();
-      this.props.contextMenu.open(event.clientX - 2, event.clientY - 4);
     };
 
     let content = this.props.itemRenderer(heading, toc);
     if (!content) {
       return null;
     }
-    const FLG = NestedCodeCells(this.props.toc, heading);
     return (
-      <li onClick={onClick} onContextMenu={FLG ? onContextMenu : undefined}>
+      <li
+        className="jp-tocItem"
+        onClick={onClick}
+        onContextMenu={(event: React.SyntheticEvent<HTMLSpanElement>) => {
+          this.props.entryClicked?.emit(this);
+          heading.onClick();
+        }}
+      >
         {content}
       </li>
     );

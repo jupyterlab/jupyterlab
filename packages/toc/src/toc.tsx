@@ -13,11 +13,11 @@ import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { CommandRegistry } from '@lumino/commands';
-import { IHeading, INotebookHeading } from './utils/headings';
+import { IHeading } from './utils/headings';
 import { TableOfContentsRegistry as Registry } from './registry';
-import { CommandIDs, TOCTree } from './toc_tree';
-import { NestedCodeCells } from './toc_item';
+import { TOCTree } from './toc_tree';
+import { Signal } from '@lumino/signaling';
+import { TOCItem } from './toc_item';
 
 /**
  * Timeout for throttling ToC rendering.
@@ -43,35 +43,17 @@ export class TableOfContents extends Widget {
     this._rendermime = options.rendermime;
     this._trans = this.translator.load('jupyterlab');
     this._toc = [];
+    this._entryClicked = new Signal<TableOfContents, TOCItem>(this);
+    this._entryClicked.connect((toc, item) => {
+      this.activeEntry = item.props.heading;
+    });
     if (this._current) {
       this._toc = this._current.generator.generate(
         this._current.widget,
         this._current.generator.options
       );
     }
-    this._commands = options.commands;
-    this.addCommands();
   }
-
-  /**
-   * Adds commands to command registry.
-   *
-   * @param commands - command registry
-   * @param toc - List of headings
-   * @returns
-   */
-  addCommands = () => {
-    this._commands.addCommand(CommandIDs.runCells, {
-      execute: args => {
-        const pos = args['position'] as number;
-        const heading = this._toc[pos];
-        let code: INotebookHeading[];
-        code = [];
-        return NestedCodeCells(this._toc, heading, code);
-      },
-      label: this._trans.__('Run Cell(s)')
-    });
-  };
 
   /**
    * Current widget-generator tuple for the ToC.
@@ -170,7 +152,7 @@ export class TableOfContents extends Widget {
         <TOCTree
           title={title}
           toc={this._toc}
-          commands={this._commands}
+          entryClicked={this._entryClicked}
           generator={this.generator}
           itemRenderer={itemRenderer}
           toolbar={this._toolbar}
@@ -188,6 +170,17 @@ export class TableOfContents extends Widget {
     });
   }
 
+  get activeEntry(): IHeading {
+    return this._activeEntry;
+  }
+  set activeEntry(value: IHeading) {
+    this._activeEntry = value;
+  }
+
+  get headings(): IHeading[] {
+    return this._toc;
+  }
+
   /**
    * Callback invoked to re-render after showing a table of contents.
    *
@@ -198,13 +191,14 @@ export class TableOfContents extends Widget {
   }
 
   private translator: ITranslator;
+  private _activeEntry: IHeading;
+  private _entryClicked?: Signal<TableOfContents, TOCItem>;
   private _trans: TranslationBundle;
   private _toolbar: any;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
   private _current: TableOfContents.ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
-  private _commands: CommandRegistry;
   private _toc: IHeading[];
 }
 
@@ -230,11 +224,6 @@ export namespace TableOfContents {
      * Application language translator.
      */
     translator?: ITranslator;
-
-    /**
-     * Application command registry.
-     */
-    commands: CommandRegistry;
   }
 
   /**
