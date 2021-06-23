@@ -16,4 +16,7 @@ export class ProviderMock implements IDocumentProvider {
   destroy(): void {
     /* nop */
   }
+  setPath(path: string): void {
+    /* nop */
+  }
 }

@@ -13,6 +13,7 @@ acquireLockMessageType = 127
 releaseLockMessageType = 126
 requestInitializedContentMessageType = 125
 putInitializedContentMessageType = 124
+renameSession = 123
 
 class YjsRoom:
     def __init__(self):
@@ -32,14 +33,15 @@ class YJSEchoWS(WebSocketHandler):
         if room is None:
             room = YjsRoom()
             cls.rooms[self.room_id] = room
-        room.clients[self.id] = ( IOLoop.current(), self.hook_send_message )
+        room.clients[self.id] = ( IOLoop.current(), self.hook_send_message, self )
         # Send SyncStep1 message (based on y-protocols)
         self.write_message(bytes([0, 0, 1, 0]), binary=True)
 
     def on_message(self, message):
         #print("[YJSEchoWS]: message, ", message)
         cls = self.__class__
-        room = cls.rooms.get(self.room_id)
+        room_id = self.room_id
+        room = cls.rooms.get(room_id)
         if message[0] == acquireLockMessageType: # tries to acquire lock
             now = int(time.time())
             if room.lock is None or now - room.lock > 15: # no lock or timeout
@@ -59,8 +61,16 @@ class YJSEchoWS(WebSocketHandler):
         elif message[0] == putInitializedContentMessageType:
             # print("client put initialized content")
             room.content = message[1:]
+        elif message[0] == renameSession:
+            # We move the room to a different entry and also change the room_id property of each connected client
+            new_room_id = message[1:].decode("utf-8")
+            for client_id, (loop, hook_send_message, client) in room.clients.items() :
+                client.room_id = new_room_id
+            cls.rooms.pop(room_id)
+            cls.rooms[new_room_id] = room
+            # print("renamed room to " + new_room_id + ". Old room name was " + room_id)
         elif room:
-            for client_id, (loop, hook_send_message) in room.clients.items() :
+            for client_id, (loop, hook_send_message, client) in room.clients.items() :
                 if self.id != client_id :
                     loop.add_callback(hook_send_message, message)
 
