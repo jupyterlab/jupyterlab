@@ -29,7 +29,7 @@ import {
 } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
-import { NestedCodeCells } from '@jupyterlab/toc';
+import { runNestedCodeCells } from '@jupyterlab/toc/src/utils/headings';
 
 /**
  * The command IDs used by TOC item.
@@ -88,7 +88,7 @@ async function activateTOC(
 
   app.commands.addCommand(CommandIDs.runCells, {
     execute: args => {
-      return NestedCodeCells(toc.headings, toc.activeEntry, []);
+      return runNestedCodeCells(toc.headings, toc.activeEntry);
     },
     label: trans.__('Run Cell(s)')
   });
