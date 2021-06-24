@@ -74,14 +74,8 @@ function generate(editor: IDocumentWidget<FileEditor>): IHeading[] {
    * @returns cleaned line of code
    */
   function clean_declaration_code_string(line: string): string {
-    let first_paren = line.indexOf('(');
-    let first_colon = line.indexOf(':');
-    let last_char = Math.min(
-      first_paren || Infinity,
-      first_colon || Infinity,
-      line.length
-    );
-    return line.slice(0, last_char);
+    const candidates = [line.indexOf('('), line.indexOf(':'), line.length];
+    return line.slice(0, Math.min(...candidates.filter(n => n >= 0)));
   }
 }
 
