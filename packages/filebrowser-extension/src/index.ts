@@ -120,21 +120,6 @@ namespace CommandIDs {
   export const search = 'filebrowser:search';
 }
 
-namespace Selectors {
-  // matches the text in the filebrowser; relies on an implementation detail
-  // being the text of the listing element being substituted with input
-  // area to deactivate shortcuts when the file name is being edited.
-  export const selectorBrowser =
-    '.jp-DirListing-content .jp-DirListing-itemText';
-  // matches anywhere on filebrowser
-  export const selectorContent = '.jp-DirListing-content';
-  // matches all filebrowser items
-  export const selectorItem = '.jp-DirListing-item[data-isdir]';
-  // matches only non-directory items
-  export const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
-  export const selectorHeader = '.jp-DirListing-header';
-}
-
 /**
  * The file browser namespace token.
  */
