@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, CodeCell} from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
 
 /**
@@ -90,7 +90,7 @@ interface INotebookHeading extends INumberedHeading {
  * @param heading - heading to test
  * @returns boolean indicating whether a heading is a notebook heading
  */
- const isNotebookHeading = (heading: any): heading is INotebookHeading => {
+const isNotebookHeading = (heading: any): heading is INotebookHeading => {
   return heading.type !== undefined && heading.cellRef !== undefined;
 };
 
@@ -101,12 +101,12 @@ interface INotebookHeading extends INumberedHeading {
  * @param headings - list of headings
  * @param heading - heading
  */
- const runNestedCodeCells = (headings: IHeading[], heading: IHeading) => {
+const runNestedCodeCells = (headings: IHeading[], heading: IHeading) => {
   let h: INotebookHeading;
   let i: number;
 
   if (!isNotebookHeading(heading)) {
-    return ;
+    return;
   }
 
   let runCode: INotebookHeading[] = [];

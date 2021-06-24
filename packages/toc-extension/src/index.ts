@@ -29,7 +29,7 @@ import {
 } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
-import { runNestedCodeCells } from '@jupyterlab/toc/src/utils/headings';
+import { runNestedCodeCells } from '@jupyterlab/toc';
 
 /**
  * The command IDs used by TOC item.
