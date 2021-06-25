@@ -83,13 +83,13 @@ export const moonsOfJupyter = [
 
 /**
  * Get a random user-name based on the moons of Jupyter.
- * This function retuns names like "Anonymous Io" or "Anonymous Metis".
+ * This function returns names like "Anonymous Io" or "Anonymous Metis".
  */
 export const getAnonymousUserName = (): string =>
   'Anonymous ' +
   moonsOfJupyter[Math.floor(Math.random() * moonsOfJupyter.length)];
 
-export const usercolors = [
+export const userColors = [
   '#12A0D3',
   '#17AB30',
   '#CC8500',
@@ -101,4 +101,4 @@ export const usercolors = [
 ];
 
 export const getRandomColor = (): string =>
-  usercolors[Math.floor(Math.random() * usercolors.length)];
+  userColors[Math.floor(Math.random() * userColors.length)];

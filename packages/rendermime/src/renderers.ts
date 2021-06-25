@@ -398,7 +398,7 @@ export namespace renderMarkdown {
     latexTypesetter: IRenderMime.ILatexTypesetter | null;
 
     /**
-     * The application languate translator.
+     * The application language translator.
      */
     translator?: ITranslator;
   }

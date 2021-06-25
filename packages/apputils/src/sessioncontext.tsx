@@ -1197,7 +1197,7 @@ export namespace SessionContext {
 }
 
 /**
- * The default implementation of the client sesison dialog provider.
+ * The default implementation of the client session dialog provider.
  */
 export const sessionContextDialogs: ISessionContext.IDialogs = {
   /**

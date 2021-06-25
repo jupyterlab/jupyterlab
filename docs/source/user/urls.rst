@@ -199,7 +199,7 @@ For example, if your workspace looks like this:
     }
   }
 
-It will run the `docmanager:open` with the `{ "path": "package.json", "factory": "JSON" }` args, because the `application-mimedocuments` tracker is registerd with the `docmanager:open` command, like this:
+It will run the `docmanager:open` with the `{ "path": "package.json", "factory": "JSON" }` args, because the `application-mimedocuments` tracker is registered with the `docmanager:open` command, like this:
 
 
 .. code-block:: typescript
@@ -216,4 +216,4 @@ It will run the `docmanager:open` with the `{ "path": "package.json", "factory":
       `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
   });
 
-Not that the part of the data key after the first `:`, `package.json:JSON` is dropped and is irrelevent.
+Not that the part of the data key after the first `:`, `package.json:JSON` is dropped and is irrelevant.

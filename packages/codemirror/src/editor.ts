@@ -339,7 +339,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Set config options for the editor.
    *
-   * This method is prefered when setting several options. The
+   * This method is preferred when setting several options. The
    * options are set within an operation, which only performs
    * the costly update at the end, and not after every option
    * is set.
@@ -510,9 +510,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   getRange(
     from: CodeMirror.Position,
     to: CodeMirror.Position,
-    seperator?: string
+    separator?: string
   ): string {
-    return this._editor.getDoc().getRange(from, to, seperator);
+    return this._editor.getDoc().getRange(from, to, separator);
   }
 
   /**
@@ -957,7 +957,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     switch (args.type) {
       case 'insert': {
         const pos = doc.posFromIndex(args.start);
-        // Replace the range, including a '+input' orign,
+        // Replace the range, including a '+input' origin,
         // which indicates that CodeMirror may merge changes
         // for undo/redo purposes.
         doc.replaceRange(args.value, pos, pos, '+input');
@@ -966,7 +966,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       case 'remove': {
         const from = doc.posFromIndex(args.start);
         const to = doc.posFromIndex(args.end);
-        // Replace the range, including a '+input' orign,
+        // Replace the range, including a '+input' origin,
         // which indicates that CodeMirror may merge changes
         // for undo/redo purposes.
         doc.replaceRange('', from, to, '+input');
@@ -1463,7 +1463,7 @@ namespace Private {
   }
 
   /**
-   * Delete spaces to the previous tab stob in a codemirror editor.
+   * Delete spaces to the previous tab stop in a codemirror editor.
    */
   export function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
     const doc = cm.getDoc();

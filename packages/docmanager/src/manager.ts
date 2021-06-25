@@ -565,7 +565,7 @@ export class DocumentManager implements IDocumentManager {
       return undefined;
     }
 
-    // Handle the kernel pereference.
+    // Handle the kernel preference.
     const preference = this.registry.getKernelPreference(
       path,
       widgetFactory.name,
@@ -670,7 +670,7 @@ export namespace DocumentManager {
     sessionDialogs?: ISessionContext.IDialogs;
 
     /**
-     * The applicaton language translator.
+     * The application language translator.
      */
     translator?: ITranslator;
 

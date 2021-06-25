@@ -39,7 +39,7 @@ Dissecting the 'filebrowser' example
 ------------------------------------
 
 The filebrowser example provides a stand-alone implementation of a
-filebrowser. Here's what the filebrowser's user interface looks like:
+filebrowser. Here's what the filebrowser’s user interface looks like:
 
 |filebrowser user interface|
 

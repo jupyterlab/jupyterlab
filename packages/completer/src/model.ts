@@ -236,7 +236,7 @@ export class CompleterModel implements Completer.IModel {
    * ```
    * ['function', 'instance', 'class', 'module', 'keyword']
    * ```
-   * and then has any remaining types listed alphebetically. This will give
+   * and then has any remaining types listed alphabetically. This will give
    * reliable visual encoding for these known types, but allow kernels to
    * provide new types.
    */

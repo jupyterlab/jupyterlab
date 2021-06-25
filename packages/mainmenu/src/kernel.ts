@@ -86,7 +86,7 @@ export namespace IKernelMenu {
      * A function to return the label associated to the `restartKernelAndClear` action.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     restartKernelAndClearLabel?: (n: number) => string;
   }

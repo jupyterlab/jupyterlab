@@ -30,7 +30,7 @@ export interface IKernelspecMetadata extends PartialJSONObject {
 }
 
 /**
- * The language info metatda
+ * The language info metadata
  */
 export interface ILanguageInfoMetadata extends PartialJSONObject {
   name: string;

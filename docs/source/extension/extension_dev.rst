@@ -51,7 +51,7 @@ A JupyterLab plugin is the basic unit of extensibility in JupyterLab. An extensi
 
 An extension can be published both as a source extension on NPM and as a prebuilt extension (e.g., published as a Python package). In some cases, system administrators may even choose to install a prebuilt extension by directly copying the prebuilt bundle to an appropriate directory, circumventing the need to create a Python package. If a source extension and a prebuilt extension with the same name are installed in JupyterLab, the prebuilt extension takes precedence.
 
-Because prebuilt extensions do not require a JupyterLab rebuild, they have a distinct advantage in multiuser systems where JuptyerLab is installed at the system level. On such systems, only the system administrator has permissions to rebuild JupyterLab and install source extensions. Since prebuilt extensions can be installed at the per-user level, the per-environment level, or the system level, each user can have their own separate set of prebuilt extensions that are loaded dynamically in their browser on top of the system-wide JupyterLab.
+Because prebuilt extensions do not require a JupyterLab rebuild, they have a distinct advantage in multiuser systems where JupyterLab is installed at the system level. On such systems, only the system administrator has permissions to rebuild JupyterLab and install source extensions. Since prebuilt extensions can be installed at the per-user level, the per-environment level, or the system level, each user can have their own separate set of prebuilt extensions that are loaded dynamically in their browser on top of the system-wide JupyterLab.
 
 .. tip::
    We recommend publishing prebuilt extensions in Python packages for user convenience.
@@ -626,7 +626,7 @@ If you want to test a source extension against the unreleased versions of Jupyte
     jupyter lab --watch --splice-source
 
 This command will splice the local ``packages`` directory into the application directory, allowing you to build source extension(s)
-against the current development sources.  To statically build spliced sources, use ``jupyter lab build --splice-source``.  Once a spliced build is created, any subsquent calls to `jupyter labextension build` will be in splice mode by default.  A spliced build can be forced by calling ``jupyter labextension build --splice-source``. Note that :ref:`developing a prebuilt extension <prebuilt_dev_workflow>` against a development version of JupyterLab is generally much easier than source package building.
+against the current development sources.  To statically build spliced sources, use ``jupyter lab build --splice-source``.  Once a spliced build is created, any subsequent calls to `jupyter labextension build` will be in splice mode by default.  A spliced build can be forced by calling ``jupyter labextension build --splice-source``. Note that :ref:`developing a prebuilt extension <prebuilt_dev_workflow>` against a development version of JupyterLab is generally much easier than source package building.
 
 The package should export EMCAScript 6 compatible JavaScript. It can
 import CSS using the syntax ``require('foo.css')``. The CSS files can

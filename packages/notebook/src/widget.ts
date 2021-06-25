@@ -545,7 +545,7 @@ export class StaticNotebook extends Widget {
     ) {
       // We have an observer and we are have been asked to push (not to insert).
       // and we are above the number of cells to render directly, then
-      // we will add a placeholder and let the instersection observer or the
+      // we will add a placeholder and let the intersection observer or the
       // idle browser render those placeholder cells.
       this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
       const placeholder = this._createPlaceholderCell(
@@ -1028,7 +1028,7 @@ export namespace StaticNotebook {
   }
 
   /**
-   * A namespace for the staic notebook content factory.
+   * A namespace for the static notebook content factory.
    */
   export namespace ContentFactory {
     /**
