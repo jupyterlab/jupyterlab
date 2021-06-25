@@ -51,7 +51,8 @@ export class CompletionHandler implements IDisposable {
 
   /**
    * The data connector used to populate completion requests.
-   * @deprecated use `CompletionHandler.ICompletionItesConnector` instead of `IDataConnector`
+   * @deprecated will be removed, or will return `CompletionHandler.ICompletionItemsConnector`
+   * instead of `IDataConnector` in future versions
    *
    * #### Notes
    * The only method of this connector that will ever be called is `fetch`, so
@@ -555,6 +556,9 @@ export namespace CompletionHandler {
      * The only method of this connector that will ever be called is `fetch`, so
      * it is acceptable for the other methods to be simple functions that return
      * rejected promises.
+     *
+     * @deprecated will be removed, or will return `CompletionHandler.ICompletionItemsConnector`
+     * instead of `IDataConnector` in future versions
      */
     connector:
       | IDataConnector<IReply, void, IRequest>
