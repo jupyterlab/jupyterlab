@@ -18,7 +18,11 @@ import {
   CodeMirrorIntegration,
   IEditorRange
 } from '../editor_integration/codemirror';
-import { FeatureSettings, IFeatureLabIntegration } from '../feature';
+import {
+  FeatureSettings,
+  IEditorIntegrationOptions,
+  IFeatureLabIntegration
+} from '../feature';
 import { IRootPosition, IVirtualPosition, is_equal } from '../positioning';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { getModifierState } from '../utils';
@@ -48,6 +52,18 @@ class ResponseCache {
   }
 
   store(item: IResponseData) {
+    const previousIndex = this._data.findIndex(
+      previous =>
+        previous.document === item.document &&
+        is_equal(previous.editor_range.start, item.editor_range.start) &&
+        is_equal(previous.editor_range.end, item.editor_range.end) &&
+        previous.editor_range.editor === item.editor_range.editor
+    );
+    if (previousIndex !== -1) {
+      this._data[previousIndex] = item;
+      return;
+    }
+
     if (this._data.length >= this.maxSize) {
       this._data.shift();
     }
@@ -85,6 +101,12 @@ export class HoverCM extends CodeMirrorIntegration {
 
   private debounced_get_hover: Throttler<Promise<lsProtocol.Hover>>;
   private tooltip: FreeTooltip;
+  private _previousHoverRequest: Promise<Promise<lsProtocol.Hover>> | null;
+
+  constructor(options: IEditorIntegrationOptions) {
+    super(options);
+    this._previousHoverRequest = null;
+  }
 
   protected get modifierKey(): ModifierKey {
     return this.settings.composite.modifierKey;
@@ -111,7 +133,8 @@ export class HoverCM extends CodeMirrorIntegration {
       return (
         line >= range.start.line &&
         line <= range.end.line &&
-        (line != range.start.line || ch >= range.start.character) &&
+        // need to be non-overlapping see https://github.com/krassowski/jupyterlab-lsp/issues/628
+        (line != range.start.line || ch > range.start.character) &&
         (line != range.end.line || ch <= range.end.character)
       );
     });
@@ -380,10 +403,27 @@ export class HoverCM extends CodeMirrorIntegration {
       this.virtual_position = virtual_position;
       this.last_hover_character = root_position;
 
+      // if we already sent a request, maybe it already covers the are of interest?
+      // not harm waiting as the server won't be able to help us anyways
+      if (this._previousHoverRequest) {
+        await Promise.race([
+          this._previousHoverRequest,
+          // just in case if the request stalled, set a timeout so we do not
+          // get stuck indefinitely
+          new Promise(resolve => {
+            return setTimeout(resolve, 1000);
+          })
+        ]);
+      }
       let response_data = this.restore_from_cache(document, virtual_position);
 
       if (response_data == null) {
-        let response = await this.debounced_get_hover.invoke();
+        const promise = this.debounced_get_hover.invoke();
+        this._previousHoverRequest = promise;
+        let response = await promise;
+        if (this._previousHoverRequest === promise) {
+          this._previousHoverRequest = null;
+        }
         if (this.is_useful_response(response)) {
           let ce_editor = this.virtual_editor.get_editor_at_root_position(
             root_position
