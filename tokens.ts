@@ -46,6 +46,7 @@ export type TLanguageServerId =
 export type TServerKeys = TLanguageServerId;
 
 export type TSessionMap = Map<TServerKeys, SCHEMA.LanguageServerSession>;
+export type TSpecsMap = Map<TServerKeys, SCHEMA.LanguageServerSpec>;
 
 export type TLanguageServerConfigurations = Partial<
   Record<TServerKeys, LSPLanguageServerSettings>
@@ -55,11 +56,18 @@ export interface ILanguageServerManager {
   sessionsChanged: ISignal<ILanguageServerManager, void>;
   sessions: TSessionMap;
   /**
-   * An ordered list of matching servers, with servers of higher priority higher in the list
+   * An ordered list of matching >running< sessions, with servers of higher priority higher in the list
    */
   getMatchingServers(
     options: ILanguageServerManager.IGetServerIdOptions
   ): TLanguageServerId[];
+
+  /**
+   * A list of all known matching specs (whether detected or not).
+   */
+  getMatchingSpecs(
+    options: ILanguageServerManager.IGetServerIdOptions
+  ): TSpecsMap;
   setConfiguration(configuration: TLanguageServerConfigurations): void;
   fetchSessions(): Promise<void>;
   statusUrl: string;

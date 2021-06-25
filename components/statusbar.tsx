@@ -39,7 +39,8 @@ import {
   ILSPAdapterManager,
   ILanguageServerManager,
   TSessionMap,
-  TLanguageServerId
+  TLanguageServerId,
+  TSpecsMap
 } from '../tokens';
 import { VirtualDocument, collect_documents } from '../virtual/document';
 
@@ -84,7 +85,7 @@ class CollapsibleList extends React.Component<
   IListProps,
   ICollapsibleListStates
 > {
-  constructor(props: any) {
+  constructor(props: IListProps) {
     super(props);
     this.state = { isCollapsed: props.startCollapsed || false };
   }
@@ -112,6 +113,131 @@ class CollapsibleList extends React.Component<
         </h4>
         <div>{this.props.list}</div>
       </div>
+    );
+  }
+}
+
+interface IHelpButtonProps {
+  language: string;
+  servers: TSpecsMap;
+  trans: TranslationBundle;
+}
+
+interface ILanguageServerInfo {
+  serverId: TLanguageServerId;
+  specs: SCHEMA.LanguageServerSpec;
+  trans: TranslationBundle;
+}
+
+class LanguageServerInfo extends React.Component<ILanguageServerInfo, any> {
+  render() {
+    const specification = this.props.specs;
+    const trans = this.props.trans;
+    return (
+      <div>
+        <h3>{specification.display_name}</h3>
+        <div>
+          <ul className={'lsp-server-links-list'}>
+            {Object.entries(specification?.urls || {}).map(([name, url]) => (
+              <li key={this.props.serverId + '-url-' + name}>
+                {name}:{' '}
+                <a href={url} target="_blank" rel="noreferrer">
+                  {url}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <h4>{trans.__('Troubleshooting')}</h4>
+          <p className={'lsp-troubleshoot-section'}>
+            {specification.troubleshoot
+              ? specification.troubleshoot
+              : trans.__(
+                  'In case of issues with installation feel welcome to ask a question on GitHub.'
+                )}
+          </p>
+          <h4>{trans.__('Installation')}</h4>
+          <ul>
+            {Object.entries(specification?.install || {}).map(
+              ([name, command]) => (
+                <li key={this.props.serverId + '-install-' + name}>
+                  {name}: <code>{command}</code>
+                </li>
+              )
+            )}
+          </ul>
+        </div>
+      </div>
+    );
+  }
+}
+
+class HelpButton extends React.Component<IHelpButtonProps, any> {
+  handleClick = () => {
+    const trans = this.props.trans;
+
+    showDialog({
+      title: trans.__(
+        'No language server for %1 detected',
+        this.props.language
+      ),
+      body: (
+        <div>
+          {this.props.servers.size ? (
+            <div>
+              <p>
+                {trans._n(
+                  'There is %1 language server you can easily install that supports %2.',
+                  'There are %1 language servers you can easily install that supports %2.',
+                  this.props.servers.size,
+                  this.props.language
+                )}
+              </p>
+              {[...this.props.servers.entries()].map(([key, specification]) => (
+                <LanguageServerInfo
+                  specs={specification}
+                  serverId={key}
+                  key={key}
+                  trans={trans}
+                />
+              ))}
+            </div>
+          ) : (
+            <div>
+              <p>
+                {trans.__(
+                  'We do not have an auto-detection ready for a language servers supporting %1 yet.',
+                  this.props.language
+                )}
+              </p>
+              <p>
+                {trans.__(
+                  'You may contribute a specification for auto-detection as described in our '
+                )}{' '}
+                <a
+                  href={
+                    'https://jupyterlab-lsp.readthedocs.io/en/latest/Contributing.html#specs'
+                  }
+                >
+                  {trans.__('documentation')}
+                </a>
+              </p>
+            </div>
+          )}
+        </div>
+      ),
+      buttons: [okButton()]
+    }).catch(console.warn);
+  };
+
+  render() {
+    return (
+      <button
+        type={'button'}
+        className={'jp-Button lsp-help-button'}
+        onClick={this.handleClick}
+      >
+        ?
+      </button>
     );
   }
 }
@@ -191,11 +317,26 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
     }
 
     const missing_languages = this.model.missing_languages.map(
-      (language, i) => (
-        <div key={i} className={'lsp-missing-server'}>
-          {language}
-        </div>
-      )
+      (language, i) => {
+        const specs_for_missing = this.model.language_server_manager.getMatchingSpecs(
+          { language }
+        );
+        console.log(specs_for_missing);
+        return (
+          <div key={i} className={'lsp-missing-server'}>
+            {language}
+            {specs_for_missing.size ? (
+              <HelpButton
+                language={language}
+                servers={specs_for_missing}
+                trans={this.model.trans}
+              />
+            ) : (
+              ''
+            )}
+          </div>
+        );
+      }
     );
     return (
       <div className={'lsp-popover-content'}>
@@ -324,7 +465,12 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
           kind={'statusBar'}
           title={this.trans.__('LSP Code Intelligence')}
         />
-        {this.displayText ? <TextItem source={model.short_message} /> : null}
+        {this.displayText ? (
+          <TextItem
+            className={'lsp-status-message'}
+            source={model.short_message}
+          />
+        ) : null}
         <TextItem source={model.feature_message} />
       </GroupItem>
     );
@@ -338,7 +484,7 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
       showDialog({
         title: this.trans.__('LSP server extension not found'),
         body: SERVER_EXTENSION_404,
-        buttons: [okButton({ label: this.trans.__('OK') })]
+        buttons: [okButton()]
       }).catch(console.warn);
     } else {
       this._popup = showPopup({

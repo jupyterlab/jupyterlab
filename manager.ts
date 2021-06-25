@@ -8,7 +8,8 @@ import {
   ILSPLogConsole,
   TLanguageServerConfigurations,
   TLanguageServerId,
-  TSessionMap
+  TSessionMap,
+  TSpecsMap
 } from './tokens';
 
 export class LanguageServerManager implements ILanguageServerManager {
@@ -17,6 +18,8 @@ export class LanguageServerManager implements ILanguageServerManager {
     void
   >(this);
   protected _sessions: TSessionMap = new Map();
+  protected _specs: TSpecsMap = new Map();
+  protected _version: number;
   private _settings: ServerConnection.ISettings;
   private _baseUrl: string;
   private _statusCode: number;
@@ -35,6 +38,10 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._configuration = {};
     this.console = options.console;
     this.fetchSessions().catch(console.warn);
+  }
+
+  get specs() {
+    return this._specs;
   }
 
   get statusUrl() {
@@ -74,6 +81,19 @@ export class LanguageServerManager implements ILanguageServerManager {
     return b_priority - a_priority;
   }
 
+  protected isMatchingSpec(
+    options: ILanguageServerManager.IGetServerIdOptions,
+    spec: SCHEMA.LanguageServerSpec
+  ) {
+    // most things speak language
+    // if language is not known, it is guessed based on MIME type earlier
+    // so some language should be available by now (which can be not obvious, e.g. "plain" for txt documents)
+    const lowerCaseLanguage = options.language.toLocaleLowerCase();
+    return spec.languages.some(
+      language => language.toLocaleLowerCase() == lowerCaseLanguage
+    );
+  }
+
   getMatchingServers(options: ILanguageServerManager.IGetServerIdOptions) {
     if (!options.language) {
       this.console.error(
@@ -83,22 +103,25 @@ export class LanguageServerManager implements ILanguageServerManager {
     }
 
     const matchingSessionsKeys: TLanguageServerId[] = [];
-    const lowerCaseLanguage = options.language.toLocaleLowerCase();
 
-    // most things speak language
-    // if language is not known, it is guessed based on MIME type earlier
-    // so some language should be available by now (which can be not obvious, e.g. "plain" for txt documents)
     for (const [key, session] of this._sessions.entries()) {
-      if (
-        session.spec.languages.some(
-          language => language.toLocaleLowerCase() == lowerCaseLanguage
-        )
-      ) {
+      if (this.isMatchingSpec(options, session.spec)) {
         matchingSessionsKeys.push(key);
       }
     }
 
     return matchingSessionsKeys.sort(this._comparePriorities.bind(this));
+  }
+
+  getMatchingSpecs(options: ILanguageServerManager.IGetServerIdOptions) {
+    const result: TSpecsMap = new Map();
+
+    for (const [key, specification] of this._specs.entries()) {
+      if (this.isMatchingSpec(options, specification)) {
+        result.set(key, specification);
+      }
+    }
+    return result;
   }
 
   get statusCode(): number {
@@ -126,7 +149,14 @@ export class LanguageServerManager implements ILanguageServerManager {
     let sessions: SCHEMA.Sessions;
 
     try {
-      sessions = (await response.json()).sessions;
+      const data = await response.json();
+      sessions = data.sessions;
+      try {
+        this._version = data.version;
+        this._specs = new Map(Object.entries(data.specs)) as TSpecsMap;
+      } catch (err) {
+        console.warn(err);
+      }
     } catch (err) {
       console.warn(err);
       return;
