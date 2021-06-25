@@ -1379,7 +1379,7 @@ export namespace CodeMirrorEditor {
   export function addCommand(
     name: string,
     command: (cm: CodeMirror.Editor) => void
-  ) {
+  ): void {
     (CodeMirror.commands as any)[name] = command;
   }
 }
@@ -1530,6 +1530,9 @@ namespace Private {
   ): void {
     const el = editor.getWrapperElement();
     switch (option) {
+      case 'cursorBlinkRate':
+        (editor.setOption as any)(option, value);
+        break;
       case 'lineWrap': {
         const lineWrapping = value === 'off' ? false : true;
         const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
