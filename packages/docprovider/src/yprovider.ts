@@ -7,7 +7,7 @@ import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
 import { WebsocketProvider } from 'y-websocket';
 import * as Y from 'yjs';
-import { IDocumentProviderFactory } from './tokens';
+import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
 import { getAnonymousUserName, getRandomColor } from './awareness';
 import * as env from 'lib0/environment';
 
@@ -17,17 +17,30 @@ import * as env from 'lib0/environment';
  * The user can specify their own user-name and user-color by adding urlparameters:
  *   ?username=Alice&usercolor=007007
  * wher usercolor must be a six-digit hexadicimal encoded RGB value without the hash token.
+ *
+ * We specify custom messages that the server can interpret. For reference please look in yjs_ws_server.
+ *
  */
-export class WebSocketProviderWithLocks extends WebsocketProvider {
+export class WebSocketProviderWithLocks
+  extends WebsocketProvider
+  implements IDocumentProvider {
   /**
    * Construct a new WebSocketProviderWithLocks
    *
    * @param options The instantiation options for a WebSocketProviderWithLocks
    */
   constructor(options: WebSocketProviderWithLocks.IOptions) {
-    super(options.url, options.guid, options.ymodel.ydoc, {
-      awareness: options.ymodel.awareness
-    });
+    super(
+      options.url,
+      options.contentType + ':' + options.path,
+      options.ymodel.ydoc,
+      {
+        awareness: options.ymodel.awareness
+      }
+    );
+    this._path = options.path;
+    this._contentType = options.contentType;
+    this._serverUrl = options.url;
     const color = '#' + env.getParam('--usercolor', getRandomColor().slice(1));
     const name = env.getParam('--username', getAnonymousUserName());
     const awareness = options.ymodel.awareness;
@@ -81,6 +94,29 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     this._isInitialized = false;
     this._onConnectionStatus = this._onConnectionStatus.bind(this);
     this.on('status', this._onConnectionStatus);
+  }
+
+  setPath(newPath: string): void {
+    if (newPath !== this._path) {
+      this._path = newPath;
+      // The next time the provider connects, we should connect through a different server url
+      this.bcChannel =
+        this._serverUrl + '/' + this._contentType + ':' + this._path;
+      this.url = this.bcChannel;
+      const encoder = encoding.createEncoder();
+      encoding.write(encoder, 123);
+      // writing a utf8 string to the encoder
+      const escapedPath = unescape(
+        encodeURIComponent(this._contentType + ':' + newPath)
+      );
+      for (let i = 0; i < escapedPath.length; i++) {
+        encoding.write(
+          encoder,
+          /** @type {number} */ escapedPath.codePointAt(i)!
+        );
+      }
+      this._sendMessage(encoding.toUint8Array(encoder));
+    }
   }
 
   /**
@@ -198,6 +234,9 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     }
   }
 
+  private _path: string;
+  private _contentType: string;
+  private _serverUrl: string;
   private _isInitialized: boolean;
   private _currentLockRequest: {
     promise: Promise<number>;
