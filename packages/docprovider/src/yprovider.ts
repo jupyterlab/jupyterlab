@@ -102,7 +102,7 @@ export class WebSocketProviderWithLocks
         color = '#' + getRandomColor().slice(1);
       }
       // only set if this was not already set by another plugin
-      if (currState && currState.name == null) {
+      if (currState && currState.user?.name == null) {
         options.ymodel.awareness.setLocalStateField('user', {
           name,
           color
@@ -123,7 +123,7 @@ export class WebSocketProviderWithLocks
         color = userColor as string;
       }
       // only set if this was not already set by another plugin
-      if (currState && currState.name == null) {
+      if (currState && currState.user?.name == null) {
         options.ymodel.awareness.setLocalStateField('user', {
           name,
           color
