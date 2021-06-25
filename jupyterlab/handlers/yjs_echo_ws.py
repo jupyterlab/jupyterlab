@@ -9,11 +9,21 @@ import time
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
+## The y-protocol defines messages types that just need to be propagated to all other peers.
+## Here, we define some additional messageTypes that the server can interpret.
+## Messages that the server can't interpret should be broadcasted to all other clients.
+
+# The client is asking for a lock. Should return a lock-identifier if one is available.
 acquireLockMessageType = 127
+# The client is asking to release a lock to make it available to other users again.
 releaseLockMessageType = 126
+# The client is asking to retrieve the initial state of the Yjs document. Return an empty buffer when nothing is available.
 requestInitializedContentMessageType = 125
+# The client retrieved an empty "initial content" and generated the initial state of the document after acquiring a lock. Store this.
 putInitializedContentMessageType = 124
-renameSession = 123
+# The client moved the document to a different location. After receiving this message, we make the current document available under a different url.
+# The other clients are automatically notified of this change because the path is shared through the Yjs document as well.
+renameSessionMessageType = 123
 
 class YjsRoom:
     def __init__(self):
@@ -61,7 +71,7 @@ class YJSEchoWS(WebSocketHandler):
         elif message[0] == putInitializedContentMessageType:
             # print("client put initialized content")
             room.content = message[1:]
-        elif message[0] == renameSession:
+        elif message[0] == renameSessionMessageType:
             # We move the room to a different entry and also change the room_id property of each connected client
             new_room_id = message[1:].decode("utf-8")
             for client_id, (loop, hook_send_message, client) in room.clients.items() :
