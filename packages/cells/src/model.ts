@@ -611,7 +611,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     if (!executionCount.get()) {
       if (cell && cell.cell_type === 'code') {
         executionCount.set(cell.execution_count || null);
-        outputs = cell.outputs;
+        outputs = cell.outputs ?? [];
         // If output is not empty presume it results of the input code execution
         // TODO load from the notebook file when the dirty state is stored in it
         if (outputs.length > 0) {
@@ -625,7 +625,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
 
     this._modelDBMutex(() => {
       const sharedCell = this.sharedModel as models.ISharedCodeCell;
-      sharedCell.setOutputs(outputs ?? []);
+      sharedCell.setOutputs(outputs);
     });
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
     this._outputs.changed.connect(this.onGenericChange, this);
