@@ -712,6 +712,13 @@ export namespace CodeEditor {
    */
   export interface IConfig {
     /**
+     * Half-period in milliseconds used for cursor blinking.
+     * By setting this to zero, blinking can be disabled.
+     * A negative value hides the cursor entirely.
+     */
+    cursorBlinkRate: number;
+
+    /**
      * User preferred font family for text editors.
      */
     fontFamily: string | null;
@@ -790,6 +797,7 @@ export namespace CodeEditor {
    * The default configuration options for an editor.
    */
   export const defaultConfig: IConfig = {
+    cursorBlinkRate: 530,
     fontFamily: null,
     fontSize: null,
     lineHeight: null,

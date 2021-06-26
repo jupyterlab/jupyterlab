@@ -71,10 +71,13 @@ export class Context<
     const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('context');
-    const guid = this._factory.contentType + ':' + localPath;
     const docProviderFactory = options.docProviderFactory;
     this._provider = docProviderFactory
-      ? docProviderFactory({ guid, ymodel })
+      ? docProviderFactory({
+          path: this._path,
+          contentType: this._factory.contentType,
+          ymodel
+        })
       : new ProviderMock();
 
     this._readyPromise = manager.ready.then(() => {
@@ -100,6 +103,20 @@ export class Context<
     }));
     this.pathChanged.connect((sender, newPath) => {
       urlResolver.path = newPath;
+      if (this._ycontext.get('path') !== newPath) {
+        this._ycontext.set('path', newPath);
+      }
+    });
+    this._ycontext.set('path', this._path);
+    this._ycontext.observe(event => {
+      const pathChanged = event.changes.keys.get('path');
+      if (pathChanged) {
+        const newPath = this._ycontext.get('path')!;
+        this._provider.setPath(newPath);
+        if (newPath && newPath !== this.path) {
+          this.sessionContext.session?.setPath(newPath) as any;
+        }
+      }
     });
   }
 

@@ -665,14 +665,5 @@ async function activateConsole(
     } as IHelpMenu.IKernelUser<ConsolePanel>);
   }
 
-  app.contextMenu.addItem({
-    command: CommandIDs.clear,
-    selector: '.jp-CodeConsole-content'
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.restart,
-    selector: '.jp-CodeConsole'
-  });
-
   return tracker;
 }

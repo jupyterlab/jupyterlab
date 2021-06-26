@@ -36,7 +36,7 @@ function activateForeign(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   palette: ICommandPalette | null
-) {
+): void {
   const trans = translator.load('jupyterlab');
   const { shell } = app;
   tracker.widgetAdded.connect((sender, widget) => {
@@ -103,11 +103,6 @@ function activateForeign(
       args: { isPalette: true }
     });
   }
-
-  app.contextMenu.addItem({
-    command: toggleShowAllActivity,
-    selector: '.jp-CodeConsole'
-  });
 }
 
 /*
