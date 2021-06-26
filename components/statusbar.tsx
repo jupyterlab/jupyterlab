@@ -321,7 +321,9 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
         const specs_for_missing = this.model.language_server_manager.getMatchingSpecs(
           { language }
         );
-        console.log(specs_for_missing);
+        if (language === 'r') {
+          language = 'R';
+        }
         return (
           <div key={i} className={'lsp-missing-server'}>
             {language}
