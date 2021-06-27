@@ -114,6 +114,43 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#executionScheduled', () => {
+      it('should emit only when code cell execution is scheduled', async () => {
+        const cell = widget.activeCell as CodeCell;
+        const next = widget.widgets[1] as MarkdownCell;
+        let emitted = 0;
+        widget.activeCell!.model.value.text = "print('hello')";
+        widget.select(next);
+        cell.model.outputs.clear();
+        next.rendered = false;
+        NotebookActions.executionScheduled.connect(() => {
+          emitted += 1;
+        });
+
+        await NotebookActions.run(widget, sessionContext);
+        expect(emitted).toBe(1);
+        expect(next.rendered).toBe(true);
+      });
+    });
+
+    describe('#executionFailed', () => {
+      it('should emit only when cell execution failed.', async () => {
+        let emitted = 0;
+        NotebookActions.executionFailed.connect(() => {
+          emitted += 1;
+        });
+        widget.activeCell!.model.value.text = ERROR_INPUT;
+        const cell = widget.model!.contentFactory.createCodeCell({});
+        widget.model!.cells.push(cell);
+        widget.select(widget.widgets[widget.widgets.length - 1]);
+        const result = await NotebookActions.run(widget, ipySessionContext);
+        expect(result).toBe(false);
+        expect(cell.executionCount).toBeNull();
+        expect(emitted).toBe(1);
+        await ipySessionContext.session!.kernel!.restart();
+      });
+    });
+
     describe('#splitCell({})', () => {
       it('should split the active cell into two cells', () => {
         const cell = widget.activeCell!;
@@ -553,6 +590,10 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#run()', () => {
       it('should run the selected cells', async () => {
+        let emitted = 0;
+        NotebookActions.allExecuted.connect(() => {
+          emitted += 1;
+        });
         const next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         const cell = widget.activeCell as CodeCell;
@@ -562,55 +603,90 @@ describe('@jupyterlab/notebook', () => {
         expect(result).toBe(true);
         expect(cell.model.outputs.length).toBeGreaterThan(0);
         expect(next.rendered).toBe(true);
+        expect(emitted).toBe(1);
       });
 
       it('should delete deletedCells metadata when cell run', () => {
         const cell = widget.activeCell as CodeCell;
+        let emitted = 0;
+        NotebookActions.allExecuted.connect(() => {
+          emitted += 1;
+        });
         cell.model.outputs.clear();
         return NotebookActions.run(widget, sessionContext).then(result => {
           expect(result).toBe(true);
           expect(widget.model!.deletedCells.length).toBe(0);
+          expect(emitted).toBe(1);
         });
       });
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
+        let emitted = 0;
+        NotebookActions.allExecuted.connect(() => {
+          emitted += 1;
+        });
         const result = await NotebookActions.run(widget, sessionContext);
         expect(result).toBe(false);
+        expect(emitted).toBe(0);
       });
 
       it('should activate the last selected cell', async () => {
         const other = widget.widgets[2];
+        let emitted = 0;
+        NotebookActions.allExecuted.connect(() => {
+          emitted += 1;
+        });
         widget.select(other);
         other.model.value.text = 'a = 1';
         const result = await NotebookActions.run(widget, sessionContext);
         expect(result).toBe(true);
         expect(widget.activeCell).toBe(other);
+        expect(emitted).toBe(1);
       });
 
       it('should clear the selection', async () => {
         const next = widget.widgets[1];
+        let emitted = 0;
+        NotebookActions.allExecuted.connect(() => {
+          emitted += 1;
+        });
         widget.select(next);
         const result = await NotebookActions.run(widget, sessionContext);
         expect(result).toBe(true);
         expect(widget.isSelected(widget.widgets[0])).toBe(false);
+        expect(emitted).toBe(1);
       });
 
       it('should change to command mode', async () => {
         widget.mode = 'edit';
+        let emitted = 0;
+        NotebookActions.allExecuted.connect(() => {
+          emitted += 1;
+        });
         const result = await NotebookActions.run(widget, sessionContext);
         expect(result).toBe(true);
         expect(widget.mode).toBe('command');
+        expect(emitted).toBe(1);
       });
 
       it('should handle no session', async () => {
+        let emitted = 0;
+        NotebookActions.allExecuted.connect(() => {
+          emitted += 1;
+        });
         const result = await NotebookActions.run(widget, undefined);
         expect(result).toBe(true);
         const cell = widget.activeCell as CodeCell;
         expect(cell.model.executionCount).toBeNull();
+        expect(emitted).toBe(1);
       });
 
       it('should stop executing code cells on an error', async () => {
+        let emitted = 0;
+        NotebookActions.allExecuted.connect(() => {
+          emitted += 1;
+        });
         let cell = widget.model!.contentFactory.createCodeCell({});
         cell.value.text = ERROR_INPUT;
         widget.model!.cells.insert(2, cell);
@@ -622,9 +698,14 @@ describe('@jupyterlab/notebook', () => {
         expect(result).toBe(false);
         expect(cell.executionCount).toBeNull();
         await ipySessionContext.session!.kernel!.restart();
+        expect(emitted).toBe(1);
       });
 
       it('should render all markdown cells on an error', async () => {
+        let emitted = 0;
+        NotebookActions.allExecuted.connect(() => {
+          emitted += 1;
+        });
         const cell = widget.model!.contentFactory.createMarkdownCell({});
         widget.model!.cells.push(cell);
         const child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
@@ -639,6 +720,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).toBe(false);
         expect(child.rendered).toBe(true);
         await ipySessionContext.session!.kernel!.restart();
+        expect(emitted).toBe(1);
       });
     });
 
