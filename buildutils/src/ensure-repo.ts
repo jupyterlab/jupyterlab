@@ -67,6 +67,7 @@ const UNUSED: Dict<string[]> = {
     'webpack-cli',
     'worker-loader'
   ],
+  '@jupyterlab/buildutils': ['npm-cli-login', 'verdaccio'],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
