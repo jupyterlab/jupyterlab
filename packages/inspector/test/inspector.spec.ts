@@ -27,6 +27,10 @@ class TestInspectable implements IInspector.IInspectable {
   isDisposed = false;
 
   standby = false;
+
+  onEditorChange(customText?: string): void {
+    /* empty */
+  }
 }
 
 describe('inspector/index', () => {
