@@ -6,6 +6,13 @@
   "jupyter.lab.menus": {
     "main": [
       {
+        "id": "jp-mainmenu-run",
+        "items": [
+          { "command": "debugger:restart-debug", "rank": 40 },
+          { "type": "separator", "rank": 40 }
+        ]
+      },
+      {
         "id": "jp-mainmenu-view",
         "items": [
           {
