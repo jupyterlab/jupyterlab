@@ -62,7 +62,9 @@ export class YDocument<T> implements models.ISharedDocument {
   /**
    * The changed signal.
    */
-  readonly changed = new Signal<this, T>(this);
+  get changed(): ISignal<this, T> {
+    return this._changed;
+  }
 
   /**
    * Perform a transaction. While the function f is called, all changes to the shared
@@ -115,6 +117,7 @@ export class YDocument<T> implements models.ISharedDocument {
   }
 
   private _isDisposed = false;
+  protected _changed = new Signal<this, T>(this);
 }
 
 export class YFile
@@ -131,7 +134,7 @@ export class YFile
   private _modelObserver = (event: Y.YTextEvent) => {
     const changes: models.FileChange = {};
     changes.sourceChange = event.changes.delta as any;
-    this.changed.emit(changes);
+    this._changed.emit(changes);
   };
 
   public static create(): YFile {
@@ -411,7 +414,7 @@ export class YNotebook
       }
     });
 
-    this.changed.emit({
+    this._changed.emit({
       cellsChange: cellsChange
     });
   };
