@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import { ReactWidget } from '@jupyterlab/apputils';
+import { ElementExt } from '@lumino/domutils';
 
 import * as React from 'react';
 
@@ -135,6 +136,13 @@ export class OutputCollapser extends Collapser {
     const cell = this.parent?.parent as CodeCell | undefined | null;
     if (cell) {
       cell.outputHidden = !cell.outputHidden;
+      /* Scroll cell into view after output collapse */
+      if (cell.outputHidden) {
+        let area = cell.parent?.node;
+        if (area) {
+          ElementExt.scrollIntoViewIfNeeded(area, cell.node);
+        }
+      }
     }
     /* We need this until we watch the cell state */
     this.update();
