@@ -50,13 +50,6 @@ if [[ $GROUP == js-debugger ]]; then
     pip install xeus-python">=0.9.0,<0.10.0"
 fi
 
-# The UI tests use ipykernel with support for debugging, to not
-# extra launcher items and other UI elements to the reference screenshots
-if [[ $GROUP == ui-tests ]]; then
-    # TODO remove when ipykernel 6 is released
-    pip install --pre --upgrade ipykernel
-fi
-
 # Pin the jedi dependency to prevent a temporary breakage
 # See https://github.com/ipython/ipython/issues/12740, https://github.com/ipython/ipython/pull/12751
 pip install 'jedi<0.18'
