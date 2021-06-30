@@ -110,7 +110,6 @@ const runNestedCodeCells = (headings: IHeading[], heading: IHeading) => {
   }
 
   let runCode: INotebookHeading[] = [];
-
   // Find the heading in the list of headings...
   i = headings.indexOf(heading);
 
