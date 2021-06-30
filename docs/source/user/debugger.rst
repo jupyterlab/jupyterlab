@@ -16,6 +16,8 @@ Here is a list of kernels that are known to be supporting the Jupyter Debug Prot
 
 - `xeus-python <https://github.com/jupyter-xeus/xeus-python>`_: Jupyter kernel for the Python programming language
 - `xeus-robot <https://github.com/jupyter-xeus/xeus-robot>`_: Jupyter kernel for Robot Framework
+- `ipykernel <https://github.com/ipython/ipykernel>`_:  IPython Kernel for Jupyter 
+
 
 Other Jupyter Kernels can also support debugging and be compatible with the JupyterLab debugger
 by implementing the `Jupyter Debugger Protocol <https://jupyter-client.readthedocs.io/en/latest/messaging.html#debug-request>`_.
@@ -26,11 +28,13 @@ Here is an example of how to install ``xeus-python`` in a new ``conda`` environm
 
 .. code:: bash
 
-   conda create -n jupyterlab-debugger -c conda-forge jupyterlab=3 xeus-python
+   conda create -n jupyterlab-debugger -c conda-forge jupyterlab=3
    conda activate jupyterlab-debugger
 
 Usage
 -----
+
+For Python, both ``ipykernel`` and ``xeus-python`` support debugging.
 
 ``xeus-python`` can be selected from the JupyterLab launcher:
 
