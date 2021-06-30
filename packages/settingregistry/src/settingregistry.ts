@@ -899,10 +899,11 @@ export namespace SettingRegistry {
   export function reconcileMenus(
     reference: ISettingRegistry.IMenu[] | null,
     addition: ISettingRegistry.IMenu[] | null,
-    warn: boolean = false
+    warn: boolean = false,
+    addNewItems: boolean = true
   ): ISettingRegistry.IMenu[] {
     if (!reference) {
-      return addition ? JSONExt.deepCopy(addition) : [];
+      return addition && addNewItems ? JSONExt.deepCopy(addition) : [];
     }
     if (!addition) {
       return JSONExt.deepCopy(reference);
@@ -916,53 +917,37 @@ export namespace SettingRegistry {
         merged[refIndex] = {
           ...merged[refIndex],
           ...menu,
-          items: reconcileItems(merged[refIndex].items, menu.items, warn)
+          items: reconcileItems(
+            merged[refIndex].items,
+            menu.items,
+            warn,
+            addNewItems
+          )
         };
       } else {
-        merged.push(menu);
+        if (addNewItems) {
+          merged.push(menu);
+        }
       }
     });
 
-    // Remove disabled menus
-    return merged
-      .filter(menu => !menu.disabled)
-      .map(menu => filterDisableEntries(menu));
+    return merged;
   }
 
-  function filterDisableEntries(
-    menu: ISettingRegistry.IMenu
-  ): ISettingRegistry.IMenu {
-    return {
-      ...menu,
-      items: (menu.items ?? []).reduce<ISettingRegistry.IMenuItem[]>(
-        (final, value) => {
-          if (!value.disabled) {
-            if (value.type === 'submenu') {
-              const { submenu, ...others } = value;
-              final.push({
-                ...others,
-                submenu:
-                  submenu && !submenu.disabled
-                    ? filterDisableEntries(submenu)
-                    : null
-              });
-            } else {
-              final.push(value);
-            }
-          }
-
-          return final;
-        },
-        []
-      )
-    };
-  }
-
-  function reconcileItems(
-    reference?: ISettingRegistry.IMenuItem[],
-    addition?: ISettingRegistry.IMenuItem[],
-    warn: boolean = false
-  ): ISettingRegistry.IMenuItem[] | undefined {
+  /**
+   * Merge two set of menu items.
+   *
+   * @param reference Reference set of menu items
+   * @param addition New items to add
+   * @param warn Whether to warn if item is duplicated; default to false
+   * @returns The merged set of items
+   */
+  export function reconcileItems<T extends ISettingRegistry.IMenuItem>(
+    reference?: T[],
+    addition?: T[],
+    warn: boolean = false,
+    addNewItems: boolean = true
+  ): T[] | undefined {
     if (!reference) {
       return addition ? JSONExt.deepCopy(addition) : undefined;
     }
@@ -976,7 +961,9 @@ export namespace SettingRegistry {
     addition.forEach(item => {
       switch (item.type ?? 'command') {
         case 'separator':
-          items.push({ ...item });
+          if (addNewItems) {
+            items.push({ ...item });
+          }
           break;
         case 'submenu':
           if (item.submenu) {
@@ -985,7 +972,9 @@ export namespace SettingRegistry {
                 ref.type === 'submenu' && ref.submenu?.id === item.submenu?.id
             );
             if (refIndex < 0) {
-              items.push(JSONExt.deepCopy(item));
+              if (addNewItems) {
+                items.push(JSONExt.deepCopy(item));
+              }
             } else {
               items[refIndex] = {
                 ...items[refIndex],
@@ -995,7 +984,8 @@ export namespace SettingRegistry {
                     ? [items[refIndex].submenu as any]
                     : null,
                   [item.submenu],
-                  warn
+                  warn,
+                  addNewItems
                 )[0]
               };
             }
@@ -1006,10 +996,13 @@ export namespace SettingRegistry {
             const refIndex = items.findIndex(
               ref =>
                 ref.command === item.command &&
+                ref.selector === item.selector &&
                 JSONExt.deepEqual(ref.args ?? {}, item.args ?? {})
             );
             if (refIndex < 0) {
-              items.push({ ...item });
+              if (addNewItems) {
+                items.push({ ...item });
+              }
             } else {
               if (warn) {
                 console.warn(
@@ -1023,6 +1016,28 @@ export namespace SettingRegistry {
     });
 
     return items;
+  }
+
+  export function filterDisabledItems<T extends ISettingRegistry.IMenuItem>(
+    items: T[]
+  ): T[] {
+    return items.reduce<T[]>((final, value) => {
+      const copy = { ...value };
+      if (!copy.disabled) {
+        if (copy.type === 'submenu') {
+          const { submenu } = copy;
+          if (submenu && !submenu.disabled) {
+            copy.submenu = {
+              ...submenu,
+              items: filterDisabledItems(submenu.items ?? [])
+            };
+          }
+        }
+        final.push(copy);
+      }
+
+      return final;
+    }, []);
   }
 
   /**

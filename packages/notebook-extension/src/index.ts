@@ -1252,137 +1252,6 @@ function activateNotebookHandler(
     });
   }
 
-  // Cell context menu groups
-  app.contextMenu.addItem({
-    type: 'separator',
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 0
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.cut,
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 1
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.copy,
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 2
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.pasteBelow,
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 3
-  });
-  app.contextMenu.addItem({
-    type: 'separator',
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 4
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.deleteCell,
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 5
-  });
-  app.contextMenu.addItem({
-    type: 'separator',
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 6
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.split,
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 7
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.merge,
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 8
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.mergeAbove,
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 8
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.mergeBelow,
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 8
-  });
-  app.contextMenu.addItem({
-    type: 'separator',
-    selector: '.jp-Notebook .jp-Cell',
-    rank: 9
-  });
-
-  // CodeCell context menu groups
-  app.contextMenu.addItem({
-    command: CommandIDs.createOutputView,
-    selector: '.jp-Notebook .jp-CodeCell',
-    rank: 10
-  });
-  app.contextMenu.addItem({
-    type: 'separator',
-    selector: '.jp-Notebook .jp-CodeCell',
-    rank: 11
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.clearOutputs,
-    selector: '.jp-Notebook .jp-CodeCell',
-    rank: 12
-  });
-
-  // Notebook context menu groups
-  app.contextMenu.addItem({
-    command: CommandIDs.clearAllOutputs,
-    selector: '.jp-Notebook',
-    rank: 0
-  });
-  app.contextMenu.addItem({
-    type: 'separator',
-    selector: '.jp-Notebook',
-    rank: 1
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.enableOutputScrolling,
-    selector: '.jp-Notebook',
-    rank: 2
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.disableOutputScrolling,
-    selector: '.jp-Notebook',
-    rank: 3
-  });
-  app.contextMenu.addItem({
-    type: 'separator',
-    selector: '.jp-Notebook',
-    rank: 4
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.undoCellAction,
-    selector: '.jp-Notebook',
-    rank: 5
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.redoCellAction,
-    selector: '.jp-Notebook',
-    rank: 6
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.restart,
-    selector: '.jp-Notebook',
-    rank: 7
-  });
-  app.contextMenu.addItem({
-    type: 'separator',
-    selector: '.jp-Notebook',
-    rank: 8
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.createConsole,
-    selector: '.jp-Notebook',
-    rank: 9
-  });
-
   return tracker;
 }
 
@@ -1440,7 +1309,10 @@ function addCommands(
   // Set up collapse signal for each header cell in a notebook
   tracker.currentChanged.connect(
     (sender: INotebookTracker, panel: NotebookPanel) => {
-      panel.content.model?.cells.changed.connect(
+      if (!panel?.content?.model?.cells) {
+        return;
+      }
+      panel.content.model.cells.changed.connect(
         (
           list: IObservableUndoableList<ICellModel>,
           args: IObservableList.IChangedArgs<ICellModel>

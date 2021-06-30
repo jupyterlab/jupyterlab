@@ -605,7 +605,7 @@ export class DirListing extends Widget {
   /**
    * Clear the selected items.
    */
-  clearSelectedItems() {
+  clearSelectedItems(): void {
     this.selection = Object.create(null);
   }
 
@@ -848,13 +848,16 @@ export class DirListing extends Widget {
     this._prevPath = this._model.path;
   }
 
-  onResize(msg: Widget.ResizeMessage) {
+  onResize(msg: Widget.ResizeMessage): void {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
     this.toggleClass('jp-DirListing-narrow', width < 250);
   }
 
-  setColumnVisibility(name: DirListing.ToggleableColumn, visible: boolean) {
+  setColumnVisibility(
+    name: DirListing.ToggleableColumn,
+    visible: boolean
+  ): void {
     if (visible) {
       this._hiddenColumns.delete(name);
     } else {

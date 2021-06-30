@@ -52,7 +52,7 @@ export namespace PageConfig {
       }
     }
     // Otherwise use CLI if given.
-    if (!found && typeof process !== 'undefined') {
+    if (!found && typeof process !== 'undefined' && process.argv) {
       try {
         const cli = minimist(process.argv.slice(2));
         const path: any = require('path');

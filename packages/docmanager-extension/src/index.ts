@@ -803,25 +803,28 @@ function addCommands(
     }
   });
 
+  const newFileRegex = new RegExp('^untitled', 'i');
+
   docManager.activateRequested.connect((sender, args) => {
     const widget = sender.findWidget(args);
-    if (widget && widget.shouldNameFile) {
-      widget.shouldNameFile.connect(() => {
-        if (sender.nameFileOnSave && widget == shell.currentWidget) {
+    if (!widget) {
+      return;
+    }
+
+    widget.context.saveState.connect((doc, state) => {
+      if (sender.nameFileOnSave && widget === shell.currentWidget) {
+        const model = doc.contentsModel;
+        if (
+          state === 'completed manually' &&
+          model &&
+          !model.renamed == true &&
+          newFileRegex.test(model.name)
+        ) {
           const context = sender.contextForWidget(widget!);
           return nameOnSaveDialog(sender, context!);
         }
-      });
-    }
-  });
-
-  // .jp-mod-current added so that the console-creation command is only shown
-  // on the current document.
-  // Otherwise it will delegate to the wrong widget.
-  app.contextMenu.addItem({
-    command: 'filemenu:create-console',
-    selector: '[data-type="document-title"].jp-mod-current',
-    rank: 6
+      }
+    });
   });
 
   if (palette) {
@@ -948,27 +951,6 @@ function addLabCommands(
       await commands.execute('filebrowser:activate', { path: context.path });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
     }
-  });
-
-  app.contextMenu.addItem({
-    command: CommandIDs.rename,
-    selector: '[data-type="document-title"]',
-    rank: 1
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.del,
-    selector: '[data-type="document-title"]',
-    rank: 2
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.clone,
-    selector: '[data-type="document-title"]',
-    rank: 3
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.showInFileBrowser,
-    selector: '[data-type="document-title"]',
-    rank: 4
   });
 }
 

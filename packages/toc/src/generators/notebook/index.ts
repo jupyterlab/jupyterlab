@@ -25,6 +25,7 @@ import { getRenderedHTMLHeadings } from './get_rendered_html_heading';
 import { OptionsManager } from './options_manager';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * Returns a ToC generator for notebooks.
@@ -34,19 +35,31 @@ import { toolbar } from './toolbar_generator';
  * @param widget - table of contents widget
  * @param sanitizer - HTML sanitizer
  * @param translator - Language translator
+ * @param settings - advanced settings for toc extension
  * @returns ToC generator capable of parsing notebooks
  */
 function createNotebookGenerator(
   tracker: INotebookTracker,
   widget: TableOfContents,
   sanitizer: ISanitizer,
-  translator?: ITranslator
+  translator?: ITranslator,
+  settings?: ISettingRegistry.ISettings
 ): Registry.IGenerator<NotebookPanel> {
+  let numberingH1 = true;
+  if (settings) {
+    numberingH1 = settings.composite.numberingH1 as boolean;
+  }
   const options = new OptionsManager(widget, tracker, {
     numbering: false,
+    numberingH1: numberingH1,
     sanitizer: sanitizer,
     translator: translator || nullTranslator
   });
+  if (settings) {
+    settings.changed.connect(() => {
+      options.numberingH1 = settings.composite.numberingH1 as boolean;
+    });
+  }
   tracker.activeCellChanged.connect(
     (sender: INotebookTracker, args: Cell<ICellModel>) => {
       widget.update();
@@ -155,6 +168,7 @@ function createNotebookGenerator(
             dict,
             getLastHeadingLevel(headings),
             options.numbering,
+            options.numberingH1,
             cell,
             i
           );
@@ -198,6 +212,7 @@ function createNotebookGenerator(
             dict,
             lastLevel,
             options.numbering,
+            options.numberingH1,
             cell,
             i
           );

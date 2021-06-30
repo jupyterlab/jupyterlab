@@ -2,13 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Kernel } from '@jupyterlab/services';
+import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
-import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
+import { IMenuExtender } from './tokens';
 
 /**
  * An interface for a Help menu.
  */
-export interface IHelpMenu extends IJupyterLabMenu {
+export interface IHelpMenu extends IRankedMenu {
   /**
    * A set of kernel users for the help menu.
    * This is used to populate additional help
@@ -20,11 +21,11 @@ export interface IHelpMenu extends IJupyterLabMenu {
 /**
  * An extensible Help menu for the application.
  */
-export class HelpMenu extends JupyterLabMenu implements IHelpMenu {
+export class HelpMenu extends RankedMenu implements IHelpMenu {
   /**
    * Construct the help menu.
    */
-  constructor(options: IJupyterLabMenu.IOptions) {
+  constructor(options: IRankedMenu.IOptions) {
     super(options);
     this.kernelUsers = new Set<IHelpMenu.IKernelUser<Widget>>();
   }

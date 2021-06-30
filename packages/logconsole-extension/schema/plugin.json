@@ -17,7 +17,8 @@
           }
         ]
       }
-    ]
+    ],
+    "context": [{ "command": "logconsole:open", "selector": ".jp-Notebook" }]
   },
   "title": "Log Console",
   "description": "Log Console settings.",

@@ -220,6 +220,133 @@
           }
         ]
       }
+    ],
+    "context": [
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 0
+      },
+      {
+        "command": "notebook:cut-cell",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 1
+      },
+      {
+        "command": "notebook:copy-cell",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 2
+      },
+      {
+        "command": "notebook:paste-cell-below",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 3
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 4
+      },
+      {
+        "command": "notebook:delete-cell",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 5
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 6
+      },
+      {
+        "command": "notebook:split-cell-at-cursor",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 7
+      },
+      {
+        "command": "notebook:merge-cells",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 8
+      },
+      {
+        "command": "notebook:merge-cell-above",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 8
+      },
+      {
+        "command": "notebook:merge-cell-below",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 8
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 9
+      },
+      {
+        "command": "notebook:create-output-view",
+        "selector": ".jp-Notebook .jp-CodeCell",
+        "rank": 10
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook .jp-CodeCell",
+        "rank": 11
+      },
+      {
+        "command": "notebook:clear-cell-output",
+        "selector": ".jp-Notebook .jp-CodeCell",
+        "rank": 12
+      },
+      {
+        "command": "notebook:clear-all-cell-outputs",
+        "selector": ".jp-Notebook",
+        "rank": 0
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook",
+        "rank": 1
+      },
+      {
+        "command": "notebook:enable-output-scrolling",
+        "selector": ".jp-Notebook",
+        "rank": 2
+      },
+      {
+        "command": "notebook:disable-output-scrolling",
+        "selector": ".jp-Notebook",
+        "rank": 3
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook",
+        "rank": 4
+      },
+      {
+        "command": "notebook:undo-cell-action",
+        "selector": ".jp-Notebook",
+        "rank": 5
+      },
+      {
+        "command": "notebook:redo-cell-action",
+        "selector": ".jp-Notebook",
+        "rank": 6
+      },
+      {
+        "command": "notebook:restart-kernel",
+        "selector": ".jp-Notebook",
+        "rank": 7
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook",
+        "rank": 8
+      },
+      {
+        "command": "notebook:create-console",
+        "selector": ".jp-Notebook",
+        "rank": 9
+      }
     ]
   },
   "jupyter.lab.shortcuts": [
@@ -457,6 +584,11 @@
         "autoClosingBrackets": {
           "type": "boolean"
         },
+        "cursorBlinkRate": {
+          "type": "number",
+          "title": "Cursor blinking rate",
+          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely."
+        },
         "fontFamily": {
           "type": ["string", "null"]
         },
@@ -514,6 +646,7 @@
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": true,
+        "cursorBlinkRate": 530,
         "fontFamily": null,
         "fontSize": null,
         "lineHeight": null,
@@ -548,6 +681,7 @@
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": false,
+        "cursorBlinkRate": 530,
         "fontFamily": null,
         "fontSize": null,
         "lineHeight": null,
@@ -569,6 +703,7 @@
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": false,
+        "cursorBlinkRate": 530,
         "fontFamily": null,
         "fontSize": null,
         "lineHeight": null,

@@ -26,6 +26,7 @@ type onClickFactory = (el: Element) => () => void;
  * @param dict - numbering dictionary
  * @param lastLevel - last level
  * @param numbering - boolean indicating whether to enable numbering
+ * @param numberingH1 - boolean indicating whether to enable first level headers numbering
  * @param cellRef - cell reference
  * @param index - index of referenced cell relative to other cells in the notebook
  * @returns notebook heading
@@ -37,6 +38,7 @@ function getRenderedHTMLHeadings(
   dict: INumberingDictionary,
   lastLevel: number,
   numbering = false,
+  numberingH1 = true,
   cellRef: Cell,
   index: number = -1
 ): INotebookHeading[] {
@@ -71,7 +73,10 @@ function getRenderedHTMLHeadings(
     let html = sanitizer.sanitize(el.innerHTML, sanitizerOptions);
     html = html.replace('¶', '');
 
-    const level = parseInt(el.tagName[1], 10);
+    let level = parseInt(el.tagName[1], 10);
+    if (!numberingH1) {
+      level -= 1;
+    }
     let nstr = generateNumbering(dict, level);
     if (numbering) {
       const nhtml = document.createElement('span');

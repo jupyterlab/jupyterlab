@@ -308,10 +308,10 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     this._modelDBMutex(() => {
       switch (event.type) {
         case 'add':
-          this._changeCellMetata(metadata, event);
+          this._changeCellMetadata(metadata, event);
           break;
         case 'change':
-          this._changeCellMetata(metadata, event);
+          this._changeCellMetadata(metadata, event);
           break;
         case 'remove':
           delete metadata[event.key];
@@ -329,7 +329,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * @param metadata The cell metadata.
    * @param event The event to handle.
    */
-  private _changeCellMetata(
+  private _changeCellMetadata(
     metadata: Partial<models.ISharedBaseCellMetadata>,
     event: IObservableJSON.IChangedArgs
   ): void {
@@ -611,7 +611,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     if (!executionCount.get()) {
       if (cell && cell.cell_type === 'code') {
         executionCount.set(cell.execution_count || null);
-        outputs = cell.outputs;
+        outputs = cell.outputs ?? [];
+        // If output is not empty presume it results of the input code execution
+        // TODO load from the notebook file when the dirty state is stored in it
+        if (outputs.length > 0) {
+          this._executedCode = this.value.text.trim();
+        }
       } else {
         executionCount.set(null);
       }
@@ -620,7 +625,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
 
     this._modelDBMutex(() => {
       const sharedCell = this.sharedModel as models.ISharedCodeCell;
-      sharedCell.setOutputs(outputs ?? []);
+      sharedCell.setOutputs(outputs);
     });
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
     this._outputs.changed.connect(this.onGenericChange, this);
@@ -676,7 +681,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this.modelDB.getValue('executionCount') as nbformat.ExecutionCount;
+    return this.modelDB.has('executionCount')
+      ? (this.modelDB.getValue('executionCount') as nbformat.ExecutionCount)
+      : null;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
     const oldValue = this.executionCount;
@@ -715,7 +722,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
   }
 
-  clearExecution() {
+  clearExecution(): void {
     this.outputs.clear();
     this.executionCount = null;
     this._setDirty(false);
@@ -810,7 +817,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * Handle a change to the observable value.
    */
   protected onGenericChange(): void {
-    if ((this.sharedModel as models.YCodeCell).execution_count !== null) {
+    if (this.executionCount !== null) {
       this._setDirty(this._executedCode !== this.value.text.trim());
     }
     this.contentChanged.emit(void 0);
@@ -919,7 +926,7 @@ namespace Private {
   export function collapseChanged(
     metadata: IObservableJSON,
     args: IObservableMap.IChangedArgs<JSONValue>
-  ) {
+  ): void {
     if (args.key === 'collapsed') {
       const jupyter = (metadata.get('jupyter') || {}) as JSONObject;
       const { outputs_hidden, ...newJupyter } = jupyter;

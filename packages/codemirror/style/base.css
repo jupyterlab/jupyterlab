@@ -237,13 +237,15 @@
 }
 
 .jp-CodeMirrorEditor .remote-caret > div {
+  white-space: nowrap;
   position: absolute;
-  top: -1.05em;
+  top: -1.15em;
+  padding-bottom: 0.05em;
   left: -2px;
-  font-size: 0.8em;
+  font-size: 0.95em;
   background-color: rgb(250, 129, 0);
-  font-family: serif;
-  font-style: normal;
+  font-family: var(--jp-ui-font-family);
+  font-style: bold;
   font-weight: normal;
   line-height: normal;
   user-select: none;
@@ -252,7 +254,6 @@
   padding-right: 2px;
   z-index: 3;
   transition: opacity 0.3s ease-in-out;
-  opacity: 0;
 }
 
 .jp-CodeMirrorEditor .remote-caret.hide-name > div {

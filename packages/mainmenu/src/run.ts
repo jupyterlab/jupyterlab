@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
-import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
+import { IMenuExtender } from './tokens';
 
 /**
  * An interface for a Run menu.
  */
-export interface IRunMenu extends IJupyterLabMenu {
+export interface IRunMenu extends IRankedMenu {
   /**
    * A set storing ICodeRunner for the Run menu.
    *
@@ -20,11 +21,11 @@ export interface IRunMenu extends IJupyterLabMenu {
 /**
  * An extensible Run menu for the application.
  */
-export class RunMenu extends JupyterLabMenu implements IRunMenu {
+export class RunMenu extends RankedMenu implements IRunMenu {
   /**
    * Construct the run menu.
    */
-  constructor(options: IJupyterLabMenu.IOptions) {
+  constructor(options: IRankedMenu.IOptions) {
     super(options);
     this.codeRunners = new Set<IRunMenu.ICodeRunner<Widget>>();
   }

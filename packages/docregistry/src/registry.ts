@@ -977,7 +977,7 @@ export namespace DocumentRegistry {
     | 'started'
     | 'failed'
     | 'completed'
-    | 'completed-manual';
+    | 'completed manually';
 
   /**
    * A type alias for a context.
@@ -1511,8 +1511,6 @@ export interface IDocumentWidget<
    * Set URI fragment identifier.
    */
   setFragment(fragment: string): void;
-
-  shouldNameFile?: Signal<this, void>;
 }
 
 /**

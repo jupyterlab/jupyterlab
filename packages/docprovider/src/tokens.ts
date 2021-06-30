@@ -36,6 +36,11 @@ export interface IDocumentProvider {
   releaseLock(lock: number): void;
 
   /**
+   * This should be called by the docregistry when the file has been renamed to update the websocket connection url
+   */
+  setPath(newPath: string): void;
+
+  /**
    * Destroy the provider.
    */
   destroy(): void;
@@ -59,7 +64,8 @@ export namespace IDocumentProviderFactory {
     /**
      * The name (id) of the room
      */
-    guid: string;
+    path: string;
+    contentType: string;
 
     /**
      * The YNotebook.

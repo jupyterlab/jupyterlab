@@ -472,10 +472,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
-"@jupyterlab/galata@3.0.7-7":
-  version "3.0.7-7"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/galata/-/galata-3.0.7-7.tgz#981deeda09b1a25496cef5746aebb20cea8883cf"
-  integrity sha512-OLr5fTSdGdHWoa13NYNpszCFdfwJ4ri8sDP/DFCFAVSl/3tzzp3EvJTgH4CI3VMvJjukeXtcfGSD5K11ofUq6Q==
+"@jupyterlab/galata@3.0.11-2":
+  version "3.0.11-2"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/galata/-/galata-3.0.11-2.tgz#eeaf1a571a744718d664df7a3decc40907405bdc"
+  integrity sha512-i8jBhL0JUezAZ0Apa56Gy7lH6K0uuYhlkVwY0AYfrMJJw8ILLnd8yunt7QXAPto0m+QC3ud4VZ82KYck4W9+3w==
   dependencies:
     "@types/dateformat" "^3.0.1"
     "@types/jest" "^25.1.2"

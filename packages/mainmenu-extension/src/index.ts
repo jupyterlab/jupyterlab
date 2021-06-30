@@ -910,7 +910,10 @@ namespace Private {
           loaded[plugin] = menus;
           return menus;
         })
-        .concat([schema.properties!.menus.default as any[]])
+        .concat([
+          schema['jupyter.lab.menus']?.main ?? [],
+          schema.properties!.menus.default as any[]
+        ])
         .reduceRight(
           (acc, val) => SettingRegistry.reconcileMenus(acc, val, true),
           []
@@ -965,10 +968,21 @@ namespace Private {
 
     const settings = await registry.load(PLUGIN_ID);
 
-    const currentMenus =
+    const currentMenus: ISettingRegistry.IMenu[] =
       JSONExt.deepCopy(settings.composite.menus as any) ?? [];
     const menus = new Array<Menu>();
-    MenuFactory.createMenus(currentMenus, menuFactory).forEach(menu => {
+    // Create menu for non-disabled element
+    MenuFactory.createMenus(
+      currentMenus
+        .filter(menu => !menu.disabled)
+        .map(menu => {
+          return {
+            ...menu,
+            items: SettingRegistry.filterDisabledItems(menu.items ?? [])
+          };
+        }),
+      menuFactory
+    ).forEach(menu => {
       menus.push(menu);
       addMenu(menu);
     });
@@ -994,12 +1008,25 @@ namespace Private {
             await displayInformation(trans);
           } else {
             // The plugin was not yet loaded when the menu was built => update the menu
-            loaded[plugin] = newMenus;
-            MenuFactory.updateMenus(menus, loaded[plugin], menuFactory).forEach(
-              menu => {
-                addMenu(menu);
-              }
-            );
+            loaded[plugin] = JSONExt.deepCopy(newMenus);
+            // Merge potential disabled state
+            const toAdd = SettingRegistry.reconcileMenus(
+              newMenus,
+              currentMenus,
+              false,
+              false
+            )
+              .filter(menu => !menu.disabled)
+              .map(menu => {
+                return {
+                  ...menu,
+                  items: SettingRegistry.filterDisabledItems(menu.items ?? [])
+                };
+              });
+
+            MenuFactory.updateMenus(menus, toAdd, menuFactory).forEach(menu => {
+              addMenu(menu);
+            });
           }
         }
       }

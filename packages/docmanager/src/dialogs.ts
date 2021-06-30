@@ -267,20 +267,6 @@ class NameOnSaveHandler extends Widget {
   getValue(): string {
     return this.inputNode.value;
   }
-
-  /**
-   * Get the checkbox node.
-   */
-  get checkboxNode(): HTMLInputElement {
-    return this.node.getElementsByTagName('input')[1] as HTMLInputElement;
-  }
-
-  /**
-   * Get checked of the checkbox widget.
-   */
-  getChecked(): boolean {
-    return this.checkboxNode.checked;
-  }
 }
 
 /**
@@ -288,7 +274,7 @@ class NameOnSaveHandler extends Widget {
  */
 namespace Private {
   /**
-   * Create the node for a rename after launch handler.
+   * Create the node for the name file dialog handler.
    */
   export function createNameFileNode(
     manager: IDocumentManager,
@@ -299,11 +285,13 @@ namespace Private {
     const body = document.createElement('div');
     const name = document.createElement('input');
     const checkbox = document.createElement('input');
+    checkbox.id = 'jp-filedialog-input-id';
     const label = document.createElement('label');
+    label.htmlFor = checkbox.id;
     const div = document.createElement('div');
+    div.classList.add(FILE_DIALOG_CHECKBOX_CLASS);
 
     checkbox.type = 'checkbox';
-    checkbox.classList.add(FILE_DIALOG_CHECKBOX_CLASS);
     checkbox.addEventListener('change', function () {
       manager.nameFileOnSave = !this.checked;
     });

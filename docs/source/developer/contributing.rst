@@ -323,7 +323,7 @@ Now run Lighthouse against this local server and show the results:
 
    jlpm run lighthouse --view
 
-.. image:: /images/lighthouse.png
+.. image:: ../images/lighthouse.png
 
 Using throttling
 ^^^^^^^^^^^^^^^^

@@ -112,7 +112,10 @@ export class TableOfContents extends Widget {
     let toc: IHeading[] = [];
     let title = this._trans.__('Table of Contents');
     if (this._current) {
-      toc = this._current.generator.generate(this._current.widget);
+      toc = this._current.generator.generate(
+        this._current.widget,
+        this._current.generator.options
+      );
       const context = this._docmanager.contextForWidget(this._current.widget);
       if (context) {
         title = PathExt.basename(context.localPath);

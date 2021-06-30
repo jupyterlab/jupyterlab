@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror-extension",
-  "version": "3.1.0-alpha.12",
+  "version": "3.1.0-beta.0",
   "description": "JupyterLab - CodeMirror Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,15 +38,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0-alpha.12",
-    "@jupyterlab/codeeditor": "^3.1.0-alpha.12",
-    "@jupyterlab/codemirror": "^3.1.0-alpha.12",
-    "@jupyterlab/docregistry": "^3.1.0-alpha.12",
-    "@jupyterlab/fileeditor": "^3.1.0-alpha.12",
-    "@jupyterlab/mainmenu": "^3.1.0-alpha.12",
-    "@jupyterlab/settingregistry": "^3.1.0-alpha.12",
-    "@jupyterlab/statusbar": "^3.1.0-alpha.12",
-    "@jupyterlab/translation": "^3.1.0-alpha.12",
+    "@jupyterlab/application": "^3.1.0-beta.0",
+    "@jupyterlab/codeeditor": "^3.1.0-beta.0",
+    "@jupyterlab/codemirror": "^3.1.0-beta.0",
+    "@jupyterlab/docregistry": "^3.1.0-beta.0",
+    "@jupyterlab/fileeditor": "^3.1.0-beta.0",
+    "@jupyterlab/mainmenu": "^3.1.0-beta.0",
+    "@jupyterlab/settingregistry": "^3.1.0-beta.0",
+    "@jupyterlab/statusbar": "^3.1.0-beta.0",
+    "@jupyterlab/translation": "^3.1.0-beta.0",
     "codemirror": "~5.61.0"
   },
   "devDependencies": {
