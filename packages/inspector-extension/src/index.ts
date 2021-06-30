@@ -80,7 +80,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector.content.source?.onEditorChange(args);
       }
       if (!inspector.isAttached) {
-        shell.add(inspector, 'main', { activate: false });
+        shell.add(inspector, 'main', { activate: false, mode: 'split-right' });
       }
       shell.activateById(inspector.id);
       return inspector;
