@@ -1343,7 +1343,12 @@ namespace Private {
 
     const options = getKernelSearch(sessionContext);
     const selector = document.createElement('select');
-    populateKernelSelect(selector, options, translator);
+    populateKernelSelect(
+      selector,
+      options,
+      sessionContext.kernelDisplayName,
+      translator
+    );
     body.appendChild(selector);
     return body;
   }
@@ -1418,6 +1423,7 @@ namespace Private {
   export function populateKernelSelect(
     node: HTMLSelectElement,
     options: SessionContext.IKernelSearch,
+    currentKernelDisplayName: string,
     translator?: ITranslator
   ): void {
     while (node.firstChild) {
@@ -1508,7 +1514,11 @@ namespace Private {
     if (shouldStart === false) {
       node.value = 'null';
     } else {
-      node.selectedIndex = 0;
+      // Select current kernel by default.
+      const selectedIndex = [...node.options].findIndex(
+        option => option.text === currentKernelDisplayName
+      );
+      node.selectedIndex = Math.max(selectedIndex, 0);
     }
 
     // Bail if there are no sessions.
