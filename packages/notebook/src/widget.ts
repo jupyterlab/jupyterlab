@@ -180,6 +180,7 @@ export class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[UNDOER] = 'true';
+    this.node.dataset[CODE_RUNNER] = 'true';
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
     this.contentFactory =
@@ -2252,21 +2253,14 @@ export class Notebook extends StaticNotebook {
       // If the editor itself does not have focus, ensure command mode.
       if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
-      }
-      this.activeCellIndex = index;
-      // If the editor has focus, ensure edit mode.
-      const node = widget.editorWidget.node;
-      if (node.contains(target)) {
+      } else {
+        // If the editor has focus, ensure edit mode.
         this.mode = 'edit';
       }
+      this.activeCellIndex = index;
     } else {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
-    }
-    if (this.mode === 'command' && target !== this.node) {
-      delete this.node.dataset[CODE_RUNNER];
-    } else {
-      this.node.dataset[CODE_RUNNER] = 'true';
     }
   }
 
