@@ -36,14 +36,6 @@ Usage
 
 For Python, both ``ipykernel`` and ``xeus-python`` support debugging.
 
-``xeus-python`` can be selected from the JupyterLab launcher:
-
-.. image:: ./images/debugger/xpython-launcher.png
-
-Alternatively, it is also possible to switch to the `xpython` kernel using the kernel selection dialog:
-
-.. image:: ./images/debugger/kernel-selection.gif
-
 Enable the debugger, set breakpoints and step into the code:
 
 .. image:: ./images/debugger/step.gif
