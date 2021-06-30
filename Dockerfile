@@ -49,6 +49,7 @@ ENV PATH="/home/micromamba/.local/bin:$PATH"
 COPY --from=build /tmp/jupyterlab-dev/dist/jupyterlab*.whl /tmp
 
 RUN pip install /tmp/jupyterlab*.whl \
+    && pip install --upgrade ipykernel~=6.0 \
     && mkdir -p /home/micromamba/jlab_root
 
 COPY ./docker/jupyter_server_config.json /etc/jupyter/
