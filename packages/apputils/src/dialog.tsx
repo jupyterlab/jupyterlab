@@ -351,11 +351,20 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 13: // Enter.
+      case 13: {
+        // Enter.
         event.stopPropagation();
         event.preventDefault();
-        this.resolve();
+
+        const activeEl = document.activeElement;
+        let index: number | undefined;
+
+        if (activeEl instanceof HTMLButtonElement) {
+          index = this._buttonNodes.indexOf(activeEl as HTMLElement);
+        }
+        this.resolve(index);
         break;
+      }
       default:
         break;
     }
