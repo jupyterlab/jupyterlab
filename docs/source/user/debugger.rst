@@ -16,7 +16,7 @@ Here is a list of kernels that are known to be supporting the Jupyter Debug Prot
 
 - `xeus-python <https://github.com/jupyter-xeus/xeus-python>`_: Jupyter kernel for the Python programming language
 - `xeus-robot <https://github.com/jupyter-xeus/xeus-robot>`_: Jupyter kernel for Robot Framework
-- `ipykernel <https://github.com/ipython/ipykernel>`_:  IPython Kernel for Jupyter 
+- `ipykernel <https://github.com/ipython/ipykernel>`_:  IPython Kernel for Jupyter
 
 
 Other Jupyter Kernels can also support debugging and be compatible with the JupyterLab debugger
@@ -33,7 +33,7 @@ Here is an example of how to install ``ipykernel`` and ``xeus-python`` in a new 
 Usage
 -----
 
-For Python, both ``ipykernel`` and ``xeus-python`` support debugging.
+For Python, both ``ipykernel`` (6.0+) and ``xeus-python`` support debugging.
 
 Enable the debugger, set breakpoints and step into the code:
 
