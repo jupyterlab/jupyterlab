@@ -285,6 +285,7 @@ async function activateConsole(
   }
 
   const pluginId = '@jupyterlab/console-extension:tracker';
+  const notebookPluginId = '@jupyterlab/notebook-extension:tracker';
   let interactionMode: string;
   async function updateSettings() {
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
@@ -293,12 +294,27 @@ async function activateConsole(
       widget.console.node.dataset.jpInteractionMode = interactionMode;
     });
   }
+  async function updateCodeCellConfig() {
+    const config = (await settingRegistry.get(notebookPluginId, 'codeCellConfig'))
+    .composite as JSONObject;
+    console.log(config);
+    tracker.forEach(widget => {
+      // widget.console.node.dataset.jpInteractionMode = interactionMode;
+      // widget.console
+      console.log(widget.console.promptCell);
+      widget.console.promptCell?.editor.setOption('autoClosingBrackets', false);
+    });
+  }
   settingRegistry.pluginChanged.connect((sender, plugin) => {
     if (plugin === pluginId) {
       void updateSettings();
     }
+    if (plugin === notebookPluginId){
+      void updateCodeCellConfig();
+    }
   });
   await updateSettings();
+  await updateCodeCellConfig();
 
   /**
    * Whether there is an active console.
