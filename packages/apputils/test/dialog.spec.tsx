@@ -182,6 +182,29 @@ describe('@jupyterlab/apputils', () => {
           expect((await prompt).button.accept).toBe(true);
         });
 
+        it('should resolve with currently focused button', async () => {
+          const dialog = new TestDialog({
+            buttons: [
+              Dialog.createButton({ label: 'first' }),
+              Dialog.createButton({ label: 'second' }),
+              Dialog.createButton({ label: 'third' }),
+              Dialog.createButton({ label: 'fourth' })
+            ],
+            // focus on "first"
+            defaultButton: 0
+          });
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+          // press right arrow twice (focusing on "third")
+          simulate(dialog.node, 'keydown', { keyCode: 39 });
+          simulate(dialog.node, 'keydown', { keyCode: 39 });
+          // press enter
+          simulate(dialog.node, 'keydown', { keyCode: 13 });
+          expect((await prompt).button.label).toBe('third');
+          dialog.dispose();
+        });
+
         it('should cycle to the first button on a tab key', async () => {
           const prompt = dialog.launch();
 
