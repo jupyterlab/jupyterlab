@@ -295,21 +295,21 @@ async function activateConsole(
     });
   }
   async function updateCodeCellConfig() {
-    const config = (await settingRegistry.get(notebookPluginId, 'codeCellConfig'))
-    .composite as JSONObject;
-    console.log(config);
+    const config = (
+      await settingRegistry.get(notebookPluginId, 'codeCellConfig')
+    ).composite as JSONObject;
     tracker.forEach(widget => {
-      // widget.console.node.dataset.jpInteractionMode = interactionMode;
-      // widget.console
-      console.log(widget.console.promptCell);
-      widget.console.promptCell?.editor.setOption('autoClosingBrackets', false);
+      widget.console.promptCell?.editor.setOption(
+        'autoClosingBrackets',
+        config['autoClosingBrackets'] as boolean
+      );
     });
   }
   settingRegistry.pluginChanged.connect((sender, plugin) => {
     if (plugin === pluginId) {
       void updateSettings();
     }
-    if (plugin === notebookPluginId){
+    if (plugin === notebookPluginId) {
       void updateCodeCellConfig();
     }
   });
