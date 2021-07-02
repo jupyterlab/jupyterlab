@@ -538,7 +538,10 @@ export namespace NotebookModel {
      * This method is intended to be a convenience method to programmatically
      * call the other cell creation methods in the factory.
      */
-    createCell(type: nbformat.CellType, options: CellModel.IOptions): ICellModel;
+    createCell(
+      type: nbformat.CellType,
+      options: CellModel.IOptions
+    ): ICellModel;
 
     /**
      * Create a new code cell.
@@ -610,7 +613,10 @@ export namespace NotebookModel {
      * This method is intended to be a convenience method to programmatically
      * call the other cell creation methods in the factory.
      */
-    createCell(type: nbformat.CellType, options: CellModel.IOptions): ICellModel {
+    createCell(
+      type: nbformat.CellType,
+      options: CellModel.IOptions
+    ): ICellModel {
       switch (type) {
         case 'code':
           return this.createCodeCell(options);
