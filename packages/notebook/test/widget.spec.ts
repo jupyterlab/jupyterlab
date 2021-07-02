@@ -1596,6 +1596,7 @@ describe('@jupyter/notebook', () => {
       });
     });
 
+    // WIP See https://github.com/jupyterlab/jupyterlab/issues/10526
     describe('#virtualNotebook()', () => {
       it('should render the last cell widget', () => {
         const model = new NotebookModel();
