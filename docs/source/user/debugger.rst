@@ -24,6 +24,12 @@ by implementing the `Jupyter Debugger Protocol <https://jupyter-client.readthedo
 
 If you know of other kernels with support for debugging, please open a PR to add them to this list.
 
+Here is an example of how to install ``ipykernel`` and ``xeus-python`` in a new ``conda`` environment:
+
+.. code:: bash
+   conda create -n jupyterlab-debugger -c conda-forge jupyterlab=3 ipykernel>=6 xeus-python
+   conda activate jupyterlab-debugger
+
 Usage
 -----
 
