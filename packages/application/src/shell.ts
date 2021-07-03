@@ -1739,12 +1739,10 @@ namespace Private {
      */
     constructor(shell: ILabShell) {
       super();
-
       this.addClass('jp-skiplink');
       this.id = 'jp-skiplink';
       this._shell = shell;
       this.createSkipLink('Skip to left side bar');
-      this.createSkipLink('Skip to main area');
     }
 
     handleEvent(event: Event): void {
