@@ -396,12 +396,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
 
     // Skip Links
-    const skipLinkWidgetHandler = (this._skipLinkWidgetHandler = new Private.SkipLinkWidgetHandler(
+    const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
       this
     ));
 
-    this.add(skipLinkWidgetHandler.skipLinkWidget, 'top', { rank: 0 });
-    this._skipLinkWidgetHandler.show();
+    this.add(skipLinkWidget, 'top', { rank: 0 });
+    this._skipLinkWidget.show();
 
     // Wire up signals to update the title panel of the simple interface mode to
     // follow the title of this.currentWidget
@@ -1394,7 +1394,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _vsplitPanel: Private.RestorableSplitPanel;
   private _topHandler: Private.PanelHandler;
   private _menuHandler: Private.PanelHandler;
-  private _skipLinkWidgetHandler: Private.SkipLinkWidgetHandler;
+  private _skipLinkWidget: Private.SkipLinkWidget;
   private _titleWidgetHandler: Private.TitleWidgetHandler;
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
@@ -1733,80 +1733,58 @@ namespace Private {
     private _lastCurrent: Widget | null;
   }
 
-  export class SkipLinkWidgetHandler {
+  export class SkipLinkWidget extends Widget {
     /**
      * Construct a new skipLink widget handler.
      */
     constructor(shell: ILabShell) {
-      const skipLinkWidget = (this._skipLinkWidget = new Widget());
-      const skipToFilterFiles = document.createElement('a');
-      skipToFilterFiles.href = '#';
-      skipToFilterFiles.tabIndex = 1;
-      skipToFilterFiles.text = 'Skip to Filter Files';
-      skipToFilterFiles.className = 'skip-link';
-      skipToFilterFiles.addEventListener('click', this);
-      skipLinkWidget.addClass('jp-skiplink');
-      skipLinkWidget.id = 'jp-skiplink';
-      skipLinkWidget.node.appendChild(skipToFilterFiles);
+      super();
+
+      this.addClass('jp-skiplink');
+      this.id = 'jp-skiplink';
+      this._shell = shell;
+      this.createSkipLink('Skip to left side bar');
+      this.createSkipLink('Skip to main area');
     }
 
     handleEvent(event: Event): void {
       switch (event.type) {
         case 'click':
-          this._focusFileSearch();
+          this._focusLeftSideBar();
           break;
       }
     }
 
-    private _focusFileSearch() {
-      const input = document.querySelector(
-        '#filename-searcher .bp3-input'
-      ) as HTMLInputElement;
-      input.focus();
+    createSkipLink(skipLinkText: string): void {
+      const skipLink = document.createElement('a');
+      skipLink.href = '#';
+      skipLink.tabIndex = 1;
+      skipLink.text = skipLinkText;
+      skipLink.className = 'skip-link';
+      this.node.appendChild(skipLink);
     }
 
     /**
-     * Get the input element managed by the handler.
+     * Handle `after-attach` messages for the widget.
      */
-    get skipLinkWidget(): Widget {
-      return this._skipLinkWidget;
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('click', this);
     }
 
     /**
-     * Dispose of the handler and the resources it holds.
+     * A message handler invoked on a `'before-detach'`
+     * message
      */
-    dispose(): void {
-      if (this.isDisposed) {
-        return;
-      }
-      this._isDisposed = true;
-      this._skipLinkWidget.node.removeEventListener('click', this);
-      this._skipLinkWidget.dispose();
+    protected onBeforeDetach(msg: Message): void {
+      this.node.removeEventListener('click', this);
+      super.onBeforeDetach(msg);
     }
 
-    /**
-     * Hide the skipLink widget.
-     */
-    hide(): void {
-      this._skipLinkWidget.hide();
+    private _focusLeftSideBar() {
+      this._shell.expandLeft();
     }
-
-    /**
-     * Show the skipLink widget.
-     */
-    show(): void {
-      this._skipLinkWidget.show();
-    }
-
-    /**
-     * Test whether the handler has been disposed.
-     */
-    get isDisposed(): boolean {
-      return this._isDisposed;
-    }
-
-    private _skipLinkWidget: Widget;
-    private _isDisposed: boolean = false;
+    private _shell: ILabShell;
   }
 
   export class TitleWidgetHandler {
