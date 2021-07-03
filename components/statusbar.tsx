@@ -157,13 +157,17 @@ class LanguageServerInfo extends React.Component<ILanguageServerInfo, any> {
           </p>
           <h4>{trans.__('Installation')}</h4>
           <ul>
-            {Object.entries(specification?.install || {}).map(
-              ([name, command]) => (
-                <li key={this.props.serverId + '-install-' + name}>
-                  {name}: <code>{command}</code>
-                </li>
-              )
-            )}
+            {specification?.install
+              ? Object.entries(specification?.install || {}).map(
+                  ([name, command]) => (
+                    <li key={this.props.serverId + '-install-' + name}>
+                      {name}: <code>{command}</code>
+                    </li>
+                  )
+                )
+              : trans.__(
+                  'No installation instructions were provided with this specification.'
+                )}
           </ul>
         </div>
       </div>
@@ -321,9 +325,6 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
         const specs_for_missing = this.model.language_server_manager.getMatchingSpecs(
           { language }
         );
-        if (language === 'r') {
-          language = 'R';
-        }
         return (
           <div key={i} className={'lsp-missing-server'}>
             {language}

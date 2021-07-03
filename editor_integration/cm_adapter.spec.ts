@@ -27,6 +27,10 @@ describe('CodeMirrorAdapter', () => {
         }
       }
 
+      await env.adapter.widget.context.initialize(true);
+      await env.adapter.widget.context.ready;
+      await env.adapter.initialized;
+
       let feature = env.init_integration({
         constructor: UpdateReceivingFeature,
         id: 'UpdateReceivingFeature'

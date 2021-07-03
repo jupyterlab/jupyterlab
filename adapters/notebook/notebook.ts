@@ -33,7 +33,9 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     this.ce_editor_to_cell = new Map();
     this.editor = editor_widget.content;
     this.known_editors_ids = new Set();
-    this.init_once_ready().catch(this.console.warn);
+    this.initialized = new Promise<void>((resolve, reject) => {
+      this.init_once_ready().then(resolve).catch(reject);
+    });
   }
 
   private async update_language_info() {
@@ -123,7 +125,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     return this.widget.node;
   }
 
-  async init_once_ready() {
+  protected async init_once_ready() {
     this.console.log('waiting for', this.document_path, 'to fully load');
     await this.widget.context.sessionContext.ready;
     await until_ready(this.is_ready, -1);

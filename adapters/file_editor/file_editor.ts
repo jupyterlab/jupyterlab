@@ -24,7 +24,27 @@ export class FileEditorAdapter extends WidgetAdapter<
   }
 
   get mime_type() {
-    return this.editor.model.mimeType;
+    const codeMirrorMimeType = this.editor.model.mimeType;
+    const contentsModel = this.editor.context.contentsModel;
+
+    // when MIME type is not known it defaults to 'text/plain',
+    // so if it is different we can accept it as it is
+    if (codeMirrorMimeType != 'text/plain') {
+      return codeMirrorMimeType;
+    } else if (contentsModel) {
+      // a script that does not have a MIME type known by the editor
+      // (no syntax highlight mode), can still be known by the document
+      // registry (and this is arguably easier to extend), so let's check it
+      // just in case; this is also how the "Klingon" language for testing
+      // gets registered, so we need it for tests too.
+      let fileType = this.extension.app.docRegistry.getFileTypeForModel(
+        this.editor.context.contentsModel
+      );
+      return fileType.mimeTypes[0];
+    } else {
+      // "text/plain" this is
+      return codeMirrorMimeType;
+    }
   }
 
   get language_file_extension(): string {
@@ -47,6 +67,15 @@ export class FileEditorAdapter extends WidgetAdapter<
     super(extension, editor_widget);
     this.editor = editor_widget.content;
 
+    this.initialized = new Promise<void>((resolve, reject) => {
+      this.init_once_ready().then(resolve).catch(reject);
+    });
+  }
+
+  protected async init_once_ready() {
+    if (!this.editor.context.isReady) {
+      await this.editor.context.ready;
+    }
     this.init_virtual();
 
     this.console.log('file ready for connection:', this.path);

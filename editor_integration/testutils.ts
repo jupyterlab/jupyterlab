@@ -21,7 +21,7 @@ import {
   NotebookPanel
 } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
-import { NBTestUtils } from '@jupyterlab/testutils';
+import { Mock, NBTestUtils } from '@jupyterlab/testutils';
 import { ITranslator } from '@jupyterlab/translation';
 import { Signal } from '@lumino/signaling';
 
@@ -159,7 +159,15 @@ export abstract class TestEnvironment implements ITestEnvironment {
     let adapter_type = this.get_adapter_type();
     this.adapter = new adapter_type(this.extension, this.widget);
     this.virtual_editor = this.create_virtual_editor();
+    // override the virtual editor with a mock/test one
     this.adapter.virtual_editor = this.virtual_editor;
+    this.adapter.initialized
+      .then(() => {
+        // override it again after initialization
+        // TODO: rewrite tests to async to only override after initialization
+        this.adapter.virtual_editor = this.virtual_editor;
+      })
+      .catch(console.error);
   }
 
   create_virtual_editor(): CodeMirrorVirtualEditor {
@@ -295,13 +303,12 @@ export class FileEditorTestEnvironment extends TestEnvironment {
         fileTypes: ['*']
       }
     });
-    return factory.createNew(
-      new Context({
-        manager: new ServiceManager({ standby: 'never' }),
-        factory: new TextModelFactory(),
-        path: this.document_options.path
-      })
-    );
+    const context = new Context({
+      manager: new Mock.ServiceManagerMock(),
+      factory: new TextModelFactory(),
+      path: this.document_options.path
+    });
+    return factory.createNew(context);
   }
 
   dispose(): void {

@@ -108,6 +108,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   public editorAdded: Signal<WidgetAdapter<T>, IEditorChangedData>;
   public editorRemoved: Signal<WidgetAdapter<T>, IEditorChangedData>;
   public update_finished: Promise<void>;
+  public initialized: Promise<void>;
 
   /**
    * (re)create virtual document using current path and language
