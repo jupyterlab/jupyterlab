@@ -94,7 +94,7 @@ export namespace IEditMenu {
      * A function to create the label for the `clearCurrent`action.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     clearCurrentLabel?: (n: number) => string;
 
@@ -102,7 +102,7 @@ export namespace IEditMenu {
      * A function to create the label for the `clearAll`action.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     clearAllLabel?: (n: number) => string;
 

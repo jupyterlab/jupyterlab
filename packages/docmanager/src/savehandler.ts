@@ -159,7 +159,7 @@ export namespace SaveHandler {
    */
   export interface IOptions {
     /**
-     * The context asssociated with the file.
+     * The context associated with the file.
      */
     context: DocumentRegistry.Context;
 

@@ -15,7 +15,7 @@ export interface IEditorMimeTypeService {
    * @returns A valid mimetype.
    *
    * #### Notes
-   * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
+   * If a mime type cannot be found returns the default mime type `text/plain`, never `null`.
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string;
 
@@ -27,7 +27,7 @@ export interface IEditorMimeTypeService {
    * @returns A valid mimetype.
    *
    * #### Notes
-   * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
+   * If a mime type cannot be found returns the default mime type `text/plain`, never `null`.
    */
   getMimeTypeByFilePath(filePath: string): string;
 }

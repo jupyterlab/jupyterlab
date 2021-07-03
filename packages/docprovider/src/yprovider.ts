@@ -14,9 +14,9 @@ import * as env from 'lib0/environment';
 /**
  * A class to provide Yjs synchronization over WebSocket.
  *
- * The user can specify their own user-name and user-color by adding urlparameters:
+ * The user can specify their own user-name and user-color by adding url parameters:
  *   ?username=Alice&usercolor=007007
- * wher usercolor must be a six-digit hexadicimal encoded RGB value without the hash token.
+ * where usercolor must be a six-digit hexadecimal encoded RGB value without the hash token.
  *
  * We specify custom messages that the server can interpret. For reference please look in yjs_ws_server.
  *

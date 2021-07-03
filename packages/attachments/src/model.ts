@@ -342,7 +342,7 @@ export class AttachmentsModel implements IAttachmentsModel {
  */
 export namespace AttachmentsModel {
   /**
-   * The default implementation of a `IAttachemntsModel.IContentFactory`.
+   * The default implementation of a `IAttachmentsModel.IContentFactory`.
    */
   export class ContentFactory implements IAttachmentsModel.IContentFactory {
     /**
@@ -362,7 +362,7 @@ export namespace AttachmentsModel {
 }
 
 /**
- * A resolver for cell attachments 'attchment:filename'.
+ * A resolver for cell attachments 'attachment:filename'.
  *
  * Will resolve to a data: url.
  */

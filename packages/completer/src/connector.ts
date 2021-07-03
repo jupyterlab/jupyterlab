@@ -17,7 +17,7 @@ export class CompletionConnector extends DataConnector<
   /**
    * Create a new connector for completion requests.
    *
-   * @param options - The instatiation options for the connector.
+   * @param options - The instantiation options for the connector.
    */
   constructor(options: CompletionConnector.IOptions) {
     super();

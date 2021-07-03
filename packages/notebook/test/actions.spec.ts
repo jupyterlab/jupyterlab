@@ -851,7 +851,7 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets[2].model.value.text = 'a = 1';
       });
 
-      it('should run all of the cells in the notebok', async () => {
+      it('should run all of the cells in the notebook', async () => {
         const next = widget.widgets[1] as MarkdownCell;
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
@@ -1055,7 +1055,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.isSelected(widget.widgets[1])).toBe(true);
       });
 
-      it('should extend the selection the bottomost cell', () => {
+      it('should extend the selection the bottom-most cell', () => {
         NotebookActions.extendSelectionBelow(widget, true);
         for (let i = widget.activeCellIndex; i < widget.widgets.length; i++) {
           expect(widget.isSelected(widget.widgets[i])).toBe(true);

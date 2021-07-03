@@ -190,7 +190,7 @@ export namespace InputArea {
    */
   export interface IContentFactory {
     /**
-     * The editor factory we need to include in `CodeEditorWratter.IOptions`.
+     * The editor factory we need to include in `CodeEditorWrapper.IOptions`.
      *
      * This is a separate readonly attribute rather than a factory method as we need
      * to pass it around.

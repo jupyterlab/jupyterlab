@@ -263,7 +263,7 @@ export class Context<
     const finally_ = () => {
       this._provider.releaseLock(lock);
     };
-    // if save/revert completed successfully, we set the inialized content in the rtc server.
+    // if save/revert completed successfully, we set the initialized content in the rtc server.
     promise
       .then(() => {
         this._provider.putInitializedState();
@@ -300,7 +300,7 @@ export class Context<
     } else {
       promise = this._save();
     }
-    // if save completed successfully, we set the inialized content in the rtc server.
+    // if save completed successfully, we set the initialized content in the rtc server.
     promise = promise.then(() => {
       this._provider.putInitializedState();
     });

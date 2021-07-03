@@ -535,10 +535,13 @@ export namespace NotebookModel {
      * @param options: the cell creation options.
      *
      * #### Notes
-     * This method is intended to be a convenience method to programmaticaly
+     * This method is intended to be a convenience method to programmatically
      * call the other cell creation methods in the factory.
      */
-    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel;
+    createCell(
+      type: nbformat.CellType,
+      options: CellModel.IOptions
+    ): ICellModel;
 
     /**
      * Create a new code cell.
@@ -607,18 +610,21 @@ export namespace NotebookModel {
      * @param options: the cell creation options.
      *
      * #### Notes
-     * This method is intended to be a convenience method to programmaticaly
+     * This method is intended to be a convenience method to programmatically
      * call the other cell creation methods in the factory.
      */
-    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel {
+    createCell(
+      type: nbformat.CellType,
+      options: CellModel.IOptions
+    ): ICellModel {
       switch (type) {
         case 'code':
-          return this.createCodeCell(opts);
+          return this.createCodeCell(options);
         case 'markdown':
-          return this.createMarkdownCell(opts);
+          return this.createMarkdownCell(options);
         case 'raw':
         default:
-          return this.createRawCell(opts);
+          return this.createRawCell(options);
       }
     }
 

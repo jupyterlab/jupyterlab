@@ -127,7 +127,7 @@ you may encounter HTTP and SSL errors due to the proxy or firewall blocking conn
 
     CondaHTTPError: HTTP 000 CONNECTION FAILED for url <https://repo.anaconda.com/pkgs/main/win-64/current_repodata.json>
 
-Here are some widely-used sites that host packages in the Python and JavaScript open-source ecosystems. Your network adminstrator may be able to allow http and https connections to these domains:
+Here are some widely-used sites that host packages in the Python and JavaScript open-source ecosystems. Your network administrator may be able to allow http and https connections to these domains:
 
 - pypi.org
 - pythonhosted.org

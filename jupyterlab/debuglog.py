@@ -52,9 +52,9 @@ class DebugLogFileMixin(Configurable):
             for line in msg:
                 self.log.debug(line)
             if isinstance(ex, SystemExit):
-                print('An error occured. See the log file for details: ', log_path)
+                print('An error occurred. See the log file for details: ', log_path)
                 raise
-            print('An error occured.')
+            print('An error occurred.')
             print(msg[-1].strip())
             print('See the log file for details: ', log_path)
             self.exit(1)

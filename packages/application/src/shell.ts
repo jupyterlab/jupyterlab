@@ -449,7 +449,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * A signal emitted when the shell/dock panel change modes (single/mutiple document).
+   * A signal emitted when the shell/dock panel change modes (single/multiple document).
    */
   get modeChanged(): ISignal<this, DockPanel.Mode> {
     return this._modeChanged;

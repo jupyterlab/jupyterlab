@@ -166,7 +166,7 @@ const MULTI_SELECTED_CLASS = 'jp-mod-multiSelected';
 const RUNNING_CLASS = 'jp-mod-running';
 
 /**
- * The class name added for a decending sort.
+ * The class name added for a descending sort.
  */
 const DESCENDING_CLASS = 'jp-mod-descending';
 

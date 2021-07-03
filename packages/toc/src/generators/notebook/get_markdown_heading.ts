@@ -35,7 +35,7 @@ function getMarkdownHeadings(
   cellRef: Cell,
   index: number = -1
 ): INotebookHeading[] {
-  const clbk = onClick(0);
+  const callback = onClick(0);
   let headings: INotebookHeading[] = [];
   if (index === -1) {
     console.warn(
@@ -49,7 +49,7 @@ function getMarkdownHeadings(
         text: heading.text,
         level: heading.level,
         numbering: generateNumbering(dict, heading.level),
-        onClick: clbk,
+        onClick: callback,
         type: 'header',
         cellRef: cellRef,
         hasChild: false,
@@ -59,7 +59,7 @@ function getMarkdownHeadings(
       headings.push({
         text: text,
         level: lastLevel + 1,
-        onClick: clbk,
+        onClick: callback,
         type: 'markdown',
         cellRef: cellRef,
         hasChild: false,

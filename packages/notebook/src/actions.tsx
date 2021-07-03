@@ -76,7 +76,7 @@ export namespace NotebookActions {
    * #### Notes
    * It will preserve the existing mode.
    * The last cell will be activated if no selection is found.
-   * If text was selected, the cell cotaining the selection will
+   * If text was selected, the cell containing the selection will
      be activated.
    * The existing selection will be cleared.
    * The activated cell will have focus and the cursor will move
@@ -863,7 +863,7 @@ export namespace NotebookActions {
   /**
    * Deselect all of the cells of the notebook.
    *
-   * @param notebook - the targe notebook widget.
+   * @param notebook - the target notebook widget.
    */
   export function deselectAll(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -1497,11 +1497,11 @@ export namespace NotebookActions {
     if (!notebook.widgets.length) {
       return which + 1;
     }
-    let selectedheadingInfo = NotebookActions.getHeadingInfo(cell);
+    let selectedHeadingInfo = NotebookActions.getHeadingInfo(cell);
     if (
       cell.isHidden ||
       !(cell instanceof MarkdownCell) ||
-      !selectedheadingInfo.isHeading
+      !selectedHeadingInfo.isHeading
     ) {
       // otherwise collapsing and uncollapsing already hidden stuff can
       // cause some funny looking bugs.
@@ -1513,10 +1513,10 @@ export namespace NotebookActions {
     let cellNum;
     for (cellNum = which + 1; cellNum < notebook.widgets.length; cellNum++) {
       let subCell = notebook.widgets[cellNum];
-      let subCellheadingInfo = NotebookActions.getHeadingInfo(subCell);
+      let subCellHeadingInfo = NotebookActions.getHeadingInfo(subCell);
       if (
-        subCellheadingInfo.isHeading &&
-        subCellheadingInfo.headingLevel <= selectedheadingInfo.headingLevel
+        subCellHeadingInfo.isHeading &&
+        subCellHeadingInfo.headingLevel <= selectedHeadingInfo.headingLevel
       ) {
         // then reached an equivalent or higher heading level than the
         // original the end of the collapse.
@@ -1525,8 +1525,8 @@ export namespace NotebookActions {
       }
       if (
         localCollapsed &&
-        subCellheadingInfo.isHeading &&
-        subCellheadingInfo.headingLevel <= localCollapsedLevel
+        subCellHeadingInfo.isHeading &&
+        subCellHeadingInfo.headingLevel <= localCollapsedLevel
       ) {
         // then reached the end of the local collapsed, so unset NotebookActions.
         localCollapsed = false;
@@ -1539,9 +1539,9 @@ export namespace NotebookActions {
         continue;
       }
 
-      if (subCellheadingInfo.collapsed && subCellheadingInfo.isHeading) {
+      if (subCellHeadingInfo.collapsed && subCellHeadingInfo.isHeading) {
         localCollapsed = true;
-        localCollapsedLevel = subCellheadingInfo.headingLevel;
+        localCollapsedLevel = subCellHeadingInfo.headingLevel;
         // but don't collapse the locally collapsed heading, so continue to
         // expand the heading. This will get noticed in the next round.
       }
@@ -1638,7 +1638,7 @@ export namespace NotebookActions {
     const trustMessage = (
       <p>
         {trans.__(
-          'A trusted Jupyter notebook may execute hidden malicious code when you openit.'
+          'A trusted Jupyter notebook may execute hidden malicious code when you open it.'
         )}
         <br />
         {trans.__(

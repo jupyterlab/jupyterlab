@@ -23,7 +23,7 @@ const FILE_DIALOG_CHECKBOX_CLASS = 'jp-FileDialog-Checkbox';
 /**
  * The class name added for the new name label in the rename dialog
  */
-const RENAME_NEWNAME_TITLE_CLASS = 'jp-new-name-title';
+const RENAME_NEW_NAME_TITLE_CLASS = 'jp-new-name-title';
 
 /**
  * A stripped-down interface for a file container.
@@ -228,7 +228,7 @@ namespace Private {
 
     const nameTitle = document.createElement('label');
     nameTitle.textContent = trans.__('New Name');
-    nameTitle.className = RENAME_NEWNAME_TITLE_CLASS;
+    nameTitle.className = RENAME_NEW_NAME_TITLE_CLASS;
     const name = document.createElement('input');
 
     body.appendChild(existingLabel);

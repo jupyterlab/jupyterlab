@@ -70,7 +70,7 @@ discussion, makes others aware of work being done, and sets the stage
 for a fruitful community interaction. A pull request should reference
 the issue it is addressing. Once the pull request is merged, the issue
 related to it will also be closed. If there is additional discussion
-around implemementation the issue may be re-opened. Once 30 days have
+around implementation the issue may be re-opened. Once 30 days have
 passed with no additional discussion, the `lock
 bot <https://github.com/apps/lock>`__ will lock the issue. If additional
 discussion is desired, or if the pull request doesn't fully address the
@@ -286,7 +286,7 @@ tests.
 For tests that rely on ``@jupyterlab/services`` (starting kernels,
 interacting with files, etc.), there are two options. If a simple
 interaction is needed, the ``Mock`` namespace exposed by ``testutils``
-has a number of mock implmentations (see ``testutils/src/mock.ts``). If
+has a number of mock implementations (see ``testutils/src/mock.ts``). If
 a full server interaction is required, use the ``JupyterServer`` class.
 
 We have a helper function called ``testEmission`` to help with writing
@@ -769,7 +769,7 @@ User Interface Naming Conventions
 Documents, Files, and Activities
 """"""""""""""""""""""""""""""""
 
-Files are referrred to as either files or documents, depending on the
+Files are referred to as either files or documents, depending on the
 context.
 
 Documents are more human centered. If human viewing, interpretation,

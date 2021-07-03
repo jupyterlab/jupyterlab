@@ -145,7 +145,7 @@ export class OutputArea extends Widget {
   private headEndIndex: number;
 
   /**
-   * A read-only sequence of the chidren widgets in the output area.
+   * A read-only sequence of the children widgets in the output area.
    */
   get widgets(): ReadonlyArray<Widget> {
     return (this.layout as PanelLayout).widgets;

@@ -824,7 +824,7 @@ export interface IComm extends IDisposable {
    *
    * @param data - The data to send to the server on opening.
    *
-   * @param metadata - Additional metatada for the message.
+   * @param metadata - Additional metadata for the message.
    *
    * @returns A future for the generated message.
    *
@@ -842,7 +842,7 @@ export interface IComm extends IDisposable {
    *
    * @param data - The data to send to the server on opening.
    *
-   * @param metadata - Additional metatada for the message.
+   * @param metadata - Additional metadata for the message.
    *
    * @param buffers - Optional buffer data.
    *
@@ -865,7 +865,7 @@ export interface IComm extends IDisposable {
    *
    * @param data - The data to send to the server on opening.
    *
-   * @param metadata - Additional metatada for the message.
+   * @param metadata - Additional metadata for the message.
    *
    * @returns A future for the generated message.
    *

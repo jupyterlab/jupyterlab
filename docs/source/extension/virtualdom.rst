@@ -24,7 +24,7 @@ into a Lumino widget. Whenever the widget is mounted, the React
 element will be rendered on the page.
 
 If you need to handle other life cycle events on the Lumino widget
-or add other methods to it, you can subbclass ``ReactWidget`` and
+or add other methods to it, you can subclass ``ReactWidget`` and
 override the ``render`` method to return a React element:
 
 

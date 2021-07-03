@@ -88,7 +88,7 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
  */
 export namespace CommandEditStatus {
   /**
-   * A VDomModle for the CommandEdit renderer.
+   * A VDomModel for the CommandEdit renderer.
    */
   export class Model extends VDomModel {
     /**

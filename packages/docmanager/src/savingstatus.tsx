@@ -170,7 +170,7 @@ export namespace SavingStatus {
     docManager: IDocumentManager;
 
     /**
-     * The aplication language translator.
+     * The application language translator.
      */
     translator?: ITranslator;
   }
