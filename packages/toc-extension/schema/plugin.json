@@ -9,6 +9,12 @@
       "description": "Whether to number first level headings",
       "type": "boolean",
       "default": true
+    },
+    "includeOutput": {
+      "title": "Include cell output in headings",
+      "description": "Whether to include cell output in headings",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,
