@@ -43,7 +43,7 @@ import { nullTranslator, ITranslator } from '@jupyterlab/translation';
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
-class KernelError extends Error {
+export class KernelError extends Error {
   constructor(content: KernelMessage.IExecuteReplyMsg['content']) {
     const errorContent = content as KernelMessage.IReplyErrorContent;
     const errorName = errorContent.ename;
@@ -66,7 +66,15 @@ export class NotebookActions {
   /**
    * A signal that emits whenever a cell completes execution.
    */
-  static get executed(): ISignal<any, { notebook: Notebook; cell: Cell }> {
+  static get executed(): ISignal<
+    any,
+    {
+      notebook: Notebook;
+      cell: Cell;
+      success: boolean;
+      error?: KernelError | null;
+    }
+  > {
     return Private.executed;
   }
 
@@ -78,16 +86,6 @@ export class NotebookActions {
     { notebook: Notebook; cell: Cell }
   > {
     return Private.executionScheduled;
-  }
-
-  /**
-   * A signal that emits whenever a cell execution fails.
-   */
-  static get executionFailed(): ISignal<
-    any,
-    { notebook: Notebook; cell: Cell; error: any }
-  > {
-    return Private.executionFailed;
   }
 
   /**
@@ -1489,9 +1487,15 @@ namespace Private {
   /**
    * A signal that emits whenever a cell completes execution.
    */
-  export const executed = new Signal<any, { notebook: Notebook; cell: Cell }>(
-    {}
-  );
+  export const executed = new Signal<
+    any,
+    {
+      notebook: Notebook;
+      cell: Cell;
+      success: boolean;
+      error?: KernelError | null;
+    }
+  >({});
 
   /**
    * A signal that emits whenever a cell execution is scheduled.
@@ -1499,14 +1503,6 @@ namespace Private {
   export const executionScheduled = new Signal<
     any,
     { notebook: Notebook; cell: Cell }
-  >({});
-
-  /**
-   * A signal that emits whenever a cell execution fails.
-   */
-  export const executionFailed = new Signal<
-    any,
-    { notebook: Notebook; cell: Cell; error: any }
   >({});
 
   /**
@@ -1679,7 +1675,7 @@ namespace Private {
       case 'markdown':
         (cell as MarkdownCell).rendered = true;
         cell.inputHidden = false;
-        executed.emit({ notebook, cell });
+        executed.emit({ notebook, cell, success: true });
         break;
       case 'code':
         if (sessionContext) {
@@ -1725,12 +1721,12 @@ namespace Private {
               if (cell.isDisposed || reason.message.startsWith('Canceled')) {
                 return false;
               }
-              executionFailed.emit({ notebook, cell, error: reason });
+              executed.emit({ notebook, cell, success: false, error: reason });
               throw reason;
             })
             .then(ran => {
               if (ran) {
-                executed.emit({ notebook, cell });
+                executed.emit({ notebook, cell, success: true });
               }
 
               return ran;

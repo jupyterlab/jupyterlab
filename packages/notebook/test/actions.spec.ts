@@ -24,7 +24,7 @@ import { JSONObject, JSONArray, UUID } from '@lumino/coreutils';
 
 import { NotebookModel } from '../src';
 
-import { NotebookActions } from '../src';
+import { NotebookActions, KernelError } from '../src';
 
 import { Notebook } from '../src';
 
@@ -100,17 +100,47 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.activeCell as CodeCell;
         const next = widget.widgets[1] as MarkdownCell;
         let emitted = 0;
-
+        let failed = 0;
         widget.select(next);
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.executed.connect(() => {
+        NotebookActions.executed.connect((_, args) => {
+          const { success } = args;
           emitted += 1;
+          if (!success) {
+            failed += 1;
+          }
         });
 
         await NotebookActions.run(widget, sessionContext);
         expect(emitted).toBe(2);
+        expect(failed).toBe(0);
         expect(next.rendered).toBe(true);
+      });
+
+      it('should emit an error for a cell execution failure.', async () => {
+        let emitted = 0;
+        let failed = 0;
+        let cellError = null;
+        NotebookActions.executed.connect((_, args) => {
+          const { success, error } = args;
+          emitted += 1;
+          if (!success) {
+            failed += 1;
+            cellError = error;
+          }
+        });
+
+        const cell = widget.model!.contentFactory.createCodeCell({});
+        cell.value.text = ERROR_INPUT;
+        widget.model!.cells.push(cell);
+        widget.select(widget.widgets[widget.widgets.length - 1]);
+        const result = await NotebookActions.run(widget, ipySessionContext);
+        expect(result).toBe(false);
+        expect(emitted).toBe(2);
+        expect(failed).toBe(1);
+        expect(cellError).toBeInstanceOf(KernelError);
+        await ipySessionContext.session!.kernel!.restart();
       });
     });
 
@@ -130,24 +160,6 @@ describe('@jupyterlab/notebook', () => {
         await NotebookActions.run(widget, sessionContext);
         expect(emitted).toBe(1);
         expect(next.rendered).toBe(true);
-      });
-    });
-
-    describe('#executionFailed', () => {
-      it('should emit only when cell execution failed.', async () => {
-        let emitted = 0;
-        NotebookActions.executionFailed.connect(() => {
-          emitted += 1;
-        });
-        widget.activeCell!.model.value.text = ERROR_INPUT;
-        const cell = widget.model!.contentFactory.createCodeCell({});
-        widget.model!.cells.push(cell);
-        widget.select(widget.widgets[widget.widgets.length - 1]);
-        const result = await NotebookActions.run(widget, ipySessionContext);
-        expect(result).toBe(false);
-        expect(cell.executionCount).toBeNull();
-        expect(emitted).toBe(1);
-        await ipySessionContext.session!.kernel!.restart();
       });
     });
 
