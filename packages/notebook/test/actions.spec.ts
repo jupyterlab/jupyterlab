@@ -121,7 +121,7 @@ describe('@jupyterlab/notebook', () => {
       it('should emit an error for a cell execution failure.', async () => {
         let emitted = 0;
         let failed = 0;
-        let cellError = null;
+        let cellError: any = null;
         NotebookActions.executed.connect((_, args) => {
           const { success, error } = args;
           emitted += 1;
@@ -140,6 +140,9 @@ describe('@jupyterlab/notebook', () => {
         expect(emitted).toBe(2);
         expect(failed).toBe(1);
         expect(cellError).toBeInstanceOf(KernelError);
+        expect(cellError!.errorName).toBe('NameError');
+        expect(cellError!.errorValue).toBe("name 'foo' is not defined");
+        expect(cellError!.traceback).not.toBeNull();
         await ipySessionContext.session!.kernel!.restart();
       });
     });

@@ -44,11 +44,31 @@ import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 export class KernelError extends Error {
+  /**
+   * Exception name
+   */
+  errorName: string;
+  /**
+   * Exception value
+   */
+  errorValue: string;
+  /**
+   * Traceback
+   */
+  traceback: string[];
+
+  /**
+   * Construct the kernel error.
+   */
   constructor(content: KernelMessage.IExecuteReplyMsg['content']) {
     const errorContent = content as KernelMessage.IReplyErrorContent;
     const errorName = errorContent.ename;
     const errorValue = errorContent.evalue;
     super(`KernelReplyNotOK: ${errorName} ${errorValue}`);
+
+    this.errorName = errorName;
+    this.errorValue = errorValue;
+    this.traceback = errorContent.traceback;
     Object.setPrototypeOf(this, KernelError.prototype);
   }
 }
