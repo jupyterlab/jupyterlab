@@ -591,7 +591,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#run()', () => {
       it('should run the selected cells', async () => {
         let emitted = 0;
-        NotebookActions.allExecuted.connect(() => {
+        NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
         const next = widget.widgets[1] as MarkdownCell;
@@ -609,7 +609,7 @@ describe('@jupyterlab/notebook', () => {
       it('should delete deletedCells metadata when cell run', () => {
         const cell = widget.activeCell as CodeCell;
         let emitted = 0;
-        NotebookActions.allExecuted.connect(() => {
+        NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
         cell.model.outputs.clear();
@@ -623,7 +623,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
         let emitted = 0;
-        NotebookActions.allExecuted.connect(() => {
+        NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
         const result = await NotebookActions.run(widget, sessionContext);
@@ -634,7 +634,7 @@ describe('@jupyterlab/notebook', () => {
       it('should activate the last selected cell', async () => {
         const other = widget.widgets[2];
         let emitted = 0;
-        NotebookActions.allExecuted.connect(() => {
+        NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
         widget.select(other);
@@ -648,7 +648,7 @@ describe('@jupyterlab/notebook', () => {
       it('should clear the selection', async () => {
         const next = widget.widgets[1];
         let emitted = 0;
-        NotebookActions.allExecuted.connect(() => {
+        NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
         widget.select(next);
@@ -661,7 +661,7 @@ describe('@jupyterlab/notebook', () => {
       it('should change to command mode', async () => {
         widget.mode = 'edit';
         let emitted = 0;
-        NotebookActions.allExecuted.connect(() => {
+        NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
         const result = await NotebookActions.run(widget, sessionContext);
@@ -672,7 +672,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should handle no session', async () => {
         let emitted = 0;
-        NotebookActions.allExecuted.connect(() => {
+        NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
         const result = await NotebookActions.run(widget, undefined);
@@ -684,7 +684,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should stop executing code cells on an error', async () => {
         let emitted = 0;
-        NotebookActions.allExecuted.connect(() => {
+        NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
         let cell = widget.model!.contentFactory.createCodeCell({});
@@ -703,7 +703,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should render all markdown cells on an error', async () => {
         let emitted = 0;
-        NotebookActions.allExecuted.connect(() => {
+        NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
         const cell = widget.model!.contentFactory.createMarkdownCell({});

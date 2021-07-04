@@ -93,11 +93,11 @@ export class NotebookActions {
   /**
    * A signal that emits whenever a cell completes execution.
    */
-  static get allExecuted(): ISignal<
+  static get selectionExecuted(): ISignal<
     any,
     { notebook: Notebook; lastCell: Cell }
   > {
-    return Private.allExecuted;
+    return Private.selectionExecuted;
   }
 
   /**
@@ -1512,7 +1512,7 @@ namespace Private {
   /**
    * A signal that emits when one notebook's cells are all executed.
    */
-  export const allExecuted = new Signal<
+  export const selectionExecuted = new Signal<
     any,
     { notebook: Notebook; lastCell: Cell }
   >({});
@@ -1630,7 +1630,10 @@ namespace Private {
         if (notebook.isDisposed) {
           return false;
         }
-        allExecuted.emit({ notebook, lastCell: notebook.widgets[lastIndex] });
+        selectionExecuted.emit({
+          notebook,
+          lastCell: notebook.widgets[lastIndex]
+        });
         // Post an update request.
         notebook.update();
 
@@ -1651,7 +1654,10 @@ namespace Private {
           throw reason;
         }
 
-        allExecuted.emit({ notebook, lastCell: notebook.widgets[lastIndex] });
+        selectionExecuted.emit({
+          notebook,
+          lastCell: notebook.widgets[lastIndex]
+        });
         notebook.update();
 
         return false;
