@@ -718,11 +718,15 @@ Writing Documentation
 Documentation is written in Markdown and reStructuredText. In
 particular, the documentation on our Read the Docs page is written in
 reStructuredText. To ensure that the Read the Docs page builds, you'll
-need to install the documentation dependencies with ``pip``:
+need to install the documentation dependencies with ``conda``:
 
 .. code:: bash
 
-   pip install -r docs/requirements.txt
+   conda env create -f docs/environment.yml
+
+.. code:: bash
+
+   conda activate jupyterlab_documentation
 
 
 To test the docs run:
