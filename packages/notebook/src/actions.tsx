@@ -47,15 +47,15 @@ export class KernelError extends Error {
   /**
    * Exception name
    */
-  errorName: string;
+  readonly errorName: string;
   /**
    * Exception value
    */
-  errorValue: string;
+  readonly errorValue: string;
   /**
    * Traceback
    */
-  traceback: string[];
+  readonly traceback: string[];
 
   /**
    * Construct the kernel error.
