@@ -1742,7 +1742,7 @@ namespace Private {
       this.addClass('jp-skiplink');
       this.id = 'jp-skiplink';
       this._shell = shell;
-      this.createSkipLink('Skip to left side bar');
+      this.private_createSkipLink('Skip to left side bar');
     }
 
     handleEvent(event: Event): void {
@@ -1751,18 +1751,6 @@ namespace Private {
           this._focusLeftSideBar();
           break;
       }
-    }
-
-    /**
-     * Create a skipLink for the widget.
-     */
-    createSkipLink(skipLinkText: string): void {
-      const skipLink = document.createElement('a');
-      skipLink.href = '#';
-      skipLink.tabIndex = 1;
-      skipLink.text = skipLinkText;
-      skipLink.className = 'skip-link';
-      this.node.appendChild(skipLink);
     }
 
     /**
@@ -1786,6 +1774,15 @@ namespace Private {
       this._shell.expandLeft();
     }
     private _shell: ILabShell;
+
+    private_createSkipLink(skipLinkText: string): void {
+      const skipLink = document.createElement('a');
+      skipLink.href = '#';
+      skipLink.tabIndex = 1;
+      skipLink.text = skipLinkText;
+      skipLink.className = 'skip-link';
+      this.node.appendChild(skipLink);
+    }
   }
 
   export class TitleWidgetHandler {
