@@ -1735,7 +1735,7 @@ namespace Private {
 
   export class SkipLinkWidget extends Widget {
     /**
-     * Construct a new skipLink widget handler.
+     * Construct a new skipLink widget.
      */
     constructor(shell: ILabShell) {
       super();
@@ -1753,6 +1753,9 @@ namespace Private {
       }
     }
 
+    /**
+     * Create a skipLink for the widget.
+     */
     createSkipLink(skipLinkText: string): void {
       const skipLink = document.createElement('a');
       skipLink.href = '#';
