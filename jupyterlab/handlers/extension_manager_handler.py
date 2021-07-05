@@ -262,7 +262,7 @@ class ExtensionHandler(ExtensionHandlerMixin, APIHandler):
         if (cmd not in ('install', 'uninstall', 'enable', 'disable') or
                 not name):
             raise web.HTTPError(
-                422, 'Could not process instrution %r with extension name %r' % (
+                422, 'Could not process instruction %r with extension name %r' % (
                     cmd, name))
 
         # TODO: Can we trust extension_name? Does it need sanitation?

@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import { Message } from '@lumino/messaging';
-
 import { Widget } from '@lumino/widgets';
 
 /**

@@ -1,30 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt } from '@lumino/algorithm';
-
-import { Message } from '@lumino/messaging';
-
-import { ElementExt } from '@lumino/domutils';
-
-import { IDragEvent } from '@lumino/dragdrop';
-
-import { Widget } from '@lumino/widgets';
-
 import { DOMUtils, showErrorMessage } from '@jupyterlab/apputils';
-
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
-
 import { renameFile } from '@jupyterlab/docmanager';
-
 import {
+  ITranslator,
   nullTranslator,
-  TranslationBundle,
-  ITranslator
+  TranslationBundle
 } from '@jupyterlab/translation';
-
 import { ellipsesIcon, folderIcon } from '@jupyterlab/ui-components';
-
+import { ArrayExt } from '@lumino/algorithm';
+import { ElementExt } from '@lumino/domutils';
+import { IDragEvent } from '@lumino/dragdrop';
+import { Message } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
 import { FileBrowserModel } from './model';
 
 /**

@@ -2,32 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
-
-import { IMimeBundle, CellType } from '@jupyterlab/nbformat';
-
+import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import {
   acceptDialog,
   createSessionContext,
   dismissDialog,
   sleep
 } from '@jupyterlab/testutils';
-
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-
 import { each } from '@lumino/algorithm';
-
-import { JSONObject, JSONArray, UUID } from '@lumino/coreutils';
-
-import { NotebookModel } from '../src';
-
-import { NotebookActions, KernelError } from '../src';
-
-import { Notebook } from '../src';
-
+import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
+import { KernelError, Notebook, NotebookActions, NotebookModel } from '../src';
 import * as utils from './utils';
 
 const ERROR_INPUT = 'a = foo';
@@ -961,7 +948,7 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets[2].model.value.text = 'a = 1';
       });
 
-      it('should run all of the cells in the notebok', async () => {
+      it('should run all of the cells in the notebook', async () => {
         const next = widget.widgets[1] as MarkdownCell;
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
@@ -1060,24 +1047,6 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectAbove(widget);
         expect(widget.activeCellIndex).toBe(0);
       });
-
-      it('should not change if in edit mode and no non-collapsed cells above', () => {
-        widget.activeCellIndex = 1;
-        widget.mode = 'edit';
-        widget.widgets[0].inputHidden = true;
-        NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).toBe(1);
-      });
-
-      it('should not skip collapsed cells and in command mode', () => {
-        widget.activeCellIndex = 3;
-        widget.mode = 'command';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).toBe(2);
-      });
     });
 
     describe('#selectBelow()', () => {
@@ -1107,32 +1076,12 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('edit');
       });
 
-      it('should skip collapsed cells in edit mode', () => {
-        widget.activeCellIndex = 0;
-        widget.mode = 'edit';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).toBe(3);
-      });
-
       it('should not change if in edit mode and no non-collapsed cells below', () => {
         widget.activeCellIndex = widget.widgets.length - 2;
         widget.mode = 'edit';
         widget.widgets[widget.widgets.length - 1].inputHidden = true;
         NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
-      });
-
-      it('should not skip collapsed cells and in command mode', () => {
-        widget.activeCellIndex = 0;
-        widget.mode = 'command';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).toBe(1);
       });
     });
 
@@ -1203,7 +1152,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.isSelected(widget.widgets[1])).toBe(true);
       });
 
-      it('should extend the selection the bottomost cell', () => {
+      it('should extend the selection the bottom-most cell', () => {
         NotebookActions.extendSelectionBelow(widget, true);
         for (let i = widget.activeCellIndex; i < widget.widgets.length; i++) {
           expect(widget.isSelected(widget.widgets[i])).toBe(true);

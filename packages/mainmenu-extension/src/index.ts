@@ -5,40 +5,40 @@
  * @module mainmenu-extension
  */
 
-import { each, find } from '@lumino/algorithm';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { Menu, Widget } from '@lumino/widgets';
-
 import {
   ILabShell,
+  IRouter,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  IRouter
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
-import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
-
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-
 import {
+  Dialog,
+  ICommandPalette,
+  MenuFactory,
+  showDialog
+} from '@jupyterlab/apputils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import {
+  IEditMenu,
+  IFileMenu,
+  IKernelMenu,
   IMainMenu,
   IMenuExtender,
-  EditMenu,
-  FileMenu,
-  HelpMenu,
-  KernelMenu,
-  MainMenu,
-  RunMenu,
-  SettingsMenu,
-  ViewMenu,
-  TabsMenu
+  IRunMenu,
+  ITabsMenu,
+  IViewMenu,
+  JupyterLabMenu,
+  MainMenu
 } from '@jupyterlab/mainmenu';
-
 import { ServerConnection } from '@jupyterlab/services';
-
+import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { each, find } from '@lumino/algorithm';
+import { JSONExt } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { Menu, Widget } from '@lumino/widgets';
+
+const PLUGIN_ID = '@jupyterlab/mainmenu-extension:plugin';
 
 /**
  * A namespace for command IDs of semantic extension points.
@@ -77,8 +77,6 @@ export namespace CommandIDs {
   export const restartKernel = 'kernelmenu:restart';
 
   export const restartKernelAndClear = 'kernelmenu:restart-and-clear';
-
-  export const restartAndRunToSelected = 'notebook:restart-and-run-to-selected';
 
   export const changeKernel = 'kernelmenu:change';
 
@@ -124,23 +122,36 @@ export namespace CommandIDs {
  * A service providing an interface to the main menu.
  */
 const plugin: JupyterFrontEndPlugin<IMainMenu> = {
-  id: '@jupyterlab/mainmenu-extension:plugin',
+  id: PLUGIN_ID,
   requires: [IRouter, ITranslator],
-  optional: [ICommandPalette, ILabShell],
+  optional: [ICommandPalette, ILabShell, ISettingRegistry],
   provides: IMainMenu,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     router: IRouter,
     translator: ITranslator,
     palette: ICommandPalette | null,
-    labShell: ILabShell | null
-  ): IMainMenu => {
+    labShell: ILabShell | null,
+    registry: ISettingRegistry | null
+  ): Promise<IMainMenu> => {
     const { commands } = app;
     const trans = translator.load('jupyterlab');
 
     const menu = new MainMenu(commands);
     menu.id = 'jp-MainMenu';
     menu.addClass('jp-scrollbar-tiny');
+
+    // Built menu from settings
+    if (registry) {
+      await Private.loadSettingsMenu(
+        registry,
+        (aMenu: JupyterLabMenu) => {
+          menu.addMenu(aMenu, { rank: aMenu.rank });
+        },
+        options => MainMenu.generateMenu(commands, options, trans),
+        translator
+      );
+    }
 
     // Only add quit button if the back-end supports it by checking page config.
     const quitButton = PageConfig.getOption('quitButton').toLowerCase();
@@ -151,17 +162,11 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     createFileMenu(app, menu.fileMenu, router, trans);
     createKernelMenu(app, menu.kernelMenu, trans);
     createRunMenu(app, menu.runMenu, trans);
-    createSettingsMenu(app, menu.settingsMenu, trans);
     createViewMenu(app, menu.viewMenu, trans);
-    createHelpMenu(app, menu.helpMenu, trans);
-
-    // Set the Tabs Title so it's visible also in other shells
-    const tabsMenu = menu.tabsMenu;
-    tabsMenu.menu.title.label = trans.__('Tabs');
 
     // The tabs menu relies on lab shell functionality.
     if (labShell) {
-      createTabsMenu(app, tabsMenu, labShell, trans);
+      createTabsMenu(app, menu.tabsMenu, labShell, trans);
     }
 
     // Create commands to open the main application menus.
@@ -172,35 +177,35 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     commands.addCommand(CommandIDs.openEdit, {
       label: trans.__('Open Edit Menu'),
-      execute: () => activateMenu(menu.editMenu.menu)
+      execute: () => activateMenu(menu.editMenu)
     });
     commands.addCommand(CommandIDs.openFile, {
       label: trans.__('Open File Menu'),
-      execute: () => activateMenu(menu.fileMenu.menu)
+      execute: () => activateMenu(menu.fileMenu)
     });
     commands.addCommand(CommandIDs.openKernel, {
       label: trans.__('Open Kernel Menu'),
-      execute: () => activateMenu(menu.kernelMenu.menu)
+      execute: () => activateMenu(menu.kernelMenu)
     });
     commands.addCommand(CommandIDs.openRun, {
       label: trans.__('Open Run Menu'),
-      execute: () => activateMenu(menu.runMenu.menu)
+      execute: () => activateMenu(menu.runMenu)
     });
     commands.addCommand(CommandIDs.openView, {
       label: trans.__('Open View Menu'),
-      execute: () => activateMenu(menu.viewMenu.menu)
+      execute: () => activateMenu(menu.viewMenu)
     });
     commands.addCommand(CommandIDs.openSettings, {
       label: trans.__('Open Settings Menu'),
-      execute: () => activateMenu(menu.settingsMenu.menu)
+      execute: () => activateMenu(menu.settingsMenu)
     });
     commands.addCommand(CommandIDs.openTabs, {
       label: trans.__('Open Tabs Menu'),
-      execute: () => activateMenu(menu.tabsMenu.menu)
+      execute: () => activateMenu(menu.tabsMenu)
     });
     commands.addCommand(CommandIDs.openHelp, {
       label: trans.__('Open Help Menu'),
-      execute: () => activateMenu(menu.helpMenu.menu)
+      execute: () => activateMenu(menu.helpMenu)
     });
     commands.addCommand(CommandIDs.openFirst, {
       label: trans.__('Open First Menu'),
@@ -212,16 +217,14 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     if (palette) {
       // Add some of the commands defined here to the command palette.
-      if (menu.fileMenu.quitEntry) {
-        palette.addItem({
-          command: CommandIDs.shutdown,
-          category: trans.__('Main Area')
-        });
-        palette.addItem({
-          command: CommandIDs.logout,
-          category: trans.__('Main Area')
-        });
-      }
+      palette.addItem({
+        command: CommandIDs.shutdown,
+        category: trans.__('Main Area')
+      });
+      palette.addItem({
+        command: CommandIDs.logout,
+        category: trans.__('Main Area')
+      });
 
       palette.addItem({
         command: CommandIDs.shutdownAllKernels,
@@ -245,11 +248,10 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
  */
 export function createEditMenu(
   app: JupyterFrontEnd,
-  menu: EditMenu,
+  menu: IEditMenu,
   trans: TranslationBundle
 ): void {
-  const commands = menu.menu.commands;
-  menu.menu.title.label = trans.__('Edit');
+  const commands = app.commands;
 
   // Add the undo/redo commands the the Edit menu.
   commands.addCommand(CommandIDs.undo, {
@@ -262,10 +264,6 @@ export function createEditMenu(
     isEnabled: Private.delegateEnabled(app, menu.undoers, 'redo'),
     execute: Private.delegateExecute(app, menu.undoers, 'redo')
   });
-  menu.addGroup(
-    [{ command: CommandIDs.undo }, { command: CommandIDs.redo }],
-    0
-  );
 
   // Add the clear commands to the Edit menu.
   commands.addCommand(CommandIDs.clearCurrent, {
@@ -304,17 +302,12 @@ export function createEditMenu(
     isEnabled: Private.delegateEnabled(app, menu.clearers, 'clearAll'),
     execute: Private.delegateExecute(app, menu.clearers, 'clearAll')
   });
-  menu.addGroup(
-    [{ command: CommandIDs.clearCurrent }, { command: CommandIDs.clearAll }],
-    10
-  );
 
   commands.addCommand(CommandIDs.goToLine, {
     label: trans.__('Go to Line…'),
     isEnabled: Private.delegateEnabled(app, menu.goToLiners, 'goToLine'),
     execute: Private.delegateExecute(app, menu.goToLiners, 'goToLine')
   });
-  menu.addGroup([{ command: CommandIDs.goToLine }], 200);
 }
 
 /**
@@ -322,13 +315,11 @@ export function createEditMenu(
  */
 export function createFileMenu(
   app: JupyterFrontEnd,
-  menu: FileMenu,
+  menu: IFileMenu,
   router: IRouter,
   trans: TranslationBundle
 ): void {
-  const commands = menu.menu.commands;
-  menu.menu.title.label = trans.__('File');
-  menu.newMenu.menu.title.label = trans.__('New');
+  const commands = app.commands;
 
   // Add a delegator command for closing and cleaning up an activity.
   // This one is a bit different, in that we consider it enabled
@@ -384,6 +375,8 @@ export function createFileMenu(
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shut Down'),
     caption: trans.__('Shut down JupyterLab'),
+    isVisible: () => menu.quitEntry,
+    isEnabled: () => menu.quitEntry,
     execute: () => {
       return showDialog({
         title: trans.__('Shutdown confirmation'),
@@ -437,68 +430,12 @@ export function createFileMenu(
   commands.addCommand(CommandIDs.logout, {
     label: trans.__('Log Out'),
     caption: trans.__('Log out of JupyterLab'),
+    isVisible: () => menu.quitEntry,
+    isEnabled: () => menu.quitEntry,
     execute: () => {
       router.navigate('/logout', { hard: true });
     }
   });
-
-  // Add the new group
-  const newGroup = [
-    { type: 'submenu' as Menu.ItemType, submenu: menu.newMenu.menu },
-    { command: 'filebrowser:create-main-launcher' }
-  ];
-
-  const openGroup = [{ command: 'filebrowser:open-path' }];
-
-  const newViewGroup = [
-    { command: 'docmanager:clone' },
-    { command: CommandIDs.createConsole }
-  ].filter(item => !!item);
-
-  // Add the close group
-  const closeGroup = [
-    'application:close',
-    'filemenu:close-and-cleanup',
-    'application:close-all'
-  ].map(command => {
-    return { command };
-  });
-
-  // Add save group.
-  const saveGroup = [
-    'docmanager:save',
-    'docmanager:save-as',
-    'docmanager:save-all'
-  ].map(command => {
-    return { command };
-  });
-
-  // Add the re group.
-  const reGroup = [
-    'docmanager:reload',
-    'docmanager:restore-checkpoint',
-    'docmanager:rename'
-  ].map(command => {
-    return { command };
-  });
-
-  // Add the quit group.
-  const quitGroup = [
-    { command: 'filemenu:logout' },
-    { command: 'filemenu:shutdown' }
-  ];
-  const printGroup = [{ command: 'apputils:print' }];
-
-  menu.addGroup(newGroup, 0);
-  menu.addGroup(openGroup, 1);
-  menu.addGroup(newViewGroup, 2);
-  menu.addGroup(closeGroup, 3);
-  menu.addGroup(saveGroup, 4);
-  menu.addGroup(reGroup, 5);
-  menu.addGroup(printGroup, 98);
-  if (menu.quitEntry) {
-    menu.addGroup(quitGroup, 99);
-  }
 }
 
 /**
@@ -506,11 +443,10 @@ export function createFileMenu(
  */
 export function createKernelMenu(
   app: JupyterFrontEnd,
-  menu: KernelMenu,
+  menu: IKernelMenu,
   trans: TranslationBundle
 ): void {
-  const commands = menu.menu.commands;
-  menu.menu.title.label = trans.__('Kernel');
+  const commands = app.commands;
 
   commands.addCommand(CommandIDs.interruptKernel, {
     label: trans.__('Interrupt Kernel'),
@@ -599,27 +535,6 @@ export function createKernelMenu(
       });
     }
   });
-
-  const restartGroup = [
-    CommandIDs.restartKernel,
-    CommandIDs.restartKernelAndClear,
-    CommandIDs.restartAndRunToSelected,
-    CommandIDs.restartAndRunAll
-  ].map(command => {
-    return { command };
-  });
-
-  menu.addGroup([{ command: CommandIDs.interruptKernel }], 0);
-  menu.addGroup(restartGroup, 1);
-  menu.addGroup([{ command: CommandIDs.reconnectToKernel }], 1.5);
-  menu.addGroup(
-    [
-      { command: CommandIDs.shutdownKernel },
-      { command: CommandIDs.shutdownAllKernels }
-    ],
-    2
-  );
-  menu.addGroup([{ command: CommandIDs.changeKernel }], 3);
 }
 
 /**
@@ -627,11 +542,10 @@ export function createKernelMenu(
  */
 export function createViewMenu(
   app: JupyterFrontEnd,
-  menu: ViewMenu,
+  menu: IViewMenu,
   trans: TranslationBundle
 ): void {
-  const commands = menu.menu.commands;
-  menu.menu.title.label = trans.__('View');
+  const commands = app.commands;
 
   commands.addCommand(CommandIDs.lineNumbering, {
     label: trans.__('Show Line Numbers'),
@@ -685,33 +599,6 @@ export function createViewMenu(
     ),
     execute: Private.delegateExecute(app, menu.editorViewers, 'toggleWordWrap')
   });
-
-  menu.addGroup([{ command: 'apputils:activate-command-palette' }], 0);
-
-  menu.addGroup(
-    [
-      { command: 'application:toggle-mode' },
-      { command: 'application:toggle-presentation-mode' }
-    ],
-    1
-  );
-
-  menu.addGroup(
-    [
-      { command: 'application:toggle-left-area' },
-      { command: 'application:toggle-right-area' }
-    ],
-    2
-  );
-
-  const editorViewerGroup = [
-    CommandIDs.lineNumbering,
-    CommandIDs.matchBrackets,
-    CommandIDs.wordWrap
-  ].map(command => {
-    return { command };
-  });
-  menu.addGroup(editorViewerGroup, 10);
 }
 
 /**
@@ -719,11 +606,10 @@ export function createViewMenu(
  */
 export function createRunMenu(
   app: JupyterFrontEnd,
-  menu: RunMenu,
+  menu: IRunMenu,
   trans: TranslationBundle
 ): void {
-  const commands = menu.menu.commands;
-  menu.menu.title.label = trans.__('Run');
+  const commands = app.commands;
 
   commands.addCommand(CommandIDs.run, {
     label: () => {
@@ -783,27 +669,6 @@ export function createRunMenu(
     ),
     execute: Private.delegateExecute(app, menu.codeRunners, 'restartAndRunAll')
   });
-
-  const runAllGroup = [CommandIDs.runAll, CommandIDs.restartAndRunAll].map(
-    command => {
-      return { command };
-    }
-  );
-
-  menu.addGroup([{ command: CommandIDs.run }], 0);
-  menu.addGroup(runAllGroup, 999);
-}
-
-/**
- * Create the basic `Settings` menu.
- */
-export function createSettingsMenu(
-  _: JupyterFrontEnd,
-  menu: SettingsMenu,
-  trans: TranslationBundle
-): void {
-  menu.menu.title.label = trans.__('Settings');
-  menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
 /**
@@ -811,23 +676,11 @@ export function createSettingsMenu(
  */
 export function createTabsMenu(
   app: JupyterFrontEnd,
-  menu: TabsMenu,
+  menu: ITabsMenu,
   labShell: ILabShell | null,
   trans: TranslationBundle
 ): void {
   const commands = app.commands;
-
-  // Add commands for cycling the active tabs.
-  menu.addGroup(
-    [
-      { command: 'application:activate-next-tab' },
-      { command: 'application:activate-previous-tab' },
-      { command: 'application:activate-next-tab-bar' },
-      { command: 'application:activate-previous-tab-bar' },
-      { command: CommandIDs.activatePreviouslyUsedTab }
-    ],
-    0
-  );
 
   // A list of the active tabs in the main area.
   const tabGroup: Menu.IItemOptions[] = [];
@@ -896,17 +749,6 @@ export function createTabsMenu(
       });
     });
   }
-}
-
-/**
- * Create the basic `Help` menu.
- */
-export function createHelpMenu(
-  app: JupyterFrontEnd,
-  menu: HelpMenu,
-  trans: TranslationBundle
-): void {
-  menu.menu.title.label = trans.__('Help');
 }
 
 export default plugin;
@@ -1027,5 +869,167 @@ namespace Private {
         !!((extender[toggled] as any) as (w: Widget) => () => boolean)(widget)
       );
     };
+  }
+
+  async function displayInformation(trans: TranslationBundle): Promise<void> {
+    const result = await showDialog({
+      title: trans.__('Information'),
+      body: trans.__(
+        'Menu customization has changed. You will need to reload JupyterLab to see the changes.'
+      ),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.okButton({ label: trans.__('Reload') })
+      ]
+    });
+
+    if (result.button.accept) {
+      location.reload();
+    }
+  }
+
+  export async function loadSettingsMenu(
+    registry: ISettingRegistry,
+    addMenu: (menu: Menu) => void,
+    menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu,
+    translator: ITranslator
+  ): Promise<void> {
+    const trans = translator.load('jupyterlab');
+    let canonical: ISettingRegistry.ISchema | null;
+    let loaded: { [name: string]: ISettingRegistry.IMenu[] } = {};
+
+    /**
+     * Populate the plugin's schema defaults.
+     */
+    function populate(schema: ISettingRegistry.ISchema) {
+      loaded = {};
+      schema.properties!.menus.default = Object.keys(registry.plugins)
+        .map(plugin => {
+          const menus =
+            registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];
+          loaded[plugin] = menus;
+          return menus;
+        })
+        .concat([
+          schema['jupyter.lab.menus']?.main ?? [],
+          schema.properties!.menus.default as any[]
+        ])
+        .reduceRight(
+          (acc, val) => SettingRegistry.reconcileMenus(acc, val, true),
+          []
+        ) // flatten one level
+        .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
+    }
+
+    // Transform the plugin object to return different schema than the default.
+    registry.transform(PLUGIN_ID, {
+      compose: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        const defaults = canonical.properties?.menus?.default ?? [];
+        const user = {
+          menus: plugin.data.user.menus ?? []
+        };
+        const composite = {
+          menus: SettingRegistry.reconcileMenus(
+            defaults as ISettingRegistry.IMenu[],
+            user.menus as ISettingRegistry.IMenu[]
+          )
+        };
+
+        plugin.data = { composite, user };
+
+        return plugin;
+      },
+      fetch: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        return {
+          data: plugin.data,
+          id: plugin.id,
+          raw: plugin.raw,
+          schema: canonical,
+          version: plugin.version
+        };
+      }
+    });
+
+    // Repopulate the canonical variable after the setting registry has
+    // preloaded all initial plugins.
+    canonical = null;
+
+    const settings = await registry.load(PLUGIN_ID);
+
+    const currentMenus: ISettingRegistry.IMenu[] =
+      JSONExt.deepCopy(settings.composite.menus as any) ?? [];
+    const menus = new Array<Menu>();
+    // Create menu for non-disabled element
+    MenuFactory.createMenus(
+      currentMenus
+        .filter(menu => !menu.disabled)
+        .map(menu => {
+          return {
+            ...menu,
+            items: SettingRegistry.filterDisabledItems(menu.items ?? [])
+          };
+        }),
+      menuFactory
+    ).forEach(menu => {
+      menus.push(menu);
+      addMenu(menu);
+    });
+
+    settings.changed.connect(() => {
+      // As extension may change menu through API, prompt the user to reload if the
+      // menu has been updated.
+      const newMenus = (settings.composite.menus as any) ?? [];
+      if (!JSONExt.deepEqual(currentMenus, newMenus)) {
+        void displayInformation(trans);
+      }
+    });
+
+    registry.pluginChanged.connect(async (sender, plugin) => {
+      if (plugin !== PLUGIN_ID) {
+        // If the plugin changed its menu.
+        const oldMenus = loaded[plugin] ?? [];
+        const newMenus =
+          registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];
+        if (!JSONExt.deepEqual(oldMenus, newMenus)) {
+          if (loaded[plugin]) {
+            // The plugin has changed, request the user to reload the UI - this should not happen
+            await displayInformation(trans);
+          } else {
+            // The plugin was not yet loaded when the menu was built => update the menu
+            loaded[plugin] = JSONExt.deepCopy(newMenus);
+            // Merge potential disabled state
+            const toAdd = SettingRegistry.reconcileMenus(
+              newMenus,
+              currentMenus,
+              false,
+              false
+            )
+              .filter(menu => !menu.disabled)
+              .map(menu => {
+                return {
+                  ...menu,
+                  items: SettingRegistry.filterDisabledItems(menu.items ?? [])
+                };
+              });
+
+            MenuFactory.updateMenus(menus, toAdd, menuFactory).forEach(menu => {
+              addMenu(menu);
+            });
+          }
+        }
+      }
+    });
   }
 }

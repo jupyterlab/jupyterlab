@@ -1,23 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject } from '@lumino/coreutils';
-
-import { Message } from '@lumino/messaging';
-
-import { PanelLayout } from '@lumino/widgets';
-
-import { Widget } from '@lumino/widgets';
-
-import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { HoverBox } from '@jupyterlab/apputils';
-
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IRenderMime,
   IRenderMimeRegistry,
   MimeModel
 } from '@jupyterlab/rendermime';
+import { JSONObject } from '@lumino/coreutils';
+import { Message } from '@lumino/messaging';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
  * The class name added to each tooltip.
@@ -140,7 +133,7 @@ export class Tooltip extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.node.tabIndex = -1;
+    this.node.tabIndex = 0;
     this.node.focus();
   }
 

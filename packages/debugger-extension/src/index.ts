@@ -11,45 +11,33 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
-
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
-
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
-
 import {
   Debugger,
   IDebugger,
   IDebuggerConfig,
-  IDebuggerSources,
-  IDebuggerSidebar
+  IDebuggerSidebar,
+  IDebuggerSources
 } from '@jupyterlab/debugger';
-
 import { DocumentWidget } from '@jupyterlab/docregistry';
-
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-
 import { ILoggerRegistry } from '@jupyterlab/logconsole';
-
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
 import {
-  RenderMimeRegistry,
-  standardRendererFactories as initialFactories
+  standardRendererFactories as initialFactories,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-
 import { Session } from '@jupyterlab/services';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -625,7 +613,8 @@ const main: JupyterFrontEndPlugin<void> = {
 
       const onCurrentSourceOpened = (
         _: IDebugger.Model.ISources | null,
-        source: IDebugger.Source
+        source: IDebugger.Source,
+        breakpoint?: IDebugger.IBreakpoint
       ): void => {
         if (!source) {
           return;
@@ -638,6 +627,21 @@ const main: JupyterFrontEndPlugin<void> = {
           source: path
         });
         if (results.length > 0) {
+          if (breakpoint && typeof breakpoint.line !== 'undefined') {
+            results.forEach(editor => {
+              if (editor instanceof CodeMirrorEditor) {
+                (editor as CodeMirrorEditor).scrollIntoViewCentered({
+                  line: (breakpoint.line as number) - 1,
+                  ch: breakpoint.column || 0
+                });
+              } else {
+                editor.revealPosition({
+                  line: (breakpoint.line as number) - 1,
+                  column: breakpoint.column || 0
+                });
+              }
+            });
+          }
           return;
         }
         const editorWrapper = readOnlyEditorFactory.createNewEditor({
@@ -673,7 +677,7 @@ const main: JupyterFrontEndPlugin<void> = {
           sourceReference: 0,
           path
         });
-        onCurrentSourceOpened(null, source);
+        onCurrentSourceOpened(null, source, breakpoint);
       });
     }
   }

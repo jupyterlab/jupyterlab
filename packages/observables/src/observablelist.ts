@@ -4,14 +4,12 @@
 import {
   ArrayExt,
   ArrayIterator,
+  each,
   IIterator,
   IterableOrArrayLike,
-  each,
   toArray
 } from '@lumino/algorithm';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { ISignal, Signal } from '@lumino/signaling';
 
 /**
@@ -433,6 +431,10 @@ export class ObservableList<T> implements IObservableList<T> {
    * #### Complexity
    * Constant.
    *
+   * #### Notes
+   * By convention, the oldIndex is set to -1 to indicate
+   * an push operation.
+   *
    * #### Iterator Validity
    * No changes.
    */
@@ -463,6 +465,8 @@ export class ObservableList<T> implements IObservableList<T> {
    *
    * #### Notes
    * The `index` will be clamped to the bounds of the list.
+   * By convention, the oldIndex is set to -2 to indicate
+   * an insert operation.
    *
    * #### Undefined Behavior
    * An `index` which is non-integral.
@@ -471,7 +475,7 @@ export class ObservableList<T> implements IObservableList<T> {
     ArrayExt.insert(this._array, index, value);
     this._changed.emit({
       type: 'add',
-      oldIndex: -1,
+      oldIndex: -2,
       newIndex: index,
       oldValues: [],
       newValues: [value]
@@ -596,6 +600,10 @@ export class ObservableList<T> implements IObservableList<T> {
    * #### Complexity
    * Linear.
    *
+   * #### Notes
+   * By convention, the oldIndex is set to -1 to indicate
+   * an push operation.
+   *
    * #### Iterator Validity
    * No changes.
    */
@@ -629,6 +637,8 @@ export class ObservableList<T> implements IObservableList<T> {
    *
    * #### Notes
    * The `index` will be clamped to the bounds of the list.
+   * By convention, the oldIndex is set to -2 to indicate
+   * an insert operation.
    *
    * #### Undefined Behavior.
    * An `index` which is non-integral.
@@ -640,7 +650,7 @@ export class ObservableList<T> implements IObservableList<T> {
     });
     this._changed.emit({
       type: 'add',
-      oldIndex: -1,
+      oldIndex: -2,
       newIndex,
       oldValues: [],
       newValues: toArray(values)

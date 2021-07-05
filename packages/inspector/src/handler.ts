@@ -2,21 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { Text } from '@jupyterlab/coreutils';
-
+import { IRenderMimeRegistry, MimeModel } from '@jupyterlab/rendermime';
 import { IDataConnector } from '@jupyterlab/statedb';
-
-import { MimeModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ReadonlyJSONObject } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { Debouncer } from '@lumino/polling';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { IInspector } from './tokens';
 
 /**
@@ -120,7 +112,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
    * #### Notes
    * Update the hints inspector based on a text change.
    */
-  protected onEditorChange(): void {
+  onEditorChange(customText?: string): void {
     // If the handler is in standby mode, bail.
     if (this._standby) {
       return;
@@ -131,8 +123,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     if (!editor) {
       return;
     }
-
-    const text = editor.model.value.text;
+    const text = customText ? customText : editor.model.value.text;
     const position = editor.getCursorPosition();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const update: IInspector.IInspectorUpdate = { content: null };

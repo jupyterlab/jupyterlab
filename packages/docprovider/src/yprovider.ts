@@ -3,29 +3,56 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as sharedModels from '@jupyterlab/shared-models';
-
-import * as Y from 'yjs';
-
-import { WebsocketProvider } from 'y-websocket';
-
 import * as decoding from 'lib0/decoding';
-
 import * as encoding from 'lib0/encoding';
+import { WebsocketProvider } from 'y-websocket';
+import * as Y from 'yjs';
+import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
+import { getAnonymousUserName, getRandomColor } from './awareness';
+import * as env from 'lib0/environment';
 
 /**
- * A class to provide Yjs synchronization over Websocket.
+ * A class to provide Yjs synchronization over WebSocket.
+ *
+ * The user can specify their own user-name and user-color by adding url parameters:
+ *   ?username=Alice&usercolor=007007
+ * where usercolor must be a six-digit hexadecimal encoded RGB value without the hash token.
+ *
+ * We specify custom messages that the server can interpret. For reference please look in yjs_ws_server.
+ *
  */
-export class WebsocketProviderWithLocks extends WebsocketProvider {
+export class WebSocketProviderWithLocks
+  extends WebsocketProvider
+  implements IDocumentProvider {
   /**
-   * Construct a new WebsocketProviderWithLocks
+   * Construct a new WebSocketProviderWithLocks
    *
-   * @param options The instantiation options for a WebsocketProviderWithLocks
+   * @param options The instantiation options for a WebSocketProviderWithLocks
    */
-  constructor(options: WebsocketProviderWithLocks.IOptions) {
-    super(options.url, options.guid, options.ymodel.ydoc, {
-      awareness: options.ymodel.awareness
-    });
+  constructor(options: WebSocketProviderWithLocks.IOptions) {
+    super(
+      options.url,
+      options.contentType + ':' + options.path,
+      options.ymodel.ydoc,
+      {
+        awareness: options.ymodel.awareness
+      }
+    );
+    this._path = options.path;
+    this._contentType = options.contentType;
+    this._serverUrl = options.url;
+    const color = '#' + env.getParam('--usercolor', getRandomColor().slice(1));
+    const name = env.getParam('--username', getAnonymousUserName());
+    const awareness = options.ymodel.awareness;
+    const currState = awareness.getLocalState();
+    // only set if this was not already set by another plugin
+    if (currState && currState.name == null) {
+      options.ymodel.awareness.setLocalStateField('user', {
+        name,
+        color
+      });
+    }
+
     // Message handler that confirms when a lock has been acquired
     this.messageHandlers[127] = (
       encoder,
@@ -64,9 +91,32 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
         initialContentRequest.resolve(initialContent.byteLength > 0);
       }
     };
-    this.isInitialized = false;
-    this.onConnectionStatus = this.onConnectionStatus.bind(this);
-    this.on('status', this.onConnectionStatus);
+    this._isInitialized = false;
+    this._onConnectionStatus = this._onConnectionStatus.bind(this);
+    this.on('status', this._onConnectionStatus);
+  }
+
+  setPath(newPath: string): void {
+    if (newPath !== this._path) {
+      this._path = newPath;
+      // The next time the provider connects, we should connect through a different server url
+      this.bcChannel =
+        this._serverUrl + '/' + this._contentType + ':' + this._path;
+      this.url = this.bcChannel;
+      const encoder = encoding.createEncoder();
+      encoding.write(encoder, 123);
+      // writing a utf8 string to the encoder
+      const escapedPath = unescape(
+        encodeURIComponent(this._contentType + ':' + newPath)
+      );
+      for (let i = 0; i < escapedPath.length; i++) {
+        encoding.write(
+          encoder,
+          /** @type {number} */ escapedPath.codePointAt(i)!
+        );
+      }
+      this._sendMessage(encoding.toUint8Array(encoder));
+    }
   }
 
   /**
@@ -93,27 +143,21 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     return promise;
   }
 
-  async onConnectionStatus(status: {
-    status: 'connected' | 'disconnected';
-  }): Promise<void> {
-    if (this.isInitialized && status.status === 'connected') {
-      const lock = await this.acquireLock();
-      const contentIsInitialized = await this.requestInitialContent();
-      if (!contentIsInitialized) {
-        this.putInitializedState();
-      }
-      this.releaseLock(lock);
-    }
-  }
-
+  /**
+   * Put the initialized state.
+   */
   putInitializedState(): void {
     const encoder = encoding.createEncoder();
     encoding.writeVarUint(encoder, 124);
     encoding.writeUint8Array(encoder, Y.encodeStateAsUpdate(this.doc));
     this._sendMessage(encoding.toUint8Array(encoder));
-    this.isInitialized = true;
+    this._isInitialized = true;
   }
 
+  /**
+   * Acquire a lock.
+   * Returns a Promise that resolves to the lock number.
+   */
   acquireLock(): Promise<number> {
     if (this._currentLockRequest) {
       return this._currentLockRequest.promise;
@@ -139,6 +183,11 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     return promise;
   }
 
+  /**
+   * Release a lock.
+   *
+   * @param lock The lock to release.
+   */
   releaseLock(lock: number): void {
     const encoder = encoding.createEncoder();
     // reply with release lock
@@ -148,6 +197,11 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     this._sendMessage(encoding.toUint8Array(encoder));
   }
 
+  /**
+   * Send a new message to WebSocket server.
+   *
+   * @param message The message to send
+   */
   private _sendMessage(message: Uint8Array): void {
     // send once connected
     const send = () => {
@@ -162,7 +216,28 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     send();
   }
 
-  isInitialized: boolean;
+  /**
+   * Handle a change to the connection status.
+   *
+   * @param status The connection status.
+   */
+  private async _onConnectionStatus(status: {
+    status: 'connected' | 'disconnected';
+  }): Promise<void> {
+    if (this._isInitialized && status.status === 'connected') {
+      const lock = await this.acquireLock();
+      const contentIsInitialized = await this.requestInitialContent();
+      if (!contentIsInitialized) {
+        this.putInitializedState();
+      }
+      this.releaseLock(lock);
+    }
+  }
+
+  private _path: string;
+  private _contentType: string;
+  private _serverUrl: string;
+  private _isInitialized: boolean;
   private _currentLockRequest: {
     promise: Promise<number>;
     resolve: (lock: number) => void;
@@ -176,26 +251,16 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
 }
 
 /**
- * A namespace for WebsocketProviderWithLocks statics.
+ * A namespace for WebSocketProviderWithLocks statics.
  */
-export namespace WebsocketProviderWithLocks {
+export namespace WebSocketProviderWithLocks {
   /**
-   * The instantiation options for a WebsocketProviderWithLocks.
+   * The instantiation options for a WebSocketProviderWithLocks.
    */
-  export interface IOptions {
+  export interface IOptions extends IDocumentProviderFactory.IOptions {
     /**
-     * The server URL.
+     * The server URL
      */
     url: string;
-
-    /**
-     * The name of the room
-     */
-    guid: string;
-
-    /**
-     * The YNotebook.
-     */
-    ymodel: sharedModels.YDocument<sharedModels.DocumentChange>;
   }
 }

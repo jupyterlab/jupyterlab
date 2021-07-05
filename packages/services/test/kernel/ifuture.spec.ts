@@ -1,10 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Kernel, KernelMessage, KernelAPI, KernelManager } from '../../src';
-
+import { flakyIt as it, JupyterServer } from '@jupyterlab/testutils';
+import { Kernel, KernelAPI, KernelManager, KernelMessage } from '../../src';
 import { KernelTester } from '../utils';
-import { JupyterServer, flakyIt as it } from '@jupyterlab/testutils';
 
 const server = new JupyterServer();
 

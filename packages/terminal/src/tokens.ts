@@ -1,13 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@lumino/widgets';
-
-import { Token } from '@lumino/coreutils';
-
 import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
-
 import { Terminal } from '@jupyterlab/services';
+import { Token } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 
 /**
  * A class that tracks editor widgets.

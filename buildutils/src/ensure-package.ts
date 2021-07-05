@@ -368,31 +368,52 @@ export async function ensurePackage(
   // Ensure that the `style` directories match what is in the `package.json`
   const styles = glob.sync(path.join(pkgPath, 'style', '**/*.*'));
   const styleIndex: { [key: string]: string } = {};
-  // If we have styles, ensure that 'style' and 'styleModule' fields are declared
   if (styles.length > 0) {
-    if (data.style === undefined) {
-      data.style = 'style/index.css';
-    }
-    styleIndex[path.join(pkgPath, data.style)] = data.style;
-    if (!fs.existsSync(path.join(pkgPath, data.style))) {
-      messages.push(
-        `Style file from .style package.json key (${data.style}) does not exist`
-      );
+    // If there is no theme path, the style/styleModule must be defined
+    if (!data.jupyterlab?.themePath) {
+      if (data.style === undefined) {
+        data.style = 'style/index.css';
+      }
+      if (data.styleModule === undefined) {
+        data.styleModule = 'style/index.js';
+      }
     }
 
-    if (data.styleModule === undefined) {
-      data.styleModule = 'style/index.js';
+    // If the theme path is given, make sure it exists.
+    if (data.jupyterlab?.themePath) {
+      styleIndex[path.join(pkgPath, data.jupyterlab.themePath)] =
+        data.jupyterlab.themePath;
+      if (!fs.existsSync(path.join(pkgPath, data.jupyterlab.themePath))) {
+        messages.push(
+          `Theme file from .jupyterlab.themePath package.json key (${data.jupyterlab.themePath}) does not exist`
+        );
+      }
     }
-    styleIndex[path.join(pkgPath, data.styleModule)] = data.styleModule;
-    if (!fs.existsSync(path.join(pkgPath, data.styleModule))) {
-      messages.push(
-        `Style module file from .styleModule package.json key (${data.styleModule}) does not exist`
-      );
+
+    // If the style path is given, make sure it exists.
+    if (data.style) {
+      styleIndex[path.join(pkgPath, data.style)] = data.style;
+      if (!fs.existsSync(path.join(pkgPath, data.style))) {
+        messages.push(
+          `Style file from .style package.json key (${data.style}) does not exist`
+        );
+      }
+    }
+
+    // If the styleModule path is given, make sure it exists.
+    if (data.styleModule) {
+      styleIndex[path.join(pkgPath, data.styleModule)] = data.styleModule;
+      if (!fs.existsSync(path.join(pkgPath, data.styleModule))) {
+        messages.push(
+          `Style module file from .styleModule package.json key (${data.styleModule}) does not exist`
+        );
+      }
     }
   } else {
     // Delete the style field
     delete data.style;
     delete data.styleModule;
+    delete data.jupyterlab?.themePath;
   }
 
   for (const style of styles) {
@@ -550,6 +571,14 @@ export async function ensurePackage(
     if (writeMain) {
       fs.writeFileSync(mainFile, lines.join('\n'));
     }
+  }
+
+  // Ensure extra LICENSE is not packaged (always use repo license)
+  let licenseFile = path.join(pkgPath, 'LICENSE');
+
+  if (fs.existsSync(licenseFile)) {
+    messages.push('Removed LICENSE (prefer top-level)');
+    await fs.unlink(licenseFile);
   }
 
   if (utils.writePackageData(path.join(pkgPath, 'package.json'), data)) {

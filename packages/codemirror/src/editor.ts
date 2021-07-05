@@ -3,61 +3,49 @@
 // / <reference types="codemirror"/>
 // / <reference types="codemirror/searchcursor"/>
 
-import CodeMirror from 'codemirror';
-
 import { showDialog } from '@jupyterlab/apputils';
-
-import * as models from '@jupyterlab/shared-models';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import {
+  ICollaborator,
   IObservableMap,
-  IObservableString,
-  ICollaborator
+  IObservableString
 } from '@jupyterlab/observables';
-
+import * as models from '@jupyterlab/shared-models';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { ArrayExt } from '@lumino/algorithm';
-
 import { JSONExt, UUID } from '@lumino/coreutils';
-
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
-
 import { Signal } from '@lumino/signaling';
-
-import { CodemirrorBinding } from 'y-codemirror';
-
-import { Mode } from './mode';
-
+import CodeMirror from 'codemirror';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/display/rulers.js';
-import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/fold/brace-fold.js';
+import 'codemirror/addon/fold/comment-fold.js';
 import 'codemirror/addon/fold/foldcode.js';
 import 'codemirror/addon/fold/foldgutter.js';
-import 'codemirror/addon/fold/brace-fold.js';
 import 'codemirror/addon/fold/indent-fold.js';
 import 'codemirror/addon/fold/markdown-fold.js';
 import 'codemirror/addon/fold/xml-fold.js';
-import 'codemirror/addon/fold/comment-fold.js';
+import 'codemirror/addon/mode/simple';
 import 'codemirror/addon/scroll/scrollpastend.js';
-import 'codemirror/addon/search/searchcursor';
-import 'codemirror/addon/search/search';
 import 'codemirror/addon/search/jump-to-line';
+import 'codemirror/addon/search/search';
+import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/selection/active-line';
 import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/addon/selection/selection-pointer';
-import 'codemirror/addon/mode/simple';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
+import { CodemirrorBinding } from 'y-codemirror';
+import { Mode } from './mode';
+
 // import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
 
 /**
@@ -351,7 +339,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Set config options for the editor.
    *
-   * This method is prefered when setting several options. The
+   * This method is preferred when setting several options. The
    * options are set within an operation, which only performs
    * the costly update at the end, and not after every option
    * is set.
@@ -501,6 +489,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._editor.scrollIntoView(pos, margin);
   }
 
+  scrollIntoViewCentered(pos: CodeMirror.Position): void {
+    const top = this._editor.charCoords(pos, 'local').top;
+    const height = this._editor.getWrapperElement().offsetHeight;
+    this.host.scrollIntoView?.({
+      behavior: 'auto',
+      block: 'center',
+      inline: 'center'
+    });
+    this._editor.scrollTo(null, top - height / 2);
+  }
+
   cursorCoords(
     where: boolean,
     mode?: 'window' | 'page' | 'local'
@@ -511,9 +510,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   getRange(
     from: CodeMirror.Position,
     to: CodeMirror.Position,
-    seperator?: string
+    separator?: string
   ): string {
-    return this._editor.getDoc().getRange(from, to, seperator);
+    return this._editor.getDoc().getRange(from, to, separator);
   }
 
   /**
@@ -958,7 +957,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     switch (args.type) {
       case 'insert': {
         const pos = doc.posFromIndex(args.start);
-        // Replace the range, including a '+input' orign,
+        // Replace the range, including a '+input' origin,
         // which indicates that CodeMirror may merge changes
         // for undo/redo purposes.
         doc.replaceRange(args.value, pos, pos, '+input');
@@ -967,7 +966,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       case 'remove': {
         const from = doc.posFromIndex(args.start);
         const to = doc.posFromIndex(args.end);
-        // Replace the range, including a '+input' orign,
+        // Replace the range, including a '+input' origin,
         // which indicates that CodeMirror may merge changes
         // for undo/redo purposes.
         doc.replaceRange('', from, to, '+input');
@@ -1380,7 +1379,7 @@ export namespace CodeMirrorEditor {
   export function addCommand(
     name: string,
     command: (cm: CodeMirror.Editor) => void
-  ) {
+  ): void {
     (CodeMirror.commands as any)[name] = command;
   }
 }
@@ -1464,7 +1463,7 @@ namespace Private {
   }
 
   /**
-   * Delete spaces to the previous tab stob in a codemirror editor.
+   * Delete spaces to the previous tab stop in a codemirror editor.
    */
   export function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
     const doc = cm.getDoc();
@@ -1531,6 +1530,9 @@ namespace Private {
   ): void {
     const el = editor.getWrapperElement();
     switch (option) {
+      case 'cursorBlinkRate':
+        (editor.setOption as any)(option, value);
+        break;
       case 'lineWrap': {
         const lineWrapping = value === 'off' ? false : true;
         const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;

@@ -2,12 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JSONObject } from '@lumino/coreutils';
-
 import {
   validateSpecModel,
   validateSpecModels
 } from '../../src/kernelspec/validate';
-
 import { PYTHON_SPEC } from '../utils';
 
 describe('kernelspec/validate', () => {

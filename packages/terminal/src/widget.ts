@@ -2,24 +2,17 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Terminal as TerminalNS } from '@jupyterlab/services';
-
-import { Platform } from '@lumino/domutils';
-
-import { Message, MessageLoop } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { Terminal as Xterm } from 'xterm';
-
-import { FitAddon } from 'xterm-addon-fit';
-
-import { ITerminal } from '.';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { Platform } from '@lumino/domutils';
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { Terminal as Xterm } from 'xterm';
+import { FitAddon } from 'xterm-addon-fit';
+import { ITerminal } from '.';
 
 /**
  * The class name added to a terminal widget.
@@ -319,7 +312,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
         }
         break;
       case 'disconnect':
-        this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
+        this._term.write('\r\n\r\n[Finished… Term Session]\r\n');
         break;
       default:
         break;

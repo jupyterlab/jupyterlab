@@ -3,6 +3,11 @@
 
 import { Text } from '@jupyterlab/coreutils';
 import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
   Button,
   circleEmptyIcon,
   circleIcon,
@@ -12,22 +17,15 @@ import {
   refreshIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
-
-import { IIterator, find, map, some } from '@lumino/algorithm';
+import { find, IIterator, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-
 import { ISessionContext, sessionContextDialogs } from './sessioncontext';
-import { UseSignal, ReactWidget } from './vdom';
-import {
-  nullTranslator,
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import { ReactWidget, UseSignal } from './vdom';
 
 /**
  * The class name added to toolbars.
@@ -464,7 +462,7 @@ export namespace Toolbar {
  */
 export namespace ToolbarButtonComponent {
   /**
-   * Interface for ToolbarButttonComponent props.
+   * Interface for ToolbarButtonComponent props.
    */
   export interface IProps {
     className?: string;
@@ -542,7 +540,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
         <LabIcon.resolveReact
           icon={props.icon}
           iconClass={
-            // add some extra classes for proper support of icons-as-css-backgorund
+            // add some extra classes for proper support of icons-as-css-background
             classes(props.iconClass, 'jp-Icon')
           }
           className="jp-ToolbarButtonComponent-icon"
@@ -572,7 +570,7 @@ export function addToolbarButtonClass(w: Widget): Widget {
 export class ToolbarButton extends ReactWidget {
   /**
    * Creates a toolbar button
-   * @param props props for underlying `ToolbarButton` componenent
+   * @param props props for underlying `ToolbarButton` component
    */
   constructor(private props: ToolbarButtonComponent.IProps = {}) {
     super();
@@ -634,7 +632,7 @@ export function addCommandToolbarButtonClass(w: Widget): Widget {
 export class CommandToolbarButton extends ReactWidget {
   /**
    * Creates a command toolbar button
-   * @param props props for underlying `CommandToolbarButtonComponent` componenent
+   * @param props props for underlying `CommandToolbarButtonComponent` component
    */
   constructor(private props: CommandToolbarButtonComponent.IProps) {
     super();
@@ -670,7 +668,13 @@ namespace Private {
     if (!commands.isVisible(id, args)) {
       className += ' lm-mod-hidden';
     }
-    const tooltip = commands.caption(id, args) || label || iconLabel;
+    let tooltip = commands.caption(id, args) || label || iconLabel;
+    // Shows hot keys in tooltips
+    const binding = commands.keyBindings.find(b => b.command === id);
+    if (binding) {
+      const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+      tooltip = `${tooltip} (${ks})`;
+    }
     const onClick = () => {
       void commands.execute(id, args);
     };

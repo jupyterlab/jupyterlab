@@ -3,16 +3,16 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
-  VDomRenderer,
-  ToolbarButtonComponent,
   Dialog,
-  showDialog
+  showDialog,
+  ToolbarButtonComponent,
+  VDomRenderer
 } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
@@ -25,12 +25,10 @@ import {
   listingsInfoIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
-
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
-
-import { ListModel, IEntry, Action } from './model';
+import { Action, IEntry, ListModel } from './model';
 import { isJupyterOrg } from './npm';
 
 // TODO: Replace pagination with lazy loading of lower search results
@@ -348,7 +346,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       title,
                       body: (
                         <div>
-                          {getprebuiltUninstallInstruction(entry, trans)}
+                          {getPrebuiltUninstallInstruction(entry, trans)}
                         </div>
                       ),
                       buttons: [
@@ -375,7 +373,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   );
 }
 
-function getprebuiltUninstallInstruction(
+function getPrebuiltUninstallInstruction(
   entry: IEntry,
   trans: TranslationBundle
 ): JSX.Element {
@@ -651,7 +649,7 @@ export namespace CollapsibleSection {
     headerElements?: React.ReactNode;
 
     /**
-     * If given, this will be diplayed instead of the children.
+     * If given, this will be displayed instead of the children.
      */
     errorMessage?: string | null;
 
@@ -869,7 +867,13 @@ risks or contain malicious code that runs on your machine.`)}
             key="installed-items"
             listMode={model.listMode}
             viewType={'installed'}
-            entries={model.installed}
+            entries={
+              model.searchResult.length > 0
+                ? model.installed.filter(
+                    entry => model.searchResult.indexOf(entry) > -1
+                  )
+                : model.installed
+            }
             numPages={1}
             translator={this.translator}
             onPage={value => {
@@ -1005,13 +1009,13 @@ risks or contain malicious code that runs on your machine.`)}
   }
 
   /**
-   * Handle the DOM events for the command palette.
+   * Handle the DOM events for the extension manager search bar.
    *
-   * @param event - The DOM event sent to the command palette.
+   * @param event - The DOM event sent to the extension manager search bar.
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the command palette's DOM node.
+   * called in response to events on the search bar's DOM node.
    * It should not be called directly by user code.
    */
   handleEvent(event: Event): void {

@@ -2,35 +2,27 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-
 import {
   ABCWidgetFactory,
   DocumentRegistry,
-  IDocumentWidget,
-  DocumentWidget
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
-
+import { ITranslator } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import {
   BasicKeyHandler,
   BasicMouseHandler,
   BasicSelectionModel,
+  CellRenderer,
   DataGrid,
-  TextRenderer,
-  CellRenderer
+  TextRenderer
 } from '@lumino/datagrid';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { PanelLayout, Widget } from '@lumino/widgets';
-
-import { CSVDelimiter } from './toolbar';
-
 import { DSVModel } from './model';
-import { ITranslator } from '@jupyterlab/translation';
+import { CSVDelimiter } from './toolbar';
 
 /**
  * The class name added to a CSV viewer.

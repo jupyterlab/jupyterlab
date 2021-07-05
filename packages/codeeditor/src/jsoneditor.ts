@@ -3,12 +3,11 @@
 
 import { IObservableJSON } from '@jupyterlab/observables';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import { checkIcon, undoIcon } from '@jupyterlab/ui-components';
-
 import {
   JSONExt,
   JSONObject,
@@ -16,7 +15,6 @@ import {
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-
 import { CodeEditor } from './editor';
 
 /**

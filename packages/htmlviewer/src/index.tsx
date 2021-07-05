@@ -15,24 +15,17 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/apputils';
-
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-
 import {
   ABCWidgetFactory,
   DocumentRegistry,
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { refreshIcon } from '@jupyterlab/ui-components';
-
 import { Token } from '@lumino/coreutils';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import * as React from 'react';
 
 /**
@@ -64,7 +57,7 @@ const CSS_CLASS = 'jp-HTMLViewer';
  * since it can execute Javascript, and make same-origin requests
  * to the server, thereby executing arbitrary Javascript.
  *
- * Here, we sandbox the iframe so that it can't execute Javsacript
+ * Here, we sandbox the iframe so that it can't execute Javascript
  * or launch any popups. We allow one exception: 'allow-same-origin'
  * requests, so that local HTML documents can access CSS, images,
  * etc from the files system.
@@ -277,7 +270,7 @@ namespace Private {
   /**
    * React component for a trusted button.
    *
-   * This wraps the ToolbarButtonComponent and watches for trust chagnes.
+   * This wraps the ToolbarButtonComponent and watches for trust changes.
    */
   export function TrustButtonComponent(props: TrustButtonComponent.IProps) {
     const translator = props.translator || nullTranslator;

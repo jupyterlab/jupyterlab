@@ -174,7 +174,7 @@ hex values.
 Most one-color icons in JupyterLab (including the sidebar and toolbar
 icons) are colored using the `jp-icon3` class.
 
-For light/dark themes, `jp-icon0` corresponds to the darkest/lighest
+For light/dark themes, `jp-icon0` corresponds to the darkest/lightest
 background color, while `jp-icon1` is somewhat lighter/darker, and so
 forth.
 
@@ -189,13 +189,13 @@ forth.
 </ul>
 
 For light/dark themes, `jp-icon-accent0` corresponds to the
-lighest/darkest background color, while `jp-icon-accent1` is somewhat
+lightest/darkest background color, while `jp-icon-accent1` is somewhat
 darker/lighter, and so forth.
 
 ### Adding classes to a one-color icon
 
 For most simple, one-color icons, it is desirable for the icon's color
-to strongly constrast with that of the application's background. You can
+to strongly contrast with that of the application's background. You can
 achieve this using one of the `jp-iconX` classes.
 
 **Example: check icon**

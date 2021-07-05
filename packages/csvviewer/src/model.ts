@@ -1,13 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DataModel } from '@lumino/datagrid';
-
-import { IDisposable } from '@lumino/disposable';
-
 import { PromiseDelegate } from '@lumino/coreutils';
-
-import { parseDSV, parseDSVNoQuotes, IParser } from './parse';
+import { DataModel } from '@lumino/datagrid';
+import { IDisposable } from '@lumino/disposable';
+import { IParser, parseDSV, parseDSVNoQuotes } from './parse';
 
 /*
 Possible ideas for further implementation:

@@ -1,15 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { LoggerRegistry, LogConsolePanel } from '@jupyterlab/logconsole';
-
+import { LogConsolePanel, LoggerRegistry } from '@jupyterlab/logconsole';
 import {
-  RenderMimeRegistry,
+  standardRendererFactories as initialFactories,
   IRenderMimeRegistry,
-  standardRendererFactories as initialFactories
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-
-import { Signal, ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 class SignalLogger<SENDER, ARGS> {

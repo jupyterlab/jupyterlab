@@ -1,14 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
-
-import { Widget } from '@lumino/widgets';
-
 import { WidgetTracker } from '@jupyterlab/apputils';
-
 import { EditMenu, IEditMenu } from '@jupyterlab/mainmenu';
-
+import { CommandRegistry } from '@lumino/commands';
+import { Widget } from '@lumino/widgets';
 import { delegateExecute } from './util';
 
 class Wodget extends Widget {
@@ -43,7 +39,7 @@ describe('@jupyterlab/mainmenu', () => {
       it('should construct a new edit menu', () => {
         expect(menu).toBeInstanceOf(EditMenu);
         // For localization this is now defined when on the mainmenu-extension.
-        expect(menu.menu.title.label).toBe('');
+        expect(menu.title.label).toBe('');
       });
     });
 

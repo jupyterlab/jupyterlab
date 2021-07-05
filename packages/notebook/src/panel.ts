@@ -1,32 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { isMarkdownCellModel } from '@jupyterlab/cells';
-
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-
-import { each } from '@lumino/algorithm';
-
-import { Token } from '@lumino/coreutils';
-
 import {
+  Dialog,
   ISessionContext,
   Printing,
-  showDialog,
-  Dialog
+  showDialog
 } from '@jupyterlab/apputils';
-
-import { DocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
-
-import { INotebookModel } from './model';
-
-import { Notebook, StaticNotebook } from './widget';
+import { isMarkdownCellModel } from '@jupyterlab/cells';
 import { PageConfig } from '@jupyterlab/coreutils';
+import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { each } from '@lumino/algorithm';
+import { Token } from '@lumino/coreutils';
+import { INotebookModel } from './model';
+import { Notebook, StaticNotebook } from './widget';
 
 /**
  * The class name added to notebook panels.
@@ -36,6 +29,11 @@ const NOTEBOOK_PANEL_CLASS = 'jp-NotebookPanel';
 const NOTEBOOK_PANEL_TOOLBAR_CLASS = 'jp-NotebookPanel-toolbar';
 
 const NOTEBOOK_PANEL_NOTEBOOK_CLASS = 'jp-NotebookPanel-notebook';
+
+/**
+ * The class name to add when the document is loaded for the search box.
+ */
+const SEARCH_DOCUMENT_LOADED_CLASS = 'jp-DocumentSearch-document-loaded';
 
 /**
  * A widget that hosts a notebook toolbar and content area.
@@ -68,6 +66,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this._onSessionStatusChanged,
       this
     );
+    this.content.fullyRendered.connect(this._onFullyRendered, this);
     this.context.saveState.connect(this._onSave, this);
     void this.revealed.then(() => {
       if (this.isDisposed) {
@@ -85,7 +84,10 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     });
   }
 
-  _onSave(sender: DocumentRegistry.Context, state: DocumentRegistry.SaveState) {
+  _onSave(
+    sender: DocumentRegistry.Context,
+    state: DocumentRegistry.SaveState
+  ): void {
     if (state === 'started' && this.model) {
       // Find markdown cells
       const { cells } = this.model;
@@ -166,6 +168,15 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         })
       );
     };
+  }
+
+  /**
+   * Handle a fully rendered signal notebook.
+   */
+  private _onFullyRendered(notebook: Notebook, fullyRendered: boolean): void {
+    fullyRendered
+      ? this.removeClass(SEARCH_DOCUMENT_LOADED_CLASS)
+      : this.addClass(SEARCH_DOCUMENT_LOADED_CLASS);
   }
 
   /**

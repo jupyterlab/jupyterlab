@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import * as React from 'react';
 
 /**

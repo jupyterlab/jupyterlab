@@ -3,27 +3,19 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { find } from '@lumino/algorithm';
-
-import { CommandRegistry } from '@lumino/commands';
-
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
-import { CommandPalette } from '@lumino/widgets';
-
 import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   IPaletteItem,
   ModalCommandPalette
 } from '@jupyterlab/apputils';
-
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
+import { find } from '@lumino/algorithm';
+import { CommandRegistry } from '@lumino/commands';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { CommandPalette } from '@lumino/widgets';
 
 /**
  * The command IDs used by the apputils extension.

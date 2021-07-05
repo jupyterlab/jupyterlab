@@ -11,43 +11,31 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
-  showDialog,
-  showErrorMessage,
   Dialog,
   ICommandPalette,
-  ISessionContextDialogs
+  ISessionContextDialogs,
+  showDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
-
 import { IChangedArgs, Time } from '@jupyterlab/coreutils';
-
 import {
-  renameDialog,
   DocumentManager,
   IDocumentManager,
+  nameOnSaveDialog,
   PathStatus,
+  renameDialog,
   SavingStatus
 } from '@jupyterlab/docmanager';
-
+import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { Contents, Kernel } from '@jupyterlab/services';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-
 import { each, map, some, toArray } from '@lumino/algorithm';
-
 import { JSONExt } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -68,6 +56,8 @@ namespace CommandIDs {
 
   export const rename = 'docmanager:rename';
 
+  export const nameOnSave = 'docmanager:name-on-save';
+
   export const del = 'docmanager:delete';
 
   export const restoreCheckpoint = 'docmanager:restore-checkpoint';
@@ -82,24 +72,29 @@ namespace CommandIDs {
 
   export const toggleAutosave = 'docmanager:toggle-autosave';
 
+  export const toggleNameFileOnSave = 'docmanager:toggle-name-file-on-save';
+
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
 }
 
-const pluginId = '@jupyterlab/docmanager-extension:plugin';
+/**
+ * The id of the document manager plugin.
+ */
+const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 
 /**
  * The default document manager provider.
  */
 const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
-  id: pluginId,
+  id: docManagerPluginId,
   provides: IDocumentManager,
   requires: [ISettingRegistry, ITranslator],
   optional: [
     ILabStatus,
     ICommandPalette,
     ILabShell,
-    IMainMenu,
-    ISessionContextDialogs
+    ISessionContextDialogs,
+    IDocumentProviderFactory
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -108,8 +103,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     status: ILabStatus | null,
     palette: ICommandPalette | null,
     labShell: ILabShell | null,
-    mainMenu: IMainMenu | null,
-    sessionDialogs: ISessionContextDialogs | null
+    sessionDialogs: ISessionContextDialogs | null,
+    docProviderFactory: IDocumentProviderFactory | null
   ): IDocumentManager => {
     const trans = translator.load('jupyterlab');
     const manager = app.serviceManager;
@@ -148,7 +143,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       sessionDialogs: sessionDialogs || undefined,
       translator,
-      collaborative: true
+      collaborative: true,
+      docProviderFactory: docProviderFactory ?? undefined
     });
 
     // Register the file operations commands.
@@ -159,8 +155,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       settingRegistry,
       translator,
       labShell,
-      palette,
-      mainMenu
+      palette
     );
 
     // Keep up to date with the settings registry.
@@ -176,6 +171,15 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
         | number
         | null;
       docManager.autosaveInterval = autosaveInterval || 120;
+
+      // Handle whether to prompt to name file on first save
+      const nameFileOnSave = settings.get('nameFileOnSave')
+        .composite as boolean;
+
+      if (docManager.nameFileOnSave != nameFileOnSave) {
+        docManager.nameFileOnSave = nameFileOnSave;
+        app.commands.notifyCommandChanged(CommandIDs.nameOnSave);
+      }
 
       // Handle default widget factory overrides.
       const defaultViewers = settings.get('defaultViewers').composite as {
@@ -209,7 +213,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     };
 
     // Fetch the initial state of the settings.
-    Promise.all([settingRegistry.load(pluginId), app.restored])
+    Promise.all([settingRegistry.load(docManagerPluginId), app.restored])
       .then(([settings]) => {
         settings.changed.connect(onSettingsUpdated);
         onSettingsUpdated(settings);
@@ -222,7 +226,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     // allowing us to dynamically populate a help string with the
     // available document viewers and file types for the default
     // viewer overrides.
-    settingRegistry.transform(pluginId, {
+    settingRegistry.transform(docManagerPluginId, {
       fetch: plugin => {
         // Get the available file types.
         const fileTypes = toArray(registry.fileTypes())
@@ -260,7 +264,7 @@ Available file types:
 
     // If the document registry gains or loses a factory or file type,
     // regenerate the settings description with the available options.
-    registry.changed.connect(() => settingRegistry.reload(pluginId));
+    registry.changed.connect(() => settingRegistry.reload(docManagerPluginId));
 
     return docManager;
   }
@@ -344,13 +348,12 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:download',
   autoStart: true,
   requires: [ITranslator, IDocumentManager],
-  optional: [ICommandPalette, IMainMenu],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
     docManager: IDocumentManager,
-    palette: ICommandPalette | null,
-    mainMenu: IMainMenu | null
+    palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
@@ -382,9 +385,51 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
     if (palette) {
       palette.addItem({ command: CommandIDs.download, category });
     }
-    if (mainMenu) {
-      mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
-    }
+  }
+};
+
+/**
+ * A plugin providing open-browser-tab commands.
+ *
+ * This is its own plugin in case you would like to disable this feature.
+ * e.g. jupyter labextension disable @jupyterlab/docmanager-extension:open-browser-tab
+ *
+ * Note: If disabling this, you may also want to disable:
+ * @jupyterlab/filebrowser-extension:open-browser-tab
+ */
+export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/docmanager-extension:open-browser-tab',
+  autoStart: true,
+  requires: [ITranslator, IDocumentManager],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    docManager: IDocumentManager
+  ) => {
+    const trans = translator.load('jupyterlab');
+    const { commands } = app;
+    commands.addCommand(CommandIDs.openBrowserTab, {
+      execute: args => {
+        const path =
+          typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
+
+        if (!path) {
+          return;
+        }
+
+        return docManager.services.contents.getDownloadUrl(path).then(url => {
+          const opened = window.open();
+          if (opened) {
+            opened.opener = null;
+            opened.location.href = url;
+          } else {
+            throw new Error('Failed to open new browser tab.');
+          }
+        });
+      },
+      icon: args => (args['icon'] as string) || '',
+      label: () => trans.__('Open in New Browser Tab')
+    });
   }
 };
 
@@ -395,7 +440,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   docManagerPlugin,
   pathStatusPlugin,
   savingStatusPlugin,
-  downloadPlugin
+  downloadPlugin,
+  openBrowserTabPlugin
 ];
 export default plugins;
 
@@ -438,8 +484,7 @@ function addCommands(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   labShell: ILabShell | null,
-  palette: ICommandPalette | null,
-  mainMenu: IMainMenu | null
+  palette: ICommandPalette | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -464,7 +509,7 @@ function addCommands(
 
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
-    addLabCommands(app, docManager, labShell, opener, translator, palette);
+    addLabCommands(app, docManager, labShell, opener, translator);
   }
 
   commands.addCommand(CommandIDs.deleteFile, {
@@ -478,6 +523,18 @@ function addCommands(
         throw new Error(`A non-empty path is required for ${command}.`);
       }
       return docManager.deleteFile(path);
+    }
+  });
+
+  commands.addCommand(CommandIDs.nameOnSave, {
+    label: () =>
+      trans.__('Rename %1…', fileType(shell.currentWidget, docManager)),
+    isEnabled,
+    execute: () => {
+      if (isEnabled()) {
+        const context = docManager.contextForWidget(shell.currentWidget!);
+        return nameOnSaveDialog(docManager, context!);
+      }
     }
   });
 
@@ -518,29 +575,6 @@ function addCommands(
     icon: args => (args['icon'] as string) || '',
     label: args => (args['label'] || args['factory']) as string,
     mnemonic: args => (args['mnemonic'] as number) || -1
-  });
-
-  commands.addCommand(CommandIDs.openBrowserTab, {
-    execute: args => {
-      const path =
-        typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
-
-      if (!path) {
-        return;
-      }
-
-      return docManager.services.contents.getDownloadUrl(path).then(url => {
-        const opened = window.open();
-        if (opened) {
-          opened.opener = null;
-          opened.location.href = url;
-        } else {
-          throw new Error('Failed to open new browser tab.');
-        }
-      });
-    },
-    icon: args => (args['icon'] as string) || '',
-    label: () => trans.__('Open in New Browser Tab')
   });
 
   commands.addCommand(CommandIDs.reload, {
@@ -655,25 +689,27 @@ function addCommands(
             body: trans.__('No context found for current widget!'),
             buttons: [Dialog.okButton({ label: trans.__('Ok') })]
           });
+        } else {
+          if (context.model.readOnly) {
+            return showDialog({
+              title: trans.__('Cannot Save'),
+              body: trans.__('Document is read-only'),
+              buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+            });
+          }
+
+          return context
+            .save(true)
+            .then(() => context!.createCheckpoint())
+            .catch(err => {
+              // If the save was canceled by user-action, do nothing.
+              // FIXME-TRANS: Is this using the text on the button or?
+              if (err.message === 'Cancel') {
+                return;
+              }
+              throw err;
+            });
         }
-        if (context.model.readOnly) {
-          return showDialog({
-            title: trans.__('Cannot Save'),
-            body: trans.__('Document is read-only'),
-            buttons: [Dialog.okButton({ label: trans.__('Ok') })]
-          });
-        }
-        return context
-          .save()
-          .then(() => context!.createCheckpoint())
-          .catch(err => {
-            // If the save was canceled by user-action, do nothing.
-            // FIXME-TRANS: Is this using the text on the button or?
-            if (err.message === 'Cancel') {
-              return;
-            }
-            throw err;
-          });
       }
     }
   });
@@ -729,20 +765,66 @@ function addCommands(
       const value = !docManager.autosave;
       const key = 'autosave';
       return settingRegistry
-        .set(pluginId, key, value)
+        .set(docManagerPluginId, key, value)
         .catch((reason: Error) => {
-          console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+          console.error(
+            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
+          );
         });
     }
   });
 
-  // .jp-mod-current added so that the console-creation command is only shown
-  // on the current document.
-  // Otherwise it will delegate to the wrong widget.
-  app.contextMenu.addItem({
-    command: 'filemenu:create-console',
-    selector: '[data-type="document-title"].jp-mod-current',
-    rank: 6
+  commands.addCommand(CommandIDs.toggleNameFileOnSave, {
+    label: trans.__('Name File on First Save'),
+    isToggled: () => docManager.nameFileOnSave,
+    execute: () => {
+      const value = !docManager.nameFileOnSave;
+      const key = 'nameFileOnSave';
+      return settingRegistry
+        .set(docManagerPluginId, key, value)
+        .catch((reason: Error) => {
+          console.error(
+            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
+          );
+        });
+    }
+  });
+  docManager.optionChanged.connect(() => {
+    const key = 'nameFileOnSave';
+    const value = settingRegistry.plugins[docManagerPluginId]?.data.user[key];
+    if (value == docManager.nameFileOnSave) {
+      void settingRegistry
+        .set(docManagerPluginId, key, !value)
+        .catch((reason: Error) => {
+          console.error(
+            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
+          );
+        });
+    }
+  });
+
+  const newFileRegex = new RegExp('^untitled', 'i');
+
+  docManager.activateRequested.connect((sender, args) => {
+    const widget = sender.findWidget(args);
+    if (!widget) {
+      return;
+    }
+
+    widget.context.saveState.connect((doc, state) => {
+      if (sender.nameFileOnSave && widget === shell.currentWidget) {
+        const model = doc.contentsModel;
+        if (
+          state === 'completed manually' &&
+          model &&
+          !model.renamed == true &&
+          newFileRegex.test(model.name)
+        ) {
+          const context = sender.contextForWidget(widget!);
+          return nameOnSaveDialog(sender, context!);
+        }
+      }
+    });
   });
 
   if (palette) {
@@ -756,10 +838,6 @@ function addCommands(
       palette.addItem({ command, category });
     });
   }
-
-  if (mainMenu) {
-    mainMenu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
-  }
 }
 
 function addLabCommands(
@@ -767,8 +845,7 @@ function addLabCommands(
   docManager: IDocumentManager,
   labShell: ILabShell,
   opener: DocumentManager.IWidgetOpener,
-  translator: ITranslator,
-  palette: ICommandPalette | null
+  translator: ITranslator
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands } = app;
@@ -874,27 +951,6 @@ function addLabCommands(
       await commands.execute('filebrowser:activate', { path: context.path });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
     }
-  });
-
-  app.contextMenu.addItem({
-    command: CommandIDs.rename,
-    selector: '[data-type="document-title"]',
-    rank: 1
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.del,
-    selector: '[data-type="document-title"]',
-    rank: 2
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.clone,
-    selector: '[data-type="document-title"]',
-    rank: 3
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.showInFileBrowser,
-    selector: '[data-type="document-title"]',
-    rank: 4
   });
 }
 

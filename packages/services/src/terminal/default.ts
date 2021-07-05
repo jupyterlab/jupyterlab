@@ -182,7 +182,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
       this._updateConnectionStatus('connecting');
 
       // The first reconnect attempt should happen immediately, and subsequent
-      // attemps should pick a random number in a growing range so that we
+      // attempts should pick a random number in a growing range so that we
       // don't overload the server with synchronized reconnection attempts
       // across multiple kernels.
       const timeout = Private.getRandomIntInclusive(

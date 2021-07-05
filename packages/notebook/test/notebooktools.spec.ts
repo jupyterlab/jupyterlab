@@ -1,18 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message } from '@lumino/messaging';
-
-import { TabPanel, Widget } from '@lumino/widgets';
-
-import { simulate } from 'simulate-event';
-
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
-
 import { Context } from '@jupyterlab/docregistry';
-
 import { ObservableJSON } from '@jupyterlab/observables';
-
+import { initNotebookContext, sleep } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+import { Message } from '@lumino/messaging';
+import { TabPanel, Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 import {
   INotebookModel,
   NotebookActions,
@@ -20,9 +16,6 @@ import {
   NotebookTools,
   NotebookTracker
 } from '../src';
-
-import { initNotebookContext, sleep } from '@jupyterlab/testutils';
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
 import * as utils from './utils';
 
 class LogTool extends NotebookTools.Tool {

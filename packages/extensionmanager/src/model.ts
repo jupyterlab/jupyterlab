@@ -2,35 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import { VDomModel } from '@jupyterlab/apputils';
-
 import {
   KernelSpec,
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Debouncer } from '@lumino/polling';
-
 import * as semver from 'semver';
-
 import { doBuild } from './build-helper';
-
 import {
-  presentCompanions,
   IKernelInstallInfo,
-  KernelCompanion
+  KernelCompanion,
+  presentCompanions
 } from './companions';
-
 import { reportInstallError } from './dialog';
-
-import { Searcher, ISearchResult, isJupyterOrg } from './npm';
-
-import { Lister, ListResult, IListEntry } from './listings';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { IListEntry, Lister, ListResult } from './listings';
+import { ISearchResult, isJupyterOrg, Searcher } from './npm';
 
 /**
  * Information about an extension.
@@ -96,7 +86,7 @@ export interface IEntry {
  */
 export interface IInstall {
   /**
-   * The used pacakge manager (e.g. pip, conda...)
+   * The used package manager (e.g. pip, conda...)
    */
   packageManager: string | undefined;
 
@@ -172,7 +162,7 @@ export interface IInstalledEntry {
  */
 export interface IInstallEntry {
   /**
-   * The used pacakge manager (e.g. pip, conda...)
+   * The used package manager (e.g. pip, conda...)
    */
   packageManager: string | undefined;
 

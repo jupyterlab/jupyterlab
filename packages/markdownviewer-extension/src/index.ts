@@ -10,24 +10,19 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { WidgetTracker } from '@jupyterlab/apputils';
-
+import { PathExt } from '@jupyterlab/coreutils';
 import {
-  MarkdownViewer,
-  MarkdownViewerFactory,
+  IMarkdownViewerTracker,
   MarkdownDocument,
-  IMarkdownViewerTracker
+  MarkdownViewer,
+  MarkdownViewerFactory
 } from '@jupyterlab/markdownviewer';
-
 import {
   IRenderMimeRegistry,
   markdownRendererFactory
 } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { PathExt } from '@jupyterlab/coreutils';
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -176,11 +171,6 @@ function activate(
       );
     },
     label: trans.__('Show Markdown Editor')
-  });
-
-  app.contextMenu.addItem({
-    command: CommandIDs.markdownEditor,
-    selector: '.jp-RenderedMarkdown'
   });
 
   return tracker;

@@ -1,17 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { framePromise } from '@jupyterlab/testutils';
-
-import { toArray } from '@lumino/algorithm';
-
-import { Message } from '@lumino/messaging';
-
-import { Widget, DockPanel } from '@lumino/widgets';
-
-import { simulate } from 'simulate-event';
-
 import { LabShell } from '@jupyterlab/application';
+import { framePromise } from '@jupyterlab/testutils';
+import { toArray } from '@lumino/algorithm';
+import { Message } from '@lumino/messaging';
+import { DockPanel, Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 
 class ContentWidget extends Widget {
   activated = false;
@@ -71,7 +66,6 @@ describe('LabShell', () => {
     it('should be the current widget in the shell main area', () => {
       expect(shell.currentWidget).toBe(null);
       const widget = new Widget();
-      widget.node.tabIndex = -1;
       widget.id = 'foo';
       shell.add(widget, 'main');
       expect(shell.currentWidget).toBe(null);

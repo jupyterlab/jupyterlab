@@ -1,16 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JupyterServer, testEmission } from '@jupyterlab/testutils';
 import { toArray } from '@lumino/algorithm';
-
 import {
   ServerConnection,
   Terminal,
-  TerminalManager,
-  TerminalAPI
+  TerminalAPI,
+  TerminalManager
 } from '../../src';
-
-import { testEmission, JupyterServer } from '@jupyterlab/testutils';
 
 const server = new JupyterServer();
 

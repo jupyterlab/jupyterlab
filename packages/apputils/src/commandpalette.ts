@@ -4,12 +4,10 @@
 |----------------------------------------------------------------------------*/
 
 import { Token } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { Message } from '@lumino/messaging';
-
-import { CommandPalette, Widget, Panel } from '@lumino/widgets';
+import { CommandPalette, Panel, Widget } from '@lumino/widgets';
+import { searchIcon } from '@jupyterlab/ui-components';
 
 /* tslint:disable */
 /**
@@ -50,6 +48,11 @@ export interface ICommandPalette {
 }
 
 /**
+ * Class name identifying the input group with search icon.
+ */
+const SEARCH_ICON_GROUP_CLASS = 'jp-SearchIconGroup';
+
+/**
  * Wrap the command palette in a modal to make it more usable.
  */
 export class ModalCommandPalette extends Panel {
@@ -57,14 +60,12 @@ export class ModalCommandPalette extends Panel {
     super();
     this.addClass('jp-ModalCommandPalette');
     this.id = 'modal-command-palette';
-    this._commandPalette = options.commandPalette;
-    this.addWidget(this._commandPalette);
+    this.palette = options.commandPalette;
     this._commandPalette.commands.commandExecuted.connect(() => {
       if (this.isAttached && this.isVisible) {
         this.hideAndReset();
       }
     });
-    this.hideAndReset();
   }
 
   get palette(): CommandPalette {
@@ -73,6 +74,12 @@ export class ModalCommandPalette extends Panel {
 
   set palette(value: CommandPalette) {
     this._commandPalette = value;
+    if (!this.searchIconGroup) {
+      this._commandPalette.inputNode.insertAdjacentElement(
+        'afterend',
+        this.createSearchIconGroup()
+      );
+    }
     this.addWidget(value);
     this.hideAndReset();
   }
@@ -102,7 +109,7 @@ export class ModalCommandPalette extends Panel {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
         break;
-      case 'focus':
+      case 'focus': {
         // if the focus shifted outside of this DOM element, hide and reset.
         const target = event.target as HTMLElement;
         if (!this.node.contains(target as HTMLElement)) {
@@ -110,6 +117,7 @@ export class ModalCommandPalette extends Panel {
           this.hideAndReset();
         }
         break;
+      }
       case 'contextmenu':
         event.preventDefault();
         event.stopPropagation();
@@ -117,6 +125,25 @@ export class ModalCommandPalette extends Panel {
       default:
         break;
     }
+  }
+
+  /**
+   * Find the element with search icon group.
+   */
+  protected get searchIconGroup(): HTMLDivElement | undefined {
+    return this._commandPalette.node.getElementsByClassName(
+      SEARCH_ICON_GROUP_CLASS
+    )[0] as HTMLDivElement;
+  }
+
+  /**
+   * Create element with search icon group.
+   */
+  protected createSearchIconGroup(): HTMLDivElement {
+    const inputGroup = document.createElement('div');
+    inputGroup.classList.add(SEARCH_ICON_GROUP_CLASS);
+    searchIcon.render(inputGroup);
+    return inputGroup;
   }
 
   /**

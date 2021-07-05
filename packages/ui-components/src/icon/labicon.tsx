@@ -6,13 +6,11 @@ import { Signal } from '@lumino/signaling';
 import { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-import { LabIconStyle } from '../style';
-import { getReactAttrs, classes } from '../utils';
-
 import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
+import { LabIconStyle } from '../style';
+import { classes, getReactAttrs } from '../utils';
 
 export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   /** *********

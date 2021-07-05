@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { URLExt, PathExt } from '@jupyterlab/coreutils';
+import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { ModelDB } from '@jupyterlab/observables';
 
@@ -106,6 +106,13 @@ export namespace Contents {
      * The indices of the matched characters in the name.
      */
     indices?: ReadonlyArray<number> | null;
+
+    /**
+     * Whether file has been renamed.
+     *
+     * The default is `false`.
+     */
+    renamed?: boolean;
   }
 
   /**
@@ -186,7 +193,7 @@ export namespace Contents {
   }
 
   /**
-   * Validates an ICheckpointModel, thowing an error if it does not pass.
+   * Validates an ICheckpointModel, throwing an error if it does not pass.
    */
   export function validateCheckpointModel(checkpoint: ICheckpointModel): void {
     validate.validateCheckpointModel(checkpoint);
@@ -1095,9 +1102,9 @@ export class Drive implements Contents.IDrive {
     let url = URLExt.join(baseUrl, FILES_URL, URLExt.encodeParts(localPath));
     const xsrfTokenMatch = document.cookie.match('\\b_xsrf=([^;]*)\\b');
     if (xsrfTokenMatch) {
-      const fullurl = new URL(url);
-      fullurl.searchParams.append('_xsrf', xsrfTokenMatch[1]);
-      url = fullurl.toString();
+      const fullUrl = new URL(url);
+      fullUrl.searchParams.append('_xsrf', xsrfTokenMatch[1]);
+      url = fullUrl.toString();
     }
     return Promise.resolve(url);
   }

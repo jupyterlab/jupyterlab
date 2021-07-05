@@ -1,0 +1,19 @@
+{
+  "name": "@jupyterlab/ui-tests",
+  "version": "1.0.0",
+  "description": "JupyterLab UI Tests",
+  "private": true,
+  "scripts": {
+    "start-jlab": "jupyter lab --config ./jupyter_server_config.py",
+    "start-jlab:detached": "jlpm run start-jlab&",
+    "test:create-references": "galata --skip-visual-regression --skip-html-regression",
+    "test:debug": "galata --no-headless --no-discard-matched-captures --slow-mo 200 --result-server",
+    "test:launch-last-report": "galata --launch-result-server",
+    "test": "galata"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "@jupyterlab/galata": "3.0.11-2"
+  }
+}

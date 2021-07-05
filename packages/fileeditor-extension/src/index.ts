@@ -10,42 +10,28 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
-  WidgetTracker,
-  ISessionContextDialogs
+  ISessionContextDialogs,
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
-
 import { IConsoleTracker } from '@jupyterlab/console';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import {
   FileEditor,
   FileEditorFactory,
   IEditorTracker,
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { JSONObject } from '@lumino/coreutils';
-
 import { Menu } from '@lumino/widgets';
-
 import { Commands, FACTORY, IFileTypeData } from './commands';
 
 export { Commands } from './commands';
@@ -208,7 +194,7 @@ function activate(
       [
         {
           fileExt: 'jl',
-          iconName: 'ui-components:text-editor',
+          iconName: 'ui-components:julia',
           launcherLabel: trans.__('Julia File'),
           paletteLabel: trans.__('New Julia File'),
           caption: trans.__('Create a new Julia file')
@@ -340,8 +326,6 @@ function activate(
     .catch((reason: Error) => {
       console.error(reason.message);
     });
-
-  Commands.addContextMenuItems(app);
 
   return tracker;
 }

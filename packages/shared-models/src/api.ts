@@ -14,13 +14,10 @@
  * It also defines the shared changes to be used in the events.
  */
 
-import { PartialJSONObject } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { ISignal } from '@lumino/signaling';
-
 import * as nbformat from '@jupyterlab/nbformat';
+import { PartialJSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal } from '@lumino/signaling';
 
 /**
  * ISharedBase defines common operations that can be performed on any shared object.
@@ -371,9 +368,9 @@ export interface ISharedMarkdownCell
   /**
    * Sets the cell attachments
    *
-   * @param attchments: The cell attachments.
+   * @param attachments: The cell attachments.
    */
-  setAttachments(attchments: nbformat.IAttachments | undefined): void;
+  setAttachments(attachments: nbformat.IAttachments | undefined): void;
 
   /**
    * Serialize the model to JSON.
@@ -402,9 +399,9 @@ export interface ISharedRawCell
   /**
    * Sets the cell attachments
    *
-   * @param attchments: The cell attachments.
+   * @param attachments: The cell attachments.
    */
-  setAttachments(attchments: nbformat.IAttachments | undefined): void;
+  setAttachments(attachments: nbformat.IAttachments | undefined): void;
 
   /**
    * Serialize the model to JSON.

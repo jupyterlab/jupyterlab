@@ -2,18 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
-
-import { Spinner } from './spinner';
-
-import { Toolbar } from './toolbar';
-
 import { DOMUtils } from './domutils';
-
 import { Printing } from './printing';
+import { Spinner } from './spinner';
+import { Toolbar } from './toolbar';
 
 /**
  * A widget meant to be contained in the JupyterLab main area.
@@ -35,6 +29,11 @@ export class MainAreaWidget<T extends Widget = Widget>
   constructor(options: MainAreaWidget.IOptions<T>) {
     super(options);
     this.addClass('jp-MainAreaWidget');
+    // Set contain=strict to avoid many forced layout rendering while adding cells.
+    // Don't forget to remove the CSS class when your remove the spinner to allow
+    // the content to be rendered.
+    // @see https://github.com/jupyterlab/jupyterlab/issues/9381
+    this.addClass('jp-MainAreaWidget-ContainStrict');
     this.id = DOMUtils.createDomID();
 
     const trans = (options.translator || nullTranslator).load('jupyterlab');
@@ -44,7 +43,6 @@ export class MainAreaWidget<T extends Widget = Widget>
     const toolbar = (this._toolbar = options.toolbar || new Toolbar());
     toolbar.node.setAttribute('role', 'navigation');
     toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
-    const spinner = this._spinner;
     const contentHeader = (this._contentHeader =
       options.contentHeader ||
       new BoxPanel({
@@ -64,7 +62,7 @@ export class MainAreaWidget<T extends Widget = Widget>
     if (!content.id) {
       content.id = DOMUtils.createDomID();
     }
-    content.node.tabIndex = -1;
+    content.node.tabIndex = 0;
 
     this._updateTitle();
     content.title.changed.connect(this._updateTitle, this);
@@ -72,7 +70,7 @@ export class MainAreaWidget<T extends Widget = Widget>
     this.title.changed.connect(this._updateContentTitle, this);
 
     if (options.reveal) {
-      this.node.appendChild(spinner.node);
+      this.node.appendChild(this._spinner.node);
       this._revealed = options.reveal
         .then(() => {
           if (content.isDisposed) {
@@ -80,9 +78,8 @@ export class MainAreaWidget<T extends Widget = Widget>
             return;
           }
           content.disposed.connect(() => this.dispose());
-          const active = document.activeElement === spinner.node;
-          this.node.removeChild(spinner.node);
-          spinner.dispose();
+          const active = document.activeElement === this._spinner.node;
+          this._disposeSpinner();
           this._isRevealed = true;
           if (active) {
             this._focusContent();
@@ -96,8 +93,7 @@ export class MainAreaWidget<T extends Widget = Widget>
           pre.textContent = String(e);
           error.node.appendChild(pre);
           BoxLayout.setStretch(error, 1);
-          this.node.removeChild(spinner.node);
-          spinner.dispose();
+          this._disposeSpinner();
           content.dispose();
           this._content = null!;
           toolbar.dispose();
@@ -108,7 +104,8 @@ export class MainAreaWidget<T extends Widget = Widget>
         });
     } else {
       // Handle no reveal promise.
-      spinner.dispose();
+      this._spinner.dispose();
+      this.removeClass('jp-MainAreaWidget-ContainStrict');
       content.disposed.connect(() => this.dispose());
       this._isRevealed = true;
       this._revealed = Promise.resolve(undefined);
@@ -116,7 +113,7 @@ export class MainAreaWidget<T extends Widget = Widget>
   }
 
   /**
-   * Print method. Defered to content.
+   * Print method. Deferred to content.
    */
   [Printing.symbol](): Printing.OptionalAsyncThunk {
     if (!this._content) {
@@ -188,6 +185,12 @@ export class MainAreaWidget<T extends Widget = Widget>
     if (this._content) {
       MessageLoop.sendMessage(this._content, msg);
     }
+  }
+
+  private _disposeSpinner() {
+    this.node.removeChild(this._spinner.node);
+    this._spinner.dispose();
+    this.removeClass('jp-MainAreaWidget-ContainStrict');
   }
 
   /**

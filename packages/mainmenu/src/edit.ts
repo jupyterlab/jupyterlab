@@ -1,14 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Menu, Widget } from '@lumino/widgets';
-
-import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
+import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
+import { Widget } from '@lumino/widgets';
+import { IMenuExtender } from './tokens';
 
 /**
  * An interface for an Edit menu.
  */
-export interface IEditMenu extends IJupyterLabMenu {
+export interface IEditMenu extends IRankedMenu {
   /**
    * A set storing IUndoers for the Edit menu.
    */
@@ -28,11 +28,11 @@ export interface IEditMenu extends IJupyterLabMenu {
 /**
  * An extensible Edit menu for the application.
  */
-export class EditMenu extends JupyterLabMenu implements IEditMenu {
+export class EditMenu extends RankedMenu implements IEditMenu {
   /**
    * Construct the edit menu.
    */
-  constructor(options: Menu.IOptions) {
+  constructor(options: IRankedMenu.IOptions) {
     super(options);
 
     this.undoers = new Set<IEditMenu.IUndoer<Widget>>();
@@ -94,7 +94,7 @@ export namespace IEditMenu {
      * A function to create the label for the `clearCurrent`action.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     clearCurrentLabel?: (n: number) => string;
 
@@ -102,7 +102,7 @@ export namespace IEditMenu {
      * A function to create the label for the `clearAll`action.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     clearAllLabel?: (n: number) => string;
 

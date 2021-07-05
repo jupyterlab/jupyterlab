@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
-
 import { HelpMenu } from '@jupyterlab/mainmenu';
+import { CommandRegistry } from '@lumino/commands';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('HelpMenu', () => {
@@ -26,7 +25,7 @@ describe('@jupyterlab/mainmenu', () => {
       it('should construct a new help menu', () => {
         expect(menu).toBeInstanceOf(HelpMenu);
         // For localization this is now defined when on the mainmenu-extension.
-        expect(menu.menu.title.label).toBe('');
+        expect(menu.title.label).toBe('');
       });
     });
   });

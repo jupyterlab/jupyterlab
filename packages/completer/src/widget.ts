@@ -1,26 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
-
+import { defaultSanitizer, HoverBox } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { LabIcon } from '@jupyterlab/ui-components';
-
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
-
-import { JSONObject, JSONExt } from '@lumino/coreutils';
-
+import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-
 import { ElementExt } from '@lumino/domutils';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
-
 import { CompletionHandler } from './handler';
 
 /**
@@ -76,6 +66,13 @@ export class Completer extends Widget {
   }
 
   /**
+   * The active index.
+   */
+  get activeIndex(): number {
+    return this._activeIndex;
+  }
+
+  /**
    * The editor used by the completion widget.
    */
   get editor(): CodeEditor.IEditor | null {
@@ -101,6 +98,13 @@ export class Completer extends Widget {
    */
   get visibilityChanged(): ISignal<this, void> {
     return this._visibilityChanged;
+  }
+
+  /**
+   * A signal emitted when the active index changes.
+   */
+  get indexChanged(): ISignal<this, number> {
+    return this._indexChanged;
   }
 
   /**
@@ -396,6 +400,7 @@ export class Completer extends Widget {
       '.jp-Completer-list'
     ) as Element;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
+    this._indexChanged.emit(this._activeIndex);
     this._updateDocPanel();
   }
 
@@ -630,6 +635,7 @@ export class Completer extends Widget {
   private _resetFlag = false;
   private _selected = new Signal<this, string>(this);
   private _visibilityChanged = new Signal<this, void>(this);
+  private _indexChanged = new Signal<this, number>(this);
 }
 
 export namespace Completer {

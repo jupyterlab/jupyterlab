@@ -1,17 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
-
-import Highlight from 'react-highlighter';
-
-import JSONTree from 'react-json-tree';
-
-import { JSONArray, JSONObject, JSONValue, JSONExt } from '@lumino/coreutils';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { InputGroup } from '@jupyterlab/ui-components';
+import { JSONArray, JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
+import * as React from 'react';
+import Highlight from 'react-highlighter';
+import JSONTree from 'react-json-tree';
 
 /**
  * The properties for the JSON tree component.

@@ -9,8 +9,8 @@ import { Session } from '@jupyterlab/services';
 
 import {
   createSession,
-  signalToPromises,
-  JupyterServer
+  JupyterServer,
+  signalToPromises
 } from '@jupyterlab/testutils';
 
 import { find } from '@lumino/algorithm';

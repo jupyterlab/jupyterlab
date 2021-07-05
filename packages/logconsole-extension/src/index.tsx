@@ -11,53 +11,38 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   CommandToolbarButton,
   ICommandPalette,
   MainAreaWidget,
-  WidgetTracker,
-  ReactWidget
+  ReactWidget,
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import {
   ILoggerRegistry,
   LogConsolePanel,
   LoggerRegistry,
   LogLevel
 } from '@jupyterlab/logconsole';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import {
   addIcon,
   clearIcon,
   HTMLSelect,
   listIcon
 } from '@jupyterlab/ui-components';
-
 import { UUID } from '@lumino/coreutils';
-
 import { DockLayout, Widget } from '@lumino/widgets';
-
 import * as React from 'react';
-
 import { LogConsoleStatus } from './status';
 
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
@@ -80,13 +65,7 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   id: LOG_CONSOLE_PLUGIN_ID,
   provides: ILoggerRegistry,
   requires: [ILabShell, IRenderMimeRegistry, INotebookTracker, ITranslator],
-  optional: [
-    ICommandPalette,
-    ILayoutRestorer,
-    IMainMenu,
-    ISettingRegistry,
-    IStatusBar
-  ],
+  optional: [ICommandPalette, ILayoutRestorer, ISettingRegistry, IStatusBar],
   autoStart: true
 };
 
@@ -101,7 +80,6 @@ function activateLogConsole(
   translator: ITranslator,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null,
-  mainMenu: IMainMenu | null,
   settingRegistry: ISettingRegistry | null,
   statusBar: IStatusBar | null
 ): ILoggerRegistry {
@@ -198,11 +176,12 @@ function activateLogConsole(
       app.commands.notifyCommandChanged();
     });
 
-    app.shell.add(logConsoleWidget, 'main', {
+    app.shell.add(logConsoleWidget, 'down', {
       ref: options.ref,
       mode: options.insertMode
     });
     void tracker.add(logConsoleWidget);
+    app.shell.activateById(logConsoleWidget.id);
 
     logConsoleWidget.update();
     app.commands.notifyCommandChanged();
@@ -257,13 +236,6 @@ function activateLogConsole(
       trans.__('Set Log Level to %1', toTitleCase(args.level as string))
   });
 
-  app.contextMenu.addItem({
-    command: CommandIDs.open,
-    selector: '.jp-Notebook'
-  });
-  if (mainMenu) {
-    mainMenu.viewMenu.addGroup([{ command: CommandIDs.open }]);
-  }
   if (palette) {
     palette.addItem({
       command: CommandIDs.open,

@@ -35,9 +35,28 @@ input.jp-mod-styled {
   -moz-appearance: none;
 }
 
+input[type='checkbox'].jp-mod-styled {
+  appearance: checkbox;
+  -webkit-appearance: checkbox;
+  -moz-appearance: checkbox;
+  height: auto;
+}
+
 input.jp-mod-styled:focus {
   border: var(--jp-border-width) solid var(--md-blue-500);
   box-shadow: inset 0 0 4px var(--md-blue-300);
+}
+
+.jp-FileDialog-Checkbox {
+  margin-top: 35px;
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  width: 100%;
+}
+
+.jp-FileDialog-Checkbox > label {
+  flex: 1 1 auto;
 }
 
 .jp-select-wrapper {

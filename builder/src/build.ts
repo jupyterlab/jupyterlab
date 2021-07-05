@@ -143,16 +143,12 @@ export namespace Build {
 
       const { schemaDir, themePath } = extension;
 
-      // Handle styles.
-      // We explicitly ignore themes so they can be loaded dynamically.
-      if (!data.jupyterlab.themePath) {
-        // We prefer the styleModule key if it exists, falling back to
-        // the normal style key.
-        if (typeof data.styleModule === 'string') {
-          cssImports.push(`${name}/${data.styleModule}`);
-        } else if (typeof data.style === 'string') {
-          cssImports.push(`${name}/${data.style}`);
-        }
+      // We prefer the styleModule key if it exists, falling back to
+      // the normal style key.
+      if (typeof data.styleModule === 'string') {
+        cssImports.push(`${name}/${data.styleModule}`);
+      } else if (typeof data.style === 'string') {
+        cssImports.push(`${name}/${data.style}`);
       }
 
       // Handle schemas.

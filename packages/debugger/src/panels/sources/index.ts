@@ -7,7 +7,7 @@ import { ToolbarButton } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { Panel } from '@lumino/widgets';
 

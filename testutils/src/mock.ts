@@ -11,14 +11,14 @@ import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 
 import {
+  Contents,
+  ContentsManager,
   Kernel,
   KernelMessage,
   KernelSpec,
-  Session,
-  ServiceManager,
-  Contents,
   ServerConnection,
-  ContentsManager
+  ServiceManager,
+  Session
 } from '@jupyterlab/services';
 
 import { ArrayIterator } from '@lumino/algorithm';
@@ -245,8 +245,13 @@ export const KernelMock = jest.fn<
     Kernel.IKernelConnection,
     Kernel.Status
   >(thisObject);
+  const pendingInputSignal = new Signal<Kernel.IKernelConnection, boolean>(
+    thisObject
+  );
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
+  (thisObject as any).pendingInput = pendingInputSignal;
+  (thisObject as any).hasPendingInput = false;
   return thisObject;
 });
 
@@ -329,12 +334,20 @@ export const SessionConnectionMock = jest.fn<
     KernelMessage.IMessage
   >(thisObject);
 
+  const pendingInputSignal = new Signal<Session.ISessionConnection, boolean>(
+    thisObject
+  );
+
   kernel!.iopubMessage.connect((_, args) => {
     iopubMessageSignal.emit(args);
   }, thisObject);
 
   kernel!.statusChanged.connect((_, args) => {
     statusChangedSignal.emit(args);
+  }, thisObject);
+
+  kernel!.pendingInput.connect((_, args) => {
+    pendingInputSignal.emit(args);
   }, thisObject);
 
   (thisObject as any).disposed = disposedSignal;
@@ -344,6 +357,7 @@ export const SessionConnectionMock = jest.fn<
   (thisObject as any).kernelChanged = kernelChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
   (thisObject as any).unhandledMessage = unhandledMessageSignal;
+  (thisObject as any).pendingInput = pendingInputSignal;
   return thisObject;
 });
 
@@ -420,12 +434,17 @@ export const SessionContextMock = jest.fn<
     kernelChangedSignal.emit(args);
   });
 
+  session!.pendingInput.connect((_, args) => {
+    (thisObject as any).pendingInput = args;
+  });
+
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).kernelChanged = kernelChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
   (thisObject as any).propertyChanged = propertyChangedSignal;
   (thisObject as any).disposed = disposedSignal;
   (thisObject as any).session = session;
+  (thisObject as any).pendingInput = false;
 
   return thisObject;
 });

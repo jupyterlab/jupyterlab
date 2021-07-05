@@ -101,3 +101,28 @@
 .jp-MarkdownOutput.jp-RenderedHTMLCommon {
   overflow: auto;
 }
+
+.jp-showHiddenCellsButton {
+  margin-left: calc(var(--jp-cell-prompt-width) + 2 * var(--jp-code-padding));
+  margin-top: var(--jp-code-padding);
+  border: 1px solid var(--jp-border-color2);
+  background-color: var(--jp-border-color3) !important;
+  color: var(--jp-content-font-color0) !important;
+}
+
+.jp-showHiddenCellsButton:hover {
+  background-color: var(--jp-border-color2) !important;
+}
+
+.jp-collapseHeadingButton {
+  display: none;
+}
+
+.jp-MarkdownCell:hover .jp-collapseHeadingButton {
+  display: flex;
+  min-height: var(--jp-cell-collapser-min-height);
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}

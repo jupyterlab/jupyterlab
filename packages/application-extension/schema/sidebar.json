@@ -2,6 +2,15 @@
   "jupyter.lab.setting-icon-label": "Sidebar",
   "title": "Sidebar",
   "description": "Sidebar layout settings.",
+  "jupyter.lab.menus": {
+    "context": [
+      {
+        "command": "sidebar:switch",
+        "selector": ".jp-SideBar .lm-TabBar-tab",
+        "rank": 500
+      }
+    ]
+  },
   "properties": {
     "overrides": {
       "type": "object",

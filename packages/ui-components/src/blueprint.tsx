@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
 import {
   Button as BPButton,
   IButtonProps as IBPButtonProps
@@ -11,6 +10,10 @@ import {
   ICollapseProps
 } from '@blueprintjs/core/lib/cjs/components/collapse/collapse';
 import {
+  Checkbox as BPCheckbox,
+  ICheckboxProps
+} from '@blueprintjs/core/lib/cjs/components/forms/controls';
+import {
   InputGroup as BPInputGroup,
   IInputGroupProps as IBPInputGroupProps
 } from '@blueprintjs/core/lib/cjs/components/forms/inputGroup';
@@ -18,14 +21,10 @@ import {
   Select as BPSelect,
   ISelectProps
 } from '@blueprintjs/select/lib/cjs/components/select/select';
-import {
-  Checkbox as BPCheckbox,
-  ICheckboxProps
-} from '@blueprintjs/core/lib/cjs/components/forms/controls';
+import * as React from 'react';
 import { LabIcon } from './icon';
-export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
-
 import { classes } from './utils';
+export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
 
 interface IButtonProps extends IBPButtonProps {
   title?: string;

@@ -2,11 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Widget } from '@lumino/widgets';
-
 import { Dialog, showDialog } from './dialog';
 import { Styling } from './styling';
 
 const INPUT_DIALOG_CLASS = 'jp-Input-Dialog';
+
+const INPUT_BOOLEAN_DIALOG_CLASS = 'jp-Input-Boolean-Dialog';
 
 /**
  * Namespace for input dialogs
@@ -226,13 +227,20 @@ class InputDialogBase<T> extends Widget implements Dialog.IBodyWidget<T> {
     super();
     this.addClass(INPUT_DIALOG_CLASS);
 
+    this._input = document.createElement('input');
+    this._input.classList.add('jp-mod-styled');
+    this._input.id = 'jp-dialog-input-id';
+
     if (label !== undefined) {
       const labelElement = document.createElement('label');
       labelElement.textContent = label;
+      labelElement.htmlFor = this._input.id;
 
       // Initialize the node
       this.node.appendChild(labelElement);
     }
+
+    this.node.appendChild(this._input);
   }
 
   /** Input HTML node */
@@ -250,14 +258,10 @@ class InputBooleanDialog extends InputDialogBase<boolean> {
    */
   constructor(options: InputDialog.IBooleanOptions) {
     super(options.label);
+    this.addClass(INPUT_BOOLEAN_DIALOG_CLASS);
 
-    this._input = document.createElement('input');
-    this._input.classList.add('jp-mod-styled');
     this._input.type = 'checkbox';
     this._input.checked = options.value ? true : false;
-
-    // Initialize the node
-    this.node.appendChild(this._input);
   }
 
   /**
@@ -280,13 +284,8 @@ class InputNumberDialog extends InputDialogBase<number> {
   constructor(options: InputDialog.INumberOptions) {
     super(options.label);
 
-    this._input = document.createElement('input', {});
-    this._input.classList.add('jp-mod-styled');
     this._input.type = 'number';
     this._input.value = options.value ? options.value.toString() : '0';
-
-    // Initialize the node
-    this.node.appendChild(this._input);
   }
 
   /**
@@ -313,16 +312,11 @@ class InputTextDialog extends InputDialogBase<string> {
   constructor(options: InputDialog.ITextOptions) {
     super(options.label);
 
-    this._input = document.createElement('input', {});
-    this._input.classList.add('jp-mod-styled');
     this._input.type = 'text';
     this._input.value = options.text ? options.text : '';
     if (options.placeholder) {
       this._input.placeholder = options.placeholder;
     }
-
-    // Initialize the node
-    this.node.appendChild(this._input);
   }
 
   /**
@@ -345,16 +339,11 @@ class InputPasswordDialog extends InputDialogBase<string> {
   constructor(options: InputDialog.ITextOptions) {
     super(options.label);
 
-    this._input = document.createElement('input', {});
-    this._input.classList.add('jp-mod-styled');
     this._input.type = 'password';
     this._input.value = options.text ? options.text : '';
     if (options.placeholder) {
       this._input.placeholder = options.placeholder;
     }
-
-    // Initialize the node
-    this.node.appendChild(this._input);
   }
 
   /**
@@ -404,18 +393,16 @@ class InputItemsDialog extends InputDialogBase<string> {
       data.id = 'input-dialog-items';
       data.appendChild(this._list);
 
-      this._input = document.createElement('input', {});
-      this._input.classList.add('jp-mod-styled');
       this._input.type = 'list';
       this._input.value = current;
       this._input.setAttribute('list', data.id);
       if (options.placeholder) {
         this._input.placeholder = options.placeholder;
       }
-      this.node.appendChild(this._input);
       this.node.appendChild(data);
     } else {
       /* Use select directly */
+      this._input.remove();
       this.node.appendChild(Styling.wrapSelect(this._list));
     }
   }

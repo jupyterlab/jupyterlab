@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IDisposable } from '@lumino/disposable';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { IObservable } from './modeldb';
 
 /**
@@ -141,7 +139,7 @@ export namespace IObservableMap {
 }
 
 /**
- * A concrete implementation of IObservbleMap<T>.
+ * A concrete implementation of IObservableMap<T>.
  */
 export class ObservableMap<T> implements IObservableMap<T> {
   /**

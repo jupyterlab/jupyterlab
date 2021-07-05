@@ -1,42 +1,36 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-
-import * as models from '@jupyterlab/shared-models';
-
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
+  CellModel,
+  CodeCellModel,
   ICellModel,
   ICodeCellModel,
-  IRawCellModel,
   IMarkdownCellModel,
-  CodeCellModel,
-  RawCellModel,
+  IRawCellModel,
   MarkdownCellModel,
-  CellModel
+  RawCellModel
 } from '@jupyterlab/cells';
-
-import * as nbformat from '@jupyterlab/nbformat';
-
-import { ISignal, Signal } from '@lumino/signaling';
-import { UUID } from '@lumino/coreutils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+import * as nbformat from '@jupyterlab/nbformat';
 import {
-  IObservableJSON,
-  IObservableUndoableList,
-  IObservableList,
   IModelDB,
+  IObservableJSON,
+  IObservableList,
+  IObservableUndoableList,
   ModelDB
 } from '@jupyterlab/observables';
-
-import { CellList } from './celllist';
-import { showDialog, Dialog } from '@jupyterlab/apputils';
+import * as models from '@jupyterlab/shared-models';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { UUID } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
+import { CellList } from './celllist';
 
 /**
  * The definition of a model object for a notebook widget.
@@ -541,10 +535,13 @@ export namespace NotebookModel {
      * @param options: the cell creation options.
      *
      * #### Notes
-     * This method is intended to be a convenience method to programmaticaly
+     * This method is intended to be a convenience method to programmatically
      * call the other cell creation methods in the factory.
      */
-    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel;
+    createCell(
+      type: nbformat.CellType,
+      options: CellModel.IOptions
+    ): ICellModel;
 
     /**
      * Create a new code cell.
@@ -613,18 +610,21 @@ export namespace NotebookModel {
      * @param options: the cell creation options.
      *
      * #### Notes
-     * This method is intended to be a convenience method to programmaticaly
+     * This method is intended to be a convenience method to programmatically
      * call the other cell creation methods in the factory.
      */
-    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel {
+    createCell(
+      type: nbformat.CellType,
+      options: CellModel.IOptions
+    ): ICellModel {
       switch (type) {
         case 'code':
-          return this.createCodeCell(opts);
+          return this.createCodeCell(options);
         case 'markdown':
-          return this.createMarkdownCell(opts);
+          return this.createMarkdownCell(options);
         case 'raw':
         default:
-          return this.createRawCell(opts);
+          return this.createRawCell(options);
       }
     }
 

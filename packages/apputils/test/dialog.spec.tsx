@@ -5,22 +5,16 @@
 // import { expect } from 'chai';
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-
-import { each } from '@lumino/algorithm';
-
-import { Message } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { generate, simulate } from 'simulate-event';
-
-import * as React from 'react';
-
 import {
   acceptDialog,
   dismissDialog,
   waitForDialog
 } from '@jupyterlab/testutils';
+import { each } from '@lumino/algorithm';
+import { Message } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import * as React from 'react';
+import { generate, simulate } from 'simulate-event';
 
 class TestDialog extends Dialog<any> {
   methods: string[] = [];
@@ -188,6 +182,29 @@ describe('@jupyterlab/apputils', () => {
           expect((await prompt).button.accept).toBe(true);
         });
 
+        it('should resolve with currently focused button', async () => {
+          const dialog = new TestDialog({
+            buttons: [
+              Dialog.createButton({ label: 'first' }),
+              Dialog.createButton({ label: 'second' }),
+              Dialog.createButton({ label: 'third' }),
+              Dialog.createButton({ label: 'fourth' })
+            ],
+            // focus on "first"
+            defaultButton: 0
+          });
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+          // press right arrow twice (focusing on "third")
+          simulate(dialog.node, 'keydown', { keyCode: 39 });
+          simulate(dialog.node, 'keydown', { keyCode: 39 });
+          // press enter
+          simulate(dialog.node, 'keydown', { keyCode: 13 });
+          expect((await prompt).button.label).toBe('third');
+          dialog.dispose();
+        });
+
         it('should cycle to the first button on a tab key', async () => {
           const prompt = dialog.launch();
 
@@ -240,9 +257,9 @@ describe('@jupyterlab/apputils', () => {
         it('should focus the default button when focus leaves the dialog', async () => {
           const host = document.createElement('div');
           const target = document.createElement('div');
+          target.tabIndex = 0; // Make the div element focusable
           const dialog = new TestDialog({ host });
 
-          target.tabIndex = -1;
           document.body.appendChild(target);
           document.body.appendChild(host);
           target.focus();

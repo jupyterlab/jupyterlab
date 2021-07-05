@@ -5,25 +5,16 @@
  * @module vdom
  */
 
-import * as React from 'react';
-
-import * as ReactDOM from 'react-dom';
-
 import { ISessionContext, IWidgetTracker } from '@jupyterlab/apputils';
-
 import { DocumentRegistry, MimeDocument } from '@jupyterlab/docregistry';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import { Kernel } from '@jupyterlab/services';
-
-import VDOM, { SerializedEvent } from '@nteract/transform-vdom';
-
 import { Token } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { Widget } from '@lumino/widgets';
+import VDOM, { SerializedEvent } from '@nteract/transform-vdom';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 /**
  * The CSS class to add to the VDOM Widget.

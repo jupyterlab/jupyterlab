@@ -1,19 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Terminal as TerminalNS, TerminalManager } from '@jupyterlab/services';
-
-import { Message, MessageLoop } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { Terminal } from '../src';
-
+import { TerminalManager, Terminal as TerminalNS } from '@jupyterlab/services';
 import {
   framePromise,
-  testEmission,
-  JupyterServer
+  JupyterServer,
+  testEmission
 } from '@jupyterlab/testutils';
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { Terminal } from '../src';
 
 const server = new JupyterServer();
 

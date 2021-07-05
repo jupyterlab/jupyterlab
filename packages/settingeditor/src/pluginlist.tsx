@@ -4,19 +4,12 @@
 |----------------------------------------------------------------------------*/
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { classes, LabIcon, settingsIcon } from '@jupyterlab/ui-components';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
-
 import * as React from 'react';
-
 import * as ReactDOM from 'react-dom';
 
 /**

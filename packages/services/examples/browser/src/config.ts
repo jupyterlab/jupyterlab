@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ConfigWithDefaults, ConfigSection } from '@jupyterlab/services';
+import { ConfigSection, ConfigWithDefaults } from '@jupyterlab/services';
 
 import { log } from './log';
 

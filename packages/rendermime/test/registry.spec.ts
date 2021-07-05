@@ -1,32 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import json2html from 'json-to-html';
-
-import { UUID, JSONObject } from '@lumino/coreutils';
-
-import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
-
-import { toArray } from '@lumino/algorithm';
-
-import { PageConfig } from '@jupyterlab/coreutils';
-
-import { Widget } from '@lumino/widgets';
-
 import { SessionContext } from '@jupyterlab/apputils';
-
+import { PageConfig } from '@jupyterlab/coreutils';
 import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
-
+import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
+import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { toArray } from '@lumino/algorithm';
+import { JSONObject, UUID } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
+import json2html from 'json-to-html';
 import {
-  MimeModel,
   IRenderMime,
+  MimeModel,
+  RenderedHTML,
   RenderedText,
   RenderMimeRegistry,
-  RenderedHTML,
   standardRendererFactories
 } from '../src';
-
-import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 class JSONRenderer extends RenderedHTML {
   mimeType = 'text/html';

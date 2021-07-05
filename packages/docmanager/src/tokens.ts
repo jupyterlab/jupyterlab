@@ -1,17 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Token } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { ISignal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
+import { Token } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 /* tslint:disable */
 /**
@@ -42,6 +37,11 @@ export interface IDocumentManager extends IDisposable {
   readonly activateRequested: ISignal<this, string>;
 
   /**
+   * A signal emitted when an option has changed.
+   */
+  readonly optionChanged: ISignal<this, any>;
+
+  /**
    * Whether to autosave documents.
    */
   autosave: boolean;
@@ -50,6 +50,11 @@ export interface IDocumentManager extends IDisposable {
    * Determines the time interval for autosave in seconds.
    */
   autosaveInterval: number;
+
+  /**
+   * Whether to prompt to name file on first save.
+   */
+  nameFileOnSave: boolean;
 
   /**
    * Clone a widget.

@@ -2,27 +2,21 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Toolbar,
-  ToolbarButton,
   CommandToolbarButton,
-  SessionContext
+  SessionContext,
+  Toolbar,
+  ToolbarButton
 } from '@jupyterlab/apputils';
-
-import { toArray } from '@lumino/algorithm';
-
-import { CommandRegistry } from '@lumino/commands';
-
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-
-import { Widget } from '@lumino/widgets';
-
-import { simulate } from 'simulate-event';
-
 import {
   createSessionContext,
   framePromise,
   JupyterServer
 } from '@jupyterlab/testutils';
+import { toArray } from '@lumino/algorithm';
+import { CommandRegistry } from '@lumino/commands';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 
 const server = new JupyterServer();
 

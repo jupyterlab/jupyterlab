@@ -2,52 +2,38 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents,
-  ServiceManager,
-  ServerConnection
-} from '@jupyterlab/services';
-
-import * as ymodels from '@jupyterlab/shared-models';
-
-import * as Y from 'yjs';
-
-import { PromiseDelegate, PartialJSONValue } from '@lumino/coreutils';
-
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
-import {
-  showDialog,
-  SessionContext,
   Dialog,
   ISessionContext,
-  showErrorMessage,
-  sessionContextDialogs
+  SessionContext,
+  sessionContextDialogs,
+  showDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
-
-import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
-
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
-
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
+import { PathExt } from '@jupyterlab/coreutils';
 import {
-  nullTranslator,
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-
-import {
-  WebsocketProviderWithLocks,
-  IProvider,
+  IDocumentProvider,
+  IDocumentProviderFactory,
   ProviderMock
 } from '@jupyterlab/docprovider';
-
+import { IModelDB, ModelDB } from '@jupyterlab/observables';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import {
+  Contents,
+  ServerConnection,
+  ServiceManager
+} from '@jupyterlab/services';
+import * as ymodels from '@jupyterlab/shared-models';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
+import * as Y from 'yjs';
 import { DocumentRegistry } from './registry';
 
 /**
@@ -85,14 +71,13 @@ export class Context<
     const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('context');
-    // @todo remove websocket provider - this should be handled by a separate plugin
-    const server = ServerConnection.makeSettings();
-    const url = URLExt.join(server.wsUrl, 'api/yjs');
-    const guid = this._factory.contentType + ':' + localPath;
-    const collaborative =
-      PageConfig.getOption('collaborative') == 'true' ? true : false;
-    this._provider = collaborative
-      ? new WebsocketProviderWithLocks({ url, guid, ymodel })
+    const docProviderFactory = options.docProviderFactory;
+    this._provider = docProviderFactory
+      ? docProviderFactory({
+          path: this._path,
+          contentType: this._factory.contentType,
+          ymodel
+        })
       : new ProviderMock();
 
     this._readyPromise = manager.ready.then(() => {
@@ -118,6 +103,20 @@ export class Context<
     }));
     this.pathChanged.connect((sender, newPath) => {
       urlResolver.path = newPath;
+      if (this._ycontext.get('path') !== newPath) {
+        this._ycontext.set('path', newPath);
+      }
+    });
+    this._ycontext.set('path', this._path);
+    this._ycontext.observe(event => {
+      const pathChanged = event.changes.keys.get('path');
+      if (pathChanged) {
+        const newPath = this._ycontext.get('path')!;
+        this._provider.setPath(newPath);
+        if (newPath && newPath !== this.path) {
+          this.sessionContext.session?.setPath(newPath) as any;
+        }
+      }
     });
   }
 
@@ -264,7 +263,7 @@ export class Context<
     const finally_ = () => {
       this._provider.releaseLock(lock);
     };
-    // if save/revert completed successfully, we set the inialized content in the rtc server.
+    // if save/revert completed successfully, we set the initialized content in the rtc server.
     promise
       .then(() => {
         this._provider.putInitializedState();
@@ -290,13 +289,18 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  async save(): Promise<void> {
+  async save(manual?: boolean): Promise<void> {
     const [lock] = await Promise.all([
       this._provider.acquireLock(),
       this.ready
     ]);
-    let promise = this._save();
-    // if save completed successfully, we set the inialized content in the rtc server.
+    let promise: Promise<void>;
+    if (manual) {
+      promise = this._save(manual);
+    } else {
+      promise = this._save();
+    }
+    // if save completed successfully, we set the initialized content in the rtc server.
     promise = promise.then(() => {
       this._provider.putInitializedState();
     });
@@ -488,6 +492,9 @@ export class Context<
       void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
+      if (this._contentsModel) {
+        this._contentsModel.renamed = true;
+      }
     }
   }
 
@@ -518,7 +525,8 @@ export class Context<
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
-      format: model.format
+      format: model.format,
+      renamed: model.renamed == true ? true : false
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
@@ -581,7 +589,7 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  private async _save(): Promise<void> {
+  private async _save(manual?: boolean): Promise<void> {
     this._saveState.emit('started');
     const model = this._model;
     let content: PartialJSONValue;
@@ -612,6 +620,7 @@ export class Context<
       }
 
       model.dirty = false;
+      value.renamed = this._contentsModel?.renamed;
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {
@@ -619,7 +628,11 @@ export class Context<
       }
 
       // Emit completion.
-      this._saveState.emit('completed');
+      if (manual) {
+        this._saveState.emit('completed manually');
+      } else {
+        this._saveState.emit('completed');
+      }
     } catch (err) {
       // If the save has been canceled by the user,
       // throw the error so that whoever called save()
@@ -886,7 +899,7 @@ or load the version on disk (revert)?`,
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
-  private _provider: IProvider;
+  private _provider: IDocumentProvider;
   private _ydoc: Y.Doc;
   private _ycontext: Y.Map<string>;
 }
@@ -923,6 +936,11 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: ISessionContext.IKernelPreference;
+
+    /**
+     * An factory method for the document provider.
+     */
+    docProviderFactory?: IDocumentProviderFactory;
 
     /**
      * An IModelDB factory method which may be used for the document.

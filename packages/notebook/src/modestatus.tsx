@@ -1,17 +1,13 @@
-import * as React from 'react';
-
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { Text } from '@jupyterlab/coreutils';
-
-import { Notebook, NotebookMode } from '.';
-
 import { TextItem } from '@jupyterlab/statusbar';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import * as React from 'react';
+import { Notebook, NotebookMode } from '.';
 
 /**
  * A pure function for rendering a Command/Edit mode component.
@@ -92,7 +88,7 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
  */
 export namespace CommandEditStatus {
   /**
-   * A VDomModle for the CommandEdit renderer.
+   * A VDomModel for the CommandEdit renderer.
    */
   export class Model extends VDomModel {
     /**

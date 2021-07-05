@@ -10,7 +10,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/codemirror/style/index.css';
 import '@jupyterlab/filebrowser/style/index.css';
-import '@jupyterlab/theme-light-extension/style/index.css';
+import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
 import { each } from '@lumino/algorithm';
@@ -21,7 +21,7 @@ import { DockPanel, Menu, SplitPanel, Widget } from '@lumino/widgets';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { Dialog, ToolbarButton, showDialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog, ToolbarButton } from '@jupyterlab/apputils';
 
 import {
   CodeMirrorEditorFactory,
