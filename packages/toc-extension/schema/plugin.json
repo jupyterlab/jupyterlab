@@ -15,6 +15,12 @@
       "description": "Whether to include cell output in headings",
       "type": "boolean",
       "default": true
+    },    
+    "collapsibleNotebooks": {
+      "type": "boolean",
+      "title": "collapsibleNotebooks",
+      "description": "When set to true (default), when a header is collapsed in the ToC the corresponding section in the notebook is collapsed as well and vice versa.",
+      "default": true
     }
   },
   "additionalProperties": false,

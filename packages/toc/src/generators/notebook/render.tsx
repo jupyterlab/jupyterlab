@@ -8,7 +8,7 @@ import { INotebookHeading } from '../../utils/headings';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { CodeComponent } from './codemirror';
 import { OptionsManager } from './options_manager';
-import { headerCollapsedState } from './utils';
+import { headerCollapsedState, setToCHeaderCollapsed } from './utils';
 
 /**
  * Renders a notebook table of contents item.
@@ -24,7 +24,6 @@ function render(
   options: OptionsManager,
   tracker: INotebookTracker,
   item: INotebookHeading,
-
   toc: INotebookHeading[] = []
 ) {
   let jsx;
@@ -182,14 +181,21 @@ function render(
 
   function onClick(tracker: INotebookTracker, heading?: INotebookHeading) {
     let collapsed;
-    collapsed = headerCollapsedState(heading!.cellRef!);
+    collapsed = headerCollapsedState(
+      heading!.cellRef!,
+      options.collapsibleNotebooks
+    );
     if (heading) {
-      if (tracker.currentWidget) {
-        NotebookActions.setHeadingCollapse(
-          heading!.cellRef!,
-          !collapsed,
-          tracker.currentWidget.content
-        );
+      if (options.collapsibleNotebooks) {
+        if (tracker.currentWidget) {
+          NotebookActions.setHeadingCollapse(
+            heading!.cellRef!,
+            !collapsed,
+            tracker.currentWidget.content
+          );
+        }
+      } else {
+        setToCHeaderCollapsed(heading!.cellRef!, !collapsed);
       }
       options.updateAndCollapse({
         heading: heading,

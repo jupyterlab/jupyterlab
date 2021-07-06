@@ -48,14 +48,17 @@ function createNotebookGenerator(
 ): Registry.IGenerator<NotebookPanel> {
   let numberingH1 = true;
   let includeOutput = true;
+  let collapsibleNotebooks = true;
   if (settings) {
     numberingH1 = settings.composite.numberingH1 as boolean;
     includeOutput = settings.composite.includeOutput as boolean;
+    collapsibleNotebooks = settings.composite.collapsibleNotebooks as boolean;
   }
   const options = new OptionsManager(widget, tracker, {
     numbering: false,
     numberingH1: numberingH1,
     includeOutput: includeOutput,
+    collapsibleNotebooks: collapsibleNotebooks,
     sanitizer: sanitizer,
     translator: translator || nullTranslator
   });
@@ -63,6 +66,8 @@ function createNotebookGenerator(
     settings.changed.connect(() => {
       options.numberingH1 = settings.composite.numberingH1 as boolean;
       options.includeOutput = settings.composite.includeOutput as boolean;
+      options.collapsibleNotebooks = settings.composite
+        .collapsibleNotebooks as boolean;
     });
   }
   tracker.activeCellChanged.connect(
@@ -121,7 +126,7 @@ function createNotebookGenerator(
     for (let i = 0; i < panel.content.widgets.length; i++) {
       let cell: Cell = panel.content.widgets[i];
       let model = cell.model;
-      let collapsed = headerCollapsedState(cell);
+      let collapsed = headerCollapsedState(cell, options.collapsibleNotebooks);
       collapsed = collapsed || false;
 
       if (model.type === 'code') {
