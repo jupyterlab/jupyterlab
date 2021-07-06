@@ -14,6 +14,8 @@ jobs:
         run: |
           docker-compose -f "./ui-tests/docker/docker-compose.yml" down || true
           docker-compose -f "./ui-tests/docker/docker-compose.yml" pull
+          /bin/sh ./scripts/build_docker.sh
+          docker-compose -f "./ui-tests/docker/docker-compose.yml" build
           docker-compose -f "./ui-tests/docker/docker-compose.yml" run --rm e2e
 
       - name: Upload UI Test artifacts
