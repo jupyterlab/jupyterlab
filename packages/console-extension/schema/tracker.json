@@ -109,6 +109,12 @@
       "description": "Whether the console defaults to showing all\nkernel activity or just kernel activity originating from itself.",
       "type": "boolean",
       "default": false
+    },
+    "autoClosingBrackets": {
+      "title": "Auto Closing Brackets",
+      "description": "Whether prompt cells in console default to having auto closing brackets.",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,

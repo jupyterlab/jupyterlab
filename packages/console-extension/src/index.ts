@@ -286,11 +286,19 @@ async function activateConsole(
 
   const pluginId = '@jupyterlab/console-extension:tracker';
   let interactionMode: string;
+  let autoClosingBrackets: boolean;
   async function updateSettings() {
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
+    autoClosingBrackets = (
+      await settingRegistry.get(pluginId, 'autoClosingBrackets')
+    ).composite as boolean;
     tracker.forEach(widget => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
+      widget.console.promptCell?.editor.setOption(
+        'autoClosingBrackets',
+        autoClosingBrackets
+      );
     });
   }
   settingRegistry.pluginChanged.connect((sender, plugin) => {
