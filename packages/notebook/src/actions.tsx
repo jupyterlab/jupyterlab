@@ -33,6 +33,36 @@ import { Notebook } from './widget';
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
+export class KernelError extends Error {
+  /**
+   * Exception name
+   */
+  readonly errorName: string;
+  /**
+   * Exception value
+   */
+  readonly errorValue: string;
+  /**
+   * Traceback
+   */
+  readonly traceback: string[];
+
+  /**
+   * Construct the kernel error.
+   */
+  constructor(content: KernelMessage.IExecuteReplyMsg['content']) {
+    const errorContent = content as KernelMessage.IReplyErrorContent;
+    const errorName = errorContent.ename;
+    const errorValue = errorContent.evalue;
+    super(`KernelReplyNotOK: ${errorName} ${errorValue}`);
+
+    this.errorName = errorName;
+    this.errorValue = errorValue;
+    this.traceback = errorContent.traceback;
+    Object.setPrototypeOf(this, KernelError.prototype);
+  }
+}
+
 /**
  * A collection of actions that run against notebooks.
  *
@@ -44,10 +74,38 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
  */
 export class NotebookActions {
   /**
-   * A signal that emits whenever a cell is run.
+   * A signal that emits whenever a cell completes execution.
    */
-  static get executed(): ISignal<any, { notebook: Notebook; cell: Cell }> {
+  static get executed(): ISignal<
+    any,
+    {
+      notebook: Notebook;
+      cell: Cell;
+      success: boolean;
+      error?: KernelError | null;
+    }
+  > {
     return Private.executed;
+  }
+
+  /**
+   * A signal that emits whenever a cell execution is scheduled.
+   */
+  static get executionScheduled(): ISignal<
+    any,
+    { notebook: Notebook; cell: Cell }
+  > {
+    return Private.executionScheduled;
+  }
+
+  /**
+   * A signal that emits whenever a cell completes execution.
+   */
+  static get selectionExecuted(): ISignal<
+    any,
+    { notebook: Notebook; lastCell: Cell }
+  > {
+    return Private.selectionExecuted;
   }
 
   /**
@@ -1681,11 +1739,33 @@ export namespace NotebookActions {
  */
 namespace Private {
   /**
-   * A signal that emits whenever a cell is run.
+   * A signal that emits whenever a cell completes execution.
    */
-  export const executed = new Signal<any, { notebook: Notebook; cell: Cell }>(
-    {}
-  );
+  export const executed = new Signal<
+    any,
+    {
+      notebook: Notebook;
+      cell: Cell;
+      success: boolean;
+      error?: KernelError | null;
+    }
+  >({});
+
+  /**
+   * A signal that emits whenever a cell execution is scheduled.
+   */
+  export const executionScheduled = new Signal<
+    any,
+    { notebook: Notebook; cell: Cell }
+  >({});
+
+  /**
+   * A signal that emits when one notebook's cells are all executed.
+   */
+  export const selectionExecuted = new Signal<
+    any,
+    { notebook: Notebook; lastCell: Cell }
+  >({});
 
   /**
    * The interface for a widget state.
@@ -1800,14 +1880,17 @@ namespace Private {
         if (notebook.isDisposed) {
           return false;
         }
-
+        selectionExecuted.emit({
+          notebook,
+          lastCell: notebook.widgets[lastIndex]
+        });
         // Post an update request.
         notebook.update();
 
         return results.every(result => result);
       })
       .catch(reason => {
-        if (reason.message === 'KernelReplyNotOK') {
+        if (reason.message.startsWith('KernelReplyNotOK')) {
           selected.map(cell => {
             // Remove '*' prompt from cells that didn't execute
             if (
@@ -1821,6 +1904,10 @@ namespace Private {
           throw reason;
         }
 
+        selectionExecuted.emit({
+          notebook,
+          lastCell: notebook.widgets[lastIndex]
+        });
         notebook.update();
 
         return false;
@@ -1838,12 +1925,11 @@ namespace Private {
   ): Promise<boolean> {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
-
     switch (cell.model.type) {
       case 'markdown':
         (cell as MarkdownCell).rendered = true;
         cell.inputHidden = false;
-        executed.emit({ notebook, cell });
+        executed.emit({ notebook, cell, success: true });
         break;
       case 'code':
         if (sessionContext) {
@@ -1869,6 +1955,7 @@ namespace Private {
             return Promise.resolve(false);
           }
           const deletedCells = notebook.model?.deletedCells ?? [];
+          executionScheduled.emit({ notebook, cell });
           return CodeCell.execute(cell as CodeCell, sessionContext, {
             deletedCells,
             recordTiming: notebook.notebookConfig.recordTiming
@@ -1882,7 +1969,6 @@ namespace Private {
               if (!reply) {
                 return true;
               }
-
               if (reply.content.status === 'ok') {
                 const content = reply.content;
 
@@ -1892,18 +1978,19 @@ namespace Private {
 
                 return true;
               } else {
-                throw new Error('KernelReplyNotOK');
+                throw new KernelError(reply.content);
               }
             })
             .catch(reason => {
               if (cell.isDisposed || reason.message.startsWith('Canceled')) {
                 return false;
               }
+              executed.emit({ notebook, cell, success: false, error: reason });
               throw reason;
             })
             .then(ran => {
               if (ran) {
-                executed.emit({ notebook, cell });
+                executed.emit({ notebook, cell, success: true });
               }
 
               return ran;
