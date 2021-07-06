@@ -152,7 +152,11 @@ export const convertType = (variable: IDebugger.IVariable): string | number => {
     case 'bool':
       return value;
     case 'str':
-      return value.slice(1, value.length - 1);
+      if (variable.presentationHint?.attributes?.includes('rawString')) {
+        return value.slice(1, value.length - 1);
+      } else {
+        return value;
+      }
     default:
       return type ?? value;
   }
