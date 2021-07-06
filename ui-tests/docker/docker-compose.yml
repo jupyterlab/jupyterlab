@@ -22,7 +22,7 @@ services:
       context: ..
     environment:
       SERVER_URL: 'jupyterlab:8888'
-      TIMEOUT: 180
+      TIMEOUT: 240
     command: ['yarn', 'run', 'test', '--jlab-base-url=http://jupyterlab:8888']
     # See https://playwright.dev/docs/docker/#run-the-image
     ipc: host
