@@ -13,7 +13,7 @@ jobs:
       - name: Run UI Tests
         run: |
           docker-compose -f "./ui-tests/docker/docker-compose.yml" down || true
-          docker-compose -f "./ui-tests/docker/docker-compose.yml" pull
+          docker-compose -f "./ui-tests/docker/docker-compose.yml" pull || true
           /bin/sh ./scripts/build_docker.sh
           docker-compose -f "./ui-tests/docker/docker-compose.yml" build
           docker-compose -f "./ui-tests/docker/docker-compose.yml" run --rm e2e
