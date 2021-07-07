@@ -1742,7 +1742,7 @@ namespace Private {
       this.addClass('jp-skiplink');
       this.id = 'jp-skiplink';
       this._shell = shell;
-      this.private_createSkipLink('Skip to left side bar');
+      this._createSkipLink('Skip to left side bar');
     }
 
     handleEvent(event: Event): void {
@@ -1775,7 +1775,7 @@ namespace Private {
     }
     private _shell: ILabShell;
 
-    private_createSkipLink(skipLinkText: string): void {
+    private _createSkipLink(skipLinkText: string): void {
       const skipLink = document.createElement('a');
       skipLink.href = '#';
       skipLink.tabIndex = 1;
