@@ -71,6 +71,8 @@ might want to use the services in your extensions.
 - ``@jupyterlab/docmanager:IDocumentManager``: A service for the manager for all
   documents used by the application. Use this if you want to open and close documents,
   create and delete files, and otherwise interact with the file system.
+- ``@jupyterlab/docprovider:IDocumentProviderFactory``: A factory object that creates new providers for
+  shared documents. Use this if you want to create a provider for a new shared document.
 - ``@jupyterlab/documentsearch:ISearchProviderRegistry``: A service for a registry of search
   providers for the application. Plugins can register their UI elements with this registry
   to provide find/replace support.

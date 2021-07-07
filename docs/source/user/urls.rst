@@ -21,9 +21,6 @@ the nomenclature of the classic notebook; these URLs are ``/tree`` URLs:
 
   http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb
 
-Entering this URL will open the notebook in JupyterLab in
-:ref:`single-document mode <tabs>`.
-
 By default, the file browser will navigate to the directory containing the requested
 file. This behavior can be changed with the optional ``file-browser-path`` query parameter:
 
@@ -62,8 +59,7 @@ multiple users (or browsers) as long as they have access to the same server.
 
 A workspace should only be open in a single browser tab at a time. If JupyterLab
 detects that a workspace is being opened multiple times simultaneously, it will
-prompt for a new workspace name. Opening a document in two different browser
-tabs simultaneously is also not supported.
+prompt for a new workspace name.
 
 .. _url-clone:
 
