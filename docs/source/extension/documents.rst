@@ -47,7 +47,7 @@ a view of a document model. There can be multiple document widgets associated wi
 a single document model, and they naturally stay in sync with each other since they
 are views on the same underlying data model.
 
-`Shared Models <../api/interfaces/shared_models.ishareddocument.html>`__ models
+`Shared Models <../api/interfaces/shared_models.ishareddocument.html>`__ are models
 using Yjs’ shared types as a data structures instead of ``ModelDB``.
 
 The `Document Registry <../api/classes/docregistry.documentregistry-1.html>`__
@@ -138,8 +138,8 @@ between the document model and the wider application.
 Shared Models
 -------------
 
-The shared-models package contains a `ISharedNotebook
-<../api/interfaces/shared_models.isharednotebook.html>`_ and a `ISharedFile
+The shared-models package contains an `ISharedNotebook
+<../api/interfaces/shared_models.isharednotebook.html>`_ and an `ISharedFile
 <../api/interfaces/shared_models.isharedfile.html>`_ which are the abstract
 interfaces to work against if you want to manipulate a notebook or a file.
 
