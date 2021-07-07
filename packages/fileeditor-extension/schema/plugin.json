@@ -32,22 +32,6 @@
             "rank": 30
           },
           {
-            "command": "fileeditor:change-font-size",
-            "rank": 30,
-            "args": {
-              "delta": 1,
-              "isMenu": true
-            }
-          },
-          {
-            "command": "fileeditor:change-font-size",
-            "rank": 30,
-            "args": {
-              "delta": -1,
-              "isMenu": true
-            }
-          },
-          {
             "type": "submenu",
             "submenu": {
               "id": "jp-mainmenu-settings-fileeditorindent",
@@ -97,8 +81,20 @@
             "rank": 30
           },
           {
-            "type": "separator",
-            "rank": 30
+            "command": "fileeditor:change-font-size",
+            "rank": 30,
+            "args": {
+              "delta": 1,
+              "isMenu": true
+            }
+          },
+          {
+            "command": "fileeditor:change-font-size",
+            "rank": 30,
+            "args": {
+              "delta": -1,
+              "isMenu": true
+            }
           }
         ]
       }
