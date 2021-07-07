@@ -123,7 +123,6 @@ export class DebuggerSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
-    // console.log("start");
     const reply = await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
@@ -141,11 +140,8 @@ export class DebuggerSession implements IDebugger.ISession {
       throw new Error(`Could not start the debugger: ${reply.message}`);
     }
 
-    // console.log(reply);
-
     this._isStarted = true;
     this._pausingOnExceptions = false;
-    console.log(this._pausingOnExceptions)
     await this.sendRequest('attach', {});
   }
 
@@ -165,7 +161,7 @@ export class DebuggerSession implements IDebugger.ISession {
    */
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
     const message = await this.sendRequest('debugInfo', {});
-    // console.log("DEBUG INFO", message)
+    console.log("DEBUG INFO", message)
     this._isStarted = message.body.isStarted;
     return message;
   }
