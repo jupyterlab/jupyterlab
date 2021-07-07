@@ -1,0 +1,29 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-skiplink {
+  position: absolute;
+  top: -100em;
+}
+
+.jp-skiplink:focus-within {
+  position: absolute;
+  z-index: 10000;
+  top: 0;
+  left: 46%;
+  margin: 0 auto;
+  padding: 1em;
+  width: 15%;
+  box-shadow: var(--jp-elevation-z4);
+  border-radius: 4px;
+  background: var(--jp-layout-color0);
+  text-align: center;
+}
+
+.jp-skiplink:focus-within a {
+  text-decoration: underline;
+  color: var(--jp-content-link-color);
+}
