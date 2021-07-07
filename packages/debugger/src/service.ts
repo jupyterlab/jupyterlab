@@ -521,15 +521,23 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
-    // await this.session.sendRequest('configurationDone', {});
+    await this.session.sendRequest('configurationDone', {});
   }
 
+  /**
+   * Enable or disable pausing on exceptions.
+   *
+   * @param enable - Wether to enbale or disable pausing on exceptions.
+   */
   async pauseOnExceptions(enable : boolean): Promise<void> {
     if (!this.session?.isStarted) {
       return
     }
 
-    console.log("Pause on exceptions", enable);
+    const exceptionPaths = this.session.exceptionPaths;
+    const exceptionBreakpointFilters = this.session.exceptionBreakpointFilters;
+    console.log(exceptionPaths);
+    console.log(exceptionBreakpointFilters);
     this.session.pausingOnExceptions = enable;
     let options: DebugProtocol.SetExceptionBreakpointsArguments;
     if (enable) {
@@ -537,11 +545,11 @@ export class DebuggerService implements IDebugger, IDisposable {
         filters: ["raised", "uncaught"],
         exceptionOptions: [
           { 
-            path: [{names: ["Python Exceptions"]}],
+            path: [{names: exceptionPaths}],
             breakMode: "always"
           },
           { 
-            path: [{names: ["Python Exceptions"]}],
+            path: [{names: exceptionPaths}],
             breakMode: "always"
           }
         ]
@@ -551,18 +559,17 @@ export class DebuggerService implements IDebugger, IDisposable {
         filters: ["raised", "uncaught"],
         exceptionOptions: [
           { 
-            path: [{names: ["Python Exceptions"]}],
-            breakMode: "never"
+            path: [{names: exceptionPaths}],
+            breakMode: "always"
           },
           { 
-            path: [{names: ["Python Exceptions"]}],
+            path: [{names: exceptionPaths}],
             breakMode: "never"
           }
         ]
       }
     }
     await this.session.sendRequest('setExceptionBreakpoints', options);
-    // console.log(reply);
   }
 
   pauseOnExceptionsIsValid(): boolean {

@@ -337,6 +337,16 @@ export namespace IDebugger {
       | undefined;
 
     /**
+     * Whether the debug session is pausing on exceptions.
+     */
+    exceptionPaths: string[];
+
+    /**
+     * Get exception filters and default values.
+     */
+    exceptionBreakpointFilters: { [key: string]: string };
+
+    /**
      * Signal emitted for debug event messages.
      */
     readonly eventMessage: ISignal<
