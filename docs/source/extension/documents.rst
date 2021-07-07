@@ -143,7 +143,7 @@ The shared-models package contains an `ISharedNotebook
 <../api/interfaces/shared_models.isharedfile.html>`_ which are the abstract
 interfaces to work against if you want to manipulate a notebook or a file.
 
-These models wrap a `Yjs documents (Y.Doc) <https://docs.yjs.dev/api/y.doc>`_ which represents
+These models wrap a `Yjs document (Y.Doc) <https://docs.yjs.dev/api/y.doc>`_ which represents
 a shared document between clients and hold multiple shared objects. They enable you
 to share different `data types like text, Array, Map or set
 <https://docs.yjs.dev/getting-started/working-with-shared-types>`_, to make different
