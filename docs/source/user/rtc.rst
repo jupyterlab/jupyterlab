@@ -26,7 +26,9 @@ for what is essential, the document's content.
    :align: center
    :class: jp-screenshot
 
-Something you need to be aware of is that not all editors are in sync.
+Something you need to be aware of is that not all editors in JupyterLab support sync.
+Additionally, opening the same underlying document using different editor types may result
+in a lack of synchronization.
 For example, on JupyterLab, you can open a Notebook using the Notebook
 editor or a plain text editor, the so-called Editor. Those editors are
 not synchronized because, under the hood, they use a different model to
