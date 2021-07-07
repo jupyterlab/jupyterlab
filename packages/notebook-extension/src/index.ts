@@ -1297,6 +1297,8 @@ function addCommands(
     for (const cell of notebook.widgets) {
       if (cell instanceof MarkdownCell && cell.headingCollapsed) {
         NotebookActions.setHeadingCollapse(cell, true, notebook);
+      }
+      if (cell.model.id === notebook.activeCell?.model?.id) {
         NotebookActions.expandParent(cell, notebook);
       }
     }

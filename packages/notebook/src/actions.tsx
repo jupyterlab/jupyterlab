@@ -1530,6 +1530,38 @@ export namespace NotebookActions {
   }
 
   /**
+   * Finds the next heading that isn't a child of the given markdown heading.
+   * @param cell - "Child" cell that has become the active cell
+   * @param notebook - The target notebook widget.
+   */
+  export function findNextParentHeading(
+    cell: Cell,
+    notebook: Notebook
+  ): number {
+    let index = findIndex(
+      notebook.widgets,
+      (possibleCell: Cell, index: number) => {
+        return cell.model.id === possibleCell.model.id;
+      }
+    );
+    if (index === -1) {
+      return -1;
+    }
+    let childHeaderInfo = getHeadingInfo(cell);
+    for (index = index + 1; index < notebook.widgets.length; index++) {
+      let hInfo = getHeadingInfo(notebook.widgets[index]);
+      if (
+        hInfo.isHeading &&
+        hInfo.headingLevel <= childHeaderInfo.headingLevel
+      ) {
+        return index;
+      }
+    }
+    // else no parent header found. return the index of the last cell
+    return notebook.widgets.length;
+  }
+
+  /**
    * Set the given cell and ** all "child" cells **
    * to the given collapse / expand if cell is
    * a markdown header.
