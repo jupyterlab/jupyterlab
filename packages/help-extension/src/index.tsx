@@ -53,6 +53,8 @@ namespace CommandIDs {
 
   export const launchClassic = 'help:launch-classic-notebook';
 
+  export const jupyterForum = 'help:jupyter-forum';
+
   export const licenses = 'help:licenses';
 
   export const licenseReport = 'help:license-report';
@@ -188,6 +190,36 @@ const launchClassic: JupyterFrontEndPlugin<void> = {
 
     if (palette) {
       palette.addItem({ command: CommandIDs.launchClassic, category });
+    }
+  }
+};
+
+/**
+ * A plugin to add a command to open the Jupyter Forum.
+ */
+const jupyterForum: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:jupyter-forum',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ): void => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Help');
+
+    commands.addCommand(CommandIDs.jupyterForum, {
+      label: trans.__('Jupyter Forum'),
+      execute: () => {
+        window.open(PageConfig.getBaseUrl() + 'tree');
+      }
+    });
+
+    if (palette) {
+      palette.addItem({ command: CommandIDs.jupyterForum, category });
     }
   }
 };
@@ -614,6 +646,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   about,
   launchClassic,
+  jupyterForum,
   resources,
   licenses
 ];
