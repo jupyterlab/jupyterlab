@@ -482,7 +482,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: IDebugger.IBreakpoint[],
     path?: string
   ): Promise<void> {
-    // console.log("Updating!")
     if (!this.session?.isStarted) {
       return;
     }
