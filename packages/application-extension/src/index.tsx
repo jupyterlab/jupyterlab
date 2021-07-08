@@ -561,7 +561,23 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         }).then(result => (result.button.accept ? build() : undefined));
       });
     }
+    return updateTreePath;
+  },
+  autoStart: true
+};
 
+/**
+ * Check if the application is dirty before closing the browser tab.
+ */
+const dirty: JupyterFrontEndPlugin<void> = {
+  id: '@retrolab/application-extension:dirty',
+  autoStart: true,
+  requires: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator): void => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${dirty.id} must be activated in JupyterLab.`);
+    }
+    const trans = translator.load('jupyterlab');
     const message = trans.__(
       'Are you sure you want to exit JupyterLab?\n\nAny unsaved changes will be lost.'
     );
@@ -576,9 +592,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         return ((event as any).returnValue = message);
       }
     });
-    return updateTreePath;
-  },
-  autoStart: true
+  }
 };
 
 /**
@@ -969,6 +983,7 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  dirty,
   main,
   mainCommands,
   layout,
