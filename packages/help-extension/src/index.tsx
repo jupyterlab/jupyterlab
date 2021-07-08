@@ -213,11 +213,8 @@ const jupyterForum: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.jupyterForum, {
       label: trans.__('Jupyter Forum'),
-      execute: args => {
-        const url = args[
-          'https://discourse.jupyter.org/c/jupyterlab'
-        ] as string;
-        window.open(url);
+      execute: () => {
+        window.open('https://discourse.jupyter.org/c/jupyterlab');
       }
     });
 
