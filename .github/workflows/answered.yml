@@ -17,5 +17,5 @@ jobs:
           days-before-stale: 30
           days-before-close: 7
           stale-issue-label: 'status:Closing as Answered'
-          stale-issue-message: ''
+          stale-issue-message: '.'
           only-issue-labels: 'status:Answered'
