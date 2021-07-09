@@ -2830,9 +2830,9 @@
     tslib "^2.0.0"
     upath "2.0.1"
 
-"@storybook/addon-actions@^6.0.19":
+"@storybook/addon-actions@6.0.20":
   version "6.0.20"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-6.0.20.tgz"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-6.0.20.tgz#4fcf83ec7f961a90a0836633cdf18ecf37d9ed51"
   integrity sha512-zO0iol1FQya3cPuVjkq5/YWmmmgXuElIcVQpxndACHGIF6ktwmMJSLToLjfz9Gi5l9LA9/m8j/7FUZrORFtWQQ==
   dependencies:
     "@storybook/addons" "6.0.20"
@@ -3104,9 +3104,9 @@
     npmlog "^4.1.2"
     pretty-hrtime "^1.0.3"
 
-"@storybook/react@^6.0.19":
+"@storybook/react@6.0.20":
   version "6.0.20"
-  resolved "https://registry.yarnpkg.com/@storybook/react/-/react-6.0.20.tgz"
+  resolved "https://registry.yarnpkg.com/@storybook/react/-/react-6.0.20.tgz#bf5ab1f291918ad74f1f7777af494b85eec993dd"
   integrity sha512-+OQwsCY0IFG2HnirwcoSACJiLQK4F0iJxaJO1xzXkouYHNOLeCpRt9fjn8OdhPNyDZSr0SvU7U9k5p1U+6N0Og==
   dependencies:
     "@babel/preset-flow" "^7.0.0"
