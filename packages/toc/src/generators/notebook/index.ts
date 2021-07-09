@@ -48,7 +48,7 @@ function createNotebookGenerator(
 ): Registry.IGenerator<NotebookPanel> {
   let numberingH1 = true;
   let includeOutput = true;
-  let collapsibleNotebooks = true;
+  let collapsibleNotebooks = false;
   if (settings) {
     numberingH1 = settings.composite.numberingH1 as boolean;
     includeOutput = settings.composite.includeOutput as boolean;
