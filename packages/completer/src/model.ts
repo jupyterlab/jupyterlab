@@ -182,7 +182,18 @@ export class CompleterModel implements Completer.IModel {
     if (query) {
       return this._markup(query);
     }
-    return this._completionItems;
+    return this._completionItems.map(item => {
+      const newItem = Object.assign({}, item);
+      const newLabel = escapeHTML(newItem.label);
+      if (newLabel != newItem.label) {
+        // preserve the old label for insertText if not defined
+        if (typeof newItem.insertText === 'undefined') {
+          newItem.insertText = newItem.label;
+        }
+        newItem.label = newLabel;
+      }
+      return newItem;
+    });
   }
 
   /**
@@ -415,7 +426,7 @@ export class CompleterModel implements Completer.IModel {
       if (match) {
         // Highlight label text if there's a match
         let marked = StringExt.highlight(
-          item.label,
+          escapeHTML(item.label),
           match.indices,
           Private.mark
         );
@@ -455,13 +466,13 @@ export class CompleterModel implements Completer.IModel {
       }));
     }
     const results: Private.IMatch[] = [];
-    for (let option of options) {
-      option = escapeHTML(option);
+    for (const rawOption of options) {
+      const option = escapeHTML(rawOption);
       const match = StringExt.matchSumOfSquares(option, query);
       if (match) {
         const marked = StringExt.highlight(option, match.indices, Private.mark);
         results.push({
-          raw: option,
+          raw: rawOption,
           score: match.score,
           text: marked.join('')
         });
