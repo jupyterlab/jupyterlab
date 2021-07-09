@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
 import { WebsocketProvider } from 'y-websocket';
@@ -127,20 +128,15 @@ export class WebSocketProviderWithLocks
       return this._initialContentRequest.promise;
     }
 
-    let resolve: any, reject: any;
-    const promise: Promise<boolean> = new Promise((_resolve, _reject) => {
-      resolve = _resolve;
-      reject = _reject;
-    });
-    this._initialContentRequest = { promise, resolve, reject };
+    this._initialContentRequest = new PromiseDelegate<boolean>();
     this._sendMessage(new Uint8Array([125]));
 
     // Resolve with true if the server doesn't respond for some reason.
     // In case of a connection problem, we don't want the user to re-initialize the window.
     // Instead wait for y-websocket to connect to the server.
     // @todo maybe we should reload instead..
-    setTimeout(() => resolve(false), 1000);
-    return promise;
+    setTimeout(() => this._initialContentRequest?.resolve(false), 1000);
+    return this._initialContentRequest.promise;
   }
 
   /**
@@ -243,11 +239,7 @@ export class WebSocketProviderWithLocks
     resolve: (lock: number) => void;
     reject: () => void;
   } | null = null;
-  private _initialContentRequest: {
-    promise: Promise<boolean>;
-    resolve: (initialized: boolean) => void;
-    reject: () => void;
-  } | null = null;
+  private _initialContentRequest: PromiseDelegate<boolean> | null = null;
 }
 
 /**
