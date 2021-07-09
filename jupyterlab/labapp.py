@@ -31,7 +31,7 @@ from .debuglog import DebugLogFileMixin
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
-from .handlers.yjs_echo_ws import YJSEchoWS
+from .handlers.yjs_echo_ws import YjsEchoWebSocket
 
 # TODO: remove when oldest compatible jupyterlab_server contains license tooling
 try:
@@ -734,8 +734,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         build_handler = (build_path, BuildHandler, {'builder': builder})
         handlers.append(build_handler)
 
-        #YJS_Echo WS Handler
-        yjs_echo_handler = (r"/api/yjs/(.*)", YJSEchoWS)
+        # Yjs Echo WebSocket handler
+        yjs_echo_handler = (r"/api/yjs/(.*)", YjsEchoWebSocket)
         handlers.append(yjs_echo_handler)
 
         errored = False
