@@ -15,6 +15,15 @@ import { CompletionHandler } from './handler';
 import { Completer } from './widget';
 
 /**
+ * Escape HTML by native means of the browser.
+ */
+function escapeHTML(text: string) {
+  const node = document.createElement('span');
+  node.textContent = text;
+  return node.innerHTML;
+}
+
+/**
  * An implementation of a completer model.
  */
 export class CompleterModel implements Completer.IModel {
@@ -399,7 +408,8 @@ export class CompleterModel implements Completer.IModel {
       // e.g. Given label `foo(b, a, r)` and query `bar`,
       // don't count parameters, `b`, `a`, and `r` as matches.
       const index = item.label.indexOf('(');
-      const prefix = index > -1 ? item.label.substring(0, index) : item.label;
+      let prefix = index > -1 ? item.label.substring(0, index) : item.label;
+      prefix = escapeHTML(prefix);
       let match = StringExt.matchSumOfSquares(prefix, query);
       // Filter non-matching items.
       if (match) {
@@ -439,10 +449,14 @@ export class CompleterModel implements Completer.IModel {
     const options = this._options || [];
     const query = this._query;
     if (!query) {
-      return map(options, option => ({ raw: option, text: option }));
+      return map(options, option => ({
+        raw: option,
+        text: escapeHTML(option)
+      }));
     }
     const results: Private.IMatch[] = [];
-    for (const option of options) {
+    for (let option of options) {
+      option = escapeHTML(option);
       const match = StringExt.matchSumOfSquares(option, query);
       if (match) {
         const marked = StringExt.highlight(option, match.indices, Private.mark);
