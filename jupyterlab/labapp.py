@@ -734,7 +734,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         build_handler = (build_path, BuildHandler, {'builder': builder})
         handlers.append(build_handler)
 
-        #YJS_Echo WS Handler
+        # Yjs Echo WebSocket handler
         yjs_echo_handler = (r"/api/yjs/(.*)", YjsEchoWebSocket)
         handlers.append(yjs_echo_handler)
 
