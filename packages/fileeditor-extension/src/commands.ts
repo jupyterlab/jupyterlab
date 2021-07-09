@@ -99,7 +99,35 @@ export interface IFileTypeData extends ReadonlyJSONObject {
  */
 export const FACTORY = 'Editor';
 
-let config: CodeEditor.IConfig = { ...CodeEditor.defaultConfig };
+const userSettings = [
+  'autoClosingBrackets',
+  'cursorBlinkRate',
+  'fontFamily',
+  'fontSize',
+  'lineHeight',
+  'lineNumbers',
+  'lineWrap',
+  'matchBrackets',
+  'readOnly',
+  'insertSpaces',
+  'tabSize',
+  'wordWrapColumn',
+  'rulers',
+  'codeFolding'
+];
+
+function filterUserSettings(config: CodeEditor.IConfig): CodeEditor.IConfig {
+  const filteredConfig = { ...config };
+  // Delete parts of the config that are not user settings (like handlePaste).
+  for (let k of Object.keys(config)) {
+    if (!userSettings.includes(k)) {
+      delete (config as any)[k];
+    }
+  }
+  return filteredConfig;
+}
+
+let config: CodeEditor.IConfig = filterUserSettings(CodeEditor.defaultConfig);
 
 /**
  * A utility class for adding commands and menu items,
@@ -143,10 +171,10 @@ export namespace Commands {
     settings: ISettingRegistry.ISettings,
     commands: CommandRegistry
   ): void {
-    config = {
+    config = filterUserSettings({
       ...CodeEditor.defaultConfig,
       ...(settings.get('editorConfig').composite as JSONObject)
-    };
+    });
 
     // Trigger a refresh of the rendered commands
     commands.notifyCommandChanged();
