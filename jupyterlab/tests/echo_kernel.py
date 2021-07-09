@@ -26,8 +26,8 @@ class EchoKernel(Kernel):
             # Send a input_request if code contains input command.
             if allow_stdin and code and code.find('input(') != -1:
                 self._input_request('Echo Prompt',
-                    self._parent_ident,
-                    self._parent_header,
+                    self._parent_ident["shell"],
+                    self.get_parent(channel="shell"),
                     password=False,
                 )
 
