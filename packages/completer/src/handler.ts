@@ -557,8 +557,8 @@ export namespace CompletionHandler {
      * it is acceptable for the other methods to be simple functions that return
      * rejected promises.
      *
-     * @deprecated will be removed, or will return `CompletionHandler.ICompletionItemsConnector`
-     * instead of `IDataConnector` in future versions
+     * @deprecated passing `IDataConnector` is deprecated;
+     * pass `CompletionHandler.ICompletionItemsConnector`
      */
     connector:
       | IDataConnector<IReply, void, IRequest>
