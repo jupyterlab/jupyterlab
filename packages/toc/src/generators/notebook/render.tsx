@@ -183,10 +183,10 @@ function render(
     let collapsed;
     collapsed = headerCollapsedState(
       heading!.cellRef!,
-      options.collapsibleNotebooks
+      options.syncCollapseState
     );
     if (heading) {
-      if (options.collapsibleNotebooks) {
+      if (options.syncCollapseState) {
         if (tracker.currentWidget) {
           NotebookActions.setHeadingCollapse(
             heading!.cellRef!,

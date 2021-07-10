@@ -2,23 +2,23 @@ import { MarkdownCell } from '@jupyterlab/cells';
 import { Cell } from '@jupyterlab/cells';
 
 /**
- * Determines the collapsed state of a header in the ToC. If collapsibleNotebooks setting
+ * Determines the collapsed state of a header in the ToC. If syncCollapseState setting
  * is set to true, toc state is also updated to match the state of the Notebook header
  *
  * @param cell - cell containing the header in the notebook
- * @param collapsibleNotebooks - setting indicating if header cell collapse state and ToC collapse state should match
+ * @param syncCollapseState - setting indicating if header cell collapse state and ToC collapse state should match
  */
 
 export function headerCollapsedState(
   cell?: Cell,
-  collapsibleNotebooks?: boolean
+  syncCollapseState?: boolean
 ): boolean {
   let collapsed;
   let tocCollapsed;
   if (cell!.model.metadata.has('toc-hr-collapsed')) {
     tocCollapsed = cell!.model.metadata.get('toc-hr-collapsed') as boolean;
   }
-  if (collapsibleNotebooks) {
+  if (syncCollapseState) {
     let cellCollapsed;
     if (cell instanceof MarkdownCell) {
       cellCollapsed = cell!.headingCollapsed!;

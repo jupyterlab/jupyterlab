@@ -30,7 +30,7 @@ interface IOptions {
   /** 
    * Boolean indicating whether notebook headers should collapse with ToC headers and vice versa
    */
-  collapsibleNotebooks: boolean;
+  syncCollapseState: boolean;
   /**
    * HTML sanitizer.
    */
@@ -70,7 +70,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._numbering = options.numbering;
     this._numberingH1 = options.numberingH1;
     this._includeOutput = options.includeOutput;
-    this._collapsibleNotebooks = options.collapsibleNotebooks;
+    this._syncCollapseState = options.syncCollapseState;
     this._widget = widget;
     this._notebook = notebook;
     this.sanitizer = options.sanitizer;
@@ -149,15 +149,15 @@ class OptionsManager extends Registry.IOptionsManager {
   /**
    * Gets/sets option for ToC heading collapsing to be reflected in Notebook and vice versa
    */
-  set collapsibleNotebooks(value: boolean) {
-    if (this._collapsibleNotebooks != value) {
-      this._collapsibleNotebooks = value;
+  set syncCollapseState(value: boolean) {
+    if (this._syncCollapseState != value) {
+      this._syncCollapseState = value;
       this._widget.update();
     }
   }
 
-  get collapsibleNotebooks() {
-    return this._collapsibleNotebooks;
+  get syncCollapseState() {
+    return this._syncCollapseState;
   }
 
   /**
@@ -259,7 +259,7 @@ class OptionsManager extends Registry.IOptionsManager {
    * @param numbering - boolean indicating whether to number items
    * @param numberingH1 - boolean indicating whether to number first level items
    * @param includeOutput - boolean indicating whether cell outputs should be included in headings
-   * @param collapsibleNotebooks - boolean indicating whether collapsing in ToC should be reflected in Notebook and vice versa
+   * @param syncCollapseState - boolean indicating whether collapsing in ToC should be reflected in Notebook and vice versa
    * @param showCode - boolean indicating whether to show code previews
    * @param showMarkdown - boolean indicating whether to show Markdown previews
    * @param showTags - boolean indicating whether to show tags
@@ -268,7 +268,7 @@ class OptionsManager extends Registry.IOptionsManager {
     numbering: boolean,
     numberingH1: boolean,
     includeOutput: boolean,
-    collapsibleNotebooks: boolean,
+    syncCollapseState: boolean,
     showCode: boolean,
     showMarkdown: boolean,
     showTags: boolean
@@ -276,7 +276,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._numbering = numbering;
     this._numberingH1 = numberingH1;
     this._includeOutput = includeOutput;
-    this._collapsibleNotebooks = collapsibleNotebooks;
+    this._syncCollapseState = syncCollapseState;
     this._showCode = showCode;
     this._showMarkdown = showMarkdown;
     this._showTags = showTags;
@@ -288,7 +288,7 @@ class OptionsManager extends Registry.IOptionsManager {
   private _numbering: boolean;
   private _numberingH1: boolean;
   private _includeOutput: boolean;
-  private _collapsibleNotebooks: boolean;
+  private _syncCollapseState: boolean;
   private _showCode = false;
   private _showMarkdown = false;
   private _showTags = false;

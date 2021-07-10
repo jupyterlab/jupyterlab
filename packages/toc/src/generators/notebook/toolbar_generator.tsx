@@ -97,7 +97,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
               numbering || options.numbering,
               options.numberingH1,
               options.includeOutput,
-              options.collapsibleNotebooks,
+              options.syncCollapseState,
               showCode || options.showCode,
               showMarkdown || options.showMarkdown,
               showTags || options.showTags
