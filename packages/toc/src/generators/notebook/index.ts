@@ -7,6 +7,7 @@ import {
   CodeCell,
   CodeCellModel,
   ICellModel,
+  MARKDOWN_HEADING_COLLAPSED,
   MarkdownCell
 } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
@@ -26,7 +27,6 @@ import { OptionsManager } from './options_manager';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { headerCollapsedState } from './utils';
 
 /**
  * Returns a ToC generator for notebooks.
@@ -126,7 +126,10 @@ function createNotebookGenerator(
     for (let i = 0; i < panel.content.widgets.length; i++) {
       let cell: Cell = panel.content.widgets[i];
       let model = cell.model;
-      let collapsed = headerCollapsedState(cell, options.syncCollapseState);
+      let cellCollapseMetadata = options.syncCollapseState
+        ? MARKDOWN_HEADING_COLLAPSED
+        : 'toc-hr-collapsed';
+      let collapsed = model.metadata.get(cellCollapseMetadata) as boolean;
       collapsed = collapsed || false;
 
       if (model.type === 'code') {
@@ -191,7 +194,8 @@ function createNotebookGenerator(
                 collapseLevel,
                 options.filtered,
                 collapsed,
-                options.showMarkdown
+                options.showMarkdown,
+                cellCollapseMetadata
               );
             }
           }
@@ -236,7 +240,8 @@ function createNotebookGenerator(
               collapseLevel,
               options.filtered,
               collapsed,
-              options.showMarkdown
+              options.showMarkdown,
+              cellCollapseMetadata
             );
           }
           // If not rendered, generate ToC items from the cell text...
@@ -263,7 +268,8 @@ function createNotebookGenerator(
               collapseLevel,
               options.filtered,
               collapsed,
-              options.showMarkdown
+              options.showMarkdown,
+              cellCollapseMetadata
             );
           }
         }
