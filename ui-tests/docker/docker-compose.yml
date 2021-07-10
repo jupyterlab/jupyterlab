@@ -3,9 +3,8 @@ version: '3.5'
 services:
   lab:
     container_name: jupyterlab
-    build:
-      context: ../..
-      dockerfile: ./Dockerfile
+    # Need to be built running script: scripts/build_docker.sh
+    image: jupyterlab-dev
     command:
       [
         '--ServerApp.token=',
@@ -21,6 +20,9 @@ services:
   e2e:
     build:
       context: ..
+    environment:
+      SERVER_URL: 'jupyterlab:8888'
+      TIMEOUT: 360
     command: ['yarn', 'run', 'test', '--jlab-base-url=http://jupyterlab:8888']
     # See https://playwright.dev/docs/docker/#run-the-image
     ipc: host

@@ -5,5 +5,8 @@
     "port": 8888,
     "open_browser": false,
     "root_dir": "/home/micromamba/jlab_root"
+  },
+  "LabApp": {
+    "dev_mode": true
   }
 }

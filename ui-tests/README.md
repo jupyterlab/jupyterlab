@@ -16,6 +16,9 @@ import { galata, describe, test } from '@jupyterlab/galata';
 5. If you added visual regression tests, make sure you tested them locally enough number of times to make sure they do not produce false positives due to async nature of UI actions. Use the following steps to test locally (it requires [docker](https://docs.docker.com/engine/) and [docker-compose](https://docs.docker.com/compose/install/)).
 
 ```bash
+# Build the JupyterLab docker to be tested
+/bin/sh ./scripts/build_docker.sh
+
 # run UI tests once to create test captures to use as reference images for your new feature
 docker-compose -f "./ui-tests/docker/docker-compose.yml" run --rm e2e yarn run test:create-references --jlab-base-url=http://jupyterlab:8888
 
@@ -24,7 +27,12 @@ docker-compose -f "./ui-tests/docker/docker-compose.yml" run --rm e2e yarn run t
 
 # run UI tests locally, repeatedly. make sure no test fails. wait for 10-20 successful repeats
 docker-compose -f "./ui-tests/docker/docker-compose.yml" run --rm e2e
+
+# Stop the docker stack
+docker-compose -f "./ui-tests/docker/docker-compose.yml" down
 ```
+
+> You can access the server logs by running `docker logs jupyterlab`
 
 6. Once you are done testing locally, push the new references on your PR and check CI is passing.
 

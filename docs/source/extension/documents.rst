@@ -18,23 +18,54 @@ is backed by a file stored on disk (i.e. uses Contents API).
 Overview of document architecture
 ---------------------------------
 
-A 'document' in JupyterLab is represented by a model instance implementing the `IModel <../api/interfaces/docregistry.documentregistry.imodel.html>`__ interface. The model interface is intentionally fairly small, and concentrates on representing the data in the document and signaling changes to that data. Each model has an associated `context <../api/interfaces/docregistry.documentregistry.icontext.html>`__ instance as well. The context for a model is the bridge between the internal data of the document, stored in the model, and the file metadata and operations possible on the file, such as save and revert. Since many objects will need both the context and the model, the context contains a reference to the model as its `.model` attribute.
+A 'document' in JupyterLab is represented by a model instance implementing the
+`IModel <../api/interfaces/docregistry.documentregistry.imodel.html>`__ interface.
+The model interface is intentionally fairly small, and concentrates on representing
+the data in the document and signaling changes to that data. Each model has an
+associated `context <../api/interfaces/docregistry.documentregistry.icontext.html>`__
+instance as well. The context for a model is the bridge between the internal data
+of the document, stored in the model, and the file metadata and operations possible
+on the file, such as save and revert. Since many objects will need both the context
+and the model, the context contains a reference to the model as its `.model` attribute.
 
-A single file path can have multiple different models (and hence different contexts) representing the file. For example, a notebook can be opened with a notebook model and with a text model. Different models for the same file path do not directly communicate with each other.
+A single file path can have multiple different models (and hence different contexts)
+representing the file. For example, a notebook can be opened with a notebook model
+and with a text model. Different models for the same file path do not directly
+communicate with each other.
 
-`Document widgets <../api/classes/docregistry.documentregistry-1.html>`__ represent a view of a document model. There can be multiple document widgets associated with a single document model, and they naturally stay in sync with each other since they are views on the same underlying data model.
+Models contain an instance of `ModelDB <../api/classes/observables.modeldb-1.html>`__
+that acts as data storage for the model's content. In JupyterLab 3.1, we introduced
+the package ``@jupyterlab/shared-models`` to swap ``ModelDB`` as a data storage
+to make 'documents' collaborative. We implemented these shared models using
+`Yjs <https://yjs.dev>`_, a high-performance CRDT for building collaborative applications
+that automatically sync. You can find all the documentation of Yjs `here <https://docs.yjs.dev>`_.
+At the moment, models contain both a ``ModelDB`` and a ``Shared Model`` instance, so it is
+possible to access ``ModelDB`` yet.
 
+`Document widgets <../api/classes/docregistry.documentregistry-1.html>`__ represent
+a view of a document model. There can be multiple document widgets associated with
+a single document model, and they naturally stay in sync with each other since they
+are views on the same underlying data model.
 
-The `Document
-Registry <../api/classes/docregistry.documentregistry-1.html>`__
+`Shared Models <../api/interfaces/shared_models.ishareddocument.html>`__ are models
+using Yjs’ shared types as a data structures instead of ``ModelDB``.
+
+The `Document Registry <../api/classes/docregistry.documentregistry-1.html>`__
 is where document types and factories are registered. Plugins can
 require a document registry instance and register their content types
 and providers.
 
-The `Document
-Manager <../api/classes/docmanager.documentmanager-1.html>`__
+The `Document Manager <../api/classes/docmanager.documentmanager-1.html>`__
 uses the Document Registry to create models and widgets for documents.
 The Document Manager handles the lifecycle of documents for the application.
+
+The `Document Provider <../api/classes/docprovider.websocketproviderwithlocks-1.html>`__
+is a WebSocket provider that syncs documents through a new end-point (``api/yjs``)
+in the JupyterLab server. `Providers <https://docs.yjs.dev/ecosystem/connection-provider>`_
+abstract Yjs from the network technology your application uses. They sync Yjs
+documents through a communication protocol or a database. Most providers have
+in common that they use the concept of room names to connect Yjs documents.
+
 
 Document Registry
 -----------------
@@ -103,6 +134,24 @@ create model factories and the heavy lifting of the context is left to
 the Document Manager. Contexts are not meant to be subclassed or
 re-implemented. Instead, the contexts are intended to be the glue
 between the document model and the wider application.
+
+Shared Models
+-------------
+
+The shared-models package contains an `ISharedNotebook
+<../api/interfaces/shared_models.isharednotebook.html>`_ and an `ISharedFile
+<../api/interfaces/shared_models.isharedfile.html>`_ which are the abstract
+interfaces to work against if you want to manipulate a notebook or a file.
+
+These models wrap a `Yjs document (Y.Doc) <https://docs.yjs.dev/api/y.doc>`_ which represents
+a shared document between clients and hold multiple shared objects. They enable you
+to share different `data types like text, Array, Map or set
+<https://docs.yjs.dev/getting-started/working-with-shared-types>`_, to make different
+types of collaborative applications.
+
+In addition, a shared model has an `Awareness <https://docs.yjs.dev/getting-started/adding-awareness>`_
+attribute. This attribute is linked to the *Y.Doc* which means there is one *Awareness* object per document and is
+used for sharing cursor locations and presence information.
 
 Document Manager
 ----------------
