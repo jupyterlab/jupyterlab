@@ -805,7 +805,7 @@ function addCommands(
 
   const newFileRegex = new RegExp('^untitled', 'i');
   /**
-   * An array of activated file names used as a naive implemetation of lock for Name File
+   * An array of activated file names used as a naive implementation of lock for Name File
    */
   let activatedDocs: string[] = [];
   docManager.activateRequested.connect((sender, args) => {
