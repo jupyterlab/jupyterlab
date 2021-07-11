@@ -105,7 +105,7 @@ The upgrade script also updates the dependencies in ``package.json`` to the ``^3
 On the diff above, we see that additional development scripts are also added, as they are used by the new extension system workflow.
 
 The diff also shows the new ``@jupyterlab/builder`` as a ``devDependency``.
-``@jupyterlab/builder`` is a package required to build the extension as a federated extension.
+``@jupyterlab/builder`` is a package required to build the extension as a federated (prebuilt) extension.
 It hides away internal dependencies such as ``webpack``, and produces the assets that can then be distributed as part of a Python package.
 
 Extension developers do not need to interact with ``@jupyterlab/builder`` directly, but instead can use the
