@@ -542,7 +542,8 @@ export class StaticNotebook extends Widget {
     if (
       this._observer &&
       insertType === 'push' &&
-      this._renderedCellsCount > this.notebookConfig.numberCellsToRenderDirectly
+      this._renderedCellsCount >=
+        this.notebookConfig.numberCellsToRenderDirectly
     ) {
       // We have an observer and we are have been asked to push (not to insert).
       // and we are above the number of cells to render directly, then
@@ -592,6 +593,7 @@ export class StaticNotebook extends Widget {
     pl.insertWidget(index, cell);
     this._toRenderMap.delete(cell.model.id);
     this._incrementRenderedCount();
+    this.onCellInserted(index, cell);
     this._placeholderCellRendered.emit(cell);
   }
 
