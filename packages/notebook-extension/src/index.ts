@@ -1067,6 +1067,36 @@ function activateNotebookHandler(
         settings.changed.connect(() => {
           updateConfig(settings);
         });
+        commands.addCommand(CommandIDs.autoClosingBrackets, {
+          execute: args => {
+            const codeConfig = settings.get('codeCellConfig')
+              .composite as JSONObject;
+            const markdownConfig = settings.get('markdownCellConfig')
+              .composite as JSONObject;
+            const rawConfig = settings.get('rawCellConfig')
+              .composite as JSONObject;
+  
+            const anyToggled =
+              codeConfig.autoClosingBrackets ||
+              markdownConfig.autoClosingBrackets ||
+              rawConfig.autoClosingBrackets;
+            const toggled = !!(args['force'] ?? !anyToggled);
+            [
+              codeConfig.autoClosingBrackets,
+              markdownConfig.autoClosingBrackets,
+              rawConfig.autoClosingBrackets
+            ] = [toggled, toggled, toggled];
+  
+            void settings.set('codeCellConfig', codeConfig);
+            void settings.set('markdownCellConfig', markdownConfig);
+            void settings.set('rawCellConfig', rawConfig);
+          },
+          label: trans.__('Auto Close Brackets for All Notebook Cell Types'),
+          isToggled: () =>
+            ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
+              x => (settings.get(x).composite as JSONObject).autoClosingBrackets
+            )
+        });
       })
       .catch((reason: Error) => {
         console.warn(reason.message);
@@ -1164,57 +1194,6 @@ function activateNotebookHandler(
       kernelShutdown: factory.shutdownOnClose
     });
   }
-
-  // Fetch settings if possible.
-  const fetchSettings = settingRegistry
-    ? settingRegistry.load(trackerPlugin.id)
-    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
-  app.restored
-    .then(() => fetchSettings)
-    .then(settings => {
-      updateConfig(settings);
-      settings.changed.connect(() => {
-        updateConfig(settings);
-      });
-      commands.addCommand(CommandIDs.autoClosingBrackets, {
-        execute: args => {
-          const codeConfig = settings.get('codeCellConfig')
-            .composite as JSONObject;
-          const markdownConfig = settings.get('markdownCellConfig')
-            .composite as JSONObject;
-          const rawConfig = settings.get('rawCellConfig')
-            .composite as JSONObject;
-
-          const anyToggled =
-            codeConfig.autoClosingBrackets ||
-            markdownConfig.autoClosingBrackets ||
-            rawConfig.autoClosingBrackets;
-          const toggled = !!(args['force'] ?? !anyToggled);
-          [
-            codeConfig.autoClosingBrackets,
-            markdownConfig.autoClosingBrackets,
-            rawConfig.autoClosingBrackets
-          ] = [toggled, toggled, toggled];
-
-          void settings.set('codeCellConfig', codeConfig);
-          void settings.set('markdownCellConfig', markdownConfig);
-          void settings.set('rawCellConfig', rawConfig);
-        },
-        label: trans.__('Auto Close Brackets for All Notebook Cell Types'),
-        isToggled: () =>
-          ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
-            x => (settings.get(x).composite as JSONObject).autoClosingBrackets
-          )
-      });
-    })
-    .catch((reason: Error) => {
-      console.warn(reason.message);
-      updateTracker({
-        editorConfig: factory.editorConfig,
-        notebookConfig: factory.notebookConfig,
-        kernelShutdown: factory.shutdownOnClose
-      });
-    });
 
   // Add main menu notebook menu.
   if (mainMenu) {
