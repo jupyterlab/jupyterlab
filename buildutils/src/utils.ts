@@ -215,7 +215,7 @@ ${status}`
 /**
  * Post-bump.
  */
-export function postbump(): void {
+export function postbump(commit = true): void {
   // Get the current version.
   const curr = getPythonVersion();
 
@@ -226,7 +226,9 @@ export function postbump(): void {
   writeJSONFile(filePath, data);
 
   // Commit changes.
-  run('git commit -am "bump version"');
+  if (commit) {
+    run('git commit -am "bump version"');
+  }
 }
 
 /**

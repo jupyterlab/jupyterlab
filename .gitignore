@@ -114,4 +114,6 @@ junit.xml
 
 ui-tests/test-output
 ui-tests/jlab_root
+
 package_json.tar.gz
+.jupyter_releaser_checkout

@@ -1,4 +1,6 @@
 {
+  "name": "@jupyterlab/repo-top",
+  "version": "0.0.1",
   "private": true,
   "workspaces": {
     "packages": [
@@ -22,9 +24,12 @@
   },
   "scripts": {
     "add:sibling": "node buildutils/lib/add-sibling.js",
+    "after:build:python": "node buildutils/lib/local-repository fix-links --path jupyterlab/staging && node buildutils/lib/local-repository stop",
+    "after:publish:assets": "node buildutils/lib/publish --skip-publish",
     "analyze": "jlpm run analyze:dev",
     "analyze:dev": "cd dev_mode && jlpm run build --analyze",
     "analyze:prod": "cd dev_mode && jlpm run build:prod --analyze",
+    "before:build:python": "node buildutils/lib/local-repository start && node buildutils/lib/publish --yes --skip-tags && node buildutils/lib/update-core-mode.js",
     "build": "jlpm run build:dev",
     "build:builder": "cd builder && jlpm run build",
     "build:core": "cd jupyterlab/staging && jlpm && (jlpm deduplicate || jlpm) && jlpm run build",
@@ -82,6 +87,7 @@
     "test:examples": "python examples/test_examples.py",
     "test:scope": "lerna run test --concurrency 1 --stream",
     "test:summary": "lerna run test --scope \"@jupyterlab/*\" --parallel --no-bail | grep -Ei '.* test.*(failed|passed|total|completed|skipped)' | sort",
+    "try:login": "env && echo '\n\nhi\n\n' && npm config ls -l && npm whoami",
     "update:dependency": "node buildutils/lib/update-dependency.js --lerna",
     "watch": "python scripts/watch_dev.py",
     "watch:main": "jlpm run watch",
