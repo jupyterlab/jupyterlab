@@ -117,27 +117,6 @@ export class DocumentManager implements IDocumentManager {
   }
 
   /**
-   * Whether to prompt to name file on first save.
-   */
-  get nameFileOnSave(): boolean {
-    return this._nameFileOnSave;
-  }
-
-  set nameFileOnSave(value: boolean) {
-    if (this._nameFileOnSave != value) {
-      this._optionChanged.emit({ nameFileOnSave: value });
-    }
-    this._nameFileOnSave = value;
-  }
-
-  /**
-   * A signal emitted when option is changed.
-   */
-  get optionChanged(): ISignal<this, any> {
-    return this._optionChanged;
-  }
-
-  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
@@ -428,11 +407,7 @@ export class DocumentManager implements IDocumentManager {
    * a file.
    */
   rename(oldPath: string, newPath: string): Promise<Contents.IModel> {
-    return this.services.contents.rename(oldPath, newPath).then(model => {
-      if (model.type == 'notebook' || model.type == 'file') {
-        model.renamed = true;
-      }
-    }) as Promise<Contents.IModel>;
+    return this.services.contents.rename(oldPath, newPath);
   }
 
   /**
@@ -621,8 +596,6 @@ export class DocumentManager implements IDocumentManager {
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;
   private _autosave = true;
-  private _nameFileOnSave = true;
-  private _optionChanged = new Signal<this, Object>(this);
   private _autosaveInterval = 120;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
