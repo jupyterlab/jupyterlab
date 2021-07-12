@@ -1075,7 +1075,7 @@ function activateNotebookHandler(
               .composite as JSONObject;
             const rawConfig = settings.get('rawCellConfig')
               .composite as JSONObject;
-  
+
             const anyToggled =
               codeConfig.autoClosingBrackets ||
               markdownConfig.autoClosingBrackets ||
@@ -1086,7 +1086,7 @@ function activateNotebookHandler(
               markdownConfig.autoClosingBrackets,
               rawConfig.autoClosingBrackets
             ] = [toggled, toggled, toggled];
-  
+
             void settings.set('codeCellConfig', codeConfig);
             void settings.set('markdownCellConfig', markdownConfig);
             void settings.set('rawCellConfig', rawConfig);
