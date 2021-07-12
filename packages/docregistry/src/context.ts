@@ -489,9 +489,6 @@ export class Context<
       void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
       this._ycontext.set('path', this._path);
-      if (this._contentsModel) {
-        this._contentsModel.renamed = true;
-      }
     }
   }
 
@@ -522,8 +519,7 @@ export class Context<
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
-      format: model.format,
-      renamed: model.renamed == true ? true : false
+      format: model.format
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
@@ -618,7 +614,6 @@ export class Context<
       }
 
       model.dirty = false;
-      value.renamed = this._contentsModel?.renamed;
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {

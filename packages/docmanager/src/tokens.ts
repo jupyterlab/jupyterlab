@@ -37,11 +37,6 @@ export interface IDocumentManager extends IDisposable {
   readonly activateRequested: ISignal<this, string>;
 
   /**
-   * A signal emitted when an option has changed.
-   */
-  readonly optionChanged: ISignal<this, any>;
-
-  /**
    * Whether to autosave documents.
    */
   autosave: boolean;
@@ -50,11 +45,6 @@ export interface IDocumentManager extends IDisposable {
    * Determines the time interval for autosave in seconds.
    */
   autosaveInterval: number;
-
-  /**
-   * Whether to prompt to name file on first save.
-   */
-  nameFileOnSave: boolean;
 
   /**
    * Clone a widget.
