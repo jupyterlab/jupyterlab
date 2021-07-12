@@ -1137,7 +1137,7 @@ export class DirListing extends Widget {
             })
             .then(async model => {
               await this._manager.rename(
-                `${this._model.path}/Untitled Folder`,
+                `${this._model.path}/${model.name}`,
                 `${this._model.path}/${item}`
               );
               this._model
