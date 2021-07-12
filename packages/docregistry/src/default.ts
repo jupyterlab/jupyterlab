@@ -11,7 +11,7 @@ import * as models from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Widget, Title } from '@lumino/widgets';
+import { Title, Widget } from '@lumino/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
 
 /**
