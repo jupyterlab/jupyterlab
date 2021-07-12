@@ -44,7 +44,6 @@ import {
 } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
-import { TranslationBundle } from '@jupyterlab/translation';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 
