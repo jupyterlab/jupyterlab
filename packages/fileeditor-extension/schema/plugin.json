@@ -20,9 +20,6 @@
           "minimum": 1,
           "maximum": 100
         },
-        "handlePaste": {
-          "type": "boolean"
-        },
         "insertSpaces": {
           "type": "boolean"
         },
@@ -69,7 +66,6 @@
         "codeFolding": false,
         "fontFamily": null,
         "fontSize": null,
-        "handlePaste": true,
         "insertSpaces": true,
         "lineHeight": null,
         "lineNumbers": true,
