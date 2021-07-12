@@ -24,14 +24,18 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
   }
 
   // Get current registry values
-  const prev_npm =
-    utils.run('npm config get registry', { stdio: 'pipe' }, true) ||
-    'https://registry.npmjs.org/';
+  let prev_npm = utils.run('npm config get registry', { stdio: 'pipe' }, true);
   let prev_yarn = '';
   try {
     prev_yarn = utils.run('yarn config get registry', { stdio: 'pipe' }, true);
   } catch (e) {
     // Do nothing
+  }
+  if (!prev_npm || prev_npm.indexOf('localhost') !== -1) {
+    prev_npm = 'https://registry.npmjs.org/';
+  }
+  if (prev_yarn.indexOf('localhost') !== -1) {
+    prev_yarn = '';
   }
 
   // write the config file
@@ -176,12 +180,30 @@ async function stopLocalRegistry(out_dir: string) {
   }
 }
 
+/**
+ * Fix the yarn lock links in the given directory.
+ */
+function fixLinks(package_dir: string) {
+  let yarn_reg = '';
+  try {
+    yarn_reg = utils.run('yarn config get registry', { stdio: 'pipe' }, true);
+  } catch (e) {
+    // Do nothing
+  }
+  yarn_reg = yarn_reg || 'https://registry.yarnpkg.com';
+  const lock_file = path.join(package_dir, 'yarn.lock');
+  let content = fs.readFileSync(lock_file, { encoding: 'utf-8' });
+  const regex = /http\:\/\/localhost\:\d+/g;
+  content = content.replace(regex, yarn_reg);
+  fs.writeFileSync(lock_file, content, 'utf8');
+}
+
 const program = new Command();
 
 program
   .command('start')
-  .option('--port', 'Port to use for the registry')
-  .option('--path', 'Path to use for the registry')
+  .option('--port <port>', 'Port to use for the registry')
+  .option('--path <path>', 'Path to use for the registry')
   .action(async (options: any) => {
     const out_dir = options.path || DEFAULT_OUT_DIR;
     await startLocalRegistry(out_dir, options.port || DEFAULT_PORT);
@@ -189,10 +211,17 @@ program
 
 program
   .command('stop')
-  .option('--path', 'Path to use for the registry')
+  .option('--path <path>', 'Path to use for the registry')
   .action(async (options: any) => {
     const out_dir = options.path || DEFAULT_OUT_DIR;
     await stopLocalRegistry(out_dir);
+  });
+
+program
+  .command('fix-links')
+  .option('--path <path>', 'Path to the directory with a yarn lock')
+  .action((options: any) => {
+    fixLinks(options.out_dir || process.cwd());
   });
 
 if (require.main === module) {

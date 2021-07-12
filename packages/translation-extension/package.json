@@ -35,7 +35,6 @@
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "eslint:check": "eslint . --ext .ts,.tsx",
-    "prepare": "jlpm run clean && jlpm run build",
     "prepublishOnly": "npm run build",
     "watch": "tsc -w"
   },
