@@ -31,10 +31,8 @@ version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
 
 [tool.jupyter-releaser.hooks]
-after-prep-git = ["jlpm", "jlpm run build:utils", "node buildutils/lib/local-repository start"]
-before-bump-version = ["npm whoami", "git checkout .", "pip install bump2version"]
-after-bump-version = "jlpm run try:login"
-before-build-npm = ["git commit -am 'Bump version'", "jlpm run build:src"]
+before-bump-version = ["git checkout .", "pip install bump2version"]
+before-build-npm = ["git commit -am 'Bump version'", "jlpm", "jlpm run build:utils", "jlpm run build:src"]
 before-build-python = ["node buildutils/lib/local-repository start", "jlpm run before:build:python"]
-after-build-python = "jlpm run after:build:python"
+after-build-python = ["jlpm run after:build:python", "node buildutils/lib/local-repository stop"]
 after-publish-assets = "jlpm run after:publish:assets"
