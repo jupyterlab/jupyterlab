@@ -77,7 +77,7 @@
             "rank": 30
           },
           {
-            "command": "fileeditor:toggle-autoclosing-brackets",
+            "command": "fileeditor:toggle-autoclosing-brackets-universal",
             "rank": 30
           },
           {

@@ -43,8 +43,6 @@ import {
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
 
-import { Menu } from '@lumino/widgets';
-
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 
 /**
@@ -1193,68 +1191,6 @@ export namespace Commands {
         sessionDialogs
       );
     }
-  }
-
-  /**
-   * Add File Editor editing commands to the Settings menu, including:
-   * Indent with Tab, Tab Spaces, Change Font Size, and auto closing brackets
-   */
-  export function addEditingCommandsToSettingsMenu(
-    menu: IMainMenu,
-    commands: CommandRegistry,
-    trans: TranslationBundle
-  ): void {
-    const tabMenu = new Menu({ commands });
-    tabMenu.title.label = trans.__('Text Editor Indentation');
-    const args: JSONObject = {
-      insertSpaces: false,
-      size: 4,
-      name: trans.__('Indent with Tab')
-    };
-    const command = 'fileeditor:change-tabs';
-    tabMenu.addItem({ command, args });
-
-    for (const size of [1, 2, 4, 8]) {
-      const args: JSONObject = {
-        insertSpaces: true,
-        size,
-        name: trans._n('Spaces: %1', 'Spaces: %1', size)
-      };
-      tabMenu.addItem({ command, args });
-    }
-
-    menu.settingsMenu.addGroup(
-      [
-        {
-          command: CommandIDs.changeFontSize,
-          args: { name: trans.__('Increase Text Editor Font Size'), delta: +1 }
-        },
-        {
-          command: CommandIDs.changeFontSize,
-          args: { name: trans.__('Decrease Text Editor Font Size'), delta: -1 }
-        },
-        { type: 'submenu', submenu: tabMenu },
-        { command: CommandIDs.autoClosingBracketsUniversal }
-      ],
-      30
-    );
-  }
-
-  /**
-   * Add a Create New File command to the File menu
-   */
-  export function addCreateNewFileToFileMenu(menu: IMainMenu): void {
-    menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
-  }
-
-  /**
-   * Add a Create New Markdown File command to the File menu
-   */
-  export function addCreateNewMarkdownFileToFileMenu(menu: IMainMenu): void {
-    menu.fileMenu.newMenu.addGroup(
-      [{ command: CommandIDs.createNewMarkdown }],
-      30
-    );
   }
 
   /**
