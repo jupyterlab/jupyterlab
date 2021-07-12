@@ -27,7 +27,7 @@ interface IOptions {
    * Boolean indicating whether cell output should be included in headings.
    */
   includeOutput: boolean;
-  /** 
+  /**
    * Boolean indicating whether notebook headers should collapse with ToC headers and vice versa
    */
   syncCollapseState: boolean;
@@ -142,7 +142,7 @@ class OptionsManager extends Registry.IOptionsManager {
       this._widget.update();
     }
   }
-    
+
   get includeOutput() {
     return this._includeOutput;
   }
