@@ -15,20 +15,17 @@
   "sideEffects": [
     "style/*.css"
   ],
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "style/index.js",
   "style": "style/index.css",
   "directories": {
-    "lib": "lib/"
+    "style": "style/"
   },
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
+    "style/*.js",
     "style/*.css"
   ],
   "scripts": {
-    "build": "webpack && rimraf style/index.js",
+    "build": "webpack",
     "clean": "rimraf style/",
     "prepublishOnly": "npm run build",
     "watch": "webpack --watch"

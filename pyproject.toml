@@ -23,3 +23,18 @@ ignore="tests examples"
 
 [tool.check-manifest]
 ignore = ["binder/**", "builder/**", "buildutils/**", "design/**", "dev_mode/**", "examples/**", "packages/**", "scripts/**", "testutils/**", "*.json", "yarn.lock", "readthedocs.yml", ".bumpversion.cfg", ".*", "clean.py", "lint-staged.config.js", "release/*", "typedoc-theme/**", "typedoc.js", "jupyterlab/schemas/**", "jupyterlab/static/**", "jupyterlab/themes/**", "jupyterlab/style.js"]
+
+[tool.jupyter-releaser.options]
+ignore-glob = ["packages/ui-components/docs/source/ui_components.rst"]
+ignore-links = ["../api/*.*"]
+version-cmd = "jlpm bumpversion --force --skip-commit"
+npm-install-options = "--legacy-peer-deps"
+
+[tool.jupyter-releaser.hooks]
+after-prep-git = ["jlpm", "jlpm run build:utils", "node buildutils/lib/local-repository start"]
+before-bump-version = ["npm whoami", "git checkout .", "pip install bump2version"]
+after-bump-version = "jlpm run try:login"
+before-build-npm = ["git commit -am 'Bump version'", "jlpm run build:src"]
+before-build-python = ["node buildutils/lib/local-repository start", "jlpm run before:build:python"]
+after-build-python = "jlpm run after:build:python"
+after-publish-assets = "jlpm run after:publish:assets"

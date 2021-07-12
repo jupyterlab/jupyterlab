@@ -15,44 +15,62 @@ commander
     '--skip-build',
     'Skip the clean and build step (if there was a network error during a JS publish'
   )
+  .option('--skip-publish', 'Skip publish and only handle tags')
+  .option('--skip-tags', 'publish assets but do not handle tags')
+  .option('--yes', 'Publish without confirmation')
   .option('--dry-run', 'Do not actually push any assets')
   .action(async (options: any) => {
-    if (!options.skipBuild) {
-      utils.run('jlpm run build:packages');
-    }
+    if (!options.skipPublish) {
+      if (!options.skipBuild) {
+        utils.run('jlpm run build:packages');
+      }
 
-    if (!options.dryRun) {
-      // Make sure we are logged in.
-      if (utils.checkStatus('npm whoami') !== 0) {
-        console.error('Please run `npm login`');
+      if (!options.dryRun) {
+        // Make sure we are logged in.
+        if (utils.checkStatus('npm whoami') !== 0) {
+          console.error('Please run `npm login`');
+          process.exit(1);
+        }
+      }
+
+      // Ensure a clean git environment
+      try {
+        utils.run('git commit -am "bump version"');
+      } catch (e) {
+        // do nothing
+      }
+
+      // Publish JS to the appropriate tag.
+      const curr = utils.getPythonVersion();
+      let cmd = 'lerna publish from-package ';
+      if (options.dryRun) {
+        cmd += '--no-git-tag-version --no-push ';
+      }
+      if (options.yes) {
+        cmd += '  --yes ';
+      }
+      if (curr.indexOf('rc') === -1 && curr.indexOf('a') === -1) {
+        utils.run(`${cmd} -m "Publish"`);
+      } else {
+        utils.run(`${cmd} --dist-tag=next -m "Publish"`);
       }
     }
 
-    // Publish JS to the appropriate tag.
-    const curr = utils.getPythonVersion();
-    let cmd = 'lerna publish from-package ';
-    if (options.dryRun) {
-      cmd += '--no-git-tag-version --no-push ';
-    }
-    if (curr.indexOf('rc') === -1 && curr.indexOf('a') === -1) {
-      utils.run(`${cmd} -m "Publish"`);
-    } else {
-      utils.run(`${cmd} --dist-tag=next -m "Publish"`);
-    }
-
     // Fix up any tagging issues.
-    const basePath = path.resolve('.');
-    const paths = utils.getLernaPaths(basePath).sort();
-    const cmds = await Promise.all(paths.map(handlePackage));
-    cmds.forEach(cmdList => {
-      cmdList.forEach(cmd => {
-        if (!options.dryRun) {
-          utils.run(cmd);
-        } else {
-          throw new Error(`Tag is out of sync: ${cmd}`);
-        }
+    if (!options.skipTags && !options.dryRun) {
+      const basePath = path.resolve('.');
+      const paths = utils.getLernaPaths(basePath).sort();
+      const cmds = await Promise.all(paths.map(handlePackage));
+      cmds.forEach(cmdList => {
+        cmdList.forEach(cmd => {
+          if (!options.dryRun) {
+            utils.run(cmd);
+          } else {
+            throw new Error(`Tag is out of sync: ${cmd}`);
+          }
+        });
       });
-    });
+    }
 
     // Emit a system beep.
     process.stdout.write('\x07');
