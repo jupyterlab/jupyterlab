@@ -3,22 +3,13 @@
 
 // import { expect } from 'chai';
 
-import { CommandRegistry } from '@lumino/commands';
-
-import { JSONObject } from '@lumino/coreutils';
-
-import { MessageLoop } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { CommandPalette } from '@lumino/widgets';
-
-import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
-
 import { ModalCommandPalette } from '@jupyterlab/apputils';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
+import { CommandRegistry } from '@lumino/commands';
+import { JSONObject } from '@lumino/coreutils';
+import { MessageLoop } from '@lumino/messaging';
+import { CommandPalette, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 describe('@jupyterlab/apputils', () => {
@@ -68,7 +59,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#hideAndReset()', () => {
       it('should become hidden and clear the input when calling hideAndReset', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
-        palette.inputNode.value = 'Search string...';
+        palette.inputNode.value = 'Search string…';
         modalPalette.hideAndReset();
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');
@@ -78,7 +69,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#focus()', () => {
       it('should hide and reset when focus is shifted', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
-        palette.inputNode.value = 'Search string...';
+        palette.inputNode.value = 'Search string…';
         simulate(document.body, 'focus');
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');
@@ -88,7 +79,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#escape()', () => {
       it('should hide and reset when ESC is pressed', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
-        palette.inputNode.value = 'Search string...';
+        palette.inputNode.value = 'Search string…';
         simulate(modalPalette.node, 'keydown', { keyCode: 27 });
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');

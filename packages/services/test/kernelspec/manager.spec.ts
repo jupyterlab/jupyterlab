@@ -1,17 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONExt } from '@lumino/coreutils';
-
-import { KernelSpecManager, KernelSpec } from '../../src';
-
-import {
-  PYTHON_SPEC,
-  KERNELSPECS,
-  handleRequest,
-  makeSettings
-} from '../utils';
 import { JupyterServer } from '@jupyterlab/testutils';
+import { JSONExt } from '@lumino/coreutils';
+import { KernelSpec, KernelSpecManager } from '../../src';
+import {
+  handleRequest,
+  KERNELSPECS,
+  makeSettings,
+  PYTHON_SPEC
+} from '../utils';
 
 class TestManager extends KernelSpecManager {
   intercept: KernelSpec.ISpecModels | null = null;

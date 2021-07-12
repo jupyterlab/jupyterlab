@@ -6,6 +6,8 @@
  */
 
 // Note: keep in alphabetical order...
+export * from './generators';
 export * from './registry';
 export * from './toc';
-export * from './generators';
+export * from './toc_item';
+export * from './utils/headings';

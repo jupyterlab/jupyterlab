@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext } from '@jupyterlab/apputils';
-
-import { DataConnector } from '@jupyterlab/statedb';
-
 import { KernelMessage } from '@jupyterlab/services';
-
+import { DataConnector } from '@jupyterlab/statedb';
 import { InspectionHandler } from './handler';
 
 /**
@@ -20,7 +17,7 @@ export class KernelConnector extends DataConnector<
   /**
    * Create a new kernel connector for inspection requests.
    *
-   * @param options - The instatiation options for the kernel connector.
+   * @param options - The instantiation options for the kernel connector.
    */
   constructor(options: KernelConnector.IOptions) {
     super();

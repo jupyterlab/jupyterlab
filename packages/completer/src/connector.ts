@@ -2,12 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { DataConnector } from '@jupyterlab/statedb';
-
-import { KernelConnector } from './kernelconnector';
-
 import { ContextConnector } from './contextconnector';
-
 import { CompletionHandler } from './handler';
+import { KernelConnector } from './kernelconnector';
 
 /**
  * A context+kernel connector for completion handlers.
@@ -20,7 +17,7 @@ export class CompletionConnector extends DataConnector<
   /**
    * Create a new connector for completion requests.
    *
-   * @param options - The instatiation options for the connector.
+   * @param options - The instantiation options for the connector.
    */
   constructor(options: CompletionConnector.IOptions) {
     super();

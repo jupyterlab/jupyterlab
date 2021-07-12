@@ -10,34 +10,26 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
-  ISessionContext,
   ICommandPalette,
+  ISessionContext,
   ISessionContextDialogs,
   sessionContextDialogs
 } from '@jupyterlab/apputils';
-
 import { Cell, CodeCell } from '@jupyterlab/cells';
-
 import {
   CodeConsole,
   ConsolePanel,
   IConsoleTracker
 } from '@jupyterlab/console';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import {
   INotebookTracker,
   Notebook,
   NotebookPanel
 } from '@jupyterlab/notebook';
-
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   IStatusBar,
   KernelStatus,
@@ -45,15 +37,9 @@ import {
   RunningSessions,
   StatusBar
 } from '@jupyterlab/statusbar';
-
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { Switch } from '@jupyterlab/ui-components';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import { Title, Widget } from '@lumino/widgets';
 
 export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
@@ -71,7 +57,6 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
     translator: ITranslator,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null,
-    mainMenu: IMainMenu | null,
     palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -107,9 +92,6 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
     if (palette) {
       palette.addItem({ command, category });
     }
-    if (mainMenu) {
-      mainMenu.viewMenu.addGroup([{ command }], 1);
-    }
 
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(STATUSBAR_PLUGIN_ID);
@@ -132,7 +114,7 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
 
     return statusBar;
   },
-  optional: [ILabShell, ISettingRegistry, IMainMenu, ICommandPalette]
+  optional: [ILabShell, ISettingRegistry, ICommandPalette]
 };
 
 /**

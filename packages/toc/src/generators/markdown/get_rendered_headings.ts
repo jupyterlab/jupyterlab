@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
-import { INumberingDictionary } from '../../utils/numbering_dictionary';
-import { INumberedHeading } from '../../utils/headings';
 import { generateNumbering } from '../../utils/generate_numbering';
+import { INumberedHeading } from '../../utils/headings';
+import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 /**
@@ -28,19 +28,21 @@ function onClick(heading: Element) {
  * @param sanitizer - HTML sanitizer
  * @param dict - numbering dictionary
  * @param numbering - boolean indicating whether to enable numbering
+ * @param numberingH1 - whether first level header should be numbered
  * @returns list of headings
  */
 function getRenderedHeadings(
   node: HTMLElement,
   sanitizer: ISanitizer,
   dict: INumberingDictionary,
-  numbering = true
+  numbering = true,
+  numberingH1 = true
 ): INumberedHeading[] {
   let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
   let headings: INumberedHeading[] = [];
   for (let i = 0; i < nodes.length; i++) {
     const heading = nodes[i];
-    const level = parseInt(heading.tagName[1], 10);
+    let level = parseInt(heading.tagName[1], 10);
     let text = heading.textContent ? heading.textContent : '';
     let hide = !numbering;
 
@@ -52,8 +54,10 @@ function getRenderedHeadings(
     html = html.replace('¶', ''); // remove the anchor symbol
 
     // Generate a numbering string:
+    if (!numberingH1) {
+      level -= 1;
+    }
     let nstr = generateNumbering(dict, level);
-
     // Generate the numbering DOM element:
     let nhtml = '';
     if (!hide) {

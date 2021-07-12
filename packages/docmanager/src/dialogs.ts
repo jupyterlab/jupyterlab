@@ -2,18 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-
 import { PathExt } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import { Contents } from '@jupyterlab/services';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
-
 import { IDocumentManager } from './';
 
 /**
@@ -29,7 +23,7 @@ const FILE_DIALOG_CHECKBOX_CLASS = 'jp-FileDialog-Checkbox';
 /**
  * The class name added for the new name label in the rename dialog
  */
-const RENAME_NEWNAME_TITLE_CLASS = 'jp-new-name-title';
+const RENAME_NEW_NAME_TITLE_CLASS = 'jp-new-name-title';
 
 /**
  * A stripped-down interface for a file container.
@@ -234,7 +228,7 @@ namespace Private {
 
     const nameTitle = document.createElement('label');
     nameTitle.textContent = trans.__('New Name');
-    nameTitle.className = RENAME_NEWNAME_TITLE_CLASS;
+    nameTitle.className = RENAME_NEW_NAME_TITLE_CLASS;
     const name = document.createElement('input');
 
     body.appendChild(existingLabel);
@@ -273,20 +267,6 @@ class NameOnSaveHandler extends Widget {
   getValue(): string {
     return this.inputNode.value;
   }
-
-  /**
-   * Get the checkbox node.
-   */
-  get checkboxNode(): HTMLInputElement {
-    return this.node.getElementsByTagName('input')[1] as HTMLInputElement;
-  }
-
-  /**
-   * Get checked of the checkbox widget.
-   */
-  getChecked(): boolean {
-    return this.checkboxNode.checked;
-  }
 }
 
 /**
@@ -294,7 +274,7 @@ class NameOnSaveHandler extends Widget {
  */
 namespace Private {
   /**
-   * Create the node for a rename after launch handler.
+   * Create the node for the name file dialog handler.
    */
   export function createNameFileNode(
     manager: IDocumentManager,
@@ -305,11 +285,13 @@ namespace Private {
     const body = document.createElement('div');
     const name = document.createElement('input');
     const checkbox = document.createElement('input');
+    checkbox.id = 'jp-filedialog-input-id';
     const label = document.createElement('label');
+    label.htmlFor = checkbox.id;
     const div = document.createElement('div');
+    div.classList.add(FILE_DIALOG_CHECKBOX_CLASS);
 
     checkbox.type = 'checkbox';
-    checkbox.classList.add(FILE_DIALOG_CHECKBOX_CLASS);
     checkbox.addEventListener('change', function () {
       manager.nameFileOnSave = !this.checked;
     });

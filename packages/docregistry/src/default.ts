@@ -1,29 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Mode } from '@jupyterlab/codemirror';
-
-import { Contents } from '@jupyterlab/services';
-
-import { PartialJSONValue } from '@lumino/coreutils';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
 import { MainAreaWidget } from '@jupyterlab/apputils';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
+import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-
 import { IModelDB } from '@jupyterlab/observables';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
-import { DocumentRegistry, IDocumentWidget } from './index';
-
+import { Contents } from '@jupyterlab/services';
 import * as models from '@jupyterlab/shared-models';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { PartialJSONValue } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
+import { DocumentRegistry, IDocumentWidget } from './index';
 
 /**
  * The default implementation of a document model.
@@ -390,7 +379,7 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The aplication language translator.
+   * The application language translator.
    */
   get translator(): ITranslator {
     return this._translator;
@@ -497,8 +486,6 @@ export class DocumentWidget<
     void this.context.ready.then(() => {
       this._handleDirtyState();
     });
-
-    this.shouldNameFile = new Signal<this, void>(this);
   }
 
   /**
@@ -542,7 +529,6 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
-  shouldNameFile: Signal<any, void>;
 }
 
 export namespace DocumentWidget {

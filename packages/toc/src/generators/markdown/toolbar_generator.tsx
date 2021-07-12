@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { TranslationBundle } from '@jupyterlab/translation';
+import { numberingIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { OptionsManager } from './options_manager';
-import { numberingIcon } from '@jupyterlab/ui-components';
-import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * Interface describing toolbar properties.
@@ -43,7 +43,7 @@ function toolbar(options: OptionsManager) {
     constructor(props: IProperties) {
       super(props);
       this.state = { numbering: false };
-      options.initializeOptions(false);
+      options.initializeOptions(false, options.numberingH1);
       this._trans = options.translator.load('jupyterlab');
     }
 

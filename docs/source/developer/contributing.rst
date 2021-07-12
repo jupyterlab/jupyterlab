@@ -70,7 +70,7 @@ discussion, makes others aware of work being done, and sets the stage
 for a fruitful community interaction. A pull request should reference
 the issue it is addressing. Once the pull request is merged, the issue
 related to it will also be closed. If there is additional discussion
-around implemementation the issue may be re-opened. Once 30 days have
+around implementation the issue may be re-opened. Once 30 days have
 passed with no additional discussion, the `lock
 bot <https://github.com/apps/lock>`__ will lock the issue. If additional
 discussion is desired, or if the pull request doesn't fully address the
@@ -286,7 +286,7 @@ tests.
 For tests that rely on ``@jupyterlab/services`` (starting kernels,
 interacting with files, etc.), there are two options. If a simple
 interaction is needed, the ``Mock`` namespace exposed by ``testutils``
-has a number of mock implmentations (see ``testutils/src/mock.ts``). If
+has a number of mock implementations (see ``testutils/src/mock.ts``). If
 a full server interaction is required, use the ``JupyterServer`` class.
 
 We have a helper function called ``testEmission`` to help with writing
@@ -323,7 +323,7 @@ Now run Lighthouse against this local server and show the results:
 
    jlpm run lighthouse --view
 
-.. image:: /images/lighthouse.png
+.. image:: ../images/lighthouse.png
 
 Using throttling
 ^^^^^^^^^^^^^^^^
@@ -525,6 +525,32 @@ the two reports:
      `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/dom-size>`__.
 
+Visual Regression and UI Tests
+------------------------------
+
+As part of JupyterLab CI workflows, UI tests are run with visual regression checks. `Galata <https://github.com/jupyterlab/galata>`__ is used for UI testing. Galata provides a high level API to control and inspect JupyterLab UI programmatically, testing tools and CLI to manage tests and other tasks.
+
+UI tests are run for each commit into JupyterLab project in PRs or direct commits. Code changes can sometimes cause UI tests to fail for various reasons. After each test run, Galata generates a user friendly test result report which can be used to inspect failing UI tests. Result report shows the failure reason, call-stack up to the failure and detailed information on visual regression issues. For visual regression errors, reference image and test capture image, along with diff image generated during comparison are provided in the report. You can use these information to debug failing tests. Galata test report can be downloaded from GitHub Actions page for a UI test run. Test artifact is named ``ui-test-output`` and once you extract it, you can access the report by opening ``test/report/index.html`` in a browser window.
+
+Main reasons for UI test failures are:
+
+1. **A visual regression caused by code changes**:
+
+   Sometimes unintentional UI changes are introduced by modifications to project source code. Goal of visual regression testing is to detect this kind of UI changes. If your PR / commit is causing visual regression, then debug and fix the regression caused. You can locally run and debug the UI tests to fix the visual regression. Follow the instructions in steps 5-7 of ``Adding a new UI test suite guide`` in `UI Testing documentation <https://github.com/jupyterlab/jupyterlab/blob/master/ui-tests/README.md#adding-a-new-ui-test-suite>`__ to locally debug and fix UI tests. Once you have a fix, you can push the change to your GitHub branch and test with GitHub actions.
+
+2. **An intended update to user interface**:
+
+   If your code change is introducing an update to UI which causes existing UI Tests to fail, then you will need to update reference image(s) for the failing tests. In order to do that, simply go to GitHub Actions page for the failed test and download test artifacts. It will contain test captures in directory ``test/screenshots``. You can copy the capture for the failed test and paste into reference screenshots directory in JupyterLab source code, replacing the failing test's reference capture. Reference captures are located in ``ui-tests/reference-output/screenshots`` in JupyterLab source code.
+
+For more information on UI Testing, please read the `UI Testing developer documentation <.https://github.com/jupyterlab/jupyterlab/blob/master/ui-tests/README.md>`__ and `Galata documentation <https://github.com/jupyterlab/galata/blob/main/README.md>`__.
+
+Good Practices for Integration tests
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here are some good practices to follow when writing integration tests:
+
+- Don't compare multiple screenshots in the same test; if the first comparison breaks, it will require running multiple times the CI workflow to fix all tests.
+
 Contributing to the debugger front-end
 --------------------------------------
 
@@ -692,11 +718,15 @@ Writing Documentation
 Documentation is written in Markdown and reStructuredText. In
 particular, the documentation on our Read the Docs page is written in
 reStructuredText. To ensure that the Read the Docs page builds, you'll
-need to install the documentation dependencies with ``pip``:
+need to install the documentation dependencies with ``conda``:
 
 .. code:: bash
 
-   pip install -r docs/requirements.txt
+   conda env create -f docs/environment.yml
+
+.. code:: bash
+
+   conda activate jupyterlab_documentation
 
 
 To test the docs run:
@@ -743,7 +773,7 @@ User Interface Naming Conventions
 Documents, Files, and Activities
 """"""""""""""""""""""""""""""""
 
-Files are referrred to as either files or documents, depending on the
+Files are referred to as either files or documents, depending on the
 context.
 
 Documents are more human centered. If human viewing, interpretation,

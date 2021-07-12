@@ -6,6 +6,8 @@ import { Widget } from '@lumino/widgets';
 import { IHeading } from './utils/headings';
 import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCItem } from './toc_item';
+import { Signal } from '@lumino/signaling';
+import { TableOfContents } from './toc';
 
 /**
  * Interface describing component properties.
@@ -27,6 +29,8 @@ interface IProperties extends React.Props<TOCTree> {
    * Toolbar.
    */
   toolbar: any;
+
+  entryClicked?: Signal<TableOfContents, TOCItem>;
 
   /**
    * Table of contents generator.
@@ -69,6 +73,7 @@ class TOCTree extends React.Component<IProperties, IState> {
         <TOCItem
           heading={el}
           toc={this.props.toc}
+          entryClicked={this.props.entryClicked}
           itemRenderer={this.props.itemRenderer}
           key={`${el.text}-${el.level}-${i++}`}
         />

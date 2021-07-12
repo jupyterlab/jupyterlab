@@ -2,25 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ArrayExt } from '@lumino/algorithm';
-
 import {
   DisposableDelegate,
   DisposableSet,
   IDisposable
 } from '@lumino/disposable';
-
 import { Message } from '@lumino/messaging';
-
-import { Widget, Panel, PanelLayout } from '@lumino/widgets';
-
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import {
   statusBar as barStyle,
-  side as sideStyle,
   item as itemStyle,
   leftSide as leftSideStyle,
-  rightSide as rightSideStyle
+  rightSide as rightSideStyle,
+  side as sideStyle
 } from './style/statusbar';
-
 import { IStatusBar } from './tokens';
 
 /**

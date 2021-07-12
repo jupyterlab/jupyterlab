@@ -11,20 +11,14 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import {
   ITranslator,
-  TranslationManager,
-  requestTranslationsAPI
+  requestTranslationsAPI,
+  TranslationManager
 } from '@jupyterlab/translation';
-
-import { Menu } from '@lumino/widgets';
 
 /**
  * A namespace for command IDs.
@@ -102,17 +96,11 @@ const langMenu: JupyterFrontEndPlugin<void> = {
         setting.changed.connect(loadSetting);
 
         // Create a languages menu
-        const languagesMenu: Menu = new Menu({ commands });
-        languagesMenu.title.label = trans.__('Language');
-        mainMenu.settingsMenu.addGroup(
-          [
-            {
-              type: 'submenu' as Menu.ItemType,
-              submenu: languagesMenu
-            }
-          ],
-          1
-        );
+        const languagesMenu = mainMenu.settingsMenu.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-mainmenu-settings-language'
+        )?.submenu;
 
         let command: string;
 
@@ -160,10 +148,12 @@ const langMenu: JupyterFrontEndPlugin<void> = {
               });
 
               // Add the language command to the menu
-              languagesMenu.addItem({
-                command,
-                args: {}
-              });
+              if (languagesMenu) {
+                languagesMenu.addItem({
+                  command,
+                  args: {}
+                });
+              }
             }
           })
           .catch(reason => {

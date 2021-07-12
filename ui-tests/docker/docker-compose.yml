@@ -1,0 +1,41 @@
+version: '3.5'
+
+services:
+  lab:
+    container_name: jupyterlab
+    # Need to be built running script: scripts/build_docker.sh
+    image: jupyterlab-dev
+    command:
+      [
+        '--ServerApp.token=',
+        '--ServerApp.password=',
+        '--ServerApp.disable_check_xsrf=True',
+        '--LabApp.expose_app_in_browser=True',
+      ]
+    networks:
+      - frontend
+    ports:
+      - 8888:8888
+
+  e2e:
+    build:
+      context: ..
+    environment:
+      SERVER_URL: 'jupyterlab:8888'
+      TIMEOUT: 360
+    command: ['yarn', 'run', 'test', '--jlab-base-url=http://jupyterlab:8888']
+    # See https://playwright.dev/docs/docker/#run-the-image
+    ipc: host
+    networks:
+      - frontend
+    depends_on:
+      - lab
+    volumes:
+      # Mount everything in a shared drive to be sure we are not using files from docker cache
+      - ../reference-output:/tmp/galata/reference-output
+      - ../test-output:/tmp/galata/test-output
+      - ../tests:/tmp/galata/tests
+    working_dir: /tmp/galata
+
+networks:
+  frontend:

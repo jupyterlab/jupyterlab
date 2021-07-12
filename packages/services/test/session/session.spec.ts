@@ -1,25 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
-import { toArray } from '@lumino/algorithm';
-
-import { SessionAPI } from '../../src';
-
-import { Session } from '../../src';
-
 import {
   expectFailure,
-  JupyterServer,
-  flakyIt as it
+  flakyIt as it,
+  JupyterServer
 } from '@jupyterlab/testutils';
-
+import { toArray } from '@lumino/algorithm';
+import { UUID } from '@lumino/coreutils';
+import { Session, SessionAPI } from '../../src';
 import {
-  makeSettings,
   createSessionModel,
   getRequestHandler,
-  init
+  init,
+  makeSettings
 } from '../utils';
 
 init();

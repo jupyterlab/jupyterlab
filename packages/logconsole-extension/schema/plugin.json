@@ -1,6 +1,25 @@
 {
   "jupyter.lab.setting-icon": "ui-components:list",
   "jupyter.lab.setting-icon-label": "Log Console",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "separator"
+          },
+          {
+            "command": "logconsole:open"
+          },
+          {
+            "type": "separator"
+          }
+        ]
+      }
+    ],
+    "context": [{ "command": "logconsole:open", "selector": ".jp-Notebook" }]
+  },
   "title": "Log Console",
   "description": "Log Console settings.",
   "properties": {

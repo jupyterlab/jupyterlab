@@ -1,37 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MessageLoop, Message } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { simulate } from 'simulate-event';
-
-import { UUID } from '@lumino/coreutils';
-
-import { ServiceManager } from '@jupyterlab/services';
-
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
-
 import {
   Context,
   DocumentRegistry,
-  TextModelFactory,
-  DocumentWidget
+  DocumentWidget,
+  TextModelFactory
 } from '@jupyterlab/docregistry';
-
 import {
   FileEditor,
   FileEditorCodeWrapper,
   FileEditorFactory
 } from '@jupyterlab/fileeditor';
-
+import { ServiceManager } from '@jupyterlab/services';
 import { framePromise } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { UUID } from '@lumino/coreutils';
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 
 class LogFileEditor extends FileEditor {
   events: string[] = [];

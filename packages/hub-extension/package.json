@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/hub-extension",
-  "version": "3.1.0-alpha.11",
+  "version": "3.1.0-beta.1",
   "description": "JupyterLab integration for JupyterHub",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,12 +34,11 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0-alpha.11",
-    "@jupyterlab/apputils": "^3.1.0-alpha.11",
-    "@jupyterlab/coreutils": "^5.1.0-alpha.11",
-    "@jupyterlab/mainmenu": "^3.1.0-alpha.11",
-    "@jupyterlab/services": "^6.1.0-alpha.11",
-    "@jupyterlab/translation": "^3.1.0-alpha.11"
+    "@jupyterlab/application": "^3.1.0-beta.1",
+    "@jupyterlab/apputils": "^3.1.0-beta.1",
+    "@jupyterlab/coreutils": "^5.1.0-beta.1",
+    "@jupyterlab/services": "^6.1.0-beta.1",
+    "@jupyterlab/translation": "^3.1.0-beta.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
@@ -49,7 +48,8 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
 }

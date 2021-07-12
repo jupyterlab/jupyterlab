@@ -2,10 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import {
-  CodeMirrorEditorFactory,
-  CodeMirrorEditor
+  CodeMirrorEditor,
+  CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
 
 class ExposeCodeMirrorEditorFactory extends CodeMirrorEditorFactory {

@@ -538,7 +538,7 @@ export namespace LabIconStyle {
   }
 
   /**
-   * Resolve a pure icon styleheet into a typestyle class
+   * Resolve a pure icon stylesheet into a typestyle class
    */
   function resolveStyleClass(stylesheet: ISheetPure): string {
     return typestyleClass({

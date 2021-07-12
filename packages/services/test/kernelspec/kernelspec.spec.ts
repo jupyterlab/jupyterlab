@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelSpecAPI } from '../../src';
-
 import { expectFailure, JupyterServer } from '@jupyterlab/testutils';
-
-import { makeSettings, PYTHON_SPEC, getRequestHandler } from '../utils';
+import { KernelSpecAPI } from '../../src';
+import { getRequestHandler, makeSettings, PYTHON_SPEC } from '../utils';
 
 const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
 PYTHON3_SPEC.name = 'Python3';

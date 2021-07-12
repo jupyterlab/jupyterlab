@@ -2,13 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MimeData } from '@lumino/coreutils';
-
 import { IDragEvent } from '@lumino/dragdrop';
-
 import { Message } from '@lumino/messaging';
-
 import { Widget } from '@lumino/widgets';
-
 import { CodeEditor } from './';
 
 /**

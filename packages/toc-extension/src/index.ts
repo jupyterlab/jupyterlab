@@ -16,18 +16,27 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  TableOfContents,
+  createLatexGenerator,
+  createMarkdownGenerator,
+  createNotebookGenerator,
+  createPythonGenerator,
+  createRenderedMarkdownGenerator,
   ITableOfContentsRegistry,
   TableOfContentsRegistry as Registry,
-  createLatexGenerator,
-  createNotebookGenerator,
-  createMarkdownGenerator,
-  createPythonGenerator,
-  createRenderedMarkdownGenerator
+  TableOfContents
 } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
+import { runNestedCodeCells } from '@jupyterlab/toc';
+
+/**
+ * The command IDs used by TOC item.
+ */
+namespace CommandIDs {
+  export const runCells = 'toc:run-cells';
+}
 
 /**
  * Activates the ToC extension.
@@ -42,6 +51,7 @@ import { tocIcon } from '@jupyterlab/ui-components';
  * @param notebookTracker - notebook tracker
  * @param rendermime - rendered MIME registry
  * @param translator - translator
+ * @param settingRegistry - setting registry
  * @returns table of contents registry
  */
 async function activateTOC(
@@ -53,11 +63,16 @@ async function activateTOC(
   markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
-  translator: ITranslator
+  translator: ITranslator,
+  settingRegistry?: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
   // Create the ToC widget:
-  const toc = new TableOfContents({ docmanager, rendermime, translator });
+  const toc = new TableOfContents({
+    docmanager,
+    rendermime,
+    translator
+  });
 
   // Create the ToC registry:
   const registry = new Registry();
@@ -71,15 +86,40 @@ async function activateTOC(
 
   labShell.add(toc, 'left', { rank: 400 });
 
+  app.commands.addCommand(CommandIDs.runCells, {
+    execute: args => {
+      return runNestedCodeCells(toc.headings, toc.activeEntry);
+    },
+    label: trans.__('Run Cell(s)')
+  });
+
+  app.contextMenu.addItem({
+    selector: '.jp-tocItem',
+    command: CommandIDs.runCells
+  });
+
   // Add the ToC widget to the application restorer:
   restorer.add(toc, '@jupyterlab/toc:plugin');
+
+  // Attempt to load plugin settings:
+  let settings: ISettingRegistry.ISettings | undefined;
+  if (settingRegistry) {
+    try {
+      settings = await settingRegistry.load('@jupyterlab/toc-extension:plugin');
+    } catch (error) {
+      console.error(
+        `Failed to load settings for the Table of Contents extension.\n\n${error}`
+      );
+    }
+  }
 
   // Create a notebook generator:
   const notebookGenerator = createNotebookGenerator(
     notebookTracker,
     toc,
     rendermime.sanitizer,
-    translator
+    translator,
+    settings
   );
   registry.add(notebookGenerator);
 
@@ -88,7 +128,8 @@ async function activateTOC(
     editorTracker,
     toc,
     rendermime.sanitizer,
-    translator
+    translator,
+    settings
   );
   registry.add(markdownGenerator);
 
@@ -97,7 +138,8 @@ async function activateTOC(
     markdownViewerTracker,
     toc,
     rendermime.sanitizer,
-    translator
+    translator,
+    settings
   );
   registry.add(renderedMarkdownGenerator);
 
@@ -156,6 +198,7 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
     IRenderMimeRegistry,
     ITranslator
   ],
+  optional: [ISettingRegistry],
   activate: activateTOC
 };
 

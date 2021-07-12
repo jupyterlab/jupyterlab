@@ -1,28 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as models from '@jupyterlab/shared-models';
-
-import * as nbformat from '@jupyterlab/nbformat';
-
-import { JSONObject } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
+import * as nbformat from '@jupyterlab/nbformat';
 import {
   IModelDB,
-  ModelDB,
-  IObservableValue,
-  ObservableValue,
   IObservableMap,
-  IObservableString
+  IObservableString,
+  IObservableValue,
+  ModelDB,
+  ObservableValue
 } from '@jupyterlab/observables';
-
+import * as models from '@jupyterlab/shared-models';
 import { ITranslator } from '@jupyterlab/translation';
+import { JSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * A namespace for code editors.
@@ -283,7 +276,7 @@ export namespace CodeEditor {
     /**
      * We update the modeldb store when the shared model changes.
      * To ensure that we don't run into infinite loops, we wrap this call in a "mutex".
-     * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged hander
+     * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged handler
      * or the modelDB change handler.
      */
     protected _onSharedModelChanged(
@@ -719,6 +712,13 @@ export namespace CodeEditor {
    */
   export interface IConfig {
     /**
+     * Half-period in milliseconds used for cursor blinking.
+     * By setting this to zero, blinking can be disabled.
+     * A negative value hides the cursor entirely.
+     */
+    cursorBlinkRate: number;
+
+    /**
      * User preferred font family for text editors.
      */
     fontFamily: string | null;
@@ -788,7 +788,7 @@ export namespace CodeEditor {
     rulers: Array<number>;
 
     /**
-     * Wheter to allow code folding
+     * Whether to allow code folding
      */
     codeFolding: boolean;
   }
@@ -797,6 +797,7 @@ export namespace CodeEditor {
    * The default configuration options for an editor.
    */
   export const defaultConfig: IConfig = {
+    cursorBlinkRate: 530,
     fontFamily: null,
     fontSize: null,
     lineHeight: null,

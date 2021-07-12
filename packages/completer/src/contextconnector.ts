@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { DataConnector } from '@jupyterlab/statedb';
-
 import { CompletionHandler } from './handler';
 
 /**
@@ -18,7 +16,7 @@ export class ContextConnector extends DataConnector<
   /**
    * Create a new context connector for completion requests.
    *
-   * @param options - The instatiation options for the context connector.
+   * @param options - The instantiation options for the context connector.
    */
   constructor(options: ContextConnector.IOptions) {
     super();
@@ -80,7 +78,7 @@ namespace Private {
     // Only choose the ones that have a non-empty type
     // field, which are likely to be of interest.
     const completionList = tokenList.filter(t => t.type).map(t => t.value);
-    // Remove duplicate completsions from the list
+    // Remove duplicate completions from the list
     const matches = Array.from(new Set<string>(completionList));
 
     return {

@@ -2,26 +2,21 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { SessionContext } from '@jupyterlab/apputils';
-
-import { KernelManager } from '@jupyterlab/services';
-
-import { Message } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
 import {
   IOutputAreaModel,
-  OutputAreaModel,
-  OutputArea
+  OutputArea,
+  OutputAreaModel
 } from '@jupyterlab/outputarea';
-
+import { KernelManager } from '@jupyterlab/services';
 import {
   createSessionContext,
   defaultRenderMime,
-  NBTestUtils,
+  flakyIt as it,
   JupyterServer,
-  flakyIt as it
+  NBTestUtils
 } from '@jupyterlab/testutils';
+import { Message } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The default rendermime instance to use for testing.

@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { DisposableDelegate } from '@lumino/disposable';
-
 import * as Kernel from './kernel';
-
 import * as KernelMessage from './messages';
 
 declare let setImmediate: any;
@@ -241,6 +238,7 @@ export abstract class KernelFutureHandler<
   }
 
   private async _handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
+    this._kernel.hasPendingInput = true;
     const stdin = this._stdin;
     if (stdin) {
       // tslint:disable-next-line:await-promise

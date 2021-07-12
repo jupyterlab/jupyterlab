@@ -2,10 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  validateContentsModel,
-  validateCheckpointModel
+  validateCheckpointModel,
+  validateContentsModel
 } from '../../src/contents/validate';
-
 import { DEFAULT_FILE } from '../utils';
 
 describe('validate', () => {

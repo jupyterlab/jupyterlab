@@ -1,6 +1,68 @@
 {
   "title": "Theme",
   "jupyter.lab.setting-icon-label": "Theme Manager",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-settings",
+        "items": [
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-settings-apputilstheme",
+              "label": "JupyterLab Theme",
+              "items": [
+                { "type": "separator" },
+                {
+                  "command": "apputils:theme-scrollbars"
+                },
+                { "type": "separator" },
+                {
+                  "command": "apputils:incr-font-size",
+                  "args": {
+                    "key": "code-font-size"
+                  }
+                },
+                {
+                  "command": "apputils:decr-font-size",
+                  "args": {
+                    "key": "code-font-size"
+                  }
+                },
+                { "type": "separator" },
+                {
+                  "command": "apputils:incr-font-size",
+                  "args": {
+                    "key": "content-font-size1"
+                  }
+                },
+                {
+                  "command": "apputils:decr-font-size",
+                  "args": {
+                    "key": "content-font-size1"
+                  }
+                },
+                { "type": "separator" },
+                {
+                  "command": "apputils:incr-font-size",
+                  "args": {
+                    "key": "ui-font-size1"
+                  }
+                },
+                {
+                  "command": "apputils:decr-font-size",
+                  "args": {
+                    "key": "ui-font-size1"
+                  }
+                }
+              ]
+            },
+            "rank": 0
+          }
+        ]
+      }
+    ]
+  },
   "description": "Theme manager settings.",
   "type": "object",
   "additionalProperties": false,

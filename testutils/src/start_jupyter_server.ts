@@ -1,6 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 
-import { spawn, ChildProcess } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 

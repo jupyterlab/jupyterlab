@@ -19,13 +19,13 @@
       "path": "../docmanager"
     },
     {
+      "path": "../docregistry"
+    },
+    {
       "path": "../filebrowser"
     },
     {
       "path": "../launcher"
-    },
-    {
-      "path": "../mainmenu"
     },
     {
       "path": "../services"

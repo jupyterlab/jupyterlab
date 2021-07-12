@@ -194,7 +194,7 @@ export interface ISearchProvider<T extends Widget = Widget> {
   replaceAllMatches(newText: string): Promise<boolean>;
 
   /**
-   * The same list of matches provided by the startQuery promise resoluton
+   * The same list of matches provided by the startQuery promise resolution
    */
   readonly matches: ISearchMatch[];
 

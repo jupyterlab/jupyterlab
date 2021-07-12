@@ -2,10 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-
 import { caretDownEmptyIcon, LabIcon } from '../icon';
-import { DEFAULT_STYLE_CLASS, IElementRefProps } from './interface';
 import { classes } from '../utils';
+import { DEFAULT_STYLE_CLASS, IElementRefProps } from './interface';
 
 export const HTML_SELECT_CLASS = 'jp-HTMLSelect';
 

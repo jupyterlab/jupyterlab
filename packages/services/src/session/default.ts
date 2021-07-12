@@ -71,6 +71,13 @@ export class SessionConnection implements Session.ISessionConnection {
   }
 
   /**
+   * A signal proxied from the kernel pending input.
+   */
+  get pendingInput(): ISignal<this, boolean> {
+    return this._pendingInput;
+  }
+
+  /**
    * A signal proxied from the kernel about iopub kernel messages.
    */
   get iopubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
@@ -315,6 +322,7 @@ export class SessionConnection implements Session.ISessionConnection {
     this._kernel = kc;
     kc.statusChanged.connect(this.onKernelStatus, this);
     kc.connectionStatusChanged.connect(this.onKernelConnectionStatus, this);
+    kc.pendingInput.connect(this.onPendingInput, this);
     kc.unhandledMessage.connect(this.onUnhandledMessage, this);
     kc.iopubMessage.connect(this.onIOPubMessage, this);
     kc.anyMessage.connect(this.onAnyMessage, this);
@@ -338,6 +346,13 @@ export class SessionConnection implements Session.ISessionConnection {
     state: Kernel.ConnectionStatus
   ) {
     this._connectionStatusChanged.emit(state);
+  }
+
+  /**
+   * Handle a change in the pendingInput.
+   */
+  protected onPendingInput(sender: Kernel.IKernelConnection, state: boolean) {
+    this._pendingInput.emit(state);
   }
 
   /**
@@ -416,6 +431,7 @@ export class SessionConnection implements Session.ISessionConnection {
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
     this
   );
+  private _pendingInput = new Signal<this, boolean>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);

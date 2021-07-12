@@ -3,8 +3,13 @@
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import {
-  caretDownIcon,
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
   caretDownEmptyThinIcon,
+  caretDownIcon,
   caretRightIcon,
   caretUpEmptyThinIcon,
   caseSensitiveIcon,
@@ -13,19 +18,12 @@ import {
   ellipsesIcon,
   regexIcon
 } from '@jupyterlab/ui-components';
-
 import { Debouncer } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-
 import { IDisplayState } from './interfaces';
 import { SearchInstance } from './searchinstance';
-import {
-  nullTranslator,
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
@@ -43,6 +41,7 @@ const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
 const SEARCH_OPTIONS_DISABLED_CLASS =
   'jp-DocumentSearch-search-options-disabled';
+const SEARCH_DOCUMENT_LOADING = 'jp-DocumentSearch-document-loading';
 const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
@@ -214,7 +213,7 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
 
 interface IUpDownProps {
   onHighlightPrevious: Function;
-  onHightlightNext: Function;
+  onHighlightNext: Function;
 }
 
 function UpDownButtons(props: IUpDownProps) {
@@ -232,7 +231,7 @@ function UpDownButtons(props: IUpDownProps) {
       </button>
       <button
         className={BUTTON_WRAPPER_CLASS}
-        onClick={() => props.onHightlightNext()}
+        onClick={() => props.onHighlightNext()}
         tabIndex={0}
       >
         <caretDownEmptyThinIcon.react
@@ -353,7 +352,7 @@ interface ISearchOverlayProps {
   overlayState: IDisplayState;
   onCaseSensitiveToggled: Function;
   onRegexToggled: Function;
-  onHightlightNext: Function;
+  onHighlightNext: Function;
   onHighlightPrevious: Function;
   onStartQuery: Function;
   onEndSearch: Function;
@@ -440,7 +439,7 @@ class SearchOverlay extends React.Component<
       !filterChanged
     ) {
       if (goForward) {
-        this.props.onHightlightNext();
+        this.props.onHighlightNext();
       } else {
         this.props.onHighlightPrevious();
       }
@@ -573,7 +572,7 @@ class SearchOverlay extends React.Component<
         />
         <UpDownButtons
           onHighlightPrevious={() => this._executeSearch(false)}
-          onHightlightNext={() => this._executeSearch(true)}
+          onHighlightNext={() => this._executeSearch(true)}
         />
         {showReplace ? null : filterToggle}
         <button
@@ -619,6 +618,10 @@ class SearchOverlay extends React.Component<
         key={3}
       >
         {this.state.errorMessage}
+      </div>,
+      <div className={SEARCH_DOCUMENT_LOADING} key={4}>
+        This document is still loading. Only loaded content will appear in
+        search results until the entire document loads.
       </div>
     ];
   }
@@ -639,7 +642,7 @@ export function createSearchOverlay(
     overlayState,
     onCaseSensitiveToggled,
     onRegexToggled,
-    onHightlightNext,
+    onHighlightNext,
     onHighlightPrevious,
     onStartQuery,
     onReplaceCurrent,
@@ -656,7 +659,7 @@ export function createSearchOverlay(
           <SearchOverlay
             onCaseSensitiveToggled={onCaseSensitiveToggled}
             onRegexToggled={onRegexToggled}
-            onHightlightNext={onHightlightNext}
+            onHighlightNext={onHighlightNext}
             onHighlightPrevious={onHighlightPrevious}
             onStartQuery={onStartQuery}
             onEndSearch={onEndSearch}
@@ -681,7 +684,7 @@ namespace createSearchOverlay {
     overlayState: IDisplayState;
     onCaseSensitiveToggled: Function;
     onRegexToggled: Function;
-    onHightlightNext: Function;
+    onHighlightNext: Function;
     onHighlightPrevious: Function;
     onStartQuery: Function;
     onEndSearch: Function;

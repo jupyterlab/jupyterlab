@@ -5,7 +5,7 @@ import { IThemeManager } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { bugIcon } from '@jupyterlab/ui-components';
 

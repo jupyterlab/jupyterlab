@@ -1,16 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React, { useState, useEffect } from 'react';
-
-import { StringExt } from '@lumino/algorithm';
-
-import { InputGroup } from '@jupyterlab/ui-components';
-
 import { ReactWidget } from '@jupyterlab/apputils';
-
 import { Contents } from '@jupyterlab/services';
-
+import { InputGroup } from '@jupyterlab/ui-components';
+import { StringExt } from '@lumino/algorithm';
+import React, { useEffect, useState } from 'react';
 import { DirListing } from './listing';
 
 /**

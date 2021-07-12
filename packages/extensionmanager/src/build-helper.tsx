@@ -2,13 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-
 import { Builder } from '@jupyterlab/services';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import * as React from 'react';
 
 /**

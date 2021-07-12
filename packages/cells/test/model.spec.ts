@@ -7,9 +7,9 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import {
   CellModel,
-  RawCellModel,
+  CodeCellModel,
   MarkdownCellModel,
-  CodeCellModel
+  RawCellModel
 } from '@jupyterlab/cells';
 
 import * as nbformat from '@jupyterlab/nbformat';
@@ -110,8 +110,10 @@ describe('cells/model', () => {
         const model = new CodeCellModel({});
         let called = false;
         const listener = (sender: any, args: IChangedArgs<any>) => {
-          expect(args.newValue).toBe(1);
-          called = true;
+          if (args.name == 'executionCount') {
+            expect(args.newValue).toBe(1);
+            called = true;
+          }
         };
         model.stateChanged.connect(listener);
         model.executionCount = 1;
@@ -121,8 +123,10 @@ describe('cells/model', () => {
       it('should not signal when model state has not changed', () => {
         const model = new CodeCellModel({});
         let called = 0;
-        model.stateChanged.connect(() => {
-          called++;
+        model.stateChanged.connect((model, args) => {
+          if (args.name == 'executionCount') {
+            called++;
+          }
         });
         expect(called).toBe(0);
         model.executionCount = 1;
@@ -445,8 +449,10 @@ describe('cells/model', () => {
       it('should not signal when state has not changed', () => {
         const model = new CodeCellModel({});
         let called = 0;
-        model.stateChanged.connect(() => {
-          called++;
+        model.stateChanged.connect((model, args) => {
+          if (args.name == 'executionCount') {
+            called++;
+          }
         });
         expect(model.executionCount).toBeNull();
         expect(called).toBe(0);
@@ -454,6 +460,31 @@ describe('cells/model', () => {
         expect(model.executionCount).toBe(1);
         model.executionCount = 1;
         expect(called).toBe(1);
+      });
+
+      it('should set dirty flag and signal', () => {
+        const model = new CodeCellModel({});
+        let called = 0;
+        model.stateChanged.connect((model, args) => {
+          if (args.name == 'isDirty') {
+            called++;
+          }
+        });
+        expect(model.executionCount).toBeNull();
+        expect(model.isDirty).toBe(false);
+        expect(called).toBe(0);
+
+        model.executionCount = 1;
+        expect(model.isDirty).toBe(false);
+        expect(called).toBe(0);
+
+        model.value.text = 'foo';
+        expect(model.isDirty).toBe(true);
+        expect(called).toBe(1);
+
+        model.executionCount = 2;
+        expect(model.isDirty).toBe(false);
+        expect(called).toBe(2);
       });
     });
 

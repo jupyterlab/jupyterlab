@@ -9,7 +9,7 @@ import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { ISessionContext } from '@jupyterlab/apputils';
 
-import { IChangedArgs, ActivityMonitor, URLExt } from '@jupyterlab/coreutils';
+import { ActivityMonitor, IChangedArgs, URLExt } from '@jupyterlab/coreutils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
@@ -17,52 +17,52 @@ import { DirListing } from '@jupyterlab/filebrowser';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { IObservableMap, IObservableJSON } from '@jupyterlab/observables';
+import { IObservableJSON, IObservableMap } from '@jupyterlab/observables';
 
 import {
-  OutputArea,
-  SimplifiedOutputArea,
   IOutputPrompt,
-  OutputPrompt,
   IStdin,
+  OutputArea,
+  OutputPrompt,
+  SimplifiedOutputArea,
   Stdin
 } from '@jupyterlab/outputarea';
 
 import {
+  imageRendererFactory,
   IRenderMime,
-  MimeModel,
   IRenderMimeRegistry,
-  imageRendererFactory
+  MimeModel
 } from '@jupyterlab/rendermime';
 
-import { KernelMessage, Kernel } from '@jupyterlab/services';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import {
-  JSONValue,
-  PromiseDelegate,
   JSONObject,
-  UUID,
-  PartialJSONValue
+  JSONValue,
+  PartialJSONValue,
+  PromiseDelegate,
+  UUID
 } from '@lumino/coreutils';
 
-import { some, filter, toArray } from '@lumino/algorithm';
+import { filter, some, toArray } from '@lumino/algorithm';
 
 import { IDragEvent } from '@lumino/dragdrop';
 
 import { Message } from '@lumino/messaging';
 
-import { PanelLayout, Panel, Widget } from '@lumino/widgets';
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { InputCollapser, OutputCollapser } from './collapser';
 
 import {
-  CellHeader,
   CellFooter,
-  ICellHeader,
-  ICellFooter
+  CellHeader,
+  ICellFooter,
+  ICellHeader
 } from './headerfooter';
 
-import { InputArea, IInputPrompt, InputPrompt } from './inputarea';
+import { IInputPrompt, InputArea, InputPrompt } from './inputarea';
 
 import {
   IAttachmentsCellModel,
@@ -125,6 +125,11 @@ const CELL_OUTPUT_COLLAPSER_CLASS = 'jp-Cell-outputCollapser';
  * The class name added to the cell when readonly.
  */
 const READONLY_CLASS = 'jp-mod-readOnly';
+
+/**
+ * The class name added to the cell when dirty.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
 
 /**
  * The class name added to code cells.
@@ -206,7 +211,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     const input = (this._input = new InputArea({
       model,
       contentFactory,
-      updateOnShow: options.updateEditorOnShow
+      updateOnShow: options.updateEditorOnShow,
+      placeholder: options.placeholder
     }));
     input.addClass(CELL_INPUT_AREA_CLASS);
     inputWrapper.addWidget(inputCollapser);
@@ -462,7 +468,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     const constructor = this.constructor as typeof Cell;
     return new constructor({
       model: this.model,
-      contentFactory: this.contentFactory
+      contentFactory: this.contentFactory,
+      placeholder: false
     });
   }
 
@@ -582,6 +589,11 @@ export namespace Cell {
      * The maximum number of output items to display in cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Whether this cell is a placeholder for future rendering.
+     */
+    placeholder?: boolean;
   }
 
   /**
@@ -710,32 +722,38 @@ export class CodeCell extends Cell<ICodeCellModel> {
     const contentFactory = this.contentFactory;
     const model = this.model;
 
-    // Insert the output before the cell footer.
-    const outputWrapper = (this._outputWrapper = new Panel());
-    outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-    const outputCollapser = new OutputCollapser();
-    outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
-    const output = (this._output = new OutputArea({
-      model: model.outputs,
-      rendermime,
-      contentFactory: contentFactory,
-      maxNumberOutputs: options.maxNumberOutputs
-    }));
-    output.addClass(CELL_OUTPUT_AREA_CLASS);
-    // Set a CSS if there are no outputs, and connect a signal for future
-    // changes to the number of outputs. This is for conditional styling
-    // if there are no outputs.
-    if (model.outputs.length === 0) {
-      this.addClass(NO_OUTPUTS_CLASS);
-    }
-    output.outputLengthChanged.connect(this._outputLengthHandler, this);
-    outputWrapper.addWidget(outputCollapser);
-    outputWrapper.addWidget(output);
-    (this.layout as PanelLayout).insertWidget(2, outputWrapper);
+    if (!options.placeholder) {
+      // Insert the output before the cell footer.
+      const outputWrapper = (this._outputWrapper = new Panel());
+      outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
+      const outputCollapser = new OutputCollapser();
+      outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
+      const output = (this._output = new OutputArea({
+        model: model.outputs,
+        rendermime,
+        contentFactory: contentFactory,
+        maxNumberOutputs: options.maxNumberOutputs
+      }));
+      output.addClass(CELL_OUTPUT_AREA_CLASS);
+      // Set a CSS if there are no outputs, and connect a signal for future
+      // changes to the number of outputs. This is for conditional styling
+      // if there are no outputs.
+      if (model.outputs.length === 0) {
+        this.addClass(NO_OUTPUTS_CLASS);
+      }
+      output.outputLengthChanged.connect(this._outputLengthHandler, this);
+      outputWrapper.addWidget(outputCollapser);
+      outputWrapper.addWidget(output);
+      (this.layout as PanelLayout).insertWidget(2, outputWrapper);
 
-    this._outputPlaceholder = new OutputPlaceholder(() => {
-      this.outputHidden = !this.outputHidden;
-    });
+      if (model.isDirty) {
+        this.addClass(DIRTY_CLASS);
+      }
+
+      this._outputPlaceholder = new OutputPlaceholder(() => {
+        this.outputHidden = !this.outputHidden;
+      });
+    }
     model.stateChanged.connect(this.onStateChanged, this);
   }
 
@@ -926,7 +944,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory,
-      rendermime: this._rendermime
+      rendermime: this._rendermime,
+      placeholder: false
     });
   }
 
@@ -966,6 +985,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
     switch (args.name) {
       case 'executionCount':
         this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
+        break;
+      case 'isDirty':
+        if ((model as ICodeCellModel).isDirty) {
+          this.addClass(DIRTY_CLASS);
+        } else {
+          this.removeClass(DIRTY_CLASS);
+        }
         break;
       default:
         break;
@@ -1668,7 +1694,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory,
-      rendermime: this._rendermime
+      rendermime: this._rendermime,
+      placeholder: false
     });
   }
 
@@ -1721,7 +1748,8 @@ export class RawCell extends Cell<IRawCellModel> {
     const constructor = this.constructor as typeof RawCell;
     return new constructor({
       model: this.model,
-      contentFactory: this.contentFactory
+      contentFactory: this.contentFactory,
+      placeholder: false
     });
   }
 }

@@ -60,7 +60,17 @@ module.exports = {
     'no-case-declarations': 'warn',
     'no-useless-escape': 'off',
     'prefer-const': 'off',
-    'react/prop-types': 'warn'
+    'react/prop-types': 'warn',
+    'sort-imports': [
+      'error',
+      {
+        ignoreCase: true,
+        ignoreDeclarationSort: true,
+        ignoreMemberSort: false,
+        memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
+        allowSeparatedGroups: false
+      }
+    ]
   },
   settings: {
     react: {

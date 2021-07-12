@@ -1,26 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React from 'react';
-
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import {
   ServiceManager,
-  Terminal,
-  TerminalManager,
+  Session,
   SessionManager,
-  Session
+  Terminal,
+  TerminalManager
 } from '@jupyterlab/services';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { kernelIcon, terminalIcon } from '@jupyterlab/ui-components';
-
+import React from 'react';
 import { GroupItem, interactiveItem, TextItem } from '..';
 
 /**
@@ -53,7 +48,7 @@ function RunningSessionsComponent(
 }
 
 /**
- * A namepsace for RunningSessionsComponents statics.
+ * A namespace for RunningSessionsComponents statics.
  */
 namespace RunningSessionsComponent {
   /**
@@ -61,7 +56,7 @@ namespace RunningSessionsComponent {
    */
   export interface IProps {
     /**
-     * A click handler for the component. By defult this is used
+     * A click handler for the component. By default this is used
      * to activate the running sessions side panel.
      */
     handleClick: () => void;
@@ -170,11 +165,11 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
 }
 
 /**
- * A namespace for RunninSessions statics.
+ * A namespace for RunningSessions statics.
  */
 export namespace RunningSessions {
   /**
-   * A VDomModel for the RunninSessions status item.
+   * A VDomModel for the RunningSessions status item.
    */
   export class Model extends VDomModel {
     /**
@@ -221,7 +216,7 @@ export namespace RunningSessions {
     serviceManager: ServiceManager;
 
     /**
-     * A click handler for the item. By defult this is used
+     * A click handler for the item. By default this is used
      * to activate the running sessions side panel.
      */
     onClick: () => void;

@@ -1,0 +1,24 @@
+{
+  "title": "Workspaces",
+  "description": "Workspaces settings.",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "command": "workspace-ui:save-as",
+            "rank": 40
+          },
+          {
+            "command": "workspace-ui:save",
+            "rank": 40
+          }
+        ]
+      }
+    ]
+  },
+  "additionalProperties": false,
+  "properties": {},
+  "type": "object"
+}

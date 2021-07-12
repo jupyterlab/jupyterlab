@@ -3,7 +3,7 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { MainAreaWidget, WidgetTracker, DOMUtils } from '@jupyterlab/apputils';
+import { DOMUtils, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
 
 import {
   CodeEditor,

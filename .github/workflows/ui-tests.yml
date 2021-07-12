@@ -1,0 +1,48 @@
+name: UI Tests
+
+on: [push, pull_request]
+
+jobs:
+  ui-tests:
+    name: Visual Regression
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run UI Tests
+        run: |
+          docker-compose -f "./ui-tests/docker/docker-compose.yml" down || true
+          docker-compose -f "./ui-tests/docker/docker-compose.yml" pull || true
+          /bin/sh ./scripts/build_docker.sh
+          docker-compose -f "./ui-tests/docker/docker-compose.yml" build
+          docker-compose -f "./ui-tests/docker/docker-compose.yml" run --rm e2e
+
+      - name: Upload UI Test artifacts
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: ui-test-output
+          path: |
+            ui-tests/test-output
+
+      - name: Stop containers
+        if: always()
+        run: |
+          # Print jupyterlab logs before removing the containers using the container name set in docker-compose file
+          docker logs jupyterlab
+          docker-compose -f "./ui-tests/docker/docker-compose.yml" down
+          
+      - name: Run UI Tests
+        if: ${{ failure() }}
+        run: |
+          docker-compose -f "./ui-tests/docker/docker-compose.yml" run --rm e2e yarn run test:create-references --jlab-base-url=http://jupyterlab:8888
+          docker-compose -f "./ui-tests/docker/docker-compose.yml" down
+
+      - name: Upload UI Test new reference artifacts
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ui-test-new-reference
+          path: |
+            ui-tests/test-output/test/screenshots/*.png

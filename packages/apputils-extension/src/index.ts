@@ -13,43 +13,30 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
+  defaultSanitizer,
   Dialog,
   ICommandPalette,
+  ISanitizer,
   ISessionContextDialogs,
   ISplashScreen,
   IWindowResolver,
-  WindowResolver,
+  MainAreaWidget,
   Printing,
   sessionContextDialogs,
-  ISanitizer,
-  defaultSanitizer,
-  MainAreaWidget
+  WindowResolver
 } from '@jupyterlab/apputils';
-
-import { URLExt, PageConfig } from '@jupyterlab/coreutils';
-
-import { IStateDB, StateDB } from '@jupyterlab/statedb';
-
-import { ITranslator } from '@jupyterlab/translation';
-
-import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
-
-import { PromiseDelegate } from '@lumino/coreutils';
-
-import { DisposableDelegate } from '@lumino/disposable';
-
-import { Debouncer, Throttler } from '@lumino/polling';
-
-import { Palette } from './palette';
-
-import { settingsPlugin } from './settingsplugin';
-
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { themesPlugin, themesPaletteMenuPlugin } from './themesplugins';
-
+import { IStateDB, StateDB } from '@jupyterlab/statedb';
+import { ITranslator } from '@jupyterlab/translation';
+import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
+import { PromiseDelegate } from '@lumino/coreutils';
+import { DisposableDelegate } from '@lumino/disposable';
+import { Debouncer, Throttler } from '@lumino/polling';
+import { Palette } from './palette';
+import { settingsPlugin } from './settingsplugin';
+import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { workspacesPlugin } from './workspacesplugin';
 
 /**
@@ -70,6 +57,8 @@ namespace CommandIDs {
   export const resetOnLoad = 'apputils:reset-on-load';
 
   export const runFirstEnabled = 'apputils:run-first-enabled';
+
+  export const runAllEnabled = 'apputils:run-all-enabled';
 
   export const toggleHeader = 'apputils:toggle-header';
 }
@@ -215,7 +204,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
         }
 
         dialog = new Dialog({
-          title: trans.__('Loading...'),
+          title: trans.__('Loading…'),
           body: trans.__(`The loading screen is taking a long time.
 Would you like to clear the workspace or keep waiting?`),
           buttons: [
@@ -577,6 +566,27 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
           const arg = argList ? commandArgs[i] : commandArgs;
           if (app.commands.isEnabled(cmd, arg)) {
             return app.commands.execute(cmd, arg);
+          }
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.runAllEnabled, {
+      label: trans.__('Run All Enabled Commands Passed as Args'),
+      execute: async args => {
+        const commands: string[] = args.commands as string[];
+        const commandArgs: any = args.args;
+        const argList = Array.isArray(args);
+        const errorIfNotEnabled: boolean = args.errorIfNotEnabled as boolean;
+        for (let i = 0; i < commands.length; i++) {
+          const cmd = commands[i];
+          const arg = argList ? commandArgs[i] : commandArgs;
+          if (app.commands.isEnabled(cmd, arg)) {
+            await app.commands.execute(cmd, arg);
+          } else {
+            if (errorIfNotEnabled) {
+              console.error(`${cmd} is not enabled.`);
+            }
           }
         }
       }

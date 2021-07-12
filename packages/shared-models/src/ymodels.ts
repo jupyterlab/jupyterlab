@@ -3,18 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ISignal, Signal } from '@lumino/signaling';
-import { UUID } from '@lumino/coreutils';
-
-import * as Y from 'yjs';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
-import * as models from './api';
-
-import { Delta } from './api';
-
+import { UUID } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
+import * as Y from 'yjs';
+import * as models from './api';
+import { Delta } from './api';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 
@@ -313,7 +308,7 @@ export class YNotebook
    * Handle a change to the list of cells.
    */
   private _onYCellsChanged = (event: Y.YArrayEvent<Y.Map<any>>) => {
-    // update the type⇔cell mapping by iterating through the addded/removed types
+    // update the type⇔cell mapping by iterating through the added/removed types
     event.changes.added.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
       if (!this._ycellMapping.has(type)) {
@@ -613,12 +608,12 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   /**
    * Sets the cell attachments
    *
-   * @param attchments: The cell attachments.
+   * @param attachments: The cell attachments.
    */
-  public setAttachments(value: nbformat.IAttachments | undefined): void {
+  public setAttachments(attachments: nbformat.IAttachments | undefined): void {
     this.transact(() => {
-      if (value == null) {
-        this.ymodel.set('attachments', value);
+      if (attachments == null) {
+        this.ymodel.set('attachments', attachments);
       } else {
         this.ymodel.delete('attachments');
       }

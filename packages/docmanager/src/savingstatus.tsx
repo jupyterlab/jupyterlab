@@ -1,19 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React from 'react';
-
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-
-import { IDocumentManager } from './tokens';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import { TextItem } from '@jupyterlab/statusbar';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
+import React from 'react';
+import { IDocumentManager } from './tokens';
 
 /**
  * A namespace for SavingStatusComponent statics.
@@ -176,7 +170,7 @@ export namespace SavingStatus {
     docManager: IDocumentManager;
 
     /**
-     * The aplication language translator.
+     * The application language translator.
      */
     translator?: ITranslator;
   }

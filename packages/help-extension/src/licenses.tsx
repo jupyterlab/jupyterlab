@@ -1,23 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
-
-import { Panel, SplitPanel, TabBar, Widget } from '@lumino/widgets';
-import { ReadonlyJSONObject, PromiseDelegate } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { VirtualElement, h } from '@lumino/virtualdom';
-
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { ServerConnection } from '@jupyterlab/services';
 import { TranslationBundle } from '@jupyterlab/translation';
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import {
-  spreadsheetIcon,
   jsonIcon,
+  LabIcon,
   markdownIcon,
-  LabIcon
+  spreadsheetIcon
 } from '@jupyterlab/ui-components';
+import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
+import { h, VirtualElement } from '@lumino/virtualdom';
+import { Panel, SplitPanel, TabBar, Widget } from '@lumino/widgets';
+import * as React from 'react';
 
 /**
  * A license viewer

@@ -3,29 +3,57 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as Y from 'yjs';
-
-import { WebsocketProvider } from 'y-websocket';
-
+import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
-
 import * as encoding from 'lib0/encoding';
-
-import { IDocumentProviderFactory } from './tokens';
+import { WebsocketProvider } from 'y-websocket';
+import * as Y from 'yjs';
+import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
+import { getAnonymousUserName, getRandomColor } from './awareness';
+import * as env from 'lib0/environment';
 
 /**
  * A class to provide Yjs synchronization over WebSocket.
+ *
+ * The user can specify their own user-name and user-color by adding url parameters:
+ *   ?username=Alice&usercolor=007007
+ * where usercolor must be a six-digit hexadecimal encoded RGB value without the hash token.
+ *
+ * We specify custom messages that the server can interpret. For reference please look in yjs_ws_server.
+ *
  */
-export class WebSocketProviderWithLocks extends WebsocketProvider {
+export class WebSocketProviderWithLocks
+  extends WebsocketProvider
+  implements IDocumentProvider {
   /**
    * Construct a new WebSocketProviderWithLocks
    *
    * @param options The instantiation options for a WebSocketProviderWithLocks
    */
   constructor(options: WebSocketProviderWithLocks.IOptions) {
-    super(options.url, options.guid, options.ymodel.ydoc, {
-      awareness: options.ymodel.awareness
-    });
+    super(
+      options.url,
+      options.contentType + ':' + options.path,
+      options.ymodel.ydoc,
+      {
+        awareness: options.ymodel.awareness
+      }
+    );
+    this._path = options.path;
+    this._contentType = options.contentType;
+    this._serverUrl = options.url;
+    const color = '#' + env.getParam('--usercolor', getRandomColor().slice(1));
+    const name = env.getParam('--username', getAnonymousUserName());
+    const awareness = options.ymodel.awareness;
+    const currState = awareness.getLocalState();
+    // only set if this was not already set by another plugin
+    if (currState && currState.name == null) {
+      options.ymodel.awareness.setLocalStateField('user', {
+        name,
+        color
+      });
+    }
+
     // Message handler that confirms when a lock has been acquired
     this.messageHandlers[127] = (
       encoder,
@@ -69,6 +97,29 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     this.on('status', this._onConnectionStatus);
   }
 
+  setPath(newPath: string): void {
+    if (newPath !== this._path) {
+      this._path = newPath;
+      // The next time the provider connects, we should connect through a different server url
+      this.bcChannel =
+        this._serverUrl + '/' + this._contentType + ':' + this._path;
+      this.url = this.bcChannel;
+      const encoder = encoding.createEncoder();
+      encoding.write(encoder, 123);
+      // writing a utf8 string to the encoder
+      const escapedPath = unescape(
+        encodeURIComponent(this._contentType + ':' + newPath)
+      );
+      for (let i = 0; i < escapedPath.length; i++) {
+        encoding.write(
+          encoder,
+          /** @type {number} */ escapedPath.codePointAt(i)!
+        );
+      }
+      this._sendMessage(encoding.toUint8Array(encoder));
+    }
+  }
+
   /**
    * Resolves to true if the initial content has been initialized on the server. false otherwise.
    */
@@ -77,20 +128,15 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
       return this._initialContentRequest.promise;
     }
 
-    let resolve: any, reject: any;
-    const promise: Promise<boolean> = new Promise((_resolve, _reject) => {
-      resolve = _resolve;
-      reject = _reject;
-    });
-    this._initialContentRequest = { promise, resolve, reject };
+    this._initialContentRequest = new PromiseDelegate<boolean>();
     this._sendMessage(new Uint8Array([125]));
 
     // Resolve with true if the server doesn't respond for some reason.
     // In case of a connection problem, we don't want the user to re-initialize the window.
     // Instead wait for y-websocket to connect to the server.
     // @todo maybe we should reload instead..
-    setTimeout(() => resolve(false), 1000);
-    return promise;
+    setTimeout(() => this._initialContentRequest?.resolve(false), 1000);
+    return this._initialContentRequest.promise;
   }
 
   /**
@@ -184,17 +230,16 @@ export class WebSocketProviderWithLocks extends WebsocketProvider {
     }
   }
 
+  private _path: string;
+  private _contentType: string;
+  private _serverUrl: string;
   private _isInitialized: boolean;
   private _currentLockRequest: {
     promise: Promise<number>;
     resolve: (lock: number) => void;
     reject: () => void;
   } | null = null;
-  private _initialContentRequest: {
-    promise: Promise<boolean>;
-    resolve: (initialized: boolean) => void;
-    reject: () => void;
-  } | null = null;
+  private _initialContentRequest: PromiseDelegate<boolean> | null = null;
 }
 
 /**

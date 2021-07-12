@@ -1,6 +1,10 @@
 Design System CSS:
   - '**/*.css'
   - '*.css'
+  
+documentation:
+  - docs/**/*
+  - docs/*
 
 tag:CSS:
   - '**/*.css'
@@ -10,10 +14,6 @@ tag:CSS:
   - design/**/*
   - design/*
 
-tag:Documentation:
-  - docs/**/*
-  - docs/*
-
 tag:Examples:
   - examples/**/*
   - examples/*
@@ -21,6 +21,8 @@ tag:Examples:
 tag:Testing:
   - tests/**/*
   - tests/*
+  - ui-tests/**/*
+  - ui-tests/*
 
 ######################
 #   Package Labels   #

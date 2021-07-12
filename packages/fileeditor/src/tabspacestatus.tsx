@@ -1,23 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React from 'react';
-
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import {
-  interactiveItem,
   clickedItem,
+  interactiveItem,
   Popup,
   showPopup,
   TextItem
 } from '@jupyterlab/statusbar';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Menu } from '@lumino/widgets';
+import React from 'react';
 
 /**
  * A namespace for TabSpaceComponent statics.

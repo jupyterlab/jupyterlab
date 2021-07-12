@@ -66,7 +66,9 @@ export class InputArea extends Widget {
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(prompt);
-    layout.addWidget(editor);
+    if (!options.placeholder) {
+      layout.addWidget(editor);
+    }
   }
 
   /**
@@ -173,6 +175,11 @@ export namespace InputArea {
      * Whether to send an update request to the editor when it is shown.
      */
     updateOnShow?: boolean;
+
+    /**
+     * Whether this input area is a placeholder for future rendering.
+     */
+    placeholder?: boolean;
   }
 
   /**
@@ -183,7 +190,7 @@ export namespace InputArea {
    */
   export interface IContentFactory {
     /**
-     * The editor factory we need to include in `CodeEditorWratter.IOptions`.
+     * The editor factory we need to include in `CodeEditorWrapper.IOptions`.
      *
      * This is a separate readonly attribute rather than a factory method as we need
      * to pass it around.

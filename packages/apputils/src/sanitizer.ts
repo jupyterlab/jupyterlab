@@ -4,13 +4,12 @@
 // sanitize-html uses the url package, so we depend on a standalone version of
 // it which acts as a polyfill for browsers.
 import sanitize from 'sanitize-html';
-
 import { ISanitizer } from './tokens';
 
 /**
  * Helper class that contains regular expressions for inline CSS style validation.
  *
- * Which properties (and values) to allow is largly based on the Google Caja project:
+ * Which properties (and values) to allow is largely based on the Google Caja project:
  *   https://github.com/google/caja
  *
  * The regular expressions are largly based on the syntax definition found at
@@ -54,7 +53,7 @@ class CssProp {
   };
 
   /*
-   * Atomic (i.e. not dependant on other regular expresions) sub RegEx segments
+   * Atomic (i.e. not dependant on other regular expressions) sub RegEx segments
    */
   private static readonly A = {
     absolute_size: `xx-small|x-small|small|medium|large|x-large|xx-large`,
@@ -86,7 +85,7 @@ class CssProp {
   };
 
   /*
-   * Compound (i.e. dependant on other (sub) regular expresions) sub RegEx segments
+   * Compound (i.e. dependant on other (sub) regular expressions) sub RegEx segments
    */
   private static readonly _C = {
     alpha: `${CssProp.N.integer_zero_ff}|${CssProp.N.number_zero_one}|${CssProp.B.percentage_zero_hundred}`,

@@ -10,41 +10,30 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
+  CommandToolbarButton,
   Dialog,
   ICommandPalette,
   IFrame,
   MainAreaWidget,
   showDialog,
-  WidgetTracker,
-  CommandToolbarButton,
-  Toolbar
+  Toolbar,
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-
-import { IInspector } from '@jupyterlab/inspector';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { KernelMessage } from '@jupyterlab/services';
-
 import { ITranslator } from '@jupyterlab/translation';
-
-import { Licenses } from './licenses';
-
 import {
+  copyrightIcon,
   jupyterIcon,
   jupyterlabWordmarkIcon,
-  copyrightIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
-
-import { Menu } from '@lumino/widgets';
-
-import * as React from 'react';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { Menu } from '@lumino/widgets';
+import * as React from 'react';
+import { Licenses } from './licenses';
 
 /**
  * The command IDs used by the help plugin.
@@ -63,6 +52,8 @@ namespace CommandIDs {
   export const hide = 'help:hide';
 
   export const launchClassic = 'help:launch-classic-notebook';
+
+  export const jupyterForum = 'help:jupyter-forum';
 
   export const licenses = 'help:licenses';
 
@@ -88,11 +79,10 @@ const about: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:about',
   autoStart: true,
   requires: [ITranslator],
-  optional: [IMainMenu, ICommandPalette],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    menu: IMainMenu | null,
     palette: ICommandPalette | null
   ): void => {
     const { commands } = app;
@@ -168,11 +158,6 @@ const about: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    if (menu) {
-      const helpMenu = menu.helpMenu;
-      helpMenu.addGroup([{ command: CommandIDs.about }], 0);
-    }
-
     if (palette) {
       palette.addItem({ command: CommandIDs.about, category });
     }
@@ -186,11 +171,10 @@ const launchClassic: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:launch-classic',
   autoStart: true,
   requires: [ITranslator],
-  optional: [IMainMenu, ICommandPalette],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    menu: IMainMenu | null,
     palette: ICommandPalette | null
   ): void => {
     const { commands } = app;
@@ -204,13 +188,38 @@ const launchClassic: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    if (menu) {
-      const helpMenu = menu.helpMenu;
-      helpMenu.addGroup([{ command: CommandIDs.launchClassic }], 1);
-    }
-
     if (palette) {
       palette.addItem({ command: CommandIDs.launchClassic, category });
+    }
+  }
+};
+
+/**
+ * A plugin to add a command to open the Jupyter Forum.
+ */
+const jupyterForum: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:jupyter-forum',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ): void => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Help');
+
+    commands.addCommand(CommandIDs.jupyterForum, {
+      label: trans.__('Jupyter Forum'),
+      execute: () => {
+        window.open('https://discourse.jupyter.org/c/jupyterlab');
+      }
+    });
+
+    if (palette) {
+      palette.addItem({ command: CommandIDs.jupyterForum, category });
     }
   }
 };
@@ -222,14 +231,13 @@ const resources: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:resources',
   autoStart: true,
   requires: [IMainMenu, ITranslator],
-  optional: [ICommandPalette, ILayoutRestorer, IInspector],
+  optional: [ICommandPalette, ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
     mainMenu: IMainMenu,
     translator: ITranslator,
     palette: ICommandPalette | null,
-    restorer: ILayoutRestorer | null,
-    inspector: IInspector | null
+    restorer: ILayoutRestorer | null
   ): void => {
     const trans = translator.load('jupyterlab');
     let counter = 0;
@@ -251,10 +259,6 @@ const resources: JupyterFrontEndPlugin<void> = {
       {
         text: trans.__('Jupyter Reference'),
         url: 'https://jupyter.org/documentation'
-      },
-      {
-        text: trans.__('Jupyter Forum'),
-        url: 'https://discourse.jupyter.org/c/jupyterlab'
       },
       {
         text: trans.__('Markdown Reference'),
@@ -301,12 +305,6 @@ const resources: JupyterFrontEndPlugin<void> = {
 
     // Populate the Help menu.
     const helpMenu = mainMenu.helpMenu;
-
-    // Contextual help in its own group
-    const contextualHelpGroup = [
-      inspector ? 'inspector:open' : undefined
-    ].map(command => ({ command }));
-    helpMenu.addGroup(contextualHelpGroup, 0);
 
     const resourcesGroup = resources.map(args => ({
       args,
@@ -508,7 +506,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
     });
 
     /**
-     * Return a full report format based on a format name
+     * Return a full license report format based on a format name
      */
     function formatOrDefault(format: string): Licenses.IReportFormat {
       return (
@@ -518,10 +516,15 @@ const licenses: JupyterFrontEndPlugin<void> = {
     }
 
     /**
-     * Create a MainAreaWidget for a toolbar item
+     * Create a MainAreaWidget for a license viewer
      */
     function createLicenseWidget(args: Licenses.ICreateArgs) {
-      const licensesModel = new Licenses.Model({ licensesUrl, trans, ...args });
+      const licensesModel = new Licenses.Model({
+        ...args,
+        licensesUrl,
+        trans,
+        serverSettings: app.serviceManager.serverSettings
+      });
       const content = new Licenses({ model: licensesModel });
       content.id = `${licensesNamespace}-${++counter}`;
       content.title.label = licensesText;
@@ -639,6 +642,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   about,
   launchClassic,
+  jupyterForum,
   resources,
   licenses
 ];

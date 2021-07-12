@@ -4,9 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
-
 import { Token } from '@lumino/coreutils';
-
 import { requestTranslationsAPI } from './server';
 
 /*

@@ -1,18 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, toArray } from '@lumino/algorithm';
-
 import { CodeCellModel } from '@jupyterlab/cells';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { NotebookModel } from '../src';
-
 import { ModelDB } from '@jupyterlab/observables';
-
 import { acceptDialog } from '@jupyterlab/testutils';
-
+import { ArrayExt, toArray } from '@lumino/algorithm';
+import { NotebookModel } from '../src';
 import * as utils from './utils';
 
 describe('@jupyterlab/notebook', () => {

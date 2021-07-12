@@ -111,3 +111,7 @@ junit.xml
 *.code-workspace
 .history
 .vscode
+
+ui-tests/test-output
+ui-tests/jlab_root
+package_json.tar.gz

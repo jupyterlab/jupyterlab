@@ -11,46 +11,31 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
-  showDialog,
-  showErrorMessage,
   Dialog,
   ICommandPalette,
-  ISessionContextDialogs
+  ISessionContextDialogs,
+  showDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
-
 import { IChangedArgs, Time } from '@jupyterlab/coreutils';
-
 import {
-  renameDialog,
-  nameOnSaveDialog,
   DocumentManager,
   IDocumentManager,
+  nameOnSaveDialog,
   PathStatus,
+  renameDialog,
   SavingStatus
 } from '@jupyterlab/docmanager';
-
 import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { Contents, Kernel } from '@jupyterlab/services';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-
 import { each, map, some, toArray } from '@lumino/algorithm';
-
 import { JSONExt } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -108,7 +93,6 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     ILabStatus,
     ICommandPalette,
     ILabShell,
-    IMainMenu,
     ISessionContextDialogs,
     IDocumentProviderFactory
   ],
@@ -119,7 +103,6 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     status: ILabStatus | null,
     palette: ICommandPalette | null,
     labShell: ILabShell | null,
-    mainMenu: IMainMenu | null,
     sessionDialogs: ISessionContextDialogs | null,
     docProviderFactory: IDocumentProviderFactory | null
   ): IDocumentManager => {
@@ -172,8 +155,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       settingRegistry,
       translator,
       labShell,
-      palette,
-      mainMenu
+      palette
     );
 
     // Keep up to date with the settings registry.
@@ -366,13 +348,12 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:download',
   autoStart: true,
   requires: [ITranslator, IDocumentManager],
-  optional: [ICommandPalette, IMainMenu],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
     docManager: IDocumentManager,
-    palette: ICommandPalette | null,
-    mainMenu: IMainMenu | null
+    palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
@@ -403,9 +384,6 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
     const category = trans.__('File Operations');
     if (palette) {
       palette.addItem({ command: CommandIDs.download, category });
-    }
-    if (mainMenu) {
-      mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
     }
   }
 };
@@ -506,8 +484,7 @@ function addCommands(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   labShell: ILabShell | null,
-  palette: ICommandPalette | null,
-  mainMenu: IMainMenu | null
+  palette: ICommandPalette | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -532,7 +509,7 @@ function addCommands(
 
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
-    addLabCommands(app, docManager, labShell, opener, translator, palette);
+    addLabCommands(app, docManager, labShell, opener, translator);
   }
 
   commands.addCommand(CommandIDs.deleteFile, {
@@ -546,6 +523,18 @@ function addCommands(
         throw new Error(`A non-empty path is required for ${command}.`);
       }
       return docManager.deleteFile(path);
+    }
+  });
+
+  commands.addCommand(CommandIDs.nameOnSave, {
+    label: () =>
+      trans.__('Rename %1…', fileType(shell.currentWidget, docManager)),
+    isEnabled,
+    execute: () => {
+      if (isEnabled()) {
+        const context = docManager.contextForWidget(shell.currentWidget!);
+        return nameOnSaveDialog(docManager, context!);
+      }
     }
   });
 
@@ -814,25 +803,28 @@ function addCommands(
     }
   });
 
+  const newFileRegex = new RegExp('^untitled', 'i');
+
   docManager.activateRequested.connect((sender, args) => {
     const widget = sender.findWidget(args);
-    if (widget && widget.shouldNameFile) {
-      widget.shouldNameFile.connect(() => {
-        if (sender.nameFileOnSave && widget == shell.currentWidget) {
+    if (!widget) {
+      return;
+    }
+
+    widget.context.saveState.connect((doc, state) => {
+      if (sender.nameFileOnSave && widget === shell.currentWidget) {
+        const model = doc.contentsModel;
+        if (
+          state === 'completed manually' &&
+          model &&
+          !model.renamed == true &&
+          newFileRegex.test(model.name)
+        ) {
           const context = sender.contextForWidget(widget!);
           return nameOnSaveDialog(sender, context!);
         }
-      });
-    }
-  });
-
-  // .jp-mod-current added so that the console-creation command is only shown
-  // on the current document.
-  // Otherwise it will delegate to the wrong widget.
-  app.contextMenu.addItem({
-    command: 'filemenu:create-console',
-    selector: '[data-type="document-title"].jp-mod-current',
-    rank: 6
+      }
+    });
   });
 
   if (palette) {
@@ -846,16 +838,6 @@ function addCommands(
       palette.addItem({ command, category });
     });
   }
-
-  if (mainMenu) {
-    mainMenu.settingsMenu.addGroup(
-      [
-        { command: CommandIDs.toggleAutosave },
-        { command: CommandIDs.toggleNameFileOnSave }
-      ],
-      5
-    );
-  }
 }
 
 function addLabCommands(
@@ -863,8 +845,7 @@ function addLabCommands(
   docManager: IDocumentManager,
   labShell: ILabShell,
   opener: DocumentManager.IWidgetOpener,
-  translator: ITranslator,
-  palette: ICommandPalette | null
+  translator: ITranslator
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands } = app;
@@ -927,19 +908,6 @@ function addLabCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.nameOnSave, {
-    label: () =>
-      trans.__('Rename %1…', fileType(contextMenuWidget(), docManager)),
-    isEnabled,
-    execute: () => {
-      // Implies contextMenuWidget() !== null
-      if (isEnabled()) {
-        const context = docManager.contextForWidget(contextMenuWidget()!);
-        return nameOnSaveDialog(docManager, context!);
-      }
-    }
-  });
-
   commands.addCommand(CommandIDs.del, {
     label: () =>
       trans.__('Delete %1', fileType(contextMenuWidget(), docManager)),
@@ -983,27 +951,6 @@ function addLabCommands(
       await commands.execute('filebrowser:activate', { path: context.path });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
     }
-  });
-
-  app.contextMenu.addItem({
-    command: CommandIDs.rename,
-    selector: '[data-type="document-title"]',
-    rank: 1
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.del,
-    selector: '[data-type="document-title"]',
-    rank: 2
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.clone,
-    selector: '[data-type="document-title"]',
-    rank: 3
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.showInFileBrowser,
-    selector: '[data-type="document-title"]',
-    rank: 4
   });
 }
 

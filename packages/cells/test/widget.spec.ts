@@ -5,23 +5,23 @@ import { Message, MessageLoop } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
 
-import { SessionContext, ISessionContext } from '@jupyterlab/apputils';
+import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import {
   Cell,
-  CellModel,
-  InputPrompt,
-  CodeCell,
-  CodeCellModel,
-  MarkdownCell,
-  RawCell,
-  RawCellModel,
-  MarkdownCellModel,
   CellFooter,
   CellHeader,
-  InputArea
+  CellModel,
+  CodeCell,
+  CodeCellModel,
+  InputArea,
+  InputPrompt,
+  MarkdownCell,
+  MarkdownCellModel,
+  RawCell,
+  RawCellModel
 } from '@jupyterlab/cells';
 
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
@@ -29,8 +29,8 @@ import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 import {
   createSessionContext,
   framePromise,
-  NBTestUtils,
-  JupyterServer
+  JupyterServer,
+  NBTestUtils
 } from '@jupyterlab/testutils';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
@@ -122,7 +122,7 @@ describe('cells/widget', () => {
         expect(widget).toBeInstanceOf(Cell);
       });
 
-      it('shoule accept a custom editorConfig', () => {
+      it('should accept a custom editorConfig', () => {
         const editorConfig: Partial<CodeEditor.IConfig> = {
           insertSpaces: false,
           matchBrackets: false

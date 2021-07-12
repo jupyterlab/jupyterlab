@@ -95,9 +95,6 @@ language = None
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = []
 
-# The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
-
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
@@ -128,6 +125,23 @@ def build_api_docs(out_dir):
     if osp.exists(dest_dir):
         shutil.rmtree(dest_dir)
     shutil.copytree(docs_api, dest_dir)
+
+# Copy frontend files for snippet inclusion
+FILES_LIST = [  # File paths should be relative to jupyterlab root folder
+    'packages/settingregistry/src/plugin-schema.json'
+]
+SNIPPETS_FOLDER = 'snippets'
+
+def copy_code_files(temp_folder):
+    """Copy files in the temp_folder"""
+    docs = osp.join(HERE, os.pardir)
+    root = osp.join(docs, os.pardir)
+
+    for file in FILES_LIST:
+        target = osp.join(temp_folder, file)
+        if not osp.exists(osp.dirname(target)):
+            os.makedirs(osp.dirname(target), exist_ok=True)
+        shutil.copyfile(osp.join(root, file), target)
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -263,3 +277,14 @@ def setup(app):
     shutil.copy(osp.join(HERE, '..', '..', 'CHANGELOG.md'), dest)
     app.add_css_file('css/custom.css')  # may also be an URL
     build_api_docs(app.outdir)
+
+    copy_code_files(osp.join(app.srcdir, SNIPPETS_FOLDER))
+
+    def clean_code_files(app, exception):
+        """Remove temporary folder."""
+        try:
+            shutil.rmtree(osp.join(app.srcdir, SNIPPETS_FOLDER))
+        except Exception as e:
+            print(f"Fail to remove temporary snippet folder: {e}")
+    
+    app.connect('build-finished', clean_code_files)

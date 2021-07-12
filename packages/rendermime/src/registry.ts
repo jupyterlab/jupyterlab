@@ -2,24 +2,17 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { Contents, Session } from '@jupyterlab/services';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { PathExt, URLExt } from '@jupyterlab/coreutils';
-
 import {
-  ISessionContext,
+  defaultSanitizer,
   ISanitizer,
-  defaultSanitizer
+  ISessionContext
 } from '@jupyterlab/apputils';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { PathExt, URLExt } from '@jupyterlab/coreutils';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { Contents, Session } from '@jupyterlab/services';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-
 import { MimeModel } from './mimemodel';
-
 import { IRenderMimeRegistry } from './tokens';
 
 /**

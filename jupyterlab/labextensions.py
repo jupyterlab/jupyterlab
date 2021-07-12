@@ -157,8 +157,8 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
     This installs JupyterLab extensions similar to yarn add or npm install.
 
-    Pass a list of comma seperate names to the --pin-version-as flag
-    to use as alises for the packages providers. This is useful to
+    Pass a list of comma separate names to the --pin-version-as flag
+    to use as aliases for the packages providers. This is useful to
     install multiple versions of the same extension.
     These can be uninstalled with the alias you provided
     to the flag, similar to the "alias" feature of yarn add.
@@ -188,7 +188,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
 
 class DevelopLabExtensionApp(BaseExtensionApp):
-    desciption = "Develop labextension"
+    description = "Develop labextension"
     flags = develop_flags
 
     user = Bool(False, config=True, help="Whether to do a user install")
@@ -217,7 +217,7 @@ class BuildLabExtensionApp(BaseExtensionApp):
         help="Build in development mode")
 
     source_map = Bool(False, config=True,
-        help="Generage source maps")
+        help="Generate source maps")
 
     core_path = Unicode(os.path.join(HERE, 'staging'), config=True,
         help="Directory containing core application package.json file")
@@ -242,7 +242,7 @@ class WatchLabExtensionApp(BaseExtensionApp):
         help="Build in development mode")
 
     source_map = Bool(False, config=True,
-        help="Generage source maps")
+        help="Generate source maps")
 
     core_path = Unicode(os.path.join(HERE, 'staging'), config=True,
         help="Directory containing core application package.json file")

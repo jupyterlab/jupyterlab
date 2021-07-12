@@ -1,15 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
-import { JSONObject } from '@lumino/coreutils';
-
-import { ConfigSection, ConfigWithDefaults } from '../../src';
-
 import { expectFailure, JupyterServer } from '@jupyterlab/testutils';
-
-import { handleRequest, makeSettings, getRequestHandler } from '../utils';
+import { JSONObject, UUID } from '@lumino/coreutils';
+import { ConfigSection, ConfigWithDefaults } from '../../src';
+import { getRequestHandler, handleRequest, makeSettings } from '../utils';
 
 /**
  * Generate a random config section name.

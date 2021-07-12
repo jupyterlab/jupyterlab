@@ -2,13 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import { Token } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { ISignal } from '@lumino/signaling';
-
 import { ISessionContext } from './sessioncontext';
 
 /**

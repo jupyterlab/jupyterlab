@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import { UUID, JSONObject } from '@lumino/coreutils';
+import { JSONObject, UUID } from '@lumino/coreutils';
 
 export interface IOptions<T extends Message> {
   session: string;
@@ -686,7 +686,7 @@ export function isCommMsgMsg(msg: IMessage): msg is ICommMsgMsg {
 // ///////////////////////////////////////////////
 
 /**
- * Reply content indicating a sucessful request.
+ * Reply content indicating a successful request.
  */
 export interface IReplyOkContent {
   status: 'ok';
@@ -1131,7 +1131,7 @@ export interface ICommInfoReplyMsg extends IShellMessage<'comm_info_reply'> {
 // ///////////////////////////////////////////////
 
 /**
- * An experimental `'debug_request'` messsage on the `'control'` channel.
+ * An experimental `'debug_request'` message on the `'control'` channel.
  *
  * @hidden
  *
@@ -1164,7 +1164,7 @@ export function isDebugRequestMsg(msg: IMessage): msg is IDebugRequestMsg {
 }
 
 /**
- * An experimental `'debug_reply'` messsage on the `'control'` channel.
+ * An experimental `'debug_reply'` message on the `'control'` channel.
  *
  * @hidden
  *

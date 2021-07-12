@@ -3,9 +3,11 @@
   "extends": "./tsconfigbase",
   "exclude": [
     "**/test/**",
-    "**/testutils/**"
+    "**/testutils/**",
+    "**/ui-tests/**"
   ],
   "compilerOptions": {
+    "strictNullChecks": false,
     "paths": {
       "@jupyterlab/*": [
         "./packages/*/src"

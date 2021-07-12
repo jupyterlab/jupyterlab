@@ -47,12 +47,21 @@
   min-height: var(--jp-notebook-scroll-padding);
 }
 
+.jp-MainAreaWidget-ContainStrict .jp-Notebook * {
+  contain: strict;
+}
+
+.jp-Notebook-render * {
+  contain: none !important;
+}
+
 .jp-Notebook .jp-Cell {
   overflow: visible;
 }
 
 .jp-Notebook .jp-Cell .jp-InputPrompt {
   cursor: move;
+  float: left;
 }
 
 /*-----------------------------------------------------------------------------
@@ -86,6 +95,19 @@
 /* cell is active */
 .jp-Notebook .jp-Cell.jp-mod-active .jp-Collapser {
   background: var(--jp-brand-color1);
+}
+
+/* cell is dirty */
+.jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt {
+  color: var(--jp-warn-color1);
+}
+.jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt:before {
+  color: var(--jp-warn-color1);
+  content: '•';
+}
+
+.jp-Notebook .jp-Cell.jp-mod-active.jp-mod-dirty .jp-Collapser {
+  background: var(--jp-warn-color1);
 }
 
 /* collapser is hovered */
@@ -137,7 +159,7 @@
 }
 
 .jp-dragImage {
-  display: flex;
+  display: block;
   flex-direction: row;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
@@ -270,4 +292,87 @@
 .jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-InputPrompt,
 .jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-OutputPrompt {
   flex: 0 0 110px;
+}
+
+/*-----------------------------------------------------------------------------
+| Placeholder
+|----------------------------------------------------------------------------*/
+
+.jp-Cell-Placeholder {
+  padding-left: 55px;
+}
+
+.jp-Cell-Placeholder-wrapper {
+  background: #fff;
+  border: 1px solid;
+  border-color: #e5e6e9 #dfe0e4 #d0d1d5;
+  border-radius: 4px;
+  -webkit-border-radius: 4px;
+  margin: 10px 15px;
+}
+
+.jp-Cell-Placeholder-wrapper-inner {
+  padding: 15px;
+  position: relative;
+}
+
+.jp-Cell-Placeholder-wrapper-body {
+  background-repeat: repeat;
+  background-size: 50% auto;
+}
+
+.jp-Cell-Placeholder-wrapper-body div {
+  background: #f6f7f8;
+  background-image: -webkit-linear-gradient(
+    left,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 800px 104px;
+  height: 104px;
+  position: relative;
+}
+
+.jp-Cell-Placeholder-wrapper-body div {
+  position: absolute;
+  right: 15px;
+  left: 15px;
+  top: 15px;
+}
+
+div.jp-Cell-Placeholder-h1 {
+  top: 20px;
+  height: 20px;
+  left: 15px;
+  width: 150px;
+}
+
+div.jp-Cell-Placeholder-h2 {
+  left: 15px;
+  top: 50px;
+  height: 10px;
+  width: 100px;
+}
+
+div.jp-Cell-Placeholder-content-1,
+div.jp-Cell-Placeholder-content-2,
+div.jp-Cell-Placeholder-content-3 {
+  left: 15px;
+  right: 15px;
+  height: 10px;
+}
+
+div.jp-Cell-Placeholder-content-1 {
+  top: 100px;
+}
+
+div.jp-Cell-Placeholder-content-2 {
+  top: 120px;
+}
+
+div.jp-Cell-Placeholder-content-3 {
+  top: 140px;
 }

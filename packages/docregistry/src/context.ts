@@ -2,50 +2,38 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents,
-  ServiceManager,
-  ServerConnection
-} from '@jupyterlab/services';
-
-import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
-
-import * as ymodels from '@jupyterlab/shared-models';
-
-import * as Y from 'yjs';
-
-import { PromiseDelegate, PartialJSONValue } from '@lumino/coreutils';
-
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
-import {
-  showDialog,
-  SessionContext,
   Dialog,
   ISessionContext,
-  showErrorMessage,
-  sessionContextDialogs
+  SessionContext,
+  sessionContextDialogs,
+  showDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
-
 import { PathExt } from '@jupyterlab/coreutils';
-
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
-
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import {
-  nullTranslator,
+  IDocumentProvider,
+  IDocumentProviderFactory,
+  ProviderMock
+} from '@jupyterlab/docprovider';
+import { IModelDB, ModelDB } from '@jupyterlab/observables';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import {
+  Contents,
+  ServerConnection,
+  ServiceManager
+} from '@jupyterlab/services';
+import * as ymodels from '@jupyterlab/shared-models';
+import {
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { IDocumentProvider, ProviderMock } from '@jupyterlab/docprovider';
-
+import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
+import * as Y from 'yjs';
 import { DocumentRegistry } from './registry';
 
 /**
@@ -83,10 +71,13 @@ export class Context<
     const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('context');
-    const guid = this._factory.contentType + ':' + localPath;
     const docProviderFactory = options.docProviderFactory;
     this._provider = docProviderFactory
-      ? docProviderFactory({ guid, ymodel })
+      ? docProviderFactory({
+          path: this._path,
+          contentType: this._factory.contentType,
+          ymodel
+        })
       : new ProviderMock();
 
     this._readyPromise = manager.ready.then(() => {
@@ -110,8 +101,19 @@ export class Context<
       path: this._path,
       contents: manager.contents
     }));
-    this.pathChanged.connect((sender, newPath) => {
-      urlResolver.path = newPath;
+    this._ycontext.set('path', this._path);
+    this._ycontext.observe(event => {
+      const pathChanged = event.changes.keys.get('path');
+      if (pathChanged) {
+        const newPath = this._ycontext.get('path')!;
+        if (newPath && newPath !== pathChanged.oldValue) {
+          urlResolver.path = newPath;
+          this._path = newPath;
+          this._provider.setPath(newPath);
+          this._pathChanged.emit(this.path);
+          this.sessionContext.session?.setPath(newPath) as any;
+        }
+      }
     });
   }
 
@@ -258,7 +260,7 @@ export class Context<
     const finally_ = () => {
       this._provider.releaseLock(lock);
     };
-    // if save/revert completed successfully, we set the inialized content in the rtc server.
+    // if save/revert completed successfully, we set the initialized content in the rtc server.
     promise
       .then(() => {
         this._provider.putInitializedState();
@@ -295,7 +297,7 @@ export class Context<
     } else {
       promise = this._save();
     }
-    // if save completed successfully, we set the inialized content in the rtc server.
+    // if save completed successfully, we set the initialized content in the rtc server.
     promise = promise.then(() => {
       this._provider.putInitializedState();
     });
@@ -486,7 +488,7 @@ export class Context<
       const localPath = this._manager.contents.localPath(newPath);
       void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
-      this._pathChanged.emit(this._path);
+      this._ycontext.set('path', this._path);
       if (this._contentsModel) {
         this._contentsModel.renamed = true;
       }
@@ -503,7 +505,7 @@ export class Context<
     const path = this.sessionContext.session!.path;
     if (path !== this._path) {
       this._path = path;
-      this._pathChanged.emit(path);
+      this._ycontext.set('path', this._path);
     }
   }
 
@@ -578,7 +580,8 @@ export class Context<
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newName);
 
-    this._pathChanged.emit(this._path);
+    this._path = newPath;
+    this._ycontext.set('path', this._path);
   }
 
   /**
@@ -624,7 +627,7 @@ export class Context<
 
       // Emit completion.
       if (manual) {
-        this._saveState.emit('completed-manual');
+        this._saveState.emit('completed manually');
       } else {
         this._saveState.emit('completed');
       }
@@ -867,7 +870,7 @@ or load the version on disk (revert)?`,
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
     await this.save();
-    this._pathChanged.emit(this._path);
+    this._ycontext.set('path', this._path);
     await this._maybeCheckpoint(true);
   }
 

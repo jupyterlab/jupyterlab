@@ -107,7 +107,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-FileDialog.jp-mod-conflict input {
-  color: red;
+  color: var(--jp-error-color1);
 }
 
 .jp-FileDialog .jp-new-name-title {
@@ -207,6 +207,10 @@
   font-weight: bold;
 }
 
+.jp-DirListing-content .jp-DirListing-item.jp-mod-selected mark {
+  color: var(--jp-ui-inverse-font-color0);
+}
+
 /* Style the directory listing content when a user drops a file to upload */
 .jp-DirListing.jp-mod-native-drop .jp-DirListing-content {
   outline: 5px dashed rgba(128, 128, 128, 0.5);
@@ -229,7 +233,7 @@
 }
 
 .jp-DirListing-item.jp-mod-selected {
-  color: white;
+  color: var(--jp-ui-inverse-font-color1);
   background: var(--jp-brand-color1);
 }
 
@@ -266,11 +270,16 @@
 }
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon:before {
-  color: limegreen;
+  color: var(--jp-success-color1);
   content: '\25CF';
   font-size: 8px;
   position: absolute;
   left: -8px;
+}
+
+.jp-DirListing-item.jp-mod-running.jp-mod-selected
+  .jp-DirListing-itemIcon:before {
+  color: var(--jp-ui-inverse-font-color1);
 }
 
 .jp-DirListing-item.lm-mod-drag-image,

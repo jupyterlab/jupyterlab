@@ -1,5 +1,5 @@
 {
-  "title": "Application ",
+  "title": "Application",
   "description": "Main JupyterLab application settings.",
   "jupyter.lab.setting-icon-label": "Application",
   "jupyter.lab.shortcuts": [
@@ -49,7 +49,103 @@
       "selector": "body"
     }
   ],
-  "properties": {},
+  "jupyter.lab.transform": true,
+  "properties": {
+    "contextMenu": {
+      "title": "The application context menu.",
+      "description": "Note: To disable a context menu item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable Download item on files:\n{\n  \"contextMenu\": [\n    {\n      \"command\": \"filebrowser:download\",\n      \"selector\": \".jp-DirListing-item[data-isdir=\\\"false\\\"]\",\n      \"disabled\": true\n    }\n  ]\n}\n\nContext menu description:",
+      "items": {
+        "allOf": [
+          { "$ref": "#/definitions/menuItem" },
+          {
+            "properties": {
+              "selector": {
+                "description": "The CSS selector for the context menu item.",
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "type": "array",
+      "default": []
+    }
+  },
   "additionalProperties": false,
+  "definitions": {
+    "menu": {
+      "properties": {
+        "disabled": {
+          "description": "Whether the menu is disabled or not",
+          "type": "boolean",
+          "default": false
+        },
+        "id": {
+          "description": "Menu unique id",
+          "type": "string",
+          "pattern": "[a-z][a-z0-9\\-_]+"
+        },
+        "items": {
+          "description": "Menu items",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/menuItem"
+          }
+        },
+        "label": {
+          "description": "Menu label",
+          "type": "string"
+        },
+        "rank": {
+          "description": "Menu rank",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": ["id"],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "menuItem": {
+      "properties": {
+        "args": {
+          "description": "Command arguments",
+          "type": "object"
+        },
+        "command": {
+          "description": "Command id",
+          "type": "string"
+        },
+        "disabled": {
+          "description": "Whether the item is disabled or not",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "description": "Item type",
+          "type": "string",
+          "enum": ["command", "submenu", "separator"],
+          "default": "command"
+        },
+        "rank": {
+          "description": "Item rank",
+          "type": "number",
+          "minimum": 0
+        },
+        "submenu": {
+          "description": "Submenu definition",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/menu"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
   "type": "object"
 }

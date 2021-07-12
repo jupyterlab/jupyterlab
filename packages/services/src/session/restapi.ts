@@ -4,7 +4,7 @@
 import { ServerConnection } from '../serverconnection';
 import { Session } from '.';
 import { URLExt } from '@jupyterlab/coreutils';
-import { validateModel, updateLegacySessionModel } from './validate';
+import { updateLegacySessionModel, validateModel } from './validate';
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;

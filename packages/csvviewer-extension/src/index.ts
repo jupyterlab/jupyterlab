@@ -11,22 +11,22 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
-  IThemeManager,
   InputDialog,
+  IThemeManager,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
   CSVViewer,
-  TextRenderConfig,
   CSVViewerFactory,
+  TextRenderConfig,
   TSVViewerFactory
 } from '@jupyterlab/csvviewer';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
+import { ITranslator } from '@jupyterlab/translation';
 import { DataGrid } from '@lumino/datagrid';
 import { CSVSearchProvider } from './searchprovider';
-import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * The name of the factories that creates widgets.

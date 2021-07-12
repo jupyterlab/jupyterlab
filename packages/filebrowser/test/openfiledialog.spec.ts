@@ -1,25 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect from 'expect';
-
-import { toArray } from '@lumino/algorithm';
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
-import { FileDialog, FilterFileBrowserModel, FileBrowserModel } from '../src';
-
-import { ServiceManager, Contents } from '@jupyterlab/services';
+import { Contents, ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
-  waitForDialog,
+  framePromise,
   sleep,
-  framePromise
+  waitForDialog
 } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
-
+import { toArray } from '@lumino/algorithm';
+import expect from 'expect';
 import { simulate } from 'simulate-event';
+import { FileBrowserModel, FileDialog, FilterFileBrowserModel } from '../src';
 
 describe('@jupyterlab/filebrowser', () => {
   let manager: IDocumentManager;

@@ -4,6 +4,94 @@
   "jupyter.lab.setting-icon": "ui-components:file",
   "jupyter.lab.setting-icon-label": "Document Manager",
   "jupyter.lab.transform": true,
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "command": "docmanager:clone",
+            "rank": 2
+          },
+          {
+            "type": "separator",
+            "rank": 4
+          },
+          {
+            "command": "docmanager:save",
+            "rank": 4
+          },
+          {
+            "command": "docmanager:save-as",
+            "rank": 4
+          },
+          {
+            "command": "docmanager:save-all",
+            "rank": 4
+          },
+          {
+            "type": "separator",
+            "rank": 5
+          },
+          {
+            "command": "docmanager:reload",
+            "rank": 5
+          },
+          {
+            "command": "docmanager:restore-checkpoint",
+            "rank": 5
+          },
+          {
+            "command": "docmanager:rename",
+            "rank": 5
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-settings",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 4
+          },
+          {
+            "command": "docmanager:toggle-autosave",
+            "rank": 4
+          },
+          {
+            "command": "docmanager:toggle-name-file-on-save",
+            "rank": 4
+          },
+          {
+            "type": "separator",
+            "rank": 4
+          }
+        ]
+      }
+    ],
+    "context": [
+      {
+        "command": "docmanager:rename",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 1
+      },
+      {
+        "command": "docmanager:delete",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 2
+      },
+      {
+        "command": "docmanager:clone",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 3
+      },
+      {
+        "command": "docmanager:show-in-file-browser",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 4
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
     {
       "command": "docmanager:save",

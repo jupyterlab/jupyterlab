@@ -87,20 +87,22 @@
     inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
 }
 
-.lm-CommandPalette-wrapper::after {
-  content: ' ';
+.jp-SearchIconGroup {
   color: white;
   background-color: var(--jp-brand-color1);
   position: absolute;
   top: 4px;
   right: 4px;
-  height: 30px;
-  width: 10px;
-  padding: 0px 10px;
-  background-image: var(--jp-icon-search-white);
-  background-size: 20px;
-  background-repeat: no-repeat;
-  background-position: center;
+  padding: 5px 5px 1px 5px;
+}
+
+.jp-SearchIconGroup svg {
+  height: 20px;
+  width: 20px;
+}
+
+.jp-SearchIconGroup .jp-icon3[fill] {
+  fill: var(--jp-layout-color0);
 }
 
 .lm-CommandPalette-input {
@@ -117,7 +119,7 @@
 .lm-CommandPalette-input::-webkit-input-placeholder,
 .lm-CommandPalette-input::-moz-placeholder,
 .lm-CommandPalette-input:-ms-input-placeholder {
-  color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color2);
   font-size: var(--jp-ui-font-size1);
 }
 
@@ -161,15 +163,29 @@
 }
 
 .lm-CommandPalette-item.lm-mod-disabled {
-  color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color2);
 }
 
 .lm-CommandPalette-item.lm-mod-active {
-  background: var(--jp-layout-color3);
+  color: var(--jp-ui-inverse-font-color1);
+  background: var(--jp-brand-color1);
+}
+
+.lm-CommandPalette-item.lm-mod-active .lm-CommandPalette-itemLabel > mark {
+  color: var(--jp-ui-inverse-font-color0);
+}
+
+.lm-CommandPalette-item.lm-mod-active .jp-icon-selectable[fill] {
+  fill: var(--jp-layout-color0);
+}
+
+.lm-CommandPalette-item.lm-mod-active .lm-CommandPalette-itemLabel > mark {
+  color: var(--jp-ui-inverse-font-color0);
 }
 
 .lm-CommandPalette-item.lm-mod-active:hover:not(.lm-mod-disabled) {
-  background: var(--jp-layout-color4);
+  color: var(--jp-ui-inverse-font-color1);
+  background: var(--jp-brand-color1);
 }
 
 .lm-CommandPalette-item:hover:not(.lm-mod-active):not(.lm-mod-disabled) {
@@ -187,7 +203,7 @@
 }
 
 .lm-CommandPalette-item.lm-mod-disabled mark {
-  color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color2);
 }
 
 .lm-CommandPalette-item .lm-CommandPalette-itemIcon {
@@ -199,7 +215,7 @@
 }
 
 .lm-CommandPalette-item.lm-mod-disabled .lm-CommandPalette-itemIcon {
-  opacity: 0.4;
+  opacity: 0.6;
 }
 
 .lm-CommandPalette-item .lm-CommandPalette-itemShortcut {

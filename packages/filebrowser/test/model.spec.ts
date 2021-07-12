@@ -1,32 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect from 'expect';
-
 import { PageConfig } from '@jupyterlab/coreutils';
-
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
-
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
-
 import { Contents, ServiceManager } from '@jupyterlab/services';
-
 import { StateDB } from '@jupyterlab/statedb';
-
 import {
   acceptDialog,
   dismissDialog,
   signalToPromises,
   sleep
 } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
-
 import { toArray } from '@lumino/algorithm';
-
 import { UUID } from '@lumino/coreutils';
-
-import { FileBrowserModel, CHUNK_SIZE, LARGE_FILE_SIZE } from '../src';
+import expect from 'expect';
+import { CHUNK_SIZE, FileBrowserModel, LARGE_FILE_SIZE } from '../src';
 
 /**
  * A contents manager that delays requests by less each time it is called

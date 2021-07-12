@@ -19,9 +19,9 @@ import { FileEditor } from '@jupyterlab/fileeditor';
 
 import { NotebookPanel } from '@jupyterlab/notebook';
 
-import { Kernel, Session, KernelMessage } from '@jupyterlab/services';
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { bugIcon, Switch } from '@jupyterlab/ui-components';
 

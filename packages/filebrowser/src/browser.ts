@@ -2,36 +2,26 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ReactWidget,
   showErrorMessage,
   Toolbar,
-  ToolbarButton,
-  ReactWidget
+  ToolbarButton
 } from '@jupyterlab/apputils';
-
 import { IDocumentManager } from '@jupyterlab/docmanager';
-
 import { Contents, ServerConnection } from '@jupyterlab/services';
-
-import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
-
-import { IIterator } from '@lumino/algorithm';
-
-import { PanelLayout, Widget } from '@lumino/widgets';
-
-import { BreadCrumbs } from './crumbs';
-
-import { DirListing } from './listing';
-
-import { FilterFileBrowserModel } from './model';
-
-import { Uploader } from './upload';
-
-import { FilenameSearcher } from './search';
 import {
+  ITranslator,
   nullTranslator,
-  TranslationBundle,
-  ITranslator
+  TranslationBundle
 } from '@jupyterlab/translation';
+import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
+import { IIterator } from '@lumino/algorithm';
+import { PanelLayout, Widget } from '@lumino/widgets';
+import { BreadCrumbs } from './crumbs';
+import { DirListing } from './listing';
+import { FilterFileBrowserModel } from './model';
+import { FilenameSearcher } from './search';
+import { Uploader } from './upload';
 
 /**
  * The class name added to file browsers.
@@ -69,7 +59,7 @@ export class FileBrowser extends Widget {
   /**
    * Construct a new file browser.
    *
-   * @param model - The file browser view model.
+   * @param options - The file browser options.
    */
   constructor(options: FileBrowser.IOptions) {
     super();
@@ -198,7 +188,6 @@ export class FileBrowser extends Widget {
       forceRefresh: true
     });
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
-    this._filenameSearcher.id = 'filename-searcher';
 
     this.layout.removeWidget(this._filenameSearcher);
     this.layout.removeWidget(this.crumbs);

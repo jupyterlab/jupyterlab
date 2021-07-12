@@ -1,26 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Toolbar, CommandToolbarButton } from '@jupyterlab/apputils';
-
+import { CommandToolbarButton, Toolbar } from '@jupyterlab/apputils';
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { BoxLayout, Widget } from '@lumino/widgets';
-
 import { createInspector } from './inspector';
-
 import { SplitPanel } from './splitpanel';
 
 /**

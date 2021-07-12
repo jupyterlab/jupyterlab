@@ -1,6 +1,86 @@
 {
   "jupyter.lab.setting-icon": "ui-components:terminal",
   "jupyter.lab.setting-icon-label": "Terminal",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-file-new",
+              "items": [
+                {
+                  "command": "terminal:create-new",
+                  "rank": 20
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-settings",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 40
+          },
+          {
+            "command": "terminal:increase-font",
+            "rank": 40
+          },
+          {
+            "command": "terminal:decrease-font",
+            "rank": 40
+          },
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-settings-terminaltheme",
+              "label": "Terminal Theme",
+              "items": [
+                {
+                  "command": "terminal:set-theme",
+                  "args": {
+                    "theme": "inherit",
+                    "isPalette": false
+                  }
+                },
+                {
+                  "command": "terminal:set-theme",
+                  "args": {
+                    "theme": "light",
+                    "isPalette": false
+                  }
+                },
+                {
+                  "command": "terminal:set-theme",
+                  "args": {
+                    "theme": "dark",
+                    "isPalette": false
+                  }
+                }
+              ]
+            },
+            "rank": 40
+          },
+          {
+            "type": "separator",
+            "rank": 40
+          }
+        ]
+      }
+    ],
+    "context": [
+      {
+        "command": "terminal:refresh",
+        "selector": ".jp-Terminal",
+        "rank": 1
+      }
+    ]
+  },
   "title": "Terminal",
   "description": "Terminal settings.",
   "definitions": {

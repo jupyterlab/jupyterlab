@@ -2,15 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IDisposable } from '@lumino/disposable';
-
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
-
 import * as React from 'react';
-
 import * as ReactDOM from 'react-dom';
 
 type ReactRenderElement =
@@ -172,7 +167,7 @@ export interface IUseSignalProps<SENDER, ARGS> {
    */
   initialArgs?: ARGS;
   /**
-   * Function mapping the last signal value or inital values to an element to render.
+   * Function mapping the last signal value or initial values to an element to render.
    *
    * Note: returns `React.ReactNode` as per
    * https://github.com/sw-yx/react-typescript-cheatsheet#higher-order-componentsrender-props

@@ -12,9 +12,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISanitizer } from '@jupyterlab/apputils';
-
 import { IDocumentManager } from '@jupyterlab/docmanager';
-
 import {
   ILatexTypesetter,
   IRenderMimeRegistry,

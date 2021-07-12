@@ -13,5 +13,4 @@ import '@jupyterlab/application/style/index.js';
 import '@jupyterlab/cells/style/index.js';
 import '@jupyterlab/console/style/index.js';
 import '@jupyterlab/fileeditor/style/index.js';
-import '@jupyterlab/mainmenu/style/index.js';
 import '@jupyterlab/notebook/style/index.js';

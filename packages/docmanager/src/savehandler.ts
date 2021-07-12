@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@lumino/disposable';
-
-import { Signal } from '@lumino/signaling';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { IDisposable } from '@lumino/disposable';
+import { Signal } from '@lumino/signaling';
 
 /**
  * A class that manages the auto saving of a document.
@@ -161,7 +159,7 @@ export namespace SaveHandler {
    */
   export interface IOptions {
     /**
-     * The context asssociated with the file.
+     * The context associated with the file.
      */
     context: DocumentRegistry.Context;
 
