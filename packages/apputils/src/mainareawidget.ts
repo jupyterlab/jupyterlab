@@ -29,7 +29,7 @@ export class MainAreaWidget<T extends Widget = Widget>
   constructor(options: MainAreaWidget.IOptions<T>) {
     super(options);
     this.addClass('jp-MainAreaWidget');
-    // Set contain=strict to avoid many forced layout rendering while addding cells.
+    // Set contain=strict to avoid many forced layout rendering while adding cells.
     // Don't forget to remove the CSS class when your remove the spinner to allow
     // the content to be rendered.
     // @see https://github.com/jupyterlab/jupyterlab/issues/9381
@@ -113,7 +113,7 @@ export class MainAreaWidget<T extends Widget = Widget>
   }
 
   /**
-   * Print method. Defered to content.
+   * Print method. Deferred to content.
    */
   [Printing.symbol](): Printing.OptionalAsyncThunk {
     if (!this._content) {

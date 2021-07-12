@@ -561,7 +561,23 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         }).then(result => (result.button.accept ? build() : undefined));
       });
     }
+    return updateTreePath;
+  },
+  autoStart: true
+};
 
+/**
+ * Check if the application is dirty before closing the browser tab.
+ */
+const dirty: JupyterFrontEndPlugin<void> = {
+  id: '@retrolab/application-extension:dirty',
+  autoStart: true,
+  requires: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator): void => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${dirty.id} must be activated in JupyterLab.`);
+    }
+    const trans = translator.load('jupyterlab');
     const message = trans.__(
       'Are you sure you want to exit JupyterLab?\n\nAny unsaved changes will be lost.'
     );
@@ -576,9 +592,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         return ((event as any).returnValue = message);
       }
     });
-    return updateTreePath;
-  },
-  autoStart: true
+  }
 };
 
 /**
@@ -586,12 +600,13 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
  */
 const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
-  requires: [IStateDB, ILabShell],
+  requires: [IStateDB, ILabShell, ISettingRegistry, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     state: IStateDB,
     labShell: ILabShell,
-    info: JupyterLab.IInfo
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
   ) => {
     const first = app.started;
     const registry = app.commands;
@@ -605,6 +620,13 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
       labShell.layoutModified.connect(() => {
         void restorer.save(labShell.saveLayout());
       });
+      Private.activateSidebarSwitcher(
+        app,
+        labShell,
+        settingRegistry,
+        translator,
+        saved
+      );
     });
 
     return restorer;
@@ -772,84 +794,6 @@ const busy: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
-const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
-
-/**
- * Keep user settings for where to show the side panels.
- */
-const sidebar: JupyterFrontEndPlugin<void> = {
-  id: SIDEBAR_ID,
-  autoStart: true,
-  requires: [ISettingRegistry, ILabShell, ITranslator],
-  activate: (
-    app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry,
-    labShell: ILabShell,
-    translator: ITranslator,
-    info: JupyterLab.IInfo
-  ) => {
-    const trans = translator.load('jupyterlab');
-    type overrideMap = { [id: string]: 'left' | 'right' };
-    let overrides: overrideMap = {};
-    // const trans = translator.load("jupyterlab");
-    const handleLayoutOverrides = () => {
-      each(labShell.widgets('left'), widget => {
-        if (overrides[widget.id] && overrides[widget.id] === 'right') {
-          labShell.add(widget, 'right');
-        }
-      });
-      each(labShell.widgets('right'), widget => {
-        if (overrides[widget.id] && overrides[widget.id] === 'left') {
-          labShell.add(widget, 'left');
-        }
-      });
-    };
-    labShell.layoutModified.connect(handleLayoutOverrides);
-    // Fetch overrides from the settings system.
-    void Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
-      ([settings]) => {
-        overrides = (settings.get('overrides').composite as overrideMap) || {};
-        settings.changed.connect(settings => {
-          overrides =
-            (settings.get('overrides').composite as overrideMap) || {};
-          handleLayoutOverrides();
-        });
-      }
-    );
-
-    // Add a command to switch a side panels's side
-    app.commands.addCommand(CommandIDs.switchSidebar, {
-      label: trans.__('Switch Sidebar Side'),
-      execute: () => {
-        // First, try to find the correct panel based on the
-        // application context menu click.
-        const contextNode: HTMLElement | undefined = app.contextMenuHitTest(
-          node => !!node.dataset.id
-        );
-        let id: string;
-        let side: 'left' | 'right';
-        if (contextNode) {
-          id = contextNode.dataset['id']!;
-          const leftPanel = document.getElementById('jp-left-stack');
-          const node = document.getElementById(id);
-          if (leftPanel && node && leftPanel.contains(node)) {
-            side = 'right';
-          } else {
-            side = 'left';
-          }
-        } else {
-          // Bail if we don't find a sidebar for the widget.
-          return;
-        }
-        // Move the panel to the other side.
-        const newOverrides = { ...overrides };
-        newOverrides[id] = side;
-        return settingRegistry.set(SIDEBAR_ID, 'overrides', newOverrides);
-      }
-    });
-  }
-};
-
 /**
  * The default JupyterLab application shell.
  */
@@ -969,6 +913,7 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  dirty,
   main,
   mainCommands,
   layout,
@@ -976,7 +921,6 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tree,
   notfound,
   busy,
-  sidebar,
   shell,
   status,
   info,
@@ -988,6 +932,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
 export default plugins;
 
 namespace Private {
+  type SidebarOverrides = { [id: string]: 'left' | 'right' };
+
   async function displayInformation(trans: TranslationBundle): Promise<void> {
     const result = await showDialog({
       title: trans.__('Information'),
@@ -1136,6 +1082,82 @@ namespace Private {
             });
           }
         }
+      }
+    });
+  }
+
+  export function activateSidebarSwitcher(
+    app: JupyterFrontEnd,
+    labShell: ILabShell,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator,
+    initial: ILabShell.ILayout
+  ): void {
+    const setting = '@jupyterlab/application-extension:sidebar';
+    const trans = translator.load('jupyterlab');
+    let overrides: SidebarOverrides = {};
+    const update = (_: ILabShell, layout: ILabShell.ILayout | void) => {
+      each(labShell.widgets('left'), widget => {
+        if (overrides[widget.id] && overrides[widget.id] === 'right') {
+          labShell.add(widget, 'right');
+          if (layout && layout.rightArea?.currentWidget === widget) {
+            labShell.activateById(widget.id);
+          }
+        }
+      });
+      each(labShell.widgets('right'), widget => {
+        if (overrides[widget.id] && overrides[widget.id] === 'left') {
+          labShell.add(widget, 'left');
+          if (layout && layout.leftArea?.currentWidget === widget) {
+            labShell.activateById(widget.id);
+          }
+        }
+      });
+    };
+    // Fetch overrides from the settings system.
+    void Promise.all([settingRegistry.load(setting), app.restored]).then(
+      ([settings]) => {
+        overrides = (settings.get('overrides').composite ||
+          {}) as SidebarOverrides;
+        settings.changed.connect(settings => {
+          overrides = (settings.get('overrides').composite ||
+            {}) as SidebarOverrides;
+          update(labShell);
+        });
+        labShell.layoutModified.connect(update);
+        update(labShell, initial);
+      }
+    );
+
+    // Add a command to switch a side panels's side
+    app.commands.addCommand(CommandIDs.switchSidebar, {
+      label: trans.__('Switch Sidebar Side'),
+      execute: () => {
+        // First, try to find the correct panel based on the application
+        // context menu click. Bail if we don't find a sidebar for the widget.
+        const contextNode: HTMLElement | undefined = app.contextMenuHitTest(
+          node => !!node.dataset.id
+        );
+        if (!contextNode) {
+          return;
+        }
+
+        const id = contextNode.dataset['id']!;
+        const leftPanel = document.getElementById('jp-left-stack');
+        const node = document.getElementById(id);
+        let side: 'left' | 'right';
+
+        if (leftPanel && node && leftPanel.contains(node)) {
+          side = 'right';
+        } else {
+          side = 'left';
+        }
+
+        // Move the panel to the other side.
+        return settingRegistry.set(setting, 'overrides', {
+          ...overrides,
+          [id]: side
+        });
       }
     });
   }

@@ -59,7 +59,7 @@ export class FileBrowser extends Widget {
   /**
    * Construct a new file browser.
    *
-   * @param model - The file browser view model.
+   * @param options - The file browser options.
    */
   constructor(options: FileBrowser.IOptions) {
     super();
@@ -188,7 +188,6 @@ export class FileBrowser extends Widget {
       forceRefresh: true
     });
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
-    this._filenameSearcher.id = 'filename-searcher';
 
     this.layout.removeWidget(this._filenameSearcher);
     this.layout.removeWidget(this.crumbs);

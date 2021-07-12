@@ -346,7 +346,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       title,
                       body: (
                         <div>
-                          {getprebuiltUninstallInstruction(entry, trans)}
+                          {getPrebuiltUninstallInstruction(entry, trans)}
                         </div>
                       ),
                       buttons: [
@@ -373,7 +373,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   );
 }
 
-function getprebuiltUninstallInstruction(
+function getPrebuiltUninstallInstruction(
   entry: IEntry,
   trans: TranslationBundle
 ): JSX.Element {
@@ -649,7 +649,7 @@ export namespace CollapsibleSection {
     headerElements?: React.ReactNode;
 
     /**
-     * If given, this will be diplayed instead of the children.
+     * If given, this will be displayed instead of the children.
      */
     errorMessage?: string | null;
 

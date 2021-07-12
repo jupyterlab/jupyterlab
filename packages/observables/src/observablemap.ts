@@ -139,7 +139,7 @@ export namespace IObservableMap {
 }
 
 /**
- * A concrete implementation of IObservbleMap<T>.
+ * A concrete implementation of IObservableMap<T>.
  */
 export class ObservableMap<T> implements IObservableMap<T> {
   /**

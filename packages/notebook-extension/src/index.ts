@@ -261,7 +261,7 @@ namespace CommandIDs {
 const FACTORY = 'Notebook';
 
 /**
- * The exluded Export To ...
+ * The excluded Export To ...
  * (returned from nbconvert's export list)
  */
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
@@ -1297,6 +1297,8 @@ function addCommands(
     for (const cell of notebook.widgets) {
       if (cell instanceof MarkdownCell && cell.headingCollapsed) {
         NotebookActions.setHeadingCollapse(cell, true, notebook);
+      }
+      if (cell.model.id === notebook.activeCell?.model?.id) {
         NotebookActions.expandParent(cell, notebook);
       }
     }

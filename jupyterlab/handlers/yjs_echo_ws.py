@@ -33,7 +33,7 @@ class YjsRoom:
         self.clients = {}
         self.content = bytes([])
 
-class YJSEchoWS(WebSocketHandler):
+class YjsEchoWebSocket(WebSocketHandler):
     rooms = {}
 
     def open(self, guid):

@@ -167,6 +167,7 @@ if [[ $GROUP == release_check ]]; then
 
     # Prep for using verdaccio during publish
     node buildutils/lib/local-repository.js start
+    npm whoami
     pushd packages/application
     npm version patch
     npm publish

@@ -138,9 +138,9 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       });
 
       if (cell instanceof CodeCell && this._filters.output) {
-        const outputProivder = new GenericSearchProvider();
-        outputProivder.isSubProvider = true;
-        const matchesFromOutput = await outputProivder.startQuery(
+        const outputProvider = new GenericSearchProvider();
+        outputProvider.isSubProvider = true;
+        const matchesFromOutput = await outputProvider.startQuery(
           query,
           cell.outputArea
         );
@@ -151,11 +151,11 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
         allMatches.concat(matchesFromOutput);
 
-        outputProivder.changed.connect(this._onSearchProviderChanged, this);
+        outputProvider.changed.connect(this._onSearchProviderChanged, this);
 
         this._searchProviders.push({
           cell: cell,
-          provider: outputProivder
+          provider: outputProvider
         });
       }
     }

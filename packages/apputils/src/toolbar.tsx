@@ -462,7 +462,7 @@ export namespace Toolbar {
  */
 export namespace ToolbarButtonComponent {
   /**
-   * Interface for ToolbarButttonComponent props.
+   * Interface for ToolbarButtonComponent props.
    */
   export interface IProps {
     className?: string;
@@ -540,7 +540,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
         <LabIcon.resolveReact
           icon={props.icon}
           iconClass={
-            // add some extra classes for proper support of icons-as-css-backgorund
+            // add some extra classes for proper support of icons-as-css-background
             classes(props.iconClass, 'jp-Icon')
           }
           className="jp-ToolbarButtonComponent-icon"
@@ -570,7 +570,7 @@ export function addToolbarButtonClass(w: Widget): Widget {
 export class ToolbarButton extends ReactWidget {
   /**
    * Creates a toolbar button
-   * @param props props for underlying `ToolbarButton` componenent
+   * @param props props for underlying `ToolbarButton` component
    */
   constructor(private props: ToolbarButtonComponent.IProps = {}) {
     super();
@@ -632,7 +632,7 @@ export function addCommandToolbarButtonClass(w: Widget): Widget {
 export class CommandToolbarButton extends ReactWidget {
   /**
    * Creates a command toolbar button
-   * @param props props for underlying `CommandToolbarButtonComponent` componenent
+   * @param props props for underlying `CommandToolbarButtonComponent` component
    */
   constructor(private props: CommandToolbarButtonComponent.IProps) {
     super();

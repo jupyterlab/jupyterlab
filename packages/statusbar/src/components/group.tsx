@@ -40,7 +40,7 @@ export namespace GroupItem {
    */
   export interface IProps {
     /**
-     * The spacing, in px, between the items in the goup.
+     * The spacing, in px, between the items in the group.
      */
     spacing: number;
 

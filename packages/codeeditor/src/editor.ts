@@ -276,7 +276,7 @@ export namespace CodeEditor {
     /**
      * We update the modeldb store when the shared model changes.
      * To ensure that we don't run into infinite loops, we wrap this call in a "mutex".
-     * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged hander
+     * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged handler
      * or the modelDB change handler.
      */
     protected _onSharedModelChanged(
@@ -788,7 +788,7 @@ export namespace CodeEditor {
     rulers: Array<number>;
 
     /**
-     * Wheter to allow code folding
+     * Whether to allow code folding
      */
     codeFolding: boolean;
   }

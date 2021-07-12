@@ -144,14 +144,14 @@ You can enable a disabled extension with:
 
     jupyter labextension enable my-extension
 
-Installed extensions are enabled by default unless there is configuration explicity disabling them.
+Installed extensions are enabled by default unless there is configuration explicitly disabling them.
 Extensions can be disabled or enabled using the command line.
 Extensions or individual plugins within an extension can be disabled by another extension.
 
 The priority order for determining whether an extension is enabled or disabled is as follows:
 
 - Presence of ``<jupyter_config_path>/labconfig/pageconfig.json`` file(s) with a ``disabledExtensions`` key that is a object with package names as keys and boolean values. 
-- (deprecated) Presence of ``disabledExensions`` key in ``<lab_app_dir>/settings/pageconfig.json``.   This value is a list of extensions to disable, but is deprecated in favor of the layered configuration approach in the `labconfig` location(s).
+- (deprecated) Presence of ``disabledExtensions`` key in ``<lab_app_dir>/settings/pageconfig.json``.   This value is a list of extensions to disable, but is deprecated in favor of the layered configuration approach in the `labconfig` location(s).
 - Presence of ``disabledExtensions`` key in another JupyterLab extension's metadata that disables a given extension.  The key is ignored if that extension itself is disabled.
 
 When using the command line, you can target the ``--level`` of the config: ``user``, ``system``, or ``sys-prefix`` (default).
@@ -368,7 +368,7 @@ Blocklist mode
 Extensions can be freely downloaded without going through a vetting process.
 However, users can add malicious extensions to a blocklist. The extension manager 
 will show all extensions except for those that have 
-been explicitly added to the blocklist. Therfore, the extension manager 
+been explicitly added to the blocklist. Therefore, the extension manager
 does not allow you to install blocklisted extensions.
 
 If you, or your administrator, has enabled the blocklist mode,
@@ -399,7 +399,7 @@ will only show extensions that have been explicitly added to the allowlist.
 
 If you, or your administrator, has enabled the allowlist mode
 JupyterLab will use the allowlist and only show extensions present
-in the withelist. The other extensions will not be show in the search result.
+in the allowlist. The other extensions will not be show in the search result.
 
 If you have installed an allowlisted extension and at some point
 in time that extension is removed from the allowlist, the extension entry 

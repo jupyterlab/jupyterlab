@@ -48,7 +48,7 @@ function RunningSessionsComponent(
 }
 
 /**
- * A namepsace for RunningSessionsComponents statics.
+ * A namespace for RunningSessionsComponents statics.
  */
 namespace RunningSessionsComponent {
   /**
@@ -56,7 +56,7 @@ namespace RunningSessionsComponent {
    */
   export interface IProps {
     /**
-     * A click handler for the component. By defult this is used
+     * A click handler for the component. By default this is used
      * to activate the running sessions side panel.
      */
     handleClick: () => void;
@@ -165,11 +165,11 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
 }
 
 /**
- * A namespace for RunninSessions statics.
+ * A namespace for RunningSessions statics.
  */
 export namespace RunningSessions {
   /**
-   * A VDomModel for the RunninSessions status item.
+   * A VDomModel for the RunningSessions status item.
    */
   export class Model extends VDomModel {
     /**
@@ -216,7 +216,7 @@ export namespace RunningSessions {
     serviceManager: ServiceManager;
 
     /**
-     * A click handler for the item. By defult this is used
+     * A click handler for the item. By default this is used
      * to activate the running sessions side panel.
      */
     onClick: () => void;

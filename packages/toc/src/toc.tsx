@@ -13,9 +13,11 @@ import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { IHeading } from './utils/headings';
 import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCTree } from './toc_tree';
-import { IHeading } from './utils/headings';
+import { Signal } from '@lumino/signaling';
+import { TOCItem } from './toc_item';
 
 /**
  * Timeout for throttling ToC rendering.
@@ -40,6 +42,17 @@ export class TableOfContents extends Widget {
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
     this._trans = this.translator.load('jupyterlab');
+    this._headings = [];
+    this._entryClicked = new Signal<TableOfContents, TOCItem>(this);
+    this._entryClicked.connect((toc, item) => {
+      this.activeEntry = item.props.heading;
+    });
+    if (this._current) {
+      this._headings = this._current.generator.generate(
+        this._current.widget,
+        this._current.generator.options
+      );
+    }
   }
 
   /**
@@ -109,10 +122,9 @@ export class TableOfContents extends Widget {
    * @param msg - message
    */
   protected onUpdateRequest(msg: Message): void {
-    let toc: IHeading[] = [];
     let title = this._trans.__('Table of Contents');
     if (this._current) {
-      toc = this._current.generator.generate(
+      this._headings = this._current.generator.generate(
         this._current.widget,
         this._current.generator.options
       );
@@ -139,7 +151,8 @@ export class TableOfContents extends Widget {
       jsx = (
         <TOCTree
           title={title}
-          toc={toc}
+          toc={this._headings}
+          entryClicked={this._entryClicked}
           generator={this.generator}
           itemRenderer={itemRenderer}
           toolbar={this._toolbar}
@@ -158,6 +171,28 @@ export class TableOfContents extends Widget {
   }
 
   /**
+   * Current active entry.
+   *
+   * @returns table of contents active entry
+   */
+  get activeEntry(): IHeading {
+    return this._activeEntry;
+  }
+
+  set activeEntry(value: IHeading) {
+    this._activeEntry = value;
+  }
+
+  /**
+   * List of headings.
+   *
+   * @returns table of contents list of headings
+   */
+  get headings(): IHeading[] {
+    return this._headings;
+  }
+
+  /**
    * Callback invoked to re-render after showing a table of contents.
    *
    * @param msg - message
@@ -167,12 +202,15 @@ export class TableOfContents extends Widget {
   }
 
   private translator: ITranslator;
+  private _activeEntry: IHeading;
+  private _entryClicked?: Signal<TableOfContents, TOCItem>;
   private _trans: TranslationBundle;
   private _toolbar: any;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
   private _current: TableOfContents.ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
+  private _headings: IHeading[];
 }
 
 /**

@@ -16,7 +16,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ArrayExt, each } from '@lumino/algorithm';
+import { ArrayExt, each, findIndex } from '@lumino/algorithm';
 import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag, IDragEvent } from '@lumino/dragdrop';
@@ -25,6 +25,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';
+import { NotebookActions } from './actions';
 import { INotebookModel } from './model';
 
 /**
@@ -180,6 +181,7 @@ export class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[UNDOER] = 'true';
+    this.node.dataset[CODE_RUNNER] = 'true';
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
     this.contentFactory =
@@ -540,11 +542,12 @@ export class StaticNotebook extends Widget {
     if (
       this._observer &&
       insertType === 'push' &&
-      this._renderedCellsCount > this.notebookConfig.numberCellsToRenderDirectly
+      this._renderedCellsCount >=
+        this.notebookConfig.numberCellsToRenderDirectly
     ) {
       // We have an observer and we are have been asked to push (not to insert).
       // and we are above the number of cells to render directly, then
-      // we will add a placeholder and let the instersection observer or the
+      // we will add a placeholder and let the intersection observer or the
       // idle browser render those placeholder cells.
       this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
       const placeholder = this._createPlaceholderCell(
@@ -580,7 +583,7 @@ export class StaticNotebook extends Widget {
     ) {
       const index = this._renderedCellsCount;
       const cell = this._cellsArray[index];
-      this._renderPlaceholderCell(cell, index - 1);
+      this._renderPlaceholderCell(cell, index);
     }
   }
 
@@ -590,6 +593,7 @@ export class StaticNotebook extends Widget {
     pl.insertWidget(index, cell);
     this._toRenderMap.delete(cell.model.id);
     this._incrementRenderedCount();
+    this.onCellInserted(index, cell);
     this._placeholderCellRendered.emit(cell);
   }
 
@@ -1027,7 +1031,7 @@ export namespace StaticNotebook {
   }
 
   /**
-   * A namespace for the staic notebook content factory.
+   * A namespace for the static notebook content factory.
    */
   export namespace ContentFactory {
     /**
@@ -2104,6 +2108,19 @@ export class Notebook extends StaticNotebook {
       event.dropAction = 'move';
       const toMove: Cell[] = event.mimeData.getData('internal:cells');
 
+      // For collapsed markdown headings with hidden "child" cells, move all
+      // child cells as well as the markdown heading.
+      const cell = toMove[toMove.length - 1];
+      if (cell instanceof MarkdownCell && cell.headingCollapsed) {
+        const nextParent = NotebookActions.findNextParentHeading(cell, source);
+        if (nextParent > 0) {
+          const index = findIndex(source.widgets, (possibleCell: Cell) => {
+            return cell.model.id === possibleCell.model.id;
+          });
+          toMove.push(...source.widgets.slice(index + 1, nextParent));
+        }
+      }
+
       // Compute the to/from indices for the move.
       let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
       let toIndex = this._findCell(target);
@@ -2252,21 +2269,14 @@ export class Notebook extends StaticNotebook {
       // If the editor itself does not have focus, ensure command mode.
       if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
-      }
-      this.activeCellIndex = index;
-      // If the editor has focus, ensure edit mode.
-      const node = widget.editorWidget.node;
-      if (node.contains(target)) {
+      } else {
+        // If the editor has focus, ensure edit mode.
         this.mode = 'edit';
       }
+      this.activeCellIndex = index;
     } else {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
-    }
-    if (this.mode === 'command' && target !== this.node) {
-      delete this.node.dataset[CODE_RUNNER];
-    } else {
-      this.node.dataset[CODE_RUNNER] = 'true';
     }
   }
 

@@ -130,7 +130,7 @@ class Gettext {
   constructor(options?: IOptions) {
     options = options || {};
 
-    // default values that could be overriden in Gettext() constructor
+    // default values that could be overridden in Gettext() constructor
     this._defaults = {
       domain: 'messages',
       locale: document.documentElement.getAttribute('lang') || 'en',

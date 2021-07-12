@@ -87,20 +87,22 @@
     inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
 }
 
-.lm-CommandPalette-wrapper::after {
-  content: ' ';
+.jp-SearchIconGroup {
   color: white;
   background-color: var(--jp-brand-color1);
   position: absolute;
   top: 4px;
   right: 4px;
-  height: 30px;
-  width: 10px;
-  padding: 0px 10px;
-  background-image: var(--jp-icon-search-white);
-  background-size: 20px;
-  background-repeat: no-repeat;
-  background-position: center;
+  padding: 5px 5px 1px 5px;
+}
+
+.jp-SearchIconGroup svg {
+  height: 20px;
+  width: 20px;
+}
+
+.jp-SearchIconGroup .jp-icon3[fill] {
+  fill: var(--jp-layout-color0);
 }
 
 .lm-CommandPalette-input {
@@ -167,6 +169,18 @@
 .lm-CommandPalette-item.lm-mod-active {
   color: var(--jp-ui-inverse-font-color1);
   background: var(--jp-brand-color1);
+}
+
+.lm-CommandPalette-item.lm-mod-active .lm-CommandPalette-itemLabel > mark {
+  color: var(--jp-ui-inverse-font-color0);
+}
+
+.lm-CommandPalette-item.lm-mod-active .jp-icon-selectable[fill] {
+  fill: var(--jp-layout-color0);
+}
+
+.lm-CommandPalette-item.lm-mod-active .lm-CommandPalette-itemLabel > mark {
+  color: var(--jp-ui-inverse-font-color0);
 }
 
 .lm-CommandPalette-item.lm-mod-active:hover:not(.lm-mod-disabled) {

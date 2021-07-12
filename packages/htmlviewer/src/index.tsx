@@ -270,7 +270,7 @@ namespace Private {
   /**
    * React component for a trusted button.
    *
-   * This wraps the ToolbarButtonComponent and watches for trust chagnes.
+   * This wraps the ToolbarButtonComponent and watches for trust changes.
    */
   export function TrustButtonComponent(props: TrustButtonComponent.IProps) {
     const translator = props.translator || nullTranslator;

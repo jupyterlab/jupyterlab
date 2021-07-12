@@ -379,7 +379,7 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The aplication language translator.
+   * The application language translator.
    */
   get translator(): ITranslator {
     return this._translator;

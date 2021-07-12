@@ -86,7 +86,7 @@ export interface IEntry {
  */
 export interface IInstall {
   /**
-   * The used pacakge manager (e.g. pip, conda...)
+   * The used package manager (e.g. pip, conda...)
    */
   packageManager: string | undefined;
 
@@ -162,7 +162,7 @@ export interface IInstalledEntry {
  */
 export interface IInstallEntry {
   /**
-   * The used pacakge manager (e.g. pip, conda...)
+   * The used package manager (e.g. pip, conda...)
    */
   packageManager: string | undefined;
 
