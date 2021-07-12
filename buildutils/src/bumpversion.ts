@@ -11,10 +11,14 @@ commander
   .description('Update the version and publish')
   .option('--dry-run', 'Dry run')
   .option('--force', 'Force the upgrade')
+  .option('--skip-commit', 'Whether to skip commit changes')
   .arguments('<spec>')
   .action((spec: any, opts: any) => {
     // Get the previous version.
     const prev = utils.getPythonVersion();
+
+    // Whether to commit after bumping
+    const commit = opts.skipCommit !== true;
 
     // For patch, defer to `patch:release` command
     if (spec === 'patch') {
@@ -64,7 +68,7 @@ commander
       utils.run(`bumpversion ${spec}`);
 
       // Run the post-bump script.
-      utils.postbump();
+      utils.postbump(commit);
 
       return;
     }
@@ -127,7 +131,7 @@ commander
     utils.run(`bumpversion ${spec}`);
 
     // Run the post-bump script.
-    utils.postbump();
+    utils.postbump(commit);
   });
 
 commander.parse(process.argv);

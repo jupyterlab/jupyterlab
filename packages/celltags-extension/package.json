@@ -35,7 +35,6 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "prepare": "npm run clean && npm run build",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },

@@ -562,7 +562,9 @@ export namespace NotebookActions {
         {}
       );
 
-      model.cells.push(cell);
+      // Do not use push here, as we want an widget insertion
+      // to make sure no placeholder widget is rendered.
+      model.cells.insert(notebook.widgets.length, cell);
       notebook.activeCellIndex++;
       notebook.mode = 'edit';
     } else {
