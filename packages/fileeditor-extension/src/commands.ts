@@ -44,7 +44,7 @@ import {
 } from '@lumino/coreutils';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
-
+const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
 /**
  * The command IDs used by the fileeditor plugin.
  */
@@ -457,25 +457,29 @@ export namespace Commands {
       execute: () => {
         const anyToggled =
           commands.isToggled(CommandIDs.autoClosingBrackets) ||
-          commands.isToggled(autoClosingBracketsNotebook);
+          commands.isToggled(autoClosingBracketsNotebook) ||
+          commands.isToggled(autoClosingBracketsConsole);
         // if any auto closing brackets options is toggled, toggle both off
         if (anyToggled) {
           void commands.execute(CommandIDs.autoClosingBrackets, {
             force: false
           });
           void commands.execute(autoClosingBracketsNotebook, { force: false });
+          void commands.execute(autoClosingBracketsConsole, { force: false });
         } else {
           // both are off, turn them on
           void commands.execute(CommandIDs.autoClosingBrackets, {
             force: true
           });
           void commands.execute(autoClosingBracketsNotebook, { force: true });
+          void commands.execute(autoClosingBracketsConsole, { force: true });
         }
       },
       label: trans.__('Auto Close Brackets'),
       isToggled: () =>
         commands.isToggled(CommandIDs.autoClosingBrackets) ||
-        commands.isToggled(autoClosingBracketsNotebook)
+        commands.isToggled(autoClosingBracketsNotebook) ||
+        commands.isToggled(autoClosingBracketsConsole)
     });
   }
 
