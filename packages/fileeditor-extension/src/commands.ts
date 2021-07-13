@@ -457,7 +457,7 @@ export namespace Commands {
       execute: () => {
         const anyToggled =
           commands.isToggled(CommandIDs.autoClosingBrackets) ||
-          commands.isToggled(autoClosingBracketsNotebook) || 
+          commands.isToggled(autoClosingBracketsNotebook) ||
           commands.isToggled(autoClosingBracketsConsole);
         // if any auto closing brackets options is toggled, toggle both off
         if (anyToggled) {

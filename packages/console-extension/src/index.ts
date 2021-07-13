@@ -393,12 +393,13 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.autoClosingBrackets, {
     execute: async args => {
-      promptCellConfig.autoClosingBrackets = !!(args['force'] ?? !promptCellConfig.autoClosingBrackets);
+      promptCellConfig.autoClosingBrackets = !!(
+        args['force'] ?? !promptCellConfig.autoClosingBrackets
+      );
       await settingRegistry.set(pluginId, 'promptCellConfig', promptCellConfig);
     },
     label: trans.__('Auto Close Brackets for Code Console Prompt'),
-    isToggled: () =>
-      promptCellConfig.autoClosingBrackets as boolean
+    isToggled: () => promptCellConfig.autoClosingBrackets as boolean
   });
 
   /**
