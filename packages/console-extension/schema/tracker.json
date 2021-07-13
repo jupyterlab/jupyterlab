@@ -176,7 +176,7 @@
       "description": "The configuration for all prompt cells.",
       "$ref": "#/definitions/editorConfig",
       "default": {
-        "autoClosingBrackets": true,
+        "autoClosingBrackets": false,
         "cursorBlinkRate": 530,
         "fontFamily": null,
         "fontSize": null,
