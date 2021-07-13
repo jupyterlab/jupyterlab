@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra';
 import * as child_process from 'child_process';
+import * as crypto from 'crypto';
 import * as path from 'path';
 import * as os from 'os';
 import * as ps from 'process';
@@ -192,10 +193,21 @@ function fixLinks(package_dir: string) {
   }
   yarn_reg = yarn_reg || 'https://registry.yarnpkg.com';
   const lock_file = path.join(package_dir, 'yarn.lock');
-  let content = fs.readFileSync(lock_file, { encoding: 'utf-8' });
+  console.log(`Fixing links in ${lock_file}`);
+  const content = fs.readFileSync(lock_file, { encoding: 'utf-8' });
+
+  let shasum = crypto.createHash('sha256');
+  let hash = shasum.update(content);
+  console.log('Prior hash', hash.digest('hex'));
+
   const regex = /http\:\/\/localhost\:\d+/g;
-  content = content.replace(regex, yarn_reg);
-  fs.writeFileSync(lock_file, content, 'utf8');
+  const new_content = content.replace(regex, yarn_reg);
+
+  shasum = crypto.createHash('sha256');
+  hash = shasum.update(new_content);
+  console.log('After hash', hash.digest('hex'));
+
+  fs.writeFileSync(lock_file, new_content, 'utf8');
 }
 
 const program = new Command();
@@ -221,7 +233,7 @@ program
   .command('fix-links')
   .option('--path <path>', 'Path to the directory with a yarn lock')
   .action((options: any) => {
-    fixLinks(options.out_dir || process.cwd());
+    fixLinks(options.path || process.cwd());
   });
 
 if (require.main === module) {
