@@ -3,7 +3,6 @@
 
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
@@ -14,11 +13,6 @@ import { IDocumentManager } from './';
  * The class name added to file dialogs.
  */
 const FILE_DIALOG_CLASS = 'jp-FileDialog';
-
-/**
- * The class name added to checkboxes in file dialogs.
- */
-const FILE_DIALOG_CHECKBOX_CLASS = 'jp-FileDialog-Checkbox';
 
 /**
  * The class name added for the new name label in the rename dialog
@@ -73,48 +67,6 @@ export function renameDialog(
         )
       );
       return null;
-    }
-    const basePath = PathExt.dirname(oldPath);
-    const newPath = PathExt.join(basePath, result.value);
-    return renameFile(manager, oldPath, newPath);
-  });
-}
-
-/**
- * Name a file on first save with a dialog.
- */
-export function nameOnSaveDialog(
-  manager: IDocumentManager,
-  context: DocumentRegistry.Context,
-  translator?: ITranslator
-): Promise<Contents.IModel | null> {
-  translator = translator || nullTranslator;
-  const trans = translator.load('jupyterlab');
-  const oldPath = context.path;
-
-  return showDialog({
-    title: trans.__('Name File'),
-    body: new NameOnSaveHandler(manager, oldPath),
-    focusNodeSelector: 'input',
-    buttons: [Dialog.okButton({ label: trans.__('Enter') })]
-  }).then(result => {
-    context.model.dirty = false;
-    context.contentsModel!.renamed = true;
-    if (!result.value) {
-      return renameFile(manager, oldPath, oldPath);
-    }
-
-    if (!isValidFileName(result.value)) {
-      void showErrorMessage(
-        trans.__('Naming Error'),
-        Error(
-          trans.__(
-            '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
-            result.value
-          )
-        )
-      );
-      return renameFile(manager, oldPath, oldPath);
     }
     const basePath = PathExt.dirname(oldPath);
     const newPath = PathExt.join(basePath, result.value);
@@ -235,73 +187,6 @@ namespace Private {
     body.appendChild(existingPath);
     body.appendChild(nameTitle);
     body.appendChild(name);
-    return body;
-  }
-}
-
-/**
- * A widget used to name file on first save.
- */
-class NameOnSaveHandler extends Widget {
-  /**
-   * Construct a new "name notebook file" dialog.
-   */
-  constructor(manager: IDocumentManager, oldPath: string) {
-    super({ node: Private.createNameFileNode(manager) });
-    this.addClass(FILE_DIALOG_CLASS);
-    const ext = PathExt.extname(oldPath);
-    const value = (this.inputNode.value = PathExt.basename(oldPath));
-    this.inputNode.setSelectionRange(0, value.length - ext.length);
-  }
-
-  /**
-   * Get the input text node.
-   */
-  get inputNode(): HTMLInputElement {
-    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
-  }
-
-  /**
-   * Get the value of the input widget.
-   */
-  getValue(): string {
-    return this.inputNode.value;
-  }
-}
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * Create the node for the name file dialog handler.
-   */
-  export function createNameFileNode(
-    manager: IDocumentManager,
-    translator?: ITranslator
-  ): HTMLElement {
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    const body = document.createElement('div');
-    const name = document.createElement('input');
-    const checkbox = document.createElement('input');
-    checkbox.id = 'jp-filedialog-input-id';
-    const label = document.createElement('label');
-    label.htmlFor = checkbox.id;
-    const div = document.createElement('div');
-    div.classList.add(FILE_DIALOG_CHECKBOX_CLASS);
-
-    checkbox.type = 'checkbox';
-    checkbox.addEventListener('change', function () {
-      manager.nameFileOnSave = !this.checked;
-    });
-
-    label.textContent = trans.__("Don't ask me again");
-    body.appendChild(name);
-    div.appendChild(checkbox);
-    div.appendChild(label);
-    body.appendChild(div);
-
     return body;
   }
 }

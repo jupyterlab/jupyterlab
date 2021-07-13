@@ -16,6 +16,7 @@ import { appendHeading } from './append_heading';
  * @param tags - filter tags
  * @param collapsed - boolean indicating whether a heading is collapsed
  * @param showMarkdown - boolean indicating whether to show Markdown previews
+ * @param cellCollapseMetadata - indicates which metadata string to use based on the cellSyncSetting
  * @returns result tuple
  */
 function appendMarkdownHeading(
@@ -25,7 +26,8 @@ function appendMarkdownHeading(
   collapseLevel: number,
   tags: string[],
   collapsed: boolean,
-  showMarkdown: boolean
+  showMarkdown: boolean,
+  cellCollapseMetadata: string
 ): [INotebookHeading[], INotebookHeading | null, number] {
   if (heading && heading.type === 'markdown' && showMarkdown) {
     // Append a Markdown preview heading:
@@ -43,7 +45,8 @@ function appendMarkdownHeading(
       prev,
       collapseLevel,
       tags,
-      collapsed
+      collapsed,
+      cellCollapseMetadata
     );
   }
   return [headings, prev, collapseLevel];

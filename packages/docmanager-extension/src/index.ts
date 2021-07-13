@@ -22,7 +22,6 @@ import { IChangedArgs, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   IDocumentManager,
-  nameOnSaveDialog,
   PathStatus,
   renameDialog,
   SavingStatus
@@ -56,8 +55,6 @@ namespace CommandIDs {
 
   export const rename = 'docmanager:rename';
 
-  export const nameOnSave = 'docmanager:name-on-save';
-
   export const del = 'docmanager:delete';
 
   export const restoreCheckpoint = 'docmanager:restore-checkpoint';
@@ -71,8 +68,6 @@ namespace CommandIDs {
   export const download = 'docmanager:download';
 
   export const toggleAutosave = 'docmanager:toggle-autosave';
-
-  export const toggleNameFileOnSave = 'docmanager:toggle-name-file-on-save';
 
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
 }
@@ -171,15 +166,6 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
         | number
         | null;
       docManager.autosaveInterval = autosaveInterval || 120;
-
-      // Handle whether to prompt to name file on first save
-      const nameFileOnSave = settings.get('nameFileOnSave')
-        .composite as boolean;
-
-      if (docManager.nameFileOnSave != nameFileOnSave) {
-        docManager.nameFileOnSave = nameFileOnSave;
-        app.commands.notifyCommandChanged(CommandIDs.nameOnSave);
-      }
 
       // Handle default widget factory overrides.
       const defaultViewers = settings.get('defaultViewers').composite as {
@@ -526,18 +512,6 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.nameOnSave, {
-    label: () =>
-      trans.__('Rename %1…', fileType(shell.currentWidget, docManager)),
-    isEnabled,
-    execute: () => {
-      if (isEnabled()) {
-        const context = docManager.contextForWidget(shell.currentWidget!);
-        return nameOnSaveDialog(docManager, context!);
-      }
-    }
-  });
-
   commands.addCommand(CommandIDs.newUntitled, {
     execute: args => {
       // FIXME-TRANS: Localizing args['error']?
@@ -772,59 +746,6 @@ function addCommands(
           );
         });
     }
-  });
-
-  commands.addCommand(CommandIDs.toggleNameFileOnSave, {
-    label: trans.__('Name File on First Save'),
-    isToggled: () => docManager.nameFileOnSave,
-    execute: () => {
-      const value = !docManager.nameFileOnSave;
-      const key = 'nameFileOnSave';
-      return settingRegistry
-        .set(docManagerPluginId, key, value)
-        .catch((reason: Error) => {
-          console.error(
-            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
-          );
-        });
-    }
-  });
-  docManager.optionChanged.connect(() => {
-    const key = 'nameFileOnSave';
-    const value = settingRegistry.plugins[docManagerPluginId]?.data.user[key];
-    if (value == docManager.nameFileOnSave) {
-      void settingRegistry
-        .set(docManagerPluginId, key, !value)
-        .catch((reason: Error) => {
-          console.error(
-            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
-          );
-        });
-    }
-  });
-
-  const newFileRegex = new RegExp('^untitled', 'i');
-
-  docManager.activateRequested.connect((sender, args) => {
-    const widget = sender.findWidget(args);
-    if (!widget) {
-      return;
-    }
-
-    widget.context.saveState.connect((doc, state) => {
-      if (sender.nameFileOnSave && widget === shell.currentWidget) {
-        const model = doc.contentsModel;
-        if (
-          state === 'completed manually' &&
-          model &&
-          !model.renamed == true &&
-          newFileRegex.test(model.name)
-        ) {
-          const context = sender.contextForWidget(widget!);
-          return nameOnSaveDialog(sender, context!);
-        }
-      }
-    });
   });
 
   if (palette) {
