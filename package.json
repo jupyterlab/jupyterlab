@@ -24,7 +24,6 @@
   },
   "scripts": {
     "add:sibling": "node buildutils/lib/add-sibling.js",
-    "after:build:python": "node buildutils/lib/local-repository fix-links --path jupyterlab/staging",
     "after:publish:assets": "node buildutils/lib/publish --skip-publish",
     "analyze": "jlpm run analyze:dev",
     "analyze:dev": "cd dev_mode && jlpm run build --analyze",

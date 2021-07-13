@@ -61,3 +61,10 @@ jobs:
           RH_VERSION_SPEC: build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Assets
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist-files
+          path: |
+            .jupyter_releaser_checkout/dist/*.*
