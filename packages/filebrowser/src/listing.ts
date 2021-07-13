@@ -1138,10 +1138,10 @@ export class DirListing extends Widget {
             .then(async model => {
               await this._manager.rename(
                 `${this._model.path}/${model.name}`,
-                `${this._model.path}/${item}`
+                `${this._model.path}/${item.name}`
               );
               this._model
-                .cd(`${this._model.path}/${item}`)
+                .cd(`${this._model.path}/${item.name}`)
                 .catch(error =>
                   showErrorMessage(
                     this._trans._p('showErrorMessage', 'Open directory'),
