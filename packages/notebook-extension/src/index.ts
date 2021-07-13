@@ -246,6 +246,8 @@ namespace CommandIDs {
 
   export const replaceSelection = 'notebook:replace-selection';
 
+  export const autoClosingBrackets = 'notebook:toggle-autoclosing-brackets';
+
   export const toggleCollapseCmd = 'Collapsible_Headings:Toggle_Collapse';
 
   export const collapseAllCmd = 'Collapsible_Headings:Collapse_All';
@@ -1064,6 +1066,36 @@ function activateNotebookHandler(
         updateConfig(settings);
         settings.changed.connect(() => {
           updateConfig(settings);
+        });
+        commands.addCommand(CommandIDs.autoClosingBrackets, {
+          execute: args => {
+            const codeConfig = settings.get('codeCellConfig')
+              .composite as JSONObject;
+            const markdownConfig = settings.get('markdownCellConfig')
+              .composite as JSONObject;
+            const rawConfig = settings.get('rawCellConfig')
+              .composite as JSONObject;
+
+            const anyToggled =
+              codeConfig.autoClosingBrackets ||
+              markdownConfig.autoClosingBrackets ||
+              rawConfig.autoClosingBrackets;
+            const toggled = !!(args['force'] ?? !anyToggled);
+            [
+              codeConfig.autoClosingBrackets,
+              markdownConfig.autoClosingBrackets,
+              rawConfig.autoClosingBrackets
+            ] = [toggled, toggled, toggled];
+
+            void settings.set('codeCellConfig', codeConfig);
+            void settings.set('markdownCellConfig', markdownConfig);
+            void settings.set('rawCellConfig', rawConfig);
+          },
+          label: trans.__('Auto Close Brackets for All Notebook Cell Types'),
+          isToggled: () =>
+            ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
+              x => (settings.get(x).composite as JSONObject).autoClosingBrackets
+            )
         });
       })
       .catch((reason: Error) => {
