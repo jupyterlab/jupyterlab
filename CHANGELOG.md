@@ -8,6 +8,16 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 3.1.0rc0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.0b3...a8d22506a60cd879105276b1624affb57c49cb6c))
+
+### Bugs fixed
+
+- Disable autoclosing brackets by default in console [#10612](https://github.com/jupyterlab/jupyterlab/pull/10612) ([@jasongrout](https://github.com/jasongrout))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 3.1.0b3
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.0b1...d5538a55329a00807a2dd541ec85b4a49cadd2b0))
@@ -66,8 +76,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 - Revert name file feature [#10609](https://github.com/jupyterlab/jupyterlab/pull/10609) ([@jess-x](https://github.com/jess-x))
 - Finish Releaser Integration [#10606](https://github.com/jupyterlab/jupyterlab/pull/10606) ([@afshin](https://github.com/afshin))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 3.1.0b2
 
