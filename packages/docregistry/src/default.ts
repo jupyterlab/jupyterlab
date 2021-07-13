@@ -11,7 +11,7 @@ import * as models from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import { Title, Widget } from '@lumino/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
 
 /**
@@ -486,6 +486,9 @@ export class DocumentWidget<
     void this.context.ready.then(() => {
       this._handleDirtyState();
     });
+
+    // listen for changes to the title object
+    this.title.changed.connect(this._onTitleChanged, this);
   }
 
   /**
@@ -493,6 +496,29 @@ export class DocumentWidget<
    */
   setFragment(fragment: string): void {
     /* no-op */
+  }
+
+  /**
+   * Handle a title change.
+   */
+  private async _onTitleChanged(_sender: Title<this>) {
+    const validNameExp = /[\/\\:]/;
+    const name = this.title.label;
+    const filename = this.context.path.split('/').pop()!;
+
+    if (name === filename) {
+      return;
+    }
+    if (name.length > 0 && !validNameExp.test(name)) {
+      const oldPath = this.context.path;
+      await this.context.rename(name);
+      if (this.context.path !== oldPath) {
+        // Rename succeeded
+        return;
+      }
+    }
+    // Reset title if name is invalid or rename fails
+    this.title.label = filename;
   }
 
   /**
