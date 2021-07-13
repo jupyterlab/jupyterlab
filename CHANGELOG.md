@@ -8,6 +8,67 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 3.1.0b3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.0b1...d5538a55329a00807a2dd541ec85b4a49cadd2b0))
+
+### Enhancements made
+
+- Allow to set custom position for `Tooltip` [#10590](https://github.com/jupyterlab/jupyterlab/pull/10590) ([@krassowski](https://github.com/krassowski))
+- Rename files in collaborative mode [#10564](https://github.com/jupyterlab/jupyterlab/pull/10564) ([@hbcarlos](https://github.com/hbcarlos))
+- Add promptCellConfig to Code Console Settings [#10555](https://github.com/jupyterlab/jupyterlab/pull/10555) ([@jess-x](https://github.com/jess-x))
+- Communicate heading collapse between ToC and Notebook [#10545](https://github.com/jupyterlab/jupyterlab/pull/10545) ([@andrewfulton9](https://github.com/andrewfulton9))
+- Ad options to include cell output in headings [#10537](https://github.com/jupyterlab/jupyterlab/pull/10537) ([@skyetim](https://github.com/skyetim))
+- Simple mode rename improvements 2.0 [#10518](https://github.com/jupyterlab/jupyterlab/pull/10518) ([@cameron-toy](https://github.com/cameron-toy))
+- Disable `autoClosingBracket` by default everywhere [#9488](https://github.com/jupyterlab/jupyterlab/pull/9488) ([@telamonian](https://github.com/telamonian))
+
+### Bugs fixed
+
+- Restore current sidebar widget even if sides are switched [#10605](https://github.com/jupyterlab/jupyterlab/pull/10605) ([@afshin](https://github.com/afshin))
+- Save only workspace name as metadata.id instead of full path [#10603](https://github.com/jupyterlab/jupyterlab/pull/10603) ([@afshin](https://github.com/afshin))
+- Invoke onCellInserted when rendering a placeholder cell [#10602](https://github.com/jupyterlab/jupyterlab/pull/10602) ([@echarles](https://github.com/echarles))
+- Fix font-weight for collaborative cursor caret [#10598](https://github.com/jupyterlab/jupyterlab/pull/10598) ([@krassowski](https://github.com/krassowski))
+- Do not show tooltip when completer is active [#10588](https://github.com/jupyterlab/jupyterlab/pull/10588) ([@krassowski](https://github.com/krassowski))
+- Only save and use valid user settings for the editor [#10585](https://github.com/jupyterlab/jupyterlab/pull/10585) ([@jasongrout](https://github.com/jasongrout))
+- Remove `tabIndex` taking focus away from notebook [#10580](https://github.com/jupyterlab/jupyterlab/pull/10580) ([@krassowski](https://github.com/krassowski))
+- Open Help menu's Jupyter Forum in a new browser tab by default [#10574](https://github.com/jupyterlab/jupyterlab/pull/10574) ([@isabela-pf](https://github.com/isabela-pf))
+- Move all child cells when collapsed markdown heading is moved [#10571](https://github.com/jupyterlab/jupyterlab/pull/10571) ([@marthacryan](https://github.com/marthacryan))
+- Restore JupyterLabMenu missing `menu` attribute [#10567](https://github.com/jupyterlab/jupyterlab/pull/10567) ([@fcollonval](https://github.com/fcollonval))
+- Completer: Do not announce subset match selection if it did not change [#10556](https://github.com/jupyterlab/jupyterlab/pull/10556) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- More releaser fixes [#10614](https://github.com/jupyterlab/jupyterlab/pull/10614) ([@afshin](https://github.com/afshin))
+- Fix usage of Releaser [#10608](https://github.com/jupyterlab/jupyterlab/pull/10608) ([@afshin](https://github.com/afshin))
+- Fix `js-services` test with the new ipykernel 6 [#10592](https://github.com/jupyterlab/jupyterlab/pull/10592) ([@jtpio](https://github.com/jtpio))
+- Switch to using a `PromiseDelegate` in `yprovider.ts` [#10587](https://github.com/jupyterlab/jupyterlab/pull/10587) ([@jtpio](https://github.com/jtpio))
+- Rename to `YjsEchoWebSocket` [#10586](https://github.com/jupyterlab/jupyterlab/pull/10586) ([@jtpio](https://github.com/jtpio))
+- Give answered issues action permission to write [#10583](https://github.com/jupyterlab/jupyterlab/pull/10583) ([@jasongrout](https://github.com/jasongrout))
+- Update typedoc [#10582](https://github.com/jupyterlab/jupyterlab/pull/10582) ([@jasongrout](https://github.com/jasongrout))
+- Set the stale message to have an actual value. [#10575](https://github.com/jupyterlab/jupyterlab/pull/10575) ([@jasongrout](https://github.com/jasongrout))
+- Move the application status check to a separate plugin [#10572](https://github.com/jupyterlab/jupyterlab/pull/10572) ([@jtpio](https://github.com/jtpio))
+- Skip the ipykernel debugger test [#10569](https://github.com/jupyterlab/jupyterlab/pull/10569) ([@jtpio](https://github.com/jtpio))
+- Add new file to CodeQL `path-ignore` [#10568](https://github.com/jupyterlab/jupyterlab/pull/10568) ([@jtpio](https://github.com/jtpio))
+- Update skiplink implementation [#10535](https://github.com/jupyterlab/jupyterlab/pull/10535) ([@isabela-pf](https://github.com/isabela-pf))
+- DirListing: Make mouse events methods protected [#10527](https://github.com/jupyterlab/jupyterlab/pull/10527) ([@martinRenou](https://github.com/martinRenou))
+- Refresh yarn.lock in preparation for 3.1 [#10516](https://github.com/jupyterlab/jupyterlab/pull/10516) ([@jasongrout](https://github.com/jasongrout))
+- tagging deprecated completer APIs [#10348](https://github.com/jupyterlab/jupyterlab/pull/10348) ([@dharmaquark](https://github.com/dharmaquark))
+
+### Documentation improvements
+
+- Mention prebuilt extensions in README and docs [#10604](https://github.com/jupyterlab/jupyterlab/pull/10604) ([@krassowski](https://github.com/krassowski))
+- replace OS X -> macOS [#10599](https://github.com/jupyterlab/jupyterlab/pull/10599) ([@partev](https://github.com/partev))
+- Fix documentation for `selectionExecuted` signal (copy-paste error) [#10579](https://github.com/jupyterlab/jupyterlab/pull/10579) ([@krassowski](https://github.com/krassowski))
+- Documentation for Real Time Collaboration [#10547](https://github.com/jupyterlab/jupyterlab/pull/10547) ([@hbcarlos](https://github.com/hbcarlos))
+- Add `ipykernel` to the debugger user docs [#10512](https://github.com/jupyterlab/jupyterlab/pull/10512) ([@jtpio](https://github.com/jtpio))
+
+### Other merged PRs
+
+- Revert name file feature [#10609](https://github.com/jupyterlab/jupyterlab/pull/10609) ([@jess-x](https://github.com/jess-x))
+- Finish Releaser Integration [#10606](https://github.com/jupyterlab/jupyterlab/pull/10606) ([@afshin](https://github.com/afshin))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 3.1.0b2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.0.6...9f6041d0a0300f2b045b7a9a82aa63084757edc4))
@@ -369,8 +430,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 - Add license-webpack-plugin [#9519](https://github.com/jupyterlab/jupyterlab/pull/9519) ([@bollwyvl](https://github.com/bollwyvl))
 - Debugger keyboard shortcuts [#9154](https://github.com/jupyterlab/jupyterlab/pull/9154) ([@mnowacki-b](https://github.com/mnowacki-b))
 - Add null fileformat [#7596](https://github.com/jupyterlab/jupyterlab/pull/7596) ([@telamonian](https://github.com/telamonian))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## v3.0
 
