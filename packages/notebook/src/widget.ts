@@ -1156,6 +1156,15 @@ export class Notebook extends StaticNotebook {
       cell.rendered = false;
     }
     this._ensureFocus();
+    if (
+      cell instanceof MarkdownCell &&
+      cell.numberChildNodes > 0 &&
+      cell.headingCollapsed
+    ) {
+      for (let i = newValue; i <= newValue + cell.numberChildNodes; i++) {
+        Private.selectedProperty.set(this.widgets[i], true);
+      }
+    }
     if (newValue === oldValue) {
       return;
     }
