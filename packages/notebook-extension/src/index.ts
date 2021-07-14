@@ -7,6 +7,7 @@
 
 import {
   ILayoutRestorer,
+  JupyterLab,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -226,6 +227,10 @@ namespace CommandIDs {
   export const hideAllOutputs = 'notebook:hide-all-cell-outputs';
 
   export const showAllOutputs = 'notebook:show-all-cell-outputs';
+
+  export const renderSideBySide = 'notebook:render-side-by-side';
+
+  export const renderNotSideBySide = 'notebook:render-not-side-by-side';
 
   export const enableOutputScrolling = 'notebook:enable-output-scrolling';
 
@@ -2185,6 +2190,29 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.renderSideBySide, {
+    label: trans.__('Render Side-by-side'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        if (!(app instanceof JupyterLab)) {
+          return NotebookActions.renderSideBySide(current);
+        }
+        return NotebookActions.renderSideBySide(current, app);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.renderNotSideBySide, {
+    label: trans.__('Render Not Side-by-side'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        return NotebookActions.renderNotSideBySide();
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.showAllOutputs, {
     label: trans.__('Expand All Outputs'),
     execute: args => {
@@ -2360,6 +2388,7 @@ function populatePalette(
     CommandIDs.showOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
+    CommandIDs.renderSideBySide,
     CommandIDs.enableOutputScrolling,
     CommandIDs.disableOutputScrolling
   ].forEach(command => {

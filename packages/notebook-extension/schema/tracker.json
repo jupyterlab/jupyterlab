@@ -163,6 +163,18 @@
           {
             "type": "separator",
             "rank": 11
+          },
+          {
+            "command": "notebook:render-side-by-side",
+            "rank": 12
+          },
+          {
+            "command": "notebook:render-not-side-by-side",
+            "rank": 12
+          },
+          {
+            "type": "separator",
+            "rank": 12
           }
         ]
       },

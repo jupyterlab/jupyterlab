@@ -12,6 +12,7 @@ import '@jupyterlab/codeeditor/style/index.js';
 import '@jupyterlab/statusbar/style/index.js';
 import '@jupyterlab/rendermime/style/index.js';
 import '@jupyterlab/docregistry/style/index.js';
+import '@jupyterlab/application/style/index.js';
 import '@jupyterlab/cells/style/index.js';
 
 import './base.css';

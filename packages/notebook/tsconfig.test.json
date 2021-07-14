@@ -3,6 +3,9 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
+      "path": "../application"
+    },
+    {
       "path": "../apputils"
     },
     {
@@ -46,6 +49,51 @@
     },
     {
       "path": "../../testutils"
+<<<<<<< HEAD
+=======
+    },
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../shared-models"
+    },
+    {
+      "path": "../statusbar"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
+>>>>>>> 0cdbacf20 (Add commands to View)
     }
   ]
 }
