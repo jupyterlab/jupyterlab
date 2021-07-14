@@ -33,5 +33,5 @@ npm-install-options = "--legacy-peer-deps"
 [tool.jupyter-releaser.hooks]
 before-bump-version = ["git checkout .", "pip install bump2version"]
 before-build-npm = ["git commit -am 'Bump version'", "jlpm", "jlpm run build:utils", "jlpm run build:src"]
-before-build-python = ["node buildutils/lib/local-repository start", "jlpm run before:build:python", "ls -ltr jupyterlab/staging", "node buildutils/lib/local-repository stop", "node buildutils/lib/local-repository fix-links --path jupyterlab/staging"]
+before-build-python = ["node buildutils/lib/local-repository start", "jlpm run before:build:python", "node buildutils/lib/local-repository stop", "node buildutils/lib/local-repository fix-links --path jupyterlab/staging"]
 after-publish-assets = "jlpm run after:publish:assets"

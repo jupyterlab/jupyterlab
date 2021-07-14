@@ -4,6 +4,7 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import * as os from 'os';
 import * as ps from 'process';
+import glob from 'glob';
 
 import { Command } from 'commander';
 
@@ -210,6 +211,17 @@ function fixLinks(package_dir: string) {
   fs.writeFileSync(lock_file, new_content, 'utf8');
 }
 
+/**
+ * Publish the npm tar files in a given directory
+ */
+function publishPackages(dist_dir: string) {
+  const paths = glob.sync(path.join(dist_dir, '*.tgz'));
+  paths.forEach(package_path => {
+    const name = path.basename(package_path);
+    utils.run(`npm publish ${name}`, { cwd: dist_dir });
+  });
+}
+
 const program = new Command();
 
 program
@@ -234,6 +246,13 @@ program
   .option('--path <path>', 'Path to the directory with a yarn lock')
   .action((options: any) => {
     fixLinks(options.path || process.cwd());
+  });
+
+program
+  .command('publish-dists')
+  .option('--path <path>', 'Path to the directory with npm tar balls')
+  .action((options: any) => {
+    publishPackages(options.path || process.cwd());
   });
 
 if (require.main === module) {
