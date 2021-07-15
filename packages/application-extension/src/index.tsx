@@ -374,48 +374,19 @@ const MAIN_PLUGIN_ID = '@jupyterlab/application-extension:main';
 const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
   id: MAIN_PLUGIN_ID,
   requires: [IRouter, IWindowResolver, ITranslator],
-  optional: [IConnectionLost, ISettingRegistry],
+  optional: [IConnectionLost],
   provides: ITreePathUpdater,
   activate: (
     app: JupyterFrontEnd,
     router: IRouter,
     resolver: IWindowResolver,
     translator: ITranslator,
-    connectionLost: IConnectionLost | null,
-    settingRegistry: ISettingRegistry | null
+    connectionLost: IConnectionLost | null
   ) => {
     const trans = translator.load('jupyterlab');
 
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${main.id} must be activated in JupyterLab.`);
-    }
-
-    // Build context menu from settings
-    if (settingRegistry) {
-      function createMenu(options: ISettingRegistry.IMenu): RankedMenu {
-        const menu = new RankedMenu({ ...options, commands: app.commands });
-        if (options.label) {
-          menu.title.label = trans.__(options.label);
-        }
-        return menu;
-      }
-
-      // Load the context menu lately so plugins are loaded.
-      app.started
-        .then(() => {
-          return Private.loadSettingsContextMenu(
-            app.contextMenu,
-            settingRegistry,
-            createMenu,
-            translator
-          );
-        })
-        .catch(reason => {
-          console.error(
-            'Failed to load context menu items from settings registry.',
-            reason
-          );
-        });
     }
 
     // These two internal state variables are used to manage the two source
@@ -564,6 +535,47 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     return updateTreePath;
   },
   autoStart: true
+};
+
+/**
+ * Plugin to build the context menu from the settings.
+ */
+const contextMenu: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:context-menu',
+  autoStart: true,
+  requires: [ISettingRegistry, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
+  ): void => {
+    const trans = translator.load('jupyterlab');
+
+    function createMenu(options: ISettingRegistry.IMenu): RankedMenu {
+      const menu = new RankedMenu({ ...options, commands: app.commands });
+      if (options.label) {
+        menu.title.label = trans.__(options.label);
+      }
+      return menu;
+    }
+
+    // Load the context menu lately so plugins are loaded.
+    app.started
+      .then(() => {
+        return Private.loadSettingsContextMenu(
+          app.contextMenu,
+          settingRegistry,
+          createMenu,
+          translator
+        );
+      })
+      .catch(reason => {
+        console.error(
+          'Failed to load context menu items from settings registry.',
+          reason
+        );
+      });
+  }
 };
 
 /**
@@ -913,6 +925,7 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  contextMenu,
   dirty,
   main,
   mainCommands,
