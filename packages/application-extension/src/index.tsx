@@ -582,7 +582,7 @@ const contextMenu: JupyterFrontEndPlugin<void> = {
  * Check if the application is dirty before closing the browser tab.
  */
 const dirty: JupyterFrontEndPlugin<void> = {
-  id: '@retrolab/application-extension:dirty',
+  id: '@jupyterlab/application-extension:dirty',
   autoStart: true,
   requires: [ITranslator],
   activate: (app: JupyterFrontEnd, translator: ITranslator): void => {
