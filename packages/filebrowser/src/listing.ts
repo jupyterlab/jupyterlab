@@ -1142,6 +1142,15 @@ export class DirListing extends Widget {
               );
               this._model
                 .cd(`${this._model.path}/${item.name}`)
+                .then(() => {
+                  let directoryReader = item.createReader();
+
+                  directoryReader.readEntries((entries: any) => {
+                    entries.forEach((entry: any) => {
+                      addDirectory(entry);
+                    });
+                  });
+                })
                 .catch(error =>
                   showErrorMessage(
                     this._trans._p('showErrorMessage', 'Open directory'),
@@ -1153,13 +1162,13 @@ export class DirListing extends Widget {
               console.log('error while creating folder: ', err);
             });
 
-          let directoryReader = item.createReader();
+          // let directoryReader = item.createReader();
 
-          directoryReader.readEntries((entries: any) => {
-            entries.forEach((entry: any) => {
-              addDirectory(entry);
-            });
-          });
+          // directoryReader.readEntries((entries: any) => {
+          //   entries.forEach((entry: any) => {
+          //     addDirectory(entry);
+          //   });
+          // });
         } else {
           item.file((file: any) => {
             void this._model.upload(file);
