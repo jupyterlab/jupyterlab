@@ -264,3 +264,11 @@
   opacity: 1;
   transition-delay: 0s;
 }
+
+/* Prevent the caret names from being cut off by the editor (cell) edges */
+.CodeMirror,
+.jp-Cell-inputArea,
+.jp-InputArea-editor,
+.CodeMirror .CodeMirror-scroll {
+  overflow: visible !important;
+}
