@@ -28,7 +28,7 @@
     "analyze": "jlpm run analyze:dev",
     "analyze:dev": "cd dev_mode && jlpm run build --analyze",
     "analyze:prod": "cd dev_mode && jlpm run build:prod --analyze",
-    "before:build:python": "node buildutils/lib/publish --yes --skip-tags && node buildutils/lib/update-core-mode.js",
+    "before:build:python": "node buildutils/lib/local-repository.js publish-dists --path ./dist && node buildutils/lib/update-core-mode.js",
     "build": "jlpm run build:dev",
     "build:builder": "cd builder && jlpm run build",
     "build:core": "cd jupyterlab/staging && jlpm && (jlpm deduplicate || jlpm) && jlpm run build",
