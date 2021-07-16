@@ -34,6 +34,14 @@ describe('IPython rpy2 extractors', () => {
   });
 
   describe('%R line magic', () => {
+    it('should not extract parts of non-code commands', () => {
+      let code = wrap_in_python_lines('%Rdevice svg');
+      let { cell_code_kept, foreign_document_map } = extract(code);
+
+      expect(cell_code_kept).to.equal(code);
+      expect(foreign_document_map.size).to.equal(0);
+    });
+
     it('correctly gives ranges in source', () => {
       let code = '%R ggplot()';
       let { foreign_document_map } = extract(code);

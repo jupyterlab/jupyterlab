@@ -34,6 +34,23 @@ describe('rpy2 IPython overrides', () => {
     let line_magics = new ReversibleOverridesMap(
       overrides.filter(override => override.scope == 'line')
     );
+
+    it('works with other Rdevice', () => {
+      let line = '%Rdevice svg';
+      let override = line_magics.override_for(line);
+      expect(override).to.equal(
+        'rpy2.ipython.rmagic.RMagics.Rdevice(" svg", "")'
+      );
+      let reverse = line_magics.reverse.override_for(override);
+      expect(reverse).to.equal(line);
+    });
+
+    it('does not overwrite non-rpy2 magics', () => {
+      let line = '%RestMagic';
+      let override = line_magics.override_for(line);
+      expect(override).to.equal(null);
+    });
+
     it('works with the short form arguments, inputs and outputs', () => {
       let line = '%R -i x';
       let override = line_magics.override_for(line);

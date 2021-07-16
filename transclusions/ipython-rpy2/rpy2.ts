@@ -46,11 +46,17 @@ export function parse_r_args(args: string[], content_position: number) {
   };
 }
 
-export function rpy2_reverse_pattern(quote = '"', multi_line = false): string {
+export function rpy2_reverse_pattern(
+  quote = '"',
+  multi_line = false,
+  magic = 'R'
+): string {
   return (
     '(\\S+)?' +
     '(?:, (\\S+))?'.repeat(9) +
-    '( = )?rpy2\\.ipython\\.rmagic\\.RMagics.R\\(' +
+    '( = )?rpy2\\.ipython\\.rmagic\\.RMagics.' +
+    magic +
+    '\\(' +
     quote +
     (multi_line ? '([\\s\\S]*)' : '(.*?)') +
     quote +
