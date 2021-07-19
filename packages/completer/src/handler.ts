@@ -188,6 +188,7 @@ export class CompletionHandler implements IDisposable {
     const { start, end, value } = patch;
     // we need to update the shared model in a single transaction so that the undo manager works as expected
     editor.model.sharedModel.updateSource(start, end, value);
+    editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
   }
 
   /**
