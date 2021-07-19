@@ -1205,11 +1205,13 @@ function activateNotebookHandler(
     return commands
       .execute('docmanager:new-untitled', { path: cwd, type: 'notebook' })
       .then(model => {
-        return commands.execute('docmanager:open', {
-          path: model.path,
-          factory: FACTORY,
-          kernel: { name: kernelName }
-        });
+        if (model != undefined) {
+          return commands.execute('docmanager:open', {
+            path: model.path,
+            factory: FACTORY,
+            kernel: { name: kernelName }
+          });
+        }
       });
   };
 
