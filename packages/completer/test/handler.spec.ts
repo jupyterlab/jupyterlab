@@ -246,7 +246,7 @@ describe('@jupyterlab/completer', () => {
         const text = 'eggs\nfoo # comment\nbaz';
         const want = 'eggs\nfoobar # comment\nbaz';
         const line = 1;
-        const column = 5;
+        const column = 5; // this sets the cursor after the "#" sign - not in the mid of the replaced word
         const request: Completer.ITextState = {
           column,
           line,
