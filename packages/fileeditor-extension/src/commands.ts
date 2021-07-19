@@ -936,10 +936,12 @@ export namespace Commands {
         ext
       })
       .then(model => {
-        return commands.execute('docmanager:open', {
-          path: model.path,
-          factory: FACTORY
-        });
+        if (model != undefined) {
+          return commands.execute('docmanager:open', {
+            path: model.path,
+            factory: FACTORY
+          });
+        }
       });
   }
 
