@@ -2269,8 +2269,11 @@ export class Notebook extends StaticNotebook {
       // If the editor itself does not have focus, ensure command mode.
       if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
-      } else {
-        // If the editor has focus, ensure edit mode.
+      }
+      this.activeCellIndex = index;
+      // If the editor has focus, ensure edit mode.
+      const node = widget.editorWidget.node;
+      if (node.contains(target)) {
         this.mode = 'edit';
       }
       this.activeCellIndex = index;
