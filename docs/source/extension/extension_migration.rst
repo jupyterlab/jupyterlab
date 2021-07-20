@@ -3,6 +3,48 @@
 Extension Migration Guide
 ================================================
 
+JupyterLab 3.0 to 3.1
+---------------------
+
+Following semver rules, API are compatible.
+
+New main and context menus customization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab 3.1 introduces a new way to hook commands into :ref:`mainmenu` and :ref:`context_menu`.
+It allows the final user to customize those menus through settings as it is already possible for
+the shortcuts.
+
+
+Jest configuration update
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
+They need to be ignore when transforming the code with Jest. You will need to update the 
+``transformIgnorePatterns`` to match:
+
+.. code::
+
+   const esModules = [
+     '@jupyterlab/',
+     'lib0',
+     'y\\-protocols',
+     'y\\-websocket',
+     'yjs'
+   ].join('|');
+
+   // ...
+
+   transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
+
+For more information, have a look at :ref:`testing_with_jest`.
+
+.. note::
+
+   Here is an example of pull request to update to JupyterLab 3.1 in ``@jupyterlab/git`` extension:  
+   https://github.com/jupyterlab/jupyterlab-git/pull/979/files
+
+
 .. _extension_migration_2_3:
 
 JupyterLab 2.x to 3.x
