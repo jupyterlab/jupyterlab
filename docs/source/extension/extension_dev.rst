@@ -681,6 +681,8 @@ path on the user's machine or a provided tarball. Any valid
 We encourage extension authors to add the `jupyterlab-extension GitHub topic
 <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__ to any GitHub extension repository.
 
+.. _testing_with_jest:
+
 Testing your extension
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -703,14 +705,22 @@ To transpile jupyterlab packages, you need to install the following package:
    jlpm add --dev jest @types/jest ts-jest @babel/core@^7 @babel/preset-env@^7
 
 Then in `jest.config.js`, you will specify to use babel for js files and ignore
-all node modules except the jupyterlab ones:
+all node modules except the ES6 modules:
 
 ::
+
+   const esModules = [
+     '@jupyterlab/',
+     'lib0',
+     'y\\-protocols',
+     'y\\-websocket',
+     'yjs'
+   ].join('|');
 
    module.exports = {
      preset: 'ts-jest/presets/js-with-babel',
      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-     transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
+     transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
      globals: {
        'ts-jest': {
          tsConfig: 'tsconfig.json'
