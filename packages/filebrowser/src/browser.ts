@@ -276,6 +276,7 @@ export class FileBrowser extends Widget {
         this._directoryPending = false;
       })
       .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
         this._directoryPending = false;
       });
   }
@@ -305,6 +306,7 @@ export class FileBrowser extends Widget {
         this._filePending = false;
       })
       .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
         this._filePending = false;
       });
   }
