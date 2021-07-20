@@ -211,6 +211,7 @@ Your command ``label`` function can then check the ``args`` it is provided for `
 and return a different label in that case.
 This can be useful to make a single command flexible enough to work in multiple contexts.
 
+.. _context_menu:
 
 Context Menu
 ------------
