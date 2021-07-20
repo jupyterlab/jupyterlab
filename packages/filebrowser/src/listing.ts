@@ -1128,26 +1128,26 @@ export class DirListing extends Widget {
     if (event.dataTransfer && event.dataTransfer.items) {
       let items = event.dataTransfer.items;
 
-      const addDirectory = (item: any) => {
+      const addDirectory = (item: any, path: string) => {
         if (item.isDirectory) {
           this._model.manager
             .newUntitled({
-              path: this._model.path,
+              path: path,
               type: 'directory'
             })
             .then(async model => {
               await this._manager.rename(
-                `${this._model.path}/${model.name}`,
-                `${this._model.path}/${item.name}`
+                `${path}/${model.name}`,
+                `${path}/${item.name}`
               );
               this._model
-                .cd(`${this._model.path}/${item.name}`)
+                .cd(`${path}/${item.name}`)
                 .then(() => {
                   let directoryReader = item.createReader();
 
                   directoryReader.readEntries((entries: any) => {
                     entries.forEach((entry: any) => {
-                      addDirectory(entry);
+                      addDirectory(entry, this._model.path);
                     });
                   });
                 })
@@ -1180,7 +1180,7 @@ export class DirListing extends Widget {
         let item = items[i].webkitGetAsEntry();
 
         if (item) {
-          addDirectory(item);
+          addDirectory(item, this._model.path);
         }
       }
       return;
