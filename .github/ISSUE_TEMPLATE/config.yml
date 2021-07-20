@@ -1,0 +1,10 @@
+
+# Ref: https://help.github.com/en/github/building-a-strong-community/configuring-issue-templates-for-your-repository#configuring-the-template-chooser
+blank_issues_enabled: false
+contact_links:
+  - name: Question/Support/Other
+    url: https://discourse.jupyter.org/c/jupyterlab/17
+    about: If you have a usage question
+  - name: Chat with devs
+    url: https://gitter.im/jupyterlab/jupyterlab
+    about: Ask short questions about using or creating widgets
