@@ -1482,7 +1482,7 @@ We are very excited to add Eric Charles to the core team this month!
   ([#8562](https://github.com/jupyterlab/jupyterlab/pull/8562),
   [#8477](https://github.com/jupyterlab/jupyterlab/issues/8477))
 
-<img alt=" " src="https://user-images.githubusercontent.com/226720/84566070-966daf80-ad6e-11ea-815b-5f48136b524b.gif" class="jp-screenshot">
+<img alt="An animation of the Jupyterlab interface that demonstrates restarting a kernel and running code cells." src="https://user-images.githubusercontent.com/226720/84566070-966daf80-ad6e-11ea-815b-5f48136b524b.gif" class="jp-screenshot">
 
 - Adds a visual clue for distinguishing hidden files and folders in
   the file browser window
