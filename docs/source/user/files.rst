@@ -15,7 +15,7 @@ The file browser is in the left sidebar Files tab:
 .. image:: images/file_menu_left.png
    :align: center
    :class: jp-screenshot
-   :alt: Alt text here
+   :alt: Arrow pointing to the file browser in the upper left sidebar 
 
 Many actions on files can also be carried out in the File menu:
 
