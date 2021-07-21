@@ -15,12 +15,14 @@ The file browser is in the left sidebar Files tab:
 .. image:: images/file_menu_left.png
    :align: center
    :class: jp-screenshot
+   :alt: Alt text here
 
 Many actions on files can also be carried out in the File menu:
 
 .. image:: images/file_menu_top.png
    :align: center
    :class: jp-screenshot
+   :alt: Alt text here
 
 .. _open-file:
 
@@ -87,6 +89,7 @@ directory open.
 .. image:: images/shareable_link.png
    :align: center
    :class: jp-screenshot
+   :alt: Alt text here
 
 .. _file-copy-path:
 
@@ -116,6 +119,7 @@ You can also create new documents or activities using the File menu:
 .. image:: images/file_create_text_file.png
    :align: center
    :class: jp-screenshot
+   :alt: Alt text here
 
 .. _current-directory:
 
