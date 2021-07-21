@@ -354,7 +354,6 @@ describe('@jupyterlab/completer', () => {
         line,
         column: column + 6
       });
-      console.warn(editor.getCursorPosition());
     });
   });
 });
