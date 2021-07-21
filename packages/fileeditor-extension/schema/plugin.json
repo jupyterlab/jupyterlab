@@ -103,14 +103,6 @@
     ],
     "context": [
       {
-        "command": "fileeditor:create-console",
-        "selector": ".jp-FileEditor"
-      },
-      {
-        "command": "fileeditor:markdown-preview",
-        "selector": ".jp-FileEditor"
-      },
-      {
         "command": "fileeditor:undo",
         "selector": ".jp-FileEditor",
         "rank": 1
@@ -139,6 +131,16 @@
         "command": "fileeditor:select-all",
         "selector": ".jp-FileEditor",
         "rank": 6
+      },
+      {
+        "command": "fileeditor:create-console",
+        "selector": ".jp-FileEditor",
+        "rank": 10
+      },
+      {
+        "command": "fileeditor:markdown-preview",
+        "selector": ".jp-FileEditor",
+        "rank": 11
       }
     ]
   },

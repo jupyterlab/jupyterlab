@@ -61,11 +61,13 @@
     "context": [
       {
         "command": "console:clear",
-        "selector": ".jp-CodeConsole-content"
+        "selector": ".jp-CodeConsole-content",
+        "rank": 10
       },
       {
         "command": "console:restart-kernel",
-        "selector": ".jp-CodeConsole"
+        "selector": ".jp-CodeConsole",
+        "rank": 30
       }
     ]
   },
