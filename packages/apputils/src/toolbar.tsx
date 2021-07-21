@@ -22,7 +22,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { PanelLayout, Widget } from '@lumino/widgets';
+import { BoxPanel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { ISessionContext, sessionContextDialogs } from './sessioncontext';
 import { ReactWidget, UseSignal } from './vdom';
@@ -51,6 +51,8 @@ const TOOLBAR_SPACER_CLASS = 'jp-Toolbar-spacer';
  * The class name added to toolbar kernel status icon.
  */
 const TOOLBAR_KERNEL_STATUS_CLASS = 'jp-Toolbar-kernelStatus';
+
+const TOOLBAR_RESPONSIVE_BUTTON_CLASS = 'jp-Toolbar-responsive-btn';
 
 /**
  * A layout for toolbars.
@@ -178,6 +180,11 @@ class ToolbarLayout extends PanelLayout {
  * A class which provides a toolbar widget.
  */
 export class Toolbar<T extends Widget = Widget> extends Widget {
+  menuButton: T;
+  menuPopup: T;
+  resizeTimer?: number;
+  widgetWidths: { [key: string]: number } = {};
+
   /**
    * Construct a new toolbar widget.
    */
@@ -186,6 +193,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     this.addClass(TOOLBAR_CLASS);
     this.addClass('jp-scrollbar-tiny');
     this.layout = new ToolbarLayout();
+    this.menuButton = this._createToolbarMenuButton() as T;
+    this.insertItem(0, 'responsive-menu-button', this.menuButton as T);
+    this.menuButton.hide();
+    this.menuPopup = this._createMenuPopup() as T;
   }
 
   /**
@@ -217,7 +228,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   addItem(name: string, widget: T): boolean {
     const layout = this.layout as ToolbarLayout;
-    return this.insertItem(layout.widgets.length, name, widget);
+    return this.insertItem(layout.widgets.length - 1, name, widget);
   }
 
   /**
@@ -360,6 +371,117 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
+  }
+
+  protected onResize(msg: Widget.ResizeMessage) {
+    super.onResize(msg);
+    if (this.resizeTimer) {
+      clearTimeout(this.resizeTimer);
+    }
+    this.resizeTimer = setTimeout(() => {
+      this._onResize(msg);
+    }, 250);
+  }
+
+  private _onResize(msg: Widget.ResizeMessage) {
+    if (this.parent!.isAttached) {
+      const toolbarWidth = this.node.clientWidth;
+      const button = this.menuButton;
+      const layout = this.layout as ToolbarLayout;
+      const popup = (this.menuPopup as unknown) as BoxPanel;
+
+      let width = 30; // keeping extra width for menu button
+      let index = 0;
+      const widgetsToRemove = [];
+      const toIndex = layout.widgets.length - 1;
+
+      while (index < toIndex) {
+        const widget = layout.widgets[index];
+        this._saveWidgetWidth(widget as T);
+        width += this._getWidgetWidth(widget as T);
+        if (width > toolbarWidth) {
+          widgetsToRemove.push(widget);
+        }
+        index++;
+      }
+
+      while (widgetsToRemove.length > 0) {
+        const widget = widgetsToRemove.pop() as Widget;
+        width -= this._getWidgetWidth(widget as T);
+        popup.insertWidget(0, widget);
+      }
+
+      if (popup.widgets.length > 0) {
+        const widgetsToAdd = [];
+        let index = 0;
+        let widget = popup.widgets[index];
+        width += this._getWidgetWidth(widget as T);
+        while (index < popup.widgets.length && width < toolbarWidth) {
+          widgetsToAdd.push(widget);
+          index++;
+          widget = popup.widgets[index];
+          if (widget) {
+            width += this._getWidgetWidth(widget as T);
+          } else {
+            break;
+          }
+        }
+
+        while (widgetsToAdd.length > 0) {
+          const widget = widgetsToAdd.pop() as T;
+          this.addItem(Private.nameProperty.get(widget), widget);
+        }
+      }
+
+      if (popup.widgets.length > 0) {
+        button.show();
+      } else {
+        button.hide();
+      }
+
+      this._updateMenuPopupPosition();
+    }
+  }
+
+  private _saveWidgetWidth(widget: T) {
+    const widgetName = Private.nameProperty.get(widget);
+    this.widgetWidths![widgetName] = widget.hasClass(TOOLBAR_SPACER_CLASS)
+      ? 2
+      : widget.node.clientWidth;
+  }
+
+  private _getWidgetWidth(widget: T): number {
+    const widgetName = Private.nameProperty.get(widget);
+    return this.widgetWidths![widgetName];
+  }
+
+  private _updateMenuPopupPosition() {
+    const { left, top } = this.menuButton.node.getBoundingClientRect();
+    const menuPopup = this.menuPopup;
+    menuPopup.node.style.left = left - 270 + 'px';
+    menuPopup.node.style.top = top + 28 + 'px';
+  }
+
+  _createToolbarMenuButton(translator?: ITranslator): Widget {
+    return new ToolbarButton({
+      label: '...',
+      className: TOOLBAR_RESPONSIVE_BUTTON_CLASS,
+      onClick: () => {
+        this._updateMenuPopupPosition();
+        // show/hide the popup with items
+        this.menuPopup.setHidden(!this.menuPopup.isHidden);
+      }
+    });
+  }
+
+  _createMenuPopup(): Widget {
+    const widget = new BoxPanel({
+      direction: 'left-to-right'
+    });
+    widget.addClass('jp-Toolbar-responsive-popup');
+    Widget.attach(widget, document.body);
+    widget.hide();
+    return widget;
   }
 }
 
