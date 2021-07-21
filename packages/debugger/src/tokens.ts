@@ -154,8 +154,19 @@ export interface IDebugger {
     path?: string
   ): Promise<void>;
 
+  /**
+   * Get the debugger state
+   *
+   * @returns Debugger state
+   */
   getDebuggerState(): IDebugger.State;
 
+  /**
+   * Restore the debugger state
+   *
+   * @param state Debugger state
+   * @returns Whether the state has been restored successfully or not
+   */
   restoreDebuggerState(state: IDebugger.State): Promise<boolean>;
 }
 

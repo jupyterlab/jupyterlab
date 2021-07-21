@@ -461,6 +461,11 @@ export class DebuggerService implements IDebugger, IDisposable {
     await this.session.sendRequest('configurationDone', {});
   }
 
+  /**
+   * Get the debugger state
+   *
+   * @returns Debugger state
+   */
   getDebuggerState(): IDebugger.State {
     const breakpoints = this._model.breakpoints.breakpoints;
     let cells: string[] = [];
@@ -477,6 +482,12 @@ export class DebuggerService implements IDebugger, IDisposable {
     return { cells, breakpoints };
   }
 
+  /**
+   * Restore the debugger state
+   *
+   * @param state Debugger state
+   * @returns Whether the state has been restored successfully or not
+   */
   async restoreDebuggerState(state: IDebugger.State): Promise<boolean> {
     await this.start();
 

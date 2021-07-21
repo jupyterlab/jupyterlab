@@ -172,13 +172,14 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:notebooks',
   autoStart: true,
   requires: [IDebugger, INotebookTracker, ITranslator],
-  optional: [ILabShell],
+  optional: [ILabShell, ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
     translator: ITranslator,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    palette: ICommandPalette | null
   ) => {
     const handler = new Debugger.Handler({
       type: 'notebook',
@@ -188,8 +189,8 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
-      label: trans.__('Restart and Debug'),
-      caption: trans.__('Restart and Debug'),
+      label: trans.__('Restart Kernel and Debug…'),
+      caption: trans.__('Restart Kernel and Debug…'),
       isEnabled: () => {
         return service.isStarted;
       },
@@ -231,6 +232,13 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         await updateHandlerAndCommands(widget);
       });
       return;
+    }
+
+    if (palette) {
+      palette.addItem({
+        category: 'Notebook Operations',
+        command: Debugger.CommandIDs.restartDebug
+      });
     }
 
     notebookTracker.currentChanged.connect(
