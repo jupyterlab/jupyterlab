@@ -8,6 +8,32 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 3.1.0rc2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.0rc1...d5379411b1a19f19bb94465e93cb0714f224b08f))
+
+### Enhancements made
+
+- fixes doc string for toc syncCollapseState setting [#10639](https://github.com/jupyterlab/jupyterlab/pull/10639) ([@andrewfulton9](https://github.com/andrewfulton9))
+
+### Bugs fixed
+
+- Restore the focus target check removed in #10517 [#10664](https://github.com/jupyterlab/jupyterlab/pull/10664) ([@krassowski](https://github.com/krassowski))
+- Fixed event handler in debugger session test [#10651](https://github.com/jupyterlab/jupyterlab/pull/10651) ([@JohanMabille](https://github.com/JohanMabille))
+- Fix error messages when creating new dirs/files in a read only dir [#10641](https://github.com/jupyterlab/jupyterlab/pull/10641) ([@vkaidalov-rft](https://github.com/vkaidalov-rft))
+- More automated release fixes [#10621](https://github.com/jupyterlab/jupyterlab/pull/10621) ([@blink1073](https://github.com/blink1073))
+
+### Maintenance and upkeep improvements
+
+- Fix typo in the `dirty` plugin id [#10623](https://github.com/jupyterlab/jupyterlab/pull/10623) ([@jtpio](https://github.com/jtpio))
+- Move the context menu building logic to a separate plugin [#10624](https://github.com/jupyterlab/jupyterlab/pull/10624) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Add some upgrade notes to JupyterLab 3.1 [#10654](https://github.com/jupyterlab/jupyterlab/pull/10654) ([@fcollonval](https://github.com/fcollonval))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 3.1.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.0b3...a8d22506a60cd879105276b1624affb57c49cb6c))
@@ -15,8 +41,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 ### Bugs fixed
 
 - Disable autoclosing brackets by default in console [#10612](https://github.com/jupyterlab/jupyterlab/pull/10612) ([@jasongrout](https://github.com/jasongrout))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 3.1.0b3
 
