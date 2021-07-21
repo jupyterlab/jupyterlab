@@ -2326,7 +2326,7 @@ extensible for other widgets who wish to support it.
 
 ### Status Bar
 
-<img alt=" " src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/statusbar.png" class="jp-screenshot">
+<img alt= "A screenshot of the updated JupyterLab status bar." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/statusbar.png" class="jp-screenshot">
 
 We have integrated the [JupyterLab Status Bar
 package](https://github.com/jupyterlab/jupyterlab-statusbar) package
