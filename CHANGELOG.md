@@ -8,6 +8,38 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 3.1.0rc2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.0rc1...d5379411b1a19f19bb94465e93cb0714f224b08f))
+
+### Enhancements made
+
+- fixes doc string for toc syncCollapseState setting [#10639](https://github.com/jupyterlab/jupyterlab/pull/10639) ([@andrewfulton9](https://github.com/andrewfulton9))
+
+### Bugs fixed
+
+- Restore the focus target check removed in #10517 [#10664](https://github.com/jupyterlab/jupyterlab/pull/10664) ([@krassowski](https://github.com/krassowski))
+- Fixed event handler in debugger session test [#10651](https://github.com/jupyterlab/jupyterlab/pull/10651) ([@JohanMabille](https://github.com/JohanMabille))
+- Fix error messages when creating new dirs/files in a read only dir [#10641](https://github.com/jupyterlab/jupyterlab/pull/10641) ([@vkaidalov-rft](https://github.com/vkaidalov-rft))
+- More automated release fixes [#10621](https://github.com/jupyterlab/jupyterlab/pull/10621) ([@blink1073](https://github.com/blink1073))
+
+### Maintenance and upkeep improvements
+
+- Fix typo in the `dirty` plugin id [#10623](https://github.com/jupyterlab/jupyterlab/pull/10623) ([@jtpio](https://github.com/jtpio))
+- Move the context menu building logic to a separate plugin [#10624](https://github.com/jupyterlab/jupyterlab/pull/10624) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Add some upgrade notes to JupyterLab 3.1 [#10654](https://github.com/jupyterlab/jupyterlab/pull/10654) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-07-13&to=2021-07-21&type=c))
+
+[@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-07-13..2021-07-21&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2021-07-13..2021-07-21&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2021-07-13..2021-07-21&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2021-07-13..2021-07-21&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2021-07-13..2021-07-21&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2021-07-13..2021-07-21&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-07-13..2021-07-21&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2021-07-13..2021-07-21&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2021-07-13..2021-07-21&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2021-07-13..2021-07-21&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 3.1.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.0b3...a8d22506a60cd879105276b1624affb57c49cb6c))
@@ -15,8 +47,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 ### Bugs fixed
 
 - Disable autoclosing brackets by default in console [#10612](https://github.com/jupyterlab/jupyterlab/pull/10612) ([@jasongrout](https://github.com/jasongrout))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 3.1.0b3
 
