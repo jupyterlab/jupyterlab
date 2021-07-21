@@ -1488,7 +1488,7 @@ We are very excited to add Eric Charles to the core team this month!
   the file browser window
   ([#8393](https://github.com/jupyterlab/jupyterlab/pull/8393))
 
-<img alt=" " src="https://user-images.githubusercontent.com/13181907/81358007-3b77d700-90a3-11ea-885c-31628c55744b.png" class="jp-screenshot">
+<img alt="A screenshot of the JupyterLab file browser." src="https://user-images.githubusercontent.com/13181907/81358007-3b77d700-90a3-11ea-885c-31628c55744b.png" class="jp-screenshot">
 
 - Enable horizontal scrolling for toolbars to improve mobile
   experience
