@@ -1494,7 +1494,7 @@ We are very excited to add Eric Charles to the core team this month!
   experience
   ([#8417](https://github.com/jupyterlab/jupyterlab/pull/8417))
 
-<img alt=" " src="https://user-images.githubusercontent.com/591645/81733090-bb31e700-9491-11ea-96ab-a4b1695b8e3c.gif" class="jp-screenshot">
+<img alt="An animation demonstrating improved scrolling and navigation on mobile." src="https://user-images.githubusercontent.com/591645/81733090-bb31e700-9491-11ea-96ab-a4b1695b8e3c.gif" class="jp-screenshot">
 
 - Improves the right-click context menu for the file editor
   ([#8425](https://github.com/jupyterlab/jupyterlab/pull/8425))
