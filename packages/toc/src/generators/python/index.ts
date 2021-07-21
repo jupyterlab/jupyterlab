@@ -73,7 +73,7 @@ function generate(editor: IDocumentWidget<FileEditor>): IHeading[] {
    * @param line - line of python code to clean
    * @returns cleaned line of code
    */
-  function clean_declaration_code_string(line: string): string {
+  function cleanDeclarationCodeString(line: string): string {
     const candidates = [line.indexOf('('), line.indexOf(':'), line.length];
     return line.slice(0, Math.min(...candidates.filter(n => n >= 0)));
   }
