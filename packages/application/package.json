@@ -62,9 +62,7 @@
     "@lumino/properties": "^1.2.3",
     "@lumino/signaling": "^1.4.3",
     "@lumino/widgets": "^1.19.0",
-    "@types/fscreen": "~1.0.1",
-    "@types/screenfull": "^4.1.0",
-    "fscreen": "~1.2.0"
+    "@types/fscreen": "~1.0.1"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.1.0-rc.2",
