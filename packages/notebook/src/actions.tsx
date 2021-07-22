@@ -1645,6 +1645,8 @@ export namespace NotebookActions {
       cell.numberChildNodes = cellNum - which;
     }
     NotebookActions.setCellCollapse(cell, collapsing);
+    notebook.deselectAll();
+    notebook.activeCellIndex = which;
     return cellNum + 1;
   }
 

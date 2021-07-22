@@ -1161,7 +1161,9 @@ export class Notebook extends StaticNotebook {
       cell.headingCollapsed
     ) {
       for (let i = newValue; i <= newValue + cell.numberChildNodes; i++) {
-        Private.selectedProperty.set(this.widgets[i], true);
+        if (this.widgets[i]) {
+          Private.selectedProperty.set(this.widgets[i], true);
+        }
       }
     }
     if (newValue === oldValue) {
