@@ -79,6 +79,8 @@ namespace CommandIDs {
 
   export const toggleRightArea: string = 'application:toggle-right-area';
 
+  export const toggleFullscreenMode: string = 'application:toggle-fullscreen-mode';
+
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
 
@@ -316,6 +318,15 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isVisible: () => true
       });
 
+      commands.addCommand(CommandIDs.toggleFullscreenMode, {
+        label: () => trans.__('FullscreenMode'),
+        execute: () => {
+          labShell.fullscreenMode = !labShell.fullscreenMode;
+        },
+        isToggled: () => labShell.fullscreenMode,
+        isVisible: () => true
+      });
+
       commands.addCommand(CommandIDs.setMode, {
         isVisible: args => {
           const mode = args['mode'] as string;
@@ -357,6 +368,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
         CommandIDs.togglePresentationMode,
+        CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode
       ].forEach(command => palette.addItem({ command, category }));
     }

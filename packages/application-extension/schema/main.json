@@ -47,6 +47,11 @@
       "command": "application:toggle-presentation-mode",
       "keys": [""],
       "selector": "body"
+    },
+    {
+      "command": "application:toggle-fullscreen-mode",
+      "keys": ["Ctrl Shift F11"],
+      "selector": "body"
     }
   ],
   "jupyter.lab.transform": true,
