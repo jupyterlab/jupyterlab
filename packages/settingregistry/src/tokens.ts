@@ -211,6 +211,22 @@ export namespace ISettingRegistry {
     label?: string;
 
     /**
+     * Menu icon id
+     *
+     * #### Note
+     * The icon id will looked for in registered LabIcon.
+     */
+    icon?: string;
+
+    /**
+     * Get the mnemonic index for the title.
+     *
+     * #### Notes
+     * The default value is `-1`.
+     */
+    mnemonic?: number;
+
+    /**
      * Whether a menu is disabled. `False` by default.
      *
      * #### Notes

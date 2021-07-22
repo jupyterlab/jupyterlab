@@ -80,6 +80,10 @@
           "type": "boolean",
           "default": false
         },
+        "icon": {
+          "description": "Menu icon id",
+          "type": "string"
+        },
         "id": {
           "description": "Menu unique id",
           "type": "string",
@@ -95,6 +99,12 @@
         "label": {
           "description": "Menu label",
           "type": "string"
+        },
+        "mnemonic": {
+          "description": "Mnemonic index for the label",
+          "type": "number",
+          "minimum": -1,
+          "default": -1
         },
         "rank": {
           "description": "Menu rank",
