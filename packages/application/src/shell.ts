@@ -423,17 +423,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       }
       this._updateCurrentPath();
     });
-
-    // handle 
-    if (fscreen.fullscreenEnabled) {
-      fscreen.addEventListener('fullscreenchange',() => {
-        if (fscreen.fullscreenElement !== null) {
-           console.log('Entered fullscreen mode');
-         } else {
-           console.log('Exited fullscreen mode');
-         }
-      }, false);
-    }
   }
 
   /**
