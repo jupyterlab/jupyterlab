@@ -17,7 +17,6 @@ import {
   isRawCellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import { JupyterLab } from '@jupyterlab/application';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -27,13 +26,14 @@ import { ElementExt } from '@lumino/domutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
 import { INotebookModel } from './model';
-import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
 
 /**
  * The mimetype used for Jupyter cell data.
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+
+const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
 
 export class KernelError extends Error {
   /**
@@ -1316,76 +1316,19 @@ export namespace NotebookActions {
   /**
    * Render side-by-side.
    *
-   * @param panel - The current notebook panel.
+   * @param notebook - The target notebook widget.
    */
-  export function renderSideBySide(
-    panel: NotebookPanel,
-    app?: JupyterLab
-  ): void {
-    Private.sideBySide = true;
-    const applySideBySide = () => {
-      if (!Private.sideBySide) {
-        return;
-      }
-
-      const halfWidth = panel.node.clientWidth / 2;
-      const nodes = document.getElementsByClassName('jp-CodeCell');
-      for (let i = 0; i < nodes.length; i++) {
-        const ele = nodes.item(i) as HTMLElement;
-        ele.style.display = 'flex';
-        ele.style.alignItems = 'flex-start';
-        ele.style.flexWrap = 'wrap';
-        ele.style.direction = 'row';
-      }
-      const inputarea = document.getElementsByClassName('jp-InputArea-editor');
-      for (let j = 0; j < inputarea.length; j++) {
-        const area = inputarea.item(j) as HTMLElement;
-        area.style.minWidth = `calc(${halfWidth}px - 30px)`;
-        area.style.maxWidth = `calc(${halfWidth}px - 30px)`;
-      }
-      const outputarea = document.getElementsByClassName('jp-OutputArea');
-      for (let k = 0; k < outputarea.length; k++) {
-        (outputarea.item(
-          k
-        ) as HTMLElement).style.maxWidth = `calc(${halfWidth}px - 50px)`;
-      }
-    };
-    applySideBySide();
-
-    panel.content.activeCellChanged.connect(() => {
-      applySideBySide();
-    });
-    if (app) {
-      app.shell.layoutModified.connect(() => {
-        applySideBySide();
-      });
-    }
+  export function renderSideBySide(notebook: Notebook): void {
+    notebook.node.classList.add(SIDE_BY_SIDE_CLASS);
   }
 
   /**
    * Render not side-by-side.
    *
+   * @param notebook - The target notebook widget.
    */
-  export function renderNotSideBySide(): void {
-    Private.sideBySide = false;
-    const removeSideBySide = () => {
-      const nodes = document.getElementsByClassName('jp-CodeCell');
-      for (let i = 0; i < nodes.length; i++) {
-        const ele = nodes.item(i) as HTMLElement;
-        ele.style.display = 'initial';
-      }
-      const inputarea = document.getElementsByClassName('jp-InputArea-editor');
-      for (let j = 0; j < inputarea.length; j++) {
-        const area = inputarea.item(j) as HTMLElement;
-        area.style.minWidth = 'initial';
-        area.style.maxWidth = 'initial';
-      }
-      const outputarea = document.getElementsByClassName('jp-OutputArea');
-      for (let k = 0; k < outputarea.length; k++) {
-        (outputarea.item(k) as HTMLElement).style.maxWidth = 'initial';
-      }
-    };
-    removeSideBySide();
+  export function renderNotSideBySide(notebook: Notebook): void {
+    notebook.node.classList.remove(SIDE_BY_SIDE_CLASS);
   }
 
   /**
@@ -2331,6 +2274,4 @@ namespace Private {
     }
     cell.value.text = newHeader + source;
   }
-
-  export var sideBySide = false;
 }

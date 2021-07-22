@@ -7,7 +7,6 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -15,6 +14,7 @@ import {
   createToolbarFactory,
   Dialog,
   ICommandPalette,
+  InputDialog,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
@@ -231,6 +231,8 @@ namespace CommandIDs {
   export const renderSideBySide = 'notebook:render-side-by-side';
 
   export const renderNotSideBySide = 'notebook:render-not-side-by-side';
+
+  export const setSideBySideRatio = 'notebook:set-side-by-side-ratio';
 
   export const enableOutputScrolling = 'notebook:enable-output-scrolling';
 
@@ -2195,10 +2197,7 @@ function addCommands(
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        if (!(app instanceof JupyterLab)) {
-          return NotebookActions.renderSideBySide(current);
-        }
-        return NotebookActions.renderSideBySide(current, app);
+        return NotebookActions.renderSideBySide(current.content);
       }
     },
     isEnabled
@@ -2208,10 +2207,28 @@ function addCommands(
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.renderNotSideBySide();
+        return NotebookActions.renderNotSideBySide(current.content);
       }
     },
     isEnabled
+  });
+  commands.addCommand(CommandIDs.setSideBySideRatio, {
+    label: trans.__('Set side-by-side ratio'),
+    execute: args => {
+      InputDialog.getNumber({
+        title: trans.__('Width of the output in side-by-side mode'),
+        value: 1
+      })
+        .then(result => {
+          if (result.value) {
+            document.documentElement.style.setProperty(
+              '--jp-side-by-side-output-size',
+              `${result.value}fr`
+            );
+          }
+        })
+        .catch(console.error);
+    }
   });
   commands.addCommand(CommandIDs.showAllOutputs, {
     label: trans.__('Expand All Outputs'),
@@ -2389,6 +2406,7 @@ function populatePalette(
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
     CommandIDs.renderSideBySide,
+    CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
     CommandIDs.disableOutputScrolling
   ].forEach(command => {
