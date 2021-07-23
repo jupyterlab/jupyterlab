@@ -63,7 +63,7 @@ and a list of tabs in the main work area:
 .. image:: images/interface_left.png
    :align: center
    :class: jp-screenshot
-   :alt: A screen shot of the primary JupyterLab sidebar a variety of files in the file browser.
+   :alt: A screenshot of the primary JupyterLab sidebar showing a variety of files in the file browser.
 
 .. _left-sidebar-toggle:
 
