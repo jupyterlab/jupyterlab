@@ -47,14 +47,6 @@ jobs:
             ${{ runner.os }}-pip-
             ${{ runner.os }}-pip-
 
-      - name: Cache checked links
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/.md') }}-md-links
-          restore-keys: |
-            ${{ runner.os }}-linkcheck-
-
       - name: Check Release
         uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1
         env:
