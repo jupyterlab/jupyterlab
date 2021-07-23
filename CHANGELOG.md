@@ -1764,7 +1764,7 @@ closed.
   ([#7485](https://github.com/jupyterlab/jupyterlab/pull/7485),
   [#7352](https://github.com/jupyterlab/jupyterlab/issues/7352))
 
-<img alt="The file browser with a tooltip describing a notebook's info like the the name, size, and kernel." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_fileinfo.png" class="jp-screenshot">
+<img alt="The file browser with a tooltip describing a notebook's info like the name, size, and kernel." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_fileinfo.png" class="jp-screenshot">
 
 - Support for searching outputs in notebooks
   ([#7258](https://github.com/jupyterlab/jupyterlab/pull/7258))
