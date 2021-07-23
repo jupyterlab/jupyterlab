@@ -114,13 +114,12 @@ function activateHTMLViewer(
       if (!current) {
         return false;
       }
-      const sandbox = current.content.sandbox;
-      return sandbox.indexOf('allow-scripts') !== -1;
+      return current.trusted;
     },
     execute: () => {
       const current = tracker.currentWidget;
       if (!current) {
-        return false;
+        return;
       }
       current.trusted = !current.trusted;
     }
