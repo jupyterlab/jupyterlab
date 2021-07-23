@@ -18,7 +18,7 @@ cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
 .. image:: images/interface_jupyterlab.png
    :align: center
    :class: jp-screenshot
-   :alt: A screen shot of the JupyterLab interface. The main work area is in the middle section of the interface. There is also a left sidebar and a top menu bar.
+   :alt: A screenshot of the JupyterLab interface. The main work area is in the middle section of the interface. There is also a left sidebar and a top menu bar.
 
 JupyterLab sessions always reside in a :ref:`workspace <url-workspaces-ui>`.
 Workspaces contain the state of JupyterLab: the files that are currently open,
