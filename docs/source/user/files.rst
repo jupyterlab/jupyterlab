@@ -22,7 +22,7 @@ Many actions on files can also be carried out in the File menu:
 .. image:: images/file_menu_top.png
    :align: center
    :class: jp-screenshot
-   :alt: A screen shot showing the File menu open including options like "New", "Save All."
+   :alt: A screenshot showing the File menu open including options like "New", "Save All."
 
 .. _open-file:
 
