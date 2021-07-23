@@ -89,7 +89,7 @@ directory open.
 .. image:: images/shareable_link.png
    :align: center
    :class: jp-screenshot
-   :alt: A screen shot showing the Copy Shareable Link option in the context menu opened over a file, which is the last entry on the list.
+   :alt: A screenshot showing the Copy Shareable Link option in the context menu opened over a file, which is the last entry on the list.
 
 .. _file-copy-path:
 
