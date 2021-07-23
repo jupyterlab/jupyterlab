@@ -119,7 +119,7 @@ The same information is also available in the Tabs menu:
 .. image:: images/interface_tabs_menu.png
    :align: center
    :class: jp-screenshot
-   :alt: A screen shot of the tabs menu in JupyterLab with a list of sample documents.
+   :alt: A screenshot of the tabs menu in JupyterLab with a list of sample documents.
 
 .. _tabs-singledocument:
 
