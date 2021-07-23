@@ -47,7 +47,7 @@ export class WebSocketProviderWithLocks
     const awareness = options.ymodel.awareness;
     const currState = awareness.getLocalState();
     // only set if this was not already set by another plugin
-    if (currState && currState.name == null) {
+    if (currState && currState.user?.name == null) {
       options.ymodel.awareness.setLocalStateField('user', {
         name,
         color
