@@ -112,7 +112,7 @@ activities in the main work area:
 .. image:: images/interface_tabs.png
    :align: center
    :class: jp-screenshot
-   :alt: A screen shot of the tabs panel in JupyterLab that lists some sample documents.
+   :alt: A screenshot of the tabs panel in JupyterLab that lists some sample documents.
 
 The same information is also available in the Tabs menu:
 
