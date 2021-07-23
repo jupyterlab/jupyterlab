@@ -2303,7 +2303,7 @@ in 1.0.0, and other 1.0.x milestones for bugs fixed in patch releases.
 
 ### Find and Replace
 
-<img alt="A notebook with multiple cells and the find and replace interface in the upper right" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/find.png" class="jp-screenshot">
+<img alt="A notebook with multiple cells and the find and replace interface in the upper right." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/find.png" class="jp-screenshot">
 
 We have added first class support for find and replace across
 JupyterLab. It is currently supported in notebooks and text files and is
