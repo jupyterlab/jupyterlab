@@ -66,11 +66,13 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#focus()', () => {
+    describe('#blur()', () => {
       it('should hide and reset when focus is shifted', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
         palette.inputNode.value = 'Search string…';
-        simulate(document.body, 'focus');
+        simulate(modalPalette.node, 'blur', {
+          relatedTarget: document.body
+        });
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');
       });
