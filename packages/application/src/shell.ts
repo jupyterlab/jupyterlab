@@ -29,6 +29,7 @@ import {
   Widget
 } from '@lumino/widgets';
 import { JupyterFrontEnd } from './frontend';
+import fscreen from 'fscreen';
 
 /**
  * The class name added to AppShell instances.
@@ -503,6 +504,26 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   set presentationMode(value: boolean) {
     this.toggleClass('jp-mod-presentationMode', value);
+  }
+
+  /**
+   * Whether JupyterLab is in fullscreen mode
+   */
+  get fullscreenMode(): boolean {
+    return fscreen.fullscreenElement !== null
+  }
+
+  /**
+   * Enable/disable fullscreenMode with
+   * a boolean.
+   */
+  set fullscreenMode(value: boolean) {
+    if(!this.fullscreenMode){
+      fscreen.requestFullscreen(document.documentElement)
+    }
+    else{
+      fscreen.exitFullscreen()
+    }
   }
 
   /**

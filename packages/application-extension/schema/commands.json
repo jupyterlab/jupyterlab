@@ -36,6 +36,10 @@
             "rank": 1
           },
           {
+            "command": "application:toggle-fullscreen-mode",
+            "rank": 1
+          },
+          {
             "type": "separator",
             "rank": 2
           },
