@@ -1482,36 +1482,36 @@ We are very excited to add Eric Charles to the core team this month!
   ([#8562](https://github.com/jupyterlab/jupyterlab/pull/8562),
   [#8477](https://github.com/jupyterlab/jupyterlab/issues/8477))
 
-<img src="https://user-images.githubusercontent.com/226720/84566070-966daf80-ad6e-11ea-815b-5f48136b524b.gif" class="jp-screenshot">
+<img alt="An animation of the Jupyterlab interface that demonstrates restarting a kernel and running code cells." src="https://user-images.githubusercontent.com/226720/84566070-966daf80-ad6e-11ea-815b-5f48136b524b.gif" class="jp-screenshot">
 
 - Adds a visual clue for distinguishing hidden files and folders in
   the file browser window
   ([#8393](https://github.com/jupyterlab/jupyterlab/pull/8393))
 
-<img src="https://user-images.githubusercontent.com/13181907/81358007-3b77d700-90a3-11ea-885c-31628c55744b.png" class="jp-screenshot">
+<img alt="A screenshot of the JupyterLab file browser." src="https://user-images.githubusercontent.com/13181907/81358007-3b77d700-90a3-11ea-885c-31628c55744b.png" class="jp-screenshot">
 
 - Enable horizontal scrolling for toolbars to improve mobile
   experience
   ([#8417](https://github.com/jupyterlab/jupyterlab/pull/8417))
 
-<img src="https://user-images.githubusercontent.com/591645/81733090-bb31e700-9491-11ea-96ab-a4b1695b8e3c.gif" class="jp-screenshot">
+<img alt="An animation demonstrating improved scrolling and navigation on mobile." src="https://user-images.githubusercontent.com/591645/81733090-bb31e700-9491-11ea-96ab-a4b1695b8e3c.gif" class="jp-screenshot">
 
 - Improves the right-click context menu for the file editor
   ([#8425](https://github.com/jupyterlab/jupyterlab/pull/8425))
 
-<img src="https://user-images.githubusercontent.com/25207344/84947222-d8bd2680-b0b7-11ea-98da-e4907f9131ba.png" class="jp-screenshot">
+<img alt="A context menu in a text file with options like undo and redo." src="https://user-images.githubusercontent.com/25207344/84947222-d8bd2680-b0b7-11ea-98da-e4907f9131ba.png" class="jp-screenshot">
 
 - Merge cell attachments when merging cells
   ([#8427](https://github.com/jupyterlab/jupyterlab/pull/8427),
   [#8414](https://github.com/jupyterlab/jupyterlab/issues/8414))
 
-<img src="https://user-images.githubusercontent.com/591645/82072833-97acad80-96d8-11ea-957c-ce006731219b.gif" class="jp-screenshot">
+<img alt="An animation demonstrating merging two cells with image outputs into one cell with both outputs." src="https://user-images.githubusercontent.com/591645/82072833-97acad80-96d8-11ea-957c-ce006731219b.gif" class="jp-screenshot">
 
 - Add styling for high memory usage warning in status bar with
   nbresuse
   ([#8437](https://github.com/jupyterlab/jupyterlab/pull/8437))
 
-<img src="https://user-images.githubusercontent.com/7725109/82213619-1b150b80-9932-11ea-9a53-570bd82d3d2a.png" class="jp-screenshot">
+<img alt="A status bar message that says memory 110.51 MB used out of 117.25 MB available." src="https://user-images.githubusercontent.com/7725109/82213619-1b150b80-9932-11ea-9a53-570bd82d3d2a.png" class="jp-screenshot">
 
 - Adds support for Python version 3.10
   ([#8445](https://github.com/jupyterlab/jupyterlab/pull/8445))
@@ -1519,7 +1519,7 @@ We are very excited to add Eric Charles to the core team this month!
   ([#8495](https://github.com/jupyterlab/jupyterlab/pull/8495),
   [#8494](https://github.com/jupyterlab/jupyterlab/issues/8494))
 
-<img src="https://user-images.githubusercontent.com/45380/83218329-c8123400-a13b-11ea-9137-6b91a29dbc08.png" class="jp-screenshot">
+<img alt="Demonstrating editing an SVG in one tab and while it is previewed live in another tab." src="https://user-images.githubusercontent.com/45380/83218329-c8123400-a13b-11ea-9137-6b91a29dbc08.png" class="jp-screenshot">
 
 ### For developers
 
@@ -1634,7 +1634,7 @@ closed.
   notebook toolbar
   ([#8024](https://github.com/jupyterlab/jupyterlab/pull/8024))
 
-<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_restartrunallbutton.png" class="jp-screenshot">
+<img alt="The main JupyterLab toolbar with focus on the Restart Kernel and Run All Cells button." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_restartrunallbutton.png" class="jp-screenshot">
 
 - Added a context menu item for opening a Markdown editor from the
   Markdown preview
@@ -1758,18 +1758,18 @@ closed.
   ([#7407](https://github.com/jupyterlab/jupyterlab/pull/7407),
   [#7786](https://github.com/jupyterlab/jupyterlab/pull/7786))
 
-<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_celltags.png" class="jp-screenshot">
+<img alt="Notebook cell tags in the left sidebar next to an open notebook." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_celltags.png" class="jp-screenshot">
 
 - File info display when hovering on a file in the file browser
   ([#7485](https://github.com/jupyterlab/jupyterlab/pull/7485),
   [#7352](https://github.com/jupyterlab/jupyterlab/issues/7352))
 
-<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_fileinfo.png" class="jp-screenshot">
+<img alt="The file browser with a tooltip describing a notebook's info like the name, size, and kernel." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_fileinfo.png" class="jp-screenshot">
 
 - Support for searching outputs in notebooks
   ([#7258](https://github.com/jupyterlab/jupyterlab/pull/7258))
 
-<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_searchoutput.png" class="jp-screenshot">
+<img alt="A notebook with multiple cells and the cell output searching in the upper right." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/changelog_searchoutput.png" class="jp-screenshot">
 
 - `Ctrl Shift .` and `Ctrl Shift ,` shortcuts move focus to the next
   and previous tab bar in the main area, respectively
@@ -2303,7 +2303,7 @@ in 1.0.0, and other 1.0.x milestones for bugs fixed in patch releases.
 
 ### Find and Replace
 
-<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/find.png" class="jp-screenshot">
+<img alt="A notebook with multiple cells and the find and replace interface in the upper right." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/find.png" class="jp-screenshot">
 
 We have added first class support for find and replace across
 JupyterLab. It is currently supported in notebooks and text files and is
@@ -2326,7 +2326,7 @@ extensible for other widgets who wish to support it.
 
 ### Status Bar
 
-<img src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/statusbar.png" class="jp-screenshot">
+<img alt= "A screenshot of the updated JupyterLab status bar." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/docs/source/getting_started/statusbar.png" class="jp-screenshot">
 
 We have integrated the [JupyterLab Status Bar
 package](https://github.com/jupyterlab/jupyterlab-statusbar) package
