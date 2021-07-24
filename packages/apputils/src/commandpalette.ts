@@ -66,6 +66,9 @@ export class ModalCommandPalette extends Panel {
         this.hideAndReset();
       }
     });
+    // required to properly receive blur and focus events;
+    // selection of items with mouse may not work without this.
+    this.node.tabIndex = 0;
   }
 
   get palette(): CommandPalette {
@@ -109,10 +112,16 @@ export class ModalCommandPalette extends Panel {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
         break;
-      case 'focus': {
+      case 'blur': {
         // if the focus shifted outside of this DOM element, hide and reset.
-        const target = event.target as HTMLElement;
-        if (!this.node.contains(target as HTMLElement)) {
+        if (
+          // focus went away from child element
+          this.node.contains(event.target as HTMLElement) &&
+          // and it did NOT go to another child element but someplace else
+          !this.node.contains(
+            (event as MouseEvent).relatedTarget as HTMLElement
+          )
+        ) {
           event.stopPropagation();
           this.hideAndReset();
         }
@@ -163,11 +172,11 @@ export class ModalCommandPalette extends Panel {
   }
 
   protected onBeforeHide(msg: Message): void {
-    document.removeEventListener('focus', this, true);
+    document.removeEventListener('blur', this, true);
   }
 
   protected onAfterShow(msg: Message): void {
-    document.addEventListener('focus', this, true);
+    document.addEventListener('blur', this, true);
   }
 
   /**
