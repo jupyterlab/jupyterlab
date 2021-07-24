@@ -15,12 +15,14 @@ The file browser is in the left sidebar Files tab:
 .. image:: images/file_menu_left.png
    :align: center
    :class: jp-screenshot
+   :alt: Arrow pointing to the file browser in the upper left sidebar.
 
 Many actions on files can also be carried out in the File menu:
 
 .. image:: images/file_menu_top.png
    :align: center
    :class: jp-screenshot
+   :alt: A screenshot showing the File menu open including options like "New", "Save All."
 
 .. _open-file:
 
@@ -87,6 +89,7 @@ directory open.
 .. image:: images/shareable_link.png
    :align: center
    :class: jp-screenshot
+   :alt: A screenshot showing the Copy Shareable Link option in the context menu opened over a file, which is the last entry on the list.
 
 .. _file-copy-path:
 
@@ -116,6 +119,7 @@ You can also create new documents or activities using the File menu:
 .. image:: images/file_create_text_file.png
    :align: center
    :class: jp-screenshot
+   :alt: A screenshot showing the context menu entry for creating a new file.
 
 .. _current-directory:
 
