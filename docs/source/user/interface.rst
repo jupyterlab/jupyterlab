@@ -65,6 +65,9 @@ and a list of tabs in the main work area:
    :class: jp-screenshot
    :alt: A screenshot of the primary JupyterLab sidebar showing a variety of files in the file browser.
 
+The icons and labels column that allows to switch between tabs is called
+Activity Bar in JupyterLab.
+
 .. _left-sidebar-toggle:
 
 The left sidebar can be collapsed or expanded by selecting "Show Left Sidebar"
