@@ -73,11 +73,17 @@ namespace CommandIDs {
 
   export const setMode: string = 'application:set-mode';
 
+  export const showPropertyPanel: string = 'property-inspector:show-panel';
+
+  export const resetLayout: string = 'application:reset-layout';
+
   export const toggleMode: string = 'application:toggle-mode';
 
   export const toggleLeftArea: string = 'application:toggle-left-area';
 
   export const toggleRightArea: string = 'application:toggle-right-area';
+
+  export const toggleSideTabBar: string = 'application:toggle-side-tabbar';
 
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
@@ -288,7 +294,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           }
         },
         isToggled: () => !labShell.leftCollapsed,
-        isVisible: () => !labShell.isEmpty('left')
+        isEnabled: () => !labShell.isEmpty('left')
       });
 
       commands.addCommand(CommandIDs.toggleRightArea, {
@@ -304,7 +310,29 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           }
         },
         isToggled: () => !labShell.rightCollapsed,
-        isVisible: () => !labShell.isEmpty('right')
+        isEnabled: () => !labShell.isEmpty('right')
+      });
+
+      commands.addCommand(CommandIDs.toggleSideTabBar, {
+        label: args =>
+          args.side === 'right'
+            ? trans.__('Show Right Activity Bar')
+            : trans.__('Show Left Activity Bar'),
+        execute: args => {
+          if (args.side === 'right') {
+            labShell.toggleSideTabBarVisibility('right');
+          } else {
+            labShell.toggleSideTabBarVisibility('left');
+          }
+        },
+        isToggled: args =>
+          args.side === 'right'
+            ? labShell.isSideTabBarVisible('right')
+            : labShell.isSideTabBarVisible('left'),
+        isEnabled: args =>
+          args.side === 'right'
+            ? !labShell.isEmpty('right')
+            : !labShell.isEmpty('left')
       });
 
       commands.addCommand(CommandIDs.togglePresentationMode, {
@@ -342,6 +370,36 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           return commands.execute(CommandIDs.setMode, args);
         }
       });
+
+      commands.addCommand(CommandIDs.resetLayout, {
+        label: trans.__('Reset Default Layout'),
+        execute: () => {
+          // Turn off presentation mode
+          if (labShell.presentationMode) {
+            commands
+              .execute(CommandIDs.togglePresentationMode)
+              .catch(reason => {
+                console.error('Failed to undo presentation mode.', reason);
+              });
+          }
+          // Display side tabbar
+          (['left', 'right'] as ('left' | 'right')[]).forEach(side => {
+            if (
+              !labShell.isSideTabBarVisible(side) &&
+              !labShell.isEmpty(side)
+            ) {
+              commands
+                .execute(CommandIDs.toggleSideTabBar, { side })
+                .catch(reason => {
+                  console.error(`Failed to show ${side} activity bar.`, reason);
+                });
+            }
+          });
+
+          // Some actions are also trigger indirectly
+          // - by listening to this command execution.
+        }
+      });
     }
 
     if (palette) {
@@ -357,22 +415,26 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
         CommandIDs.togglePresentationMode,
-        CommandIDs.toggleMode
+        CommandIDs.toggleMode,
+        CommandIDs.resetLayout
       ].forEach(command => palette.addItem({ command, category }));
+
+      ['right', 'left'].forEach(side => {
+        palette.addItem({
+          command: CommandIDs.toggleSideTabBar,
+          category,
+          args: { side }
+        });
+      });
     }
   }
 };
 
 /**
- * Main plugin id
- */
-const MAIN_PLUGIN_ID = '@jupyterlab/application-extension:main';
-
-/**
  * The main extension.
  */
 const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
-  id: MAIN_PLUGIN_ID,
+  id: '@jupyterlab/application-extension:main',
   requires: [IRouter, IWindowResolver, ITranslator],
   optional: [IConnectionLost],
   provides: ITreePathUpdater,
@@ -540,7 +602,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
 /**
  * Plugin to build the context menu from the settings.
  */
-const contextMenu: JupyterFrontEndPlugin<void> = {
+const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:context-menu',
   autoStart: true,
   requires: [ISettingRegistry, ITranslator],
@@ -896,6 +958,14 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
     widget.title.caption = trans.__('Property Inspector');
     widget.id = 'jp-property-inspector';
     labshell.add(widget, 'right', { rank: 100 });
+
+    app.commands.addCommand(CommandIDs.showPropertyPanel, {
+      label: trans.__('Property Inspector'),
+      execute: () => {
+        labshell.activateById(widget.id);
+      }
+    });
+
     if (restorer) {
       restorer.add(widget, 'jp-property-inspector');
     }
@@ -925,7 +995,7 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
-  contextMenu,
+  contextMenuPlugin,
   dirty,
   main,
   mainCommands,
@@ -971,6 +1041,7 @@ namespace Private {
     translator: ITranslator
   ): Promise<void> {
     const trans = translator.load('jupyterlab');
+    const pluginId = contextMenuPlugin.id;
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IContextMenuItem[] } = {};
 
@@ -1005,7 +1076,7 @@ namespace Private {
     }
 
     // Transform the plugin object to return different schema than the default.
-    registry.transform(MAIN_PLUGIN_ID, {
+    registry.transform(pluginId, {
       compose: plugin => {
         // Only override the canonical schema the first time.
         if (!canonical) {
@@ -1050,7 +1121,7 @@ namespace Private {
     // preloaded all initial plugins.
     canonical = null;
 
-    const settings = await registry.load(MAIN_PLUGIN_ID);
+    const settings = await registry.load(pluginId);
 
     const contextItems: ISettingRegistry.IContextMenuItem[] =
       JSONExt.deepCopy(settings.composite.contextMenu as any) ?? [];
@@ -1070,7 +1141,7 @@ namespace Private {
     });
 
     registry.pluginChanged.connect(async (sender, plugin) => {
-      if (plugin !== MAIN_PLUGIN_ID) {
+      if (plugin !== pluginId) {
         // If the plugin changed its menu.
         const oldItems = loaded[plugin] ?? [];
         const newItems =
@@ -1170,6 +1241,14 @@ namespace Private {
         return settingRegistry.set(setting, 'overrides', {
           ...overrides,
           [id]: side
+        });
+      }
+    });
+
+    app.commands.commandExecuted.connect((registry, executed) => {
+      if (executed.id === CommandIDs.resetLayout) {
+        settingRegistry.set(setting, 'overrides', {}).catch(reason => {
+          console.error('Failed to reset sidebar sides.', reason);
         });
       }
     });
