@@ -364,15 +364,10 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * Main plugin id
- */
-const MAIN_PLUGIN_ID = '@jupyterlab/application-extension:main';
-
-/**
  * The main extension.
  */
 const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
-  id: MAIN_PLUGIN_ID,
+  id: '@jupyterlab/application-extension:main',
   requires: [IRouter, IWindowResolver, ITranslator],
   optional: [IConnectionLost],
   provides: ITreePathUpdater,
@@ -540,7 +535,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
 /**
  * Plugin to build the context menu from the settings.
  */
-const contextMenu: JupyterFrontEndPlugin<void> = {
+const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:context-menu',
   autoStart: true,
   requires: [ISettingRegistry, ITranslator],
@@ -925,7 +920,7 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
-  contextMenu,
+  contextMenuPlugin,
   dirty,
   main,
   mainCommands,
@@ -971,6 +966,7 @@ namespace Private {
     translator: ITranslator
   ): Promise<void> {
     const trans = translator.load('jupyterlab');
+    const pluginId = contextMenuPlugin.id;
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IContextMenuItem[] } = {};
 
@@ -1005,7 +1001,7 @@ namespace Private {
     }
 
     // Transform the plugin object to return different schema than the default.
-    registry.transform(MAIN_PLUGIN_ID, {
+    registry.transform(pluginId, {
       compose: plugin => {
         // Only override the canonical schema the first time.
         if (!canonical) {
@@ -1050,7 +1046,7 @@ namespace Private {
     // preloaded all initial plugins.
     canonical = null;
 
-    const settings = await registry.load(MAIN_PLUGIN_ID);
+    const settings = await registry.load(pluginId);
 
     const contextItems: ISettingRegistry.IContextMenuItem[] =
       JSONExt.deepCopy(settings.composite.contextMenu as any) ?? [];
@@ -1070,7 +1066,7 @@ namespace Private {
     });
 
     registry.pluginChanged.connect(async (sender, plugin) => {
-      if (plugin !== MAIN_PLUGIN_ID) {
+      if (plugin !== pluginId) {
         // If the plugin changed its menu.
         const oldItems = loaded[plugin] ?? [];
         const newItems =
