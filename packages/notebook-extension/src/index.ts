@@ -228,9 +228,7 @@ namespace CommandIDs {
 
   export const showAllOutputs = 'notebook:show-all-cell-outputs';
 
-  export const renderSideBySide = 'notebook:render-side-by-side';
-
-  export const renderNotSideBySide = 'notebook:render-not-side-by-side';
+  export const toggleRenderSideBySide = 'notebook:toggle-render-side-by-side';
 
   export const setSideBySideRatio = 'notebook:set-side-by-side-ratio';
 
@@ -2192,26 +2190,25 @@ function addCommands(
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.renderSideBySide, {
+
+  commands.addCommand(CommandIDs.toggleRenderSideBySide, {
     label: trans.__('Render Side-by-side'),
     execute: args => {
-      const current = getCurrent(tracker, shell, args);
-      if (current) {
-        return NotebookActions.renderSideBySide(current.content);
-      }
+      Private.renderSideBySide = !Private.renderSideBySide;
+      tracker.forEach((wideget) => {
+        if (wideget) {
+          if(Private.renderSideBySide){
+            return NotebookActions.renderSideBySide(wideget.content);
+          }else{
+            return NotebookActions.renderNotSideBySide(wideget.content);
+          }
+        }
+      });
     },
+    isToggled: ()=> Private.renderSideBySide,
     isEnabled
   });
-  commands.addCommand(CommandIDs.renderNotSideBySide, {
-    label: trans.__('Render Not Side-by-side'),
-    execute: args => {
-      const current = getCurrent(tracker, shell, args);
-      if (current) {
-        return NotebookActions.renderNotSideBySide(current.content);
-      }
-    },
-    isEnabled
-  });
+
   commands.addCommand(CommandIDs.setSideBySideRatio, {
     label: trans.__('Set side-by-side ratio'),
     execute: args => {
@@ -2405,7 +2402,7 @@ function populatePalette(
     CommandIDs.showOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
-    CommandIDs.renderSideBySide,
+    CommandIDs.toggleRenderSideBySide,
     CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
     CommandIDs.disableOutputScrolling
@@ -2769,4 +2766,6 @@ namespace Private {
       translator?: ITranslator;
     }
   }
+
+  export var renderSideBySide = false;
 }
