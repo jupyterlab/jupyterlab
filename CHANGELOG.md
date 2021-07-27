@@ -13,9 +13,9 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.0.6...60f37be54a714c391fad5500cb57055af1492591))
 
 From JupyterLab 3.1, file documents and notebooks have collaborative
-editing using the `Yjs shared editing framework <https://github.com/yjs/yjs>`_.
+editing using the `Yjs shared editing framework <https://github.com/yjs/yjs>`\_.
 Editors are not collaborative by default; to activate it, start JupyterLab
-with the ``--collaborative`` flag.   See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/latest/user/rtc.html).
+with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/latest/user/rtc.html).
 
 ### New features added
 
@@ -29,7 +29,7 @@ with the ``--collaborative`` flag.   See full documentation on [collaboration](h
 - Allow to set custom position for `Tooltip` [#10590](https://github.com/jupyterlab/jupyterlab/pull/10590) ([@krassowski](https://github.com/krassowski))
 - Rename files in collaborative mode [#10564](https://github.com/jupyterlab/jupyterlab/pull/10564) ([@hbcarlos](https://github.com/hbcarlos))
 - Reorganize settings menu for text editor [#10563](https://github.com/jupyterlab/jupyterlab/pull/10563) ([@fcollonval](https://github.com/fcollonval))
--  Add promptCellConfig to Code Console Settings [#10555](https://github.com/jupyterlab/jupyterlab/pull/10555) ([@jess-x](https://github.com/jess-x))
+- Add promptCellConfig to Code Console Settings [#10555](https://github.com/jupyterlab/jupyterlab/pull/10555) ([@jess-x](https://github.com/jess-x))
 - communicate heading collapse between ToC and Notebook [#10545](https://github.com/jupyterlab/jupyterlab/pull/10545) ([@andrewfulton9](https://github.com/andrewfulton9))
 - feat: add options to include cell output in headings [#10537](https://github.com/jupyterlab/jupyterlab/pull/10537) ([@skyetim](https://github.com/skyetim))
 - Open inspector split to the right [#10519](https://github.com/jupyterlab/jupyterlab/pull/10519) ([@legendb317](https://github.com/legendb317))
@@ -158,7 +158,7 @@ with the ``--collaborative`` flag.   See full documentation on [collaboration](h
 - Fix #7525 by setting yarn.lock permissions [#10063](https://github.com/jupyterlab/jupyterlab/pull/10063) ([@jluttine](https://github.com/jluttine))
 - Add cell id per notebook format 4.5 [#10018](https://github.com/jupyterlab/jupyterlab/pull/10018) ([@jayqi](https://github.com/jayqi))
 - [Fix] `Copy shareable link` command - fix the filename encoding (for files with spaces in the name) [#10015](https://github.com/jupyterlab/jupyterlab/pull/10015) ([@ognjenjevremovic](https://github.com/ognjenjevremovic))
-- fixed ellipsis character after menu items in UI  [#10000](https://github.com/jupyterlab/jupyterlab/pull/10000) ([@RodyLipson](https://github.com/RodyLipson))
+- fixed ellipsis character after menu items in UI [#10000](https://github.com/jupyterlab/jupyterlab/pull/10000) ([@RodyLipson](https://github.com/RodyLipson))
 - Fix js-apputils session context tests [#9997](https://github.com/jupyterlab/jupyterlab/pull/9997) ([@jtpio](https://github.com/jtpio))
 - Fix escaping of urls and paths [#9978](https://github.com/jupyterlab/jupyterlab/pull/9978) ([@jasongrout](https://github.com/jasongrout))
 - Do not make unnecessary npm registry requests [#9974](https://github.com/jupyterlab/jupyterlab/pull/9974) ([@jasongrout](https://github.com/jasongrout))
@@ -192,7 +192,7 @@ with the ``--collaborative`` flag.   See full documentation on [collaboration](h
 - Add missing default_url fields to examples [#9731](https://github.com/jupyterlab/jupyterlab/pull/9731) ([@afshin](https://github.com/afshin))
 - Fix debug flag handling in build command [#9715](https://github.com/jupyterlab/jupyterlab/pull/9715) ([@afshin](https://github.com/afshin))
 - Use Path.resolve() to get canonical case-sensitive path names [#9709](https://github.com/jupyterlab/jupyterlab/pull/9709) ([@jasongrout](https://github.com/jasongrout))
-- Fix use of hyphen  in module name [#9655](https://github.com/jupyterlab/jupyterlab/pull/9655) ([@hbcarlos](https://github.com/hbcarlos))
+- Fix use of hyphen in module name [#9655](https://github.com/jupyterlab/jupyterlab/pull/9655) ([@hbcarlos](https://github.com/hbcarlos))
 
 ### Maintenance and upkeep improvements
 
@@ -260,7 +260,7 @@ with the ``--collaborative`` flag.   See full documentation on [collaboration](h
 - Add Yjs as a singleton package [#10301](https://github.com/jupyterlab/jupyterlab/pull/10301) ([@dmonad](https://github.com/dmonad))
 - Remove various tab indices [#10289](https://github.com/jupyterlab/jupyterlab/pull/10289) ([@marthacryan](https://github.com/marthacryan))
 - Add the new docprovider-extension to the labeler [#10288](https://github.com/jupyterlab/jupyterlab/pull/10288) ([@jtpio](https://github.com/jtpio))
-- FileBrowserModel: Allow for overwriting _onFileChanged [#10286](https://github.com/jupyterlab/jupyterlab/pull/10286) ([@martinRenou](https://github.com/martinRenou))
+- FileBrowserModel: Allow for overwriting \_onFileChanged [#10286](https://github.com/jupyterlab/jupyterlab/pull/10286) ([@martinRenou](https://github.com/martinRenou))
 - Enable real time collaboration on the dev Binder [#10258](https://github.com/jupyterlab/jupyterlab/pull/10258) ([@jtpio](https://github.com/jtpio))
 - Add the new packages to the labeler [#10257](https://github.com/jupyterlab/jupyterlab/pull/10257) ([@jtpio](https://github.com/jtpio))
 - Update enhancement tag in the issue template [#10253](https://github.com/jupyterlab/jupyterlab/pull/10253) ([@jtpio](https://github.com/jtpio))
@@ -282,7 +282,7 @@ with the ``--collaborative`` flag.   See full documentation on [collaboration](h
 - Fix Permissions of Labeler Workflow [#10141](https://github.com/jupyterlab/jupyterlab/pull/10141) ([@jtpio](https://github.com/jtpio))
 - Add Required Permission to CodeQL Workflow [#10138](https://github.com/jupyterlab/jupyterlab/pull/10138) ([@afshin](https://github.com/afshin))
 - Clean up workflow permissions [#10136](https://github.com/jupyterlab/jupyterlab/pull/10136) ([@afshin](https://github.com/afshin))
-- include all default*.json in @jupyterlab/testutils distributions [#10132](https://github.com/jupyterlab/jupyterlab/pull/10132) ([@bollwyvl](https://github.com/bollwyvl))
+- include all default\*.json in @jupyterlab/testutils distributions [#10132](https://github.com/jupyterlab/jupyterlab/pull/10132) ([@bollwyvl](https://github.com/bollwyvl))
 - Clean up package integrity [#10122](https://github.com/jupyterlab/jupyterlab/pull/10122) ([@jtpio](https://github.com/jtpio))
 - Update employer name [#10120](https://github.com/jupyterlab/jupyterlab/pull/10120) ([@mbektas](https://github.com/mbektas))
 - Export createRendermimePlugin from @jupyterlab/application [#10117](https://github.com/jupyterlab/jupyterlab/pull/10117) ([@jtpio](https://github.com/jtpio))
@@ -385,7 +385,7 @@ with the ``--collaborative`` flag.   See full documentation on [collaboration](h
 - Update changelog for 3.0.9 and 3.0.10 [#9917](https://github.com/jupyterlab/jupyterlab/pull/9917) ([@jasongrout](https://github.com/jasongrout))
 - Update link to JupyterLab Demo Binder [#9872](https://github.com/jupyterlab/jupyterlab/pull/9872) ([@afshin](https://github.com/afshin))
 - Add link to source extension list of metadata in prebuilt extensions [#9860](https://github.com/jupyterlab/jupyterlab/pull/9860) ([@bsyouness](https://github.com/bsyouness))
-- fix release_test, squash all non-eslint CI warnings  [#9854](https://github.com/jupyterlab/jupyterlab/pull/9854) ([@bollwyvl](https://github.com/bollwyvl))
+- fix release_test, squash all non-eslint CI warnings [#9854](https://github.com/jupyterlab/jupyterlab/pull/9854) ([@bollwyvl](https://github.com/bollwyvl))
 - Convert Changelog to Markdown [#9846](https://github.com/jupyterlab/jupyterlab/pull/9846) ([@afshin](https://github.com/afshin))
 - Update changelog for 3.0.8 [#9805](https://github.com/jupyterlab/jupyterlab/pull/9805) ([@blink1073](https://github.com/blink1073))
 - Link to file with lab CSS variables [#9788](https://github.com/jupyterlab/jupyterlab/pull/9788) ([@yuvipanda](https://github.com/yuvipanda))
