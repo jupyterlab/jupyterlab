@@ -53,7 +53,7 @@ parameter to false, Here is an animation showing its use
 
 
 Context menus are added to those toc headings having notebook sections
-containing runnable code cells, and clicking the runcell option will make the cells run in notebook.
+containing runnable code cells, and clicking the *Run Cell(s)* option will make the cells run in notebook.
 Here is an animation showing its use
 
 
