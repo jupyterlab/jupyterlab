@@ -26,7 +26,8 @@ Here is an animation showing the table of content use, with a notebook from the 
 
 
 
-The Table of Contents tool will automatically generate a table of contents for your notebook by taking all your Header Cell titles and ordering them in a list,  Because your Notebook does not utilize formal page breaks or numbers, each listed section will be hyperlinked to the actual section within your document.
+The Table of Contents tool will automatically generate a table of contents for your notebook by taking all your Header Cell titles and ordering them in a list.  
+Because your Notebook does not utilize formal page breaks or numbers, each listed section will be hyperlinked to the actual section within your document.
 
 
 
