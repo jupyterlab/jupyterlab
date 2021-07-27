@@ -79,7 +79,7 @@ Here is an animation showing its use
 ------------------------------------------------------------------------------------------------------------
 
 
-The Output is also gets numbering in the toc and the notebook, by default this ``includeOutput`` attribute is set to true.
+The cell outputs get numbered by default in the table of contents and the notebook.
 In the settings by making the attribute to false will not give numbering to outputs. Here is an animation showing its use
 
 
