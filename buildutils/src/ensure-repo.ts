@@ -11,6 +11,8 @@
  * Ensure a consistent version of all packages.
  * Manage the metapackage meta package.
  */
+import { execSync } from 'child_process';
+import * as glob from 'glob';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as utils from './utils';
@@ -21,6 +23,21 @@ import {
 } from './ensure-package';
 
 type Dict<T> = { [key: string]: T };
+
+// URL config for this branch
+// Source and target branches
+// Source and target RTD version names
+// For master these will be the same, for other branches the source
+// Branch is whichever branch it was created from
+// The current release branch should target RTD stable
+// Master should target latest
+// All other release branches should target a specific named version
+const URL_CONFIG = {
+  source: 'master',
+  target: 'master',
+  rtdSource: 'stable',
+  rtdTarget: 'latest'
+};
 
 // Data to ignore.
 const MISSING: Dict<string[]> = {
@@ -233,6 +250,89 @@ const pkgPaths: Dict<string> = {};
 const pkgNames: Dict<string> = {};
 const depCache: Dict<string> = {};
 const locals: Dict<string> = {};
+
+/**
+ * Ensure branch integrity - GitHub and RTD urls, and workflow target branches
+ *
+ * @returns An array of messages for changes.
+ */
+function ensureBranch(): string[] {
+  const messages: string[] = [];
+
+  const { source, target, rtdSource, rtdTarget } = URL_CONFIG;
+
+  // Handle the github_version in conf.py
+  const confPath = 'docs/source/conf.py';
+  let confData = fs.readFileSync(confPath, 'utf-8');
+  const confTest = new RegExp('"github_version": "(.*)"');
+  if (source !== target) {
+    messages.push(`Overwriting ${confPath}`);
+    confData = confData.replace(confTest, `"github_version": "${target}"`);
+    fs.writeFileSync(confPath, confData, 'utf-8');
+  }
+
+  // Handle urls in files
+  // Get all files matching the desired file types
+  const fileTypes = ['.json', '.md', '.rst', '.yml', '.ts', '.tsx', '.py'];
+  let files = execSync('git ls-tree -r master --name-only')
+    .toString()
+    .trim()
+    .split(/\r?\n/);
+  files = files.filter(filePath => {
+    return fileTypes.indexOf(path.extname(filePath)) !== -1;
+  });
+
+  // Set up string replacements
+  const base = '/jupyterlab/jupyterlab';
+  const rtdString = `jupyterlab.readthedocs.io/en/${rtdTarget}/`;
+  const urlMap = [
+    [`\/jupyterlab\/jupyterlab\/${source}\/`, `${base}/${target}/`],
+    [`\/jupyterlab\/jupyterlab\/blob\/${source}\/`, `${base}/blob/${target}/`],
+    [`\/jupyterlab\/jupyterlab\/tree\/${source}\/`, `${base}/tree/${target}/`],
+    [`jupyterlab.readthedocs.io\/en\/${rtdSource}\/`, rtdString]
+  ];
+
+  // Make the string replacements
+  files.forEach(filePath => {
+    const oldData = fs.readFileSync(filePath, 'utf-8');
+    let newData = oldData;
+    urlMap.forEach(section => {
+      const test = new RegExp(section[0], 'g');
+      const replacer = section[1];
+      if (newData.match(test)) {
+        newData = newData.replace(test, replacer);
+      }
+    });
+
+    // Make sure the root RTD links point to stable
+    const badgeLink = '(http://jupyterlab.readthedocs.io/en/stable/)';
+    const toReplace = badgeLink.replace('stable', rtdTarget);
+    while (newData.indexOf(toReplace) !== -1) {
+      newData = newData.replace(toReplace, badgeLink);
+    }
+
+    if (newData !== oldData) {
+      messages.push(`Overwriting ${filePath}`);
+      fs.writeFileSync(filePath, newData, 'utf-8');
+    }
+  });
+
+  // Handle workflow file target branches
+  const workflows = glob.sync(path.join('.github', 'workflows', '*.yml'));
+  workflows.forEach(filePath => {
+    let workflowData = fs.readFileSync(filePath, 'utf-8');
+    const test = new RegExp(`\\[${source}\\]`, 'g');
+    if (workflowData.match(test)) {
+      if (workflowData.match(test)![1] !== `[${target}]`) {
+        messages.push(`Overwriting ${filePath}`);
+        workflowData = workflowData.replace(test, `[${target}]`);
+        fs.writeFileSync(filePath, workflowData, 'utf-8');
+      }
+    }
+  });
+
+  return messages;
+}
 
 /**
  * Ensure the metapackage package.
@@ -450,6 +550,12 @@ function ensureBuildUtils() {
  */
 export async function ensureIntegrity(): Promise<boolean> {
   const messages: Dict<string[]> = {};
+
+  // Handle branch integrity
+  const branchMessages = ensureBranch();
+  if (branchMessages.length > 0) {
+    messages['branch'] = branchMessages;
+  }
 
   // Pick up all the package versions.
   const paths = utils.getLernaPaths();
