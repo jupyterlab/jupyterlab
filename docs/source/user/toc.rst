@@ -9,7 +9,8 @@ The table of contents extension is built-in JupyterLab since version 3.0. This m
 Anyone using earlier JupyterLab version should install a `dedicated extension <https://github.com/jupyterlab/jupyterlab-toc>`__.
 
 
-A Table of Contents extension for JupyterLab. This auto-generates a table of contents in the left area when you have a notebook or markdown document open. The entries are clickable, and scroll the document to the heading in question.
+A table of contents is auto-generated in the :ref:`left sidebar
+<left-sidebar>` when you have a notebook, markdown, latex or python files opened. The entries are clickable, and scroll the document to the heading in question.
 
 
 
