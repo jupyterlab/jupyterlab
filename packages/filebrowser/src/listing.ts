@@ -1128,7 +1128,8 @@ export class DirListing extends Widget {
     if (event.dataTransfer && event.dataTransfer.items) {
       let items = event.dataTransfer.items;
 
-      const addDirectory = (item: any, path: string) => {
+      const addDirectory = async (item: any, path: string) => {
+        console.log('logging path: ', path);
         if (item.isDirectory) {
           this._model.manager
             .newUntitled({
@@ -1141,14 +1142,17 @@ export class DirListing extends Widget {
                 `${path}/${item.name}`
               );
               this._model
-                .cd(`${path}/${item.name}`)
+                .cd(`${model.path}`)
                 .then(() => {
                   let directoryReader = item.createReader();
 
                   directoryReader.readEntries((entries: any) => {
-                    entries.forEach((entry: any) => {
-                      addDirectory(entry, this._model.path);
-                    });
+                    for (let i = 0; i < entries.length; i++) {
+                      void addDirectory(entries[i], `${path}/${item.name}`);
+                    }
+                    // entries.forEach(async (entry: any) => {
+                    //   await addDirectory(entry, this._model.path);
+                    // });
                   });
                 })
                 .catch(error =>
@@ -1180,9 +1184,13 @@ export class DirListing extends Widget {
         let item = items[i].webkitGetAsEntry();
 
         if (item) {
-          addDirectory(item, this._model.path);
+          const addDir = async () => {
+            await addDirectory(item, this._model.path);
+          };
+          void addDir();
         }
       }
+
       return;
     }
     for (let i = 0; i < files.length; i++) {
