@@ -87,7 +87,6 @@ This can be tuned by changing the settings ``includeOutput`` to ``false``. Here 
 .. image:: ./images/toc/includeOutput.gif
 
 
-The collapsing of the table of contents is now having the blue bar rather than caret up/down icons as you can see from above all the demos.
 
 
 .. _prerequisites:
