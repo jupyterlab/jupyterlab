@@ -89,21 +89,6 @@ This can be tuned by changing the settings ``includeOutput`` to ``false``. Here 
 
 
 
-.. _prerequisites:
-
-Prerequisites
--------------
-* JupyterLab >=2.0
-* NodeJS 12+
-
-
-.. _Installation:
-
-Installation
-------------
-.. code:: bash
-
-   jupyter labextension install @jupyterlab/toc
 
 
 .. _Settings:
