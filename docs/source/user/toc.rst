@@ -14,7 +14,7 @@ A table of contents is auto-generated in the :ref:`left sidebar
 
 
 
-Toc as a side panel that can number headings, collapse sections, and be used for navigation (see gif below for a demo). This extension is included by default since JupyterLab 3.0
+In the sidebar panel, you can number headings, collapse sections, and navigate into the file.
 
 
 
