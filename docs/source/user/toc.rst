@@ -102,7 +102,7 @@ The extension behavior can be modified via settings which can be set in JupyterL
 
 
 
-* **collapsibleNotebooks**: enable the ability to collapse sections of notebooks from the ToC
+* **collapsibleNotebooks**: enable the ability to collapse sections of notebooks from the Table of Contents
 * **numberingH1**         : numbers the h1 sections if set to true
 * **syncCollapseState**   : synchronization of collapsing behaviour between the table of contents and notebook
 * **includeOutput**       : includes the numbering for Outputs in both notebook and table of contents.
