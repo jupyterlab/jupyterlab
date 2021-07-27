@@ -98,7 +98,7 @@ Settings
 
 
 
-Once installed, extension behavior can be modified via the following settings which can be set in JupyterLab's advanced settings editor.
+The extension behavior can be modified via settings which can be set in JupyterLab's advanced settings editor.
 
 
 
