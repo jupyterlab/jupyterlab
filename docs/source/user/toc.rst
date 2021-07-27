@@ -80,7 +80,7 @@ Here is an animation showing its use
 
 
 The cell outputs get numbered by default in the table of contents and the notebook.
-In the settings by making the attribute to false will not give numbering to outputs. Here is an animation showing its use
+This can be tuned by changing the settings ``includeOutput`` to ``false``. Here is an animation showing its use
 
 
 
