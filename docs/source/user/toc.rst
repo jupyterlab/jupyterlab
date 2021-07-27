@@ -3,7 +3,7 @@
 Table Of Contents
 ====================
 
-The table of contents extension now ships with JupyterLab. This makes it easy to see and navigate the structure of a document.
+The table of contents extension is built-in JupyterLab since version 3.0. This makes it easy to see and navigate the structure of a document.
 
 
 This extension was added to the core JupyterLab extensions for JupyterLab 3.0. Anyone using JupyterLab < 3.0 should use this extension, but anyone using JupyterLab >= 3.0 will already have this extension installed with the core JupyterLab extensions.
