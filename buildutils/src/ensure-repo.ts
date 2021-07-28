@@ -274,7 +274,7 @@ function ensureBranch(): string[] {
   // Handle urls in files
   // Get all files matching the desired file types
   const fileTypes = ['.json', '.md', '.rst', '.yml', '.ts', '.tsx', '.py'];
-  let files = execSync('git ls-tree -r master --name-only')
+  let files = execSync('git ls-tree -r HEAD --name-only')
     .toString()
     .trim()
     .split(/\r?\n/);
@@ -550,6 +550,11 @@ function ensureBuildUtils() {
  */
 export async function ensureIntegrity(): Promise<boolean> {
   const messages: Dict<string[]> = {};
+
+  if (process.env.SKIP_INTEGRITY_CHECK === 'true') {
+    console.log('Skipping integrity check');
+    return true;
+  }
 
   // Handle branch integrity
   const branchMessages = ensureBranch();

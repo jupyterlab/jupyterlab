@@ -8,5 +8,8 @@
   },
   "LabApp": {
     "dev_mode": true
+  },
+  "Application": {
+    "log_level": "DEBUG"
   }
 }
