@@ -140,7 +140,7 @@ JupyterLab follows the Jupyter [Community Guides](https://jupyter.readthedocs.io
 ### License
 
 JupyterLab uses a shared copyright model that enables all contributors to maintain the
-copyright on their contributions. All code is licensed under the terms of the revised [BSD license](https://github.com/jupyterlab/jupyterlab/blob/master/LICENSE).
+copyright on their contributions. All code is licensed under the terms of the revised [BSD license](https://github.com/jupyterlab/jupyterlab/blob/3.1.x/LICENSE).
 
 ### Team
 

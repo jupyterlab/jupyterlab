@@ -34,9 +34,9 @@ type Dict<T> = { [key: string]: T };
 // All other release branches should target a specific named version
 const URL_CONFIG = {
   source: 'master',
-  target: 'master',
+  target: '3.1.x',
   rtdSource: 'stable',
-  rtdTarget: 'latest'
+  rtdTarget: 'stable'
 };
 
 // Data to ignore.
@@ -305,10 +305,13 @@ function ensureBranch(): string[] {
     });
 
     // Make sure the root RTD links point to stable
-    const badgeLink = '(http://jupyterlab.readthedocs.io/en/stable/)';
-    const toReplace = badgeLink.replace('stable', rtdTarget);
-    while (newData.indexOf(toReplace) !== -1) {
-      newData = newData.replace(toReplace, badgeLink);
+
+    if (rtdSource !== rtdTarget) {
+      const badgeLink = '(http://jupyterlab.readthedocs.io/en/stable/)';
+      const toReplace = badgeLink.replace('stable', rtdTarget);
+      while (newData.indexOf(toReplace) !== -1) {
+        newData = newData.replace(toReplace, badgeLink);
+      }
     }
 
     if (newData !== oldData) {
