@@ -381,17 +381,19 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
 
   protected onResize(msg: Widget.ResizeMessage) {
     super.onResize(msg);
-    if (this.resizeTimer) {
-      clearTimeout(this.resizeTimer);
-    }
+    if (msg.width > 0) {
+      if (this.resizeTimer) {
+        clearTimeout(this.resizeTimer);
+      }
 
-    this.resizeTimer = setTimeout(() => {
-      this._onResize(msg);
-    }, 250);
+      this.resizeTimer = setTimeout(() => {
+        this._onResize(msg);
+      }, 250);
+    }
   }
 
   private _onResize(msg: Widget.ResizeMessage) {
-    if (this.parent!.isAttached) {
+    if (this.parent && this.parent.isAttached) {
       const toolbarWidth = this.node.clientWidth;
       const opener = this.popupOpener;
       const openerWidth = 30;
