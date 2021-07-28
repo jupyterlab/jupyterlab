@@ -29,11 +29,6 @@ import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
-import {
-  ConsolePanel,
-  IConsoleTracker
-} from '@jupyterlab/console';
-
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -364,58 +359,93 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
 /**
  * A plugin that provides a execution time item to the status bar.
  */
- export const executionTime: JupyterFrontEndPlugin<void> = {
+export const executionTime: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:execution-time',
   autoStart: true,
   requires: [
     INotebookTracker,
-    IConsoleTracker,
     ILabShell,
     ITranslator
   ],
-  optional: [IStatusBar],
+  optional: [IStatusBar, ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     notebookTracker: INotebookTracker,
-    consoleTracker: IConsoleTracker,
     labShell: ILabShell,
     translator: ITranslator,
-    statusBar: IStatusBar | null
+    statusBar: IStatusBar | null,
+    settingRegistry: ISettingRegistry | null,
   ) => {
     if (!statusBar) {
       // Automatically disable if statusbar missing
       return;
     }
-    // Create the status item.
-    const item = new ExecutionTime(translator);
+
     let currentSession: ISessionContext | null = null;
-    labShell.currentChanged.connect((_, change) => {
-      const { newValue } = change;
-      // Grab the session off of the current widget, if it exists.
-      if (newValue && consoleTracker.has(newValue)) {
-        currentSession = (newValue as ConsolePanel).sessionContext;
-      } else if (newValue && notebookTracker.has(newValue)) {
-        currentSession = (newValue as NotebookPanel).sessionContext;
-      } else {
-        currentSession = null;
-      }
-      item.model!.attachSessionContext(currentSession);
-    });
-    statusBar.registerStatusItem(
-      '@jupyterlab/notebook-extension:execution-time',
-      {
-        item,
-        align: 'left',
-        rank: 3,
-        isActive: () => {
-          const current = labShell.currentWidget;
-          return (
-            !!current &&
-            (notebookTracker.has(current) || consoleTracker.has(current))
-          );
+    let showOnToolBar = false;
+    let showProgressBar = true;
+    let showElapsedTime = true;
+
+    const statusbarItem = new ExecutionTime(translator);
+    if (settingRegistry) {
+      const loadSettings = settingRegistry.load(trackerPlugin.id);
+            
+      const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+        const configValues= settings.get('progressIndicator').composite as JSONObject;
+        if(configValues){
+          showOnToolBar = configValues.showOnToolBar as boolean;
+          showProgressBar = configValues.showProgressBar as boolean;
+          showElapsedTime = configValues.showElapsedTime as boolean;          
         }
-      }
-    );
+        if(!showOnToolBar){
+          statusbarItem.model.displayOption = {showProgressBar, showElapsedTime}; 
+          statusBar.registerStatusItem(
+            '@jupyterlab/notebook-extension:execution-time',
+            {
+              item: statusbarItem,
+              align: 'left',
+              rank: 3,
+              isActive: () => {
+                const current = labShell.currentWidget;
+                return (
+                  !!current &&
+                  (notebookTracker.has(current))
+                );
+              }
+            }
+          );
+          statusbarItem.model!.attachSessionContext(notebookTracker.currentWidget?.sessionContext)
+
+          labShell.currentChanged.connect((_, change) => {
+            const { newValue } = change;
+            if ( newValue && notebookTracker.has(newValue)) {
+              const panel = newValue as NotebookPanel
+              currentSession = panel.sessionContext;
+              statusbarItem.model!.attachSessionContext(currentSession);
+            } 
+          });
+        } else {
+          const addItemToToolbar = (panel: NotebookPanel) =>{
+            const toolbarItem = new ExecutionTime(translator );
+            toolbarItem.model.displayOption = {showProgressBar, showElapsedTime};
+            toolbarItem.model.attachSessionContext(panel.sessionContext);
+            panel.toolbar.insertAfter('kernelStatus', 'executionProgress', toolbarItem) 
+          }
+          notebookTracker.forEach(addItemToToolbar)
+          notebookTracker.widgetAdded.connect((_, panel) =>{
+            addItemToToolbar(panel)            
+          })
+        }
+      };
+      Promise.all([loadSettings, app.restored])
+        .then(([settings]) => {
+          updateSettings(settings);
+        })
+        .catch((reason: Error) => {
+          console.error(reason.message);
+        });
+    }
+
   }
 };
 

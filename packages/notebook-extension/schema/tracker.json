@@ -675,6 +675,17 @@
       },
       "additionalProperties": false,
       "type": "object"
+    },
+    "progressIndicatorConfig" : {
+      "showOnToolBar": {
+        "type": "boolean"
+      },
+      "showProgressBar": {
+        "type": "boolean"
+      },
+      "showElapsedTime": {
+        "type": "boolean"
+      }
     }
   },
   "properties": {
@@ -825,6 +836,16 @@
       "description": "Defines the maximum number of output cells to to to be rendered in the output area for cells with many outputs. The output area will have a head and a tail, and the outputs between will be trimmed and not displayed unless the user clicks on the information message.",
       "type": "number",
       "default": 50
+    },
+    "progressIndicator" : {
+      "title": "Execution progres indicator configuration",
+      "description": "Defines the postion and components of execution progress indicator.",
+      "$ref": "#/definitions/progressIndicatorConfig",
+      "default": {
+        "showOnToolBar": false,
+        "showProgressBar": true,
+        "showElapsedTime": true
+      }
     },
     "experimentalDisableDocumentWideUndoRedo": {
       "title": "Experimental settings to enable the undo/redo on the notebook document level.",

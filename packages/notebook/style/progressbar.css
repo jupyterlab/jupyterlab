@@ -15,7 +15,6 @@
 
 .jp-Notebook-ExecutionTime {
   display: flex;
-  min-width: 255px;
 }
 
 .jp-Notebook-ExecutionTime span {
@@ -23,6 +22,7 @@
   font-family: var(--jp-ui-font-family);
   color: var(--jp-ui-font-color1);
   line-height: 24px;
+  padding-left: 2px;
 }
 
 .jp-Notebook-ExecutionTime-progress-bar {

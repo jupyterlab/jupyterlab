@@ -22,7 +22,10 @@ function ExecutionTimeComponent(
 ): React.ReactElement<ExecutionTimeComponent.IProps> {
   const translator = props.translator || nullTranslator;
   const state = props.state;
-  const emptyDiv =  <div className={'jp-Notebook-ExecutionTime'}></div>
+  const showProgressBar = props.displayOption.showProgressBar;
+  const showElapsedTime = props.displayOption.showElapsedTime;
+  const emptyDiv = <div></div>;
+
   if (!state) {
     return emptyDiv;
   }
@@ -32,34 +35,39 @@ function ExecutionTimeComponent(
   const trans = translator.load('jupyterlab');
   const executedCellNumber = scheduledCellNumber - remainingCellNumber;
   let percentage = (100 * executedCellNumber) / scheduledCellNumber;
+  const progressBar = (
+    <div className="jp-Notebook-ExecutionTime-progress-bar">
+      <div style={{ width: `${percentage}%` }}>
+        <p>
+          {executedCellNumber} / {scheduledCellNumber}
+        </p>
+      </div>
+    </div>
+  );
+  const elapsedTime = <span> {trans.__(`Total time: ${time} seconds`)} </span>;
+  
   if (state.kernelStatus === 'busy') {
     return (
       <div className={'jp-Notebook-ExecutionTime'}>
-        <div className="jp-Notebook-ExecutionTime-progress-bar">
-          <div style={{ width: `${percentage}%` }}>
-            <p>
-              {executedCellNumber} / {scheduledCellNumber}
-            </p>
-          </div>
-        </div>
-        <span> {trans.__(`Total time: ${time} seconds`)} </span>
+        {showProgressBar ? progressBar : emptyDiv}
+        {showElapsedTime ? elapsedTime : emptyDiv}
       </div>
     );
   } else {
     if (time === 0) {
       return emptyDiv;
     } else {
-      percentage = 100;
       return (
         <div className={'jp-Notebook-ExecutionTime'}>
-          <div className="jp-Notebook-ExecutionTime-progress-bar">
-            <div style={{ width: `${percentage}%` }}>
-              <p>
-                {scheduledCellNumber} / {scheduledCellNumber}
-              </p>
-            </div>
-          </div>
-          <span> {trans.__(`Total time: ${time} seconds`)} </span>
+          {showElapsedTime ? (
+            <span>
+              {trans.__(
+                `Finished ${scheduledCellNumber} cells after ${time} seconds`
+              )}
+            </span>
+          ) : (
+            emptyDiv
+          )}
         </div>
       );
     }
@@ -77,9 +85,12 @@ namespace ExecutionTimeComponent {
     /**
      * The application language translator.
      */
+    displayOption: Private.DisplayOption;
+    
+    state?: Private.IExecutionState;
+    
     translator?: ITranslator;
 
-    state?: Private.ExecutionState;
   }
 }
 
@@ -90,7 +101,7 @@ export class ExecutionTime extends VDomRenderer<ExecutionTime.Model> {
   /**
    * Construct the kernel status widget.
    */
-  constructor(opts: ExecutionTime.IOptions, translator?: ITranslator) {
+  constructor(translator?: ITranslator) {
     super(new ExecutionTime.Model(translator));
     this.translator = translator || nullTranslator;
     this.addClass(interactiveItem);
@@ -108,15 +119,17 @@ export class ExecutionTime extends VDomRenderer<ExecutionTime.Model> {
       if (!ctx) {
         return (
           <ExecutionTimeComponent
-            translator={this.translator}
+            displayOption={this.model.displayOption}
             state={undefined}
+            translator={this.translator}
           />
         );
       }
       return (
         <ExecutionTimeComponent
-          translator={this.translator}
+          displayOption={this.model.displayOption}
           state={this.model.executionState(ctx)}
+          translator={this.translator}
         />
       );
     }
@@ -136,12 +149,13 @@ export namespace ExecutionTime {
     constructor(translator?: ITranslator) {
       super();
       translator = translator || nullTranslator;
-      //   this._trans = translator.load('jupyterlab');
+      this._showProgressBar = true;
+      this._showElapsedTime = true;
       this._tick = this._tick.bind(this);
       this._resetTime = this._resetTime.bind(this);
     }
 
-    attachSessionContext(sessionContext: ISessionContext | null): void {
+    attachSessionContext(sessionContext: ISessionContext | undefined): void {
       if (sessionContext) {
         this._currentSessionContext = sessionContext;
         if (!this._notebookExecutionProgress.has(sessionContext)) {
@@ -163,6 +177,14 @@ export namespace ExecutionTime {
             const ctx = (data.notebook.parent as NotebookPanel).sessionContext;
             this._cellExecutedCallback(ctx, data.cell);
           });
+
+          sessionContext.kernelChanged.connect(() => {
+            const state = this._notebookExecutionProgress.get(sessionContext);
+            if (state) {
+              this._resetTime(state);
+              this.stateChanged.emit(void 0);
+            }
+          });
         }
       }
     }
@@ -171,9 +193,21 @@ export namespace ExecutionTime {
       return this._currentSessionContext;
     }
 
+    get displayOption(): Private.DisplayOption {
+      return {
+        showProgressBar: this._showProgressBar,
+        showElapsedTime: this._showElapsedTime
+      };
+    }
+
+    set displayOption(option: Private.DisplayOption) {
+      this._showProgressBar = option.showProgressBar;
+      this._showElapsedTime = option.showElapsedTime;
+    }
+
     public executionState(
       ctx: ISessionContext
-    ): Private.ExecutionState | undefined {
+    ): Private.IExecutionState | undefined {
       return this._notebookExecutionProgress.get(ctx);
     }
 
@@ -191,13 +225,6 @@ export namespace ExecutionTime {
           state.timeout = setTimeout(() => {
             state.needReset = true;
           }, 1000);
-          console.log(
-            'return to idle',
-            state.totalTime,
-            state.scheduledCellNumber,
-            state.timeout,
-            context
-          );
           this.stateChanged.emit(void 0);
         }
       }
@@ -213,17 +240,9 @@ export namespace ExecutionTime {
         if (state.needReset) {
           this._resetTime(state);
         }
-        console.log(
-          'set busy',
-          state?.totalTime,
-          state?.scheduledCellNumber,
-          state.kernelStatus
-        );
         state.scheduledCell.add(cell);
         state.scheduledCellNumber += 1;
         if (state.kernelStatus !== 'busy') {
-          console.log('remove timeout', state.timeout);
-
           state.kernelStatus = 'busy';
           clearTimeout(state.timeout);
           state.interval = setInterval(() => {
@@ -233,23 +252,23 @@ export namespace ExecutionTime {
       }
     };
 
-    private _tick(data: Private.ExecutionState): void {
+    private _tick(data: Private.IExecutionState): void {
       data.totalTime += 1;
       this.stateChanged.emit(void 0);
     }
 
-    private _resetTime(data: Private.ExecutionState): void {
+    private _resetTime(data: Private.IExecutionState): void {
       data.totalTime = 0;
       data.scheduledCellNumber = 0;
       data.needReset = false;
-      console.log('reset after idle');
     }
 
-    // private _trans: TranslationBundle;
+    private _showProgressBar: boolean;
+    private _showElapsedTime: boolean;
     private _currentSessionContext: ISessionContext;
     private _notebookExecutionProgress = new WeakMap<
       ISessionContext,
-      Private.ExecutionState
+      Private.IExecutionState
     >();
   }
 
@@ -260,7 +279,7 @@ export namespace ExecutionTime {
 }
 
 namespace Private {
-  export type ExecutionState = {
+  export interface IExecutionState {
     kernelStatus: string;
     totalTime: number;
     interval: number;
@@ -268,5 +287,9 @@ namespace Private {
     scheduledCell: Set<Cell>;
     scheduledCellNumber: number;
     needReset: boolean;
+  }
+  export type DisplayOption = {
+    showProgressBar: boolean;
+    showElapsedTime: boolean;
   };
 }
