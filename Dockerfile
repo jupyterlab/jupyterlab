@@ -1,7 +1,7 @@
 FROM mambaorg/micromamba:0.14.0 as build
 
 # Install basic tools
-RUN micromamba install -qy -c conda-forge python nodejs yarn=1.21 build \
+RUN micromamba install -qy -c conda-forge python nodejs yarn \
     && useradd --shell /bin/bash jovyan \
     && chown jovyan $HOME
 
