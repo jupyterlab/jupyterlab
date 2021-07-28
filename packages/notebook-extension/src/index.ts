@@ -46,7 +46,7 @@ import {
 import * as nbformat from '@jupyterlab/nbformat';
 import {
   CommandEditStatus,
-  ExecutionTime,
+  ExecutionIndicator,
   INotebookTools,
   INotebookTracker,
   INotebookWidgetFactory,
@@ -357,10 +357,10 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin that provides a execution time item to the status bar.
+ * A plugin that provides a execution indicator item to the status bar or toolbar.
  */
-export const executionTime: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extension:execution-time',
+export const executionIndicator: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:execution-indicator',
   autoStart: true,
   requires: [
     INotebookTracker,
@@ -385,8 +385,9 @@ export const executionTime: JupyterFrontEndPlugin<void> = {
     let showOnToolBar = false;
     let showProgressBar = true;
     let showElapsedTime = true;
+    let progressBarWidth = 100;
 
-    const statusbarItem = new ExecutionTime(translator);
+    const statusbarItem = new ExecutionIndicator(translator);
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(trackerPlugin.id);
             
@@ -395,12 +396,14 @@ export const executionTime: JupyterFrontEndPlugin<void> = {
         if(configValues){
           showOnToolBar = configValues.showOnToolBar as boolean;
           showProgressBar = configValues.showProgressBar as boolean;
-          showElapsedTime = configValues.showElapsedTime as boolean;          
+          showElapsedTime = configValues.showElapsedTime as boolean;  
+          progressBarWidth = configValues.progressBarWidth as number        
         }
         if(!showOnToolBar){
-          statusbarItem.model.displayOption = {showProgressBar, showElapsedTime}; 
+          // Status bar mode, only one `ExecutionIndicator` is needed.
+          statusbarItem.model.displayOption = {showProgressBar, showElapsedTime, progressBarWidth}; 
           statusBar.registerStatusItem(
-            '@jupyterlab/notebook-extension:execution-time',
+            '@jupyterlab/notebook-extension:execution-indicator',
             {
               item: statusbarItem,
               align: 'left',
@@ -425,9 +428,10 @@ export const executionTime: JupyterFrontEndPlugin<void> = {
             } 
           });
         } else {
+          // Toolbar mode, `ExecutionIndicator` item is added to each notebook toolbar.
           const addItemToToolbar = (panel: NotebookPanel) =>{
-            const toolbarItem = new ExecutionTime(translator );
-            toolbarItem.model.displayOption = {showProgressBar, showElapsedTime};
+            const toolbarItem = new ExecutionIndicator(translator );
+            toolbarItem.model.displayOption = {showProgressBar, showElapsedTime, progressBarWidth};
             toolbarItem.model.attachSessionContext(panel.sessionContext);
             panel.toolbar.insertAfter('kernelStatus', 'executionProgress', toolbarItem) 
           }
@@ -657,7 +661,7 @@ const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   trackerPlugin,
-  executionTime,
+  executionIndicator,
   exportPlugin,
   tools,
   commandEditItem,
