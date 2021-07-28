@@ -19,7 +19,7 @@ import {
 import { ArrayExt } from '@lumino/algorithm';
 import { JSONExt, UUID } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { Poll } from '@lumino/polling';
+import { Debouncer, Poll } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 import CodeMirror from 'codemirror';
 import 'codemirror/addon/comment/comment.js';
@@ -98,6 +98,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const host = (this.host = options.host);
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
+    this._refreshDebouncer = new Debouncer(() => {
+      this._editor.refresh();
+    }, 300);
 
     host.classList.add(EDITOR_CLASS);
     host.classList.add('jp-Editor');
@@ -428,8 +431,20 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Repaint editor.
    */
   refresh(): void {
-    this._editor.refresh();
+    if (this._needsRefresh) {
+      // refresh immediately if refresh is overdue
+      this._debouncedRefresh();
+    } else {
+      // refresh after current stack frees up
+      window.setTimeout(() => {
+        this._debouncedRefresh();
+      }, 0);
+    }
     this._needsRefresh = false;
+  }
+
+  private _debouncedRefresh(): void {
+    this._refreshDebouncer.invoke().catch(console.warn);
   }
 
   /**
@@ -1158,6 +1173,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   protected translator: ITranslator;
+  private _refreshDebouncer: Debouncer;
   private _trans: TranslationBundle;
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
