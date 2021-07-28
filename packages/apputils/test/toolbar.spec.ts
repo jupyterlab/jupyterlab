@@ -58,7 +58,12 @@ describe('@jupyterlab/apputils', () => {
         widget.addItem('foo', new Widget());
         widget.addItem('bar', new Widget());
         widget.addItem('baz', new Widget());
-        expect(toArray(widget.names())).toEqual(['foo', 'bar', 'baz']);
+        expect(toArray(widget.names())).toEqual([
+          'foo',
+          'bar',
+          'baz',
+          'toolbar-popup-opener'
+        ]);
       });
     });
 
@@ -86,14 +91,24 @@ describe('@jupyterlab/apputils', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
-        expect(toArray(widget.names())).toEqual(['a', 'c', 'b']);
+        expect(toArray(widget.names())).toEqual([
+          'a',
+          'c',
+          'b',
+          'toolbar-popup-opener'
+        ]);
       });
 
       it('should clamp the bounds', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(10, 'c', new Widget());
-        expect(toArray(widget.names())).toEqual(['a', 'b', 'c']);
+        expect(toArray(widget.names())).toEqual([
+          'a',
+          'b',
+          'c',
+          'toolbar-popup-opener'
+        ]);
       });
     });
 
@@ -103,7 +118,13 @@ describe('@jupyterlab/apputils', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
         widget.insertAfter('c', 'd', new Widget());
-        expect(toArray(widget.names())).toEqual(['a', 'c', 'd', 'b']);
+        expect(toArray(widget.names())).toEqual([
+          'a',
+          'c',
+          'd',
+          'b',
+          'toolbar-popup-opener'
+        ]);
       });
 
       it('should return false if the target item does not exist', () => {
@@ -120,7 +141,13 @@ describe('@jupyterlab/apputils', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
         widget.insertBefore('c', 'd', new Widget());
-        expect(toArray(widget.names())).toEqual(['a', 'd', 'c', 'b']);
+        expect(toArray(widget.names())).toEqual([
+          'a',
+          'd',
+          'c',
+          'b',
+          'toolbar-popup-opener'
+        ]);
       });
 
       it('should return false if the target item does not exist', () => {
