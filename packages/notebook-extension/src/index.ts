@@ -362,11 +362,7 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
 export const executionIndicator: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:execution-indicator',
   autoStart: true,
-  requires: [
-    INotebookTracker,
-    ILabShell,
-    ITranslator
-  ],
+  requires: [INotebookTracker, ILabShell, ITranslator],
   optional: [IStatusBar, ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
@@ -374,7 +370,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell,
     translator: ITranslator,
     statusBar: IStatusBar | null,
-    settingRegistry: ISettingRegistry | null,
+    settingRegistry: ISettingRegistry | null
   ) => {
     if (!statusBar) {
       // Automatically disable if statusbar missing
@@ -390,18 +386,23 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
     const statusbarItem = new ExecutionIndicator(translator);
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(trackerPlugin.id);
-            
+
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-        const configValues= settings.get('progressIndicator').composite as JSONObject;
-        if(configValues){
+        const configValues = settings.get('progressIndicator')
+          .composite as JSONObject;
+        if (configValues) {
           showOnToolBar = configValues.showOnToolBar as boolean;
           showProgressBar = configValues.showProgressBar as boolean;
-          showElapsedTime = configValues.showElapsedTime as boolean;  
-          progressBarWidth = configValues.progressBarWidth as number        
+          showElapsedTime = configValues.showElapsedTime as boolean;
+          progressBarWidth = configValues.progressBarWidth as number;
         }
-        if(!showOnToolBar){
+        if (!showOnToolBar) {
           // Status bar mode, only one `ExecutionIndicator` is needed.
-          statusbarItem.model.displayOption = {showProgressBar, showElapsedTime, progressBarWidth}; 
+          statusbarItem.model.displayOption = {
+            showProgressBar,
+            showElapsedTime,
+            progressBarWidth
+          };
           statusBar.registerStatusItem(
             '@jupyterlab/notebook-extension:execution-indicator',
             {
@@ -410,35 +411,42 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
               rank: 3,
               isActive: () => {
                 const current = labShell.currentWidget;
-                return (
-                  !!current &&
-                  (notebookTracker.has(current))
-                );
+                return !!current && notebookTracker.has(current);
               }
             }
           );
-          statusbarItem.model!.attachSessionContext(notebookTracker.currentWidget?.sessionContext)
+          statusbarItem.model!.attachSessionContext(
+            notebookTracker.currentWidget?.sessionContext
+          );
 
           labShell.currentChanged.connect((_, change) => {
             const { newValue } = change;
-            if ( newValue && notebookTracker.has(newValue)) {
-              const panel = newValue as NotebookPanel
+            if (newValue && notebookTracker.has(newValue)) {
+              const panel = newValue as NotebookPanel;
               currentSession = panel.sessionContext;
               statusbarItem.model!.attachSessionContext(currentSession);
-            } 
+            }
           });
         } else {
           // Toolbar mode, `ExecutionIndicator` item is added to each notebook toolbar.
-          const addItemToToolbar = (panel: NotebookPanel) =>{
-            const toolbarItem = new ExecutionIndicator(translator );
-            toolbarItem.model.displayOption = {showProgressBar, showElapsedTime, progressBarWidth};
+          const addItemToToolbar = (panel: NotebookPanel) => {
+            const toolbarItem = new ExecutionIndicator(translator);
+            toolbarItem.model.displayOption = {
+              showProgressBar,
+              showElapsedTime,
+              progressBarWidth
+            };
             toolbarItem.model.attachSessionContext(panel.sessionContext);
-            panel.toolbar.insertAfter('kernelStatus', 'executionProgress', toolbarItem) 
-          }
-          notebookTracker.forEach(addItemToToolbar)
-          notebookTracker.widgetAdded.connect((_, panel) =>{
-            addItemToToolbar(panel)            
-          })
+            panel.toolbar.insertAfter(
+              'kernelStatus',
+              'executionProgress',
+              toolbarItem
+            );
+          };
+          notebookTracker.forEach(addItemToToolbar);
+          notebookTracker.widgetAdded.connect((_, panel) => {
+            addItemToToolbar(panel);
+          });
         }
       };
       Promise.all([loadSettings, app.restored])
@@ -449,10 +457,8 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
           console.error(reason.message);
         });
     }
-
   }
 };
-
 
 /**
  * A plugin providing export commands in the main menu and command palette

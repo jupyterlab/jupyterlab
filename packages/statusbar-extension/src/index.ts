@@ -59,7 +59,6 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
     settingRegistry: ISettingRegistry | null,
     palette: ICommandPalette | null
   ) => {
-    
     const trans = translator.load('jupyterlab');
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';

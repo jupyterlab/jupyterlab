@@ -20,12 +20,12 @@ export namespace ProgressBar {
     /**
      * Width of progress bar in pixel.
      */
-    width?: number
+    width?: number;
 
     /**
      * Text to show inside progress bar.
      */
-    content?: string
+    content?: string;
   }
 }
 
@@ -33,10 +33,10 @@ export namespace ProgressBar {
  * A functional tsx component for a progress bar.
  */
 export function ProgressBar(props: ProgressBar.IProps): JSX.Element {
-  const {width, ...rest} = props
+  const { width, ...rest } = props;
   return (
     <div className={progressBarItem(width)}>
-      <Filler {...rest} contentWidth = {width} />
+      <Filler {...rest} contentWidth={width} />
     </div>
   );
 }
@@ -57,12 +57,12 @@ namespace Filler {
     /**
      * Width of content inside filler.
      */
-    contentWidth?: number
+    contentWidth?: number;
 
     /**
      * Text to show inside filler.
      */
-    content?: string
+    content?: string;
   }
 }
 

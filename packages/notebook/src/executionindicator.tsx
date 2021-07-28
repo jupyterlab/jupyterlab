@@ -264,7 +264,7 @@ export namespace ExecutionIndicator {
           state.kernelStatus = 'idle';
           clearInterval(state.interval);
 
-          state.timeout = setTimeout(() => {
+          state.timeout = window.setTimeout(() => {
             state.needReset = true;
           }, 1000);
           this.stateChanged.emit(void 0);
@@ -293,7 +293,7 @@ export namespace ExecutionIndicator {
         if (state.kernelStatus !== 'busy') {
           state.kernelStatus = 'busy';
           clearTimeout(state.timeout);
-          state.interval = setInterval(() => {
+          state.interval = window.setInterval(() => {
             this._tick(state);
           }, 1000);
         }
