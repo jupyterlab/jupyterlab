@@ -263,12 +263,15 @@ function ensureBranch(): string[] {
 
   // Handle the github_version in conf.py
   const confPath = 'docs/source/conf.py';
-  let confData = fs.readFileSync(confPath, 'utf-8');
+  const oldConfData = fs.readFileSync(confPath, 'utf-8');
   const confTest = new RegExp('"github_version": "(.*)"');
-  if (source !== target) {
+  const newConfData = oldConfData.replace(
+    confTest,
+    `"github_version": "${target}"`
+  );
+  if (newConfData !== oldConfData) {
     messages.push(`Overwriting ${confPath}`);
-    confData = confData.replace(confTest, `"github_version": "${target}"`);
-    fs.writeFileSync(confPath, confData, 'utf-8');
+    fs.writeFileSync(confPath, newConfData, 'utf-8');
   }
 
   // Handle urls in files
