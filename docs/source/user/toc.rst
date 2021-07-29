@@ -26,7 +26,7 @@ Here is an animation showing the table of content use, with a notebook from the 
 
 
 
-The Table of Contents tool will automatically generate a table of contents for your notebook by taking all your Header Cell titles and ordering them in a list.  
+The table of contents tool will automatically generate a table of contents for your notebook by taking all your Header Cell titles and ordering them in a list.  
 Because your Notebook does not utilize formal page breaks or numbers, each listed section will be hyperlinked to the actual section within your document.
 
 
@@ -40,7 +40,8 @@ Automatic section numbering will go through your Notebook and number your sectio
 
 
 Automatic section numbering can be skipped for h1 headers by setting the ``numberingH1``
-parameter to false, Here is an animation showing its use
+parameter to false.To perform that go to settings and click on advanced settings editor and then go to tableofcontents section
+and in user preferences add ``numberingH1:false`` and save the settings, Here is an animation showing its use
 
 
 
@@ -66,9 +67,10 @@ Here is an animation showing its use
 
 
 
- There will be a synchronization between Table of Contents and notebook if the ``syncCollapseState`` attribute
+ There will be a synchronization between table of contents and notebook if the ``syncCollapseState`` attribute
  is made to true in the settings. If a heading is collapsed in the table of contents the notebook will also gets collapsed and
- similarly expanding cells in notebook will expand the table of contents. Here is and animation showing its use
+ similarly expanding cells in notebook will expand the table of contents.To perform that go to settings and click on advanced settings
+ editor and then go to tableofcontents section and in user preferences add ``syncCollapseState:true`` and save the settings, Here is and animation showing its use
 
 
 
@@ -80,7 +82,8 @@ Here is an animation showing its use
 
 
 The cell outputs get numbered by default in the table of contents and the notebook.
-This can be tuned by changing the settings ``includeOutput`` to ``false``. Here is an animation showing its use
+This can be tuned by changing the settings ``includeOutput`` to ``false``. To perform that go to settings and click on advanced settings
+ editor and then go to tableofcontents section and in user preferences add ``includeOutput:false`` and save the settings, Here is an animation showing its use
 
 
 
@@ -102,7 +105,7 @@ The extension behavior can be modified via settings which can be set in JupyterL
 
 
 
-* **collapsibleNotebooks**: enable the ability to collapse sections of notebooks from the Table of Contents
+* **collapsibleNotebooks**: enable the ability to collapse sections of notebooks from the table of contents
 * **numberingH1**         : numbers the h1 sections if set to true
 * **syncCollapseState**   : synchronization of collapsing behaviour between the table of contents and notebook
 * **includeOutput**       : includes the numbering for Outputs in both notebook and table of contents.
