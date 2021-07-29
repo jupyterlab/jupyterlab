@@ -56,7 +56,7 @@ jobs:
       - name: Check Release
         uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1
         env:
-          RH_VERSION_SPEC: build
+          RH_VERSION_SPEC: patch
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
