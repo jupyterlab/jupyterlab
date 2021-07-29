@@ -592,6 +592,7 @@ provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyprojec
     Framework :: Jupyter :: JupyterLab :: 3
     Framework :: Jupyter :: JupyterLab :: 4
     Framework :: Jupyter :: JupyterLab :: Extensions
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
     Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
     Framework :: Jupyter :: JupyterLab :: Extensions :: Media Types
 
@@ -600,7 +601,8 @@ provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyprojec
 
 .. hint::
 
-    For example, a theme, only compatible with JupyterLab 3 might look like:
+    For example, a theme, only compatible with JupyterLab 3, and distributed as
+    a ready-to-run, prebuilt extensions might look like:
 
     .. code-block:: python
         # setup.py
@@ -612,6 +614,7 @@ provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyprojec
                 "Framework :: Jupyter :: JupyterLab",
                 "Framework :: Jupyter :: JupyterLab :: 3",
                 "Framework :: Jupyter :: JupyterLab :: Extensions",
+                "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
                 "Framework :: Jupyter :: JupyterLab :: Extensions :: Themes",
             ]
         )
