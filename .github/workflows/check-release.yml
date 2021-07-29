@@ -1,6 +1,12 @@
 name: Check Release
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [3.1.x]
+  pull_request:
+    branches: [3.1.x]
+  release:
+    types: [published]
 
 jobs:
 
@@ -50,7 +56,7 @@ jobs:
       - name: Check Release
         uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1
         env:
-          RH_VERSION_SPEC: build
+          RH_VERSION_SPEC: patch
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 

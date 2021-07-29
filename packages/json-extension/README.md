@@ -42,4 +42,4 @@ To render a `.json` file, simply open it:
 
 ## Development
 
-See the [JupyterLab Contributor Documentation](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md).
+See the [JupyterLab Contributor Documentation](https://github.com/jupyterlab/jupyterlab/blob/3.1.x/CONTRIBUTING.md).

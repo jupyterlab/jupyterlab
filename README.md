@@ -133,14 +133,14 @@ To start developing an extension for JupyterLab, see the [developer documentatio
 
 ### Contributing
 
-To contribute code or documentation to JupyterLab itself, please read the [contributor documentation](https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html).
+To contribute code or documentation to JupyterLab itself, please read the [contributor documentation](https://jupyterlab.readthedocs.io/en/stable/developer/contributing.html).
 
 JupyterLab follows the Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
 
 ### License
 
 JupyterLab uses a shared copyright model that enables all contributors to maintain the
-copyright on their contributions. All code is licensed under the terms of the revised [BSD license](https://github.com/jupyterlab/jupyterlab/blob/master/LICENSE).
+copyright on their contributions. All code is licensed under the terms of the revised [BSD license](https://github.com/jupyterlab/jupyterlab/blob/3.1.x/LICENSE).
 
 ### Team
 
