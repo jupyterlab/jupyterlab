@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.0",
+    "@jupyterlab/cells": "^3.3.0-alpha.0",
     "@jupyterlab/docmanager": "^3.3.0-alpha.0",
     "@jupyterlab/fileeditor": "^3.3.0-alpha.0",
     "@jupyterlab/markdownviewer": "^3.3.0-alpha.0",

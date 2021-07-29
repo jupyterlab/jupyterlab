@@ -30,7 +30,7 @@ import {
 import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
 import { INotebookHeading } from '@jupyterlab/toc';
-import { CodeCell, MarkdownCell} from '@jupyterlab/cells';
+import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
 
 /**
  * The command IDs used by TOC item.
@@ -97,32 +97,31 @@ async function activateTOC(
   app.commands.addCommand(CommandIDs.runCells, {
     execute: args => {
       const panel = notebookTracker.currentWidget;
-      if(panel == null){
-        return ;
+      if (panel == null) {
+        return;
       }
 
       const cells = panel.content.widgets;
-      if(cells=== undefined){
-        return ;
+      if (cells === undefined) {
+        return;
       }
 
       const activeCell = (toc.activeEntry as INotebookHeading).cellRef;
 
-      if(activeCell instanceof MarkdownCell){
+      if (activeCell instanceof MarkdownCell) {
         let level = activeCell.headingInfo.level;
-        for(let i = (cells.indexOf(activeCell)+1); i < cells.length; i++){
+        for (let i = cells.indexOf(activeCell) + 1; i < cells.length; i++) {
           const cell = cells[i];
-          if(cell instanceof MarkdownCell && cell.headingInfo.level <= level){
+          if (cell instanceof MarkdownCell && cell.headingInfo.level <= level) {
             break;
           }
-          
-          if(cell instanceof CodeCell){
+
+          if (cell instanceof CodeCell) {
             void CodeCell.execute(cell, panel.sessionContext);
           }
         }
-      }
-      else{
-        if(activeCell instanceof CodeCell){
+      } else {
+        if (activeCell instanceof CodeCell) {
           void CodeCell.execute(activeCell, panel.sessionContext);
         }
       }
