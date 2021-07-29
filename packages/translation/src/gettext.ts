@@ -13,6 +13,8 @@
 | See: https://github.com/DefinitelyTyped/DefinitelyTyped
 |----------------------------------------------------------------------------*/
 
+import { normalizeDomain } from './utils';
+
 /**
  * A plural form function.
  */
@@ -30,6 +32,9 @@ interface IJsonDataHeader {
   /**
    * The domain of the translation, usually the normalized package name.
    * Example: "jupyterlab", "jupyterlab_git"
+   *
+   * #### Note
+   * Normalization replaces `-` by `_` in package name.
    */
   domain: string;
 
@@ -72,6 +77,9 @@ interface IOptions {
   /**
    * The domain of the translation, usually the normalized package name.
    * Example: "jupyterlab", "jupyterlab_git"
+   *
+   * #### Note
+   * Normalization replaces `-` by `_` in package name.
    */
   domain?: string;
 
@@ -143,7 +151,7 @@ class Gettext {
 
     // Ensure the correct separator is used
     this._locale = (options.locale || this._defaults.locale).replace('_', '-');
-    this._domain = options.domain || this._defaults.domain;
+    this._domain = normalizeDomain(options.domain || this._defaults.domain);
     this._contextDelimiter =
       options.contextDelimiter || this._defaults.contextDelimiter;
     this._stringsPrefix = options.stringsPrefix || this._defaults.stringsPrefix;
@@ -203,7 +211,7 @@ class Gettext {
    * @param domain - The domain to set.
    */
   setDomain(domain: string): void {
-    this._domain = domain;
+    this._domain = normalizeDomain(domain);
   }
 
   /**
@@ -274,6 +282,8 @@ class Gettext {
         `Wrong jsonData, it must have an empty key ("") with "language" and "pluralForms" information: ${jsonData}`
       );
     }
+
+    domain = normalizeDomain(domain);
 
     let headers = jsonData[''];
     let jsonDataCopy = JSON.parse(JSON.stringify(jsonData));
@@ -450,7 +460,7 @@ class Gettext {
     n: number,
     ...args: any[]
   ): string {
-    domain = domain || this._domain;
+    domain = normalizeDomain(domain) || this._domain;
 
     let translation: Array<string>;
     let key: string = msgctxt
@@ -645,6 +655,8 @@ class Gettext {
     messages: IJsonDataMessages,
     pluralForms: string
   ): void {
+    domain = normalizeDomain(domain);
+
     if (pluralForms) this._pluralForms[locale] = pluralForms;
 
     if (!this._dictionary[domain]) this._dictionary[domain] = {};
