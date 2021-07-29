@@ -600,7 +600,7 @@ provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyprojec
 .. hint::
 
     For example, a theme, only compatible with JupyterLab 3, and distributed as
-    a ready-to-run, prebuilt extensions might look like:
+    a ready-to-run, prebuilt extension might look like:
 
     .. code-block:: python
         # setup.py
