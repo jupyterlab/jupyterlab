@@ -8,7 +8,8 @@ import React from 'react';
 import { interactiveItem, ProgressBar } from '@jupyterlab/statusbar';
 import { Cell } from '@jupyterlab/cells';
 import { NotebookActions } from './actions';
-import { NotebookPanel } from './panel';
+
+import { Notebook } from './widget';
 
 /**
  * A react functional component for rendering execution indicator.
@@ -116,9 +117,9 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
     if (this.model === null) {
       return null;
     } else {
-      const ctx = this.model.sessionContext;
+      const nb = this.model.currentNotebook;
 
-      if (!ctx) {
+      if (!nb) {
         return (
           <ExecutionIndicatorComponent
             displayOption={this.model.displayOption}
@@ -130,7 +131,7 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
       return (
         <ExecutionIndicatorComponent
           displayOption={this.model.displayOption}
-          state={this.model.executionState(ctx)}
+          state={this.model.executionState(nb)}
           translator={this.translator}
         />
       );
@@ -155,13 +156,11 @@ export namespace ExecutionIndicator {
       this._showElapsedTime = true;
 
       NotebookActions.executionScheduled.connect((_, data) => {
-        const ctx = (data.notebook.parent as NotebookPanel).sessionContext;
-        this._cellScheduledCallback(ctx, data.cell);
+        this._cellScheduledCallback(data.notebook, data.cell);
       });
 
       NotebookActions.executed.connect((_, data) => {
-        const ctx = (data.notebook.parent as NotebookPanel).sessionContext;
-        this._cellExecutedCallback(ctx, data.cell);
+        this._cellExecutedCallback(data.notebook, data.cell);
       });
     }
 
@@ -170,13 +169,16 @@ export namespace ExecutionIndicator {
      * notebooks. If a session context is already attached, only set current
      * activated session context to input.
      *
-     * @param sessionContext - The session context to be attached to model
+     * @param data - The  notebook and session context to be attached to model
      */
-    attachSessionContext(sessionContext: ISessionContext | undefined): void {
-      if (sessionContext) {
-        this._currentSessionContext = sessionContext;
-        if (!this._notebookExecutionProgress.has(sessionContext)) {
-          this._notebookExecutionProgress.set(sessionContext, {
+    attachNotebook(
+      data: { content?: Notebook; context?: ISessionContext } | null
+    ): void {
+      if (data && data.content && data.context) {
+        const nb = data.content;
+        this._currentNotebook = nb;
+        if (!this._notebookExecutionProgress.has(nb)) {
+          this._notebookExecutionProgress.set(nb, {
             kernelStatus: 'idle',
             totalTime: 0,
             interval: 0,
@@ -186,8 +188,8 @@ export namespace ExecutionIndicator {
             needReset: true
           });
 
-          sessionContext.kernelChanged.connect(() => {
-            const state = this._notebookExecutionProgress.get(sessionContext);
+          data.context.kernelChanged.connect(() => {
+            const state = this._notebookExecutionProgress.get(nb);
             if (state) {
               this._resetTime(state);
               this.stateChanged.emit(void 0);
@@ -200,8 +202,8 @@ export namespace ExecutionIndicator {
     /**
      * The current activated session context in model.
      */
-    get sessionContext(): ISessionContext | null {
-      return this._currentSessionContext;
+    get currentNotebook(): Notebook | null {
+      return this._currentNotebook;
     }
 
     /**
@@ -234,10 +236,8 @@ export namespace ExecutionIndicator {
      *
      * @return - The associated execution state.
      */
-    public executionState(
-      ctx: ISessionContext
-    ): Private.IExecutionState | undefined {
-      return this._notebookExecutionProgress.get(ctx);
+    public executionState(nb: Notebook): Private.IExecutionState | undefined {
+      return this._notebookExecutionProgress.get(nb);
     }
 
     /**
@@ -256,14 +256,13 @@ export namespace ExecutionIndicator {
      * these cells. This `Timeout` will be cleared if there is any cell
      * scheduled after that.
      */
-    private _cellExecutedCallback(context: ISessionContext, cell: Cell): void {
-      const state = this._notebookExecutionProgress.get(context);
+    private _cellExecutedCallback(nb: Notebook, cell: Cell): void {
+      const state = this._notebookExecutionProgress.get(nb);
       if (state && state.scheduledCell.has(cell)) {
         state.scheduledCell.delete(cell);
         if (state.scheduledCell.size === 0) {
           state.kernelStatus = 'idle';
           clearInterval(state.interval);
-
           state.timeout = window.setTimeout(() => {
             state.needReset = true;
           }, 1000);
@@ -281,8 +280,8 @@ export namespace ExecutionIndicator {
      * cell
      * @param  cell - The scheduled code cell.
      */
-    private _cellScheduledCallback(context: ISessionContext, cell: Cell): void {
-      const state = this._notebookExecutionProgress.get(context);
+    private _cellScheduledCallback(nb: Notebook, cell: Cell): void {
+      const state = this._notebookExecutionProgress.get(nb);
 
       if (state && !state.scheduledCell.has(cell)) {
         if (state.needReset) {
@@ -308,6 +307,8 @@ export namespace ExecutionIndicator {
      */
     private _tick(data: Private.IExecutionState): void {
       data.totalTime += 1;
+      console.log('calling tick');
+
       this.stateChanged.emit(void 0);
     }
 
@@ -338,15 +339,15 @@ export namespace ExecutionIndicator {
     private _progressBarWidth: number;
 
     /**
-     * Session context of activated notebook.
+     * Current activated notebook.
      */
-    private _currentSessionContext: ISessionContext;
+    private _currentNotebook: Notebook;
 
     /**
      * A weak map to hold execution status of multiple notebooks.
      */
     private _notebookExecutionProgress = new WeakMap<
-      ISessionContext,
+      Notebook,
       Private.IExecutionState
     >();
   }

@@ -2,18 +2,32 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import {
-  createSessionContext,
-  sleep
-} from '@jupyterlab/testutils';
+import { createSessionContext } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-import { KernelError, Notebook, NotebookActions, NotebookModel } from '../src';
+import {
+  ExecutionIndicator,
+  Notebook,
+  NotebookActions,
+  NotebookModel
+} from '../src';
 import * as utils from './utils';
 
-const ERROR_INPUT = 'a = foo';
+const fastCellModel = {
+  cell_type: 'code',
+  execution_count: 1,
+  metadata: { tags: [] },
+  outputs: [],
+  source: ['print("hello")\n']
+};
 
+const slowCellModel = {
+  cell_type: 'code',
+  execution_count: 1,
+  metadata: { tags: [] },
+  outputs: [],
+  source: ['import time\n', 'time.sleep(3)\n']
+};
 
 const server = new JupyterServer();
 
@@ -33,7 +47,7 @@ describe('@jupyterlab/notebook', () => {
     let widget: Notebook;
     let sessionContext: ISessionContext;
     let ipySessionContext: ISessionContext;
-
+    let indicator: ExecutionIndicator;
     beforeAll(async function () {
       jest.setTimeout(20000);
       rendermime = utils.defaultRenderMime();
@@ -57,16 +71,31 @@ describe('@jupyterlab/notebook', () => {
         mimeTypeService: utils.mimeTypeService
       });
       const model = new NotebookModel();
-      model.fromJSON(utils.DEFAULT_CONTENT);
+      const modelJson = {
+        ...utils.DEFAULT_CONTENT,
+        cells: [fastCellModel, slowCellModel, slowCellModel, fastCellModel]
+      };
+
+      model.fromJSON(modelJson);
+
       widget.model = model;
       model.sharedModel.clearUndoHistory();
 
       widget.activeCellIndex = 0;
+      for (let idx = 0; idx < widget.widgets.length; idx++) {
+        widget.select(widget.widgets[idx]);
+      }
+      indicator = new ExecutionIndicator();
+      indicator.model.attachNotebook({
+        content: widget,
+        context: ipySessionContext
+      });
     });
 
     afterEach(() => {
       widget.dispose();
       utils.clipboard.clear();
+      indicator.dispose();
     });
 
     afterAll(async () => {
@@ -76,145 +105,66 @@ describe('@jupyterlab/notebook', () => {
       ]);
     });
 
-    describe('#executed', () => {
-      it('should emit when Markdown and code cells are run', async () => {
-        const cell = widget.activeCell as CodeCell;
-        const next = widget.widgets[1] as MarkdownCell;
-        let emitted = 0;
-        let failed = 0;
-        widget.select(next);
-        cell.model.outputs.clear();
-        next.rendered = false;
-        NotebookActions.executed.connect((_, args) => {
-          const { success } = args;
-          emitted += 1;
-          if (!success) {
-            failed += 1;
-          }
+    describe('executedAllCell', () => {
+      it('should count correctly number of scheduled cell', async () => {
+        let scheduledCell: number | undefined = 0;
+
+        indicator.model.stateChanged.connect(state => {
+          scheduledCell = state.executionState(widget)!.scheduledCellNumber;
         });
 
-        await NotebookActions.run(widget, sessionContext);
-        expect(emitted).toBe(2);
-        expect(failed).toBe(0);
-        expect(next.rendered).toBe(true);
+        await NotebookActions.run(widget, ipySessionContext);
+        expect(scheduledCell).toBe(4);
       });
 
-      it('should emit an error for a cell execution failure.', async () => {
-        let emitted = 0;
-        let failed = 0;
-        let cellError: KernelError | null | undefined = null;
-        NotebookActions.executed.connect((_, args) => {
-          const { success, error } = args;
-          emitted += 1;
-          if (!success) {
-            failed += 1;
-            cellError = error;
-          }
+      it('should count correctly elapsed time', async () => {
+        let elapsedTime: number | undefined = 0;
+
+        indicator.model.stateChanged.connect(state => {
+          elapsedTime = state.executionState(widget)!.totalTime;
         });
 
-        const cell = widget.model!.contentFactory.createCodeCell({});
-        cell.value.text = ERROR_INPUT;
-        widget.model!.cells.push(cell);
-        widget.select(widget.widgets[widget.widgets.length - 1]);
-        const result = await NotebookActions.run(widget, ipySessionContext);
-        expect(result).toBe(false);
-        expect(emitted).toBe(2);
-        expect(failed).toBe(1);
-        expect(cellError).toBeInstanceOf(KernelError);
-        expect(cellError!.errorName).toBe('NameError');
-        expect(cellError!.errorValue).toBe("name 'foo' is not defined");
-        expect(cellError!.traceback).not.toBeNull();
-        await ipySessionContext.session!.kernel!.restart();
+        await NotebookActions.run(widget, ipySessionContext);
+        expect(elapsedTime).toBeGreaterThanOrEqual(6);
       });
-    });
 
-    describe('#executionScheduled', () => {
-      it('should emit only when code cell execution is scheduled', async () => {
-        const cell = widget.activeCell as CodeCell;
-        const next = widget.widgets[1] as MarkdownCell;
-        let emitted = 0;
-        widget.activeCell!.model.value.text = "print('hello')";
-        widget.select(next);
-        cell.model.outputs.clear();
-        next.rendered = false;
-        NotebookActions.executionScheduled.connect(() => {
-          emitted += 1;
+      it('should tick every second', async () => {
+        let tick: Array<number> = [];
+
+        indicator.model.stateChanged.connect(state => {
+          tick.push(state.executionState(widget)!.totalTime);
         });
 
-        await NotebookActions.run(widget, sessionContext);
-        expect(emitted).toBe(1);
-        expect(next.rendered).toBe(true);
+        await NotebookActions.run(widget, ipySessionContext);
+        expect(tick).toEqual(expect.arrayContaining([1, 2, 3, 4, 5, 6, 6]));
+      });
+
+      it('should count correctly number of executed cells', async () => {
+        let executed: Array<number> = [];
+
+        indicator.model.stateChanged.connect(state => {
+          executed.push(state.executionState(widget)!.scheduledCell.size);
+        });
+
+        await NotebookActions.run(widget, ipySessionContext);
+        expect(executed).toEqual(expect.arrayContaining([3, 3, 3, 2, 2, 2, 0]));
       });
     });
+    describe('executedOneFastCell', () => {
+      it('should not count anything', async () => {
+        widget.deselectAll();
+        widget.select(widget.widgets[0]);
+        let scheduledCell: number | undefined = 0;
+        let totalTime: number = 0;
+        indicator.model.stateChanged.connect(state => {
+          scheduledCell = state.executionState(widget)!.scheduledCellNumber;
+          totalTime = state.executionState(widget)!.totalTime;
+        });
 
-    describe('#runAll()', () => {
-      beforeEach(() => {
-        // Make sure all cells have valid code.
-        widget.widgets[2].model.value.text = 'a = 1';
-      });
-
-      it('should run all of the cells in the notebook', async () => {
-        const next = widget.widgets[1] as MarkdownCell;
-        const cell = widget.activeCell as CodeCell;
-        cell.model.outputs.clear();
-        next.rendered = false;
-        const result = await NotebookActions.runAll(widget, sessionContext);
-        expect(result).toBe(true);
-        expect(cell.model.outputs.length).toBeGreaterThan(0);
-        expect(next.rendered).toBe(true);
-      });
-
-      it('should be a no-op if there is no model', async () => {
-        widget.model = null;
-        const result = await NotebookActions.runAll(widget, sessionContext);
-        expect(result).toBe(false);
-      });
-
-      it('should change to command mode', async () => {
-        widget.mode = 'edit';
-        const result = await NotebookActions.runAll(widget, sessionContext);
-        expect(result).toBe(true);
-        expect(widget.mode).toBe('command');
-      });
-
-      it('should clear the existing selection', async () => {
-        const next = widget.widgets[2];
-        widget.select(next);
-        const result = await NotebookActions.runAll(widget, sessionContext);
-        expect(result).toBe(true);
-        expect(widget.isSelected(widget.widgets[2])).toBe(false);
-      });
-
-      it('should activate the last cell', async () => {
-        await NotebookActions.runAll(widget, sessionContext);
-        expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
-      });
-
-      it('should stop executing code cells on an error', async () => {
-        widget.activeCell!.model.value.text = ERROR_INPUT;
-        const cell = widget.model!.contentFactory.createCodeCell({});
-        widget.model!.cells.push(cell);
-        const result = await NotebookActions.runAll(widget, ipySessionContext);
-        expect(result).toBe(false);
-        expect(cell.executionCount).toBeNull();
-        expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
-        await ipySessionContext.session!.kernel!.restart();
-      });
-
-      it('should render all markdown cells on an error', async () => {
-        widget.activeCell!.model.value.text = ERROR_INPUT;
-        const cell = widget.widgets[1] as MarkdownCell;
-        cell.rendered = false;
-        const result = await NotebookActions.runAll(widget, ipySessionContext);
-        // Markdown rendering is asynchronous, but the cell
-        // provides no way to hook into that. Sleep here
-        // to make sure it finishes.
-        await sleep(100);
-        expect(result).toBe(false);
-        expect(cell.rendered).toBe(true);
-        await ipySessionContext.session!.kernel!.restart();
+        await NotebookActions.run(widget, ipySessionContext);
+        expect(scheduledCell).toBe(1);
+        expect(totalTime).toBe(0);
       });
     });
-
   });
 });

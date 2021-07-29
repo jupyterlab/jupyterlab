@@ -16,7 +16,6 @@ import {
   Dialog,
   ICommandPalette,
   InputDialog,
-  ISessionContext,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
@@ -377,7 +376,6 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
       return;
     }
 
-    let currentSession: ISessionContext | null = null;
     let showOnToolBar = false;
     let showProgressBar = true;
     let showElapsedTime = true;
@@ -415,16 +413,19 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
               }
             }
           );
-          statusbarItem.model!.attachSessionContext(
-            notebookTracker.currentWidget?.sessionContext
-          );
+          statusbarItem.model.attachNotebook({
+            content: notebookTracker.currentWidget?.content,
+            context: notebookTracker.currentWidget?.sessionContext
+          });
 
           labShell.currentChanged.connect((_, change) => {
             const { newValue } = change;
             if (newValue && notebookTracker.has(newValue)) {
               const panel = newValue as NotebookPanel;
-              currentSession = panel.sessionContext;
-              statusbarItem.model!.attachSessionContext(currentSession);
+              statusbarItem.model!.attachNotebook({
+                content: panel.content,
+                context: panel.sessionContext
+              });
             }
           });
         } else {
@@ -436,7 +437,10 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
               showElapsedTime,
               progressBarWidth
             };
-            toolbarItem.model.attachSessionContext(panel.sessionContext);
+            toolbarItem.model.attachNotebook({
+              content: panel.content,
+              context: panel.sessionContext
+            });
             panel.toolbar.insertAfter(
               'kernelStatus',
               'executionProgress',
