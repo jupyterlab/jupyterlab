@@ -592,7 +592,7 @@ for many audiences, the following classifiers are specific to Jupyter and Jupyte
     Framework :: Jupyter :: JupyterLab :: Extensions
     Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
     Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
-    Framework :: Jupyter :: JupyterLab :: Extensions :: Media Types
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Mime Renderers
 
 Include each relevant classifier (and its parents) to help describe what your package
 provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyproject.toml``.
