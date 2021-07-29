@@ -977,7 +977,7 @@ export namespace DocumentRegistry {
     | 'started'
     | 'failed'
     | 'completed'
-    | 'completed manually';
+    | 'manually completed';
 
   /**
    * A type alias for a context.
