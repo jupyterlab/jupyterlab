@@ -583,23 +583,40 @@ for many audiences, the following classifiers are specific to Jupyter and Jupyte
 Include each relevant classifier (and its parents) to help describe what your package
 provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyproject.toml``.
 
-.. code-block:: python
+.. code-block::
 
-    setup(
-      # the rest of the package's metadata
-      # ...
-      classifiers=[
-          "Framework :: Jupyter",
-          "Framework :: Jupyter :: JupyterLab",
-          "Framework :: Jupyter :: JupyterLab :: 1",
-          "Framework :: Jupyter :: JupyterLab :: 2",
-          "Framework :: Jupyter :: JupyterLab :: 3",
-          "Framework :: Jupyter :: JupyterLab :: 4",
-          "Framework :: Jupyter :: JupyterLab :: Extensions",
-          "Framework :: Jupyter :: JupyterLab :: Extensions :: Themes",
-          "Framework :: Jupyter :: JupyterLab :: Extensions :: Media Types",
-      ]
-    )
+    Framework :: Jupyter
+    Framework :: Jupyter :: JupyterLab
+    Framework :: Jupyter :: JupyterLab :: 1
+    Framework :: Jupyter :: JupyterLab :: 2
+    Framework :: Jupyter :: JupyterLab :: 3
+    Framework :: Jupyter :: JupyterLab :: 4
+    Framework :: Jupyter :: JupyterLab :: Extensions
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Media Types
+
+Include each relevant classifier (and its parents) to help describe what your package
+provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyproject.toml``.
+
+.. hint::
+
+    For example, a theme, only compatible with JupyterLab 3 might look like:
+
+    .. code-block:: python
+        # setup.py
+        setup(
+            # the rest of the package's metadata
+            # ...
+            classifiers=[
+                "Framework :: Jupyter",
+                "Framework :: Jupyter :: JupyterLab",
+                "Framework :: Jupyter :: JupyterLab :: 3",
+                "Framework :: Jupyter :: JupyterLab :: Extensions",
+                "Framework :: Jupyter :: JupyterLab :: Extensions :: Themes",
+            ]
+        )
+
+    This would be discoverable from a `PyPI search <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Themes>`.
 
 .. _source_dev_workflow:
 
