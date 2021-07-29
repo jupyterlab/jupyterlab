@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-app",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -10,8 +10,8 @@
   "dependencies": {
     "@jupyterlab/application": "^3.1.0",
     "@jupyterlab/application-extension": "^3.1.0",
-    "@jupyterlab/apputils-extension": "^3.1.0",
-    "@jupyterlab/builder": "^3.1.0",
+    "@jupyterlab/apputils-extension": "^3.1.1",
+    "@jupyterlab/builder": "^3.1.1",
     "@jupyterlab/celltags-extension": "^3.1.0",
     "@jupyterlab/codemirror-extension": "^3.1.0",
     "@jupyterlab/completer-extension": "^3.1.0",
