@@ -246,7 +246,7 @@ describe('@jupyterlab/completer', () => {
         const text = 'eggs\nfoo # comment\nbaz';
         const want = 'eggs\nfoobar # comment\nbaz';
         const line = 1;
-        const column = 5;
+        const column = 5; // this sets the cursor after the "#" sign - not in the mid of the replaced word
         const request: Completer.ITextState = {
           column,
           line,
@@ -318,6 +318,41 @@ describe('@jupyterlab/completer', () => {
           column: column + 6
         });
         console.warn(editor.getCursorPosition());
+      });
+    });
+
+    it('should update cursor position after autocomplete on empty word', () => {
+      const model = new CompleterModel();
+      const patch = 'foobar';
+      const completer = new Completer({ editor: null, model });
+      const handler = new TestCompletionHandler({ completer, connector });
+      const editor = createEditorWidget().editor;
+      const text = 'eggs\n  # comment\nbaz';
+      const want = 'eggs\n foobar # comment\nbaz';
+      const line = 1;
+      const column = 1;
+      const request: Completer.ITextState = {
+        column: column,
+        line,
+        lineHeight: 0,
+        charWidth: 0,
+        coords: null,
+        text
+      };
+
+      handler.editor = editor;
+      handler.editor.model.value.text = text;
+      handler.editor.model.sharedModel.clearUndoHistory();
+      handler.editor.setCursorPosition({ line, column });
+      model.original = request;
+      const offset = handler.editor.getOffsetAt({ line, column });
+      model.cursor = { start: offset, end: offset };
+      // Make the completion, check its value and cursor position.
+      (completer.selected as any).emit(patch);
+      expect(editor.model.value.text).toBe(want);
+      expect(editor.getCursorPosition()).toEqual({
+        line,
+        column: column + 6
       });
     });
   });

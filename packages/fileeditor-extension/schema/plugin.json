@@ -32,22 +32,6 @@
             "rank": 30
           },
           {
-            "command": "fileeditor:change-font-size",
-            "rank": 30,
-            "args": {
-              "delta": 1,
-              "isMenu": true
-            }
-          },
-          {
-            "command": "fileeditor:change-font-size",
-            "rank": 30,
-            "args": {
-              "delta": -1,
-              "isMenu": true
-            }
-          },
-          {
             "type": "submenu",
             "submenu": {
               "id": "jp-mainmenu-settings-fileeditorindent",
@@ -93,12 +77,24 @@
             "rank": 30
           },
           {
-            "command": "fileeditor:toggle-autoclosing-brackets",
+            "command": "fileeditor:toggle-autoclosing-brackets-universal",
             "rank": 30
           },
           {
-            "type": "separator",
-            "rank": 30
+            "command": "fileeditor:change-font-size",
+            "rank": 30,
+            "args": {
+              "delta": 1,
+              "isMenu": true
+            }
+          },
+          {
+            "command": "fileeditor:change-font-size",
+            "rank": 30,
+            "args": {
+              "delta": -1,
+              "isMenu": true
+            }
           }
         ]
       }
@@ -152,6 +148,9 @@
         "autoClosingBrackets": {
           "type": "boolean"
         },
+        "codeFolding": {
+          "type": "boolean"
+        },
         "cursorBlinkRate": {
           "type": "number",
           "title": "Cursor blinking rate",
@@ -164,6 +163,9 @@
           "type": ["integer", "null"],
           "minimum": 1,
           "maximum": 100
+        },
+        "insertSpaces": {
+          "type": "boolean"
         },
         "lineHeight": {
           "type": ["number", "null"]
@@ -181,23 +183,17 @@
         "readOnly": {
           "type": "boolean"
         },
-        "insertSpaces": {
-          "type": "boolean"
-        },
-        "tabSize": {
-          "type": "number"
-        },
-        "wordWrapColumn": {
-          "type": "integer"
-        },
         "rulers": {
           "type": "array",
           "items": {
             "type": "number"
           }
         },
-        "codeFolding": {
-          "type": "boolean"
+        "tabSize": {
+          "type": "number"
+        },
+        "wordWrapColumn": {
+          "type": "integer"
         }
       },
       "additionalProperties": false,
@@ -210,20 +206,20 @@
       "description": "The configuration for all text editors.\nIf `fontFamily`, `fontSize` or `lineHeight` are `null`,\nvalues from current theme are used.",
       "$ref": "#/definitions/editorConfig",
       "default": {
-        "autoClosingBrackets": true,
+        "autoClosingBrackets": false,
+        "codeFolding": false,
         "cursorBlinkRate": 530,
         "fontFamily": null,
         "fontSize": null,
+        "insertSpaces": true,
         "lineHeight": null,
         "lineNumbers": true,
         "lineWrap": "on",
         "matchBrackets": true,
         "readOnly": false,
-        "insertSpaces": true,
-        "tabSize": 4,
-        "wordWrapColumn": 80,
         "rulers": [],
-        "codeFolding": false
+        "tabSize": 4,
+        "wordWrapColumn": 80
       }
     }
   },

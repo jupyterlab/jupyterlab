@@ -43,6 +43,8 @@ export class CompletionHandler implements IDisposable {
 
   /**
    * The data connector used to populate completion requests.
+   * @deprecated will be removed, or will return `CompletionHandler.ICompletionItemsConnector`
+   * instead of `IDataConnector` in future versions
    *
    * #### Notes
    * The only method of this connector that will ever be called is `fetch`, so
@@ -184,8 +186,12 @@ export class CompletionHandler implements IDisposable {
     }
 
     const { start, end, value } = patch;
+    const cursorBeforeChange = editor.getOffsetAt(editor.getCursorPosition());
     // we need to update the shared model in a single transaction so that the undo manager works as expected
     editor.model.sharedModel.updateSource(start, end, value);
+    if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
+      editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
+    }
   }
 
   /**
@@ -546,6 +552,9 @@ export namespace CompletionHandler {
      * The only method of this connector that will ever be called is `fetch`, so
      * it is acceptable for the other methods to be simple functions that return
      * rejected promises.
+     *
+     * @deprecated passing `IDataConnector` is deprecated;
+     * pass `CompletionHandler.ICompletionItemsConnector`
      */
     connector:
       | IDataConnector<IReply, void, IRequest>
@@ -634,6 +643,8 @@ export namespace CompletionHandler {
   export const ICompletionItemsResponseType = 'ICompletionItemsReply' as const;
 
   /**
+   * @deprecated use `ICompletionItemsReply` instead
+   *
    * A reply to a completion request.
    */
   export interface IReply {

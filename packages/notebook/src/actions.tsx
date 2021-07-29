@@ -99,7 +99,7 @@ export class NotebookActions {
   }
 
   /**
-   * A signal that emits whenever a cell completes execution.
+   * A signal that emits whenever a cell execution is scheduled.
    */
   static get selectionExecuted(): ISignal<
     any,
@@ -562,7 +562,9 @@ export namespace NotebookActions {
         {}
       );
 
-      model.cells.push(cell);
+      // Do not use push here, as we want an widget insertion
+      // to make sure no placeholder widget is rendered.
+      model.cells.insert(notebook.widgets.length, cell);
       notebook.activeCellIndex++;
       notebook.mode = 'edit';
     } else {
@@ -1527,6 +1529,38 @@ export namespace NotebookActions {
     if (getHeadingInfo(nearestParentCell).collapsed) {
       setHeadingCollapse(nearestParentCell, false, notebook);
     }
+  }
+
+  /**
+   * Finds the next heading that isn't a child of the given markdown heading.
+   * @param cell - "Child" cell that has become the active cell
+   * @param notebook - The target notebook widget.
+   */
+  export function findNextParentHeading(
+    cell: Cell,
+    notebook: Notebook
+  ): number {
+    let index = findIndex(
+      notebook.widgets,
+      (possibleCell: Cell, index: number) => {
+        return cell.model.id === possibleCell.model.id;
+      }
+    );
+    if (index === -1) {
+      return -1;
+    }
+    let childHeaderInfo = getHeadingInfo(cell);
+    for (index = index + 1; index < notebook.widgets.length; index++) {
+      let hInfo = getHeadingInfo(notebook.widgets[index]);
+      if (
+        hInfo.isHeading &&
+        hInfo.headingLevel <= childHeaderInfo.headingLevel
+      ) {
+        return index;
+      }
+    }
+    // else no parent header found. return the index of the last cell
+    return notebook.widgets.length;
   }
 
   /**

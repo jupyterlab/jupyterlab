@@ -53,6 +53,8 @@ namespace CommandIDs {
 
   export const launchClassic = 'help:launch-classic-notebook';
 
+  export const jupyterForum = 'help:jupyter-forum';
+
   export const licenses = 'help:licenses';
 
   export const licenseReport = 'help:license-report';
@@ -193,6 +195,36 @@ const launchClassic: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to add a command to open the Jupyter Forum.
+ */
+const jupyterForum: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:jupyter-forum',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ): void => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Help');
+
+    commands.addCommand(CommandIDs.jupyterForum, {
+      label: trans.__('Jupyter Forum'),
+      execute: () => {
+        window.open('https://discourse.jupyter.org/c/jupyterlab');
+      }
+    });
+
+    if (palette) {
+      palette.addItem({ command: CommandIDs.jupyterForum, category });
+    }
+  }
+};
+
+/**
  * A plugin to add a list of resources to the help menu.
  */
 const resources: JupyterFrontEndPlugin<void> = {
@@ -217,20 +249,16 @@ const resources: JupyterFrontEndPlugin<void> = {
     const resources = [
       {
         text: trans.__('JupyterLab Reference'),
-        url: 'https://jupyterlab.readthedocs.io/en/stable/'
+        url: 'https://jupyterlab.readthedocs.io/en/latest/'
       },
       {
         text: trans.__('JupyterLab FAQ'),
         url:
-          'https://jupyterlab.readthedocs.io/en/stable/getting_started/faq.html'
+          'https://jupyterlab.readthedocs.io/en/latest/getting_started/faq.html'
       },
       {
         text: trans.__('Jupyter Reference'),
         url: 'https://jupyter.org/documentation'
-      },
-      {
-        text: trans.__('Jupyter Forum'),
-        url: 'https://discourse.jupyter.org/c/jupyterlab'
       },
       {
         text: trans.__('Markdown Reference'),
@@ -614,6 +642,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   about,
   launchClassic,
+  jupyterForum,
   resources,
   licenses
 ];

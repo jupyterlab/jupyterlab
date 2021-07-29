@@ -96,6 +96,8 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
             options.initializeOptions(
               numbering || options.numbering,
               options.numberingH1,
+              options.includeOutput,
+              options.syncCollapseState,
               showCode || options.showCode,
               showMarkdown || options.showMarkdown,
               showTags || options.showTags

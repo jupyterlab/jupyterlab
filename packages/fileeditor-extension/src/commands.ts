@@ -43,6 +43,8 @@ import {
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
 
+const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
+const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
 /**
  * The command IDs used by the fileeditor plugin.
  */
@@ -62,6 +64,9 @@ export namespace CommandIDs {
   export const matchBrackets = 'fileeditor:toggle-match-brackets';
 
   export const autoClosingBrackets = 'fileeditor:toggle-autoclosing-brackets';
+
+  export const autoClosingBracketsUniversal =
+    'fileeditor:toggle-autoclosing-brackets-universal';
 
   export const createConsole = 'fileeditor:create-console';
 
@@ -99,7 +104,35 @@ export interface IFileTypeData extends ReadonlyJSONObject {
  */
 export const FACTORY = 'Editor';
 
-let config: CodeEditor.IConfig = { ...CodeEditor.defaultConfig };
+const userSettings = [
+  'autoClosingBrackets',
+  'cursorBlinkRate',
+  'fontFamily',
+  'fontSize',
+  'lineHeight',
+  'lineNumbers',
+  'lineWrap',
+  'matchBrackets',
+  'readOnly',
+  'insertSpaces',
+  'tabSize',
+  'wordWrapColumn',
+  'rulers',
+  'codeFolding'
+];
+
+function filterUserSettings(config: CodeEditor.IConfig): CodeEditor.IConfig {
+  const filteredConfig = { ...config };
+  // Delete parts of the config that are not user settings (like handlePaste).
+  for (let k of Object.keys(config)) {
+    if (!userSettings.includes(k)) {
+      delete (config as any)[k];
+    }
+  }
+  return filteredConfig;
+}
+
+let config: CodeEditor.IConfig = filterUserSettings(CodeEditor.defaultConfig);
 
 /**
  * A utility class for adding commands and menu items,
@@ -143,10 +176,10 @@ export namespace Commands {
     settings: ISettingRegistry.ISettings,
     commands: CommandRegistry
   ): void {
-    config = {
+    config = filterUserSettings({
       ...CodeEditor.defaultConfig,
       ...(settings.get('editorConfig').composite as JSONObject)
-    };
+    });
 
     // Trigger a refresh of the rendered commands
     commands.notifyCommandChanged();
@@ -406,8 +439,10 @@ export namespace Commands {
     id: string
   ): void {
     commands.addCommand(CommandIDs.autoClosingBrackets, {
-      execute: () => {
-        config.autoClosingBrackets = !config.autoClosingBrackets;
+      execute: args => {
+        config.autoClosingBrackets = !!(
+          args['force'] ?? !config.autoClosingBrackets
+        );
         return settingRegistry
           .set(id, 'editorConfig', (config as unknown) as JSONObject)
           .catch((reason: Error) => {
@@ -416,6 +451,35 @@ export namespace Commands {
       },
       label: trans.__('Auto Close Brackets for Text Editor'),
       isToggled: () => config.autoClosingBrackets
+    });
+
+    commands.addCommand(CommandIDs.autoClosingBracketsUniversal, {
+      execute: () => {
+        const anyToggled =
+          commands.isToggled(CommandIDs.autoClosingBrackets) ||
+          commands.isToggled(autoClosingBracketsNotebook) ||
+          commands.isToggled(autoClosingBracketsConsole);
+        // if any auto closing brackets options is toggled, toggle both off
+        if (anyToggled) {
+          void commands.execute(CommandIDs.autoClosingBrackets, {
+            force: false
+          });
+          void commands.execute(autoClosingBracketsNotebook, { force: false });
+          void commands.execute(autoClosingBracketsConsole, { force: false });
+        } else {
+          // both are off, turn them on
+          void commands.execute(CommandIDs.autoClosingBrackets, {
+            force: true
+          });
+          void commands.execute(autoClosingBracketsNotebook, { force: true });
+          void commands.execute(autoClosingBracketsConsole, { force: true });
+        }
+      },
+      label: trans.__('Auto Close Brackets'),
+      isToggled: () =>
+        commands.isToggled(CommandIDs.autoClosingBrackets) ||
+        commands.isToggled(autoClosingBracketsNotebook) ||
+        commands.isToggled(autoClosingBracketsConsole)
     });
   }
 
@@ -872,10 +936,12 @@ export namespace Commands {
         ext
       })
       .then(model => {
-        return commands.execute('docmanager:open', {
-          path: model.path,
-          factory: FACTORY
-        });
+        if (model != undefined) {
+          return commands.execute('docmanager:open', {
+            path: model.path,
+            factory: FACTORY
+          });
+        }
       });
   }
 

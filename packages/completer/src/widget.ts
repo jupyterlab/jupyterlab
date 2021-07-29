@@ -168,6 +168,7 @@ export class Completer extends Widget {
    */
   reset(): void {
     this._activeIndex = 0;
+    this._lastSubsetMatch = '';
     if (this._model) {
       this._model.reset(true);
     }
@@ -433,12 +434,17 @@ export class Completer extends Widget {
           return;
         }
         const populated = this._populateSubset();
-        // If there is a common subset in the options,
-        // then emit a completion signal with that subset.
-        if (model.query) {
+
+        // If the common subset was found and set on `query`,
+        // or if there is a `query` in the initialization options,
+        // then emit a completion signal with that `query` (=subset match),
+        // but only if the query has actually changed.
+        // See: https://github.com/jupyterlab/jupyterlab/issues/10439#issuecomment-875189540
+        if (model.query && model.query != this._lastSubsetMatch) {
           model.subsetMatch = true;
           this._selected.emit(model.query);
           model.subsetMatch = false;
+          this._lastSubsetMatch = model.query;
         }
         // If the query changed, update rendering of the options.
         if (populated) {
@@ -636,6 +642,7 @@ export class Completer extends Widget {
   private _selected = new Signal<this, string>(this);
   private _visibilityChanged = new Signal<this, void>(this);
   private _indexChanged = new Signal<this, number>(this);
+  private _lastSubsetMatch: string = '';
 }
 
 export namespace Completer {

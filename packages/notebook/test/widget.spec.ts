@@ -410,19 +410,19 @@ describe('@jupyter/notebook', () => {
       it('should be settable', () => {
         const widget = createWidget();
         expect(widget.widgets[0].editor.getOption('autoClosingBrackets')).toBe(
-          true
+          false
         );
         const newConfig = {
           raw: editorConfig.raw,
           markdown: editorConfig.markdown,
           code: {
             ...editorConfig.code,
-            autoClosingBrackets: false
+            autoClosingBrackets: true
           }
         };
         widget.editorConfig = newConfig;
         expect(widget.widgets[0].editor.getOption('autoClosingBrackets')).toBe(
-          false
+          true
         );
       });
     });

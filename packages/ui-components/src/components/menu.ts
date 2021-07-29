@@ -35,6 +35,14 @@ export interface IRankedMenu extends IDisposable {
   readonly items: ReadonlyArray<Menu.IItem>;
 
   /**
+   * The underlying Lumino menu.
+   *
+   * @deprecated since v3.1
+   * RankMenu inherits from Menu since v3.1
+   */
+  readonly menu: Menu;
+
+  /**
    * Menu rank
    */
   readonly rank?: number;
@@ -91,6 +99,16 @@ export class RankedMenu extends Menu implements IRankedMenu {
     super(options);
     this._rank = options.rank;
     this._includeSeparators = options.includeSeparators ?? true;
+  }
+
+  /**
+   * The underlying Lumino menu.
+   *
+   * @deprecated since v3.1
+   * RankMenu inherits from Menu since v3.1
+   */
+  get menu(): Menu {
+    return this;
   }
 
   /**

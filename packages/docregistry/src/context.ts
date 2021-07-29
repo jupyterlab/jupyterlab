@@ -101,19 +101,16 @@ export class Context<
       path: this._path,
       contents: manager.contents
     }));
-    this.pathChanged.connect((sender, newPath) => {
-      urlResolver.path = newPath;
-      if (this._ycontext.get('path') !== newPath) {
-        this._ycontext.set('path', newPath);
-      }
-    });
     this._ycontext.set('path', this._path);
     this._ycontext.observe(event => {
       const pathChanged = event.changes.keys.get('path');
       if (pathChanged) {
         const newPath = this._ycontext.get('path')!;
-        this._provider.setPath(newPath);
-        if (newPath && newPath !== this.path) {
+        if (newPath && newPath !== pathChanged.oldValue) {
+          urlResolver.path = newPath;
+          this._path = newPath;
+          this._provider.setPath(newPath);
+          this._pathChanged.emit(this.path);
           this.sessionContext.session?.setPath(newPath) as any;
         }
       }
@@ -491,10 +488,7 @@ export class Context<
       const localPath = this._manager.contents.localPath(newPath);
       void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
-      this._pathChanged.emit(this._path);
-      if (this._contentsModel) {
-        this._contentsModel.renamed = true;
-      }
+      this._ycontext.set('path', this._path);
     }
   }
 
@@ -508,7 +502,7 @@ export class Context<
     const path = this.sessionContext.session!.path;
     if (path !== this._path) {
       this._path = path;
-      this._pathChanged.emit(path);
+      this._ycontext.set('path', this._path);
     }
   }
 
@@ -525,8 +519,7 @@ export class Context<
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
-      format: model.format,
-      renamed: model.renamed == true ? true : false
+      format: model.format
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
@@ -583,7 +576,8 @@ export class Context<
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newName);
 
-    this._pathChanged.emit(this._path);
+    this._path = newPath;
+    this._ycontext.set('path', this._path);
   }
 
   /**
@@ -620,7 +614,6 @@ export class Context<
       }
 
       model.dirty = false;
-      value.renamed = this._contentsModel?.renamed;
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {
@@ -872,7 +865,7 @@ or load the version on disk (revert)?`,
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
     await this.save();
-    this._pathChanged.emit(this._path);
+    this._ycontext.set('path', this._path);
     await this._maybeCheckpoint(true);
   }
 

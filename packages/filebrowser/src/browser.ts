@@ -188,7 +188,6 @@ export class FileBrowser extends Widget {
       forceRefresh: true
     });
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
-    this._filenameSearcher.id = 'filename-searcher';
 
     this.layout.removeWidget(this._filenameSearcher);
     this.layout.removeWidget(this.crumbs);
@@ -277,6 +276,7 @@ export class FileBrowser extends Widget {
         this._directoryPending = false;
       })
       .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
         this._directoryPending = false;
       });
   }
@@ -306,6 +306,7 @@ export class FileBrowser extends Widget {
         this._filePending = false;
       })
       .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
         this._filePending = false;
       });
   }

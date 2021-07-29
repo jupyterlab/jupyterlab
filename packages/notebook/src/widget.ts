@@ -16,7 +16,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ArrayExt, each } from '@lumino/algorithm';
+import { ArrayExt, each, findIndex } from '@lumino/algorithm';
 import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag, IDragEvent } from '@lumino/dragdrop';
@@ -25,6 +25,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';
+import { NotebookActions } from './actions';
 import { INotebookModel } from './model';
 
 /**
@@ -541,7 +542,8 @@ export class StaticNotebook extends Widget {
     if (
       this._observer &&
       insertType === 'push' &&
-      this._renderedCellsCount > this.notebookConfig.numberCellsToRenderDirectly
+      this._renderedCellsCount >=
+        this.notebookConfig.numberCellsToRenderDirectly
     ) {
       // We have an observer and we are have been asked to push (not to insert).
       // and we are above the number of cells to render directly, then
@@ -591,6 +593,7 @@ export class StaticNotebook extends Widget {
     pl.insertWidget(index, cell);
     this._toRenderMap.delete(cell.model.id);
     this._incrementRenderedCount();
+    this.onCellInserted(index, cell);
     this._placeholderCellRendered.emit(cell);
   }
 
@@ -892,7 +895,7 @@ export namespace StaticNotebook {
       ...CodeEditor.defaultConfig,
       lineWrap: 'off',
       matchBrackets: true,
-      autoClosingBrackets: true
+      autoClosingBrackets: false
     },
     markdown: {
       ...CodeEditor.defaultConfig,
@@ -2105,6 +2108,19 @@ export class Notebook extends StaticNotebook {
       event.dropAction = 'move';
       const toMove: Cell[] = event.mimeData.getData('internal:cells');
 
+      // For collapsed markdown headings with hidden "child" cells, move all
+      // child cells as well as the markdown heading.
+      const cell = toMove[toMove.length - 1];
+      if (cell instanceof MarkdownCell && cell.headingCollapsed) {
+        const nextParent = NotebookActions.findNextParentHeading(cell, source);
+        if (nextParent > 0) {
+          const index = findIndex(source.widgets, (possibleCell: Cell) => {
+            return cell.model.id === possibleCell.model.id;
+          });
+          toMove.push(...source.widgets.slice(index + 1, nextParent));
+        }
+      }
+
       // Compute the to/from indices for the move.
       let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
       let toIndex = this._findCell(target);
@@ -2253,8 +2269,11 @@ export class Notebook extends StaticNotebook {
       // If the editor itself does not have focus, ensure command mode.
       if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
-      } else {
-        // If the editor has focus, ensure edit mode.
+      }
+      this.activeCellIndex = index;
+      // If the editor has focus, ensure edit mode.
+      const node = widget.editorWidget.node;
+      if (node.contains(target)) {
         this.mode = 'edit';
       }
       this.activeCellIndex = index;

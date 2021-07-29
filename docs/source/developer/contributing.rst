@@ -224,7 +224,8 @@ Start JupyterLab in development mode:
 
 Development mode ensures that you are running the JavaScript assets that
 are built in the dev-installed Python package. Note that when running in
-dev mode, extensions will not be activated by default.
+dev mode, extensions will not be activated by default - refer
+:ref:`documentation on extension development <prebuilt_dev_workflow>` to know more.
 
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
@@ -821,6 +822,7 @@ The majority of names are written in lower case. These names include:
 The following sections of the user interface should be in title case,
 directly quoting a word in the UI:
 
+-  Activity Bar
 -  File menu
 -  Files tab
 -  Running panel

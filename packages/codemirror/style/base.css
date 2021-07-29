@@ -245,8 +245,7 @@
   font-size: 0.95em;
   background-color: rgb(250, 129, 0);
   font-family: var(--jp-ui-font-family);
-  font-style: bold;
-  font-weight: normal;
+  font-weight: bold;
   line-height: normal;
   user-select: none;
   color: white;
