@@ -1635,7 +1635,7 @@ namespace Private {
     const trans = translator.load('jupyterlab');
 
     const group = document.createElement('optgroup');
-    group.label = 'Use No Kernel';
+    group.label = trans.__('Use No Kernel');
     const option = document.createElement('option');
     option.text = trans.__('No Kernel');
     option.value = 'null';
