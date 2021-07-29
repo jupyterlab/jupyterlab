@@ -580,8 +580,6 @@ Extensions distributed as Python packages may declare additional metadata in the
 experience for users on `PyPI <https://pypi.org/search>`. While including the license,
 development status, Python versions supported, and other topic classifiers are useful
 for many audiences, the following classifiers are specific to Jupyter and JupyterLab.
-Include each relevant classifier (and its parents) to help describe what your package
-provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyproject.toml``.
 
 .. code-block::
 
