@@ -40,7 +40,7 @@ Automatic section numbering will go through your Notebook and number your sectio
 
 
 Automatic section numbering can be skipped for h1 headers by setting the ``numberingH1``
-parameter to false.To perform that go to settings and click on advanced settings editor and then go to tableofcontents section
+parameter to false.To perform that go to settings and click on advanced settings editor and then go to table of contents section
 and in user preferences add ``numberingH1:false`` and save the settings, Here is an animation showing its use
 
 
@@ -70,7 +70,7 @@ Here is an animation showing its use
  There will be a synchronization between table of contents and notebook if the ``syncCollapseState`` attribute
  is made to true in the settings. If a heading is collapsed in the table of contents the notebook will also gets collapsed and
  similarly expanding cells in notebook will expand the table of contents.To perform that go to settings and click on advanced settings
- editor and then go to tableofcontents section and in user preferences add ``syncCollapseState:true`` and save the settings, Here is an animation showing its use
+ editor and then go to table of contents section and in user preferences add ``syncCollapseState:true`` and save the settings, Here is an animation showing its use
 
 
 
@@ -83,7 +83,7 @@ Here is an animation showing its use
 
 The cell outputs get numbered by default in the table of contents and the notebook.
 This can be tuned by changing the settings ``includeOutput`` to ``false``.To perform that go to settings and click on advanced settings
-editor and then go to tableofcontents section and in user preferences add ``includeOutput:false`` and save the settings, Here is an animation showing its use
+editor and then go to table of contents section and in user preferences add ``includeOutput:false`` and save the settings, Here is an animation showing its use
 
 
 
