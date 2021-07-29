@@ -74,7 +74,7 @@ function Filler(props: Filler.IProps) {
     <div
       className={fillerItem(props.contentWidth)}
       style={{
-        width: `${props.percentage}px`
+        width: `${props.percentage}%`
       }}
     >
       <p>{props.content}</p>

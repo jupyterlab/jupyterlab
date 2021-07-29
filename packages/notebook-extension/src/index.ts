@@ -371,12 +371,9 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
     statusBar: IStatusBar | null,
     settingRegistry: ISettingRegistry | null
   ) => {
-    if (!statusBar) {
-      // Automatically disable if statusbar missing
-      return;
-    }
-
-    let showOnToolBar = false;
+    // Set default position to toolbar if status bar is not
+    // available.
+    let showOnToolBar = !statusBar;
     let showProgressBar = true;
     let showElapsedTime = true;
     let progressBarWidth = 100;
@@ -389,7 +386,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
         const configValues = settings.get('progressIndicator')
           .composite as JSONObject;
         if (configValues) {
-          showOnToolBar = configValues.showOnToolBar as boolean;
+          showOnToolBar = (configValues.showOnToolBar as boolean) || !statusBar;
           showProgressBar = configValues.showProgressBar as boolean;
           showElapsedTime = configValues.showElapsedTime as boolean;
           progressBarWidth = configValues.progressBarWidth as number;
@@ -401,7 +398,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
             showElapsedTime,
             progressBarWidth
           };
-          statusBar.registerStatusItem(
+          statusBar!.registerStatusItem(
             '@jupyterlab/notebook-extension:execution-indicator',
             {
               item: statusbarItem,

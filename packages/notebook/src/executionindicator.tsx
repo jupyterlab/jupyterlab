@@ -165,9 +165,9 @@ export namespace ExecutionIndicator {
     }
 
     /**
-     * Attach a session context to model to keep track of multiple
-     * notebooks. If a session context is already attached, only set current
-     * activated session context to input.
+     * Attach a notebook with session context to model in order to keep
+     * track of multiple notebooks. If a session context is already
+     * attached, only set current activated notebook to input.
      *
      * @param data - The  notebook and session context to be attached to model
      */
@@ -200,7 +200,7 @@ export namespace ExecutionIndicator {
     }
 
     /**
-     * The current activated session context in model.
+     * The current activated notebook in model.
      */
     get currentNotebook(): Notebook | null {
       return this._currentNotebook;
@@ -229,10 +229,10 @@ export namespace ExecutionIndicator {
     }
 
     /**
-     * Get the execution state associated with a session context.
+     * Get the execution state associated with a notebook.
      *
-     * @param ctx - The session context used to identify execution
-     * state
+     * @param nb - The notebook used to identify execution
+     * state.
      *
      * @return - The associated execution state.
      */
@@ -245,8 +245,8 @@ export namespace ExecutionIndicator {
      * used to keep track number of executed cell and the status
      * or kernel.
      *
-     * @param  context - The session context linked with the executed code
-     * cell
+     * @param  nb - The notebook which contains the executed code
+     * cell.
      * @param  cell - The executed code cell.
      *
      * ### Note
@@ -276,7 +276,7 @@ export namespace ExecutionIndicator {
      * used to keep track number of scheduled cell and the status
      * or kernel.
      *
-     * @param  context - The session context linked with the scheduled code
+     * @param  nb - The notebook which contains the scheduled code
      * cell
      * @param  cell - The scheduled code cell.
      */
