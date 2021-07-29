@@ -1,6 +1,12 @@
 name: UI Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
 
 jobs:
   ui-tests:
@@ -32,7 +38,7 @@ jobs:
           # Print jupyterlab logs before removing the containers using the container name set in docker-compose file
           docker logs jupyterlab
           docker-compose -f "./ui-tests/docker/docker-compose.yml" down
-          
+
       - name: Run UI Tests
         if: ${{ failure() }}
         run: |
