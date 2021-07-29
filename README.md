@@ -50,27 +50,27 @@ Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.rea
 
 ### Installation
 
-If you use [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.readthedocs.io/en/latest/), or [pip](https://docs.python.org/3/installing/index.html), you can install JupyterLab with:
+If you use [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.readthedocs.io/en/latest/), or [pip](https://docs.python.org/3/installing/index.html), you can install JupyterLab with one of the following commands.
 
-```shell
-# conda
-conda install -c conda-forge jupyterlab
-
-# mamba
-mamba install -c conda-forge jupyterlab
-
-# pip
-pip install jupyterlab
-```
-
-If installing using `pip install --user`, you must add the user-level `bin` directory to your `PATH` environment variable in order to launch `jupyter lab`. If you are using a Unix derivative (FreeBSD, GNU / Linux, OS X), you can achieve this by using `export PATH="$HOME/.local/bin:$PATH"` command.
+- If you use conda:
+  ```shell
+  conda install -c conda-forge jupyterlab
+  ```
+- If you use mamba:
+  ```shell
+  mamba install -c conda-forge jupyterlab
+  ```
+- If you use pip:
+  ```shell
+  pip install jupyterlab
+  ```
+  If installing using `pip install --user`, you must add the user-level `bin` directory to your `PATH` environment variable in order to launch `jupyter lab`. If you are using a Unix derivative (FreeBSD, GNU / Linux, OS X), you can achieve this by using `export PATH="$HOME/.local/bin:$PATH"` command.
 
 For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html). Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
 #### Installing with Previous Versions of Jupyter Notebook
 
-When using a version of Jupyter Notebook earlier than 5.3, the following command must be run
-after installation to enable the JupyterLab server extension:
+When using a version of Jupyter Notebook earlier than 5.3, the following command must be run after installing JupyterLab to enable the JupyterLab server extension:
 
 ```bash
 jupyter serverextension enable --py jupyterlab --sys-prefix
