@@ -3,6 +3,7 @@
 
 import { Gettext } from './gettext';
 import { ITranslator, TranslationBundle, TranslatorConnector } from './tokens';
+import { normalizeDomain } from './utils';
 
 /**
  * Translation Manager
@@ -39,6 +40,7 @@ export class TranslationManager implements ITranslator {
       if (this._currentLocale == 'en') {
         return this._englishBundle;
       } else {
+        domain = normalizeDomain(domain);
         if (!(domain in this._translationBundles)) {
           let translationBundle = new Gettext({
             domain: domain,
