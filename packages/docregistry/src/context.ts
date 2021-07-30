@@ -622,7 +622,7 @@ export class Context<
 
       // Emit completion.
       if (manual) {
-        this._saveState.emit('manually completed');
+        this._saveState.emit('completed manually');
       } else {
         this._saveState.emit('completed');
       }
