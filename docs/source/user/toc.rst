@@ -31,7 +31,7 @@ Because the Notebook does not utilize formal page breaks or numbers, each listed
 
 
 
-Automatic section numbering will go through your Notebook and number your sections and subsection as designated by your Header Cells. This means that if you've moved one or more big sections around several times, you won't have to go through your paper and renumber it, as well as all its subsections, yourself.
+Automatic section numbering will go through your Notebook and number your sections and subsection as designated by your headings. This means that if you've moved one or more big sections around several times, you won't have to go through your document and renumber it, as well as all its subsections, yourself.
 
 
 
