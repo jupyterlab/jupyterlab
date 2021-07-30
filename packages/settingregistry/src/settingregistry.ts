@@ -19,6 +19,11 @@ import Ajv from 'ajv';
 import * as json5 from 'json5';
 import SCHEMA from './plugin-schema.json';
 import { ISettingRegistry } from './tokens';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 /**
  * An alias for the JSON deep copy function.
@@ -735,8 +740,12 @@ export class Settings implements ISettingRegistry.ISettings {
   /**
    * Return the defaults in a commented JSON format.
    */
-  annotatedDefaults(): string {
-    return Private.annotatedDefaults(this.schema, this.id);
+  annotatedDefaults(translator?: ITranslator): string {
+    return Private.annotatedDefaults(
+      this.schema,
+      this.id,
+      translator || nullTranslator
+    );
   }
 
   /**
@@ -1175,8 +1184,12 @@ namespace Private {
    */
   export function annotatedDefaults(
     schema: ISettingRegistry.ISchema,
-    plugin: string
+    plugin: string,
+    translator: ITranslator
   ): string {
+    const translatorDomain =
+      (schema['jupyter.lab.translation-domain'] as string) || 'jupyterlab';
+    const trans = translator.load(translatorDomain);
     const { description, properties, title } = schema;
     const keys = properties
       ? Object.keys(properties).sort((a, b) => a.localeCompare(b))
@@ -1185,12 +1198,12 @@ namespace Private {
 
     return [
       '{',
-      prefix(`${title || untitled}`),
+      prefix(trans.__(`${title || untitled}`)),
       prefix(plugin),
-      prefix(description || nondescript),
+      prefix(trans.__(description || nondescript)),
       prefix('*'.repeat(length)),
       '',
-      join(keys.map(key => defaultDocumentedValue(schema, key))),
+      join(keys.map(key => defaultDocumentedValue(schema, key, trans))),
       '}'
     ].join('\n');
   }
@@ -1228,12 +1241,13 @@ namespace Private {
    */
   function defaultDocumentedValue(
     schema: ISettingRegistry.ISchema,
-    key: string
+    key: string,
+    trans: TranslationBundle
   ): string {
     const props = (schema.properties && schema.properties[key]) || {};
     const type = props['type'];
-    const description = props['description'] || nondescript;
-    const title = props['title'] || '';
+    const description = trans.__(props['description'] || nondescript);
+    const title = trans.__(props['title'] || '');
     const reified = reifyDefault(schema, key);
     const spaces = indent.length;
     const defaults =

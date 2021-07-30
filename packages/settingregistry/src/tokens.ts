@@ -14,6 +14,7 @@ import {
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { ISchemaValidator } from './settingregistry';
+import { ITranslator } from '@jupyterlab/translation';
 
 /* tslint:disable */
 /**
@@ -382,6 +383,12 @@ export namespace ISettingRegistry {
     };
 
     /**
+     * The translation domain to be used for translating setting titles and
+     * descriptions.
+     */
+    'jupyter.lab.translation-domain'?: string;
+
+    /**
      * Whether the schema is deprecated.
      *
      * #### Notes
@@ -496,7 +503,7 @@ export namespace ISettingRegistry {
     /**
      * Return the defaults in a commented JSON format.
      */
-    annotatedDefaults(): string;
+    annotatedDefaults(translator?: ITranslator): string;
 
     /**
      * Calculate the default value of a setting by iterating through the schema.

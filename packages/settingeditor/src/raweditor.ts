@@ -272,7 +272,8 @@ export class RawEditor extends SplitPanel {
     const defaults = this._defaults;
     const user = this._user;
 
-    defaults.editor.model.value.text = settings?.annotatedDefaults() ?? '';
+    defaults.editor.model.value.text =
+      settings?.annotatedDefaults(this.translator) ?? '';
     user.editor.model.value.text = settings?.raw ?? '';
   }
 
