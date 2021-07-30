@@ -83,7 +83,7 @@ Here is an animation showing its use
 
 The headings in the cell outputs get numbered by default in the table of contents and the notebook.
 This can be tuned by changing the settings ``includeOutput`` to ``false``. To perform that go to settings and click on Advanced Settings
-Editor and then go to Table of Contents section and in User Preferences add ``includeOutput:false`` and save the settings, Here is an animation showing its use
+Editor and then go to Table of Contents section and in User Preferences add ``includeOutput:false`` and save the settings. Here is an animation showing its use
 
 
 
