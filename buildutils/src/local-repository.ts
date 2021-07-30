@@ -218,7 +218,19 @@ function publishPackages(dist_dir: string) {
   const paths = glob.sync(path.join(dist_dir, '*.tgz'));
   paths.forEach(package_path => {
     const name = path.basename(package_path);
-    utils.run(`npm publish ${name}`, { cwd: dist_dir });
+    try {
+      utils.run(`npm publish ${name}`, { cwd: dist_dir });
+    } catch (err) {
+      // Packages may already exist if we are doing a patch release.
+      const stderr = err.stderr.toString();
+      if (
+        stderr.indexOf('EPUBLISHCONFLICT') !== -1 ||
+        stderr.indexOf('previously published versions') !== -1
+      ) {
+        return;
+      }
+      throw err;
+    }
   });
 }
 
