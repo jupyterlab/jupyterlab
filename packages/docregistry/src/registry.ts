@@ -973,10 +973,7 @@ export namespace DocumentRegistry {
     addSibling(widget: Widget, options?: IOpenOptions): IDisposable;
   }
 
-  export type SaveState =
-    | 'started'
-    | 'failed'
-    | 'completed';
+  export type SaveState = 'started' | 'failed' | 'completed';
 
   /**
    * A type alias for a context.
