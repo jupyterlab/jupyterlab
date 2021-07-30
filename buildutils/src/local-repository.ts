@@ -219,14 +219,15 @@ function publishPackages(dist_dir: string) {
   paths.forEach(package_path => {
     const name = path.basename(package_path);
     try {
-      utils.run(`npm publish ${name}`, { cwd: dist_dir });
+      child_process.execSync(`npm publish ${name}`, { cwd: dist_dir });
     } catch (err) {
       // Packages may already exist if we are doing a patch release.
-      const stderr = err.stderr.toString();
+      const stderr = (err.stderr && err.stderr.toString()) || err.toString();
       if (
         stderr.indexOf('EPUBLISHCONFLICT') !== -1 ||
         stderr.indexOf('previously published versions') !== -1
       ) {
+        console.log('Skipping already published package');
         return;
       }
       throw err;
