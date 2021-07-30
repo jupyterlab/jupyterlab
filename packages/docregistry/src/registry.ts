@@ -905,7 +905,7 @@ export namespace DocumentRegistry {
     /**
      * Save the document contents to disk.
      */
-    save(manual?: boolean): Promise<void>;
+    save(): Promise<void>;
 
     /**
      * Save the document to a different path chosen by the user.
@@ -976,8 +976,7 @@ export namespace DocumentRegistry {
   export type SaveState =
     | 'started'
     | 'failed'
-    | 'completed'
-    | 'completed manually';
+    | 'completed';
 
   /**
    * A type alias for a context.
