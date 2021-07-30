@@ -286,17 +286,13 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  async save(manual?: boolean): Promise<void> {
+  async save(): Promise<void> {
     const [lock] = await Promise.all([
       this._provider.acquireLock(),
       this.ready
     ]);
     let promise: Promise<void>;
-    if (manual) {
-      promise = this._save(manual);
-    } else {
-      promise = this._save();
-    }
+    promise = this._save();
     // if save completed successfully, we set the initialized content in the rtc server.
     promise = promise.then(() => {
       this._provider.putInitializedState();
@@ -583,7 +579,7 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  private async _save(manual?: boolean): Promise<void> {
+  private async _save(): Promise<void> {
     this._saveState.emit('started');
     const model = this._model;
     let content: PartialJSONValue;
@@ -621,11 +617,7 @@ export class Context<
       }
 
       // Emit completion.
-      if (manual) {
-        this._saveState.emit('completed manually');
-      } else {
-        this._saveState.emit('completed');
-      }
+      this._saveState.emit('completed');
     } catch (err) {
       // If the save has been canceled by the user,
       // throw the error so that whoever called save()
