@@ -68,7 +68,7 @@ Here is an animation showing its use
 
 
  There will be a synchronization between table of contents and notebook if the ``syncCollapseState`` attribute
- is made to true in the settings. If a heading is collapsed in the table of contents the notebook will also gets collapsed and
+ is set to ``true`` in the settings. If a heading is collapsed in the table of contents the notebook will also gets collapsed and
  similarly expanding cells in notebook will expand the table of contents.To perform that go to settings and click on advanced settings
  editor and then go to table of contents section and in user preferences add ``syncCollapseState:true`` and save the settings, Here is an animation showing its use
 
