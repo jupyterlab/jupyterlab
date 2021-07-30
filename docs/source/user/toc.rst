@@ -39,7 +39,7 @@ Automatic section numbering will go through your Notebook and number your sectio
 
 
 
-Automatic section numbering can be skipped for h1 headers by setting the ``numberingH1``
+Automatic section numbering can be skipped for first-level headings (``h1``) by setting the ``numberingH1``
 setting to ``false``. To perform that go to settings and click on advanced settings editor and then go to table of contents section
 and in user preferences add ``numberingH1:false`` and save the settings, Here is an animation showing its use
 
