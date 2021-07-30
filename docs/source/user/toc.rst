@@ -53,7 +53,7 @@ and in user preferences add ``numberingH1:false`` and save the settings, Here is
 
 
 
-Context menus are added to those toc headings having notebook sections
+Context menus are added to those table of contents headings having notebook sections
 containing runnable code cells, and clicking the *Run Cell(s)* option will make the cells run in notebook.
 Here is an animation showing its use
 
