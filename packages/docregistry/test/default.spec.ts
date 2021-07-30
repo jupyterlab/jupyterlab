@@ -189,10 +189,18 @@ describe('docregistry/default', () => {
         const context = await Mock.createFileContext();
         const widget = factory.createNew(context);
         const widget2 = factory.createNew(context);
-        expect(toArray(widget.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(widget2.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(widget.toolbar.children()).length).toBe(2);
-        expect(toArray(widget2.toolbar.children()).length).toBe(2);
+        expect(toArray(widget.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(toArray(widget2.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(toArray(widget.toolbar.children()).length).toBe(3);
+        expect(toArray(widget2.toolbar.children()).length).toBe(3);
       });
     });
 
