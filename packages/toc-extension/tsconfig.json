@@ -12,6 +12,9 @@
       "path": "../application"
     },
     {
+      "path": "../cells"
+    },
+    {
       "path": "../docmanager"
     },
     {
@@ -37,9 +40,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../cells"
     }
   ]
 }
