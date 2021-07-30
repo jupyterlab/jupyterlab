@@ -1,0 +1,191 @@
+/*
+ * Copyright 2018-2021 Elyra Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.elyra-expandableContainer-button,
+.elyra-expandableContainer-button.jp-mod-styled {
+  background-color: transparent;
+  vertical-align: middle;
+  padding: 0;
+  width: 20px;
+}
+
+.elyra-expandableContainer-button:hover {
+  cursor: pointer;
+}
+
+.elyra-expandableContainer-actionButton:hover {
+  background-color: var(--jp-layout-color1);
+}
+
+.elyra-expandableContainer-actionButton:active {
+  background-color: var(--jp-layout-color2);
+}
+
+.elyra-expandableContainer-title {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  padding: 0px 4px;
+  height: 36px;
+}
+
+.elyra-expandableContainer-title:hover {
+  background: var(--jp-layout-color2);
+}
+
+.elyra-expandableContainer-name {
+  flex-grow: 1;
+  font-size: var(--jp-ui-font-size1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 4px 0 4px 2px;
+  line-height: 28px;
+}
+
+.elyra-expandableContainer-name:hover {
+  cursor: pointer;
+}
+
+.elyra-button {
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  height: 100%;
+}
+
+.elyra-expandableContainer-details-visible {
+  overflow-x: auto;
+  overflow-y: auto;
+  display: block;
+  padding: 5px;
+  margin: 5px;
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 2px;
+  color: var(--jp-ui-font-color1);
+  background-color: var(--jp-layout-color1);
+}
+
+.elyra-expandableContainer-details-visible textarea {
+  color: var(--jp-ui-font-color1);
+}
+
+.elyra-expandableContainer-details-hidden {
+  display: none;
+}
+
+.elyra-expandableContainer-action-buttons {
+  display: inline-flex;
+  align-self: flex-end;
+  height: 100%;
+}
+
+.elyra-errorDialog-messageDisplay pre {
+  min-height: 125px;
+  height: 100%;
+  width: 100%;
+  resize: none;
+  overflow-x: scroll;
+}
+
+.elyra-errorDialog-messageDisplay {
+  padding-bottom: 5px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.elyra-errorDialog-messageDisplay > div:nth-child(2) {
+  margin: 15px 0;
+  display: flex;
+  flex: 1;
+  min-height: 0px;
+  flex-direction: column;
+}
+
+/* temporary fix until this is addressed in jupyterlab */
+.lm-TabBar-tabIcon svg {
+  height: auto;
+}
+
+.jp-Dialog-content {
+  resize: both;
+}
+
+.elyra-DialogDefaultButton.jp-mod-styled:hover:disabled,
+.elyra-DialogDefaultButton.jp-mod-styled:active:disabled,
+.elyra-DialogDefaultButton.jp-mod-styled:focus:disabled,
+.elyra-DialogDefaultButton.jp-mod-styled:disabled {
+  background-color: var(--jp-layout-color3);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* icons */
+
+[data-jp-theme-light='false'] .elyra-pieBrain-icon rect.st1,
+[data-jp-theme-light='false'] .elyra-pieBrain-icon rect.st2 {
+  fill: var(--jp-inverse-layout-color3);
+}
+
+.elyra-feedbackButton {
+  display: inline;
+  position: relative;
+}
+
+.elyra-feedbackButton[data-feedback]:not([data-feedback='']):before {
+  border: solid;
+  border-color: var(--jp-inverse-layout-color2) transparent;
+  border-width: 0 6px 6px 6px;
+  bottom: 0;
+  content: '';
+  left: 5px;
+  position: absolute;
+  z-index: 999;
+}
+
+.elyra-feedbackButton[data-feedback]:not([data-feedback='']):after {
+  background: var(--jp-inverse-layout-color2);
+  border-radius: 2px;
+  bottom: -20px;
+  color: var(--jp-ui-inverse-font-color1);
+  content: attr(data-feedback);
+  font-size: 0.75rem;
+  font-weight: 400;
+  padding: 3px 5px;
+  pointer-events: none;
+  position: absolute;
+  right: -10px;
+  text-align: center;
+  width: max-content;
+  word-wrap: break-word;
+  z-index: 999;
+}
+
+.elyra-browseFileDialog .jp-Dialog-content {
+  height: 400px;
+  width: 600px;
+}
+
+.elyra-expandableContainer-draggable:hover {
+  cursor: grab;
+}
+
+.rIcon {
+  content: url('./icons/r-logo.svg');
+  height: 24px;
+  width: 14px;
+}
