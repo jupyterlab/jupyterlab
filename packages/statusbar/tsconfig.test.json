@@ -9,9 +9,6 @@
       "path": "../codeeditor"
     },
     {
-      "path": "../coreutils"
-    },
-    {
       "path": "../services"
     },
     {
@@ -31,9 +28,6 @@
     },
     {
       "path": "../codeeditor"
-    },
-    {
-      "path": "../coreutils"
     },
     {
       "path": "../services"
