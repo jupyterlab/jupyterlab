@@ -6,6 +6,9 @@
       "path": "../statedb"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "."
     },
     {
@@ -13,6 +16,9 @@
     },
     {
       "path": "../statedb"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

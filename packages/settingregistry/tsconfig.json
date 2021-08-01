@@ -9,6 +9,9 @@
   "references": [
     {
       "path": "../statedb"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@jupyterlab/statedb": "^3.3.0-alpha.0",
+    "@jupyterlab/translation": "^3.3.0-alpha.0",
     "@lumino/commands": "^1.12.0",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/disposable": "^1.4.3",

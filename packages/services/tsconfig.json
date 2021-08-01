@@ -18,10 +18,10 @@
       "path": "../observables"
     },
     {
-      "path": "../settingregistry"
+      "path": "../statedb"
     },
     {
-      "path": "../statedb"
+      "path": "../settingregistry"
     }
   ]
 }
