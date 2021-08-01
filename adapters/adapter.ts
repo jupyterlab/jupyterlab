@@ -283,6 +283,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     // while already reverted in https://github.com/jupyterlab/jupyterlab/pull/10741,
     // it was not released yet and many users will continue to run 3.1.0 and 3.1.1
     // so lets workaround it for now
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const completedManually = state === 'completed manually';
 
