@@ -571,6 +571,8 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    // Add a command for taking lists of commands and command arguments
+    // and running all the enabled commands.
     commands.addCommand(CommandIDs.runAllEnabled, {
       label: trans.__('Run All Enabled Commands Passed as Args'),
       execute: async args => {
