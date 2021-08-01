@@ -278,7 +278,15 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       return;
     }
 
-    if (state === 'completed') {
+    // TODO: remove workaround no later than with 3.2 release of JupyterLab
+    // workaround for https://github.com/jupyterlab/jupyterlab/issues/10721
+    // while already reverted in https://github.com/jupyterlab/jupyterlab/pull/10741,
+    // it was not released yet and many users will continue to run 3.1.0 and 3.1.1
+    // so lets workaround it for now
+    // @ts-ignore
+    const completedManually = state === 'completed manually';
+
+    if (state === 'completed' || completedManually) {
       // note: must only be send to the appropriate connections as
       // some servers (Julia) break if they receive save notification
       // for a document that was not opened before, see:
