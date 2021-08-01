@@ -41,7 +41,13 @@ interface IResponseData {
   ce_editor: CodeEditor.IEditor;
 }
 
-function isCloseTo(what: HTMLElement, who: MouseEvent, cushion = 50) {
+/**
+ * Check whether mouse is close to given element (within a specified number of pixels)
+ * @param what target element
+ * @param who mouse event determining position and target
+ * @param cushion number of pixels on each side defining "closeness" boundary
+ */
+function isCloseTo(what: HTMLElement, who: MouseEvent, cushion = 50): boolean {
   const target = who.type === 'mouseleave' ? who.relatedTarget : who.target;
 
   if (what === target || what.contains(target as HTMLElement)) {
@@ -94,8 +100,11 @@ function to_markup(
   content: string | lsProtocol.MarkedString
 ): lsProtocol.MarkupContent {
   if (typeof content === 'string') {
+    // coerce deprecated MarkedString to an MarkupContent; if given as a string it is markdown too,
+    // quote: "It is either a markdown string or a code-block that provides a language and a code snippet."
+    // (https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#markedString)
     return {
-      kind: 'plaintext',
+      kind: 'markdown',
       value: content
     };
   } else {
