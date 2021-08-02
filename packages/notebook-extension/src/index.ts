@@ -376,7 +376,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
     let showOnToolBar = !statusBar;
     let showProgressBar = true;
     let showElapsedTime = true;
-    let progressBarWidth = 100;
+    let progressBarWidth = 80;
 
     const statusbarItem = new ExecutionIndicator(translator);
     if (settingRegistry) {

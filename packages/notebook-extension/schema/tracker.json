@@ -851,8 +851,8 @@
       "default": {
         "showOnToolBar": false,
         "showProgressBar": true,
-        "showElapsedTime": true,
-        "progressBarWidth": 100
+        "showElapsedTime": false,
+        "progressBarWidth": 80
       }
     },
     "experimentalDisableDocumentWideUndoRedo": {
