@@ -101,7 +101,7 @@ const isNotebookHeading = (heading: any): heading is INotebookHeading => {
  * @param headings - list of headings
  * @param heading - heading
  */
-const runNestedCodeCells = (headings: IHeading[], heading: IHeading) => {
+ const runNestedCodeCells = (headings: IHeading[], heading: IHeading) => {
   let h: INotebookHeading;
   let i: number;
 
@@ -150,3 +150,4 @@ export { IHeading };
 export { INumberedHeading };
 export { INotebookHeading };
 export { runNestedCodeCells };
+export { isNotebookHeading };

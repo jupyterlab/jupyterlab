@@ -29,7 +29,8 @@ import {
 } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
-import { runNestedCodeCells } from '@jupyterlab/toc';
+import { INotebookHeading } from '@jupyterlab/toc';
+import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
 
 /**
  * The command IDs used by TOC item.
@@ -88,7 +89,35 @@ async function activateTOC(
 
   app.commands.addCommand(CommandIDs.runCells, {
     execute: args => {
-      return runNestedCodeCells(toc.headings, toc.activeEntry);
+      const panel = notebookTracker.currentWidget;
+      if (panel == null) {
+        return;
+      }
+
+      const cells = panel.content.widgets;
+      if (cells === undefined) {
+        return;
+      }
+
+      const activeCell = (toc.activeEntry as INotebookHeading).cellRef;
+
+      if (activeCell instanceof MarkdownCell) {
+        let level = activeCell.headingInfo.level;
+        for (let i = cells.indexOf(activeCell) + 1; i < cells.length; i++) {
+          const cell = cells[i];
+          if (cell instanceof MarkdownCell && cell.headingInfo.level <= level) {
+            break;
+          }
+
+          if (cell instanceof CodeCell) {
+            void CodeCell.execute(cell, panel.sessionContext);
+          }
+        }
+      } else {
+        if (activeCell instanceof CodeCell) {
+          void CodeCell.execute(activeCell, panel.sessionContext);
+        }
+      }
     },
     label: trans.__('Run Cell(s)')
   });
