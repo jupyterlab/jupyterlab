@@ -119,6 +119,8 @@ namespace CommandIDs {
   export const toggleLastModified = 'filebrowser:toggle-last-modified';
 
   export const search = 'filebrowser:search';
+
+  export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
 }
 
 /**
@@ -200,6 +202,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       let navigateToCurrentDirectory: boolean = false;
       let showLastModifiedColumn: boolean = true;
       let useFuzzyFilter: boolean = true;
+      let showHiddenFiles: boolean = false;
 
       if (settingRegistry) {
         void settingRegistry
@@ -234,6 +237,16 @@ const browser: JupyterFrontEndPlugin<void> = {
             useFuzzyFilter = settings.get('useFuzzyFilter')
               .composite as boolean;
             browser.useFuzzyFilter = useFuzzyFilter;
+
+            settings.changed.connect(settings => {
+              showHiddenFiles = settings.get('showHiddenFiles')
+                .composite as boolean;
+              browser.showHiddenFiles = showHiddenFiles;
+            });
+            showHiddenFiles = settings.get('showHiddenFiles')
+              .composite as boolean;
+
+            browser.showHiddenFiles = showHiddenFiles;
           });
       }
     });
@@ -1034,6 +1047,23 @@ function addCommands(
           .set('@jupyterlab/filebrowser-extension:browser', key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set showLastModifiedColumn setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleHiddenFiles, {
+    label: trans.__('Show Hidden Files'),
+    isToggled: () => browser.showHiddenFiles,
+    isVisible: () => PageConfig.getOption('allow_hidden_files') === 'true',
+    execute: () => {
+      const value = !browser.showHiddenFiles;
+      const key = 'showHiddenFiles';
+      if (settingRegistry) {
+        return settingRegistry
+          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set showHiddenFiles setting`);
           });
       }
     }
