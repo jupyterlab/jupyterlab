@@ -38,6 +38,12 @@ import {
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
+import {
   JSONObject,
   JSONValue,
   PartialJSONValue,
@@ -179,6 +185,26 @@ const RENDER_TIMEOUT = 1000;
  */
 const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 
+/**
+ * Aria label for Code cells without output
+ */
+const CODE_CELL_WITHOUT_OUTPUT_ARIA_LABEL = 'Code Cell Content';
+
+/**
+ * Aria label for Code cells with output
+ */
+const CODE_CELL_WITH_OUTPUT_ARIA_LABEL = 'Code Cell Content with Output';
+
+/**
+ * Aria label for Markdown cells
+ */
+const MARKDOWN_CELL_ARIA_LABEL = 'Markdown Cell Content';
+
+/**
+ * Aria label for Raw cells
+ */
+const RAW_CELL_ARIA_LABEL = 'Raw Cell Content';
+
 /** ****************************************************************************
  * Cell
  ******************************************************************************/
@@ -194,9 +220,13 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     super();
     this.addClass(CELL_CLASS);
     const model = (this._model = options.model);
+
     const contentFactory = (this.contentFactory =
       options.contentFactory || Cell.defaultContentFactory);
     this.layout = new PanelLayout();
+    // Set up translator properties for aria labels
+    this.translator = options.translator || nullTranslator;
+    this.transBundle = this.translator.load('jupyterlab');
 
     // Header
     const header = contentFactory.createCellHeader();
@@ -469,7 +499,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory,
-      placeholder: false
+      placeholder: false,
+      translator: this.translator
     });
   }
 
@@ -547,6 +578,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     }
   }
 
+  // Used to translate cell Aria labels
+  protected transBundle: TranslationBundle;
+  // Used in clone() to instantiate a new instance of the current widget
+  protected translator: ITranslator;
   private _readOnly = false;
   private _model: T;
   private _inputHidden = false;
@@ -594,6 +629,11 @@ export namespace Cell {
      * Whether this cell is a placeholder for future rendering.
      */
     placeholder?: boolean;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**
@@ -716,6 +756,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   constructor(options: CodeCell.IOptions) {
     super(options);
     this.addClass(CODE_CELL_CLASS);
+    let ariaLabel = CODE_CELL_WITH_OUTPUT_ARIA_LABEL;
 
     // Only save options not handled by parent constructor.
     const rendermime = (this._rendermime = options.rendermime);
@@ -740,6 +781,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       // if there are no outputs.
       if (model.outputs.length === 0) {
         this.addClass(NO_OUTPUTS_CLASS);
+        ariaLabel = CODE_CELL_WITHOUT_OUTPUT_ARIA_LABEL;
       }
       output.outputLengthChanged.connect(this._outputLengthHandler, this);
       outputWrapper.addWidget(outputCollapser);
@@ -755,6 +797,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       });
     }
     model.stateChanged.connect(this.onStateChanged, this);
+    this.node.setAttribute('aria-label', this.transBundle.__(ariaLabel));
   }
 
   /**
@@ -945,7 +988,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       model: this.model,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime,
-      placeholder: false
+      placeholder: false,
+      translator: this.translator
     });
   }
 
@@ -1032,6 +1076,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _outputLengthHandler(sender: OutputArea, args: number) {
     const force = args === 0 ? true : false;
     this.toggleClass(NO_OUTPUTS_CLASS, force);
+    const ariaLabel = force
+      ? CODE_CELL_WITHOUT_OUTPUT_ARIA_LABEL
+      : CODE_CELL_WITH_OUTPUT_ARIA_LABEL;
+    this.node.setAttribute('aria-label', this.transBundle.__(ariaLabel));
   }
 
   private _rendermime: IRenderMimeRegistry;
@@ -1420,6 +1468,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   constructor(options: MarkdownCell.IOptions) {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
+    this.node.setAttribute(
+      'aria-label',
+      this.transBundle.__(MARKDOWN_CELL_ARIA_LABEL)
+    );
     // Ensure we can resolve attachments:
     this._rendermime = options.rendermime.clone({
       resolver: new AttachmentsResolver({
@@ -1695,7 +1747,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       model: this.model,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime,
-      placeholder: false
+      placeholder: false,
+      translator: this.translator
     });
   }
 
@@ -1739,6 +1792,10 @@ export class RawCell extends Cell<IRawCellModel> {
   constructor(options: RawCell.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
+    this.node.setAttribute(
+      'aria-label',
+      this.transBundle.__(RAW_CELL_ARIA_LABEL)
+    );
   }
 
   /**
@@ -1749,7 +1806,8 @@ export class RawCell extends Cell<IRawCellModel> {
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory,
-      placeholder: false
+      placeholder: false,
+      translator: this.translator
     });
   }
 }

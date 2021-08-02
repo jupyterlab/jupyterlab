@@ -22,7 +22,7 @@ commander
 
     // For patch, defer to `patch:release` command
     if (spec === 'patch') {
-      let cmd = 'jlpm run patch:release';
+      let cmd = 'jlpm run patch:release --all';
       if (opts.force) {
         cmd += ' --force';
       }

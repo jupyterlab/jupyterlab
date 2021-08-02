@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": ["src/*", "test/*"],
+  "include": [
+    "src/*",
+    "test/*"
+  ],
   "references": [
     {
       "path": "../apputils"
@@ -37,6 +40,9 @@
     },
     {
       "path": "../shared-models"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"
@@ -82,6 +88,9 @@
     },
     {
       "path": "../shared-models"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"

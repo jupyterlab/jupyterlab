@@ -8,6 +8,29 @@ import * as path from 'path';
 import { handlePackage } from './update-dist-tag';
 import * as utils from './utils';
 
+/**
+ * Verify that a package specifier is published and available on npm.
+ *
+ * @param specifier The package specifier to verify.
+ */
+function verifyPublished(specifier: string): void {
+  const cmd = `npm info ${specifier}`;
+  const output = utils.run(cmd, { stdio: 'pipe' }, true);
+  console.log(specifier);
+  if (output.indexOf('dist-tags') === -1) {
+    throw new Error(`${specifier} is not yet available`);
+  }
+}
+
+/**
+ * Sleep for a specified period.
+ *
+ * @param wait The time in milliseconds to wait.
+ */
+async function sleep(wait: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, wait));
+}
+
 // Specify the program signature.
 commander
   .description('Publish the JS packages')
@@ -20,6 +43,11 @@ commander
   .option('--yes', 'Publish without confirmation')
   .option('--dry-run', 'Do not actually push any assets')
   .action(async (options: any) => {
+    // No-op if we're in release helper dry run
+    if (process.env.RH_DRY_RUN === 'true') {
+      return;
+    }
+
     if (!options.skipPublish) {
       if (!options.skipBuild) {
         utils.run('jlpm run build:packages');
@@ -71,6 +99,29 @@ commander
         });
       });
     }
+
+    // Make sure all current JS packages are published.
+    console.log('Checking for published packages...');
+    utils.getCorePaths().forEach(async pkgPath => {
+      const pkgJson = path.join(pkgPath, 'package.json');
+      const pkgData = utils.readJSONFile(pkgJson);
+      const specifier = `${pkgData.name}@${pkgData.version}`;
+      let attempt = 0;
+      while (attempt < 10) {
+        try {
+          verifyPublished(specifier);
+          break;
+        } catch (e) {
+          console.error(e);
+          console.log('Sleeping for one minute...');
+          await sleep(1 * 60 * 1000);
+          attempt += 1;
+        }
+      }
+      if (attempt == 10) {
+        throw new Error(`Could not find package ${specifier}`);
+      }
+    });
 
     // Emit a system beep.
     process.stdout.write('\x07');
