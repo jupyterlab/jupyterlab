@@ -15,13 +15,16 @@
   "sideEffects": false,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js"
+    "lib/*.js",
+    "style/index.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -84,6 +87,8 @@
     "@jupyterlab/markdownviewer-extension": "^3.3.0-alpha.0",
     "@jupyterlab/mathjax2": "^3.3.0-alpha.0",
     "@jupyterlab/mathjax2-extension": "^3.3.0-alpha.0",
+    "@jupyterlab/metadata": "^3.0.0-alpha.0",
+    "@jupyterlab/metadata-editor-extension": "^3.0.0-alpha.0",
     "@jupyterlab/nbconvert-css": "^3.3.0-alpha.0",
     "@jupyterlab/nbformat": "^3.3.0-alpha.0",
     "@jupyterlab/notebook": "^3.3.0-alpha.0",
@@ -130,5 +135,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "styleModule": "style/index.js"
 }

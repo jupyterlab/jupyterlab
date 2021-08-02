@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-import { IDictionary, MetadataService } from '@elyra/services';
-import {
-  ExpandableComponent,
-  ThemeProvider,
-  JSONComponent,
-  RequestErrors,
-  trashIcon
-} from '@elyra/ui-components';
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
@@ -31,13 +23,19 @@ import {
   showDialog,
   UseSignal
 } from '@jupyterlab/apputils';
-import { editIcon, LabIcon } from '@jupyterlab/ui-components';
+import { editIcon, LabIcon, stopIcon } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
 
 import React from 'react';
 
+import { IDictionary } from './parsing';
+import { MetadataService } from './metadata';
 import { AddMetadataButton } from './AddMetadataButton';
+import { ExpandableComponent } from './ExpandableComponent';
+import { ThemeProvider } from './ThemeProvider';
+import { JSONComponent } from './JSONComponent';
+import { RequestErrors } from './RequestErrors';
 import { FilterTools } from './FilterTools';
 
 /**
@@ -122,7 +120,7 @@ export class MetadataDisplay<
         MetadataService.deleteMetadata(
           this.props.namespace,
           metadata.name
-        ).catch(error => RequestErrors.serverError(error));
+        ).catch((error: any) => RequestErrors.serverError(error));
       }
     });
   };
@@ -143,7 +141,7 @@ export class MetadataDisplay<
       },
       {
         title: 'Delete',
-        icon: trashIcon,
+        icon: stopIcon, // TODO: add trashIcon back in
         onClick: (): void => {
           this.deleteMetadata(metadata).then((response: any): void => {
             this.props.updateMetadata();

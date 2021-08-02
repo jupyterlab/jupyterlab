@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @packageDocumentation
+ * @module metadata
+ */
 
 import '../style/index.css';
 
 export * from './MetadataEditor';
+export * from './metadata';
 export * from './MetadataWidget';
 export * from './AddMetadataButton';
+export * from './RequestErrors';

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { tagIcon } from '@elyra/ui-components';
 import { InputGroup, checkIcon } from '@jupyterlab/ui-components';
 
 import React from 'react';
@@ -211,7 +210,7 @@ export class FilterTools extends React.Component<
             className={FILTER_BUTTON}
             onClick={this.createFilterBox}
           >
-            <tagIcon.react />
+            <checkIcon.react /> {/* TODO: add back in checkIcon */}
           </button>
           {this.renderFilterOption()}
         </div>

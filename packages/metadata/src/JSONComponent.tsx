@@ -21,6 +21,7 @@ import JSONTree from 'react-json-tree';
 // react-json-tree's inline styles that override CodeMirror CSS classes
 const theme = {
   scheme: 'jupyter',
+  author: 'jupyter',
   base00: 'invalid',
   base01: 'invalid',
   base02: 'invalid',

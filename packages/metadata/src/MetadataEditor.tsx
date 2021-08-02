@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import { MetadataService, IDictionary } from '@elyra/services';
-import {
-  DropDown,
-  ThemeProvider,
-  RequestErrors,
-  TextInput
-} from '@elyra/ui-components';
+import { IDictionary } from './parsing';
 
 import { ILabStatus } from '@jupyterlab/application';
 import {
@@ -44,6 +38,11 @@ import {
 
 import * as React from 'react';
 
+import { DropDown } from './DropDown';
+import { MetadataService } from './metadata';
+import { ThemeProvider } from './ThemeProvider';
+import { RequestErrors } from './RequestErrors';
+import { TextInput } from './TextInput';
 import { MetadataEditorTags } from './MetadataEditorTags';
 
 const ELYRA_METADATA_EDITOR_CLASS = 'elyra-metadataEditor';
@@ -358,7 +357,7 @@ export class MetadataEditor extends ReactWidget {
           this.onSave();
           this.close();
         })
-        .catch(error => RequestErrors.serverError(error));
+        .catch((error: any) => RequestErrors.serverError(error));
     } else {
       MetadataService.putMetadata(
         this.namespace,
@@ -370,7 +369,7 @@ export class MetadataEditor extends ReactWidget {
           this.onSave();
           this.close();
         })
-        .catch(error => RequestErrors.serverError(error));
+        .catch((error: any)  => RequestErrors.serverError(error));
     }
   }
 
