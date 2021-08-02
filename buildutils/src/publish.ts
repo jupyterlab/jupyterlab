@@ -43,6 +43,11 @@ commander
   .option('--yes', 'Publish without confirmation')
   .option('--dry-run', 'Do not actually push any assets')
   .action(async (options: any) => {
+    // No-op if we're in release helper dry run
+    if (process.env.RH_DRY_RUN === 'true') {
+      return;
+    }
+
     if (!options.skipPublish) {
       if (!options.skipBuild) {
         utils.run('jlpm run build:packages');
@@ -112,6 +117,9 @@ commander
           await sleep(1 * 60 * 1000);
           attempt += 1;
         }
+      }
+      if (attempt == 10) {
+        throw new Error(`Could not find package ${specifier}`);
       }
     });
 
