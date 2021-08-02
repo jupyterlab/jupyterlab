@@ -217,21 +217,8 @@ function fixLinks(package_dir: string) {
 function publishPackages(dist_dir: string) {
   const paths = glob.sync(path.join(dist_dir, '*.tgz'));
   paths.forEach(package_path => {
-    const name = path.basename(package_path);
-    try {
-      child_process.execSync(`npm publish ${name}`, { cwd: dist_dir });
-    } catch (err) {
-      // Packages may already exist if we are doing a patch release.
-      const stderr = (err.stderr && err.stderr.toString()) || err.toString();
-      if (
-        stderr.indexOf('EPUBLISHCONFLICT') !== -1 ||
-        stderr.indexOf('previously published versions') !== -1
-      ) {
-        console.log('Skipping already published package');
-        return;
-      }
-      throw err;
-    }
+    const filename = path.basename(package_path);
+    utils.run(`npm publish ${filename}`, { cwd: dist_dir });
   });
 }
 
