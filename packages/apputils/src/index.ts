@@ -15,7 +15,7 @@ import { Toolbar as ApputilsToolbar } from './toolbar';
 export {
   addCommandToolbarButtonClass,
   addToolbarButtonClass,
-  Collapse,
+  Collapser as Collapse,
   CommandToolbarButton,
   CommandToolbarButtonComponent,
   IFrame,
