@@ -135,7 +135,7 @@ export abstract class VDomRenderer<
   /**
    * Dispose this widget.
    */
-  dispose() {
+  dispose(): void {
     if (this.isDisposed) {
       return;
     }
@@ -236,11 +236,11 @@ export class UseSignal<SENDER, ARGS> extends React.Component<
     this.state = { value: [this.props.initialSender, this.props.initialArgs] };
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.props.signal.connect(this.slot);
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     this.props.signal.disconnect(this.slot);
   }
 
@@ -252,7 +252,7 @@ export class UseSignal<SENDER, ARGS> extends React.Component<
     this.setState({ value: [sender, args] });
   };
 
-  render() {
+  render(): React.ReactNode {
     return this.props.children(...this.state.value);
   }
 }

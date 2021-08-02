@@ -1,9 +1,15 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": ["src/*", "test/*"],
+  "include": [
+    "src/*",
+    "test/*"
+  ],
   "references": [
     {
       "path": "../coreutils"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "."
@@ -13,6 +19,9 @@
     },
     {
       "path": "../coreutils"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

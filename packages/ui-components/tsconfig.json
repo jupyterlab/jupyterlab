@@ -3,12 +3,20 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "types": ["webpack-env", "node"]
+    "types": [
+      "webpack-env",
+      "node"
+    ]
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "references": [
     {
       "path": "../coreutils"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }
