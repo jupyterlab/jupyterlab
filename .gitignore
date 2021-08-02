@@ -111,6 +111,7 @@ junit.xml
 *.code-workspace
 .history
 .vscode
+.vs
 
 ui-tests/test-output
 ui-tests/jlab_root
