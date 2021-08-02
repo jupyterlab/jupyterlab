@@ -1,12 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ReactWidget,
-  showErrorMessage,
-  Toolbar,
-  ToolbarButton
-} from '@jupyterlab/apputils';
+import { showErrorMessage } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import {
@@ -14,7 +9,13 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
+import {
+  newFolderIcon,
+  ReactWidget,
+  refreshIcon,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
 import { IIterator } from '@lumino/algorithm';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';

@@ -6,11 +6,7 @@ import {
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
-import {
-  createSessionContext,
-  framePromise,
-  JupyterServer
-} from '@jupyterlab/testutils';
+import { framePromise, JupyterServer } from '@jupyterlab/testutils';
 import { toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';

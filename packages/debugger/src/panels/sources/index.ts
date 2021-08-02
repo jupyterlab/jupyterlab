@@ -3,20 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ToolbarButton } from '@jupyterlab/apputils';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
-
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
+import { ToolbarButton } from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
-
 import { viewBreakpointIcon } from '../../icons';
-
 import { IDebugger } from '../../tokens';
-
 import { SourcesBody } from './body';
-
 import { SourcesHeader } from './header';
 
 /**

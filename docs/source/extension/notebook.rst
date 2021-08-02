@@ -165,7 +165,7 @@ released npm packages, not the development versions.
 
 ::
 
-    npm install --save @jupyterlab/notebook @jupyterlab/application @jupyterlab/apputils @jupyterlab/docregistry @lumino/disposable --legacy-peer-deps
+    npm install --save @jupyterlab/notebook @jupyterlab/application @jupyterlab/ui-components @jupyterlab/docregistry @lumino/disposable --legacy-peer-deps
 
 Copy the following to ``src/index.ts``:
 
@@ -181,7 +181,7 @@ Copy the following to ``src/index.ts``:
 
     import {
       ToolbarButton
-    } from '@jupyterlab/apputils';
+    } from '@jupyterlab/ui-components';
 
     import {
       DocumentRegistry

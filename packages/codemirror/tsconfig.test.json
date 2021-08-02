@@ -27,6 +27,9 @@
       "path": "../translation"
     },
     {
+      "path": "../ui-components"
+    },
+    {
       "path": "."
     },
     {
@@ -55,6 +58,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

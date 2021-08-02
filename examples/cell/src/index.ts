@@ -13,7 +13,8 @@ import '@jupyterlab/theme-light-extension/style/theme.css';
 import '@jupyterlab/completer/style/index.css';
 import '../index.css';
 
-import { SessionContext, Toolbar } from '@jupyterlab/apputils';
+import { Toolbar as AppToolbar, SessionContext } from '@jupyterlab/apputils';
+import { Toolbar } from '@jupyterlab/ui-components';
 
 import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
 
@@ -109,10 +110,13 @@ function main(): void {
   // Create a toolbar for the cell.
   const toolbar = new Toolbar();
   toolbar.addItem('spacer', Toolbar.createSpacerItem());
-  toolbar.addItem('interrupt', Toolbar.createInterruptButton(sessionContext));
-  toolbar.addItem('restart', Toolbar.createRestartButton(sessionContext));
-  toolbar.addItem('name', Toolbar.createKernelNameItem(sessionContext));
-  toolbar.addItem('status', Toolbar.createKernelStatusItem(sessionContext));
+  toolbar.addItem(
+    'interrupt',
+    AppToolbar.createInterruptButton(sessionContext)
+  );
+  toolbar.addItem('restart', AppToolbar.createRestartButton(sessionContext));
+  toolbar.addItem('name', AppToolbar.createKernelNameItem(sessionContext));
+  toolbar.addItem('status', AppToolbar.createKernelStatusItem(sessionContext));
 
   // Lay out the widgets.
   const panel = new BoxPanel();

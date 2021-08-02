@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import {
   ServiceManager,
   Session,
@@ -14,7 +13,12 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { kernelIcon, terminalIcon } from '@jupyterlab/ui-components';
+import {
+  kernelIcon,
+  terminalIcon,
+  VDomModel,
+  VDomRenderer
+} from '@jupyterlab/ui-components';
 import React from 'react';
 import { GroupItem, interactiveItem, TextItem } from '..';
 

@@ -19,7 +19,6 @@ import {
   InputDialog,
   MainAreaWidget,
   showErrorMessage,
-  ToolbarButton,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
@@ -51,7 +50,8 @@ import {
   newFolderIcon,
   pasteIcon,
   stopIcon,
-  textEditorIcon
+  textEditorIcon,
+  ToolbarButton
 } from '@jupyterlab/ui-components';
 import { find, IIterator, map, reduce, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';

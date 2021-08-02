@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 //
 
-import { VDomModel, VDomRenderer, WidgetTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { GroupItem, ProgressBar, TextItem } from '@jupyterlab/statusbar';
 import {
@@ -10,6 +10,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import React from 'react';
 import { FileBrowser, FileBrowserModel, IUploadModel } from '.';
