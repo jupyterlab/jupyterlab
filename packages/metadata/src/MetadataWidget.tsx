@@ -33,7 +33,6 @@ import { IDictionary } from './parsing';
 import { MetadataService } from './metadata';
 import { AddMetadataButton } from './AddMetadataButton';
 import { ExpandableComponent } from './ExpandableComponent';
-import { ThemeProvider } from './ThemeProvider';
 import { JSONComponent } from './JSONComponent';
 import { RequestErrors } from './RequestErrors';
 import { FilterTools } from './FilterTools';
@@ -420,7 +419,6 @@ export class MetadataWidget extends ReactWidget {
 
   render(): React.ReactElement {
     return (
-      <ThemeProvider themeManager={this.props.themeManager}>
         <div className={METADATA_CLASS}>
           <header className={METADATA_HEADER_CLASS}>
             <div style={{ display: 'flex' }}>
@@ -443,7 +441,6 @@ export class MetadataWidget extends ReactWidget {
             {(_, metadata): React.ReactElement => this.renderDisplay(metadata)}
           </UseSignal>
         </div>
-      </ThemeProvider>
     );
   }
 }

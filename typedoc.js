@@ -54,6 +54,8 @@ const packages = [
   'markdownviewer',
   'mathjax2-extension',
   'mathjax2',
+  'metadata',
+  'metadata-editor-extension',
   // 'metapackage',
   // 'nbconvert-css',
   'nbformat',

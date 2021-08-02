@@ -18,8 +18,6 @@
  * @module metadata
  */
 
-import '../style/index.css';
-
 export * from './MetadataEditor';
 export * from './metadata';
 export * from './MetadataWidget';

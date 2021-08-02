@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import '../style/index.css';
-
 import * as React from 'react';
 
 /**

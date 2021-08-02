@@ -40,7 +40,6 @@ import * as React from 'react';
 
 import { DropDown } from './DropDown';
 import { MetadataService } from './metadata';
-import { ThemeProvider } from './ThemeProvider';
 import { RequestErrors } from './RequestErrors';
 import { TextInput } from './TextInput';
 import { MetadataEditorTags } from './MetadataEditorTags';
@@ -593,7 +592,6 @@ export class MetadataEditor extends ReactWidget {
       }
     };
     return (
-      <ThemeProvider themeManager={this.themeManager}>
         <div onKeyPress={onKeyPress} className={ELYRA_METADATA_EDITOR_CLASS}>
           <h3> {headerText} </h3>
           <p style={{ width: '100%', marginBottom: '10px' }}>
@@ -640,7 +638,6 @@ export class MetadataEditor extends ReactWidget {
             </SaveButton>
           </div>
         </div>
-      </ThemeProvider>
     );
   }
 }

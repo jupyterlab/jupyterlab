@@ -3,36 +3,42 @@
   "version": "3.0.0-alpha.0",
   "description": "JupyterLab - Widgets for interacting with metadata",
   "keywords": [
-    "jupyter",
     "jupyterlab"
   ],
-  "homepage": "https://github.com/elyra-ai/elyra",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
-    "url": "https://github.com/elyra-ai/elyra/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/elyra-ai/elyra/"
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
-  "license": "Apache-2.0",
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "style": "style/index.css",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "src/**/*.{ts,tsx}",
+    "schema/*.json",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
     "style/index.js"
   ],
   "scripts": {
-    "build": "tsc",
-    "clean": "rimraf lib",
-    "dist": "npm pack .",
-    "lab:install": "jupyter labextension link --no-build",
-    "lab:uninstall": "jupyter labextension unlink --no-build",
-    "prepare": "npm run build",
+    "build": "tsc -b",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "docs": "typedoc src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w"
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.0",
@@ -59,9 +65,6 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "jupyterlab": {
-    "extension": false
   },
   "styleModule": "style/index.js"
 }

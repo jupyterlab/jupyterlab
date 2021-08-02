@@ -7,33 +7,38 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/elyra-ai/elyra",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
-    "url": "https://github.com/elyra-ai/elyra/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/elyra-ai/elyra/"
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
-  "license": "Apache-2.0",
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "style": "style/index.css",
+  "directories": {
+    "lib": "lib/"
+  },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "src/**/*.{ts,tsx}",
+    "schema/*.json",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
     "style/index.js"
   ],
   "scripts": {
-    "build": "tsc",
-    "clean": "rimraf lib",
-    "dist": "npm pack .",
-    "lab:install": "jupyter labextension install --no-build",
-    "lab:uninstall": "jupyter labextension uninstall --no-build",
-    "prepare": "npm run build",
+    "build": "tsc -b",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "docs": "typedoc src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w"
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.0",
