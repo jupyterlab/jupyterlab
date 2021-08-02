@@ -18,10 +18,10 @@ import { IDictionary } from './parsing';
 
 import { ILabStatus } from '@jupyterlab/application';
 import {
-  ReactWidget,
-  showDialog,
   Dialog,
-  IThemeManager
+  IThemeManager,
+  ReactWidget,
+  showDialog
 } from '@jupyterlab/apputils';
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -29,9 +29,9 @@ import { find } from '@lumino/algorithm';
 import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
 import {
-  InputLabel,
-  FormHelperText,
   Button,
+  FormHelperText,
+  InputLabel,
   Link,
   styled
 } from '@material-ui/core';
@@ -117,7 +117,6 @@ const CodeBlock: React.FC<ICodeBlockProps> = ({
     // new editors to be created unnecessarily. This effect on mount should only
     // run on mount. Keep in mind this could have side effects, for example if
     // the `onChange` callback actually does change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   React.useEffect(() => {
@@ -208,7 +207,7 @@ export class MetadataEditor extends ReactWidget {
 
     this.showSecure = {};
 
-    this.initializeMetadata();
+    void this.initializeMetadata();
   }
 
   async initializeMetadata(): Promise<void> {
@@ -243,13 +242,13 @@ export class MetadataEditor extends ReactWidget {
         }
       }
     } catch (error) {
-      RequestErrors.serverError(error);
+      void RequestErrors.serverError(error);
     }
 
     try {
       this.allMetadata = await MetadataService.getMetadata(this.namespace);
     } catch (error) {
-      RequestErrors.serverError(error);
+      void RequestErrors.serverError(error);
     }
     if (this.name) {
       for (const metadata of this.allMetadata) {
@@ -316,7 +315,7 @@ export class MetadataEditor extends ReactWidget {
 
   onCloseRequest(msg: Message): void {
     if (this.dirty) {
-      showDialog({
+      void showDialog({
         title: 'Close without saving?',
         body: (
           <p>
@@ -368,7 +367,7 @@ export class MetadataEditor extends ReactWidget {
           this.onSave();
           this.close();
         })
-        .catch((error: any)  => RequestErrors.serverError(error));
+        .catch((error: any) => RequestErrors.serverError(error));
     }
   }
 
@@ -592,52 +591,52 @@ export class MetadataEditor extends ReactWidget {
       }
     };
     return (
-        <div onKeyPress={onKeyPress} className={ELYRA_METADATA_EDITOR_CLASS}>
-          <h3> {headerText} </h3>
-          <p style={{ width: '100%', marginBottom: '10px' }}>
-            All fields marked with an asterisk are required.&nbsp;
-            {this.referenceURL ? (
-              <Link
-                href={this.referenceURL}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                [Learn more ...]
-              </Link>
-            ) : null}
-          </p>
-          {this.displayName !== undefined ? (
-            <TextInput
-              label="Name"
-              key="displayNameTextInput"
-              fieldName="display_name"
-              defaultValue={this.displayName}
-              required={true}
-              secure={false}
-              defaultError={error}
-              onChange={(value): void => {
-                this.handleTextInputChange('display_name', value);
-              }}
-            />
-          ) : null}
-          {inputElements}
-          <div
-            className={
-              'elyra-metadataEditor-formInput elyra-metadataEditor-saveButton'
-            }
-            key={'SaveButton'}
-          >
-            <SaveButton
-              variant="outlined"
-              color="primary"
-              onClick={(): void => {
-                this.saveMetadata();
-              }}
+      <div onKeyPress={onKeyPress} className={ELYRA_METADATA_EDITOR_CLASS}>
+        <h3> {headerText} </h3>
+        <p style={{ width: '100%', marginBottom: '10px' }}>
+          All fields marked with an asterisk are required.&nbsp;
+          {this.referenceURL ? (
+            <Link
+              href={this.referenceURL}
+              target="_blank"
+              rel="noreferrer noopener"
             >
-              Save & Close
-            </SaveButton>
-          </div>
+              [Learn more ...]
+            </Link>
+          ) : null}
+        </p>
+        {this.displayName !== undefined ? (
+          <TextInput
+            label="Name"
+            key="displayNameTextInput"
+            fieldName="display_name"
+            defaultValue={this.displayName}
+            required={true}
+            secure={false}
+            defaultError={error}
+            onChange={(value): void => {
+              this.handleTextInputChange('display_name', value);
+            }}
+          />
+        ) : null}
+        {inputElements}
+        <div
+          className={
+            'elyra-metadataEditor-formInput elyra-metadataEditor-saveButton'
+          }
+          key={'SaveButton'}
+        >
+          <SaveButton
+            variant="outlined"
+            color="primary"
+            onClick={(): void => {
+              this.saveMetadata();
+            }}
+          >
+            Save & Close
+          </SaveButton>
         </div>
+      </div>
     );
   }
 }

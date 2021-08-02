@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Dialog,
@@ -142,7 +141,7 @@ export class MetadataDisplay<
         title: 'Delete',
         icon: stopIcon, // TODO: add trashIcon back in
         onClick: (): void => {
-          this.deleteMetadata(metadata).then((response: any): void => {
+          void this.deleteMetadata(metadata).then((response: any): void => {
             this.props.updateMetadata();
           });
         }
@@ -348,7 +347,7 @@ export class MetadataWidget extends ReactWidget {
     this.renderDisplay = this.renderDisplay.bind(this);
     this.addMetadata = this.addMetadata.bind(this);
 
-    this.getSchemas();
+    void this.getSchemas();
   }
 
   async getSchemas(): Promise<void> {
@@ -356,7 +355,7 @@ export class MetadataWidget extends ReactWidget {
       this.schemas = await MetadataService.getSchema(this.props.namespace);
       this.update();
     } catch (error) {
-      RequestErrors.serverError(error);
+      void RequestErrors.serverError(error);
     }
   }
 
@@ -385,7 +384,7 @@ export class MetadataWidget extends ReactWidget {
   }
 
   updateMetadata(): void {
-    this.fetchMetadata().then((metadata: any[]) => {
+    void this.fetchMetadata().then((metadata: any[]) => {
       this.renderSignal.emit(metadata);
     });
   }
@@ -396,7 +395,7 @@ export class MetadataWidget extends ReactWidget {
   }
 
   openMetadataEditor = (args: any): void => {
-    this.props.app.commands.execute(commands.OPEN_METADATA_EDITOR, args);
+    void this.props.app.commands.execute(commands.OPEN_METADATA_EDITOR, args);
   };
 
   /**
@@ -419,28 +418,28 @@ export class MetadataWidget extends ReactWidget {
 
   render(): React.ReactElement {
     return (
-        <div className={METADATA_CLASS}>
-          <header className={METADATA_HEADER_CLASS}>
-            <div style={{ display: 'flex' }}>
-              <this.props.icon.react
-                tag="span"
-                width="auto"
-                height="24px"
-                verticalAlign="middle"
-                marginRight="5px"
-              />
-              <p> {this.props.display_name} </p>
-            </div>
-            <AddMetadataButton
-              schemas={this.schemas}
-              addMetadata={this.addMetadata}
-              schemaType={this.schemaType}
+      <div className={METADATA_CLASS}>
+        <header className={METADATA_HEADER_CLASS}>
+          <div style={{ display: 'flex' }}>
+            <this.props.icon.react
+              tag="span"
+              width="auto"
+              height="24px"
+              verticalAlign="middle"
+              marginRight="5px"
             />
-          </header>
-          <UseSignal signal={this.renderSignal} initialArgs={[]}>
-            {(_, metadata): React.ReactElement => this.renderDisplay(metadata)}
-          </UseSignal>
-        </div>
+            <p> {this.props.display_name} </p>
+          </div>
+          <AddMetadataButton
+            schemas={this.schemas}
+            addMetadata={this.addMetadata}
+            schemaType={this.schemaType}
+          />
+        </header>
+        <UseSignal signal={this.renderSignal} initialArgs={[]}>
+          {(_, metadata): React.ReactElement => this.renderDisplay(metadata)}
+        </UseSignal>
+      </div>
     );
   }
 }

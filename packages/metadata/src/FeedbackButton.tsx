@@ -26,14 +26,9 @@ export interface IFeedbackButtonProps {
   onClick: () => void;
 }
 
-export const FeedbackButton: React.FC<React.HTMLProps<HTMLButtonElement> &
-  IFeedbackButtonProps> = ({
-  feedback,
-  onClick,
-  className,
-  children,
-  title
-}) => {
+export const FeedbackButton: React.FC<
+  React.HTMLProps<HTMLButtonElement> & IFeedbackButtonProps
+> = ({ feedback, onClick, className, children, title }) => {
   const [showFeedback, setShowFeedback] = React.useState(false);
 
   const handleClick = (): void => {

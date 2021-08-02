@@ -18,16 +18,21 @@
  * @module metadata-extension
  */
 
-import { MetadataWidget, MetadataEditor, RequestErrors, MetadataService } from '@jupyterlab/metadata';
+import {
+  MetadataEditor,
+  MetadataService,
+  MetadataWidget,
+  RequestErrors
+} from '@jupyterlab/metadata';
 
 import {
+  ILabStatus,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  ILabStatus
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IThemeManager, ICommandPalette } from '@jupyterlab/apputils';
+import { ICommandPalette, IThemeManager } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { textEditorIcon, LabIcon } from '@jupyterlab/ui-components';
+import { LabIcon, textEditorIcon } from '@jupyterlab/ui-components';
 
 import { find } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
@@ -193,7 +198,7 @@ const extension: JupyterFrontEndPlugin<void> = {
         });
       }
     } catch (error) {
-      RequestErrors.serverError(error);
+      void RequestErrors.serverError(error);
     }
   }
 };
