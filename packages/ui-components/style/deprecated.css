@@ -85,6 +85,7 @@
   --jp-icon-terminal: url('icons/statusbar/terminal.svg');
   --jp-icon-text-editor: url('icons/filetype/text-editor.svg');
   --jp-icon-toc: url('icons/sidebar/toc.svg');
+  --jp-icon-trashIcon: url('icons/sidebar/trashIcon.svg');
   --jp-icon-tree-view: url('icons/toolbar/tree-view.svg');
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
   --jp-icon-undo: url('icons/toolbar/undo.svg');
@@ -312,6 +313,9 @@
 }
 .jp-TocIcon {
   background-image: var(--jp-icon-toc);
+}
+.jp-TrashIconIcon {
+  background-image: var(--jp-icon-trashIcon);
 }
 .jp-TreeViewIcon {
   background-image: var(--jp-icon-tree-view);

@@ -3,22 +3,22 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ILabStatus } from '@jupyterlab/application';
+import { Dialog, IThemeManager, showDialog } from '@jupyterlab/apputils';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { StackedLayout, Widget } from '@lumino/widgets';
-import { RawEditor } from './raweditor';
+// import { RawEditor } from './raweditor';
 import { SettingEditor } from './settingeditor';
+import { SettingsMetadataEditor } from './settingmetadataeditor';
 
 /**
  * The class name added to all plugin editors.
@@ -38,14 +38,7 @@ export class PluginEditor extends Widget {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
 
-    const {
-      commands,
-      editorFactory,
-      registry,
-      rendermime,
-      translator
-    } = options;
-    this.translator = translator || nullTranslator;
+    this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 
     // TODO: Remove this layout. We were using this before when we
@@ -53,17 +46,9 @@ export class PluginEditor extends Widget {
     // Now, the raw editor is the only child and probably could merged into
     // this class directly in the future.
     const layout = (this.layout = new StackedLayout());
-    const { onSaveError } = Private;
 
-    this.raw = this._rawEditor = new RawEditor({
-      commands,
-      editorFactory,
-      onSaveError,
-      registry,
-      rendermime,
-      translator
-    });
-    this._rawEditor.handleMoved.connect(this._onStateChanged, this);
+    this.raw = this._rawEditor = new SettingsMetadataEditor(options);
+    // this._rawEditor.handleMoved.connect(this._onStateChanged, this);
 
     layout.addWidget(this._rawEditor);
   }
@@ -71,13 +56,13 @@ export class PluginEditor extends Widget {
   /**
    * The plugin editor's raw editor.
    */
-  readonly raw: RawEditor;
+  readonly raw: SettingsMetadataEditor;
 
   /**
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
-    return this._rawEditor.isDirty;
+    return this._rawEditor.dirty ?? false;
   }
 
   /**
@@ -87,13 +72,9 @@ export class PluginEditor extends Widget {
     return this._settings;
   }
   set settings(settings: ISettingRegistry.ISettings | null) {
-    if (this._settings === settings) {
-      return;
-    }
+    this._settings = settings;
+    this._rawEditor.settings = settings;
 
-    const raw = this._rawEditor;
-
-    this._settings = raw.settings = settings;
     this.update();
   }
 
@@ -102,16 +83,16 @@ export class PluginEditor extends Widget {
    */
   get state(): SettingEditor.IPluginLayout {
     const plugin = this._settings ? this._settings.id : '';
-    const { sizes } = this._rawEditor;
+    // const { sizes } = this._rawEditor;
 
-    return { plugin, sizes };
+    return { plugin };
   }
   set state(state: SettingEditor.IPluginLayout) {
     if (JSONExt.deepEqual(this.state, state)) {
       return;
     }
 
-    this._rawEditor.sizes = state.sizes;
+    // this._rawEditor.sizes = state.sizes;
     this.update();
   }
 
@@ -182,13 +163,13 @@ export class PluginEditor extends Widget {
   /**
    * Handle layout state changes that need to be saved.
    */
-  private _onStateChanged(): void {
-    (this.stateChanged as Signal<any, void>).emit(undefined);
-  }
+  // private _onStateChanged(): void {
+  //   (this.stateChanged as Signal<any, void>).emit(undefined);
+  // }
 
   protected translator: ITranslator;
   private _trans: TranslationBundle;
-  private _rawEditor: RawEditor;
+  private _rawEditor: SettingsMetadataEditor;
   private _settings: ISettingRegistry.ISettings | null = null;
   private _stateChanged = new Signal<this, void>(this);
 }
@@ -201,40 +182,16 @@ export namespace PluginEditor {
    * The instantiation options for a plugin editor.
    */
   export interface IOptions {
-    /**
-     * The toolbar commands and registry for the setting editor toolbar.
-     */
-    commands: {
-      /**
-       * The command registry.
-       */
-      registry: CommandRegistry;
+    schema: string;
+    namespace: string;
+    name?: string;
+    code?: string[];
+    onSave: () => void;
+    editorServices: IEditorServices | null;
+    status: ILabStatus;
+    themeManager?: IThemeManager;
 
-      /**
-       * The revert command ID.
-       */
-      revert: string;
-
-      /**
-       * The save command ID.
-       */
-      save: string;
-    };
-
-    /**
-     * The editor factory used by the plugin editor.
-     */
-    editorFactory: CodeEditor.Factory;
-
-    /**
-     * The setting registry used by the editor.
-     */
-    registry: ISettingRegistry;
-
-    /**
-     * The optional MIME renderer to use for rendering debug messages.
-     */
-    rendermime?: IRenderMimeRegistry;
+    registry?: ISettingRegistry;
 
     /**
      * The application language translator.
@@ -246,18 +203,18 @@ export namespace PluginEditor {
 /**
  * A namespace for private module data.
  */
-namespace Private {
-  /**
-   * Handle save errors.
-   */
-  export function onSaveError(reason: any, translator?: ITranslator): void {
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    console.error(`Saving setting editor value failed: ${reason.message}`);
-    void showDialog({
-      title: trans.__('Your changes were not saved.'),
-      body: reason.message,
-      buttons: [Dialog.okButton({ label: trans.__('Ok') })]
-    });
-  }
-}
+// namespace Private {
+//   /**
+//    * Handle save errors.
+//    */
+//   export function onSaveError(reason: any, translator?: ITranslator): void {
+//     translator = translator || nullTranslator;
+//     const trans = translator.load('jupyterlab');
+//     console.error(`Saving setting editor value failed: ${reason.message}`);
+//     void showDialog({
+//       title: trans.__('Your changes were not saved.'),
+//       body: reason.message,
+//       buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+//     });
+//   }
+// }

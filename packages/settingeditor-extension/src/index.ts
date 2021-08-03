@@ -15,6 +15,7 @@ import {
 } from '@jupyterlab/application';
 import {
   ICommandPalette,
+  IThemeManager,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -27,8 +28,8 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
-import { saveIcon, settingsIcon, undoIcon } from '@jupyterlab/ui-components';
-import { IDisposable } from '@lumino/disposable';
+import { saveIcon, settingsIcon } from '@jupyterlab/ui-components';
+// import { IDisposable } from '@lumino/disposable';
 
 /**
  * The command IDs used by the setting editor.
@@ -55,7 +56,7 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     ILabStatus,
     ITranslator
   ],
-  optional: [ICommandPalette],
+  optional: [ICommandPalette, IThemeManager],
   autoStart: true,
   provides: ISettingEditorTracker,
   activate
@@ -73,13 +74,14 @@ function activate(
   rendermime: IRenderMimeRegistry,
   status: ILabStatus,
   translator: ITranslator,
-  palette: ICommandPalette | null
+  palette: ICommandPalette | null,
+  themeManager?: IThemeManager
 ): ISettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const namespace = 'setting-editor';
-  const factoryService = editorServices.factoryService;
-  const editorFactory = factoryService.newInlineEditor;
+  // const factoryService = editorServices.factoryService;
+  // const editorFactory = factoryService.newInlineEditor;
   const tracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
     namespace
   });
@@ -103,42 +105,43 @@ function activate(
       const when = app.restored;
 
       editor = new SettingEditor({
-        commands: {
-          registry: commands,
-          revert: CommandIDs.revert,
-          save: CommandIDs.save
+        schema: 'code-snippets',
+        namespace: 'code-snippet',
+        onSave: () => {
+          console.log('save');
         },
-        editorFactory,
+        editorServices,
+        status,
+        themeManager,
         key,
         registry,
-        rendermime,
         state,
         translator,
         when
       });
 
-      let disposable: IDisposable | null = null;
+      // let disposable: IDisposable | null = null;
       // Notify the command registry when the visibility status of the setting
       // editor's commands change. The setting editor toolbar listens for this
       // signal from the command registry.
-      editor.commandsChanged.connect((sender: any, args: string[]) => {
-        args.forEach(id => {
-          commands.notifyCommandChanged(id);
-        });
-        if (editor.canSaveRaw) {
-          if (!disposable) {
-            disposable = status.setDirty();
-          }
-        } else if (disposable) {
-          disposable.dispose();
-          disposable = null;
-        }
-        editor.disposed.connect(() => {
-          if (disposable) {
-            disposable.dispose();
-          }
-        });
-      });
+      // editor.commandsChanged.connect((sender: any, args: string[]) => {
+      //   args.forEach(id => {
+      //     commands.notifyCommandChanged(id);
+      //   });
+      //   if (editor.canSaveRaw) {
+      //     if (!disposable) {
+      //       disposable = status.setDirty();
+      //     }
+      //   } else if (disposable) {
+      //     disposable.dispose();
+      //     disposable = null;
+      //   }
+      //   editor.disposed.connect(() => {
+      //     if (disposable) {
+      //       disposable.dispose();
+      //     }
+      //   });
+      // });
 
       editor.id = namespace;
       editor.title.icon = settingsIcon;
@@ -157,20 +160,20 @@ function activate(
     });
   }
 
-  commands.addCommand(CommandIDs.revert, {
-    execute: () => {
-      tracker.currentWidget?.content.revert();
-    },
-    icon: undoIcon,
-    label: trans.__('Revert User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
-  });
+  // commands.addCommand(CommandIDs.revert, {
+  //   execute: () => {
+  //     tracker.currentWidget?.content.revert();
+  //   },
+  //   icon: undoIcon,
+  //   label: trans.__('Revert User Settings'),
+  //   isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
+  // });
 
   commands.addCommand(CommandIDs.save, {
     execute: () => tracker.currentWidget?.content.save(),
     icon: saveIcon,
     label: trans.__('Save User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
+    isEnabled: () => true
   });
 
   return tracker;

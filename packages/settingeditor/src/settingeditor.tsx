@@ -3,16 +3,15 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ILabStatus } from '@jupyterlab/application';
+import { IThemeManager } from '@jupyterlab/apputils';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { jupyterIcon } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
 import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { ISignal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -46,7 +45,14 @@ export class SettingEditor extends Widget {
     this.key = options.key;
     this.state = options.state;
 
-    const { commands, editorFactory, rendermime } = options;
+    const {
+      name,
+      code,
+      onSave,
+      editorServices,
+      status,
+      themeManager
+    } = options;
     const layout = (this.layout = new PanelLayout());
     const registry = (this.registry = options.registry);
     const panel = (this._panel = new SplitPanel({
@@ -56,11 +62,14 @@ export class SettingEditor extends Widget {
     }));
     const instructions = (this._instructions = new Widget());
     const editor = (this._editor = new PluginEditor({
-      commands,
-      editorFactory,
-      registry,
-      rendermime,
-      translator: this.translator
+      schema: 'code-snippet',
+      namespace: 'code-snippets',
+      name,
+      code,
+      onSave,
+      editorServices,
+      status,
+      themeManager
     }));
     const confirm = () => editor.confirm();
     const list = (this._list = new PluginList({
@@ -109,23 +118,23 @@ export class SettingEditor extends Widget {
   /**
    * Whether the raw editor revert functionality is enabled.
    */
-  get canRevertRaw(): boolean {
-    return this._editor.raw.canRevert;
-  }
+  // get canRevertRaw(): boolean {
+  //   return this._editor.raw.canRevert;
+  // }
 
   /**
    * Whether the raw editor save functionality is enabled.
    */
-  get canSaveRaw(): boolean {
-    return this._editor.raw.canSave;
-  }
+  // get canSaveRaw(): boolean {
+  //   return this._editor.raw.canSave;
+  // }
 
   /**
    * Emits when the commands passed in at instantiation change.
    */
-  get commandsChanged(): ISignal<any, string[]> {
-    return this._editor.raw.commandsChanged;
-  }
+  // get commandsChanged(): ISignal<any, string[]> {
+  //   return this._editor.raw.commandsChanged;
+  // }
 
   /**
    * The currently loaded settings.
@@ -137,9 +146,9 @@ export class SettingEditor extends Widget {
   /**
    * The inspectable raw user editor source for the currently loaded settings.
    */
-  get source(): CodeEditor.IEditor {
-    return this._editor.raw.source;
-  }
+  // get source(): CodeEditor.IEditor {
+  //   return this._editor.raw.source;
+  // }
 
   /**
    * Dispose of the resources held by the setting editor.
@@ -159,15 +168,15 @@ export class SettingEditor extends Widget {
   /**
    * Revert raw editor back to original settings.
    */
-  revert(): void {
-    this._editor.raw.revert();
-  }
+  // revert(): void {
+  //   this._editor.raw.revert();
+  // }
 
   /**
    * Save the contents of the raw editor.
    */
-  save(): Promise<void> {
-    return this._editor.raw.save();
+  save(): void {
+    return this._editor.raw.onSave();
   }
 
   /**
@@ -337,45 +346,23 @@ export namespace SettingEditor {
    * The instantiation options for a setting editor.
    */
   export interface IOptions {
-    /**
-     * The toolbar commands and registry for the setting editor toolbar.
-     */
-    commands: {
-      /**
-       * The command registry.
-       */
-      registry: CommandRegistry;
+    schema: string;
+    namespace: string;
+    name?: string;
+    code?: string[];
+    onSave: () => void;
+    editorServices: IEditorServices | null;
+    status: ILabStatus;
+    themeManager?: IThemeManager;
 
-      /**
-       * The revert command ID.
-       */
-      revert: string;
-
-      /**
-       * The save command ID.
-       */
-      save: string;
-    };
-
-    /**
-     * The editor factory used by the setting editor.
-     */
-    editorFactory: CodeEditor.Factory;
-
-    /**
-     * The state database key for the editor's state management.
-     */
-    key: string;
-
-    /**
-     * The setting registry the editor modifies.
-     */
     registry: ISettingRegistry;
 
     /**
-     * The optional MIME renderer to use for rendering debug messages.
+     * The application language translator.
      */
-    rendermime?: IRenderMimeRegistry;
+    translator?: ITranslator;
+
+    key: string;
 
     /**
      * The state database used to store layout.
@@ -386,11 +373,6 @@ export namespace SettingEditor {
      * The point after which the editor should restore its state.
      */
     when?: Promise<any> | Array<Promise<any>>;
-
-    /**
-     * The application language translator.
-     */
-    translator?: ITranslator;
   }
 
   /**
@@ -416,7 +398,7 @@ export namespace SettingEditor {
      * The current plugin being displayed.
      */
     plugin: string;
-    sizes: number[];
+    // sizes: number[];
   }
 }
 
