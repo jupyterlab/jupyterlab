@@ -44,8 +44,10 @@ export class SettingsMetadataEditor extends MetadataEditor {
           const options = settings.properties[prop];
           schema.properties.metadata.properties[prop] = {
             title: options.title,
-            type: 'string',
-            uihints: {}
+            type: options.type,
+            uihints: {
+              field_type: options.type
+            }
           };
         }
       }

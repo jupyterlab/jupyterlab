@@ -30,6 +30,7 @@ import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
 import {
   Button,
+  Checkbox,
   FormHelperText,
   InputLabel,
   Link,
@@ -468,6 +469,7 @@ export class MetadataEditor extends ReactWidget {
     }
     if (
       uihints.field_type === 'textinput' ||
+      uihints.field_type === 'number' ||
       uihints.field_type === undefined
     ) {
       return (
@@ -547,6 +549,16 @@ export class MetadataEditor extends ReactWidget {
             tags={this.allTags}
             handleChange={this.handleChangeOnTag}
           />
+        </div>
+      );
+    } else if (uihints.field_type === 'boolean') {
+      return (
+        <div
+          className="elyra-metadataEditor-formInput"
+          key={`${fieldName}BooleanInput`}
+        >
+          <InputLabel> {this.schema[fieldName].title} </InputLabel>
+          <Checkbox />
         </div>
       );
     } else {
