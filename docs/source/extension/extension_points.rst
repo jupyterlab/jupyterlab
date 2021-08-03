@@ -424,21 +424,21 @@ This requires you to define a keyboard shortcut for apputils:run-all-enabled com
 
 .. code:: json
 
-{
-    "command": "apputils:run-all-enabled",
-    "keys": ["Accel T"],
-    "args": {
-        "commands": [
-            "my-command-1",
-            "my-command-2"
-        ],
-        "args": [
-            {},
-            {}
-        ]
-    },
-    "selector": "body"
-}
+    {
+      "command": "apputils:run-all-enabled",
+      "keys": ["Accel T"],
+      "args": {
+          "commands": [
+              "my-command-1",
+              "my-command-2"
+          ],
+          "args": [
+              {},
+              {}
+            ]
+        },
+      "selector": "body"
+    }
 
 In this example ``my-command-1`` and ``my-command-2`` are passed in ``args`` 
 of ``apputils:run-all-enabled`` command as ``commands`` list.
