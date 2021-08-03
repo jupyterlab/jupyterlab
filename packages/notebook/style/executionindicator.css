@@ -16,7 +16,6 @@
 .jp-Notebook-ExecutionIndicator {
   display: flex;
   height: 100%;
-  margin-left: 5px;
 }
 
 .jp-Notebook-ExecutionIndicator span {

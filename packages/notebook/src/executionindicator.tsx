@@ -5,7 +5,11 @@ import { ISessionContext, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import React from 'react';
-import { interactiveItem, ProgressBar } from '@jupyterlab/statusbar';
+import {
+  interactiveItem,
+  //ProgressBar,
+  ProgressCircle
+} from '@jupyterlab/statusbar';
 import { Cell } from '@jupyterlab/cells';
 import { NotebookActions } from './actions';
 
@@ -21,7 +25,7 @@ function ExecutionIndicatorComponent(
   const state = props.state;
   const showProgressBar = props.displayOption.showProgressBar;
   const showElapsedTime = props.displayOption.showElapsedTime;
-  const progressBarWidth = props.displayOption.progressBarWidth;
+  //const progressBarWidth = props.displayOption.progressBarWidth;
   const emptyDiv = <div></div>;
 
   if (!state) {
@@ -33,22 +37,23 @@ function ExecutionIndicatorComponent(
   const trans = translator.load('jupyterlab');
   const executedCellNumber = scheduledCellNumber - remainingCellNumber;
   let percentage = (100 * executedCellNumber) / scheduledCellNumber;
-  const progressBar = (
-    <div className="jp-Notebook-ExecutionIndicator-progress-bar">
-      <ProgressBar
-        percentage={percentage}
-        content={`${executedCellNumber} / ${scheduledCellNumber}`}
-        width={progressBarWidth}
-      />
-    </div>
-  );
+  // const progressBar = (
+  //   <div className="jp-Notebook-ExecutionIndicator-progress-bar">
+  //     <ProgressBar
+  //       percentage={percentage}
+  //       content={`${executedCellNumber} / ${scheduledCellNumber}`}
+  //       width={progressBarWidth}
+  //     />
+  //   </div>
+  // );
   const elapsedTime = <span> {trans.__(`Total time: ${time} seconds`)} </span>;
-
+  const progressBar = (<ProgressCircle progress={percentage} width={16} height={24} />)
   if (state.kernelStatus === 'busy') {
     return (
       <div className={'jp-Notebook-ExecutionIndicator'}>
         {showProgressBar ? progressBar : emptyDiv}
         {showElapsedTime ? elapsedTime : emptyDiv}
+        {/* {progressCircle} */}
       </div>
     );
   } else {
@@ -64,7 +69,7 @@ function ExecutionIndicatorComponent(
               )}
             </span>
           ) : (
-            emptyDiv
+            <ProgressCircle progress={100} width={16} height={24} />
           )}
         </div>
       );
@@ -292,6 +297,7 @@ export namespace ExecutionIndicator {
         if (state.kernelStatus !== 'busy') {
           state.kernelStatus = 'busy';
           clearTimeout(state.timeout);
+          this._tick(state);
           state.interval = window.setInterval(() => {
             this._tick(state);
           }, 1000);
@@ -307,7 +313,6 @@ export namespace ExecutionIndicator {
      */
     private _tick(data: Private.IExecutionState): void {
       data.totalTime += 1;
-      console.log('calling tick');
 
       this.stateChanged.emit(void 0);
     }
