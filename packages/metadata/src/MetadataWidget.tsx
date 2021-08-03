@@ -22,7 +22,7 @@ import {
   showDialog,
   UseSignal
 } from '@jupyterlab/apputils';
-import { editIcon, LabIcon, stopIcon } from '@jupyterlab/ui-components';
+import { editIcon, LabIcon, trashIcon } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
 
@@ -139,7 +139,7 @@ export class MetadataDisplay<
       },
       {
         title: 'Delete',
-        icon: stopIcon, // TODO: add trashIcon back in
+        icon: trashIcon,
         onClick: (): void => {
           void this.deleteMetadata(metadata).then((response: any): void => {
             this.props.updateMetadata();
