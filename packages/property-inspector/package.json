@@ -35,7 +35,6 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.0",
-    "@jupyterlab/apputils": "^3.3.0-alpha.0",
     "@jupyterlab/translation": "^3.3.0-alpha.0",
     "@jupyterlab/ui-components": "^3.3.0-alpha.0",
     "@lumino/coreutils": "^1.5.3",
