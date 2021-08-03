@@ -14,8 +14,27 @@
 |----------------------------------------------------------------------------*/
 
 .jp-Notebook-ExecutionIndicator {
-  display: flex;
+  position: relative;
+  display: inline-block;
   height: 100%;
+  z-index: 9997
+}
+
+.jp-Notebook-ExecutionIndicator .tooltiptext {
+  visibility: hidden;
+  min-width: 135px;
+  height: 48px;
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color1);
+  text-align:justify;
+  border-radius: 6px;
+  padding: 0 5px;
+  position: fixed;
+  transform: translateX(-50%) translateY(-100%) translateY(-32px)
+}
+
+.jp-Notebook-ExecutionIndicator:hover .tooltiptext {
+  visibility: visible;
 }
 
 .jp-Notebook-ExecutionIndicator span {
@@ -23,7 +42,7 @@
   font-family: var(--jp-ui-font-family);
   color: var(--jp-ui-font-color1);
   line-height: 24px;
-  padding-left: 2px;
+  display: block;
 }
 
 .jp-Notebook-ExecutionIndicator-progress-bar {

@@ -24,7 +24,6 @@ function ExecutionIndicatorComponent(
   const translator = props.translator || nullTranslator;
   const state = props.state;
   const showProgressBar = props.displayOption.showProgressBar;
-  const showElapsedTime = props.displayOption.showElapsedTime;
   //const progressBarWidth = props.displayOption.progressBarWidth;
   const emptyDiv = <div></div>;
 
@@ -46,14 +45,22 @@ function ExecutionIndicatorComponent(
   //     />
   //   </div>
   // );
-  const elapsedTime = <span> {trans.__(`Total time: ${time} seconds`)} </span>;
-  const progressBar = (<ProgressCircle progress={percentage} width={16} height={24} />)
+
+  const progressBar = (
+    <ProgressCircle progress={percentage} width={16} height={24} />
+  );
   if (state.kernelStatus === 'busy') {
     return (
       <div className={'jp-Notebook-ExecutionIndicator'}>
         {showProgressBar ? progressBar : emptyDiv}
-        {showElapsedTime ? elapsedTime : emptyDiv}
-        {/* {progressCircle} */}
+        <div className="tooltiptext">
+          <span>
+            {trans.__(
+              `Executed ${executedCellNumber}/${scheduledCellNumber} cells`
+            )}
+          </span>
+          <span> {trans.__(`Total time: ${time} seconds`)} </span>
+        </div>
       </div>
     );
   } else {
@@ -62,15 +69,11 @@ function ExecutionIndicatorComponent(
     } else {
       return (
         <div className={'jp-Notebook-ExecutionIndicator'}>
-          {showElapsedTime ? (
-            <span>
-              {trans.__(
-                `Finished ${scheduledCellNumber} cells after ${time} seconds`
-              )}
-            </span>
-          ) : (
-            <ProgressCircle progress={100} width={16} height={24} />
-          )}
+          <ProgressCircle progress={100} width={16} height={24} />
+          <div className="tooltiptext">
+            <span> {trans.__(`Executed ${scheduledCellNumber} cells`)} </span>
+            <span> {trans.__(`Total time: ${time} seconds`)} </span>
+          </div>
         </div>
       );
     }
