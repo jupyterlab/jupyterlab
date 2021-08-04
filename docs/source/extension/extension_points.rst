@@ -420,7 +420,7 @@ declaring default keyboard shortcuts for a command:
 Shortcuts added to the settings system will be editable by users.
 
 From Jupyterlab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut. 
-This requires you to define a keyboard shortcut for apputils:run-all-enabled command:
+This requires you to define a keyboard shortcut for ``apputils:run-all-enabled`` command:
 
 .. code:: json
 
