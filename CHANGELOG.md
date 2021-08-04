@@ -1,5 +1,5 @@
 ---
-github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.1.x/CHANGELOG.md'
+github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 ---
 
 # JupyterLab Changelog
