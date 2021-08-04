@@ -26,9 +26,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.1.x/CHANGELOG.md'
 - Another Fix to Verdaccio Publishing [#10747](https://github.com/jupyterlab/jupyterlab/pull/10747) ([@afshin](https://github.com/afshin))
 - More Cleanup of Automated Release Process [#10742](https://github.com/jupyterlab/jupyterlab/pull/10742) ([@blink1073](https://github.com/blink1073))
 - Fix Verdaccio Publish [#10743](https://github.com/jupyterlab/jupyterlab/pull/10743) ([@afshin](https://github.com/afshin))
-
-### Other merged PRs
-
 - Yet another fix for Verdaccio publish [#10759](https://github.com/jupyterlab/jupyterlab/pull/10759) ([@afshin](https://github.com/afshin))
 
 ### Contributors to this release
