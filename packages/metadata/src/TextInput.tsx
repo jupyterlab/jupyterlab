@@ -15,10 +15,10 @@
  */
 
 import {
-  TextField,
-  InputAdornment,
-  IconButton,
   FormHelperText,
+  IconButton,
+  InputAdornment,
+  TextField,
   Tooltip,
   withStyles
 } from '@material-ui/core';
@@ -30,6 +30,7 @@ export interface ITextFieldProps {
   label: string;
   defaultValue: string;
   description?: string;
+  numeric?: boolean;
   fieldName?: string;
   required?: boolean;
   secure?: boolean;
@@ -50,6 +51,7 @@ export const TextInput: React.FC<ITextFieldProps> = ({
   defaultValue,
   secure,
   description,
+  numeric,
   label,
   required,
   placeholder,
@@ -89,6 +91,9 @@ export const TextInput: React.FC<ITextFieldProps> = ({
             setValue(newValue);
             onChange(newValue);
           }}
+          inputProps={
+            numeric ? { inputMode: 'numeric', pattern: '[0-9]*' } : undefined
+          }
           placeholder={placeholder}
           value={value ?? ''}
           type={showPassword || !secure ? 'text' : 'password'}

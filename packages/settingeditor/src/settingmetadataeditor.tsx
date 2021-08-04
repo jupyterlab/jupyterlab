@@ -77,22 +77,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
     }
 
     if (this.name) {
-      for (const metadata of this.allMetadata) {
-        if (metadata.metadata.tags) {
-          for (const tag of metadata.metadata.tags) {
-            if (!this.allTags.includes(tag)) {
-              this.allTags.push(tag);
-            }
-          }
-        } else {
-          metadata.metadata.tags = [];
-        }
-        if (this.name === metadata.name) {
-          this.metadata = metadata['metadata'];
-          this.displayName = metadata['display_name'];
-          this.title.label = this.displayName ?? '';
-        }
-      }
+      // this.metadata = metadata['metadata'];
     } else {
       this.displayName = '';
     }
@@ -101,6 +86,20 @@ export class SettingsMetadataEditor extends MetadataEditor {
   }
 
   saveMetadata() {
-    console.log('save');
+    if (!this.dirty || !this._settings) {
+      return Promise.resolve(undefined);
+    }
+
+    const settings = this._settings;
+    const source = JSON.stringify(this.metadata);
+
+    return settings
+      .save(source)
+      .then(() => {
+        this.dirty = false;
+      })
+      .catch(reason => {
+        console.log(reason);
+      });
   }
 }

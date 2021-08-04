@@ -42,6 +42,7 @@ import * as React from 'react';
 import { DropDown } from './DropDown';
 import { MetadataService } from './metadata';
 import { RequestErrors } from './RequestErrors';
+import { StringArrayInput } from './StringArrayInput';
 import { TextInput } from './TextInput';
 import { MetadataEditorTags } from './MetadataEditorTags';
 
@@ -478,6 +479,7 @@ export class MetadataEditor extends ReactWidget {
           description={this.schema[fieldName].description}
           key={`${fieldName}TextInput`}
           fieldName={fieldName}
+          numeric={uihints.field_type === 'number'}
           defaultValue={this.metadata[fieldName] || defaultValue}
           required={required}
           secure={uihints.secure}
@@ -561,6 +563,8 @@ export class MetadataEditor extends ReactWidget {
           <Checkbox />
         </div>
       );
+    } else if (uihints.field_type === 'array') {
+      return <StringArrayInput />;
     } else {
       return null;
     }
