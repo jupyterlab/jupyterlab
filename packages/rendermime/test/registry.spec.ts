@@ -478,6 +478,12 @@ describe('rendermime/registry', () => {
         it('should return true for a normal filesystem-like path`', () => {
           expect(resolverPath.isLocal('path/to/file')).toBe(true);
         });
+
+        it('should return false for malformed URLs', () => {
+          expect(resolverPath.isLocal('http://www.example.com%bad')).toBe(
+            false
+          );
+        });
       });
     });
   });
