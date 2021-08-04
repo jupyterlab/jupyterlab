@@ -759,7 +759,7 @@ export class YCodeCell
     this.transact(() => {
       youtputs.delete(0, youtputs.length);
       youtputs.insert(0, outputs);
-    });
+    }, false);
   }
 
   /**
@@ -781,7 +781,7 @@ export class YCodeCell
     this.transact(() => {
       youtputs.delete(start, fin);
       youtputs.insert(start, outputs);
-    });
+    }, false);
   }
 
   /**
