@@ -47,7 +47,7 @@
     "dependency-graph": "^0.9.0",
     "fs-extra": "^9.0.1",
     "glob": "~7.1.6",
-    "inquirer": "^7.0.0",
+    "inquirer": "^7.1.0",
     "minimatch": "~3.0.4",
     "os": "~0.1.1",
     "package-json": "^6.5.0",

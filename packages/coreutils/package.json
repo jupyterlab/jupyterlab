@@ -51,7 +51,6 @@
     "@jupyterlab/testutils": "^3.3.0-alpha.6",
     "@types/jest": "^26.0.10",
     "@types/minimist": "^1.2.0",
-    "@types/node": "^14.6.1",
     "@types/url-parse": "^1.4.3",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

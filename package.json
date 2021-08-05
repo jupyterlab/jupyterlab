@@ -15,6 +15,7 @@
       "buildutils",
       "buildutils/template",
       "buildutils/test-template",
+      "galata",
       "tests",
       "tests/test-*",
       "testutils",
@@ -36,6 +37,7 @@
     "build:dev:prod": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build:prod",
     "build:dev:prod:release": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build:prod:release",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
+    "build:galata": "cd galata && jlpm run build",
     "build:packages": "cd packages/metapackage && jlpm run build",
     "build:packages:scope": "lerna run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-|application-top)*\" --concurrency 1",
@@ -49,6 +51,7 @@
     "clean:core": "cd jupyterlab/staging && jlpm run clean",
     "clean:dev": "cd dev_mode && jlpm run clean",
     "clean:examples": "node buildutils/lib/clean-packages.js examples",
+    "clean:galata": "cd galata && jlpm run clean",
     "clean:packages": "node buildutils/lib/clean-packages.js packages",
     "clean:slate": "python clean.py && python -m pip install -v -e .",
     "clean:src": "jlpm run clean",
@@ -86,6 +89,7 @@
     "test": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream",
     "test:all": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream --no-bail",
     "test:examples": "python examples/test_examples.py",
+    "test:galata": "lerna run test --scope \"@jupyterlab/galata\" --concurrency 1 --stream",
     "test:scope": "lerna run test --concurrency 1 --stream",
     "test:summary": "lerna run test --scope \"@jupyterlab/*\" --parallel --no-bail | grep -Ei '.* test.*(failed|passed|total|completed|skipped)' | sort",
     "update:dependency": "node buildutils/lib/update-dependency.js --lerna",
@@ -98,6 +102,9 @@
       "pre-commit": "lint-staged",
       "pre-push": "jlpm run integrity --force"
     }
+  },
+  "resolutions": {
+    "@types/node": "^14.6.1"
   },
   "dependencies": {},
   "devDependencies": {
