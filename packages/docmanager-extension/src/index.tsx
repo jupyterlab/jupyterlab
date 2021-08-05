@@ -651,7 +651,7 @@ function addCommands(
   commands.addCommand(CommandIDs.restoreCheckpoint, {
     label: () =>
       trans.__(
-        'Revert %1 to Checkpoint...',
+        'Revert %1 to Checkpoint…',
         fileType(shell.currentWidget, docManager)
       ),
     caption: trans.__('Revert contents to previous checkpoint'),
