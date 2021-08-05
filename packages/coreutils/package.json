@@ -46,7 +46,7 @@
     "url-parse": "~1.4.7"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.7",
+    "@jupyterlab/testutils": "^2.2.8",
     "@types/jest": "^24.0.23",
     "@types/minimist": "^1.2.0",
     "@types/url-parse": "^1.1.0",

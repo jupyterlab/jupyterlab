@@ -36,7 +36,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.2.6",
+    "@jupyterlab/apputils": "^2.2.7",
     "@jupyterlab/codeeditor": "^2.2.5",
     "@jupyterlab/coreutils": "^4.2.5",
     "@jupyterlab/services": "^5.2.5",
@@ -53,7 +53,7 @@
     "typestyle": "^2.0.4"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.7",
+    "@jupyterlab/testutils": "^2.2.8",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",
