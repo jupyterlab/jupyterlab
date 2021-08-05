@@ -19,9 +19,8 @@ export namespace ProgressCircle {
 
 export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
   const d = (progress: number): string => {
-    const angle = Math.max(progress * 3.6, 0.1) ;
-    console.log('angle', angle);
-    
+    const angle = Math.max(progress * 3.6, 0.1);
+
     const rad = (angle * Math.PI) / 180,
       x = Math.sin(rad) * 125,
       y = Math.cos(rad) * -125,

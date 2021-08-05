@@ -14,6 +14,7 @@ import { Cell } from '@jupyterlab/cells';
 import { NotebookActions } from './actions';
 
 import { Notebook } from './widget';
+import { KernelMessage } from '@jupyterlab/services';
 
 /**
  * A react functional component for rendering execution indicator.
@@ -24,7 +25,8 @@ function ExecutionIndicatorComponent(
   const translator = props.translator || nullTranslator;
   const state = props.state;
   const showProgressBar = props.displayOption.showProgressBar;
-  //const progressBarWidth = props.displayOption.progressBarWidth;
+  const showOnToolBar = props.displayOption.showOnToolBar;
+  const tooltipClass = showOnToolBar ? 'down' : 'up';
   const emptyDiv = <div></div>;
 
   if (!state) {
@@ -53,7 +55,9 @@ function ExecutionIndicatorComponent(
     return (
       <div className={'jp-Notebook-ExecutionIndicator'}>
         {showProgressBar ? progressBar : emptyDiv}
-        <div className="tooltiptext">
+        <div
+          className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass}`}
+        >
           <span>
             {trans.__(
               `Executed ${executedCellNumber}/${scheduledCellNumber} cells`
@@ -70,7 +74,9 @@ function ExecutionIndicatorComponent(
       return (
         <div className={'jp-Notebook-ExecutionIndicator'}>
           <ProgressCircle progress={100} width={16} height={24} />
-          <div className="tooltiptext">
+          <div
+            className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass}`}
+          >
             <span> {trans.__(`Executed ${scheduledCellNumber} cells`)} </span>
             <span> {trans.__(`Total time: ${time} seconds`)} </span>
           </div>
@@ -184,6 +190,7 @@ export namespace ExecutionIndicator {
     ): void {
       if (data && data.content && data.context) {
         const nb = data.content;
+        const context = data.context;
         this._currentNotebook = nb;
         if (!this._notebookExecutionProgress.has(nb)) {
           this._notebookExecutionProgress.set(nb, {
@@ -191,16 +198,38 @@ export namespace ExecutionIndicator {
             totalTime: 0,
             interval: 0,
             timeout: 0,
-            scheduledCell: new Set<Cell>(),
+            scheduledCell: new Set<Cell | string>(),
             scheduledCellNumber: 0,
             needReset: true
           });
 
-          data.context.kernelChanged.connect(() => {
+          context.kernelChanged.connect((_, kernelData) => {
             const state = this._notebookExecutionProgress.get(nb);
             if (state) {
               this._resetTime(state);
               this.stateChanged.emit(void 0);
+              if (kernelData.newValue) {
+                kernelData.newValue.anyMessage.connect((sender, msg) => {
+                  const message = msg.msg;
+                  const msgId = message.header.msg_id;
+                  if (
+                    KernelMessage.isCommMsgMsg(message) &&
+                    message.content.data['method']
+                  ) {
+                    const method = message.content.data['method'];
+                    if (method !== 'request_state' && method !== 'update') {
+                      this._cellScheduledCallback(nb, msgId);
+                    }
+                  } else if (
+                    KernelMessage.isStatusMsg(message) &&
+                    message.content.execution_state === 'idle'
+                  ) {
+                    const parentId = (message.parent_header as KernelMessage.IHeader)
+                      .msg_id;
+                    this._cellExecutedCallback(nb, parentId);
+                  }
+                });
+              }
             }
           });
         }
@@ -219,6 +248,7 @@ export namespace ExecutionIndicator {
      */
     get displayOption(): Private.DisplayOption {
       return {
+        showOnToolBar: this._showOnToolBar,
         showProgressBar: this._showProgressBar,
         showElapsedTime: this._showElapsedTime,
         progressBarWidth: this._progressBarWidth
@@ -231,6 +261,7 @@ export namespace ExecutionIndicator {
      * @param options - Options to be used
      */
     set displayOption(options: Private.DisplayOption) {
+      this._showOnToolBar = options.showOnToolBar;
       this._showProgressBar = options.showProgressBar;
       this._showElapsedTime = options.showElapsedTime;
       this._progressBarWidth = options.progressBarWidth;
@@ -250,12 +281,12 @@ export namespace ExecutionIndicator {
 
     /**
      * The slot connected to `NotebookActions.executed` signal, it is
-     * used to keep track number of executed cell and the status
-     * or kernel.
+     * used to keep track number of executed cell or Comm custom message and the status
+     * of kernel.
      *
      * @param  nb - The notebook which contains the executed code
      * cell.
-     * @param  cell - The executed code cell.
+     * @param  cell - The executed code cell or id of comm message.
      *
      * ### Note
      *
@@ -264,9 +295,10 @@ export namespace ExecutionIndicator {
      * these cells. This `Timeout` will be cleared if there is any cell
      * scheduled after that.
      */
-    private _cellExecutedCallback(nb: Notebook, cell: Cell): void {
+    private _cellExecutedCallback(nb: Notebook, cell: Cell | string): void {
       const state = this._notebookExecutionProgress.get(nb);
       if (state && state.scheduledCell.has(cell)) {
+
         state.scheduledCell.delete(cell);
         if (state.scheduledCell.size === 0) {
           state.kernelStatus = 'idle';
@@ -284,14 +316,15 @@ export namespace ExecutionIndicator {
      * used to keep track number of scheduled cell and the status
      * or kernel.
      *
-     * @param  nb - The notebook which contains the scheduled code
+     * @param  nb - The notebook which contains the scheduled code or id of comm message.
      * cell
      * @param  cell - The scheduled code cell.
      */
-    private _cellScheduledCallback(nb: Notebook, cell: Cell): void {
+    private _cellScheduledCallback(nb: Notebook, cell: Cell | string): void {
       const state = this._notebookExecutionProgress.get(nb);
 
       if (state && !state.scheduledCell.has(cell)) {
+
         if (state.needReset) {
           this._resetTime(state);
         }
@@ -330,6 +363,8 @@ export namespace ExecutionIndicator {
       data.scheduledCellNumber = 0;
       data.needReset = false;
     }
+
+    private _showOnToolBar: boolean;
 
     /**
      * The option to show or hide progress bar.
@@ -393,7 +428,7 @@ namespace Private {
      * Set of code cells scheduled for executing, `kernelStatus` is set
      *  to `idle if the length of this set is 0 and to `busy` otherwise.
      */
-    scheduledCell: Set<Cell>;
+    scheduledCell: Set<Cell | string>;
 
     /**
      * Total number of cells requested for executing, it is used to compute
@@ -409,6 +444,7 @@ namespace Private {
   }
 
   export type DisplayOption = {
+    showOnToolBar: boolean;
     /**
      * The option to show or hide progress bar.
      */

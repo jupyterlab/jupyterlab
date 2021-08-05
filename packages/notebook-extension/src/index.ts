@@ -394,6 +394,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
         if (!showOnToolBar) {
           // Status bar mode, only one `ExecutionIndicator` is needed.
           statusbarItem.model.displayOption = {
+            showOnToolBar,
             showProgressBar,
             showElapsedTime,
             progressBarWidth
@@ -430,6 +431,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
           const addItemToToolbar = (panel: NotebookPanel) => {
             const toolbarItem = new ExecutionIndicator(translator);
             toolbarItem.model.displayOption = {
+              showOnToolBar,
               showProgressBar,
               showElapsedTime,
               progressBarWidth
@@ -438,6 +440,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
               content: panel.content,
               context: panel.sessionContext
             });
+
             panel.toolbar.insertAfter(
               'kernelStatus',
               'executionProgress',

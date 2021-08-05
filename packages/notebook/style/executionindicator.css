@@ -17,23 +17,30 @@
   position: relative;
   display: inline-block;
   height: 100%;
-  z-index: 9997
+  z-index: 9997;
 }
 
-.jp-Notebook-ExecutionIndicator .tooltiptext {
+.jp-Notebook-ExecutionIndicator-tooltip {
   visibility: hidden;
   min-width: 135px;
   height: 48px;
   background-color: var(--jp-layout-color2);
   color: var(--jp-ui-font-color1);
-  text-align:justify;
+  text-align: justify;
   border-radius: 6px;
   padding: 0 5px;
   position: fixed;
-  transform: translateX(-50%) translateY(-100%) translateY(-32px)
 }
 
-.jp-Notebook-ExecutionIndicator:hover .tooltiptext {
+.jp-Notebook-ExecutionIndicator-tooltip.up {
+  transform: translateX(-50%) translateY(-100%) translateY(-32px);
+}
+
+.jp-Notebook-ExecutionIndicator-tooltip.down {
+  transform: translateX(-50%) translateY(5px);
+}
+
+.jp-Notebook-ExecutionIndicator:hover .jp-Notebook-ExecutionIndicator-tooltip {
   visibility: visible;
 }
 

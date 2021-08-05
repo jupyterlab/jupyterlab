@@ -14,8 +14,7 @@ export const progressCircleStyle = (
         alignSelf: 'normal'
       },
       path: {
-       fill: 'var(--jp-inverse-layout-color3)'
+        fill: 'var(--jp-inverse-layout-color3)'
       }
     }
   });
-
