@@ -649,7 +649,6 @@ class Sanitizer implements ISanitizer {
       font: ['color', 'face', 'size'],
       form: [
         'accept',
-        'action',
         'autocomplete',
         'enctype',
         'method',
