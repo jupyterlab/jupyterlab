@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/testutils",
-  "version": "2.2.7",
+  "version": "2.2.8",
   "description": "JupyterLab - Test Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,14 +36,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.2.6",
-    "@jupyterlab/cells": "^2.2.7",
+    "@jupyterlab/apputils": "^2.2.7",
+    "@jupyterlab/cells": "^2.2.8",
     "@jupyterlab/codeeditor": "^2.2.5",
     "@jupyterlab/codemirror": "^2.2.4",
     "@jupyterlab/coreutils": "^4.2.5",
     "@jupyterlab/docregistry": "^2.2.4",
     "@jupyterlab/nbformat": "^2.2.5",
-    "@jupyterlab/notebook": "^2.2.7",
+    "@jupyterlab/notebook": "^2.2.8",
     "@jupyterlab/rendermime": "^2.2.4",
     "@jupyterlab/services": "^5.2.5",
     "@lumino/algorithm": "^1.2.3",

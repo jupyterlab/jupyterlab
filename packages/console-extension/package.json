@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/console-extension",
-  "version": "2.2.7",
+  "version": "2.2.8",
   "description": "JupyterLab - Code Console Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,13 +36,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.2.6",
-    "@jupyterlab/apputils": "^2.2.6",
+    "@jupyterlab/application": "^2.2.7",
+    "@jupyterlab/apputils": "^2.2.7",
     "@jupyterlab/codeeditor": "^2.2.5",
-    "@jupyterlab/console": "^2.2.7",
+    "@jupyterlab/console": "^2.2.8",
     "@jupyterlab/coreutils": "^4.2.5",
     "@jupyterlab/filebrowser": "^2.2.5",
-    "@jupyterlab/launcher": "^2.2.6",
+    "@jupyterlab/launcher": "^2.2.7",
     "@jupyterlab/mainmenu": "^2.2.4",
     "@jupyterlab/rendermime": "^2.2.4",
     "@jupyterlab/settingregistry": "^2.2.5",
