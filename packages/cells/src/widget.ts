@@ -740,7 +740,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     // the same in this._outputLengthHandler. Ideally, this label must
     // have been a constant and used in both places but it is not done
     // so because of limitations in the translation manager.
-    let ariaLabel = 'Code Cell Content with Output';
+    let ariaLabel = trans.__('Code Cell Content with Output');
 
     if (!options.placeholder) {
       // Insert the output before the cell footer.
@@ -760,7 +760,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       // if there are no outputs.
       if (model.outputs.length === 0) {
         this.addClass(NO_OUTPUTS_CLASS);
-        ariaLabel = 'Code Cell Content';
+        ariaLabel = trans.__('Code Cell Content');
       }
       output.outputLengthChanged.connect(this._outputLengthHandler, this);
       outputWrapper.addWidget(outputCollapser);
@@ -776,7 +776,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       });
     }
     model.stateChanged.connect(this.onStateChanged, this);
-    this.node.setAttribute('aria-label', trans.__(ariaLabel));
+    this.node.setAttribute('aria-label', ariaLabel);
   }
 
   /**
@@ -1057,9 +1057,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this.toggleClass(NO_OUTPUTS_CLASS, force);
     const trans = this.translator.load('jupyterlab');
     const ariaLabel = force
-      ? 'Code Cell Content'
-      : 'Code Cell Content with Output';
-    this.node.setAttribute('aria-label', trans.__(ariaLabel));
+      ? trans.__('Code Cell Content')
+      : trans.__('Code Cell Content with Output');
+    this.node.setAttribute('aria-label', ariaLabel);
   }
 
   private _rendermime: IRenderMimeRegistry;
