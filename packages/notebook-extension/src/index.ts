@@ -371,33 +371,23 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
     statusBar: IStatusBar | null,
     settingRegistry: ISettingRegistry | null
   ) => {
-    // Set default position to toolbar if status bar is not
-    // available.
-    let showOnToolBar = !statusBar;
-    let showProgressBar = true;
-    let showElapsedTime = true;
-    let progressBarWidth = 80;
+    // Set default position to toolbar.
+    let showOnToolBar = true;
 
     const statusbarItem = new ExecutionIndicator(translator);
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(trackerPlugin.id);
 
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-        const configValues = settings.get('progressIndicator')
+        const configValues = settings.get('kernelStatus')
           .composite as JSONObject;
         if (configValues) {
-          showOnToolBar = (configValues.showOnToolBar as boolean) || !statusBar;
-          showProgressBar = configValues.showProgressBar as boolean;
-          showElapsedTime = configValues.showElapsedTime as boolean;
-          progressBarWidth = configValues.progressBarWidth as number;
+          showOnToolBar = configValues.showOnToolBar as boolean;
         }
         if (!showOnToolBar) {
           // Status bar mode, only one `ExecutionIndicator` is needed.
           statusbarItem.model.displayOption = {
-            showOnToolBar,
-            showProgressBar,
-            showElapsedTime,
-            progressBarWidth
+            showOnToolBar
           };
           statusBar!.registerStatusItem(
             '@jupyterlab/notebook-extension:execution-indicator',
@@ -431,10 +421,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
           const addItemToToolbar = (panel: NotebookPanel) => {
             const toolbarItem = new ExecutionIndicator(translator);
             toolbarItem.model.displayOption = {
-              showOnToolBar,
-              showProgressBar,
-              showElapsedTime,
-              progressBarWidth
+              showOnToolBar
             };
             toolbarItem.model.attachNotebook({
               content: panel.content,

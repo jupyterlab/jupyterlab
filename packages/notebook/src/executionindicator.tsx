@@ -24,7 +24,6 @@ function ExecutionIndicatorComponent(
 ): React.ReactElement<ExecutionIndicatorComponent.IProps> {
   const translator = props.translator || nullTranslator;
   const state = props.state;
-  const showProgressBar = props.displayOption.showProgressBar;
   const showOnToolBar = props.displayOption.showOnToolBar;
   const tooltipClass = showOnToolBar ? 'down' : 'up';
   const emptyDiv = <div></div>;
@@ -38,15 +37,6 @@ function ExecutionIndicatorComponent(
   const trans = translator.load('jupyterlab');
   const executedCellNumber = scheduledCellNumber - remainingCellNumber;
   let percentage = (100 * executedCellNumber) / scheduledCellNumber;
-  // const progressBar = (
-  //   <div className="jp-Notebook-ExecutionIndicator-progress-bar">
-  //     <ProgressBar
-  //       percentage={percentage}
-  //       content={`${executedCellNumber} / ${scheduledCellNumber}`}
-  //       width={progressBarWidth}
-  //     />
-  //   </div>
-  // );
 
   const progressBar = (
     <ProgressCircle progress={percentage} width={16} height={24} />
@@ -54,7 +44,7 @@ function ExecutionIndicatorComponent(
   if (state.kernelStatus === 'busy') {
     return (
       <div className={'jp-Notebook-ExecutionIndicator'}>
-        {showProgressBar ? progressBar : emptyDiv}
+        {progressBar}
         <div
           className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass}`}
         >
@@ -69,7 +59,11 @@ function ExecutionIndicatorComponent(
     );
   } else {
     if (time === 0) {
-      return emptyDiv;
+      return (
+        <div className={'jp-Notebook-ExecutionIndicator'}>
+          <ProgressCircle progress={100} width={16} height={24} />
+        </div>
+      );
     } else {
       return (
         <div className={'jp-Notebook-ExecutionIndicator'}>
@@ -166,8 +160,6 @@ export namespace ExecutionIndicator {
     constructor(translator?: ITranslator) {
       super();
       translator = translator || nullTranslator;
-      this._showProgressBar = true;
-      this._showElapsedTime = true;
 
       NotebookActions.executionScheduled.connect((_, data) => {
         this._cellScheduledCallback(data.notebook, data.cell);
@@ -248,10 +240,7 @@ export namespace ExecutionIndicator {
      */
     get displayOption(): Private.DisplayOption {
       return {
-        showOnToolBar: this._showOnToolBar,
-        showProgressBar: this._showProgressBar,
-        showElapsedTime: this._showElapsedTime,
-        progressBarWidth: this._progressBarWidth
+        showOnToolBar: this._showOnToolBar
       };
     }
 
@@ -262,9 +251,6 @@ export namespace ExecutionIndicator {
      */
     set displayOption(options: Private.DisplayOption) {
       this._showOnToolBar = options.showOnToolBar;
-      this._showProgressBar = options.showProgressBar;
-      this._showElapsedTime = options.showElapsedTime;
-      this._progressBarWidth = options.progressBarWidth;
     }
 
     /**
@@ -298,7 +284,6 @@ export namespace ExecutionIndicator {
     private _cellExecutedCallback(nb: Notebook, cell: Cell | string): void {
       const state = this._notebookExecutionProgress.get(nb);
       if (state && state.scheduledCell.has(cell)) {
-
         state.scheduledCell.delete(cell);
         if (state.scheduledCell.size === 0) {
           state.kernelStatus = 'idle';
@@ -324,7 +309,6 @@ export namespace ExecutionIndicator {
       const state = this._notebookExecutionProgress.get(nb);
 
       if (state && !state.scheduledCell.has(cell)) {
-
         if (state.needReset) {
           this._resetTime(state);
         }
@@ -361,25 +345,17 @@ export namespace ExecutionIndicator {
     private _resetTime(data: Private.IExecutionState): void {
       data.totalTime = 0;
       data.scheduledCellNumber = 0;
+      data.kernelStatus = 'idle';
+      data.scheduledCell = new Set<Cell | string>();
+      clearTimeout(data.timeout);
+      clearInterval(data.interval);
       data.needReset = false;
     }
 
+    /**
+     * The option to show the indicator on status bar or toolbar.
+     */
     private _showOnToolBar: boolean;
-
-    /**
-     * The option to show or hide progress bar.
-     */
-    private _showProgressBar: boolean;
-
-    /**
-     * The option to show or hide elapsed time counter.
-     */
-    private _showElapsedTime: boolean;
-
-    /**
-     * The option to define width of progress bar.
-     */
-    private _progressBarWidth: number;
 
     /**
      * Current activated notebook.
@@ -444,20 +420,9 @@ namespace Private {
   }
 
   export type DisplayOption = {
+    /**
+     * The option to show the indicator on status bar or toolbar.
+     */
     showOnToolBar: boolean;
-    /**
-     * The option to show or hide progress bar.
-     */
-    showProgressBar: boolean;
-
-    /**
-     * The option to show or hide elapsed time counter.
-     */
-    showElapsedTime: boolean;
-
-    /**
-     * The option to define width of progress bar.
-     */
-    progressBarWidth: number;
   };
 }

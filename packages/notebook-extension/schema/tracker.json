@@ -676,22 +676,10 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "progressIndicatorConfig": {
+    "kernelStatusConfig": {
       "showOnToolBar": {
         "type": "boolean",
-        "title": "Show progress indicator on toolbar instead of status bar."
-      },
-      "showProgressBar": {
-        "type": "boolean",
-        "title": "Show or hide progress bar."
-      },
-      "showElapsedTime": {
-        "type": "boolean",
-        "title": "Show or hide elapsed time counter."
-      },
-      "progressBarWidth": {
-        "type": "number",
-        "title": "Width of progress bar in pixel."
+        "title": "Show kernel status on toolbar or status bar."
       }
     }
   },
@@ -844,15 +832,12 @@
       "type": "number",
       "default": 50
     },
-    "progressIndicator": {
-      "title": "Execution progres indicator configuration",
+    "kernelStatus": {
+      "title": "Kernel status icon configuration",
       "description": "Defines the postion and components of execution progress indicator.",
-      "$ref": "#/definitions/progressIndicatorConfig",
+      "$ref": "#/definitions/kernelStatusConfig",
       "default": {
-        "showOnToolBar": false,
-        "showProgressBar": true,
-        "showElapsedTime": false,
-        "progressBarWidth": 80
+        "showOnToolBar": true
       }
     },
     "experimentalDisableDocumentWideUndoRedo": {
