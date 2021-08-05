@@ -138,7 +138,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     ICommandPalette
   ],
   autoStart: true,
-  activate: async (
+  activate: (
     app: JupyterFrontEnd,
     factory: IFileBrowserFactory,
     translator: ITranslator,
@@ -146,7 +146,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     treePathUpdater: ITreePathUpdater | null,
     commandPalette: ICommandPalette | null
-  ): Promise<void> => {
+  ): void => {
     const trans = translator.load('jupyterlab');
     const browser = factory.defaultBrowser;
     browser.node.setAttribute('role', 'region');
@@ -160,12 +160,6 @@ const browser: JupyterFrontEndPlugin<void> = {
     // responsible for their own restoration behavior, if any.
     if (restorer) {
       restorer.add(browser, namespace);
-    }
-
-    // Navigate to preferred-dir trait if found
-    const preferredPath = PageConfig.getOption('preferredPath');
-    if (preferredPath) {
-      await browser.model.cd(preferredPath);
     }
 
     addCommands(app, factory, translator, settingRegistry, commandPalette);
