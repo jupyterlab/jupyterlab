@@ -421,17 +421,12 @@ export const SessionContextMock = jest.fn<
     kernelChangedSignal.emit(args);
   });
 
-  session!.pendingInput.connect((_, args) => {
-    (thisObject as any).pendingInput = args;
-  });
-
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).kernelChanged = kernelChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
   (thisObject as any).propertyChanged = propertyChangedSignal;
   (thisObject as any).disposed = disposedSignal;
   (thisObject as any).session = session;
-  (thisObject as any).pendingInput = false;
 
   return thisObject;
 });
