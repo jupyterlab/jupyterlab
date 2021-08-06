@@ -99,7 +99,7 @@ export class NotebookActions {
   }
 
   /**
-   * A signal that emits whenever a cell execution is scheduled.
+   * A signal that emits when one notebook's cells are all executed.
    */
   static get selectionExecuted(): ISignal<
     any,
