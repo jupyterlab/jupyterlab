@@ -378,8 +378,25 @@ export namespace RenderMimeRegistry {
      * manager.
      */
     isLocal(url: string): boolean {
-      const path = decodeURI(url);
-      return URLExt.isLocal(url) || !!this._contents.driveName(path);
+      if (this.isMalformed(url)) {
+        return false;
+      }
+      return URLExt.isLocal(url) || !!this._contents.driveName(decodeURI(url));
+    }
+
+    /**
+     * Whether the URL can be decoded using `decodeURI`.
+     */
+    isMalformed(url: string): boolean {
+      try {
+        decodeURI(url);
+        return false;
+      } catch (error: unknown) {
+        if (error instanceof URIError) {
+          return true;
+        }
+        throw error;
+      }
     }
 
     private _path: string;
