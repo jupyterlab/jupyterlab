@@ -1978,16 +1978,6 @@ namespace Private {
             });
             break;
           }
-          if (sessionContext.pendingInput) {
-            void showDialog({
-              title: trans.__('Waiting on User Input'),
-              body: trans.__(
-                'Did not run selected cell because there is a cell waiting on input! Submit your input and try again.'
-              ),
-              buttons: [Dialog.okButton({ label: trans.__('Ok') })]
-            });
-            return Promise.resolve(false);
-          }
           const deletedCells = notebook.model?.deletedCells ?? [];
           executionScheduled.emit({ notebook, cell });
           return CodeCell.execute(cell as CodeCell, sessionContext, {
