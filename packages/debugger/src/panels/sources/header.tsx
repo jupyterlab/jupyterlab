@@ -1,15 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactWidget, Toolbar, UseSignal } from '@jupyterlab/apputils';
-
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
+import { ReactWidget, Toolbar, UseSignal } from '@jupyterlab/ui-components';
 import { PanelLayout, Widget } from '@lumino/widgets';
-
-import { IDebugger } from '../../tokens';
-
 import React from 'react';
+import { IDebugger } from '../../tokens';
 
 /**
  * The header for a Source Panel.

@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IFrame } from '@jupyterlab/apputils';
+import { IFrame } from '@jupyterlab/ui-components';
 
-describe('@jupyterlab/apputils', () => {
+describe('@jupyterlab/ui-components', () => {
   describe('IFrame', () => {
     describe('#constructor()', () => {
       it('should create a new iframe widget', () => {

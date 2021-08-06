@@ -1,14 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Button, closeIcon, LabIcon } from '@jupyterlab/ui-components';
+import {
+  Button,
+  closeIcon,
+  LabIcon,
+  ReactWidget,
+  Styling
+} from '@jupyterlab/ui-components';
 import { ArrayExt, each, map, toArray } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { Styling } from './styling';
-import { ReactWidget } from './vdom';
 import { WidgetTracker } from './widgettracker';
 
 /**

@@ -12,10 +12,8 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
-  CommandToolbarButton,
   ICommandPalette,
   MainAreaWidget,
-  ReactWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
@@ -37,8 +35,10 @@ import {
 import {
   addIcon,
   clearIcon,
+  CommandToolbarButton,
   HTMLSelect,
-  listIcon
+  listIcon,
+  ReactWidget
 } from '@jupyterlab/ui-components';
 import { UUID } from '@lumino/coreutils';
 import { DockLayout, Widget } from '@lumino/widgets';

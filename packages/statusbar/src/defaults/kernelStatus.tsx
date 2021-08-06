@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 import { Session } from '@jupyterlab/services';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { JSONArray, JSONExt } from '@lumino/coreutils';
 import React from 'react';
 import { interactiveItem, TextItem } from '..';

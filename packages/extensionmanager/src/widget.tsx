@@ -2,12 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import {
-  Dialog,
-  showDialog,
-  ToolbarButtonComponent,
-  VDomRenderer
-} from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
@@ -23,7 +18,9 @@ import {
   InputGroup,
   jupyterIcon,
   listingsInfoIcon,
-  refreshIcon
+  refreshIcon,
+  ToolbarButtonComponent,
+  VDomRenderer
 } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import * as React from 'react';

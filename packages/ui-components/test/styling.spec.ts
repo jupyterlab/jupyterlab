@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Styling } from '@jupyterlab/apputils';
+import { Styling } from '@jupyterlab/ui-components';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { simulate } from 'simulate-event';
 
-describe('@jupyterlab/apputils', () => {
+describe('@jupyterlab/ui-components', () => {
   describe('Styling', () => {
     describe('.styleNode()', () => {
       it('should style descendant nodes for select, input and button', () => {

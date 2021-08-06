@@ -6,12 +6,12 @@
  */
 
 import { ILabShell } from '@jupyterlab/application';
-import { ReactWidget } from '@jupyterlab/apputils';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { ReactWidget } from '@jupyterlab/ui-components';
 import { ISignal, Signal } from '@lumino/signaling';
 import { FocusTracker, SingletonLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';

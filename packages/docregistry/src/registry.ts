@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, Toolbar } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IChangedArgs as IChangedArgsGeneric,
@@ -25,6 +25,7 @@ import {
   pythonIcon,
   rKernelIcon,
   spreadsheetIcon,
+  Toolbar,
   yamlIcon
 } from '@jupyterlab/ui-components';
 import {

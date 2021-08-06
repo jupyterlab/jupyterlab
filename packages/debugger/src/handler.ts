@@ -2,38 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
-import {
-  ISessionContext,
-  SessionContext,
-  ToolbarButton
-} from '@jupyterlab/apputils';
-
+import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { ConsolePanel } from '@jupyterlab/console';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import { DocumentWidget } from '@jupyterlab/docregistry';
-
 import { FileEditor } from '@jupyterlab/fileeditor';
-
 import { NotebookPanel } from '@jupyterlab/notebook';
-
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
-import { bugIcon, Switch } from '@jupyterlab/ui-components';
-
+import { bugIcon, Switch, ToolbarButton } from '@jupyterlab/ui-components';
 import { Debugger } from './debugger';
-
-import { IDebugger } from './tokens';
-
 import { ConsoleHandler } from './handlers/console';
-
 import { FileHandler } from './handlers/file';
-
 import { NotebookHandler } from './handlers/notebook';
+import { IDebugger } from './tokens';
 
 /**
  * Add a bug icon to the widget toolbar to enable and disable debugging.
