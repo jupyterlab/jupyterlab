@@ -247,7 +247,6 @@ export const KernelMock = jest.fn<
   >(thisObject);
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
-  (thisObject as any).pendingInput = pendingInputSignal;
   (thisObject as any).hasPendingInput = false;
   return thisObject;
 });
@@ -346,7 +345,6 @@ export const SessionConnectionMock = jest.fn<
   (thisObject as any).kernelChanged = kernelChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
   (thisObject as any).unhandledMessage = unhandledMessageSignal;
-  (thisObject as any).pendingInput = pendingInputSignal;
   return thisObject;
 });
 
