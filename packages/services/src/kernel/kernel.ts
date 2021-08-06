@@ -111,17 +111,6 @@ export interface IKernelConnection extends IObservableDisposable {
   handleComms: boolean;
 
   /**
-   * Whether the kernel connection has pending input.
-   *
-   * #### Notes
-   * This is a guard to avoid deadlock is the user asks input
-   * as second time before submitting his first input
-   *
-   * See https://github.com/jupyterlab/jupyterlab/issues/8632
-   */
-  hasPendingInput: boolean;
-
-  /**
    * Send a shell message to the kernel.
    *
    * @param msg - The fully-formed shell message to send.
@@ -496,11 +485,6 @@ export interface IKernelConnection extends IObservableDisposable {
    * message should be treated as read-only.
    */
   anyMessage: ISignal<this, IAnyMessageArgs>;
-
-  /**
-   * A signal emitted when a kernel has pending inputs from the user.
-   */
-  pendingInput: ISignal<this, boolean>;
 
   /**
    * The server settings for the kernel.
