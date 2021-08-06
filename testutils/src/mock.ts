@@ -245,9 +245,6 @@ export const KernelMock = jest.fn<
     Kernel.IKernelConnection,
     Kernel.Status
   >(thisObject);
-  const pendingInputSignal = new Signal<Kernel.IKernelConnection, boolean>(
-    thisObject
-  );
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
   (thisObject as any).pendingInput = pendingInputSignal;
@@ -334,20 +331,12 @@ export const SessionConnectionMock = jest.fn<
     KernelMessage.IMessage
   >(thisObject);
 
-  const pendingInputSignal = new Signal<Session.ISessionConnection, boolean>(
-    thisObject
-  );
-
   kernel!.iopubMessage.connect((_, args) => {
     iopubMessageSignal.emit(args);
   }, thisObject);
 
   kernel!.statusChanged.connect((_, args) => {
     statusChangedSignal.emit(args);
-  }, thisObject);
-
-  kernel!.pendingInput.connect((_, args) => {
-    pendingInputSignal.emit(args);
   }, thisObject);
 
   (thisObject as any).disposed = disposedSignal;
