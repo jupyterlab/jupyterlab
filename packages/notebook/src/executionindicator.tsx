@@ -10,8 +10,7 @@ import {
   //ProgressBar,
   ProgressCircle
 } from '@jupyterlab/statusbar';
-import { Cell } from '@jupyterlab/cells';
-import { NotebookActions } from './actions';
+
 
 import { Notebook } from './widget';
 import { KernelMessage } from '@jupyterlab/services';
@@ -160,14 +159,6 @@ export namespace ExecutionIndicator {
     constructor(translator?: ITranslator) {
       super();
       translator = translator || nullTranslator;
-
-      NotebookActions.executionScheduled.connect((_, data) => {
-        this._cellScheduledCallback(data.notebook, data.cell);
-      });
-
-      NotebookActions.executed.connect((_, data) => {
-        this._cellExecutedCallback(data.notebook, data.cell);
-      });
     }
 
     /**
@@ -190,7 +181,7 @@ export namespace ExecutionIndicator {
             totalTime: 0,
             interval: 0,
             timeout: 0,
-            scheduledCell: new Set<Cell | string>(),
+            scheduledCell: new Set<string>(),
             scheduledCellNumber: 0,
             needReset: true
           });
@@ -212,7 +203,10 @@ export namespace ExecutionIndicator {
                     if (method !== 'request_state' && method !== 'update') {
                       this._cellScheduledCallback(nb, msgId);
                     }
-                  } else if (
+                  } else if (message.header.msg_type === 'execute_request'){
+                    this._cellScheduledCallback(nb, msgId);
+                  }
+                   else if (
                     KernelMessage.isStatusMsg(message) &&
                     message.content.execution_state === 'idle'
                   ) {
@@ -272,7 +266,7 @@ export namespace ExecutionIndicator {
      *
      * @param  nb - The notebook which contains the executed code
      * cell.
-     * @param  cell - The executed code cell or id of comm message.
+     * @param  msg_id - The executed code cell or id of comm message.
      *
      * ### Note
      *
@@ -281,10 +275,10 @@ export namespace ExecutionIndicator {
      * these cells. This `Timeout` will be cleared if there is any cell
      * scheduled after that.
      */
-    private _cellExecutedCallback(nb: Notebook, cell: Cell | string): void {
+    private _cellExecutedCallback(nb: Notebook, msg_id:  string): void {
       const state = this._notebookExecutionProgress.get(nb);
-      if (state && state.scheduledCell.has(cell)) {
-        state.scheduledCell.delete(cell);
+      if (state && state.scheduledCell.has(msg_id)) {
+        state.scheduledCell.delete(msg_id);
         if (state.scheduledCell.size === 0) {
           state.kernelStatus = 'idle';
           clearInterval(state.interval);
@@ -303,16 +297,16 @@ export namespace ExecutionIndicator {
      *
      * @param  nb - The notebook which contains the scheduled code or id of comm message.
      * cell
-     * @param  cell - The scheduled code cell.
+     * @param  msg_id - The scheduled code cell.
      */
-    private _cellScheduledCallback(nb: Notebook, cell: Cell | string): void {
+    private _cellScheduledCallback(nb: Notebook, msg_id: string): void {
       const state = this._notebookExecutionProgress.get(nb);
 
-      if (state && !state.scheduledCell.has(cell)) {
+      if (state && !state.scheduledCell.has(msg_id)) {
         if (state.needReset) {
           this._resetTime(state);
         }
-        state.scheduledCell.add(cell);
+        state.scheduledCell.add(msg_id);
         state.scheduledCellNumber += 1;
         if (state.kernelStatus !== 'busy') {
           state.kernelStatus = 'busy';
@@ -346,7 +340,7 @@ export namespace ExecutionIndicator {
       data.totalTime = 0;
       data.scheduledCellNumber = 0;
       data.kernelStatus = 'idle';
-      data.scheduledCell = new Set<Cell | string>();
+      data.scheduledCell = new Set<string>();
       clearTimeout(data.timeout);
       clearInterval(data.interval);
       data.needReset = false;
@@ -401,10 +395,10 @@ namespace Private {
     timeout: number;
 
     /**
-     * Set of code cells scheduled for executing, `kernelStatus` is set
+     * Set of message scheduled for executing, `kernelStatus` is set
      *  to `idle if the length of this set is 0 and to `busy` otherwise.
      */
-    scheduledCell: Set<Cell | string>;
+    scheduledCell: Set<string>;
 
     /**
      * Total number of cells requested for executing, it is used to compute
