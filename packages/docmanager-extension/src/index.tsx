@@ -1049,7 +1049,7 @@ namespace Private {
     if (!selectedItem) {
       return;
     }
-    const selectedIndex = parseInt(selectedItem.split(indexSeparator, 1)[0]);
-    return checkpoints[selectedIndex];
+    const selectedIndex = selectedItem.split(indexSeparator, 1)[0];
+    return checkpoints[parseInt(selectedIndex, 10)];
   }
 }
