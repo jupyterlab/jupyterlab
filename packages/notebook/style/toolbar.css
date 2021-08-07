@@ -7,6 +7,10 @@
 | Variables
 |----------------------------------------------------------------------------*/
 
+:root {
+  --jp-notebook-toolbar-padding: 2px 5px 2px 2px;
+}
+
 /*-----------------------------------------------------------------------------
 
 /*-----------------------------------------------------------------------------
@@ -14,7 +18,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-NotebookPanel-toolbar {
-  padding: 2px;
+  padding: var(--jp-notebook-toolbar-padding);
 }
 
 .jp-Toolbar-item.jp-Notebook-toolbarCellType .jp-select-wrapper.jp-mod-focused {
@@ -45,7 +49,7 @@
   box-shadow: var(--jp-toolbar-box-shadow);
   background: var(--jp-toolbar-background);
   min-height: var(--jp-toolbar-micro-height);
-  padding: 2px;
+  padding: var(--jp-notebook-toolbar-padding);
   z-index: 1;
   right: 0px;
   top: 0px;
