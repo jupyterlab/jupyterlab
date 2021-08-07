@@ -31,22 +31,6 @@ import { LabIcon } from './labicon';
 {{labiconConstructions}}
 `;
 
-const ICON_CSS_CLASSES_TEMPLATE = `
-/**
- * (DEPRECATED) Support for consuming icons as CSS background images
- */
-
-/* Icons urls */
-
-:root {
-  {{iconCSSUrls}}
-}
-
-/* Icon CSS class declarations */
-
-{{iconCSSDeclarations}}
-`;
-
 /**
  * Ensure the integrity of a package.
  *
@@ -649,40 +633,6 @@ export async function ensureUiComponents(
     { funcName, svgImportStatements, labiconConstructions }
   );
   messages.push(...ensureFile(iconImportsPath, iconImportsContents, false));
-
-  /* support for deprecated icon CSS classes */
-  const iconCSSDir = path.join(pkgPath, 'style');
-
-  // build the per-icon import code
-  const _iconCSSUrls: string[] = [];
-  const _iconCSSDeclarations: string[] = [];
-  svgPaths.forEach(svgPath => {
-    const svgName = utils.stem(svgPath);
-    const urlName = 'jp-icon-' + svgName;
-    const className = 'jp-' + utils.camelCase(svgName, true) + 'Icon';
-
-    _iconCSSUrls.push(
-      `--${urlName}: url('${path
-        .relative(iconCSSDir, svgPath)
-        .split(path.sep)
-        .join('/')}');`
-    );
-    _iconCSSDeclarations.push(
-      `.${className} {background-image: var(--${urlName})}`
-    );
-  });
-
-  // sort the statements and then join them
-  const iconCSSUrls = _iconCSSUrls.sort().join('\n');
-  const iconCSSDeclarations = _iconCSSDeclarations.sort().join('\n');
-
-  // generate the actual contents of the iconCSSClasses file
-  const iconCSSClassesPath = path.join(iconCSSDir, 'deprecated.css');
-  const iconCSSClassesContent = utils.fromTemplate(
-    HEADER_TEMPLATE + ICON_CSS_CLASSES_TEMPLATE,
-    { funcName, iconCSSUrls, iconCSSDeclarations }
-  );
-  messages.push(...ensureFile(iconCSSClassesPath, iconCSSClassesContent));
 
   return messages;
 }
