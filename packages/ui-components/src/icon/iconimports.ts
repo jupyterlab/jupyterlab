@@ -9,6 +9,7 @@ import { LabIcon } from './labicon';
 
 // icon svg import statements
 import addSvgstr from '../../style/icons/toolbar/add.svg';
+import bugDotSvgstr from '../../style/icons/toolbar/bug-dot.svg';
 import bugSvgstr from '../../style/icons/toolbar/bug.svg';
 import buildSvgstr from '../../style/icons/sidebar/build.svg';
 import caretDownEmptySvgstr from '../../style/icons/arrow/caret-down-empty.svg';
@@ -89,6 +90,7 @@ import yamlSvgstr from '../../style/icons/filetype/yaml.svg';
 
 // LabIcon instance construction
 export const addIcon = new LabIcon({ name: 'ui-components:add', svgstr: addSvgstr });
+export const bugDotIcon = new LabIcon({ name: 'ui-components:bug-dot', svgstr: bugDotSvgstr });
 export const bugIcon = new LabIcon({ name: 'ui-components:bug', svgstr: bugSvgstr });
 export const buildIcon = new LabIcon({ name: 'ui-components:build', svgstr: buildSvgstr });
 export const caretDownEmptyIcon = new LabIcon({ name: 'ui-components:caret-down-empty', svgstr: caretDownEmptySvgstr });
