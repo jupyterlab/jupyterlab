@@ -498,6 +498,11 @@ export namespace ToolbarButtonComponent {
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
+    ariaLabel?: string;
+    pressed?: boolean;
+    pressedIcon?: LabIcon.IMaybeResolvable;
+    pressedTooltip?: string;
+    disabledTooltip?: string;
 
     /**
      * Trigger the button on the actual onClick event rather than onMouseDown.
@@ -547,6 +552,16 @@ export function ToolbarButtonComponent(
     }
   };
 
+  const getTooltip = () => {
+    if (props.enabled === false && props.disabledTooltip) {
+      return props.disabledTooltip;
+    } else if (props.pressed && props.pressedTooltip) {
+      return props.pressedTooltip;
+    } else {
+      return props.tooltip || props.iconLabel;
+    }
+  };
+
   return (
     <Button
       className={
@@ -554,18 +569,21 @@ export function ToolbarButtonComponent(
           ? props.className + ' jp-ToolbarButtonComponent'
           : 'jp-ToolbarButtonComponent'
       }
+      aria-label={props.ariaLabel || ''}
+      aria-pressed={props.pressed}
+      aria-disabled={props.enabled === false}
       disabled={props.enabled === false}
       onClick={props.actualOnClick ?? false ? handleClick : undefined}
       onMouseDown={
         !(props.actualOnClick ?? false) ? handleMouseDown : undefined
       }
       onKeyDown={handleKeyDown}
-      title={props.tooltip || props.iconLabel}
+      title={getTooltip()}
       minimal
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact
-          icon={props.icon}
+          icon={props.pressed ? props.pressedIcon : props.icon}
           iconClass={
             // add some extra classes for proper support of icons-as-css-background
             classes(props.iconClass, 'jp-Icon')
@@ -602,10 +620,57 @@ export class ToolbarButton extends ReactWidget {
   constructor(private props: ToolbarButtonComponent.IProps = {}) {
     super();
     addToolbarButtonClass(this);
+    this._enabled = props.enabled ?? true;
+    this._pressed = this._enabled === true ? props.pressed ?? false : false;
+    this._onClick = props.onClick;
   }
+
+  set pressed(value: boolean) {
+    if (value != this._pressed) {
+      this._pressed = value;
+      this.update();
+    }
+  }
+
+  get pressed() {
+    return this._enabled === true ? this._pressed : false;
+  }
+
+  set enabled(value: boolean) {
+    if (value != this._enabled) {
+      this._enabled = value;
+      this.update();
+    }
+  }
+
+  get enabled() {
+    return this._enabled;
+  }
+
+  set onClick(value: () => void) {
+    if (value !== this._onClick) {
+      this._onClick = value;
+      this.update();
+    }
+  }
+  get onClick() {
+    return this._onClick!;
+  }
+
   render(): JSX.Element {
-    return <ToolbarButtonComponent {...this.props} />;
+    return (
+      <ToolbarButtonComponent
+        {...this.props}
+        pressed={this.pressed}
+        enabled={this.enabled}
+        onClick={this.onClick}
+      />
+    );
   }
+
+  private _pressed;
+  private _enabled;
+  private _onClick;
 }
 
 /**
