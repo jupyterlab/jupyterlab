@@ -747,6 +747,10 @@ export class VirtualDocument {
   }
 
   transform_source_to_editor(pos: ISourcePosition): IEditorPosition {
+    if (pos == null) {
+      this.console.warn('no position available');
+      return
+    }
     let source_line = this.source_lines.get(pos.line);
     let editor_line = source_line.editor_line;
     let editor_shift = source_line.editor_shift;
@@ -781,6 +785,10 @@ export class VirtualDocument {
   }
 
   get_editor_at_virtual_line(pos: IVirtualPosition): CodeEditor.IEditor {
+    if (pos == null) {
+      this.console.warn('no position available');
+      return
+    }
     let line = pos.line;
     // tolerate overshot by one (the hanging blank line at the end)
     if (!this.virtual_lines.has(line)) {
@@ -790,6 +798,10 @@ export class VirtualDocument {
   }
 
   get_editor_at_source_line(pos: ISourcePosition): CodeEditor.IEditor {
+    if (pos == null) {
+      this.console.warn('no position available');
+      return
+    }
     return this.source_lines.get(pos.line).editor;
   }
 
