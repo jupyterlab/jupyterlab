@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { showDialog, Dialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 

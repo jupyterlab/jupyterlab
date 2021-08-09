@@ -277,7 +277,7 @@ export class MetadataEditor extends ReactWidget {
     this.update();
   }
 
-  private isValueEmpty(schemaValue: any): boolean {
+  isValueEmpty(schemaValue: any): boolean {
     return (
       schemaValue === undefined ||
       schemaValue === null ||
@@ -398,7 +398,7 @@ export class MetadataEditor extends ReactWidget {
   handleCheckboxChange = (schemaField: string, value: boolean): void => {
     this.handleDirtyState(true);
     this.metadata[schemaField] = value;
-  }
+  };
 
   handleDirtyState(dirty: boolean): void {
     this.dirty = dirty;
@@ -582,12 +582,10 @@ export class MetadataEditor extends ReactWidget {
         >
           <InputLabel> {this.schema[fieldName].title} </InputLabel>
           <ArrayInput
-            onChange={
-              (values: string[]) => {
-                this.metadata[fieldName] = values;
-                this.handleDirtyState(true);
-              }
-            }
+            onChange={(values: string[]) => {
+              this.metadata[fieldName] = values;
+              this.handleDirtyState(true);
+            }}
             values={this.metadata[fieldName]}
           />
         </div>

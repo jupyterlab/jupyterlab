@@ -46,21 +46,23 @@ export class SettingsMetadataEditor extends MetadataEditor {
       if (settings.properties) {
         for (const prop in settings.properties) {
           const options = {
-              ...settings.properties[prop],
-              ...((settings.definitions as PartialJSONObject)?.[prop] as PartialJSONObject)
-          }
+            ...settings.properties[prop],
+            ...((settings.definitions as PartialJSONObject)?.[
+              prop
+            ] as PartialJSONObject)
+          };
           if (options.type === 'object') {
             for (const subProp in options.properties) {
-                const subOptions = options.properties[subProp];
-                schema.properties.metadata.properties[subProp] = {
-                    title: subOptions.title ?? subProp,
-                    type: subOptions.type,
-                    uihints: {
-                        field_type: subOptions.type,
-                        category: options.title
-                    }
+              const subOptions = options.properties[subProp];
+              schema.properties.metadata.properties[subProp] = {
+                title: subOptions.title ?? subProp,
+                type: subOptions.type,
+                uihints: {
+                  field_type: subOptions.type,
+                  category: options.title
                 }
-                this.metadata[subProp] = currentSettings[prop]?.[subProp];
+              };
+              this.metadata[subProp] = currentSettings[prop]?.[subProp];
             }
             if (typeof options.additionalProperties === 'object') {
               if ((options.additionalProperties as any)?.enum) {
@@ -70,23 +72,23 @@ export class SettingsMetadataEditor extends MetadataEditor {
                   uihints: {
                     field_type: 'dropdown'
                   }
-                }
+                };
               }
               this.metadata[prop] = currentSettings[prop];
             }
           } else if (typeof options.type === 'object') {
             schema.properties.metadata.properties[prop] = {
-                title: options.title,
-            }
+              title: options.title
+            };
             this.metadata[prop] = currentSettings[prop];
           } else {
             schema.properties.metadata.properties[prop] = {
               title: options.title,
               type: options.type,
               uihints: {
-                  field_type: options.type
+                field_type: options.type
               }
-            }
+            };
             this.metadata[prop] = currentSettings[prop];
           }
         }
@@ -129,37 +131,44 @@ export class SettingsMetadataEditor extends MetadataEditor {
     if (settings.properties) {
       for (const prop in settings.properties) {
         const options = {
-            ...settings.properties[prop],
-            ...((settings.definitions as PartialJSONObject)?.[prop] as PartialJSONObject)
-        }
+          ...settings.properties[prop],
+          ...((settings.definitions as PartialJSONObject)?.[
+            prop
+          ] as PartialJSONObject)
+        };
         if (options.type === 'object') {
           formattedSettings[prop] = {};
           for (const subProp in options.properties) {
-              if (
-                options.properties[subProp].type === 'number' &&
-                this.metadata[subProp] &&
-                typeof this.metadata[subProp] === 'number'
-              ) {
-                formattedSettings[prop][subProp] = parseInt(this.metadata[subProp]);
-              } else if (
-                (options.properties[subProp].items as any)?.type === 'number' &&
+            if (
+              options.properties[subProp].type === 'number' &&
+              this.metadata[subProp]
+            ) {
+              formattedSettings[prop][subProp] = parseInt(
                 this.metadata[subProp]
-              ) {
-                formattedSettings[prop][subProp] = JSON.parse(JSON.stringify(this.metadata[subProp]))
-                for (const i in formattedSettings[prop][subProp]) {
-                  formattedSettings[prop][subProp][i] = parseInt(formattedSettings[prop][subProp][i]);
-                }
-              } else {
-                formattedSettings[prop][subProp] = this.metadata[subProp];
+              );
+            } else if (
+              (options.properties[subProp].items as any)?.type === 'number' &&
+              this.metadata[subProp]
+            ) {
+              formattedSettings[prop][subProp] = JSON.parse(
+                JSON.stringify(this.metadata[subProp])
+              );
+              for (const i in formattedSettings[prop][subProp]) {
+                formattedSettings[prop][subProp][i] = parseInt(
+                  formattedSettings[prop][subProp][i]
+                );
               }
+            } else {
+              formattedSettings[prop][subProp] = this.metadata[subProp];
+            }
           }
         } else if (
           (options.type === 'number' ||
-          (typeof options.type === 'object' &&
-            options.type.includes('number'))) &&
+            (typeof options.type === 'object' &&
+              options.type.includes('number'))) &&
           this.metadata[prop] !== null &&
           this.metadata[prop] !== undefined
-         ) {
+        ) {
           formattedSettings[prop] = parseInt(this.metadata[prop]);
         } else {
           formattedSettings[prop] = this.metadata[prop];
@@ -167,7 +176,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
       }
     }
 
-    console.log(JSON.stringify(formattedSettings))
+    console.log(JSON.stringify(formattedSettings));
     void this._settings
       .save(JSON.stringify(formattedSettings))
       .then(() => {
@@ -175,10 +184,10 @@ export class SettingsMetadataEditor extends MetadataEditor {
         this.onSave();
       })
       .catch(reason => {
-        showDialog({
+        void showDialog({
           title: 'Validation error',
           body: JSON.stringify(reason)
-        })
+        });
       });
   }
 
@@ -191,7 +200,10 @@ export class SettingsMetadataEditor extends MetadataEditor {
     ) {
       this.parent.parent.parent.title.className += DIRTY_CLASS;
     } else if (!this.dirty && this.parent?.parent?.parent) {
-      this.parent.parent.parent.title.className = this.parent.parent.parent.title.className.replace(DIRTY_CLASS, '');
+      this.parent.parent.parent.title.className = this.parent.parent.parent.title.className.replace(
+        DIRTY_CLASS,
+        ''
+      );
     }
     this.parent?.parent?.parent?.update();
   }

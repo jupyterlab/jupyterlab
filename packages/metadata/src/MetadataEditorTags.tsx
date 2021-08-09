@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { checkIcon, addIcon } from '@jupyterlab/ui-components';
+import { addIcon, checkIcon } from '@jupyterlab/ui-components';
 
 import React from 'react';
 

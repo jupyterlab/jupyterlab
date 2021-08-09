@@ -15,14 +15,14 @@
  */
 
 import {
-  TextField,
+  FormControl,
   FormHelperText,
-  Tooltip,
-  withStyles,
-  Select,
-  MenuItem,
   InputLabel,
-  FormControl
+  MenuItem,
+  Select,
+  TextField,
+  Tooltip,
+  withStyles
 } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 
