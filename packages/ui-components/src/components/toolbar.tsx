@@ -161,7 +161,6 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   constructor() {
     super();
     this.addClass(TOOLBAR_CLASS);
-    this.addClass('jp-scrollbar-tiny');
     this.layout = new ToolbarLayout();
     this.insertItem(
       0,
