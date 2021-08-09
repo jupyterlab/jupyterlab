@@ -1,5 +1,7 @@
-import { MetadataEditor } from '@jupyterlab/metadata';
+import { DIRTY_CLASS, MetadataEditor } from '@jupyterlab/metadata';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { PartialJSONObject } from '@lumino/coreutils';
+import { showDialog } from '@jupyterlab/apputils';
 
 export class SettingsMetadataEditor extends MetadataEditor {
   _settings: ISettingRegistry.ISettings;
@@ -22,7 +24,9 @@ export class SettingsMetadataEditor extends MetadataEditor {
       return;
     }
     try {
+      this.handleDirtyState(false);
       const settings = this._settings.schema;
+      const currentSettings = JSON.parse(this._settings.raw);
       const schema = {
         display_name: settings.description,
         properties: {
@@ -41,23 +45,56 @@ export class SettingsMetadataEditor extends MetadataEditor {
       };
       if (settings.properties) {
         for (const prop in settings.properties) {
-          const options = settings.properties[prop];
-          schema.properties.metadata.properties[prop] = {
-            title: options.title,
-            type: options.type,
-            uihints: {
-              field_type: options.type
+          const options = {
+              ...settings.properties[prop],
+              ...((settings.definitions as PartialJSONObject)?.[prop] as PartialJSONObject)
+          }
+          if (options.type === 'object') {
+            for (const subProp in options.properties) {
+                const subOptions = options.properties[subProp];
+                schema.properties.metadata.properties[subProp] = {
+                    title: subOptions.title ?? subProp,
+                    type: subOptions.type,
+                    uihints: {
+                        field_type: subOptions.type,
+                        category: options.title
+                    }
+                }
+                this.metadata[subProp] = currentSettings[prop]?.[subProp];
             }
-          };
+            if (typeof options.additionalProperties === 'object') {
+              if ((options.additionalProperties as any)?.enum) {
+                schema.properties.metadata.properties[prop] = {
+                  title: options.title,
+                  enum: (options.additionalProperties as any).enum,
+                  uihints: {
+                    field_type: 'dropdown'
+                  }
+                }
+              }
+              this.metadata[prop] = currentSettings[prop];
+            }
+          } else if (typeof options.type === 'object') {
+            schema.properties.metadata.properties[prop] = {
+                title: options.title,
+            }
+            this.metadata[prop] = currentSettings[prop];
+          } else {
+            schema.properties.metadata.properties[prop] = {
+              title: options.title,
+              type: options.type,
+              uihints: {
+                  field_type: options.type
+              }
+            }
+            this.metadata[prop] = currentSettings[prop];
+          }
         }
       }
       this.schema = schema.properties.metadata.properties;
       this.referenceURL = schema.uihints?.reference_url;
       this.schemaDisplayName = schema.title;
       this.requiredFields = schema.properties.metadata.required;
-      if (!this.name) {
-        this.title.label = `New ${this.schemaDisplayName}`;
-      }
       // Find categories of all schema properties
       this.schemaPropertiesByCategory = { _noCategory: [] };
       for (const schemaProperty in this.schema) {
@@ -76,30 +113,86 @@ export class SettingsMetadataEditor extends MetadataEditor {
       console.log(error);
     }
 
-    if (this.name) {
-      // this.metadata = metadata['metadata'];
-    } else {
-      this.displayName = '';
-    }
+    this.metadata = JSON.parse(this.settings.raw);
+    this.displayName = undefined;
 
     this.update();
   }
 
-  saveMetadata() {
+  saveMetadata(): void {
     if (!this.dirty || !this._settings) {
-      return Promise.resolve(undefined);
+      return undefined;
     }
 
-    const settings = this._settings;
-    const source = JSON.stringify(this.metadata);
+    const settings = this._settings.schema;
+    const formattedSettings: any = {};
+    if (settings.properties) {
+      for (const prop in settings.properties) {
+        const options = {
+            ...settings.properties[prop],
+            ...((settings.definitions as PartialJSONObject)?.[prop] as PartialJSONObject)
+        }
+        if (options.type === 'object') {
+          formattedSettings[prop] = {};
+          for (const subProp in options.properties) {
+              if (
+                options.properties[subProp].type === 'number' &&
+                this.metadata[subProp] &&
+                typeof this.metadata[subProp] === 'number'
+              ) {
+                formattedSettings[prop][subProp] = parseInt(this.metadata[subProp]);
+              } else if (
+                (options.properties[subProp].items as any)?.type === 'number' &&
+                this.metadata[subProp]
+              ) {
+                formattedSettings[prop][subProp] = JSON.parse(JSON.stringify(this.metadata[subProp]))
+                for (const i in formattedSettings[prop][subProp]) {
+                  formattedSettings[prop][subProp][i] = parseInt(formattedSettings[prop][subProp][i]);
+                }
+              } else {
+                formattedSettings[prop][subProp] = this.metadata[subProp];
+              }
+          }
+        } else if (
+          (options.type === 'number' ||
+          (typeof options.type === 'object' &&
+            options.type.includes('number'))) &&
+          this.metadata[prop] !== null &&
+          this.metadata[prop] !== undefined
+         ) {
+          formattedSettings[prop] = parseInt(this.metadata[prop]);
+        } else {
+          formattedSettings[prop] = this.metadata[prop];
+        }
+      }
+    }
 
-    return settings
-      .save(source)
+    console.log(JSON.stringify(formattedSettings))
+    void this._settings
+      .save(JSON.stringify(formattedSettings))
       .then(() => {
-        this.dirty = false;
+        this.handleDirtyState(false);
+        this.onSave();
       })
       .catch(reason => {
-        console.log(reason);
+        showDialog({
+          title: 'Validation error',
+          body: JSON.stringify(reason)
+        })
       });
+  }
+
+  handleDirtyState(dirty: boolean): void {
+    super.handleDirtyState(dirty);
+    if (
+      this.dirty &&
+      this.parent?.parent?.parent &&
+      !this.parent?.parent?.parent?.title?.className?.includes(DIRTY_CLASS)
+    ) {
+      this.parent.parent.parent.title.className += DIRTY_CLASS;
+    } else if (!this.dirty && this.parent?.parent?.parent) {
+      this.parent.parent.parent.title.className = this.parent.parent.parent.title.className.replace(DIRTY_CLASS, '');
+    }
+    this.parent?.parent?.parent?.update();
   }
 }

@@ -42,12 +42,12 @@ import * as React from 'react';
 import { DropDown } from './DropDown';
 import { MetadataService } from './metadata';
 import { RequestErrors } from './RequestErrors';
-import { StringArrayInput } from './StringArrayInput';
+import { ArrayInput } from './StringArrayInput';
 import { TextInput } from './TextInput';
 import { MetadataEditorTags } from './MetadataEditorTags';
 
 const ELYRA_METADATA_EDITOR_CLASS = 'elyra-metadataEditor';
-const DIRTY_CLASS = 'jp-mod-dirty';
+export const DIRTY_CLASS = 'jp-mod-dirty';
 
 interface IMetadataEditorProps {
   schema: string;
@@ -203,6 +203,7 @@ export class MetadataEditor extends ReactWidget {
     this.handleTextInputChange = this.handleTextInputChange.bind(this);
     this.handleChangeOnTag = this.handleChangeOnTag.bind(this);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
+    this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
     this.renderField = this.renderField.bind(this);
 
     this.invalidForm = false;
@@ -394,6 +395,11 @@ export class MetadataEditor extends ReactWidget {
     this.update();
   };
 
+  handleCheckboxChange = (schemaField: string, value: boolean): void => {
+    this.handleDirtyState(true);
+    this.metadata[schemaField] = value;
+  }
+
   handleDirtyState(dirty: boolean): void {
     this.dirty = dirty;
     if (this.dirty && !this.clearDirty) {
@@ -560,11 +566,32 @@ export class MetadataEditor extends ReactWidget {
           key={`${fieldName}BooleanInput`}
         >
           <InputLabel> {this.schema[fieldName].title} </InputLabel>
-          <Checkbox />
+          <Checkbox
+            checked={this.metadata[fieldName]}
+            onChange={(e: any, checked: boolean) => {
+              this.handleCheckboxChange(fieldName, checked);
+            }}
+          />
         </div>
       );
     } else if (uihints.field_type === 'array') {
-      return <StringArrayInput />;
+      return (
+        <div
+          className="elyra-metadataEditor-formInput"
+          key={`${fieldName}Array`}
+        >
+          <InputLabel> {this.schema[fieldName].title} </InputLabel>
+          <ArrayInput
+            onChange={
+              (values: string[]) => {
+                this.metadata[fieldName] = values;
+                this.handleDirtyState(true);
+              }
+            }
+            values={this.metadata[fieldName]}
+          />
+        </div>
+      );
     } else {
       return null;
     }

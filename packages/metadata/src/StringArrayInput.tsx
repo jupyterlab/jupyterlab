@@ -15,6 +15,8 @@ import { editIcon, trashIcon } from '@jupyterlab/ui-components';
 
 interface IProps {
   placeholder?: string;
+  values?: string[];
+  onChange: (values: string[]) => void;
 }
 
 interface IListItemProps {
@@ -158,8 +160,8 @@ export function ArrayListItem({
   );
 }
 
-export function StringArrayInput({ placeholder }: IProps) {
-  const [items, setItems] = React.useState([] as string[]);
+export function ArrayInput({ placeholder, onChange, values }: IProps) {
+  const [items, setItems] = React.useState(values ?? []);
 
   const [editingIndex, setEditingIndex] = useState<number | 'new'>();
 
@@ -167,6 +169,7 @@ export function StringArrayInput({ placeholder }: IProps) {
     action => {
       const newItems = reducer(items, action);
       setItems(newItems);
+      onChange(newItems);
     },
     [items, setItems]
   );
