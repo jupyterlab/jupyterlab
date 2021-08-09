@@ -83,10 +83,11 @@ if [[ $GROUP == integrity2 ]]; then
     # Make sure the storybooks build.
     jlpm run build:storybook
 
+    jlpm config set prefix ~/.yarn
+
     # Make sure we have CSS that can be converted with postcss
     jlpm global add postcss postcss-cli
 
-    jlpm config set prefix ~/.yarn
     ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
 
     # run twine check on the python build assets.

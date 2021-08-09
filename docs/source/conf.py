@@ -137,7 +137,7 @@ html_context = {
     "display_github": True,  # Integrate GitHub
     "github_user": "jupyterlab",  # Username
     "github_repo": "jupyterlab",  # Repo name
-    "github_version": "master",  # Version
+    "github_version": "2.3.x",  # Version
     "conf_py_path": "/docs/source/",  # Path in the checkout to the docs root
 }
 
@@ -244,7 +244,4 @@ def setup(app):
         'enable_auto_doc_ref': False,
     }, True)
     app.add_transform(AutoStructify)
-    try:
-        app.add_stylesheet('custom.css')  # may also be an URL
-    except AttributeError:
-        app.add_css_file('custom.css')  # may also be an URL
+    app.add_css_file('custom.css')  # may also be an URL
