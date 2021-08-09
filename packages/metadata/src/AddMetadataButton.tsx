@@ -18,9 +18,9 @@ import { IDictionary } from './parsing';
 import { addIcon } from '@jupyterlab/ui-components';
 import {
   Box,
+  Button,
   ButtonGroup,
   ClickAwayListener,
-  Button,
   MenuItem,
   MenuList,
   Paper,
