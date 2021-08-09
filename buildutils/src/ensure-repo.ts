@@ -522,6 +522,10 @@ function ensureJupyterlab(): string[] {
     corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
   });
 
+  // Update the dev mode version.
+  const curr = utils.getPythonVersion();
+  corePackage.jupyterlab.version = curr;
+
   // Write the package.json back to disk.
   if (utils.writePackageData(corePath, corePackage)) {
     return ['Updated dev mode'];
