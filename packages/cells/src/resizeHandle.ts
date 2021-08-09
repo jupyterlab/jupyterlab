@@ -40,8 +40,15 @@ export class ResizeHandle extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'dblclick':
-        this.targetNode.classList.remove(CELL_RESIZED_CLASS);
-        this.targetNode.style.gridTemplateColumns = '';
+        this.targetNode.parentNode?.childNodes.forEach(node => {
+          (node as HTMLElement).classList.remove(CELL_RESIZED_CLASS);
+        });
+
+        document.documentElement.style.setProperty(
+          '--jp-side-by-side-resized-cell',
+          ''
+        );
+
         this._isActive = false;
         break;
       case 'mousedown':
@@ -49,7 +56,10 @@ export class ResizeHandle extends Widget {
           (event as MouseEvent).clientX - this.node.getBoundingClientRect().x;
         this._isDragging = true;
         if (!this._isActive) {
-          this.targetNode.classList.add(CELL_RESIZED_CLASS);
+          this.targetNode.parentNode?.childNodes.forEach(node => {
+            (node as HTMLElement).classList.add(CELL_RESIZED_CLASS);
+          });
+
           this._isActive = true;
         }
         window.addEventListener('mousemove', this);
@@ -62,11 +72,23 @@ export class ResizeHandle extends Widget {
         const targetRect = this.targetNode.getBoundingClientRect();
         const inputWidth =
           (event as MouseEvent).clientX - targetRect.x - this._mouseOffset;
-        this.targetNode.style.gridTemplateColumns =
+
+        const resized_ratio =
+          1 -
           Math.min(
             Math.max(inputWidth, this._protectedWidth),
             targetRect.width - this._protectedWidth
-          ) + 'px min-content 1fr';
+          ) /
+            (targetRect.width - this._protectedWidth);
+
+        // Added friction to the dragging interaction
+        if (Math.round(resized_ratio * 100) % 10 == 0) {
+          document.documentElement.style.setProperty(
+            '--jp-side-by-side-resized-cell',
+            resized_ratio + 'fr'
+          );
+        }
+
         break;
       }
       case 'mouseup':

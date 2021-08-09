@@ -299,6 +299,7 @@
 |----------------------------------------------------------------------------*/
 :root {
   --jp-side-by-side-output-size: 1fr;
+  --jp-side-by-side-resized-cell: var(--jp-side-by-side-output-size);
 }
 
 .jp-mod-sideBySide.jp-Notebook .jp-CodeCell {
@@ -312,6 +313,13 @@
     'header header header'
     'input handle output'
     'footer footer footer';
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell.jp-mod-resizedCell {
+  grid-template-columns: minmax(0, 1fr) min-content minmax(
+      0,
+      var(--jp-side-by-side-resized-cell)
+    );
 }
 
 .jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-CellHeader {

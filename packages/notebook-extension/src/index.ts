@@ -2195,17 +2195,24 @@ function addCommands(
     label: trans.__('Render Side-by-side'),
     execute: args => {
       Private.renderSideBySide = !Private.renderSideBySide;
-      tracker.forEach((wideget) => {
+      tracker.forEach(wideget => {
         if (wideget) {
-          if(Private.renderSideBySide){
+          if (Private.renderSideBySide) {
             return NotebookActions.renderSideBySide(wideget.content);
-          }else{
+          } else {
             return NotebookActions.renderNotSideBySide(wideget.content);
           }
         }
       });
+      tracker.currentChanged.connect(() => {
+        if (Private.renderSideBySide && tracker.currentWidget) {
+          return NotebookActions.renderSideBySide(
+            tracker.currentWidget.content
+          );
+        }
+      });
     },
-    isToggled: ()=> Private.renderSideBySide,
+    isToggled: () => Private.renderSideBySide,
     isEnabled
   });
 
