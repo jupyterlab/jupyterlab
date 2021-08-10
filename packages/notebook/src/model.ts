@@ -107,6 +107,8 @@ export class NotebookModel implements INotebookModel {
     this._ensureMetadata();
     metadata.changed.connect(this.triggerContentChange, this);
     this._deletedCells = [];
+
+    this.sharedModel.changed.connect(this._onStateChanged, this);
   }
   /**
    * A signal emitted when the document content changes.
@@ -306,21 +308,17 @@ export class NotebookModel implements INotebookModel {
     this.cells.pushAll(cells);
     this.cells.endCompoundOperation();
 
-    let oldValue = 0;
-    let newValue = 0;
-    this._nbformatMinor = nbformat.MINOR_VERSION;
-    this._nbformat = nbformat.MAJOR_VERSION;
+    (this.sharedModel as models.YNotebook).nbformatMinor =
+      nbformat.MINOR_VERSION;
+    (this.sharedModel as models.YNotebook).nbformat = nbformat.MAJOR_VERSION;
     const origNbformat = value.metadata.orig_nbformat;
 
     if (value.nbformat !== this._nbformat) {
-      oldValue = this._nbformat;
-      this._nbformat = newValue = value.nbformat;
-      this.triggerStateChange({ name: 'nbformat', oldValue, newValue });
+      (this.sharedModel as models.YNotebook).nbformat = value.nbformat;
     }
     if (value.nbformat_minor > this._nbformatMinor) {
-      oldValue = this._nbformatMinor;
-      this._nbformatMinor = newValue = value.nbformat_minor;
-      this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
+      (this.sharedModel as models.YNotebook).nbformatMinor =
+        value.nbformat_minor;
     }
 
     // Alert the user if the format changes.
@@ -410,6 +408,26 @@ close the notebook without saving it.`,
         break;
     }
     this.triggerContentChange();
+  }
+
+  private _onStateChanged(
+    sender: models.ISharedNotebook,
+    changes: models.NotebookChange
+  ): void {
+    if (changes.stateChange) {
+      changes.stateChange.forEach(value => {
+        if (value.name === 'nbformat') {
+          this._nbformat = value.newValue;
+        }
+        if (value.name === 'nbformatMinor') {
+          this._nbformatMinor = value.newValue;
+        }
+        if (value.name === 'dirty') {
+          this._dirty = value.newValue;
+        }
+        this.triggerStateChange(value);
+      });
+    }
   }
 
   /**
