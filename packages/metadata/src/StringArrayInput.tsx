@@ -20,7 +20,7 @@ interface IProps {
 }
 
 interface IListItemProps {
-  value?: string;
+  value?: any;
   isEditing?: boolean;
   placeholder?: string;
   onSubmit?: (value: string) => any;
@@ -97,7 +97,12 @@ export function ArrayListItem({
       <div>
         <TextField
           inputProps={{ ref: inputRef }}
-          defaultValue={value ?? ''}
+          defaultValue={
+            typeof value === 'string'
+              ? value ?? ''
+              : JSON.stringify(value, null, '\t')
+          }
+          multiline={typeof value !== 'string'}
           placeholder={placeholder}
           onKeyDown={e => {
             if (e.code === 'Enter') {
@@ -135,7 +140,11 @@ export function ArrayListItem({
         onEdit?.();
       }}
     >
-      <ListItemText>{value}</ListItemText>
+      <ListItemText>
+        {typeof value === 'string'
+          ? value ?? ''
+          : JSON.stringify(value, null, '\t')}
+      </ListItemText>
       <ButtonGroup>
         <IconButton
           title="Edit"

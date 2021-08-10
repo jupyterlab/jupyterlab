@@ -90,6 +90,11 @@
 
 .elyra-metadataEditor {
   color: var(--jp-ui-font-color1);
+  overflow: scroll;
+}
+
+.elyra-metadataEditor .MuiTextField-root {
+  width: 100%;
 }
 
 .elyra-form-DropDown-item {

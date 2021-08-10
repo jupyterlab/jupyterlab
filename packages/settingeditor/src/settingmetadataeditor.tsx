@@ -24,6 +24,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
       return;
     }
     try {
+      this.metadata = JSON.parse(this.settings.raw);
       this.handleDirtyState(false);
       const settings = this._settings.schema;
       const currentSettings = JSON.parse(this._settings.raw);
@@ -43,54 +44,60 @@ export class SettingsMetadataEditor extends MetadataEditor {
           title: settings.description
         }
       };
-      if (settings.properties) {
-        for (const prop in settings.properties) {
-          const options = {
-            ...settings.properties[prop],
-            ...((settings.definitions as PartialJSONObject)?.[
-              prop
-            ] as PartialJSONObject)
-          };
-          if (options.type === 'object') {
-            for (const subProp in options.properties) {
-              const subOptions = options.properties[subProp];
-              schema.properties.metadata.properties[subProp] = {
-                title: subOptions.title ?? subProp,
-                type: subOptions.type,
-                uihints: {
-                  field_type: subOptions.type,
-                  category: options.title
-                }
-              };
-              this.metadata[subProp] = currentSettings[prop]?.[subProp];
-            }
-            if (typeof options.additionalProperties === 'object') {
-              if ((options.additionalProperties as any)?.enum) {
-                schema.properties.metadata.properties[prop] = {
-                  title: options.title,
-                  enum: (options.additionalProperties as any).enum,
-                  uihints: {
-                    field_type: 'dropdown'
-                  }
-                };
-              }
-              this.metadata[prop] = currentSettings[prop];
-            }
-          } else if (typeof options.type === 'object') {
-            schema.properties.metadata.properties[prop] = {
-              title: options.title
-            };
-            this.metadata[prop] = currentSettings[prop];
-          } else {
-            schema.properties.metadata.properties[prop] = {
-              title: options.title,
-              type: options.type,
+      for (const prop in settings.properties) {
+        const options = {
+          ...settings.properties[prop],
+          ...((settings.definitions as PartialJSONObject)?.[
+            prop
+          ] as PartialJSONObject)
+        };
+        if (options.properties && Object.keys(options.properties).length > 0) {
+          for (const subProp in options.properties) {
+            const subOptions = options.properties[subProp];
+            schema.properties.metadata.properties[subProp] = {
+              title: subOptions.title ?? subProp,
+              type: subOptions.type,
               uihints: {
-                field_type: options.type
+                field_type: subOptions.type,
+                category: options.title
               }
             };
-            this.metadata[prop] = currentSettings[prop];
+            this.metadata[subProp] =
+              currentSettings[prop]?.[subProp] ??
+              (options.default as any)?.[subProp];
           }
+        } else if ((options.additionalProperties as any)?.enum) {
+          schema.properties.metadata.properties[prop] = {
+            title: options.title,
+            enum: (options.additionalProperties as any).enum,
+            uihints: {
+              field_type: 'dropdown'
+            }
+          };
+          this.metadata[prop] = currentSettings[prop] ?? options.default;
+        } else if (typeof options.type === 'object') {
+          schema.properties.metadata.properties[prop] = {
+            title: options.title
+          };
+          this.metadata[prop] = currentSettings[prop] ?? options.default;
+        } else if (typeof options.default === 'object') {
+          for (const subProp in options.default) {
+            schema.properties.metadata.properties[subProp] = {
+              title: subProp
+            };
+            this.metadata[subProp] =
+              currentSettings[prop]?.[subProp] ??
+              (options.default as any)?.[subProp];
+          }
+        } else {
+          schema.properties.metadata.properties[prop] = {
+            title: options.title,
+            type: options.type,
+            uihints: {
+              field_type: options.type
+            }
+          };
+          this.metadata[prop] = currentSettings[prop] ?? options.default;
         }
       }
       this.schema = schema.properties.metadata.properties;
@@ -114,8 +121,6 @@ export class SettingsMetadataEditor extends MetadataEditor {
     } catch (error) {
       console.log(error);
     }
-
-    this.metadata = JSON.parse(this.settings.raw);
     this.displayName = undefined;
 
     this.update();
@@ -136,7 +141,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
             prop
           ] as PartialJSONObject)
         };
-        if (options.type === 'object') {
+        if (options.properties && Object.keys(options.properties).length > 0) {
           formattedSettings[prop] = {};
           for (const subProp in options.properties) {
             if (
@@ -176,7 +181,6 @@ export class SettingsMetadataEditor extends MetadataEditor {
       }
     }
 
-    console.log(JSON.stringify(formattedSettings));
     void this._settings
       .save(JSON.stringify(formattedSettings))
       .then(() => {
@@ -186,7 +190,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
       .catch(reason => {
         void showDialog({
           title: 'Validation error',
-          body: JSON.stringify(reason)
+          body: reason.stack
         });
       });
   }

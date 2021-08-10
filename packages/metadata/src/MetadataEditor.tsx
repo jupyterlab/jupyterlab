@@ -398,6 +398,7 @@ export class MetadataEditor extends ReactWidget {
   handleCheckboxChange = (schemaField: string, value: boolean): void => {
     this.handleDirtyState(true);
     this.metadata[schemaField] = value;
+    this.update();
   };
 
   handleDirtyState(dirty: boolean): void {
@@ -579,6 +580,7 @@ export class MetadataEditor extends ReactWidget {
         <div
           className="elyra-metadataEditor-formInput"
           key={`${fieldName}Array`}
+          style={{ flexBasis: '100%' }}
         >
           <InputLabel> {this.schema[fieldName].title} </InputLabel>
           <ArrayInput

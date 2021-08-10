@@ -59,7 +59,11 @@ export const TextInput: React.FC<ITextFieldProps> = ({
   fieldName
 }) => {
   const [error, setError] = React.useState(defaultError);
-  const [value, setValue] = React.useState(defaultValue);
+  const [value, setValue] = React.useState(
+    typeof defaultValue === 'string'
+      ? defaultValue
+      : JSON.stringify(defaultValue, null, '\t')
+  );
 
   // This is necessary to rerender with error when clicking the save button.
   React.useEffect(() => {
@@ -85,6 +89,7 @@ export const TextInput: React.FC<ITextFieldProps> = ({
           required={required}
           variant="outlined"
           error={error}
+          multiline={typeof defaultValue !== 'string'}
           onChange={(event): void => {
             const newValue = event.target.value;
             setError(required && newValue === '');
