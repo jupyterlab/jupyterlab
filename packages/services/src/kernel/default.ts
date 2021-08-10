@@ -967,6 +967,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
+   * Remove the input guard, if any.
+   */
+  removeInputGuard() {
+    this.hasPendingInput = false;
+  }
+
+  /**
    * Handle a message with a display id.
    *
    * @returns Whether the message was handled.

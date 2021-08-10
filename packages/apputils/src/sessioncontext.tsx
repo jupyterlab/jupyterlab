@@ -1087,6 +1087,9 @@ export class SessionContext implements ISessionContext {
     sender: Session.ISessionConnection,
     message: KernelMessage.IIOPubMessage
   ): void {
+    if (message.header.msg_type === 'shutdown_reply') {
+      this.session!.kernel!.removeInputGuard();
+    }
     this._iopubMessage.emit(message);
   }
 

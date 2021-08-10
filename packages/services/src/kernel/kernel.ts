@@ -466,6 +466,11 @@ export interface IKernelConnection extends IObservableDisposable {
   ): void;
 
   /**
+   * Remove the input guard, if any.
+   */
+  removeInputGuard(): void;
+
+  /**
    * A signal emitted when the kernel status changes.
    */
   statusChanged: ISignal<this, KernelMessage.Status>;
