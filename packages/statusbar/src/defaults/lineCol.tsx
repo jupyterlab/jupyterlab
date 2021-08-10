@@ -1,14 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactWidget, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { lineFormIcon } from '@jupyterlab/ui-components';
+import {
+  lineFormIcon,
+  ReactWidget,
+  VDomModel,
+  VDomRenderer
+} from '@jupyterlab/ui-components';
 import React from 'react';
 import { classes } from 'typestyle/lib';
 import { interactiveItem, Popup, showPopup, TextItem } from '..';

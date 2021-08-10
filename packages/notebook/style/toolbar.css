@@ -33,3 +33,23 @@
 .jp-Notebook-toolbarCellTypeDropdown span {
   top: 5px !important;
 }
+
+.jp-Toolbar-responsive-popup {
+  position: absolute;
+  height: var(--jp-private-toolbar-height);
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background: var(--jp-toolbar-background);
+  min-height: var(--jp-toolbar-micro-height);
+  padding: 2px;
+  z-index: 1;
+  right: 0px;
+  top: 0px;
+}
+
+.jp-toolbar > .jp-Toolbar-responsive-opener {
+  margin-left: auto;
+}

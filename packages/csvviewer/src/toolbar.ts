@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Styling } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { Styling } from '@jupyterlab/ui-components';
 import { each } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';

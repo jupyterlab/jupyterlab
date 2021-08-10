@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Toolbar } from '@jupyterlab/apputils';
-
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
+import { Toolbar } from '@jupyterlab/ui-components';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**

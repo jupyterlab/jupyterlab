@@ -1,19 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandToolbarButton } from '@jupyterlab/apputils';
-
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
+import { CommandToolbarButton } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-
 import { Panel } from '@lumino/widgets';
-
-import { CallstackBody } from './body';
-
-import { CallstackHeader } from './header';
-
 import { IDebugger } from '../../tokens';
+import { CallstackBody } from './body';
+import { CallstackHeader } from './header';
 
 /**
  * A Panel to show a callstack.

@@ -26,17 +26,16 @@ type Dict<T> = { [key: string]: T };
 
 // URL config for this branch
 // Source and target branches
-// Source and target RTD version names
+// Target RTD version name
 // For master these will be the same, for other branches the source
-// Branch is whichever branch it was created from
+// branch is whichever branch it was created from
 // The current release branch should target RTD stable
 // Master should target latest
 // All other release branches should target a specific named version
 const URL_CONFIG = {
   source: 'master',
   target: 'master',
-  rtdSource: 'stable',
-  rtdTarget: 'latest'
+  rtdVersion: 'latest'
 };
 
 // Data to ignore.
@@ -259,16 +258,19 @@ const locals: Dict<string> = {};
 function ensureBranch(): string[] {
   const messages: string[] = [];
 
-  const { source, target, rtdSource, rtdTarget } = URL_CONFIG;
+  const { source, target, rtdVersion } = URL_CONFIG;
 
   // Handle the github_version in conf.py
   const confPath = 'docs/source/conf.py';
-  let confData = fs.readFileSync(confPath, 'utf-8');
+  const oldConfData = fs.readFileSync(confPath, 'utf-8');
   const confTest = new RegExp('"github_version": "(.*)"');
-  if (source !== target) {
+  const newConfData = oldConfData.replace(
+    confTest,
+    `"github_version": "${target}"`
+  );
+  if (newConfData !== oldConfData) {
     messages.push(`Overwriting ${confPath}`);
-    confData = confData.replace(confTest, `"github_version": "${target}"`);
-    fs.writeFileSync(confPath, confData, 'utf-8');
+    fs.writeFileSync(confPath, newConfData, 'utf-8');
   }
 
   // Handle urls in files
@@ -284,16 +286,19 @@ function ensureBranch(): string[] {
 
   // Set up string replacements
   const base = '/jupyterlab/jupyterlab';
-  const rtdString = `jupyterlab.readthedocs.io/en/${rtdTarget}/`;
+  const rtdString = `jupyterlab.readthedocs.io/en/${rtdVersion}/`;
   const urlMap = [
     [`\/jupyterlab\/jupyterlab\/${source}\/`, `${base}/${target}/`],
     [`\/jupyterlab\/jupyterlab\/blob\/${source}\/`, `${base}/blob/${target}/`],
     [`\/jupyterlab\/jupyterlab\/tree\/${source}\/`, `${base}/tree/${target}/`],
-    [`jupyterlab.readthedocs.io\/en\/${rtdSource}\/`, rtdString]
+    [`jupyterlab.readthedocs.io\/en\/.*?\/`, rtdString]
   ];
 
   // Make the string replacements
   files.forEach(filePath => {
+    if (path.basename(filePath) === 'ensure-repo.ts') {
+      return;
+    }
     const oldData = fs.readFileSync(filePath, 'utf-8');
     let newData = oldData;
     urlMap.forEach(section => {
@@ -306,9 +311,11 @@ function ensureBranch(): string[] {
 
     // Make sure the root RTD links point to stable
     const badgeLink = '(http://jupyterlab.readthedocs.io/en/stable/)';
-    const toReplace = badgeLink.replace('stable', rtdTarget);
-    while (newData.indexOf(toReplace) !== -1) {
-      newData = newData.replace(toReplace, badgeLink);
+    const toReplace = badgeLink.replace('stable', rtdVersion);
+    if (badgeLink !== toReplace) {
+      while (newData.indexOf(toReplace) !== -1) {
+        newData = newData.replace(toReplace, badgeLink);
+      }
     }
 
     if (newData !== oldData) {
@@ -514,6 +521,10 @@ function ensureJupyterlab(): string[] {
     );
     corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
   });
+
+  // Update the dev mode version.
+  const curr = utils.getPythonVersion();
+  corePackage.jupyterlab.version = curr;
 
   // Write the package.json back to disk.
   if (utils.writePackageData(corePath, corePackage)) {

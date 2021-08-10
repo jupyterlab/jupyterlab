@@ -335,7 +335,7 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
   if (current === undefined) {
-    document.title = `JupyterLab${
+    document.title = `${PageConfig.getOption('appName') || 'JupyterLab'}${
       workspace.startsWith('auto-') ? ` (${workspace})` : ``
     }`;
   } else {
@@ -571,6 +571,8 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    // Add a command for taking lists of commands and command arguments
+    // and running all the enabled commands.
     commands.addCommand(CommandIDs.runAllEnabled, {
       label: trans.__('Run All Enabled Commands Passed as Args'),
       execute: async args => {

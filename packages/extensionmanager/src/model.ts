@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { VDomModel } from '@jupyterlab/apputils';
 import {
   KernelSpec,
   ServerConnection,
@@ -10,6 +9,7 @@ import {
 } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { VDomModel } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import * as semver from 'semver';
 import { doBuild } from './build-helper';

@@ -1,20 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, showDialog, ToolbarButton } from '@jupyterlab/apputils';
-
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
+import { ToolbarButton } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
-
 import { Panel } from '@lumino/widgets';
-
 import { closeAllIcon } from '../../icons';
-
 import { IDebugger } from '../../tokens';
-
 import { BreakpointsBody } from './body';
-
 import { BreakpointsHeader } from './header';
 
 /**

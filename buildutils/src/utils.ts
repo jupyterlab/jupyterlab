@@ -216,14 +216,7 @@ ${status}`
  * Post-bump.
  */
 export function postbump(commit = true): void {
-  // Get the current version.
-  const curr = getPythonVersion();
-
-  // Update the dev mode version.
-  const filePath = path.resolve(path.join('.', 'dev_mode', 'package.json'));
-  const data = readJSONFile(filePath);
-  data.jupyterlab.version = curr;
-  writeJSONFile(filePath, data);
+  run('jlpm run integrity');
 
   // Commit changes.
   if (commit) {

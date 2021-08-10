@@ -21,7 +21,7 @@ import { DockPanel, Menu, SplitPanel, Widget } from '@lumino/widgets';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { Dialog, showDialog, ToolbarButton } from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import {
   CodeMirrorEditorFactory,
@@ -42,7 +42,7 @@ import {
   TranslationManager
 } from '@jupyterlab/translation';
 
-import { addIcon } from '@jupyterlab/ui-components';
+import { addIcon, ToolbarButton } from '@jupyterlab/ui-components';
 
 const LANG = 'en';
 

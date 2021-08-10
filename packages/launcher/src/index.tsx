@@ -5,17 +5,18 @@
  * @module launcher
  */
 
-import {
-  showErrorMessage,
-  VDomModel,
-  VDomRenderer
-} from '@jupyterlab/apputils';
+import { showErrorMessage } from '@jupyterlab/apputils';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { classes, LabIcon } from '@jupyterlab/ui-components';
+import {
+  classes,
+  LabIcon,
+  VDomModel,
+  VDomRenderer
+} from '@jupyterlab/ui-components';
 import {
   ArrayExt,
   ArrayIterator,

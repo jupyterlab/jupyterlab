@@ -10,6 +10,7 @@ import * as utils from './utils';
 commander
   .description('Create a patch release')
   .option('--force', 'Force the upgrade')
+  .option('--all', 'Patch all JS packages instead of the changed ones')
   .action((options: any) => {
     // Make sure we can patch release.
     const pyVersion = utils.getPythonVersion();
@@ -26,6 +27,9 @@ commander
 
     // Version the changed
     let cmd = `lerna version patch -m \"New version\" --no-push`;
+    if (options.all) {
+      cmd += ' --force-publish=*';
+    }
     if (options.force) {
       cmd += ' --yes';
     }
