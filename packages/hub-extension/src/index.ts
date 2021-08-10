@@ -155,7 +155,7 @@ const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
 
       showingError = true;
       if (info) {
-        info.bandwidthSaveMode = true;
+        info.isConnected = false;
       }
 
       const result = await showDialog({
@@ -171,7 +171,7 @@ const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
       });
 
       if (info) {
-        info.bandwidthSaveMode = false;
+        info.isConnected = true;
       }
       showingError = false;
 

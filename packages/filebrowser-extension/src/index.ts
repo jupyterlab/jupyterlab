@@ -275,7 +275,10 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
         driveName: options.driveName || '',
         refreshInterval: options.refreshInterval,
         refreshStandby: () => {
-          return info?.bandwidthSaveMode || 'when-hidden';
+          if (info) {
+            return !info.isConnected || 'when-hidden';
+          }
+          return 'when-hidden';
         },
         state:
           options.state === null

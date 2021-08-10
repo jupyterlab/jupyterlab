@@ -26,7 +26,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
         options.serviceManager ||
         new ServiceManager({
           standby: () => {
-            return this._info.bandwidthSaveMode || 'when-hidden';
+            return !this._info.isConnected || 'when-hidden';
           }
         })
     });
@@ -221,15 +221,15 @@ export namespace JupyterLab {
 
     /**
      * Every periodic network polling should be paused while this is set
-     * to `true`. Extensions should use this value to decide whether to proceed
+     * to `false`. Extensions should use this value to decide whether to proceed
      * with the polling.
-     * The extensions may also set this value to `true` if there is no need to
+     * The extensions may also set this value to `false` if there is no need to
      * fetch anything from the server backend basing on some conditions
      * (e.g. when an error message dialog is displayed).
      * At the same time, the extensions are responsible for setting this value
-     * back to `false`.
+     * back to `true`.
      */
-    bandwidthSaveMode: boolean;
+    isConnected: boolean;
   }
 
   /**
@@ -241,7 +241,7 @@ export namespace JupyterLab {
     disabled: { patterns: [], matches: [] },
     mimeExtensions: [],
     filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
-    bandwidthSaveMode: false
+    isConnected: true
   };
 
   /**

@@ -37,13 +37,12 @@ export class DocumentManager implements IDocumentManager {
    */
   constructor(options: DocumentManager.IOptions) {
     this.translator = options.translator || nullTranslator;
-    this._bandwidthSaveModeCallback =
-      options.bandwidthSaveModeCallback || (() => false);
     this.registry = options.registry;
     this.services = options.manager;
     this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._docProviderFactory = options.docProviderFactory;
+    this._isConnectedCallback = options.isConnectedCallback || (() => true);
 
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
@@ -479,7 +478,7 @@ export class DocumentManager implements IDocumentManager {
     });
     const handler = new SaveHandler({
       context,
-      bandwidthSaveModeCallback: this._bandwidthSaveModeCallback,
+      isConnectedCallback: this._isConnectedCallback,
       saveInterval: this.autosaveInterval
     });
     Private.saveHandlerProperty.set(context, handler);
@@ -605,7 +604,7 @@ export class DocumentManager implements IDocumentManager {
   private _dialogs: ISessionContext.IDialogs;
   private _docProviderFactory: IDocumentProviderFactory | undefined;
   private _collaborative: boolean;
-  private _bandwidthSaveModeCallback: () => boolean;
+  private _isConnectedCallback: () => boolean;
 }
 
 /**
@@ -663,10 +662,10 @@ export namespace DocumentManager {
     collaborative?: boolean;
 
     /**
-     * Autosaving should be paused while this callback function returns `true`.
-     * By default, it always returns `false`.
+     * Autosaving should be paused while this callback function returns `false`.
+     * By default, it always returns `true`.
      */
-    bandwidthSaveModeCallback?: () => boolean;
+    isConnectedCallback?: () => boolean;
   }
 
   /**

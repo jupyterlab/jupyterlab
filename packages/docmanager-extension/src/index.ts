@@ -143,8 +143,11 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       translator,
       collaborative: true,
       docProviderFactory: docProviderFactory ?? undefined,
-      bandwidthSaveModeCallback: () => {
-        return info?.bandwidthSaveMode || false;
+      isConnectedCallback: () => {
+        if (info) {
+          return info.isConnected;
+        }
+        return true;
       }
     });
 
