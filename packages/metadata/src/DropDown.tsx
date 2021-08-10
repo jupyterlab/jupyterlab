@@ -31,7 +31,7 @@ import * as React from 'react';
 const DROPDOWN_ITEM_CLASS = 'elyra-form-DropDown-item';
 
 export interface IDropDownProps {
-  defaultError: boolean;
+  defaultError: string;
   defaultValue?: string;
   options?: string[];
   label: string;
@@ -71,7 +71,9 @@ export const DropDown: React.FC<IDropDownProps> = ({
 
   const handleChange = (newValue: string): void => {
     setValue(newValue);
-    setError(!!(required && newValue === ''));
+    if (required && newValue === '') {
+      setError('This field is required.');
+    }
     onChange(newValue);
   };
 
@@ -80,12 +82,12 @@ export const DropDown: React.FC<IDropDownProps> = ({
       <CustomTooltip title={description ?? ''} placement="top">
         {readonly ? (
           <FormControl variant="outlined">
-            <InputLabel error={error}>{label}</InputLabel>
+            <InputLabel error={!!error}>{label}</InputLabel>
             <Select
               value={value}
               id={`${label}DropDown`}
               label={label}
-              error={error}
+              error={!!error}
               onChange={(event: any): void => {
                 handleChange(event.target.value);
               }}
@@ -124,7 +126,7 @@ export const DropDown: React.FC<IDropDownProps> = ({
                 {...params}
                 label={label}
                 required={required}
-                error={error}
+                error={!!error}
                 onChange={(event: any): void => {
                   handleChange(event.target.value);
                 }}
@@ -137,9 +139,7 @@ export const DropDown: React.FC<IDropDownProps> = ({
           />
         )}
       </CustomTooltip>
-      {error === true && (
-        <FormHelperText error>This field is required.</FormHelperText>
-      )}
+      {!!error && <FormHelperText error>{error}</FormHelperText>}
     </div>
   );
 };

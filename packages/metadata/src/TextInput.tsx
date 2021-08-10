@@ -34,7 +34,7 @@ export interface ITextFieldProps {
   fieldName?: string;
   required?: boolean;
   secure?: boolean;
-  defaultError?: boolean;
+  defaultError?: string;
   placeholder?: string;
   onChange: (value: string) => any;
 }
@@ -88,12 +88,14 @@ export const TextInput: React.FC<ITextFieldProps> = ({
           label={label}
           required={required}
           variant="outlined"
-          error={error}
+          error={!!error}
           multiline={typeof defaultValue !== 'string'}
           maxRows={15}
           onChange={(event): void => {
             const newValue = event.target.value;
-            setError(required && newValue === '');
+            if (required && newValue === '') {
+              setError('This field is required.');
+            }
             setValue(newValue);
             onChange(newValue);
           }}
@@ -126,9 +128,7 @@ export const TextInput: React.FC<ITextFieldProps> = ({
           className={`elyra-metadataEditor-form-${fieldName ?? ''}`}
         />
       </CustomTooltip>
-      {error === true && (
-        <FormHelperText error>This field is required.</FormHelperText>
-      )}
+      {!!error && <FormHelperText error>{error}</FormHelperText>}
     </div>
   );
 };

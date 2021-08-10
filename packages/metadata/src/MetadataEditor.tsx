@@ -519,7 +519,7 @@ export class MetadataEditor extends ReactWidget {
     } else if (uihints.field_type === 'code') {
       let initialCodeValue = '';
       if (this.name) {
-        initialCodeValue = this.metadata.code.join('\n');
+        initialCodeValue = this.metadata.code?.join('\n');
       } else if (this.code) {
         this.metadata.code = this.code;
         initialCodeValue = this.code.join('\n');
@@ -616,6 +616,12 @@ export class MetadataEditor extends ReactWidget {
     return 'Save & Close';
   }
 
+  reset(): void {
+    this.handleDirtyState(true);
+    this.metadata = {};
+    this.update();
+  }
+
   render(): React.ReactElement {
     const inputElements = [];
     for (const category in this.schemaPropertiesByCategory) {
@@ -634,7 +640,10 @@ export class MetadataEditor extends ReactWidget {
       }
     }
     const headerText = this.getHeaderText();
-    const error = this.displayName === '' && this.invalidForm;
+    const error =
+      this.displayName === '' && this.invalidForm
+        ? 'This field is required.'
+        : undefined;
     const onKeyPress: React.KeyboardEventHandler = (
       event: React.KeyboardEvent
     ) => {
@@ -647,7 +656,9 @@ export class MetadataEditor extends ReactWidget {
       <div onKeyPress={onKeyPress} className={ELYRA_METADATA_EDITOR_CLASS}>
         <h3> {headerText} </h3>
         <p style={{ width: '100%', marginBottom: '10px' }}>
-          All fields marked with an asterisk are required.&nbsp;
+          {this.requiredFields &&
+            this.requiredFields.length > 0 &&
+            'All fields marked with an asterisk are required.&nbsp;'}
           {this.referenceURL ? (
             <Link
               href={this.referenceURL}
@@ -658,6 +669,14 @@ export class MetadataEditor extends ReactWidget {
             </Link>
           ) : null}
         </p>
+        <Button
+          onClick={(e: any) => {
+            this.reset();
+          }}
+        >
+          {' '}
+          Reset{' '}
+        </Button>
         {this.displayName !== undefined ? (
           <TextInput
             label="Name"

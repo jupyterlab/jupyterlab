@@ -238,28 +238,15 @@ export class SettingsMetadataEditor extends MetadataEditor {
     const errors = this._settings.validate(this.getFormattedSettings());
     console.log(errors);
     if (errors && errors.length > 0) {
-      void showDialog({
-        title: 'Error validating',
-        body: JSON.stringify(errors, null, '\t')
-      });
+      for (const error of errors) {
+        const schemaField = error.dataPath.substring(1);
+        this.schema[schemaField].uihints.error = error.message;
+      }
+      this.update();
       return true;
     } else {
       return false;
     }
-    for (const schemaField in this.schema) {
-      const value =
-        this.metadata[schemaField] || this.schema[schemaField].default;
-      if (
-        this.requiredFields?.includes(schemaField) &&
-        this.isValueEmpty(value)
-      ) {
-        this.invalidForm = true;
-        this.schema[schemaField].uihints.error = true;
-      } else {
-        this.schema[schemaField].uihints.error = false;
-      }
-    }
-    return this.invalidForm;
   }
 
   handleDirtyState(dirty: boolean): void {
