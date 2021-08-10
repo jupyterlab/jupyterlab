@@ -90,6 +90,7 @@ export const TextInput: React.FC<ITextFieldProps> = ({
           variant="outlined"
           error={error}
           multiline={typeof defaultValue !== 'string'}
+          maxRows={15}
           onChange={(event): void => {
             const newValue = event.target.value;
             setError(required && newValue === '');

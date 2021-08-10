@@ -103,6 +103,7 @@ export function ArrayListItem({
               : JSON.stringify(value, null, '\t')
           }
           multiline={typeof value !== 'string'}
+          maxRows={15}
           placeholder={placeholder}
           onKeyDown={e => {
             if (e.code === 'Enter') {
