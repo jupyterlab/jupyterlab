@@ -477,6 +477,7 @@ export class MetadataEditor extends ReactWidget {
     }
     if (
       uihints.field_type === 'textinput' ||
+      uihints.field_type === 'string' ||
       uihints.field_type === 'number' ||
       uihints.field_type === undefined
     ) {
@@ -603,6 +604,18 @@ export class MetadataEditor extends ReactWidget {
     this.allTags = allTags;
   }
 
+  getHeaderText(): string {
+    let headerText = `Edit "${this.displayName}"`;
+    if (!this.name) {
+      headerText = `Add new ${this.schemaDisplayName}`;
+    }
+    return headerText;
+  }
+
+  getSaveButtonText(): string {
+    return 'Save & Close';
+  }
+
   render(): React.ReactElement {
     const inputElements = [];
     for (const category in this.schemaPropertiesByCategory) {
@@ -620,10 +633,7 @@ export class MetadataEditor extends ReactWidget {
         inputElements.push(this.renderField(schemaProperty));
       }
     }
-    let headerText = `Edit "${this.displayName}"`;
-    if (!this.name) {
-      headerText = `Add new ${this.schemaDisplayName}`;
-    }
+    const headerText = this.getHeaderText();
     const error = this.displayName === '' && this.invalidForm;
     const onKeyPress: React.KeyboardEventHandler = (
       event: React.KeyboardEvent
@@ -676,7 +686,7 @@ export class MetadataEditor extends ReactWidget {
               this.saveMetadata();
             }}
           >
-            Save & Close
+            {this.getSaveButtonText()}
           </SaveButton>
         </div>
       </div>

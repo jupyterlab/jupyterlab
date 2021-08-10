@@ -62,8 +62,6 @@ export class SettingEditor extends Widget {
     }));
     const instructions = (this._instructions = new Widget());
     const editor = (this._editor = new PluginEditor({
-      schema: 'code-snippet',
-      namespace: 'code-snippets',
       name,
       code,
       onSave,

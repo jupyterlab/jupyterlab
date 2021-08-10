@@ -182,8 +182,6 @@ export namespace PluginEditor {
    * The instantiation options for a plugin editor.
    */
   export interface IOptions {
-    schema: string;
-    namespace: string;
     name?: string;
     code?: string[];
     onSave: () => void;

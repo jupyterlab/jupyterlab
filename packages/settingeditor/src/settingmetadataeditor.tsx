@@ -23,30 +23,55 @@ export class SettingsMetadataEditor extends MetadataEditor {
       console.log('No settings');
       return;
     }
-
-    this.metadata = JSON.parse(this.settings.raw);
+    try {
+      this.metadata = JSON.parse(this.settings.raw);
+    } catch {
+      this.metadata = {};
+    }
     this.handleDirtyState(false);
     const settings = this._settings.schema;
-    const currentSettings = JSON.parse(this._settings.raw);
+    const currentSettings = this.metadata;
     const properties: any = {};
     for (const prop in settings.properties) {
+      let ref = settings.properties[prop]['$ref'] as string;
+      if (ref) {
+        ref = ref.substring(14);
+      }
       const options = {
         ...settings.properties[prop],
         ...((settings.definitions as PartialJSONObject)?.[
-          prop
+          ref || prop
         ] as PartialJSONObject)
       };
       if (Object.keys(options.properties ?? {}).length > 0) {
         for (const subProp in options.properties) {
           const subOptions = options.properties[subProp];
-          properties[subProp] = {
-            title: subOptions.title ?? subProp,
-            type: subOptions.type,
-            uihints: {
-              field_type: subOptions.type,
-              category: options.title
-            }
-          };
+          if (subOptions.enum) {
+            properties[subProp] = {
+              title: subOptions.title ?? subProp,
+              enum: subOptions.enum,
+              uihints: {
+                field_type: 'dropdown',
+                category: options.title
+              }
+            };
+          } else if (typeof subOptions.type === 'object') {
+            properties[subProp] = {
+              title: subOptions.title ?? subProp,
+              uihints: {
+                category: options.title
+              }
+            };
+          } else {
+            properties[subProp] = {
+              title: subOptions.title ?? subProp,
+              type: subOptions.type,
+              uihints: {
+                field_type: subOptions.type,
+                category: options.title
+              }
+            };
+          }
           this.metadata[subProp] =
             currentSettings[prop]?.[subProp] ??
             (options.default as any)?.[subProp];
@@ -117,11 +142,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
     this.update();
   }
 
-  saveMetadata(): void {
-    if (!this.dirty || !this._settings) {
-      return undefined;
-    }
-
+  getFormattedSettings(): string {
     const settings = this._settings.schema;
     const formattedSettings: any = {};
     for (const prop in settings.properties) {
@@ -135,7 +156,14 @@ export class SettingsMetadataEditor extends MetadataEditor {
         formattedSettings[prop] = {};
         for (const subProp in options.properties) {
           if (
-            options.properties[subProp].type === 'number' &&
+            (options.properties[subProp].type === 'number' ||
+              (typeof options.properties[subProp].type === 'object' &&
+                ((options.properties[subProp].type as any)?.includes(
+                  'number'
+                ) ||
+                  (options.properties[subProp].type as any)?.includes(
+                    'integer'
+                  )))) &&
             this.metadata[subProp]
           ) {
             formattedSettings[prop][subProp] = parseInt(this.metadata[subProp]);
@@ -167,9 +195,28 @@ export class SettingsMetadataEditor extends MetadataEditor {
         formattedSettings[prop] = this.metadata[prop];
       }
     }
+    return JSON.stringify(formattedSettings);
+  }
+
+  getSaveButtonText(): string {
+    return 'Save';
+  }
+
+  getHeaderText(): string {
+    return this.schemaDisplayName ?? '';
+  }
+
+  saveMetadata(): void {
+    if (!this.dirty || !this._settings) {
+      return undefined;
+    }
+    if (this.hasInvalidFields()) {
+      return;
+    }
+    const formattedSettings = this.getFormattedSettings();
 
     void this._settings
-      .save(JSON.stringify(formattedSettings))
+      .save(formattedSettings)
       .then(() => {
         this.handleDirtyState(false);
         this.onSave();
@@ -180,6 +227,39 @@ export class SettingsMetadataEditor extends MetadataEditor {
           body: reason.stack
         });
       });
+  }
+
+  hasInvalidFields(): boolean {
+    this.invalidForm = false;
+    if (this.displayName === null || this.displayName === '') {
+      this.invalidForm = true;
+    }
+
+    const errors = this._settings.validate(this.getFormattedSettings());
+    console.log(errors);
+    if (errors && errors.length > 0) {
+      void showDialog({
+        title: 'Error validating',
+        body: JSON.stringify(errors, null, '\t')
+      });
+      return true;
+    } else {
+      return false;
+    }
+    for (const schemaField in this.schema) {
+      const value =
+        this.metadata[schemaField] || this.schema[schemaField].default;
+      if (
+        this.requiredFields?.includes(schemaField) &&
+        this.isValueEmpty(value)
+      ) {
+        this.invalidForm = true;
+        this.schema[schemaField].uihints.error = true;
+      } else {
+        this.schema[schemaField].uihints.error = false;
+      }
+    }
+    return this.invalidForm;
   }
 
   handleDirtyState(dirty: boolean): void {
