@@ -570,14 +570,14 @@ This ``install.json`` file is used by JupyterLab to help a user know how to mana
 * ``packageName``: This is the package name of the prebuilt extension in the package manager above, which may be different than the package name in ``package.json``.
 * ``uninstallInstructions``: This is a short block of text giving the user instructions for uninstalling the prebuilt extension. For example, it might instruct them to use a system package manager or talk to a system administrator.
 
-.. _trove_classifiers:
+.. _dev_trove_classifiers:
 
 PyPI Trove Classifiers
 """"""""""""""""""""""
 
 Extensions distributed as Python packages may declare additional metadata in the form of
-`trove classifiers <https://pypi.org/classifiers>`. These improve the browsing
-experience for users on `PyPI <https://pypi.org/search>`. While including the license,
+`trove classifiers <https://pypi.org/classifiers>`__. These improve the browsing
+experience for users on `PyPI <https://pypi.org/search>`__. While including the license,
 development status, Python versions supported, and other topic classifiers are useful
 for many audiences, the following classifiers are specific to Jupyter and JupyterLab.
 
@@ -590,9 +590,9 @@ for many audiences, the following classifiers are specific to Jupyter and Jupyte
     Framework :: Jupyter :: JupyterLab :: 3
     Framework :: Jupyter :: JupyterLab :: 4
     Framework :: Jupyter :: JupyterLab :: Extensions
-    Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
-    Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
     Framework :: Jupyter :: JupyterLab :: Extensions :: Mime Renderers
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
 
 Include each relevant classifier (and its parents) to help describe what your package
 provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyproject.toml``.
@@ -603,6 +603,7 @@ provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyprojec
     a ready-to-run, prebuilt extension might look like:
 
     .. code-block:: python
+
         # setup.py
         setup(
             # the rest of the package's metadata
@@ -617,7 +618,8 @@ provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyprojec
             ]
         )
 
-    This would be discoverable from a `PyPI search <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Themes>`.
+    This would be discoverable from, for example, a
+    `PyPI search for theme extensions <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Themes>`__.
 
 .. _source_dev_workflow:
 
