@@ -498,7 +498,6 @@ export namespace ToolbarButtonComponent {
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
-    ariaLabel?: string;
     pressed?: boolean;
     pressedIcon?: LabIcon.IMaybeResolvable;
     pressedTooltip?: string;
@@ -569,7 +568,6 @@ export function ToolbarButtonComponent(
           ? props.className + ' jp-ToolbarButtonComponent'
           : 'jp-ToolbarButtonComponent'
       }
-      aria-label={props.ariaLabel || ''}
       aria-pressed={props.pressed}
       aria-disabled={props.enabled === false}
       disabled={props.enabled === false}
@@ -621,38 +619,63 @@ export class ToolbarButton extends ReactWidget {
     super();
     addToolbarButtonClass(this);
     this._enabled = props.enabled ?? true;
-    this._pressed = this._enabled === true ? props.pressed ?? false : false;
-    this._onClick = props.onClick;
+    this._pressed = this._enabled! && (props.pressed ?? false);
+    this._onClick = props.onClick!;
   }
 
+  /**
+   * Sets the pressed state for the button
+   * @param value true if button is pressed, false otherwise
+   */
   set pressed(value: boolean) {
-    if (value != this._pressed) {
+    if (this.enabled && value !== this._pressed) {
       this._pressed = value;
       this.update();
     }
   }
 
-  get pressed() {
-    return this._enabled === true ? this._pressed : false;
+  /**
+   * Returns true if button is pressed, false otherwise
+   */
+  get pressed(): boolean {
+    return this._pressed!;
   }
 
+  /**
+   * Sets the enabled state for the button
+   * @param value true to enable the button, false otherwise
+   */
   set enabled(value: boolean) {
     if (value != this._enabled) {
       this._enabled = value;
+      if (!this._enabled) {
+        this._pressed = false;
+      }
       this.update();
     }
   }
 
-  get enabled() {
+  /**
+   * Returns true if button is enabled, false otherwise
+   */
+  get enabled(): boolean {
     return this._enabled;
   }
 
+  /**
+   * Sets the click handler for the button
+   * @param value click handler
+   */
   set onClick(value: () => void) {
     if (value !== this._onClick) {
       this._onClick = value;
       this.update();
     }
   }
+
+  /**
+   * Returns the click handler for the button
+   */
   get onClick() {
     return this._onClick!;
   }
@@ -668,9 +691,9 @@ export class ToolbarButton extends ReactWidget {
     );
   }
 
-  private _pressed;
-  private _enabled;
-  private _onClick;
+  private _pressed: boolean;
+  private _enabled: boolean;
+  private _onClick: () => void;
 }
 
 /**

@@ -35,10 +35,11 @@ function updateIconButton(
     className: 'jp-DebuggerBugButton',
     icon: bugIcon,
     tooltip: trans.__('Enable Debugger'),
-    ariaLabel: trans.__('Enable/Disable Debugger'),
     pressedIcon: bugDotIcon,
     pressedTooltip: trans.__('Disable Debugger'),
-    disabledTooltip: trans.__('Select a kernel that support debugging'),
+    disabledTooltip: trans.__(
+      'Select a kernel that supports debugging to enable debugger'
+    ),
     enabled,
     pressed,
     onClick
@@ -286,19 +287,19 @@ export class DebuggerHandler {
       }
     };
 
-    const isDebuggerOn = () => {
+    const isDebuggerOn = (): boolean => {
       return (
         this._service.isStarted &&
         this._previousConnection?.id === connection?.id
       );
     };
 
-    const stopDebugger = async () => {
+    const stopDebugger = async (): Promise<void> => {
       this._service.session!.connection = connection;
       await this._service.stop();
     };
 
-    const startDebugger = async () => {
+    const startDebugger = async (): Promise<void> => {
       this._service.session!.connection = connection;
       this._previousConnection = connection;
       await this._service.restoreState(true);

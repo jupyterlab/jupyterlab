@@ -422,22 +422,6 @@ describe('@jupyterlab/ui-components', () => {
         expect(button.querySelector('.iconFoo')).toBeDefined();
         expect(button.title).toBe('bar');
       });
-
-      it('should accept aria label', async () => {
-        const widget = new ToolbarButton({
-          className: 'foo',
-          iconClass: 'iconFoo',
-          onClick: () => {
-            return void 0;
-          },
-          tooltip: 'bar',
-          ariaLabel: 'button'
-        });
-        Widget.attach(widget, document.body);
-        await framePromise();
-        const button = widget.node.firstChild as HTMLElement;
-        expect(button.getAttribute('aria-label')).toBe('button');
-      });
     });
 
     describe('#dispose()', () => {
@@ -556,22 +540,57 @@ describe('@jupyterlab/ui-components', () => {
         );
         widget.dispose();
       });
+
+      it('should not have the pressed state when not enabled', async () => {
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'tooltip',
+          pressedTooltip: 'pressed tooltip',
+          disabledTooltip: 'disabled tooltip',
+          pressedIcon: bugDotIcon,
+          enabled: false
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        const button = widget.node.firstChild as HTMLElement;
+        expect(widget.pressed).toBe(false);
+        expect(button.title).toBe('disabled tooltip');
+        expect(button.getAttribute('aria-pressed')).toEqual('false');
+        widget.pressed = true;
+        await framePromise();
+        expect(widget.pressed).toBe(false);
+        expect(button.title).toBe('disabled tooltip');
+        expect(button.getAttribute('aria-pressed')).toEqual('false');
+        const icon = button.querySelectorAll('svg');
+        expect(icon[0].getAttribute('data-icon')).toEqual('ui-components:bug');
+        widget.dispose();
+      });
     });
 
     describe('#enabled()', () => {
       it('should update the enabled state', async () => {
         const widget = new ToolbarButton({
           icon: bugIcon,
-          tooltip: 'tooltip'
+          tooltip: 'tooltip',
+          pressedTooltip: 'pressed tooltip',
+          disabledTooltip: 'disabled tooltip',
+          pressedIcon: bugDotIcon
         });
         Widget.attach(widget, document.body);
         await framePromise();
         const button = widget.node.firstChild as HTMLElement;
         expect(widget.enabled).toBe(true);
+        expect(widget.pressed).toBe(false);
         expect(button.getAttribute('aria-disabled')).toEqual('false');
+
+        widget.pressed = true;
+        await framePromise();
+        expect(widget.pressed).toBe(true);
+
         widget.enabled = false;
         await framePromise();
         expect(widget.enabled).toBe(false);
+        expect(widget.pressed).toBe(false);
         expect(button.getAttribute('aria-disabled')).toEqual('true');
         widget.dispose();
       });
