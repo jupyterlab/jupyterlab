@@ -37,9 +37,9 @@ Browsing Extensions on PyPI
 
 The Python Package Index (PyPI) is a repository of software for the Python
 programming language, and the default source of packages for the ``pip`` package
-manager. While a `simple text search <https://pypi.org/search/?q=jupyterlab&o=>`
+manager. While a `simple text search <https://pypi.org/search/?q=jupyterlab&o=>`__
 will reveal hundreds of packages, a number of
-`trove classifiers <https://pypi.org/classifiers>` are available for packages
+`trove classifiers <https://pypi.org/classifiers>`__ are available for packages
 to self-describe the features and compatibility provided:
 
 - `Framework :: Jupyter :: JupyterLab <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab>`__
@@ -47,7 +47,7 @@ to self-describe the features and compatibility provided:
 - `Framework :: Jupyter :: JupyterLab :: 2 <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+2>`__
 - `Framework :: Jupyter :: JupyterLab :: 3 <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+3>`__
 - `Framework :: Jupyter :: JupyterLab :: 4 <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+4>`__
-- `Framework :: Jupyter :: JupyterLab :: Extensions <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Extensions>`__
+- `Framework :: Jupyter :: JupyterLab :: Extensions <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions>`__
 - `Framework :: Jupyter :: JupyterLab :: Extensions :: Mime Renderers <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Mime+Renderers>`__
 - `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt>`__
 - `Framework :: Jupyter :: JupyterLab :: Extensions :: Themes <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Themes>`__
