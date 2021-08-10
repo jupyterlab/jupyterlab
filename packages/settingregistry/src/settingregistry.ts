@@ -1,32 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import Ajv from 'ajv';
-
-import * as json5 from 'json5';
-
+import { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
-
 import {
   JSONExt,
   JSONObject,
   JSONValue,
-  ReadonlyJSONObject,
+  PartialJSONObject,
   PartialJSONValue,
+  ReadonlyJSONObject,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue,
-  PartialJSONObject
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { IDataConnector } from '@jupyterlab/statedb';
-
-import { ISettingRegistry } from './tokens';
-
+import Ajv from 'ajv';
+import * as json5 from 'json5';
 import SCHEMA from './plugin-schema.json';
+import { ISettingRegistry } from './tokens';
 
 /**
  * An alias for the JSON deep copy function.
@@ -894,6 +886,158 @@ export namespace SettingRegistry {
      * The validator used to enforce the settings JSON schema.
      */
     validator?: ISchemaValidator;
+  }
+
+  /**
+   * Reconcile the menus.
+   *
+   * @param reference The reference list of menus.
+   * @param addition The list of menus to add.
+   * @param warn Warn if the command items are duplicated within the same menu.
+   * @returns The reconciled list of menus.
+   */
+  export function reconcileMenus(
+    reference: ISettingRegistry.IMenu[] | null,
+    addition: ISettingRegistry.IMenu[] | null,
+    warn: boolean = false,
+    addNewItems: boolean = true
+  ): ISettingRegistry.IMenu[] {
+    if (!reference) {
+      return addition && addNewItems ? JSONExt.deepCopy(addition) : [];
+    }
+    if (!addition) {
+      return JSONExt.deepCopy(reference);
+    }
+
+    const merged = JSONExt.deepCopy(reference);
+
+    addition.forEach(menu => {
+      const refIndex = merged.findIndex(ref => ref.id === menu.id);
+      if (refIndex >= 0) {
+        merged[refIndex] = {
+          ...merged[refIndex],
+          ...menu,
+          items: reconcileItems(
+            merged[refIndex].items,
+            menu.items,
+            warn,
+            addNewItems
+          )
+        };
+      } else {
+        if (addNewItems) {
+          merged.push(menu);
+        }
+      }
+    });
+
+    return merged;
+  }
+
+  /**
+   * Merge two set of menu items.
+   *
+   * @param reference Reference set of menu items
+   * @param addition New items to add
+   * @param warn Whether to warn if item is duplicated; default to false
+   * @returns The merged set of items
+   */
+  export function reconcileItems<T extends ISettingRegistry.IMenuItem>(
+    reference?: T[],
+    addition?: T[],
+    warn: boolean = false,
+    addNewItems: boolean = true
+  ): T[] | undefined {
+    if (!reference) {
+      return addition ? JSONExt.deepCopy(addition) : undefined;
+    }
+    if (!addition) {
+      return JSONExt.deepCopy(reference);
+    }
+
+    const items = JSONExt.deepCopy(reference);
+
+    // Merge array element depending on the type
+    addition.forEach(item => {
+      switch (item.type ?? 'command') {
+        case 'separator':
+          if (addNewItems) {
+            items.push({ ...item });
+          }
+          break;
+        case 'submenu':
+          if (item.submenu) {
+            const refIndex = items.findIndex(
+              ref =>
+                ref.type === 'submenu' && ref.submenu?.id === item.submenu?.id
+            );
+            if (refIndex < 0) {
+              if (addNewItems) {
+                items.push(JSONExt.deepCopy(item));
+              }
+            } else {
+              items[refIndex] = {
+                ...items[refIndex],
+                ...item,
+                submenu: reconcileMenus(
+                  items[refIndex].submenu
+                    ? [items[refIndex].submenu as any]
+                    : null,
+                  [item.submenu],
+                  warn,
+                  addNewItems
+                )[0]
+              };
+            }
+          }
+          break;
+        case 'command':
+          if (item.command) {
+            const refIndex = items.findIndex(
+              ref =>
+                ref.command === item.command &&
+                ref.selector === item.selector &&
+                JSONExt.deepEqual(ref.args ?? {}, item.args ?? {})
+            );
+            if (refIndex < 0) {
+              if (addNewItems) {
+                items.push({ ...item });
+              }
+            } else {
+              if (warn) {
+                console.warn(
+                  `Menu entry for command '${item.command}' is duplicated.`
+                );
+              }
+              items[refIndex] = { ...items[refIndex], ...item };
+            }
+          }
+      }
+    });
+
+    return items;
+  }
+
+  export function filterDisabledItems<T extends ISettingRegistry.IMenuItem>(
+    items: T[]
+  ): T[] {
+    return items.reduce<T[]>((final, value) => {
+      const copy = { ...value };
+      if (!copy.disabled) {
+        if (copy.type === 'submenu') {
+          const { submenu } = copy;
+          if (submenu && !submenu.disabled) {
+            copy.submenu = {
+              ...submenu,
+              items: filterDisabledItems(submenu.items ?? [])
+            };
+          }
+        }
+        final.push(copy);
+      }
+
+      return final;
+    }, []);
   }
 
   /**

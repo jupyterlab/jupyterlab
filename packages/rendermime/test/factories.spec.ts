@@ -3,22 +3,19 @@
 
 const sampleData = require('../../../examples/filebrowser/sample.md');
 
-import { JSONObject, JSONValue } from '@lumino/coreutils';
-
-import { Widget } from '@lumino/widgets';
-
 import { defaultSanitizer } from '@jupyterlab/apputils';
-
+import { JSONObject, JSONValue } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 import {
-  latexRendererFactory,
-  svgRendererFactory,
-  markdownRendererFactory,
-  textRendererFactory,
   htmlRendererFactory,
-  imageRendererFactory
+  imageRendererFactory,
+  IRenderMime,
+  latexRendererFactory,
+  markdownRendererFactory,
+  MimeModel,
+  svgRendererFactory,
+  textRendererFactory
 } from '../src';
-
-import { MimeModel, IRenderMime } from '../src';
 
 function createModel(
   mimeType: string,

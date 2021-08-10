@@ -1,15 +1,15 @@
-import { reduce } from '@lumino/algorithm';
-import { PanelLayout } from '@lumino/widgets';
-import { NotebookTools, INotebookTracker } from '@jupyterlab/notebook';
-import { Cell } from '@jupyterlab/cells';
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { Cell } from '@jupyterlab/cells';
+import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { TagWidget } from './widget';
+import { reduce } from '@lumino/algorithm';
+import { PanelLayout } from '@lumino/widgets';
 import { AddWidget } from './addwidget';
+import { TagWidget } from './widget';
 
 /**
  * A Tool for tag operations.

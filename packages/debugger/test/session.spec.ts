@@ -9,8 +9,8 @@ import { Session } from '@jupyterlab/services';
 
 import {
   createSession,
-  signalToPromises,
-  JupyterServer
+  JupyterServer,
+  signalToPromises
 } from '@jupyterlab/testutils';
 
 import { find } from '@lumino/algorithm';
@@ -157,6 +157,8 @@ describe('protocol', () => {
             break;
           }
           case 'stopped':
+            const msg = event as DebugProtocol.StoppedEvent;
+            threadId = msg.body.threadId!;
             stoppedFuture.resolve();
             break;
           default:

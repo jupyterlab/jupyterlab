@@ -1,37 +1,36 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentModel, DocumentRegistry } from '@jupyterlab/docregistry';
-
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
+  CellModel,
+  CodeCellModel,
   ICellModel,
   ICodeCellModel,
-  IRawCellModel,
   IMarkdownCellModel,
-  CodeCellModel,
-  RawCellModel,
+  IRawCellModel,
   MarkdownCellModel,
-  CellModel
+  RawCellModel
 } from '@jupyterlab/cells';
-
+import { IChangedArgs } from '@jupyterlab/coreutils';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { UUID } from '@lumino/coreutils';
-
 import {
+  IModelDB,
   IObservableJSON,
-  IObservableUndoableList,
   IObservableList,
-  IModelDB
+  IObservableUndoableList,
+  ModelDB
 } from '@jupyterlab/observables';
-
-import { CellList } from './celllist';
-import { showDialog, Dialog } from '@jupyterlab/apputils';
+import * as models from '@jupyterlab/shared-models';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { UUID } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
+import { CellList } from './celllist';
 
 /**
  * The definition of a model object for a notebook widget.
@@ -66,21 +65,36 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * The array of deleted cells since the notebook was last run.
    */
   readonly deletedCells: string[];
+
+  /**
+   * If the model is initialized or not.
+   */
+  isInitialized: boolean;
+  readonly sharedModel: models.ISharedNotebook;
 }
 
 /**
  * An implementation of a notebook Model.
  */
-export class NotebookModel extends DocumentModel implements INotebookModel {
+export class NotebookModel implements INotebookModel {
   /**
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    super(options.languagePreference, options.modelDB);
+    if (options.modelDB) {
+      this.modelDB = options.modelDB;
+    } else {
+      this.modelDB = new ModelDB();
+    }
+    this._isInitialized = options.isInitialized === false ? false : true;
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
-    this._cells = new CellList(this.modelDB, this.contentFactory);
+    this._cells = new CellList(
+      this.modelDB,
+      this.contentFactory,
+      this.sharedModel
+    );
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._cells.changed.connect(this._onCellsChanged, this);
 
@@ -94,11 +108,49 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     metadata.changed.connect(this.triggerContentChange, this);
     this._deletedCells = [];
   }
+  /**
+   * A signal emitted when the document content changes.
+   */
+  get contentChanged(): ISignal<this, void> {
+    return this._contentChanged;
+  }
 
   /**
-   * The cell model factory for the notebook.
+   * A signal emitted when the document state changes.
    */
-  readonly contentFactory: NotebookModel.IContentFactory;
+  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+    return this._stateChanged;
+  }
+
+  /**
+   * The dirty state of the document.
+   */
+  get dirty(): boolean {
+    return this._dirty;
+  }
+  set dirty(newValue: boolean) {
+    if (newValue === this._dirty) {
+      return;
+    }
+    const oldValue = this._dirty;
+    this._dirty = newValue;
+    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
+  }
+
+  /**
+   * The read only state of the document.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
+  }
+  set readOnly(newValue: boolean) {
+    if (newValue === this._readOnly) {
+      return;
+    }
+    const oldValue = this._readOnly;
+    this._readOnly = newValue;
+    this.triggerStateChange({ name: 'readOnly', oldValue, newValue });
+  }
 
   /**
    * The metadata associated with the notebook.
@@ -146,6 +198,13 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
+   * If the model is initialized or not.
+   */
+  get isInitialized(): boolean {
+    return this._isInitialized;
+  }
+
+  /**
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
@@ -166,7 +225,8 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     const cells = this.cells;
     this._cells = null!;
     cells.dispose();
-    super.dispose();
+    this._isDisposed = true;
+    Signal.clearData(this);
   }
 
   /**
@@ -318,11 +378,11 @@ close the notebook without saving it.`,
    * and clears undo state.
    */
   initialize(): void {
-    super.initialize();
     if (!this.cells.length) {
       const factory = this.contentFactory;
       this.cells.push(factory.createCodeCell({}));
     }
+    this._isInitialized = true;
     this.cells.clearUndo();
   }
 
@@ -365,11 +425,56 @@ close the notebook without saving it.`,
     }
   }
 
+  /**
+   * Trigger a state change signal.
+   */
+  protected triggerStateChange(args: IChangedArgs<any>): void {
+    this._stateChanged.emit(args);
+  }
+
+  /**
+   * Trigger a content changed signal.
+   */
+  protected triggerContentChange(): void {
+    this._contentChanged.emit(void 0);
+    this.dirty = true;
+  }
+
+  /**
+   * Whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * The cell model factory for the notebook.
+   */
+  readonly contentFactory: NotebookModel.IContentFactory;
+
+  /**
+   * The shared notebook model.
+   */
+  readonly sharedModel = models.YNotebook.create() as models.ISharedNotebook;
+
+  /**
+   * The underlying `IModelDB` instance in which model
+   * data is stored.
+   */
+  readonly modelDB: IModelDB;
+
+  private _dirty = false;
+  private _readOnly = false;
+  private _contentChanged = new Signal<this, void>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+
   private _trans: TranslationBundle;
   private _cells: CellList;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _deletedCells: string[];
+  private _isInitialized: boolean;
+  private _isDisposed = false;
 }
 
 /**
@@ -401,6 +506,11 @@ export namespace NotebookModel {
      * Language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * If the model is initialized or not.
+     */
+    isInitialized?: boolean;
   }
 
   /**
@@ -425,10 +535,13 @@ export namespace NotebookModel {
      * @param options: the cell creation options.
      *
      * #### Notes
-     * This method is intended to be a convenience method to programmaticaly
+     * This method is intended to be a convenience method to programmatically
      * call the other cell creation methods in the factory.
      */
-    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel;
+    createCell(
+      type: nbformat.CellType,
+      options: CellModel.IOptions
+    ): ICellModel;
 
     /**
      * Create a new code cell.
@@ -497,18 +610,21 @@ export namespace NotebookModel {
      * @param options: the cell creation options.
      *
      * #### Notes
-     * This method is intended to be a convenience method to programmaticaly
+     * This method is intended to be a convenience method to programmatically
      * call the other cell creation methods in the factory.
      */
-    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel {
+    createCell(
+      type: nbformat.CellType,
+      options: CellModel.IOptions
+    ): ICellModel {
       switch (type) {
         case 'code':
-          return this.createCodeCell(opts);
+          return this.createCodeCell(options);
         case 'markdown':
-          return this.createMarkdownCell(opts);
+          return this.createMarkdownCell(options);
         case 'raw':
         default:
-          return this.createRawCell(opts);
+          return this.createRawCell(options);
       }
     }
 

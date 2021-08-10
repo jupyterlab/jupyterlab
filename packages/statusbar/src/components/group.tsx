@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-
-import { style, classes } from 'typestyle/lib';
-
+import { classes, style } from 'typestyle/lib';
 import { centeredFlex, leftToRight } from '../style/layout';
 
 const groupItemLayout = style(centeredFlex, leftToRight);
@@ -42,7 +40,7 @@ export namespace GroupItem {
    */
   export interface IProps {
     /**
-     * The spacing, in px, between the items in the goup.
+     * The spacing, in px, between the items in the group.
      */
     spacing: number;
 

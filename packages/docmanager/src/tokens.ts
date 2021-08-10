@@ -1,17 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Token } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { ISignal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
+import { Token } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 /* tslint:disable */
 /**

@@ -3,9 +3,9 @@
 import { ILayoutRestorer } from '@jupyterlab/application';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import {
+  IMarkdownViewerTracker,
   MarkdownViewer,
-  MarkdownViewerFactory,
-  IMarkdownViewerTracker
+  MarkdownViewerFactory
 } from '@jupyterlab/markdownviewer';
 import {
   IRenderMimeRegistry,
@@ -46,7 +46,6 @@ const plugin = {
  * Activate the markdown viewer plugin.
  */
 function activate(app, restorer, rendermime, settingRegistry, middleToken) {
-  console.log(middleToken);
   const { commands, docRegistry } = app;
   // Add the markdown renderer factory.
   rendermime.addFactory(markdownRendererFactory);

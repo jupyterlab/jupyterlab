@@ -3,9 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { SplitPanel as SPanel } from '@lumino/widgets';
-
 import { ISignal, Signal } from '@lumino/signaling';
+import { SplitPanel as SPanel } from '@lumino/widgets';
 
 /**
  * A deprecated split panel that will be removed when the phosphor split panel

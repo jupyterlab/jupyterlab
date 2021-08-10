@@ -1,26 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Mode } from '@jupyterlab/codemirror';
-
-import { Contents } from '@jupyterlab/services';
-
-import { PartialJSONValue } from '@lumino/coreutils';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
 import { MainAreaWidget } from '@jupyterlab/apputils';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
+import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-
 import { IModelDB } from '@jupyterlab/observables';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { Contents } from '@jupyterlab/services';
+import * as models from '@jupyterlab/shared-models';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { PartialJSONValue } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Title, Widget } from '@lumino/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
 
 /**
@@ -35,6 +26,8 @@ export class DocumentModel
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
+    const filemodel = new models.YFile() as models.ISharedFile;
+    this.switchSharedModel(filemodel, true);
     this.value.changed.connect(this.triggerContentChange, this);
   }
 
@@ -158,6 +151,10 @@ export class DocumentModel
     this.dirty = true;
   }
 
+  /**
+   * The shared notebook model.
+   */
+  readonly sharedModel: models.ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
@@ -216,12 +213,15 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * Create a new model.
    *
    * @param languagePreference - An optional kernel language preference.
+   * @param modelDB - An optional modelDB.
+   * @param isInitialized - An optional flag to check if the model is initialized.
    *
    * @returns A new document model.
    */
   createNew(
     languagePreference?: string,
-    modelDB?: IModelDB
+    modelDB?: IModelDB,
+    isInitialized?: boolean
   ): DocumentRegistry.ICodeModel {
     return new DocumentModel(languagePreference, modelDB);
   }
@@ -379,7 +379,7 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The aplication language translator.
+   * The application language translator.
    */
   get translator(): ITranslator {
     return this._translator;
@@ -486,6 +486,9 @@ export class DocumentWidget<
     void this.context.ready.then(() => {
       this._handleDirtyState();
     });
+
+    // listen for changes to the title object
+    this.title.changed.connect(this._onTitleChanged, this);
   }
 
   /**
@@ -493,6 +496,29 @@ export class DocumentWidget<
    */
   setFragment(fragment: string): void {
     /* no-op */
+  }
+
+  /**
+   * Handle a title change.
+   */
+  private async _onTitleChanged(_sender: Title<this>) {
+    const validNameExp = /[\/\\:]/;
+    const name = this.title.label;
+    const filename = this.context.path.split('/').pop()!;
+
+    if (name === filename) {
+      return;
+    }
+    if (name.length > 0 && !validNameExp.test(name)) {
+      const oldPath = this.context.path;
+      await this.context.rename(name);
+      if (this.context.path !== oldPath) {
+        // Rename succeeded
+        return;
+      }
+    }
+    // Reset title if name is invalid or rename fails
+    this.title.label = filename;
   }
 
   /**

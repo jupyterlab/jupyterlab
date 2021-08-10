@@ -1,23 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject } from '@lumino/coreutils';
-
-import { Message } from '@lumino/messaging';
-
-import { PanelLayout } from '@lumino/widgets';
-
-import { Widget } from '@lumino/widgets';
-
-import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { HoverBox } from '@jupyterlab/apputils';
-
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IRenderMime,
   IRenderMimeRegistry,
   MimeModel
 } from '@jupyterlab/rendermime';
+import { JSONObject } from '@lumino/coreutils';
+import { Message } from '@lumino/messaging';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
  * The class name added to each tooltip.
@@ -66,6 +59,7 @@ export class Tooltip extends Widget {
     this.addClass(TOOLTIP_CLASS);
     this.hide();
     this._editor = options.editor;
+    this._position = options.position;
     this._rendermime = options.rendermime;
 
     const mimeType = this._rendermime.preferredMimeType(options.bundle, 'any');
@@ -140,7 +134,7 @@ export class Tooltip extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.node.tabIndex = -1;
+    this.node.tabIndex = 0;
     this.node.focus();
   }
 
@@ -191,10 +185,9 @@ export class Tooltip extends Widget {
   }
 
   /**
-   * Set the geometry of the tooltip widget.
+   * Find the position of the first character of the current token.
    */
-  private _setGeometry(): void {
-    // Find the start of the current token for hover box placement.
+  private _getTokenPosition(): CodeEditor.IPosition | undefined {
     const editor = this._editor;
     const cursor = editor.getCursorPosition();
     const end = editor.getOffsetAt(cursor);
@@ -207,11 +200,21 @@ export class Tooltip extends Widget {
     const tokens = line.substring(0, end).split(/\W+/);
     const last = tokens[tokens.length - 1];
     const start = last ? end - last.length : end;
-    const position = editor.getPositionAt(start);
+    return editor.getPositionAt(start);
+  }
+
+  /**
+   * Set the geometry of the tooltip widget.
+   */
+  private _setGeometry(): void {
+    // determine position for hover box placement
+    const position = this._position ? this._position : this._getTokenPosition();
 
     if (!position) {
       return;
     }
+
+    const editor = this._editor;
 
     const anchor = editor.getCoordinateForPosition(position) as ClientRect;
     const style = window.getComputedStyle(this.node);
@@ -232,6 +235,7 @@ export class Tooltip extends Widget {
 
   private _content: IRenderMime.IRenderer | null = null;
   private _editor: CodeEditor.IEditor;
+  private _position: CodeEditor.IPosition | undefined;
   private _rendermime: IRenderMimeRegistry;
 }
 
@@ -262,5 +266,13 @@ export namespace Tooltip {
      * The rendermime instance used by the tooltip model.
      */
     rendermime: IRenderMimeRegistry;
+
+    /**
+     * Position at which the tooltip should be placed.
+     *
+     * If not given, the position of the first character
+     * in the current token will be used.
+     */
+    position?: CodeEditor.IPosition;
   }
 }

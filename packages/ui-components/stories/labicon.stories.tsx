@@ -3,12 +3,10 @@
  */
 // need this to avoid
 // TS2686: 'React' refers to a UMD global, but the current file is a module.
-import React from 'react';
-
-import { buildIcon, runningIcon, html5Icon } from '../src';
-
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
+import React from 'react';
+import { buildIcon, html5Icon, runningIcon } from '../src';
 
 export default {
   // component: LabIcon,

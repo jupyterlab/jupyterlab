@@ -43,7 +43,7 @@ from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 from jupyterlab._version import __version__
 
 # The regex for expecting the webpack output.
-WEBPACK_EXPECT = re.compile(r'.*theme-light-extension/style/index.css')
+WEBPACK_EXPECT = re.compile(r'.*theme-light-extension/style/theme.css')
 
 
 # The repo root directory
@@ -2307,7 +2307,7 @@ def _log_single_compat_errors(logger, name, version, errors):
 
 
 def _compat_error_age(errors):
-    """Compare all incompatabilites for an extension.
+    """Compare all incompatibilities for an extension.
 
     Returns a number > 0 if all extensions are older than that supported by lab.
     Returns a number < 0 if all extensions are newer than that supported by lab.

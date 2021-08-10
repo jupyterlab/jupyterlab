@@ -3,7 +3,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { UUID, JSONExt, JSONObject, PromiseDelegate } from '@lumino/coreutils';
+import { JSONExt, JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -16,9 +16,9 @@ import * as Kernel from './kernel';
 import * as KernelMessage from './messages';
 
 import {
+  KernelControlFutureHandler,
   KernelFutureHandler,
-  KernelShellFutureHandler,
-  KernelControlFutureHandler
+  KernelShellFutureHandler
 } from './future';
 
 import * as serialize from './serialize';
@@ -33,6 +33,7 @@ declare let requirejs: any;
 
 const KERNEL_INFO_TIMEOUT = 3000;
 const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
+const STARTING_KERNEL_SESSION = '';
 
 /**
  * Implementation of the Kernel object.
@@ -56,9 +57,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this.handleComms = options.handleComms ?? true;
 
     this._createSocket();
-
-    // Immediately queue up a request for initial kernel info.
-    void this.requestKernelInfo();
   }
 
   get disposed(): ISignal<this, void> {
@@ -388,13 +386,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
       throw new Error('Kernel is dead');
     }
 
-    // If we have a kernel_info_request and we are restarting, send the
+    // If we have a kernel_info_request and we are starting or restarting, send the
     // kernel_info_request immediately if we can, and if not throw an error so
-    // we can retry later. We do this because we must get at least one message
+    // we can retry later. On restarting we do this because we must get at least one message
     // from the kernel to reset the kernel session (thus clearing the restart
     // status sentinel).
     if (
-      this._kernelSession === RESTARTING_KERNEL_SESSION &&
+      (this._kernelSession === STARTING_KERNEL_SESSION ||
+        this._kernelSession === RESTARTING_KERNEL_SESSION) &&
       KernelMessage.isInfoRequestMsg(msg)
     ) {
       if (this.connectionStatus === 'connected') {

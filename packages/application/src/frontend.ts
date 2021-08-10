@@ -2,21 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CommandLinker } from '@jupyterlab/apputils';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import { ServiceManager } from '@jupyterlab/services';
-
 import { ContextMenuSvg } from '@jupyterlab/ui-components';
-
 import { IIterator } from '@lumino/algorithm';
-
 import { Application, IPlugin } from '@lumino/application';
-
 import { Token } from '@lumino/coreutils';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -140,7 +132,7 @@ export abstract class JupyterFrontEnd<
 
   /**
    * Walks up the DOM hierarchy of the target of the active `contextmenu`
-   * event, testing each HTMLElement ancestor for a user-supplied funcion. This can
+   * event, testing each HTMLElement ancestor for a user-supplied function. This can
    * be used to find an HTMLElement on which to operate, given a context menu click.
    *
    * @param fn - a function that takes an `HTMLElement` and returns a
@@ -345,7 +337,7 @@ export namespace JupyterFrontEnd {
      *
      * Examples of appropriate use include displaying a help dialog for a user
      * listing the paths, or a tooltip in a filebrowser displaying the server
-     * root. Examples of inapproriate use include using one of these paths in a
+     * root. Examples of inappropriate use include using one of these paths in a
      * terminal command, generating code using these paths, or using one of
      * these paths in a request to the server (it would be better to write a
      * server extension to handle these cases).

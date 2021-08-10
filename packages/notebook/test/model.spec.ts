@@ -1,18 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, toArray } from '@lumino/algorithm';
-
 import { CodeCellModel } from '@jupyterlab/cells';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { NotebookModel } from '../src';
-
 import { ModelDB } from '@jupyterlab/observables';
-
 import { acceptDialog } from '@jupyterlab/testutils';
-
+import { ArrayExt, toArray } from '@lumino/algorithm';
+import { NotebookModel } from '../src';
 import * as utils from './utils';
 
 describe('@jupyterlab/notebook', () => {
@@ -81,12 +75,15 @@ describe('@jupyterlab/notebook', () => {
         const model = new NotebookModel();
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
+        const cellJSON = cell.toJSON();
         model.cells.push(cell);
-        model.fromJSON(utils.DEFAULT_CONTENT);
+        model.cells.clearUndo();
+        model.cells.remove(model.cells.length - 1);
         model.cells.undo();
         expect(model.cells.length).toBe(1);
         expect(model.cells.get(0).value.text).toBe('foo');
-        expect(model.cells.get(0)).toBe(cell); // should be ===.
+        // Previous model matches the restored model
+        expect(model.cells.get(0).toJSON()).toEqual(cellJSON);
       });
 
       describe('cells `changed` signal', () => {

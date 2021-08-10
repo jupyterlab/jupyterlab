@@ -2,35 +2,23 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
-
 import { PathExt } from '@jupyterlab/coreutils';
-
-import { UUID } from '@lumino/coreutils';
-
+import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 import {
-  DocumentRegistry,
   Context,
+  DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, find } from '@lumino/algorithm';
-
+import { UUID } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
-
 import { SaveHandler } from './savehandler';
-
 import { IDocumentManager } from './tokens';
-
 import { DocumentWidgetManager } from './widgetmanager';
 
 /**
@@ -53,7 +41,9 @@ export class DocumentManager implements IDocumentManager {
       options.bandwidthSaveModeCallback || (() => false);
     this.registry = options.registry;
     this.services = options.manager;
+    this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
+    this._docProviderFactory = options.docProviderFactory;
 
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
@@ -483,7 +473,9 @@ export class DocumentManager implements IDocumentManager {
       kernelPreference,
       modelDBFactory,
       setBusy: this._setBusy,
-      sessionDialogs: this._dialogs
+      sessionDialogs: this._dialogs,
+      collaborative: this._collaborative,
+      docProviderFactory: this._docProviderFactory
     });
     const handler = new SaveHandler({
       context,
@@ -551,7 +543,7 @@ export class DocumentManager implements IDocumentManager {
       return undefined;
     }
 
-    // Handle the kernel pereference.
+    // Handle the kernel preference.
     const preference = this.registry.getKernelPreference(
       path,
       widgetFactory.name,
@@ -611,6 +603,8 @@ export class DocumentManager implements IDocumentManager {
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
+  private _docProviderFactory: IDocumentProviderFactory | undefined;
+  private _collaborative: boolean;
   private _bandwidthSaveModeCallback: () => boolean;
 }
 
@@ -653,9 +647,20 @@ export namespace DocumentManager {
     sessionDialogs?: ISessionContext.IDialogs;
 
     /**
-     * The applicaton language translator.
+     * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * A factory method for the document provider.
+     */
+    docProviderFactory?: IDocumentProviderFactory;
+
+    /**
+     * Whether the context should be collaborative.
+     * If true, the context will connect through yjs_ws_server to share information if possible.
+     */
+    collaborative?: boolean;
 
     /**
      * Autosaving should be paused while this callback function returns `true`.

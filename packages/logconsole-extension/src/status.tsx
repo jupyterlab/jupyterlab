@@ -1,22 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-
 import {
+  IContentChange,
   ILogger,
-  ILoggerRegistry,
-  IContentChange
+  ILoggerRegistry
 } from '@jupyterlab/logconsole';
-
-import { GroupItem, TextItem, interactiveItem } from '@jupyterlab/statusbar';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
-import { listIcon } from '@jupyterlab/ui-components';
-
+import { GroupItem, interactiveItem, TextItem } from '@jupyterlab/statusbar';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { listIcon, VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
-
 import React from 'react';
 
 /**

@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Logger } from './logger';
-
 import { ILogger, ILoggerRegistry, ILoggerRegistryChange } from './tokens';
 
 /**

@@ -5,9 +5,6 @@
  * @module terminal-extension
  */
 
-import { toArray } from '@lumino/algorithm';
-import { Menu } from '@lumino/widgets';
-
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
@@ -24,12 +21,12 @@ import { IFileMenu, IMainMenu } from '@jupyterlab/mainmenu';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { Terminal } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
-import { ITranslator } from '@jupyterlab/translation';
-import { terminalIcon } from '@jupyterlab/ui-components';
-
+import { ITerminal, ITerminalTracker } from '@jupyterlab/terminal';
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
+import { ITranslator } from '@jupyterlab/translation';
+import { terminalIcon } from '@jupyterlab/ui-components';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -87,7 +84,7 @@ function activate(
   runningSessionManagers: IRunningSessionManagers | null
 ): ITerminalTracker {
   const trans = translator.load('jupyterlab');
-  const { serviceManager, commands } = app;
+  const { serviceManager } = app;
   const category = trans.__('Terminal');
   const namespace = 'terminal';
   const tracker = new WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>({
@@ -174,43 +171,6 @@ function activate(
   addCommands(app, tracker, settingRegistry, translator, options);
 
   if (mainMenu) {
-    // Add "Terminal Theme" menu below "JupyterLab Themes" menu.
-    const themeMenu = new Menu({ commands });
-    themeMenu.title.label = trans.__('Terminal Theme');
-    themeMenu.addItem({
-      command: CommandIDs.setTheme,
-      args: {
-        theme: 'inherit',
-        displayName: trans.__('Inherit'),
-        isPalette: false
-      }
-    });
-    themeMenu.addItem({
-      command: CommandIDs.setTheme,
-      args: {
-        theme: 'light',
-        displayName: trans.__('Light'),
-        isPalette: false
-      }
-    });
-    themeMenu.addItem({
-      command: CommandIDs.setTheme,
-      args: { theme: 'dark', displayName: trans.__('Dark'), isPalette: false }
-    });
-
-    // Add some commands to the "View" menu.
-    mainMenu.settingsMenu.addGroup(
-      [
-        { command: CommandIDs.increaseFont },
-        { command: CommandIDs.decreaseFont },
-        { type: 'submenu', submenu: themeMenu }
-      ],
-      40
-    );
-
-    // Add terminal creation to the file menu.
-    mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
-
     // Add terminal close-and-shutdown to the file menu.
     mainMenu.fileMenu.closeAndCleaners.add({
       tracker,
@@ -266,12 +226,6 @@ function activate(
   if (runningSessionManagers) {
     addRunningSessionManager(runningSessionManagers, app, translator);
   }
-
-  app.contextMenu.addItem({
-    command: CommandIDs.refresh,
-    selector: '.jp-Terminal',
-    rank: 1
-  });
 
   return tracker;
 }
@@ -331,7 +285,7 @@ export function addCommands(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   options: Partial<ITerminal.IOptions>
-) {
+): void {
   const trans = translator.load('jupyterlab');
   const { commands, serviceManager } = app;
 
@@ -436,9 +390,19 @@ export function addCommands(
     }
   });
 
+  const themeDisplayedName = {
+    inherit: trans.__('Inherit'),
+    light: trans.__('Light'),
+    dark: trans.__('Dark')
+  };
+
   commands.addCommand(CommandIDs.setTheme, {
     label: args => {
-      const displayName = args['displayName'] as string;
+      const theme = args['theme'] as string;
+      const displayName =
+        theme in themeDisplayedName
+          ? themeDisplayedName[theme as keyof typeof themeDisplayedName]
+          : trans.__(theme[0].toUpperCase() + theme.slice(1));
       return args['isPalette']
         ? trans.__('Use Terminal Theme: %1', displayName)
         : displayName;

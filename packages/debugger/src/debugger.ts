@@ -16,8 +16,8 @@ import { DebuggerHandler } from './handler';
 import {
   closeAllIcon as closeAll,
   stepIntoIcon as stepInto,
-  stepOverIcon as stepOver,
   stepOutIcon as stepOut,
+  stepOverIcon as stepOver,
   variableIcon as variable,
   viewBreakpointIcon as viewBreakpoint
 } from './icons';
@@ -97,6 +97,8 @@ export namespace Debugger {
     export const terminate = 'debugger:terminate';
 
     export const next = 'debugger:next';
+
+    export const showPanel = 'debugger:show-panel';
 
     export const stepIn = 'debugger:stepIn';
 

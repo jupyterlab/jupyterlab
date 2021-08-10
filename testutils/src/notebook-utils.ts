@@ -13,9 +13,9 @@ import { Context } from '@jupyterlab/docregistry';
 
 import {
   INotebookModel,
-  NotebookPanel,
   Notebook,
   NotebookModel,
+  NotebookPanel,
   StaticNotebook
 } from '@jupyterlab/notebook';
 

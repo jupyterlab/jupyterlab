@@ -1,6 +1,12 @@
 name: Linux Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
 
 jobs:
   linuxtests:
@@ -81,7 +87,7 @@ jobs:
         if: ${{ matrix.group == 'linkcheck' }}
         with:
           path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst') }}-changelog
+          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst', '**/*.md') }}-changelog
           restore-keys: |
             ${{ runner.os }}-linkcheck-
 

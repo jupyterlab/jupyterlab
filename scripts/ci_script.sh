@@ -49,33 +49,32 @@ if [[ $GROUP == docs ]]; then
 fi
 
 if [[ $GROUP == linkcheck ]]; then
-    # Build the docs
-    pushd docs
-    conda env create -f environment.yml
-    conda init --all
-    source $CONDA/bin/activate jupyterlab_documentation
-    make html
-    conda deactivate
-    popd
+    # Run the link check using the jupyter-releaser CLI
 
-    # Run the link check on the built html files
+    # Set up caching
     CACHE_DIR="${HOME}/.cache/pytest-link-check"
     mkdir -p ${CACHE_DIR}
     echo "Existing cache:"
     ls -ltr ${CACHE_DIR}
+
+    # Set up env variables for releaser
+    export RH_CACHE_FILE=${CACHE_DIR}/cache
     # Expire links after a week
-    LINKS_EXPIRE=604800
-    base_args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
+    export RH_LINKS_EXPIRE=604800
 
-    # Ignore pull requests and issues to the link check doesn't take all day
-    base_args="--check-links-ignore https://github.com/.*/(pull|issues)/.* ${base_args}"
+    # Handle the branch
+    if [ ! -z ${GITHUB_BASE_REF} ]; then
+      echo "Using GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
+      export RH_BRANCH=${GITHUB_BASE_REF}
+    else
+      # e.g refs/head/foo or refs/tag/bar
+      echo "Using GITHUB_REF: ${GITHUB_REF}"
+      export RH_BRANCH=$(echo ${GITHUB_REF} | cut -d'/' -f 3)
+    fi
 
-    # Check built html files
-    args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html --ignore docs/build/html/api ${base_args}"
-    py.test $args --links-ext .html -k .html docs/build/html || py.test $args --links-ext .html -k .html --lf docs/build/html
-
-    # Check markdown files
-    py.test ${base_args} --links-ext .md -k .md . || py.test $args --links-ext .md -k .md --lf .
+    pip install jupyter_releaser
+    jupyter-releaser prep-git
+    jupyter-releaser check-links
 fi
 
 
@@ -114,10 +113,11 @@ if [[ $GROUP == integrity2 ]]; then
     # Make sure the storybooks build.
     jlpm run build:storybook
 
+    jlpm config set prefix ~/.yarn
+
     # Make sure we have CSS that can be converted with postcss
     jlpm global add postcss postcss-cli
 
-    jlpm config set prefix ~/.yarn
     ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
 
     # run twine check on the python build assets.
@@ -148,7 +148,7 @@ if [[ $GROUP == integrity3 ]]; then
 
     # make sure we can patch release
     jlpm bumpversion release --force  # switch to final
-    jlpm patch:release --force
+    jlpm bumpversion patch --force
 
     # make sure we can bump major JS releases
     jlpm bumpversion minor --force
@@ -164,6 +164,15 @@ if [[ $GROUP == release_check ]]; then
     jlpm run publish:js --dry-run
     jlpm run prepare:python-release
     ./scripts/release_test.sh
+
+    # Prep for using verdaccio during publish
+    node buildutils/lib/local-repository.js start
+    npm whoami
+    pushd packages/application
+    npm version patch
+    npm publish
+    popd
+    node buildutils/lib/local-repository.js stop
 fi
 
 if [[ $GROUP == examples ]]; then
@@ -216,8 +225,11 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension build extension
 
     # Test develop script with hyphens and underscores in the module name
+    pip install -e test-hyphens
     jupyter labextension develop test-hyphens --overwrite --debug
+    pip install -e test_no_hyphens
     jupyter labextension develop test_no_hyphens --overwrite --debug
+    pip install -e test-hyphens-underscore
     jupyter labextension develop test-hyphens-underscore --overwrite --debug
 
     python -m jupyterlab.browser_check
@@ -366,7 +378,7 @@ if [[ $GROUP == usage2 ]]; then
 fi
 
 
-if [[ $GROUP == splice_source ]];then
+if [[ $GROUP == splice_source ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
 

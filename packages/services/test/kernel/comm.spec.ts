@@ -1,16 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PromiseDelegate } from '@lumino/coreutils';
-
-import { KernelMessage, Kernel, KernelManager } from '../../src';
-
 import {
   isFulfilled,
-  JupyterServer,
-  flakyIt as it
+  flakyIt as it,
+  JupyterServer
 } from '@jupyterlab/testutils';
-
+import { PromiseDelegate } from '@lumino/coreutils';
+import { Kernel, KernelManager, KernelMessage } from '../../src';
 import { init } from '../utils';
 
 // Initialize fetch override.

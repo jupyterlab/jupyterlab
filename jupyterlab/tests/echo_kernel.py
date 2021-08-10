@@ -18,10 +18,18 @@ class EchoKernel(Kernel):
     banner = "Echo kernel - as useful as a parrot"
 
     def do_execute(self, code, silent, store_history=True,
-            user_expressions=None, allow_stdin=False):
+                   user_expressions=None, allow_stdin=False):
         if not silent:
             stream_content = {'name': 'stdout', 'text': code}
             self.send_response(self.iopub_socket, 'stream', stream_content)
+
+            # Send a input_request if code contains input command.
+            if allow_stdin and code and code.find('input(') != -1:
+                self._input_request('Echo Prompt',
+                    self._parent_ident["shell"],
+                    self.get_parent(channel="shell"),
+                    password=False,
+                )
 
         return {'status': 'ok',
                 # The base class increments the execution count

@@ -1,27 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ICellModel } from '@jupyterlab/cells';
+import {
+  IModelDB,
+  IObservableList,
+  IObservableMap,
+  IObservableUndoableList,
+  ObservableMap
+} from '@jupyterlab/observables';
+import * as models from '@jupyterlab/shared-models';
 import {
   ArrayExt,
+  ArrayIterator,
+  each,
   IIterator,
   IterableOrArrayLike,
-  each,
-  toArray,
-  ArrayIterator
+  toArray
 } from '@lumino/algorithm';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { ICellModel } from '@jupyterlab/cells';
-
-import {
-  IObservableMap,
-  ObservableMap,
-  IObservableList,
-  IObservableUndoableList,
-  IModelDB
-} from '@jupyterlab/observables';
-
 import { NotebookModel } from './model';
 
 /**
@@ -31,15 +28,93 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   /**
    * Construct the cell list.
    */
-  constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
+  constructor(
+    modelDB: IModelDB,
+    factory: NotebookModel.IContentFactory,
+    model: models.ISharedNotebook
+  ) {
     this._factory = factory;
     this._cellOrder = modelDB.createList<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
 
     this._cellOrder.changed.connect(this._onOrderChanged, this);
+    this.nbmodel = model;
+    this.nbmodel.changed.connect(this.onSharedModelChanged, this);
+    this.changed.connect(this.onModelDBChanged, this);
   }
 
   type: 'List';
+  nbmodel: models.ISharedNotebook;
+
+  /**
+   * Prevents that the modeldb event handler is executed when the shared-model event handler is executed and vice-versa.
+   */
+  private readonly _mutex = models.createMutex();
+
+  private onModelDBChanged(
+    self: CellList,
+    change: IObservableList.IChangedArgs<ICellModel>
+  ) {
+    this._mutex(() => {
+      const nbmodel = this.nbmodel;
+      nbmodel.transact(() => {
+        if (change.type === 'set' || change.type === 'remove') {
+          nbmodel.deleteCellRange(
+            change.oldIndex,
+            change.oldIndex + change.oldValues.length
+          );
+        }
+        if (
+          change.type === 'set' ||
+          change.type === 'add' ||
+          change.type === 'move'
+        ) {
+          const cells = change.newValues.map(cell => {
+            return cell.sharedModel.clone() as any;
+          });
+          let insertLocation = change.newIndex;
+          if (change.type === 'move' && insertLocation > change.oldIndex) {
+            insertLocation += change.oldValues.length;
+          }
+          nbmodel.insertCells(insertLocation, cells);
+          change.newValues.forEach((cell, index) => {
+            cell.switchSharedModel(cells[index], false);
+          });
+        }
+        if (change.type === 'move') {
+          let from = change.oldIndex;
+          if (from >= change.newIndex) {
+            from += change.oldValues.length;
+          }
+          nbmodel.deleteCellRange(from, from + change.oldValues.length);
+        }
+      });
+    });
+  }
+
+  private onSharedModelChanged(
+    self: models.ISharedNotebook,
+    change: models.NotebookChange
+  ) {
+    this._mutex(() => {
+      let currpos = 0;
+      change.cellsChange?.forEach(delta => {
+        if (delta.insert != null) {
+          const cells = delta.insert.map(nbcell => {
+            const cell = this._factory.createCell(nbcell.cell_type, {});
+            cell.switchSharedModel(nbcell as any, true);
+            return cell;
+          });
+          this.insertAll(currpos, cells);
+          currpos += delta.insert.length;
+        } else if (delta.delete != null) {
+          this.removeRange(currpos, currpos + delta.delete);
+        } else if (delta.retain != null) {
+          currpos += delta.retain;
+        }
+      });
+    });
+  }
 
   /**
    * A signal emitted when the cell list has changed.
@@ -370,6 +445,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     const newValues = toArray(cells);
     each(newValues, cell => {
       this._cellMap.set(cell.id, cell);
+      // @todo it looks like this compound operation shoult start before the `each` loop.
       this._cellOrder.beginCompoundOperation();
       this._cellOrder.insert(index++, cell.id);
       this._cellOrder.endCompoundOperation();
@@ -404,14 +480,14 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Whether the object can redo changes.
    */
   get canRedo(): boolean {
-    return this._cellOrder.canRedo;
+    return this.nbmodel.canRedo();
   }
 
   /**
    * Whether the object can undo changes.
    */
   get canUndo(): boolean {
-    return this._cellOrder.canUndo;
+    return this.nbmodel.canUndo();
   }
 
   /**
@@ -435,33 +511,21 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Undo an operation.
    */
   undo(): void {
-    this._cellOrder.undo();
+    this.nbmodel.undo();
   }
 
   /**
    * Redo an operation.
    */
   redo(): void {
-    this._cellOrder.redo();
+    this.nbmodel.redo();
   }
 
   /**
    * Clear the change stack.
    */
   clearUndo(): void {
-    // Dispose of cells not in the current
-    // cell order.
-    for (const key of this._cellMap.keys()) {
-      if (
-        ArrayExt.findFirstIndex(toArray(this._cellOrder), id => id === key) ===
-        -1
-      ) {
-        const cell = this._cellMap.get(key) as ICellModel;
-        cell.dispose();
-        this._cellMap.delete(key);
-      }
-    }
-    this._cellOrder.clearUndo();
+    this.nbmodel.clearUndoHistory();
   }
 
   private _onOrderChanged(
@@ -470,7 +534,8 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   ): void {
     if (change.type === 'add' || change.type === 'set') {
       each(change.newValues, id => {
-        if (!this._cellMap.has(id)) {
+        const existingCell = this._cellMap.get(id);
+        if (existingCell == null) {
           const cellDB = this._factory.modelDB!;
           const cellType = cellDB.createValue(id + '.type');
           let cell: ICellModel;
@@ -486,6 +551,25 @@ export class CellList implements IObservableUndoableList<ICellModel> {
               break;
           }
           this._cellMap.set(id, cell);
+        } else if (!existingCell.sharedModel.isStandalone) {
+          this._mutex(() => {
+            // it does already exist, probably because it was deleted previously and we introduced it
+            // copy it to a fresh codecell instance
+            const cell = existingCell.toJSON();
+            let freshCell = null;
+            switch (cell.cell_type) {
+              case 'code':
+                freshCell = this._factory.createCodeCell({ cell });
+                break;
+              case 'markdown':
+                freshCell = this._factory.createMarkdownCell({ cell });
+                break;
+              default:
+                freshCell = this._factory.createRawCell({ cell });
+                break;
+            }
+            this._cellMap.set(id, freshCell);
+          });
         }
       });
     }

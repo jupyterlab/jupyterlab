@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JSONExt } from '@lumino/coreutils';
-
 import minimist from 'minimist';
-
 import { URLExt } from './url';
 
 /**
@@ -54,7 +52,7 @@ export namespace PageConfig {
       }
     }
     // Otherwise use CLI if given.
-    if (!found && typeof process !== 'undefined') {
+    if (!found && typeof process !== 'undefined' && process.argv) {
       try {
         const cli = minimist(process.argv.slice(2));
         const path: any = require('path');

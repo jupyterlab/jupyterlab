@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { INumberedHeading } from '../../utils/headings';
+import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { OptionsManager } from './options_manager';
 
 /**

@@ -3,11 +3,11 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ISignal, Signal } from '@lumino/signaling';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { TagsToolComponent } from './tagstool';
-import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * Interface describing constructor options.
@@ -18,6 +18,19 @@ interface IOptions {
    */
   numbering: boolean;
 
+  /**
+   * Boolean indicating whether h1 headers should be numbered.
+   */
+  numberingH1: boolean;
+
+  /**
+   * Boolean indicating whether cell output should be included in headings.
+   */
+  includeOutput: boolean;
+  /**
+   * Boolean indicating whether notebook headers should collapse with ToC headers and vice versa
+   */
+  syncCollapseState: boolean;
   /**
    * HTML sanitizer.
    */
@@ -55,6 +68,9 @@ class OptionsManager extends Registry.IOptionsManager {
   ) {
     super();
     this._numbering = options.numbering;
+    this._numberingH1 = options.numberingH1;
+    this._includeOutput = options.includeOutput;
+    this._syncCollapseState = options.syncCollapseState;
     this._widget = widget;
     this._notebook = notebook;
     this.sanitizer = options.sanitizer;
@@ -101,6 +117,47 @@ class OptionsManager extends Registry.IOptionsManager {
 
   get numbering() {
     return this._numbering;
+  }
+
+  /**
+   * Gets/sets ToC generator numbering h1 headers.
+   */
+  set numberingH1(value: boolean) {
+    if (this._numberingH1 != value) {
+      this._numberingH1 = value;
+      this._widget.update();
+    }
+  }
+
+  get numberingH1() {
+    return this._numberingH1;
+  }
+
+  /**
+   * Toggles whether cell outputs should be included in headings.
+   */
+  set includeOutput(value: boolean) {
+    if (this._includeOutput != value) {
+      this._includeOutput = value;
+      this._widget.update();
+    }
+  }
+
+  get includeOutput() {
+    return this._includeOutput;
+  }
+  /**
+   * Gets/sets option for ToC heading collapsing to be reflected in Notebook and vice versa
+   */
+  set syncCollapseState(value: boolean) {
+    if (this._syncCollapseState != value) {
+      this._syncCollapseState = value;
+      this._widget.update();
+    }
+  }
+
+  get syncCollapseState() {
+    return this._syncCollapseState;
   }
 
   /**
@@ -200,17 +257,26 @@ class OptionsManager extends Registry.IOptionsManager {
    * -  This will **not** change notebook meta-data.
    *
    * @param numbering - boolean indicating whether to number items
+   * @param numberingH1 - boolean indicating whether to number first level items
+   * @param includeOutput - boolean indicating whether cell outputs should be included in headings
+   * @param syncCollapseState - boolean indicating whether collapsing in ToC should be reflected in Notebook and vice versa
    * @param showCode - boolean indicating whether to show code previews
    * @param showMarkdown - boolean indicating whether to show Markdown previews
    * @param showTags - boolean indicating whether to show tags
    */
   initializeOptions(
     numbering: boolean,
+    numberingH1: boolean,
+    includeOutput: boolean,
+    syncCollapseState: boolean,
     showCode: boolean,
     showMarkdown: boolean,
     showTags: boolean
   ) {
     this._numbering = numbering;
+    this._numberingH1 = numberingH1;
+    this._includeOutput = includeOutput;
+    this._syncCollapseState = syncCollapseState;
     this._showCode = showCode;
     this._showMarkdown = showMarkdown;
     this._showTags = showTags;
@@ -220,6 +286,9 @@ class OptionsManager extends Registry.IOptionsManager {
   private _preRenderedToolbar: any = null;
   private _filtered: string[] = [];
   private _numbering: boolean;
+  private _numberingH1: boolean;
+  private _includeOutput: boolean;
+  private _syncCollapseState: boolean;
   private _showCode = false;
   private _showMarkdown = false;
   private _showTags = false;

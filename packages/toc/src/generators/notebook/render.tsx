@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { INotebookTracker } from '@jupyterlab/notebook';
+import { INotebookTracker, NotebookActions } from '@jupyterlab/notebook';
 import { ellipsesIcon } from '@jupyterlab/ui-components';
-import { sanitizerOptions } from '../../utils/sanitizer_options';
+import { MARKDOWN_HEADING_COLLAPSED } from '@jupyterlab/cells';
 import { INotebookHeading } from '../../utils/headings';
+import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { CodeComponent } from './codemirror';
 import { OptionsManager } from './options_manager';
 
@@ -29,6 +30,9 @@ function render(
   if (item.type === 'markdown' || item.type === 'header') {
     let fontSizeClass = 'toc-level-size-default';
     let numbering = item.numbering && options.numbering ? item.numbering : '';
+    let cellCollapseMetadata = options.syncCollapseState
+      ? MARKDOWN_HEADING_COLLAPSED
+      : 'toc-hr-collapsed';
     if (item.type === 'header') {
       fontSizeClass = 'toc-level-size-' + item.level;
     }
@@ -50,7 +54,7 @@ function render(
             className="jp-Collapser p-Widget lm-Widget"
             onClick={(event: any) => {
               event.stopPropagation();
-              onClick(item);
+              onClick(tracker, cellCollapseMetadata, item);
             }}
           >
             <div className="toc-Collapser-child" />
@@ -58,9 +62,9 @@ function render(
         );
 
         let collapsed;
-        if (item.cellRef!.model.metadata.has('toc-hr-collapsed')) {
+        if (item.cellRef!.model.metadata.has(cellCollapseMetadata)) {
           collapsed = item.cellRef!.model.metadata.get(
-            'toc-hr-collapsed'
+            cellCollapseMetadata
           ) as boolean;
         }
         let ellipseButton = collapsed ? (
@@ -68,7 +72,7 @@ function render(
             className="toc-Ellipses"
             onClick={(event: any) => {
               event.stopPropagation();
-              onClick(item);
+              onClick(tracker, cellCollapseMetadata, item);
             }}
           >
             <ellipsesIcon.react />
@@ -111,16 +115,16 @@ function render(
             className="jp-Collapser p-Widget lm-Widget"
             onClick={(event: any) => {
               event.stopPropagation();
-              onClick(item);
+              onClick(tracker, cellCollapseMetadata, item);
             }}
           >
             <div className="toc-Collapser-child" />
           </div>
         );
         let collapsed;
-        if (item.cellRef!.model.metadata.has('toc-hr-collapsed')) {
+        if (item.cellRef!.model.metadata.has(cellCollapseMetadata)) {
           collapsed = item.cellRef!.model.metadata.get(
-            'toc-hr-collapsed'
+            cellCollapseMetadata
           ) as boolean;
         }
         let ellipseButton = collapsed ? (
@@ -128,7 +132,7 @@ function render(
             className="toc-Ellipses"
             onClick={(event: any) => {
               event.stopPropagation();
-              onClick(item);
+              onClick(tracker, cellCollapseMetadata, item);
             }}
           >
             <ellipsesIcon.react />
@@ -177,24 +181,41 @@ function render(
    * @private
    * @param heading - notebook heading that was clicked
    */
-  function onClick(heading?: INotebookHeading) {
-    let collapsed;
-    if (heading!.cellRef!.model.metadata.has('toc-hr-collapsed')) {
+
+  function onClick(
+    tracker: INotebookTracker,
+    cellCollapseMetadata: string,
+    heading?: INotebookHeading
+  ) {
+    let collapsed = false;
+    let syncCollapseState = options.syncCollapseState;
+    if (heading!.cellRef!.model.metadata.get(cellCollapseMetadata)) {
       collapsed = heading!.cellRef!.model.metadata.get(
-        'toc-hr-collapsed'
+        cellCollapseMetadata
       ) as boolean;
-      heading!.cellRef!.model.metadata.delete('toc-hr-collapsed');
-    } else {
-      collapsed = false;
-      heading!.cellRef!.model.metadata.set('toc-hr-collapsed', true);
     }
     if (heading) {
+      if (syncCollapseState) {
+        // if collapse state is synced, update state here
+        if (tracker.currentWidget) {
+          NotebookActions.setHeadingCollapse(
+            heading!.cellRef!,
+            !collapsed,
+            tracker.currentWidget.content
+          );
+        }
+      } else {
+        if (collapsed) {
+          heading!.cellRef!.model.metadata.delete(cellCollapseMetadata);
+        } else {
+          heading!.cellRef!.model.metadata.set(cellCollapseMetadata, true);
+        }
+      }
       options.updateAndCollapse({
         heading: heading,
         collapsedState: collapsed,
         tocType: 'notebook'
       });
-      // NOTE: we can imagine a future in which this extension combines with a collapsible-header/ings extension such that we can programmatically close notebook "sections" according to a public API specifically intended for collapsing notebook sections. In the meantime, we need to resort to manually "collapsing" sections...
     } else {
       options.updateWidget();
     }

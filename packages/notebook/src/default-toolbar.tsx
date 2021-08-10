@@ -1,40 +1,39 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@lumino/widgets';
-import * as React from 'react';
-
 import {
-  showDialog,
+  Toolbar as AppToolbar,
   Dialog,
-  Toolbar,
-  ToolbarButtonComponent,
-  UseSignal,
-  addToolbarButtonClass,
-  ReactWidget,
-  ToolbarButton,
-  ISessionContextDialogs,
   ISessionContext,
-  sessionContextDialogs
+  ISessionContextDialogs,
+  sessionContextDialogs,
+  showDialog
 } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
   addIcon,
+  addToolbarButtonClass,
   copyIcon,
   cutIcon,
   fastForwardIcon,
   HTMLSelect,
   pasteIcon,
+  ReactWidget,
   runIcon,
-  saveIcon
+  saveIcon,
+  Toolbar,
+  ToolbarButton,
+  ToolbarButtonComponent,
+  UseSignal
 } from '@jupyterlab/ui-components';
-
+import { Widget } from '@lumino/widgets';
+import * as React from 'react';
 import { NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
@@ -244,11 +243,14 @@ export namespace ToolbarItems {
       { name: 'run', widget: createRunButton(panel, translator) },
       {
         name: 'interrupt',
-        widget: Toolbar.createInterruptButton(panel.sessionContext, translator)
+        widget: AppToolbar.createInterruptButton(
+          panel.sessionContext,
+          translator
+        )
       },
       {
         name: 'restart',
-        widget: Toolbar.createRestartButton(
+        widget: AppToolbar.createRestartButton(
           panel.sessionContext,
           sessionDialogs,
           translator
@@ -262,7 +264,7 @@ export namespace ToolbarItems {
       { name: 'spacer', widget: Toolbar.createSpacerItem() },
       {
         name: 'kernelName',
-        widget: Toolbar.createKernelNameItem(
+        widget: AppToolbar.createKernelNameItem(
           panel.sessionContext,
           sessionDialogs,
           translator
@@ -270,7 +272,10 @@ export namespace ToolbarItems {
       },
       {
         name: 'kernelStatus',
-        widget: Toolbar.createKernelStatusItem(panel.sessionContext, translator)
+        widget: AppToolbar.createKernelStatusItem(
+          panel.sessionContext,
+          translator
+        )
       }
     ];
   }
@@ -338,6 +343,7 @@ export class CellTypeSwitcher extends ReactWidget {
         onKeyDown={this.handleKeyDown}
         value={value}
         aria-label={this._trans.__('Cell type')}
+        title={this._trans.__('Select the cell type')}
       >
         <option value="-">-</option>
         <option value="code">{this._trans.__('Code')}</option>

@@ -31,7 +31,12 @@ powerful user interface.
 JupyterLab will eventually replace the classic Jupyter Notebook.
 
 JupyterLab can be extended using [npm](https://www.npmjs.com/) packages
-that use our public APIs. To find JupyterLab extensions, search for the npm keyword [jupyterlab-extension](https://www.npmjs.com/search?q=keywords:jupyterlab-extension) or the GitHub topic [jupyterlab-extension](https://github.com/topics/jupyterlab-extension). To learn more about extensions, see the [user documentation](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html).
+that use our public APIs. The _prebuilt_ extensions can be distributed
+via [PyPI](https://pypi.org/search/?q=jupyterlab&o=-created&c=Framework+%3A%3A+Jupyter),
+conda, and other package managers. The _source_ extensions can be installed
+directly from npm (search for [jupyterlab-extension](https://www.npmjs.com/search?q=keywords:jupyterlab-extension)) but require additional build step.
+You can also find JupyterLab extensions exploring GitHub topic [jupyterlab-extension](https://github.com/topics/jupyterlab-extension).
+To learn more about extensions, see the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html).
 
 The current JupyterLab releases are suitable for general
 usage, and the extension APIs will continue to
@@ -45,7 +50,7 @@ Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.rea
 
 ### Installation
 
-JupyterLab can be installed using [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.readthedocs.io/en/latest/) or [pip](https://docs.python.org/3.6/installing/index.html). For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html).
+JupyterLab can be installed using [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.readthedocs.io/en/latest/) or [pip](https://docs.python.org/3.6/installing/index.html). For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html).
 
 Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
@@ -90,7 +95,7 @@ Start up JupyterLab using:
 jupyter lab
 ```
 
-JupyterLab will open automatically in the browser. See the [documentation](http://jupyterlab.readthedocs.io/en/stable/getting_started/starting.html) for additional details.
+JupyterLab will open automatically in the browser. See the [documentation](http://jupyterlab.readthedocs.io/en/latest/getting_started/starting.html) for additional details.
 
 If you encounter an error like "Command 'jupyter' not found", please make sure `PATH` environment variable is set correctly. Alternatively, you can start up JupyterLab using `~/.local/bin/jupyter lab` without changing the `PATH` environment variable.
 
@@ -102,7 +107,7 @@ The latest versions of the following browsers are currently _known to work_:
 - Chrome
 - Safari
 
-See our [documentation](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) for additional details.
+See our [documentation](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html) for additional details.
 
 ---
 
@@ -112,7 +117,7 @@ We encourage you to ask questions on the [Discourse forum](https://discourse.jup
 
 ### Bug report
 
-To report a bug please read the [guidelines](https://jupyterlab.readthedocs.io/en/stable/getting_started/issue.html) and then open a [Github issue](https://github.com/jupyterlab/jupyterlab/issues/new?template=bug_report.md). To keep resolved issues self-contained, the [lock bot](https://github.com/apps/lock) will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.
+To report a bug please read the [guidelines](https://jupyterlab.readthedocs.io/en/latest/getting_started/issue.html) and then open a [Github issue](https://github.com/jupyterlab/jupyterlab/issues/new?template=bug_report.md). To keep resolved issues self-contained, the [lock bot](https://github.com/apps/lock) will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.
 
 ### Feature request
 
@@ -124,7 +129,7 @@ We also welcome suggestions for new features as they help make the project more 
 
 ### Extending JupyterLab
 
-To start developing an extension for JupyterLab, see the [developer documentation](https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html) and the [API docs](https://jupyterlab.readthedocs.io/en/stable/api/).
+To start developing an extension for JupyterLab, see the [developer documentation](https://jupyterlab.readthedocs.io/en/latest/extension/extension_dev.html) and the [API docs](https://jupyterlab.readthedocs.io/en/latest/api/).
 
 ### Contributing
 
@@ -146,28 +151,33 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Mehmet Bektas, Splunk (general development, extensions).
 - Alex Bozarth, IBM (general development, extensions).
 - Eric Charles, Datalayer, (general development, extensions).
+- Frédéric Collonval, QuantStack (general development, extensions).
 - Martha Cryan, IBM (general development, extensions).
 - Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
-- Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
 - Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 - Jason Grout, Bloomberg (co-creator, vision, general development).
+- Michał Krassowski, University of Oxford (general development, extensions).
 - Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
+- Gonzalo Peña-Castellanos, QuanSight (general development, i18n, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
-- Ian Rose, Quansight/City of LA (general core development, extensions).
-- Andrew Schlaepfer, Bloomberg (general development, extensions).
-- Saul Shanabrook, Quansight (general development, extensions)
+- Isabela Presedo-Floyd, QuanSight Labs (design/UX).
 - Steven Silvester, Apple (co-creator, release management, packaging,
   prolific contributions throughout the code base).
+- Jeremy Tuloup, QuantStack (general development, extensions).
 
 Maintainer emeritus:
 
 - Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
   technical leadership, vision, PhosphorJS)
 - Jessica Forde, Project Jupyter (demo, documentation)
+- Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis).
 - Cameron Oelsen, Cal Poly (UI/UX design).
+- Ian Rose, Quansight/City of LA (general core development, extensions).
+- Andrew Schlaepfer, Bloomberg (general development, extensions).
+- Saul Shanabrook, Quansight (general development, extensions)
 
 This list is provided to give the reader context on who we are and how our team functions.
 To be listed, please submit a pull request with your information.

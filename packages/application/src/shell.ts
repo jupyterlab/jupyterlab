@@ -3,19 +3,17 @@
 
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
-import { classes, DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
-
+import {
+  classes,
+  DockPanelSvg,
+  LabIcon,
+  TabPanelSvg
+} from '@jupyterlab/ui-components';
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
-
 import { PromiseDelegate, Token } from '@lumino/coreutils';
-
-import { Message, MessageLoop, IMessageHandler } from '@lumino/messaging';
-
+import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import {
   BoxLayout,
   BoxPanel,
@@ -26,10 +24,10 @@ import {
   SplitPanel,
   StackedPanel,
   TabBar,
+  TabPanel,
   Title,
   Widget
 } from '@lumino/widgets';
-
 import { JupyterFrontEnd } from './frontend';
 
 /**
@@ -85,7 +83,8 @@ export namespace ILabShell {
     | 'menu'
     | 'left'
     | 'right'
-    | 'bottom';
+    | 'bottom'
+    | 'down';
 
   /**
    * The restorable description of an area within the main dock panel.
@@ -143,6 +142,11 @@ export namespace ILabShell {
     readonly mainArea: IMainArea | null;
 
     /**
+     * The down area of the user interface.
+     */
+    readonly downArea: IDownArea | null;
+
+    /**
      * The left area of the user interface.
      */
     readonly leftArea: ISideArea | null;
@@ -151,6 +155,11 @@ export namespace ILabShell {
      * The right area of the user interface.
      */
     readonly rightArea: ISideArea | null;
+
+    /**
+     * The relatives sizes of the areas of the user interface.
+     */
+    readonly relativeSizes: number[] | null;
   }
 
   /**
@@ -168,6 +177,25 @@ export namespace ILabShell {
     readonly dock: DockLayout.ILayoutConfig | null;
   }
 
+  export interface IDownArea {
+    /**
+     * The current widget that has down area focus.
+     */
+    readonly currentWidget: Widget | null;
+
+    /**
+     * The collection of widgets held by the panel.
+     */
+    readonly widgets: Array<Widget> | null;
+
+    /**
+     * Vertical relative size of the down area
+     *
+     * The main area will take the rest of the height
+     */
+    readonly size: number | null;
+  }
+
   /**
    * The restorable description of a sidebar in the user interface.
    */
@@ -181,6 +209,11 @@ export namespace ILabShell {
      * The current widget that has side area focus.
      */
     readonly currentWidget: Widget | null;
+
+    /**
+     * A flag denoting whether the side tab bar is visible.
+     */
+    readonly visible: boolean;
 
     /**
      * The collection of widgets held by the sidebar.
@@ -213,10 +246,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const bottomPanel = (this._bottomPanel = new BoxPanel());
     bottomPanel.node.setAttribute('role', 'contentinfo');
     const hboxPanel = new BoxPanel();
+    const vsplitPanel = (this._vsplitPanel = new Private.RestorableSplitPanel());
     const dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
-    const hsplitPanel = new SplitPanel();
+    const hsplitPanel = (this._hsplitPanel = new Private.RestorableSplitPanel());
+    const downPanel = (this._downPanel = new TabPanelSvg({
+      tabsMovable: true
+    }));
     const leftHandler = (this._leftHandler = new Private.SideBarHandler());
     const rightHandler = (this._rightHandler = new Private.SideBarHandler());
     const rootLayout = new BoxLayout();
@@ -226,8 +263,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     topHandler.panel.id = 'jp-top-panel';
     bottomPanel.id = 'jp-bottom-panel';
     hboxPanel.id = 'jp-main-content-panel';
+    vsplitPanel.id = 'jp-main-vsplit-panel';
     dockPanel.id = 'jp-main-dock-panel';
     hsplitPanel.id = 'jp-main-split-panel';
+    downPanel.id = 'jp-down-stack';
 
     leftHandler.sideBar.addClass(SIDEBAR_CLASS);
     leftHandler.sideBar.addClass('jp-mod-left');
@@ -258,15 +297,18 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     dockPanel.node.setAttribute('role', 'main');
 
     hboxPanel.spacing = 0;
+    vsplitPanel.spacing = 1;
     dockPanel.spacing = 5;
     hsplitPanel.spacing = 1;
 
     headerPanel.direction = 'top-to-bottom';
+    vsplitPanel.orientation = 'vertical';
     hboxPanel.direction = 'left-to-right';
     hsplitPanel.orientation = 'horizontal';
     bottomPanel.direction = 'bottom-to-top';
 
     SplitPanel.setStretch(leftHandler.stackedPanel, 0);
+    SplitPanel.setStretch(downPanel, 0);
     SplitPanel.setStretch(dockPanel, 1);
     SplitPanel.setStretch(rightHandler.stackedPanel, 0);
 
@@ -274,19 +316,25 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     BoxPanel.setStretch(hsplitPanel, 1);
     BoxPanel.setStretch(rightHandler.sideBar, 0);
 
+    SplitPanel.setStretch(vsplitPanel, 1);
+
     hsplitPanel.addWidget(leftHandler.stackedPanel);
     hsplitPanel.addWidget(dockPanel);
     hsplitPanel.addWidget(rightHandler.stackedPanel);
 
+    vsplitPanel.addWidget(hsplitPanel);
+    vsplitPanel.addWidget(downPanel);
+
     hboxPanel.addWidget(leftHandler.sideBar);
-    hboxPanel.addWidget(hsplitPanel);
+    hboxPanel.addWidget(vsplitPanel);
     hboxPanel.addWidget(rightHandler.sideBar);
 
     rootLayout.direction = 'top-to-bottom';
     rootLayout.spacing = 0; // TODO make this configurable?
     // Use relative sizing to set the width of the side panels.
     // This will still respect the min-size of children widget in the stacked
-    // panel.
+    // panel. The default sizes will be overwritten during layout restoration.
+    vsplitPanel.setRelativeSizes([3, 1]);
     hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
     BoxLayout.setStretch(headerPanel, 0);
@@ -303,6 +351,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // initially hiding header and bottom panel when no elements inside,
     this._headerPanel.hide();
     this._bottomPanel.hide();
+    this._downPanel.hide();
 
     this.layout = rootLayout;
 
@@ -313,28 +362,42 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Connect main layout change listener.
     this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
 
-    // Catch current changed events on the side handlers.
-    this._leftHandler.sideBar.currentChanged.connect(
-      this._onLayoutModified,
-      this
-    );
-    this._rightHandler.sideBar.currentChanged.connect(
-      this._onLayoutModified,
+    // Connect vsplit layout change listener
+    this._vsplitPanel.updated.connect(this._onLayoutModified, this);
+
+    // Connect down panel change listeners
+    this._downPanel.currentChanged.connect(this._onLayoutModified, this);
+    this._downPanel.tabBar.tabMoved.connect(this._onTabPanelChanged, this);
+    this._downPanel.stackedPanel.widgetRemoved.connect(
+      this._onTabPanelChanged,
       this
     );
 
+    // Catch current changed events on the side handlers.
+    this._leftHandler.updated.connect(this._onLayoutModified, this);
+    this._rightHandler.updated.connect(this._onLayoutModified, this);
+
+    // Catch update events on the horizontal split panel
+    this._hsplitPanel.updated.connect(this._onLayoutModified, this);
+
     // Setup single-document-mode title bar
-    const titleWidget = (this._titleWidget = new Widget());
-    titleWidget.id = 'jp-title-panel-title';
-    titleWidget.node.appendChild(document.createElement('h1'));
-    this.add(titleWidget, 'top', { rank: 100 });
+    const titleHandler = (this._titleHandler = new Private.TitleHandler(this));
+    this.add(titleHandler, 'top', { rank: 100 });
 
     if (this._dockPanel.mode === 'multiple-document') {
       this._topHandler.addWidget(this._menuHandler.panel, 100);
-      titleWidget.hide();
+      titleHandler.hide();
     } else {
       rootLayout.insertWidget(2, this._menuHandler.panel);
     }
+
+    // Skip Links
+    const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
+      this
+    ));
+
+    this.add(skipLinkWidget, 'top', { rank: 0 });
+    this._skipLinkWidget.show();
 
     // Wire up signals to update the title panel of the simple interface mode to
     // follow the title of this.currentWidget
@@ -382,7 +445,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * A signal emitted when the shell/dock panel change modes (single/mutiple document).
+   * A signal emitted when the shell/dock panel change modes (single/multiple document).
    */
   get modeChanged(): ISignal<this, DockPanel.Mode> {
     return this._modeChanged;
@@ -455,9 +518,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     const applicationCurrentWidget = this.currentWidget;
 
+    // Toggle back to multiple document mode.
+    dock.mode = mode;
+
     if (mode === 'single-document') {
       this._cachedLayout = dock.saveLayout();
-      dock.mode = mode;
 
       // In case the active widget in the dock panel is *not* the active widget
       // of the application, defer to the application.
@@ -465,62 +530,53 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         dock.activateWidget(this.currentWidget);
       }
 
-      // Set the mode data attribute on the application shell node.
-      this.node.dataset.shellMode = mode;
+      // Adjust menu and title
+      (this.layout as BoxLayout).insertWidget(2, this._menuHandler.panel);
+      this._titleHandler.show();
+      this._updateTitlePanelTitle();
+    } else {
+      // Cache a reference to every widget currently in the dock panel.
+      const widgets = toArray(dock.widgets());
+
+      // Restore the original layout.
+      if (this._cachedLayout) {
+        // Remove any disposed widgets in the cached layout and restore.
+        Private.normalizeAreaConfig(dock, this._cachedLayout.main);
+        dock.restoreLayout(this._cachedLayout);
+        this._cachedLayout = null;
+      }
+
+      // Add any widgets created during single document mode, which have
+      // subsequently been removed from the dock panel after the multiple document
+      // layout has been restored. If the widget has add options cached for
+      // the widget (i.e., if it has been placed with respect to another widget),
+      // then take that into account.
+      widgets.forEach(widget => {
+        if (!widget.parent) {
+          this._addToMainArea(widget, {
+            ...this._mainOptionsCache.get(widget),
+            activate: false
+          });
+        }
+      });
+      this._mainOptionsCache.clear();
+
+      // In case the active widget in the dock panel is *not* the active widget
+      // of the application, defer to the application.
+      if (applicationCurrentWidget) {
+        dock.activateWidget(applicationCurrentWidget);
+      }
 
       // Adjust menu and title
-      // this.add(this._menuHandler.panel, 'top', {rank: 100});
-      (this.layout as BoxLayout).insertWidget(2, this._menuHandler.panel);
-      this._titleWidget.show();
-      this._updateTitlePanelTitle();
-
-      this._modeChanged.emit(mode);
-      return;
-    }
-
-    // Cache a reference to every widget currently in the dock panel.
-    const widgets = toArray(dock.widgets());
-
-    // Toggle back to multiple document mode.
-    dock.mode = mode;
-
-    // Restore the original layout.
-    if (this._cachedLayout) {
-      // Remove any disposed widgets in the cached layout and restore.
-      Private.normalizeAreaConfig(dock, this._cachedLayout.main);
-      dock.restoreLayout(this._cachedLayout);
-      this._cachedLayout = null;
-    }
-
-    // Add any widgets created during single document mode, which have
-    // subsequently been removed from the dock panel after the multiple document
-    // layout has been restored. If the widget has add options cached for
-    // the widget (i.e., if it has been placed with respect to another widget),
-    // then take that into account.
-    widgets.forEach(widget => {
-      if (!widget.parent) {
-        this._addToMainArea(widget, {
-          ...this._mainOptionsCache.get(widget),
-          activate: false
-        });
-      }
-    });
-    this._mainOptionsCache.clear();
-
-    // In case the active widget in the dock panel is *not* the active widget
-    // of the application, defer to the application.
-    if (applicationCurrentWidget) {
-      dock.activateWidget(applicationCurrentWidget);
+      this.add(this._menuHandler.panel, 'top', { rank: 100 });
+      // this._topHandler.addWidget(this._menuHandler.panel, 100)
+      this._titleHandler.hide();
     }
 
     // Set the mode data attribute on the applications shell node.
     this.node.dataset.shellMode = mode;
 
-    // Adjust menu and title
-    this.add(this._menuHandler.panel, 'top', { rank: 100 });
-    // this._topHandler.addWidget(this._menuHandler.panel, 100)
-    this._titleWidget.hide();
-
+    this._downPanel.fit();
     // Emit the mode changed signal
     this._modeChanged.emit(mode);
   }
@@ -544,6 +600,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     if (this._rightHandler.has(id)) {
       this._rightHandler.activate(id);
+      return;
+    }
+
+    const tabIndex = this._downPanel.tabBar.titles.findIndex(
+      title => title.owner.id === id
+    );
+    if (tabIndex >= 0) {
+      this._downPanel.currentIndex = tabIndex;
       return;
     }
 
@@ -652,20 +716,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     options?: DocumentRegistry.IOpenOptions
   ): void {
     switch (area || 'main') {
-      case 'main':
-        return this._addToMainArea(widget, options);
-      case 'left':
-        return this._addToLeftArea(widget, options);
-      case 'right':
-        return this._addToRightArea(widget, options);
-      case 'header':
-        return this._addToHeaderArea(widget, options);
-      case 'top':
-        return this._addToTopArea(widget, options);
-      case 'menu':
-        return this._addToMenuArea(widget, options);
       case 'bottom':
         return this._addToBottomArea(widget, options);
+      case 'down':
+        return this._addToDownArea(widget, options);
+      case 'header':
+        return this._addToHeaderArea(widget, options);
+      case 'left':
+        return this._addToLeftArea(widget, options);
+      case 'main':
+        return this._addToMainArea(widget, options);
+      case 'menu':
+        return this._addToMenuArea(widget, options);
+      case 'right':
+        return this._addToRightArea(widget, options);
+      case 'top':
+        return this._addToTopArea(widget, options);
       default:
         throw new Error(`Invalid area: ${area}`);
     }
@@ -695,7 +761,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
     this._layoutDebouncer.dispose();
-    this._titleWidget.dispose();
     super.dispose();
   }
 
@@ -724,13 +789,30 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * Close all widgets in the main area.
+   * Close all widgets in the main and down area.
    */
   closeAll(): void {
     // Make a copy of all the widget in the dock panel (using `toArray()`)
     // before removing them because removing them while iterating through them
     // modifies the underlying data of the iterator.
     toArray(this._dockPanel.widgets()).forEach(widget => widget.close());
+
+    this._downPanel.stackedPanel.widgets.forEach(widget => widget.close());
+  }
+
+  /**
+   * Whether an side tab bar is visible or not.
+   *
+   * @param side Sidebar of interest
+   * @returns Side tab bar visibility
+   */
+  isSideTabBarVisible(side: 'left' | 'right'): boolean {
+    switch (side) {
+      case 'left':
+        return this._leftHandler.isVisible;
+      case 'right':
+        return this._rightHandler.isVisible;
+    }
   }
 
   /**
@@ -738,20 +820,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   isEmpty(area: ILabShell.Area): boolean {
     switch (area) {
+      case 'bottom':
+        return this._bottomPanel.widgets.length === 0;
+      case 'down':
+        return this._downPanel.stackedPanel.widgets.length === 0;
+      case 'header':
+        return this._headerPanel.widgets.length === 0;
       case 'left':
         return this._leftHandler.stackedPanel.widgets.length === 0;
       case 'main':
         return this._dockPanel.isEmpty;
-      case 'header':
-        return this._headerPanel.widgets.length === 0;
-      case 'top':
-        return this._topHandler.panel.widgets.length === 0;
       case 'menu':
         return this._menuHandler.panel.widgets.length === 0;
-      case 'bottom':
-        return this._bottomPanel.widgets.length === 0;
       case 'right':
         return this._rightHandler.stackedPanel.widgets.length === 0;
+      case 'top':
+        return this._topHandler.panel.widgets.length === 0;
       default:
         return true;
     }
@@ -761,7 +845,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Restore the layout state for the application shell.
    */
   restoreLayout(mode: DockPanel.Mode, layout: ILabShell.ILayout): void {
-    const { mainArea, leftArea, rightArea } = layout;
+    const { mainArea, downArea, leftArea, rightArea, relativeSizes } = layout;
     // Rehydrate the main area.
     if (mainArea) {
       const { currentWidget, dock } = mainArea;
@@ -782,6 +866,56 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       }
     }
 
+    // Rehydrate the down area
+    if (downArea) {
+      const { currentWidget, widgets, size } = downArea;
+
+      const widgetIds = widgets?.map(widget => widget.id) ?? [];
+      // Remove absent widgets
+      this._downPanel.tabBar.titles
+        .filter(title => !widgetIds.includes(title.owner.id))
+        .map(title => title.owner.close());
+      // Add new widgets
+      const titleIds = this._downPanel.tabBar.titles.map(
+        title => title.owner.id
+      );
+      widgets
+        ?.filter(widget => !titleIds.includes(widget.id))
+        .map(widget => this._downPanel.addWidget(widget));
+      // Reorder tabs
+      while (
+        !ArrayExt.shallowEqual(
+          widgetIds,
+          this._downPanel.tabBar.titles.map(title => title.owner.id)
+        )
+      ) {
+        this._downPanel.tabBar.titles.forEach((title, index) => {
+          const position = widgetIds.findIndex(id => title.owner.id == id);
+          if (position >= 0 && position != index) {
+            this._downPanel.tabBar.insertTab(position, title);
+          }
+        });
+      }
+
+      if (currentWidget) {
+        const index = this._downPanel.stackedPanel.widgets.findIndex(
+          widget => widget.id === currentWidget.id
+        );
+        if (index) {
+          this._downPanel.currentIndex = index;
+          this._downPanel.currentWidget?.activate();
+        }
+      }
+
+      if (size && size > 0.0) {
+        this._vsplitPanel.setRelativeSizes([1.0 - size, size]);
+      } else {
+        // Close all tabs and hide the panel
+        this._downPanel.stackedPanel.widgets.forEach(widget => widget.close());
+        this._downPanel.hide();
+      }
+    }
+
     // Rehydrate the left area.
     if (leftArea) {
       this._leftHandler.rehydrate(leftArea);
@@ -798,6 +932,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       if (mode === 'single-document') {
         this.collapseRight();
       }
+    }
+
+    // Restore the relative sizes.
+    if (relativeSizes) {
+      this._hsplitPanel.setRelativeSizes(relativeSizes);
     }
 
     if (!this._isRestored) {
@@ -823,10 +962,38 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
             ? this._cachedLayout || this._dockPanel.saveLayout()
             : this._dockPanel.saveLayout()
       },
+      downArea: {
+        currentWidget: this._downPanel.currentWidget,
+        widgets: toArray(this._downPanel.stackedPanel.widgets),
+        size: this._vsplitPanel.relativeSizes()[1]
+      },
       leftArea: this._leftHandler.dehydrate(),
-      rightArea: this._rightHandler.dehydrate()
+      rightArea: this._rightHandler.dehydrate(),
+      relativeSizes: this._hsplitPanel.relativeSizes()
     };
+
     return layout;
+  }
+
+  /**
+   * Toggle side tab bar visibility
+   *
+   * @param side Sidebar of interest
+   */
+  toggleSideTabBarVisibility(side: 'right' | 'left'): void {
+    if (side === 'right') {
+      if (this._rightHandler.isVisible) {
+        this._rightHandler.hide();
+      } else {
+        this._rightHandler.show();
+      }
+    } else {
+      if (this._leftHandler.isVisible) {
+        this._leftHandler.hide();
+      } else {
+        this._leftHandler.show();
+      }
+    }
   }
 
   /**
@@ -865,9 +1032,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
-    const h1 = this._titleWidget.node.children[0] as HTMLHeadElement;
-    h1.textContent = current ? current.title.label : '';
-    h1.title = current ? current.title.caption : '';
+    const inputElement = this._titleHandler.inputElement;
+    inputElement.value = current ? current.title.label : '';
+    inputElement.title = current ? current.title.caption : '';
   }
 
   /**
@@ -1081,6 +1248,40 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
+  private _addToDownArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+
+    options = options || {};
+
+    const { title } = widget;
+    // Add widget ID to tab so that we can get a handle on the tab's widget
+    // (for context menu support)
+    title.dataset = { ...title.dataset, id: widget.id };
+
+    if (title.icon instanceof LabIcon) {
+      // bind an appropriate style to the icon
+      title.icon = title.icon.bindprops({
+        stylesheet: 'mainAreaTab'
+      });
+    } else if (typeof title.icon === 'string' || !title.icon) {
+      // add some classes to help with displaying css background imgs
+      title.iconClass = classes(title.iconClass, 'jp-Icon');
+    }
+
+    this._downPanel.addWidget(widget);
+    this._onLayoutModified();
+
+    if (this._downPanel.isHidden) {
+      this._downPanel.show();
+    }
+  }
+
   /*
    * Return the tab bar adjacent to the current TabBar or `null`.
    */
@@ -1160,6 +1361,16 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Handle a change on the down panel widgets
+   */
+  private _onTabPanelChanged(): void {
+    if (this._downPanel.stackedPanel.widgets.length === 0) {
+      this._downPanel.hide();
+    }
+    this._onLayoutModified();
+  }
+
+  /**
    * Handle a change to the layout.
    */
   private _onLayoutModified(): void {
@@ -1198,6 +1409,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   >(this);
   private _modeChanged = new Signal<this, DockPanel.Mode>(this);
   private _dockPanel: DockPanel;
+  private _downPanel: TabPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
   private _layoutDebouncer = new Debouncer(() => {
@@ -1208,9 +1420,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _rightHandler: Private.SideBarHandler;
   private _tracker = new FocusTracker<Widget>();
   private _headerPanel: Panel;
+  private _hsplitPanel: Private.RestorableSplitPanel;
+  private _vsplitPanel: Private.RestorableSplitPanel;
   private _topHandler: Private.PanelHandler;
   private _menuHandler: Private.PanelHandler;
-  private _titleWidget: Widget;
+  private _skipLinkWidget: Private.SkipLinkWidget;
+  private _titleHandler: Private.TitleHandler;
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
@@ -1271,7 +1486,7 @@ namespace Private {
     /**
      * Get the panel managed by the handler.
      */
-    get panel() {
+    get panel(): Panel {
       return this._panel;
     }
 
@@ -1352,6 +1567,13 @@ namespace Private {
     }
 
     /**
+     * Whether the side bar is visible
+     */
+    get isVisible(): boolean {
+      return this._sideBar.isVisible;
+    }
+
+    /**
      * Get the tab bar managed by the handler.
      */
     get sideBar(): TabBar<Widget> {
@@ -1363,6 +1585,13 @@ namespace Private {
      */
     get stackedPanel(): StackedPanel {
       return this._stackedPanel;
+    }
+
+    /**
+     * Signal fires when the stack panel or the sidebar changes
+     */
+    get updated(): ISignal<SideBarHandler, void> {
+      return this._updated;
     }
 
     /**
@@ -1444,7 +1673,12 @@ namespace Private {
       const collapsed = this._sideBar.currentTitle === null;
       const widgets = toArray(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
-      return { collapsed, currentWidget, widgets };
+      return {
+        collapsed,
+        currentWidget,
+        visible: !this._isHiddenByUser,
+        widgets
+      };
     }
 
     /**
@@ -1457,6 +1691,25 @@ namespace Private {
       if (data.collapsed) {
         this.collapse();
       }
+      if (!data.visible) {
+        this.hide();
+      }
+    }
+
+    /**
+     * Hide the side bar even if it contains widgets
+     */
+    hide(): void {
+      this._isHiddenByUser = true;
+      this._refreshVisibility();
+    }
+
+    /**
+     * Show the side bar if it contains widgets
+     */
+    show(): void {
+      this._isHiddenByUser = false;
+      this._refreshVisibility();
     }
 
     /**
@@ -1493,8 +1746,11 @@ namespace Private {
      * Refresh the visibility of the side bar and stacked panel.
      */
     private _refreshVisibility(): void {
-      this._sideBar.setHidden(this._sideBar.titles.length === 0);
       this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
+      this._sideBar.setHidden(
+        this._isHiddenByUser || this._sideBar.titles.length === 0
+      );
+      this._updated.emit();
     }
 
     /**
@@ -1542,9 +1798,184 @@ namespace Private {
       this._refreshVisibility();
     }
 
+    private _isHiddenByUser = false;
     private _items = new Array<Private.IRankItem>();
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;
+    private _updated: Signal<SideBarHandler, void> = new Signal(this);
+  }
+
+  export class SkipLinkWidget extends Widget {
+    /**
+     * Construct a new skipLink widget.
+     */
+    constructor(shell: ILabShell) {
+      super();
+      this.addClass('jp-skiplink');
+      this.id = 'jp-skiplink';
+      this._shell = shell;
+      this._createSkipLink('Skip to left side bar');
+    }
+
+    handleEvent(event: Event): void {
+      switch (event.type) {
+        case 'click':
+          this._focusLeftSideBar();
+          break;
+      }
+    }
+
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('click', this);
+    }
+
+    /**
+     * A message handler invoked on a `'before-detach'`
+     * message
+     */
+    protected onBeforeDetach(msg: Message): void {
+      this.node.removeEventListener('click', this);
+      super.onBeforeDetach(msg);
+    }
+
+    private _focusLeftSideBar() {
+      this._shell.expandLeft();
+    }
+    private _shell: ILabShell;
+
+    private _createSkipLink(skipLinkText: string): void {
+      const skipLink = document.createElement('a');
+      skipLink.href = '#';
+      skipLink.tabIndex = 1;
+      skipLink.text = skipLinkText;
+      skipLink.className = 'skip-link';
+      this.node.appendChild(skipLink);
+    }
+  }
+
+  export class TitleHandler extends Widget {
+    /**
+     * Construct a new title handler.
+     */
+    constructor(shell: ILabShell) {
+      super();
+      const inputElement = document.createElement('input');
+      inputElement.type = 'text';
+      this.node.appendChild(inputElement);
+      this._shell = shell;
+      this.id = 'jp-title-panel-title';
+    }
+
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.inputElement.addEventListener('keyup', this);
+      this.inputElement.addEventListener('click', this);
+      this.inputElement.addEventListener('blur', this);
+    }
+
+    /**
+     * Handle `before-detach` messages for the widget.
+     */
+    protected onBeforeDetach(msg: Message): void {
+      super.onBeforeDetach(msg);
+      this.inputElement.removeEventListener('keyup', this);
+      this.inputElement.removeEventListener('click', this);
+      this.inputElement.removeEventListener('blur', this);
+    }
+
+    handleEvent(event: Event): void {
+      switch (event.type) {
+        case 'keyup':
+          void this._evtKeyUp(event as KeyboardEvent);
+          break;
+        case 'click':
+          this._evtClick(event as MouseEvent);
+          break;
+        case 'blur':
+          this._selected = false;
+          break;
+      }
+    }
+
+    /**
+     * Handle `keyup` events on the handler.
+     */
+    private async _evtKeyUp(event: KeyboardEvent): Promise<void> {
+      if (event.key == 'Enter') {
+        const widget = this._shell.currentWidget;
+        if (widget == null) {
+          return;
+        }
+        const oldName = widget.title.label;
+        const inputElement = this.inputElement;
+        const newName = inputElement.value;
+        inputElement.blur();
+
+        if (newName !== oldName) {
+          widget.title.label = newName;
+        } else {
+          inputElement.value = oldName;
+        }
+      }
+    }
+
+    /**
+     * Handle `click` events on the handler.
+     */
+    private _evtClick(event: MouseEvent): void {
+      // only handle primary button clicks
+      if (event.button !== 0 || this._selected) {
+        return;
+      }
+
+      const inputElement = this.inputElement;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      this._selected = true;
+
+      const selectEnd = inputElement.value.indexOf('.');
+      if (selectEnd === -1) {
+        inputElement.select();
+      } else {
+        inputElement.setSelectionRange(0, selectEnd);
+      }
+    }
+
+    /**
+     * The input element containing the parent widget's title.
+     */
+    get inputElement(): HTMLInputElement {
+      return this.node.children[0] as HTMLInputElement;
+    }
+
+    private _shell: ILabShell;
+    private _selected: boolean = false;
+  }
+
+  export class RestorableSplitPanel extends SplitPanel {
+    updated: Signal<RestorableSplitPanel, void>;
+
+    constructor(options: SplitPanel.IOptions = {}) {
+      super(options);
+      this.updated = new Signal(this);
+    }
+
+    /**
+     * Emit 'updated' signal on 'update' requests.
+     */
+    protected onUpdateRequest(msg: Message): void {
+      super.onUpdateRequest(msg);
+      this.updated.emit();
+    }
   }
 }

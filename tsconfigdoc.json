@@ -1,8 +1,13 @@
 {
   "$schema": "http://json.schemastore.org/tsconfig",
   "extends": "./tsconfigbase",
-  "exclude": ["**/test/**", "**/testutils/**"],
+  "exclude": [
+    "**/test/**",
+    "**/testutils/**",
+    "**/ui-tests/**"
+  ],
   "compilerOptions": {
+    "strictNullChecks": false,
     "paths": {
       "@jupyterlab/*": [
         "./packages/*/src"
@@ -72,6 +77,12 @@
     },
     {
       "path": "./packages/docmanager-extension"
+    },
+    {
+      "path": "./packages/docprovider"
+    },
+    {
+      "path": "./packages/docprovider-extension"
     },
     {
       "path": "./packages/docregistry"
@@ -207,6 +218,9 @@
     },
     {
       "path": "./packages/settingregistry"
+    },
+    {
+      "path": "./packages/shared-models"
     },
     {
       "path": "./packages/shortcuts-extension"

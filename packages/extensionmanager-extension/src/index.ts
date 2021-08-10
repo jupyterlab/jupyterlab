@@ -11,9 +11,8 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { Dialog, showDialog, ICommandPalette } from '@jupyterlab/apputils';
+import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { ExtensionView } from '@jupyterlab/extensionmanager';
-import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { extensionIcon } from '@jupyterlab/ui-components';
@@ -24,6 +23,7 @@ const PLUGIN_ID = '@jupyterlab/extensionmanager-extension:plugin';
  * IDs of the commands added by this extension.
  */
 namespace CommandIDs {
+  export const showPanel = 'extensionmanager:show-panel';
   export const toggle = 'extensionmanager:toggle';
 }
 
@@ -34,14 +34,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
   requires: [ISettingRegistry, ITranslator],
-  optional: [ILabShell, ILayoutRestorer, IMainMenu, ICommandPalette],
+  optional: [ILabShell, ILayoutRestorer, ICommandPalette],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     translator: ITranslator,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
-    mainMenu: IMainMenu | null,
     palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -105,6 +104,16 @@ const plugin: JupyterFrontEndPlugin<void> = {
         );
       });
 
+    commands.addCommand(CommandIDs.showPanel, {
+      label: trans.__('Extension Manager'),
+      execute: () => {
+        if (view) {
+          labShell?.activateById(view.id);
+        }
+      },
+      isVisible: () => enabled && labShell !== null
+    });
+
     commands.addCommand(CommandIDs.toggle, {
       label: trans.__('Enable Extension Manager'),
       execute: () => {
@@ -120,10 +129,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const command = CommandIDs.toggle;
     if (palette) {
       palette.addItem({ command, category });
-    }
-
-    if (mainMenu) {
-      mainMenu.settingsMenu.addGroup([{ command }], 100);
     }
   }
 };

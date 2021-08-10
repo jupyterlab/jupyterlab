@@ -56,6 +56,10 @@ body {
   background: var(--jp-layout-color1);
 }
 
+#jp-down-stack {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
 .jp-LabShell[data-shell-mode='single-document'] #jp-top-panel {
   border-bottom: none;
 }
@@ -91,3 +95,4 @@ body {
 @import './buttons.css';
 @import './sidepanel.css';
 @import './titlepanel.css';
+@import './skiplink.css';

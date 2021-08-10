@@ -1,35 +1,34 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  NotebookPanel,
-  NotebookTracker,
-  NotebookWidgetFactory,
-  NotebookModelFactory
-} from '@jupyterlab/notebook';
-import { DocumentManager } from '@jupyterlab/docmanager';
-import * as ToC from '@jupyterlab/toc';
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ServiceManager } from '@jupyterlab/services';
-import {
-  DocumentRegistry,
-  TextModelFactory,
-  IDocumentWidget,
-  DocumentWidget
-} from '@jupyterlab/docregistry';
-import { UUID } from '@lumino/coreutils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
-
-import { NBTestUtils, Mock, defaultRenderMime } from '@jupyterlab/testutils';
-import { WidgetTracker } from '@jupyterlab/apputils';
+import { DocumentManager } from '@jupyterlab/docmanager';
+import {
+  DocumentRegistry,
+  DocumentWidget,
+  IDocumentWidget,
+  TextModelFactory
+} from '@jupyterlab/docregistry';
 import { FileEditor, FileEditorFactory } from '@jupyterlab/fileeditor';
 import {
-  MarkdownViewerFactory,
-  MarkdownDocument
+  MarkdownDocument,
+  MarkdownViewerFactory
 } from '@jupyterlab/markdownviewer';
+import {
+  NotebookModelFactory,
+  NotebookPanel,
+  NotebookTracker,
+  NotebookWidgetFactory
+} from '@jupyterlab/notebook';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ServiceManager } from '@jupyterlab/services';
+import { defaultRenderMime, Mock, NBTestUtils } from '@jupyterlab/testutils';
+import * as ToC from '@jupyterlab/toc';
+import { UUID } from '@lumino/coreutils';
 
 let manager: DocumentManager;
 let tocWidget: ToC.TableOfContents;

@@ -2,17 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-
 import { PathExt } from '@jupyterlab/coreutils';
-
 import { Contents } from '@jupyterlab/services';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
-
 import { IDocumentManager } from './';
 
 /**
@@ -23,7 +17,7 @@ const FILE_DIALOG_CLASS = 'jp-FileDialog';
 /**
  * The class name added for the new name label in the rename dialog
  */
-const RENAME_NEWNAME_TITLE_CLASS = 'jp-new-name-title';
+const RENAME_NEW_NAME_TITLE_CLASS = 'jp-new-name-title';
 
 /**
  * A stripped-down interface for a file container.
@@ -186,7 +180,7 @@ namespace Private {
 
     const nameTitle = document.createElement('label');
     nameTitle.textContent = trans.__('New Name');
-    nameTitle.className = RENAME_NEWNAME_TITLE_CLASS;
+    nameTitle.className = RENAME_NEW_NAME_TITLE_CLASS;
     const name = document.createElement('input');
 
     body.appendChild(existingLabel);

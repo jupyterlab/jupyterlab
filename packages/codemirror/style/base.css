@@ -226,3 +226,41 @@
 .cm-s-jupyter .CodeMirror-gutter {
   background-color: var(--jp-layout-color2);
 }
+
+/* Styles for shared cursors (remote cursor locations and selected ranges) */
+.jp-CodeMirrorEditor .remote-caret {
+  position: relative;
+  border-left: 2px solid black;
+  margin-left: -1px;
+  margin-right: -1px;
+  box-sizing: border-box;
+}
+
+.jp-CodeMirrorEditor .remote-caret > div {
+  white-space: nowrap;
+  position: absolute;
+  top: -1.15em;
+  padding-bottom: 0.05em;
+  left: -2px;
+  font-size: 0.95em;
+  background-color: rgb(250, 129, 0);
+  font-family: var(--jp-ui-font-family);
+  font-weight: bold;
+  line-height: normal;
+  user-select: none;
+  color: white;
+  padding-left: 2px;
+  padding-right: 2px;
+  z-index: 3;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.jp-CodeMirrorEditor .remote-caret.hide-name > div {
+  transition-delay: 0.7s;
+  opacity: 0;
+}
+
+.jp-CodeMirrorEditor .remote-caret:hover > div {
+  opacity: 1;
+  transition-delay: 0s;
+}

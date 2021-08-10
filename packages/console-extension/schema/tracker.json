@@ -3,6 +3,72 @@
   "description": "Code Console settings.",
   "jupyter.lab.setting-icon": "ui-components:console",
   "jupyter.lab.setting-icon-label": "Code Console Settings",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-file-new",
+              "items": [
+                {
+                  "command": "console:create",
+                  "rank": 1
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-settings",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 9
+          },
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-settings-consoleexecute",
+              "label": "Console Run Keystroke",
+              "items": [
+                {
+                  "command": "console:interaction-mode",
+                  "args": {
+                    "interactionMode": "terminal"
+                  }
+                },
+                {
+                  "command": "console:interaction-mode",
+                  "args": {
+                    "interactionMode": "notebook"
+                  }
+                }
+              ]
+            },
+            "rank": 9
+          },
+          {
+            "type": "separator",
+            "rank": 9
+          }
+        ]
+      }
+    ],
+    "context": [
+      {
+        "command": "console:clear",
+        "selector": ".jp-CodeConsole-content"
+      },
+      {
+        "command": "console:restart-kernel",
+        "selector": ".jp-CodeConsole"
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
     {
       "command": "console:linebreak",
@@ -30,6 +96,67 @@
       "selector": ".jp-CodeConsole[data-jp-interaction-mode='terminal'] .jp-CodeConsole-promptCell"
     }
   ],
+  "definitions": {
+    "editorConfig": {
+      "properties": {
+        "autoClosingBrackets": {
+          "type": "boolean"
+        },
+        "cursorBlinkRate": {
+          "type": "number",
+          "title": "Cursor blinking rate",
+          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely."
+        },
+        "fontFamily": {
+          "type": ["string", "null"]
+        },
+        "fontSize": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 100
+        },
+        "lineHeight": {
+          "type": ["number", "null"]
+        },
+        "lineNumbers": {
+          "type": "boolean"
+        },
+        "lineWrap": {
+          "type": "string",
+          "enum": ["off", "on", "wordWrapColumn", "bounded"]
+        },
+        "matchBrackets": {
+          "type": "boolean"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "insertSpaces": {
+          "type": "boolean"
+        },
+        "tabSize": {
+          "type": "number"
+        },
+        "wordWrapColumn": {
+          "type": "integer"
+        },
+        "rulers": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "codeFolding": {
+          "type": "boolean"
+        },
+        "lineWiseCopyCut": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  },
   "properties": {
     "interactionMode": {
       "title": "Interaction mode",
@@ -43,6 +170,28 @@
       "description": "Whether the console defaults to showing all\nkernel activity or just kernel activity originating from itself.",
       "type": "boolean",
       "default": false
+    },
+    "promptCellConfig": {
+      "title": "Prompt Cell Configuration",
+      "description": "The configuration for all prompt cells.",
+      "$ref": "#/definitions/editorConfig",
+      "default": {
+        "autoClosingBrackets": false,
+        "cursorBlinkRate": 530,
+        "fontFamily": null,
+        "fontSize": null,
+        "lineHeight": null,
+        "lineNumbers": false,
+        "lineWrap": "off",
+        "matchBrackets": true,
+        "readOnly": false,
+        "insertSpaces": true,
+        "tabSize": 4,
+        "wordWrapColumn": 80,
+        "rulers": [],
+        "codeFolding": false,
+        "lineWiseCopyCut": true
+      }
     }
   },
   "additionalProperties": false,

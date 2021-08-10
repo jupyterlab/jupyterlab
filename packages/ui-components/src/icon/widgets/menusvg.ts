@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualElement } from '@lumino/virtualdom';
-import { Menu, ContextMenu } from '@lumino/widgets';
-
-import { caretRightIcon, checkIcon } from '../iconimports';
+import { ContextMenu, Menu } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
+import { caretRightIcon, checkIcon } from '../iconimports';
 
 const submenuIcon = caretRightIcon.bindprops({
   stylesheet: 'menuItem'
@@ -16,7 +17,7 @@ const submenuIcon = caretRightIcon.bindprops({
  * An object which implements a universal context menu.
  * Tweaked to use inline svg icons
  */
-export class ContextMenuSvg extends ContextMenu {
+export class ContextMenuSvg extends ContextMenu implements IDisposable {
   /**
    * Construct a new context menu.
    *
@@ -30,6 +31,62 @@ export class ContextMenuSvg extends ContextMenu {
   }
 
   readonly menu: MenuSvg;
+
+  /**
+   * Test whether the context menu is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * A signal fired when the context menu is opened.
+   */
+  get opened(): ISignal<ContextMenu, void> {
+    return this._opened;
+  }
+
+  /**
+   * Dispose of the resources held by the context menu.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+
+    this._isDisposed = true;
+    this.menu.dispose();
+    Signal.disconnectSender(this);
+  }
+
+  /**
+   * Open the context menu in response to a `'contextmenu'` event.
+   *
+   * @param event - The `'contextmenu'` event of interest.
+   *
+   * @returns `true` if the menu was opened, or `false` if no items
+   *   matched the event and the menu was not opened.
+   *
+   * #### Notes
+   * This method will populate the context menu with items which match
+   * the propagation path of the event, then open the menu at the mouse
+   * position indicated by the event.
+   */
+  open(event: MouseEvent): boolean {
+    if (this._isDisposed) {
+      return false;
+    }
+    const hasItems = super.open(event);
+    if (hasItems) {
+      this._opened.emit();
+    }
+    return hasItems;
+  }
+
+  protected _isDisposed = false;
+  protected _opened: Signal<ContextMenu, void> = new Signal<ContextMenu, void>(
+    this
+  );
 }
 
 /**
@@ -78,7 +135,14 @@ export namespace MenuSvg {
     }
 
     // ensure correct renderer on any submenus that get added in the future
-    menu.insertItem = MenuSvg.prototype.insertItem;
+    const originalInsertItem = menu.insertItem.bind(menu);
+    menu.insertItem = (index: number, options: Menu.IItemOptions) => {
+      if (options.submenu) {
+        MenuSvg.overrideDefaultRenderer(options.submenu);
+      }
+
+      return originalInsertItem(index, options);
+    };
 
     // recurse through submenus
     for (const item of (menu as any)._items as Menu.IItem[]) {

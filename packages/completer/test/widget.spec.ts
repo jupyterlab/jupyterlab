@@ -1,29 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MessageLoop, Message } from '@lumino/messaging';
-
-import { Panel } from '@lumino/widgets';
-
-import { Widget } from '@lumino/widgets';
-
-import { simulate } from 'simulate-event';
-
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-
 import {
   Completer,
-  CompletionHandler,
-  CompleterModel
+  CompleterModel,
+  CompletionHandler
 } from '@jupyterlab/completer';
-
 import { framePromise, sleep } from '@jupyterlab/testutils';
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Panel, Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 
 const TEST_ITEM_CLASS = 'jp-TestItem';
 
+const TEST_DOC_CLASS = 'jp-TestDoc';
+
 const ITEM_CLASS = 'jp-Completer-item';
+
+const DOC_PANEL_CLASS = 'jp-Completer-docpanel';
 
 const ACTIVE_CLASS = 'jp-mod-active';
 
@@ -53,6 +49,14 @@ class CustomRenderer extends Completer.Renderer {
     const li = super.createItemNode(item, typeMap, orderedTypes);
     li.classList.add(TEST_ITEM_CLASS);
     return li;
+  }
+
+  createDocumentationNode(
+    item: CompletionHandler.ICompletionItem
+  ): HTMLElement {
+    const element = super.createDocumentationNode!(item);
+    element.classList.add(TEST_DOC_CLASS);
+    return element;
   }
 }
 
@@ -124,7 +128,7 @@ describe('completer/widget', () => {
           renderer: new CustomRenderer()
         };
         options.model!.setCompletionItems!([
-          { label: 'foo' },
+          { label: 'foo', documentation: 'foo does bar' },
           { label: 'bar' }
         ]);
 
@@ -136,6 +140,12 @@ describe('completer/widget', () => {
         expect(items).toHaveLength(2);
         expect(Array.from(items[0].classList)).toEqual(
           expect.arrayContaining([TEST_ITEM_CLASS])
+        );
+
+        let panel = widget.node.querySelector(`.${DOC_PANEL_CLASS}`)!;
+        expect(panel.children).toHaveLength(1);
+        expect(Array.from(panel.firstElementChild!.classList)).toEqual(
+          expect.arrayContaining([TEST_DOC_CLASS])
         );
       });
     });
@@ -517,7 +527,7 @@ describe('completer/widget', () => {
           anchor.dispose();
         });
 
-        it('should select the item below and not progress past last', () => {
+        it('should select the item below and wrap to top past last (arrow keys)', () => {
           const anchor = createEditorWidget();
           const model = new CompleterModel();
           const options: Completer.IOptions = {
@@ -570,6 +580,61 @@ describe('completer/widget', () => {
           );
           simulate(target, 'keydown', { keyCode: 40 }); // Down
           expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          widget.dispose();
+          anchor.dispose();
+        });
+
+        it('should select the item below and wrap to top past last (tab)', () => {
+          const anchor = createEditorWidget();
+          const model = new CompleterModel();
+          const options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          model.setOptions(['foo', 'bar', 'baz'], {
+            foo: 'instance',
+            bar: 'function'
+          });
+          Widget.attach(anchor, document.body);
+
+          const widget = new Completer(options);
+          const target = document.createElement('div');
+
+          anchor.node.appendChild(target);
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+          const items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
+
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(target, 'keydown', { keyCode: 9 }); // Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(target, 'keydown', { keyCode: 9 }); // Tab
+          expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
           expect(Array.from(items[1].classList)).toEqual(
@@ -578,11 +643,21 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
+          simulate(target, 'keydown', { keyCode: 9 }); // Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
           widget.dispose();
           anchor.dispose();
         });
 
-        it('should select the completion item below and not progress past last', () => {
+        it('should select the completion item below and wrap to top past last (arrow keys)', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
           let options: Completer.IOptions = {
@@ -635,6 +710,61 @@ describe('completer/widget', () => {
           );
           simulate(target, 'keydown', { keyCode: 40 }); // Down
           expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          widget.dispose();
+          anchor.dispose();
+        });
+
+        it('should select the completion item below and wrap to top past last (tab)', () => {
+          let anchor = createEditorWidget();
+          let model = new CompleterModel();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          model.setCompletionItems!([
+            { label: 'foo' },
+            { label: 'bar' },
+            { label: 'baz' }
+          ]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
+          let target = document.createElement('div');
+
+          anchor.node.appendChild(target);
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+          let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(target, 'keydown', { keyCode: 9 }); // Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(target, 'keydown', { keyCode: 9 }); // Tab
+          expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
           expect(Array.from(items[1].classList)).toEqual(
@@ -643,11 +773,21 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
+          simulate(target, 'keydown', { keyCode: 9 }); // Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
           widget.dispose();
           anchor.dispose();
         });
 
-        it('should select the item above and not progress beyond first', () => {
+        it('should select the item above and wrap to bottom past first (arrow keys)', () => {
           const anchor = createEditorWidget();
           const model = new CompleterModel();
           const options: Completer.IOptions = {
@@ -718,6 +858,39 @@ describe('completer/widget', () => {
           );
           simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
           expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          widget.dispose();
+          anchor.dispose();
+        });
+
+        it('should select the item above and wrap to bottom past first (tab)', () => {
+          const anchor = createEditorWidget();
+          const model = new CompleterModel();
+          const options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          model.setOptions(['foo', 'bar', 'baz'], {
+            foo: 'instance',
+            bar: 'function'
+          });
+          Widget.attach(anchor, document.body);
+
+          const widget = new Completer(options);
+
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+          const items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
+
+          expect(Array.from(items[0].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
           expect(Array.from(items[1].classList)).toEqual(
@@ -726,11 +899,61 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
+          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 9, shiftKey: true }); // Shift + Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 9, shiftKey: true }); // Shift + Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 9, shiftKey: true }); // Shift + Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
           widget.dispose();
           anchor.dispose();
         });
 
-        it('should select the completion item above and not progress beyond first', () => {
+        it('should select the completion item above and wrap to top past first (arrow keys)', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
           let options: Completer.IOptions = {
@@ -802,6 +1025,40 @@ describe('completer/widget', () => {
           );
           simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
           expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          widget.dispose();
+          anchor.dispose();
+        });
+
+        it('should select the completion item above and wrap to top past first (tab)', () => {
+          let anchor = createEditorWidget();
+          let model = new CompleterModel();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          model.setCompletionItems!([
+            { label: 'foo' },
+            { label: 'bar' },
+            { label: 'baz' }
+          ]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
+
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+          let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
+
+          expect(Array.from(items[0].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
           expect(Array.from(items[1].classList)).toEqual(
@@ -809,6 +1066,56 @@ describe('completer/widget', () => {
           );
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 9, shiftKey: true }); // Shift + Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 9, shiftKey: true }); // Shift + Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 9, shiftKey: true }); // Shift + Tab
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
           );
           widget.dispose();
           anchor.dispose();

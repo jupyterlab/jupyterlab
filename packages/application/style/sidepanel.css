@@ -21,17 +21,20 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-SideBar.lm-TabBar {
+.jp-SideBar.lm-TabBar,
+#jp-down-stack .lm-TabBar {
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color2);
   font-size: var(--jp-ui-font-size1);
+  overflow: visible;
+}
+
+.jp-SideBar.lm-TabBar {
   min-width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
   max-width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
-  overflow: visible;
   display: block;
 }
 
-.jp-SideBar .lm-TabBar-content,
 .jp-SideBar .lm-TabBar-content {
   margin: 0;
   padding: 0;
@@ -58,7 +61,8 @@
   /* transform: translateY(var(--jp-border-width)); */
 }
 
-.jp-SideBar .lm-TabBar-tab:not(.lm-mod-current) {
+.jp-SideBar .lm-TabBar-tab:not(.lm-mod-current),
+#jp-down-stack .lm-TabBar-tab:not(.lm-mod-current) {
   background: var(--jp-layout-color2);
 }
 
@@ -76,7 +80,8 @@
   line-height: var(--jp-private-sidebar-tab-width);
 }
 
-.jp-SideBar .lm-TabBar-tab:hover:not(.lm-mod-current) {
+.jp-SideBar .lm-TabBar-tab:hover:not(.lm-mod-current),
+#jp-down-stack .lm-TabBar-tab:hover:not(.lm-mod-current) {
   background: var(--jp-layout-color1);
 }
 
@@ -182,6 +187,31 @@
     );
 }
 
+/* Down */
+
+/* Borders */
+
+#jp-down-stack > .lm-TabBar {
+  border-top: var(--jp-border-width) solid var(--jp-border-color0);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+#jp-down-stack > .lm-TabBar .lm-TabBar-tab {
+  border-left: none;
+  border-right: none;
+}
+
+#jp-down-stack > .lm-TabBar .lm-TabBar-tab.lm-mod-current {
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-bottom: none;
+  transform: translateY(var(--jp-border-width));
+}
+
+#jp-down-stack > .lm-TabBar .lm-TabBar-tab.lm-mod-current:first-child {
+  border: none;
+  border-right: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
 /* Stack panels */
 
 #jp-left-stack > .lm-Widget,
@@ -195,4 +225,8 @@
 
 #jp-left-stack {
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+#jp-down-stack > .lm-TabPanel-stackedPanel {
+  border: none;
 }

@@ -6,22 +6,21 @@
  */
 
 import {
+  ILabShell,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  ILabShell
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
 
 import {
-  ISearchProviderRegistry,
-  SearchInstance,
-  SearchProviderRegistry,
   CodeMirrorSearchProvider,
-  NotebookSearchProvider
+  ISearchProviderRegistry,
+  NotebookSearchProvider,
+  SearchInstance,
+  SearchProviderRegistry
 } from '@jupyterlab/documentsearch';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
@@ -78,13 +77,12 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   id: '@jupyterlab/documentsearch:plugin',
   provides: ISearchProviderRegistry,
   requires: [ITranslator],
-  optional: [ICommandPalette, IMainMenu],
+  optional: [ICommandPalette],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    palette: ICommandPalette,
-    mainMenu: IMainMenu | null
+    palette: ICommandPalette
   ) => {
     const trans = translator.load('jupyterlab');
 
@@ -225,17 +223,6 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         command: prevCommand,
         category: trans.__('Main Area')
       });
-    }
-    // Add main menu notebook menu.
-    if (mainMenu) {
-      mainMenu.editMenu.addGroup(
-        [
-          { command: startCommand },
-          { command: nextCommand },
-          { command: prevCommand }
-        ],
-        10
-      );
     }
 
     // Provide the registry to the system.

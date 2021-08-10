@@ -18,11 +18,19 @@
   margin-left: 8px;
 }
 
-#jp-title-panel-title h1 {
-  font-size: 18px;
-  color: var(--jp-ui-font-color0);
+#jp-title-panel-title input {
+  background: transparent;
   margin: 0;
+  height: 28px;
+  box-sizing: border-box;
+  border: none;
+  font-size: 18px;
   font-weight: normal;
   font-family: var(--jp-ui-font-family);
   line-height: var(--jp-private-title-panel-height);
+  color: var(--jp-ui-font-color0);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }

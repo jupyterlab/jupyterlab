@@ -18,6 +18,7 @@ cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
 .. image:: images/interface_jupyterlab.png
    :align: center
    :class: jp-screenshot
+   :alt: A screenshot of the JupyterLab interface. The main work area is in the middle section of the interface. There is also a left sidebar and a top menu bar.
 
 JupyterLab sessions always reside in a :ref:`workspace <url-workspaces-ui>`.
 Workspaces contain the state of JupyterLab: the files that are currently open,
@@ -62,6 +63,10 @@ and a list of tabs in the main work area:
 .. image:: images/interface_left.png
    :align: center
    :class: jp-screenshot
+   :alt: A screenshot of the primary JupyterLab sidebar showing a variety of files in the file browser.
+
+The icons and labels column that allows to switch between tabs is called
+Activity Bar in JupyterLab.
 
 .. _left-sidebar-toggle:
 
@@ -110,12 +115,14 @@ activities in the main work area:
 .. image:: images/interface_tabs.png
    :align: center
    :class: jp-screenshot
+   :alt: A screenshot of the tabs panel in JupyterLab that lists some sample documents.
 
 The same information is also available in the Tabs menu:
 
 .. image:: images/interface_tabs_menu.png
    :align: center
    :class: jp-screenshot
+   :alt: A screenshot of the tabs menu in JupyterLab with a list of sample documents.
 
 .. _tabs-singledocument:
 
@@ -176,6 +183,33 @@ Keyboard Shortcuts in the Settings tab.
     <div class="jp-youtube-video">
        <iframe src="https://www.youtube-nocookie.com/embed/rhW3kAExCik?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
+
+To define a custom keyboard shortcut which runs more than one command, add a keyboard shortcut
+for ``apputils:run-all-enabled`` command in Keyboard Shortcuts advanced settings. The commands you
+wish to run are passed in the ``args`` argument as a list of strings:
+
+.. code:: json
+
+    {
+      "shortcuts": [
+        {
+          "command": "apputils:run-all-enabled",
+          "keys": [
+            "Accel T"
+          ],
+          "args": {
+            "commands": [
+              "docmanager:save",
+              "application:close"
+            ]
+          },
+          "selector": "body"
+        }
+      ]
+    }
+
+In this example ``docmanager:save`` and ``application:close`` commands are mapped to ``Accel T``. 
+The commands are run in succession when you use the shortcut.
 
 .. _editor-keymaps:
 

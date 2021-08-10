@@ -11,10 +11,24 @@ commander
   .description('Update the version and publish')
   .option('--dry-run', 'Dry run')
   .option('--force', 'Force the upgrade')
+  .option('--skip-commit', 'Whether to skip commit changes')
   .arguments('<spec>')
   .action((spec: any, opts: any) => {
     // Get the previous version.
     const prev = utils.getPythonVersion();
+
+    // Whether to commit after bumping
+    const commit = opts.skipCommit !== true;
+
+    // For patch, defer to `patch:release` command
+    if (spec === 'patch') {
+      let cmd = 'jlpm run patch:release --all';
+      if (opts.force) {
+        cmd += ' --force';
+      }
+      utils.run(cmd);
+      process.exit(0);
+    }
 
     // Make sure we have a valid version spec.
     const options = ['major', 'minor', 'release', 'build'];
@@ -44,18 +58,6 @@ commander
     // Handle dry runs.
     if (opts.dryRun) {
       utils.run(`bumpversion --dry-run --verbose ${spec}`);
-      return;
-    }
-
-    // If this is a major release during the alpha cycle, bump
-    // just the Python version.
-    if (prev.indexOf('a') !== -1 && spec === 'major') {
-      // Bump the version.
-      utils.run(`bumpversion ${spec}`);
-
-      // Run the post-bump script.
-      utils.postbump();
-
       return;
     }
 
@@ -89,10 +91,10 @@ commander
       },
       true
     );
-    // For a preminor release, we bump 10 minor versions so that we do
+    // For a major release, we bump 10 minor versions so that we do
     // not conflict with versions during minor releases of the top
     // level package.
-    if (lernaVersion === 'preminor') {
+    if (spec === 'major') {
       for (let i = 0; i < 10; i++) {
         utils.run(cmd);
       }
@@ -117,7 +119,7 @@ commander
     utils.run(`bumpversion ${spec}`);
 
     // Run the post-bump script.
-    utils.postbump();
+    utils.postbump(commit);
   });
 
 commander.parse(process.argv);

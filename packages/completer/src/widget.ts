@@ -1,26 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
-
+import { defaultSanitizer, HoverBox } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { LabIcon } from '@jupyterlab/ui-components';
-
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
-
-import { JSONObject, JSONExt } from '@lumino/coreutils';
-
+import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-
 import { ElementExt } from '@lumino/domutils';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
-
 import { CompletionHandler } from './handler';
 
 /**
@@ -76,6 +66,13 @@ export class Completer extends Widget {
   }
 
   /**
+   * The active index.
+   */
+  get activeIndex(): number {
+    return this._activeIndex;
+  }
+
+  /**
    * The editor used by the completion widget.
    */
   get editor(): CodeEditor.IEditor | null {
@@ -101,6 +98,13 @@ export class Completer extends Widget {
    */
   get visibilityChanged(): ISignal<this, void> {
     return this._visibilityChanged;
+  }
+
+  /**
+   * A signal emitted when the active index changes.
+   */
+  get indexChanged(): ISignal<this, number> {
+    return this._indexChanged;
   }
 
   /**
@@ -164,6 +168,7 @@ export class Completer extends Widget {
    */
   reset(): void {
     this._activeIndex = 0;
+    this._lastSubsetMatch = '';
     if (this._model) {
       this._model.reset(true);
     }
@@ -358,8 +363,8 @@ export class Completer extends Widget {
    *
    * #### Notes
    * When the user cycles all the way `down` to the last index, subsequent
-   * `down` cycles will remain on the last index. When the user cycles `up` to
-   * the first item, subsequent `up` cycles will remain on the first cycle.
+   * `down` cycles will cycle to the first index. When the user cycles `up` to
+   * the first item, subsequent `up` cycles will cycle to the last index.
    */
   private _cycle(direction: Private.scrollType): void {
     const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
@@ -368,9 +373,9 @@ export class Completer extends Widget {
     active.classList.remove(ACTIVE_CLASS);
 
     if (direction === 'up') {
-      this._activeIndex = index === 0 ? index : index - 1;
+      this._activeIndex = index === 0 ? items.length - 1 : index - 1;
     } else if (direction === 'down') {
-      this._activeIndex = index < items.length - 1 ? index + 1 : index;
+      this._activeIndex = index < items.length - 1 ? index + 1 : 0;
     } else {
       // Measure the number of items on a page.
       const boxHeight = this.node.getBoundingClientRect().height;
@@ -396,6 +401,7 @@ export class Completer extends Widget {
       '.jp-Completer-list'
     ) as Element;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
+    this._indexChanged.emit(this._activeIndex);
     this._updateDocPanel();
   }
 
@@ -428,17 +434,24 @@ export class Completer extends Widget {
           return;
         }
         const populated = this._populateSubset();
-        // If there is a common subset in the options,
-        // then emit a completion signal with that subset.
-        if (model.query) {
+
+        // If the common subset was found and set on `query`,
+        // or if there is a `query` in the initialization options,
+        // then emit a completion signal with that `query` (=subset match),
+        // but only if the query has actually changed.
+        // See: https://github.com/jupyterlab/jupyterlab/issues/10439#issuecomment-875189540
+        if (model.query && model.query != this._lastSubsetMatch) {
           model.subsetMatch = true;
           this._selected.emit(model.query);
           model.subsetMatch = false;
+          this._lastSubsetMatch = model.query;
         }
         // If the query changed, update rendering of the options.
         if (populated) {
           this.update();
         }
+
+        this._cycle(event.shiftKey ? 'up' : 'down');
         return;
       }
       case 27: // Esc key
@@ -608,9 +621,13 @@ export class Completer extends Widget {
     }
     docPanel.textContent = '';
     if (activeItem.documentation) {
-      let pre = document.createElement('pre');
-      pre.textContent = activeItem.documentation;
-      docPanel.appendChild(pre);
+      let node: HTMLElement;
+      if (!this._renderer.createDocumentationNode) {
+        node = Completer.defaultRenderer.createDocumentationNode(activeItem);
+      } else {
+        node = this._renderer.createDocumentationNode(activeItem);
+      }
+      docPanel.appendChild(node);
       docPanel.setAttribute('style', '');
     } else {
       docPanel.setAttribute('style', 'display:none');
@@ -624,6 +641,8 @@ export class Completer extends Widget {
   private _resetFlag = false;
   private _selected = new Signal<this, string>(this);
   private _visibilityChanged = new Signal<this, void>(this);
+  private _indexChanged = new Signal<this, number>(this);
+  private _lastSubsetMatch: string = '';
 }
 
 export namespace Completer {
@@ -849,6 +868,14 @@ export namespace Completer {
       typeMap: TypeMap,
       orderedTypes: string[]
     ): HTMLLIElement;
+
+    /**
+     * Create a documentation node (a `pre` element by default) for
+     * documentation panel.
+     */
+    createDocumentationNode?(
+      activeItem: CompletionHandler.ICompletionItem
+    ): HTMLElement;
   }
 
   /**
@@ -891,6 +918,17 @@ export namespace Completer {
         typeMap[item.raw] || '',
         orderedTypes
       );
+    }
+
+    /**
+     * Create a documentation node for documentation panel.
+     */
+    createDocumentationNode(
+      activeItem: CompletionHandler.ICompletionItem
+    ): HTMLElement {
+      let pre = document.createElement('pre');
+      pre.textContent = activeItem.documentation || '';
+      return pre;
     }
 
     /**

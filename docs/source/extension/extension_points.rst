@@ -71,6 +71,8 @@ might want to use the services in your extensions.
 - ``@jupyterlab/docmanager:IDocumentManager``: A service for the manager for all
   documents used by the application. Use this if you want to open and close documents,
   create and delete files, and otherwise interact with the file system.
+- ``@jupyterlab/docprovider:IDocumentProviderFactory``: A factory object that creates new providers for
+  shared documents. Use this if you want to create a provider for a new shared document.
 - ``@jupyterlab/documentsearch:ISearchProviderRegistry``: A service for a registry of search
   providers for the application. Plugins can register their UI elements with this registry
   to provide find/replace support.
@@ -146,12 +148,12 @@ Here is a sample block of code that adds a command to the application (given by 
 .. code:: typescript
 
     const commandID = 'my-command';
-    const toggled = false;
+    let toggled = false;
 
     app.commands.addCommand(commandID, {
       label: 'My Cool Command',
-      isEnabled: true,
-      isVisible: true,
+      isEnabled: () => true,
+      isVisible: () => true,
       isToggled: () => toggled,
       iconClass: 'some-css-icon-class',
       execute: () => {
@@ -209,6 +211,7 @@ Your command ``label`` function can then check the ``args`` it is provided for `
 and return a different label in that case.
 This can be useful to make a single command flexible enough to work in multiple contexts.
 
+.. _context_menu:
 
 Context Menu
 ------------
@@ -222,8 +225,47 @@ The context menu system determines which items to show based on
 It propagates up the DOM tree and tests whether a given HTML element
 matches the CSS selector provided by a given command.
 
+Items can be added in the context menu in two ways:
+
+1. Using the settings - this is the preferred way as they are configurable by the user.
+2. Using the API - this is for advanced cases like dynamic menu or semantic items.
+
 Here is an example showing how to add a command to the application context
-menu.  See the Lumino `docs
+menu using the settings.
+
+
+.. code:: json
+
+    {
+      "jupyter.lab.menus": {
+      "context": [
+        {
+          "command": "my-command",
+          "selector": ".jp-Notebook",
+          "rank": 500
+        }
+      ]
+    }
+
+In this example, the command with id ``my-command`` is shown whenever the user
+right-clicks on a DOM element matching ``.jp-Notebook`` (that is to say, a notebook).
+The selector can be any valid CSS selector, and may target your own UI elements, or existing ones.
+A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
+
+Item must follow this definition:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+   :language: json
+   :lines: 21-39
+
+where ``menuItem`` definition is:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+   :language: json
+   :lines: 119-157
+
+
+The same example using the API is shown below. See the Lumino `docs
 <https://jupyterlab.github.io/lumino/widgets/interfaces/contextmenu.iitemoptions.html>`__
 for the item creation options.
 
@@ -233,11 +275,6 @@ for the item creation options.
       command: commandID,
       selector: '.jp-Notebook'
     })
-
-In this example, the command indicated by ``commandID`` is shown whenever the user
-right-clicks on a DOM element matching ``.jp-Notebook`` (that is to say, a notebook).
-The selector can be any valid CSS selector, and may target your own UI elements, or existing ones.
-A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
 
 If you don't want JupyterLab's custom context menu to appear for your element, because you have
 your own right click behavior that you want to trigger, you can add the `data-jp-suppress-context-menu` data attribute
@@ -382,6 +419,31 @@ declaring default keyboard shortcuts for a command:
 
 Shortcuts added to the settings system will be editable by users.
 
+From Jupyterlab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut. 
+This requires you to define a keyboard shortcut for ``apputils:run-all-enabled`` command:
+
+.. code:: json
+
+    {
+      "command": "apputils:run-all-enabled",
+      "keys": ["Accel T"],
+      "args": {
+          "commands": [
+              "my-command-1",
+              "my-command-2"
+          ],
+          "args": [
+              {},
+              {}
+            ]
+        },
+      "selector": "body"
+    }
+
+In this example ``my-command-1`` and ``my-command-2`` are passed in ``args`` 
+of ``apputils:run-all-enabled`` command as ``commands`` list.
+You can optionally pass the command arguemnts of ``my-command-1`` and ``my-command-2`` in ``args`` 
+of ``apputils:run-all-enabled`` command as ``args`` list.
 
 Launcher
 --------
@@ -416,6 +478,7 @@ In JupyterLab, the application shell consists of:
 -  A ``menu`` area for top-level menus, which is collapsed into the ``top`` area in multiple-document mode and put below it in single-document mode.
 -  ``left`` and ``right`` sidebar areas for collapsible content.
 -  A ``main`` work area for user activity.
+-  A ``down`` area for information content; like log console, contextual help.
 -  A ``bottom`` area for things like status bars.
 -  A ``header`` area for custom elements.
 
@@ -457,16 +520,114 @@ The recommended ranges for this rank are:
 Main Menu
 ---------
 
-There are three main ways to extend JupyterLab's main menu.
+There are two ways to extend JupyterLab's main menu.
+
+1. Using the settings - this is the preferred way as they are configurable by the user.
+2. Using the API - this is for advanced cases like dynamic menu or semantic items.
+
+Settings-defined menu
+^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab provides integration with its settings system for menu definitions.
+Your extension can provide a settings schema with a ``jupyter.lab.menus`` key,
+declaring default menus. You don't need to set anything in the TypeScript code
+(except the command definitions).
+
+To add a new menu with your extension command:
+
+.. code:: json
+
+    {
+      "jupyter.lab.menus": {
+      "main": [
+        {
+          "id": "jp-mainmenu-myextension",
+          "label": "My Menu",
+          "items": [
+            {
+              "command": "my-command",
+              "rank": 500
+            }
+          ],
+          "rank": 100
+        }
+      ]
+    }
+
+The menu item label will be set with the command label. For menus (and
+submenus), the label needs to be set explicitly with the ``label``
+property.
+
+Menu and item have a ``rank`` that will determine the elements order.
+
+
+To add a new entry in an existing menu:
+
+.. code:: json
+
+    {
+      "jupyter.lab.menus": {
+      "main": [
+        {
+          "id": "jp-mainmenu-file",
+          "items": [
+            {
+              "command": "my-command",
+              "rank": 500
+            }
+          ]
+        }
+      ]
+    }
+
+Here is the list of default menu ids:
+
+- File menu: ``jp-mainmenu-file``
+
+  * New file submenu: ``jp-mainmenu-file-new``
+
+- Edit menu: ``jp-mainmenu-edit``
+- View menu: ``jp-mainmenu-view``
+
+  * Appearance submenu: ``jp-mainmenu-view-appearance``
+
+- Run menu: ``jp-mainmenu-run``
+- Kernel menu: ``jp-mainmenu-kernel``
+- Tabs menu: ``jp-mainmenu-tabs``
+- Settings menu: ``jp-mainmenu-settings``
+- Help menu: ``jp-mainmenu-help``
+
+The default main menu is defined in the ``mainmenu-extension`` package settings.
+
+A menu must respect the following schema:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+   :language: json
+   :lines: 72-118
+
+And an item must follow:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+   :language: json
+   :lines: 119-157
+
+Menus added to the settings system will be editable by users using the ``mainmenu-extension``
+settings. In particular, they can be disabled at the item or the menu level by setting the
+property ``disabled`` to ``true``.
+
+API-defined menu
+^^^^^^^^^^^^^^^^
+
+To use the API, you should request the ``IMainMenu`` token for your extension.
+
+There are three main ways to extend:
 
 1. You can add your own menu to the menu bar.
 2. You can add new commands to the existing menus.
 3. You can register your extension with one of the existing semantic menu items.
 
-In all three cases, you should request the ``IMainMenu`` token for your extension.
-
 Adding a New Menu
-^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~
 
 To add a new menu to the menu bar, you need to create a new
 `Lumino menu <https://jupyterlab.github.io/lumino/widgets/classes/menu.html>`__.
@@ -489,7 +650,7 @@ rendering and execution behavior of the command in the menu context.
 
 
 Adding a New Command to an Existing Menu
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In many cases you will want to add your commands to the existing JupyterLab menus
 rather than creating a separate menu for your extension.
@@ -514,7 +675,7 @@ to the File menu, you would do the following:
 
 
 Registering a Semantic Menu Item
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There are some commands in the JupyterLab menu system that are considered
 common and important enough that they are treated differently.

@@ -4,25 +4,19 @@
 |----------------------------------------------------------------------------*/
 
 import { WidgetTracker } from '@jupyterlab/apputils';
-
 import { IDataConnector, IRestorer } from '@jupyterlab/statedb';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import {
   JSONExt,
   JSONObject,
-  PromiseDelegate,
   PartialJSONObject,
-  ReadonlyPartialJSONValue,
+  PromiseDelegate,
   ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue,
   Token
 } from '@lumino/coreutils';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { DockPanel, Widget } from '@lumino/widgets';
-
 import { ILabShell } from './shell';
 
 /**
@@ -165,8 +159,10 @@ export class LayoutRestorer implements ILayoutRestorer {
     const blank: ILabShell.ILayout = {
       fresh: true,
       mainArea: null,
+      downArea: null,
       leftArea: null,
-      rightArea: null
+      rightArea: null,
+      relativeSizes: null
     };
     const layout = this._connector.fetch(KEY);
 
@@ -177,7 +173,13 @@ export class LayoutRestorer implements ILayoutRestorer {
         return blank;
       }
 
-      const { main, left, right } = data as Private.ILayout;
+      const {
+        main,
+        down,
+        left,
+        right,
+        relativeSizes
+      } = data as Private.ILayout;
 
       // If any data exists, then this is not a fresh session.
       const fresh = false;
@@ -185,13 +187,23 @@ export class LayoutRestorer implements ILayoutRestorer {
       // Rehydrate main area.
       const mainArea = this._rehydrateMainArea(main);
 
+      // Rehydrate down area.
+      const downArea = this._rehydrateDownArea(down);
+
       // Rehydrate left area.
       const leftArea = this._rehydrateSideArea(left);
 
       // Rehydrate right area.
       const rightArea = this._rehydrateSideArea(right);
 
-      return { fresh, mainArea, leftArea, rightArea };
+      return {
+        fresh,
+        mainArea,
+        downArea,
+        leftArea,
+        rightArea,
+        relativeSizes: relativeSizes || null
+      };
     } catch (error) {
       return blank;
     }
@@ -276,8 +288,10 @@ export class LayoutRestorer implements ILayoutRestorer {
 
     const dehydrated: Private.ILayout = {};
     dehydrated.main = this._dehydrateMainArea(data.mainArea);
+    dehydrated.down = this._dehydrateDownArea(data.downArea);
     dehydrated.left = this._dehydrateSideArea(data.leftArea);
     dehydrated.right = this._dehydrateSideArea(data.rightArea);
+    dehydrated.relativeSizes = data.relativeSizes;
 
     return this._connector.save(KEY, dehydrated);
   }
@@ -295,7 +309,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
-   * Reydrate a serialized main area description object.
+   * Rehydrate a serialized main area description object.
    *
    * #### Notes
    * This function consumes data that can become corrupted, so it uses type
@@ -311,6 +325,69 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
+   * Dehydrate a down area description into a serializable object.
+   */
+  private _dehydrateDownArea(
+    area: ILabShell.IDownArea | null
+  ): Private.IDownArea | null {
+    if (!area) {
+      return null;
+    }
+
+    const dehydrated: Private.IDownArea = {
+      size: area.size
+    };
+
+    if (area.currentWidget) {
+      const current = Private.nameProperty.get(area.currentWidget);
+      if (current) {
+        dehydrated.current = current;
+      }
+    }
+
+    if (area.widgets) {
+      dehydrated.widgets = area.widgets
+        .map(widget => Private.nameProperty.get(widget))
+        .filter(name => !!name);
+    }
+
+    return dehydrated;
+  }
+
+  /**
+   * Rehydrate a serialized side area description object.
+   *
+   * #### Notes
+   * This function consumes data that can become corrupted, so it uses type
+   * coercion to guarantee the dehydrated object is safely processed.
+   */
+  private _rehydrateDownArea(
+    area?: Private.IDownArea | null
+  ): ILabShell.IDownArea | null {
+    if (!area) {
+      return { currentWidget: null, size: 0.0, widgets: null };
+    }
+
+    const internal = this._widgets;
+    const currentWidget =
+      area.current && internal.has(`${area.current}`)
+        ? internal.get(`${area.current}`)
+        : null;
+    const widgets = !Array.isArray(area.widgets)
+      ? null
+      : area.widgets
+          .map(name =>
+            internal.has(`${name}`) ? internal.get(`${name}`) : null
+          )
+          .filter(widget => !!widget);
+    return {
+      currentWidget: currentWidget!,
+      size: area.size ?? 0.0,
+      widgets: widgets as Widget[] | null
+    };
+  }
+
+  /**
    * Dehydrate a side area description into a serializable object.
    */
   private _dehydrateSideArea(
@@ -319,7 +396,10 @@ export class LayoutRestorer implements ILayoutRestorer {
     if (!area) {
       return null;
     }
-    const dehydrated: Private.ISideArea = { collapsed: area.collapsed };
+    const dehydrated: Private.ISideArea = {
+      collapsed: area.collapsed,
+      visible: area.visible
+    };
     if (area.currentWidget) {
       const current = Private.nameProperty.get(area.currentWidget);
       if (current) {
@@ -335,7 +415,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
-   * Reydrate a serialized side area description object.
+   * Rehydrate a serialized side area description object.
    *
    * #### Notes
    * This function consumes data that can become corrupted, so it uses type
@@ -345,7 +425,12 @@ export class LayoutRestorer implements ILayoutRestorer {
     area?: Private.ISideArea | null
   ): ILabShell.ISideArea {
     if (!area) {
-      return { collapsed: true, currentWidget: null, widgets: null };
+      return {
+        collapsed: true,
+        currentWidget: null,
+        visible: true,
+        widgets: null
+      };
     }
     const internal = this._widgets;
     const collapsed = area.collapsed ?? false;
@@ -363,7 +448,8 @@ export class LayoutRestorer implements ILayoutRestorer {
     return {
       collapsed,
       currentWidget: currentWidget!,
-      widgets: widgets as Widget[] | null
+      widgets: widgets as Widget[] | null,
+      visible: area.visible ?? true
     };
   }
 
@@ -433,6 +519,11 @@ namespace Private {
     main?: IMainArea | null;
 
     /**
+     * The down area of the user interface
+     */
+    down?: IDownArea | null;
+
+    /**
      * The left area of the user interface.
      */
     left?: ISideArea | null;
@@ -441,6 +532,11 @@ namespace Private {
      * The right area of the user interface.
      */
     right?: ISideArea | null;
+
+    /**
+     * The relatives sizes of the areas of the user interface.
+     */
+    relativeSizes?: number[] | null;
   }
 
   /**
@@ -476,6 +572,11 @@ namespace Private {
      * The current widget that has side area focus.
      */
     current?: string | null;
+
+    /**
+     * A flag denoting whether the side tab bar is visible.
+     */
+    visible?: boolean | null;
 
     /**
      * The collection of widgets held by the sidebar.
@@ -526,6 +627,28 @@ namespace Private {
      * The sizes of the children.
      */
     sizes: Array<number>;
+  }
+
+  /**
+   * The restorable description of the down area in the user interface
+   */
+  export interface IDownArea extends PartialJSONObject {
+    /**
+     * The current widget that has application focus.
+     */
+    current?: string | null;
+
+    /**
+     * Vertical relative size of the down area
+     *
+     * The main area will take the rest of the height
+     */
+    size?: number | null;
+
+    /**
+     * The widgets in the down area.
+     */
+    widgets?: Array<string> | null;
   }
 
   /**

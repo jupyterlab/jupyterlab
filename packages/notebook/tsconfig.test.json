@@ -30,6 +30,9 @@
       "path": "../services"
     },
     {
+      "path": "../shared-models"
+    },
+    {
       "path": "../statusbar"
     },
     {
@@ -70,6 +73,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../statusbar"

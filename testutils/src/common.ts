@@ -8,9 +8,9 @@ import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 import {
-  TextModelFactory,
+  Context,
   DocumentRegistry,
-  Context
+  TextModelFactory
 } from '@jupyterlab/docregistry';
 
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';

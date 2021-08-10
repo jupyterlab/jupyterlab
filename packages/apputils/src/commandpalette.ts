@@ -3,51 +3,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Token } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
+import { searchIcon } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
-
-import { CommandPalette, Widget, Panel } from '@lumino/widgets';
-
-/* tslint:disable */
-/**
- * The command palette token.
- */
-export const ICommandPalette = new Token<ICommandPalette>(
-  '@jupyterlab/apputils:ICommandPalette'
-);
-/* tslint:enable */
+import { CommandPalette, Panel, Widget } from '@lumino/widgets';
 
 /**
- * The options for creating a command palette item.
+ * Class name identifying the input group with search icon.
  */
-export interface IPaletteItem extends CommandPalette.IItemOptions {}
-
-/**
- * The interface for a Jupyter Lab command palette.
- */
-export interface ICommandPalette {
-  /**
-   * The placeholder text of the command palette's search input.
-   */
-  placeholder: string;
-
-  /**
-   * Activate the command palette for user input.
-   */
-  activate(): void;
-
-  /**
-   * Add a command item to the command palette.
-   *
-   * @param options - The options for creating the command item.
-   *
-   * @returns A disposable that will remove the item from the palette.
-   */
-  addItem(options: IPaletteItem): IDisposable;
-}
+const SEARCH_ICON_GROUP_CLASS = 'jp-SearchIconGroup';
 
 /**
  * Wrap the command palette in a modal to make it more usable.
@@ -57,14 +20,15 @@ export class ModalCommandPalette extends Panel {
     super();
     this.addClass('jp-ModalCommandPalette');
     this.id = 'modal-command-palette';
-    this._commandPalette = options.commandPalette;
-    this.addWidget(this._commandPalette);
+    this.palette = options.commandPalette;
     this._commandPalette.commands.commandExecuted.connect(() => {
       if (this.isAttached && this.isVisible) {
         this.hideAndReset();
       }
     });
-    this.hideAndReset();
+    // required to properly receive blur and focus events;
+    // selection of items with mouse may not work without this.
+    this.node.tabIndex = 0;
   }
 
   get palette(): CommandPalette {
@@ -73,6 +37,12 @@ export class ModalCommandPalette extends Panel {
 
   set palette(value: CommandPalette) {
     this._commandPalette = value;
+    if (!this.searchIconGroup) {
+      this._commandPalette.inputNode.insertAdjacentElement(
+        'afterend',
+        this.createSearchIconGroup()
+      );
+    }
     this.addWidget(value);
     this.hideAndReset();
   }
@@ -102,14 +72,21 @@ export class ModalCommandPalette extends Panel {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
         break;
-      case 'focus':
+      case 'blur': {
         // if the focus shifted outside of this DOM element, hide and reset.
-        const target = event.target as HTMLElement;
-        if (!this.node.contains(target as HTMLElement)) {
+        if (
+          // focus went away from child element
+          this.node.contains(event.target as HTMLElement) &&
+          // and it did NOT go to another child element but someplace else
+          !this.node.contains(
+            (event as MouseEvent).relatedTarget as HTMLElement
+          )
+        ) {
           event.stopPropagation();
           this.hideAndReset();
         }
         break;
+      }
       case 'contextmenu':
         event.preventDefault();
         event.stopPropagation();
@@ -117,6 +94,25 @@ export class ModalCommandPalette extends Panel {
       default:
         break;
     }
+  }
+
+  /**
+   * Find the element with search icon group.
+   */
+  protected get searchIconGroup(): HTMLDivElement | undefined {
+    return this._commandPalette.node.getElementsByClassName(
+      SEARCH_ICON_GROUP_CLASS
+    )[0] as HTMLDivElement;
+  }
+
+  /**
+   * Create element with search icon group.
+   */
+  protected createSearchIconGroup(): HTMLDivElement {
+    const inputGroup = document.createElement('div');
+    inputGroup.classList.add(SEARCH_ICON_GROUP_CLASS);
+    searchIcon.render(inputGroup);
+    return inputGroup;
   }
 
   /**
@@ -136,11 +132,11 @@ export class ModalCommandPalette extends Panel {
   }
 
   protected onBeforeHide(msg: Message): void {
-    document.removeEventListener('focus', this, true);
+    document.removeEventListener('blur', this, true);
   }
 
   protected onAfterShow(msg: Message): void {
-    document.addEventListener('focus', this, true);
+    document.addEventListener('blur', this, true);
   }
 
   /**

@@ -1,14 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Menu, Widget } from '@lumino/widgets';
-
-import { IJupyterLabMenu, JupyterLabMenu, IMenuExtender } from './labmenu';
+import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
+import { Widget } from '@lumino/widgets';
+import { IMenuExtender } from './tokens';
 
 /**
  * An interface for a Kernel menu.
  */
-export interface IKernelMenu extends IJupyterLabMenu {
+export interface IKernelMenu extends IRankedMenu {
   /**
    * A set storing IKernelUsers for the Kernel menu.
    */
@@ -18,11 +18,11 @@ export interface IKernelMenu extends IJupyterLabMenu {
 /**
  * An extensible Kernel menu for the application.
  */
-export class KernelMenu extends JupyterLabMenu implements IKernelMenu {
+export class KernelMenu extends RankedMenu implements IKernelMenu {
   /**
    * Construct the kernel menu.
    */
-  constructor(options: Menu.IOptions) {
+  constructor(options: IRankedMenu.IOptions) {
     super(options);
     this.kernelUsers = new Set<IKernelMenu.IKernelUser<Widget>>();
   }
@@ -86,7 +86,7 @@ export namespace IKernelMenu {
      * A function to return the label associated to the `restartKernelAndClear` action.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     restartKernelAndClearLabel?: (n: number) => string;
   }

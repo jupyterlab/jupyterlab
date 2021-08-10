@@ -3,14 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Token, ReadonlyPartialJSONObject } from '@lumino/coreutils';
-
 import { ISanitizer } from '@jupyterlab/apputils';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { MimeModel } from './mimemodel';
 import { ITranslator } from '@jupyterlab/translation';
+import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
+import { MimeModel } from './mimemodel';
 
 /* tslint:disable */
 /**

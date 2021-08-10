@@ -1,18 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { ISearchProvider, ISearchMatch } from '../index';
-import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
-import { GenericSearchProvider } from './genericsearchprovider';
-
-import { Cell, MarkdownCell, CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell, MarkdownCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { NotebookPanel } from '@jupyterlab/notebook';
-
 import { ArrayExt } from '@lumino/algorithm';
-import { Signal, ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-
 import CodeMirror from 'codemirror';
+import { ISearchMatch, ISearchProvider } from '../index';
+import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
+import { GenericSearchProvider } from './genericsearchprovider';
 
 interface ICellSearchPair {
   cell: Cell;
@@ -26,7 +23,7 @@ export interface INotebookFilters {
   output: boolean;
 
   /**
-   * Should search be within the active cell?
+   * Should search be within the selected cell(s)?
    */
   selectedCells: boolean;
 }
@@ -141,9 +138,9 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       });
 
       if (cell instanceof CodeCell && this._filters.output) {
-        const outputProivder = new GenericSearchProvider();
-        outputProivder.isSubProvider = true;
-        const matchesFromOutput = await outputProivder.startQuery(
+        const outputProvider = new GenericSearchProvider();
+        outputProvider.isSubProvider = true;
+        const matchesFromOutput = await outputProvider.startQuery(
           query,
           cell.outputArea
         );
@@ -154,11 +151,11 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
         allMatches.concat(matchesFromOutput);
 
-        outputProivder.changed.connect(this._onSearchProviderChanged, this);
+        outputProvider.changed.connect(this._onSearchProviderChanged, this);
 
         this._searchProviders.push({
           cell: cell,
-          provider: outputProivder
+          provider: outputProvider
         });
       }
     }
@@ -372,13 +369,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   /**
-   * Signal indicating that the active cell in the notebook has changed
-   */
-  get activeCellChanged(): ISignal<this, void> {
-    return this._activeCellChanged;
-  }
-
-  /**
    * The current index of the selected match.
    */
   get currentMatchIndex(): number | null {
@@ -518,5 +508,4 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   private _unRenderedMarkdownCells: MarkdownCell[] = [];
   private _cellsWithMatches: Cell[] = [];
   private _changed = new Signal<this, void>(this);
-  private _activeCellChanged = new Signal<this, void>(this);
 }

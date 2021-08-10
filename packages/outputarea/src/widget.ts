@@ -1,35 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import ResizeObserver from 'resize-observer-polyfill';
-
+import { ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
+import * as nbformat from '@jupyterlab/nbformat';
+import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 import {
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject,
-  ReadonlyPartialJSONObject
+  ReadonlyPartialJSONObject,
+  UUID
 } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { Signal } from '@lumino/signaling';
-
-import { Panel, PanelLayout } from '@lumino/widgets';
-
-import { Widget } from '@lumino/widgets';
-
-import { ISessionContext } from '@jupyterlab/apputils';
-
-import * as nbformat from '@jupyterlab/nbformat';
-
-import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { Kernel, KernelMessage } from '@jupyterlab/services';
-
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
+import ResizeObserver from 'resize-observer-polyfill';
 import { IOutputAreaModel } from './model';
 
 /**
@@ -157,7 +145,7 @@ export class OutputArea extends Widget {
   private headEndIndex: number;
 
   /**
-   * A read-only sequence of the chidren widgets in the output area.
+   * A read-only sequence of the children widgets in the output area.
    */
   get widgets(): ReadonlyArray<Widget> {
     return (this.layout as PanelLayout).widgets;
@@ -231,6 +219,7 @@ export class OutputArea extends Widget {
       this._future = null!;
     }
     this._displayIdMap.clear();
+    this._outputTracker.dispose();
     super.dispose();
   }
 
@@ -482,6 +471,9 @@ export class OutputArea extends Widget {
     if (index >= this.headTailNumberOutputs && this.maxNumberOutputs !== 0) {
       this.trimmedOutputModels.push(model);
     }
+    if (!this._outputTracker.has(output)) {
+      void this._outputTracker.add(output);
+    }
   }
 
   private _createOutput(model: IOutputModel): Widget {
@@ -492,6 +484,13 @@ export class OutputArea extends Widget {
       output = new Widget();
     }
     return output;
+  }
+
+  /**
+   * A widget tracker for individual output widgets in the output area.
+   */
+  get outputTracker(): WidgetTracker<Widget> {
+    return this._outputTracker;
   }
 
   /**
@@ -524,7 +523,7 @@ export class OutputArea extends Widget {
       return null;
     }
 
-    const panel = new Panel();
+    const panel = new Private.OutputPanel();
 
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
@@ -650,6 +649,9 @@ export class OutputArea extends Widget {
     KernelMessage.IExecuteReplyMsg
   >;
   private _displayIdMap = new Map<string, number[]>();
+  private _outputTracker = new WidgetTracker<Widget>({
+    namespace: UUID.uuid4()
+  });
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -872,7 +874,7 @@ export class Stdin extends Widget implements IStdin {
   /**
    * The value of the widget.
    */
-  get value() {
+  get value(): Promise<string> {
     return this._promise.promise.then(() => this._value);
   }
 
@@ -1043,12 +1045,7 @@ namespace Private {
      * of the widget to update it if and when new data is available.
      */
     renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-      return this._wrapped.renderModel(model).then(() => {
-        const win = (this.node as HTMLIFrameElement).contentWindow;
-        if (win) {
-          win.location.reload();
-        }
-      });
+      return this._wrapped.renderModel(model);
     }
 
     private _wrapped: IRenderMime.IRenderer;
@@ -1061,4 +1058,39 @@ namespace Private {
     name: 'preferredMimetype',
     create: owner => ''
   });
+
+  /**
+   * A `Panel` that's focused by a `contextmenu` event.
+   */
+  export class OutputPanel extends Panel {
+    /**
+     * Construct a new `OutputPanel` widget.
+     */
+    constructor(options?: Panel.IOptions) {
+      super(options);
+    }
+
+    /**
+     * A callback that focuses on the widget.
+     */
+    private _onContext(_: Event): void {
+      this.node.focus();
+    }
+
+    /**
+     * Handle `after-attach` messages sent to the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('contextmenu', this._onContext.bind(this));
+    }
+
+    /**
+     * Handle `before-detach` messages sent to the widget.
+     */
+    protected onBeforeDetach(msg: Message): void {
+      super.onAfterDetach(msg);
+      this.node.removeEventListener('contextmenu', this._onContext.bind(this));
+    }
+  }
 }

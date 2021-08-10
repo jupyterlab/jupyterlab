@@ -8,12 +8,9 @@
  */
 
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
-
 import { PageConfig } from '@jupyterlab/coreutils';
-
-import { ILatexTypesetter } from '@jupyterlab/rendermime';
-
 import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
+import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
 /**
  * The MathJax latexTypesetter plugin.

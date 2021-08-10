@@ -9,6 +9,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../docprovider"
+    },
+    {
       "path": "../docregistry"
     },
     {
@@ -19,6 +22,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     },
     {
       "path": "."
@@ -33,6 +39,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../docprovider"
+    },
+    {
       "path": "../docregistry"
     },
     {
@@ -43,6 +52,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

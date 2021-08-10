@@ -1,16 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@lumino/algorithm';
-
 import { ToolbarButton } from '@jupyterlab/apputils';
-
-import { DocumentRegistry, Context } from '@jupyterlab/docregistry';
-
-import { INotebookModel, NotebookPanel, NotebookWidgetFactory } from '../src';
-
+import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+import { toArray } from '@lumino/algorithm';
+import { INotebookModel, NotebookPanel, NotebookWidgetFactory } from '../src';
 import * as utils from './utils';
 
 const contentFactory = utils.createNotebookPanelFactory();
@@ -134,10 +130,18 @@ describe('@jupyterlab/notebook', () => {
         const factory = createFactory(toolbarFactory);
         const panel = factory.createNew(context);
         const panel2 = factory.createNew(context);
-        expect(toArray(panel.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(panel2.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(panel.toolbar.children()).length).toBe(2);
-        expect(toArray(panel2.toolbar.children()).length).toBe(2);
+        expect(toArray(panel.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(toArray(panel2.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(toArray(panel.toolbar.children()).length).toBe(3);
+        expect(toArray(panel2.toolbar.children()).length).toBe(3);
       });
 
       it('should clone from the optional source widget', () => {

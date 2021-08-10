@@ -1,6 +1,27 @@
 {
   "jupyter.lab.setting-icon": "ui-components:settings",
   "jupyter.lab.setting-icon-label": "Status Bar",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-view-appearance",
+              "items": [
+                {
+                  "command": "statusbar:toggle",
+                  "rank": 15
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
   "title": "Status Bar",
   "description": "Status Bar settings.",
   "properties": {

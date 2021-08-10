@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import {
+  FOUND_CLASSES,
   GenericSearchProvider,
-  IGenericSearchMatch,
-  FOUND_CLASSES
+  IGenericSearchMatch
 } from '@jupyterlab/documentsearch';
 import { Widget } from '@lumino/widgets';
 

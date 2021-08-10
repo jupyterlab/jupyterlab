@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { WidgetTracker } from '@jupyterlab/apputils';
-
 import { signalToPromise, testEmission } from '@jupyterlab/testutils';
-
 import { Panel, Widget } from '@lumino/widgets';
-
 import { simulate } from 'simulate-event';
 
 const namespace = 'widget-tracker-test';
@@ -24,7 +21,7 @@ function createWidget(): Widget {
   const widget = new Widget({ node: document.createElement('button') });
   widget.node.style.minHeight = '20px';
   widget.node.style.minWidth = '20px';
-  widget.node.tabIndex = -1;
+  widget.node.tabIndex = 0;
   widget.node.textContent = 'Test Button';
   return widget;
 }

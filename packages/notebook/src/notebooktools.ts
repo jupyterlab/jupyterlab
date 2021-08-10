@@ -1,41 +1,30 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each, chain } from '@lumino/algorithm';
-
-import {
-  ReadonlyPartialJSONValue,
-  ReadonlyPartialJSONObject
-} from '@lumino/coreutils';
-
-import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
-
-import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
-
-import { PanelLayout, Widget } from '@lumino/widgets';
-
-import { Collapse, Styling } from '@jupyterlab/apputils';
-
 import { Cell, ICellModel } from '@jupyterlab/cells';
-
 import {
   CodeEditor,
   CodeEditorWrapper,
   JSONEditor
 } from '@jupyterlab/codeeditor';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { NotebookPanel } from './panel';
+import { Collapser, Styling } from '@jupyterlab/ui-components';
+import { ArrayExt, chain, each } from '@lumino/algorithm';
+import {
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
+import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
+import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
+import { NotebookPanel } from './panel';
 import { INotebookTools, INotebookTracker } from './tokens';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
@@ -90,7 +79,7 @@ export class NotebookTools extends Widget implements INotebookTools {
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(this._commonTools);
-    layout.addWidget(new Collapse({ widget: this._advancedTools }));
+    layout.addWidget(new Collapser({ widget: this._advancedTools }));
 
     this._tracker = options.tracker;
     this._tracker.currentChanged.connect(
@@ -337,7 +326,7 @@ export namespace NotebookTools {
      */
     notebookTools: INotebookTools;
 
-    dispose() {
+    dispose(): void {
       super.dispose();
       if (this.notebookTools) {
         this.notebookTools = null!;
@@ -446,7 +435,7 @@ export namespace NotebookTools {
     /**
      * Dispose of the resources used by the tool.
      */
-    dispose() {
+    dispose(): void {
       if (this._model === null) {
         return;
       }
@@ -737,7 +726,9 @@ export namespace NotebookTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onActiveCellMetadataChanged(msg: ObservableJSON.ChangeMessage) {
+    protected onActiveCellMetadataChanged(
+      msg: ObservableJSON.ChangeMessage
+    ): void {
       if (this._changeGuard) {
         return;
       }

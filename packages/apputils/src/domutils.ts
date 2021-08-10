@@ -2,10 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ArrayExt } from '@lumino/algorithm';
-
-import { ElementExt } from '@lumino/domutils';
-
 import { UUID } from '@lumino/coreutils';
+import { ElementExt } from '@lumino/domutils';
 
 /**
  * The namespace for DOM utilities.

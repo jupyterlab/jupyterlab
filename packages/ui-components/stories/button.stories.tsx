@@ -1,13 +1,11 @@
 /**
  * Example story for styling a button.
  */
-import React from 'react';
-import { action } from '@storybook/addon-actions';
-
-import { Button } from '../src';
-
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
+import { action } from '@storybook/addon-actions';
+import React from 'react';
+import { Button } from '../src';
 
 export default {
   // component: Button,

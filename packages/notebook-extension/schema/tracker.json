@@ -1,6 +1,354 @@
 {
   "jupyter.lab.setting-icon": "ui-components:notebook",
   "jupyter.lab.setting-icon-label": "Notebook",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-file-new",
+              "items": [
+                {
+                  "command": "notebook:create-new",
+                  "rank": 10
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-edit",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 4
+          },
+          {
+            "command": "notebook:undo-cell-action",
+            "rank": 4
+          },
+          {
+            "command": "notebook:redo-cell-action",
+            "rank": 4
+          },
+          {
+            "type": "separator",
+            "rank": 5
+          },
+          {
+            "command": "notebook:cut-cell",
+            "rank": 5
+          },
+          {
+            "command": "notebook:copy-cell",
+            "rank": 5
+          },
+          {
+            "command": "notebook:paste-cell-below",
+            "rank": 5
+          },
+          {
+            "command": "notebook:paste-cell-above",
+            "rank": 5
+          },
+          {
+            "command": "notebook:paste-and-replace-cell",
+            "rank": 5
+          },
+          {
+            "type": "separator",
+            "rank": 6
+          },
+          {
+            "command": "notebook:delete-cell",
+            "rank": 6
+          },
+          {
+            "type": "separator",
+            "rank": 7
+          },
+          {
+            "command": "notebook:select-all",
+            "rank": 7
+          },
+          {
+            "command": "notebook:deselect-all",
+            "rank": 7
+          },
+          {
+            "type": "separator",
+            "rank": 8
+          },
+          {
+            "command": "notebook:move-cell-up",
+            "rank": 8
+          },
+          {
+            "command": "notebook:move-cell-down",
+            "rank": 8
+          },
+          {
+            "type": "separator",
+            "rank": 9
+          },
+          {
+            "command": "notebook:split-cell-at-cursor",
+            "rank": 9
+          },
+          {
+            "command": "notebook:merge-cells",
+            "rank": 9
+          },
+          {
+            "command": "notebook:merge-cell-above",
+            "rank": 9
+          },
+          {
+            "command": "notebook:merge-cell-below",
+            "rank": 9
+          },
+          {
+            "type": "separator",
+            "rank": 9
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 10
+          },
+          {
+            "command": "notebook:hide-cell-code",
+            "rank": 10
+          },
+          {
+            "command": "notebook:hide-cell-outputs",
+            "rank": 10
+          },
+          {
+            "command": "notebook:hide-all-cell-code",
+            "rank": 10
+          },
+          {
+            "command": "notebook:hide-all-cell-outputs",
+            "rank": 10
+          },
+          {
+            "type": "separator",
+            "rank": 10
+          },
+          {
+            "command": "notebook:show-cell-code",
+            "rank": 11
+          },
+          {
+            "command": "notebook:show-cell-outputs",
+            "rank": 11
+          },
+          {
+            "command": "notebook:show-all-cell-code",
+            "rank": 11
+          },
+          {
+            "command": "notebook:show-all-cell-outputs",
+            "rank": 11
+          },
+          {
+            "type": "separator",
+            "rank": 11
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-run",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 10
+          },
+          {
+            "command": "notebook:run-cell-and-insert-below",
+            "rank": 10
+          },
+          {
+            "command": "notebook:run-cell",
+            "rank": 10
+          },
+          {
+            "command": "notebook:run-in-console",
+            "rank": 10
+          },
+          {
+            "type": "separator",
+            "rank": 11
+          },
+          {
+            "command": "notebook:run-all-above",
+            "rank": 11
+          },
+          {
+            "command": "notebook:run-all-below",
+            "rank": 11
+          },
+          {
+            "type": "separator",
+            "rank": 12
+          },
+          {
+            "command": "notebook:render-all-markdown",
+            "rank": 12
+          },
+          {
+            "type": "separator",
+            "rank": 12
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-kernel",
+        "items": [
+          {
+            "command": "notebook:restart-and-run-to-selected",
+            "rank": 1
+          }
+        ]
+      }
+    ],
+    "context": [
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 0
+      },
+      {
+        "command": "notebook:cut-cell",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 1
+      },
+      {
+        "command": "notebook:copy-cell",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 2
+      },
+      {
+        "command": "notebook:paste-cell-below",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 3
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 4
+      },
+      {
+        "command": "notebook:delete-cell",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 5
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 6
+      },
+      {
+        "command": "notebook:split-cell-at-cursor",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 7
+      },
+      {
+        "command": "notebook:merge-cells",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 8
+      },
+      {
+        "command": "notebook:merge-cell-above",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 8
+      },
+      {
+        "command": "notebook:merge-cell-below",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 8
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 9
+      },
+      {
+        "command": "notebook:create-output-view",
+        "selector": ".jp-Notebook .jp-CodeCell",
+        "rank": 10
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook .jp-CodeCell",
+        "rank": 11
+      },
+      {
+        "command": "notebook:clear-cell-output",
+        "selector": ".jp-Notebook .jp-CodeCell",
+        "rank": 12
+      },
+      {
+        "command": "notebook:clear-all-cell-outputs",
+        "selector": ".jp-Notebook",
+        "rank": 0
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook",
+        "rank": 1
+      },
+      {
+        "command": "notebook:enable-output-scrolling",
+        "selector": ".jp-Notebook",
+        "rank": 2
+      },
+      {
+        "command": "notebook:disable-output-scrolling",
+        "selector": ".jp-Notebook",
+        "rank": 3
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook",
+        "rank": 4
+      },
+      {
+        "command": "notebook:undo-cell-action",
+        "selector": ".jp-Notebook",
+        "rank": 5
+      },
+      {
+        "command": "notebook:redo-cell-action",
+        "selector": ".jp-Notebook",
+        "rank": 6
+      },
+      {
+        "command": "notebook:restart-kernel",
+        "selector": ".jp-Notebook",
+        "rank": 7
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-Notebook",
+        "rank": 8
+      },
+      {
+        "command": "notebook:create-console",
+        "selector": ".jp-Notebook",
+        "rank": 9
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
     {
       "command": "notebook:change-cell-to-code",
@@ -236,6 +584,11 @@
         "autoClosingBrackets": {
           "type": "boolean"
         },
+        "cursorBlinkRate": {
+          "type": "number",
+          "title": "Cursor blinking rate",
+          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely."
+        },
         "fontFamily": {
           "type": ["string", "null"]
         },
@@ -292,7 +645,8 @@
       "description": "The configuration for all code cells.",
       "$ref": "#/definitions/editorConfig",
       "default": {
-        "autoClosingBrackets": true,
+        "autoClosingBrackets": false,
+        "cursorBlinkRate": 530,
         "fontFamily": null,
         "fontSize": null,
         "lineHeight": null,
@@ -327,6 +681,7 @@
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": false,
+        "cursorBlinkRate": 530,
         "fontFamily": null,
         "fontSize": null,
         "lineHeight": null,
@@ -348,6 +703,7 @@
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": false,
+        "cursorBlinkRate": 530,
         "fontFamily": null,
         "fontSize": null,
         "lineHeight": null,
@@ -374,6 +730,30 @@
       "description": "Should timing data be recorded in cell metadata",
       "type": "boolean",
       "default": false
+    },
+    "numberCellsToRenderDirectly": {
+      "title": "Number of cells to render directly",
+      "description": "Define the number of cells to render directly when virtual notebook intersection observer is available",
+      "type": "number",
+      "default": 20
+    },
+    "renderCellOnIdle": {
+      "title": "Render cell on browser idle time",
+      "description": "Defines if the placeholder cells should be rendered when the browser is idle",
+      "type": "boolean",
+      "default": true
+    },
+    "observedTopMargin": {
+      "title": "Observed top margin",
+      "description": "Defines the observed top margin for the virtual notebook, set a positive number of pixels to render cells above the visible view",
+      "type": "string",
+      "default": "1000px"
+    },
+    "observedBottomMargin": {
+      "title": "Observed bottom margin",
+      "description": "Defines the observed bottom margin for the virtual notebook, set a positive number of pixels to render cells below the visible view",
+      "type": "string",
+      "default": "1000px"
     },
     "maxNumberOutputs": {
       "title": "The maximum number of output cells to to be rendered in the output area. Set to 0 to have the complete display.",

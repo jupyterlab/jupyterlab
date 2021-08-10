@@ -1,15 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Kernel } from '@jupyterlab/services';
-
-import { Token } from '@lumino/coreutils';
-
-import { Widget } from '@lumino/widgets';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Kernel } from '@jupyterlab/services';
+import { Token } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 
 /* tslint:disable */
 /**

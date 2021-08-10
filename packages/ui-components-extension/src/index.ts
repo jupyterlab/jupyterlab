@@ -9,7 +9,6 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { ILabIconManager } from '@jupyterlab/ui-components';
 
 /**

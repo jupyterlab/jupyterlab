@@ -1,25 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IWidgetTracker, MenuFactory } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-
-import { Menu } from '@lumino/widgets';
-
-import { IFileMenu } from './file';
-
+import { Menu, Widget } from '@lumino/widgets';
 import { IEditMenu } from './edit';
-
+import { IFileMenu } from './file';
 import { IHelpMenu } from './help';
-
 import { IKernelMenu } from './kernel';
-
 import { IRunMenu } from './run';
-
 import { ISettingsMenu } from './settings';
-
-import { IViewMenu } from './view';
-
 import { ITabsMenu } from './tabs';
+import { IViewMenu } from './view';
 
 /* tslint:disable */
 /**
@@ -27,6 +19,29 @@ import { ITabsMenu } from './tabs';
  */
 export const IMainMenu = new Token<IMainMenu>('@jupyterlab/mainmenu:IMainMenu');
 /* tslint:enable */
+
+/**
+ * A base interface for a consumer of one of the menu
+ * semantic extension points. The IMenuExtender gives
+ * a widget tracker which is checked when the menu
+ * is deciding which IMenuExtender to delegate to upon
+ * selection of the menu item.
+ */
+export interface IMenuExtender<T extends Widget> {
+  /**
+   * A widget tracker for identifying the appropriate extender.
+   */
+  tracker: IWidgetTracker<T>;
+
+  /**
+   * An additional function that determines whether the extender
+   * is enabled. By default it is considered enabled if the application
+   * active widget is contained in the `tracker`. If this is also
+   * provided, the criterion is equivalent to
+   * `tracker.has(widget) && extender.isEnabled(widget)`
+   */
+  isEnabled?: (widget: T) => boolean;
+}
 
 /**
  * The main menu interface.
@@ -91,4 +106,9 @@ export namespace IMainMenu {
      */
     rank?: number;
   }
+
+  /**
+   * The instantiation options for an IMainMenu.
+   */
+  export interface IMenuOptions extends MenuFactory.IMenuOptions {}
 }

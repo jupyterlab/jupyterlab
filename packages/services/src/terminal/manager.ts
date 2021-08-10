@@ -13,9 +13,9 @@ import * as Terminal from './terminal';
 import { BaseManager } from '../basemanager';
 import {
   isAvailable,
-  startNew,
+  listRunning,
   shutdownTerminal,
-  listRunning
+  startNew
 } from './restapi';
 import { TerminalConnection } from './default';
 

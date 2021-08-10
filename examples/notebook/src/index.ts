@@ -12,7 +12,7 @@ import '@jupyterlab/codemirror/style/index.css';
 import '@jupyterlab/completer/style/index.css';
 import '@jupyterlab/documentsearch/style/index.css';
 import '@jupyterlab/notebook/style/index.css';
-import '@jupyterlab/theme-light-extension/style/index.css';
+import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
 import { CommandRegistry } from '@lumino/commands';
@@ -23,14 +23,14 @@ import { ServiceManager } from '@jupyterlab/services';
 import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 
 import {
+  NotebookModelFactory,
   NotebookPanel,
-  NotebookWidgetFactory,
-  NotebookModelFactory
+  NotebookWidgetFactory
 } from '@jupyterlab/notebook';
 
 import {
-  CompleterModel,
   Completer,
+  CompleterModel,
   CompletionHandler,
   KernelConnector
 } from '@jupyterlab/completer';
@@ -42,8 +42,8 @@ import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
-  RenderMimeRegistry,
-  standardRendererFactories as initialFactories
+  standardRendererFactories as initialFactories,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 import { SetupCommands } from './commands';
 

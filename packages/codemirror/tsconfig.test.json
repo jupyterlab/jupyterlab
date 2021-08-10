@@ -18,10 +18,16 @@
       "path": "../observables"
     },
     {
+      "path": "../shared-models"
+    },
+    {
       "path": "../statusbar"
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     },
     {
       "path": "."
@@ -45,10 +51,16 @@
       "path": "../observables"
     },
     {
+      "path": "../shared-models"
+    },
+    {
       "path": "../statusbar"
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

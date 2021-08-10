@@ -36,6 +36,12 @@
       "path": "../services"
     },
     {
+      "path": "../shared-models"
+    },
+    {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     },
     {
@@ -76,6 +82,12 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../shared-models"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"

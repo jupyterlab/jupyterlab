@@ -17,7 +17,7 @@ MONOREPO_DEVDOC=$(realpath $PKG_ROOT/../../docs/source/developer)
 # make the docs build dir
 mkdir -p $BUILD
 
-# paths in rst include directives are resovled relative to pwd
+# paths in rst include directives are resolved relative to pwd
 pushd $SOURCE > /dev/null
 
 # make a copy of labicon.rst with section levels shifted down

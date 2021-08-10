@@ -1,4 +1,6 @@
 {
+  "name": "@jupyterlab/repo-top",
+  "version": "0.0.1",
   "private": true,
   "workspaces": {
     "packages": [
@@ -22,9 +24,11 @@
   },
   "scripts": {
     "add:sibling": "node buildutils/lib/add-sibling.js",
+    "after:publish:assets": "node buildutils/lib/publish --skip-publish",
     "analyze": "jlpm run analyze:dev",
     "analyze:dev": "cd dev_mode && jlpm run build --analyze",
     "analyze:prod": "cd dev_mode && jlpm run build:prod --analyze",
+    "before:build:python": "node buildutils/lib/local-repository.js publish-dists --path ./dist && node buildutils/lib/update-core-mode.js",
     "build": "jlpm run build:dev",
     "build:builder": "cd builder && jlpm run build",
     "build:core": "cd jupyterlab/staging && jlpm && (jlpm deduplicate || jlpm) && jlpm run build",
@@ -95,19 +99,19 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.8.1",
-    "@typescript-eslint/parser": "^4.8.1",
-    "eslint": "^7.14.0",
-    "eslint-config-prettier": "^6.15.0",
-    "eslint-plugin-jest": "^24.1.3",
-    "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-react": "^7.21.5",
+    "@typescript-eslint/eslint-plugin": "~4.8.1",
+    "@typescript-eslint/parser": "~4.8.1",
+    "eslint": "~7.14.0",
+    "eslint-config-prettier": "~6.15.0",
+    "eslint-plugin-jest": "~24.1.3",
+    "eslint-plugin-prettier": "~3.1.4",
+    "eslint-plugin-react": "~7.21.5",
     "husky": "^4.2.5",
     "lerna": "^3.19.0",
     "lint-staged": "^10.2.13",
-    "prettier": "^2.1.1",
+    "prettier": "~2.1.1",
     "shell-quote": "^1.7.2",
-    "typedoc": "~0.20.0-beta.27",
+    "typedoc": "~0.21.2",
     "yarn": "1.21.1"
   }
 }

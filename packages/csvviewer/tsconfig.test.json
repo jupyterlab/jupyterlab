@@ -3,9 +3,6 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
-      "path": "../apputils"
-    },
-    {
       "path": "../coreutils"
     },
     {
@@ -13,6 +10,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     },
     {
       "path": "."
@@ -21,9 +21,6 @@
       "path": "../../testutils"
     },
     {
-      "path": "../apputils"
-    },
-    {
       "path": "../coreutils"
     },
     {
@@ -31,6 +28,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

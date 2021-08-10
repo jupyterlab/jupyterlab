@@ -11,27 +11,20 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   Dialog,
+  ICommandPalette,
   ISessionContext,
   ISessionContextDialogs,
-  ICommandPalette,
   sessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
-import { IEditorServices } from '@jupyterlab/codeeditor';
-
+import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import {
   IEditMenu,
   IFileMenu,
@@ -40,35 +33,28 @@ import {
   IMainMenu,
   IRunMenu
 } from '@jupyterlab/mainmenu';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { consoleIcon } from '@jupyterlab/ui-components';
-
 import { find } from '@lumino/algorithm';
-
 import {
   JSONExt,
   JSONObject,
+  ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
-  UUID,
-  ReadonlyJSONValue
+  UUID
 } from '@lumino/coreutils';
-
 import { DisposableSet } from '@lumino/disposable';
-
-import { DockLayout, Menu } from '@lumino/widgets';
-
+import { DockLayout } from '@lumino/widgets';
 import foreign from './foreign';
 
 /**
  * The command IDs used by the console plugin.
  */
 namespace CommandIDs {
+  export const autoClosingBrackets = 'console:toggle-autoclosing-brackets';
+
   export const create = 'console:create';
 
   export const clear = 'console:clear';
@@ -300,13 +286,102 @@ async function activateConsole(
     return panel;
   }
 
+  type lineWrap_type = 'off' | 'on' | 'wordWrapColumn' | 'bounded';
+
+  const mapOption = (
+    editor: CodeEditor.IEditor,
+    config: JSONObject,
+    option: string
+  ) => {
+    if (config[option] === undefined) {
+      return;
+    }
+    switch (option) {
+      case 'autoClosingBrackets':
+        editor.setOption(
+          'autoClosingBrackets',
+          config['autoClosingBrackets'] as boolean
+        );
+        break;
+      case 'cursorBlinkRate':
+        editor.setOption(
+          'cursorBlinkRate',
+          config['cursorBlinkRate'] as number
+        );
+        break;
+      case 'fontFamily':
+        editor.setOption('fontFamily', config['fontFamily'] as string | null);
+        break;
+      case 'fontSize':
+        editor.setOption('fontSize', config['fontSize'] as number | null);
+        break;
+      case 'lineHeight':
+        editor.setOption('lineHeight', config['lineHeight'] as number | null);
+        break;
+      case 'lineNumbers':
+        editor.setOption('lineNumbers', config['lineNumbers'] as boolean);
+        break;
+      case 'lineWrap':
+        editor.setOption('lineWrap', config['lineWrap'] as lineWrap_type);
+        break;
+      case 'matchBrackets':
+        editor.setOption('matchBrackets', config['matchBrackets'] as boolean);
+        break;
+      case 'readOnly':
+        editor.setOption('readOnly', config['readOnly'] as boolean);
+        break;
+      case 'insertSpaces':
+        editor.setOption('insertSpaces', config['insertSpaces'] as boolean);
+        break;
+      case 'tabSize':
+        editor.setOption('tabSize', config['tabSize'] as number);
+        break;
+      case 'wordWrapColumn':
+        editor.setOption('wordWrapColumn', config['wordWrapColumn'] as number);
+        break;
+      case 'rulers':
+        editor.setOption('rulers', config['rulers'] as number[]);
+        break;
+      case 'codeFolding':
+        editor.setOption('codeFolding', config['codeFolding'] as boolean);
+        break;
+    }
+  };
+
+  const setOption = (
+    editor: CodeEditor.IEditor | undefined,
+    config: JSONObject
+  ) => {
+    if (editor === undefined) {
+      return;
+    }
+    mapOption(editor, config, 'autoClosingBrackets');
+    mapOption(editor, config, 'cursorBlinkRate');
+    mapOption(editor, config, 'fontFamily');
+    mapOption(editor, config, 'fontSize');
+    mapOption(editor, config, 'lineHeight');
+    mapOption(editor, config, 'lineNumbers');
+    mapOption(editor, config, 'lineWrap');
+    mapOption(editor, config, 'matchBrackets');
+    mapOption(editor, config, 'readOnly');
+    mapOption(editor, config, 'insertSpaces');
+    mapOption(editor, config, 'tabSize');
+    mapOption(editor, config, 'wordWrapColumn');
+    mapOption(editor, config, 'rulers');
+    mapOption(editor, config, 'codeFolding');
+  };
+
   const pluginId = '@jupyterlab/console-extension:tracker';
   let interactionMode: string;
+  let promptCellConfig: JSONObject;
   async function updateSettings() {
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
+    promptCellConfig = (await settingRegistry.get(pluginId, 'promptCellConfig'))
+      .composite as JSONObject;
     tracker.forEach(widget => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
+      setOption(widget.console.promptCell?.editor, promptCellConfig);
     });
   }
   settingRegistry.pluginChanged.connect((sender, plugin) => {
@@ -315,6 +390,17 @@ async function activateConsole(
     }
   });
   await updateSettings();
+
+  commands.addCommand(CommandIDs.autoClosingBrackets, {
+    execute: async args => {
+      promptCellConfig.autoClosingBrackets = !!(
+        args['force'] ?? !promptCellConfig.autoClosingBrackets
+      );
+      await settingRegistry.set(pluginId, 'promptCellConfig', promptCellConfig);
+    },
+    label: trans.__('Auto Close Brackets for Code Console Prompt'),
+    isToggled: () => promptCellConfig.autoClosingBrackets as boolean
+  });
 
   /**
    * Whether there is an active console.
@@ -572,9 +658,6 @@ async function activateConsole(
   }
 
   if (mainMenu) {
-    // Add a console creator to the File menu
-    mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.create }], 0);
-
     // Add a close and shutdown command to the file menu.
     mainMenu.fileMenu.closeAndCleaners.add({
       tracker,
@@ -676,42 +759,13 @@ async function activateConsole(
     isToggled: args => args['interactionMode'] === interactionMode
   });
 
-  const executeMenu = new Menu({ commands });
-  executeMenu.title.label = trans.__('Console Run Keystroke');
-
-  ['terminal', 'notebook'].forEach(name =>
-    executeMenu.addItem({
-      command: CommandIDs.interactionMode,
-      args: { interactionMode: name }
-    })
-  );
-
   if (mainMenu) {
-    mainMenu.settingsMenu.addGroup(
-      [
-        {
-          type: 'submenu' as Menu.ItemType,
-          submenu: executeMenu
-        }
-      ],
-      10
-    );
-
     // Add kernel information to the application help menu.
     mainMenu.helpMenu.kernelUsers.add({
       tracker,
       getKernel: current => current.sessionContext.session?.kernel
     } as IHelpMenu.IKernelUser<ConsolePanel>);
   }
-
-  app.contextMenu.addItem({
-    command: CommandIDs.clear,
-    selector: '.jp-CodeConsole-content'
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.restart,
-    selector: '.jp-CodeConsole'
-  });
 
   return tracker;
 }

@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
+  "references": [
+    {
+      "path": "../shared-models"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../../testutils"
+    },
+    {
+      "path": "../shared-models"
+    },
+    {
+      "path": "../statedb"
+    }
+  ]
+}
