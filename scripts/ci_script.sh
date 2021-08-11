@@ -48,35 +48,6 @@ if [[ $GROUP == docs ]]; then
     popd
 fi
 
-if [[ $GROUP == linkcheck ]]; then
-    # Run the link check using the jupyter-releaser CLI
-
-    # Set up caching
-    CACHE_DIR="${HOME}/.cache/pytest-link-check"
-    mkdir -p ${CACHE_DIR}
-    echo "Existing cache:"
-    ls -ltr ${CACHE_DIR}
-
-    # Set up env variables for releaser
-    export RH_CACHE_FILE=${CACHE_DIR}/cache
-    # Expire links after a week
-    export RH_LINKS_EXPIRE=604800
-
-    # Handle the branch
-    if [ ! -z ${GITHUB_BASE_REF} ]; then
-      echo "Using GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
-      export RH_BRANCH=${GITHUB_BASE_REF}
-    else
-      # e.g refs/head/foo or refs/tag/bar
-      echo "Using GITHUB_REF: ${GITHUB_REF}"
-      export RH_BRANCH=$(echo ${GITHUB_REF} | cut -d'/' -f 3)
-    fi
-
-    pip install jupyter_releaser
-    jupyter-releaser prep-git
-    jupyter-releaser check-links
-fi
-
 
 if [[ $GROUP == integrity ]]; then
     # Run the integrity script first

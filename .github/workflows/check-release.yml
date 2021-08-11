@@ -12,6 +12,9 @@ jobs:
 
   check_release:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        group: [check_release, link_check]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -53,14 +56,29 @@ jobs:
             ${{ runner.os }}-pip-
             ${{ runner.os }}-pip-
 
+      - name: Cache checked links build
+        uses: actions/cache@v2
+        if: ${{ matrix.group == 'link_check' }}
+        with:
+          path: ~/.cache/pytest-link-check
+          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst', '**/*.md') }}-changelog
+          restore-keys: |
+            ${{ runner.os }}-linkcheck-
+
       - name: Check Release
+        if: ${{ matrix.group == 'check_release' }}
         uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1
         env:
           RH_VERSION_SPEC: patch
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Run Link Check
+        if: ${{ matrix.group == 'link_check' }}
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-links@v1
+
       - name: Upload Assets
+        if: ${{ matrix.group == 'check_release' }}
         uses: actions/upload-artifact@v2
         with:
           name: dist-files
