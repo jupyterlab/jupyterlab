@@ -449,11 +449,21 @@ export type NotebookChange = {
     newValue: nbformat.INotebookMetadata | undefined;
   };
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 export type FileChange = {
   sourceChange?: Delta<string>;
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 /**
@@ -474,6 +484,11 @@ export type CellChange<MetadataType> = {
 
 export type DocumentChange = {
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 /**
