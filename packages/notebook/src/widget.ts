@@ -543,7 +543,8 @@ export class StaticNotebook extends Widget {
       this._observer &&
       insertType === 'push' &&
       this._renderedCellsCount >=
-        this.notebookConfig.numberCellsToRenderDirectly
+        this.notebookConfig.numberCellsToRenderDirectly &&
+      cell.type !== 'markdown'
     ) {
       // We have an observer and we are have been asked to push (not to insert).
       // and we are above the number of cells to render directly, then
