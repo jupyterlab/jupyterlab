@@ -82,15 +82,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Cache checked links build
-        uses: actions/cache@v2
-        if: ${{ matrix.group == 'linkcheck' }}
-        with:
-          path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst', '**/*.md') }}-changelog
-          restore-keys: |
-            ${{ runner.os }}-linkcheck-
-
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
