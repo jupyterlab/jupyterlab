@@ -308,7 +308,7 @@ export class NotebookModel implements INotebookModel {
     this.cells.pushAll(cells);
     this.cells.endCompoundOperation();
 
-    (this.sharedModel as models.YNotebook).nbformatMinor =
+    (this.sharedModel as models.YNotebook).nbformat_minor =
       nbformat.MINOR_VERSION;
     (this.sharedModel as models.YNotebook).nbformat = nbformat.MAJOR_VERSION;
     const origNbformat = value.metadata.orig_nbformat;
@@ -317,7 +317,7 @@ export class NotebookModel implements INotebookModel {
       (this.sharedModel as models.YNotebook).nbformat = value.nbformat;
     }
     if (value.nbformat_minor > this._nbformatMinor) {
-      (this.sharedModel as models.YNotebook).nbformatMinor =
+      (this.sharedModel as models.YNotebook).nbformat_minor =
         value.nbformat_minor;
     }
 

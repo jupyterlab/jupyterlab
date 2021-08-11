@@ -119,7 +119,7 @@ export interface ISharedNotebook extends ISharedDocument {
   /**
    * The minor version number of the nbformat.
    */
-  readonly nbformatMinor: number;
+  readonly nbformat_minor: number;
 
   /**
    * The major version number of the nbformat.

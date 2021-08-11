@@ -222,11 +222,11 @@ export class YNotebook
     }, false);
   }
 
-  get nbformatMinor(): number {
+  get nbformat_minor(): number {
     return this.ystate.get('nbformatMinor');
   }
 
-  set nbformatMinor(value: number) {
+  set nbformat_minor(value: number) {
     this.transact(() => {
       this.ystate.set('nbformatMinor', value);
     }, false);
