@@ -8,6 +8,27 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.1.x/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 3.1.6
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.5...c7ac3668dba9ed62889ca4da64e1c882733b4ebb))
+
+### Bugs fixed
+
+- Share nbformat and nbformatMinor [#10795](https://github.com/jupyterlab/jupyterlab/pull/10795) ([@hbcarlos](https://github.com/hbcarlos))
+- Support collapsible headers with virtual notebook rendering [#10793](https://github.com/jupyterlab/jupyterlab/pull/10793) ([@echarles](https://github.com/echarles))
+
+### Maintenance and upkeep improvements
+
+- Clean up Link Caching Again [#10794](https://github.com/jupyterlab/jupyterlab/pull/10794) ([@afshin](https://github.com/afshin))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-08-09&to=2021-08-11&type=c))
+
+[@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-08-09..2021-08-11&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-08-09..2021-08-11&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2021-08-09..2021-08-11&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 3.1.5
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.4...6d14f7f8d3a7400a5fddbbdfaf79d0b8bdd5325f))
@@ -22,8 +43,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.1.x/CHANGELOG.md'
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-08-05&to=2021-08-09&type=c))
 
 [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2021-08-05..2021-08-09&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-08-05..2021-08-09&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2021-08-05..2021-08-09&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2021-08-05..2021-08-09&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 3.1.2
 
