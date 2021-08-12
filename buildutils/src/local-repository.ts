@@ -128,16 +128,13 @@ packages:
   }
 
   // Log in using cli and temp credentials
-  const env = {
-    ...process.env,
-    NPM_USER: 'foo',
-    NPM_PASS: 'bar',
-    NPM_EMAIL: 'foo@bar.com',
-    NPM_REGISTRY: local_registry
-  };
-  const npm_cli_login_bin = path.join(bin_dir, 'npm-cli-login');
+  const user = 'foo';
+  const pass = 'bar';
+  const email = 'foo@bar.com';
   console.log('Logging in');
-  child_process.execSync(npm_cli_login_bin, { env, stdio: 'pipe' });
+  child_process.execSync(`npm login -e ${email} -r ${local_registry}`, {
+    input: `${user}\n${pass}\n${email}\n`
+  });
 
   console.log('Running in', out_dir);
   ps.exit(0);
