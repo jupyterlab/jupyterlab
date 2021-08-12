@@ -901,23 +901,19 @@ namespace Private {
   export function handleOptions<T>(
     options: Partial<Dialog.IOptions<T>> = {}
   ): Dialog.IOptions<T> {
-    const buttons = options.buttons || [
+    const buttons = options.buttons ?? [
       Dialog.cancelButton(),
       Dialog.okButton()
     ];
-    let defaultButton = buttons.length - 1;
-    if (options.defaultButton !== undefined) {
-      defaultButton = options.defaultButton;
-    }
     return {
-      title: options.title || '',
-      body: options.body || '',
-      host: options.host || document.body,
+      title: options.title ?? '',
+      body: options.body ?? '',
+      host: options.host ?? document.body,
       buttons,
-      defaultButton,
-      renderer: options.renderer || Dialog.defaultRenderer,
-      focusNodeSelector: options.focusNodeSelector || '',
-      hasClose: options.hasClose || true
+      defaultButton: options.defaultButton ?? buttons.length - 1,
+      renderer: options.renderer ?? Dialog.defaultRenderer,
+      focusNodeSelector: options.focusNodeSelector ?? '',
+      hasClose: options.hasClose ?? true
     };
   }
 
