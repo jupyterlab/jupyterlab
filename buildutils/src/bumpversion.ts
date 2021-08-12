@@ -26,6 +26,9 @@ commander
       if (opts.force) {
         cmd += ' --force';
       }
+      if (opts.skipCommit) {
+        cmd += ' --skip-commit';
+      }
       utils.run(cmd);
       process.exit(0);
     }

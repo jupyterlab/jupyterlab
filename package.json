@@ -24,7 +24,7 @@
   },
   "scripts": {
     "add:sibling": "node buildutils/lib/add-sibling.js",
-    "after:publish:assets": "node buildutils/lib/publish --skip-publish",
+    "after:publish:assets": "jlpm && jlpm run build:utils && node buildutils/lib/publish --skip-publish",
     "analyze": "jlpm run analyze:dev",
     "analyze:dev": "cd dev_mode && jlpm run build --analyze",
     "analyze:prod": "cd dev_mode && jlpm run build:prod --analyze",
