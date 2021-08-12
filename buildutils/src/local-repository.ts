@@ -132,9 +132,41 @@ packages:
   const pass = 'bar';
   const email = 'foo@bar.com';
   console.log('Logging in');
-  child_process.execSync(`npm login -e ${email} -r ${local_registry}`, {
-    input: `${user}\n${pass}\n${email}\n`
+  const loginPs = child_process.spawn(
+    'npm',
+    `login -e ${email} -r ${local_registry}`.split(' ')
+  );
+
+  const loggedIn = new Promise<void>((accept, reject) => {
+    loginPs.stdout.on('data', (chunk: string) => {
+      const data = Buffer.from(chunk, 'utf-8').toString().trim();
+      console.log('debug:', data);
+      switch (data) {
+        case 'Username:':
+          console.log('Passing username...');
+          loginPs.stdin.write(user + '\n');
+          break;
+        case 'Password:':
+          console.log('Passing password...');
+          loginPs.stdin.write(pass + '\n');
+          break;
+        case 'Email':
+          console.log('Passing email...');
+          loginPs.stdin.write(email + '\n');
+          break;
+      }
+      if (data.indexOf('Logged in as') !== -1) {
+        console.log('debug: matched');
+        loginPs.stdin.end();
+        accept();
+      }
+    });
+    loginPs.on('error', error => reject(error));
+    loginPs.on('close', () => accept());
   });
+
+  await loggedIn;
+  loginPs.kill();
 
   console.log('Running in', out_dir);
   ps.exit(0);
