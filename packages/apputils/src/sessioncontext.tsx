@@ -954,7 +954,6 @@ export class SessionContext implements ISessionContext {
     }
     const body = (
       <div>
-        <pre>{err.message}</pre>
         {message && <pre>{message}</pre>}
         {traceback && (
           <details className="jp-mod-wide">
