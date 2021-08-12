@@ -38,7 +38,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a1...132f74afab92fb6ca063644951464811d8ae87ae))
 
-***NOTE*** The Python Package for this release was not published due to our trove classifiers not yet being [available](https://github.com/jupyterlab/jupyterlab/issues/9538#issuecomment-897073510).
+**_NOTE_** The Python Package for this release was not published due to our trove classifiers not yet being [available](https://github.com/jupyterlab/jupyterlab/issues/9538#issuecomment-897073510).
 
 ### Bugs fixed
 
