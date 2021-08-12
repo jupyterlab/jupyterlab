@@ -1,13 +1,26 @@
-import { DIRTY_CLASS, MetadataEditor } from '@jupyterlab/metadata';
+import {
+  DIRTY_CLASS,
+  IMetadataEditorProps,
+  MetadataEditor
+} from '@jupyterlab/metadata';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { showDialog } from '@jupyterlab/apputils';
 
-export class SettingsMetadataEditor extends MetadataEditor {
-  _settings: ISettingRegistry.ISettings;
+interface IProps extends IMetadataEditorProps {
+  settings: ISettingRegistry.IPlugin;
+}
 
-  constructor(options: any) {
+export class SettingsMetadataEditor extends MetadataEditor {
+  _settings: ISettingRegistry.IPlugin;
+  _registry: ISettingRegistry.ISettings;
+  id: string;
+
+  constructor(options: IProps) {
     super(options);
+    this._settings = options.settings;
+    this.id = options.settings.id;
+    void this.initializeMetadata();
   }
 
   get settings(): any {
@@ -15,7 +28,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
   }
   set settings(newSettings: any) {
     this._settings = newSettings;
-    void this.initializeMetadata();
+    // void this.initializeMetadata();
   }
 
   async initializeMetadata() {
@@ -122,7 +135,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
       }
     }
     this.schema = properties;
-    this.schemaDisplayName = settings.description;
+    this.schemaDisplayName = settings.title;
 
     // Find categories of all schema properties
     this.schemaPropertiesByCategory = { _noCategory: [] };
@@ -215,11 +228,10 @@ export class SettingsMetadataEditor extends MetadataEditor {
     }
     const formattedSettings = this.getFormattedSettings();
 
-    void this._settings
+    void this._registry
       .save(formattedSettings)
       .then(() => {
         this.handleDirtyState(false);
-        this.onSave();
       })
       .catch(reason => {
         void showDialog({
@@ -235,7 +247,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
       this.invalidForm = true;
     }
 
-    const errors = this._settings.validate(this.getFormattedSettings());
+    const errors = this._registry.validate(this.getFormattedSettings());
     console.log(errors);
     if (errors && errors.length > 0) {
       for (const error of errors) {

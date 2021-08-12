@@ -45,14 +45,7 @@ export class SettingEditor extends Widget {
     this.key = options.key;
     this.state = options.state;
 
-    const {
-      name,
-      code,
-      onSave,
-      editorServices,
-      status,
-      themeManager
-    } = options;
+    const { name, code, editorServices, status, themeManager } = options;
     const layout = (this.layout = new PanelLayout());
     const registry = (this.registry = options.registry);
     const panel = (this._panel = new SplitPanel({
@@ -64,12 +57,14 @@ export class SettingEditor extends Widget {
     const editor = (this._editor = new PluginEditor({
       name,
       code,
-      onSave,
       editorServices,
       status,
-      themeManager
+      themeManager,
+      registry
     }));
-    const confirm = () => editor.confirm();
+    const confirm = (id: string) => {
+      return editor.confirm(id);
+    };
     const list = (this._list = new PluginList({
       confirm,
       registry,
@@ -92,6 +87,10 @@ export class SettingEditor extends Widget {
     SplitPanel.setStretch(list, 0);
     SplitPanel.setStretch(instructions, 1);
     SplitPanel.setStretch(editor, 1);
+
+    editor.onSelectionChanged.connect((sender: PluginEditor, value: string) => {
+      list.selection = value;
+    }, this);
 
     editor.stateChanged.connect(this._onStateChanged, this);
     list.changed.connect(this._onStateChanged, this);
@@ -174,7 +173,7 @@ export class SettingEditor extends Widget {
    * Save the contents of the raw editor.
    */
   save(): void {
-    return this._editor.raw.onSave();
+    // return this._editor.raw.onSave?.();
   }
 
   /**
@@ -200,7 +199,7 @@ export class SettingEditor extends Widget {
    */
   protected onCloseRequest(msg: Message): void {
     this._editor
-      .confirm()
+      .confirm('')
       .then(() => {
         super.onCloseRequest(msg);
         this.dispose();
@@ -344,11 +343,8 @@ export namespace SettingEditor {
    * The instantiation options for a setting editor.
    */
   export interface IOptions {
-    schema: string;
-    namespace: string;
     name?: string;
     code?: string[];
-    onSave: () => void;
     editorServices: IEditorServices | null;
     status: ILabStatus;
     themeManager?: IThemeManager;

@@ -139,7 +139,7 @@ export class PluginList extends Widget {
       return;
     }
 
-    this._confirm()
+    this._confirm(id)
       .then(() => {
         this._scrollTop = this.scrollTop;
         this._selection = id!;
@@ -153,7 +153,7 @@ export class PluginList extends Widget {
 
   protected translator: ITranslator;
   private _changed = new Signal<this, void>(this);
-  private _confirm: () => Promise<void>;
+  private _confirm: (id: string) => Promise<void>;
   private _scrollTop: number | undefined = 0;
   private _selection = '';
 }
@@ -174,7 +174,7 @@ export namespace PluginList {
      * succeed and emit an event. If the promise rejects, the selection is not
      * made.
      */
-    confirm: () => Promise<void>;
+    confirm: (id: string) => Promise<void>;
 
     /**
      * The setting registry for the plugin list.
@@ -185,6 +185,19 @@ export namespace PluginList {
      * The setting registry for the plugin list.
      */
     translator?: ITranslator;
+  }
+
+  /**
+   * Sort a list of plugins by title and ID.
+   */
+  export function sortPlugins(
+    registry: ISettingRegistry
+  ): ISettingRegistry.IPlugin[] {
+    return Object.keys(registry.plugins)
+      .map(plugin => registry.plugins[plugin]!)
+      .sort((a, b) => {
+        return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
+      });
   }
 }
 
@@ -260,7 +273,7 @@ namespace Private {
   ): void {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
-    const plugins = sortPlugins(registry).filter(plugin => {
+    const plugins = PluginList.sortPlugins(registry).filter(plugin => {
       const { schema } = plugin;
       const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
       const editable = Object.keys(schema.properties || {}).length > 0;
@@ -304,16 +317,5 @@ namespace Private {
 
     ReactDOM.unmountComponentAtNode(node);
     ReactDOM.render(<ul>{items}</ul>, node);
-  }
-
-  /**
-   * Sort a list of plugins by title and ID.
-   */
-  function sortPlugins(registry: ISettingRegistry): ISettingRegistry.IPlugin[] {
-    return Object.keys(registry.plugins)
-      .map(plugin => registry.plugins[plugin]!)
-      .sort((a, b) => {
-        return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
-      });
   }
 }

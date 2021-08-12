@@ -241,3 +241,7 @@
 #setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-type {
   text-align: right;
 }
+
+#setting-editor .jp-PluginEditor {
+  overflow: scroll;
+}

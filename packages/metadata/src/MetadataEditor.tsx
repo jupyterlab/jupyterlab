@@ -49,12 +49,12 @@ import { MetadataEditorTags } from './MetadataEditorTags';
 const ELYRA_METADATA_EDITOR_CLASS = 'elyra-metadataEditor';
 export const DIRTY_CLASS = 'jp-mod-dirty';
 
-interface IMetadataEditorProps {
-  schema: string;
-  namespace: string;
+export interface IMetadataEditorProps {
+  schema?: string;
+  namespace?: string;
   name?: string;
   code?: string[];
-  onSave: () => void;
+  onSave?: () => void;
   editorServices: IEditorServices | null;
   status: ILabStatus;
   themeManager?: IThemeManager;
@@ -157,11 +157,11 @@ const SaveButton = styled(Button)({
  * Metadata editor widget
  */
 export class MetadataEditor extends ReactWidget {
-  onSave: () => void;
+  onSave?: () => void;
   editorServices: IEditorServices | null;
   status: ILabStatus;
-  schemaName: string;
-  namespace: string;
+  schemaName?: string;
+  namespace?: string;
   name?: string;
   code?: string[];
   allTags: string[];
@@ -215,6 +215,9 @@ export class MetadataEditor extends ReactWidget {
 
   async initializeMetadata(): Promise<void> {
     try {
+      if (!this.namespace) {
+        return;
+      }
       const schemas = await MetadataService.getSchema(this.namespace);
       for (const schema of schemas) {
         if (this.schemaName === schema.name) {
@@ -249,6 +252,9 @@ export class MetadataEditor extends ReactWidget {
     }
 
     try {
+      if (!this.namespace) {
+        return;
+      }
       this.allMetadata = await MetadataService.getMetadata(this.namespace);
     } catch (error) {
       void RequestErrors.serverError(error);
@@ -351,15 +357,15 @@ export class MetadataEditor extends ReactWidget {
       return;
     }
 
-    if (!this.name) {
+    if (!this.name && this.namespace) {
       MetadataService.postMetadata(this.namespace, JSON.stringify(newMetadata))
         .then((response: any): void => {
           this.handleDirtyState(false);
-          this.onSave();
+          this.onSave?.();
           this.close();
         })
         .catch((error: any) => RequestErrors.serverError(error));
-    } else {
+    } else if (this.namespace && this.name) {
       MetadataService.putMetadata(
         this.namespace,
         this.name,
@@ -367,7 +373,7 @@ export class MetadataEditor extends ReactWidget {
       )
         .then((response: any): void => {
           this.handleDirtyState(false);
-          this.onSave();
+          this.onSave?.();
           this.close();
         })
         .catch((error: any) => RequestErrors.serverError(error));
@@ -486,7 +492,7 @@ export class MetadataEditor extends ReactWidget {
           label={this.schema[fieldName].title}
           description={this.schema[fieldName].description}
           key={`${fieldName}TextInput`}
-          fieldName={fieldName}
+          fieldName={`${this.name}${fieldName}`}
           numeric={uihints.field_type === 'number'}
           defaultValue={this.metadata[fieldName] || defaultValue}
           required={required}

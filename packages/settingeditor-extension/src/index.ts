@@ -105,11 +105,6 @@ function activate(
       const when = app.restored;
 
       editor = new SettingEditor({
-        schema: 'code-snippets',
-        namespace: 'code-snippet',
-        onSave: () => {
-          console.log('save');
-        },
         editorServices,
         status,
         themeManager,
