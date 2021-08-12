@@ -29,6 +29,22 @@ import {
 } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
+import { INotebookHeading } from '@jupyterlab/toc';
+import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
+
+/**
+ * The command IDs used by TOC item.
+ */
+namespace CommandIDs {
+  export const runCells = 'toc:run-cells';
+}
+
+/**
+ * A namespace for command IDs of table of contents plugin.
+ */
+namespace CommandIDs {
+  export const showPanel = 'toc:show-panel';
+}
 
 /**
  * Activates the ToC extension.
@@ -60,7 +76,11 @@ async function activateTOC(
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
   // Create the ToC widget:
-  const toc = new TableOfContents({ docmanager, rendermime, translator });
+  const toc = new TableOfContents({
+    docmanager,
+    rendermime,
+    translator
+  });
 
   // Create the ToC registry:
   const registry = new Registry();
@@ -73,6 +93,48 @@ async function activateTOC(
   toc.node.setAttribute('aria-label', trans.__('Table of Contents section'));
 
   labShell.add(toc, 'left', { rank: 400 });
+
+  app.commands.addCommand(CommandIDs.runCells, {
+    execute: args => {
+      const panel = notebookTracker.currentWidget;
+      if (panel == null) {
+        return;
+      }
+
+      const cells = panel.content.widgets;
+      if (cells === undefined) {
+        return;
+      }
+
+      const activeCell = (toc.activeEntry as INotebookHeading).cellRef;
+
+      if (activeCell instanceof MarkdownCell) {
+        let level = activeCell.headingInfo.level;
+        for (let i = cells.indexOf(activeCell) + 1; i < cells.length; i++) {
+          const cell = cells[i];
+          if (cell instanceof MarkdownCell && cell.headingInfo.level <= level) {
+            break;
+          }
+
+          if (cell instanceof CodeCell) {
+            void CodeCell.execute(cell, panel.sessionContext);
+          }
+        }
+      } else {
+        if (activeCell instanceof CodeCell) {
+          void CodeCell.execute(activeCell, panel.sessionContext);
+        }
+      }
+    },
+    label: trans.__('Run Cell(s)')
+  });
+
+  app.commands.addCommand(CommandIDs.showPanel, {
+    label: trans.__('Table of Contents'),
+    execute: () => {
+      labShell.activateById(toc.id);
+    }
+  });
 
   // Add the ToC widget to the application restorer:
   restorer.add(toc, '@jupyterlab/toc:plugin');

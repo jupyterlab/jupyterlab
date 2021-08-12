@@ -54,7 +54,7 @@ enum T {
  * from https://codemirror.net/demo/simplemode.html
  */
 const FAKE_SIMPLE_STATES: CodeMirror.TSimpleTopState<S, T> = {
-  // The start state contains the rules that are intially used
+  // The start state contains the rules that are initially used
   start: [
     // The regex matches the token, the token property contains the type
     { regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: T.ST },

@@ -157,6 +157,8 @@ describe('protocol', () => {
             break;
           }
           case 'stopped':
+            const msg = event as DebugProtocol.StoppedEvent;
+            threadId = msg.body.threadId!;
             stoppedFuture.resolve();
             break;
           default:

@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import {
   IContentChange,
   ILogger,
@@ -9,7 +8,7 @@ import {
 } from '@jupyterlab/logconsole';
 import { GroupItem, interactiveItem, TextItem } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { listIcon } from '@jupyterlab/ui-components';
+import { listIcon, VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
 import React from 'react';
 

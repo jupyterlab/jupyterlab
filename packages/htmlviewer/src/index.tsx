@@ -7,14 +7,7 @@
  * @module htmlviewer
  */
 
-import {
-  IFrame,
-  IWidgetTracker,
-  ReactWidget,
-  ToolbarButton,
-  ToolbarButtonComponent,
-  UseSignal
-} from '@jupyterlab/apputils';
+import { IWidgetTracker } from '@jupyterlab/apputils';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 import {
   ABCWidgetFactory,
@@ -23,7 +16,14 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { refreshIcon } from '@jupyterlab/ui-components';
+import {
+  IFrame,
+  ReactWidget,
+  refreshIcon,
+  ToolbarButton,
+  ToolbarButtonComponent,
+  UseSignal
+} from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
@@ -270,7 +270,7 @@ namespace Private {
   /**
    * React component for a trusted button.
    *
-   * This wraps the ToolbarButtonComponent and watches for trust chagnes.
+   * This wraps the ToolbarButtonComponent and watches for trust changes.
    */
   export function TrustButtonComponent(props: TrustButtonComponent.IProps) {
     const translator = props.translator || nullTranslator;

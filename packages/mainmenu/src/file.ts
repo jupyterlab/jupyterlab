@@ -99,7 +99,7 @@ export namespace IFileMenu {
      * A function to create the label for the `closeAndCleanup`action.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     closeAndCleanupLabel?: (n: number) => string;
 
@@ -117,7 +117,7 @@ export namespace IFileMenu {
      * A function to create the label for the `createConsole`action.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     createConsoleLabel?: (n: number) => string;
 

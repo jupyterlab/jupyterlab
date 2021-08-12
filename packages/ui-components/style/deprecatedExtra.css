@@ -7,10 +7,6 @@
  * (DEPRECATED) Support for consuming icons as CSS background images
  */
 
-:root {
-  --jp-icon-search-white: url('icons/toolbar/search.svg');
-}
-
 .jp-Icon,
 .jp-MaterialIcon {
   background-position: center;

@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Collapse, Styling } from '@jupyterlab/apputils';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import {
   CodeEditor,
@@ -15,6 +14,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { Collapser, Styling } from '@jupyterlab/ui-components';
 import { ArrayExt, chain, each } from '@lumino/algorithm';
 import {
   ReadonlyPartialJSONObject,
@@ -79,7 +79,7 @@ export class NotebookTools extends Widget implements INotebookTools {
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(this._commonTools);
-    layout.addWidget(new Collapse({ widget: this._advancedTools }));
+    layout.addWidget(new Collapser({ widget: this._advancedTools }));
 
     this._tracker = options.tracker;
     this._tracker.currentChanged.connect(
@@ -326,7 +326,7 @@ export namespace NotebookTools {
      */
     notebookTools: INotebookTools;
 
-    dispose() {
+    dispose(): void {
       super.dispose();
       if (this.notebookTools) {
         this.notebookTools = null!;
@@ -435,7 +435,7 @@ export namespace NotebookTools {
     /**
      * Dispose of the resources used by the tool.
      */
-    dispose() {
+    dispose(): void {
       if (this._model === null) {
         return;
       }
@@ -726,7 +726,9 @@ export namespace NotebookTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onActiveCellMetadataChanged(msg: ObservableJSON.ChangeMessage) {
+    protected onActiveCellMetadataChanged(
+      msg: ObservableJSON.ChangeMessage
+    ): void {
       if (this._changeGuard) {
         return;
       }

@@ -1,12 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ReactWidget,
-  showErrorMessage,
-  Toolbar,
-  ToolbarButton
-} from '@jupyterlab/apputils';
+import { showErrorMessage } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import {
@@ -14,7 +9,13 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
+import {
+  newFolderIcon,
+  ReactWidget,
+  refreshIcon,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
 import { IIterator } from '@lumino/algorithm';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
@@ -59,7 +60,7 @@ export class FileBrowser extends Widget {
   /**
    * Construct a new file browser.
    *
-   * @param model - The file browser view model.
+   * @param options - The file browser options.
    */
   constructor(options: FileBrowser.IOptions) {
     super();
@@ -188,7 +189,6 @@ export class FileBrowser extends Widget {
       forceRefresh: true
     });
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
-    this._filenameSearcher.id = 'filename-searcher';
 
     this.layout.removeWidget(this._filenameSearcher);
     this.layout.removeWidget(this.crumbs);
@@ -277,6 +277,7 @@ export class FileBrowser extends Widget {
         this._directoryPending = false;
       })
       .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
         this._directoryPending = false;
       });
   }
@@ -306,6 +307,7 @@ export class FileBrowser extends Widget {
         this._filePending = false;
       })
       .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
         this._filePending = false;
       });
   }

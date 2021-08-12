@@ -1,7 +1,11 @@
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { notTrustedIcon, trustedIcon } from '@jupyterlab/ui-components';
+import {
+  notTrustedIcon,
+  trustedIcon,
+  VDomModel,
+  VDomRenderer
+} from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
 import React from 'react';
 import { INotebookModel, Notebook } from '.';

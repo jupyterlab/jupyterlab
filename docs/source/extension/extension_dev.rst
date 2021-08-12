@@ -51,7 +51,7 @@ A JupyterLab plugin is the basic unit of extensibility in JupyterLab. An extensi
 
 An extension can be published both as a source extension on NPM and as a prebuilt extension (e.g., published as a Python package). In some cases, system administrators may even choose to install a prebuilt extension by directly copying the prebuilt bundle to an appropriate directory, circumventing the need to create a Python package. If a source extension and a prebuilt extension with the same name are installed in JupyterLab, the prebuilt extension takes precedence.
 
-Because prebuilt extensions do not require a JupyterLab rebuild, they have a distinct advantage in multiuser systems where JuptyerLab is installed at the system level. On such systems, only the system administrator has permissions to rebuild JupyterLab and install source extensions. Since prebuilt extensions can be installed at the per-user level, the per-environment level, or the system level, each user can have their own separate set of prebuilt extensions that are loaded dynamically in their browser on top of the system-wide JupyterLab.
+Because prebuilt extensions do not require a JupyterLab rebuild, they have a distinct advantage in multiuser systems where JupyterLab is installed at the system level. On such systems, only the system administrator has permissions to rebuild JupyterLab and install source extensions. Since prebuilt extensions can be installed at the per-user level, the per-environment level, or the system level, each user can have their own separate set of prebuilt extensions that are loaded dynamically in their browser on top of the system-wide JupyterLab.
 
 .. tip::
    We recommend publishing prebuilt extensions in Python packages for user convenience.
@@ -172,7 +172,7 @@ document can then be saved by the user in the usual manner.
 Theme plugins
 ^^^^^^^^^^^^^
 
-A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated. Since CSS files referenced by the ``style`` or ``styleModule`` keys are automatically bundled and loaded on the page, the theme files should not be referenced by these keys. 
+A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated. Since CSS files referenced by the ``style`` or ``styleModule`` keys are automatically bundled and loaded on the page, the theme files should not be referenced by these keys.
 
 The extension package containing the theme plugin must include all static assets that are referenced by ``@import`` in its theme CSS files. Local URLs can be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or ``url('../foo/bar.css')`` can be used to refer local files in the theme. Absolute URLs (starting with a ``/``) or external URLs (e.g. ``https:``) can be used to refer to external assets.
 
@@ -570,7 +570,56 @@ This ``install.json`` file is used by JupyterLab to help a user know how to mana
 * ``packageName``: This is the package name of the prebuilt extension in the package manager above, which may be different than the package name in ``package.json``.
 * ``uninstallInstructions``: This is a short block of text giving the user instructions for uninstalling the prebuilt extension. For example, it might instruct them to use a system package manager or talk to a system administrator.
 
+.. _dev_trove_classifiers:
 
+PyPI Trove Classifiers
+""""""""""""""""""""""
+
+Extensions distributed as Python packages may declare additional metadata in the form of
+`trove classifiers <https://pypi.org/classifiers>`__. These improve the browsing
+experience for users on `PyPI <https://pypi.org/search>`__. While including the license,
+development status, Python versions supported, and other topic classifiers are useful
+for many audiences, the following classifiers are specific to Jupyter and JupyterLab.
+
+.. code-block::
+
+    Framework :: Jupyter
+    Framework :: Jupyter :: JupyterLab
+    Framework :: Jupyter :: JupyterLab :: 1
+    Framework :: Jupyter :: JupyterLab :: 2
+    Framework :: Jupyter :: JupyterLab :: 3
+    Framework :: Jupyter :: JupyterLab :: 4
+    Framework :: Jupyter :: JupyterLab :: Extensions
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Mime Renderers
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
+
+Include each relevant classifier (and its parents) to help describe what your package
+provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyproject.toml``.
+
+.. hint::
+
+    For example, a theme, only compatible with JupyterLab 3, and distributed as
+    a ready-to-run, prebuilt extension might look like:
+
+    .. code-block:: python
+
+        # setup.py
+        setup(
+            # the rest of the package's metadata
+            # ...
+            classifiers=[
+                "Framework :: Jupyter",
+                "Framework :: Jupyter :: JupyterLab",
+                "Framework :: Jupyter :: JupyterLab :: 3",
+                "Framework :: Jupyter :: JupyterLab :: Extensions",
+                "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
+                "Framework :: Jupyter :: JupyterLab :: Extensions :: Themes",
+            ]
+        )
+
+    This would be discoverable from, for example, a
+    `PyPI search for theme extensions <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Themes>`__.
 
 .. _source_dev_workflow:
 
@@ -626,7 +675,7 @@ If you want to test a source extension against the unreleased versions of Jupyte
     jupyter lab --watch --splice-source
 
 This command will splice the local ``packages`` directory into the application directory, allowing you to build source extension(s)
-against the current development sources.  To statically build spliced sources, use ``jupyter lab build --splice-source``.  Once a spliced build is created, any subsquent calls to `jupyter labextension build` will be in splice mode by default.  A spliced build can be forced by calling ``jupyter labextension build --splice-source``. Note that :ref:`developing a prebuilt extension <prebuilt_dev_workflow>` against a development version of JupyterLab is generally much easier than source package building.
+against the current development sources.  To statically build spliced sources, use ``jupyter lab build --splice-source``.  Once a spliced build is created, any subsequent calls to `jupyter labextension build` will be in splice mode by default.  A spliced build can be forced by calling ``jupyter labextension build --splice-source``. Note that :ref:`developing a prebuilt extension <prebuilt_dev_workflow>` against a development version of JupyterLab is generally much easier than source package building.
 
 The package should export EMCAScript 6 compatible JavaScript. It can
 import CSS using the syntax ``require('foo.css')``. The CSS files can
@@ -681,6 +730,8 @@ path on the user's machine or a provided tarball. Any valid
 We encourage extension authors to add the `jupyterlab-extension GitHub topic
 <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__ to any GitHub extension repository.
 
+.. _testing_with_jest:
+
 Testing your extension
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -703,14 +754,22 @@ To transpile jupyterlab packages, you need to install the following package:
    jlpm add --dev jest @types/jest ts-jest @babel/core@^7 @babel/preset-env@^7
 
 Then in `jest.config.js`, you will specify to use babel for js files and ignore
-all node modules except the jupyterlab ones:
+all node modules except the ES6 modules:
 
 ::
+
+   const esModules = [
+     '@jupyterlab/',
+     'lib0',
+     'y\\-protocols',
+     'y\\-websocket',
+     'yjs'
+   ].join('|');
 
    module.exports = {
      preset: 'ts-jest/presets/js-with-babel',
      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-     transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
+     transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
      globals: {
        'ts-jest': {
          tsConfig: 'tsconfig.json'

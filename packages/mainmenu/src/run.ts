@@ -60,7 +60,7 @@ export namespace IRunMenu {
      * Return the label associated to the `run` function.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     runLabel?: (n: number) => string;
 
@@ -68,7 +68,7 @@ export namespace IRunMenu {
      * Return the label associated to the `runAllLabel` function.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     runAllLabel?: (n: number) => string;
 
@@ -76,7 +76,7 @@ export namespace IRunMenu {
      * Return the label associated to the `restartAndRunAllLabel` function.
      *
      * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of tranlsations.
+     * correct pluralized forms of translations.
      */
     restartAndRunAllLabel?: (n: number) => string;
 

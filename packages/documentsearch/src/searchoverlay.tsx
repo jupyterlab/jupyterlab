@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import {
   ITranslator,
   nullTranslator,
@@ -16,7 +15,9 @@ import {
   classes,
   closeIcon,
   ellipsesIcon,
-  regexIcon
+  ReactWidget,
+  regexIcon,
+  UseSignal
 } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
@@ -213,7 +214,7 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
 
 interface IUpDownProps {
   onHighlightPrevious: Function;
-  onHightlightNext: Function;
+  onHighlightNext: Function;
 }
 
 function UpDownButtons(props: IUpDownProps) {
@@ -231,7 +232,7 @@ function UpDownButtons(props: IUpDownProps) {
       </button>
       <button
         className={BUTTON_WRAPPER_CLASS}
-        onClick={() => props.onHightlightNext()}
+        onClick={() => props.onHighlightNext()}
         tabIndex={0}
       >
         <caretDownEmptyThinIcon.react
@@ -352,7 +353,7 @@ interface ISearchOverlayProps {
   overlayState: IDisplayState;
   onCaseSensitiveToggled: Function;
   onRegexToggled: Function;
-  onHightlightNext: Function;
+  onHighlightNext: Function;
   onHighlightPrevious: Function;
   onStartQuery: Function;
   onEndSearch: Function;
@@ -439,7 +440,7 @@ class SearchOverlay extends React.Component<
       !filterChanged
     ) {
       if (goForward) {
-        this.props.onHightlightNext();
+        this.props.onHighlightNext();
       } else {
         this.props.onHighlightPrevious();
       }
@@ -572,7 +573,7 @@ class SearchOverlay extends React.Component<
         />
         <UpDownButtons
           onHighlightPrevious={() => this._executeSearch(false)}
-          onHightlightNext={() => this._executeSearch(true)}
+          onHighlightNext={() => this._executeSearch(true)}
         />
         {showReplace ? null : filterToggle}
         <button
@@ -642,7 +643,7 @@ export function createSearchOverlay(
     overlayState,
     onCaseSensitiveToggled,
     onRegexToggled,
-    onHightlightNext,
+    onHighlightNext,
     onHighlightPrevious,
     onStartQuery,
     onReplaceCurrent,
@@ -659,7 +660,7 @@ export function createSearchOverlay(
           <SearchOverlay
             onCaseSensitiveToggled={onCaseSensitiveToggled}
             onRegexToggled={onRegexToggled}
-            onHightlightNext={onHightlightNext}
+            onHighlightNext={onHighlightNext}
             onHighlightPrevious={onHighlightPrevious}
             onStartQuery={onStartQuery}
             onEndSearch={onEndSearch}
@@ -684,7 +685,7 @@ namespace createSearchOverlay {
     overlayState: IDisplayState;
     onCaseSensitiveToggled: Function;
     onRegexToggled: Function;
-    onHightlightNext: Function;
+    onHighlightNext: Function;
     onHighlightPrevious: Function;
     onStartQuery: Function;
     onEndSearch: Function;

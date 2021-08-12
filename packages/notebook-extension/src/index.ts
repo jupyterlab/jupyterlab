@@ -246,6 +246,8 @@ namespace CommandIDs {
 
   export const replaceSelection = 'notebook:replace-selection';
 
+  export const autoClosingBrackets = 'notebook:toggle-autoclosing-brackets';
+
   export const toggleCollapseCmd = 'Collapsible_Headings:Toggle_Collapse';
 
   export const collapseAllCmd = 'Collapsible_Headings:Collapse_All';
@@ -261,7 +263,7 @@ namespace CommandIDs {
 const FACTORY = 'Notebook';
 
 /**
- * The exluded Export To ...
+ * The excluded Export To ...
  * (returned from nbconvert's export list)
  */
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
@@ -1065,6 +1067,36 @@ function activateNotebookHandler(
         settings.changed.connect(() => {
           updateConfig(settings);
         });
+        commands.addCommand(CommandIDs.autoClosingBrackets, {
+          execute: args => {
+            const codeConfig = settings.get('codeCellConfig')
+              .composite as JSONObject;
+            const markdownConfig = settings.get('markdownCellConfig')
+              .composite as JSONObject;
+            const rawConfig = settings.get('rawCellConfig')
+              .composite as JSONObject;
+
+            const anyToggled =
+              codeConfig.autoClosingBrackets ||
+              markdownConfig.autoClosingBrackets ||
+              rawConfig.autoClosingBrackets;
+            const toggled = !!(args['force'] ?? !anyToggled);
+            [
+              codeConfig.autoClosingBrackets,
+              markdownConfig.autoClosingBrackets,
+              rawConfig.autoClosingBrackets
+            ] = [toggled, toggled, toggled];
+
+            void settings.set('codeCellConfig', codeConfig);
+            void settings.set('markdownCellConfig', markdownConfig);
+            void settings.set('rawCellConfig', rawConfig);
+          },
+          label: trans.__('Auto Close Brackets for All Notebook Cell Types'),
+          isToggled: () =>
+            ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
+              x => (settings.get(x).composite as JSONObject).autoClosingBrackets
+            )
+        });
       })
       .catch((reason: Error) => {
         console.warn(reason.message);
@@ -1173,11 +1205,13 @@ function activateNotebookHandler(
     return commands
       .execute('docmanager:new-untitled', { path: cwd, type: 'notebook' })
       .then(model => {
-        return commands.execute('docmanager:open', {
-          path: model.path,
-          factory: FACTORY,
-          kernel: { name: kernelName }
-        });
+        if (model != undefined) {
+          return commands.execute('docmanager:open', {
+            path: model.path,
+            factory: FACTORY,
+            kernel: { name: kernelName }
+          });
+        }
       });
   };
 
@@ -1297,6 +1331,8 @@ function addCommands(
     for (const cell of notebook.widgets) {
       if (cell instanceof MarkdownCell && cell.headingCollapsed) {
         NotebookActions.setHeadingCollapse(cell, true, notebook);
+      }
+      if (cell.model.id === notebook.activeCell?.model?.id) {
         NotebookActions.expandParent(cell, notebook);
       }
     }

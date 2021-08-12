@@ -79,7 +79,7 @@ export class MimeContent extends Widget {
   readonly mimeType: string;
 
   /**
-   * Print method. Defered to the renderer.
+   * Print method. Deferred to the renderer.
    */
   [Printing.symbol]() {
     return Printing.getPrintFunction(this.renderer);

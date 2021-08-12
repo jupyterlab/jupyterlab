@@ -5,8 +5,7 @@
 
 import * as React from 'react';
 
-import { ReactWidget } from '@jupyterlab/apputils';
-import { ellipsesIcon } from '@jupyterlab/ui-components';
+import { ellipsesIcon, ReactWidget } from '@jupyterlab/ui-components';
 
 /**
  * The CSS class added to placeholders.

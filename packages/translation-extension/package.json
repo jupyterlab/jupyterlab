@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation-extension",
-  "version": "3.1.0-alpha.13",
+  "version": "3.3.0-alpha.2",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -35,16 +35,15 @@
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "eslint:check": "eslint . --ext .ts,.tsx",
-    "prepare": "jlpm run clean && jlpm run build",
     "prepublishOnly": "npm run build",
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0-alpha.13",
-    "@jupyterlab/apputils": "^3.1.0-alpha.13",
-    "@jupyterlab/mainmenu": "^3.1.0-alpha.13",
-    "@jupyterlab/settingregistry": "^3.1.0-alpha.13",
-    "@jupyterlab/translation": "^3.1.0-alpha.13"
+    "@jupyterlab/application": "^3.3.0-alpha.2",
+    "@jupyterlab/apputils": "^3.3.0-alpha.2",
+    "@jupyterlab/mainmenu": "^3.3.0-alpha.2",
+    "@jupyterlab/settingregistry": "^3.3.0-alpha.2",
+    "@jupyterlab/translation": "^3.3.0-alpha.2"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

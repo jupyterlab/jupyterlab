@@ -31,7 +31,7 @@ export class SearchInstance implements IDisposable {
       overlayState: this._displayState,
       onCaseSensitiveToggled: this._onCaseSensitiveToggled.bind(this),
       onRegexToggled: this._onRegexToggled.bind(this),
-      onHightlightNext: this._highlightNext.bind(this),
+      onHighlightNext: this._highlightNext.bind(this),
       onHighlightPrevious: this._highlightPrevious.bind(this),
       onStartQuery: this._startQuery.bind(this),
       onReplaceCurrent: this._replaceCurrent.bind(this),

@@ -71,6 +71,8 @@ might want to use the services in your extensions.
 - ``@jupyterlab/docmanager:IDocumentManager``: A service for the manager for all
   documents used by the application. Use this if you want to open and close documents,
   create and delete files, and otherwise interact with the file system.
+- ``@jupyterlab/docprovider:IDocumentProviderFactory``: A factory object that creates new providers for
+  shared documents. Use this if you want to create a provider for a new shared document.
 - ``@jupyterlab/documentsearch:ISearchProviderRegistry``: A service for a registry of search
   providers for the application. Plugins can register their UI elements with this registry
   to provide find/replace support.
@@ -209,6 +211,7 @@ Your command ``label`` function can then check the ``args`` it is provided for `
 and return a different label in that case.
 This can be useful to make a single command flexible enough to work in multiple contexts.
 
+.. _context_menu:
 
 Context Menu
 ------------
@@ -259,7 +262,7 @@ where ``menuItem`` definition is:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 119-157
+   :lines: 129-167
 
 
 The same example using the API is shown below. See the Lumino `docs
@@ -416,6 +419,31 @@ declaring default keyboard shortcuts for a command:
 
 Shortcuts added to the settings system will be editable by users.
 
+From Jupyterlab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut. 
+This requires you to define a keyboard shortcut for ``apputils:run-all-enabled`` command:
+
+.. code:: json
+
+    {
+      "command": "apputils:run-all-enabled",
+      "keys": ["Accel T"],
+      "args": {
+          "commands": [
+              "my-command-1",
+              "my-command-2"
+          ],
+          "args": [
+              {},
+              {}
+            ]
+        },
+      "selector": "body"
+    }
+
+In this example ``my-command-1`` and ``my-command-2`` are passed in ``args`` 
+of ``apputils:run-all-enabled`` command as ``commands`` list.
+You can optionally pass the command arguemnts of ``my-command-1`` and ``my-command-2`` in ``args`` 
+of ``apputils:run-all-enabled`` command as ``args`` list.
 
 Launcher
 --------
@@ -560,6 +588,9 @@ Here is the list of default menu ids:
 
 - Edit menu: ``jp-mainmenu-edit``
 - View menu: ``jp-mainmenu-view``
+
+  * Appearance submenu: ``jp-mainmenu-view-appearance``
+
 - Run menu: ``jp-mainmenu-run``
 - Kernel menu: ``jp-mainmenu-kernel``
 - Tabs menu: ``jp-mainmenu-tabs``
@@ -572,13 +603,13 @@ A menu must respect the following schema:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 72-118
+   :lines: 72-125
 
 And an item must follow:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 119-157
+   :lines: 129-167
 
 Menus added to the settings system will be editable by users using the ``mainmenu-extension``
 settings. In particular, they can be disabled at the item or the menu level by setting the

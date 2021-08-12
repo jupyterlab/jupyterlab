@@ -10,7 +10,8 @@ JupyterLab manages several different locations for its data. These locations are
 
 JupyterLab also honors **LabConfig Directories** directories for configuration data from the ``labconfig`` subdirectories of the Jupyter ``config`` directories in the Jupyter path hierarchy.
 
-Additionally, JupyterLab can load dynamic federated extensions, i.e., extensions that bundle their dependencies, from the ``labextensions`` subdirectories of the Jupyter ``data`` directories. 
+Additionally, JupyterLab can load dynamic federated (prebuilt) extensions, i.e., extensions that
+bundle their dependencies, from the ``labextensions`` subdirectories of the Jupyter ``data`` directories.
 
 See the locations of these Jupyter config paths by running ``jupyter --path``.
 

@@ -1,4 +1,3 @@
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { Text } from '@jupyterlab/coreutils';
 import { TextItem } from '@jupyterlab/statusbar';
 import {
@@ -6,6 +5,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { Notebook, NotebookMode } from '.';
 
@@ -88,7 +88,7 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
  */
 export namespace CommandEditStatus {
   /**
-   * A VDomModle for the CommandEdit renderer.
+   * A VDomModel for the CommandEdit renderer.
    */
   export class Model extends VDomModel {
     /**

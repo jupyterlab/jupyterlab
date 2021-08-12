@@ -130,10 +130,18 @@ describe('@jupyterlab/notebook', () => {
         const factory = createFactory(toolbarFactory);
         const panel = factory.createNew(context);
         const panel2 = factory.createNew(context);
-        expect(toArray(panel.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(panel2.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(panel.toolbar.children()).length).toBe(2);
-        expect(toArray(panel2.toolbar.children()).length).toBe(2);
+        expect(toArray(panel.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(toArray(panel2.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(toArray(panel.toolbar.children()).length).toBe(3);
+        expect(toArray(panel2.toolbar.children()).length).toBe(3);
       });
 
       it('should clone from the optional source widget', () => {

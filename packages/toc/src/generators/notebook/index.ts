@@ -7,6 +7,7 @@ import {
   CodeCell,
   CodeCellModel,
   ICellModel,
+  MARKDOWN_HEADING_COLLAPSED,
   MarkdownCell
 } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
@@ -46,18 +47,27 @@ function createNotebookGenerator(
   settings?: ISettingRegistry.ISettings
 ): Registry.IGenerator<NotebookPanel> {
   let numberingH1 = true;
+  let includeOutput = true;
+  let syncCollapseState = false;
   if (settings) {
     numberingH1 = settings.composite.numberingH1 as boolean;
+    includeOutput = settings.composite.includeOutput as boolean;
+    syncCollapseState = settings.composite.syncCollapseState as boolean;
   }
   const options = new OptionsManager(widget, tracker, {
     numbering: false,
     numberingH1: numberingH1,
+    includeOutput: includeOutput,
+    syncCollapseState: syncCollapseState,
     sanitizer: sanitizer,
     translator: translator || nullTranslator
   });
   if (settings) {
     settings.changed.connect(() => {
       options.numberingH1 = settings.composite.numberingH1 as boolean;
+      options.includeOutput = settings.composite.includeOutput as boolean;
+      options.syncCollapseState = settings.composite
+        .syncCollapseState as boolean;
     });
   }
   tracker.activeCellChanged.connect(
@@ -116,7 +126,10 @@ function createNotebookGenerator(
     for (let i = 0; i < panel.content.widgets.length; i++) {
       let cell: Cell = panel.content.widgets[i];
       let model = cell.model;
-      let collapsed = model.metadata.get('toc-hr-collapsed') as boolean;
+      let cellCollapseMetadata = options.syncCollapseState
+        ? MARKDOWN_HEADING_COLLAPSED
+        : 'toc-hr-collapsed';
+      let collapsed = model.metadata.get(cellCollapseMetadata) as boolean;
       collapsed = collapsed || false;
 
       if (model.type === 'code') {
@@ -145,43 +158,46 @@ function createNotebookGenerator(
             options.filtered
           );
         }
-        // Iterate over the code cell outputs to check for Markdown or HTML from which we can generate ToC headings...
-        for (let j = 0; j < (model as CodeCellModel).outputs.length; j++) {
-          const m = (model as CodeCellModel).outputs.get(j);
+        if (options.includeOutput) {
+          // Iterate over the code cell outputs to check for Markdown or HTML from which we can generate ToC headings...
+          for (let j = 0; j < (model as CodeCellModel).outputs.length; j++) {
+            const m = (model as CodeCellModel).outputs.get(j);
 
-          let dtypes = Object.keys(m.data);
-          dtypes = dtypes.filter(t => isMarkdown(t) || isDOM(t));
-          if (!dtypes.length) {
-            continue;
-          }
-          const onClick = (el: Element) => {
-            return () => {
-              panel.content.activeCellIndex = i;
-              panel.content.mode = 'command';
-              el.scrollIntoView();
+            let dtypes = Object.keys(m.data);
+            dtypes = dtypes.filter(t => isMarkdown(t) || isDOM(t));
+            if (!dtypes.length) {
+              continue;
+            }
+            const onClick = (el: Element) => {
+              return () => {
+                panel.content.activeCellIndex = i;
+                panel.content.mode = 'command';
+                el.scrollIntoView();
+              };
             };
-          };
-          let htmlHeadings = getRenderedHTMLHeadings(
-            (cell as CodeCell).outputArea.widgets[j].node,
-            onClick,
-            sanitizer,
-            dict,
-            getLastHeadingLevel(headings),
-            options.numbering,
-            options.numberingH1,
-            cell,
-            i
-          );
-          for (const heading of htmlHeadings) {
-            [headings, prev, collapseLevel] = appendMarkdownHeading(
-              heading,
-              headings,
-              prev,
-              collapseLevel,
-              options.filtered,
-              collapsed,
-              options.showMarkdown
+            let htmlHeadings = getRenderedHTMLHeadings(
+              (cell as CodeCell).outputArea.widgets[j].node,
+              onClick,
+              sanitizer,
+              dict,
+              getLastHeadingLevel(headings),
+              options.numbering,
+              options.numberingH1,
+              cell,
+              i
             );
+            for (const heading of htmlHeadings) {
+              [headings, prev, collapseLevel] = appendMarkdownHeading(
+                heading,
+                headings,
+                prev,
+                collapseLevel,
+                options.filtered,
+                collapsed,
+                options.showMarkdown,
+                cellCollapseMetadata
+              );
+            }
           }
         }
         continue;
@@ -224,7 +240,8 @@ function createNotebookGenerator(
               collapseLevel,
               options.filtered,
               collapsed,
-              options.showMarkdown
+              options.showMarkdown,
+              cellCollapseMetadata
             );
           }
           // If not rendered, generate ToC items from the cell text...
@@ -251,7 +268,8 @@ function createNotebookGenerator(
               collapseLevel,
               options.filtered,
               collapsed,
-              options.showMarkdown
+              options.showMarkdown,
+              cellCollapseMetadata
             );
           }
         }

@@ -13,8 +13,7 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from './dialog';
-import { ISplashScreen } from './splash';
-import { IThemeManager } from './tokens';
+import { ISplashScreen, IThemeManager } from './tokens';
 
 /**
  * The number of milliseconds between theme loading attempts.
@@ -263,7 +262,7 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
-   * Toggle the `theme-scrollbbars` setting.
+   * Toggle the `theme-scrollbars` setting.
    */
   toggleThemeScrollbars(): Promise<void> {
     return this._settings.set(

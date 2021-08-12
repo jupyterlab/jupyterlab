@@ -1,14 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Button, closeIcon, LabIcon } from '@jupyterlab/ui-components';
+import {
+  Button,
+  closeIcon,
+  LabIcon,
+  ReactWidget,
+  Styling
+} from '@jupyterlab/ui-components';
 import { ArrayExt, each, map, toArray } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { Styling } from './styling';
-import { ReactWidget } from './vdom';
 import { WidgetTracker } from './widgettracker';
 
 /**
@@ -351,11 +355,20 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 13: // Enter.
+      case 13: {
+        // Enter.
         event.stopPropagation();
         event.preventDefault();
-        this.resolve();
+
+        const activeEl = document.activeElement;
+        let index: number | undefined;
+
+        if (activeEl instanceof HTMLButtonElement) {
+          index = this._buttonNodes.indexOf(activeEl as HTMLElement);
+        }
+        this.resolve(index);
         break;
+      }
       default:
         break;
     }
@@ -888,23 +901,19 @@ namespace Private {
   export function handleOptions<T>(
     options: Partial<Dialog.IOptions<T>> = {}
   ): Dialog.IOptions<T> {
-    const buttons = options.buttons || [
+    const buttons = options.buttons ?? [
       Dialog.cancelButton(),
       Dialog.okButton()
     ];
-    let defaultButton = buttons.length - 1;
-    if (options.defaultButton !== undefined) {
-      defaultButton = options.defaultButton;
-    }
     return {
-      title: options.title || '',
-      body: options.body || '',
-      host: options.host || document.body,
+      title: options.title ?? '',
+      body: options.body ?? '',
+      host: options.host ?? document.body,
       buttons,
-      defaultButton,
-      renderer: options.renderer || Dialog.defaultRenderer,
-      focusNodeSelector: options.focusNodeSelector || '',
-      hasClose: options.hasClose || true
+      defaultButton: options.defaultButton ?? buttons.length - 1,
+      renderer: options.renderer ?? Dialog.defaultRenderer,
+      focusNodeSelector: options.focusNodeSelector ?? '',
+      hasClose: options.hasClose ?? true
     };
   }
 

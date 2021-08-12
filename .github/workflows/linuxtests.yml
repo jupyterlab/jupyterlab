@@ -1,6 +1,12 @@
 name: Linux Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
 
 jobs:
   linuxtests:
@@ -75,15 +81,6 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-
-      - name: Cache checked links build
-        uses: actions/cache@v2
-        if: ${{ matrix.group == 'linkcheck' }}
-        with:
-          path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst') }}-changelog
-          restore-keys: |
-            ${{ runner.os }}-linkcheck-
 
       - name: Install dependencies
         env:

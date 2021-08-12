@@ -1,4 +1,5 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { LabIcon } from '@jupyterlab/ui-components';
 import { JSONExt } from '@lumino/coreutils';
 import { ContextMenu, Menu } from '@lumino/widgets';
 
@@ -58,6 +59,12 @@ export namespace MenuFactory {
     const menu = menuFactory(item);
     menu.id = item.id;
     menu.title.label = item.label ?? capitalize(menu.id);
+    if (item.icon) {
+      menu.title.icon = LabIcon.resolve({ icon: item.icon });
+    }
+    if (item.mnemonic !== undefined) {
+      menu.title.mnemonic = item.mnemonic;
+    }
 
     item.items
       ?.filter(item => !item.disabled)

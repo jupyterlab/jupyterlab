@@ -19,7 +19,6 @@ import {
   InputDialog,
   MainAreaWidget,
   showErrorMessage,
-  ToolbarButton,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
@@ -51,7 +50,8 @@ import {
   newFolderIcon,
   pasteIcon,
   stopIcon,
-  textEditorIcon
+  textEditorIcon,
+  ToolbarButton
 } from '@jupyterlab/ui-components';
 import { find, IIterator, map, reduce, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -138,7 +138,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     ICommandPalette
   ],
   autoStart: true,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     factory: IFileBrowserFactory,
     translator: ITranslator,
@@ -146,7 +146,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     treePathUpdater: ITreePathUpdater | null,
     commandPalette: ICommandPalette | null
-  ): void => {
+  ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const browser = factory.defaultBrowser;
     browser.node.setAttribute('role', 'region');
@@ -160,6 +160,12 @@ const browser: JupyterFrontEndPlugin<void> = {
     // responsible for their own restoration behavior, if any.
     if (restorer) {
       restorer.add(browser, namespace);
+    }
+
+    // Navigate to preferred-dir trait if found
+    const preferredPath = PageConfig.getOption('preferredPath');
+    if (preferredPath) {
+      await browser.model.cd(preferredPath);
     }
 
     addCommands(app, factory, translator, settingRegistry, commandPalette);
@@ -975,6 +981,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.toggleBrowser, {
+    label: trans.__('File Browser'),
     execute: () => {
       if (browser.isHidden) {
         return commands.execute(CommandIDs.showBrowser, void 0);

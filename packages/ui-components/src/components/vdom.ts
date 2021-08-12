@@ -135,7 +135,7 @@ export abstract class VDomRenderer<
   /**
    * Dispose this widget.
    */
-  dispose() {
+  dispose(): void {
     if (this.isDisposed) {
       return;
     }
@@ -167,7 +167,7 @@ export interface IUseSignalProps<SENDER, ARGS> {
    */
   initialArgs?: ARGS;
   /**
-   * Function mapping the last signal value or inital values to an element to render.
+   * Function mapping the last signal value or initial values to an element to render.
    *
    * Note: returns `React.ReactNode` as per
    * https://github.com/sw-yx/react-typescript-cheatsheet#higher-order-componentsrender-props
@@ -236,11 +236,11 @@ export class UseSignal<SENDER, ARGS> extends React.Component<
     this.state = { value: [this.props.initialSender, this.props.initialArgs] };
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.props.signal.connect(this.slot);
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     this.props.signal.disconnect(this.slot);
   }
 
@@ -252,7 +252,7 @@ export class UseSignal<SENDER, ARGS> extends React.Component<
     this.setState({ value: [sender, args] });
   };
 
-  render() {
+  render(): React.ReactNode {
     return this.props.children(...this.state.value);
   }
 }

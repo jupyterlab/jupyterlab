@@ -159,7 +159,7 @@ export namespace InspectorPanel {
     initialContent?: Widget | string | undefined;
 
     /**
-     * The aplication language translator.
+     * The application language translator.
      */
     translator?: ITranslator;
   }

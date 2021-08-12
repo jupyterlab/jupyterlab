@@ -84,8 +84,19 @@ interface INotebookHeading extends INumberedHeading {
 }
 
 /**
+ * Tests whether a heading is a notebook heading.
+ *
+ * @param heading - heading to test
+ * @returns boolean indicating whether a heading is a notebook heading
+ */
+const isNotebookHeading = (heading: any): heading is INotebookHeading => {
+  return heading.type !== undefined && heading.cellRef !== undefined;
+};
+
+/**
  * Exports.
  */
 export { IHeading };
 export { INumberedHeading };
 export { INotebookHeading };
+export { isNotebookHeading };

@@ -122,7 +122,7 @@ describe('cells/widget', () => {
         expect(widget).toBeInstanceOf(Cell);
       });
 
-      it('shoule accept a custom editorConfig', () => {
+      it('should accept a custom editorConfig', () => {
         const editorConfig: Partial<CodeEditor.IConfig> = {
           insertSpaces: false,
           matchBrackets: false

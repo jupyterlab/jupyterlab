@@ -32,4 +32,9 @@ prune jupyterlab/staging/build
 recursive-exclude jupyterlab *.pyc
 recursive-exclude jupyterlab *.js.map
 
+# Docker
+include Dockerfile
+include .dockerignore
+recursive-include docker *.json
+
 prune ui-tests

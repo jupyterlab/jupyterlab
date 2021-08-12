@@ -368,9 +368,9 @@ export interface ISharedMarkdownCell
   /**
    * Sets the cell attachments
    *
-   * @param attchments: The cell attachments.
+   * @param attachments: The cell attachments.
    */
-  setAttachments(attchments: nbformat.IAttachments | undefined): void;
+  setAttachments(attachments: nbformat.IAttachments | undefined): void;
 
   /**
    * Serialize the model to JSON.
@@ -399,9 +399,9 @@ export interface ISharedRawCell
   /**
    * Sets the cell attachments
    *
-   * @param attchments: The cell attachments.
+   * @param attachments: The cell attachments.
    */
-  setAttachments(attchments: nbformat.IAttachments | undefined): void;
+  setAttachments(attachments: nbformat.IAttachments | undefined): void;
 
   /**
    * Serialize the model to JSON.
@@ -449,11 +449,21 @@ export type NotebookChange = {
     newValue: nbformat.INotebookMetadata | undefined;
   };
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 export type FileChange = {
   sourceChange?: Delta<string>;
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 /**
@@ -474,6 +484,11 @@ export type CellChange<MetadataType> = {
 
 export type DocumentChange = {
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 /**

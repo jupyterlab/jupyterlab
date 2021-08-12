@@ -2,12 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import {
-  Dialog,
-  showDialog,
-  ToolbarButtonComponent,
-  VDomRenderer
-} from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
@@ -23,7 +18,9 @@ import {
   InputGroup,
   jupyterIcon,
   listingsInfoIcon,
-  refreshIcon
+  refreshIcon,
+  ToolbarButtonComponent,
+  VDomRenderer
 } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
@@ -250,7 +247,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               )}
               onClick={() =>
                 window.open(
-                  'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                  'https://jupyterlab.readthedocs.io/en/latest/user/extensions.html'
                 )
               }
             />
@@ -266,7 +263,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 )}
                 onClick={() =>
                   window.open(
-                    'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                    'https://jupyterlab.readthedocs.io/en/latest/user/extensions.html'
                   )
                 }
               />
@@ -346,7 +343,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       title,
                       body: (
                         <div>
-                          {getprebuiltUninstallInstruction(entry, trans)}
+                          {getPrebuiltUninstallInstruction(entry, trans)}
                         </div>
                       ),
                       buttons: [
@@ -373,7 +370,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   );
 }
 
-function getprebuiltUninstallInstruction(
+function getPrebuiltUninstallInstruction(
   entry: IEntry,
   trans: TranslationBundle
 ): JSX.Element {
@@ -396,11 +393,11 @@ function getprebuiltUninstallInstruction(
       </p>
       <p>
         <a
-          href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
+          href="https://jupyterlab.readthedocs.io/en/latest/user/extensions.html"
           target="_blank"
           rel="noopener noreferrer"
         >
-          https://jupyterlab.readthedocs.io/en/stable/user/extensions.html
+          https://jupyterlab.readthedocs.io/en/latest/user/extensions.html
         </a>
       </p>
     </div>
@@ -649,7 +646,7 @@ export namespace CollapsibleSection {
     headerElements?: React.ReactNode;
 
     /**
-     * If given, this will be diplayed instead of the children.
+     * If given, this will be displayed instead of the children.
      */
     errorMessage?: string | null;
 
@@ -725,7 +722,7 @@ administrator to verify the listings configuration.`)}
           </div>
           <div>
             <a
-              href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
+              href="https://jupyterlab.readthedocs.io/en/latest/user/extensions.html"
               target="_blank"
               rel="noopener noreferrer"
             >

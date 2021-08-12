@@ -3,8 +3,11 @@
 
 import { MarkdownCodeBlocks } from '@jupyterlab/coreutils';
 
-const BLOCK1 = 'Here is text\n\n```\na = 10\nb = 20\n```\n\nMore text.';
-const BLOCK2 = 'Here is text\n\n```a = 10```\n\nMore text.';
+const MULTI_LINE_BLOCK =
+  'Here is text\n\n```\na = 10\nb = 20\n```\n\nMore text.';
+const SINGLE_LINE_BLOCK = 'Here is text\n\n```a = 10```\n\nMore text.';
+const MULTI_LINE_BLOCK_WITH_LANGUAGE =
+  'Here is text\n\n```python\na = 10\nb = 20\n```\n\nMore text.';
 
 describe('@jupyterlab/coreutils', () => {
   describe('MarkdownCodeBlocks', () => {
@@ -17,19 +20,25 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('.findMarkdownCodeBlocks()', () => {
       it('should find a simple block', () => {
-        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK1);
+        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(
+          MULTI_LINE_BLOCK
+        );
         expect(codeblocks.length).toBe(1);
         expect(codeblocks[0].code).toBe('a = 10\nb = 20\n');
       });
 
       it('should find a single line block', () => {
-        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK2);
+        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(
+          SINGLE_LINE_BLOCK
+        );
         expect(codeblocks.length).toBe(1);
         expect(codeblocks[0].code).toBe('a = 10');
       });
 
       it('should find a block with a language', () => {
-        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK1);
+        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(
+          MULTI_LINE_BLOCK_WITH_LANGUAGE
+        );
         expect(codeblocks.length).toBe(1);
         expect(codeblocks[0].code).toBe('a = 10\nb = 20\n');
       });

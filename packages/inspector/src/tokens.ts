@@ -60,6 +60,13 @@ export namespace IInspector {
      * inspector is visible. It can be modified by the consumer of the source.
      */
     standby: boolean;
+    /**
+     * Handle a text changed signal from an editor.
+     *
+     * #### Notes
+     * Update the hints inspector based on a text change.
+     */
+    onEditorChange(customText?: string): void;
   }
 
   /**

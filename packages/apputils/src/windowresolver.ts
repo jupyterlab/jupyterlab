@@ -1,26 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PromiseDelegate, Token } from '@lumino/coreutils';
-
-/* tslint:disable */
-/**
- * The default window resolver token.
- */
-export const IWindowResolver = new Token<IWindowResolver>(
-  '@jupyterlab/apputils:IWindowResolver'
-);
-/* tslint:enable */
-
-/**
- * The description of a window name resolver.
- */
-export interface IWindowResolver {
-  /**
-   * A window name to use as a handle among shared resources.
-   */
-  readonly name: string;
-}
+import { PromiseDelegate } from '@lumino/coreutils';
+import { IWindowResolver } from './tokens';
 
 /**
  * A concrete implementation of a window name resolver.

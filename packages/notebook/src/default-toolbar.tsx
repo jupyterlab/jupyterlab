@@ -2,17 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  addToolbarButtonClass,
+  Toolbar as AppToolbar,
   Dialog,
   ISessionContext,
   ISessionContextDialogs,
-  ReactWidget,
   sessionContextDialogs,
-  showDialog,
-  Toolbar,
-  ToolbarButton,
-  ToolbarButtonComponent,
-  UseSignal
+  showDialog
 } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
@@ -23,13 +18,19 @@ import {
 } from '@jupyterlab/translation';
 import {
   addIcon,
+  addToolbarButtonClass,
   copyIcon,
   cutIcon,
   fastForwardIcon,
   HTMLSelect,
   pasteIcon,
+  ReactWidget,
   runIcon,
-  saveIcon
+  saveIcon,
+  Toolbar,
+  ToolbarButton,
+  ToolbarButtonComponent,
+  UseSignal
 } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
@@ -67,7 +68,7 @@ export namespace ToolbarItems {
           buttons: [Dialog.okButton({ label: trans.__('Ok') })]
         });
       }
-      void panel.context.save(true).then(() => {
+      void panel.context.save().then(() => {
         if (!panel.isDisposed) {
           return panel.context.createCheckpoint();
         }
@@ -242,11 +243,14 @@ export namespace ToolbarItems {
       { name: 'run', widget: createRunButton(panel, translator) },
       {
         name: 'interrupt',
-        widget: Toolbar.createInterruptButton(panel.sessionContext, translator)
+        widget: AppToolbar.createInterruptButton(
+          panel.sessionContext,
+          translator
+        )
       },
       {
         name: 'restart',
-        widget: Toolbar.createRestartButton(
+        widget: AppToolbar.createRestartButton(
           panel.sessionContext,
           sessionDialogs,
           translator
@@ -260,7 +264,7 @@ export namespace ToolbarItems {
       { name: 'spacer', widget: Toolbar.createSpacerItem() },
       {
         name: 'kernelName',
-        widget: Toolbar.createKernelNameItem(
+        widget: AppToolbar.createKernelNameItem(
           panel.sessionContext,
           sessionDialogs,
           translator
@@ -268,7 +272,10 @@ export namespace ToolbarItems {
       },
       {
         name: 'kernelStatus',
-        widget: Toolbar.createKernelStatusItem(panel.sessionContext, translator)
+        widget: AppToolbar.createKernelStatusItem(
+          panel.sessionContext,
+          translator
+        )
       }
     ];
   }

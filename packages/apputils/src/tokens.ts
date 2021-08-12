@@ -5,7 +5,46 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
+import { CommandPalette } from '@lumino/widgets';
 import { ISessionContext } from './sessioncontext';
+
+/* tslint:disable */
+/**
+ * The command palette token.
+ */
+export const ICommandPalette = new Token<ICommandPalette>(
+  '@jupyterlab/apputils:ICommandPalette'
+);
+/* tslint:enable */
+
+/**
+ * The options for creating a command palette item.
+ */
+export interface IPaletteItem extends CommandPalette.IItemOptions {}
+
+/**
+ * The interface for a Jupyter Lab command palette.
+ */
+export interface ICommandPalette {
+  /**
+   * The placeholder text of the command palette's search input.
+   */
+  placeholder: string;
+
+  /**
+   * Activate the command palette for user input.
+   */
+  activate(): void;
+
+  /**
+   * Add a command item to the command palette.
+   *
+   * @param options - The options for creating the command item.
+   *
+   * @returns A disposable that will remove the item from the palette.
+   */
+  addItem(options: IPaletteItem): IDisposable;
+}
 
 /**
  * An interface for the session context dialogs.
@@ -177,4 +216,46 @@ export namespace ISanitizer {
      */
     allowedStyles?: { [key: string]: { [key: string]: RegExp[] } };
   }
+}
+
+/* tslint:disable */
+/**
+ * The main menu token.
+ */
+export const ISplashScreen = new Token<ISplashScreen>(
+  '@jupyterlab/apputils:ISplashScreen'
+);
+/* tslint:enable */
+
+/**
+ * The interface for an application splash screen.
+ */
+export interface ISplashScreen {
+  /**
+   * Show the application splash screen.
+   *
+   * @param light - Whether to show the light splash screen or the dark one.
+   *
+   * @returns A disposable used to clear the splash screen.
+   */
+  show(light?: boolean): IDisposable;
+}
+
+/* tslint:disable */
+/**
+ * The default window resolver token.
+ */
+export const IWindowResolver = new Token<IWindowResolver>(
+  '@jupyterlab/apputils:IWindowResolver'
+);
+/* tslint:enable */
+
+/**
+ * The description of a window name resolver.
+ */
+export interface IWindowResolver {
+  /**
+   * A window name to use as a handle among shared resources.
+   */
+  readonly name: string;
 }

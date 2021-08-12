@@ -8,6 +8,8 @@ dependencies:
 - sphinx-copybutton
 - sphinx_rtd_theme
 - pytest
+- pytest-tornasync
+- pytest-check-links
 - pip
 - nodejs
 - jsx-lexer

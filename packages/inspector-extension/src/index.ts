@@ -60,10 +60,14 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       namespace
     });
 
+    function isInspectorOpen() {
+      return inspector && !inspector.isDisposed;
+    }
+
     let source: IInspector.IInspectable | null = null;
     let inspector: MainAreaWidget<InspectorPanel>;
-    function openInspector(): MainAreaWidget<InspectorPanel> {
-      if (!inspector || inspector.isDisposed) {
+    function openInspector(args: string): MainAreaWidget<InspectorPanel> {
+      if (!isInspectorOpen()) {
         inspector = new MainAreaWidget({
           content: new InspectorPanel({ translator })
         });
@@ -73,9 +77,10 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         void tracker.add(inspector);
         source = source && !source.isDisposed ? source : null;
         inspector.content.source = source;
+        inspector.content.source?.onEditorChange(args);
       }
       if (!inspector.isAttached) {
-        shell.add(inspector, 'main', { activate: false });
+        shell.add(inspector, 'main', { activate: false, mode: 'split-right' });
       }
       shell.activateById(inspector.id);
       return inspector;
@@ -93,7 +98,14 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         !inspector.isVisible,
       label,
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
-      execute: () => openInspector()
+      execute: args => {
+        const text = args && (args.text as string);
+        const refresh = args && (args.refresh as boolean);
+        // if inspector is open, see if we need a refresh
+        if (isInspectorOpen() && refresh)
+          inspector.content.source?.onEditorChange(text);
+        else openInspector(text);
+      }
     });
 
     // Add command to UI where possible.

@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { isValidFileName } from '@jupyterlab/docmanager';
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -212,6 +211,11 @@ export namespace ILabShell {
     readonly currentWidget: Widget | null;
 
     /**
+     * A flag denoting whether the side tab bar is visible.
+     */
+    readonly visible: boolean;
+
+    /**
      * The collection of widgets held by the sidebar.
      */
     readonly widgets: Array<Widget> | null;
@@ -370,38 +374,30 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     );
 
     // Catch current changed events on the side handlers.
-    this._leftHandler.sideBar.currentChanged.connect(
-      this._onLayoutModified,
-      this
-    );
-    this._rightHandler.sideBar.currentChanged.connect(
-      this._onLayoutModified,
-      this
-    );
+    this._leftHandler.updated.connect(this._onLayoutModified, this);
+    this._rightHandler.updated.connect(this._onLayoutModified, this);
 
     // Catch update events on the horizontal split panel
     this._hsplitPanel.updated.connect(this._onLayoutModified, this);
 
     // Setup single-document-mode title bar
-    const titleWidgetHandler = (this._titleWidgetHandler = new Private.TitleWidgetHandler(
-      this
-    ));
-    this.add(titleWidgetHandler.titleWidget, 'top', { rank: 100 });
+    const titleHandler = (this._titleHandler = new Private.TitleHandler(this));
+    this.add(titleHandler, 'top', { rank: 100 });
 
     if (this._dockPanel.mode === 'multiple-document') {
       this._topHandler.addWidget(this._menuHandler.panel, 100);
-      titleWidgetHandler.hide();
+      titleHandler.hide();
     } else {
       rootLayout.insertWidget(2, this._menuHandler.panel);
     }
 
     // Skip Links
-    const skipLinkWidgetHandler = (this._skipLinkWidgetHandler = new Private.SkipLinkWidgetHandler(
+    const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
       this
     ));
 
-    this.add(skipLinkWidgetHandler.skipLinkWidget, 'top', { rank: 0 });
-    this._skipLinkWidgetHandler.show();
+    this.add(skipLinkWidget, 'top', { rank: 0 });
+    this._skipLinkWidget.show();
 
     // Wire up signals to update the title panel of the simple interface mode to
     // follow the title of this.currentWidget
@@ -449,7 +445,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * A signal emitted when the shell/dock panel change modes (single/mutiple document).
+   * A signal emitted when the shell/dock panel change modes (single/multiple document).
    */
   get modeChanged(): ISignal<this, DockPanel.Mode> {
     return this._modeChanged;
@@ -536,7 +532,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
       // Adjust menu and title
       (this.layout as BoxLayout).insertWidget(2, this._menuHandler.panel);
-      this._titleWidgetHandler.show();
+      this._titleHandler.show();
       this._updateTitlePanelTitle();
     } else {
       // Cache a reference to every widget currently in the dock panel.
@@ -574,7 +570,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       // Adjust menu and title
       this.add(this._menuHandler.panel, 'top', { rank: 100 });
       // this._topHandler.addWidget(this._menuHandler.panel, 100)
-      this._titleWidgetHandler.hide();
+      this._titleHandler.hide();
     }
 
     // Set the mode data attribute on the applications shell node.
@@ -765,7 +761,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
     this._layoutDebouncer.dispose();
-    this._titleWidgetHandler.dispose();
     super.dispose();
   }
 
@@ -803,6 +798,21 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     toArray(this._dockPanel.widgets()).forEach(widget => widget.close());
 
     this._downPanel.stackedPanel.widgets.forEach(widget => widget.close());
+  }
+
+  /**
+   * Whether an side tab bar is visible or not.
+   *
+   * @param side Sidebar of interest
+   * @returns Side tab bar visibility
+   */
+  isSideTabBarVisible(side: 'left' | 'right'): boolean {
+    switch (side) {
+      case 'left':
+        return this._leftHandler.isVisible;
+      case 'right':
+        return this._rightHandler.isVisible;
+    }
   }
 
   /**
@@ -966,6 +976,27 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Toggle side tab bar visibility
+   *
+   * @param side Sidebar of interest
+   */
+  toggleSideTabBarVisibility(side: 'right' | 'left'): void {
+    if (side === 'right') {
+      if (this._rightHandler.isVisible) {
+        this._rightHandler.hide();
+      } else {
+        this._rightHandler.show();
+      }
+    } else {
+      if (this._leftHandler.isVisible) {
+        this._leftHandler.hide();
+      } else {
+        this._leftHandler.show();
+      }
+    }
+  }
+
+  /**
    * Returns the widgets for an application area.
    */
   widgets(area?: ILabShell.Area): IIterator<Widget> {
@@ -1001,8 +1032,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
-    const inputElement = this._titleWidgetHandler.titleWidget.node
-      .children[0] as HTMLInputElement;
+    const inputElement = this._titleHandler.inputElement;
     inputElement.value = current ? current.title.label : '';
     inputElement.title = current ? current.title.caption : '';
   }
@@ -1394,8 +1424,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _vsplitPanel: Private.RestorableSplitPanel;
   private _topHandler: Private.PanelHandler;
   private _menuHandler: Private.PanelHandler;
-  private _skipLinkWidgetHandler: Private.SkipLinkWidgetHandler;
-  private _titleWidgetHandler: Private.TitleWidgetHandler;
+  private _skipLinkWidget: Private.SkipLinkWidget;
+  private _titleHandler: Private.TitleHandler;
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
@@ -1456,7 +1486,7 @@ namespace Private {
     /**
      * Get the panel managed by the handler.
      */
-    get panel() {
+    get panel(): Panel {
       return this._panel;
     }
 
@@ -1537,6 +1567,13 @@ namespace Private {
     }
 
     /**
+     * Whether the side bar is visible
+     */
+    get isVisible(): boolean {
+      return this._sideBar.isVisible;
+    }
+
+    /**
      * Get the tab bar managed by the handler.
      */
     get sideBar(): TabBar<Widget> {
@@ -1548,6 +1585,13 @@ namespace Private {
      */
     get stackedPanel(): StackedPanel {
       return this._stackedPanel;
+    }
+
+    /**
+     * Signal fires when the stack panel or the sidebar changes
+     */
+    get updated(): ISignal<SideBarHandler, void> {
+      return this._updated;
     }
 
     /**
@@ -1629,7 +1673,12 @@ namespace Private {
       const collapsed = this._sideBar.currentTitle === null;
       const widgets = toArray(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
-      return { collapsed, currentWidget, widgets };
+      return {
+        collapsed,
+        currentWidget,
+        visible: !this._isHiddenByUser,
+        widgets
+      };
     }
 
     /**
@@ -1642,6 +1691,25 @@ namespace Private {
       if (data.collapsed) {
         this.collapse();
       }
+      if (!data.visible) {
+        this.hide();
+      }
+    }
+
+    /**
+     * Hide the side bar even if it contains widgets
+     */
+    hide(): void {
+      this._isHiddenByUser = true;
+      this._refreshVisibility();
+    }
+
+    /**
+     * Show the side bar if it contains widgets
+     */
+    show(): void {
+      this._isHiddenByUser = false;
+      this._refreshVisibility();
     }
 
     /**
@@ -1678,8 +1746,11 @@ namespace Private {
      * Refresh the visibility of the side bar and stacked panel.
      */
     private _refreshVisibility(): void {
-      this._sideBar.setHidden(this._sideBar.titles.length === 0);
       this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
+      this._sideBar.setHidden(
+        this._isHiddenByUser || this._sideBar.titles.length === 0
+      );
+      this._updated.emit();
     }
 
     /**
@@ -1727,103 +1798,97 @@ namespace Private {
       this._refreshVisibility();
     }
 
+    private _isHiddenByUser = false;
     private _items = new Array<Private.IRankItem>();
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;
+    private _updated: Signal<SideBarHandler, void> = new Signal(this);
   }
 
-  export class SkipLinkWidgetHandler {
+  export class SkipLinkWidget extends Widget {
     /**
-     * Construct a new skipLink widget handler.
+     * Construct a new skipLink widget.
      */
     constructor(shell: ILabShell) {
-      const skipLinkWidget = (this._skipLinkWidget = new Widget());
-      const skipToFilterFiles = document.createElement('a');
-      skipToFilterFiles.href = '#';
-      skipToFilterFiles.tabIndex = 1;
-      skipToFilterFiles.text = 'Skip to Filter Files';
-      skipToFilterFiles.className = 'skip-link';
-      skipToFilterFiles.addEventListener('click', this);
-      skipLinkWidget.addClass('jp-skiplink');
-      skipLinkWidget.id = 'jp-skiplink';
-      skipLinkWidget.node.appendChild(skipToFilterFiles);
+      super();
+      this.addClass('jp-skiplink');
+      this.id = 'jp-skiplink';
+      this._shell = shell;
+      this._createSkipLink('Skip to left side bar');
     }
 
     handleEvent(event: Event): void {
       switch (event.type) {
         case 'click':
-          this._focusFileSearch();
+          this._focusLeftSideBar();
           break;
       }
     }
 
-    private _focusFileSearch() {
-      const input = document.querySelector(
-        '#filename-searcher .bp3-input'
-      ) as HTMLInputElement;
-      input.focus();
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('click', this);
     }
 
     /**
-     * Get the input element managed by the handler.
+     * A message handler invoked on a `'before-detach'`
+     * message
      */
-    get skipLinkWidget(): Widget {
-      return this._skipLinkWidget;
+    protected onBeforeDetach(msg: Message): void {
+      this.node.removeEventListener('click', this);
+      super.onBeforeDetach(msg);
     }
 
-    /**
-     * Dispose of the handler and the resources it holds.
-     */
-    dispose(): void {
-      if (this.isDisposed) {
-        return;
-      }
-      this._isDisposed = true;
-      this._skipLinkWidget.node.removeEventListener('click', this);
-      this._skipLinkWidget.dispose();
+    private _focusLeftSideBar() {
+      this._shell.expandLeft();
     }
+    private _shell: ILabShell;
 
-    /**
-     * Hide the skipLink widget.
-     */
-    hide(): void {
-      this._skipLinkWidget.hide();
+    private _createSkipLink(skipLinkText: string): void {
+      const skipLink = document.createElement('a');
+      skipLink.href = '#';
+      skipLink.tabIndex = 1;
+      skipLink.text = skipLinkText;
+      skipLink.className = 'skip-link';
+      this.node.appendChild(skipLink);
     }
-
-    /**
-     * Show the skipLink widget.
-     */
-    show(): void {
-      this._skipLinkWidget.show();
-    }
-
-    /**
-     * Test whether the handler has been disposed.
-     */
-    get isDisposed(): boolean {
-      return this._isDisposed;
-    }
-
-    private _skipLinkWidget: Widget;
-    private _isDisposed: boolean = false;
   }
 
-  export class TitleWidgetHandler {
+  export class TitleHandler extends Widget {
     /**
-     * Construct a new title widget handler.
+     * Construct a new title handler.
      */
     constructor(shell: ILabShell) {
+      super();
+      const inputElement = document.createElement('input');
+      inputElement.type = 'text';
+      this.node.appendChild(inputElement);
       this._shell = shell;
-      const titleWidget = (this._titleWidget = new Widget());
-      titleWidget.id = 'jp-title-panel-title';
-      const titleInput = document.createElement('input');
-      titleInput.type = 'text';
-      titleInput.addEventListener('keyup', this);
-      titleInput.addEventListener('click', this);
-      titleInput.addEventListener('blur', this);
+      this.id = 'jp-title-panel-title';
+    }
 
-      titleWidget.node.appendChild(titleInput);
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.inputElement.addEventListener('keyup', this);
+      this.inputElement.addEventListener('click', this);
+      this.inputElement.addEventListener('blur', this);
+    }
+
+    /**
+     * Handle `before-detach` messages for the widget.
+     */
+    protected onBeforeDetach(msg: Message): void {
+      super.onBeforeDetach(msg);
+      this.inputElement.removeEventListener('keyup', this);
+      this.inputElement.removeEventListener('click', this);
+      this.inputElement.removeEventListener('blur', this);
     }
 
     handleEvent(event: Event): void {
@@ -1846,17 +1911,18 @@ namespace Private {
     private async _evtKeyUp(event: KeyboardEvent): Promise<void> {
       if (event.key == 'Enter') {
         const widget = this._shell.currentWidget;
-        if (widget instanceof DocumentWidget) {
-          const oldName = widget.context.path.split('/').pop()!;
-          const inputElement = this.titleWidget.node
-            .children[0] as HTMLInputElement;
-          const newName = inputElement.value;
-          inputElement.blur();
-          if (newName !== oldName && isValidFileName(newName)) {
-            await widget.context.rename(newName);
-          } else {
-            inputElement.value = oldName;
-          }
+        if (widget == null) {
+          return;
+        }
+        const oldName = widget.title.label;
+        const inputElement = this.inputElement;
+        const newName = inputElement.value;
+        inputElement.blur();
+
+        if (newName !== oldName) {
+          widget.title.label = newName;
+        } else {
+          inputElement.value = oldName;
         }
       }
     }
@@ -1870,15 +1936,7 @@ namespace Private {
         return;
       }
 
-      const currentWidget = this._shell.currentWidget;
-      const inputElement = this.titleWidget.node
-        .children[0] as HTMLInputElement;
-      if (currentWidget == null || !(currentWidget instanceof DocumentWidget)) {
-        inputElement.readOnly = true;
-        return;
-      } else {
-        inputElement.removeAttribute('readOnly');
-      }
+      const inputElement = this.inputElement;
 
       event.preventDefault();
       event.stopPropagation();
@@ -1894,50 +1952,13 @@ namespace Private {
     }
 
     /**
-     * Get the input element managed by the handler.
+     * The input element containing the parent widget's title.
      */
-    get titleWidget(): Widget {
-      return this._titleWidget;
+    get inputElement(): HTMLInputElement {
+      return this.node.children[0] as HTMLInputElement;
     }
 
-    /**
-     * Dispose of the handler and the resources it holds.
-     */
-    dispose(): void {
-      if (this.isDisposed) {
-        return;
-      }
-      this._isDisposed = true;
-      this._titleWidget.node.removeEventListener('keyup', this);
-      this._titleWidget.node.removeEventListener('click', this);
-      this._titleWidget.node.removeEventListener('blur', this);
-      this._titleWidget.dispose();
-    }
-
-    /**
-     * Hide the title widget.
-     */
-    hide(): void {
-      this._titleWidget.hide();
-    }
-
-    /**
-     * Show the title widget.
-     */
-    show(): void {
-      this._titleWidget.show();
-    }
-
-    /**
-     * Test whether the handler has been disposed.
-     */
-    get isDisposed(): boolean {
-      return this._isDisposed;
-    }
-
-    private _titleWidget: Widget;
     private _shell: ILabShell;
-    private _isDisposed: boolean = false;
     private _selected: boolean = false;
   }
 
