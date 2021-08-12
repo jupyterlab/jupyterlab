@@ -793,7 +793,7 @@ export namespace CodeEditor {
     codeFolding: boolean;
 
     /**
-     * Wheter to highlight trailing whitespace
+     * Whether to highlight trailing whitespace
      */
     showTrailingSpace: boolean;
   }
