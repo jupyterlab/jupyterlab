@@ -180,7 +180,7 @@ export function addCommands(
   app: JupyterFrontEnd,
   tracker: IImageTracker,
   translator: ITranslator
-) {
+): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
 

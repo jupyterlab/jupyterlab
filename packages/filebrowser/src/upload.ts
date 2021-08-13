@@ -105,7 +105,7 @@ namespace Private {
   /**
    * Translate upload tooltip.
    */
-  export function translateToolTip(translator?: ITranslator) {
+  export function translateToolTip(translator?: ITranslator): string {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     return trans.__('Upload Files');

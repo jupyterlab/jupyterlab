@@ -65,7 +65,7 @@ export class SavingStatus extends VDomRenderer<SavingStatus.Model> {
   /**
    * Render the SavingStatus item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (this.model === null || this.model.status === null) {
       return null;
     } else {
@@ -112,7 +112,7 @@ export namespace SavingStatus {
      * but it only has any effect if the widget is an IDocument widget
      * known to the application document manager.
      */
-    get widget() {
+    get widget(): Widget | null {
       return this._widget;
     }
     set widget(widget: Widget | null) {

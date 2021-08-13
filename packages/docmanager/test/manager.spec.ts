@@ -123,7 +123,7 @@ describe('@jupyterlab/docmanager', () => {
 
     describe('#services', () => {
       it('should get the service manager for the manager', async () => {
-        await manager.services.ready;
+        await expect(manager.services.ready).resolves.not.toThrow();
       });
     });
 
@@ -397,8 +397,8 @@ describe('@jupyterlab/docmanager', () => {
         expect(called).toBe(2);
       });
 
-      it('should be a no-op if there are no open files on that path', () => {
-        return manager.closeFile('foo');
+      it('should be a no-op if there are no open files on that path', async () => {
+        await expect(manager.closeFile('foo')).resolves.not.toThrow();
       });
     });
 
@@ -426,7 +426,7 @@ describe('@jupyterlab/docmanager', () => {
       });
 
       it('should be a no-op if there are no open documents', async () => {
-        await manager.closeAll();
+        await expect(manager.closeAll()).resolves.not.toThrow();
       });
     });
   });

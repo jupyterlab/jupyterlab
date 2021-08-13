@@ -108,7 +108,7 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   /**
    * Dispose of the resources held by the pdf widget.
    */
-  dispose() {
+  dispose(): void {
     if (this._disposable) {
       this._disposable.dispose();
     }

@@ -12,6 +12,6 @@ describe('JupyterServer', () => {
     const server = new JupyterServer();
     const url = await server.start();
     await fetch(URLExt.join(url, 'api'));
-    await server.shutdown();
+    await expect(server.shutdown()).resolves.not.toThrow();
   });
 });

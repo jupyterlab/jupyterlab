@@ -195,7 +195,7 @@ export class CodeConsole extends Widget {
    * rendered code cell widgets and does not execute them (though it can store
    * the execution message id).
    */
-  addCell(cell: CodeCell, msgId?: string) {
+  addCell(cell: CodeCell, msgId?: string): void {
     cell.addClass(CONSOLE_CELL_CLASS);
     this._content.addWidget(cell);
     this._cells.push(cell);
@@ -210,7 +210,7 @@ export class CodeConsole extends Widget {
   /**
    * Add a banner cell.
    */
-  addBanner() {
+  addBanner(): void {
     if (this._banner) {
       // An old banner just becomes a normal cell now.
       const cell = this._banner;
@@ -256,7 +256,7 @@ export class CodeConsole extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;

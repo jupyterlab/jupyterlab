@@ -738,7 +738,7 @@ export class FilterFileBrowserModel extends FileBrowserModel {
     });
   }
 
-  setFilter(filter: (value: Contents.IModel) => boolean) {
+  setFilter(filter: (value: Contents.IModel) => boolean): void {
     this._filter = filter;
     void this.refresh();
   }

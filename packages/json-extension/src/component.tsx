@@ -37,7 +37,7 @@ export class Component extends React.Component<IProps, IState> {
 
   timer: number = 0;
 
-  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const { value } = event.target;
     this.setState({ value });
     window.clearTimeout(this.timer);
@@ -46,7 +46,7 @@ export class Component extends React.Component<IProps, IState> {
     }, 300);
   };
 
-  render() {
+  render(): JSX.Element {
     const translator = this.props.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 

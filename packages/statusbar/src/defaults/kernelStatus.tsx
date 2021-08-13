@@ -87,7 +87,7 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
   /**
    * Render the kernel status item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (this.model === null) {
       return null;
     } else {
@@ -141,14 +141,14 @@ export namespace KernelStatus {
     /**
      * The name of the kernel.
      */
-    get kernelName() {
+    get kernelName(): string {
       return this._kernelName;
     }
 
     /**
      * The current status of the kernel.
      */
-    get status() {
+    get status(): string | undefined {
       return this._kernelStatus
         ? this._statusNames[this._kernelStatus]
         : undefined;

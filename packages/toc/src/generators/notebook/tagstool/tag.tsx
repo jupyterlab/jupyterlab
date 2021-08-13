@@ -49,7 +49,7 @@ abstract class TagComponent extends React.Component<IProperties> {
    *
    * @returns rendered component
    */
-  render() {
+  render(): JSX.Element {
     const tag = this.props.tag as string;
     return (
       <div>

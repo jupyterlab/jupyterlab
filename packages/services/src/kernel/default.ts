@@ -1574,7 +1574,10 @@ namespace Private {
    */
   export async function handleShellMessage<
     T extends KernelMessage.ShellMessageType
-  >(kernel: Kernel.IKernelConnection, msg: KernelMessage.IShellMessage<T>) {
+  >(
+    kernel: Kernel.IKernelConnection,
+    msg: KernelMessage.IShellMessage<T>
+  ): Promise<KernelMessage.IShellMessage<KernelMessage.ShellMessageType>> {
     const future = kernel.sendShellMessage(msg, true);
     return future.done;
   }
@@ -1633,7 +1636,7 @@ namespace Private {
    * that, but doing so would cause your random numbers to follow a non-uniform
    * distribution, which may not be acceptable for your needs.
    */
-  export function getRandomIntInclusive(min: number, max: number) {
+  export function getRandomIntInclusive(min: number, max: number): number {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;

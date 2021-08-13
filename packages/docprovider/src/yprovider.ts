@@ -112,11 +112,11 @@ export class WebSocketProviderWithLocks
     }
 
     const user = state.fetch(USER);
-    user.then(param => {
+    void user.then(param => {
       if (param === undefined) {
         name = getAnonymousUserName();
         color = '#' + getRandomColor().slice(1);
-        state.save(USER, { userName: name, userColor: color });
+        void state.save(USER, { userName: name, userColor: color });
       } else {
         const { userName, userColor } = param as JSONObject;
         name = userName as string;

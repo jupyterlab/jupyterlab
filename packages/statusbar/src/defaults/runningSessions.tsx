@@ -106,7 +106,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
   /**
    * Render the running sessions widget.
    */
-  render() {
+  render(): JSX.Element | null {
     if (!this.model) {
       return null;
     }
@@ -129,7 +129,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
   /**
    * Dispose of the status item.
    */
-  dispose() {
+  dispose(): void {
     super.dispose();
 
     this._serviceManager.sessions.runningChanged.disconnect(

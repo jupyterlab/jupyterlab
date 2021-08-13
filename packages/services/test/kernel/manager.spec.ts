@@ -112,8 +112,8 @@ describe('kernel/manager', () => {
     });
 
     describe('#ready', () => {
-      it('should resolve when the manager is ready', () => {
-        return manager.ready;
+      it('should resolve when the manager is ready', async () => {
+        await expect(manager.ready).resolves.not.toThrow();
       });
     });
 
@@ -132,8 +132,8 @@ describe('kernel/manager', () => {
     });
 
     describe('#startNew()', () => {
-      it('should start a new kernel', () => {
-        return manager.startNew();
+      it('should start a new kernel', async () => {
+        await expect(manager.startNew()).resolves.not.toThrow();
       });
 
       it('should emit a runningChanged signal', async () => {

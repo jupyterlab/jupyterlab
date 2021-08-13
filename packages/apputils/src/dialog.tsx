@@ -39,7 +39,7 @@ export function showDialog<T>(
  */
 export function showErrorMessage(
   title: string,
-  error: any,
+  error: string | Dialog.IError,
   buttons: ReadonlyArray<Dialog.IButton> = [
     Dialog.okButton({ label: 'Dismiss' })
   ]
@@ -492,6 +492,16 @@ export namespace Dialog {
      * The button display type.
      */
     displayType: 'default' | 'warn';
+  }
+
+  /**
+   * Error object interface
+   */
+  export interface IError {
+    /**
+     * Error message
+     */
+    message: string | React.ReactElement<any>;
   }
 
   /**

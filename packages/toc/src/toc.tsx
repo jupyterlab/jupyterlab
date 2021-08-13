@@ -109,7 +109,7 @@ export class TableOfContents extends Widget {
    *
    * @returns table of contents generator
    */
-  get generator() {
+  get generator(): Registry.IGenerator<Widget> | null {
     if (this._current) {
       return this._current.generator;
     }

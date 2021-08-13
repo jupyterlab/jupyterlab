@@ -158,27 +158,36 @@ describe('docregistry/registry', () => {
     describe('#addModelFactory()', () => {
       it('should add the model factory to the registry', () => {
         const factory = new Base64ModelFactory();
-        registry.addModelFactory(factory);
+        expect(() => {
+          registry.addModelFactory(factory);
+        }).not.toThrow();
       });
 
       it('should be a no-op a factory with the given `name` is already registered', () => {
         const factory = new Base64ModelFactory();
         registry.addModelFactory(factory);
-        const disposable = registry.addModelFactory(new Base64ModelFactory());
-        disposable.dispose();
+
+        expect(() => {
+          const disposable = registry.addModelFactory(new Base64ModelFactory());
+          disposable.dispose();
+        }).not.toThrow();
       });
 
       it('should be a no-op if the same factory is already registered', () => {
         const factory = new Base64ModelFactory();
         registry.addModelFactory(factory);
-        const disposable = registry.addModelFactory(factory);
-        disposable.dispose();
+        expect(() => {
+          const disposable = registry.addModelFactory(factory);
+          disposable.dispose();
+        }).not.toThrow();
       });
 
       it('should be removed from the registry when disposed', () => {
         const factory = new Base64ModelFactory();
-        const disposable = registry.addModelFactory(factory);
-        disposable.dispose();
+        expect(() => {
+          const disposable = registry.addModelFactory(factory);
+          disposable.dispose();
+        }).not.toThrow();
       });
     });
 

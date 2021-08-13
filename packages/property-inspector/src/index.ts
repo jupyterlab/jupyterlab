@@ -262,7 +262,7 @@ namespace Private {
     /**
      * Whether the property inspector is disposed.
      */
-    get isDisposed() {
+    get isDisposed(): boolean {
       return this._isDisposed;
     }
 

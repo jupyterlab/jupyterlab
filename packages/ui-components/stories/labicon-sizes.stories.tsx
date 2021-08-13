@@ -13,7 +13,15 @@ export default {
   title: 'LabIcon sizing'
 };
 
-export const clearSmall = () => <clearIcon.react elementSize="small" />;
-export const clearNormal = () => <clearIcon.react elementSize="normal" />;
-export const clearLarge = () => <clearIcon.react elementSize="large" />;
-export const clearXlarge = () => <clearIcon.react elementSize="xlarge" />;
+export const clearSmall = (): JSX.Element => (
+  <clearIcon.react elementSize="small" />
+);
+export const clearNormal = (): JSX.Element => (
+  <clearIcon.react elementSize="normal" />
+);
+export const clearLarge = (): JSX.Element => (
+  <clearIcon.react elementSize="large" />
+);
+export const clearXlarge = (): JSX.Element => (
+  <clearIcon.react elementSize="xlarge" />
+);

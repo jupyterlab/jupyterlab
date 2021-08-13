@@ -25,7 +25,7 @@ function activateNBOutput(
   app: JupyterFrontEnd,
   nbtracker: INotebookTracker,
   loggerRegistry: ILoggerRegistry | null
-) {
+): void {
   if (!loggerRegistry) {
     // Automatically disable if logconsole is missing
     return;

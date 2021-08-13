@@ -63,7 +63,7 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
   /**
    * Render the CommandEdit status item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (!this.model) {
       return null;
     }
@@ -94,7 +94,7 @@ export namespace CommandEditStatus {
     /**
      * The current mode of the current notebook.
      */
-    get notebookMode() {
+    get notebookMode(): NotebookMode {
       return this._notebookMode;
     }
 

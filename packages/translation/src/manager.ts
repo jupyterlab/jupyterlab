@@ -20,7 +20,7 @@ export class TranslationManager implements ITranslator {
    *
    * @param locale The language locale to use for translations.
    */
-  async fetch(locale: string) {
+  async fetch(locale: string): Promise<void> {
     this._currentLocale = locale;
     this._languageData = await this._connector.fetch({ language: locale });
     this._domainData = this._languageData?.data || {};

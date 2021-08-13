@@ -303,7 +303,7 @@ namespace Private {
     connected: Date | null,
     executed: Date | null,
     translator?: ITranslator
-  ) {
+  ): void {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 

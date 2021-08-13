@@ -63,7 +63,7 @@ class TagListComponent extends React.Component<IProperties, IState> {
    *
    * @param name - tag name
    */
-  selectedTagWithName = (name: string) => {
+  selectedTagWithName = (name: string): void => {
     if (this.props.selectedTags.indexOf(name) >= 0) {
       this.props.selectionStateHandler(name, false);
     } else {
@@ -76,7 +76,7 @@ class TagListComponent extends React.Component<IProperties, IState> {
    *
    * @param tags - list of tags
    */
-  renderTagComponents = (tags: string[]) => {
+  renderTagComponents = (tags: string[]): JSX.Element[] => {
     const selectedTags = this.props.selectedTags;
     const selectedTagWithName = this.selectedTagWithName;
     return tags.map((tag, index) => {
@@ -108,7 +108,7 @@ class TagListComponent extends React.Component<IProperties, IState> {
    *
    * @returns rendered list
    */
-  render() {
+  render(): JSX.Element {
     let tags = this.props.tags;
     let jsx = null;
     if (tags) {

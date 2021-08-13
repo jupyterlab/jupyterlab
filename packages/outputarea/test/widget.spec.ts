@@ -131,9 +131,9 @@ describe('outputarea/widget', () => {
       });
 
       it('should execute code on a kernel and send outputs to the model', async () => {
-        const future = sessionContext.session?.kernel?.requestExecute({
+        const future = sessionContext.session!.kernel!.requestExecute({
           code: CODE
-        })!;
+        });
         widget.future = future;
         const reply = await future.done;
         expect(reply!.content.execution_count).toBeTruthy();
@@ -143,9 +143,9 @@ describe('outputarea/widget', () => {
 
       it('should clear existing outputs', async () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
-        const future = sessionContext.session?.kernel?.requestExecute({
+        const future = sessionContext.session!.kernel!.requestExecute({
           code: CODE
-        })!;
+        });
         widget.future = future;
         const reply = await future.done;
         expect(reply!.content.execution_count).toBeTruthy();

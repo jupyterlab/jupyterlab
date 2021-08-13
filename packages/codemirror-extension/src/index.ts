@@ -147,7 +147,7 @@ class CodeMirrorSingleton implements ICodeMirror {
 
   async ensureVimKeymap() {
     if (!('Vim' in (CodeMirror as any))) {
-      // @ts-expect-error
+      // @ts-expect-error Import non typed package
       await import('codemirror/keymap/vim.js');
     }
   }

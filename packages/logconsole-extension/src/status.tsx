@@ -99,7 +99,7 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
   /**
    * Render the log console status item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (this.model === null || this.model.version === 0) {
       this.hide();
       return null;
@@ -270,7 +270,7 @@ export namespace LogConsoleStatus {
      * This will also update the last notified version so that the last
      * notified version is always at least the last displayed version.
      */
-    sourceDisplayed(source: string | null, version: number | null) {
+    sourceDisplayed(source: string | null, version: number | null): void {
       if (source === null || version === null) {
         return;
       }
@@ -295,7 +295,7 @@ export namespace LogConsoleStatus {
      * @param source - The name of the log source.
      * @param version - The version of the log.
      */
-    sourceNotified(source: string | null, version: number) {
+    sourceNotified(source: string | null, version: number): void {
       if (source === null) {
         return;
       }

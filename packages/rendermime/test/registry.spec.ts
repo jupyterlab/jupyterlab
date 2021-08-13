@@ -293,7 +293,9 @@ describe('rendermime/registry', () => {
       });
 
       it('should be a no-op if the mimeType is not registered', () => {
-        r.removeMimeType('text/foo');
+        expect(() => {
+          r.removeMimeType('text/foo');
+        }).not.toThrow();
       });
     });
 

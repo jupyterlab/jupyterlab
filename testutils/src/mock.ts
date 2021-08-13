@@ -96,7 +96,7 @@ export const NOTEBOOK_PATHS: { [kernelName: string]: string[] } = {
 export function updateKernelStatus(
   sessionContext: ISessionContext,
   newStatus: KernelMessage.Status
-) {
+): void {
   const kernel = sessionContext.session!.kernel!;
   (kernel as any).status = newStatus;
   (sessionContext.statusChanged as any).emit(newStatus);
@@ -785,7 +785,7 @@ namespace Private {
   }
 
   // Get the kernel spec for kernel name
-  export function kernelSpecForKernelName(name: string) {
+  export function kernelSpecForKernelName(name: string): KernelSpec.ISpecModel {
     return KERNELSPECS[name];
   }
 

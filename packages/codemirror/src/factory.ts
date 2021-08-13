@@ -52,7 +52,7 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
   /**
    * Create a new editor for inline code.
    */
-  newInlineEditor = (options: CodeEditor.IOptions) => {
+  newInlineEditor = (options: CodeEditor.IOptions): CodeMirrorEditor => {
     options.host.dataset.type = 'inline';
     return new CodeMirrorEditor({
       ...options,
@@ -64,7 +64,7 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
   /**
    * Create a new editor for a full document.
    */
-  newDocumentEditor = (options: CodeEditor.IOptions) => {
+  newDocumentEditor = (options: CodeEditor.IOptions): CodeMirrorEditor => {
     options.host.dataset.type = 'document';
     return new CodeMirrorEditor({
       ...options,
