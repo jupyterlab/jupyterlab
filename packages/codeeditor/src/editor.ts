@@ -791,6 +791,11 @@ export namespace CodeEditor {
      * Whether to allow code folding
      */
     codeFolding: boolean;
+
+    /**
+     * Whether to highlight trailing whitespace
+     */
+    showTrailingSpace: boolean;
   }
 
   /**
@@ -811,7 +816,8 @@ export namespace CodeEditor {
     autoClosingBrackets: false,
     handlePaste: true,
     rulers: [],
-    codeFolding: false
+    codeFolding: false,
+    showTrailingSpace: false
   };
 
   /**

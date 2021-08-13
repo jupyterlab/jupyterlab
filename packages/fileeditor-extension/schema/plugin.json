@@ -189,6 +189,9 @@
             "type": "number"
           }
         },
+        "showTrailingSpace": {
+          "type": "boolean"
+        },
         "tabSize": {
           "type": "number"
         },
@@ -218,6 +221,7 @@
         "matchBrackets": true,
         "readOnly": false,
         "rulers": [],
+        "showTrailingSpace": false,
         "tabSize": 4,
         "wordWrapColumn": 80
       }
