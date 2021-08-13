@@ -133,6 +133,7 @@ export namespace VirtualDocument {
     overrides_registry: ICodeOverridesRegistry;
     path: string;
     file_extension: string;
+    console: ILSPLogConsole;
     /**
      * Notebooks or any other aggregates of documents are not supported
      * by the LSP specification, and we need to make appropriate
@@ -149,7 +150,6 @@ export namespace VirtualDocument {
      */
     standalone?: boolean;
     parent?: VirtualDocument;
-    console?: ILSPLogConsole;
   }
 }
 
@@ -179,6 +179,8 @@ export class VirtualDocument {
   public foreign_document_closed: Signal<VirtualDocument, IForeignContext>;
   public foreign_document_opened: Signal<VirtualDocument, IForeignContext>;
   public readonly instance_id: number;
+  protected console: ILSPLogConsole;
+
   standalone: boolean;
   isDisposed = false;
   /**
@@ -225,6 +227,7 @@ export class VirtualDocument {
   constructor(options: VirtualDocument.IOptions) {
     this.options = options;
     this.path = options.path;
+    this.console = options.console;
     this.file_extension = options.file_extension;
     this.has_lsp_supported_file = options.has_lsp_supported_file;
     this.parent = options.parent;

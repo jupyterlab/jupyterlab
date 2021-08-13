@@ -284,7 +284,8 @@ export class FileEditorTestEnvironment extends TestEnvironment {
       has_lsp_supported_file: true,
       standalone: true,
       foreign_code_extractors: {},
-      overrides_registry: {}
+      overrides_registry: {},
+      console: new BrowserConsole()
     };
   }
 
