@@ -1260,7 +1260,7 @@ function activateNotebookHandler(
           ''
         );
       }
-      if (args['isPalette']) {
+      if (args['isPalette'] || args['isContextMenu']) {
         return trans.__('New Notebook');
       }
       return trans.__('Notebook');
