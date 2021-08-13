@@ -24,10 +24,6 @@
   overflow-x: hidden;
 }
 
-.jp-Toolbar:hover {
-  overflow-x: auto;
-}
-
 /* Toolbar items */
 
 .jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
