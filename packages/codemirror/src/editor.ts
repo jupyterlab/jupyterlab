@@ -1606,6 +1606,7 @@ namespace Private {
         break;
       case 'showTrailingSpace':
         (editor.setOption as any)(option, value);
+        break;
       default:
         (editor.setOption as any)(option, value);
         break;
