@@ -612,9 +612,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       if (cell && cell.cell_type === 'code') {
         executionCount.set(cell.execution_count || null);
         outputs = cell.outputs ?? [];
-        // If output is not empty presume it results of the input code execution
+        // If execution count is not null presume the input code was the latest executed
         // TODO load from the notebook file when the dirty state is stored in it
-        if (outputs.length > 0) {
+        if (cell.execution_count != null) {
+          // True if execution_count is null or undefined
           this._executedCode = this.value.text.trim();
         }
       } else {
