@@ -107,16 +107,27 @@ export function createDefaultFactory(
     toolbarItem: ToolbarRegistry.IWidget
   ) => {
     switch (toolbarItem.type ?? 'command') {
-      case 'command':
+      case 'command': {
+        const {
+          command: tId,
+          args: tArgs,
+          label: tLabel,
+          icon: tIcon
+        } = toolbarItem;
+        const id = tId ?? '';
+        const args = { toolbar: true, ...tArgs };
+        const icon = tIcon ? LabIcon.resolve({ icon: tIcon }) : undefined;
+        // If there is an icon, undefined label will results in no label
+        // otherwise the label will be set using the setting or the command label
+        const label = icon ?? commands.icon(id, args) ? tLabel ?? '' : tLabel;
         return new CommandToolbarButton({
           commands,
-          id: toolbarItem.command ?? '',
-          args: { toolbar: true, ...toolbarItem.args },
-          icon: toolbarItem.icon
-            ? LabIcon.resolve({ icon: toolbarItem.icon })
-            : undefined,
-          label: toolbarItem.label ?? ''
+          id,
+          args,
+          icon,
+          label
         });
+      }
       case 'spacer':
         return Toolbar.createSpacerItem();
       default:

@@ -264,7 +264,7 @@ where ``menuItem`` definition is:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 129-167
+   :lines: 142-180
 
 
 The same example using the API is shown below. See the Lumino `docs
@@ -605,13 +605,13 @@ A menu must respect the following schema:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 72-125
+   :lines: 85-141
 
 And an item must follow:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 129-167
+   :lines: 142-180
 
 Menus added to the settings system will be editable by users using the ``mainmenu-extension``
 settings. In particular, they can be disabled at the item or the menu level by setting the
@@ -882,6 +882,12 @@ The current widget factories supporting the toolbar customization are:
 - ``HTML Viewer``: HTML Viewer toolbar
 - ``CSVTable``: CSV (Comma Separated Value) Viewer toolbar
 - ``TSVTable``: TSV (Tabulation Separated Value) Viewer toolbar
+
+Add the toolbar item must follow this definition:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+   :language: json
+   :lines: 207-252
 
 .. _widget-tracker:
 

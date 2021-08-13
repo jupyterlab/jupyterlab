@@ -63,7 +63,7 @@
           "type": "string"
         },
         "label": {
-          "title": "Item icon label",
+          "title": "Item label",
           "description": "If defined, it will override the command label",
           "type": "string"
         },
