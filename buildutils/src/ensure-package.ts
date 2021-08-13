@@ -331,9 +331,6 @@ export async function ensurePackage(
     Object.keys(testReferences).forEach(name => {
       tsConfigTestData.references.push({ path: testReferences[name] });
     });
-    Object.keys(references).forEach(name => {
-      tsConfigTestData.references.push({ path: testReferences[name] });
-    });
     utils.writeJSONFile(tsConfigTestPath, tsConfigTestData);
   }
 

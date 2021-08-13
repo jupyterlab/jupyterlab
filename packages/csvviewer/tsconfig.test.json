@@ -19,18 +19,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }
