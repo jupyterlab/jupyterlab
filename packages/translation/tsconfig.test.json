@@ -16,15 +16,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statedb"
     }
   ]
 }
