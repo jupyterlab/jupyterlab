@@ -342,7 +342,7 @@ export class StaticNotebook extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
@@ -2526,7 +2526,9 @@ namespace Private {
    * #### Notes
    * This defaults the content factory to that in the `Notebook` namespace.
    */
-  export function processNotebookOptions(options: Notebook.IOptions) {
+  export function processNotebookOptions(
+    options: Notebook.IOptions
+  ): Notebook.IOptions {
     if (options.contentFactory) {
       return options;
     } else {

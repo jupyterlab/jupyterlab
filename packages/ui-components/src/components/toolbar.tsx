@@ -621,9 +621,26 @@ export namespace CommandToolbarButtonComponent {
    * Interface for CommandToolbarButtonComponent props.
    */
   export interface IProps {
+    /**
+     * Application commands registry
+     */
     commands: CommandRegistry;
+    /**
+     * Command unique id
+     */
     id: string;
+    /**
+     * Command arguments
+     */
     args?: ReadonlyJSONObject;
+    /**
+     * Overrides command icon
+     */
+    icon?: LabIcon;
+    /**
+     * Overrides command label
+     */
+    label?: string;
   }
 }
 
@@ -834,7 +851,7 @@ namespace Private {
     const iconLabel = commands.iconLabel(id, args);
     // DEPRECATED: remove _icon when lumino 2.0 is adopted
     // if icon is aliasing iconClass, don't use it
-    const _icon = commands.icon(id, args);
+    const _icon = options.icon ?? commands.icon(id, args);
     const icon = _icon === iconClass ? undefined : _icon;
 
     const label = commands.label(id, args);
@@ -846,7 +863,9 @@ namespace Private {
     if (!commands.isVisible(id, args)) {
       className += ' lm-mod-hidden';
     }
-    let tooltip = commands.caption(id, args) || label || iconLabel;
+
+    let tooltip =
+      commands.caption(id, args) || options.label || label || iconLabel;
     // Shows hot keys in tooltips
     const binding = commands.keyBindings.find(b => b.command === id);
     if (binding) {
@@ -858,7 +877,15 @@ namespace Private {
     };
     const enabled = commands.isEnabled(id, args);
 
-    return { className, icon, iconClass, tooltip, onClick, enabled, label };
+    return {
+      className,
+      icon,
+      iconClass,
+      tooltip,
+      onClick,
+      enabled,
+      label: options.label ?? label
+    };
   }
 
   /**
