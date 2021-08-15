@@ -1737,10 +1737,14 @@ export namespace NotebookActions {
           'Selecting trust will re-render this notebook in a trusted state.'
         )}
         <br />
-        {trans.__(
-          'For more information, see the <a href="https://jupyter-server.readthedocs.io/en/stable/operators/security.html">%1</a>',
-          trans.__('Jupyter security documentation')
-        )}
+        {trans.__('For more information, see')}{' '}
+        <a
+          href="https://jupyter-server.readthedocs.io/en/stable/operators/security.html"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {trans.__('the Jupyter security documentation')}
+        </a>
       </p>
     );
 
