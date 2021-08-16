@@ -25,7 +25,14 @@ export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
       x = Math.sin(rad) * 125,
       y = Math.cos(rad) * -125,
       mid = angle < 180 ? 1 : 0,
-      shape = 'M 0 0 v -125 A 125 125 1 ' + mid + ' 0 ' + x + ' ' + y + ' z';
+      shape =
+        'M 0 0 v -125 A 125 125 1 ' +
+        mid +
+        ' 0 ' +
+        x.toFixed(4) +
+        ' ' +
+        y.toFixed(4) +
+        ' z';
     return shape;
   };
   return (

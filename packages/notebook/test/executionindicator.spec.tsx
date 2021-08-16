@@ -7,11 +7,14 @@ import { createSessionContext } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
 import {
   ExecutionIndicator,
+  ExecutionIndicatorComponent,
   Notebook,
   NotebookActions,
   NotebookModel
 } from '../src';
 import * as utils from './utils';
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 
 const fastCellModel = {
   cell_type: 'code',
@@ -150,6 +153,96 @@ describe('@jupyterlab/notebook', () => {
         await NotebookActions.run(widget, ipySessionContext);
         expect(executed).toEqual(expect.arrayContaining([3, 3, 3, 2, 2, 2, 0]));
       });
+    });
+  });
+  describe('testProgressCircle', () => {
+    let displayOption: { showOnToolBar: boolean; showProgress: boolean };
+    let defaultState: {
+      interval: number;
+      kernelStatus: string;
+      needReset: boolean;
+      scheduledCell: Set<string>;
+      scheduledCellNumber: number;
+      timeout: number;
+      totalTime: number;
+    };
+
+    const EMPTY_CIRCLE = 'M 0 0 v -125 A 125 125 1 0 0 -0.0000 -125.0000 z';
+    const HALF_FILLED_CIRCLE = 'M 0 0 v -125 A 125 125 1 0 0 0.0000 125.0000 z';
+    const FILLED_CIRCLE = 'M 0 0 v -125 A 125 125 1 1 0 0.2182 -124.9998 z';
+
+    beforeEach(() => {
+      displayOption = { showOnToolBar: false, showProgress: true };
+      defaultState = {
+        interval: 0,
+        kernelStatus: 'idle',
+        needReset: false,
+        scheduledCell: new Set<string>(),
+        scheduledCellNumber: 0,
+        timeout: 0,
+        totalTime: 0
+      };
+    });
+    it('Should render an empty div with undefined state', () => {
+      const element = (
+        <ExecutionIndicatorComponent
+          displayOption={displayOption}
+          state={undefined}
+          translator={undefined}
+        />
+      );
+      const htmlElement = ReactDOMServer.renderToString(element);
+      expect(htmlElement).toContain('<div data-reactroot=""></div>');
+    });
+    it('Should render a filled circle with 0/2 cell executed message', () => {
+      defaultState.scheduledCellNumber = 2;
+      defaultState.scheduledCell.add('foo');
+      defaultState.scheduledCell.add('bar');
+      defaultState.kernelStatus = 'busy';
+      defaultState.totalTime = 1;
+      const element = (
+        <ExecutionIndicatorComponent
+          displayOption={displayOption}
+          state={defaultState}
+          translator={undefined}
+        />
+      );
+      const htmlElement = ReactDOMServer.renderToString(element);
+      expect(htmlElement).toContain(FILLED_CIRCLE);
+      expect(htmlElement).toContain(`Executed 0/2 cells`);
+    });
+
+    it('Should render a half filled circle with 1/2 cell executed message', () => {
+      defaultState.scheduledCellNumber = 2;
+      defaultState.scheduledCell.add('foo');
+      defaultState.kernelStatus = 'busy';
+      defaultState.totalTime = 1;
+      const element = (
+        <ExecutionIndicatorComponent
+          displayOption={displayOption}
+          state={defaultState}
+          translator={undefined}
+        />
+      );
+      const htmlElement = ReactDOMServer.renderToString(element);
+      expect(htmlElement).toContain(HALF_FILLED_CIRCLE);
+      expect(htmlElement).toContain(`Executed 1/2 cells`);
+    });
+
+    it('Should render an empty circle with 2 cells executed message', () => {
+      defaultState.scheduledCellNumber = 2;
+      defaultState.kernelStatus = 'idle';
+      defaultState.totalTime = 1;
+      const element = (
+        <ExecutionIndicatorComponent
+          displayOption={displayOption}
+          state={defaultState}
+          translator={undefined}
+        />
+      );
+      const htmlElement = ReactDOMServer.renderToString(element);
+      expect(htmlElement).toContain(EMPTY_CIRCLE);
+      expect(htmlElement).toContain(`Executed 2 cells`);
     });
   });
 });

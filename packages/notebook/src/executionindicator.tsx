@@ -17,7 +17,7 @@ import { KernelMessage } from '@jupyterlab/services';
 /**
  * A react functional component for rendering execution indicator.
  */
-function ExecutionIndicatorComponent(
+export function ExecutionIndicatorComponent(
   props: ExecutionIndicatorComponent.IProps
 ): React.ReactElement<ExecutionIndicatorComponent.IProps> {
   const translator = props.translator || nullTranslator;
@@ -30,6 +30,7 @@ function ExecutionIndicatorComponent(
   if (!state) {
     return emptyDiv;
   }
+
   const time = state.totalTime;
   const scheduledCellNumber = state.scheduledCellNumber || 0;
   const remainingCellNumber = state.scheduledCell.size || 0;
