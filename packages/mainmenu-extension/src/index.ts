@@ -397,8 +397,10 @@ export function createFileMenu(
           const apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
 
           // Shutdown all kernel and terminal sessions before shutting down the server
-          await app.serviceManager.sessions.shutdownAll();
-          await app.serviceManager.terminals.shutdownAll();
+          await Promise.all([
+            app.serviceManager.sessions.shutdownAll(),
+            app.serviceManager.terminals.shutdownAll()
+          ]);
 
           return ServerConnection.makeRequest(
             apiURL,
