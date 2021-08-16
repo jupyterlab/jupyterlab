@@ -147,7 +147,7 @@ describe('Kernel.IKernel', () => {
         msgId,
         content: {}
       });
-      msg.parent_header = { session: kernel.clientId };
+      msg.parent_header = { session: kernel.clientId } as any;
       tester.send(msg);
       await expect(emission).resolves.not.toThrow();
     });
@@ -175,7 +175,7 @@ describe('Kernel.IKernel', () => {
         msgId,
         content: {}
       });
-      msg.parent_header = { session: kernel.clientId };
+      msg.parent_header = { session: kernel.clientId } as any;
       tester.send(msg);
 
       await emission;
@@ -205,7 +205,7 @@ describe('Kernel.IKernel', () => {
         msgId: 'message from wrong session',
         content: {}
       });
-      msg1.parent_header = { session: 'wrong session' };
+      msg1.parent_header = { session: 'wrong session' } as any;
       tester.send(msg1);
 
       // Send a shell message with the right client (parent) session.
@@ -216,7 +216,7 @@ describe('Kernel.IKernel', () => {
         msgId: msgId,
         content: {}
       });
-      msg2.parent_header = { session: kernel.clientId };
+      msg2.parent_header = { session: kernel.clientId } as any;
       tester.send(msg2);
 
       await emission;
@@ -252,7 +252,7 @@ describe('Kernel.IKernel', () => {
         msgId,
         content: {}
       });
-      msg.parent_header = { session: kernel.clientId };
+      msg.parent_header = { session: kernel.clientId } as any;
       tester.send(msg);
       await emission;
     });
