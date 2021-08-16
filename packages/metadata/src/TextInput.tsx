@@ -78,8 +78,8 @@ export const TextInput: React.FC<ITextFieldProps> = ({
 
   return (
     <div
-      className={`elyra-metadataEditor-formInput ${
-        secure ? 'elyra-metadataEditor-secure' : ''
+      className={`jp-metadataEditor-formInput ${
+        secure ? 'jp-metadataEditor-secure' : ''
       }`}
     >
       <CustomTooltip title={description ?? ''}>
@@ -125,7 +125,7 @@ export const TextInput: React.FC<ITextFieldProps> = ({
                 }
               : {}
           }
-          className={`elyra-metadataEditor-form-${fieldName ?? ''}`}
+          className={`jp-metadataEditor-form-${fieldName ?? ''}`}
         />
       </CustomTooltip>
       {!!error && <FormHelperText error>{error}</FormHelperText>}

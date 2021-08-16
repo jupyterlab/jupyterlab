@@ -26,15 +26,15 @@ import { FeedbackButton } from './FeedbackButton';
 /**
  * The CSS class for expandable containers.
  */
-const DETAILS_VISIBLE_CLASS = 'elyra-expandableContainer-details-visible';
-const DETAILS_HIDDEN_CLASS = 'elyra-expandableContainer-details-hidden';
-const DISPLAY_NAME_CLASS = 'elyra-expandableContainer-name';
-const ELYRA_BUTTON_CLASS = 'elyra-button';
-const BUTTON_CLASS = 'elyra-expandableContainer-button';
-const TITLE_CLASS = 'elyra-expandableContainer-title';
-const ACTION_BUTTONS_WRAPPER_CLASS = 'elyra-expandableContainer-action-buttons';
-const ACTION_BUTTON_CLASS = 'elyra-expandableContainer-actionButton';
-const DRAGGABLE_CLASS = 'elyra-expandableContainer-draggable';
+const DETAILS_VISIBLE_CLASS = 'jp-expandableContainer-details-visible';
+const DETAILS_HIDDEN_CLASS = 'jp-expandableContainer-details-hidden';
+const DISPLAY_NAME_CLASS = 'jp-expandableContainer-name';
+const JP_BUTTON_CLASS = 'jp-button';
+const BUTTON_CLASS = 'jp-expandableContainer-button';
+const TITLE_CLASS = 'jp-expandableContainer-title';
+const ACTION_BUTTONS_WRAPPER_CLASS = 'jp-expandableContainer-action-buttons';
+const ACTION_BUTTON_CLASS = 'jp-expandableContainer-actionButton';
+const DRAGGABLE_CLASS = 'jp-expandableContainer-draggable';
 
 /**
  * Expandable container props.
@@ -80,7 +80,7 @@ export const ExpandableComponent: React.FC<IExpandableComponentProps> = ({
     onExpand?.(expanded);
   });
 
-  const buttonClasses = [ELYRA_BUTTON_CLASS, BUTTON_CLASS].join(' ');
+  const buttonClasses = [JP_BUTTON_CLASS, BUTTON_CLASS].join(' ');
 
   return (
     <div>

@@ -29,8 +29,8 @@ import {
 } from '@material-ui/core';
 import React from 'react';
 
-export const METADATA_HEADER_BUTTON_CLASS = 'elyra-metadataHeader-button';
-export const METADATA_HEADER_POPPER_CLASS = 'elyra-metadataHeader-popper';
+export const METADATA_HEADER_BUTTON_CLASS = 'jp-metadataHeader-button';
+export const METADATA_HEADER_POPPER_CLASS = 'jp-metadataHeader-popper';
 
 export interface IAddMetadataButtonProps {
   schemas?: IDictionary<any>[];

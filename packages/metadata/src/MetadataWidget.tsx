@@ -39,13 +39,13 @@ import { FilterTools } from './FilterTools';
 /**
  * The CSS class added to metadata widgets.
  */
-export const METADATA_CLASS = 'elyra-metadata';
-export const METADATA_HEADER_CLASS = 'elyra-metadataHeader';
-export const METADATA_ITEM = 'elyra-metadata-item';
+export const METADATA_CLASS = 'jp-metadata';
+export const METADATA_HEADER_CLASS = 'jp-metadataHeader';
+export const METADATA_ITEM = 'jp-metadata-item';
 const METADATA_JSON_CLASS = 'jp-RenderedJSON CodeMirror cm-s-jupyter';
 
 const commands = {
-  OPEN_METADATA_EDITOR: 'elyra-metadata-editor:open'
+  OPEN_METADATA_EDITOR: 'jp-metadata-editor:open'
 };
 
 export interface IMetadata {
@@ -299,7 +299,7 @@ export class MetadataDisplay<
       this.sortMetadata();
     }
     return (
-      <div id="elyra-metadata" className={this.props.className}>
+      <div id="jp-metadata" className={this.props.className}>
         <FilterTools
           onFilter={this.filteredMetadata}
           tags={this.getActiveTags()}
@@ -335,7 +335,7 @@ export class MetadataWidget extends ReactWidget {
 
   constructor(props: IMetadataWidgetProps) {
     super();
-    this.addClass('elyra-metadata');
+    this.addClass('jp-metadata');
 
     this.props = props;
     this.renderSignal = new Signal<this, any>(this);

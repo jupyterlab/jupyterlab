@@ -28,7 +28,7 @@ import { Autocomplete } from '@material-ui/lab';
 
 import * as React from 'react';
 
-const DROPDOWN_ITEM_CLASS = 'elyra-form-DropDown-item';
+const DROPDOWN_ITEM_CLASS = 'jp-form-DropDown-item';
 
 export interface IDropDownProps {
   defaultError: string;
@@ -78,7 +78,7 @@ export const DropDown: React.FC<IDropDownProps> = ({
   };
 
   return (
-    <div className={`elyra-metadataEditor-formInput ${DROPDOWN_ITEM_CLASS}`}>
+    <div className={`jp-metadataEditor-formInput ${DROPDOWN_ITEM_CLASS}`}>
       <CustomTooltip title={description ?? ''} placement="top">
         {readonly ? (
           <FormControl variant="outlined">
@@ -114,7 +114,7 @@ export const DropDown: React.FC<IDropDownProps> = ({
           <Autocomplete
             id="combo-box-demo"
             freeSolo
-            key="elyra-DropDown"
+            key="jp-DropDown"
             options={options ?? []}
             style={{ width: 300 }}
             value={value ?? ''}

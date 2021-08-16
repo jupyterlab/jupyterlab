@@ -18,7 +18,7 @@ import * as React from 'react';
 
 import { ExpandableComponent } from './ExpandableComponent';
 
-const MESSAGE_DISPLAY = 'elyra-errorDialog-messageDisplay';
+const MESSAGE_DISPLAY = 'jp-errorDialog-messageDisplay';
 const ERROR_DIALOG_WIDTH = 600;
 const ERROR_DIALOG_HEIGHT = 400;
 const JP_DIALOG_CONTENT = 'jp-Dialog-content';

@@ -37,12 +37,12 @@ import { LabIcon, textEditorIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
 
-const METADATA_EDITOR_ID = 'elyra-metadata-editor';
-const METADATA_WIDGET_ID = 'elyra-metadata';
+const METADATA_EDITOR_ID = 'jp-metadata-editor';
+const METADATA_WIDGET_ID = 'jp-metadata';
 
 const commandIDs = {
-  openMetadata: 'elyra-metadata:open',
-  closeTabCommand: 'elyra-metadata:close'
+  openMetadata: 'jp-metadata:open',
+  closeTabCommand: 'jp-metadata:close'
 };
 
 /**
@@ -169,7 +169,7 @@ const extension: JupyterFrontEndPlugin<void> = {
     });
     app.contextMenu.addItem({
       selector:
-        '[data-id^="elyra-metadata:"]:not([data-id$="code-snippets"]):not([data-id$="runtimes"])',
+        '[data-id^="jp-metadata:"]:not([data-id$="code-snippets"]):not([data-id$="runtimes"])',
       command: closeTabCommand
     });
 

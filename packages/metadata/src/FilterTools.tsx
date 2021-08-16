@@ -29,17 +29,17 @@ interface IFilterMetadataState {
   searchValue: string;
 }
 
-const FILTER_OPTION = 'elyra-filter-option';
-const FILTER_TAGS = 'elyra-filter-tags';
-const FILTER_TAG = 'elyra-filter-tag';
-const FILTER_TAG_LABEL = 'elyra-filter-tag-label';
-const FILTER_CHECK = 'elyra-filter-check';
-const FILTER_TOOLS = 'elyra-filterTools';
-const FILTER_SEARCHBAR = 'elyra-searchbar';
-const FILTER_SEARCHWRAPPER = 'elyra-searchwrapper';
-const FILTER_CLASS = 'elyra-filter';
-const FILTER_BUTTON = 'elyra-filter-btn';
-const FILTER_EMPTY = 'elyra-filter-empty';
+const FILTER_OPTION = 'jp-filter-option';
+const FILTER_TAGS = 'jp-filter-tags';
+const FILTER_TAG = 'jp-filter-tag';
+const FILTER_TAG_LABEL = 'jp-filter-tag-label';
+const FILTER_CHECK = 'jp-filter-check';
+const FILTER_TOOLS = 'jp-filterTools';
+const FILTER_SEARCHBAR = 'jp-searchbar';
+const FILTER_SEARCHWRAPPER = 'jp-searchwrapper';
+const FILTER_CLASS = 'jp-filter';
+const FILTER_BUTTON = 'jp-filter-btn';
+const FILTER_EMPTY = 'jp-filter-empty';
 
 export class FilterTools extends React.Component<
   IFilterMetadataProps,

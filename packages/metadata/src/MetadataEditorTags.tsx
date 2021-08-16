@@ -34,10 +34,10 @@ interface IMetadataEditorTagState {
 /**
  * CSS STYLING
  */
-const METADATA_EDITOR_TAG = 'elyra-editor-tag';
-const METADATA_EDITOR_TAG_PLUS_ICON = 'elyra-editor-tag-plusIcon';
-const METADATA_EDITOR_TAG_LIST = 'elyra-editor-tagList';
-const METADATA_EDITOR_INPUT_TAG = 'elyra-inputTag';
+const METADATA_EDITOR_TAG = 'jp-editor-tag';
+const METADATA_EDITOR_TAG_PLUS_ICON = 'jp-editor-tag-plusIcon';
+const METADATA_EDITOR_TAG_LIST = 'jp-editor-tagList';
+const METADATA_EDITOR_INPUT_TAG = 'jp-inputTag';
 
 export class MetadataEditorTags extends React.Component<
   IMetadataEditorTagProps,

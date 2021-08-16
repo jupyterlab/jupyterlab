@@ -46,7 +46,7 @@ import { ArrayInput } from './StringArrayInput';
 import { TextInput } from './TextInput';
 import { MetadataEditorTags } from './MetadataEditorTags';
 
-const ELYRA_METADATA_EDITOR_CLASS = 'elyra-metadataEditor';
+const ELYRA_METADATA_EDITOR_CLASS = 'jp-metadataEditor';
 export const DIRTY_CLASS = 'jp-mod-dirty';
 
 export interface IMetadataEditorProps {
@@ -137,7 +137,7 @@ const CodeBlock: React.FC<ICodeBlockProps> = ({
       <InputLabel error={error} required={required}>
         {label}
       </InputLabel>
-      <div ref={codeBlockRef} className="elyra-form-code" />
+      <div ref={codeBlockRef} className="jp-form-code" />
       {error === true && (
         <FormHelperText error>This field is required.</FormHelperText>
       )}
@@ -198,7 +198,7 @@ export class MetadataEditor extends ReactWidget {
     this.code = props.code;
     this.themeManager = props.themeManager;
 
-    this.widgetClass = `elyra-metadataEditor-${this.name ? this.name : 'new'}`;
+    this.widgetClass = `jp-metadataEditor-${this.name ? this.name : 'new'}`;
     this.addClass(this.widgetClass);
 
     this.handleTextInputChange = this.handleTextInputChange.bind(this);
@@ -534,7 +534,7 @@ export class MetadataEditor extends ReactWidget {
 
       return (
         <div
-          className={'elyra-metadataEditor-formInput elyra-metadataEditor-code'}
+          className={'jp-metadataEditor-formInput jp-metadataEditor-code'}
           key={`${fieldName}CodeEditor`}
         >
           {this.editorServices !== null && (
@@ -557,7 +557,7 @@ export class MetadataEditor extends ReactWidget {
     } else if (uihints.field_type === 'tags') {
       return (
         <div
-          className="elyra-metadataEditor-formInput"
+          className="jp-metadataEditor-formInput"
           key={`${fieldName}TagList`}
         >
           <InputLabel> Tags </InputLabel>
@@ -571,7 +571,7 @@ export class MetadataEditor extends ReactWidget {
     } else if (uihints.field_type === 'boolean') {
       return (
         <div
-          className="elyra-metadataEditor-formInput"
+          className="jp-metadataEditor-formInput"
           key={`${fieldName}BooleanInput`}
         >
           <InputLabel> {this.schema[fieldName].title} </InputLabel>
@@ -586,7 +586,7 @@ export class MetadataEditor extends ReactWidget {
     } else if (uihints.field_type === 'array') {
       return (
         <div
-          className="elyra-metadataEditor-formInput"
+          className="jp-metadataEditor-formInput"
           key={`${fieldName}Array`}
           style={{ flexBasis: '100%' }}
         >
@@ -703,9 +703,7 @@ export class MetadataEditor extends ReactWidget {
         ) : null}
         {inputElements}
         <div
-          className={
-            'elyra-metadataEditor-formInput elyra-metadataEditor-saveButton'
-          }
+          className={'jp-metadataEditor-formInput jp-metadataEditor-saveButton'}
           key={'SaveButton'}
         >
           <SaveButton

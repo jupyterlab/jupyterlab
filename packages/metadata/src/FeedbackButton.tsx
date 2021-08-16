@@ -19,7 +19,7 @@ import * as React from 'react';
 /**
  * The CSS class for feedback buttons.
  */
-const ELYRA_FEEDBACKBUTTON_CLASS = 'elyra-feedbackButton';
+const JP_FEEDBACKBUTTON_CLASS = 'jp-feedbackButton';
 
 export interface IFeedbackButtonProps {
   feedback?: string;
@@ -42,7 +42,7 @@ export const FeedbackButton: React.FC<
     }
   };
 
-  const classes = `${ELYRA_FEEDBACKBUTTON_CLASS} ${className}`;
+  const classes = `${JP_FEEDBACKBUTTON_CLASS} ${className}`;
 
   return (
     <button
