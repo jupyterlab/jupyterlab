@@ -23,6 +23,7 @@ function ExecutionIndicatorComponent(
   const translator = props.translator || nullTranslator;
   const state = props.state;
   const showOnToolBar = props.displayOption.showOnToolBar;
+  const showProgress = props.displayOption.showProgress;
   const tooltipClass = showOnToolBar ? 'down' : 'up';
   const emptyDiv = <div></div>;
 
@@ -35,6 +36,10 @@ function ExecutionIndicatorComponent(
   const trans = translator.load('jupyterlab');
   const executedCellNumber = scheduledCellNumber - remainingCellNumber;
   let percentage = (100 * executedCellNumber) / scheduledCellNumber;
+  let displayClass = showProgress?'' : 'hidden';
+  if(!showProgress && percentage < 100){
+    percentage = 0;
+  } 
 
   const progressBar = (
     <ProgressCircle progress={percentage} width={16} height={24} />
@@ -44,7 +49,7 @@ function ExecutionIndicatorComponent(
       <div className={'jp-Notebook-ExecutionIndicator'}>
         {progressBar}
         <div
-          className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass}`}
+          className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass} ${displayClass}`}
         >
           <span>
             {trans.__(
@@ -67,7 +72,7 @@ function ExecutionIndicatorComponent(
         <div className={'jp-Notebook-ExecutionIndicator'}>
           <ProgressCircle progress={100} width={16} height={24} />
           <div
-            className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass}`}
+            className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass} ${displayClass}`}
           >
             <span> {trans.__(`Executed ${scheduledCellNumber} cells`)} </span>
             <span> {trans.__(`Total time: ${time} seconds`)} </span>
@@ -95,7 +100,7 @@ namespace ExecutionIndicatorComponent {
      * Execution state of selected notebook.
      */
     state?: Private.IExecutionState;
-
+    
     /**
      * The application language translator.
      */
@@ -110,8 +115,8 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
   /**
    * Construct the kernel status widget.
    */
-  constructor(translator?: ITranslator) {
-    super(new ExecutionIndicator.Model(translator));
+  constructor(translator?: ITranslator, showProgress: boolean = true) {
+    super(new ExecutionIndicator.Model());
     this.translator = translator || nullTranslator;
     this.addClass(interactiveItem);
   }
@@ -144,7 +149,7 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
     }
   }
 
-  translator: ITranslator;
+  private translator: ITranslator;
 }
 
 /**
@@ -155,9 +160,9 @@ export namespace ExecutionIndicator {
    * A VDomModel for the execution status indicator.
    */
   export class Model extends VDomModel {
-    constructor(translator?: ITranslator) {
+    constructor() {
       super();
-      translator = translator || nullTranslator;
+      this._displayOption = { showOnToolBar : true, showProgress : true};
     }
 
     /**
@@ -231,9 +236,7 @@ export namespace ExecutionIndicator {
      * The display options for progress bar and elapsed time.
      */
     get displayOption(): Private.DisplayOption {
-      return {
-        showOnToolBar: this._showOnToolBar
-      };
+      return this._displayOption;
     }
 
     /**
@@ -242,7 +245,7 @@ export namespace ExecutionIndicator {
      * @param options - Options to be used
      */
     set displayOption(options: Private.DisplayOption) {
-      this._showOnToolBar = options.showOnToolBar;
+      this._displayOption = options;
     }
 
     /**
@@ -347,7 +350,7 @@ export namespace ExecutionIndicator {
     /**
      * The option to show the indicator on status bar or toolbar.
      */
-    private _showOnToolBar: boolean;
+    private _displayOption: Private.DisplayOption;
 
     /**
      * Current activated notebook.
@@ -416,5 +419,11 @@ namespace Private {
      * The option to show the indicator on status bar or toolbar.
      */
     showOnToolBar: boolean;
+
+    /**
+     * The option to show the execution progress inside kernel
+     * status circle.
+     */    
+    showProgress : boolean;
   };
 }

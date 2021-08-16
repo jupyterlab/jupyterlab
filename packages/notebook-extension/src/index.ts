@@ -373,6 +373,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
   ) => {
     // Set default position to toolbar.
     let showOnToolBar = true;
+    let showProgress = true;
 
     const statusbarItem = new ExecutionIndicator(translator);
     if (settingRegistry) {
@@ -382,12 +383,14 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
         const configValues = settings.get('kernelStatus')
           .composite as JSONObject;
         if (configValues) {
-          showOnToolBar = configValues.showOnToolBar as boolean;
+          showOnToolBar = !(configValues.showOnStatusBar as boolean);
+          showProgress = (configValues.showProgress as boolean)
         }
         if (!showOnToolBar) {
           // Status bar mode, only one `ExecutionIndicator` is needed.
           statusbarItem.model.displayOption = {
-            showOnToolBar
+            showOnToolBar,
+            showProgress
           };
           statusBar!.registerStatusItem(
             '@jupyterlab/notebook-extension:execution-indicator',
@@ -421,7 +424,8 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
           const addItemToToolbar = (panel: NotebookPanel) => {
             const toolbarItem = new ExecutionIndicator(translator);
             toolbarItem.model.displayOption = {
-              showOnToolBar
+              showOnToolBar,
+              showProgress
             };
             toolbarItem.model.attachNotebook({
               content: panel.content,

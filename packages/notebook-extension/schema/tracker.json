@@ -677,9 +677,13 @@
       "type": "object"
     },
     "kernelStatusConfig": {
-      "showOnToolBar": {
+      "showOnStatusBar": {
         "type": "boolean",
         "title": "Show kernel status on toolbar or status bar."
+      },
+      "showProgress": {
+        "type": "boolean",
+        "title": "Show execution progress."
       }
     }
   },
@@ -837,7 +841,8 @@
       "description": "Defines the postion and components of execution progress indicator.",
       "$ref": "#/definitions/kernelStatusConfig",
       "default": {
-        "showOnToolBar": true
+        "showOnStatusBar": false,
+        "showProgress" : true
       }
     },
     "experimentalDisableDocumentWideUndoRedo": {
