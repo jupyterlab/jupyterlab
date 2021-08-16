@@ -35,9 +35,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 ### Documentation improvements
 
 - Allow extensions and users to customize easily toolbar items. [#10469](https://github.com/jupyterlab/jupyterlab/pull/10469) ([@fcollonval](https://github.com/fcollonval))
-
-### Other merged PRs
-
 - Clean up changelog [#10825](https://github.com/jupyterlab/jupyterlab/pull/10825) ([@blink1073](https://github.com/blink1073))
 
 ### Contributors to this release
