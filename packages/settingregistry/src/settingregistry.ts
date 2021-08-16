@@ -718,6 +718,18 @@ export class Settings implements ISettingRegistry.ISettings {
     return this.plugin.raw;
   }
 
+  get modified(): boolean {
+    for (const key in this.schema.properties) {
+      if (
+        this.get(key).user !== undefined &&
+        this.get(key).user !== this.default(key)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * The user settings.
    */

@@ -170,6 +170,7 @@ export class MetadataEditor extends ReactWidget {
   showSecure: IDictionary<boolean>;
   widgetClass: string;
   themeManager?: IThemeManager;
+  resetButtonText?: string;
 
   displayName?: string;
   editor?: CodeEditor.IEditor;
@@ -660,7 +661,18 @@ export class MetadataEditor extends ReactWidget {
     };
     return (
       <div onKeyPress={onKeyPress} className={ELYRA_METADATA_EDITOR_CLASS}>
-        <h3> {headerText} </h3>
+        <div className="jp-SettingsHeader">
+          <h3> {headerText} </h3>
+          {this.resetButtonText ? (
+            <Button
+              onClick={(e: any) => {
+                this.reset();
+              }}
+            >
+              {this.resetButtonText}
+            </Button>
+          ) : undefined}
+        </div>
         <p style={{ width: '100%', marginBottom: '10px' }}>
           {this.requiredFields &&
             this.requiredFields.length > 0 &&
@@ -675,14 +687,6 @@ export class MetadataEditor extends ReactWidget {
             </Link>
           ) : null}
         </p>
-        <Button
-          onClick={(e: any) => {
-            this.reset();
-          }}
-        >
-          {' '}
-          Reset{' '}
-        </Button>
         {this.displayName !== undefined ? (
           <TextInput
             label="Name"

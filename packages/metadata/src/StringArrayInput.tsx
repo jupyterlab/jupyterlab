@@ -141,7 +141,7 @@ export function ArrayListItem({
         onEdit?.();
       }}
     >
-      <ListItemText>
+      <ListItemText style={{ whiteSpace: 'pre' }}>
         {typeof value === 'string'
           ? value ?? ''
           : JSON.stringify(value, null, '\t')}

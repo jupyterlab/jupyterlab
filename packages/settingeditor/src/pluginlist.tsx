@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { classes, LabIcon, settingsIcon } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
@@ -106,7 +106,7 @@ export class PluginList extends Widget {
     const selection = this._selection;
     const translation = this.translator;
 
-    Private.populateList(registry, selection, node, translation);
+    void Private.populateList(registry, selection, node, translation);
     const ul = node.querySelector('ul');
     if (ul && this._scrollTop !== undefined) {
       ul.scrollTop = this._scrollTop;
@@ -265,12 +265,12 @@ namespace Private {
   /**
    * Populate the plugin list.
    */
-  export function populateList(
+  export async function populateList(
     registry: ISettingRegistry,
     selection: string,
     node: HTMLElement,
     translator?: ITranslator
-  ): void {
+  ): Promise<void> {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     const plugins = PluginList.sortPlugins(registry).filter(plugin => {
@@ -281,7 +281,17 @@ namespace Private {
 
       return !deprecated && (editable || extensible);
     });
-    const items = plugins.map(plugin => {
+    const modified = [];
+    const items = [];
+    for (const plugin of plugins) {
+      const settings: Settings = (await registry.load(plugin.id)) as Settings;
+      if (settings.modified) {
+        modified.push(plugin);
+      } else {
+        items.push(plugin);
+      }
+    }
+    const mapPlugins = (plugin: ISettingRegistry.IPlugin) => {
       const { id, schema, version } = plugin;
       const title =
         typeof schema.title === 'string'
@@ -303,6 +313,9 @@ namespace Private {
           key={id}
           title={itemTitle}
         >
+          {id === selection ? (
+            <div className="jp-SelectedIndicator" />
+          ) : undefined}
           <LabIcon.resolveReact
             icon={icon || (iconClass ? undefined : settingsIcon)}
             iconClass={classes(iconClass, 'jp-Icon')}
@@ -313,9 +326,23 @@ namespace Private {
           <span>{title}</span>
         </li>
       );
-    });
+    };
+    const modifiedItems = modified.map(mapPlugins);
+    const otherItems = items.map(mapPlugins);
 
     ReactDOM.unmountComponentAtNode(node);
-    ReactDOM.render(<ul>{items}</ul>, node);
+    ReactDOM.render(
+      <div>
+        {modifiedItems.length > 0 ? (
+          <div>
+            <p className="jp-PluginList-header">Modified</p>
+            <ul>{modifiedItems}</ul>
+          </div>
+        ) : undefined}
+        <p className="jp-PluginList-header">Settings</p>
+        <ul>{otherItems}</ul>
+      </div>,
+      node
+    );
   }
 }

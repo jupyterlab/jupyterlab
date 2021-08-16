@@ -89,7 +89,7 @@ export const TextInput: React.FC<ITextFieldProps> = ({
           required={required}
           variant="outlined"
           error={!!error}
-          multiline={typeof defaultValue !== 'string'}
+          multiline={typeof defaultValue !== 'string' && !numeric}
           maxRows={15}
           onChange={(event): void => {
             const newValue = event.target.value;

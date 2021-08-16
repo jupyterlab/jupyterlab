@@ -160,6 +160,10 @@
   display: flex;
 }
 
+.elyra-metadataEditor-formInput li {
+  border-bottom: 1px solid var(--jp-border-color1);
+}
+
 /* Code Snippet Filter CSS */
 .elyra-searchbar {
   margin: 0px 8px;

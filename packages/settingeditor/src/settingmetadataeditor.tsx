@@ -14,6 +14,7 @@ interface IProps extends IMetadataEditorProps {
 export class SettingsMetadataEditor extends MetadataEditor {
   _settings: ISettingRegistry.IPlugin;
   _registry: ISettingRegistry.ISettings;
+  defaultMetadata: any;
   id: string;
 
   constructor(options: IProps) {
@@ -23,12 +24,20 @@ export class SettingsMetadataEditor extends MetadataEditor {
     void this.initializeMetadata();
   }
 
-  get settings(): any {
-    return this._settings;
+  get settings(): ISettingRegistry.ISettings {
+    return this._registry;
   }
-  set settings(newSettings: any) {
-    this._settings = newSettings;
-    // void this.initializeMetadata();
+  set settings(newSettings: ISettingRegistry.ISettings) {
+    this._registry = newSettings;
+  }
+
+  hasModifiedSettings(): boolean {
+    return !!this._settings.modified;
+  }
+
+  reset(): void {
+    this.metadata = this.defaultMetadata;
+    this.update();
   }
 
   async initializeMetadata() {
@@ -37,11 +46,12 @@ export class SettingsMetadataEditor extends MetadataEditor {
       return;
     }
     try {
-      this.metadata = JSON.parse(this.settings.raw);
+      this.metadata = JSON.parse(this._settings.raw);
     } catch {
       this.metadata = {};
     }
     this.handleDirtyState(false);
+    this.defaultMetadata = {};
     const settings = this._settings.schema;
     const currentSettings = this.metadata;
     const properties: any = {};
@@ -88,21 +98,24 @@ export class SettingsMetadataEditor extends MetadataEditor {
           this.metadata[subProp] =
             currentSettings[prop]?.[subProp] ??
             (options.default as any)?.[subProp];
+          this.defaultMetadata[subProp] = (options.default as any)?.[subProp];
         }
-      } else if ((options.additionalProperties as any)?.enum) {
+      } else if (options.enum || (options.additionalProperties as any)?.enum) {
         properties[prop] = {
           title: options.title,
-          enum: (options.additionalProperties as any).enum,
+          enum: options.enum ?? (options.additionalProperties as any).enum,
           uihints: {
             field_type: 'dropdown'
           }
         };
         this.metadata[prop] = currentSettings[prop] ?? options.default;
+        this.defaultMetadata[prop] = options.default;
       } else if (typeof options.type === 'object') {
         properties[prop] = {
           title: options.title
         };
         this.metadata[prop] = currentSettings[prop] ?? options.default;
+        this.defaultMetadata[prop] = options.default;
       } else if (options.type === 'array') {
         properties[prop] = {
           title: options.title,
@@ -111,6 +124,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
           }
         };
         this.metadata[prop] = currentSettings[prop] ?? options.default;
+        this.defaultMetadata[prop] = options.default;
       } else if (typeof options.default === 'object') {
         for (const subProp in options.default) {
           properties[subProp] = {
@@ -122,6 +136,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
           this.metadata[subProp] =
             currentSettings[prop]?.[subProp] ??
             (options.default as any)?.[subProp];
+          this.defaultMetadata[subProp] = (options.default as any)?.[subProp];
         }
       } else {
         properties[prop] = {
@@ -132,6 +147,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
           }
         };
         this.metadata[prop] = currentSettings[prop] ?? options.default;
+        this.defaultMetadata[prop] = options.default;
       }
     }
     this.schema = properties;
@@ -150,6 +166,9 @@ export class SettingsMetadataEditor extends MetadataEditor {
       } else {
         this.schemaPropertiesByCategory[category] = [schemaProperty];
       }
+    }
+    if (this.hasModifiedSettings()) {
+      this.resetButtonText = 'Restore to Defaults';
     }
     this.displayName = undefined;
     this.update();
@@ -226,10 +245,9 @@ export class SettingsMetadataEditor extends MetadataEditor {
     if (this.hasInvalidFields()) {
       return;
     }
-    const formattedSettings = this.getFormattedSettings();
 
     void this._registry
-      .save(formattedSettings)
+      .save(this.getFormattedSettings())
       .then(() => {
         this.handleDirtyState(false);
       })
@@ -248,7 +266,6 @@ export class SettingsMetadataEditor extends MetadataEditor {
     }
 
     const errors = this._registry.validate(this.getFormattedSettings());
-    console.log(errors);
     if (errors && errors.length > 0) {
       for (const error of errors) {
         const schemaField = error.dataPath.substring(1);
@@ -257,6 +274,9 @@ export class SettingsMetadataEditor extends MetadataEditor {
       this.update();
       return true;
     } else {
+      for (const schemaField in this.schema) {
+        this.schema[schemaField].uihints.error = undefined;
+      }
       return false;
     }
   }
@@ -274,6 +294,12 @@ export class SettingsMetadataEditor extends MetadataEditor {
         DIRTY_CLASS,
         ''
       );
+    }
+
+    if (this.hasModifiedSettings()) {
+      this.resetButtonText = 'Restore to Defaults';
+    } else {
+      this.resetButtonText = undefined;
     }
     this.parent?.parent?.parent?.update();
   }

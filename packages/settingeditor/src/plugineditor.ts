@@ -6,7 +6,7 @@
 import { ILabStatus } from '@jupyterlab/application';
 import { Dialog, IThemeManager, showDialog } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
@@ -15,7 +15,7 @@ import {
 import { JSONExt } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { PanelLayout, Widget } from '@lumino/widgets';
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import { PluginList } from './pluginlist';
 import { SettingEditor } from './settingeditor';
 import { SettingsMetadataEditor } from './settingmetadataeditor';
@@ -40,13 +40,16 @@ export class PluginEditor extends Widget {
 
     this.node.addEventListener('scroll', (ev: Event) => {
       for (const editor of this._editors) {
+        const offsetTop =
+          editor.node.offsetTop + (editor.parent?.node?.offsetTop ?? 0);
         if (
+          this.node.scrollTop >= (editor.parent?.node?.offsetTop ?? 0) &&
           // If top of editor is visible
-          editor.node.offsetTop >= this.node.scrollTop ||
-          // If the top is above the view and the bottom is below the view
-          (editor.node.offsetTop < this.node.scrollTop &&
-            editor.node.offsetTop + editor.node.scrollHeight >
-              this.node.scrollTop + this.node.clientHeight)
+          (offsetTop >= this.node.scrollTop ||
+            // If the top is above the view and the bottom is below the view
+            (offsetTop < this.node.scrollTop &&
+              offsetTop + editor.node.scrollHeight >
+                this.node.scrollTop + this.node.clientHeight))
         ) {
           this.selection = editor.id;
           break;
@@ -61,6 +64,10 @@ export class PluginEditor extends Widget {
     // Now, the raw editor is the only child and probably could merged into
     // this class directly in the future.
     const layout = (this.layout = new PanelLayout());
+    const modifiedLayout = new Panel();
+    const otherLayout = new Panel();
+    layout.addWidget(modifiedLayout);
+    layout.addWidget(otherLayout);
     const editors = (this._editors = [] as SettingsMetadataEditor[]);
     const setupEditors = async () => {
       const plugins = PluginList.sortPlugins(options.registry).filter(
@@ -87,12 +94,16 @@ export class PluginEditor extends Widget {
           settings: plugin
         });
         editors.push(newEditor);
-        if (!newEditor.isAttached) {
-          layout.addWidget(newEditor);
-        }
         try {
-          const settings = await options.registry;
-          await settings.load(plugin.id);
+          const registry = await options.registry;
+          const settings = (await registry.load(plugin.id)) as Settings;
+          if (!newEditor.isAttached) {
+            if (settings.modified) {
+              modifiedLayout.addWidget(newEditor);
+            } else {
+              otherLayout.addWidget(newEditor);
+            }
+          }
           newEditor.settings = settings;
         } catch {
           console.log(`error loading settings for ${plugin.id}`);
@@ -176,7 +187,6 @@ export class PluginEditor extends Widget {
    */
   confirm(id: string): Promise<void> {
     const editor = this._editors.find(editor => editor.id === id);
-    console.log(editor);
     if (editor) {
       editor.node?.scrollIntoView(true);
     }
@@ -230,6 +240,7 @@ export class PluginEditor extends Widget {
     }
 
     this.show();
+    void this.confirm(this.selection);
     // raw.show();
   }
 

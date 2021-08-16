@@ -62,6 +62,7 @@
 #setting-editor .jp-PluginList {
   min-width: 175px;
   max-width: 275px;
+  overflow-y: scroll;
 }
 
 #setting-editor .jp-PluginList ul {
@@ -72,7 +73,7 @@
   margin: 0;
   padding: 0;
   overflow-y: auto;
-  position: absolute;
+  position: relative;
   top: 0;
   bottom: 0;
   left: 0;
@@ -89,15 +90,43 @@
   white-space: nowrap;
 }
 
-#setting-editor .jp-PluginList li:hover {
-  background-color: var(--jp-layout-color2);
-  border: 1px solid var(--jp-border-color2);
+#setting-editor .jp-PluginList .jp-SettingsHeader {
+  display: flex;
+  flex-basis: 100%;
+}
+
+#setting-editor .jp-PluginList .jp-SettingsHeader button {
+  color: var(--jp-private-notebook-selected-color);
+  white-space: nowrap;
+}
+
+#setting-editor .jp-PluginList .jp-PluginList-header {
+  flex: 0 0 auto;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
+  padding: 8px 8px 8px 12px;
+  margin: 10px;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+#setting-editor .jp-PluginList li:hover span {
+  font-weight: var(--jp-content-heading-font-weight);
+}
+
+#setting-editor .jp-PluginList li.jp-mod-selected .jp-SelectedIndicator {
+  width: 3px;
+  background-color: var(--jp-brand-color1);
+}
+
+#setting-editor .jp-PluginList li:not(.jp-mod-selected) {
+  margin-left: 3px;
 }
 
 #setting-editor .jp-PluginList li.jp-mod-selected {
-  background-color: var(--jp-brand-color1);
-  color: white;
-  border: 1px solid var(--jp-brand-color1);
+  font-weight: var(--jp-content-heading-font-weight);
 }
 
 #setting-editor
@@ -108,7 +137,7 @@
 }
 
 #setting-editor .jp-PluginList-icon {
-  display: inline-block;
+  display: flex;
   height: 20px;
   width: 20px;
   margin-right: 3px;
