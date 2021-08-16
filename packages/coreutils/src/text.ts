@@ -99,7 +99,7 @@ export namespace Text {
    *
    * @returns the same string, but with each word capitalized.
    */
-  export function titleCase(str: string) {
+  export function titleCase(str: string): string {
     return (str || '')
       .toLowerCase()
       .split(' ')

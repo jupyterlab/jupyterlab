@@ -72,6 +72,8 @@ export namespace IRankedMenu {
    */
   export interface IOptions extends Menu.IOptions {
     /**
+     * Whether to include separators between the
+     *   groups that are added to the menu.
      *
      * Default: true
      */
@@ -90,10 +92,7 @@ export class RankedMenu extends Menu implements IRankedMenu {
   /**
    * Construct a new menu.
    *
-   * @param options - Options for the phosphor menu.
-   *
-   * @param includeSeparators - whether to include separators between the
-   *   groups that are added to the menu.
+   * @param options - Options for the lumino menu.
    */
   constructor(options: IRankedMenu.IOptions) {
     super(options);
