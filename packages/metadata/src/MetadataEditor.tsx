@@ -455,7 +455,7 @@ export class MetadataEditor extends ReactWidget {
 
     if (!isFocused) {
       const input = document.querySelector(
-        `.${this.widgetClass} .elyra-metadataEditor-form-display_name input`
+        `.${this.widgetClass} .jp-metadataEditor-form-display_name input`
       ) as HTMLInputElement;
       if (input) {
         input.focus();

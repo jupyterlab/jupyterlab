@@ -15,46 +15,46 @@
  */
 
 /* MetadataWidget CSS */
-.elyra-metadata {
+.jp-metadata {
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
 }
 
-.elyra-metadata a,
-.elyra-metadataEditor a {
+.jp-metadata a,
+.jp-metadataEditor a {
   color: var(--jp-content-link-color);
 }
 
-.elyra-metadataHeader {
+.jp-metadataHeader {
   font-weight: bold;
   padding: 8px 10px;
   display: flex;
   justify-content: space-between;
 }
 
-.elyra-metadataHeader p {
+.jp-metadataHeader p {
   font-weight: bold;
 }
 
-.elyra-metadataHeader-popper {
+.jp-metadataHeader-popper {
   z-index: 100;
 }
 
-.elyra-metadataHeader-button:hover {
+.jp-metadataHeader-button:hover {
   background-color: var(--jp-layout-color2);
   cursor: pointer;
 }
 
-.elyra-metadataHeader [fill] {
+.jp-metadataHeader [fill] {
   fill: var(--jp-ui-font-color1);
 }
 
-.elyra-metadataHeader + div:first-of-type {
+.jp-metadataHeader + div:first-of-type {
   overflow-y: auto;
   height: calc(100vh - 95px);
 }
 
-.elyra-metadata-item {
+.jp-metadata-item {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   display: flex;
   flex-direction: column;
@@ -62,12 +62,12 @@
   padding: 0;
 }
 
-.elyra-metadata-item .elyra-expandableContainer-details-visible {
+.jp-metadata-item .jp-expandableContainer-details-visible {
   background-color: var(--jp-cell-editor-background);
   resize: vertical;
 }
 
-.elyra-metadata-item .CodeMirror.cm-s-jupyter {
+.jp-metadata-item .CodeMirror.cm-s-jupyter {
   background-color: inherit;
   border: none;
   font-family: var(--jp-code-font-family);
@@ -75,29 +75,29 @@
   line-height: var(--jp-code-line-height);
 }
 
-.elyra-metadata-item .cm-s-jupyter li .cm-string {
+.jp-metadata-item .cm-s-jupyter li .cm-string {
   word-break: normal;
 }
 
 /* MetadataEditor css */
-.elyra-metadataEditor .jp-InputGroup {
+.jp-metadataEditor .jp-InputGroup {
   width: 100%;
 }
 
-.elyra-metadataEditor-formInput.elyra-metadataEditor-secure label {
+.jp-metadataEditor-formInput.jp-metadataEditor-secure label {
   margin-right: 70px;
 }
 
-.elyra-metadataEditor {
+.jp-metadataEditor {
   color: var(--jp-ui-font-color1);
   overflow: scroll;
 }
 
-.elyra-metadataEditor .MuiTextField-root {
+.jp-metadataEditor .MuiTextField-root {
   width: 100%;
 }
 
-.elyra-form-DropDown-item {
+.jp-form-DropDown-item {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -106,7 +106,7 @@
   border-radius: 0;
 }
 
-.elyra-metadataEditor {
+.jp-metadataEditor {
   padding: 20px;
   display: flex;
   flex-wrap: wrap;
@@ -116,13 +116,13 @@
   justify-content: flex-start;
 }
 
-.elyra-metadataEditor h3 {
+.jp-metadataEditor h3 {
   flex-basis: 100%;
   margin-bottom: 15px;
   color: var(--jp-ui-font-color1);
 }
 
-.elyra-metadataEditor .elyra-form-code.jp-CodeMirrorEditor {
+.jp-metadataEditor .jp-form-code.jp-CodeMirrorEditor {
   background-color: var(--jp-cell-editor-background);
   border: var(--jp-border-width) solid var(--jp-input-border-color);
   overflow-y: auto;
@@ -134,59 +134,59 @@
   margin-top: 5px;
 }
 
-.elyra-metadataEditor .CodeMirror.cm-s-jupyter {
+.jp-metadataEditor .CodeMirror.cm-s-jupyter {
   background-color: inherit;
   height: 100%;
 }
 
-.elyra-metadataEditor .elyra-metadataEditor-code {
+.jp-metadataEditor .jp-metadataEditor-code {
   height: auto;
   flex-basis: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.elyra-metadataEditor-formInput {
+.jp-metadataEditor-formInput {
   margin: 10px;
   flex-basis: 100%;
 }
 
-.elyra-metadata-editor {
+.jp-metadata-editor {
   overflow-y: auto;
 }
 
-.elyra-metadataEditor .elyra-metadataEditor-saveButton {
+.jp-metadataEditor .jp-metadataEditor-saveButton {
   flex-basis: 100%;
   display: flex;
 }
 
-.elyra-metadataEditor-formInput li {
+.jp-metadataEditor-formInput li {
   border-bottom: 1px solid var(--jp-border-color1);
 }
 
 /* Code Snippet Filter CSS */
-.elyra-searchbar {
+.jp-searchbar {
   margin: 0px 8px;
 }
 
-.elyra-filterTools {
+.jp-filterTools {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-mark.elyra-search-bolding {
+mark.jp-search-bolding {
   background-color: transparent;
   font-weight: bold;
   color: var(--jp-ui-font-color0);
 }
 
-.elyra-filter {
+.jp-filter {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: 10px 10px 0 10px;
 }
 
-.elyra-filter .elyra-filter-btn {
+.jp-filter .jp-filter-btn {
   align-self: flex-end;
   padding: 0px;
   margin-bottom: 5px;
@@ -196,22 +196,22 @@ mark.elyra-search-bolding {
   cursor: pointer;
 }
 
-.elyra-filter .elyra-filter-btn:hover {
+.jp-filter .jp-filter-btn:hover {
   background-color: var(--jp-layout-color2);
 }
 
-.elyra-filter-btn svg {
+.jp-filter-btn svg {
   display: block;
   width: 30px;
   height: 22px;
 }
 
-.elyra-filter-arrow-up.idle,
-.elyra-filter-option.idle {
+.jp-filter-arrow-up.idle,
+.jp-filter-option.idle {
   display: none;
 }
 
-.elyra-filter-arrow-up {
+.jp-filter-arrow-up {
   position: absolute;
   margin-top: 16px;
   margin-right: 38px;
@@ -219,7 +219,7 @@ mark.elyra-search-bolding {
   background-color: var(--jp-layout-color0);
 }
 
-.elyra-filter-option {
+.jp-filter-option {
   border: var(--jp-border-width) solid var(--jp-border-color1);
   height: 140px;
   width: 100%;
@@ -229,16 +229,16 @@ mark.elyra-search-bolding {
   overflow: auto;
 }
 
-.elyra-filter-tags {
+.jp-filter-tags {
   margin: 8px 8px;
 }
 
-.elyra-filter-tag {
+.jp-filter-tag {
   margin-left: 3px;
   margin-right: 3px;
 }
 
-button.elyra-filter-tag {
+button.jp-filter-tag {
   height: 24px;
   padding: 0 12px;
   cursor: pointer;
@@ -246,68 +246,68 @@ button.elyra-filter-tag {
   font-size: var(--jp-ui-font-size1);
 }
 
-button.elyra-filter-tag .elyra-filter-tag-label {
+button.jp-filter-tag .jp-filter-tag-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-button.elyra-filter-tag span,
-button.elyra-filter-tag svg {
+button.jp-filter-tag span,
+button.jp-filter-tag svg {
   pointer-events: none;
 }
 
-.elyra-filter-empty {
+.jp-filter-empty {
   font-size: var(--jp-ui-font-size1);
 }
 
-.elyra-tools {
+.jp-tools {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-.elyra-editor-tagList {
+.jp-editor-tagList {
   list-style: none;
   margin-left: -3px;
   margin-top: 4px;
 }
 
-.elyra-editor-tag {
+.jp-editor-tag {
   margin-left: 3px;
   margin-right: 3px;
   padding: 0 12px;
   height: 24px;
 }
 
-button.elyra-editor-tag {
+button.jp-editor-tag {
   cursor: pointer;
   color: var(--jp-ui-font-color2);
   font-size: var(--jp-ui-font-size1);
 }
 
-button.elyra-editor-tag.applied-tag {
+button.jp-editor-tag.applied-tag {
   color: var(--jp-ui-font-color1);
 }
 
-button.elyra-editor-tag.unapplied-tag {
+button.jp-editor-tag.unapplied-tag {
   color: var(--jp-ui-font-color2);
   white-space: nowrap;
 }
 
-.elyra-editor-tag.tag.unapplied-tag input {
+.jp-editor-tag.tag.unapplied-tag input {
   border: none;
 }
 
 /* Code Snippet Tags in InputDialog */
-.elyra-inputTagList {
+.jp-inputTagList {
   list-style: none;
 }
 
-.elyra-inputTag {
+.jp-inputTag {
   margin-left: 8px;
   margin-right: 8px;
 }
 
-button.elyra-inputTag {
+button.jp-inputTag {
   cursor: pointer;
   background: none;
   border: none;
@@ -316,7 +316,7 @@ button.elyra-inputTag {
   font-size: var(--jp-ui-font-size1);
 }
 
-input.elyra-inputTag {
+input.jp-inputTag {
   font-size: var(--jp-ui-font-size1);
   background: none;
   border: none;
@@ -326,26 +326,26 @@ input.elyra-inputTag {
   height: 15px;
 }
 
-.elyra-tags {
+.jp-tags {
   margin-top: 8px;
 }
 
-.elyra-no-metadata-msg {
+.jp-no-metadata-msg {
   padding-left: 8px;
 }
 
-.elyra-metadataEditor .jp-InputGroup {
+.jp-metadataEditor .jp-InputGroup {
   width: 100%;
 }
 
-.elyra-form-DropDown-item {
+.jp-form-DropDown-item {
   width: 100%;
   display: flex;
   justify-content: left;
   border-radius: 0;
 }
 
-.elyra-metadataEditor {
+.jp-metadataEditor {
   padding: 20px;
   display: flex;
   flex-wrap: wrap;
@@ -355,13 +355,13 @@ input.elyra-inputTag {
   justify-content: flex-start;
 }
 
-.elyra-metadataEditor h3 {
+.jp-metadataEditor h3 {
   flex-basis: 100%;
   margin-bottom: 15px;
   color: var(--jp-ui-font-color1);
 }
 
-.elyra-metadataEditor .elyra-form-code.jp-CodeMirrorEditor {
+.jp-metadataEditor .jp-form-code.jp-CodeMirrorEditor {
   background-color: var(--jp-cell-editor-background);
   border: var(--jp-border-width) solid var(--jp-input-border-color);
   overflow-y: auto;
@@ -372,46 +372,46 @@ input.elyra-inputTag {
   cursor: initial;
 }
 
-.elyra-metadataEditor .CodeMirror.cm-s-jupyter {
+.jp-metadataEditor .CodeMirror.cm-s-jupyter {
   background-color: inherit;
   height: 100%;
 }
 
-.elyra-metadataEditor .elyra-metadataEditor-code {
+.jp-metadataEditor .jp-metadataEditor-code {
   height: auto;
   flex-basis: 100%;
   display: flex;
 }
 
-.elyra-metadataEditor-code .elyra-form-code {
+.jp-metadataEditor-code .jp-form-code {
   height: 100%;
 }
 
-.elyra-metadata-editor {
+.jp-metadata-editor {
   overflow-y: auto;
 }
 
-.elyra-expandableContainer-button,
-.elyra-expandableContainer-button.jp-mod-styled {
+.jp-expandableContainer-button,
+.jp-expandableContainer-button.jp-mod-styled {
   background-color: transparent;
   vertical-align: middle;
   padding: 0;
   width: 20px;
 }
 
-.elyra-expandableContainer-button:hover {
+.jp-expandableContainer-button:hover {
   cursor: pointer;
 }
 
-.elyra-expandableContainer-actionButton:hover {
+.jp-expandableContainer-actionButton:hover {
   background-color: var(--jp-layout-color1);
 }
 
-.elyra-expandableContainer-actionButton:active {
+.jp-expandableContainer-actionButton:active {
   background-color: var(--jp-layout-color2);
 }
 
-.elyra-expandableContainer-title {
+.jp-expandableContainer-title {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -419,11 +419,11 @@ input.elyra-inputTag {
   height: 36px;
 }
 
-.elyra-expandableContainer-title:hover {
+.jp-expandableContainer-title:hover {
   background: var(--jp-layout-color2);
 }
 
-.elyra-expandableContainer-name {
+.jp-expandableContainer-name {
   flex-grow: 1;
   font-size: var(--jp-ui-font-size1);
   white-space: nowrap;
@@ -433,18 +433,18 @@ input.elyra-inputTag {
   line-height: 28px;
 }
 
-.elyra-expandableContainer-name:hover {
+.jp-expandableContainer-name:hover {
   cursor: pointer;
 }
 
-.elyra-button {
+.jp-button {
   background-repeat: no-repeat;
   background-position: center;
   border: none;
   height: 100%;
 }
 
-.elyra-expandableContainer-details-visible {
+.jp-expandableContainer-details-visible {
   overflow-x: auto;
   overflow-y: auto;
   display: block;
@@ -456,21 +456,21 @@ input.elyra-inputTag {
   background-color: var(--jp-layout-color1);
 }
 
-.elyra-expandableContainer-details-visible textarea {
+.jp-expandableContainer-details-visible textarea {
   color: var(--jp-ui-font-color1);
 }
 
-.elyra-expandableContainer-details-hidden {
+.jp-expandableContainer-details-hidden {
   display: none;
 }
 
-.elyra-expandableContainer-action-buttons {
+.jp-expandableContainer-action-buttons {
   display: inline-flex;
   align-self: flex-end;
   height: 100%;
 }
 
-.elyra-errorDialog-messageDisplay pre {
+.jp-errorDialog-messageDisplay pre {
   min-height: 125px;
   height: 100%;
   width: 100%;
@@ -478,7 +478,7 @@ input.elyra-inputTag {
   overflow-x: scroll;
 }
 
-.elyra-errorDialog-messageDisplay {
+.jp-errorDialog-messageDisplay {
   padding-bottom: 5px;
   display: flex;
   flex-direction: column;
@@ -486,7 +486,7 @@ input.elyra-inputTag {
   white-space: pre-line;
 }
 
-.elyra-errorDialog-messageDisplay > div:nth-child(2) {
+.jp-errorDialog-messageDisplay > div:nth-child(2) {
   margin: 15px 0;
   display: flex;
   flex: 1;
@@ -503,10 +503,10 @@ input.elyra-inputTag {
   resize: both;
 }
 
-.elyra-DialogDefaultButton.jp-mod-styled:hover:disabled,
-.elyra-DialogDefaultButton.jp-mod-styled:active:disabled,
-.elyra-DialogDefaultButton.jp-mod-styled:focus:disabled,
-.elyra-DialogDefaultButton.jp-mod-styled:disabled {
+.jp-DialogDefaultButton.jp-mod-styled:hover:disabled,
+.jp-DialogDefaultButton.jp-mod-styled:active:disabled,
+.jp-DialogDefaultButton.jp-mod-styled:focus:disabled,
+.jp-DialogDefaultButton.jp-mod-styled:disabled {
   background-color: var(--jp-layout-color3);
   opacity: 0.3;
   pointer-events: none;
@@ -514,21 +514,21 @@ input.elyra-inputTag {
 
 /* icons */
 
-[data-jp-theme-light='false'] .elyra-pieBrain-icon rect.st1,
-[data-jp-theme-light='false'] .elyra-pieBrain-icon rect.st2 {
+[data-jp-theme-light='false'] .jp-pieBrain-icon rect.st1,
+[data-jp-theme-light='false'] .jp-pieBrain-icon rect.st2 {
   fill: var(--jp-inverse-layout-color3);
 }
 
-.elyra-metadataEditor-formInput > div {
+.jp-metadataEditor-formInput > div {
   width: 100%;
 }
 
-.elyra-feedbackButton {
+.jp-feedbackButton {
   display: inline;
   position: relative;
 }
 
-.elyra-feedbackButton[data-feedback]:not([data-feedback='']):before {
+.jp-feedbackButton[data-feedback]:not([data-feedback='']):before {
   border: solid;
   border-color: var(--jp-inverse-layout-color2) transparent;
   border-width: 0 6px 6px 6px;
@@ -539,7 +539,7 @@ input.elyra-inputTag {
   z-index: 999;
 }
 
-.elyra-feedbackButton[data-feedback]:not([data-feedback='']):after {
+.jp-feedbackButton[data-feedback]:not([data-feedback='']):after {
   background: var(--jp-inverse-layout-color2);
   border-radius: 2px;
   bottom: -20px;
@@ -557,11 +557,11 @@ input.elyra-inputTag {
   z-index: 999;
 }
 
-.elyra-browseFileDialog .jp-Dialog-content {
+.jp-browseFileDialog .jp-Dialog-content {
   height: 400px;
   width: 600px;
 }
 
-.elyra-expandableContainer-draggable:hover {
+.jp-expandableContainer-draggable:hover {
   cursor: grab;
 }
