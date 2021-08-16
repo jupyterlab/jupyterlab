@@ -64,7 +64,7 @@ describe('@jupyterlab/notebook', () => {
       ]);
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
       widget = new Notebook({
         rendermime,
         contentFactory: utils.createNotebookFactory(),
@@ -90,6 +90,7 @@ describe('@jupyterlab/notebook', () => {
         content: widget,
         context: ipySessionContext
       });
+      await ipySessionContext.restartKernel();
     });
 
     afterEach(() => {
@@ -148,22 +149,6 @@ describe('@jupyterlab/notebook', () => {
 
         await NotebookActions.run(widget, ipySessionContext);
         expect(executed).toEqual(expect.arrayContaining([3, 3, 3, 2, 2, 2, 0]));
-      });
-    });
-    describe('executedOneFastCell', () => {
-      it('should not count anything', async () => {
-        widget.deselectAll();
-        widget.select(widget.widgets[0]);
-        let scheduledCell: number | undefined = 0;
-        let totalTime: number = 0;
-        indicator.model.stateChanged.connect(state => {
-          scheduledCell = state.executionState(widget)!.scheduledCellNumber;
-          totalTime = state.executionState(widget)!.totalTime;
-        });
-
-        await NotebookActions.run(widget, ipySessionContext);
-        expect(scheduledCell).toBe(1);
-        expect(totalTime).toBe(0);
       });
     });
   });

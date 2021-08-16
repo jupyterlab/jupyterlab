@@ -11,7 +11,6 @@ import {
   ProgressCircle
 } from '@jupyterlab/statusbar';
 
-
 import { Notebook } from './widget';
 import { KernelMessage } from '@jupyterlab/services';
 
@@ -203,10 +202,9 @@ export namespace ExecutionIndicator {
                     if (method !== 'request_state' && method !== 'update') {
                       this._cellScheduledCallback(nb, msgId);
                     }
-                  } else if (message.header.msg_type === 'execute_request'){
+                  } else if (message.header.msg_type === 'execute_request') {
                     this._cellScheduledCallback(nb, msgId);
-                  }
-                   else if (
+                  } else if (
                     KernelMessage.isStatusMsg(message) &&
                     message.content.execution_state === 'idle'
                   ) {
@@ -275,7 +273,7 @@ export namespace ExecutionIndicator {
      * these cells. This `Timeout` will be cleared if there is any cell
      * scheduled after that.
      */
-    private _cellExecutedCallback(nb: Notebook, msg_id:  string): void {
+    private _cellExecutedCallback(nb: Notebook, msg_id: string): void {
       const state = this._notebookExecutionProgress.get(nb);
       if (state && state.scheduledCell.has(msg_id)) {
         state.scheduledCell.delete(msg_id);
