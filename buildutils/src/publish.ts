@@ -5,22 +5,9 @@
 
 import commander from 'commander';
 import * as path from 'path';
+import * as os from 'os';
 import { handlePackage } from './update-dist-tag';
 import * as utils from './utils';
-
-/**
- * Verify that a package specifier is published and available on npm.
- *
- * @param specifier The package specifier to verify.
- */
-function verifyPublished(specifier: string): void {
-  const cmd = `npm info ${specifier}`;
-  const output = utils.run(cmd, { stdio: 'pipe' }, true);
-  console.log(specifier);
-  if (output.indexOf('dist-tags') === -1) {
-    throw new Error(`${specifier} is not yet available`);
-  }
-}
 
 /**
  * Sleep for a specified period.
@@ -101,27 +88,32 @@ commander
     }
 
     // Make sure all current JS packages are published.
+    // Try and install them into a temporary local npm package.
     console.log('Checking for published packages...');
+    const installDir = os.tmpdir();
+    utils.run('npm init -y', { cwd: installDir, stdio: 'pipe' }, true);
+    const specifiers: string[] = [];
     utils.getCorePaths().forEach(async pkgPath => {
       const pkgJson = path.join(pkgPath, 'package.json');
       const pkgData = utils.readJSONFile(pkgJson);
-      const specifier = `${pkgData.name}@${pkgData.version}`;
-      let attempt = 0;
-      while (attempt < 10) {
-        try {
-          verifyPublished(specifier);
-          break;
-        } catch (e) {
-          console.error(e);
-          console.log('Sleeping for one minute...');
-          await sleep(1 * 60 * 1000);
-          attempt += 1;
-        }
-      }
-      if (attempt == 10) {
-        throw new Error(`Could not find package ${specifier}`);
-      }
+      specifiers.push(`${pkgData.name}@${pkgData.version}`);
     });
+
+    let attempt = 0;
+    while (attempt < 10) {
+      try {
+        utils.run(`npm install ${specifiers}`, { cwd: installDir });
+        break;
+      } catch (e) {
+        console.error(e);
+        console.log('Sleeping for one minute...');
+        await sleep(1 * 60 * 1000);
+        attempt += 1;
+      }
+    }
+    if (attempt == 10) {
+      throw new Error('Could not install packages');
+    }
 
     // Emit a system beep.
     process.stdout.write('\x07');
