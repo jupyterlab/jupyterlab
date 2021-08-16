@@ -8,6 +8,46 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.0a4
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a3...26c35fef04a6b34564662965741f561701becf05))
+
+### Enhancements made
+
+- Don't sort context menu items by selector [#10666](https://github.com/jupyterlab/jupyterlab/pull/10666) ([@fcollonval](https://github.com/fcollonval))
+- Add show trailing whitespace option to Notebook and Text Editor [#10632](https://github.com/jupyterlab/jupyterlab/pull/10632) ([@richardkang112](https://github.com/richardkang112))
+- Allow extensions and users to customize easily toolbar items. [#10469](https://github.com/jupyterlab/jupyterlab/pull/10469) ([@fcollonval](https://github.com/fcollonval))
+- Implemented Restart and debug [#10462](https://github.com/jupyterlab/jupyterlab/pull/10462) ([@JohanMabille](https://github.com/JohanMabille))
+- Add `isConnected` to `ServiceManager`, use it in `hub-extension` [#10156](https://github.com/jupyterlab/jupyterlab/pull/10156) ([@vkaidalov-rft](https://github.com/vkaidalov-rft))
+
+### Bugs fixed
+
+- Fix link to the security documentation [#10836](https://github.com/jupyterlab/jupyterlab/pull/10836) ([@krassowski](https://github.com/krassowski))
+- Fix missing break in switch [#10829](https://github.com/jupyterlab/jupyterlab/pull/10829) ([@fcollonval](https://github.com/fcollonval))
+- The dirty indicator does not get cleared up after reverting changes [#10812](https://github.com/jupyterlab/jupyterlab/pull/10812) ([@fcollonval](https://github.com/fcollonval))
+- Removed toolbar scrollbar [#10790](https://github.com/jupyterlab/jupyterlab/pull/10790) ([@3coins](https://github.com/3coins))
+
+### Maintenance and upkeep improvements
+
+- References are duplicated in tsconfig.test.json [#10830](https://github.com/jupyterlab/jupyterlab/pull/10830) ([@fcollonval](https://github.com/fcollonval))
+- Remove outdated `npm-cli-login` utility from buildutils [#10828](https://github.com/jupyterlab/jupyterlab/pull/10828) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Allow extensions and users to customize easily toolbar items. [#10469](https://github.com/jupyterlab/jupyterlab/pull/10469) ([@fcollonval](https://github.com/fcollonval))
+
+### Other merged PRs
+
+- Clean up changelog [#10825](https://github.com/jupyterlab/jupyterlab/pull/10825) ([@blink1073](https://github.com/blink1073))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-08-12&to=2021-08-16&type=c))
+
+[@3coins](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3A3coins+updated%3A2021-08-12..2021-08-16&type=Issues) | [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2021-08-12..2021-08-16&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-08-12..2021-08-16&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2021-08-12..2021-08-16&type=Issues) | [@goanpeca](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agoanpeca+updated%3A2021-08-12..2021-08-16&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2021-08-12..2021-08-16&type=Issues) | [@JohanMabille](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJohanMabille+updated%3A2021-08-12..2021-08-16&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-08-12..2021-08-16&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2021-08-12..2021-08-16&type=Issues) | [@richardkang112](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Arichardkang112+updated%3A2021-08-12..2021-08-16&type=Issues) | [@vkaidalov-rft](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Avkaidalov-rft+updated%3A2021-08-12..2021-08-16&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.0a3
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a2...b5a5937b0e6ab99eeeaedf80e6e1508e17629ad3))
@@ -31,8 +71,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-08-11&to=2021-08-12&type=c))
 
 [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2021-08-11..2021-08-12&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-08-11..2021-08-12&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2021-08-11..2021-08-12&type=Issues) | [@franckchen](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afranckchen+updated%3A2021-08-11..2021-08-12&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-08-11..2021-08-12&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2021-08-11..2021-08-12&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.0a2
 
