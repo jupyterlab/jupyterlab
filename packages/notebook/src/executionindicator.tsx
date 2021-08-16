@@ -36,17 +36,19 @@ function ExecutionIndicatorComponent(
   const trans = translator.load('jupyterlab');
   const executedCellNumber = scheduledCellNumber - remainingCellNumber;
   let percentage = (100 * executedCellNumber) / scheduledCellNumber;
-  let displayClass = showProgress?'' : 'hidden';
-  if(!showProgress && percentage < 100){
+  let displayClass = showProgress ? '' : 'hidden';
+  let tooltip = showProgress ? '' : 'Kernel idle';
+  if (!showProgress && percentage < 100) {
     percentage = 0;
-  } 
+    tooltip = 'Kernel busy';
+  }
 
   const progressBar = (
     <ProgressCircle progress={percentage} width={16} height={24} />
   );
   if (state.kernelStatus === 'busy') {
     return (
-      <div className={'jp-Notebook-ExecutionIndicator'}>
+      <div className={'jp-Notebook-ExecutionIndicator'} title={tooltip}>
         {progressBar}
         <div
           className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass} ${displayClass}`}
@@ -63,13 +65,13 @@ function ExecutionIndicatorComponent(
   } else {
     if (time === 0) {
       return (
-        <div className={'jp-Notebook-ExecutionIndicator'}>
+        <div className={'jp-Notebook-ExecutionIndicator'} title={tooltip}>
           <ProgressCircle progress={100} width={16} height={24} />
         </div>
       );
     } else {
       return (
-        <div className={'jp-Notebook-ExecutionIndicator'}>
+        <div className={'jp-Notebook-ExecutionIndicator'} title={tooltip}>
           <ProgressCircle progress={100} width={16} height={24} />
           <div
             className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass} ${displayClass}`}
@@ -100,7 +102,7 @@ namespace ExecutionIndicatorComponent {
      * Execution state of selected notebook.
      */
     state?: Private.IExecutionState;
-    
+
     /**
      * The application language translator.
      */
@@ -162,7 +164,7 @@ export namespace ExecutionIndicator {
   export class Model extends VDomModel {
     constructor() {
       super();
-      this._displayOption = { showOnToolBar : true, showProgress : true};
+      this._displayOption = { showOnToolBar: true, showProgress: true };
     }
 
     /**
@@ -423,7 +425,7 @@ namespace Private {
     /**
      * The option to show the execution progress inside kernel
      * status circle.
-     */    
-    showProgress : boolean;
+     */
+    showProgress: boolean;
   };
 }

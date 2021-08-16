@@ -384,10 +384,14 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
           .composite as JSONObject;
         if (configValues) {
           showOnToolBar = !(configValues.showOnStatusBar as boolean);
-          showProgress = (configValues.showProgress as boolean)
+          showProgress = configValues.showProgress as boolean;
         }
         if (!showOnToolBar) {
           // Status bar mode, only one `ExecutionIndicator` is needed.
+          if (!statusBar) {
+            // Automatically disable if statusbar missing
+            return;
+          }
           statusbarItem.model.displayOption = {
             showOnToolBar,
             showProgress
@@ -433,7 +437,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
             });
 
             panel.toolbar.insertAfter(
-              'kernelStatus',
+              'kernelName',
               'executionProgress',
               toolbarItem
             );

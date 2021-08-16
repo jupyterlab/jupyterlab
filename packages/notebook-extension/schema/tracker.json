@@ -842,7 +842,7 @@
       "$ref": "#/definitions/kernelStatusConfig",
       "default": {
         "showOnStatusBar": false,
-        "showProgress" : true
+        "showProgress": true
       }
     },
     "experimentalDisableDocumentWideUndoRedo": {
