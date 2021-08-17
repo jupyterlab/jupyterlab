@@ -385,10 +385,23 @@ export function createFileMenu(
           Dialog.cancelButton(),
           Dialog.warnButton({ label: trans.__('Shut Down') })
         ]
-      }).then(result => {
+      }).then(async result => {
         if (result.button.accept) {
           const setting = ServerConnection.makeSettings();
           const apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
+
+          // Shutdown all kernel and terminal sessions before shutting down the server
+          // If this fails, we continue execution so we can post an api/shutdown request
+          try {
+            await Promise.all([
+              app.serviceManager.sessions.shutdownAll(),
+              app.serviceManager.terminals.shutdownAll()
+            ]);
+          } catch (e) {
+            // Do nothing
+            console.log(`Failed to shutdown sessions and terminals: ${e}`);
+          }
+
           return ServerConnection.makeRequest(
             apiURL,
             { method: 'POST' },
