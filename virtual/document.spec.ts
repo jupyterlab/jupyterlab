@@ -4,6 +4,7 @@ import { expect } from 'chai';
 import { ISourcePosition, IVirtualPosition } from '../positioning';
 import { foreign_code_extractors } from '../transclusions/ipython-rpy2/extractors';
 
+import { BrowserConsole } from './console';
 import { VirtualDocument, is_within_range } from './document';
 
 import Mock = jest.Mock;
@@ -58,7 +59,8 @@ describe('VirtualDocument', () => {
       foreign_code_extractors: foreign_code_extractors,
       standalone: false,
       file_extension: 'py',
-      has_lsp_supported_file: false
+      has_lsp_supported_file: false,
+      console: new BrowserConsole()
     });
   });
 

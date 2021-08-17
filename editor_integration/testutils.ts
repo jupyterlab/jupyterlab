@@ -336,7 +336,8 @@ export class NotebookTestEnvironment extends TestEnvironment {
       overrides_registry: {},
       foreign_code_extractors: {},
       has_lsp_supported_file: false,
-      standalone: true
+      standalone: true,
+      console: new BrowserConsole()
     };
   }
 

@@ -5,6 +5,7 @@ import {
   get_the_only_virtual,
   wrap_in_python_lines
 } from '../../extractors/testutils';
+import { BrowserConsole } from '../../virtual/console';
 import { VirtualDocument } from '../../virtual/document';
 
 import { SQL_URL_PATTERN, foreign_code_extractors } from './extractors';
@@ -24,7 +25,8 @@ describe('IPython SQL extractors', () => {
       foreign_code_extractors: foreign_code_extractors,
       standalone: false,
       file_extension: 'py',
-      has_lsp_supported_file: false
+      has_lsp_supported_file: false,
+      console: new BrowserConsole()
     });
   });
 

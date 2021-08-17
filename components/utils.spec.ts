@@ -1,6 +1,7 @@
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { WidgetAdapter } from '../adapters/adapter';
+import { BrowserConsole } from '../virtual/console';
 import { VirtualDocument } from '../virtual/document';
 
 import { get_breadcrumbs } from './utils';
@@ -13,6 +14,7 @@ function create_dummy_document(options: Partial<VirtualDocument.IOptions>) {
     path: 'Untitled.ipynb.py',
     file_extension: 'py',
     has_lsp_supported_file: false,
+    console: new BrowserConsole(),
     ...options
   });
 }
