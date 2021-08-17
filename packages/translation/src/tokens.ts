@@ -35,7 +35,7 @@ export class TranslatorConnector
 }
 
 /**
- * Bundle of gettext-based translation function.
+ * Bundle of gettext-based translation functions.
  *
  * The calls to the functions in this bundle will be automatically
  * extracted by `jupyterlab-translate` package to generate translation
