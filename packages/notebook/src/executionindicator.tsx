@@ -1,15 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import React from 'react';
+import { interactiveItem, ProgressCircle } from '@jupyterlab/statusbar';
+
 import {
-  interactiveItem,
-  //ProgressBar,
-  ProgressCircle
-} from '@jupyterlab/statusbar';
+  circleIcon,
+  LabIcon,
+  offlineBoltIcon,
+  VDomModel,
+  VDomRenderer
+} from '@jupyterlab/ui-components';
 
 import { Notebook } from './widget';
 import { KernelMessage } from '@jupyterlab/services';
@@ -21,6 +25,7 @@ export function ExecutionIndicatorComponent(
   props: ExecutionIndicatorComponent.IProps
 ): React.ReactElement<ExecutionIndicatorComponent.IProps> {
   const translator = props.translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
   const state = props.state;
   const showOnToolBar = props.displayOption.showOnToolBar;
   const showProgress = props.displayOption.showProgress;
@@ -31,57 +36,90 @@ export function ExecutionIndicatorComponent(
     return emptyDiv;
   }
 
+  const kernelStatus = state.kernelStatus;
+  const circleIconProps: LabIcon.IProps = {
+    alignSelf: 'normal',
+    height: '24px'
+  };
   const time = state.totalTime;
+
   const scheduledCellNumber = state.scheduledCellNumber || 0;
   const remainingCellNumber = state.scheduledCell.size || 0;
-  const trans = translator.load('jupyterlab');
   const executedCellNumber = scheduledCellNumber - remainingCellNumber;
   let percentage = (100 * executedCellNumber) / scheduledCellNumber;
   let displayClass = showProgress ? '' : 'hidden';
-  let tooltip = showProgress ? '' : 'Kernel idle';
   if (!showProgress && percentage < 100) {
     percentage = 0;
-    tooltip = 'Kernel busy';
   }
 
-  const progressBar = (
+  const progressBar = (percentage: number) => (
     <ProgressCircle progress={percentage} width={16} height={24} />
   );
-  if (state.kernelStatus === 'busy') {
-    return (
-      <div className={'jp-Notebook-ExecutionIndicator'} title={tooltip}>
-        {progressBar}
-        <div
-          className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass} ${displayClass}`}
-        >
-          <span>
-            {trans.__(
-              `Executed ${executedCellNumber}/${scheduledCellNumber} cells`
-            )}
-          </span>
-          <span> {trans.__(`Total time: ${time} seconds`)} </span>
-        </div>
+  const titleFactory = (prefix: string, title: string) =>
+    trans.__(`${prefix} ${title[0].toUpperCase() + title.slice(1)}`);
+
+  const reactElement = (
+    status: string,
+    circle: JSX.Element,
+    popup: JSX.Element[]
+  ): JSX.Element => (
+    <div
+      className={'jp-Notebook-ExecutionIndicator'}
+      title={showProgress ? '' : titleFactory('Kernel', status)}
+    >
+      {circle}
+      <div
+        className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass} ${displayClass}`}
+      >
+        <span> {titleFactory('Kernel status:', status)} </span>
+        {popup}
       </div>
+    </div>
+  );
+
+  if (
+    state.kernelStatus === 'connecting' ||
+    state.kernelStatus === 'disconnected' ||
+    state.kernelStatus === 'unknown'
+  ) {
+    return reactElement(
+      kernelStatus,
+      <offlineBoltIcon.react {...circleIconProps} />,
+      []
     );
+  }
+  if (
+    state.kernelStatus === 'starting' ||
+    state.kernelStatus === 'terminating' ||
+    state.kernelStatus === 'restarting' ||
+    state.kernelStatus === 'initializing'
+  ) {
+    return reactElement(
+      kernelStatus,
+      <circleIcon.react {...circleIconProps} />,
+      []
+    );
+  }
+
+  if (state.executionStatus === 'busy') {
+    return reactElement('busy', progressBar(percentage), [
+      <span key={0}>
+        {trans.__(
+          `Executed ${executedCellNumber}/${scheduledCellNumber} cells`
+        )}
+      </span>,
+      <span key={1}> {trans.__(`Total time: ${time} seconds`)} </span>
+    ]);
   } else {
     if (time === 0) {
-      return (
-        <div className={'jp-Notebook-ExecutionIndicator'} title={tooltip}>
-          <ProgressCircle progress={100} width={16} height={24} />
-        </div>
-      );
+      return reactElement('idle', progressBar(100), []);
     } else {
-      return (
-        <div className={'jp-Notebook-ExecutionIndicator'} title={tooltip}>
-          <ProgressCircle progress={100} width={16} height={24} />
-          <div
-            className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass} ${displayClass}`}
-          >
-            <span> {trans.__(`Executed ${scheduledCellNumber} cells`)} </span>
-            <span> {trans.__(`Total time: ${time} seconds`)} </span>
-          </div>
-        </div>
-      );
+      return reactElement('idle', progressBar(100), [
+        <span key={0}>
+          {trans.__(`Executed ${scheduledCellNumber} cells`)}
+        </span>,
+        <span key={1}> {trans.__(`Total time: ${time} seconds`)} </span>
+      ]);
     }
   }
 }
@@ -119,7 +157,7 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
    * Construct the kernel status widget.
    */
   constructor(translator?: ITranslator, showProgress: boolean = true) {
-    super(new ExecutionIndicator.Model());
+    super(new ExecutionIndicator.Model(translator));
     this.translator = translator || nullTranslator;
     this.addClass(interactiveItem);
   }
@@ -163,8 +201,9 @@ export namespace ExecutionIndicator {
    * A VDomModel for the execution status indicator.
    */
   export class Model extends VDomModel {
-    constructor() {
+    constructor(translator?: ITranslator) {
       super();
+      translator = translator || nullTranslator;
       this._displayOption = { showOnToolBar: true, showProgress: true };
     }
 
@@ -184,6 +223,7 @@ export namespace ExecutionIndicator {
         this._currentNotebook = nb;
         if (!this._notebookExecutionProgress.has(nb)) {
           this._notebookExecutionProgress.set(nb, {
+            executionStatus: 'idle',
             kernelStatus: 'idle',
             totalTime: 0,
             interval: 0,
@@ -193,8 +233,21 @@ export namespace ExecutionIndicator {
             needReset: true
           });
 
+          const state = this._notebookExecutionProgress.get(nb);
+          context.statusChanged.connect(ctx => {
+            if (state) {
+              state.kernelStatus = ctx.kernelDisplayStatus;
+            }
+            this.stateChanged.emit(void 0);
+          }, this);
+
+          context.connectionStatusChanged.connect(ctx => {
+            if (state) {
+              state.kernelStatus = ctx.kernelDisplayStatus;
+            }
+            this.stateChanged.emit(void 0);
+          }, this);
           context.kernelChanged.connect((_, kernelData) => {
-            const state = this._notebookExecutionProgress.get(nb);
             if (state) {
               this._resetTime(state);
               this.stateChanged.emit(void 0);
@@ -284,7 +337,7 @@ export namespace ExecutionIndicator {
       if (state && state.scheduledCell.has(msg_id)) {
         state.scheduledCell.delete(msg_id);
         if (state.scheduledCell.size === 0) {
-          state.kernelStatus = 'idle';
+          state.executionStatus = 'idle';
           clearInterval(state.interval);
           state.timeout = window.setTimeout(() => {
             state.needReset = true;
@@ -312,8 +365,8 @@ export namespace ExecutionIndicator {
         }
         state.scheduledCell.add(msg_id);
         state.scheduledCellNumber += 1;
-        if (state.kernelStatus !== 'busy') {
-          state.kernelStatus = 'busy';
+        if (state.executionStatus !== 'busy') {
+          state.executionStatus = 'busy';
           clearTimeout(state.timeout);
           this._tick(state);
           state.interval = window.setInterval(() => {
@@ -343,7 +396,7 @@ export namespace ExecutionIndicator {
     private _resetTime(data: Private.IExecutionState): void {
       data.totalTime = 0;
       data.scheduledCellNumber = 0;
-      data.kernelStatus = 'idle';
+      data.executionStatus = 'idle';
       data.scheduledCell = new Set<string>();
       clearTimeout(data.timeout);
       clearInterval(data.interval);
@@ -379,7 +432,12 @@ namespace Private {
      * Execution status of kernel, this status is deducted from the
      * number of scheduled code cells.
      */
-    kernelStatus: string;
+    executionStatus: string;
+
+    /**
+     * Current status of kernel.
+     */
+    kernelStatus: ISessionContext.KernelDisplayStatus;
 
     /**
      * Total execution time.
@@ -399,7 +457,7 @@ namespace Private {
     timeout: number;
 
     /**
-     * Set of message scheduled for executing, `kernelStatus` is set
+     * Set of messages scheduled for executing, `executionStatus` is set
      *  to `idle if the length of this set is 0 and to `busy` otherwise.
      */
     scheduledCell: Set<string>;

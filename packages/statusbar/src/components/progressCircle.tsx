@@ -18,15 +18,15 @@ export namespace ProgressCircle {
 }
 
 export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
+  const radius = 104;
   const d = (progress: number): string => {
     const angle = Math.max(progress * 3.6, 0.1);
-
     const rad = (angle * Math.PI) / 180,
-      x = Math.sin(rad) * 125,
-      y = Math.cos(rad) * -125,
+      x = Math.sin(rad) * radius,
+      y = Math.cos(rad) * -radius,
       mid = angle < 180 ? 1 : 0,
       shape =
-        'M 0 0 v -125 A 125 125 1 ' +
+        `M 0 0 v -${radius} A ${radius} ${radius} 1 ` +
         mid +
         ' 0 ' +
         x.toFixed(4) +
@@ -41,9 +41,9 @@ export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
         <circle
           cx="125"
           cy="125"
-          r="112.5"
+          r={`${radius}`}
           stroke="var(--jp-inverse-layout-color3)"
-          strokeWidth="25"
+          strokeWidth="20"
           fill="none"
         />
         <path

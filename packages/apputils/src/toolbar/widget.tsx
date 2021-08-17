@@ -216,7 +216,6 @@ namespace Private {
       }
 
       const status = sessionContext.kernelDisplayStatus;
-
       const circleIconProps: LabIcon.IProps = {
         container: this.node,
         title: this._trans.__('Kernel %1', this._statusNames[status] || status),
