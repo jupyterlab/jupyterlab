@@ -34,10 +34,48 @@ export class TranslatorConnector
   private _translationsUrl: string;
 }
 
+/**
+ * Bundle of gettext-based translation function.
+ *
+ * The calls to the functions in this bundle will be automatically
+ * extracted by `jupyterlab-translate` package to generate translation
+ * template files if the bundle is assigned to:
+ * - variable named `trans`,
+ * - public attribute named `trans` (`this.trans`),
+ * - private attribute named `trans` (`this._trans`),
+ * - `trans` attribute `props` variable (`props.trans`),
+ * - `trans` attribute `props` attribute (`this.props.trans`)
+ */
 export type TranslationBundle = {
+  /**
+   * Alias for `gettext` (translate strings without number inflection)
+   * @param msgid message (text to translate)
+   * @param args
+   */
   __(msgid: string, ...args: any[]): string;
+  /**
+   * Alias for `ngettext` (translate accounting for plural forms)
+   * @param msgid message for singular
+   * @param msgid_plural message for plural
+   * @param n determines which plural form to use
+   * @param args
+   */
   _n(msgid: string, msgid_plural: string, n: number, ...args: any[]): string;
+  /**
+   * Alias for `pgettext` (translate in given context)
+   * @param msgctxt context
+   * @param msgid message (text to translate)
+   * @param args
+   */
   _p(msgctxt: string, msgid: string, ...args: any[]): string;
+  /**
+   * Alias for `npgettext` (translate accounting for plural forms in given context)
+   * @param msgctxt context
+   * @param msgid message for singular
+   * @param msgid_plural message for plural
+   * @param n number used to determine which plural form to use
+   * @param args
+   */
   _np(
     msgctxt: string,
     msgid: string,
