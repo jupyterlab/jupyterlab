@@ -828,11 +828,6 @@ function activateWidgetFactory(
       translator
     )
   );
-  toolbarRegistry.registerFactory<NotebookPanel>(
-    FACTORY,
-    'kernelStatus',
-    panel => Toolbar.createKernelStatusItem(panel.sessionContext, translator)
-  );
 
   if (settingRegistry) {
     // Create the factory

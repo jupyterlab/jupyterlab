@@ -159,7 +159,8 @@ describe('@jupyterlab/notebook', () => {
     let displayOption: { showOnToolBar: boolean; showProgress: boolean };
     let defaultState: {
       interval: number;
-      kernelStatus: string;
+      kernelStatus: ISessionContext.KernelDisplayStatus;
+      executionStatus: string;
       needReset: boolean;
       scheduledCell: Set<string>;
       scheduledCellNumber: number;
@@ -167,15 +168,16 @@ describe('@jupyterlab/notebook', () => {
       totalTime: number;
     };
 
-    const EMPTY_CIRCLE = 'M 0 0 v -125 A 125 125 1 0 0 -0.0000 -125.0000 z';
-    const HALF_FILLED_CIRCLE = 'M 0 0 v -125 A 125 125 1 0 0 0.0000 125.0000 z';
-    const FILLED_CIRCLE = 'M 0 0 v -125 A 125 125 1 1 0 0.2182 -124.9998 z';
+    const EMPTY_CIRCLE = 'M 0 0 v -104 A 104 104 1 0 0 -0.0000 -104.0000 z';
+    const HALF_FILLED_CIRCLE = 'M 0 0 v -104 A 104 104 1 0 0 0.0000 104.0000 z';
+    const FILLED_CIRCLE = 'M 0 0 v -104 A 104 104 1 1 0 0.1815 -103.9998 z';
 
     beforeEach(() => {
       displayOption = { showOnToolBar: false, showProgress: true };
       defaultState = {
         interval: 0,
         kernelStatus: 'idle',
+        executionStatus: 'idle',
         needReset: false,
         scheduledCell: new Set<string>(),
         scheduledCellNumber: 0,
@@ -198,7 +200,7 @@ describe('@jupyterlab/notebook', () => {
       defaultState.scheduledCellNumber = 2;
       defaultState.scheduledCell.add('foo');
       defaultState.scheduledCell.add('bar');
-      defaultState.kernelStatus = 'busy';
+      defaultState.executionStatus = 'busy';
       defaultState.totalTime = 1;
       const element = (
         <ExecutionIndicatorComponent
@@ -215,7 +217,7 @@ describe('@jupyterlab/notebook', () => {
     it('Should render a half filled circle with 1/2 cell executed message', () => {
       defaultState.scheduledCellNumber = 2;
       defaultState.scheduledCell.add('foo');
-      defaultState.kernelStatus = 'busy';
+      defaultState.executionStatus = 'busy';
       defaultState.totalTime = 1;
       const element = (
         <ExecutionIndicatorComponent
@@ -231,7 +233,7 @@ describe('@jupyterlab/notebook', () => {
 
     it('Should render an empty circle with 2 cells executed message', () => {
       defaultState.scheduledCellNumber = 2;
-      defaultState.kernelStatus = 'idle';
+      defaultState.executionStatus = 'idle';
       defaultState.totalTime = 1;
       const element = (
         <ExecutionIndicatorComponent
