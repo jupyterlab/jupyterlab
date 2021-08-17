@@ -8,6 +8,7 @@ import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { PanelLayout, Widget } from '@lumino/widgets';
+import { Throttler } from '@lumino/polling';
 import * as React from 'react';
 import { Button } from '../blueprint';
 import { ellipsesIcon, LabIcon } from '../icon';
@@ -168,6 +169,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
       (this.popupOpener as unknown) as T
     );
     this.popupOpener.hide();
+    this._resizer = new Throttler(this._onResize.bind(this), 500);
   }
 
   /**
@@ -210,8 +212,8 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
       return;
     }
 
-    if (this._resizeTimer) {
-      clearTimeout(this._resizeTimer);
+    if (this._resizer) {
+      this._resizer.dispose();
     }
 
     super.dispose();
@@ -366,18 +368,12 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
 
   protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
-    if (msg.width > 0) {
-      if (this._resizeTimer) {
-        clearTimeout(this._resizeTimer);
-      }
-
-      this._resizeTimer = window.setTimeout(() => {
-        this._onResize(msg);
-      }, 250);
+    if (msg.width > 0 && this._resizer) {
+      void this._resizer.invoke();
     }
   }
 
-  private _onResize(msg: Widget.ResizeMessage) {
+  private _onResize() {
     if (this.parent && this.parent.isAttached) {
       const toolbarWidth = this.node.clientWidth;
       const opener = this.popupOpener;
@@ -467,7 +463,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
 
   readonly popupOpener: ToolbarPopupOpener = new ToolbarPopupOpener();
   private readonly _widgetWidths: { [key: string]: number } = {};
-  private _resizeTimer?: number;
+  private readonly _resizer: Throttler;
 }
 
 /**
