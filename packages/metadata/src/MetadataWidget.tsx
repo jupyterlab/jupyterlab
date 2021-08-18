@@ -28,12 +28,9 @@ import { Signal } from '@lumino/signaling';
 
 import React from 'react';
 
-import { IDictionary } from './parsing';
-import { MetadataService } from './metadata';
+import { IDictionary, MetadataService, ExpandableComponent, RequestErrors } from '@jupyterlab/formeditor';
 import { AddMetadataButton } from './AddMetadataButton';
-import { ExpandableComponent } from './ExpandableComponent';
 import { JSONComponent } from './JSONComponent';
-import { RequestErrors } from './RequestErrors';
 import { FilterTools } from './FilterTools';
 
 /**

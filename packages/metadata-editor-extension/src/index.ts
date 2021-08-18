@@ -21,8 +21,10 @@
 import {
   MetadataEditor,
   MetadataService,
-  MetadataWidget,
   RequestErrors
+} from '@jupyterlab/formeditor';
+import {
+  MetadataWidget,
 } from '@jupyterlab/metadata';
 
 import {
@@ -31,7 +33,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette, IThemeManager } from '@jupyterlab/apputils';
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor'
 import { LabIcon, textEditorIcon } from '@jupyterlab/ui-components';
 
 import { find } from '@lumino/algorithm';

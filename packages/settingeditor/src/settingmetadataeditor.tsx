@@ -2,7 +2,7 @@ import {
   DIRTY_CLASS,
   IMetadataEditorProps,
   MetadataEditor
-} from '@jupyterlab/metadata';
+} from '@jupyterlab/formeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { showDialog } from '@jupyterlab/apputils';

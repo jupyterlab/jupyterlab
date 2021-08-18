@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IDictionary } from './parsing';
+import { IDictionary } from '@jupyterlab/formeditor';
 import { addIcon } from '@jupyterlab/ui-components';
 import {
   Box,

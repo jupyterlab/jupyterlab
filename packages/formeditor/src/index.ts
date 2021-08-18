@@ -18,5 +18,8 @@
  * @module metadata
  */
 
-export * from './MetadataWidget';
-export * from './AddMetadataButton';
+export * from './ExpandableComponent';
+export * from './MetadataEditor';
+export * from './metadata';
+export * from './parsing';
+export * from './RequestErrors';
