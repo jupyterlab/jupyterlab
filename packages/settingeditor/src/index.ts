@@ -8,3 +8,4 @@
 export * from './settingeditor';
 export * from './tokens';
 export * from './SettingEditorRegistry';
+export * from './renderers';

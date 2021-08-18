@@ -1,14 +1,7 @@
-import {
-  ArrayInput,
-  DropDown,
-  IMetadataEditorProps,
-  MetadataEditor,
-  TextInput
-} from '@jupyterlab/formeditor';
+import { IMetadataEditorProps, MetadataEditor } from '@jupyterlab/formeditor';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { showDialog } from '@jupyterlab/apputils';
-import { Checkbox, FormControlLabel, InputLabel } from '@material-ui/core';
 import React from 'react';
 import { ISettingEditorRegistry } from './tokens';
 
@@ -16,12 +9,6 @@ interface IProps extends IMetadataEditorProps {
   settings: ISettingRegistry.IPlugin;
   registry: ISettingRegistry;
   editorRegistry: ISettingEditorRegistry;
-}
-
-interface IInputProps {
-  handleChange: (value: any) => void;
-  value?: any;
-  uihints: any;
 }
 
 const RESET_BUTTON_TEXT = 'Restore to Defaults';
@@ -39,96 +26,10 @@ export class SettingsMetadataEditor extends MetadataEditor {
     this._settings = options.settings;
     this.id = options.settings.id;
     this.handleChange = this.handleChange.bind(this);
-    options.editorRegistry.addRenderer('textinput', this.renderTextInput);
-    options.editorRegistry.addRenderer('number', this.renderTextInput);
-    options.editorRegistry.addRenderer('integer', this.renderTextInput);
-    options.editorRegistry.addRenderer('string', this.renderTextInput);
-    options.editorRegistry.addRenderer('dropdown', this.renderDropdown);
-    options.editorRegistry.addRenderer('boolean', this.renderCheckbox);
-    options.editorRegistry.addRenderer('array', this.renderStringArray);
     this._settingRegistry = options.registry;
     this._editorRegistry = options.editorRegistry;
 
     void this.initializeMetadata();
-  }
-
-  renderDropdown(props: IInputProps): any {
-    return (
-      <DropDown
-        label={props.uihints.title}
-        key={`${props.uihints.title?.replace(' ', '')}DropDown`}
-        description={props.uihints.description}
-        defaultError={props.uihints.error ?? ''}
-        placeholder={props.uihints.placeholder}
-        defaultValue={props.uihints.default}
-        readonly={props.uihints.enum !== undefined}
-        initialValue={props.value}
-        options={props.uihints.enum}
-        onChange={(value: any): void => {
-          props.handleChange(value);
-        }}
-      />
-    );
-  }
-
-  renderTextInput(props: IInputProps): any {
-    return (
-      <TextInput
-        label={props.uihints.title}
-        description={props.uihints.description}
-        key={`${props.uihints.title?.replace(' ', '')}TextInput`}
-        fieldName={props.uihints.title?.replace(' ', '')}
-        numeric={props.uihints.field_type === 'number'}
-        defaultValue={props.value || props.uihints.default || ''}
-        secure={props.uihints.secure}
-        defaultError={props.uihints.error}
-        placeholder={props.uihints.placeholder}
-        onChange={(value: any): void => {
-          props.handleChange(value);
-        }}
-      />
-    );
-  }
-
-  renderCheckbox(props: IInputProps): any {
-    return (
-      <div
-        className="jp-metadataEditor-formInput"
-        key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
-      >
-        <FormControlLabel
-          className="jp-metadataEditor-formInput"
-          key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
-          control={
-            <Checkbox
-              checked={props.value}
-              onChange={(e: any, checked: boolean) => {
-                props.handleChange(checked);
-              }}
-            />
-          }
-          label={props.uihints.title}
-        />
-      </div>
-    );
-  }
-
-  renderStringArray(props: IInputProps): any {
-    return (
-      <div
-        className="jp-metadataEditor-formInput"
-        key={`${props.uihints.title?.replace(' ', '')}Array`}
-        style={{ flexBasis: '100%' }}
-      >
-        <InputLabel> {props.uihints.title} </InputLabel>
-        <ArrayInput
-          onChange={(values: string[]) => {
-            props.handleChange(values);
-          }}
-          values={props.value ?? ([] as string[])}
-        />
-      </div>
-    );
   }
 
   get settings(): Settings {

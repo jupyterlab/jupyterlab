@@ -24,6 +24,10 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   ISettingEditorRegistry,
   ISettingEditorTracker,
+  renderCheckbox,
+  renderDropdown,
+  renderStringArray,
+  renderTextInput,
   SettingEditor,
   SettingEditorRegistry
 } from '@jupyterlab/settingeditor';
@@ -31,6 +35,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
 import { saveIcon, settingsIcon } from '@jupyterlab/ui-components';
+
 // import { IDisposable } from '@lumino/disposable';
 
 /**
@@ -97,6 +102,14 @@ function activate(
     args: widget => ({}),
     name: widget => namespace
   });
+
+  editorRegistry.addRenderer('textinput', renderTextInput);
+  editorRegistry.addRenderer('number', renderTextInput);
+  editorRegistry.addRenderer('integer', renderTextInput);
+  editorRegistry.addRenderer('string', renderTextInput);
+  editorRegistry.addRenderer('dropdown', renderDropdown);
+  editorRegistry.addRenderer('boolean', renderCheckbox);
+  editorRegistry.addRenderer('array', renderStringArray);
 
   commands.addCommand(CommandIDs.open, {
     execute: () => {
