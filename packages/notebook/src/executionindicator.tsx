@@ -113,7 +113,7 @@ export function ExecutionIndicatorComponent(
         )}
       </span>,
       <span key={1}>
-        {trans._n('Total time: %s second', 'Total time: %s seconds', time)}
+        {trans._n('Total time: %1 second', 'Total time: %1 seconds', time)}
       </span>
     ]);
   } else {
@@ -123,15 +123,15 @@ export function ExecutionIndicatorComponent(
       return reactElement('idle', progressBar(100), [
         <span key={0}>
           {trans._n(
-            'Executed %s request',
-            'Executed %s requests',
+            'Executed %1 request',
+            'Executed %1 requests',
             scheduledCellNumber
           )}
         </span>,
         <span key={1}>
           {trans._n(
-            'Total time: %s second',
-            'Total time: %s seconds',
+            'Total time: %1 second',
+            'Total time: %1 seconds',
             time
           )}
         </span>
