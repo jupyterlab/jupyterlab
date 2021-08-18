@@ -129,11 +129,7 @@ export function ExecutionIndicatorComponent(
           )}
         </span>,
         <span key={1}>
-          {trans._n(
-            'Total time: %1 second',
-            'Total time: %1 seconds',
-            time
-          )}
+          {trans._n('Total time: %1 second', 'Total time: %1 seconds', time)}
         </span>
       ]);
     }
