@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// add comment to trigger bot
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
   CellModel,
