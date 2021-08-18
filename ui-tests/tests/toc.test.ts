@@ -23,15 +23,8 @@ describe('Table of Contents', () => {
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `uploaded/${fileName}`
     );
-    await galata.contents.moveFileToServer(
-      path.resolve(__dirname, './notebooks/WidgetArch.png'),
-      'uploaded/WidgetArch.png'
-    );
     expect(
       await galata.contents.fileExists(`uploaded/${fileName}`)
-    ).toBeTruthy();
-    expect(
-      await galata.contents.fileExists('uploaded/WidgetArch.png')
     ).toBeTruthy();
   });
 
