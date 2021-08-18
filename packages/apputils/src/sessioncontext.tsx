@@ -1225,7 +1225,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
 
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
-      body: new Private.KernelSelector(sessionContext),
+      body: new Private.KernelSelector(sessionContext, translator),
       buttons
     });
 
@@ -1306,8 +1306,8 @@ namespace Private {
     /**
      * Create a new kernel selector widget.
      */
-    constructor(sessionContext: ISessionContext) {
-      super({ node: createSelectorNode(sessionContext) });
+    constructor(sessionContext: ISessionContext, translator?: ITranslator) {
+      super({ node: createSelectorNode(sessionContext, translator) });
     }
 
     /**
