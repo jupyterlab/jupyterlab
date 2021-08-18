@@ -17,6 +17,10 @@ import {
 
 import { Notebook } from './widget';
 import { KernelMessage } from '@jupyterlab/services';
+import {
+  IAnyMessageArgs,
+  IKernelConnection
+} from '@jupyterlab/services/src/kernel/kernel';
 
 /**
  * A react functional component for rendering execution indicator.
@@ -247,33 +251,47 @@ export namespace ExecutionIndicator {
             }
             this.stateChanged.emit(void 0);
           }, this);
+
+          const handleKernelMsg = (
+            sender: IKernelConnection,
+            msg: IAnyMessageArgs
+          ) => {
+            const message = msg.msg;
+            const msgId = message.header.msg_id;
+
+            if (
+              KernelMessage.isCommMsgMsg(message) &&
+              message.content.data['method']
+            ) {
+              // Execution request from Comm message
+              const method = message.content.data['method'];
+              if (method !== 'request_state' && method !== 'update') {
+                this._cellScheduledCallback(nb, msgId);
+                this._startTimer(nb);
+              }
+            } else if (message.header.msg_type === 'execute_request') {
+              // A cell code is scheduled for executing
+              this._cellScheduledCallback(nb, msgId);
+            } else if (
+              KernelMessage.isStatusMsg(message) &&
+              message.content.execution_state === 'idle'
+            ) {
+              // Idle status message case.
+              const parentId = (message.parent_header as KernelMessage.IHeader)
+                .msg_id;
+              this._cellExecutedCallback(nb, parentId);
+            } else if (message.header.msg_type === 'execute_input') {
+              // A cell code starts executing.
+              this._startTimer(nb);
+            }
+          };
+          context.session?.kernel?.anyMessage.connect(handleKernelMsg);
           context.kernelChanged.connect((_, kernelData) => {
             if (state) {
               this._resetTime(state);
               this.stateChanged.emit(void 0);
               if (kernelData.newValue) {
-                kernelData.newValue.anyMessage.connect((sender, msg) => {
-                  const message = msg.msg;
-                  const msgId = message.header.msg_id;
-                  if (
-                    KernelMessage.isCommMsgMsg(message) &&
-                    message.content.data['method']
-                  ) {
-                    const method = message.content.data['method'];
-                    if (method !== 'request_state' && method !== 'update') {
-                      this._cellScheduledCallback(nb, msgId);
-                    }
-                  } else if (message.header.msg_type === 'execute_request') {
-                    this._cellScheduledCallback(nb, msgId);
-                  } else if (
-                    KernelMessage.isStatusMsg(message) &&
-                    message.content.execution_state === 'idle'
-                  ) {
-                    const parentId = (message.parent_header as KernelMessage.IHeader)
-                      .msg_id;
-                    this._cellExecutedCallback(nb, parentId);
-                  }
-                });
+                kernelData.newValue.anyMessage.connect(handleKernelMsg);
               }
             }
           });
@@ -317,13 +335,13 @@ export namespace ExecutionIndicator {
     }
 
     /**
-     * The slot connected to `NotebookActions.executed` signal, it is
-     * used to keep track number of executed cell or Comm custom message and the status
-     * of kernel.
+     * The function is called on kernel's idle status message.
+     * It is used to keep track number of executed
+     * cell or Comm custom messages and the status of kernel.
      *
      * @param  nb - The notebook which contains the executed code
      * cell.
-     * @param  msg_id - The executed code cell or id of comm message.
+     * @param  msg_id - The id of message.
      *
      * ### Note
      *
@@ -337,24 +355,46 @@ export namespace ExecutionIndicator {
       if (state && state.scheduledCell.has(msg_id)) {
         state.scheduledCell.delete(msg_id);
         if (state.scheduledCell.size === 0) {
-          state.executionStatus = 'idle';
-          clearInterval(state.interval);
+          window.setTimeout(() => {
+            state.executionStatus = 'idle';
+            clearInterval(state.interval);
+            this.stateChanged.emit(void 0);
+          }, 150);
           state.timeout = window.setTimeout(() => {
             state.needReset = true;
           }, 1000);
-          this.stateChanged.emit(void 0);
         }
       }
     }
 
     /**
-     * The slot connected to `NotebookActions.executionScheduled` signal, it is
-     * used to keep track number of scheduled cell and the status
-     * or kernel.
+     * This function is called on kernel's `execute_input` message to start
+     * the elapsed time counter.
      *
-     * @param  nb - The notebook which contains the scheduled code or id of comm message.
+     * @param  nb - The notebook which contains the scheduled execution request.
+     */
+    private _startTimer(nb: Notebook) {
+      const state = this._notebookExecutionProgress.get(nb);
+      if (state) {
+        if (state.executionStatus !== 'busy') {
+          state.executionStatus = 'busy';
+          clearTimeout(state.timeout);
+          this.stateChanged.emit(void 0);
+          state.interval = window.setInterval(() => {
+            this._tick(state);
+          }, 1000);
+        }
+      }
+    }
+
+    /**
+     * The function is called on kernel's `execute_request` message or Comm message, it is
+     * used to keep track number of scheduled cell or Comm execution message
+     * and the status of kernel.
+     *
+     * @param  nb - The notebook which contains the scheduled code.
      * cell
-     * @param  msg_id - The scheduled code cell.
+     * @param  msg_id - The id of message.
      */
     private _cellScheduledCallback(nb: Notebook, msg_id: string): void {
       const state = this._notebookExecutionProgress.get(nb);
@@ -365,14 +405,6 @@ export namespace ExecutionIndicator {
         }
         state.scheduledCell.add(msg_id);
         state.scheduledCellNumber += 1;
-        if (state.executionStatus !== 'busy') {
-          state.executionStatus = 'busy';
-          clearTimeout(state.timeout);
-          this._tick(state);
-          state.interval = window.setInterval(() => {
-            this._tick(state);
-          }, 1000);
-        }
       }
     }
 
@@ -384,7 +416,6 @@ export namespace ExecutionIndicator {
      */
     private _tick(data: Private.IExecutionState): void {
       data.totalTime += 1;
-
       this.stateChanged.emit(void 0);
     }
 
