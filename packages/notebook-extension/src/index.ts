@@ -88,11 +88,11 @@ import {
   ReadonlyPartialJSONObject,
   UUID
 } from '@lumino/coreutils';
-import { DisposableSet } from '@lumino/disposable';
+import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
-
+import { find, map } from '@lumino/algorithm';
 /**
  * The command IDs used by the notebook plugin.
  */
@@ -374,12 +374,48 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
     // Set default position to toolbar.
     let showOnToolBar = true;
     let showProgress = true;
-
-    const statusbarItem = new ExecutionIndicator(translator);
+    const toolbarItemName = 'executionProgress';
+    
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(trackerPlugin.id);
+      const statusbarItem = new ExecutionIndicator(translator);
+      const labShellCurrentChanged = (_ : ILabShell, change: ILabShell.IChangedArgs) => {
+        const { newValue } = change;
+        if (newValue && notebookTracker.has(newValue)) {
+          const panel = newValue as NotebookPanel;
+          statusbarItem.model!.attachNotebook({
+            content: panel.content,
+            context: panel.sessionContext
+          });
+        }
+      }
+      
+      let statusBarDisposable: IDisposable;
+      let widgetAddedSlot: (tracker : INotebookTracker, panel: NotebookPanel) => void;
 
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+        //Remove old indicator widget on status bar
+        if(statusBarDisposable){
+          labShell.currentChanged.disconnect(labShellCurrentChanged)
+          statusBarDisposable.dispose()
+        }
+
+        // Remove old indicator widgets on toolbar
+        notebookTracker.forEach((panel) => {
+            const nameWithIndex = map(panel.toolbar.names(), (name, i) => { 
+              return { name: name, index: i };
+            });
+            const target = find(nameWithIndex, x => x.name === toolbarItemName);
+            if(target){
+              const widget = find(panel.toolbar.children(), (value, idx) => idx === target.index)
+              if(widget){
+                panel.toolbar.layout?.removeWidget(widget)
+                widget.dispose();
+              }
+            }
+        });
+        notebookTracker.widgetAdded.disconnect(widgetAddedSlot)
+
         const configValues = settings.get('kernelStatus')
           .composite as JSONObject;
         if (configValues) {
@@ -396,7 +432,8 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
             showOnToolBar,
             showProgress
           };
-          statusBar!.registerStatusItem(
+
+          statusBarDisposable = statusBar.registerStatusItem(
             '@jupyterlab/notebook-extension:execution-indicator',
             {
               item: statusbarItem,
@@ -413,16 +450,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
             context: notebookTracker.currentWidget?.sessionContext
           });
 
-          labShell.currentChanged.connect((_, change) => {
-            const { newValue } = change;
-            if (newValue && notebookTracker.has(newValue)) {
-              const panel = newValue as NotebookPanel;
-              statusbarItem.model!.attachNotebook({
-                content: panel.content,
-                context: panel.sessionContext
-              });
-            }
-          });
+          labShell.currentChanged.connect(labShellCurrentChanged);
         } else {
           // Toolbar mode, `ExecutionIndicator` item is added to each notebook toolbar.
           const addItemToToolbar = (panel: NotebookPanel) => {
@@ -438,19 +466,21 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
 
             panel.toolbar.insertAfter(
               'kernelName',
-              'executionProgress',
+              toolbarItemName,
               toolbarItem
             );
           };
           notebookTracker.forEach(addItemToToolbar);
-          notebookTracker.widgetAdded.connect((_, panel) => {
+          widgetAddedSlot = (tracker : INotebookTracker, panel: NotebookPanel) => {
             addItemToToolbar(panel);
-          });
+          }
+          notebookTracker.widgetAdded.connect(widgetAddedSlot);
         }
       };
       Promise.all([loadSettings, app.restored])
         .then(([settings]) => {
           updateSettings(settings);
+          settings.changed.connect((sender) => updateSettings(sender))
         })
         .catch((reason: Error) => {
           console.error(reason.message);
