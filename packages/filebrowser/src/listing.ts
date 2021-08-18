@@ -1523,7 +1523,7 @@ export class DirListing extends Widget {
         }
         if (!isValidFileName(newName)) {
           void showErrorMessage(
-            this._trans.__('showErrorMessage', 'Rename Error'),
+            this._trans.__('Rename Error'),
             Error(
               this._trans._p(
                 'showErrorMessage',
