@@ -109,10 +109,12 @@ export function ExecutionIndicatorComponent(
     return reactElement('busy', progressBar(percentage), [
       <span key={0}>
         {trans.__(
-          `Executed ${executedCellNumber}/${scheduledCellNumber} cells`
+          `Executed ${executedCellNumber}/${scheduledCellNumber} requests`
         )}
       </span>,
-      <span key={1}> {trans.__(`Total time: ${time} seconds`)} </span>
+      <span key={1}>
+        {trans._n('Total time: %s second', 'Total time: %s seconds', time)}
+      </span>
     ]);
   } else {
     if (time === 0) {
@@ -120,9 +122,19 @@ export function ExecutionIndicatorComponent(
     } else {
       return reactElement('idle', progressBar(100), [
         <span key={0}>
-          {trans.__(`Executed ${scheduledCellNumber} cells`)}
+          {trans._n(
+            'Executed %s request',
+            'Executed %s requests',
+            scheduledCellNumber
+          )}
         </span>,
-        <span key={1}> {trans.__(`Total time: ${time} seconds`)} </span>
+        <span key={1}>
+          {trans._n(
+            'Total time: %s second',
+            'Total time: %s seconds',
+            time
+          )}
+        </span>
       ]);
     }
   }
@@ -161,7 +173,7 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
    * Construct the kernel status widget.
    */
   constructor(translator?: ITranslator, showProgress: boolean = true) {
-    super(new ExecutionIndicator.Model(translator));
+    super(new ExecutionIndicator.Model());
     this.translator = translator || nullTranslator;
     this.addClass(interactiveItem);
   }
@@ -205,9 +217,8 @@ export namespace ExecutionIndicator {
    * A VDomModel for the execution status indicator.
    */
   export class Model extends VDomModel {
-    constructor(translator?: ITranslator) {
+    constructor() {
       super();
-      translator = translator || nullTranslator;
       this._displayOption = { showOnToolBar: true, showProgress: true };
     }
 

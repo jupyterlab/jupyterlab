@@ -375,11 +375,14 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
     let showOnToolBar = true;
     let showProgress = true;
     const toolbarItemName = 'executionProgress';
-    
+
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(trackerPlugin.id);
       const statusbarItem = new ExecutionIndicator(translator);
-      const labShellCurrentChanged = (_ : ILabShell, change: ILabShell.IChangedArgs) => {
+      const labShellCurrentChanged = (
+        _: ILabShell,
+        change: ILabShell.IChangedArgs
+      ) => {
         const { newValue } = change;
         if (newValue && notebookTracker.has(newValue)) {
           const panel = newValue as NotebookPanel;
@@ -388,33 +391,39 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
             context: panel.sessionContext
           });
         }
-      }
-      
+      };
+
       let statusBarDisposable: IDisposable;
-      let widgetAddedSlot: (tracker : INotebookTracker, panel: NotebookPanel) => void;
+      let widgetAddedSlot: (
+        tracker: INotebookTracker,
+        panel: NotebookPanel
+      ) => void;
 
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
         //Remove old indicator widget on status bar
-        if(statusBarDisposable){
-          labShell.currentChanged.disconnect(labShellCurrentChanged)
-          statusBarDisposable.dispose()
+        if (statusBarDisposable) {
+          labShell.currentChanged.disconnect(labShellCurrentChanged);
+          statusBarDisposable.dispose();
         }
 
         // Remove old indicator widgets on toolbar
-        notebookTracker.forEach((panel) => {
-            const nameWithIndex = map(panel.toolbar.names(), (name, i) => { 
-              return { name: name, index: i };
-            });
-            const target = find(nameWithIndex, x => x.name === toolbarItemName);
-            if(target){
-              const widget = find(panel.toolbar.children(), (value, idx) => idx === target.index)
-              if(widget){
-                panel.toolbar.layout?.removeWidget(widget)
-                widget.dispose();
-              }
+        notebookTracker.forEach(panel => {
+          const nameWithIndex = map(panel.toolbar.names(), (name, i) => {
+            return { name: name, index: i };
+          });
+          const target = find(nameWithIndex, x => x.name === toolbarItemName);
+          if (target) {
+            const widget = find(
+              panel.toolbar.children(),
+              (value, idx) => idx === target.index
+            );
+            if (widget) {
+              panel.toolbar.layout?.removeWidget(widget);
+              widget.dispose();
             }
+          }
         });
-        notebookTracker.widgetAdded.disconnect(widgetAddedSlot)
+        notebookTracker.widgetAdded.disconnect(widgetAddedSlot);
 
         const configValues = settings.get('kernelStatus')
           .composite as JSONObject;
@@ -471,16 +480,19 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
             );
           };
           notebookTracker.forEach(addItemToToolbar);
-          widgetAddedSlot = (tracker : INotebookTracker, panel: NotebookPanel) => {
+          widgetAddedSlot = (
+            tracker: INotebookTracker,
+            panel: NotebookPanel
+          ) => {
             addItemToToolbar(panel);
-          }
+          };
           notebookTracker.widgetAdded.connect(widgetAddedSlot);
         }
       };
       Promise.all([loadSettings, app.restored])
         .then(([settings]) => {
           updateSettings(settings);
-          settings.changed.connect((sender) => updateSettings(sender))
+          settings.changed.connect(sender => updateSettings(sender));
         })
         .catch((reason: Error) => {
           console.error(reason.message);
