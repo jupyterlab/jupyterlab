@@ -262,7 +262,7 @@ export class NotebookModel implements INotebookModel {
       cells.push(cell);
     }
     this._ensureMetadata();
-    const metadata = Object.create(null) as nbformat.INotebookMetadata;
+    const metadata = this.sharedModel.getMetadata();
     for (const key of this.metadata.keys()) {
       metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
     }
