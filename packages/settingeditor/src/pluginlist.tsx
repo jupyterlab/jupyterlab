@@ -56,9 +56,6 @@ export class PluginList extends Widget {
     return this._selection;
   }
   set selection(selection: string) {
-    if (this._selection === selection) {
-      return;
-    }
     this._selection = selection;
     this.update();
   }

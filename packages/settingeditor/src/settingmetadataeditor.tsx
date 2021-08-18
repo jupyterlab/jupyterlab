@@ -4,14 +4,13 @@ import { PartialJSONObject } from '@lumino/coreutils';
 import { showDialog } from '@jupyterlab/apputils';
 import React from 'react';
 import { ISettingEditorRegistry } from './tokens';
+import { Button } from '@material-ui/core';
 
 interface IProps extends IMetadataEditorProps {
   settings: ISettingRegistry.IPlugin;
   registry: ISettingRegistry;
   editorRegistry: ISettingEditorRegistry;
 }
-
-const RESET_BUTTON_TEXT = 'Restore to Defaults';
 
 export class SettingsMetadataEditor extends MetadataEditor {
   _settings: ISettingRegistry.IPlugin;
@@ -26,8 +25,10 @@ export class SettingsMetadataEditor extends MetadataEditor {
     this._settings = options.settings;
     this.id = options.settings.id;
     this.handleChange = this.handleChange.bind(this);
+    this.toggleCollapse = this.toggleCollapse.bind(this);
     this._settingRegistry = options.registry;
     this._editorRegistry = options.editorRegistry;
+    this.addClass('jp-MetadataEditorWidget');
 
     void this.initializeMetadata();
   }
@@ -37,15 +38,6 @@ export class SettingsMetadataEditor extends MetadataEditor {
   }
   set settings(newSettings: Settings) {
     this._registry = newSettings;
-    this.updateResetButton();
-  }
-
-  updateResetButton(): void {
-    if (this._registry?.modifiedFields?.length > 0) {
-      this.resetButtonText = RESET_BUTTON_TEXT;
-    } else {
-      this.resetButtonText = undefined;
-    }
     this.update();
   }
 
@@ -276,12 +268,35 @@ export class SettingsMetadataEditor extends MetadataEditor {
     return JSON.stringify(formattedSettings);
   }
 
-  getSaveButtonText(): string {
-    return '';
+  renderSaveButton(): React.ReactNode {
+    return undefined;
   }
 
-  getHeaderText(): string {
-    return this.schemaDisplayName ?? '';
+  toggleCollapse(e: any) {
+    this.collapsed = !this.collapsed;
+    this.update();
+  }
+
+  renderHeader(): React.ReactNode {
+    return (
+      <div className="jp-SettingsHeader">
+        <Button
+          onClick={this.toggleCollapse}
+          className="jp-SettingsHeader-Name"
+        >
+          {`${this.schemaDisplayName ?? ''} Settings`}
+        </Button>
+        {this._registry?.modifiedFields?.length > 0 ? (
+          <Button
+            onClick={(e: any) => {
+              this.reset();
+            }}
+          >
+            Restore to Default
+          </Button>
+        ) : undefined}
+      </div>
+    );
   }
 
   saveMetadata(): void {
@@ -295,7 +310,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
     void this._registry
       .save(this.getFormattedSettings())
       .then(() => {
-        this.updateResetButton();
+        this.update();
       })
       .catch(reason => {
         void showDialog({

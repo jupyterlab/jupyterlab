@@ -44,7 +44,7 @@ export class PluginEditor extends Widget {
         const offsetTop =
           editor.node.offsetTop + (editor.parent?.node?.offsetTop ?? 0);
         if (
-          this.node.scrollTop >= (editor.parent?.node?.offsetTop ?? 0) &&
+          this.node.scrollTop + 1 >= (editor.parent?.node?.offsetTop ?? 0) &&
           // If top of editor is visible
           (offsetTop >= this.node.scrollTop ||
             // If the top is above the view and the bottom is below the view
@@ -199,6 +199,8 @@ export class PluginEditor extends Widget {
   confirm(id: string): Promise<void> {
     const editor = this._editors.find(editor => editor.id === id);
     if (editor) {
+      editor.collapsed = false;
+      editor.update();
       editor.node?.scrollIntoView();
     }
     if (this.isHidden || !this.isAttached || !this.isDirty) {

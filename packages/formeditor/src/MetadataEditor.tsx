@@ -171,6 +171,7 @@ export class MetadataEditor extends ReactWidget {
   widgetClass: string;
   themeManager?: IThemeManager;
   resetButtonText?: string;
+  collapsed?: boolean;
 
   displayName?: string;
   editor?: CodeEditor.IEditor;
@@ -611,16 +612,44 @@ export class MetadataEditor extends ReactWidget {
     this.allTags = allTags;
   }
 
-  getHeaderText(): string {
+  renderHeader(): React.ReactNode {
     let headerText = `Edit "${this.displayName}"`;
     if (!this.name) {
       headerText = `Add new ${this.schemaDisplayName}`;
     }
-    return headerText;
+    return (
+      <div className="jp-SettingsHeader">
+        <h3> {headerText} </h3>
+        {this.resetButtonText ? (
+          <Button
+            onClick={(e: any) => {
+              this.reset();
+            }}
+          >
+            {this.resetButtonText}
+          </Button>
+        ) : undefined}
+      </div>
+    );
   }
 
-  getSaveButtonText(): string {
-    return 'Save & Close';
+  renderSaveButton(): React.ReactNode {
+    return (
+      <div
+        className={'jp-metadataEditor-formInput jp-metadataEditor-saveButton'}
+        key={'SaveButton'}
+      >
+        <SaveButton
+          variant="outlined"
+          color="primary"
+          onClick={(): void => {
+            this.saveMetadata();
+          }}
+        >
+          Save & Close
+        </SaveButton>
+      </div>
+    );
   }
 
   reset(): void {
@@ -646,7 +675,6 @@ export class MetadataEditor extends ReactWidget {
         inputElements.push(this.renderField(schemaProperty));
       }
     }
-    const headerText = this.getHeaderText();
     const error =
       this.displayName === '' && this.invalidForm
         ? 'This field is required.'
@@ -661,18 +689,7 @@ export class MetadataEditor extends ReactWidget {
     };
     return (
       <div onKeyPress={onKeyPress} className={ELYRA_METADATA_EDITOR_CLASS}>
-        <div className="jp-SettingsHeader">
-          <h3> {headerText} </h3>
-          {this.resetButtonText ? (
-            <Button
-              onClick={(e: any) => {
-                this.reset();
-              }}
-            >
-              {this.resetButtonText}
-            </Button>
-          ) : undefined}
-        </div>
+        {this.renderHeader()}
         <p style={{ width: '100%', marginBottom: '10px' }}>
           {this.requiredFields &&
             this.requiredFields.length > 0 &&
@@ -701,21 +718,8 @@ export class MetadataEditor extends ReactWidget {
             }}
           />
         ) : null}
-        {inputElements}
-        <div
-          className={'jp-metadataEditor-formInput jp-metadataEditor-saveButton'}
-          key={'SaveButton'}
-        >
-          <SaveButton
-            variant="outlined"
-            color="primary"
-            onClick={(): void => {
-              this.saveMetadata();
-            }}
-          >
-            {this.getSaveButtonText()}
-          </SaveButton>
-        </div>
+        {this.collapsed ? undefined : inputElements}
+        {this.renderSaveButton()}
       </div>
     );
   }

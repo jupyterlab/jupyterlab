@@ -261,6 +261,16 @@
 #setting-editor .jp-SettingsHeader {
   display: flex;
   flex: auto;
+  justify-content: space-between;
+}
+
+#setting-editor .jp-MetadataEditorWidget {
+  padding-top: 60px;
+  margin-top: -60px;
+}
+
+#setting-editor .MuiCheckbox-colorSecondary.Mui-checked {
+  color: var(--jp-brand-color1);
 }
 
 #setting-editor .jp-SettingsHeader button {
