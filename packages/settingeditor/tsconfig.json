@@ -16,10 +16,10 @@
       "path": "../codeeditor"
     },
     {
-      "path": "../inspector"
+      "path": "../formeditor"
     },
     {
-      "path": "../formeditor"
+      "path": "../inspector"
     },
     {
       "path": "../rendermime"

@@ -1,19 +1,36 @@
 import {
-  DIRTY_CLASS,
+  ArrayInput,
+  DropDown,
   IMetadataEditorProps,
-  MetadataEditor
+  MetadataEditor,
+  TextInput
 } from '@jupyterlab/formeditor';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { showDialog } from '@jupyterlab/apputils';
+import { Checkbox, FormControlLabel, InputLabel } from '@material-ui/core';
+import React from 'react';
+import { ISettingEditorRegistry } from './tokens';
 
 interface IProps extends IMetadataEditorProps {
   settings: ISettingRegistry.IPlugin;
+  registry: ISettingRegistry;
+  editorRegistry: ISettingEditorRegistry;
 }
+
+interface IInputProps {
+  handleChange: (value: any) => void;
+  value?: any;
+  uihints: any;
+}
+
+const RESET_BUTTON_TEXT = 'Restore to Defaults';
 
 export class SettingsMetadataEditor extends MetadataEditor {
   _settings: ISettingRegistry.IPlugin;
-  _registry: ISettingRegistry.ISettings;
+  _registry: Settings;
+  _settingRegistry: ISettingRegistry;
+  _editorRegistry: ISettingEditorRegistry;
   defaultMetadata: any;
   id: string;
 
@@ -21,23 +38,142 @@ export class SettingsMetadataEditor extends MetadataEditor {
     super(options);
     this._settings = options.settings;
     this.id = options.settings.id;
+    this.handleChange = this.handleChange.bind(this);
+    options.editorRegistry.addRenderer('textinput', this.renderTextInput);
+    options.editorRegistry.addRenderer('number', this.renderTextInput);
+    options.editorRegistry.addRenderer('integer', this.renderTextInput);
+    options.editorRegistry.addRenderer('string', this.renderTextInput);
+    options.editorRegistry.addRenderer('dropdown', this.renderDropdown);
+    options.editorRegistry.addRenderer('boolean', this.renderCheckbox);
+    options.editorRegistry.addRenderer('array', this.renderStringArray);
+    this._settingRegistry = options.registry;
+    this._editorRegistry = options.editorRegistry;
+
     void this.initializeMetadata();
   }
 
-  get settings(): ISettingRegistry.ISettings {
-    return this._registry;
-  }
-  set settings(newSettings: ISettingRegistry.ISettings) {
-    this._registry = newSettings;
+  renderDropdown(props: IInputProps): any {
+    return (
+      <DropDown
+        label={props.uihints.title}
+        key={`${props.uihints.title?.replace(' ', '')}DropDown`}
+        description={props.uihints.description}
+        defaultError={props.uihints.error ?? ''}
+        placeholder={props.uihints.placeholder}
+        defaultValue={props.uihints.default}
+        readonly={props.uihints.enum !== undefined}
+        initialValue={props.value}
+        options={props.uihints.enum}
+        onChange={(value: any): void => {
+          props.handleChange(value);
+        }}
+      />
+    );
   }
 
-  hasModifiedSettings(): boolean {
-    return !!this._settings.modified;
+  renderTextInput(props: IInputProps): any {
+    return (
+      <TextInput
+        label={props.uihints.title}
+        description={props.uihints.description}
+        key={`${props.uihints.title?.replace(' ', '')}TextInput`}
+        fieldName={props.uihints.title?.replace(' ', '')}
+        numeric={props.uihints.field_type === 'number'}
+        defaultValue={props.value || props.uihints.default || ''}
+        secure={props.uihints.secure}
+        defaultError={props.uihints.error}
+        placeholder={props.uihints.placeholder}
+        onChange={(value: any): void => {
+          props.handleChange(value);
+        }}
+      />
+    );
+  }
+
+  renderCheckbox(props: IInputProps): any {
+    return (
+      <div
+        className="jp-metadataEditor-formInput"
+        key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
+      >
+        <FormControlLabel
+          className="jp-metadataEditor-formInput"
+          key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
+          control={
+            <Checkbox
+              checked={props.value}
+              onChange={(e: any, checked: boolean) => {
+                props.handleChange(checked);
+              }}
+            />
+          }
+          label={props.uihints.title}
+        />
+      </div>
+    );
+  }
+
+  renderStringArray(props: IInputProps): any {
+    return (
+      <div
+        className="jp-metadataEditor-formInput"
+        key={`${props.uihints.title?.replace(' ', '')}Array`}
+        style={{ flexBasis: '100%' }}
+      >
+        <InputLabel> {props.uihints.title} </InputLabel>
+        <ArrayInput
+          onChange={(values: string[]) => {
+            props.handleChange(values);
+          }}
+          values={props.value ?? ([] as string[])}
+        />
+      </div>
+    );
+  }
+
+  get settings(): Settings {
+    return this._registry;
+  }
+  set settings(newSettings: Settings) {
+    this._registry = newSettings;
+    this.updateResetButton();
+  }
+
+  updateResetButton(): void {
+    if (this._registry?.modifiedFields?.length > 0) {
+      this.resetButtonText = RESET_BUTTON_TEXT;
+    } else {
+      this.resetButtonText = undefined;
+    }
+    this.update();
   }
 
   reset(): void {
-    this.metadata = this.defaultMetadata;
+    for (const field of this._registry.modifiedFields) {
+      void this._registry.remove(field);
+    }
     this.update();
+  }
+
+  handleChange(fieldName: string, value: any): void {
+    this.metadata[fieldName] = value;
+    void this.saveMetadata();
+    this.update();
+  }
+
+  renderField(fieldName: string): React.ReactNode {
+    let uihints = this.schema[fieldName].uihints;
+    uihints = {
+      ...this.schema[fieldName],
+      ...uihints
+    };
+    return this._editorRegistry.getRenderer(uihints.field_type ?? 'string')?.({
+      value: this.metadata[fieldName],
+      handleChange: (value: any) => {
+        this.handleChange(fieldName, value);
+      },
+      uihints
+    });
   }
 
   async initializeMetadata() {
@@ -50,7 +186,6 @@ export class SettingsMetadataEditor extends MetadataEditor {
     } catch {
       this.metadata = {};
     }
-    this.handleDirtyState(false);
     this.defaultMetadata = {};
     const settings = this._settings.schema;
     const currentSettings = this.metadata;
@@ -66,7 +201,17 @@ export class SettingsMetadataEditor extends MetadataEditor {
           ref || prop
         ] as PartialJSONObject)
       };
-      if (Object.keys(options.properties ?? {}).length > 0) {
+      if (options.renderer_id) {
+        properties[prop] = {
+          title: options.title,
+          type: options.type,
+          uihints: {
+            field_type: options.renderer_id
+          }
+        };
+        this.metadata[prop] = currentSettings[prop] ?? options.default;
+        this.defaultMetadata[prop] = options.default;
+      } else if (Object.keys(options.properties ?? {}).length > 0) {
         for (const subProp in options.properties) {
           const subOptions = options.properties[subProp];
           if (subOptions.enum) {
@@ -112,7 +257,10 @@ export class SettingsMetadataEditor extends MetadataEditor {
         this.defaultMetadata[prop] = options.default;
       } else if (typeof options.type === 'object') {
         properties[prop] = {
-          title: options.title
+          title: options.title,
+          uihints: {
+            field_type: 'string'
+          }
         };
         this.metadata[prop] = currentSettings[prop] ?? options.default;
         this.defaultMetadata[prop] = options.default;
@@ -166,9 +314,6 @@ export class SettingsMetadataEditor extends MetadataEditor {
       } else {
         this.schemaPropertiesByCategory[category] = [schemaProperty];
       }
-    }
-    if (this.hasModifiedSettings()) {
-      this.resetButtonText = 'Restore to Defaults';
     }
     this.displayName = undefined;
     this.update();
@@ -231,7 +376,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
   }
 
   getSaveButtonText(): string {
-    return 'Save';
+    return '';
   }
 
   getHeaderText(): string {
@@ -239,7 +384,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
   }
 
   saveMetadata(): void {
-    if (!this.dirty || !this._settings) {
+    if (!this._registry) {
       return undefined;
     }
     if (this.hasInvalidFields()) {
@@ -249,7 +394,7 @@ export class SettingsMetadataEditor extends MetadataEditor {
     void this._registry
       .save(this.getFormattedSettings())
       .then(() => {
-        this.handleDirtyState(false);
+        this.updateResetButton();
       })
       .catch(reason => {
         void showDialog({
@@ -279,28 +424,5 @@ export class SettingsMetadataEditor extends MetadataEditor {
       }
       return false;
     }
-  }
-
-  handleDirtyState(dirty: boolean): void {
-    super.handleDirtyState(dirty);
-    if (
-      this.dirty &&
-      this.parent?.parent?.parent &&
-      !this.parent?.parent?.parent?.title?.className?.includes(DIRTY_CLASS)
-    ) {
-      this.parent.parent.parent.title.className += DIRTY_CLASS;
-    } else if (!this.dirty && this.parent?.parent?.parent) {
-      this.parent.parent.parent.title.className = this.parent.parent.parent.title.className.replace(
-        DIRTY_CLASS,
-        ''
-      );
-    }
-
-    if (this.hasModifiedSettings()) {
-      this.resetButtonText = 'Restore to Defaults';
-    } else {
-      this.resetButtonText = undefined;
-    }
-    this.parent?.parent?.parent?.update();
   }
 }

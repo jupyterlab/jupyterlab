@@ -19,6 +19,7 @@ import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import { PluginList } from './pluginlist';
 import { SettingEditor } from './settingeditor';
 import { SettingsMetadataEditor } from './settingmetadataeditor';
+import { ISettingEditorRegistry } from './tokens';
 
 /**
  * The class name added to all plugin editors.
@@ -66,7 +67,15 @@ export class PluginEditor extends Widget {
     const layout = (this.layout = new PanelLayout());
     const modifiedLayout = new Panel();
     const otherLayout = new Panel();
+    const modifiedHeader = document.createElement('div');
+    modifiedHeader.textContent = 'Modified';
+    modifiedHeader.className = 'jp-SettingEditor-header';
+    layout.addWidget(new Widget({ node: modifiedHeader }));
     layout.addWidget(modifiedLayout);
+    const otherHeader = document.createElement('div');
+    otherHeader.textContent = 'Other Settings';
+    otherHeader.className = 'jp-SettingEditor-header';
+    layout.addWidget(new Widget({ node: otherHeader }));
     layout.addWidget(otherLayout);
     const editors = (this._editors = [] as SettingsMetadataEditor[]);
     const setupEditors = async () => {
@@ -91,14 +100,16 @@ export class PluginEditor extends Widget {
           editorServices: options.editorServices,
           status: options.status,
           themeManager: options.themeManager,
-          settings: plugin
+          settings: plugin,
+          registry: options.registry,
+          editorRegistry: options.editorRegistry
         });
         editors.push(newEditor);
         try {
           const registry = await options.registry;
           const settings = (await registry.load(plugin.id)) as Settings;
           if (!newEditor.isAttached) {
-            if (settings.modified) {
+            if (settings.modifiedFields.length > 0) {
               modifiedLayout.addWidget(newEditor);
             } else {
               otherLayout.addWidget(newEditor);
@@ -188,7 +199,7 @@ export class PluginEditor extends Widget {
   confirm(id: string): Promise<void> {
     const editor = this._editors.find(editor => editor.id === id);
     if (editor) {
-      editor.node?.scrollIntoView(true);
+      editor.node?.scrollIntoView();
     }
     if (this.isHidden || !this.isAttached || !this.isDirty) {
       return Promise.resolve(undefined);
@@ -275,6 +286,8 @@ export namespace PluginEditor {
     themeManager?: IThemeManager;
 
     registry: ISettingRegistry;
+
+    editorRegistry: ISettingEditorRegistry;
 
     /**
      * The application language translator.

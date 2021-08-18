@@ -22,8 +22,10 @@ import {
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
+  ISettingEditorRegistry,
   ISettingEditorTracker,
-  SettingEditor
+  SettingEditor,
+  SettingEditorRegistry
 } from '@jupyterlab/settingeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -45,7 +47,7 @@ namespace CommandIDs {
 /**
  * The default setting editor extension.
  */
-const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
+const trackerPlugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
   requires: [
     ILayoutRestorer,
@@ -54,7 +56,8 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     IStateDB,
     IRenderMimeRegistry,
     ILabStatus,
-    ITranslator
+    ITranslator,
+    ISettingEditorRegistry
   ],
   optional: [ICommandPalette, IThemeManager],
   autoStart: true,
@@ -74,6 +77,7 @@ function activate(
   rendermime: IRenderMimeRegistry,
   status: ILabStatus,
   translator: ITranslator,
+  editorRegistry: ISettingEditorRegistry,
   palette: ICommandPalette | null,
   themeManager?: IThemeManager
 ): ISettingEditorTracker {
@@ -101,7 +105,7 @@ function activate(
         return;
       }
 
-      const key = plugin.id;
+      const key = trackerPlugin.id;
       const when = app.restored;
 
       editor = new SettingEditor({
@@ -112,6 +116,7 @@ function activate(
         registry,
         state,
         translator,
+        editorRegistry,
         when
       });
 
@@ -173,4 +178,16 @@ function activate(
 
   return tracker;
 }
-export default plugin;
+
+const activateRegistry = (app: JupyterFrontEnd): ISettingEditorRegistry => {
+  return new SettingEditorRegistry();
+};
+
+const registryPlugin: JupyterFrontEndPlugin<ISettingEditorRegistry> = {
+  id: '@jupyterlab/settingeditor-extension:registry-plugin',
+  provides: ISettingEditorRegistry,
+  autoStart: true,
+  activate: activateRegistry
+};
+
+export default [trackerPlugin, registryPlugin];

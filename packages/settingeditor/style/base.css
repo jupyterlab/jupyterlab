@@ -129,6 +129,22 @@
   font-weight: var(--jp-content-heading-font-weight);
 }
 
+#setting-editor .jp-PluginList li.jp-mod-selected span {
+  color: var(--jp-brand-color1);
+}
+
+#setting-editor .jp-SettingEditor-header {
+  font-size: var(--jp-content-font-size4);
+  font-weight: var(--jp-content-heading-font-weight);
+  color: var(--jp-ui-font-color0);
+  padding: 20px 0 10px 20px;
+  border-bottom: 1px solid var(--jp-border-color2);
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background-color: var(--jp-layout-color0);
+}
+
 #setting-editor
   ul.jp-PluginList
   li.jp-mod-selected
@@ -240,6 +256,20 @@
   border: 1px solid transparent;
   font-weight: bold;
   height: var(--jp-private-settingeditor-row-height);
+}
+
+#setting-editor .jp-SettingsHeader {
+  display: flex;
+  flex: auto;
+}
+
+#setting-editor .jp-SettingsHeader button {
+  white-space: nowrap;
+}
+
+#setting-editor .jp-SettingsHeader button:hover {
+  background-color: transparent;
+  color: var(--jp-brand-color1);
 }
 
 #setting-editor .jp-SettingsTableEditor td {

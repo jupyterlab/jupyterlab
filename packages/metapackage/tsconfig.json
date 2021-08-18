@@ -106,6 +106,9 @@
       "path": "../fileeditor-extension"
     },
     {
+      "path": "../formeditor"
+    },
+    {
       "path": "../help-extension"
     },
     {

@@ -14,6 +14,15 @@ export const ISettingEditorTracker = new Token<ISettingEditorTracker>(
 );
 /* tslint:enable */
 
+export interface ISettingEditorRegistry {
+  addRenderer: (id: string, renderer: (props: any) => any) => void;
+  getRenderer: (id: string) => (props: any) => any;
+}
+
+export const ISettingEditorRegistry = new Token<ISettingEditorRegistry>(
+  '@jupyterlab/settingeditor:ISettingEditorRegistry'
+);
+
 /**
  * A class that tracks the setting editor.
  */

@@ -285,7 +285,7 @@ namespace Private {
     const items = [];
     for (const plugin of plugins) {
       const settings: Settings = (await registry.load(plugin.id)) as Settings;
-      if (settings.modified) {
+      if (settings.modifiedFields.length > 0) {
         modified.push(plugin);
       } else {
         items.push(plugin);

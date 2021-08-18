@@ -718,16 +718,23 @@ export class Settings implements ISettingRegistry.ISettings {
     return this.plugin.raw;
   }
 
-  get modified(): boolean {
+  get modifiedFields(): string[] {
+    const modifiedFields = [];
     for (const key in this.schema.properties) {
-      if (
-        this.get(key).user !== undefined &&
-        this.get(key).user !== this.default(key)
-      ) {
-        return true;
+      const user = this.get(key).user;
+      const defaultValue = this.default(key);
+      if (user !== undefined && user !== defaultValue) {
+        if (typeof user === 'object' && typeof defaultValue === 'object') {
+          for (const subKey in user) {
+            if ((defaultValue as any)[subKey] !== (user as any)[subKey]) {
+              modifiedFields.push(key);
+            }
+          }
+        }
+        modifiedFields.push(key);
       }
     }
-    return false;
+    return modifiedFields;
   }
 
   /**

@@ -18,6 +18,7 @@ import * as ReactDOM from 'react-dom';
 import { PluginEditor } from './plugineditor';
 import { PluginList } from './pluginlist';
 import { SplitPanel } from './splitpanel';
+import { ISettingEditorRegistry } from './tokens';
 
 /**
  * The ratio panes in the setting editor.
@@ -45,7 +46,14 @@ export class SettingEditor extends Widget {
     this.key = options.key;
     this.state = options.state;
 
-    const { name, code, editorServices, status, themeManager } = options;
+    const {
+      name,
+      code,
+      editorServices,
+      status,
+      themeManager,
+      editorRegistry
+    } = options;
     const layout = (this.layout = new PanelLayout());
     const registry = (this.registry = options.registry);
     const panel = (this._panel = new SplitPanel({
@@ -60,7 +68,8 @@ export class SettingEditor extends Widget {
       editorServices,
       status,
       themeManager,
-      registry
+      registry,
+      editorRegistry
     }));
     const confirm = (id: string) => {
       return editor.confirm(id);
@@ -350,6 +359,8 @@ export namespace SettingEditor {
     themeManager?: IThemeManager;
 
     registry: ISettingRegistry;
+
+    editorRegistry: ISettingEditorRegistry;
 
     /**
      * The application language translator.

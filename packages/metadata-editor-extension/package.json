@@ -44,6 +44,7 @@
     "@jupyterlab/application": "^3.3.0-alpha.0",
     "@jupyterlab/apputils": "^3.3.0-alpha.0",
     "@jupyterlab/codeeditor": "^3.3.0-alpha.0",
+    "@jupyterlab/formeditor": "^3.0.0-alpha.0",
     "@jupyterlab/metadata": "^3.0.0-alpha.0",
     "@jupyterlab/ui-components": "^3.3.0-alpha.0",
     "@lumino/algorithm": "^1.3.3",

@@ -112,6 +112,9 @@
       "path": "./packages/fileeditor-extension"
     },
     {
+      "path": "./packages/formeditor"
+    },
+    {
       "path": "./packages/help-extension"
     },
     {
