@@ -6,7 +6,7 @@
   "properties": {
     "numberingH1": {
       "title": "Enable h1 numbering",
-      "description": "Whether to number first level headings",
+      "description": "Whether to number first-level headings",
       "type": "boolean",
       "default": true
     },
@@ -18,8 +18,8 @@
     },
     "syncCollapseState": {
       "type": "boolean",
-      "title": "syncCollapseState",
-      "description": "If set to true, when a header is collapsed in the ToC the corresponding section in the notebook is collapsed as well and vice versa.",
+      "title": "Synchronize collapse state",
+      "description": "If set to true, when a header is collapsed in the table of contents the corresponding section in the notebook is collapsed as well and vice versa.",
       "default": false
     }
   },
