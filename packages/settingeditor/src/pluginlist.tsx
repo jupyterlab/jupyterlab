@@ -3,19 +3,36 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { ReactWidget } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { classes, LabIcon, settingsIcon } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+
+/**
+ * The JupyterLab plugin schema key for the setting editor
+ * icon class of a plugin.
+ */
+const ICON_KEY = 'jupyter.lab.setting-icon';
+
+/**
+ * The JupyterLab plugin schema key for the setting editor
+ * icon class of a plugin.
+ */
+const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
+
+/**
+ * The JupyterLab plugin schema key for the setting editor
+ * icon label of a plugin.
+ */
+const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
 
 /**
  * A list of plugins with editable settings.
  */
-export class PluginList extends Widget {
+export class PluginList extends ReactWidget {
   /**
    * Create a new plugin list.
    */
@@ -28,6 +45,16 @@ export class PluginList extends Widget {
     this.registry.pluginChanged.connect(() => {
       this.update();
     }, this);
+    this.mapPlugins = this.mapPlugins.bind(this);
+
+    this._allPlugins = PluginList.sortPlugins(this.registry).filter(plugin => {
+      const { schema } = plugin;
+      const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
+      const editable = Object.keys(schema.properties || {}).length > 0;
+      const extensible = schema.additionalProperties !== false;
+
+      return !deprecated && (editable || extensible);
+    });
   }
 
   /**
@@ -95,19 +122,40 @@ export class PluginList extends Widget {
     this.node.removeEventListener('mousedown', this);
   }
 
+  protected async updateModifiedPlugins(): Promise<void> {
+    const modifiedPlugins = [];
+    for (const plugin of this._allPlugins) {
+      const settings: Settings = (await this.registry.load(
+        plugin.id
+      )) as Settings;
+      if (settings.modifiedFields.length > 0) {
+        modifiedPlugins.push(plugin);
+      }
+    }
+    if (this._modifiedPlugins.length !== modifiedPlugins.length) {
+      this._modifiedPlugins = modifiedPlugins;
+      this.update();
+      return;
+    }
+    for (const plugin of modifiedPlugins) {
+      if (!this._modifiedPlugins.find(p => p.id === plugin.id)) {
+        this._modifiedPlugins = modifiedPlugins;
+        this.update();
+        return;
+      }
+    }
+  }
+
   /**
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    const { node, registry } = this;
-    const selection = this._selection;
-    const translation = this.translator;
-
-    void Private.populateList(registry, selection, node, translation);
-    const ul = node.querySelector('ul');
+    void this.updateModifiedPlugins();
+    const ul = this.node.querySelector('ul');
     if (ul && this._scrollTop !== undefined) {
       ul.scrollTop = this._scrollTop;
     }
+    super.onUpdateRequest(msg);
   }
 
   /**
@@ -148,78 +196,6 @@ export class PluginList extends Widget {
       });
   }
 
-  protected translator: ITranslator;
-  private _changed = new Signal<this, void>(this);
-  private _confirm: (id: string) => Promise<void>;
-  private _scrollTop: number | undefined = 0;
-  private _selection = '';
-}
-
-/**
- * A namespace for `PluginList` statics.
- */
-export namespace PluginList {
-  /**
-   * The instantiation options for a plugin list.
-   */
-  export interface IOptions {
-    /**
-     * A function that allows for asynchronously confirming a selection.
-     *
-     * #### Notest
-     * If the promise returned by the function resolves, then the selection will
-     * succeed and emit an event. If the promise rejects, the selection is not
-     * made.
-     */
-    confirm: (id: string) => Promise<void>;
-
-    /**
-     * The setting registry for the plugin list.
-     */
-    registry: ISettingRegistry;
-
-    /**
-     * The setting registry for the plugin list.
-     */
-    translator?: ITranslator;
-  }
-
-  /**
-   * Sort a list of plugins by title and ID.
-   */
-  export function sortPlugins(
-    registry: ISettingRegistry
-  ): ISettingRegistry.IPlugin[] {
-    return Object.keys(registry.plugins)
-      .map(plugin => registry.plugins[plugin]!)
-      .sort((a, b) => {
-        return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
-      });
-  }
-}
-
-/**
- * A namespace for private module data.
- */
-namespace Private {
-  /**
-   * The JupyterLab plugin schema key for the setting editor
-   * icon class of a plugin.
-   */
-  const ICON_KEY = 'jupyter.lab.setting-icon';
-
-  /**
-   * The JupyterLab plugin schema key for the setting editor
-   * icon class of a plugin.
-   */
-  const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
-
-  /**
-   * The JupyterLab plugin schema key for the setting editor
-   * icon label of a plugin.
-   */
-  const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
-
   /**
    * Check the plugin for a rendering hint's value.
    *
@@ -230,7 +206,7 @@ namespace Private {
    * 2. Data set by the plugin author as a schema default.
    * 3. Data set by the plugin author as a top-level key of the schema.
    */
-  function getHint(
+  getHint(
     key: string,
     registry: ISettingRegistry,
     plugin: ISettingRegistry.IPlugin
@@ -259,76 +235,50 @@ namespace Private {
     return typeof hint === 'string' ? hint : '';
   }
 
-  /**
-   * Populate the plugin list.
-   */
-  export async function populateList(
-    registry: ISettingRegistry,
-    selection: string,
-    node: HTMLElement,
-    translator?: ITranslator
-  ): Promise<void> {
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    const plugins = PluginList.sortPlugins(registry).filter(plugin => {
-      const { schema } = plugin;
-      const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
-      const editable = Object.keys(schema.properties || {}).length > 0;
-      const extensible = schema.additionalProperties !== false;
+  mapPlugins(plugin: ISettingRegistry.IPlugin) {
+    const { id, schema, version } = plugin;
+    const trans = this.translator.load('jupyterlab');
+    const title =
+      typeof schema.title === 'string' ? trans._p('schema', schema.title) : id;
+    const description =
+      typeof schema.description === 'string'
+        ? trans._p('schema', schema.description)
+        : '';
+    const itemTitle = `${description}\n${id}\n${version}`;
+    const icon = this.getHint(ICON_KEY, this.registry, plugin);
+    const iconClass = this.getHint(ICON_CLASS_KEY, this.registry, plugin);
+    const iconTitle = this.getHint(ICON_LABEL_KEY, this.registry, plugin);
 
-      return !deprecated && (editable || extensible);
-    });
-    const modified = [];
-    const items = [];
-    for (const plugin of plugins) {
-      const settings: Settings = (await registry.load(plugin.id)) as Settings;
-      if (settings.modifiedFields.length > 0) {
-        modified.push(plugin);
-      } else {
-        items.push(plugin);
-      }
-    }
-    const mapPlugins = (plugin: ISettingRegistry.IPlugin) => {
-      const { id, schema, version } = plugin;
-      const title =
-        typeof schema.title === 'string'
-          ? trans._p('schema', schema.title)
-          : id;
-      const description =
-        typeof schema.description === 'string'
-          ? trans._p('schema', schema.description)
-          : '';
-      const itemTitle = `${description}\n${id}\n${version}`;
-      const icon = getHint(ICON_KEY, registry, plugin);
-      const iconClass = getHint(ICON_CLASS_KEY, registry, plugin);
-      const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
+    return (
+      <li
+        className={id === this.selection ? 'jp-mod-selected' : ''}
+        data-id={id}
+        key={id}
+        title={itemTitle}
+      >
+        {id === this.selection ? (
+          <div className="jp-SelectedIndicator" />
+        ) : undefined}
+        <LabIcon.resolveReact
+          icon={icon || (iconClass ? undefined : settingsIcon)}
+          iconClass={classes(iconClass, 'jp-Icon')}
+          title={iconTitle}
+          tag="span"
+          stylesheet="settingsEditor"
+        />
+        <span>{title}</span>
+      </li>
+    );
+  }
 
-      return (
-        <li
-          className={id === selection ? 'jp-mod-selected' : ''}
-          data-id={id}
-          key={id}
-          title={itemTitle}
-        >
-          {id === selection ? (
-            <div className="jp-SelectedIndicator" />
-          ) : undefined}
-          <LabIcon.resolveReact
-            icon={icon || (iconClass ? undefined : settingsIcon)}
-            iconClass={classes(iconClass, 'jp-Icon')}
-            title={iconTitle}
-            tag="span"
-            stylesheet="settingsEditor"
-          />
-          <span>{title}</span>
-        </li>
-      );
-    };
-    const modifiedItems = modified.map(mapPlugins);
-    const otherItems = items.map(mapPlugins);
+  render(): React.ReactElement<any> {
+    console.log('render');
+    const modifiedItems = this._modifiedPlugins.map(this.mapPlugins);
+    const otherItems = this._allPlugins
+      .filter(plugin => !this._modifiedPlugins.includes(plugin))
+      .map(this.mapPlugins);
 
-    ReactDOM.unmountComponentAtNode(node);
-    ReactDOM.render(
+    return (
       <div>
         {modifiedItems.length > 0 ? (
           <div>
@@ -338,8 +288,58 @@ namespace Private {
         ) : undefined}
         <p className="jp-PluginList-header">Settings</p>
         <ul>{otherItems}</ul>
-      </div>,
-      node
+      </div>
     );
+  }
+
+  protected translator: ITranslator;
+  private _changed = new Signal<this, void>(this);
+  private _modifiedPlugins: ISettingRegistry.IPlugin[] = [];
+  private _allPlugins: ISettingRegistry.IPlugin[] = [];
+  private _confirm: (id: string) => Promise<void>;
+  private _scrollTop: number | undefined = 0;
+  private _selection = '';
+}
+
+/**
+ * A namespace for `PluginList` statics.
+ */
+export namespace PluginList {
+  /**
+   * The instantiation options for a plugin list.
+   */
+  export interface IOptions {
+    /**
+     * A function that allows for asynchronously confirming a selection.
+     *
+     * #### Notest
+     * If the promise returned by the function resolves, then the selection will
+     * succeed and emit an event. If the promise rejects, the selection is not
+     * made.
+     */
+    // confirm: (id: string) => Promise<void>;
+
+    /**
+     * The setting registry for the plugin list.
+     */
+    registry: ISettingRegistry;
+
+    /**
+     * The setting registry for the plugin list.
+     */
+    translator?: ITranslator;
+  }
+
+  /**
+   * Sort a list of plugins by title and ID.
+   */
+  export function sortPlugins(
+    registry: ISettingRegistry
+  ): ISettingRegistry.IPlugin[] {
+    return Object.keys(registry.plugins)
+      .map(plugin => registry.plugins[plugin]!)
+      .sort((a, b) => {
+        return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
+      });
   }
 }
