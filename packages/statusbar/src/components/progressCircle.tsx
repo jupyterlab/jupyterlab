@@ -1,6 +1,4 @@
 import React from 'react';
-import { progressCircleStyle } from '../style/circleBar';
-
 export namespace ProgressCircle {
   /**
    * Props for the ProgressBar.
@@ -36,7 +34,7 @@ export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
     return shape;
   };
   return (
-    <div className={progressCircleStyle(props.width, props.height)}>
+    <div className={'jp-Statusbar-ProgressCircle'}>
       <svg viewBox="0 0 250 250">
         <circle
           cx="125"

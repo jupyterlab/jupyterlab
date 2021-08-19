@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { fillerItem, progressBarItem } from '../style/progressBar';
 
 /**
  * A namespace for ProgressBar statics.
@@ -35,7 +34,7 @@ export namespace ProgressBar {
 export function ProgressBar(props: ProgressBar.IProps): JSX.Element {
   const { width, ...rest } = props;
   return (
-    <div className={progressBarItem(width)}>
+    <div className={'jp-Statusbar-ProgressBar-progress-bar'}>
       <Filler {...rest} contentWidth={width} />
     </div>
   );
@@ -72,7 +71,6 @@ namespace Filler {
 function Filler(props: Filler.IProps) {
   return (
     <div
-      className={fillerItem(props.contentWidth)}
       style={{
         width: `${props.percentage}%`
       }}

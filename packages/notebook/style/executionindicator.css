@@ -24,12 +24,14 @@
   visibility: hidden;
   height: auto;
   width: fit-content;
+  width: -moz-fit-content;
   background-color: var(--jp-layout-color2);
   color: var(--jp-ui-font-color1);
   text-align: justify;
   border-radius: 6px;
   padding: 0 5px;
   position: fixed;
+  display: table;
 }
 
 .jp-Notebook-ExecutionIndicator-tooltip.up {
