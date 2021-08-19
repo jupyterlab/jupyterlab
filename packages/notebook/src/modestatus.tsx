@@ -1,5 +1,4 @@
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import { Text } from '@jupyterlab/coreutils';
 import { TextItem } from '@jupyterlab/statusbar';
 import {
   ITranslator,
@@ -22,7 +21,7 @@ function CommandEditComponent(
   const trans = (props.translator || nullTranslator).load('jupyterlab');
   return (
     <TextItem
-      source={trans.__('Mode: %1', Text.titleCase(props.notebookMode))}
+      source={trans.__('Mode: %1', props.modeNames[props.notebookMode])}
     />
   );
 }
@@ -44,6 +43,11 @@ namespace CommandEditComponent {
      * Language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Mapping translating the names of modes.
+     */
+    modeNames: Record<NotebookMode, string>;
   }
 }
 
@@ -58,6 +62,10 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
     super(new CommandEditStatus.Model());
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
+    this._modeNames = {
+      command: this._trans.__('Command'),
+      edit: this._trans.__('Edit')
+    };
   }
 
   /**
@@ -69,18 +77,20 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
     }
     this.node.title = this._trans.__(
       'Notebook is in %1 mode',
-      this.model.notebookMode
+      this._modeNames[this.model.notebookMode]
     );
     return (
       <CommandEditComponent
         notebookMode={this.model.notebookMode}
         translator={this.translator}
+        modeNames={this._modeNames}
       />
     );
   }
 
   protected translator: ITranslator;
   private _trans: TranslationBundle;
+  private readonly _modeNames: Record<NotebookMode, string>;
 }
 
 /**
