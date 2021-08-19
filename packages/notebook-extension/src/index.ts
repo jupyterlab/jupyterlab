@@ -92,7 +92,7 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
-import { find, map } from '@lumino/algorithm';
+
 /**
  * The command IDs used by the notebook plugin.
  */
@@ -356,7 +356,7 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin that provides a execution indicator item to the status bar or toolbar.
+ * A plugin that provides a execution indicator item to the status bar.
  */
 export const executionIndicator: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:execution-indicator',
@@ -371,75 +371,18 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
     statusBar: IStatusBar | null,
     settingRegistry: ISettingRegistry | null
   ) => {
-    const toolbarItemName = 'executionProgress';
-
-    const getSettingValue = (
-      settings: ISettingRegistry.ISettings | null
-    ): { showOnToolBar: boolean; showProgress: boolean } => {
-      let showOnToolBar = true;
-      let showProgress = true;
-      if (settings) {
-        const configValues = settings.get('kernelStatus')
-          .composite as JSONObject;
-        if (configValues) {
-          showOnToolBar = !(configValues.showOnStatusBar as boolean);
-          showProgress = configValues.showProgress as boolean;
-        }
-      }
-      return { showOnToolBar, showProgress };
-    };
-
-    const statusbarItem = new ExecutionIndicator(translator);
-
-    const labShellCurrentChanged = (
+    let statusbarItem: ExecutionIndicator;
+    let labShellCurrentChanged: (
       _: ILabShell,
       change: ILabShell.IChangedArgs
-    ) => {
-      const { newValue } = change;
-      if (newValue && notebookTracker.has(newValue)) {
-        const panel = newValue as NotebookPanel;
-        statusbarItem.model!.attachNotebook({
-          content: panel.content,
-          context: panel.sessionContext
-        });
-      }
-    };
+    ) => void;
 
     let statusBarDisposable: IDisposable;
-
-    let widgetAddedSlot: (
-      tracker: INotebookTracker,
-      panel: NotebookPanel
-    ) => void;
 
     const updateSettings = (settings: {
       showOnToolBar: boolean;
       showProgress: boolean;
     }): void => {
-      //Remove old indicator widget on status bar
-      if (statusBarDisposable) {
-        labShell.currentChanged.disconnect(labShellCurrentChanged);
-        statusBarDisposable.dispose();
-      }
-
-      // Remove old indicator widgets on toolbar
-      notebookTracker.forEach(panel => {
-        const nameWithIndex = map(panel.toolbar.names(), (name, i) => {
-          return { name: name, index: i };
-        });
-        const target = find(nameWithIndex, x => x.name === toolbarItemName);
-        if (target) {
-          const widget = find(
-            panel.toolbar.children(),
-            (value, idx) => idx === target.index
-          );
-          if (widget) {
-            panel.toolbar.layout?.removeWidget(widget);
-            widget.dispose();
-          }
-        }
-      });
-      notebookTracker.widgetAdded.disconnect(widgetAddedSlot);
       let { showOnToolBar, showProgress } = settings;
 
       if (!showOnToolBar) {
@@ -448,66 +391,70 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
           // Automatically disable if statusbar missing
           return;
         }
+
+        if (!statusbarItem?.model) {
+          statusbarItem = new ExecutionIndicator(translator);
+          labShellCurrentChanged = (
+            _: ILabShell,
+            change: ILabShell.IChangedArgs
+          ) => {
+            const { newValue } = change;
+            if (newValue && notebookTracker.has(newValue)) {
+              const panel = newValue as NotebookPanel;
+              statusbarItem.model!.attachNotebook({
+                content: panel.content,
+                context: panel.sessionContext
+              });
+            }
+          };
+          statusBarDisposable = statusBar.registerStatusItem(
+            '@jupyterlab/notebook-extension:execution-indicator',
+            {
+              item: statusbarItem,
+              align: 'left',
+              rank: 3,
+              isActive: () => {
+                const current = labShell.currentWidget;
+                return !!current && notebookTracker.has(current);
+              }
+            }
+          );
+
+          statusbarItem.model.attachNotebook({
+            content: notebookTracker.currentWidget?.content,
+            context: notebookTracker.currentWidget?.sessionContext
+          });
+
+          labShell.currentChanged.connect(labShellCurrentChanged);
+        }
+
         statusbarItem.model.displayOption = {
           showOnToolBar,
           showProgress
         };
-
-        statusBarDisposable = statusBar.registerStatusItem(
-          '@jupyterlab/notebook-extension:execution-indicator',
-          {
-            item: statusbarItem,
-            align: 'left',
-            rank: 3,
-            isActive: () => {
-              const current = labShell.currentWidget;
-              return !!current && notebookTracker.has(current);
-            }
-          }
-        );
-        statusbarItem.model.attachNotebook({
-          content: notebookTracker.currentWidget?.content,
-          context: notebookTracker.currentWidget?.sessionContext
-        });
-
-        labShell.currentChanged.connect(labShellCurrentChanged);
       } else {
-        // Toolbar mode, `ExecutionIndicator` item is added to each notebook toolbar.
-        const addItemToToolbar = (panel: NotebookPanel) => {
-          const toolbarItem = new ExecutionIndicator(translator);
-          toolbarItem.model.displayOption = {
-            showOnToolBar,
-            showProgress
-          };
-          toolbarItem.model.attachNotebook({
-            content: panel.content,
-            context: panel.sessionContext
-          });
-
-          panel.toolbar.insertAfter('kernelName', toolbarItemName, toolbarItem);
-        };
-        notebookTracker.forEach(addItemToToolbar);
-        widgetAddedSlot = (tracker: INotebookTracker, panel: NotebookPanel) => {
-          addItemToToolbar(panel);
-        };
-        notebookTracker.widgetAdded.connect(widgetAddedSlot);
+        //Remove old indicator widget on status bar
+        if (statusBarDisposable) {
+          labShell.currentChanged.disconnect(labShellCurrentChanged);
+          statusBarDisposable.dispose();
+        }
       }
     };
 
     if (settingRegistry) {
+      // Indicator is default in tool bar, user needs to specify its
+      // position in settings in order to have indicator on status bar.
       const loadSettings = settingRegistry.load(trackerPlugin.id);
       Promise.all([loadSettings, app.restored])
         .then(([settings]) => {
-          updateSettings(getSettingValue(settings));
+          updateSettings(ExecutionIndicator.getSettingValue(settings));
           settings.changed.connect(sender =>
-            updateSettings(getSettingValue(sender))
+            updateSettings(ExecutionIndicator.getSettingValue(sender))
           );
         })
         .catch((reason: Error) => {
           console.error(reason.message);
         });
-    } else {
-      updateSettings(getSettingValue(null));
     }
   }
 };
@@ -880,6 +827,18 @@ function activateWidgetFactory(
       sessionContextDialogs,
       translator
     )
+  );
+
+  toolbarRegistry.registerFactory<NotebookPanel>(
+    FACTORY,
+    'executionProgress',
+    panel => {
+      return ExecutionIndicator.createExecutionIndicatorItem(
+        panel,
+        translator,
+        settingRegistry?.load(trackerPlugin.id)
+      );
+    }
   );
 
   if (settingRegistry) {

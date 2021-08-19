@@ -21,6 +21,10 @@ import {
   IAnyMessageArgs,
   IKernelConnection
 } from '@jupyterlab/services/src/kernel/kernel';
+import { NotebookPanel } from './panel';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { Widget } from '@lumino/widgets';
+import { JSONObject } from '@lumino/coreutils';
 
 /**
  * A react functional component for rendering execution indicator.
@@ -178,8 +182,8 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
    * Render the execution status item.
    */
   render(): JSX.Element | null {
-    if (this.model === null) {
-      return null;
+    if (this.model === null || !this.model.renderFlag) {
+      return <div></div>;
     } else {
       const nb = this.model.currentNotebook;
 
@@ -192,6 +196,7 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
           />
         );
       }
+
       return (
         <ExecutionIndicatorComponent
           displayOption={this.model.displayOption}
@@ -216,6 +221,7 @@ export namespace ExecutionIndicator {
     constructor() {
       super();
       this._displayOption = { showOnToolBar: true, showProgress: true };
+      this._renderFlag = true;
     }
 
     /**
@@ -441,6 +447,25 @@ export namespace ExecutionIndicator {
       data.needReset = false;
     }
 
+    get renderFlag(): boolean {
+      return this._renderFlag;
+    }
+
+    public updateRenderOption(options: {
+      showOnToolBar: boolean;
+      showProgress: boolean;
+    }): void {
+      if (this.displayOption.showOnToolBar) {
+        if (!options.showOnToolBar) {
+          this._renderFlag = false;
+        } else {
+          this._renderFlag = true;
+        }
+      }
+      this.displayOption.showProgress = options.showProgress;
+      this.stateChanged.emit(void 0);
+    }
+
     /**
      * The option to show the indicator on status bar or toolbar.
      */
@@ -458,6 +483,55 @@ export namespace ExecutionIndicator {
       Notebook,
       Private.IExecutionState
     >();
+
+    private _renderFlag: boolean;
+  }
+
+  export function createExecutionIndicatorItem(
+    panel: NotebookPanel,
+    translator: ITranslator,
+    loadSettings: Promise<ISettingRegistry.ISettings> | undefined
+  ): Widget {
+    const toolbarItem = new ExecutionIndicator(translator);
+    toolbarItem.model.displayOption = {
+      showOnToolBar: true,
+      showProgress: true
+    };
+    toolbarItem.model.attachNotebook({
+      content: panel.content,
+      context: panel.sessionContext
+    });
+
+    panel.disposed.connect(() => {
+      toolbarItem.dispose();
+    });
+    if (loadSettings) {
+      loadSettings
+        .then(settings => {
+          toolbarItem.model.updateRenderOption(getSettingValue(settings));
+          settings.changed.connect(newSettings => {
+            toolbarItem.model.updateRenderOption(getSettingValue(newSettings));
+          });
+        })
+        .catch((reason: Error) => {
+          console.error(reason.message);
+        });
+    }
+    return toolbarItem;
+  }
+
+  export function getSettingValue(
+    settings: ISettingRegistry.ISettings
+  ): { showOnToolBar: boolean; showProgress: boolean } {
+    let showOnToolBar = true;
+    let showProgress = true;
+    const configValues = settings.get('kernelStatus').composite as JSONObject;
+    if (configValues) {
+      showOnToolBar = !(configValues.showOnStatusBar as boolean);
+      showProgress = configValues.showProgress as boolean;
+    }
+
+    return { showOnToolBar, showProgress };
   }
 }
 
