@@ -3,8 +3,11 @@ import React from 'react';
 import { Checkbox, FormControlLabel, InputLabel } from '@material-ui/core';
 
 import { ArrayInput, DropDown, TextInput } from '@jupyterlab/formeditor';
+import { SettingEditorRegistry } from './SettingEditorRegistry';
 
-export const renderDropdown = (props: any): any => {
+export const renderDropdown = (
+  props: SettingEditorRegistry.IRendererProps
+): any => {
   return (
     <DropDown
       label={props.uihints.title}
@@ -23,7 +26,9 @@ export const renderDropdown = (props: any): any => {
   );
 };
 
-export const renderTextInput = (props: any): any => {
+export const renderTextInput = (
+  props: SettingEditorRegistry.IRendererProps
+): any => {
   return (
     <TextInput
       label={props.uihints.title}
@@ -42,7 +47,9 @@ export const renderTextInput = (props: any): any => {
   );
 };
 
-export const renderCheckbox = (props: any): any => {
+export const renderCheckbox = (
+  props: SettingEditorRegistry.IRendererProps
+): any => {
   return (
     <div
       className="jp-metadataEditor-formInput"
@@ -65,7 +72,9 @@ export const renderCheckbox = (props: any): any => {
   );
 };
 
-export const renderStringArray = (props: any): any => {
+export const renderStringArray = (
+  props: SettingEditorRegistry.IRendererProps
+): any => {
   return (
     <div
       className="jp-metadataEditor-formInput"

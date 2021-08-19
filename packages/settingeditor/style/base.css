@@ -264,6 +264,11 @@
   justify-content: space-between;
 }
 
+#setting-editor .jp-SettingsHeader-Name {
+  text-transform: inherit;
+  font-size: var(--jp-content-font-size3);
+}
+
 #setting-editor .jp-MetadataEditorWidget {
   padding-top: 60px;
   margin-top: -60px;

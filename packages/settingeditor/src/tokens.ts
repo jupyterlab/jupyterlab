@@ -4,6 +4,7 @@
 import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
 import { SettingEditor } from './settingeditor';
+import { SettingEditorRegistry } from './SettingEditorRegistry';
 
 /* tslint:disable */
 /**
@@ -15,8 +16,13 @@ export const ISettingEditorTracker = new Token<ISettingEditorTracker>(
 /* tslint:enable */
 
 export interface ISettingEditorRegistry {
-  addRenderer: (id: string, renderer: (props: any) => any) => void;
-  getRenderer: (id: string) => (props: any) => any;
+  addRenderer: (
+    id: string,
+    renderer: (props: SettingEditorRegistry.IRendererProps) => any
+  ) => void;
+  getRenderer: (
+    id: string
+  ) => (props: SettingEditorRegistry.IRendererProps) => any;
 }
 
 export const ISettingEditorRegistry = new Token<ISettingEditorRegistry>(
