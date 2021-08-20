@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import { ISessionContext, translateKernelStatuses } from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import React from 'react';
@@ -34,7 +34,9 @@ export function ExecutionIndicatorComponent(
   props: ExecutionIndicatorComponent.IProps
 ): React.ReactElement<ExecutionIndicatorComponent.IProps> {
   const translator = props.translator || nullTranslator;
+  const kernelStatuses = translateKernelStatuses(translator);
   const trans = translator.load('jupyterlab');
+
   const state = props.state;
   const showOnToolBar = props.displayOption.showOnToolBar;
   const showProgress = props.displayOption.showProgress;
@@ -64,23 +66,23 @@ export function ExecutionIndicatorComponent(
   const progressBar = (percentage: number) => (
     <ProgressCircle progress={percentage} width={16} height={24} />
   );
-  const titleFactory = (prefix: string, title: string) =>
-    trans.__(`${prefix} ${title[0].toUpperCase() + title.slice(1)}`);
+  const titleFactory = (translatedStatus: string) =>
+    trans.__('Kernel status: %1', translatedStatus);
 
   const reactElement = (
-    status: string,
+    status: ISessionContext.KernelDisplayStatus,
     circle: JSX.Element,
     popup: JSX.Element[]
   ): JSX.Element => (
     <div
       className={'jp-Notebook-ExecutionIndicator'}
-      title={showProgress ? '' : titleFactory('Kernel', status)}
+      title={showProgress ? '' : titleFactory(kernelStatuses[status])}
     >
       {circle}
       <div
         className={`jp-Notebook-ExecutionIndicator-tooltip ${tooltipClass} ${displayClass}`}
       >
-        <span> {titleFactory('Kernel status:', status)} </span>
+        <span> {titleFactory(kernelStatuses[status])} </span>
         {popup}
       </div>
     </div>

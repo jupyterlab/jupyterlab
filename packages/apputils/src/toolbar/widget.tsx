@@ -21,7 +21,7 @@ import {
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { ISessionContext, sessionContextDialogs } from '../sessioncontext';
-
+import { translateKernelStatuses } from '../kernelstatuses';
 /**
  * The class name added to toolbar kernel name text.
  */
@@ -183,22 +183,7 @@ namespace Private {
       this.translator = translator || nullTranslator;
       this._trans = this.translator.load('jupyterlab');
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
-      // TODO-FIXME: this mapping is duplicated in statusbar/kernelStatus.tsx
-      this._statusNames = {
-        unknown: this._trans.__('Unknown'),
-        starting: this._trans.__('Starting'),
-        idle: this._trans.__('Idle'),
-        busy: this._trans.__('Busy'),
-        terminating: this._trans.__('Terminating'),
-        restarting: this._trans.__('Restarting'),
-        autorestarting: this._trans.__('Autorestarting'),
-        dead: this._trans.__('Dead'),
-        connected: this._trans.__('Connected'),
-        connecting: this._trans.__('Connecting'),
-        disconnected: this._trans.__('Disconnected'),
-        initializing: this._trans.__('Initializing'),
-        '': ''
-      };
+      this._statusNames = translateKernelStatuses(this.translator);
       this._onStatusChanged(sessionContext);
       sessionContext.statusChanged.connect(this._onStatusChanged, this);
       sessionContext.connectionStatusChanged.connect(
