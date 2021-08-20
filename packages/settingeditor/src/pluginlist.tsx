@@ -317,7 +317,7 @@ export namespace PluginList {
      * succeed and emit an event. If the promise rejects, the selection is not
      * made.
      */
-    // confirm: (id: string) => Promise<void>;
+    confirm: (id: string) => Promise<void>;
 
     /**
      * The setting registry for the plugin list.
