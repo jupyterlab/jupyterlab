@@ -1086,9 +1086,11 @@ namespace Private {
 
         const defaults = canonical.properties?.contextMenu?.default ?? [];
         const user = {
+          ...plugin.data.user,
           contextMenu: plugin.data.user.contextMenu ?? []
         };
         const composite = {
+          ...plugin.data.composite,
           contextMenu: SettingRegistry.reconcileItems(
             defaults as ISettingRegistry.IContextMenuItem[],
             user.contextMenu as ISettingRegistry.IContextMenuItem[],

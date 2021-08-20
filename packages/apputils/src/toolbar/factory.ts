@@ -2,7 +2,7 @@ import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { findIndex, toArray } from '@lumino/algorithm';
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, PartialJSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from '../dialog';
 import { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
@@ -104,10 +104,12 @@ async function getToolbarItems(
 
       const defaults =
         ((canonical.properties ?? {})[propertyId] ?? {}).default ?? [];
-      const user: { [k: string]: ISettingRegistry.IToolbarItem[] } = {};
+      // Initialize the settings
+      const user: PartialJSONObject = plugin.data.user;
+      const composite: PartialJSONObject = plugin.data.composite;
+      // Overrides the value with using the aggregated default for the toolbar property
       user[propertyId] =
         (plugin.data.user[propertyId] as ISettingRegistry.IToolbarItem[]) ?? [];
-      const composite: { [k: string]: ISettingRegistry.IToolbarItem[] } = {};
       composite[propertyId] =
         SettingRegistry.reconcileToolbarItems(
           defaults as ISettingRegistry.IToolbarItem[],
