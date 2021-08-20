@@ -447,7 +447,9 @@ class SearchOverlay extends React.Component<
       return;
     }
 
-    this.props.onStartQuery(query, this.state.filters);
+    if (query !== null) {
+      this.props.onStartQuery(query, this.state.filters);
+    }
   }
 
   private _onClose() {
@@ -706,7 +708,7 @@ namespace Private {
     queryString: string,
     caseSensitive: boolean,
     regex: boolean
-  ): RegExp {
+  ): RegExp | null {
     const flag = caseSensitive ? 'g' : 'gi';
     // escape regex characters in query if its a string search
     const queryText = regex
@@ -714,9 +716,14 @@ namespace Private {
       : queryString.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
     let ret;
     ret = new RegExp(queryText, flag);
+
+    // If the empty string is hit, the search logic will freeze the browser tab
+    //  Trying /^/ or /$/ on the codemirror search demo, does not find anything.
+    //  So this is a limitation of the editor.
     if (ret.test('')) {
-      ret = /x^/;
+      return null;
     }
+
     return ret;
   }
 
