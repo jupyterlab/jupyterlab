@@ -25,6 +25,7 @@ import { NotebookPanel } from './panel';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Widget } from '@lumino/widgets';
 import { JSONObject } from '@lumino/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 
 /**
  * A react functional component for rendering execution indicator.
@@ -251,20 +252,32 @@ export namespace ExecutionIndicator {
           });
 
           const state = this._notebookExecutionProgress.get(nb);
-          context.statusChanged.connect(ctx => {
+          const contextStatusChanged = (ctx: ISessionContext) => {
             if (state) {
               state.kernelStatus = ctx.kernelDisplayStatus;
             }
             this.stateChanged.emit(void 0);
-          }, this);
+          };
+          context.statusChanged.connect(contextStatusChanged, this);
 
-          context.connectionStatusChanged.connect(ctx => {
+          const contextConnectionStatusChanged = (ctx: ISessionContext) => {
             if (state) {
               state.kernelStatus = ctx.kernelDisplayStatus;
             }
             this.stateChanged.emit(void 0);
-          }, this);
+          };
+          context.connectionStatusChanged.connect(
+            contextConnectionStatusChanged,
+            this
+          );
 
+          context.disposed.connect(ctx => {
+            ctx.connectionStatusChanged.disconnect(
+              contextConnectionStatusChanged,
+              this
+            );
+            ctx.statusChanged.disconnect(contextStatusChanged, this);
+          });
           const handleKernelMsg = (
             sender: IKernelConnection,
             msg: IAnyMessageArgs
@@ -299,7 +312,17 @@ export namespace ExecutionIndicator {
             }
           };
           context.session?.kernel?.anyMessage.connect(handleKernelMsg);
-          context.kernelChanged.connect((_, kernelData) => {
+          context.session?.kernel?.disposed.connect(kernel =>
+            kernel.anyMessage.disconnect(handleKernelMsg)
+          );
+          const kernelChangedSlot = (
+            _: ISessionContext,
+            kernelData: IChangedArgs<
+              IKernelConnection | null,
+              IKernelConnection | null,
+              'kernel'
+            >
+          ) => {
             if (state) {
               this._resetTime(state);
               this.stateChanged.emit(void 0);
@@ -307,7 +330,11 @@ export namespace ExecutionIndicator {
                 kernelData.newValue.anyMessage.connect(handleKernelMsg);
               }
             }
-          });
+          };
+          context.kernelChanged.connect(kernelChangedSlot);
+          context.disposed.connect(ctx =>
+            ctx.kernelChanged.disconnect(kernelChangedSlot)
+          );
         }
       }
     }

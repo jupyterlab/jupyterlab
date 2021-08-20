@@ -426,6 +426,9 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
           });
 
           labShell.currentChanged.connect(labShellCurrentChanged);
+          statusbarItem.disposed.connect(() => {
+            labShell.currentChanged.disconnect(labShellCurrentChanged);
+          });
         }
 
         statusbarItem.model.displayOption = {
