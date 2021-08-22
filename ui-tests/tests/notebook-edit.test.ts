@@ -168,6 +168,14 @@ describe('Notebook Edit', () => {
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
   });
 
+  test('Navigate back from panel using Tab key', async () => {
+    await galata.notebook.selectCells(2);
+    const nbPanel = await galata.notebook.getNotebookInPanel();
+    await nbPanel.focus();
+    await galata.context.page.keyboard.press('Tab');
+    expect(await galata.notebook.isCellSelected(2)).toBe(true);
+  });
+
   test('Delete Notebook', async () => {
     await galata.contents.deleteFile(fileName);
     expect(await galata.contents.fileExists(fileName)).toBeFalsy();
