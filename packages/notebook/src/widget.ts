@@ -1966,7 +1966,7 @@ export class Notebook extends StaticNotebook {
         event.preventDefault();
       }
     } else if (targetArea === 'input') {
-      if (button === 2 && !this.isSelectedOrActive(widget)) {
+      if (!this.isSelectedOrActive(widget)) {
         this.deselectAll();
         this.activeCellIndex = index;
       }
@@ -2273,25 +2273,35 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle `focus` events for the widget.
+   * Handle `focusin` events for the widget.
    */
   private _evtFocusIn(event: FocusEvent): void {
     const target = event.target as HTMLElement;
+    const activeCell = this.activeCell;
     const index = this._findCell(target);
-    if (index !== -1) {
-      const widget = this.widgets[index];
-      // If the editor itself does not have focus, ensure command mode.
-      if (!widget.editorWidget.node.contains(target)) {
-        this.mode = 'command';
-      }
-      this.activeCellIndex = index;
-      // If the editor has focus, ensure edit mode.
-      const node = widget.editorWidget.node;
-      if (node.contains(target)) {
+    // If a cell got focused by keyboard event,
+    // ensure that the correct cell gets focus;
+    // this might be a different cell from the
+    // cell that captured the focus event.
+    if (activeCell !== null && index !== -1) {
+      // If focus would go elsewhere, force it to go to the cell.
+      if (activeCell.node !== target && !activeCell.node.contains(target)) {
+        target.blur();
+        activeCell.node.focus();
         this.mode = 'edit';
+      } else {
+        // If the editor itself does not have focus, ensure command mode.
+        if (!activeCell.editorWidget.node.contains(target)) {
+          this.mode = 'command';
+        }
+        this.activeCellIndex = index;
+        // If the editor has focus, ensure edit mode.
+        const node = activeCell.editorWidget.node;
+        if (node.contains(target)) {
+          this.mode = 'edit';
+        }
       }
-      this.activeCellIndex = index;
-    } else {
+    } else if (index === -1) {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
     }
