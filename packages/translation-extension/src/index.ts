@@ -114,7 +114,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
               const toggled = displayName === nativeName;
               const label = toggled
                 ? `${displayName}`
-                : `${displayName} (${nativeName})`;
+                : `${displayName} - ${nativeName}`;
 
               // Add a command per language
               command = `jupyterlab-translation:${locale}`;
