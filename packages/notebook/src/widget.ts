@@ -1505,10 +1505,10 @@ export class Notebook extends StaticNotebook {
         this._evtDblClick(event as MouseEvent);
         break;
       case 'focusin':
-        this._evtFocusIn(event as MouseEvent);
+        this._evtFocusIn(event as FocusEvent);
         break;
       case 'focusout':
-        this._evtFocusOut(event as MouseEvent);
+        this._evtFocusOut(event as FocusEvent);
         break;
       case 'lm-dragenter':
         this._evtDragEnter(event as IDragEvent);
@@ -2275,7 +2275,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle `focus` events for the widget.
    */
-  private _evtFocusIn(event: MouseEvent): void {
+  private _evtFocusIn(event: FocusEvent): void {
     const target = event.target as HTMLElement;
     const index = this._findCell(target);
     if (index !== -1) {
@@ -2300,7 +2300,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle `focusout` events for the notebook.
    */
-  private _evtFocusOut(event: MouseEvent): void {
+  private _evtFocusOut(event: FocusEvent): void {
     const relatedTarget = event.relatedTarget as HTMLElement;
 
     // Bail if the window is losing focus, to preserve edit mode. This test
