@@ -129,16 +129,16 @@ export namespace NotebookActions {
   /**
    * Split the active cell into two or more cells.
    *
-   * @param widget - The target notebook widget.
+   * @param notebook The target notebook widget.
    *
    * #### Notes
    * It will preserve the existing mode.
    * The last cell will be activated if no selection is found.
    * If text was selected, the cell containing the selection will
-     be activated.
+   * be activated.
    * The existing selection will be cleared.
-   * The activated cell will have focus and the cursor will move
-     to the end of the cell.
+   * The activated cell will have focus and the cursor will
+   * remain in the initial position.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells will be created.
    * Both cells will have the same type as the original cell.
@@ -215,9 +215,6 @@ export namespace NotebookActions {
     notebook.activeCellIndex = index + clones.length - activeCellDelta;
     const focusedEditor = notebook.activeCell.editor;
     focusedEditor.focus();
-
-    // Move to the end of the cell that now contains the cursor
-    focusedEditor.setCursorPosition({ line: editor.lineCount, column: 0 });
 
     Private.handleState(notebook, state);
   }
