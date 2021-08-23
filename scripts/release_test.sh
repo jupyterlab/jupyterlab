@@ -23,8 +23,6 @@ pushd $TEST_DIR
 
 JLAB_BROWSER_CHECK_OUTPUT=${OUTPUT_DIR} python -m jupyterlab.browser_check
 
-jupyter lab clean --all
-
 popd
 
 pushd jupyterlab/tests/mock_packages

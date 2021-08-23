@@ -32,6 +32,8 @@ ignore-glob = ["packages/ui-components/docs/source/ui_components.rst"]
 ignore-links = ["../api/*.*"]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
+release-message = "[ci skip] Publish {version}"
+tag-message = "[ci skip] Release {tag_name}"
 
 [tool.jupyter-releaser.hooks]
 before-bump-version = ["git checkout .", "pip install bump2version"]

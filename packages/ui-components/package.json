@@ -34,7 +34,6 @@
     "cleansvg": "svgo --config svgo.yaml",
     "docs": "typedoc src",
     "docs:init": "bash docs/build.sh",
-    "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "test": "jest",
     "test:cov": "jest --collect-coverage",

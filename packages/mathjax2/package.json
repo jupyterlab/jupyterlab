@@ -30,7 +30,6 @@
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {

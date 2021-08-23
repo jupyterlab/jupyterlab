@@ -220,7 +220,7 @@ export function postbump(commit = true): void {
 
   // Commit changes.
   if (commit) {
-    run('git commit -am "bump version"');
+    run('git commit -am "[ci skip] bump version"');
   }
 }
 
