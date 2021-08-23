@@ -19,6 +19,7 @@ describe('Text Editor Tests', () => {
 
   test('Open a text editor', async () => {
     const imageName = 'text-editor';
+    await galata.filebrowser.openHomeDirectory();
     await galata.menu.clickMenuItem('File>New>Text File');
 
     await galata.context.page.waitForSelector(
@@ -49,5 +50,10 @@ describe('Text Editor Tests', () => {
     const tabHandle = await galata.activity.getPanel(DEFAULT_NAME);
     await galata.capture.screenshot(imageName, tabHandle);
     expect(await galata.capture.compareScreenshot(imageName)).toBe('same');
+  });
+
+  test('Remove created file', async () => {
+    await galata.filebrowser.openHomeDirectory();
+    expect(await galata.contents.deleteFile(DEFAULT_NAME)).toEqual(true);
   });
 });
