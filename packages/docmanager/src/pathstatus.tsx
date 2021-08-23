@@ -57,7 +57,7 @@ export class PathStatus extends VDomRenderer<PathStatus.Model> {
   /**
    * Render the status item.
    */
-  render() {
+  render(): JSX.Element {
     return (
       <PathStatusComponent
         fullPath={this.model!.path}

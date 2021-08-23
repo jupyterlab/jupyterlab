@@ -116,11 +116,11 @@ describe('LabShell', () => {
   });
 
   describe('#restored', () => {
-    it('should resolve when the app is restored for the first time', () => {
+    it('should resolve when the app is restored for the first time', async () => {
       const state = shell.saveLayout();
       const mode: DockPanel.Mode = 'multiple-document';
       shell.restoreLayout(mode, state);
-      return shell.restored;
+      await expect(shell.restored).resolves.not.toThrow();
     });
   });
 

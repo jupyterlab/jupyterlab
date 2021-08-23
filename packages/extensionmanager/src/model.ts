@@ -744,7 +744,7 @@ export class ListModel extends VDomModel {
    *
    * Emits the `stateChanged` signal on successful completion.
    */
-  protected async update(refreshInstalled = false) {
+  protected async update(refreshInstalled = false): Promise<void> {
     if (ListModel.isDisclaimed()) {
       const [searchMap, installedMap] = await Promise.all([
         this.performSearch(),
@@ -926,11 +926,11 @@ export namespace ListModel {
     return semver.lt(entry.installed_version, entry.latest_version);
   }
 
-  export function isDisclaimed() {
+  export function isDisclaimed(): boolean {
     return _isDisclaimed;
   }
 
-  export function toogleDisclaimed() {
+  export function toogleDisclaimed(): void {
     _isDisclaimed = !_isDisclaimed;
   }
 }

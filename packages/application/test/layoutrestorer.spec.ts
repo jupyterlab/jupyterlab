@@ -40,7 +40,7 @@ describe('apputils', () => {
         });
         const promise = restorer.restored;
         ready.resolve(void 0);
-        await promise;
+        await expect(promise).resolves.not.toThrow();
       });
     });
 

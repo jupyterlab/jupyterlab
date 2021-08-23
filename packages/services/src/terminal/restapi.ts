@@ -111,7 +111,7 @@ namespace Private {
   /**
    * Throw an error if terminals are not available.
    */
-  export function errorIfNotAvailable() {
+  export function errorIfNotAvailable(): void {
     if (!isAvailable()) {
       throw new Error('Terminals Unavailable');
     }

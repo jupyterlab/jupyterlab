@@ -37,7 +37,7 @@ interface IInputGroupProps extends IBPInputGroupProps {
 
 type CommonProps<T> = React.DOMAttributes<T>;
 
-export const Button = (props: IButtonProps & CommonProps<any>) => (
+export const Button = (props: IButtonProps & CommonProps<any>): JSX.Element => (
   <BPButton
     {...props}
     className={classes(
@@ -48,7 +48,9 @@ export const Button = (props: IButtonProps & CommonProps<any>) => (
   />
 );
 
-export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
+export const InputGroup = (
+  props: IInputGroupProps & CommonProps<any>
+): JSX.Element => {
   if (props.rightIcon) {
     return (
       <BPInputGroup
@@ -70,14 +72,18 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
   );
 };
 
-export const Collapse = (props: ICollapseProps & CommonProps<any>) => (
-  <BPCollapse {...props} />
-);
+export const Collapse = (
+  props: ICollapseProps & CommonProps<any>
+): JSX.Element => <BPCollapse {...props} />;
 
-export const Select = (props: ISelectProps<any> & CommonProps<any>) => (
+export const Select = (
+  props: ISelectProps<any> & CommonProps<any>
+): JSX.Element => (
   <BPSelect {...props} className={classes(props.className, 'jp-Select')} />
 );
 
-export const Checkbox = (props: ICheckboxProps & CommonProps<any>) => (
+export const Checkbox = (
+  props: ICheckboxProps & CommonProps<any>
+): JSX.Element => (
   <BPCheckbox {...props} className={classes(props.className, 'jp-Checkbox')} />
 );

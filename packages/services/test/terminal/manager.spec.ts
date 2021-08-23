@@ -80,8 +80,8 @@ describe('terminal', () => {
     });
 
     describe('#ready', () => {
-      it('should resolve when the manager is ready', () => {
-        return manager.ready;
+      it('should resolve when the manager is ready', async () => {
+        await expect(manager.ready).resolves.not.toThrow();
       });
     });
 

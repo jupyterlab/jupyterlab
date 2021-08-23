@@ -25,7 +25,7 @@ function render(
   tracker: INotebookTracker,
   item: INotebookHeading,
   toc: INotebookHeading[] = []
-) {
+): JSX.Element | null {
   let jsx;
   if (item.type === 'markdown' || item.type === 'header') {
     let fontSizeClass = 'toc-level-size-default';

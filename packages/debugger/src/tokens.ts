@@ -404,7 +404,7 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsArguments;
       configurationDone: DebugProtocol.ConfigurationDoneArguments;
       continue: DebugProtocol.ContinueArguments;
-      debugInfo: {};
+      debugInfo: Record<string, never>;
       disconnect: DebugProtocol.DisconnectArguments;
       dumpCell: IDumpCellArguments;
       evaluate: DebugProtocol.EvaluateArguments;
@@ -412,7 +412,7 @@ export namespace IDebugger {
       goto: DebugProtocol.GotoArguments;
       gotoTargets: DebugProtocol.GotoTargetsArguments;
       initialize: DebugProtocol.InitializeRequestArguments;
-      inspectVariables: {};
+      inspectVariables: Record<string, never>;
       launch: DebugProtocol.LaunchRequestArguments;
       loadedSources: DebugProtocol.LoadedSourcesArguments;
       modules: DebugProtocol.ModulesArguments;
@@ -435,7 +435,7 @@ export namespace IDebugger {
       stepOut: DebugProtocol.StepOutArguments;
       terminate: DebugProtocol.TerminateArguments;
       terminateThreads: DebugProtocol.TerminateThreadsArguments;
-      threads: {};
+      threads: Record<string, never>;
       variables: DebugProtocol.VariablesArguments;
     };
 

@@ -69,7 +69,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
   /**
    * Render the status item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (!this.model) {
       return null;
     }

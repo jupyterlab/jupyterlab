@@ -1422,7 +1422,7 @@ export namespace NotebookActions {
    * There will always be one blank space after the header.
    * The cells will be unrendered.
    */
-  export function setMarkdownHeader(notebook: Notebook, level: number) {
+  export function setMarkdownHeader(notebook: Notebook, level: number): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -2232,7 +2232,7 @@ namespace Private {
   /**
    * Set the markdown header level of a cell.
    */
-  export function setMarkdownHeader(cell: ICellModel, level: number) {
+  export function setMarkdownHeader(cell: ICellModel, level: number): void {
     // Remove existing header or leading white space.
     let source = cell.value.text;
     const regex = /^(#+\s*)|^(\s*)/;

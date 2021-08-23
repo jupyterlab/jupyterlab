@@ -87,7 +87,7 @@ export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
   /**
    * Render the FileUpload status.
    */
-  render() {
+  render(): JSX.Element {
     const uploadPaths = this.model!.items;
     if (uploadPaths.length > 0) {
       const item = this.model!.items[0];
@@ -107,7 +107,7 @@ export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
     }
   }
 
-  dispose() {
+  dispose(): void {
     super.dispose();
     this._tracker.currentChanged.disconnect(this._onBrowserChange);
   }
@@ -147,7 +147,7 @@ export namespace FileUploadStatus {
     /**
      * The currently uploading items.
      */
-    get items() {
+    get items(): IFileUploadItem[] {
       return this._items;
     }
 

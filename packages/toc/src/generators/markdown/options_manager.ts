@@ -68,7 +68,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._widget.update();
   }
 
-  get numbering() {
+  get numbering(): boolean {
     return this._numbering;
   }
 
@@ -82,7 +82,7 @@ class OptionsManager extends Registry.IOptionsManager {
     }
   }
 
-  get numberingH1() {
+  get numberingH1(): boolean {
     return this._numberingH1;
   }
 
@@ -95,7 +95,7 @@ class OptionsManager extends Registry.IOptionsManager {
    *
    * @param numbering - boolean indicating whether to number items
    */
-  initializeOptions(numbering: boolean, numberingH1: boolean) {
+  initializeOptions(numbering: boolean, numberingH1: boolean): void {
     this._numbering = numbering;
     this._numberingH1 = numberingH1;
     this._widget.update();

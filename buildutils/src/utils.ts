@@ -1,3 +1,4 @@
+/* global NodeRequire */
 import path from 'path';
 import glob from 'glob';
 import fs from 'fs-extra';

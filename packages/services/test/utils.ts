@@ -29,7 +29,7 @@ declare let global: any;
  * This can be used by test modules that wouldn't otherwise import
  * this file.
  */
-export function init() {
+export function init(): void {
   if (typeof global !== 'undefined') {
     global.TextEncoder = encoding.TextEncoder;
     global.TextDecoder = encoding.TextDecoder;
@@ -116,6 +116,7 @@ export const KERNELSPECS: JSONObject = {
  */
 export function getRequestHandler(
   status: number,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any
 ): ServerConnection.ISettings {
   const fetch = (info: RequestInfo, init: RequestInit) => {
@@ -139,7 +140,8 @@ export interface IService {
 /**
  * Handle a single request with a mock response.
  */
-export function handleRequest(item: IService, status: number, body: any) {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function handleRequest(item: IService, status: number, body: any): void {
   // Store the existing fetch function.
   const oldFetch = item.serverSettings.fetch;
 
@@ -309,7 +311,7 @@ export class KernelTester extends SocketTester {
   /**
    * Send the status from the server to the client.
    */
-  sendStatus(msgId: string, status: Kernel.Status) {
+  sendStatus(msgId: string, status: Kernel.Status): string {
     return this.sendMessage({
       msgId,
       msgType: 'status',
@@ -321,7 +323,10 @@ export class KernelTester extends SocketTester {
   /**
    * Send an iopub stream message.
    */
-  sendStream(msgId: string, content: KernelMessage.IStreamMsg['content']) {
+  sendStream(
+    msgId: string,
+    content: KernelMessage.IStreamMsg['content']
+  ): string {
     return this.sendMessage({
       msgId,
       msgType: 'stream',
@@ -336,7 +341,7 @@ export class KernelTester extends SocketTester {
   sendDisplayData(
     msgId: string,
     content: KernelMessage.IDisplayDataMsg['content']
-  ) {
+  ): string {
     return this.sendMessage({
       msgId,
       msgType: 'display_data',
@@ -351,7 +356,7 @@ export class KernelTester extends SocketTester {
   sendUpdateDisplayData(
     msgId: string,
     content: KernelMessage.IUpdateDisplayDataMsg['content']
-  ) {
+  ): string {
     return this.sendMessage({
       msgId,
       msgType: 'update_display_data',
@@ -362,7 +367,10 @@ export class KernelTester extends SocketTester {
   /**
    * Send an iopub comm open message.
    */
-  sendCommOpen(msgId: string, content: KernelMessage.ICommOpenMsg['content']) {
+  sendCommOpen(
+    msgId: string,
+    content: KernelMessage.ICommOpenMsg['content']
+  ): string {
     return this.sendMessage({
       msgId,
       msgType: 'comm_open',
@@ -377,7 +385,7 @@ export class KernelTester extends SocketTester {
   sendCommClose(
     msgId: string,
     content: KernelMessage.ICommCloseMsg['content']
-  ) {
+  ): string {
     return this.sendMessage({
       msgId,
       msgType: 'comm_close',
@@ -389,7 +397,10 @@ export class KernelTester extends SocketTester {
   /**
    * Send an iopub comm message.
    */
-  sendCommMsg(msgId: string, content: KernelMessage.ICommMsgMsg['content']) {
+  sendCommMsg(
+    msgId: string,
+    content: KernelMessage.ICommMsgMsg['content']
+  ): string {
     return this.sendMessage({
       msgId,
       msgType: 'comm_msg',
@@ -401,7 +412,7 @@ export class KernelTester extends SocketTester {
   sendExecuteResult(
     msgId: string,
     content: KernelMessage.IExecuteResultMsg['content']
-  ) {
+  ): string {
     return this.sendMessage({
       msgId,
       msgType: 'execute_result',
@@ -413,7 +424,7 @@ export class KernelTester extends SocketTester {
   sendExecuteReply(
     msgId: string,
     content: KernelMessage.IExecuteReplyMsg['content']
-  ) {
+  ): string {
     return this.sendMessage({
       msgId,
       msgType: 'execute_reply',
@@ -425,7 +436,7 @@ export class KernelTester extends SocketTester {
   sendKernelInfoReply(
     msgId: string,
     content: KernelMessage.IInfoReplyMsg['content']
-  ) {
+  ): string {
     return this.sendMessage({
       msgId,
       msgType: 'kernel_info_reply',
@@ -437,7 +448,7 @@ export class KernelTester extends SocketTester {
   sendInputRequest(
     msgId: string,
     content: KernelMessage.IInputRequestMsg['content']
-  ) {
+  ): string {
     return this.sendMessage({
       msgId,
       msgType: 'input_request',
@@ -451,7 +462,7 @@ export class KernelTester extends SocketTester {
    */
   sendMessage<T extends KernelMessage.Message>(
     options: MakeOptional<KernelMessage.IOptions<T>, 'session'>
-  ) {
+  ): string {
     const msg = KernelMessage.createMessage<any>({
       session: this.serverSessionId,
       ...options
@@ -510,7 +521,7 @@ export class KernelTester extends SocketTester {
   /**
    * Dispose the tester.
    */
-  dispose() {
+  dispose(): void {
     if (this._kernel) {
       this._kernel.dispose();
       this._kernel = null;
@@ -618,7 +629,10 @@ export class SessionTester extends SocketTester {
   /**
    * Send the status from the server to the client.
    */
-  sendStatus(status: Kernel.Status, parentHeader?: KernelMessage.IHeader) {
+  sendStatus(
+    status: Kernel.Status,
+    parentHeader?: KernelMessage.IHeader
+  ): void {
     const msg = KernelMessage.createMessage({
       msgType: 'status',
       channel: 'iopub',
@@ -695,7 +709,7 @@ export class TerminalTester extends SocketTester {
   /**
    * Register the message callback with the websocket server.
    */
-  onMessage(cb: (msg: Terminal.IMessage) => void) {
+  onMessage(cb: (msg: Terminal.IMessage) => void): void {
     this._onMessage = cb;
   }
 

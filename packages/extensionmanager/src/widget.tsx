@@ -81,7 +81,7 @@ export class SearchBar extends React.Component<
   /**
    * Handler for search input changes.
    */
-  handleChange = (e: React.FormEvent<HTMLElement>) => {
+  handleChange = (e: React.FormEvent<HTMLElement>): void => {
     const target = e.target as HTMLInputElement;
     this.setState({
       value: target.value
@@ -595,7 +595,7 @@ export class CollapsibleSection extends React.Component<
   /**
    * Handler for search input changes.
    */
-  handleCollapse() {
+  handleCollapse(): void {
     this.setState(
       {
         isOpen: !this.state.isOpen
@@ -608,7 +608,9 @@ export class CollapsibleSection extends React.Component<
     );
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
+  UNSAFE_componentWillReceiveProps(
+    nextProps: CollapsibleSection.IProperties
+  ): void {
     if (nextProps.forceOpen) {
       this.setState({
         isOpen: true
@@ -971,7 +973,7 @@ risks or contain malicious code that runs on your machine.`)}
    *
    * @param value The new query.
    */
-  onSearch(value: string) {
+  onSearch(value: string): void {
     this.model!.query = value;
   }
 
@@ -980,7 +982,7 @@ risks or contain malicious code that runs on your machine.`)}
    *
    * @param value The pagination page number.
    */
-  onPage(value: number) {
+  onPage(value: number): void {
     this.model!.page = value;
   }
 
@@ -990,7 +992,7 @@ risks or contain malicious code that runs on your machine.`)}
    * @param action The action to perform.
    * @param entry The entry to perform the action on.
    */
-  onAction(action: Action, entry: IEntry) {
+  onAction(action: Action, entry: IEntry): Promise<void> {
     switch (action) {
       case 'install':
         return this.model!.install(entry);

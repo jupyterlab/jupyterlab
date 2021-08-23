@@ -136,7 +136,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Set URI fragment identifier.
    */
-  setFragment(fragment: string) {
+  setFragment(fragment: string): void {
     void this.context.ready.then(() => {
       this.content.setFragment(fragment);
     });
@@ -154,7 +154,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Prints the notebook by converting to HTML with nbconvert.
    */
   [Printing.symbol]() {
-    return async () => {
+    return async (): Promise<void> => {
       // Save before generating HTML
       if (this.context.model.dirty && !this.context.model.readOnly) {
         await this.context.save();

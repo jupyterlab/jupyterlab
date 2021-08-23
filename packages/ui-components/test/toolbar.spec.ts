@@ -487,28 +487,28 @@ describe('@jupyterlab/ui-components', () => {
       });
     });
 
-    //   describe('#onAfterAttach()', () => {
-    //     it('should add event listeners to the node', () => {
-    //       const button = new LogToolbarButton();
-    //       Widget.attach(button, document.body);
-    //       expect(button.methods).to.contain('onAfterAttach');
-    //       simulate(button.node, 'click');
-    //       expect(button.events).to.contain('click');
-    //       button.dispose();
-    //     });
-    //   });
+    describe('#onAfterAttach()', () => {
+      it.skip('should add event listeners to the node', () => {
+        // const button = new LogToolbarButton();
+        // Widget.attach(button, document.body);
+        // expect(button.methods).to.contain('onAfterAttach');
+        // simulate(button.node, 'click');
+        // expect(button.events).to.contain('click');
+        // button.dispose();
+      });
+    });
 
-    //   describe('#onBeforeDetach()', () => {
-    //     it('should remove event listeners from the node', async () => {
-    //       const button = new LogToolbarButton();
-    //       Widget.attach(button, document.body);
-    //       await framePromise();
-    //       Widget.detach(button);
-    //       expect(button.methods).to.contain('onBeforeDetach');
-    //       simulate(button.node, 'click');
-    //       expect(button.events).to.not.contain('click');
-    //       button.dispose();
-    //     });
-    //   });
+    describe('#onBeforeDetach()', () => {
+      it.skip('should remove event listeners from the node', async () => {
+        // const button = new LogToolbarButton();
+        // Widget.attach(button, document.body);
+        // await framePromise();
+        // Widget.detach(button);
+        // expect(button.methods).to.contain('onBeforeDetach');
+        // simulate(button.node, 'click');
+        // expect(button.events).to.not.contain('click');
+        // button.dispose();
+      });
+    });
   });
 });

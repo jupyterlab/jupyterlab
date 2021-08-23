@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import * as fs from 'fs-extra';
 import * as child_process from 'child_process';
 import * as crypto from 'crypto';

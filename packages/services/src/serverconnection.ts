@@ -113,7 +113,7 @@ export namespace ServerConnection {
    *
    * @returns The full settings object.
    */
-  export function makeSettings(options?: Partial<ISettings>) {
+  export function makeSettings(options?: Partial<ISettings>): ISettings {
     return Private.makeSettings(options);
   }
 

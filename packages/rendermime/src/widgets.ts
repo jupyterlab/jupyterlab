@@ -112,7 +112,7 @@ export abstract class RenderedCommon
    *
    * @param fragment - The URI fragment identifier.
    */
-  protected setFragment(fragment: string) {
+  protected setFragment(fragment: string): void {
     /* no-op */
   }
 }
@@ -131,7 +131,7 @@ export abstract class RenderedHTMLCommon extends RenderedCommon {
     this.addClass('jp-RenderedHTMLCommon');
   }
 
-  setFragment(fragment: string) {
+  setFragment(fragment: string): void {
     let el;
     try {
       el = this.node.querySelector(fragment);

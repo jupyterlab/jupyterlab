@@ -537,6 +537,7 @@ class Gettext {
    * @param pluralForm - Plural form string..
    * @return An function to compute plural forms.
    */
+  // eslint-disable-next-line @typescript-eslint/ban-types
   private getPluralFunc(pluralForm: string): Function {
     // Plural form string regexp
     // taken from https://github.com/Orange-OpenSource/gettext.js/blob/master/lib.gettext.js

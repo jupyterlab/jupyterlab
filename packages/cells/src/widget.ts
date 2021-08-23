@@ -325,7 +325,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Save view editable state to model
    */
-  saveEditableState() {
+  saveEditableState(): void {
     const { metadata } = this.model;
     const current = metadata.get('editable');
 
@@ -346,7 +346,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Load view editable state from model.
    */
-  loadEditableState() {
+  loadEditableState(): void {
     this.readOnly = this.model.metadata.get('editable') === false;
   }
 
@@ -392,7 +392,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Save view collapse state to model
    */
-  saveCollapseState() {
+  saveCollapseState(): void {
     const jupyter = { ...(this.model.metadata.get('jupyter') as any) };
 
     if (
@@ -417,7 +417,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Revert view collapse state from model.
    */
-  loadCollapseState() {
+  loadCollapseState(): void {
     const jupyter = (this.model.metadata.get('jupyter') as any) || {};
     this.inputHidden = !!jupyter.source_hidden;
   }
@@ -482,7 +482,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
@@ -834,7 +834,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Save view collapse state to model
    */
-  saveCollapseState() {
+  saveCollapseState(): void {
     // Because collapse state for a code cell involves two different pieces of
     // metadata (the `collapsed` and `jupyter` metadata keys), we block reacting
     // to changes in metadata until we have fully committed our changes.
@@ -873,7 +873,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * We consider the `collapsed` metadata key as the source of truth for outputs
    * being hidden.
    */
-  loadCollapseState() {
+  loadCollapseState(): void {
     super.loadCollapseState();
     this.outputHidden = !!this.model.metadata.get('collapsed');
   }
@@ -895,7 +895,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Save view collapse state to model
    */
-  saveScrolledState() {
+  saveScrolledState(): void {
     const { metadata } = this.model;
     const current = metadata.get('scrolled');
 
@@ -915,7 +915,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Revert view collapse state from model.
    */
-  loadScrolledState() {
+  loadScrolledState(): void {
     const metadata = this.model.metadata;
 
     // We don't have the notion of 'auto' scrolled, so we make it false.
@@ -1676,7 +1676,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   protected updateCellSourceWithAttachment(
     attachmentName: string,
     URI?: string
-  ) {
+  ): void {
     const textToBeAppended = `![${attachmentName}](attachment:${
       URI ?? attachmentName
     })`;
