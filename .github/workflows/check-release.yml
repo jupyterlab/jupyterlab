@@ -76,7 +76,7 @@ jobs:
           else
             version_spec=build
           fi
-          echo "::set-spec name=dir::${version_spec}"
+          echo "::set-output name=spec::${version_spec}"
 
       - name: Check Release
         if: ${{ matrix.group == 'check_release' }}
