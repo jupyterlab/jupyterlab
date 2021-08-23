@@ -114,7 +114,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
               const toggled = displayName === nativeName;
               const label = toggled
                 ? `${displayName}`
-                : `${displayName} (${nativeName})`;
+                : `${displayName} - ${nativeName}`;
 
               // Add a command per language
               command = `jupyterlab-translation:${locale}`;
@@ -127,10 +127,13 @@ const langMenu: JupyterFrontEndPlugin<void> = {
                 execute: () => {
                   return showDialog({
                     title: trans.__('Change interface language?'),
-                    body: trans.__('Are you sure you want to refresh?'),
+                    body: trans.__(
+                      'After changing the interface language to %1, you will need to reload JupyterLab to see the changes.',
+                      label
+                    ),
                     buttons: [
                       Dialog.cancelButton({ label: trans.__('Cancel') }),
-                      Dialog.okButton({ label: trans.__('Ok') })
+                      Dialog.okButton({ label: trans.__('Change and reload') })
                     ]
                   }).then(result => {
                     if (result.button.accept) {
