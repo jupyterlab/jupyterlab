@@ -67,7 +67,7 @@ The workflow is as follow:
 
 .. note::
 
-    Crowdin is uploading automatically the translation using `GitHub Integration <https://support.crowdin.com/github-integration/>`_ set up
+    Crowdin is automatically uploading the translation using `GitHub Integration <https://support.crowdin.com/github-integration/>`_ set up
     with the Crowdin account of *jupyterlab-bot*. Hence the commits and pull request is attributed
     to the bot.
 
