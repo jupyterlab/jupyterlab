@@ -374,7 +374,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       label: args => {
         const formatLabel = args['label'] as string;
         return args['isPalette']
-          ? trans.__('Export Notebook: %1', formatLabel)
+          ? trans.__('Save and Export Notebook: %1', formatLabel)
           : formatLabel;
       },
       execute: args => {
