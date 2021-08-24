@@ -25,7 +25,7 @@ And finally it publishes them. All those actions are carried out using helpers d
 Workflows
 ---------
 
-The workflows at play will be described next. In the order they are usually called.
+The workflows at play will be described next, in the order they are usually called.
 
 .. note::
 
