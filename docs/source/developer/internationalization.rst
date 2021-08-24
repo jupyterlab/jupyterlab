@@ -75,8 +75,10 @@ The workflow is as follow:
 
 .. warning::
 
-    To avoid merge conflicts on those translation update pull requests, they must to be merged before
-    any ``repository-map.yaml`` pull requests as those will update the source strings.
+    To avoid merge conflicts on those translation update pull requests, they should to be merged before
+    any ``repository-map.yaml`` pull requests as those will update the source strings. If not, the pull
+    requests updating the source strings need to be closed in order for the Crowdin integration to
+    re-open the PR.
 
 Language packs update
 ^^^^^^^^^^^^^^^^^^^^^
