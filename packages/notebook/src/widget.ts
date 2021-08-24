@@ -582,9 +582,8 @@ export class StaticNotebook extends Widget {
       this._renderedCellsCount >=
         this.notebookConfig.numberCellsToRenderDirectly
     ) {
-      const index = this._renderedCellsCount;
-      const cell = this._cellsArray[index];
-      this._renderPlaceholderCell(cell, index);
+      let entry = this._toRenderMap.entries().next();
+      this._renderPlaceholderCell(entry.value[1].cell, entry.value[1].index);
     }
   }
 
