@@ -59,11 +59,11 @@ In order for the strings to be extracted from the code, the following rules must
 - Domain name are normalized by replacing ``-`` to ``_``
 - Translation bundle variable must be one of:
 
-  - `trans`
-  - `this.trans`
-  - `this._trans`
-  - `this.props.trans`
-  - `props.trans`
+  - ``trans``
+  - ``this.trans``
+  - ``this._trans``
+  - ``this.props.trans``
+  - ``props.trans``
 
 Examples that work:
 
