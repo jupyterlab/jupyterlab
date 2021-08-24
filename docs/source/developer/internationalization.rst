@@ -101,7 +101,7 @@ The workflow is:
 
 .. note::
 
-    The version policy applies on the language packs is to follow major and minor version numbers of 
+    The version policy for the language packs is to follow major and minor version numbers of 
     JupyterLab and bumping the post number for any intermediate updates. The version
     of all language packs is identical to ease maintenance.
 
