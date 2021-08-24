@@ -88,7 +88,6 @@ export class YDocument<T> implements models.ISharedDocument {
   public source = this.ydoc.getText('source');
   public ystate: Y.Map<any> = this.ydoc.getMap('state');
   public undoManager = new Y.UndoManager([this.source], {
-    captureTimeout: 200,
     trackedOrigins: new Set([this])
   });
   public awareness = new Awareness(this.ydoc);
@@ -424,7 +423,6 @@ export class YNotebook
   public ymeta: Y.Map<any> = this.ydoc.getMap('meta');
   public ymodel: Y.Map<any> = this.ydoc.getMap('model');
   public undoManager = new Y.UndoManager([this.ycells], {
-    captureTimeout: 200,
     trackedOrigins: new Set([this])
   });
   private _ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
@@ -585,7 +583,6 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     cell.isStandalone = true;
     new Y.Doc().getArray().insert(0, [cell.ymodel]);
     cell._undoManager = new Y.UndoManager([cell.ymodel], {
-      captureTimeout: 200,
       trackedOrigins: new Set([cell])
     });
     return cell;
