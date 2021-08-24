@@ -85,7 +85,7 @@ You could also look at the following pull requests on the
 
 4. Create and publish the translation for your extension.
 
-There is two options to do so, you can either add your extension to the JupyterLab `language packs <https://github.com/jupyterlab/language-packs/#adding-a-new-extension>`_
+There are two options: you can either add your extension to the JupyterLab `language packs <https://github.com/jupyterlab/language-packs/#adding-a-new-extension>`_
 or you can create a python package to distribute your extension translation (see `test example <https://github.com/jupyterlab/jupyterlab_server/tree/master/jupyterlab_server/tests/translations/jupyterlab-some-package>`_).
 
 .. _internationalization-rules:
@@ -122,7 +122,7 @@ Examples that will **not** work:
     __('This translatable string WONT be found');
     this.__('This translatable string WONT be found');
 
-To fix this issue, affect your variable to an accepted name:
+To fix this issue, alter your variable to use an accepted name:
 
 .. code:: typescript
 
@@ -138,7 +138,7 @@ Examples that will **not** work:
     const errorMessage = 'This translatable string WONT be found'
     trans.__(errorMessage);
 
-To fix this issue, pass directly the string:
+To fix this issue, pass the string directly:
 
 .. code:: typescript
 

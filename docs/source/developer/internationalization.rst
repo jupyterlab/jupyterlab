@@ -69,7 +69,7 @@ The workflow is as follow:
     with the Crowdin account of *jupyterlab-bot*. Hence the commits and pull request is attributed
     to the bot.
 
-    If the branch is deleted, it will be created.
+    If the branch is deleted, it will be re-created.
 
 .. warning::
 
@@ -79,7 +79,7 @@ The workflow is as follow:
 Language packs update
 ^^^^^^^^^^^^^^^^^^^^^
 
-The translation from Crowdin needs to be dispatched in the various language packs. 
+Before a release of updated language packs with new translations from Crowdin the language packs need to be prepared by updating the version strings of all packages.
 This is done by trigger manually the `Prepare language packs for release <https://github.com/jupyterlab/language-packs/blob/master/.github/workflows/prepare_release.yml>`_ workflow.
 
 There is one optional setting:
@@ -98,7 +98,7 @@ The workflow is:
 .. note::
 
     The version policy applies on the language packs is to follow major and minor version numbers of 
-    JupyterLab and bumping the post number for any intermediate updates. And the version
+    JupyterLab and bumping the post number for any intermediate updates. The version
     of all language packs is identical to ease maintenance.
 
 
