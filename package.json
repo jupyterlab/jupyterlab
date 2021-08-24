@@ -63,6 +63,8 @@
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --fix .",
     "eslint:check": "eslint --ext .js,.jsx,.ts,.tsx .",
+    "eslint:check:typed": "eslint --config .eslintrc.typecheck.js --ext .js,.jsx,.ts,.tsx .",
+    "eslint:typed": "eslint --config .eslintrc.typecheck.js --ext .js,.jsx,.ts,.tsx --fix .",
     "get:dependency": "node buildutils/lib/get-dependency.js",
     "postinstall": "node scripts/ensure-buildutils.js",
     "integrity": "node scripts/ensure-buildutils.js && node buildutils/lib/ensure-repo.js",
