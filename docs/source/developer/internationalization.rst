@@ -86,7 +86,7 @@ This is done by trigger manually the `Prepare language packs for release <https:
 
 There is one optional setting:
 
-- The new version in form *X.YpostZ* - if not provided, the post number will be bumped.
+- The new version in form *X.Y.postZ* - if not provided, the post number will be bumped.
 
 .. image:: prep_language_packs.png
 
