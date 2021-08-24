@@ -88,7 +88,7 @@ There is one optional setting:
 
 - The new version in form *X.YpostZ* - if not provided, the post number will be bumped.
 
-.. image:: ../images/pre-language-packs.png
+.. image:: prep_language_packs.png
 
 The workflow is:
 
