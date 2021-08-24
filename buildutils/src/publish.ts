@@ -23,7 +23,7 @@ commander
   .description('Publish the JS packages')
   .option(
     '--skip-build',
-    'Skip the clean and build step (if there was a network error during a JS publish'
+    'Skip the build step (if there was a network error during a JS publish'
   )
   .option('--skip-publish', 'Skip publish and only handle tags')
   .option('--skip-tags', 'publish assets but do not handle tags')
@@ -50,7 +50,7 @@ commander
 
       // Ensure a clean git environment
       try {
-        utils.run('git commit -am "bump version"');
+        utils.run('git commit -am "[ci skip] bump version"');
       } catch (e) {
         // do nothing
       }
@@ -102,7 +102,7 @@ commander
     let attempt = 0;
     while (attempt < 10) {
       try {
-        utils.run(`npm install ${specifiers}`, { cwd: installDir });
+        utils.run(`npm install ${specifiers.join(' ')}`, { cwd: installDir });
         break;
       } catch (e) {
         console.error(e);
@@ -112,7 +112,8 @@ commander
       }
     }
     if (attempt == 10) {
-      throw new Error('Could not install packages');
+      console.error('Could not install packages');
+      process.exit(1);
     }
 
     // Emit a system beep.

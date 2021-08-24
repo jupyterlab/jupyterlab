@@ -532,10 +532,11 @@ export async function ensurePackage(
     data['publishConfig'] = { access: 'public' };
   }
 
-  // Ensure there is a minimal prepublishOnly script
-  if (!data.private && !data.scripts.prepublishOnly) {
-    messages.push(`prepublishOnly script missing in ${pkgPath}`);
-    data.scripts.prepublishOnly = 'npm run build';
+  // Ensure there is not a prepublishOnly script.
+  // Since publishing is handled by an automated script and we don't
+  // Want to run individual scripts during publish.
+  if (data.scripts.prepublishOnly) {
+    delete data.scripts.prepublishOnly;
   }
 
   // Ensure the main module has an @packageDocumentation comment

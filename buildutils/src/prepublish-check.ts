@@ -8,8 +8,7 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as utils from './utils';
 
-utils.run('npm run clean:slate');
-utils.run('lerna run prepublishOnly');
+utils.run('npm run build:packages');
 
 utils.getLernaPaths().forEach(pkgPath => {
   const pkgData = utils.readJSONFile(path.join(pkgPath, 'package.json'));
