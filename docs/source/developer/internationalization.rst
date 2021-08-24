@@ -84,7 +84,7 @@ Language packs update
 ^^^^^^^^^^^^^^^^^^^^^
 
 Before a release of updated language packs with new translations from Crowdin the language packs need to be prepared by updating the version strings of all packages.
-This is done by trigger manually the `Prepare language packs for release <https://github.com/jupyterlab/language-packs/blob/master/.github/workflows/prepare_release.yml>`_ workflow.
+This is done by manually triggering the `Prepare language packs for release <https://github.com/jupyterlab/language-packs/blob/master/.github/workflows/prepare_release.yml>`_ workflow.
 
 There is one optional setting:
 
