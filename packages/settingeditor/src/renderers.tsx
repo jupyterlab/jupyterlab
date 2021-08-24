@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Checkbox, FormControlLabel, InputLabel } from '@material-ui/core';
+import { FormControlLabel, InputLabel, Switch } from '@material-ui/core';
 
 import { ArrayInput, DropDown, TextInput } from '@jupyterlab/formeditor';
 import { SettingEditorRegistry } from './SettingEditorRegistry';
@@ -59,7 +59,7 @@ export const renderCheckbox = (
         className="jp-metadataEditor-formInput"
         key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
         control={
-          <Checkbox
+          <Switch
             checked={props.value}
             onChange={(e: any, checked: boolean) => {
               props.handleChange(checked);
