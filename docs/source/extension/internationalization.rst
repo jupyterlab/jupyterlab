@@ -65,7 +65,7 @@ In order for the strings to be extracted from the code, the following rules must
   - `this.props.trans`
   - `props.trans`
 
-Examples that works:
+Examples that work:
 
 .. code:: typescript
 
