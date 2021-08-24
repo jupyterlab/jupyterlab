@@ -43,7 +43,7 @@ file in *language-packs* repository. The workflow to trigger an update is as fol
 1. Edit ``repository-map.yaml`` by adding new repositories and/or updating the target version.
 2. Push the change in a pull request.
 3. Once the pull request is merged, the workflow `Update source strings <https://github.com/jupyterlab/language-packs/blob/master/.github/workflows/update_pot.yml>`_ will automatically be triggered.
-4. That workflow will open a new pull request that update the source strings and optionally the Crowdin configuration.
+4. That workflow will open a new pull request that will update the source strings and optionally the Crowdin configuration.
 5. Once that pul request is merged, Crowdin will upload the new source strings automatically.
 
 .. note::
