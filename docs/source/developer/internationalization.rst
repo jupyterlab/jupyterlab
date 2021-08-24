@@ -60,7 +60,7 @@ The new and/or updated translation are automatically pushed to the *language-pac
 The workflow is as follow:
 
 1. A contributor updates the translation on JupyterLab Crowdin project
-2. A new commit with those changes are pushed to the *language-packs* repository on a branch named
+2. A new commit with those changes is pushed to the *language-packs* repository on a branch named
    ``l10n_master``.
 3. If there is no pull request associated with that branch, a new pull request will be opened.
 4. A maintainer needs to merge that pull request.
