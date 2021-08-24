@@ -31,46 +31,7 @@ To internationalize your extension, the following tasks are required:
 
     Domain are normalized by replacing ``-`` with ``_`` characters.
 
-3. Wraps all translatable strings with one of the *gettext* functions.
-
-.. code:: typescript
-
-    /**
-    * Alias for `gettext` (translate strings without number inflection)
-    * @param msgid message (text to translate)
-    * @param args
-    */
-    __(msgid: string, ...args: any[]): string;
-    /**
-    * Alias for `ngettext` (translate accounting for plural forms)
-    * @param msgid message for singular
-    * @param msgid_plural message for plural
-    * @param n determines which plural form to use
-    * @param args
-    */
-    _n(msgid: string, msgid_plural: string, n: number, ...args: any[]): string;
-    /**
-    * Alias for `pgettext` (translate in given context)
-    * @param msgctxt context
-    * @param msgid message (text to translate)
-    * @param args
-    */
-    _p(msgctxt: string, msgid: string, ...args: any[]): string;
-    /**
-    * Alias for `npgettext` (translate accounting for plural forms in given context)
-    * @param msgctxt context
-    * @param msgid message for singular
-    * @param msgid_plural message for plural
-    * @param n number used to determine which plural form to use
-    * @param args
-    */
-    _np(
-        msgctxt: string,
-        msgid: string,
-        msgid_plural: string,
-        n: number,
-        ...args: any[]
-    ): string;
+3. Wraps all translatable strings with one of the `gettext functions<https://jupyterlab.readthedocs.io/en/stable/api/modules/translation.html#translationbundle>`_.
 
 Examples:
 
@@ -131,7 +92,7 @@ To fix this issue, alter your variable to use an accepted name:
 
 - String must be passed directly to the function; don't use variables or constants
 
-Examples that will **not** work:
+Example that will **not** work:
 
 .. code:: typescript
 

@@ -7,15 +7,15 @@ JupyterLab.
 Four elements are used to handle the internationalization of JupyterLab:
 
 - `language-packs <https://github.com/jupyterlab/language-packs>`_ repository: It contains
-the source strings, their translations, the language packs and the GitHub workflows to
-update and publish the translations.
+  the source strings, their translations, the language packs and the GitHub workflows to
+  update and publish the translations.
 - `Crowdin project <https://crowdin.com/project/jupyterlab>`_: Crowdin is the cloud-based solution 
-that streamlines localization management for JupyterLab. This is the place where contributors
-can translate JupyterLab strings.
+  that streamlines localization management for JupyterLab. This is the place where contributors
+  can translate JupyterLab strings.
 - `jupyterlab-translate <https://github.com/jupyterlab/jupyterlab-translate>`_ repository: Python
-library defining helpers to deal with internationalization (e.g. extracting the strings).
+  library defining helpers to deal with internationalization (e.g. extracting the strings).
 - `Cookiecutter template <https://github.com/jupyterlab/language-pack-cookiecutter>`_ repository: It
-defines the Python package template of a language pack.
+  defines the Python package template of a language pack.
 
 The *language-packs* repository is the main entry point. It interacts with Crowdin to publish
 newer source strings and get the latest translation. It also creates and updates the language packs.
@@ -29,7 +29,7 @@ The workflows at play will be described next. In the order they are usually call
 
 .. note::
 
-    Automatic tasks are carried out through the *jupyterlab-bot*. To do that, that bot have
+    Automatic tasks are carried out through the *jupyterlab-bot*. To do that, that bot has
     access to the GitHub repository, the Crowdin project and all language packs projects on
     `PyPI <https://www.pypi.org>`_.
 
@@ -51,6 +51,8 @@ file in *language-packs* repository. The workflow to trigger an update is as fol
     Crowdin is uploading automatically its source strings using `GitHub Integration <https://support.crowdin.com/github-integration/>`_ set up
     with the Crowdin account of *jupyterlab-bot*.
 
+    The script used for this workflow is `02_update_catalogs.py <https://github.com/jupyterlab/language-packs/blob/master/scripts/02_update_catalogs.py>`_.
+
 Translation update
 ^^^^^^^^^^^^^^^^^^
 
@@ -59,7 +61,7 @@ The workflow is as follow:
 
 1. A contributor updates the translation on JupyterLab Crowdin project
 2. A new commit with those changes are pushed to the *language-packs* repository on a branch named
-``l10n_master``.
+   ``l10n_master``.
 3. If there is no pull request associated with that branch, a new pull request will be opened.
 4. A maintainer needs to merge that pull request.
 
@@ -73,7 +75,7 @@ The workflow is as follow:
 
 .. warning::
 
-    To avoid merge conflict on those translation update pull requests, they must to be merged before
+    To avoid merge conflicts on those translation update pull requests, they must to be merged before
     any ``repository-map.yaml`` pull requests as those will update the source strings.
 
 Language packs update
@@ -86,7 +88,7 @@ There is one optional setting:
 
 - The new version in form *X.YpostZ* - if not provided, the post number will be bumped.
 
-.. image:: ./images/pre-language-packs.png
+.. image:: ../images/pre-language-packs.png
 
 The workflow is:
 
@@ -100,6 +102,8 @@ The workflow is:
     The version policy applies on the language packs is to follow major and minor version numbers of 
     JupyterLab and bumping the post number for any intermediate updates. The version
     of all language packs is identical to ease maintenance.
+
+    The script used for this workflow is `03_prepare_release.py <https://github.com/jupyterlab/language-packs/blob/master/scripts/03_prepare_release.py>`_.
 
 
 Language packs publication
@@ -119,4 +123,4 @@ will be automatically triggered. Its steps are:
 
     Publication is done using jupyterlab-bot credentials on all PyPI projects.
 
-    `Conda recipe <https://github.com/conda-forge/jupyterlab-language-packs-feedstock>`_ should be updated by the auto update bot of conda-forge.
+    `Conda recipe <https://github.com/conda-forge/jupyterlab-language-packs-feedstock>`_ should be updated by the auto-tick bot of conda-forge.
