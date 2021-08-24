@@ -19,12 +19,8 @@ module.exports = {
     'plugin:jest/recommended'
   ],
   parser: '@typescript-eslint/parser',
-  parserOptions: {
-    project: 'tsconfig.eslint.json'
-  },
   plugins: ['@typescript-eslint', 'jest'],
   rules: {
-    '@typescript-eslint/no-floating-promises': ['error', { ignoreVoid: true }],
     '@typescript-eslint/naming-convention': [
       'error',
       {
