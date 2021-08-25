@@ -13,7 +13,7 @@ import { Menu } from '@lumino/widgets';
  * application menus that may be extended by plugins as well,
  * such as "Edit" and "View"
  */
-export interface IRankedMenu extends IDisposable {
+export interface IRankedMenu extends Menu {
   /**
    * Add a group of menu items specific to a particular
    * plugin.
