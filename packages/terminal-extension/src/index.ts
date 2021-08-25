@@ -96,6 +96,14 @@ function activate(
     console.warn(
       'Disabling terminals plugin because they are not available on the server'
     );
+    const terminalThemeMenu = mainMenu?.settingsMenu.items.find(
+      item =>
+        item.type === 'submenu' &&
+        item.submenu?.id === 'jp-mainmenu-settings-terminaltheme'
+    );
+    if (terminalThemeMenu) {
+      mainMenu?.settingsMenu.removeItem(terminalThemeMenu);
+    }
     return tracker;
   }
 
