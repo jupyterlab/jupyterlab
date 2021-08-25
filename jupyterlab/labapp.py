@@ -258,6 +258,28 @@ class LabPathApp(JupyterApp):
         print('Workspaces directory: %s' % get_workspaces_dir())
 
 
+class LabWorkspaceListApp(JupyterApp):
+    version = version
+    description = """
+    Print name of all the workspaces available alongside their respective path
+    """
+    def start(self):
+        app = LabApp(config=self.config)
+        directory = app.workspaces_dir
+        app_url = app.app_url
+
+        items = [item
+                for item in os.listdir(directory)
+                if item.endswith(WORKSPACE_EXTENSION)]
+        items.sort()
+
+        for slug in items:
+            workspace_path = os.path.join(directory, slug)
+            if os.path.exists(workspace_path):
+                print(slug, workspace_path, json.dumps(dict(data=dict(), metadata=dict(id=app_url))))
+                
+
+
 class LabWorkspaceExportApp(JupyterApp):
     version = version
     description = """
@@ -396,9 +418,9 @@ class LabWorkspaceImportApp(JupyterApp):
 class LabWorkspaceApp(JupyterApp):
     version = version
     description = """
-    Import or export a JupyterLab workspace
+    Import or export a JupyterLab workspace or list all the JupyterLab workspaces
 
-    There are two sub-commands for export or import of workspaces. This app
+    There are three sub-commands for export, import or list of workspaces. This app
         should not otherwise do any work.
     """
     subcommands = dict()
@@ -410,11 +432,14 @@ class LabWorkspaceApp(JupyterApp):
         LabWorkspaceImportApp,
         LabWorkspaceImportApp.description.splitlines()[0]
     )
-
+    subcommands['list'] = (
+        LabWorkspaceListApp,
+        LabWorkspaceListApp.description.splitlines()[0]
+    )
     def start(self):
         try:
             super().start()
-            print('Either `export` or `import` must be specified.')
+            print('Anyone of `export`, `import` or `list` must be specified.')
             self.exit(1)
         except NoStart:
             pass
