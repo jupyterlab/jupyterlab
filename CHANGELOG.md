@@ -8,6 +8,29 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.0a6
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a5...8a727b71bde05944214a2c53fe1f7e6e33864701))
+
+### Bugs fixed
+
+- Fix Package Publish [#10916](https://github.com/jupyterlab/jupyterlab/pull/10916) ([@afshin](https://github.com/afshin))
+- Remove terminal theme menu if terminal feature is disabled [#10909](https://github.com/jupyterlab/jupyterlab/pull/10909) ([@Mithil467](https://github.com/Mithil467))
+
+### Documentation improvements
+
+- Correct the documentation for packaging [#10910](https://github.com/jupyterlab/jupyterlab/pull/10910) ([@fcollonval](https://github.com/fcollonval))
+- Forward port 3.1.8 Changelog Entry [#10907](https://github.com/jupyterlab/jupyterlab/pull/10907) ([@blink1073](https://github.com/blink1073))
+- Add internationalization documentation [#10893](https://github.com/jupyterlab/jupyterlab/pull/10893) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-08-24&to=2021-08-25&type=c))
+
+[@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2021-08-24..2021-08-25&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-08-24..2021-08-25&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2021-08-24..2021-08-25&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-08-24..2021-08-25&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2021-08-24..2021-08-25&type=Issues) | [@Mithil467](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMithil467+updated%3A2021-08-24..2021-08-25&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2021-08-24..2021-08-25&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.0a5
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a4...0cf99e5d3e3881df8b406d097a46e91569a02f52))
@@ -43,8 +66,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-08-16&to=2021-08-24&type=c))
 
 [@3coins](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3A3coins+updated%3A2021-08-16..2021-08-24&type=Issues) | [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2021-08-16..2021-08-24&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-08-16..2021-08-24&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2021-08-16..2021-08-24&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2021-08-16..2021-08-24&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2021-08-16..2021-08-24&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-08-16..2021-08-24&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2021-08-16..2021-08-24&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2021-08-16..2021-08-24&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2021-08-16..2021-08-24&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.0a4
 
@@ -185,6 +206,25 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 [@3coins](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3A3coins+updated%3A2021-07-27..2021-08-06&type=Issues) | [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2021-07-27..2021-08-06&type=Issues) | [@AnudeepGunukula](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAnudeepGunukula+updated%3A2021-07-27..2021-08-06&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-07-27..2021-08-06&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2021-07-27..2021-08-06&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2021-07-27..2021-08-06&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2021-07-27..2021-08-06&type=Issues) | [@ellisonbg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aellisonbg+updated%3A2021-07-27..2021-08-06&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2021-07-27..2021-08-06&type=Issues) | [@goanpeca](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agoanpeca+updated%3A2021-07-27..2021-08-06&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2021-07-27..2021-08-06&type=Issues) | [@i-aki-y](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ai-aki-y+updated%3A2021-07-27..2021-08-06&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2021-07-27..2021-08-06&type=Issues) | [@jess-x](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajess-x+updated%3A2021-07-27..2021-08-06&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2021-07-27..2021-08-06&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-07-27..2021-08-06&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2021-07-27..2021-08-06&type=Issues) | [@KrishnaKumarHariprasannan](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AKrishnaKumarHariprasannan+updated%3A2021-07-27..2021-08-06&type=Issues) | [@loichuder](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aloichuder+updated%3A2021-07-27..2021-08-06&type=Issues) | [@manfromjupyter](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amanfromjupyter+updated%3A2021-07-27..2021-08-06&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2021-07-27..2021-08-06&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2021-07-27..2021-08-06&type=Issues) | [@richardkang112](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Arichardkang112+updated%3A2021-07-27..2021-08-06&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2021-07-27..2021-08-06&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2021-07-27..2021-08-06&type=Issues)
 
 ## v3.1
+
+## 3.1.9
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.8...8f8cfc548c7c91e9dcf0dc51fd6eafc98f3fcfef))
+
+### Bugs fixed
+
+- Fix Package Publish [#10916](https://github.com/jupyterlab/jupyterlab/pull/10916) ([@afshin](https://github.com/afshin))
+- Remove terminal theme menu if terminal feature is disabled [#10909](https://github.com/jupyterlab/jupyterlab/pull/10909) ([@Mithil467](https://github.com/Mithil467))
+
+### Documentation improvements
+
+- Correct the documentation for packaging [#10910](https://github.com/jupyterlab/jupyterlab/pull/10910) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-08-24&to=2021-08-25&type=c))
+
+[@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-08-24..2021-08-25&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-08-24..2021-08-25&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2021-08-24..2021-08-25&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2021-08-24..2021-08-25&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2021-08-24..2021-08-25&type=Issues)
 
 ## 3.1.8
 
