@@ -10,7 +10,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ## 4.0.0a6
 
-([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a5...8a727b71bde05944214a2c53fe1f7e6e33864701))
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a5...30b45e478d494f7da1a63da484e6085889029588))
 
 ### Bugs fixed
 
