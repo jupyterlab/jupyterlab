@@ -37,6 +37,8 @@ commander
 
     if (!options.skipPublish) {
       if (!options.skipBuild) {
+        utils.run('jlpm run build:builder');
+        utils.run('jlpm run build:testutils');
         utils.run('jlpm run build:packages');
       }
 
