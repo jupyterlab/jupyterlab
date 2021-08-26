@@ -1965,7 +1965,7 @@ def _yarn_config(logger):
         return configuration
 
     try:
-        output_binary = subprocess.check_output([node, YARN_PATH, 'config', 'list', '--json'], stderr=subprocess.PIPE, cwd=HERE)
+        output_binary = subprocess.check_output([node, YARN_PATH, 'config', '--json'], stderr=subprocess.PIPE, cwd=HERE)
         output = output_binary.decode('utf-8')
         lines = iter(output.splitlines())
         try:
