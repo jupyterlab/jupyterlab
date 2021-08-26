@@ -267,7 +267,7 @@ class LabWorkspaceListApp(JupyterApp):
 
     If '--json' flag is passed in, 'json' output of each workspace is printed.
     If '--jsonlist' flag is passed in, 'json' output of list of workspaces is printed.
-    If both of the above are not passed in, 'human-readable' output is printed.
+    If nothing is passed in, 'human-readable' output is printed.
     """
     flags = dict(
         jsonlist=(
@@ -302,27 +302,32 @@ class LabWorkspaceListApp(JupyterApp):
         app = LabApp(config=self.config)
         directory = app.workspaces_dir
 
-        if self.jsonlist:
-            workspaces = []
-
         items = [item
                 for item in os.listdir(directory)
                 if item.endswith(WORKSPACE_EXTENSION)]
         items.sort()
 
-        for slug in items:
-            workspace_path = os.path.join(directory, slug)
-            if os.path.exists(workspace_path):
-                workspace = _load_with_file_times(workspace_path)
-                if self.json:
-                    print(json.dumps(workspace))
-                if self.jsonlist:
-                    workspaces.append(workspace)
-                if not self.json and not self.jsonlist:
-                    print(slug, workspace_path, sep='\t')
+        workspaces = _list_available_workspaces(directory, items)
         if self.jsonlist:
             print(json.dumps(workspaces))
+        elif self.json:
+            for workspace in workspaces:
+                print(json.dumps(workspace))
+        else:
+            print(*items, sep="\n")
                 
+
+def _list_available_workspaces(directory, items):
+    """
+    Return a list containing all the workspaces
+    """
+    workspaces = []
+    for slug in items:
+        workspace_path = os.path.join(directory, slug)
+        if os.path.exists(workspace_path):
+            workspaces.append(_load_with_file_times(workspace_path))
+    return workspaces
+
 
 def _load_with_file_times(workspace_path):
     """
@@ -479,7 +484,7 @@ class LabWorkspaceApp(JupyterApp):
     description = """
     Import or export a JupyterLab workspace or list all the JupyterLab workspaces
 
-    There are three sub-commands for export, import or list of workspaces. This app
+    There are three sub-commands for export, import or listing of workspaces. This app
         should not otherwise do any work.
     """
     subcommands = dict()
