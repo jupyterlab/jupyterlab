@@ -272,8 +272,7 @@ export class YNotebook
   insertCells(index: number, cells: YCellType[]): void {
     cells.forEach(cell => {
       this._ycellMapping.set(cell.ymodel, cell);
-      // cell.yawareness = this.yawareness;
-      // cell.yUndoManager = this.yUndoManager;
+      cell.undoManager = this.undoManager;
     });
     this.transact(() => {
       this.ycells.insert(
@@ -495,6 +494,13 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    */
   get undoManager(): Y.UndoManager | null {
     return this.notebook ? this.notebook.undoManager : this._undoManager;
+  }
+
+  /**
+   * Set the undoManager when adding new cells.
+   */
+  set undoManager(undoManager: Y.UndoManager | null) {
+    this._undoManager = undoManager;
   }
 
   /**
