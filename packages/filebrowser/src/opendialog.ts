@@ -81,7 +81,8 @@ export namespace FileDialog {
         Dialog.cancelButton({ label: trans.__('Cancel') }),
         Dialog.okButton({
           label: trans.__('Select')
-        })
+        }),
+        Dialog.saveasButton({ label: trans.__('Save as') })
       ],
       focusNodeSelector: options.focusNodeSelector,
       host: options.host,
