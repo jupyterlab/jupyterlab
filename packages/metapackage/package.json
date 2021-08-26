@@ -24,11 +24,11 @@
     "lib/*.js"
   ],
   "scripts": {
-    "build": "tsc -b",
-    "build:all": "npm run build",
-    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "docs": "node build-doc-index.js",
-    "watch": "tsc -b --watch"
+    "build": "yarn run tsc -b",
+    "build:all": "yarn run build",
+    "clean": "yarn run rimraf lib && yarn run rimraf tsconfig.tsbuildinfo",
+    "docs": "yarn node build-doc-index.js",
+    "watch": "yarn run tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.7",
