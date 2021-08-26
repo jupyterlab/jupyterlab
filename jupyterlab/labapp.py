@@ -15,10 +15,11 @@ from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
 from jupyter_server import _tz as tz
+from jupyter_server.transutils import _i18n
 
 from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, slugify
 from nbclassic.shim import NBClassicConfigShimMixin
-from traitlets import Bool, Instance, Unicode, default, _i18n
+from traitlets import Bool, Instance, Unicode, default
 
 from ._version import __version__
 from .commands import (
