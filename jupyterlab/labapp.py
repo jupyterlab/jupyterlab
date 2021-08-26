@@ -314,7 +314,8 @@ class LabWorkspaceListApp(JupyterApp):
             for workspace in workspaces:
                 print(json.dumps(workspace))
         else:
-            print(*items, sep="\n")
+            for workspace in workspaces:
+                print(workspace['metadata']['id'])
                 
 
 def _list_available_workspaces(directory, items):
