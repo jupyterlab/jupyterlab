@@ -307,5 +307,6 @@
     ],
     "linkedPackages": {},
     "staticDir": "../static"
-  }
+  },
+  "packageManager": "yarn@3.0.1"
 }

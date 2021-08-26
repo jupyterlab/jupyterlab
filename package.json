@@ -3,27 +3,25 @@
   "version": "0.0.1",
   "private": true,
   "files": [],
-  "workspaces": {
-    "packages": [
-      "dev_mode",
-      "examples/*",
-      "examples/federated/*",
-      "packages/*",
-      "packages/services/examples/node",
-      "packages/services/examples/browser",
-      "packages/services/examples/typescript-browser-with-output",
-      "builder",
-      "buildutils",
-      "buildutils/template",
-      "buildutils/test-template",
-      "galata",
-      "tests",
-      "tests/test-*",
-      "testutils",
-      "jupyterlab/tests/mock_packages/extension",
-      "jupyterlab/tests/mock_packages/interop/*"
-    ]
-  },
+  "workspaces": [
+    "dev_mode",
+    "examples/*",
+    "examples/federated/*",
+    "packages/*",
+    "packages/services/examples/node",
+    "packages/services/examples/browser",
+    "packages/services/examples/typescript-browser-with-output",
+    "builder",
+    "buildutils",
+    "buildutils/template",
+    "buildutils/test-template",
+    "galata",
+    "tests",
+    "tests/test-*",
+    "testutils",
+    "jupyterlab/tests/mock_packages/extension",
+    "jupyterlab/tests/mock_packages/interop/*"
+  ],
   "scripts": {
     "add:sibling": "node buildutils/lib/add-sibling.js",
     "after:publish:assets": "jlpm && jlpm run build:utils && node buildutils/lib/publish --skip-publish",
@@ -124,6 +122,7 @@
     "prettier": "~2.1.1",
     "shell-quote": "^1.7.2",
     "typedoc": "~0.21.2",
-    "yarn": "1.21.1"
-  }
+    "yarn": "1.22.11"
+  },
+  "packageManager": "yarn@3.0.1"
 }
