@@ -151,7 +151,8 @@ export namespace InputDialog {
       body: new InputItemsDialog(options),
       buttons: [
         Dialog.cancelButton({ label: options.cancelLabel }),
-        Dialog.okButton({ label: options.okLabel })
+        Dialog.okButton({ label: options.okLabel }),
+        Dialog.saveasButton({ label: options.saveasLabel })
       ],
       focusNodeSelector: options.editable ? 'input' : 'select'
     });
@@ -186,7 +187,8 @@ export namespace InputDialog {
       body: new InputTextDialog(options),
       buttons: [
         Dialog.cancelButton({ label: options.cancelLabel }),
-        Dialog.okButton({ label: options.okLabel })
+        Dialog.okButton({ label: options.okLabel }),
+        Dialog.saveasButton({ label: options.saveasLabel })
       ],
       focusNodeSelector: 'input'
     });
