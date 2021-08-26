@@ -272,7 +272,6 @@ export class YNotebook
   insertCells(index: number, cells: YCellType[]): void {
     cells.forEach(cell => {
       this._ycellMapping.set(cell.ymodel, cell);
-      //cell.awareness = this.yawareness;
       cell.undoManager = this.undoManager;
     });
     this.transact(() => {
