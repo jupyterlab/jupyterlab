@@ -309,7 +309,7 @@ export class MainMenu extends MenuBar implements IMainMenu {
     }
 
     if (label) {
-      menu.title.label = trans.__(label);
+      menu.title.label = trans._p('menu', label);
     }
 
     return menu;
