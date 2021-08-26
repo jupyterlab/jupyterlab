@@ -25,16 +25,16 @@
     "src/**/*.{ts,tsx}"
   ],
   "scripts": {
-    "build": "tsc -b",
+    "build": "yarn run tsc -b",
     "build:all": "npm run build",
-    "build:test": "tsc --build tsconfig.test.json",
-    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "docs": "node build-doc-index.js",
-    "test": "jest",
-    "test:cov": "jest --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
-    "watch": "tsc -b --watch"
+    "build:test": "yarn run tsc --build tsconfig.test.json",
+    "clean": "yarn run rimraf lib && yarn run rimraf tsconfig.tsbuildinfo",
+    "docs": "yarn node build-doc-index.js",
+    "test": "yarn jest",
+    "test:cov": "yarn jest --collect-coverage",
+    "test:debug": "yarn node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "yarn node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "watch": "yarn run tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.21",
