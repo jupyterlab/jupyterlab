@@ -48,15 +48,11 @@ jobs:
         run: |
           bash ./scripts/ci_install.sh
 
-      - name: Build JupyterLab dev-mode docker
-        run: |
-          /bin/sh ./scripts/build_docker.sh
-
       - name: Launch JupyterLab
         run: |
           cd galata
           # Mount a volume to overwrite the server configuration
-          docker run --rm -p 8888:8888 -v ${PWD}:/etc/jupyter -e SKIP_INTEGRITY_CHECK=true -d --name galata-jlab jupyterlab-dev
+          jlpm start 2>&1 > /tmp/jupyterlab_server.log &
 
       - name: Install browser
         run: |
@@ -92,9 +88,7 @@ jobs:
           path: |
             galata/playwright-report
 
-      - name: Stop JupyterLab
+      - name: Print JupyterLab logs
         if: always()
         run: |
-          docker logs galata-jlab || true
-          docker stop galata-jlab || true
-          docker rm -f galata-jlab || true
+          cat /tmp/jupyterlab_server.log
