@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
@@ -82,9 +83,11 @@ export type GalataOptions = {
    * Mock JupyterLab settings in-memory or not.
    *
    * Possible values are:
-   * - true (default): JupyterLab settings will be mocked on a per test basis
+   * - true: JupyterLab settings will be mocked on a per test basis
    * - false: JupyterLab settings won't be mocked (Be careful it will read & write settings local files)
-   * - Record<string, unknown>: Mapping {pluginId: settings} that will override default settings
+   * - Record<string, unknown>: Mapping {pluginId: settings} that will be default user settings
+   *
+   * The default value is `galata.DEFAULT_SETTINGS`
    *
    * By default the settings are stored in-memory. However the
    * they are still initialized with the hard drive values.
@@ -165,14 +168,16 @@ export const test: TestType<
    * Mock JupyterLab settings in-memory or not.
    *
    * Possible values are:
-   * - true (default): JupyterLab settings will be mocked on a per test basis
+   * - true: JupyterLab settings will be mocked on a per test basis
    * - false: JupyterLab settings won't be mocked (Be careful it may write settings local files)
-   * - Record<string, unknown>: Mapping {pluginId: settings} that will override default settings
+   * - Record<string, unknown>: Mapping {pluginId: settings} that will be default user settings
+   *
+   * The default value is `galata.DEFAULT_SETTINGS`
    *
    * By default the settings are stored in-memory. However the
    * they are still initialized with the hard drive values.
    */
-  mockSettings: true,
+  mockSettings: galata.DEFAULT_SETTINGS,
   /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
    * the server root for debugging purpose. By default the files are kept
@@ -254,7 +259,7 @@ export const test: TestType<
    * JupyterLab test page.
    *
    * It brings the following feature on top of Playwright Page object:
-   * - Goto to JupyterLab URL and wait for the application to be ready
+   * - Goto to JupyterLab URL and wait for the application to be ready (autoGoto == true)
    * - Helpers for JupyterLab
    * - Settings mock-up
    * - State mock-up

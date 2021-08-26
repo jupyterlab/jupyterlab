@@ -10,6 +10,21 @@ import { IJupyterLabPageFixture, JupyterLabPage } from './jupyterlabpage';
  */
 export namespace galata {
   /**
+   * Default user settings:
+   * - Deactivate codemirror cursor blinking to avoid noise in screenshots
+   */
+  export const DEFAULT_SETTINGS: Record<string, any> = {
+    '@jupyterlab/fileeditor-extension:plugin': {
+      editorConfig: { cursorBlinkRate: 0 }
+    },
+    '@jupyterlab/notebook-extension:tracker': {
+      codeCellConfig: { cursorBlinkRate: 0 },
+      markdownCellConfig: { cursorBlinkRate: 0 },
+      rawCellConfig: { cursorBlinkRate: 0 }
+    }
+  };
+
+  /**
    * Sidebar position
    */
   export type SidebarPosition = 'left' | 'right';
