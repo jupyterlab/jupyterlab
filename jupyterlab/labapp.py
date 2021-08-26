@@ -14,10 +14,11 @@ from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_fla
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
+from jupyter_server import _tz as tz
 
 from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, slugify
 from nbclassic.shim import NBClassicConfigShimMixin
-from traitlets import Bool, Instance, Unicode, default
+from traitlets import Bool, Instance, Unicode, default, _i18n
 
 from ._version import __version__
 from .commands import (
@@ -261,12 +262,47 @@ class LabPathApp(JupyterApp):
 class LabWorkspaceListApp(JupyterApp):
     version = version
     description = """
-    Print name of all the workspaces available alongside their respective path
+    Print all the workspaces available
+
+    If '--json' flag is passed in, 'json' output of each workspace is printed.
+    If '--jsonlist' flag is passed in, 'json' output of list of workspaces is printed.
+    If both of the above are not passed in, 'human-readable' output is printed.
     """
+    flags = dict(
+        jsonlist=(
+            {"LabWorkspaceListApp": {"jsonlist": True}},
+            _i18n("Produce machine-readable JSON list output."),
+        ),
+        json=(
+            {"LabWorkspaceListApp": {"json": True}},
+            _i18n("Produce machine-readable JSON object on each line of output."),
+        ),
+    )
+
+    jsonlist = Bool(
+        False,
+        config=True,
+        help=_i18n(
+            "If True, the output will be a JSON list of objects, one per "
+            "JupyterLab workspace, each with the details of the "
+            "relevant workspace"
+        ),
+    )
+    json = Bool(
+        False,
+        config=True,
+        help=_i18n(
+            "If True, each line of output will be a JSON object with the "
+            "details of the workspace."
+        ),
+    )
+
     def start(self):
         app = LabApp(config=self.config)
         directory = app.workspaces_dir
-        app_url = app.app_url
+
+        if self.jsonlist:
+            workspaces = []
 
         items = [item
                 for item in os.listdir(directory)
@@ -276,8 +312,30 @@ class LabWorkspaceListApp(JupyterApp):
         for slug in items:
             workspace_path = os.path.join(directory, slug)
             if os.path.exists(workspace_path):
-                print(slug, workspace_path, json.dumps(dict(data=dict(), metadata=dict(id=app_url))))
+                workspace = _load_with_file_times(workspace_path)
+                if self.json:
+                    print(json.dumps(workspace))
+                if self.jsonlist:
+                    workspaces.append(workspace)
+                if not self.json and not self.jsonlist:
+                    print(slug, workspace_path, sep='\t')
+        if self.jsonlist:
+            print(json.dumps(workspaces))
                 
+
+def _load_with_file_times(workspace_path):
+    """
+    Load workspace JSON from disk, overwriting the `created` and `last_modified`
+    metadata with current file stat information
+    """
+    stat = os.stat(workspace_path)
+    with open(workspace_path, encoding='utf-8') as fid:
+        workspace = json.load(fid)
+        workspace["metadata"].update(
+            last_modified=tz.utcfromtimestamp(stat.st_mtime).isoformat(),
+            created=tz.utcfromtimestamp(stat.st_ctime).isoformat()
+        )
+    return workspace
 
 
 class LabWorkspaceExportApp(JupyterApp):
@@ -439,7 +497,7 @@ class LabWorkspaceApp(JupyterApp):
     def start(self):
         try:
             super().start()
-            print('Anyone of `export`, `import` or `list` must be specified.')
+            print('One of `export`, `import` or `list` must be specified.')
             self.exit(1)
         except NoStart:
             pass
