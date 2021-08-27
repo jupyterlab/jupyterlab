@@ -25,6 +25,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:all": "npm run build",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "node build-doc-index.js",
     "watch": "tsc -b --watch"
