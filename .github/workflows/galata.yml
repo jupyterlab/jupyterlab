@@ -3,7 +3,7 @@ name: Galata Tests
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches: '*'
 
@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.py') }}
+          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
           restore-keys: |
             ${{ runner.os }}-pip-3.8
   

@@ -135,7 +135,251 @@ jupyter lab --config jupyter_server_test_config.py &
 PWDEBUG=1 jlpm playwright test
 ```
 
-## Developement
+## Fixtures
+
+Here are the new test fixture introduced by Galata on top of [Playwright fixtures](https://playwright.dev/docs/api/class-fixtures.
+
+### appPath
+
+- type: <string>;
+
+Application URL path fragment; default `"/lab"`
+
+### autoGoto
+
+- type: <boolean>
+
+Whether to go to JupyterLab page within the fixture or not; default `true`.
+
+If set to `false`, it allows you to add route mock before loading JupyterLab.
+
+Example:
+
+```ts
+test.use({ autoGoto: false });
+
+test('Open language menu', async ({ page }) => {
+  await page.route(/.*\/api\/translation.*/, (route, request) => {
+    if (request.method() === 'GET') {
+      return route.fulfill({
+        status: 200,
+        body:
+          '{"data": {"en": {"displayName": "English", "nativeName": "English"}}, "message": ""}'
+      });
+    } else {
+      return route.continue();
+    }
+  });
+  await page.goto();
+
+  // ...
+});
+```
+
+### serverFiles
+
+- type: <'on' | 'off' | 'only-on-failure'>
+
+Galata can keep the uploaded and created files in `tmpPath` on
+the server root for debugging purpose. By default the files are kept
+on failure.
+
+- 'off' - `tmpPath` is deleted after each tests
+- 'on' - `tmpPath` is never deleted
+- 'only-on-failure' - `tmpPath` is deleted except if a test failed or timed out.
+
+### mockState
+
+- type: <boolean | Record<string, unknown>>;
+
+Mock JupyterLab state in-memory or not.
+Possible values are:
+
+- true (default): JupyterLab state will be mocked on a per test basis
+- false: JupyterLab state won't be mocked (Be careful it will write state in local files)
+- Record<string, unknown>: Initial JupyterLab data state - Mapping (state key, value).
+  By default the state is stored in-memory.
+
+Example:
+
+```ts
+test.use({
+  mockState: {
+    'layout-restorer:data': {
+      main: {
+        dock: {
+          type: 'tab-area',
+          currentIndex: 0,
+          widgets: []
+        }
+      },
+      down: {
+        size: 0,
+        widgets: []
+      },
+      left: {
+        collapsed: false,
+        visible: true,
+        current: 'running-sessions',
+        widgets: [
+          'filebrowser',
+          'jp-property-inspector',
+          'running-sessions',
+          '@jupyterlab/toc:plugin',
+          'debugger-sidebar',
+          'extensionmanager.main-view'
+        ]
+      },
+      right: {
+        collapsed: true,
+        visible: true,
+        widgets: []
+      },
+      relativeSizes: [0.4, 0.6, 0]
+    }
+  } as any
+});
+
+test('should return the mocked state', async ({ page }) => {
+  expect(
+    await page.waitForSelector(
+      '[aria-label="Running Sessions section"] >> text=Open Tabs'
+    )
+  ).toBeTruthy();
+});
+```
+
+### mockSettings
+
+- type: <boolean | Record<string, unknown>>;
+
+Mock JupyterLab settings in-memory or not.
+Possible values are:
+
+- true: JupyterLab settings will be mocked on a per test basis
+- false: JupyterLab settings won't be mocked (Be careful it will read & write settings local files)
+- Record<string, unknown>: Mapping {pluginId: settings} that will be default user settings
+
+  The default value is `galata.DEFAULT_SETTINGS`
+
+  By default the settings are stored in-memory. However the
+  they are still initialized with the hard drive values.
+
+Example:
+
+```ts
+test.use({
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/apputils-extension:themes': {
+      theme: 'JupyterLab Dark'
+    }
+  }
+});
+
+test('should return mocked settings', async ({ page }) => {
+  expect(await page.theme.getTheme()).toEqual('JupyterLab Dark');
+});
+```
+
+### sessions
+
+- type: <Map<string, Session.IModel> | null>;
+
+Sessions created during the test.
+Possible values are:
+
+- null: The sessions API won't be mocked
+- Map<string, Session.IModel>: The sessions created during a test.
+  By default the sessions created during a test will be tracked and disposed at the end.
+
+Example:
+
+```ts
+test('should return the active sessions', async ({ page, sessions }) => {
+  await page.notebook.createNew();
+
+  // Wait for the poll to tick
+  await page.waitForResponse(
+    async response =>
+      response.url().includes('api/sessions') &&
+      response.request().method() === 'GET' &&
+      ((await response.json()) as any[]).length === 1
+  );
+
+  expect(sessions.size).toEqual(1);
+  // You can introspect the sessions.values()[0] if needed
+});
+```
+
+### terminals
+
+- type: <Map<string, TerminalAPI.IModel> | null>;
+
+Terminals created during the test.
+Possible values are:
+
+- null: The Terminals API won't be mocked
+- Map<string, TerminalsAPI.IModel>: The Terminals created during a test.
+  By default the Terminals created during a test will be tracked and disposed at the end.
+
+Example:
+
+```ts
+test('should return the active terminals', async ({ page, terminals }) => {
+  await Promise.all([
+    page.waitForResponse(
+      response =>
+        response.request().method() === 'POST' &&
+        response.url().includes('api/terminals')
+    ),
+    page.menu.clickMenuItem('File>New>Terminal')
+  ]);
+
+  // Wait for the poll to tick
+  await page.waitForResponse(
+    async response =>
+      response.url().includes('api/terminals') &&
+      response.request().method() === 'GET' &&
+      ((await response.json()) as any[]).length === 1
+  );
+
+  expect(terminals.size).toEqual(1);
+  // You can introspect the [...terminals.values()][0] if needed
+});
+```
+
+### tmpPath
+
+- type: <string>;
+
+Unique test temporary path created on the server.
+
+Note: if you override this string, you will need to take care of creating the
+folder and cleaning it.
+
+Example:
+
+```ts
+test.use({ tmpPath: 'test-toc' });
+
+test.describe.serial('Table of Contents', () => {
+  test.beforeAll(async ({ baseURL, tmpPath }) => {
+    const contents = galata.newContentsHelper(baseURL);
+    await contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
+    );
+  });
+
+  test.afterAll(async ({ baseURL, tmpPath }) => {
+    const contents = galata.newContentsHelper(baseURL);
+    await contents.deleteDirectory(tmpPath);
+  });
+});
+```
+
+## Development
 
 ### Build
 
