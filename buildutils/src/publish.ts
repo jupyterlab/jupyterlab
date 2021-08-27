@@ -30,6 +30,8 @@ commander
   .option('--yes', 'Publish without confirmation')
   .option('--dry-run', 'Do not actually push any assets')
   .action(async (options: any) => {
+    utils.exitOnUuncaughtException();
+
     // No-op if we're in release helper dry run
     if (process.env.RH_DRY_RUN === 'true') {
       return;
@@ -37,9 +39,7 @@ commander
 
     if (!options.skipPublish) {
       if (!options.skipBuild) {
-        utils.run('jlpm run build:builder');
-        utils.run('jlpm run build:testutils');
-        utils.run('jlpm run build:packages');
+        utils.run('jlpm run build:all');
       }
 
       if (!options.dryRun) {

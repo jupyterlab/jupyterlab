@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
-    "clean": "rimraf build",
-    "prepublishOnly": "npm run build"
+    "clean": "rimraf build"
   },
   "dependencies": {
+    "@jupyterlab/application": "^3.1.8",
+    "@jupyterlab/apputils": "^3.1.8",
     "@jupyterlab/codemirror": "^3.1.8",
     "@jupyterlab/completer": "^3.1.8",
+    "@jupyterlab/coreutils": "^5.1.8",
     "@jupyterlab/docmanager": "^3.1.8",
     "@jupyterlab/docregistry": "^3.1.8",
     "@jupyterlab/documentsearch": "^3.1.8",
