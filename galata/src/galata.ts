@@ -1,6 +1,8 @@
+/* eslint-disable camelcase */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as nbformat from '@jupyterlab/nbformat';
 import { Browser, Page } from '@playwright/test';
 import { ContentsHelper } from './contents';
 import { IJupyterLabPageFixture, JupyterLabPage } from './jupyterlabpage';
@@ -176,5 +178,108 @@ export namespace galata {
      * The id will be suffixed by '/'.
      */
     export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)/;
+  }
+
+  export namespace Notebook {
+    export function generateNotebook(
+      nCells: number = 0,
+      cellType: nbformat.CellType = 'code',
+      defaultInput: string[] = [],
+      defaultOutput: nbformat.IOutput[] = []
+    ): nbformat.INotebookContent {
+      const cells = new Array<nbformat.ICell>();
+      for (let i = 0; i < nCells; i++) {
+        const execution_count =
+          cellType === 'code'
+            ? defaultOutput.length > 0
+              ? i + 1
+              : null
+            : undefined;
+        const cell = makeCell({
+          cell_type: cellType,
+          source: [...defaultInput],
+          outputs: cellType === 'code' ? [...defaultOutput] : undefined,
+          execution_count
+        });
+        cells.push(cell);
+      }
+
+      return makeNotebook(cells);
+    }
+
+    export function makeCell(
+      skeleton: Partial<nbformat.ICell>
+    ): nbformat.ICell {
+      switch (skeleton.cell_type ?? 'code') {
+        case 'code':
+          return {
+            cell_type: 'code',
+            execution_count: null,
+            metadata: {},
+            outputs: [],
+            source: [],
+            ...skeleton
+          };
+        default: {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { execution_count, outputs, ...others } = skeleton;
+          return {
+            cell_type: 'markdown',
+            metadata: {},
+            source: [],
+            ...others
+          };
+        }
+      }
+    }
+
+    export function makeNotebook(
+      cells: Array<nbformat.ICell>
+    ): nbformat.INotebookContent {
+      return {
+        cells,
+        metadata: {
+          kernelspec: {
+            display_name: 'Python 3',
+            language: 'python',
+            name: 'python3'
+          },
+          language_info: {
+            codemirror_mode: {
+              name: 'ipython',
+              version: 3
+            },
+            file_extension: '.py',
+            mimetype: 'text/x-python',
+            name: 'python',
+            nbconvert_exporter: 'python',
+            pygments_lexer: 'ipython3',
+            version: '3.8.0'
+          },
+          orig_nbformat: 4
+        },
+        nbformat: 4,
+        nbformat_minor: 4
+      };
+    }
+  }
+
+  export namespace MathFunc {
+    export function mean(...numbers: number[]): number {
+      return numbers.length === 0
+        ? NaN
+        : numbers.reduce((acc, v) => v + acc, 0) / numbers.length;
+    }
+
+    export function std(...numbers: number[]): number {
+      if (numbers.length <= 1) {
+        return NaN;
+      }
+      const meanValue = this.mean(...numbers);
+      return Math.sqrt(
+        (numbers.length / (numbers.length - 1)) *
+          this.mean(...numbers.map(n => (n - meanValue) ** 2))
+      );
+    }
   }
 }

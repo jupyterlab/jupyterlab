@@ -42,6 +42,7 @@ tests/**/coverage
 tests/**/.cache-loader
 
 # galata
+galata/benchmark-results
 galata/playwright-report
 galata/test-results
 

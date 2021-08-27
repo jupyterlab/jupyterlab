@@ -1,0 +1,391 @@
+{
+  "values": [
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 4048.2000000011176,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 4136.799999998882,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 4216.5999999996275,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 3408,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 3526.5999999996275,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 4229.60000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 4107.89999999851,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 3977.2000000011176,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 3484.9000000003725,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 4177.5999999996275,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 3957.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 2978.4000000003725,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 4190.800000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 4265.199999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 3722.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 3537.10000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 3899.2000000011176,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 3760.60000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 3738.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_code_notebook",
+      "time": 4730.10000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2382.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2329.0999999996275,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2559.2000000011176,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2230.9000000003725,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2362,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2300.7999999988824,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2151,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2354.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2385.4000000003725,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2224.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2342.4000000003725,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2295.800000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2228.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2407.0999999996275,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2199.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2450.4000000003725,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2181,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2440.10000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2429.199999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "test": "open",
+      "file": "large_md_notebook",
+      "time": 2237.4000000003725,
+      "reference": "expected"
+    }
+  ],
+  "metadata": {
+    "browsers": {
+      "chromium": "94.0.4595.0"
+    },
+    "benchmark": {
+      "BENCHMARK_OUTPUTFILE": "lab-benchmark.json",
+      "BENCHMARK_REFERENCE": "actual"
+    },
+    "systemInformation": {
+      "cpu": {
+        "manufacturer": "11th",
+        "brand": "Gen Intel® Core™ i7-1165G7",
+        "vendor": "GenuineIntel",
+        "family": "6",
+        "model": "140",
+        "stepping": "1",
+        "revision": "",
+        "voltage": "",
+        "speed": 2.8,
+        "speedMin": 0.4,
+        "speedMax": 4.7,
+        "governor": "powersave",
+        "cores": 8,
+        "physicalCores": 4,
+        "processors": 1,
+        "socket": "",
+        "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities",
+        "virtualization": false,
+        "cache": {
+          "l1d": 196608,
+          "l1i": 131072,
+          "l2": 5242880,
+          "l3": 12582912
+        }
+      },
+      "mem": {
+        "total": 33383514112,
+        "free": 18569019392,
+        "used": 14814494720,
+        "active": 11105206272,
+        "available": 22278307840,
+        "buffers": 665587712,
+        "cached": 3885133824,
+        "slab": 646762496,
+        "buffcache": 5197484032,
+        "swaptotal": 1023406080,
+        "swapused": 0,
+        "swapfree": 1023406080
+      },
+      "osInfo": {
+        "platform": "linux",
+        "distro": "Debian GNU/Linux",
+        "release": "11",
+        "codename": "bullseye",
+        "kernel": "5.10.0-8-amd64",
+        "arch": "x64",
+        "hostname": "qs-fco",
+        "fqdn": "qs-fco.home",
+        "codepage": "UTF-8",
+        "logofile": "debian",
+        "serial": "ce2b82beffbb455480f89b4531aafcfa",
+        "build": "",
+        "servicepack": "",
+        "uefi": true
+      }
+    }
+  }
+}

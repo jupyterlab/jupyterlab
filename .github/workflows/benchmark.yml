@@ -1,0 +1,113 @@
+name: Benchmark Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches: '*'
+
+permissions:
+  pull-requests: write
+
+jobs:
+  build:
+    name: Benchmark
+    timeout-minutes: 40
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Cache pip on Linux
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-3.8
+  
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Cache yarn
+        uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+
+      - name: Launch JupyterLab
+        run: |
+          cd galata
+          # Mount a volume to overwrite the server configuration
+          jlpm start 2>&1 > /tmp/jupyterlab_server.log &
+
+      - name: Install browser
+        run: |
+          cd galata
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
+
+      - uses: iterative/setup-cml@v1
+      - name: Test
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd galata
+          jlpm run test:benchmark
+
+          echo "_Send from benchmark CI_" > report.md
+          # Publish image to cml.dev
+          cml-publish ./benchmark-results/lab-benchmark.png --md >> report.md
+          cat report.md
+          echo 'BENCH_REPORT<<EOF' >> $GITHUB_ENV
+          cat report.md >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+
+      - name: Comment on PR with benchmark report
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: process.env.BENCH_REPORT
+            })
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: benchmark-test-assets
+          path: |
+            galata/benchmark-results
+            galata/test-results
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log

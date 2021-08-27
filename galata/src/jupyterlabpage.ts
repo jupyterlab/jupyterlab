@@ -11,6 +11,7 @@ import {
   LogConsoleHelper,
   MenuHelper,
   NotebookHelper,
+  PerformanceHelper,
   SidebarHelper,
   StatusBarHelper,
   ThemeHelper
@@ -60,6 +61,8 @@ export interface IJupyterLabPage {
    * JupyterLab notebook helpers
    */
   readonly notebook: NotebookHelper;
+
+  readonly performance: PerformanceHelper;
   /**
    * JupyterLab status bar helpers
    */
@@ -257,6 +260,7 @@ export class JupyterLabPage implements IJupyterLabPage {
       this.filebrowser,
       this.menu
     );
+    this.performance = new PerformanceHelper(page);
     this.statusbar = new StatusBarHelper(page, this.menu);
     this.sidebar = new SidebarHelper(page, this.menu);
     this.theme = new ThemeHelper(page);
@@ -296,6 +300,8 @@ export class JupyterLabPage implements IJupyterLabPage {
    * JupyterLab notebook helpers
    */
   readonly notebook: NotebookHelper;
+
+  readonly performance: PerformanceHelper;
 
   /**
    * JupyterLab status bar helpers
