@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.0",
+    "@jupyterlab/formeditor": "^3.0.0-alpha.0",
     "@jupyterlab/settingeditor": "^3.3.0-alpha.0",
     "@jupyterlab/settingregistry": "^3.3.0-alpha.0",
     "@jupyterlab/translation": "^3.3.0-alpha.0",

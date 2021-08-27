@@ -41,6 +41,7 @@
     "@jupyterlab/application": "^3.3.0-alpha.0",
     "@jupyterlab/apputils": "^3.3.0-alpha.0",
     "@jupyterlab/codeeditor": "^3.3.0-alpha.0",
+    "@jupyterlab/formeditor": "^3.0.0-alpha.0",
     "@jupyterlab/rendermime": "^3.3.0-alpha.0",
     "@jupyterlab/settingeditor": "^3.3.0-alpha.0",
     "@jupyterlab/settingregistry": "^3.3.0-alpha.0",

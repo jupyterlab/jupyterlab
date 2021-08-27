@@ -2,7 +2,12 @@ import React from 'react';
 
 import { FormControlLabel, InputLabel, Switch } from '@material-ui/core';
 
-import { ArrayInput, DropDown, TextInput, FormComponentRegistry } from '@jupyterlab/formeditor';
+import {
+  ArrayInput,
+  DropDown,
+  FormComponentRegistry,
+  TextInput
+} from '@jupyterlab/formeditor';
 import { checkIcon } from '@jupyterlab/ui-components';
 
 export const renderDropdown = (
@@ -10,18 +15,9 @@ export const renderDropdown = (
 ): any => {
   return (
     <DropDown
-      label={props.uihints.title}
-      key={`${props.uihints.title?.replace(' ', '')}DropDown`}
-      description={props.uihints.description}
-      defaultError={props.uihints.error ?? ''}
-      placeholder={props.uihints.placeholder}
-      defaultValue={props.uihints.default}
-      readonly={props.uihints.enum !== undefined}
-      initialValue={props.value}
-      options={props.uihints.enum}
-      onChange={(value: any): void => {
-        props.handleChange(value);
-      }}
+      value={props.value}
+      handleChange={props.handleChange}
+      uihints={props.uihints}
     />
   );
 };
@@ -55,7 +51,7 @@ export const renderCheckbox = (
       className="jp-metadataEditor-formInput"
       key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
     >
-      {props.uihints.modified ? <checkIcon.react/> : undefined}
+      {props.uihints.modified ? <checkIcon.react /> : undefined}
       <FormControlLabel
         className="jp-metadataEditor-formInput"
         key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
