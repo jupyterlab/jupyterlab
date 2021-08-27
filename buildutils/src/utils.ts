@@ -12,6 +12,16 @@ type Dict<T> = { [key: string]: T };
 const backSlash = /\\/g;
 
 /**
+ *  Exit with an error code on uncaught error.
+ */
+export function exitOnUuncaughtException(): void {
+  process.on('uncaughtException', function (err) {
+    console.error('Uncaught exception', err);
+    process.exit(1);
+  });
+}
+
+/**
  * Get all of the lerna package paths.
  */
 export function getLernaPaths(basePath = '.'): string[] {
