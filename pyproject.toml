@@ -37,6 +37,6 @@ tag-message = "[ci skip] Release {tag_name}"
 
 [tool.jupyter-releaser.hooks]
 before-bump-version = ["git checkout .", "pip install bump2version"]
-before-build-npm = ["git commit -am 'Bump version'", "jlpm", "jlpm run build:utils", "jlpm run build:src"]
+before-build-npm = ["git commit -am '[ci skip] Bump version'", "jlpm", "jlpm run build:all"]
 before-build-python = ["node buildutils/lib/local-repository start", "jlpm run before:build:python", "node buildutils/lib/local-repository stop", "node buildutils/lib/local-repository fix-links --path jupyterlab/staging"]
-after-publish-assets = "jlpm run after:publish:assets"
+after-publish-assets = "npm run after:publish:assets"

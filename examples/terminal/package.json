@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
-    "clean": "rimraf build",
-    "prepublishOnly": "npm run build"
+    "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/services": "^6.1.8",
-    "@jupyterlab/terminal": "^3.1.8",
-    "@jupyterlab/theme-light-extension": "^3.1.8",
-    "@lumino/widgets": "^1.19.0",
+    "@jupyterlab/application": "^3.3.0-alpha.6",
+    "@jupyterlab/coreutils": "^5.3.0-alpha.6",
+    "@jupyterlab/services": "^6.3.0-alpha.6",
+    "@jupyterlab/terminal": "^3.3.0-alpha.6",
+    "@jupyterlab/theme-light-extension": "^3.3.0-alpha.6",
+    "@lumino/widgets": "^1.26.0",
     "es6-promise": "~4.2.8"
   },
   "devDependencies": {
