@@ -989,7 +989,18 @@ export namespace NotebookActions {
     const newCells = values.map(cell => {
       switch (cell.cell_type) {
         case 'code':
-          return model.contentFactory.createCodeCell({ cell });
+          if (
+            notebook.lastClipboardInteraction === 'cut' &&
+            typeof cell.id === 'string'
+          ) {
+            let cell_id = cell.id as string;
+            return model.contentFactory.createCodeCell({
+              id: cell_id,
+              cell: cell
+            });
+          } else {
+            return model.contentFactory.createCodeCell({ cell });
+          }
         case 'markdown':
           return model.contentFactory.createMarkdownCell({ cell });
         default:
@@ -1043,6 +1054,7 @@ export namespace NotebookActions {
 
     notebook.activeCellIndex += newCells.length;
     notebook.deselectAll();
+    notebook.lastClipboardInteraction = 'paste';
     Private.handleState(notebook, state);
   }
 
@@ -1943,6 +1955,7 @@ namespace Private {
           notebook,
           lastCell: notebook.widgets[lastIndex]
         });
+
         notebook.update();
 
         return false;
@@ -2115,6 +2128,11 @@ namespace Private {
       deleteCells(notebook);
     } else {
       notebook.deselectAll();
+    }
+    if (cut) {
+      notebook.lastClipboardInteraction = 'cut';
+    } else {
+      notebook.lastClipboardInteraction = 'copy';
     }
     handleState(notebook, state);
   }
