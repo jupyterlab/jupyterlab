@@ -27,6 +27,7 @@ import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
 import { ITranslator } from '@jupyterlab/translation';
 import { terminalIcon } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
+import { Menu } from '@lumino/widgets';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -84,7 +85,7 @@ function activate(
   runningSessionManagers: IRunningSessionManagers | null
 ): ITerminalTracker {
   const trans = translator.load('jupyterlab');
-  const { serviceManager } = app;
+  const { serviceManager, commands } = app;
   const category = trans.__('Terminal');
   const namespace = 'terminal';
   const tracker = new WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>({
@@ -96,14 +97,6 @@ function activate(
     console.warn(
       'Disabling terminals plugin because they are not available on the server'
     );
-    const terminalThemeMenu = mainMenu?.settingsMenu.items.find(
-      item =>
-        item.type === 'submenu' &&
-        item.submenu?.id === 'jp-mainmenu-settings-terminaltheme'
-    );
-    if (terminalThemeMenu) {
-      mainMenu?.settingsMenu.removeItem(terminalThemeMenu);
-    }
     return tracker;
   }
 
@@ -179,6 +172,43 @@ function activate(
   addCommands(app, tracker, settingRegistry, translator, options);
 
   if (mainMenu) {
+    // Add "Terminal Theme" menu below "JupyterLab Themes" menu.
+    const themeMenu = new Menu({ commands });
+    themeMenu.title.label = trans.__('Terminal Theme');
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: {
+        theme: 'inherit',
+        displayName: trans.__('Inherit'),
+        isPalette: false
+      }
+    });
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: {
+        theme: 'light',
+        displayName: trans.__('Light'),
+        isPalette: false
+      }
+    });
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'dark', displayName: trans.__('Dark'), isPalette: false }
+    });
+
+    // Add some commands to the "View" menu.
+    mainMenu.settingsMenu.addGroup(
+      [
+        { command: CommandIDs.increaseFont },
+        { command: CommandIDs.decreaseFont },
+        { type: 'submenu', submenu: themeMenu }
+      ],
+      40
+    );
+
+    // Add terminal creation to the file menu.
+    mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
+
     // Add terminal close-and-shutdown to the file menu.
     mainMenu.fileMenu.closeAndCleaners.add({
       tracker,
