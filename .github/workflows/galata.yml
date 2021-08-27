@@ -15,7 +15,7 @@ jobs:
     # Run directly on playwright docker so that browser are available.
     container: 
       image: mcr.microsoft.com/playwright:v1.14.1-focal
-      options: '--ipc=host --user pwuser'
+      options: '--ipc=host'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
