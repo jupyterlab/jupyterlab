@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "clean": "rimraf build",
-    "prepublishOnly": "npm run build"
+    "clean": "rimraf build"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.6",
