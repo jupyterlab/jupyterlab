@@ -27,6 +27,7 @@ import {
 import { Autocomplete } from '@material-ui/lab';
 
 import * as React from 'react';
+import { FormComponentRegistry } from './FormComponentRegistry';
 
 const DROPDOWN_ITEM_CLASS = 'jp-form-DropDown-item';
 
@@ -37,9 +38,7 @@ export interface IDropDownProps {
   label: string;
   description?: string;
   required?: boolean;
-  onChange: (value: string) => any;
   placeholder?: string;
-  initialValue?: string;
   readonly?: boolean;
 }
 
@@ -49,32 +48,34 @@ const CustomTooltip = withStyles(_theme => ({
   }
 }))(Tooltip);
 
-export const DropDown: React.FC<IDropDownProps> = ({
-  defaultError,
-  defaultValue,
-  options,
-  label,
-  description,
-  required,
-  onChange,
-  placeholder,
-  initialValue,
-  readonly
+export const DropDown: React.FC<FormComponentRegistry.IRendererProps> = ({
+  value,
+  handleChange,
+  uihints: {
+    defaultError,
+    defaultValue,
+    options,
+    label,
+    description,
+    required,
+    placeholder,
+    readonly
+  }
 }) => {
   const [error, setError] = React.useState(defaultError);
-  const [value, setValue] = React.useState(initialValue || defaultValue);
+  const [updatedValue, setValue] = React.useState(value || defaultValue);
 
   // This is necessary to rerender with error when clicking the save button.
   React.useEffect(() => {
     setError(defaultError);
   }, [defaultError]);
 
-  const handleChange = (newValue: string): void => {
+  const handleInputChange = (newValue: string): void => {
     setValue(newValue);
     if (required && newValue === '') {
       setError('This field is required.');
     }
-    onChange(newValue);
+    handleChange(newValue);
   };
 
   return (
@@ -84,12 +85,12 @@ export const DropDown: React.FC<IDropDownProps> = ({
           <FormControl variant="outlined">
             <InputLabel error={!!error}>{label}</InputLabel>
             <Select
-              value={value}
+              value={updatedValue}
               id={`${label}DropDown`}
               label={label}
               error={!!error}
               onChange={(event: any): void => {
-                handleChange(event.target.value);
+                handleInputChange(event.target.value);
               }}
             >
               {options?.map((option: string) => {
@@ -117,9 +118,9 @@ export const DropDown: React.FC<IDropDownProps> = ({
             key="jp-DropDown"
             options={options ?? []}
             style={{ width: 300 }}
-            value={value ?? ''}
+            value={updatedValue ?? ''}
             onChange={(event: any, newValue: string | null): void => {
-              handleChange(newValue ?? '');
+              handleInputChange(newValue ?? '');
             }}
             renderInput={(params): React.ReactNode => (
               <TextField
@@ -128,7 +129,7 @@ export const DropDown: React.FC<IDropDownProps> = ({
                 required={required}
                 error={!!error}
                 onChange={(event: any): void => {
-                  handleChange(event.target.value);
+                  handleInputChange(event.target.value);
                 }}
                 placeholder={
                   placeholder || `Create or select ${label.toLocaleLowerCase()}`

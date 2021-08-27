@@ -180,7 +180,7 @@ export class RequestHandler {
     console.log(`Sending a ${requestInit.method} request to ${requestUrl}`);
 
     if (longRequestDialog) {
-      longRequestDialog.launch();
+      void longRequestDialog.launch();
     }
 
     const getServerResponse: Promise<any> = new Promise((resolve, reject) => {

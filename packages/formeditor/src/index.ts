@@ -18,11 +18,8 @@
  * @module metadata
  */
 
-export * from './ExpandableComponent';
-export * from './MetadataEditor';
-export * from './metadata';
-export * from './parsing';
-export * from './RequestErrors';
+export * from './FormEditor';
+export * from './FormComponentRegistry';
 export * from './StringArrayInput';
 export * from './TextInput';
 export * from './DropDown';

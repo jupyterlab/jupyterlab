@@ -20,3 +20,6 @@
 
 export * from './MetadataWidget';
 export * from './AddMetadataButton';
+export * from './MetadataEditor';
+export * from './metadata';
+export * from './RequestErrors';

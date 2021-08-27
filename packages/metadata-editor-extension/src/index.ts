@@ -18,13 +18,12 @@
  * @module metadata-extension
  */
 
+import { IFormComponentRegistry } from '@jupyterlab/formeditor';
 import {
+  MetadataWidget,
   MetadataEditor,
   MetadataService,
   RequestErrors
-} from '@jupyterlab/formeditor';
-import {
-  MetadataWidget,
 } from '@jupyterlab/metadata';
 
 import {
@@ -53,13 +52,14 @@ const commandIDs = {
 const extension: JupyterFrontEndPlugin<void> = {
   id: METADATA_WIDGET_ID,
   autoStart: true,
-  requires: [ICommandPalette, IEditorServices, ILabStatus],
+  requires: [ICommandPalette, IEditorServices, ILabStatus, IFormComponentRegistry],
   optional: [IThemeManager],
   activate: async (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     editorServices: IEditorServices,
     status: ILabStatus,
+    componentRegistry: IFormComponentRegistry,
     themeManager?: IThemeManager
   ) => {
     console.log('Elyra - metadata extension is activated!');
@@ -94,7 +94,8 @@ const extension: JupyterFrontEndPlugin<void> = {
         ...args,
         editorServices,
         status,
-        themeManager
+        themeManager,
+        componentRegistry
       });
       metadataEditorWidget.title.label = widgetLabel;
       metadataEditorWidget.id = widgetId;

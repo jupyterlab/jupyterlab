@@ -6,10 +6,11 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { classes, LabIcon, settingsIcon } from '@jupyterlab/ui-components';
+import { classes, InputGroup, LabIcon, settingsIcon } from '@jupyterlab/ui-components';
+import { StringExt } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 
 /**
  * The JupyterLab plugin schema key for the setting editor
@@ -29,10 +30,137 @@ const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
  */
 const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
 
+
+/**
+ * A text match score with associated content item.
+ */
+ interface IScore {
+  /**
+   * The numerical score for the text match.
+   */
+  score: number;
+
+  /**
+   * The indices of the text matches.
+   */
+  indices: number[] | null;
+}
+
+interface ISearcherProps {
+  listing: ISettingRegistry.IPlugin[];
+  setFilter: (filter: (plugin: ISettingRegistry.IPlugin) => boolean) => void;
+  useFuzzyFilter: boolean;
+  placeholder?: string;
+  forceRefresh?: boolean;
+}
+
+/**
+ * Perform a fuzzy search on a single item.
+ */
+ function fuzzySearch(source: string, query: string): IScore | null {
+  // Set up the match score and indices array.
+  let score = Infinity;
+  let indices: number[] | null = null;
+
+  // The regex for search word boundaries
+  const rgx = /\b\w/g;
+
+  let continueSearch = true;
+
+  // Search the source by word boundary.
+  while (continueSearch) {
+    // Find the next word boundary in the source.
+    let rgxMatch = rgx.exec(source);
+
+    // Break if there is no more source context.
+    if (!rgxMatch) {
+      break;
+    }
+
+    // Run the string match on the relevant substring.
+    let match = StringExt.matchSumOfDeltas(source, query, rgxMatch.index);
+
+    // Break if there is no match.
+    if (!match) {
+      break;
+    }
+
+    // Update the match if the score is better.
+    if (match && match.score <= score) {
+      score = match.score;
+      indices = match.indices;
+    }
+  }
+
+  // Bail if there was no match.
+  if (!indices || score === Infinity) {
+    return null;
+  }
+
+  // Handle a split match.
+  return {
+    score,
+    indices
+  };
+}
+
+const Searcher = (props: ISearcherProps) => {
+  const [filter, setFilter] = useState('');
+
+  if (props.forceRefresh) {
+    useEffect(() => {
+      props.setFilter((item: ISettingRegistry.IPlugin) => {
+        return true;
+      });
+    }, []);
+  }
+
+  /**
+   * Handler for search input changes.
+   */
+  const handleChange = (e: React.FormEvent<HTMLElement>) => {
+    const target = e.target as HTMLInputElement;
+    setFilter(target.value);
+    props.setFilter((item: ISettingRegistry.IPlugin) => {
+      if (props.useFuzzyFilter) {
+        // Run the fuzzy search for the item and query.
+        const name = item.id.toLowerCase();
+        const query = target.value.toLowerCase();
+        let score = fuzzySearch(name, query);
+        // Ignore the item if it is not a match.
+        if (!score) {
+          item.indices = [];
+          return false;
+        }
+        item.indices = score.indices;
+        return true;
+      }
+      const i = item.id.indexOf(target.value);
+      if (i === -1) {
+        item.indices = [];
+        return false;
+      }
+      item.indices = [...Array(target.value.length).keys()].map(x => x + i);
+      return true;
+    });
+  };
+
+  return (
+    <InputGroup
+      type="text"
+      rightIcon="ui-components:search"
+      placeholder={props.placeholder}
+      onChange={handleChange}
+      value={filter}
+    />
+  );
+};
+
 /**
  * A list of plugins with editable settings.
  */
 export class PluginList extends ReactWidget {
+  private _filter: (item: ISettingRegistry.IPlugin) => boolean;
   /**
    * Create a new plugin list.
    */
@@ -46,6 +174,9 @@ export class PluginList extends ReactWidget {
       this.update();
     }, this);
     this.mapPlugins = this.mapPlugins.bind(this);
+    this._filter = (item: ISettingRegistry.IPlugin) => true;
+    this.setFilter = this.setFilter.bind(this);
+    this._evtMousedown = this._evtMousedown.bind(this);
 
     this._allPlugins = PluginList.sortPlugins(this.registry).filter(plugin => {
       const { schema } = plugin;
@@ -53,7 +184,7 @@ export class PluginList extends ReactWidget {
       const editable = Object.keys(schema.properties || {}).length > 0;
       const extensible = schema.additionalProperties !== false;
 
-      return !deprecated && (editable || extensible);
+      return !deprecated && (editable || extensible) && (this._filter?.(plugin));
     });
   }
 
@@ -85,41 +216,6 @@ export class PluginList extends ReactWidget {
   set selection(selection: string) {
     this._selection = selection;
     this.update();
-  }
-
-  /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the plugin list's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-      case 'mousedown':
-        this._evtMousedown(event as MouseEvent);
-        break;
-      default:
-        break;
-    }
-  }
-
-  /**
-   * Handle `'after-attach'` messages.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('mousedown', this);
-    this.update();
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('mousedown', this);
   }
 
   protected async updateModifiedPlugins(): Promise<void> {
@@ -163,22 +259,9 @@ export class PluginList extends ReactWidget {
    *
    * @param event - The DOM event sent to the widget
    */
-  private _evtMousedown(event: MouseEvent): void {
-    event.preventDefault();
-
-    let target = event.target as HTMLElement;
-    let id = target.getAttribute('data-id');
-
-    if (id === this._selection) {
-      return;
-    }
-
-    if (!id) {
-      while (!id && target !== this.node) {
-        target = target.parentElement as HTMLElement;
-        id = target.getAttribute('data-id');
-      }
-    }
+  private _evtMousedown(event: React.MouseEvent<HTMLButtonElement>): void {
+    const target = event.currentTarget;
+    const id = target.getAttribute('data-id');
 
     if (!id) {
       return;
@@ -235,6 +318,10 @@ export class PluginList extends ReactWidget {
     return typeof hint === 'string' ? hint : '';
   }
 
+  setFilter(filter: (item: ISettingRegistry.IPlugin) => boolean) {
+    this._filter = filter;
+  }
+
   mapPlugins(plugin: ISettingRegistry.IPlugin) {
     const { id, schema, version } = plugin;
     const trans = this.translator.load('jupyterlab');
@@ -250,8 +337,9 @@ export class PluginList extends ReactWidget {
     const iconTitle = this.getHint(ICON_LABEL_KEY, this.registry, plugin);
 
     return (
-      <li
-        className={id === this.selection ? 'jp-mod-selected' : ''}
+      <button
+        onClick={this._evtMousedown}
+        className={id === this.selection ? 'jp-mod-selected jp-PluginList-entry' : 'jp-PluginList-entry'}
         data-id={id}
         key={id}
         title={itemTitle}
@@ -267,7 +355,7 @@ export class PluginList extends ReactWidget {
           stylesheet="settingsEditor"
         />
         <span>{title}</span>
-      </li>
+      </button>
     );
   }
 
@@ -280,6 +368,13 @@ export class PluginList extends ReactWidget {
 
     return (
       <div>
+        <Searcher
+          listing={this._allPlugins}
+          setFilter={this.setFilter}
+          useFuzzyFilter={true}
+          placeholder={'Search...'}
+          forceRefresh={false}
+        />
         {modifiedItems.length > 0 ? (
           <div>
             <p className="jp-PluginList-header">Modified</p>

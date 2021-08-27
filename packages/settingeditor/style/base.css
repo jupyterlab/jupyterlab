@@ -80,16 +80,6 @@
   right: 0;
 }
 
-#setting-editor .jp-PluginList li {
-  display: flex;
-  flex-direction: row;
-  border: 1px solid transparent;
-  overflow: hidden;
-  padding: 4px 0 4px 4px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 #setting-editor .jp-PluginList .jp-SettingsHeader {
   display: flex;
   flex-basis: 100%;
@@ -112,24 +102,21 @@
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
-#setting-editor .jp-PluginList li:hover span {
+#setting-editor .jp-PluginList button:hover span {
   font-weight: var(--jp-content-heading-font-weight);
 }
 
-#setting-editor .jp-PluginList li.jp-mod-selected .jp-SelectedIndicator {
+#setting-editor .jp-PluginList button.jp-mod-selected .jp-SelectedIndicator {
   width: 3px;
   background-color: var(--jp-brand-color1);
 }
 
-#setting-editor .jp-PluginList li:not(.jp-mod-selected) {
+#setting-editor .jp-PluginList button:not(.jp-mod-selected) {
   margin-left: 3px;
 }
 
-#setting-editor .jp-PluginList li.jp-mod-selected {
+#setting-editor .jp-PluginList button.jp-mod-selected span {
   font-weight: var(--jp-content-heading-font-weight);
-}
-
-#setting-editor .jp-PluginList li.jp-mod-selected span {
   color: var(--jp-brand-color1);
 }
 
@@ -264,14 +251,29 @@
   justify-content: space-between;
 }
 
+#setting-editor .jp-PluginList-entry:hover {
+  font-weight: 600;
+}
+
+#setting-editor .jp-PluginList-entry {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid transparent;
+  background: transparent;
+  overflow: hidden;
+  padding: 4px 0 4px 4px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: -webkit-fill-available;
+}
+
 #setting-editor .jp-SettingsHeader-Name {
   text-transform: inherit;
   font-size: var(--jp-content-font-size3);
 }
 
-#setting-editor .jp-MetadataEditorWidget {
-  padding-top: 60px;
-  margin-top: -60px;
+#setting-editor .jp-SettingsEditor {
+  padding: 20px;
 }
 
 #setting-editor .MuiCheckbox-colorSecondary.Mui-checked {

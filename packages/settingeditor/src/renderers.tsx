@@ -2,11 +2,11 @@ import React from 'react';
 
 import { FormControlLabel, InputLabel, Switch } from '@material-ui/core';
 
-import { ArrayInput, DropDown, TextInput } from '@jupyterlab/formeditor';
-import { SettingEditorRegistry } from './SettingEditorRegistry';
+import { ArrayInput, DropDown, TextInput, FormComponentRegistry } from '@jupyterlab/formeditor';
+import { checkIcon } from '@jupyterlab/ui-components';
 
 export const renderDropdown = (
-  props: SettingEditorRegistry.IRendererProps
+  props: FormComponentRegistry.IRendererProps
 ): any => {
   return (
     <DropDown
@@ -27,7 +27,7 @@ export const renderDropdown = (
 };
 
 export const renderTextInput = (
-  props: SettingEditorRegistry.IRendererProps
+  props: FormComponentRegistry.IRendererProps
 ): any => {
   return (
     <TextInput
@@ -48,13 +48,14 @@ export const renderTextInput = (
 };
 
 export const renderCheckbox = (
-  props: SettingEditorRegistry.IRendererProps
+  props: FormComponentRegistry.IRendererProps
 ): any => {
   return (
     <div
       className="jp-metadataEditor-formInput"
       key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
     >
+      {props.uihints.modified ? <checkIcon.react/> : undefined}
       <FormControlLabel
         className="jp-metadataEditor-formInput"
         key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
@@ -73,7 +74,7 @@ export const renderCheckbox = (
 };
 
 export const renderStringArray = (
-  props: SettingEditorRegistry.IRendererProps
+  props: FormComponentRegistry.IRendererProps
 ): any => {
   return (
     <div

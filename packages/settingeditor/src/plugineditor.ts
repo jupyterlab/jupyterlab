@@ -6,7 +6,8 @@
 import { ILabStatus } from '@jupyterlab/application';
 import { Dialog, IThemeManager, showDialog } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import { IFormComponentRegistry } from '@jupyterlab/formeditor';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
@@ -15,11 +16,10 @@ import {
 import { JSONExt } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Panel, PanelLayout, Widget } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { PluginList } from './pluginlist';
 import { SettingEditor } from './settingeditor';
-import { SettingsMetadataEditor } from './settingmetadataeditor';
-import { ISettingEditorRegistry } from './tokens';
+import { SettingsFormEditorWidget } from './settingmetadataeditor';
 
 /**
  * The class name added to all plugin editors.
@@ -52,7 +52,7 @@ export class PluginEditor extends Widget {
               offsetTop + editor.node.scrollHeight >
                 this.node.scrollTop + this.node.clientHeight))
         ) {
-          this.selection = editor.id;
+          this.selection = editor.plugin.id;
           break;
         }
       }
@@ -65,67 +65,25 @@ export class PluginEditor extends Widget {
     // Now, the raw editor is the only child and probably could merged into
     // this class directly in the future.
     const layout = (this.layout = new PanelLayout());
-    const modifiedLayout = new Panel();
-    const otherLayout = new Panel();
-    const modifiedHeader = document.createElement('div');
-    modifiedHeader.textContent = 'Modified';
-    modifiedHeader.className = 'jp-SettingEditor-header';
-    layout.addWidget(new Widget({ node: modifiedHeader }));
-    layout.addWidget(modifiedLayout);
-    const otherHeader = document.createElement('div');
-    otherHeader.textContent = 'Other Settings';
-    otherHeader.className = 'jp-SettingEditor-header';
-    layout.addWidget(new Widget({ node: otherHeader }));
-    layout.addWidget(otherLayout);
-    const editors = (this._editors = [] as SettingsMetadataEditor[]);
-    const setupEditors = async () => {
-      const plugins = PluginList.sortPlugins(options.registry).filter(
-        plugin => {
-          const { schema } = plugin;
-          const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
-          const editable = Object.keys(schema.properties || {}).length > 0;
-          const extensible = schema.additionalProperties !== false;
+    const plugins = PluginList.sortPlugins(options.registry).filter(
+      plugin => {
+        const { schema } = plugin;
+        const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
+        const editable = Object.keys(schema.properties || {}).length > 0;
+        const extensible = schema.additionalProperties !== false;
 
-          return !deprecated && (editable || extensible);
-        }
-      );
-      for (const plugin of plugins) {
-        const newEditor = new SettingsMetadataEditor({
-          name: plugin?.id
-            .replace('@', '')
-            .replace('/', '')
-            .replace('-', '')
-            .replace(':', ''),
-          code: options.code,
-          editorServices: options.editorServices,
-          status: options.status,
-          themeManager: options.themeManager,
-          settings: plugin,
-          registry: options.registry,
-          editorRegistry: options.editorRegistry
-        });
-        editors.push(newEditor);
-        try {
-          const registry = await options.registry;
-          const settings = (await registry.load(plugin.id)) as Settings;
-          if (!newEditor.isAttached) {
-            if (settings.modifiedFields.length > 0) {
-              modifiedLayout.addWidget(newEditor);
-            } else {
-              otherLayout.addWidget(newEditor);
-            }
-          }
-          newEditor.settings = settings;
-        } catch {
-          console.log(`error loading settings for ${plugin.id}`);
-        }
-        // list.selection = pluginName;
-        // this._setLayout();
+        return !deprecated && (editable || extensible);
       }
-      this.update();
-    };
-
-    void setupEditors();
+    );
+    for (const plugin of plugins) {
+      const newEditor = new SettingsFormEditorWidget({
+        plugin,
+        registry: options.registry,
+        componentRegistry: options.editorRegistry
+      })
+      this._editors.push(newEditor);
+      layout.addWidget(newEditor);
+    }
 
     // this.raw = this._rawEditor = new SettingsMetadataEditor(options);
     // this._rawEditor.handleMoved.connect(this._onStateChanged, this);
@@ -140,7 +98,7 @@ export class PluginEditor extends Widget {
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
-    return this._editors.filter(editor => editor.dirty).length > 0;
+    return false;
   }
 
   /**
@@ -197,10 +155,8 @@ export class PluginEditor extends Widget {
    * If the editor is in a dirty state, confirm that the user wants to leave.
    */
   confirm(id: string): Promise<void> {
-    const editor = this._editors.find(editor => editor.id === id);
+    const editor = this._editors.find(editor => editor.plugin.id === id);
     if (editor) {
-      editor.collapsed = false;
-      editor.update();
       editor.node?.scrollIntoView();
     }
     if (this.isHidden || !this.isAttached || !this.isDirty) {
@@ -267,7 +223,7 @@ export class PluginEditor extends Widget {
   protected translator: ITranslator;
   private _selection: string;
   private _trans: TranslationBundle;
-  private _editors: SettingsMetadataEditor[];
+  private _editors: SettingsFormEditorWidget[] = [];
   private _settings: ISettingRegistry.ISettings | null = null;
   private _onSelectionChanged = new Signal<this, string>(this);
   private _stateChanged = new Signal<this, void>(this);
@@ -289,7 +245,7 @@ export namespace PluginEditor {
 
     registry: ISettingRegistry;
 
-    editorRegistry: ISettingEditorRegistry;
+    editorRegistry: IFormComponentRegistry;
 
     /**
      * The application language translator.

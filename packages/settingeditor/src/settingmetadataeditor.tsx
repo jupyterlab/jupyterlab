@@ -1,96 +1,81 @@
-import { IMetadataEditorProps, MetadataEditor } from '@jupyterlab/formeditor';
-import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import { IFormComponentRegistry, FormComponentRegistry, FormEditor } from '@jupyterlab/formeditor';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { PartialJSONObject } from '@lumino/coreutils';
-import { showDialog } from '@jupyterlab/apputils';
+import { showDialog, ReactWidget } from '@jupyterlab/apputils';
 import React from 'react';
-import { ISettingEditorRegistry } from './tokens';
-import { Button } from '@material-ui/core';
+import { Button } from '@jupyterlab/ui-components';
 
-interface IProps extends IMetadataEditorProps {
-  settings: ISettingRegistry.IPlugin;
+interface IProps {
+  plugin: ISettingRegistry.IPlugin;
   registry: ISettingRegistry;
-  editorRegistry: ISettingEditorRegistry;
+  componentRegistry: IFormComponentRegistry;
 }
 
-export class SettingsMetadataEditor extends MetadataEditor {
-  _settings: ISettingRegistry.IPlugin;
-  _registry: Settings;
-  _settingRegistry: ISettingRegistry;
-  _editorRegistry: ISettingEditorRegistry;
-  defaultMetadata: any;
-  id: string;
+export class SettingsFormEditorWidget extends ReactWidget {
+  plugin: ISettingRegistry.IPlugin;
+  registry: ISettingRegistry;
+  componentRegistry: IFormComponentRegistry;
 
-  constructor(options: IProps) {
-    super(options);
-    this._settings = options.settings;
-    this.id = options.settings.id;
-    this.handleChange = this.handleChange.bind(this);
-    this.toggleCollapse = this.toggleCollapse.bind(this);
-    this._settingRegistry = options.registry;
-    this._editorRegistry = options.editorRegistry;
-    this.addClass('jp-MetadataEditorWidget');
-
-    void this.initializeMetadata();
+  constructor(props: IProps) {
+    super();
+    this.plugin = props.plugin;
+    this.registry = props.registry;
+    this.componentRegistry = props.componentRegistry;
   }
 
-  get settings(): Settings {
-    return this._registry;
+  render() {
+    return (<SettingsMetadataEditor
+      componentRegistry={this.componentRegistry}
+      plugin={this.plugin}
+      registry={this.registry}
+    />);
   }
-  set settings(newSettings: Settings) {
-    this._registry = newSettings;
-    this.update();
-  }
+}
 
-  reset(): void {
-    for (const field of this._registry.modifiedFields) {
-      void this._registry.remove(field);
+export const SettingsMetadataEditor = ({
+  plugin,
+  registry,
+  componentRegistry
+}: IProps) => {
+  const [data, setData] = React.useState({} as FormEditor.IData);
+  const [schema, setSchema] = React.useState({} as FormEditor.ISchema);
+  const [settings, setSettings] = React.useState(Object);
+  const [title, setTitle] = React.useState('');
+  const [modifiedFields, setModifiedFields] = React.useState([] as string[]);
+  let defaultMetadata: FormEditor.IData = {};
+  
+  React.useEffect(() => {
+    registry.load(plugin.id).then(
+      (newSettings: ISettingRegistry.ISettings) => {
+        setSettings(newSettings)
+      }
+    );
+  }, []);
+  
+  const reset = React.useCallback(() => {
+    for (const field of settings?.modifiedFields) {
+      void settings.remove(field);
     }
-    this.update();
-  }
+  }, [settings]);
 
-  handleChange(fieldName: string, value: any): void {
-    this.metadata[fieldName] = value;
-    void this.saveMetadata();
-    this.update();
-  }
-
-  renderField(fieldName: string): React.ReactNode {
-    let uihints = this.schema[fieldName].uihints;
-    uihints = {
-      ...this.schema[fieldName],
-      ...uihints
-    };
-    return this._editorRegistry.getRenderer(uihints.field_type ?? 'string')?.({
-      value: this.metadata[fieldName],
-      handleChange: (value: any) => {
-        this.handleChange(fieldName, value);
-      },
-      uihints
-    });
-  }
-
-  async initializeMetadata() {
-    if (!this._settings) {
-      console.log('No settings');
+  React.useEffect(() => {
+    try {
+      setData(JSON.parse(settings.raw));
+    } catch {}
+    if (!settings.schema) {
       return;
     }
-    try {
-      this.metadata = JSON.parse(this._settings.raw);
-    } catch {
-      this.metadata = {};
-    }
-    this.defaultMetadata = {};
-    const settings = this._settings.schema;
-    const currentSettings = this.metadata;
     const properties: any = {};
-    for (const prop in settings.properties) {
-      let ref = settings.properties[prop]['$ref'] as string;
+    const current = JSON.parse(JSON.stringify(data));
+    setTitle(settings.schema.title);
+    for (const prop in settings.schema.properties) {
+      let ref = settings.schema.properties[prop]['$ref'] as string;
       if (ref) {
         ref = ref.substring(14);
       }
       const options = {
-        ...settings.properties[prop],
-        ...((settings.definitions as PartialJSONObject)?.[
+        ...settings.schema.properties[prop],
+        ...((settings.schema.definitions as PartialJSONObject)?.[
           ref || prop
         ] as PartialJSONObject)
       };
@@ -99,11 +84,12 @@ export class SettingsMetadataEditor extends MetadataEditor {
           title: options.title,
           type: options.type,
           uihints: {
-            field_type: options.renderer_id
+            field_type: options.renderer_id,
+            modified: modifiedFields.includes(prop)
           }
         };
-        this.metadata[prop] = currentSettings[prop] ?? options.default;
-        this.defaultMetadata[prop] = options.default;
+        current[prop] = data[prop] ?? options.default;
+        defaultMetadata[prop] = options.default;
       } else if (Object.keys(options.properties ?? {}).length > 0) {
         for (const subProp in options.properties) {
           const subOptions = options.properties[subProp];
@@ -133,39 +119,42 @@ export class SettingsMetadataEditor extends MetadataEditor {
               }
             };
           }
-          this.metadata[subProp] =
-            currentSettings[prop]?.[subProp] ??
+          current[subProp] =
+            data[prop]?.[subProp] ??
             (options.default as any)?.[subProp];
-          this.defaultMetadata[subProp] = (options.default as any)?.[subProp];
+          defaultMetadata[subProp] = (options.default as any)?.[subProp];
         }
       } else if (options.enum || (options.additionalProperties as any)?.enum) {
         properties[prop] = {
           title: options.title,
           enum: options.enum ?? (options.additionalProperties as any).enum,
           uihints: {
-            field_type: 'dropdown'
+            field_type: 'dropdown',
+            modified: modifiedFields.includes(prop)
           }
         };
-        this.metadata[prop] = currentSettings[prop] ?? options.default;
-        this.defaultMetadata[prop] = options.default;
+        current[prop] = data[prop] ?? options.default;
+        defaultMetadata[prop] = options.default;
       } else if (typeof options.type === 'object') {
         properties[prop] = {
           title: options.title,
           uihints: {
-            field_type: 'string'
+            field_type: 'string',
+            modified: modifiedFields.includes(prop)
           }
         };
-        this.metadata[prop] = currentSettings[prop] ?? options.default;
-        this.defaultMetadata[prop] = options.default;
+        current[prop] = data[prop] ?? options.default;
+        defaultMetadata[prop] = options.default;
       } else if (options.type === 'array') {
         properties[prop] = {
           title: options.title,
           uihints: {
-            field_type: options.type
+            field_type: options.type,
+            modified: modifiedFields.includes(prop)
           }
         };
-        this.metadata[prop] = currentSettings[prop] ?? options.default;
-        this.defaultMetadata[prop] = options.default;
+        current[prop] = data[prop] ?? options.default;
+        defaultMetadata[prop] = options.default;
       } else if (typeof options.default === 'object') {
         for (const subProp in options.default) {
           properties[subProp] = {
@@ -174,51 +163,54 @@ export class SettingsMetadataEditor extends MetadataEditor {
               field_type: typeof (options.default as any)[subProp]
             }
           };
-          this.metadata[subProp] =
-            currentSettings[prop]?.[subProp] ??
+          current[subProp] =
+            data[prop]?.[subProp] ??
             (options.default as any)?.[subProp];
-          this.defaultMetadata[subProp] = (options.default as any)?.[subProp];
+          defaultMetadata[subProp] = (options.default as any)?.[subProp];
         }
       } else {
         properties[prop] = {
           title: options.title,
           type: options.type,
           uihints: {
-            field_type: options.type
+            field_type: options.type,
+            modified: modifiedFields.includes(prop)
           }
         };
-        this.metadata[prop] = currentSettings[prop] ?? options.default;
-        this.defaultMetadata[prop] = options.default;
+        current[prop] = data[prop] ?? options.default;
+        defaultMetadata[prop] = options.default;
       }
     }
-    this.schema = properties;
-    this.schemaDisplayName = settings.title;
+    setSchema(getSchemaPropertiesByCategory(properties));
+    setData(current);
+    setModifiedFields(settings?.modifiedFields)
+  }, [settings]);
 
+  const getSchemaPropertiesByCategory = (properties: any): FormEditor.ISchema => {
     // Find categories of all schema properties
-    this.schemaPropertiesByCategory = { _noCategory: [] };
-    for (const schemaProperty in this.schema) {
+    const schemaPropertiesByCategory: { [cat: string]: { [fieldName: string]: FormComponentRegistry.IRendererProps } } = { _noCategory: {} };
+    for (const schemaProperty in properties) {
       const category =
-        this.schema[schemaProperty].uihints &&
-        this.schema[schemaProperty].uihints.category;
+        properties[schemaProperty].uihints &&
+        properties[schemaProperty].uihints.category;
       if (!category) {
-        this.schemaPropertiesByCategory['_noCategory'].push(schemaProperty);
-      } else if (this.schemaPropertiesByCategory[category]) {
-        this.schemaPropertiesByCategory[category].push(schemaProperty);
+        schemaPropertiesByCategory['_noCategory'][schemaProperty] = properties[schemaProperty];
+      } else if (schemaPropertiesByCategory[category]) {
+        schemaPropertiesByCategory[category][schemaProperty] = properties[schemaProperty];
       } else {
-        this.schemaPropertiesByCategory[category] = [schemaProperty];
+        schemaPropertiesByCategory[category] = {};
+        schemaPropertiesByCategory[category][schemaProperty] = properties[schemaProperty];
       }
     }
-    this.displayName = undefined;
-    this.update();
-  }
+    return schemaPropertiesByCategory;
+  };
 
-  getFormattedSettings(): string {
-    const settings = this._settings.schema;
+  const getFormattedSettings = (values: FormEditor.IData) => {
     const formattedSettings: any = {};
-    for (const prop in settings.properties) {
+    for (const prop in settings.schema.properties) {
       const options = {
-        ...settings.properties[prop],
-        ...((settings.definitions as PartialJSONObject)?.[
+        ...settings.schema.properties[prop],
+        ...((settings.schema.definitions as PartialJSONObject)?.[
           prop
         ] as PartialJSONObject)
       };
@@ -234,15 +226,15 @@ export class SettingsMetadataEditor extends MetadataEditor {
                   (options.properties[subProp].type as any)?.includes(
                     'integer'
                   )))) &&
-            this.metadata[subProp]
+            values[subProp]
           ) {
-            formattedSettings[prop][subProp] = parseInt(this.metadata[subProp]);
+            formattedSettings[prop][subProp] = parseInt(values[subProp]);
           } else if (
             (options.properties[subProp].items as any)?.type === 'number' &&
-            this.metadata[subProp]
+            values[subProp]
           ) {
             formattedSettings[prop][subProp] = JSON.parse(
-              JSON.stringify(this.metadata[subProp])
+              JSON.stringify(values[subProp])
             );
             for (const i in formattedSettings[prop][subProp]) {
               formattedSettings[prop][subProp][i] = parseInt(
@@ -250,95 +242,95 @@ export class SettingsMetadataEditor extends MetadataEditor {
               );
             }
           } else {
-            formattedSettings[prop][subProp] = this.metadata[subProp];
+            formattedSettings[prop][subProp] = values[subProp];
           }
         }
       } else if (
         (options.type === 'number' ||
           (typeof options.type === 'object' &&
             options.type.includes('number'))) &&
-        this.metadata[prop] !== null &&
-        this.metadata[prop] !== undefined
+            values[prop] !== null &&
+            values[prop] !== undefined
       ) {
-        formattedSettings[prop] = parseInt(this.metadata[prop]);
+        formattedSettings[prop] = parseInt(values[prop]);
       } else {
-        formattedSettings[prop] = this.metadata[prop];
+        formattedSettings[prop] = values[prop];
       }
     }
     return JSON.stringify(formattedSettings);
-  }
+  };
 
-  renderSaveButton(): React.ReactNode {
-    return undefined;
-  }
+  const hasInvalidFields = (values: FormEditor.IData) => {
+    const errors = settings.validate(getFormattedSettings(values));
+    if (errors && errors.length > 0) {
+      const newSchema = JSON.parse(JSON.stringify(schema));
+      for (const error of errors) {
+        const schemaField = error.dataPath.substring(1);
+        newSchema[schemaField].uihints.error = error.message;
+      }
+      setSchema(newSchema);
+      return true;
+    } else {
+      const newSchema = JSON.parse(JSON.stringify(schema));
+      for (const cat in newSchema) {
+        for (const schemaField in newSchema[cat]) {
+          newSchema[cat][schemaField].uihints.error = undefined;
+        }
+      }
+      setSchema(newSchema);
+      return false;
+    }
+  };
 
-  toggleCollapse(e: any) {
-    this.collapsed = !this.collapsed;
-    this.update();
-  }
-
-  renderHeader(): React.ReactNode {
-    return (
-      <div className="jp-SettingsHeader">
-        <Button
-          onClick={this.toggleCollapse}
-          className="jp-SettingsHeader-Name"
-        >
-          {`${this.schemaDisplayName ?? ''} Settings`}
-        </Button>
-        {this._registry?.modifiedFields?.length > 0 ? (
-          <Button
-            onClick={(e: any) => {
-              this.reset();
-            }}
-          >
-            Restore to Default
-          </Button>
-        ) : undefined}
-      </div>
-    );
-  }
-
-  saveMetadata(): void {
-    if (!this._registry) {
+  const saveMetadata = (values: FormEditor.IData) => {
+    if (!registry) {
       return undefined;
     }
-    if (this.hasInvalidFields()) {
+    if (hasInvalidFields(values)) {
       return;
     }
 
-    void this._registry
-      .save(this.getFormattedSettings())
+    void settings
+      .save(getFormattedSettings(values))
       .then(() => {
-        this.update();
+        setModifiedFields(settings?.modifiedFields)
+        for (const fieldName of modifiedFields) {
+          const newSchema = JSON.parse(JSON.stringify(schema));
+          for (const cat in newSchema) {
+            if (newSchema[cat][fieldName]) {
+              newSchema[cat][fieldName].uihints.modified = true;
+            }
+          }
+          setSchema(newSchema);
+        }
       })
-      .catch(reason => {
+      .catch((reason: { stack: any; }) => {
         void showDialog({
           title: 'Validation error',
           body: reason.stack
         });
       });
+  };
+  
+  const handleChange = (fieldName: string, value: any) => {
+    const newData = JSON.parse(JSON.stringify(data));
+    newData[fieldName] = value;
+    setData(newData);
+    saveMetadata(newData);
   }
 
-  hasInvalidFields(): boolean {
-    this.invalidForm = false;
-    if (this.displayName === null || this.displayName === '') {
-      this.invalidForm = true;
-    }
-
-    const errors = this._registry.validate(this.getFormattedSettings());
-    if (errors && errors.length > 0) {
-      for (const error of errors) {
-        const schemaField = error.dataPath.substring(1);
-        this.schema[schemaField].uihints.error = error.message;
-      }
-      this.update();
-      return true;
-    } else {
-      for (const schemaField in this.schema) {
-        this.schema[schemaField].uihints.error = undefined;
-      }
-      return false;
-    }
-  }
+  return (
+    <div className="jp-SettingsEditor">
+      <div className="jp-SettingsHeader">
+        <h3>{title}</h3>
+        { modifiedFields.length > 0 ? <Button onClick={reset}> Restore to Defaults </Button> : undefined}
+      </div>
+      <FormEditor
+        schema={schema}
+        initialData={data}
+        handleChange={handleChange}
+        componentRegistry={componentRegistry}
+      />
+    </div>
+  )
 }

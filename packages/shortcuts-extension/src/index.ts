@@ -11,9 +11,9 @@ import {
 } from '@jupyterlab/application';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  ISettingEditorRegistry,
-  SettingEditorRegistry
-} from '@jupyterlab/settingeditor';
+  IFormComponentRegistry,
+  FormComponentRegistry
+} from '@jupyterlab/formeditor';
 import { ITranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import {
@@ -76,11 +76,11 @@ function getExternalForJupyterLab(
  */
 const shortcuts: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:shortcuts',
-  requires: [ISettingRegistry, ISettingEditorRegistry, ITranslator],
+  requires: [ISettingRegistry, IFormComponentRegistry, ITranslator],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
-    editorRegistry: ISettingEditorRegistry,
+    editorRegistry: IFormComponentRegistry,
     translator: ITranslator
   ) => {
     const trans = translator.load('jupyterlab');
@@ -90,7 +90,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
 
     editorRegistry.addRenderer(
       'shortcuts',
-      (props: SettingEditorRegistry.IRendererProps) => {
+      (props: FormComponentRegistry.IRendererProps) => {
         return renderShortCut({
           external: getExternalForJupyterLab(registry, app),
           ...props

@@ -6,6 +6,7 @@
 import { ILabStatus } from '@jupyterlab/application';
 import { IThemeManager } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
+import { IFormComponentRegistry } from '@jupyterlab/formeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -18,7 +19,6 @@ import * as ReactDOM from 'react-dom';
 import { PluginEditor } from './plugineditor';
 import { PluginList } from './pluginlist';
 import { SplitPanel } from './splitpanel';
-import { ISettingEditorRegistry } from './tokens';
 
 /**
  * The ratio panes in the setting editor.
@@ -360,7 +360,7 @@ export namespace SettingEditor {
 
     registry: ISettingRegistry;
 
-    editorRegistry: ISettingEditorRegistry;
+    editorRegistry: IFormComponentRegistry;
 
     /**
      * The application language translator.

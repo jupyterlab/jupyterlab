@@ -28,10 +28,13 @@ import { Signal } from '@lumino/signaling';
 
 import React from 'react';
 
-import { IDictionary, MetadataService, ExpandableComponent, RequestErrors } from '@jupyterlab/formeditor';
+import { ExpandableComponent } from './ExpandableComponent';
 import { AddMetadataButton } from './AddMetadataButton';
 import { JSONComponent } from './JSONComponent';
 import { FilterTools } from './FilterTools';
+import { IDictionary } from './parsing';
+import { MetadataService } from './metadata';
+import { RequestErrors } from './RequestErrors';
 
 /**
  * The CSS class added to metadata widgets.
