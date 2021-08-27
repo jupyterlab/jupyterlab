@@ -43,6 +43,7 @@ const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['path', 'webpack'],
   '@jupyterlab/builder': ['path'],
+  '@jupyterlab/galata': ['fs', 'path'],
   '@jupyterlab/testutils': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
@@ -85,7 +86,7 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/buildutils': ['verdaccio'],
   '@jupyterlab/coreutils': ['path-browserify'],
-  '@jupyterlab/galata': ['node-fetch', 'fs-extra', 'http-server'],
+  '@jupyterlab/galata': ['node-fetch', 'http-server'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testutils': [
