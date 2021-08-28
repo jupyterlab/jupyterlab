@@ -1201,7 +1201,7 @@ class _AppHandler(object):
             target = pjoin(staging, fname)
             shutil.copy(pjoin(source_dir, fname), target)
 
-        for fname in ['.yarnrc', 'yarn.js']:
+        for fname in ['.yarnrc.yml', 'yarn.js']:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, 'staging', fname), target)
 
