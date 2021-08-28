@@ -147,7 +147,7 @@ async def run_browser(url):
         await run_async_process(["jlpm", "init", "-y"], cwd=target)
         await run_async_process(["jlpm", "add", "playwright@^1.9.2"], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
-    await run_async_process(["node", "browser-test.js", url], cwd=target)
+    await run_async_process(["jlpm", "node", "browser-test.js", url], cwd=target)
 
 
 def run_browser_sync(url):
@@ -158,7 +158,7 @@ def run_browser_sync(url):
         subprocess.call(["jlpm", "init", "-y"], cwd=target)
         subprocess.call(["jlpm", "add", "playwright@^1.9.2"], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
-    return subprocess.check_call(["node", "browser-test.js", url], cwd=target)
+    return subprocess.check_call(["jlpm", "node", "browser-test.js", url], cwd=target)
 
 
 class BrowserApp(LabApp):
