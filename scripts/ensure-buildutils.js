@@ -56,7 +56,7 @@ function ensurePackage(p) {
     //   stdio: [0, 1, 2],
     //   cwd: path.resolve('./' + p)
     // });
-    childProcess.execSync('jlpm run build', {
+    childProcess.execSync('yarn run build', {
       stdio: [0, 1, 2],
       cwd: path.resolve('./' + p)
     });
