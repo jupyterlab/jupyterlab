@@ -400,6 +400,7 @@
       "@jupyterlab/builder": "../builder",
       "@jupyterlab/buildutils": "../buildutils",
       "@jupyterlab/template": "../buildutils/template",
+      "@jupyterlab/galata": "../galata",
       "@jupyterlab/testutils": "../testutils"
     }
   }

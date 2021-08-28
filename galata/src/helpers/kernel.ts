@@ -1,0 +1,40 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { Page } from '@playwright/test';
+import * as Utils from '../utils';
+
+/**
+ * Kernels and sessions helpers
+ *
+ * These helpers are using JupyterLab serviceManager in Javascript. There
+ * are therefore not available if the page is not loaded.
+ */
+export class KernelHelper {
+  constructor(readonly page: Page) {}
+
+  /**
+   * Whether a sessions is running or not.
+   *
+   * @returns Running status
+   */
+  async isAnyRunning(): Promise<boolean> {
+    return await this.page.evaluate(
+      () =>
+        window.jupyterlab.serviceManager.sessions.running().next() !== undefined
+    );
+  }
+
+  /**
+   * Shutdown all sessions.
+   */
+  async shutdownAll(): Promise<void> {
+    await this.page.evaluate(async () => {
+      await window.jupyterlab.serviceManager.sessions.shutdownAll();
+    });
+
+    await Utils.waitForCondition(async () => {
+      return (await this.isAnyRunning()) === false;
+    });
+  }
+}

@@ -23,17 +23,16 @@ RUN list_package=$(python -c "from configparser import ConfigParser; c = ConfigP
     && rm /tmp/setup.cfg
 
 # Install JupyterLab
-COPY ./builder/ /tmp/jupyterlab-dev/builder/
-COPY ./buildutils/ /tmp/jupyterlab-dev/buildutils/
-COPY ./dev_mode/ /tmp/jupyterlab-dev/dev_mode/
-COPY ./jupyterlab/ /tmp/jupyterlab-dev/jupyterlab/
-COPY ./packages/ /tmp/jupyterlab-dev/packages/
-COPY ./scripts/ /tmp/jupyterlab-dev/scripts/
-COPY ./*.* ./LICENSE /tmp/jupyterlab-dev/
+COPY --chown=jovyan ./builder/ /tmp/jupyterlab-dev/builder/
+COPY --chown=jovyan ./buildutils/ /tmp/jupyterlab-dev/buildutils/
+COPY --chown=jovyan ./dev_mode/ /tmp/jupyterlab-dev/dev_mode/
+COPY --chown=jovyan ./jupyterlab/ /tmp/jupyterlab-dev/jupyterlab/
+COPY --chown=jovyan ./packages/ /tmp/jupyterlab-dev/packages/
+COPY --chown=jovyan ./scripts/ /tmp/jupyterlab-dev/scripts/
+COPY --chown=jovyan ./*.* ./LICENSE /tmp/jupyterlab-dev/
 
 RUN pushd /tmp/jupyterlab-dev \
-    && pip install -e .[ui-tests] \
-    && chown -R jovyan /tmp/jupyterlab-dev
+    && pip install -e .[ui-tests]
 
 USER jovyan
 WORKDIR ${HOME}

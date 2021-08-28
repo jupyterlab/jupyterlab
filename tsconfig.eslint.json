@@ -13,6 +13,11 @@
     ".eslintrc.js",
     ".eslintrc.typecheck.js",
     "examples/**/*",
+    "galata/.eslintrc.js",
+    "galata/*.config.js",
+    "galata/src/**/*",
+    "galata/test/**/*",
+    "galata/style/**/*",
     "*",
     "packages/services/examples/**/*",
     "packages/**/*.config.js",
@@ -21,7 +26,6 @@
     "scripts/*",
     "jupyterlab/*",
     "jupyterlab/staging/*",
-    "testutils/**/*",
-    "ui-tests/**/*"
+    "testutils/**/*"
   ]
 }
