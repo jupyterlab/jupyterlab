@@ -30,7 +30,7 @@
   ],
   "scripts": {
     "build": "jlpm run clean && jlpm run build:galata && jlpm run build:inpage",
-    "build:all": "npm run build",
+    "build:all": "yarn run build",
     "build:galata": "tsc -b",
     "build:inpage": "webpack --mode=production",
     "clean": "rimraf lib tsconfig.tsbuildinfo",

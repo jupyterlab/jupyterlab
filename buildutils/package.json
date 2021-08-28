@@ -35,7 +35,7 @@
   ],
   "scripts": {
     "build": "yarn run tsc",
-    "build:all": "npm run build",
+    "build:all": "yarn run build",
     "clean": "yarn run rimraf lib && yarn run rimraf tsconfig.tsbuildinfo",
     "watch": "yarn run tsc -w --listEmittedFiles"
   },
