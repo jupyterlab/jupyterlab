@@ -369,7 +369,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.0.6...60f37be54a714c391fad5500cb57055af1492591))
 
 From JupyterLab 3.1, file documents and notebooks have collaborative
-editing using the `Yjs shared editing framework <https://github.com/yjs/yjs>`\_.
+editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
 Editors are not collaborative by default; to activate it, start JupyterLab
 with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/latest/user/rtc.html).
 
