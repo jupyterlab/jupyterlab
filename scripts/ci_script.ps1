@@ -20,10 +20,6 @@ if ($Env:GROUP -eq "integrity") {
     jlpm run integrity --force
     if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
-    # Check yarn.lock file
-    jlpm check --integrity
-    if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
-
     # Run a browser check in dev mode
     jlpm run build
     if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
