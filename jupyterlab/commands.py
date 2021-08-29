@@ -663,7 +663,7 @@ class _AppHandler(object):
         # If splicing, make sure the source packages are built
         if self._options.splice_source:
             ensure_node_modules(REPO_ROOT, logger=self.logger)
-            self._run(['node', YARN_PATH, 'build:packages'], cwd=REPO_ROOT)
+            self._run(['jlpm', 'run', 'build:packages'], cwd=REPO_ROOT)
 
         info = ['production' if production else 'development']
         if production:
@@ -681,7 +681,7 @@ class _AppHandler(object):
         staging = pjoin(app_dir, 'staging')
 
         # Make sure packages are installed.
-        ret = self._run(['node', YARN_PATH, 'install'], cwd=staging)
+        ret = self._run(['jlpm', 'install'], cwd=staging)
         if ret != 0:
             msg = 'npm dependencies failed to install'
             self.logger.debug(msg)
@@ -690,7 +690,7 @@ class _AppHandler(object):
         # Build the app.
         # dedupe_yarn(staging, self.logger)
         command = f'build:{"prod" if production else "dev"}{":minimize" if minimize else ""}'
-        ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
+        ret = self._run(['jlpm', 'run', command], cwd=staging)
         if ret != 0:
             msg = 'JupyterLab failed to build'
             self.logger.debug(msg)
