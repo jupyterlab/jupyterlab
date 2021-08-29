@@ -350,7 +350,7 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
     // Truncate to first 12 characters of current document name + ... if length > 15
     currentFile =
       currentFile.length > 15
-        ? currentFile.slice(0, 12).concat(`...`)
+        ? currentFile.slice(0, 12).concat(`…`)
         : currentFile;
     // Number of restorable items that are either notebooks or editors
     const count: number = Object.keys(data).filter(
