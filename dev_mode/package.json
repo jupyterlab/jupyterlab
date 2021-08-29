@@ -4,16 +4,16 @@
   "private": true,
   "license": "BSD-3-Clause",
   "scripts": {
-    "build": "npm run clean && webpack",
-    "build:dev": "npm run build",
-    "build:prod": "webpack --config webpack.prod.config.js",
-    "build:prod:minimize": "webpack --config webpack.prod.minimize.config.js",
-    "build:prod:release": "webpack --config webpack.prod.release.config.js",
-    "build:prod:stats": "webpack --profile --config webpack.prod.minimize.config.js --json > stats.json",
-    "build:stats": "webpack --profile --json > stats.json",
-    "clean": "rimraf build",
-    "prepublishOnly": "npm run build",
-    "watch": "webpack --watch"
+    "build": "yarn run clean && yarn run webpack",
+    "build:dev": "yarn run build",
+    "build:prod": "yarn run webpack --config webpack.prod.config.js",
+    "build:prod:minimize": "yarn run webpack --config webpack.prod.minimize.config.js",
+    "build:prod:release": "yarn run webpack --config webpack.prod.release.config.js",
+    "build:prod:stats": "yarn run webpack --profile --config webpack.prod.minimize.config.js --json > stats.json",
+    "build:stats": "yarn run webpack --profile --json > stats.json",
+    "clean": "yarn run rimraf build",
+    "prepublishOnly": "yarn run build",
+    "watch": "yarn run webpack --watch"
   },
   "resolutions": {
     "@jupyterlab/application": "~3.3.0-alpha.7",
