@@ -12,6 +12,7 @@ fi
 
 
 if [[ $GROUP == python ]]; then
+    export JUPYTERLAB_DIR="$(pwd)"
     jupyter lab build --debug
     # Run the python tests
     python -m pytest
