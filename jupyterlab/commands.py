@@ -706,7 +706,7 @@ class _AppHandler:
             raise RuntimeError(msg)
 
         # Build the app.
-        dedupe_yarn(staging, self.logger)
+        # dedupe_yarn(staging, self.logger)
         command = f'build:{"prod" if production else "dev"}{":minimize" if minimize else ""}'
         ret = self._run(["node", YARN_PATH, "run", command], cwd=staging)
         if ret != 0:
