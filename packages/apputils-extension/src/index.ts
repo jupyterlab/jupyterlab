@@ -335,13 +335,13 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
 async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
-  // File name from current path
-  let currentFile: string = PathExt.basename(current)?.split(':')[0];
-  if (currentFile === undefined) {
+  if (current === undefined) {
     document.title = `${PageConfig.getOption('appName') || 'JupyterLab'}${
       workspace.startsWith('auto-') ? ` (${workspace})` : ``
     }`;
   } else {
+    // File name from current path
+    let currentFile: string = PathExt.basename(current)?.split(':')[0];
     // Truncate to first 12 characters of current document name + ... if length > 15
     currentFile =
       currentFile.length > 15
