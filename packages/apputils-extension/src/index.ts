@@ -347,9 +347,9 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
       workspace.startsWith('auto-') ? ` (${workspace})` : ``
     }`;
   } else {
-    // First 12 characters of current document name + ... if length > 12
+    // Truncate to first 12 characters of current document name + ... if length > 15
     currentFile =
-      currentFile.length > 12
+      currentFile.length > 15
         ? currentFile.slice(0, 12).concat(`...`)
         : currentFile;
     // Number of restorable items that are either notebooks or editors
