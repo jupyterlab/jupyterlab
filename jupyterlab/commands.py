@@ -699,6 +699,26 @@ class _AppHandler:
         staging = pjoin(app_dir, "staging")
 
         # Make sure packages are installed.
+        import subprocess as sproc
+
+        with sproc.Popen(
+            ["jlpm", "config"],
+            bufsize=1,
+            cwd=staging,
+            stdout=sproc.PIPE,
+            universal_newlines=True
+        ) as p:
+            for line in p.stdout:
+                print(line, end='', flush=True)
+        with sproc.Popen(
+            ["jlpm", "install"],
+            bufsize=1,
+            cwd=staging,
+            stdout=sproc.PIPE,
+            universal_newlines=True
+        ) as p:
+            for line in p.stdout:
+                print(line, end='', flush=True)
         ret = self._run(["node", YARN_PATH, "install"], cwd=staging)
         if ret != 0:
             msg = "npm dependencies failed to install"
