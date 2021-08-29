@@ -1482,6 +1482,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
     this.renderCollapseButtons(this._renderer!);
     this.renderInput(this._renderer!);
+    this._showEditorForReadOnlyMarkdown =
+      typeof options.showEditorForReadOnlyMarkdown === 'undefined'
+        ? MarkdownCell.defaultShowEditorForReadOnlyMarkdown
+        : options.showEditorForReadOnlyMarkdown;
   }
 
   /**
@@ -1557,6 +1561,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return this._rendered;
   }
   set rendered(value: boolean) {
+    // Show cell as rendered when cell is not editable
+    if (this.readOnly && this._showEditorForReadOnlyMarkdown === false) {
+      value = true;
+    }
     if (value === this._rendered) {
       return;
     }
@@ -1739,6 +1747,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendered = true;
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
+  private _showEditorForReadOnlyMarkdown: boolean = true;
 }
 
 /**
@@ -1753,7 +1762,17 @@ export namespace MarkdownCell {
      * The mime renderer for the cell widget.
      */
     rendermime: IRenderMimeRegistry;
+
+    /**
+     * Show editor for read-only Markdown cells.
+     */
+    showEditorForReadOnlyMarkdown?: boolean;
   }
+
+  /**
+   * Default value for showEditorForReadOnlyMarkdown.
+   */
+  export const defaultShowEditorForReadOnlyMarkdown = true;
 }
 
 /** ****************************************************************************

@@ -95,7 +95,9 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       notebookConfig: source
         ? source.content.notebookConfig
         : this._notebookConfig,
-      translator
+      translator,
+      showEditorForReadOnlyMarkdown: this._notebookConfig
+        .showEditorForReadOnlyMarkdown
     };
     const content = this.contentFactory.createNotebook(nbOptions);
 

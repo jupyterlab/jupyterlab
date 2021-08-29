@@ -1218,7 +1218,10 @@ function activateNotebookHandler(
       observedTopMargin: settings.get('observedTopMargin').composite as string,
       observedBottomMargin: settings.get('observedBottomMargin')
         .composite as string,
-      maxNumberOutputs: settings.get('maxNumberOutputs').composite as number
+      maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
+      showEditorForReadOnlyMarkdown: settings.get(
+        'showEditorForReadOnlyMarkdown'
+      ).composite as boolean
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
