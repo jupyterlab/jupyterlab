@@ -1,4 +1,4 @@
-name: Galata Tests
+name: UI Tests
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Galata
+    name: Visual Regression Tests
     timeout-minutes: 40
     runs-on: ubuntu-20.04
     steps:
