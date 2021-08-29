@@ -26,7 +26,7 @@ import {
   sessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
@@ -336,12 +336,7 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
   // File name from current path
-  let currentFile: string | undefined = current
-    ?.split(':')[1]
-    ?.split('\\')
-    ?.pop()
-    ?.split('/')
-    ?.pop();
+  let currentFile: string = PathExt.basename(current)?.split(':')[0];
   if (currentFile === undefined) {
     document.title = `${PageConfig.getOption('appName') || 'JupyterLab'}${
       workspace.startsWith('auto-') ? ` (${workspace})` : ``
