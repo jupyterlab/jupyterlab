@@ -80,6 +80,8 @@ The workflow is as follow:
     requests updating the source strings need to be closed in order for the Crowdin integration to
     re-open the PR.
 
+.. _language-update:
+
 Language packs update
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -126,3 +128,17 @@ will be automatically triggered. Its steps are:
     Publication is done using jupyterlab-bot credentials on all PyPI projects.
 
     `Conda recipe <https://github.com/conda-forge/jupyterlab-language-packs-feedstock>`_ should be updated by the auto-tick bot of conda-forge.
+
+
+Adding a new language pack
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This requires the following manual actions to be executed (in that order):
+
+1. Add the language on Crowdin
+2. Execute the :ref:`language-update` workflow
+3. Manually upload the package on PyPI
+4. Update the owner on PyPI to add jupyterlab-bot as maintainer
+5. Acknowledge the grant for the bot
+6. Update the `github action list <https://github.com/jupyterlab/language-packs/blob/814ee5589fd83ceaeb6ecaefa8ad2db741f3a2df/.github/workflows/release_publish.yml#L42>`_
+7. Update the `conda-forge variant list <https://github.com/conda-forge/jupyterlab-language-packs-feedstock/blob/master/recipe/conda_build_config.yaml>`_
