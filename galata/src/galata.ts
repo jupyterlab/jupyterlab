@@ -180,7 +180,19 @@ export namespace galata {
     export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)/;
   }
 
+  /**
+   * Notebook generation helpers
+   */
   export namespace Notebook {
+    /**
+     * Generate a notebook with identical cells
+     *
+     * @param nCells Number of cells
+     * @param cellType Type of cells
+     * @param defaultInput Default input source
+     * @param defaultOutput Default outputs
+     * @returns The notebook
+     */
     export function generateNotebook(
       nCells: number = 0,
       cellType: nbformat.CellType = 'code',
@@ -207,6 +219,12 @@ export namespace galata {
       return makeNotebook(cells);
     }
 
+    /**
+     * Generate a cell object
+     *
+     * @param skeleton Cell description template
+     * @returns A cell
+     */
     export function makeCell(
       skeleton: Partial<nbformat.ICell>
     ): nbformat.ICell {
@@ -233,6 +251,12 @@ export namespace galata {
       }
     }
 
+    /**
+     * Generate a notebook object from a cell list
+     *
+     * @param cells Notebook cells
+     * @returns Notebook
+     */
     export function makeNotebook(
       cells: Array<nbformat.ICell>
     ): nbformat.INotebookContent {
@@ -261,25 +285,6 @@ export namespace galata {
         nbformat: 4,
         nbformat_minor: 4
       };
-    }
-  }
-
-  export namespace MathFunc {
-    export function mean(...numbers: number[]): number {
-      return numbers.length === 0
-        ? NaN
-        : numbers.reduce((acc, v) => v + acc, 0) / numbers.length;
-    }
-
-    export function std(...numbers: number[]): number {
-      if (numbers.length <= 1) {
-        return NaN;
-      }
-      const meanValue = this.mean(...numbers);
-      return Math.sqrt(
-        (numbers.length / (numbers.length - 1)) *
-          this.mean(...numbers.map(n => (n - meanValue) ** 2))
-      );
     }
   }
 }

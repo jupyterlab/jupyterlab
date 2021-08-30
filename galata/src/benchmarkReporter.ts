@@ -138,6 +138,12 @@ interface IReport {
  * Custom Playwright reporter for benchmark tests
  */
 class BenchmarkReporter implements Reporter {
+  /**
+   *
+   * @param options
+   *   outputFile: Name of the output file (default to env BENCHMARK_OUTPUTFILE)
+   *   reference: Name to be saved as reference for the execution time (default to env BENCHMARK_REFERENCE)
+   */
   constructor(options: { outputFile?: string; reference?: string } = {}) {
     this._outputFile =
       options.outputFile ??

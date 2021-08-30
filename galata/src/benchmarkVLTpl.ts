@@ -13,6 +13,9 @@ const GENERAL_CONFIG = {
 
 /**
  * Matrix of figures per test file
+ *
+ * @param tests Kind of test
+ * @returns The specification
  */
 function configPerFile(tests: string[]): Record<string, any> {
   return {

@@ -379,6 +379,42 @@ test.describe.serial('Table of Contents', () => {
 });
 ```
 
+## Benchmark
+
+Benchmark of JupyterLab is done automatically using Playwright. The actions measured are:
+
+- Opening a file
+- Switching from the file to a simple text file
+- Switching back to the file
+- Closing the file
+
+Two files are tested a notebook with many code cells and another with many markdown cells.
+
+The tests are place in the subfolder [test/benchmark](./test/benchmark). And they can be
+executed with the following command:
+
+```bash
+jlpm run test:benchmark
+```
+
+A special report will be generated in the folder `benchmark-results` that will contain 4 files:
+
+- `lab-benchmark.json`: The execution time of the tests and some metadata.
+- `lab-benchmark.md`: A report in Markdown
+- `lab-benchmark.png`: A comparison of execution time distribution
+- `lab-benchmark.vl.json`: The [_Vega-Lite_](https://vega.github.io/vega-lite) description used to produce the PNG file.
+
+The reference, tagged _expected_, is stored in [`lab-benchmark-expected.json`](lab-benchmark-expected.json). It can be
+updated using the `-u` option of Playwright; i.e. `jlpm run test:benchmark -u`.
+
+### Benchmark parameters
+
+The benchmark can be customized using the following environment variables:
+
+- `BENCHMARK_NUMBER_SAMPLES`: Number of samples to compute the execution time distribution; default 20.
+- `BENCHMARK_OUTPUTFILE`: Benchmark result output file; default `benchmark.json`. It is overridden in the [`playwright-benchmark.config.js`](playwright-benchmark.config.js).
+- `BENCHMARK_REFERENCE`: Reference name of the data; default is `actual` for current data and `expected` for the reference.
+
 ## Development
 
 ### Build

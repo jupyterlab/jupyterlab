@@ -5,7 +5,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 5325.300000000745,
+      "time": 7124.200000000012,
       "reference": "expected"
     },
     {
@@ -13,7 +13,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 274.1000000014901,
+      "time": 509.5999999999767,
       "reference": "expected"
     },
     {
@@ -21,7 +21,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1244.1000000014901,
+      "time": 1975.6999999999534,
       "reference": "expected"
     },
     {
@@ -29,7 +29,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 4149.39999999851,
+      "time": 14028.099999999977,
       "reference": "expected"
     },
     {
@@ -37,7 +37,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 4253.79999999702,
+      "time": 6377.099999999977,
       "reference": "expected"
     },
     {
@@ -45,7 +45,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 369.5,
+      "time": 483.80000000004657,
       "reference": "expected"
     },
     {
@@ -53,7 +53,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1326.5,
+      "time": 1694.5999999999767,
       "reference": "expected"
     },
     {
@@ -61,7 +61,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 4274.300000000745,
+      "time": 11954.300000000047,
       "reference": "expected"
     },
     {
@@ -69,7 +69,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 4412,
+      "time": 6993.899999999907,
       "reference": "expected"
     },
     {
@@ -77,7 +77,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 340,
+      "time": 550.1999999999534,
       "reference": "expected"
     },
     {
@@ -85,7 +85,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1299.300000000745,
+      "time": 1841.2999999999302,
       "reference": "expected"
     },
     {
@@ -93,7 +93,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 3068.699999999255,
+      "time": 9813.300000000047,
       "reference": "expected"
     },
     {
@@ -101,7 +101,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 4375.60000000149,
+      "time": 7178.099999999977,
       "reference": "expected"
     },
     {
@@ -109,7 +109,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 340.79999999701977,
+      "time": 546.8000000000466,
       "reference": "expected"
     },
     {
@@ -117,7 +117,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1371.2999999970198,
+      "time": 1798.0999999999767,
       "reference": "expected"
     },
     {
@@ -125,7 +125,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 6524.79999999702,
+      "time": 9366.699999999953,
       "reference": "expected"
     },
     {
@@ -133,7 +133,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 5886,
+      "time": 7487.699999999953,
       "reference": "expected"
     },
     {
@@ -141,7 +141,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 337.8999999985099,
+      "time": 440.0999999999767,
       "reference": "expected"
     },
     {
@@ -149,7 +149,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1302.5,
+      "time": 1725.6000000000931,
       "reference": "expected"
     },
     {
@@ -157,7 +157,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 4013.60000000149,
+      "time": 10757.900000000023,
       "reference": "expected"
     },
     {
@@ -165,7 +165,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 6907.699999999255,
+      "time": 6905.599999999977,
       "reference": "expected"
     },
     {
@@ -173,7 +173,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 309.19999999925494,
+      "time": 552.8000000000466,
       "reference": "expected"
     },
     {
@@ -181,7 +181,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1461.800000000745,
+      "time": 1726.2999999999302,
       "reference": "expected"
     },
     {
@@ -189,7 +189,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 4803.800000000745,
+      "time": 17524.20000000007,
       "reference": "expected"
     },
     {
@@ -197,7 +197,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 15051,
+      "time": 5456.300000000047,
       "reference": "expected"
     },
     {
@@ -205,7 +205,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 275.6000000014901,
+      "time": 433.19999999995343,
       "reference": "expected"
     },
     {
@@ -213,7 +213,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1255.0999999977648,
+      "time": 1558.5999999999767,
       "reference": "expected"
     },
     {
@@ -221,7 +221,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 5401.300000000745,
+      "time": 4809.600000000093,
       "reference": "expected"
     },
     {
@@ -229,7 +229,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 7067.099999997765,
+      "time": 5509.300000000047,
       "reference": "expected"
     },
     {
@@ -237,7 +237,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 282.80000000074506,
+      "time": 460.5,
       "reference": "expected"
     },
     {
@@ -245,7 +245,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1302.199999999255,
+      "time": 1625.0999999999767,
       "reference": "expected"
     },
     {
@@ -253,7 +253,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 5733,
+      "time": 4477.900000000023,
       "reference": "expected"
     },
     {
@@ -261,7 +261,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 7362.900000002235,
+      "time": 7468.699999999953,
       "reference": "expected"
     },
     {
@@ -269,7 +269,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 260.20000000298023,
+      "time": 546.8000000000466,
       "reference": "expected"
     },
     {
@@ -277,7 +277,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1301.3999999985099,
+      "time": 2020.9000000000233,
       "reference": "expected"
     },
     {
@@ -285,7 +285,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 6051.800000000745,
+      "time": 5347.70000000007,
       "reference": "expected"
     },
     {
@@ -293,7 +293,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 7620.599999997765,
+      "time": 7058.599999999977,
       "reference": "expected"
     },
     {
@@ -301,7 +301,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 337.8999999985099,
+      "time": 461.30000000004657,
       "reference": "expected"
     },
     {
@@ -309,7 +309,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1408.8999999985099,
+      "time": 1566.2000000000698,
       "reference": "expected"
     },
     {
@@ -317,7 +317,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 5356.400000002235,
+      "time": 5277.5,
       "reference": "expected"
     },
     {
@@ -325,7 +325,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 7396.5,
+      "time": 5553.5,
       "reference": "expected"
     },
     {
@@ -333,7 +333,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 336.5,
+      "time": 512.0999999999767,
       "reference": "expected"
     },
     {
@@ -341,7 +341,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1465.199999999255,
+      "time": 1877.9000000000233,
       "reference": "expected"
     },
     {
@@ -349,7 +349,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 4885.5,
+      "time": 4954,
       "reference": "expected"
     },
     {
@@ -357,7 +357,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 6233,
+      "time": 5666.400000000023,
       "reference": "expected"
     },
     {
@@ -365,7 +365,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 351.29999999701977,
+      "time": 573.6000000000931,
       "reference": "expected"
     },
     {
@@ -373,7 +373,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1279.8999999985099,
+      "time": 1688.5999999999767,
       "reference": "expected"
     },
     {
@@ -381,7 +381,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 4251.39999999851,
+      "time": 4558.29999999993,
       "reference": "expected"
     },
     {
@@ -389,7 +389,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 7592.60000000149,
+      "time": 7331,
       "reference": "expected"
     },
     {
@@ -397,7 +397,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 330.69999999925494,
+      "time": 485.20000000006985,
       "reference": "expected"
     },
     {
@@ -405,7 +405,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1355.199999999255,
+      "time": 1880.1999999999534,
       "reference": "expected"
     },
     {
@@ -413,7 +413,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 3559.699999999255,
+      "time": 10439.400000000023,
       "reference": "expected"
     },
     {
@@ -421,7 +421,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 5734.60000000149,
+      "time": 8863.199999999953,
       "reference": "expected"
     },
     {
@@ -429,7 +429,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 272.1000000014901,
+      "time": 480.10000000009313,
       "reference": "expected"
     },
     {
@@ -437,7 +437,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1323.2999999970198,
+      "time": 1813.7999999999302,
       "reference": "expected"
     },
     {
@@ -445,39 +445,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 3249.699999999255,
-      "reference": "expected"
-    },
-    {
-      "nSamples": 20,
-      "browser": "chromium",
-      "file": "large_code_notebook",
-      "test": "open",
-      "time": 5898.699999999255,
-      "reference": "expected"
-    },
-    {
-      "nSamples": 20,
-      "browser": "chromium",
-      "file": "large_code_notebook",
-      "test": "switch-from",
-      "time": 354,
-      "reference": "expected"
-    },
-    {
-      "nSamples": 20,
-      "browser": "chromium",
-      "file": "large_code_notebook",
-      "test": "switch-to",
-      "time": 1280.1000000014901,
-      "reference": "expected"
-    },
-    {
-      "nSamples": 20,
-      "browser": "chromium",
-      "file": "large_code_notebook",
-      "test": "close",
-      "time": 4885.900000002235,
+      "time": 11243.20000000007,
       "reference": "expected"
     },
     {
@@ -485,7 +453,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 6079.5,
+      "time": 7832.099999999977,
       "reference": "expected"
     },
     {
@@ -493,7 +461,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 267.9000000022352,
+      "time": 470.5999999999767,
       "reference": "expected"
     },
     {
@@ -501,7 +469,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1299.199999999255,
+      "time": 1597,
       "reference": "expected"
     },
     {
@@ -509,7 +477,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 4813.300000000745,
+      "time": 10029.400000000023,
       "reference": "expected"
     },
     {
@@ -517,7 +485,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 6140.79999999702,
+      "time": 7501.199999999953,
       "reference": "expected"
     },
     {
@@ -525,7 +493,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 304.69999999925494,
+      "time": 569,
       "reference": "expected"
     },
     {
@@ -533,7 +501,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1365.9000000022352,
+      "time": 1641.1999999999534,
       "reference": "expected"
     },
     {
@@ -541,7 +509,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 10325.599999997765,
+      "time": 4498.800000000047,
       "reference": "expected"
     },
     {
@@ -549,7 +517,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 7791.39999999851,
+      "time": 5610.79999999993,
       "reference": "expected"
     },
     {
@@ -557,7 +525,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 531.1999999992549,
+      "time": 473.4000000000233,
       "reference": "expected"
     },
     {
@@ -565,7 +533,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1514.8999999985099,
+      "time": 1616.5,
       "reference": "expected"
     },
     {
@@ -573,7 +541,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 7642.400000002235,
+      "time": 4870.300000000047,
       "reference": "expected"
     },
     {
@@ -581,7 +549,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 11688.300000000745,
+      "time": 5568.79999999993,
       "reference": "expected"
     },
     {
@@ -589,7 +557,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 330.80000000074506,
+      "time": 459.19999999995343,
       "reference": "expected"
     },
     {
@@ -597,7 +565,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1396.5,
+      "time": 1656.6000000000931,
       "reference": "expected"
     },
     {
@@ -605,7 +573,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 6470.800000000745,
+      "time": 4957.399999999907,
       "reference": "expected"
     },
     {
@@ -613,7 +581,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "open",
-      "time": 8253.10000000149,
+      "time": 7407.700000000186,
       "reference": "expected"
     },
     {
@@ -621,7 +589,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-from",
-      "time": 299.4000000022352,
+      "time": 528.2999999998137,
       "reference": "expected"
     },
     {
@@ -629,7 +597,7 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "switch-to",
-      "time": 1348.300000000745,
+      "time": 1849.6000000000931,
       "reference": "expected"
     },
     {
@@ -637,7 +605,39 @@
       "browser": "chromium",
       "file": "large_code_notebook",
       "test": "close",
-      "time": 6186.60000000149,
+      "time": 7451.800000000047,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "open",
+      "time": 7533.300000000047,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 544.1999999999534,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1755.8000000000466,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 4601.600000000093,
       "reference": "expected"
     },
     {
@@ -645,7 +645,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 5002.39999999851,
+      "time": 3360.7999999998137,
       "reference": "expected"
     },
     {
@@ -653,7 +653,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 288.5999999977648,
+      "time": 311.30000000004657,
       "reference": "expected"
     },
     {
@@ -661,7 +661,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1306.5999999977648,
+      "time": 1484.1000000000931,
       "reference": "expected"
     },
     {
@@ -669,7 +669,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2623.2000000029802,
+      "time": 3226.8000000000466,
       "reference": "expected"
     },
     {
@@ -677,7 +677,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3888.60000000149,
+      "time": 3299.5999999998603,
       "reference": "expected"
     },
     {
@@ -685,7 +685,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 295.1000000014901,
+      "time": 301.5,
       "reference": "expected"
     },
     {
@@ -693,7 +693,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1216.199999999255,
+      "time": 1576.3000000000466,
       "reference": "expected"
     },
     {
@@ -701,7 +701,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2815.89999999851,
+      "time": 3324.8000000000466,
       "reference": "expected"
     },
     {
@@ -709,7 +709,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 4625.5,
+      "time": 3286.3000000000466,
       "reference": "expected"
     },
     {
@@ -717,7 +717,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 277.6000000014901,
+      "time": 301.69999999995343,
       "reference": "expected"
     },
     {
@@ -725,7 +725,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1427.1000000014901,
+      "time": 1591.5,
       "reference": "expected"
     },
     {
@@ -733,7 +733,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 3737.2999999970198,
+      "time": 3617.6999999999534,
       "reference": "expected"
     },
     {
@@ -741,7 +741,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 4709.800000000745,
+      "time": 3395,
       "reference": "expected"
     },
     {
@@ -749,7 +749,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 277.80000000074506,
+      "time": 322.39999999990687,
       "reference": "expected"
     },
     {
@@ -757,7 +757,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1308.199999999255,
+      "time": 1602.8000000000466,
       "reference": "expected"
     },
     {
@@ -765,7 +765,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2915.60000000149,
+      "time": 3457.5999999998603,
       "reference": "expected"
     },
     {
@@ -773,7 +773,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3890.39999999851,
+      "time": 3155.600000000093,
       "reference": "expected"
     },
     {
@@ -781,7 +781,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 326,
+      "time": 411.89999999990687,
       "reference": "expected"
     },
     {
@@ -789,7 +789,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1307.8999999985099,
+      "time": 1576.3000000000466,
       "reference": "expected"
     },
     {
@@ -797,7 +797,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2559,
+      "time": 3596.399999999907,
       "reference": "expected"
     },
     {
@@ -805,7 +805,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 4521.099999997765,
+      "time": 3100.5999999998603,
       "reference": "expected"
     },
     {
@@ -813,7 +813,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 282.69999999925494,
+      "time": 346.39999999990687,
       "reference": "expected"
     },
     {
@@ -821,7 +821,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1435.8999999985099,
+      "time": 1516.0999999998603,
       "reference": "expected"
     },
     {
@@ -829,7 +829,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2604.10000000149,
+      "time": 3679.2999999998137,
       "reference": "expected"
     },
     {
@@ -837,7 +837,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3978.800000000745,
+      "time": 3224.9000000001397,
       "reference": "expected"
     },
     {
@@ -845,7 +845,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 291.69999999925494,
+      "time": 304.9000000001397,
       "reference": "expected"
     },
     {
@@ -853,7 +853,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1443.0999999977648,
+      "time": 1606.8999999999069,
       "reference": "expected"
     },
     {
@@ -861,7 +861,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2959.39999999851,
+      "time": 3414.9000000001397,
       "reference": "expected"
     },
     {
@@ -869,7 +869,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 4306.89999999851,
+      "time": 3215.5999999998603,
       "reference": "expected"
     },
     {
@@ -877,7 +877,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 307.30000000074506,
+      "time": 325.5999999998603,
       "reference": "expected"
     },
     {
@@ -885,7 +885,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1374.6000000014901,
+      "time": 1544,
       "reference": "expected"
     },
     {
@@ -893,7 +893,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2802,
+      "time": 3512.5,
       "reference": "expected"
     },
     {
@@ -901,7 +901,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 4028.5,
+      "time": 3154.4000000001397,
       "reference": "expected"
     },
     {
@@ -909,7 +909,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 275.1000000014901,
+      "time": 312.39999999990687,
       "reference": "expected"
     },
     {
@@ -917,7 +917,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1386.5,
+      "time": 1532.1999999999534,
       "reference": "expected"
     },
     {
@@ -925,7 +925,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2854,
+      "time": 3445.0999999998603,
       "reference": "expected"
     },
     {
@@ -933,7 +933,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3988.599999997765,
+      "time": 3036.7999999998137,
       "reference": "expected"
     },
     {
@@ -941,7 +941,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 279.5999999977648,
+      "time": 322.39999999990687,
       "reference": "expected"
     },
     {
@@ -949,7 +949,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1332.199999999255,
+      "time": 1529.8999999999069,
       "reference": "expected"
     },
     {
@@ -957,7 +957,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2824.400000002235,
+      "time": 3604.3000000000466,
       "reference": "expected"
     },
     {
@@ -965,7 +965,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 5003,
+      "time": 3215.1999999999534,
       "reference": "expected"
     },
     {
@@ -973,7 +973,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 289.19999999925494,
+      "time": 343.69999999995343,
       "reference": "expected"
     },
     {
@@ -981,7 +981,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1449.8999999985099,
+      "time": 1603.6999999999534,
       "reference": "expected"
     },
     {
@@ -989,7 +989,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2965.099999997765,
+      "time": 3727,
       "reference": "expected"
     },
     {
@@ -997,7 +997,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 4845.800000000745,
+      "time": 3102.3000000000466,
       "reference": "expected"
     },
     {
@@ -1005,7 +1005,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 284.3999999985099,
+      "time": 317.79999999981374,
       "reference": "expected"
     },
     {
@@ -1013,7 +1013,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1458,
+      "time": 1683.1999999999534,
       "reference": "expected"
     },
     {
@@ -1021,7 +1021,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2878.199999999255,
+      "time": 3490.6999999999534,
       "reference": "expected"
     },
     {
@@ -1029,7 +1029,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3415.5,
+      "time": 3069.100000000093,
       "reference": "expected"
     },
     {
@@ -1037,7 +1037,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 229.10000000149012,
+      "time": 328.19999999995343,
       "reference": "expected"
     },
     {
@@ -1045,7 +1045,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1213.4000000022352,
+      "time": 1491.3999999999069,
       "reference": "expected"
     },
     {
@@ -1053,7 +1053,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2683.10000000149,
+      "time": 3439.399999999907,
       "reference": "expected"
     },
     {
@@ -1061,7 +1061,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3065.60000000149,
+      "time": 3081,
       "reference": "expected"
     },
     {
@@ -1069,7 +1069,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 267.5,
+      "time": 293.60000000009313,
       "reference": "expected"
     },
     {
@@ -1077,7 +1077,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1276.199999999255,
+      "time": 1583.5,
       "reference": "expected"
     },
     {
@@ -1085,7 +1085,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2364,
+      "time": 3349.399999999907,
       "reference": "expected"
     },
     {
@@ -1093,7 +1093,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3755.300000000745,
+      "time": 3179.0999999998603,
       "reference": "expected"
     },
     {
@@ -1101,7 +1101,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 242.90000000223517,
+      "time": 313.19999999995343,
       "reference": "expected"
     },
     {
@@ -1109,7 +1109,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1249.5999999977648,
+      "time": 1525.2999999998137,
       "reference": "expected"
     },
     {
@@ -1117,7 +1117,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2650,
+      "time": 3619.9000000001397,
       "reference": "expected"
     },
     {
@@ -1125,7 +1125,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3538,
+      "time": 3049.100000000093,
       "reference": "expected"
     },
     {
@@ -1133,7 +1133,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 300.1000000014901,
+      "time": 318.5,
       "reference": "expected"
     },
     {
@@ -1141,7 +1141,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1229.699999999255,
+      "time": 1543.0999999998603,
       "reference": "expected"
     },
     {
@@ -1149,7 +1149,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2271.2000000029802,
+      "time": 3535.8000000000466,
       "reference": "expected"
     },
     {
@@ -1157,7 +1157,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3413.300000000745,
+      "time": 3182.6999999999534,
       "reference": "expected"
     },
     {
@@ -1165,7 +1165,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 265.6000000014901,
+      "time": 315.80000000004657,
       "reference": "expected"
     },
     {
@@ -1173,7 +1173,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1274.1000000014901,
+      "time": 1614,
       "reference": "expected"
     },
     {
@@ -1181,7 +1181,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2314.89999999851,
+      "time": 3641.4000000001397,
       "reference": "expected"
     },
     {
@@ -1189,7 +1189,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3717.7999999970198,
+      "time": 2979.3000000000466,
       "reference": "expected"
     },
     {
@@ -1197,7 +1197,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 239.69999999925494,
+      "time": 315.5,
       "reference": "expected"
     },
     {
@@ -1205,7 +1205,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1226.1000000014901,
+      "time": 1513.1000000000931,
       "reference": "expected"
     },
     {
@@ -1213,7 +1213,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2309.5,
+      "time": 3678.3000000000466,
       "reference": "expected"
     },
     {
@@ -1221,7 +1221,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3531.599999997765,
+      "time": 3497.1999999999534,
       "reference": "expected"
     },
     {
@@ -1229,7 +1229,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 256.9000000022352,
+      "time": 305.60000000009313,
       "reference": "expected"
     },
     {
@@ -1237,7 +1237,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1121.800000000745,
+      "time": 1542.1999999999534,
       "reference": "expected"
     },
     {
@@ -1245,7 +1245,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2200.5,
+      "time": 3667.899999999907,
       "reference": "expected"
     },
     {
@@ -1253,7 +1253,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "open",
-      "time": 3775.5,
+      "time": 3247.8000000000466,
       "reference": "expected"
     },
     {
@@ -1261,7 +1261,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-from",
-      "time": 256.80000000074506,
+      "time": 315.89999999990687,
       "reference": "expected"
     },
     {
@@ -1269,7 +1269,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "switch-to",
-      "time": 1119.699999999255,
+      "time": 1537.6000000000931,
       "reference": "expected"
     },
     {
@@ -1277,7 +1277,7 @@
       "browser": "chromium",
       "file": "large_md_notebook",
       "test": "close",
-      "time": 2362.5,
+      "time": 3564.3000000000466,
       "reference": "expected"
     }
   ],
@@ -1291,47 +1291,47 @@
     },
     "systemInformation": {
       "cpu": {
-        "manufacturer": "11th",
-        "brand": "Gen Intel® Core™ i7-1165G7",
+        "manufacturer": "Intel®",
+        "brand": "Xeon® Platinum 8272CL",
         "vendor": "GenuineIntel",
         "family": "6",
-        "model": "140",
-        "stepping": "1",
+        "model": "85",
+        "stepping": "7",
         "revision": "",
         "voltage": "",
-        "speed": 2.8,
-        "speedMin": 0.4,
-        "speedMax": 4.7,
-        "governor": "powersave",
-        "cores": 8,
-        "physicalCores": 4,
+        "speed": 2.6,
+        "speedMin": null,
+        "speedMax": null,
+        "governor": "",
+        "cores": 2,
+        "physicalCores": 2,
         "processors": 1,
         "socket": "",
-        "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l2 invpcid_single cdp_l2 ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves split_lock_detect dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b fsrm avx512_vp2intersect md_clear flush_l1d arch_capabilities",
+        "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology cpuid pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch invpcid_single pti fsgsbase bmi1 hle avx2 smep bmi2 erms invpcid rtm mpx avx512f avx512dq rdseed adx smap clflushopt avx512cd avx512bw avx512vl xsaveopt xsavec xsaves md_clear",
         "virtualization": false,
         "cache": {
-          "l1d": 196608,
-          "l1i": 131072,
-          "l2": 5242880,
-          "l3": 12582912
+          "l1d": 65536,
+          "l1i": 65536,
+          "l2": 2097152,
+          "l3": 36700160
         }
       },
       "mem": {
-        "total": 33383514112
+        "total": 7291699200
       },
       "osInfo": {
         "platform": "linux",
-        "distro": "Debian GNU/Linux",
-        "release": "11",
-        "codename": "bullseye",
-        "kernel": "5.10.0-8-amd64",
+        "distro": "Ubuntu",
+        "release": "20.04.2 LTS",
+        "codename": "Focal Fossa",
+        "kernel": "5.8.0-1039-azure",
         "arch": "x64",
         "codepage": "UTF-8",
-        "logofile": "debian",
-        "serial": "ce2b82beffbb455480f89b4531aafcfa",
+        "logofile": "ubuntu",
+        "serial": "7f7f37c78b7c4116b0acfb78e51a655d",
         "build": "",
         "servicepack": "",
-        "uefi": true
+        "uefi": false
       }
     }
   }

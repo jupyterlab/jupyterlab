@@ -82,13 +82,13 @@ jobs:
           # Publish image to cml.dev
           echo "" >> ${REPORT}
           cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
+          echo "" >> ${REPORT}
           
           # Test if metadata have changed
-          export METADATA_DIFF="./benchmark-results/metadata.diff"
+          export METADATA_DIFF="/tmp/metadata.diff"
           diff <(jq --sort-keys .metadata benchmark-results/lab-benchmark.json) <(jq --sort-keys .metadata lab-benchmark-expected.json) > ${METADATA_DIFF} || true
-          [ -s ${METADATA_DIFF} ] && echo "\n:exclamation: Test metadata have changed\n" >> ${REPORT} && cat ${METADATA_DIFF} >> ${REPORT}
-          
-          cat ${REPORT}
+          [ -s ${METADATA_DIFF} ] && echo ":exclamation: Test metadata have changed" >> ${REPORT}  && echo "```diff" >> ${REPORT} && cat ${METADATA_DIFF} >> ${REPORT} && echo "```" >> ${REPORT}
+
           echo 'BENCH_REPORT<<EOF' >> $GITHUB_ENV
           cat ${REPORT} >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV

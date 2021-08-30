@@ -62,6 +62,9 @@ export interface IJupyterLabPage {
    */
   readonly notebook: NotebookHelper;
 
+  /**
+   * Webbrowser performance helpers
+   */
   readonly performance: PerformanceHelper;
   /**
    * JupyterLab status bar helpers
@@ -301,6 +304,9 @@ export class JupyterLabPage implements IJupyterLabPage {
    */
   readonly notebook: NotebookHelper;
 
+  /**
+   * Webbrowser performance helpers
+   */
   readonly performance: PerformanceHelper;
 
   /**

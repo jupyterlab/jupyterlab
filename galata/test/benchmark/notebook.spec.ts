@@ -24,7 +24,8 @@ const codeNotebook = 'large_code_notebook.ipynb';
 const mdNotebook = 'large_md_notebook.ipynb';
 const textFile = 'lorem_ipsum.txt';
 
-test.describe.serial('Benchmark open large notebook', () => {
+test.describe.serial('Benchmark', () => {
+  // Generate the files for the benchmark
   test.beforeAll(async ({ baseURL, tmpPath }) => {
     const contents = galata.newContentsHelper(baseURL);
 
@@ -79,11 +80,18 @@ test.describe.serial('Benchmark open large notebook', () => {
     await contents.uploadContent(loremIpsum, 'text', `${tmpPath}/${textFile}`);
   });
 
+  // Remove benchmark files
   test.afterAll(async ({ baseURL, tmpPath }) => {
     const contents = galata.newContentsHelper(baseURL);
     await contents.deleteDirectory(tmpPath);
   });
 
+  // Loop on benchmark files nSamples times
+  //  For each file, benchmark:
+  //  - Open the file
+  //  - Switch to a text file
+  //  - Switch back to the file
+  //  - Close the file
   for (const file of [codeNotebook, mdNotebook]) {
     for (let sample = 0; sample < benchmark.nSamples; sample++) {
       test(`measure ${file} - ${sample + 1}`, async ({

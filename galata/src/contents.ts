@@ -150,6 +150,17 @@ export class ContentsHelper {
     return true;
   }
 
+  /**
+   * Upload content as file to JupyterLab.
+   *
+   * Note: the destinationPath is the filepath on the server.
+   *
+   * @param content Content file to upload
+   * @param format Content format
+   * @param destinationPath Destination filepath
+   * @returns Whether the action succeeded or not.
+   */
+
   async uploadContent(
     content: string,
     format: 'base64' | 'text' | 'json',
