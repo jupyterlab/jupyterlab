@@ -245,7 +245,7 @@ class BenchmarkReporter implements Reporter {
       const graphConfigFile = path.resolve(outputDir, `${baseName}.vl.json`);
       const allData = [...expectations.values, ...report.values];
       const config = generateVegaLiteSpec([
-        ...new Set(allData.map(d => d.browser))
+        ...new Set(allData.map(d => d.file))
       ]);
       config.data.values = allData;
       fs.writeFileSync(graphConfigFile, JSON.stringify(config), 'utf-8');

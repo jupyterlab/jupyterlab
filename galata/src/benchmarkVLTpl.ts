@@ -14,16 +14,16 @@ const GENERAL_CONFIG = {
 /**
  * Matrix of figures per browser
  */
-const CONFIG_PER_BROWSER = {
+const CONFIG_PER_FILE = {
   facet: {
-    column: { field: 'file', type: 'nominal' },
+    column: { field: 'browser', type: 'nominal' },
     row: { field: 'test', type: 'nominal' }
   },
   spec: {
     mark: { type: 'boxplot', extent: 'min-max' },
     encoding: {
       x: { field: 'reference', type: 'nominal' },
-      color: { field: 'file', type: 'nominal', legend: null },
+      // color: { field: 'file', type: 'nominal', legend: null },
       y: {
         field: 'time',
         title: 'Time (ms)',
@@ -39,25 +39,25 @@ const CONFIG_PER_BROWSER = {
  *
  * Note: The data field is set to empty
  *
- * @param browsers Browser list
+ * @param filenames Test file name list
  * @returns The specification
  */
-function generateVegaLiteSpec(browsers?: string[]): Record<string, any> {
-  const webbrowsers = browsers ?? [];
+function generateVegaLiteSpec(filenames?: string[]): Record<string, any> {
+  const files = filenames ?? [];
 
-  if (webbrowsers.length === 0) {
+  if (files.length === 0) {
     return {
       ...GENERAL_CONFIG,
-      ...CONFIG_PER_BROWSER
+      ...CONFIG_PER_FILE
     };
   } else {
     return {
       ...GENERAL_CONFIG,
-      hconcat: webbrowsers.map(b => {
+      hconcat: files.map(b => {
         return {
-          title: `${b[0].toLocaleUpperCase()}${b.slice(1)} browser`,
-          transform: [{ filter: `datum.browser === '${b}'` }],
-          ...CONFIG_PER_BROWSER
+          title: b,
+          transform: [{ filter: `datum.file === '${b}'` }],
+          ...CONFIG_PER_FILE
         };
       })
     };
