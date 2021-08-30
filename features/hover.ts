@@ -290,10 +290,6 @@ export class HoverCM extends CodeMirrorIntegration {
   ): lsProtocol.MarkupContent {
     let contents = response.contents;
 
-    // this causes the webpack to fail "Module not found: Error: Can't resolve 'net'" for some reason
-    // if (lsProtocol.MarkedString.is(contents))
-    ///  contents = [contents];
-
     if (typeof contents === 'string') {
       contents = [contents as lsProtocol.MarkedString];
     }

@@ -22,9 +22,17 @@ interface IFreeTooltipOptions extends Tooltip.IOptions {
    */
   position: CodeEditor.IPosition | null;
   /**
-   * Should the tooltip be placed at the end of the line indicated by position?
+   * HoverBox privilege.
    */
-  moveToLineEnd: boolean;
+  privilege?: 'above' | 'below' | 'forceAbove' | 'forceBelow';
+  /**
+   * Alignment with respect to the current token.
+   */
+  alignment?: 'start' | 'end' | null;
+  /**
+   * default: true; ESC will always hide
+   */
+  hideOnKeyPress?: boolean;
 }
 
 /**
@@ -33,13 +41,35 @@ interface IFreeTooltipOptions extends Tooltip.IOptions {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 export class FreeTooltip extends Tooltip {
-  position: CodeEditor.IPosition | null;
-  movetoLineEnd: boolean;
-
-  constructor(options: IFreeTooltipOptions) {
+  constructor(protected options: IFreeTooltipOptions) {
     super(options);
-    this.position = options.position;
-    this.movetoLineEnd = options.moveToLineEnd;
+  }
+
+  handleEvent(event: Event): void {
+    if (this.isHidden || this.isDisposed) {
+      return;
+    }
+
+    const { node } = this;
+    const target = event.target as HTMLElement;
+
+    switch (event.type) {
+      case 'keydown': {
+        const keyCode = (event as KeyboardEvent).keyCode;
+        // ESC or Backspace cancel anyways
+        if (
+          node.contains(target) ||
+          (!this.options.hideOnKeyPress && keyCode != 27 && keyCode != 8)
+        ) {
+          return;
+        }
+        this.dispose();
+        break;
+      }
+      default:
+        super.handleEvent(event);
+        break;
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -50,7 +80,9 @@ export class FreeTooltip extends Tooltip {
     // @ts-ignore
     const editor = this._editor as CodeEditor.IEditor;
     const cursor: CodeEditor.IPosition =
-      this.position == null ? editor.getCursorPosition() : this.position;
+      this.options.position == null
+        ? editor.getCursorPosition()
+        : this.options.position;
 
     const end = editor.getOffsetAt(cursor);
     const line = editor.getLine(cursor.line);
@@ -61,13 +93,25 @@ export class FreeTooltip extends Tooltip {
 
     let position: CodeEditor.IPosition;
 
-    if (this.movetoLineEnd) {
-      const tokens = line.substring(0, end).split(/\W+/);
-      const last = tokens[tokens.length - 1];
-      const start = last ? end - last.length : end;
-      position = editor.getPositionAt(start);
-    } else {
-      position = cursor;
+    switch (this.options.alignment) {
+      case 'start': {
+        const tokens = line.substring(0, end).split(/\W+/);
+        const last = tokens[tokens.length - 1];
+        const start = last ? end - last.length : end;
+        position = editor.getPositionAt(start);
+        break;
+      }
+      case 'end': {
+        const tokens = line.substring(0, end).split(/\W+/);
+        const last = tokens[tokens.length - 1];
+        const start = last ? end - last.length : end;
+        position = editor.getPositionAt(start);
+        break;
+      }
+      default: {
+        position = cursor;
+        break;
+      }
     }
 
     if (!position) {
@@ -86,7 +130,7 @@ export class FreeTooltip extends Tooltip {
       minHeight: MIN_HEIGHT,
       node: this.node,
       offset: { horizontal: -1 * paddingLeft },
-      privilege: 'below',
+      privilege: this.options.privilege || 'below',
       style: style
     });
   }
@@ -94,21 +138,25 @@ export class FreeTooltip extends Tooltip {
 
 export namespace EditorTooltip {
   export interface IOptions {
+    id?: string;
     markup: lsProtocol.MarkupContent;
     ce_editor: CodeEditor.IEditor;
     position: IEditorPosition;
     adapter: WidgetAdapter<IDocumentWidget>;
     className?: string;
+    tooltip?: Partial<IFreeTooltipOptions>;
   }
 }
 
 export class EditorTooltipManager {
   private currentTooltip: FreeTooltip = null;
+  private currentOptions: EditorTooltip.IOptions | null;
 
   constructor(private rendermime_registry: IRenderMimeRegistry) {}
 
   create(options: EditorTooltip.IOptions): FreeTooltip {
     this.remove();
+    this.currentOptions = options;
     let { markup, position, adapter } = options;
     let widget = adapter.widget;
     const bundle =
@@ -116,12 +164,12 @@ export class EditorTooltipManager {
         ? { 'text/plain': markup.value }
         : { 'text/markdown': markup.value };
     const tooltip = new FreeTooltip({
+      ...(options.tooltip || {}),
       anchor: widget.content,
       bundle: bundle,
       editor: options.ce_editor,
       rendermime: this.rendermime_registry,
-      position: PositionConverter.cm_to_ce(position),
-      moveToLineEnd: false
+      position: PositionConverter.cm_to_ce(position)
     });
     tooltip.addClass(options.className);
     Widget.attach(tooltip, document.body);
@@ -129,9 +177,25 @@ export class EditorTooltipManager {
     return tooltip;
   }
 
+  get position(): IEditorPosition {
+    return this.currentOptions.position;
+  }
+
+  isShown(id?: string): boolean {
+    if (id && this.currentOptions && this.currentOptions?.id !== id) {
+      return false;
+    }
+    return (
+      this.currentTooltip &&
+      !this.currentTooltip.isDisposed &&
+      this.currentTooltip.isVisible
+    );
+  }
+
   remove() {
     if (this.currentTooltip !== null) {
       this.currentTooltip.dispose();
+      this.currentTooltip = null;
     }
   }
 }

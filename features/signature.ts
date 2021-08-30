@@ -2,6 +2,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ICodeMirror } from '@jupyterlab/codemirror';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import * as lsProtocol from 'vscode-languageserver-protocol';
@@ -9,9 +10,31 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import { EditorTooltipManager } from '../components/free_tooltip';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import { FeatureSettings, IFeatureLabIntegration } from '../feature';
-import { IRootPosition } from '../positioning';
+import { IEditorPosition, IRootPosition } from '../positioning';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { IEditorChange } from '../virtual/editor';
+
+const TOOLTIP_ID = 'signature';
+
+function escapeMarkdown(text: string) {
+  text = text.replace('#', '\\#').replace('*', '\\*').replace('_', '\\_');
+  // escape HTML
+  const span = document.createElement('span');
+  span.textContent = text;
+  return span.innerHTML;
+}
+
+function getMarkdown(item: string | lsProtocol.MarkupContent) {
+  if (typeof item === 'string') {
+    return escapeMarkdown(item);
+  } else {
+    if (item.kind === 'markdown') {
+      return item.value;
+    } else {
+      return escapeMarkdown(item.value);
+    }
+  }
+}
 
 export class SignatureCM extends CodeMirrorIntegration {
   protected signature_character: IRootPosition;
@@ -26,6 +49,25 @@ export class SignatureCM extends CodeMirrorIntegration {
     language: string
   ): lsProtocol.MarkupContent {
     let signatures = new Array<string>();
+
+    if (response.activeSignature != null) {
+      if (response.activeSignature >= response.signatures.length) {
+        this.console.error(
+          'LSP server returned wrong number for activeSignature for: ',
+          response
+        );
+      } else {
+        const item = response.signatures[response.activeSignature];
+        return {
+          kind: 'markdown',
+          value: this.markdown_from_signature(
+            item,
+            language,
+            response.activeParameter
+          )
+        };
+      }
+    }
 
     response.signatures.forEach(item => {
       let markdown = this.markdown_from_signature(item, language);
@@ -45,9 +87,57 @@ export class SignatureCM extends CodeMirrorIntegration {
    */
   private markdown_from_signature(
     item: lsProtocol.SignatureInformation,
-    language: string
+    language: string,
+    activeParameterFallback?: number | null
   ): string {
-    let markdown = '```' + language + '\n' + item.label + '\n```';
+    const activeParameter: number | null =
+      typeof item.activeParameter !== 'undefined'
+        ? item.activeParameter
+        : activeParameterFallback;
+    let markdown: string;
+    let label = item.label;
+    if (item.parameters && activeParameter != null) {
+      if (activeParameter > item.parameters.length) {
+        this.console.error(
+          'LSP server returned wrong number for activeSignature for: ',
+          item
+        );
+        markdown = '```' + language + '\n' + label + '\n```';
+      } else {
+        const parameter = item.parameters[activeParameter];
+        let substring: string =
+          typeof parameter.label === 'string'
+            ? parameter.label
+            : label.slice(parameter.label[0], parameter.label[1]);
+        const pre = document.createElement('pre');
+        const code = document.createElement('code');
+        pre.appendChild(code);
+        code.className = `cm-s-jupyter language-${language}`;
+        this.lab_integration.codeMirror.CodeMirror.runMode(
+          label,
+          language,
+          (token: string, className: string) => {
+            let element: HTMLElement | Node;
+            if (className) {
+              element = document.createElement('span');
+              (element as HTMLElement).classList.add('cm-' + className);
+              element.textContent = token;
+            } else {
+              element = document.createTextNode(token);
+            }
+            if (className === 'variable' && token === substring) {
+              const mark = document.createElement('mark');
+              mark.appendChild(element);
+              element = mark;
+            }
+            code.appendChild(element);
+          }
+        );
+        markdown = pre.outerHTML + '\n\n';
+      }
+    } else {
+      markdown = '```' + language + '\n' + label + '\n```';
+    }
     if (item.documentation) {
       markdown += '\n';
       if (
@@ -89,17 +179,28 @@ export class SignatureCM extends CodeMirrorIntegration {
         }
         markdown += item.documentation.value;
       }
+    } else if (item.parameters) {
+      markdown +=
+        '\n\n' +
+        item.parameters
+          .filter(parameter => parameter.documentation)
+          .map(parameter => '- ' + getMarkdown(parameter.documentation))
+          .join('\n');
     }
     return markdown;
   }
 
   private handleSignature(
     response: lsProtocol.SignatureHelp,
-    position_at_request: IRootPosition
+    position_at_request: IRootPosition,
+    display_position: IEditorPosition | null = null
   ) {
-    this.lab_integration.tooltip.remove();
-
     this.console.log('Signature received', response);
+    if (response || response === null) {
+      // do not hide on undefined as it simply indicates that no new info is available
+      // (null means close, response means update)
+      this.lab_integration.tooltip.remove();
+    }
 
     if (!this.signature_character || !response || !response.signatures.length) {
       this.console.debug(
@@ -138,15 +239,22 @@ export class SignatureCM extends CodeMirrorIntegration {
       'Signature will be shown',
       language,
       markup,
-      root_position
+      root_position,
+      response
     );
 
     this.lab_integration.tooltip.create({
       markup,
-      position: editor_position,
+      position: display_position === null ? editor_position : display_position,
+      id: TOOLTIP_ID,
       ce_editor: this.virtual_editor.find_ce_editor(cm_editor),
       adapter: this.adapter,
-      className: 'lsp-signature-help'
+      className: 'lsp-signature-help',
+      tooltip: {
+        privilege: 'forceAbove',
+        alignment: 'start',
+        hideOnKeyPress: false
+      }
     });
   }
 
@@ -158,9 +266,27 @@ export class SignatureCM extends CodeMirrorIntegration {
   }
 
   afterChange(change: IEditorChange, root_position: IRootPosition) {
+    // TODO: tooltip needs to be closed if the cursor moves
+
+    // TODO: make closeCharacters it configurable
+    const closeCharacters = [')', ';'];
     let last_character = this.extract_last_character(change);
 
-    if (this.signatureCharacters.indexOf(last_character) === -1) {
+    const isSignatureShown = this.lab_integration.tooltip.isShown(TOOLTIP_ID);
+    let previousPosition: IEditorPosition | null = null;
+
+    if (isSignatureShown) {
+      previousPosition = this.lab_integration.tooltip.position;
+      if (closeCharacters.includes(last_character)) {
+        // remove just in case but do not short-circuit in case if we need to re-trigger
+        this.lab_integration.tooltip.remove();
+      }
+    }
+
+    // only proceed if: trigger character was used or the signature is/was visible immediately before
+    if (
+      !(this.signatureCharacters.includes(last_character) || isSignatureShown)
+    ) {
       return;
     }
 
@@ -178,7 +304,7 @@ export class SignatureCM extends CodeMirrorIntegration {
         this.virtual_document.document_info,
         false
       )
-      .then(help => this.handleSignature(help, root_position))
+      .then(help => this.handleSignature(help, root_position, previousPosition))
       .catch(this.console.warn);
   }
 }
@@ -190,7 +316,8 @@ class SignatureLabIntegration implements IFeatureLabIntegration {
   constructor(
     app: JupyterFrontEnd,
     settings: FeatureSettings<any>,
-    renderMimeRegistry: IRenderMimeRegistry
+    renderMimeRegistry: IRenderMimeRegistry,
+    public codeMirror: ICodeMirror
   ) {
     this.tooltip = new EditorTooltipManager(renderMimeRegistry);
   }
@@ -200,19 +327,26 @@ const FEATURE_ID = PLUGIN_ID + ':signature';
 
 export const SIGNATURE_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
-  requires: [ILSPFeatureManager, ISettingRegistry, IRenderMimeRegistry],
+  requires: [
+    ILSPFeatureManager,
+    ISettingRegistry,
+    IRenderMimeRegistry,
+    ICodeMirror
+  ],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
     settingRegistry: ISettingRegistry,
-    renderMimeRegistry: IRenderMimeRegistry
+    renderMimeRegistry: IRenderMimeRegistry,
+    codeMirror: ICodeMirror
   ) => {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
     const labIntegration = new SignatureLabIntegration(
       app,
       settings,
-      renderMimeRegistry
+      renderMimeRegistry,
+      codeMirror
     );
 
     featureManager.register({
