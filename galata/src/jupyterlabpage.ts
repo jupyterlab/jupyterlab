@@ -412,7 +412,13 @@ export class JupyterLabPage implements IJupyterLabPage {
       ? url
       : `${this.baseURL}${this.appPath}/${url ?? ''}`;
 
-    const response = await this.page.goto(target, options);
+    const response = await this.page.goto(
+      target,
+      {
+        ...options,
+        waitUntil: options.waitUntil ?? 'domcontentloaded'
+      }
+    );
     await this.waitForAppStarted();
     await this.hookHelpersUp();
     await this.waitIsReady();
@@ -463,7 +469,10 @@ export class JupyterLabPage implements IJupyterLabPage {
      */
     waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
   }): Promise<Response | null> {
-    const response = await this.page.reload(options);
+    const response = await this.page.reload({
+      ...options,
+      waitUntil: options.waitUntil ?? 'domcontentloaded'
+    });
     await this.waitForAppStarted();
     await this.hookHelpersUp();
     await this.waitIsReady();
@@ -626,7 +635,9 @@ export class JupyterLabPage implements IJupyterLabPage {
     await this.waitForCondition(() => {
       return this.activity.isTabActive('Launcher');
     });
-    // Improve robustness the active class is set before the status is updated
-    await this.page.waitForSelector('#jp-main-statusbar >> text=Launcher');
+    // FIXME should Improve robustness the active class is set before the status is updated
+    // Oddly current tab is not always set to active
+    // await this.page.waitForSelector('#jp-main-statusbar >> text=Launcher');
+    await this.activity.activateTab('Launcher');
   };
 }
