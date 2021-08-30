@@ -408,10 +408,11 @@ export class JupyterLabPage implements IJupyterLabPage {
       waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
     }
   ): Promise<Response | null> {
-    const response = await this.page.goto(
-      `${this.baseURL}${this.appPath}/${url ?? ''}`,
-      options
-    );
+    const target = url?.startsWith('http')
+      ? url
+      : `${this.baseURL}${this.appPath}/${url ?? ''}`;
+
+    const response = await this.page.goto(target, options);
     await this.waitForAppStarted();
     await this.hookHelpersUp();
     await this.waitIsReady();
