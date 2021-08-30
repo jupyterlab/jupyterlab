@@ -18,6 +18,16 @@ describe('escapeMarkdown', () => {
       'pre \\*italic\\* post'
     );
   });
+  it('escapes underscore italics', () => {
+    expect(escapeMarkdown('pre _italic_ post')).to.equal(
+      'pre \\_italic\\_ post'
+    );
+  });
+  it('escapes escaped italics', () => {
+    expect(escapeMarkdown('pre \\*non-italic\\* post')).to.equal(
+      'pre \\\\*non-italic\\\\* post'
+    );
+  });
   it('escapes bold', () => {
     expect(escapeMarkdown('pre **bold** post')).to.equal(
       'pre \\*\\*bold\\*\\* post'
