@@ -415,8 +415,8 @@ export class JupyterLabPage implements IJupyterLabPage {
     const response = await this.page.goto(
       target,
       {
-        ...options,
-        waitUntil: options.waitUntil ?? 'domcontentloaded'
+        ...(options ?? {}),
+        waitUntil: options?.waitUntil ?? 'domcontentloaded'
       }
     );
     await this.waitForAppStarted();
@@ -470,8 +470,8 @@ export class JupyterLabPage implements IJupyterLabPage {
     waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
   }): Promise<Response | null> {
     const response = await this.page.reload({
-      ...options,
-      waitUntil: options.waitUntil ?? 'domcontentloaded'
+      ...(options ?? {}),
+      waitUntil: options?.waitUntil ?? 'domcontentloaded'
     });
     await this.waitForAppStarted();
     await this.hookHelpersUp();
