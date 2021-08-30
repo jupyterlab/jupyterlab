@@ -26,7 +26,7 @@ import {
   sessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
@@ -339,19 +339,26 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
       workspace.startsWith('auto-') ? ` (${workspace})` : ``
     }`;
   } else {
-    // First 15 characters of current document name
-    current = current.split(':')[1].slice(0, 15);
+    // File name from current path
+    let currentFile: string = PathExt.basename(current.split(':')[1]);
+    // Truncate to first 12 characters of current document name + ... if length > 15
+    currentFile =
+      currentFile.length > 15
+        ? currentFile.slice(0, 12).concat(`…`)
+        : currentFile;
     // Number of restorable items that are either notebooks or editors
     const count: number = Object.keys(data).filter(
       item => item.startsWith('notebook') || item.startsWith('editor')
     ).length;
 
     if (workspace.startsWith('auto-')) {
-      document.title = `${current} (${workspace}${
+      document.title = `${currentFile} (${workspace}${
         count > 1 ? ` : ${count}` : ``
       }) - ${name}`;
     } else {
-      document.title = `${current}${count > 1 ? ` (${count})` : ``} - ${name}`;
+      document.title = `${currentFile}${
+        count > 1 ? ` (${count})` : ``
+      } - ${name}`;
     }
   }
 }
