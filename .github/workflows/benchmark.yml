@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Benchmark
+    name: Execute benchmark tests
     timeout-minutes: 40
     runs-on: ubuntu-20.04
     steps:
@@ -71,16 +71,29 @@ jobs:
           timeout: 360000
 
       - uses: iterative/setup-cml@v1
-      - name: Test
+      - name: Execute benchmark tests
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd galata
           jlpm run test:benchmark
 
-          echo "_Send from benchmark CI_" > report.md
+          cat ./benchmark-results/lab-benchmark.md > report.md
+
           # Publish image to cml.dev
           cml-publish ./benchmark-results/lab-benchmark.png --md >> report.md
+          
+          # Test if metadata have changed
+          export METADATA_DIFF="./benchmark-results/metadata.diff"
+          diff <(jq --sort-keys .metadata benchmark-results/lab-benchmark.json) <(jq --sort-keys .metadata lab-benchmark-expected.json) > METADATA_DIFF
+          if [[ $? == 1 ]]; then
+            echo "" >> report.md
+            echo ":exclamation: Test metadata have changed" >> report.md
+            echo "" >> report.md
+            cat METADATA_DIFF >> report.md
+            echo "" >> report.md
+          fi
+          
           cat report.md
           echo 'BENCH_REPORT<<EOF' >> $GITHUB_ENV
           cat report.md >> $GITHUB_ENV

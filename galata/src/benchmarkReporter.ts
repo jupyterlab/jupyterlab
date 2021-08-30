@@ -13,6 +13,7 @@ import path from 'path';
 import si from 'systeminformation';
 import * as vega from 'vega';
 import * as vl from 'vega-lite';
+import * as vs from 'vega-statistics';
 import generateVegaLiteSpec from './benchmarkVLTpl';
 
 /**
@@ -250,6 +251,74 @@ class BenchmarkReporter implements Reporter {
       config.data.values = allData;
       fs.writeFileSync(graphConfigFile, JSON.stringify(config), 'utf-8');
 
+      // Compute statistics
+      // - Groupby (file, test, browser, reference)
+      const groups = new Map<
+        string,
+        Map<string, Map<string, Map<string, number[]>>>
+      >();
+
+      allData.forEach(d => {
+        if (!groups.has(d.file)) {
+          groups.set(
+            d.file,
+            new Map<string, Map<string, Map<string, number[]>>>()
+          );
+        }
+
+        const fileGroup = groups.get(d.file)!;
+
+        if (!fileGroup.has(d.test)) {
+          fileGroup.set(d.test, new Map<string, Map<string, number[]>>());
+        }
+
+        const testGroup = fileGroup.get(d.test)!;
+
+        if (!testGroup.has(d.browser)) {
+          testGroup.set(d.browser, new Map<string, number[]>());
+        }
+
+        const browserGroup = testGroup.get(d.browser)!;
+
+        if (!browserGroup.has(d.reference)) {
+          browserGroup.set(d.reference, new Array<number>());
+        }
+
+        browserGroup.get(d.reference)?.push(d.time);
+      });
+
+      // - Create report
+      const reportContent = new Array<string>(
+        '## Benchmark report',
+        '',
+        'The execution time (in milliseconds) are grouped by test file, test type and browser.',
+        'For each case, the following values are computed: _min_ <- || _1st quartile_ | _median_ | _3rd quartile_ || -> _max_.',
+        ''
+      );
+      for (const [file, fileGroup] of groups) {
+        reportContent.push(`### Test file \`${file}\``, '');
+        for (const [test, testGroup] of fileGroup) {
+          reportContent.push(`#### Test \`${test}\``, '');
+          for (const [browser, browserGroup] of testGroup) {
+            reportContent.push(`**Browser ${browser}**`);
+            for (const [reference, dataGroup] of browserGroup) {
+              const [q1, median, q3] = vs.quartiles(dataGroup);
+              reportContent.push(
+                `${reference}: ${Math.min(
+                  ...dataGroup
+                ).toFixed()} <- || ${q1.toFixed()} | ${median.toFixed()} | ${q3.toFixed()} || -> ${Math.max(
+                  ...dataGroup
+                ).toFixed()}`
+              );
+            }
+            reportContent.push('');
+          }
+        }
+      }
+
+      const reportFile = path.resolve(outputDir, `${baseName}.md`);
+      fs.writeFileSync(reportFile, reportContent.join('\n'), 'utf-8');
+
       // Generate image
       const vegaSpec = vl.compile(config as any).spec;
 
@@ -280,8 +349,11 @@ class BenchmarkReporter implements Reporter {
 
   protected async getMetadata(browser?: string): Promise<any> {
     const cpu = await si.cpu();
-    const mem = await si.mem();
-    const osInfo = await si.osInfo();
+    // Keep only non-variable value
+    const totalMemory = (await si.mem()).total;
+    // Remove some os information
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { hostname, fqdn, ...osInfo } = await si.osInfo();
 
     const browsers = ['chromium', 'firefox', 'webkit'];
     const browserVersions: { [name: string]: string } = {};
@@ -312,7 +384,7 @@ class BenchmarkReporter implements Reporter {
       },
       systemInformation: {
         cpu: cpu,
-        mem: mem,
+        mem: { total: totalMemory },
         osInfo: osInfo
       }
     };

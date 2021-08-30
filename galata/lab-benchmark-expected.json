@@ -357,18 +357,7 @@
         }
       },
       "mem": {
-        "total": 33383514112,
-        "free": 18569019392,
-        "used": 14814494720,
-        "active": 11105206272,
-        "available": 22278307840,
-        "buffers": 665587712,
-        "cached": 3885133824,
-        "slab": 646762496,
-        "buffcache": 5197484032,
-        "swaptotal": 1023406080,
-        "swapused": 0,
-        "swapfree": 1023406080
+        "total": 33383514112
       },
       "osInfo": {
         "platform": "linux",
@@ -377,8 +366,6 @@
         "codename": "bullseye",
         "kernel": "5.10.0-8-amd64",
         "arch": "x64",
-        "hostname": "qs-fco",
-        "fqdn": "qs-fco.home",
         "codepage": "UTF-8",
         "logofile": "debian",
         "serial": "ce2b82beffbb455480f89b4531aafcfa",
