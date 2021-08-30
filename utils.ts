@@ -197,3 +197,11 @@ export const expandDottedPaths = (
   }
   return mergeWith({}, ...settings);
 };
+
+export function escapeMarkdown(text: string) {
+  text = text.replace(/([#*_\[\]])/g, '\\$1');
+  // escape HTML
+  const span = document.createElement('span');
+  span.textContent = text;
+  return span.innerHTML;
+}

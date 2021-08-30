@@ -7,22 +7,16 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 
+import { SignatureHelp as LSPSignatureSettings } from '../_signature';
 import { EditorTooltipManager } from '../components/free_tooltip';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import { FeatureSettings, IFeatureLabIntegration } from '../feature';
 import { IEditorPosition, IRootPosition } from '../positioning';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { escapeMarkdown } from '../utils';
 import { IEditorChange } from '../virtual/editor';
 
 const TOOLTIP_ID = 'signature';
-
-function escapeMarkdown(text: string) {
-  text = text.replace('#', '\\#').replace('*', '\\*').replace('_', '\\_');
-  // escape HTML
-  const span = document.createElement('span');
-  span.textContent = text;
-  return span.innerHTML;
-}
 
 function getMarkdown(item: string | lsProtocol.MarkupContent) {
   if (typeof item === 'string') {
@@ -39,6 +33,30 @@ function getMarkdown(item: string | lsProtocol.MarkupContent) {
 export class SignatureCM extends CodeMirrorIntegration {
   protected signature_character: IRootPosition;
   protected _signatureCharacters: string[];
+  protected _closeCharacters: string[] = [];
+
+  get settings() {
+    return super.settings as FeatureSettings<LSPSignatureSettings>;
+  }
+
+  register(): void {
+    this.settings.changed.connect(settings => {
+      this._closeCharacters = settings.composite.closeCharacters;
+    });
+    this.editor_handlers.set('cursorActivity', this.onCursorActivity);
+    this.editor_handlers.set('blur', this.onBlur);
+    this.editor_handlers.set('focus', this.onCursorActivity);
+    super.register();
+  }
+
+  onBlur() {
+    this._hideTooltip();
+  }
+
+  onCursorActivity(args: any) {
+    // TODO
+    console.log('Cursor activity', args);
+  }
 
   get lab_integration() {
     return super.lab_integration as SignatureLabIntegration;
@@ -190,6 +208,10 @@ export class SignatureCM extends CodeMirrorIntegration {
     return markdown;
   }
 
+  private _hideTooltip() {
+    this.lab_integration.tooltip.remove();
+  }
+
   private handleSignature(
     response: lsProtocol.SignatureHelp,
     position_at_request: IRootPosition,
@@ -199,7 +221,7 @@ export class SignatureCM extends CodeMirrorIntegration {
     if (response || response === null) {
       // do not hide on undefined as it simply indicates that no new info is available
       // (null means close, response means update)
-      this.lab_integration.tooltip.remove();
+      this._hideTooltip();
     }
 
     if (!this.signature_character || !response || !response.signatures.length) {
@@ -268,8 +290,6 @@ export class SignatureCM extends CodeMirrorIntegration {
   afterChange(change: IEditorChange, root_position: IRootPosition) {
     // TODO: tooltip needs to be closed if the cursor moves
 
-    // TODO: make closeCharacters it configurable
-    const closeCharacters = [')', ';'];
     let last_character = this.extract_last_character(change);
 
     const isSignatureShown = this.lab_integration.tooltip.isShown(TOOLTIP_ID);
@@ -277,9 +297,9 @@ export class SignatureCM extends CodeMirrorIntegration {
 
     if (isSignatureShown) {
       previousPosition = this.lab_integration.tooltip.position;
-      if (closeCharacters.includes(last_character)) {
+      if (this._closeCharacters.includes(last_character)) {
         // remove just in case but do not short-circuit in case if we need to re-trigger
-        this.lab_integration.tooltip.remove();
+        this._hideTooltip();
       }
     }
 
@@ -311,11 +331,11 @@ export class SignatureCM extends CodeMirrorIntegration {
 
 class SignatureLabIntegration implements IFeatureLabIntegration {
   tooltip: EditorTooltipManager;
-  settings: FeatureSettings<any>;
+  settings: FeatureSettings<LSPSignatureSettings>;
 
   constructor(
     app: JupyterFrontEnd,
-    settings: FeatureSettings<any>,
+    settings: FeatureSettings<LSPSignatureSettings>,
     renderMimeRegistry: IRenderMimeRegistry,
     public codeMirror: ICodeMirror
   ) {
