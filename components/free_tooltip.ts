@@ -16,6 +16,8 @@ import { IEditorPosition } from '../positioning';
 const MIN_HEIGHT = 20;
 const MAX_HEIGHT = 250;
 
+const CLASS_NAME = 'lsp-tooltip';
+
 interface IFreeTooltipOptions extends Tooltip.IOptions {
   /**
    * Position at which the tooltip should be placed, or null (default) to use the current cursor position.
@@ -171,6 +173,7 @@ export class EditorTooltipManager {
       rendermime: this.rendermime_registry,
       position: PositionConverter.cm_to_ce(position)
     });
+    tooltip.addClass(CLASS_NAME);
     tooltip.addClass(options.className);
     Widget.attach(tooltip, document.body);
     this.currentTooltip = tooltip;
