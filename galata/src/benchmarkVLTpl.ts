@@ -12,43 +12,55 @@ const GENERAL_CONFIG = {
 };
 
 /**
- * Matrix of figures per browser
+ * Matrix of figures per test file
  */
-const CONFIG_PER_FILE = {
-  facet: {
-    column: { field: 'browser', type: 'nominal' },
-    row: { field: 'test', type: 'nominal' }
-  },
-  spec: {
-    mark: { type: 'boxplot', extent: 'min-max' },
-    encoding: {
-      x: { field: 'reference', type: 'nominal' },
-      // color: { field: 'file', type: 'nominal', legend: null },
-      y: {
-        field: 'time',
-        title: 'Time (ms)',
-        type: 'quantitative',
-        scale: { zero: false }
-      }
-    }
-  }
-};
+function configPerFile(tests: string[]): Record<string, any> {
+  return {
+    vconcat: tests.map(t => {
+      return {
+        title: t,
+        transform: [{ filter: `datum.test === '${t}'` }],
+        facet: {
+          column: { field: 'browser', type: 'nominal' }
+          // row: { field: 'test', type: 'nominal' }
+        },
+        spec: {
+          mark: { type: 'boxplot', extent: 'min-max' },
+          encoding: {
+            x: { field: 'reference', type: 'nominal' },
+            // color: { field: 'file', type: 'nominal', legend: null },
+            y: {
+              field: 'time',
+              title: 'Time (ms)',
+              type: 'quantitative',
+              scale: { zero: false }
+            }
+          }
+        }
+      };
+    })
+  };
+}
 
 /**
  * Generate the Vega-Lite specification for test
  *
  * Note: The data field is set to empty
  *
+ * @param tests Kind of test
  * @param filenames Test file name list
  * @returns The specification
  */
-function generateVegaLiteSpec(filenames?: string[]): Record<string, any> {
+function generateVegaLiteSpec(
+  tests: string[],
+  filenames?: string[]
+): Record<string, any> {
   const files = filenames ?? [];
 
   if (files.length === 0) {
     return {
       ...GENERAL_CONFIG,
-      ...CONFIG_PER_FILE
+      ...configPerFile(tests)
     };
   } else {
     return {
@@ -57,7 +69,7 @@ function generateVegaLiteSpec(filenames?: string[]): Record<string, any> {
         return {
           title: b,
           transform: [{ filter: `datum.file === '${b}'` }],
-          ...CONFIG_PER_FILE
+          ...configPerFile(tests)
         };
       })
     };

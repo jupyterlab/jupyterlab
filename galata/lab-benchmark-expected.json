@@ -3,321 +3,1281 @@
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 4048.2000000011176,
+      "test": "open",
+      "time": 5325.300000000745,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 4136.799999998882,
+      "test": "switch-from",
+      "time": 274.1000000014901,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 4216.5999999996275,
+      "test": "switch-to",
+      "time": 1244.1000000014901,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 3408,
+      "test": "close",
+      "time": 4149.39999999851,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 3526.5999999996275,
+      "test": "open",
+      "time": 4253.79999999702,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 4229.60000000149,
+      "test": "switch-from",
+      "time": 369.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 4107.89999999851,
+      "test": "switch-to",
+      "time": 1326.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 3977.2000000011176,
+      "test": "close",
+      "time": 4274.300000000745,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 3484.9000000003725,
+      "test": "open",
+      "time": 4412,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 4177.5999999996275,
+      "test": "switch-from",
+      "time": 340,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 3957.5,
+      "test": "switch-to",
+      "time": 1299.300000000745,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 2978.4000000003725,
+      "test": "close",
+      "time": 3068.699999999255,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 4190.800000000745,
+      "test": "open",
+      "time": 4375.60000000149,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 4265.199999999255,
+      "test": "switch-from",
+      "time": 340.79999999701977,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 3722.5,
+      "test": "switch-to",
+      "time": 1371.2999999970198,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 3537.10000000149,
+      "test": "close",
+      "time": 6524.79999999702,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 3899.2000000011176,
+      "test": "open",
+      "time": 5886,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 3760.60000000149,
+      "test": "switch-from",
+      "time": 337.8999999985099,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 3738.5,
+      "test": "switch-to",
+      "time": 1302.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
       "file": "large_code_notebook",
-      "time": 4730.10000000149,
+      "test": "close",
+      "time": 4013.60000000149,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
+      "file": "large_code_notebook",
       "test": "open",
-      "file": "large_md_notebook",
-      "time": 2382.5,
+      "time": 6907.699999999255,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2329.0999999996275,
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 309.19999999925494,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2559.2000000011176,
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1461.800000000745,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2230.9000000003725,
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 4803.800000000745,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
+      "file": "large_code_notebook",
       "test": "open",
-      "file": "large_md_notebook",
-      "time": 2362,
+      "time": 15051,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2300.7999999988824,
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 275.6000000014901,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2151,
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1255.0999999977648,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2354.5,
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 5401.300000000745,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
+      "file": "large_code_notebook",
       "test": "open",
-      "file": "large_md_notebook",
-      "time": 2385.4000000003725,
+      "time": 7067.099999997765,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2224.5,
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 282.80000000074506,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2342.4000000003725,
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1302.199999999255,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2295.800000000745,
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 5733,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
+      "file": "large_code_notebook",
       "test": "open",
-      "file": "large_md_notebook",
-      "time": 2228.5,
+      "time": 7362.900000002235,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2407.0999999996275,
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 260.20000000298023,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2199.5,
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1301.3999999985099,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2450.4000000003725,
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 6051.800000000745,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
+      "file": "large_code_notebook",
       "test": "open",
-      "file": "large_md_notebook",
-      "time": 2181,
+      "time": 7620.599999997765,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2440.10000000149,
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 337.8999999985099,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
-      "test": "open",
-      "file": "large_md_notebook",
-      "time": 2429.199999999255,
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1408.8999999985099,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 5356.400000002235,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
       "test": "open",
+      "time": 7396.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 336.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1465.199999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 4885.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "open",
+      "time": 6233,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 351.29999999701977,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1279.8999999985099,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 4251.39999999851,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "open",
+      "time": 7592.60000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 330.69999999925494,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1355.199999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 3559.699999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "open",
+      "time": 5734.60000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 272.1000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1323.2999999970198,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 3249.699999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "open",
+      "time": 5898.699999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 354,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1280.1000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 4885.900000002235,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "open",
+      "time": 6079.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 267.9000000022352,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1299.199999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 4813.300000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "open",
+      "time": 6140.79999999702,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 304.69999999925494,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1365.9000000022352,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 10325.599999997765,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "open",
+      "time": 7791.39999999851,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 531.1999999992549,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1514.8999999985099,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 7642.400000002235,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "open",
+      "time": 11688.300000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 330.80000000074506,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1396.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 6470.800000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "open",
+      "time": 8253.10000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-from",
+      "time": 299.4000000022352,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "switch-to",
+      "time": 1348.300000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_code_notebook",
+      "test": "close",
+      "time": 6186.60000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
       "file": "large_md_notebook",
-      "time": 2237.4000000003725,
+      "test": "open",
+      "time": 5002.39999999851,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 288.5999999977648,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1306.5999999977648,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2623.2000000029802,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3888.60000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 295.1000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1216.199999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2815.89999999851,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 4625.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 277.6000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1427.1000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 3737.2999999970198,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 4709.800000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 277.80000000074506,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1308.199999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2915.60000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3890.39999999851,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 326,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1307.8999999985099,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2559,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 4521.099999997765,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 282.69999999925494,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1435.8999999985099,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2604.10000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3978.800000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 291.69999999925494,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1443.0999999977648,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2959.39999999851,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 4306.89999999851,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 307.30000000074506,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1374.6000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2802,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 4028.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 275.1000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1386.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2854,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3988.599999997765,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 279.5999999977648,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1332.199999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2824.400000002235,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 5003,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 289.19999999925494,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1449.8999999985099,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2965.099999997765,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 4845.800000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 284.3999999985099,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1458,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2878.199999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3415.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 229.10000000149012,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1213.4000000022352,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2683.10000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3065.60000000149,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 267.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1276.199999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2364,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3755.300000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 242.90000000223517,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1249.5999999977648,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2650,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3538,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 300.1000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1229.699999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2271.2000000029802,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3413.300000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 265.6000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1274.1000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2314.89999999851,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3717.7999999970198,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 239.69999999925494,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1226.1000000014901,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2309.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3531.599999997765,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 256.9000000022352,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1121.800000000745,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2200.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "open",
+      "time": 3775.5,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-from",
+      "time": 256.80000000074506,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "switch-to",
+      "time": 1119.699999999255,
+      "reference": "expected"
+    },
+    {
+      "nSamples": 20,
+      "browser": "chromium",
+      "file": "large_md_notebook",
+      "test": "close",
+      "time": 2362.5,
       "reference": "expected"
     }
   ],

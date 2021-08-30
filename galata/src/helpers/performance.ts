@@ -14,8 +14,8 @@ export class PerformanceHelper {
   }
 
   async endTimer(
-    name: string = 'duration',
-    startMark: string = 'start'
+    startMark: string = 'start',
+    name: string = 'duration'
   ): Promise<number> {
     await this.page.evaluate(`performance.measure('${name}', '${startMark}')`);
     const time: number = await this.page.evaluate(

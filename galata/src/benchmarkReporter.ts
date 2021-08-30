@@ -177,15 +177,16 @@ class BenchmarkReporter implements Reporter {
   onTestEnd(test: TestCase, result: TestResult): void {
     test.titlePath;
     if (result.status === 'passed') {
-      const data = result.attachments.find(
-        a => a.name === benchmark.DEFAULT_NAME_ATTACHMENT
+      this._report.push(
+        ...result.attachments
+          .filter(a => a.name === benchmark.DEFAULT_NAME_ATTACHMENT)
+          .map(raw => {
+            const json = (JSON.parse(
+              raw.body?.toString() ?? '{}'
+            ) as any) as benchmark.IRecord;
+            return { ...json, reference: this._reference };
+          })
       );
-      if (data) {
-        const json = (JSON.parse(
-          data.body?.toString() ?? '{}'
-        ) as any) as benchmark.IRecord;
-        this._report.push({ ...json, reference: this._reference });
-      }
     }
   }
 
@@ -245,9 +246,10 @@ class BenchmarkReporter implements Reporter {
       // Create graph file
       const graphConfigFile = path.resolve(outputDir, `${baseName}.vl.json`);
       const allData = [...expectations.values, ...report.values];
-      const config = generateVegaLiteSpec([
-        ...new Set(allData.map(d => d.file))
-      ]);
+      const config = generateVegaLiteSpec(
+        [...new Set(allData.map(d => d.test))],
+        [...new Set(allData.map(d => d.file))]
+      );
       config.data.values = allData;
       fs.writeFileSync(graphConfigFile, JSON.stringify(config), 'utf-8');
 
