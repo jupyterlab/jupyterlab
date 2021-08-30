@@ -43,9 +43,12 @@ export class SignatureCM extends CodeMirrorIntegration {
     this.settings.changed.connect(settings => {
       this._closeCharacters = settings.composite.closeCharacters;
     });
-    this.editor_handlers.set('cursorActivity', this.onCursorActivity);
-    this.editor_handlers.set('blur', this.onBlur);
-    this.editor_handlers.set('focus', this.onCursorActivity);
+    this.editor_handlers.set(
+      'cursorActivity',
+      this.onCursorActivity.bind(this)
+    );
+    this.editor_handlers.set('blur', this.onBlur.bind(this));
+    this.editor_handlers.set('focus', this.onCursorActivity.bind(this));
     super.register();
   }
 
@@ -53,9 +56,21 @@ export class SignatureCM extends CodeMirrorIntegration {
     this._hideTooltip();
   }
 
-  onCursorActivity(args: any) {
-    // TODO
-    console.log('Cursor activity', args);
+  onCursorActivity() {
+    if (!this.isSignatureShown()) {
+      return;
+    }
+    const newRootPosition = this.virtual_editor.get_cursor_position();
+    const previousPosition = this.lab_integration.tooltip.position;
+    let newEditorPosition = this.virtual_editor.root_position_to_editor(
+      newRootPosition
+    );
+    if (
+      newEditorPosition.line === previousPosition.line &&
+      newEditorPosition.ch < previousPosition.ch
+    ) {
+      this._hideTooltip();
+    }
   }
 
   get lab_integration() {
@@ -287,12 +302,16 @@ export class SignatureCM extends CodeMirrorIntegration {
     return this._signatureCharacters;
   }
 
+  protected isSignatureShown() {
+    return this.lab_integration.tooltip.isShown(TOOLTIP_ID);
+  }
+
   afterChange(change: IEditorChange, root_position: IRootPosition) {
     // TODO: tooltip needs to be closed if the cursor moves
 
     let last_character = this.extract_last_character(change);
 
-    const isSignatureShown = this.lab_integration.tooltip.isShown(TOOLTIP_ID);
+    const isSignatureShown = this.isSignatureShown();
     let previousPosition: IEditorPosition | null = null;
 
     if (isSignatureShown) {
