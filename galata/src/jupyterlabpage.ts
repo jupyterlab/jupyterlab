@@ -625,5 +625,7 @@ export class JupyterLabPage implements IJupyterLabPage {
     await this.waitForCondition(() => {
       return this.activity.isTabActive('Launcher');
     });
+    // Improve robustness the active class is set before the status is updated
+    await this.page.waitForSelector('#jp-main-statusbar >> text=Launcher');
   };
 }
