@@ -30,6 +30,21 @@ test.describe('Notebook Markdown', () => {
     const imageName = 'do-not-highlight-not-latex.png';
     await page.notebook.enterCellEditingMode(1);
     const cell = await page.notebook.getCell(1);
-    expect(await cell.screenshot()).toMatchSnapshot(imageName);
+    // Add some timeout to stabilize codemirror bounding box
+    const cellBox = await cell.boundingBox();
+    const cellNew = await page.notebook.getCell(1);
+    const cellNewBox = await cellNew.boundingBox();
+    if (
+      cellBox.x != cellNewBox.x ||
+      cellBox.y != cellNewBox.y ||
+      cellBox.width != cellNewBox.width ||
+      cellBox.height != cellNewBox.height
+    ) {
+      // Wait a bit if the bounding box have changed
+      await page.waitForTimeout(100);
+    }
+    expect(await (await page.notebook.getCell(1)).screenshot()).toMatchSnapshot(
+      imageName
+    );
   });
 });
