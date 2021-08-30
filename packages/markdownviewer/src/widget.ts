@@ -262,7 +262,7 @@ export namespace MarkdownViewer {
     lineWidth: number | null;
 
     /**
-     * Whether to hide the YALM front matter.
+     * Whether to hide the YAML front matter.
      */
     hideFrontMatter: boolean;
 
@@ -367,7 +367,7 @@ namespace Private {
   }
 
   /**
-   * Remove YALM front matter from source.
+   * Remove YAML front matter from source.
    */
   export function removeFrontMatter(source: string): string {
     const re = /^---\n[^]*?\n(---|...)\n/;
