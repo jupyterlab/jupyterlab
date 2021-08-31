@@ -24,7 +24,7 @@ test('should test if the application is in simple mode', async ({ page }) => {
 });
 
 test('should reload the application page and load hook', async ({ page }) => {
-  await Promise.all([page.waitForNavigation(), page.reload()]);
+  await page.reload();
 
   expect(
     await page.evaluate(() => typeof window.galataip === 'object')

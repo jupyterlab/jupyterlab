@@ -408,10 +408,14 @@ export class JupyterLabPage implements IJupyterLabPage {
       waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
     }
   ): Promise<Response | null> {
-    const response = await this.page.goto(
-      `${this.baseURL}${this.appPath}/${url ?? ''}`,
-      options
-    );
+    const target = url?.startsWith('http')
+      ? url
+      : `${this.baseURL}${this.appPath}/${url ?? ''}`;
+
+    const response = await this.page.goto(target, {
+      ...(options ?? {}),
+      waitUntil: options?.waitUntil ?? 'domcontentloaded'
+    });
     await this.waitForAppStarted();
     await this.hookHelpersUp();
     await this.waitIsReady();
@@ -462,7 +466,10 @@ export class JupyterLabPage implements IJupyterLabPage {
      */
     waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
   }): Promise<Response | null> {
-    const response = await this.page.reload(options);
+    const response = await this.page.reload({
+      ...(options ?? {}),
+      waitUntil: options?.waitUntil ?? 'domcontentloaded'
+    });
     await this.waitForAppStarted();
     await this.hookHelpersUp();
     await this.waitIsReady();
@@ -625,5 +632,10 @@ export class JupyterLabPage implements IJupyterLabPage {
     await this.waitForCondition(() => {
       return this.activity.isTabActive('Launcher');
     });
+
+    // Oddly current tab is not always set to active
+    if (!(await this.isInSimpleMode())) {
+      await this.activity.activateTab('Launcher');
+    }
   };
 }
