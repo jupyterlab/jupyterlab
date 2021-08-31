@@ -411,3 +411,37 @@ function activateEditorCommands(
     } as IEditMenu.IGoToLiner<IDocumentWidget<FileEditor>>);
   }
 }
+
+
+
+
+
+// Define a new editor command that is 'Insert text' with args of the text it should insert. 
+// user can assign a keyboard shortcut to that command with the args specifying whatever text they wanted.
+
+
+commands.addCommand(CommandIDs.insertText, {
+  label: 'Insert Text',
+  execute: args => {
+    let widget = tracker.currentWidget;
+    if (!widget) {
+    return;
+     }
+     const text: string = args['text'] as string || '';
+     let editor = widget.editor as CodeMirrorEditor;
+     editor.doc.replaceSelection(text);
+   },
+    isEnabled
+});
+
+
+"pipeshortcut": {
+  "command": "codemirror:insert-text",
+      "args": {
+          "text": ">>"
+      },
+  "keys": [
+    "Accel Shift M"
+  ],
+  "selector": "body"
+}
