@@ -154,7 +154,7 @@ export class RankedMenu extends Menu implements IRankedMenu {
     }
 
     // Keep an array of the menu items that have been created.
-    const added: Menu.IItem[] = [];
+    const added: IDisposableMenuItem[] = [];
 
     // Insert a separator before the group.
     // Phosphor takes care of superfluous leading,
@@ -179,7 +179,7 @@ export class RankedMenu extends Menu implements IRankedMenu {
     }
 
     return new DisposableDelegate(() => {
-      added.forEach(i => this.removeItem(i));
+      added.forEach(i => i.dispose());
     });
   }
 
