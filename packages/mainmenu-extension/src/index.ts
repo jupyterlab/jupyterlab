@@ -852,7 +852,7 @@ namespace Private {
       ? find(s, value => value.tracker.has(widget!))
       : undefined;
 
-    if (!extender) {
+    if (!extender || !extender[label]) {
       return '';
     } else {
       const count: number = extender.tracker.size;
