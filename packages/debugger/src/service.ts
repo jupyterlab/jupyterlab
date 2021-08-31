@@ -469,15 +469,17 @@ export class DebuggerService implements IDebugger, IDisposable {
   getDebuggerState(): IDebugger.State {
     const breakpoints = this._model.breakpoints.breakpoints;
     let cells: string[] = [];
-    for (const id of breakpoints.keys()) {
-      const editorList = this._debuggerSources!.find({
-        focus: false,
-        kernel: this.session?.connection?.kernel?.name ?? '',
-        path: this._session?.connection?.path ?? '',
-        source: id
-      });
-      const tmpCells = editorList.map(e => e.model.value.text);
-      cells = cells.concat(tmpCells);
+    if (this._debuggerSources) {
+      for (const id of breakpoints.keys()) {
+        const editorList = this._debuggerSources.find({
+          focus: false,
+          kernel: this.session?.connection?.kernel?.name ?? '',
+          path: this._session?.connection?.path ?? '',
+          source: id
+        });
+        const tmpCells = editorList.map(e => e.model.value.text);
+        cells = cells.concat(tmpCells);
+      }
     }
     return { cells, breakpoints };
   }
