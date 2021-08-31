@@ -92,7 +92,7 @@ describe('Debugging support', () => {
       expect(enabled).toBe(true);
     });
 
-    it.skip('should return false for kernels that do not have support for debugging', async () => {
+    it('should return false for kernels that do not have support for debugging', async () => {
       const enabled = await service.isAvailable(ipykernel);
       expect(enabled).toBe(false);
     });
