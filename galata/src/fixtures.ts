@@ -60,8 +60,8 @@ export type GalataOptions = {
   autoGoto: boolean;
   /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
-   * the server root for debugging purpose. By default the files are kept
-   * on failure.
+   * the server root for debugging purpose. By default the files are
+   * always deleted
    *
    * - 'off' - ``tmpPath`` is deleted after each tests
    * - 'on' - ``tmpPath`` is never deleted
@@ -180,14 +180,14 @@ export const test: TestType<
   mockSettings: galata.DEFAULT_SETTINGS,
   /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
-   * the server root for debugging purpose. By default the files are kept
-   * on failure.
+   * the server root for debugging purpose. By default the files are
+   * always deleted.
    *
    * - 'off' - ``tmpPath`` is deleted after each tests
    * - 'on' - ``tmpPath`` is never deleted
    * - 'only-on-failure' - ``tmpPath`` is deleted except if a test failed or timed out.
    */
-  serverFiles: 'only-on-failure',
+  serverFiles: 'off',
   /**
    * Sessions created during the test.
    *
