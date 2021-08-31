@@ -92,7 +92,7 @@ describe('Debugging support', () => {
       expect(enabled).toBe(true);
     });
 
-    it.skip('should return false for kernels that do not have support for debugging', async () => {
+    it('should return false for kernels that do not have support for debugging', async () => {
       // The kernel spec are mocked in KERNELSPECS
       const enabled = await service.isAvailable(pyNoDebug);
       expect(enabled).toBe(false);
