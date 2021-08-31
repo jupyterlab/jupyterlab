@@ -56,7 +56,7 @@ describe('Debugging support', () => {
   let service: Debugger.Service;
   let config: IDebugger.IConfig;
   let xpython: Session.ISessionConnection;
-  let ipykernel: Session.ISessionConnection;
+  let pyNoDebug: Session.ISessionConnection;
 
   beforeAll(async () => {
     xpython = await createSession({
@@ -66,12 +66,12 @@ describe('Debugging support', () => {
     });
     await xpython.changeKernel({ name: 'xpython' });
 
-    ipykernel = await createSession({
+    pyNoDebug = await createSession({
       name: '',
       type: 'test',
       path: UUID.uuid4()
     });
-    await ipykernel.changeKernel({ name: 'python3' });
+    await pyNoDebug.changeKernel({ name: 'python3' });
 
     specsManager = new TestKernelSpecManager({ standby: 'never' });
     specsManager.intercept = specs;
@@ -81,7 +81,7 @@ describe('Debugging support', () => {
   });
 
   afterAll(async () => {
-    await Promise.all([xpython.shutdown(), ipykernel.shutdown()]);
+    await Promise.all([xpython.shutdown(), pyNoDebug.shutdown()]);
     service.dispose();
     specsManager.dispose();
   });
@@ -93,7 +93,8 @@ describe('Debugging support', () => {
     });
 
     it.skip('should return false for kernels that do not have support for debugging', async () => {
-      const enabled = await service.isAvailable(ipykernel);
+      // The kernel spec are mocked in KERNELSPECS
+      const enabled = await service.isAvailable(pyNoDebug);
       expect(enabled).toBe(false);
     });
   });
