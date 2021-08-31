@@ -25,6 +25,13 @@ export interface IRankedMenu extends IDisposable {
   /**
    * Add a group of menu items specific to a particular
    * plugin.
+   *
+   * The rank can be set for all items in the group using the
+   * function argument or per item.
+   *
+   * @param items - the list of menu items to add.
+   * @param rank - the default rank in the menu in which to insert the group.
+   * @returns Disposable of the group
    */
   addGroup(items: Menu.IItemOptions[], rank?: number): IDisposable;
 
@@ -125,8 +132,8 @@ export class RankedMenu extends Menu implements IRankedMenu {
    * function argument or per item.
    *
    * @param items - the list of menu items to add.
-   *
    * @param rank - the default rank in the menu in which to insert the group.
+   * @returns Disposable of the group
    */
   addGroup(items: IRankedMenu.IItemOptions[], rank?: number): IDisposable {
     if (items.length === 0) {

@@ -174,7 +174,7 @@ function activate(
   if (mainMenu) {
     // Add "Terminal Theme" menu below "JupyterLab Themes" menu.
     const themeMenu = new Menu({ commands });
-    themeMenu.title.label = trans.__('Terminal Theme');
+    themeMenu.title.label = trans._p('menu', 'Terminal Theme');
     themeMenu.addItem({
       command: CommandIDs.setTheme,
       args: {
@@ -207,7 +207,10 @@ function activate(
     );
 
     // Add terminal creation to the file menu.
-    mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
+    mainMenu.fileMenu.newMenu.addItem({
+      command: CommandIDs.createNew,
+      rank: 20
+    });
 
     // Add terminal close-and-shutdown to the file menu.
     mainMenu.fileMenu.closeAndCleaners.add({
