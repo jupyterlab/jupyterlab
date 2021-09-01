@@ -2,10 +2,10 @@
 // Copyright (c) Bloomberg Finance LP.
 // Distributed under the terms of the Modified BSD License.
 
-import { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
-import { Cell, MarkdownCell } from '@jupyterlab/cells';
-import * as nbformat from '@jupyterlab/nbformat';
-import { Notebook, NotebookActions, NotebookPanel } from '@jupyterlab/notebook';
+import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
+import type { Cell, MarkdownCell } from '@jupyterlab/cells';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { toArray } from '@lumino/algorithm';
 import {
   IGalataInpage,
@@ -235,7 +235,7 @@ export class GalataInpage implements IGalataInpage {
     const nbPanel = this._app.shell.currentWidget as NotebookPanel;
     const nb = nbPanel.content;
 
-    NotebookActions.deleteCells(nb);
+    this._app.commands.execute('notebook:delete-cell');
 
     nb.update();
   }
@@ -251,7 +251,7 @@ export class GalataInpage implements IGalataInpage {
     const nb = nbPanel.content;
 
     if (nb !== null) {
-      NotebookActions.insertBelow(nb);
+      this._app.commands.execute('notebook:insert-cell-below');
 
       const numCells = nb.widgets.length;
 
@@ -351,9 +351,7 @@ export class GalataInpage implements IGalataInpage {
    * Run the active notebook
    */
   async runActiveNotebook(): Promise<void> {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
-
-    await NotebookActions.runAll(nbPanel.content);
+    await this._app.commands.execute('notebook:run-all-cells');
   }
 
   /**
@@ -538,14 +536,14 @@ export class GalataInpage implements IGalataInpage {
       return;
     }
 
-    NotebookActions.deselectAll(notebook);
+    this._app.commands.execute('notebook:deselect-all');
 
     for (let i = 0; i < numCells; ++i) {
       const cell = notebook.widgets[i];
       notebook.activeCellIndex = i;
       notebook.select(cell);
 
-      await NotebookActions.run(notebook, nbPanel.context.sessionContext);
+      await this._app.commands.execute('notebook:run-cell');
 
       const output = await this.waitForCellRun(cell);
 
