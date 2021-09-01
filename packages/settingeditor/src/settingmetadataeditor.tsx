@@ -1,73 +1,88 @@
-import { IFormComponentRegistry, FormComponentRegistry, FormEditor } from '@jupyterlab/formeditor';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import {
+  FormComponentRegistry,
+  FormEditor,
+  IFormComponentRegistry
+} from '@jupyterlab/formeditor';
+import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { PartialJSONObject } from '@lumino/coreutils';
-import { showDialog, ReactWidget } from '@jupyterlab/apputils';
+import { ReactWidget, showDialog } from '@jupyterlab/apputils';
 import React from 'react';
 import { Button } from '@jupyterlab/ui-components';
 
-interface IProps {
+interface IWidgetProps {
   plugin: ISettingRegistry.IPlugin;
   registry: ISettingRegistry;
+  componentRegistry: IFormComponentRegistry;
+}
+
+interface IProps {
+  plugin: ISettingRegistry.IPlugin;
+  settings: Settings;
   componentRegistry: IFormComponentRegistry;
 }
 
 export class SettingsFormEditorWidget extends ReactWidget {
   plugin: ISettingRegistry.IPlugin;
-  registry: ISettingRegistry;
   componentRegistry: IFormComponentRegistry;
+  settings?: Settings;
 
-  constructor(props: IProps) {
+  constructor(props: IWidgetProps) {
     super();
     this.plugin = props.plugin;
-    this.registry = props.registry;
     this.componentRegistry = props.componentRegistry;
+    void props.registry.load(this.plugin.id).then((value: Settings) => {
+      this.settings = value;
+      this.update();
+    });
   }
 
   render() {
-    return (<SettingsMetadataEditor
-      componentRegistry={this.componentRegistry}
-      plugin={this.plugin}
-      registry={this.registry}
-    />);
+    if (this.settings) {
+      return (
+        <SettingsMetadataEditor
+          componentRegistry={this.componentRegistry}
+          plugin={this.plugin}
+          settings={this.settings}
+        />
+      );
+    } else {
+      return <div />;
+    }
   }
 }
 
 export const SettingsMetadataEditor = ({
   plugin,
-  registry,
+  settings,
   componentRegistry
 }: IProps) => {
   const [data, setData] = React.useState({} as FormEditor.IData);
   const [schema, setSchema] = React.useState({} as FormEditor.ISchema);
-  const [settings, setSettings] = React.useState(Object);
   const [title, setTitle] = React.useState('');
   const [modifiedFields, setModifiedFields] = React.useState([] as string[]);
   let defaultMetadata: FormEditor.IData = {};
-  
-  React.useEffect(() => {
-    registry.load(plugin.id).then(
-      (newSettings: ISettingRegistry.ISettings) => {
-        setSettings(newSettings)
-      }
-    );
-  }, []);
-  
+
   const reset = React.useCallback(() => {
-    for (const field of settings?.modifiedFields) {
-      void settings.remove(field);
+    settings.resetAll();
+    try {
+      setData(JSON.parse(settings.raw));
+    } catch (error) {
+      console.log(error);
     }
   }, [settings]);
 
   React.useEffect(() => {
     try {
       setData(JSON.parse(settings.raw));
-    } catch {}
+    } catch (error) {
+      console.log(error);
+    }
     if (!settings.schema) {
       return;
     }
     const properties: any = {};
     const current = JSON.parse(JSON.stringify(data));
-    setTitle(settings.schema.title);
+    setTitle(settings.schema.title ?? '');
     for (const prop in settings.schema.properties) {
       let ref = settings.schema.properties[prop]['$ref'] as string;
       if (ref) {
@@ -120,8 +135,7 @@ export const SettingsMetadataEditor = ({
             };
           }
           current[subProp] =
-            data[prop]?.[subProp] ??
-            (options.default as any)?.[subProp];
+            data[prop]?.[subProp] ?? (options.default as any)?.[subProp];
           defaultMetadata[subProp] = (options.default as any)?.[subProp];
         }
       } else if (options.enum || (options.additionalProperties as any)?.enum) {
@@ -164,8 +178,7 @@ export const SettingsMetadataEditor = ({
             }
           };
           current[subProp] =
-            data[prop]?.[subProp] ??
-            (options.default as any)?.[subProp];
+            data[prop]?.[subProp] ?? (options.default as any)?.[subProp];
           defaultMetadata[subProp] = (options.default as any)?.[subProp];
         }
       } else {
@@ -183,23 +196,32 @@ export const SettingsMetadataEditor = ({
     }
     setSchema(getSchemaPropertiesByCategory(properties));
     setData(current);
-    setModifiedFields(settings?.modifiedFields)
+    setModifiedFields(settings?.modifiedFields);
   }, [settings]);
 
-  const getSchemaPropertiesByCategory = (properties: any): FormEditor.ISchema => {
+  const getSchemaPropertiesByCategory = (
+    properties: any
+  ): FormEditor.ISchema => {
     // Find categories of all schema properties
-    const schemaPropertiesByCategory: { [cat: string]: { [fieldName: string]: FormComponentRegistry.IRendererProps } } = { _noCategory: {} };
+    const schemaPropertiesByCategory: {
+      [cat: string]: {
+        [fieldName: string]: FormComponentRegistry.IRendererProps;
+      };
+    } = { _noCategory: {} };
     for (const schemaProperty in properties) {
       const category =
         properties[schemaProperty].uihints &&
         properties[schemaProperty].uihints.category;
       if (!category) {
-        schemaPropertiesByCategory['_noCategory'][schemaProperty] = properties[schemaProperty];
+        schemaPropertiesByCategory['_noCategory'][schemaProperty] =
+          properties[schemaProperty];
       } else if (schemaPropertiesByCategory[category]) {
-        schemaPropertiesByCategory[category][schemaProperty] = properties[schemaProperty];
+        schemaPropertiesByCategory[category][schemaProperty] =
+          properties[schemaProperty];
       } else {
         schemaPropertiesByCategory[category] = {};
-        schemaPropertiesByCategory[category][schemaProperty] = properties[schemaProperty];
+        schemaPropertiesByCategory[category][schemaProperty] =
+          properties[schemaProperty];
       }
     }
     return schemaPropertiesByCategory;
@@ -249,8 +271,8 @@ export const SettingsMetadataEditor = ({
         (options.type === 'number' ||
           (typeof options.type === 'object' &&
             options.type.includes('number'))) &&
-            values[prop] !== null &&
-            values[prop] !== undefined
+        values[prop] !== null &&
+        values[prop] !== undefined
       ) {
         formattedSettings[prop] = parseInt(values[prop]);
       } else {
@@ -283,9 +305,6 @@ export const SettingsMetadataEditor = ({
   };
 
   const saveMetadata = (values: FormEditor.IData) => {
-    if (!registry) {
-      return undefined;
-    }
     if (hasInvalidFields(values)) {
       return;
     }
@@ -293,7 +312,7 @@ export const SettingsMetadataEditor = ({
     void settings
       .save(getFormattedSettings(values))
       .then(() => {
-        setModifiedFields(settings?.modifiedFields)
+        setModifiedFields(settings?.modifiedFields);
         for (const fieldName of modifiedFields) {
           const newSchema = JSON.parse(JSON.stringify(schema));
           for (const cat in newSchema) {
@@ -304,26 +323,28 @@ export const SettingsMetadataEditor = ({
           setSchema(newSchema);
         }
       })
-      .catch((reason: { stack: any; }) => {
+      .catch((reason: { stack: any }) => {
         void showDialog({
           title: 'Validation error',
           body: reason.stack
         });
       });
   };
-  
+
   const handleChange = (fieldName: string, value: any) => {
     const newData = JSON.parse(JSON.stringify(data));
     newData[fieldName] = value;
     setData(newData);
     saveMetadata(newData);
-  }
+  };
 
   return (
     <div className="jp-SettingsEditor">
       <div className="jp-SettingsHeader">
         <h3>{title}</h3>
-        { modifiedFields.length > 0 ? <Button onClick={reset}> Restore to Defaults </Button> : undefined}
+        {modifiedFields.length > 0 ? (
+          <Button onClick={reset}> Restore to Defaults </Button>
+        ) : undefined}
       </div>
       <FormEditor
         schema={schema}
@@ -332,5 +353,5 @@ export const SettingsMetadataEditor = ({
         componentRegistry={componentRegistry}
       />
     </div>
-  )
-}
+  );
+};

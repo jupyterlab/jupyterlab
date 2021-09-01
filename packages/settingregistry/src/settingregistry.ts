@@ -723,14 +723,10 @@ export class Settings implements ISettingRegistry.ISettings {
     for (const key in this.schema.properties) {
       const user = this.get(key).user;
       const defaultValue = this.default(key);
-      if (user !== undefined && user !== defaultValue) {
-        if (typeof user === 'object' && typeof defaultValue === 'object') {
-          for (const subKey in user) {
-            if ((defaultValue as any)[subKey] !== (user as any)[subKey]) {
-              modifiedFields.push(key);
-            }
-          }
-        }
+      if (
+        user !== undefined &&
+        JSON.stringify(user) !== JSON.stringify(defaultValue)
+      ) {
         modifiedFields.push(key);
       }
     }
@@ -842,6 +838,12 @@ export class Settings implements ISettingRegistry.ISettings {
    */
   set(key: string, value: JSONValue): Promise<void> {
     return this.registry.set(this.plugin.id, key, value);
+  }
+
+  resetAll() {
+    for (const key in this.schema.properties) {
+      void this.remove(key);
+    }
   }
 
   /**

@@ -132,7 +132,8 @@ export const DropDown: React.FC<FormComponentRegistry.IRendererProps> = ({
                   handleInputChange(event.target.value);
                 }}
                 placeholder={
-                  placeholder || `Create or select ${label.toLocaleLowerCase()}`
+                  placeholder ||
+                  `Create or select ${label?.toLocaleLowerCase()}`
                 }
                 variant="outlined"
               />
