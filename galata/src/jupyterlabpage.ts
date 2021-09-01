@@ -628,6 +628,10 @@ export class JupyterLabPage implements IJupyterLabPage {
           // Wait for plugins to be loaded
           await window.jupyterlab.started;
           return true;
+        } else if (typeof window.jupyterapp === 'object') {
+          // Wait for plugins to be loaded
+          await window.jupyterapp.started;
+          return true;
         }
         return false;
       })

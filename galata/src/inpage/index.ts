@@ -31,7 +31,7 @@ function xpContainsClass(className: string): string {
  */
 export class GalataInpage implements IGalataInpage {
   constructor() {
-    this._app = window.jupyterlab;
+    this._app = window.jupyterlab ?? window.jupyterapp;
   }
 
   /**
