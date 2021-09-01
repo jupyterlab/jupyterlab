@@ -38,7 +38,12 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
       commands,
       translator
     });
-    this._table = new VariablesBodyGrid({ model, commands, themeManager });
+    this._table = new VariablesBodyGrid({
+      model,
+      commands,
+      themeManager,
+      translator
+    });
     this._table.hide();
 
     this._header.toolbar.addItem(
