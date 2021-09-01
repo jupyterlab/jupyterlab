@@ -137,7 +137,7 @@ PWDEBUG=1 jlpm playwright test
 
 ## Fixtures
 
-Here are the new test fixture introduced by Galata on top of [Playwright fixtures](https://playwright.dev/docs/api/class-fixtures.
+Here are the new test fixture introduced by Galata on top of [Playwright fixtures](https://playwright.dev/docs/api/class-fixtures).
 
 ### appPath
 
