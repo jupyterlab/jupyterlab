@@ -14,12 +14,11 @@ import { FeatureSettings, IFeatureLabIntegration } from '../feature';
 import { IEditorPosition, IRootPosition } from '../positioning';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { escapeMarkdown } from '../utils';
-import { CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
+import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 import { IEditorChange } from '../virtual/editor';
 
 const TOOLTIP_ID = 'signature';
 const CLASS_NAME = 'lsp-signature-help';
-
 
 function getMarkdown(item: string | lsProtocol.MarkupContent) {
   if (typeof item === 'string') {
@@ -42,8 +41,8 @@ export class SignatureCM extends CodeMirrorIntegration {
   }
 
   get _closeCharacters(): string[] {
-    if(!this.settings) {
-        return []
+    if (!this.settings) {
+      return [];
     }
     return this.settings.composite.closeCharacters;
   }
@@ -59,7 +58,10 @@ export class SignatureCM extends CodeMirrorIntegration {
   }
 
   onBlur(virtualEditor: CodeMirrorVirtualEditor, event: FocusEvent) {
-    if (this.isSignatureShown() && (event.target as Element).closest('.' + CLASS_NAME) !== null) {
+    if (
+      this.isSignatureShown() &&
+      (event.target as Element).closest('.' + CLASS_NAME) !== null
+    ) {
       this._hideTooltip();
     }
   }
@@ -82,8 +84,9 @@ export class SignatureCM extends CodeMirrorIntegration {
     } else {
       // otherwise, update the signature as the active parameter could have changed,
       // or the server may want us to close the tooltip
-      this.requestSignature(newRootPosition, previousPosition)
-          .catch(this.console.warn);
+      this.requestSignature(newRootPosition, previousPosition).catch(
+        this.console.warn
+      );
     }
   }
 
@@ -341,26 +344,32 @@ export class SignatureCM extends CodeMirrorIntegration {
       return;
     }
 
-    this.requestSignature(root_position, previousPosition)
-      .catch(this.console.warn);
+    this.requestSignature(root_position, previousPosition).catch(
+      this.console.warn
+    );
   }
 
-  private requestSignature(root_position: IRootPosition, previousPosition: IEditorPosition | null) {
+  private requestSignature(
+    root_position: IRootPosition,
+    previousPosition: IEditorPosition | null
+  ) {
     this.signature_character = root_position;
 
     let virtual_position = this.virtual_editor.root_position_to_virtual_position(
-        root_position
+      root_position
     );
 
     this.console.log('Signature will be requested for', virtual_position);
 
     return this.connection
-        .getSignatureHelp(
-            virtual_position,
-            this.virtual_document.document_info,
-            false
-        )
-        .then(help => this.handleSignature(help, root_position, previousPosition));
+      .getSignatureHelp(
+        virtual_position,
+        this.virtual_document.document_info,
+        false
+      )
+      .then(help =>
+        this.handleSignature(help, root_position, previousPosition)
+      );
   }
 }
 
