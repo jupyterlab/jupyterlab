@@ -29,9 +29,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.1.x/CHANGELOG.md'
 ### Documentation improvements
 
 - Backport #10893 on branch 3.1.x (Add internationalization documentation) [#10974](https://github.com/jupyterlab/jupyterlab/pull/10974) ([@fcollonval](https://github.com/fcollonval))
-
-### Other merged PRs
-
 - Fix formatting of a link in the changelog [#10945](https://github.com/jupyterlab/jupyterlab/pull/10945) ([@jtpio](https://github.com/jtpio))
 
 ### Contributors to this release
