@@ -47,7 +47,7 @@ test.describe('Notebook Tests', () => {
     // Wait for kernel to be idle and the debug switch to appear
     await Promise.all([
       page.waitForSelector(`#jp-main-statusbar >> text=Idle`),
-      page.waitForSelector('#jp-debugger.jp-Toolbar-item')
+      page.waitForSelector('.jp-DebuggerBugButton')
     ]);
 
     expect(await (await page.$('[role="main"]')).screenshot()).toMatchSnapshot(
