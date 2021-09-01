@@ -19,10 +19,10 @@ export class KernelHelper {
    * @returns Running status
    */
   async isAnyRunning(): Promise<boolean> {
-    return await this.page.evaluate(
-      () =>
-        window.jupyterlab.serviceManager.sessions.running().next() !== undefined
-    );
+    return await this.page.evaluate(() => {
+      const app = window.jupyterlab ?? window.jupyterapp;
+      return app.serviceManager.sessions.running().next() !== undefined;
+    });
   }
 
   /**
@@ -30,7 +30,8 @@ export class KernelHelper {
    */
   async shutdownAll(): Promise<void> {
     await this.page.evaluate(async () => {
-      await window.jupyterlab.serviceManager.sessions.shutdownAll();
+      const app = window.jupyterlab ?? window.jupyterapp;
+      await app.serviceManager.sessions.shutdownAll();
     });
 
     await Utils.waitForCondition(async () => {

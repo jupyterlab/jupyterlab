@@ -22,7 +22,7 @@ export class ActivityHelper {
    */
   async closeAll(): Promise<void> {
     await this.page.evaluate(async (launcherSelector: string) => {
-      const app = window.jupyterlab;
+      const app = window.jupyterlab ?? window.jupyterapp;
 
       await app.commands.execute('application:close-all');
       await window.galataip.waitForXPath(launcherSelector);
