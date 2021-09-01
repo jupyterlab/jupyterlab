@@ -14,9 +14,12 @@ import { FeatureSettings, IFeatureLabIntegration } from '../feature';
 import { IEditorPosition, IRootPosition } from '../positioning';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { escapeMarkdown } from '../utils';
+import { CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
 import { IEditorChange } from '../virtual/editor';
 
 const TOOLTIP_ID = 'signature';
+const CLASS_NAME = 'lsp-signature-help';
+
 
 function getMarkdown(item: string | lsProtocol.MarkupContent) {
   if (typeof item === 'string') {
@@ -33,16 +36,19 @@ function getMarkdown(item: string | lsProtocol.MarkupContent) {
 export class SignatureCM extends CodeMirrorIntegration {
   protected signature_character: IRootPosition;
   protected _signatureCharacters: string[];
-  protected _closeCharacters: string[] = [];
 
   get settings() {
     return super.settings as FeatureSettings<LSPSignatureSettings>;
   }
 
+  get _closeCharacters(): string[] {
+    if(!this.settings) {
+        return []
+    }
+    return this.settings.composite.closeCharacters;
+  }
+
   register(): void {
-    this.settings.changed.connect(settings => {
-      this._closeCharacters = settings.composite.closeCharacters;
-    });
     this.editor_handlers.set(
       'cursorActivity',
       this.onCursorActivity.bind(this)
@@ -52,8 +58,10 @@ export class SignatureCM extends CodeMirrorIntegration {
     super.register();
   }
 
-  onBlur() {
-    this._hideTooltip();
+  onBlur(virtualEditor: CodeMirrorVirtualEditor, event: FocusEvent) {
+    if (this.isSignatureShown() && (event.target as Element).closest('.' + CLASS_NAME) !== null) {
+      this._hideTooltip();
+    }
   }
 
   onCursorActivity() {
@@ -65,11 +73,17 @@ export class SignatureCM extends CodeMirrorIntegration {
     let newEditorPosition = this.virtual_editor.root_position_to_editor(
       newRootPosition
     );
+    // hide tooltip if exceeded position
     if (
       newEditorPosition.line === previousPosition.line &&
       newEditorPosition.ch < previousPosition.ch
     ) {
       this._hideTooltip();
+    } else {
+      // otherwise, update the signature as the active parameter could have changed,
+      // or the server may want us to close the tooltip
+      this.requestSignature(newRootPosition, previousPosition)
+          .catch(this.console.warn);
     }
   }
 
@@ -286,7 +300,7 @@ export class SignatureCM extends CodeMirrorIntegration {
       id: TOOLTIP_ID,
       ce_editor: this.virtual_editor.find_ce_editor(cm_editor),
       adapter: this.adapter,
-      className: 'lsp-signature-help',
+      className: CLASS_NAME,
       tooltip: {
         privilege: 'forceAbove',
         alignment: 'start',
@@ -307,8 +321,6 @@ export class SignatureCM extends CodeMirrorIntegration {
   }
 
   afterChange(change: IEditorChange, root_position: IRootPosition) {
-    // TODO: tooltip needs to be closed if the cursor moves
-
     let last_character = this.extract_last_character(change);
 
     const isSignatureShown = this.isSignatureShown();
@@ -329,22 +341,26 @@ export class SignatureCM extends CodeMirrorIntegration {
       return;
     }
 
+    this.requestSignature(root_position, previousPosition)
+      .catch(this.console.warn);
+  }
+
+  private requestSignature(root_position: IRootPosition, previousPosition: IEditorPosition | null) {
     this.signature_character = root_position;
 
     let virtual_position = this.virtual_editor.root_position_to_virtual_position(
-      root_position
+        root_position
     );
 
     this.console.log('Signature will be requested for', virtual_position);
 
-    this.connection
-      .getSignatureHelp(
-        virtual_position,
-        this.virtual_document.document_info,
-        false
-      )
-      .then(help => this.handleSignature(help, root_position, previousPosition))
-      .catch(this.console.warn);
+    return this.connection
+        .getSignatureHelp(
+            virtual_position,
+            this.virtual_document.document_info,
+            false
+        )
+        .then(help => this.handleSignature(help, root_position, previousPosition));
   }
 }
 
