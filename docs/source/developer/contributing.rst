@@ -530,8 +530,8 @@ Visual Regression and UI Tests
 ------------------------------
 
 As part of JupyterLab CI workflows, UI tests are run with visual regression checks.
-`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__is used for UI 
-testing. Galata provides `Playwright <https://playwright.dev>`_ helpers to control and 
+`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__ is used for UI 
+testing. Galata provides `Playwright <https://playwright.dev>`__ helpers to control and 
 inspect JupyterLab UI programmatically.
 
 UI tests are run for each commit into JupyterLab project in PRs or direct commits. Code 
@@ -566,7 +566,7 @@ Main reasons for UI test failures are:
    copy the capture for the failed test suffixed with *actual* and paste it into reference 
    screenshots directory in JupyterLab source code, replacing the failing test's reference
    capture. Reference captures are located in directories named as the test files with the
-   suffix ``-snapshots` in JupyterLab source code.
+   suffix ``-snapshots`` in JupyterLab source code.
 
 For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/master/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.
