@@ -20,6 +20,6 @@ module.exports = {
     viewport: { width: 1024, height: 768 },
 
     // Artifacts
-    video: 'on'
+    video: 'retain-on-failure'
   }
 } as PlaywrightTestConfig;
