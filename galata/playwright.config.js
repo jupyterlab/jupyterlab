@@ -16,7 +16,7 @@ module.exports = {
     }
   ],
   // Switch to 'always' to keep raw assets for all tests
-  preserveOutput: 'failures-only',
+  // preserveOutput: 'failures-only', // FIXME Breaks HTML report
   // Try one retry as some tests are flaky
   retries: 2
 };
