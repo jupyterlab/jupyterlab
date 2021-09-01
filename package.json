@@ -110,7 +110,7 @@
     "eslint-plugin-prettier": "~3.1.4",
     "eslint-plugin-react": "~7.21.5",
     "husky": "^4.2.5",
-    "lerna": "^3.19.0",
+    "lerna": "^4.0.0",
     "lint-staged": "^10.2.13",
     "prettier": "~2.1.1",
     "shell-quote": "^1.7.2",
