@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Page } from '@playwright/test';
+import { UUID } from '@lumino/coreutils';
 
 /**
  * Performance helper
@@ -37,5 +38,20 @@ export class PerformanceHelper {
       `performance.getEntriesByName('${name}')[0].duration`
     );
     return time;
+  }
+
+  /**
+   * Measure the time to execute a function using web browser performance API.
+   *
+   * @param fn Function to measure
+   * @returns The duration to execute the function
+   */
+  async measure(fn: () => Promise<void>): Promise<number> {
+    const mark = UUID.uuid4();
+    await this.startTimer(mark);
+
+    await fn();
+
+    return this.endTimer(mark);
   }
 }

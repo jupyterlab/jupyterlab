@@ -102,30 +102,29 @@ test.describe.serial('Benchmark', () => {
         const attachmentCommon = {
           nSamples: benchmark.nSamples,
           browser: browserName,
-          file: path.basename(file, '.ipynb')
+          file: path.basename(file, '.ipynb'),
+          project: testInfo.project.name
         };
 
-        await page.performance.startTimer('open-notebook');
+        const openTime = await page.performance.measure(async () => {
+          // Open the notebook and wait for the spinner
+          await Promise.all([
+            page.waitForSelector('[role="main"] >> .jp-SpinnerContent'),
+            page.notebook.openByPath(`${tmpPath}/${file}`)
+          ]);
 
-        // Open the notebook and wait for the spinner
-        await Promise.all([
-          page.waitForSelector('[role="main"] >> .jp-SpinnerContent'),
-          page.notebook.openByPath(`${tmpPath}/${file}`)
-        ]);
+          // Wait for spinner to be hidden
+          await page.waitForSelector('[role="main"] >> .jp-SpinnerContent', {
+            state: 'hidden'
+          });
 
-        // Wait for spinner to be hidden
-        await page.waitForSelector('[role="main"] >> .jp-SpinnerContent', {
-          state: 'hidden'
+          // if (file === mdNotebook) {
+          //   // Wait for Latex rendering => consider as acceptable to require additional time
+          //   await page.waitForSelector('[role="main"] >> text=𝜌');
+          // }
+          // // Wait for kernel readiness => consider this is acceptable to take additional time
+          // await page.waitForSelector(`#jp-main-statusbar >> text=Idle`);
         });
-
-        // if (file === mdNotebook) {
-        //   // Wait for Latex rendering => consider as acceptable to require additional time
-        //   await page.waitForSelector('[role="main"] >> text=𝜌');
-        // }
-        // // Wait for kernel readiness => consider this is acceptable to take additional time
-        // await page.waitForSelector(`#jp-main-statusbar >> text=Idle`);
-
-        const openTime = await page.performance.endTimer('open-notebook');
 
         // Check the notebook is correctly opened
         let panel = await page.activity.getPanel();
@@ -146,14 +145,12 @@ test.describe.serial('Benchmark', () => {
         // Open text file
         await page.filebrowser.revealFileInBrowser(`${tmpPath}/${textFile}`);
 
-        await page.performance.startTimer('switch-from-notebook');
-        await page.filebrowser.open(textFile);
-        await page.waitForCondition(
-          async () => await page.activity.isTabActive(path.basename(textFile))
-        );
-        const fromTime = await page.performance.endTimer(
-          'switch-from-notebook'
-        );
+        const fromTime = await page.performance.measure(async () => {
+          await page.filebrowser.open(textFile);
+          await page.waitForCondition(
+            async () => await page.activity.isTabActive(path.basename(textFile))
+          );
+        });
 
         let editorPanel = await page.activity.getPanel();
         expect(await editorPanel.screenshot()).toMatchSnapshot(
@@ -169,9 +166,9 @@ test.describe.serial('Benchmark', () => {
         );
 
         // Switch back
-        await page.performance.startTimer('switch-to-notebook');
-        await page.notebook.openByPath(`${tmpPath}/${file}`);
-        const toTime = await page.performance.endTimer('switch-to-notebook');
+        const toTime = await page.performance.measure(async () => {
+          await page.notebook.openByPath(`${tmpPath}/${file}`);
+        });
 
         // Check the notebook is correctly opened
         panel = await page.activity.getPanel();
@@ -190,10 +187,10 @@ test.describe.serial('Benchmark', () => {
         );
 
         // Close notebook
-        await page.performance.startTimer('close-notebook');
-        // Revert changes so we don't measure saving
-        await page.notebook.close(true);
-        const closeTime = await page.performance.endTimer('close-notebook');
+        const closeTime = await page.performance.measure(async () => {
+          // Revert changes so we don't measure saving
+          await page.notebook.close(true);
+        });
 
         editorPanel = await page.activity.getPanel();
         expect(await editorPanel.screenshot()).toMatchSnapshot(

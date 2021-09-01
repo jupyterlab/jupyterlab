@@ -15,9 +15,13 @@ const GENERAL_CONFIG = {
  * Matrix of figures per test file
  *
  * @param tests Kind of test
+ * @param comparison Field name to compare
  * @returns The specification
  */
-function configPerFile(tests: string[]): Record<string, any> {
+function configPerFile(
+  tests: string[],
+  comparison: string
+): Record<string, any> {
   return {
     vconcat: tests.map(t => {
       return {
@@ -30,9 +34,9 @@ function configPerFile(tests: string[]): Record<string, any> {
         spec: {
           mark: { type: 'boxplot', extent: 'min-max' },
           encoding: {
-            x: { field: 'reference', type: 'nominal' },
+            y: { field: comparison, type: 'nominal' },
             // color: { field: 'file', type: 'nominal', legend: null },
-            y: {
+            x: {
               field: 'time',
               title: 'Time (ms)',
               type: 'quantitative',
@@ -51,11 +55,13 @@ function configPerFile(tests: string[]): Record<string, any> {
  * Note: The data field is set to empty
  *
  * @param tests Kind of test
+ * @param comparison Field name to compare
  * @param filenames Test file name list
  * @returns The specification
  */
 function generateVegaLiteSpec(
   tests: string[],
+  comparison: string,
   filenames?: string[]
 ): Record<string, any> {
   const files = filenames ?? [];
@@ -63,7 +69,7 @@ function generateVegaLiteSpec(
   if (files.length === 0) {
     return {
       ...GENERAL_CONFIG,
-      ...configPerFile(tests)
+      ...configPerFile(tests, comparison)
     };
   } else {
     return {
@@ -72,7 +78,7 @@ function generateVegaLiteSpec(
         return {
           title: b,
           transform: [{ filter: `datum.file === '${b}'` }],
-          ...configPerFile(tests)
+          ...configPerFile(tests, comparison)
         };
       })
     };

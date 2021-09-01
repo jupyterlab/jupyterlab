@@ -78,10 +78,29 @@ export namespace benchmark {
    * Benchmark test record
    */
   export interface IRecord extends Record<string, any> {
+    /**
+     * Test kind
+     */
     test: string;
+    /**
+     * Browser name
+     */
     browser: string;
+    /**
+     * Number of samples
+     */
     nSamples: number;
+    /**
+     * Tested file name
+     */
     file: string;
+    /**
+     * Playwright project name
+     */
+    project: string;
+    /**
+     * Test duration in milliseconds
+     */
     time: number;
   }
 
@@ -114,11 +133,20 @@ interface IReportRecord extends benchmark.IRecord {
  * Test suite metadata
  */
 interface IMetadata {
+  /**
+   * Web browsers version
+   */
   browsers: { [name: string]: string };
+  /**
+   * Benchmark information
+   */
   benchmark: {
     BENCHMARK_OUTPUTFILE: string;
     BENCHMARK_REFERENCE: string;
   };
+  /**
+   * System information
+   */
   systemInformation: {
     cpu: Record<string, any>;
     mem: Record<string, any>;
@@ -130,7 +158,13 @@ interface IMetadata {
  * Report interface
  */
 interface IReport {
+  /**
+   * Test records
+   */
   values: IReportRecord[];
+  /**
+   * Test metadata
+   */
   metadata: IMetadata;
 }
 
@@ -139,20 +173,22 @@ interface IReport {
  */
 class BenchmarkReporter implements Reporter {
   /**
-   *
    * @param options
    *   outputFile: Name of the output file (default to env BENCHMARK_OUTPUTFILE)
-   *   reference: Name to be saved as reference for the execution time (default to env BENCHMARK_REFERENCE)
+   *   comparison: Logic of test comparisons: 'snapshot' or 'project'
+   *    - 'snapshot': (default) This will compare the 'actual' result with the 'expected' one
+   *    - 'project': This will compare the different project
    */
-  constructor(options: { outputFile?: string; reference?: string } = {}) {
+  constructor(
+    options: { outputFile?: string; comparison?: 'snapshot' | 'project' } = {}
+  ) {
     this._outputFile =
       options.outputFile ??
       process.env['BENCHMARK_OUTPUTFILE'] ??
       benchmark.DEFAULT_OUTPUT;
+    this._comparison = options.comparison ?? 'snapshot';
     this._reference =
-      options.reference ??
-      process.env['BENCHMARK_REFERENCE'] ??
-      benchmark.DEFAULT_REFERENCE;
+      process.env['BENCHMARK_REFERENCE'] ?? benchmark.DEFAULT_REFERENCE;
   }
 
   /**
@@ -162,6 +198,7 @@ class BenchmarkReporter implements Reporter {
    */
   onBegin(config: FullConfig, suite: Suite): void {
     this.config = config;
+    this.suite = suite;
     this._report = new Array<IReportRecord>();
     // Clean up output folder if it exists
     if (this._outputFile) {
@@ -181,7 +218,6 @@ class BenchmarkReporter implements Reporter {
    * @param result Result of the test run.
    */
   onTestEnd(test: TestCase, result: TestResult): void {
-    test.titlePath;
     if (result.status === 'passed') {
       this._report.push(
         ...result.attachments
@@ -222,38 +258,44 @@ class BenchmarkReporter implements Reporter {
         'utf-8'
       );
 
-      // Test if expectations exists otherwise creates it depending on updateSnapshot value
-      const expectationsFile = path.resolve(
-        this.config.rootDir,
-        `${baseName}-expected.json`
-      );
-      const hasExpectations = fs.existsSync(expectationsFile);
-      let expectations: IReport;
-      if (!hasExpectations || this.config.updateSnapshots === 'all') {
-        expectations = {
-          values: report.values.map(d => {
-            return { ...d, reference: benchmark.DEFAULT_EXPECTED_REFERENCE };
-          }),
-          metadata: report.metadata
-        };
+      const allData = [...report.values];
 
-        if (this.config.updateSnapshots !== 'none') {
-          fs.writeFileSync(
-            expectationsFile,
-            JSON.stringify(expectations, undefined, 2),
-            'utf-8'
-          );
+      if (this._comparison === 'snapshot') {
+        // Test if expectations exists otherwise creates it depending on updateSnapshot value
+        const expectationsFile = path.resolve(
+          this.config.rootDir,
+          `${baseName}-expected.json`
+        );
+        const hasExpectations = fs.existsSync(expectationsFile);
+        let expectations: IReport;
+        if (!hasExpectations || this.config.updateSnapshots === 'all') {
+          expectations = {
+            values: report.values.map(d => {
+              return { ...d, reference: benchmark.DEFAULT_EXPECTED_REFERENCE };
+            }),
+            metadata: report.metadata
+          };
+
+          if (this.config.updateSnapshots !== 'none') {
+            fs.writeFileSync(
+              expectationsFile,
+              JSON.stringify(expectations, undefined, 2),
+              'utf-8'
+            );
+          }
+        } else {
+          const expected = fs.readFileSync(expectationsFile, 'utf-8');
+          expectations = JSON.parse(expected);
         }
-      } else {
-        const expected = fs.readFileSync(expectationsFile, 'utf-8');
-        expectations = JSON.parse(expected);
+
+        allData.push(...expectations.values);
       }
 
       // Create graph file
       const graphConfigFile = path.resolve(outputDir, `${baseName}.vl.json`);
-      const allData = [...expectations.values, ...report.values];
       const config = generateVegaLiteSpec(
         [...new Set(allData.map(d => d.test))],
+        this._comparison == 'snapshot' ? 'reference' : 'project',
         [...new Set(allData.map(d => d.file))]
       );
       config.data.values = allData;
@@ -406,6 +448,8 @@ class BenchmarkReporter implements Reporter {
   }
 
   protected config: FullConfig;
+  protected suite: Suite;
+  private _comparison: 'snapshot' | 'project';
   private _outputFile: string;
   private _reference: string;
   private _report: IReportRecord[];
