@@ -12,7 +12,7 @@ Galata is a set of helpers and fixtures for JupyterLab UI Testing using [Playwri
 - **[Rich High Level API](src/jupyterlabpage.ts)** to control and inspect JupyterLab UI programmatically
 - **[Dedicated fixtures](src/fixtures.ts)** to hooks the helpers in the Playwright Page and ensure state isolation between tests.
 
-![screencast](media/screencast.gif)
+![screencast](https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/galata/media/screencast.gif)
 
 ## Getting Started
 
@@ -137,17 +137,17 @@ PWDEBUG=1 jlpm playwright test
 
 ## Fixtures
 
-Here are the new test fixture introduced by Galata on top of [Playwright fixtures](https://playwright.dev/docs/api/class-fixtures.
+Here are the new test fixture introduced by Galata on top of [Playwright fixtures](https://playwright.dev/docs/api/class-fixtures).
 
 ### appPath
 
-- type: <string>;
+- type: < string >
 
 Application URL path fragment; default `"/lab"`
 
 ### autoGoto
 
-- type: <boolean>
+- type: < boolean >
 
 Whether to go to JupyterLab page within the fixture or not; default `true`.
 
@@ -190,7 +190,7 @@ on failure.
 
 ### mockState
 
-- type: <boolean | Record<string, unknown>>;
+- type: < boolean | Record<string, unknown> >
 
 Mock JupyterLab state in-memory or not.
 Possible values are:
@@ -251,7 +251,7 @@ test('should return the mocked state', async ({ page }) => {
 
 ### mockSettings
 
-- type: <boolean | Record<string, unknown>>;
+- type: < boolean | Record<string, unknown> >
 
 Mock JupyterLab settings in-memory or not.
 Possible values are:
@@ -284,7 +284,7 @@ test('should return mocked settings', async ({ page }) => {
 
 ### sessions
 
-- type: <Map<string, Session.IModel> | null>;
+- type: <Map<string, Session.IModel> | null>
 
 Sessions created during the test.
 Possible values are:
@@ -314,7 +314,7 @@ test('should return the active sessions', async ({ page, sessions }) => {
 
 ### terminals
 
-- type: <Map<string, TerminalAPI.IModel> | null>;
+- type: < Map<string, TerminalAPI.IModel> | null >
 
 Terminals created during the test.
 Possible values are:
@@ -351,7 +351,7 @@ test('should return the active terminals', async ({ page, terminals }) => {
 
 ### tmpPath
 
-- type: <string>;
+- type: < string >
 
 Unique test temporary path created on the server.
 
