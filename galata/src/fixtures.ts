@@ -285,7 +285,7 @@ export const test: TestType<
         await helpers.activity.activateTab('Launcher');
       }
     };
-    use(waitIsReady);
+    await use(waitIsReady);
   },
   /**
    * JupyterLab test page.
