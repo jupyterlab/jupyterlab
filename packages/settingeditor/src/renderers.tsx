@@ -14,11 +14,14 @@ export const renderDropdown = (
   props: FormComponentRegistry.IRendererProps
 ): any => {
   return (
-    <DropDown
-      value={props.value}
-      handleChange={props.handleChange}
-      uihints={props.uihints}
-    />
+    <div>
+      {props.uihints.default !== props.value ? <checkIcon.react /> : undefined}
+      <DropDown
+        value={props.value}
+        handleChange={props.handleChange}
+        uihints={props.uihints}
+      />
+    </div>
   );
 };
 
@@ -26,20 +29,23 @@ export const renderTextInput = (
   props: FormComponentRegistry.IRendererProps
 ): any => {
   return (
-    <TextInput
-      label={props.uihints.title}
-      description={props.uihints.description}
-      key={`${props.uihints.title?.replace(' ', '')}TextInput`}
-      fieldName={props.uihints.title?.replace(' ', '')}
-      numeric={props.uihints.field_type === 'number'}
-      defaultValue={props.value || props.uihints.default || ''}
-      secure={props.uihints.secure}
-      defaultError={props.uihints.error}
-      placeholder={props.uihints.placeholder}
-      onChange={(value: any): void => {
-        props.handleChange(value);
-      }}
-    />
+    <div>
+      {props.uihints.default !== props.value ? <checkIcon.react /> : undefined}
+      <TextInput
+        label={props.uihints.title}
+        description={props.uihints.description}
+        key={`${props.uihints.title?.replace(' ', '')}TextInput`}
+        fieldName={props.uihints.title?.replace(' ', '')}
+        numeric={props.uihints.field_type === 'number'}
+        defaultValue={props.value || props.uihints.default || ''}
+        secure={props.uihints.secure}
+        defaultError={props.uihints.error}
+        placeholder={props.uihints.placeholder}
+        onChange={(value: any): void => {
+          props.handleChange(value);
+        }}
+      />
+    </div>
   );
 };
 
@@ -51,7 +57,7 @@ export const renderCheckbox = (
       className="jp-metadataEditor-formInput"
       key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
     >
-      {props.uihints.modified ? <checkIcon.react /> : undefined}
+      {props.uihints.default !== props.value ? <checkIcon.react /> : undefined}
       <FormControlLabel
         className="jp-metadataEditor-formInput"
         key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}

@@ -1,8 +1,4 @@
-import {
-  FormComponentRegistry,
-  FormEditor,
-  IFormComponentRegistry
-} from '@jupyterlab/formeditor';
+import { FormEditor, IFormComponentRegistry } from '@jupyterlab/formeditor';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { ReactWidget, showDialog } from '@jupyterlab/apputils';
@@ -16,7 +12,6 @@ interface IWidgetProps {
 }
 
 interface IProps {
-  plugin: ISettingRegistry.IPlugin;
   settings: Settings;
   componentRegistry: IFormComponentRegistry;
 }
@@ -41,7 +36,6 @@ export class SettingsFormEditorWidget extends ReactWidget {
       return (
         <SettingsMetadataEditor
           componentRegistry={this.componentRegistry}
-          plugin={this.plugin}
           settings={this.settings}
         />
       );
@@ -52,37 +46,39 @@ export class SettingsFormEditorWidget extends ReactWidget {
 }
 
 export const SettingsMetadataEditor = ({
-  plugin,
   settings,
   componentRegistry
 }: IProps) => {
   const [data, setData] = React.useState({} as FormEditor.IData);
   const [schema, setSchema] = React.useState({} as FormEditor.ISchema);
   const [title, setTitle] = React.useState('');
-  const [modifiedFields, setModifiedFields] = React.useState([] as string[]);
-  let defaultMetadata: FormEditor.IData = {};
+  const [modifiedFields, setModifiedFields] = React.useState(
+    settings.modifiedFields
+  );
 
-  const reset = React.useCallback(() => {
+  const reset = () => {
     settings.resetAll();
     try {
-      setData(JSON.parse(settings.raw));
+      updateSchema();
     } catch (error) {
       console.log(error);
     }
-  }, [settings]);
+  };
 
-  React.useEffect(() => {
+  const updateSchema = () => {
+    let initialData: any = {};
     try {
-      setData(JSON.parse(settings.raw));
+      initialData = JSON.parse(settings.raw);
     } catch (error) {
       console.log(error);
     }
     if (!settings.schema) {
       return;
     }
-    const properties: any = {};
-    const current = JSON.parse(JSON.stringify(data));
+    const properties: any = { _noCategory: {} };
+    const current = JSON.parse(JSON.stringify(initialData));
     setTitle(settings.schema.title ?? '');
+    setModifiedFields(settings.modifiedFields);
     for (const prop in settings.schema.properties) {
       let ref = settings.schema.properties[prop]['$ref'] as string;
       if (ref) {
@@ -95,145 +91,123 @@ export const SettingsMetadataEditor = ({
         ] as PartialJSONObject)
       };
       if (options.renderer_id) {
-        properties[prop] = {
+        properties['_noCategory'][prop] = {
           title: options.title,
           type: options.type,
           uihints: {
             field_type: options.renderer_id,
-            modified: modifiedFields.includes(prop)
+            modified: modifiedFields.includes(prop),
+            default: options.default
           }
         };
-        current[prop] = data[prop] ?? options.default;
-        defaultMetadata[prop] = options.default;
+        current[prop] = initialData[prop] ?? options.default;
       } else if (Object.keys(options.properties ?? {}).length > 0) {
+        properties[prop] = {};
         for (const subProp in options.properties) {
           const subOptions = options.properties[subProp];
           if (subOptions.enum) {
-            properties[subProp] = {
+            properties[prop][subProp] = {
               title: subOptions.title ?? subProp,
               enum: subOptions.enum,
               uihints: {
                 field_type: 'dropdown',
-                category: options.title
+                category: options.title,
+                default: options.default
               }
             };
           } else if (typeof subOptions.type === 'object') {
-            properties[subProp] = {
+            properties[prop][subProp] = {
               title: subOptions.title ?? subProp,
               uihints: {
-                category: options.title
+                category: options.title,
+                default: (options.default as any)?.[subProp]
               }
             };
           } else {
-            properties[subProp] = {
+            properties[prop][subProp] = {
               title: subOptions.title ?? subProp,
               type: subOptions.type,
               uihints: {
                 field_type: subOptions.type,
-                category: options.title
+                category: options.title,
+                default: (options.default as any)?.[subProp]
               }
             };
           }
           current[subProp] =
-            data[prop]?.[subProp] ?? (options.default as any)?.[subProp];
-          defaultMetadata[subProp] = (options.default as any)?.[subProp];
+            initialData[prop]?.[subProp] ?? (options.default as any)?.[subProp];
         }
       } else if (options.enum || (options.additionalProperties as any)?.enum) {
-        properties[prop] = {
+        properties['_noCategory'][prop] = {
           title: options.title,
           enum: options.enum ?? (options.additionalProperties as any).enum,
           uihints: {
             field_type: 'dropdown',
-            modified: modifiedFields.includes(prop)
+            modified: modifiedFields.includes(prop),
+            default: options.default
           }
         };
-        current[prop] = data[prop] ?? options.default;
-        defaultMetadata[prop] = options.default;
+        current[prop] = initialData[prop] ?? options.default;
       } else if (typeof options.type === 'object') {
-        properties[prop] = {
+        properties['_noCategory'][prop] = {
           title: options.title,
           uihints: {
             field_type: 'string',
-            modified: modifiedFields.includes(prop)
+            modified: modifiedFields.includes(prop),
+            default: options.default
           }
         };
-        current[prop] = data[prop] ?? options.default;
-        defaultMetadata[prop] = options.default;
+        current[prop] = initialData[prop] ?? options.default;
       } else if (options.type === 'array') {
-        properties[prop] = {
+        properties['_noCategory'][prop] = {
           title: options.title,
           uihints: {
             field_type: options.type,
-            modified: modifiedFields.includes(prop)
+            modified: modifiedFields.includes(prop),
+            default: options.default
           }
         };
-        current[prop] = data[prop] ?? options.default;
-        defaultMetadata[prop] = options.default;
+        current[prop] = initialData[prop] ?? options.default;
       } else if (typeof options.default === 'object') {
         for (const subProp in options.default) {
-          properties[subProp] = {
+          properties[prop][subProp] = {
             title: subProp,
             uihints: {
-              field_type: typeof (options.default as any)[subProp]
+              field_type: typeof (options.default as any)[subProp],
+              default: (options.default as any)[subProp]
             }
           };
           current[subProp] =
-            data[prop]?.[subProp] ?? (options.default as any)?.[subProp];
-          defaultMetadata[subProp] = (options.default as any)?.[subProp];
+            initialData[prop]?.[subProp] ?? (options.default as any)?.[subProp];
         }
       } else {
-        properties[prop] = {
+        properties['_noCategory'][prop] = {
           title: options.title,
           type: options.type,
           uihints: {
             field_type: options.type,
-            modified: modifiedFields.includes(prop)
+            modified: modifiedFields.includes(prop),
+            default: options.default
           }
         };
-        current[prop] = data[prop] ?? options.default;
-        defaultMetadata[prop] = options.default;
+        current[prop] = initialData[prop] ?? options.default;
       }
     }
-    setSchema(getSchemaPropertiesByCategory(properties));
+    setSchema(properties);
     setData(current);
-    setModifiedFields(settings?.modifiedFields);
-  }, [settings]);
-
-  const getSchemaPropertiesByCategory = (
-    properties: any
-  ): FormEditor.ISchema => {
-    // Find categories of all schema properties
-    const schemaPropertiesByCategory: {
-      [cat: string]: {
-        [fieldName: string]: FormComponentRegistry.IRendererProps;
-      };
-    } = { _noCategory: {} };
-    for (const schemaProperty in properties) {
-      const category =
-        properties[schemaProperty].uihints &&
-        properties[schemaProperty].uihints.category;
-      if (!category) {
-        schemaPropertiesByCategory['_noCategory'][schemaProperty] =
-          properties[schemaProperty];
-      } else if (schemaPropertiesByCategory[category]) {
-        schemaPropertiesByCategory[category][schemaProperty] =
-          properties[schemaProperty];
-      } else {
-        schemaPropertiesByCategory[category] = {};
-        schemaPropertiesByCategory[category][schemaProperty] =
-          properties[schemaProperty];
-      }
-    }
-    return schemaPropertiesByCategory;
   };
 
   const getFormattedSettings = (values: FormEditor.IData) => {
     const formattedSettings: any = {};
     for (const prop in settings.schema.properties) {
+      let ref = settings.schema.properties[prop]['$ref'] as string;
+      if (ref) {
+        ref = ref.substring(14);
+      }
       const options = {
         ...settings.schema.properties[prop],
         ...((settings.schema.definitions as PartialJSONObject)?.[
-          prop
+          ref || prop
         ] as PartialJSONObject)
       };
       if (options.properties && Object.keys(options.properties).length > 0) {
@@ -282,6 +256,10 @@ export const SettingsMetadataEditor = ({
     return JSON.stringify(formattedSettings);
   };
 
+  React.useEffect(() => {
+    updateSchema();
+  }, []);
+
   const hasInvalidFields = (values: FormEditor.IData) => {
     const errors = settings.validate(getFormattedSettings(values));
     if (errors && errors.length > 0) {
@@ -312,16 +290,7 @@ export const SettingsMetadataEditor = ({
     void settings
       .save(getFormattedSettings(values))
       .then(() => {
-        setModifiedFields(settings?.modifiedFields);
-        for (const fieldName of modifiedFields) {
-          const newSchema = JSON.parse(JSON.stringify(schema));
-          for (const cat in newSchema) {
-            if (newSchema[cat][fieldName]) {
-              newSchema[cat][fieldName].uihints.modified = true;
-            }
-          }
-          setSchema(newSchema);
-        }
+        updateSchema();
       })
       .catch((reason: { stack: any }) => {
         void showDialog({
