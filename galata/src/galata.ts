@@ -5,7 +5,11 @@
 import * as nbformat from '@jupyterlab/nbformat';
 import { Browser, Page } from '@playwright/test';
 import { ContentsHelper } from './contents';
-import { IJupyterLabPageFixture, JupyterLabPage } from './jupyterlabpage';
+import {
+  IJupyterLabPage,
+  IJupyterLabPageFixture,
+  JupyterLabPage
+} from './jupyterlabpage';
 
 /**
  * Galata namespace
@@ -75,15 +79,22 @@ export namespace galata {
    *
    * @param page Playwright page model
    * @param baseURL Application base URL
+   * @param waitForApplication Callback that resolved when the application page is ready
    * @param appPath Application URL path fragment
    * @returns Playwright page model with Galata helpers
    */
   export function addHelpersToPage(
     page: Page,
     baseURL: string,
-    appPath: string
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
+    appPath?: string
   ): IJupyterLabPageFixture {
-    const jlabPage = new JupyterLabPage(page, baseURL, appPath);
+    const jlabPage = new JupyterLabPage(
+      page,
+      baseURL,
+      waitForApplication,
+      appPath
+    );
 
     const handler = {
       get: function (obj: JupyterLabPage, prop: string) {
@@ -116,18 +127,20 @@ export namespace galata {
    *
    * @param browser Playwright browser model
    * @param baseURL Application base URL
+   * @param waitForApplication Callback that resolved when the application page is ready
    * @param appPath Application URL path fragment
    * @returns Playwright page model with Galata helpers
    */
   export async function newPage(
     browser: Browser,
     baseURL: string,
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
     appPath: string = '/lab'
   ): Promise<IJupyterLabPageFixture> {
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    return addHelpersToPage(page, baseURL, appPath);
+    return addHelpersToPage(page, baseURL, waitForApplication, appPath);
   }
 
   /**
