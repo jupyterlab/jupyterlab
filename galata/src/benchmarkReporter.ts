@@ -302,39 +302,39 @@ class BenchmarkReporter implements Reporter {
       fs.writeFileSync(graphConfigFile, JSON.stringify(config), 'utf-8');
 
       // Compute statistics
-      // - Groupby (file, test, browser, reference)
+      // - Groupby (test, browser, reference, file)
       const groups = new Map<
         string,
         Map<string, Map<string, Map<string, number[]>>>
       >();
 
       allData.forEach(d => {
-        if (!groups.has(d.file)) {
+        if (!groups.has(d.test)) {
           groups.set(
-            d.file,
+            d.test,
             new Map<string, Map<string, Map<string, number[]>>>()
           );
         }
 
-        const fileGroup = groups.get(d.file)!;
-
-        if (!fileGroup.has(d.test)) {
-          fileGroup.set(d.test, new Map<string, Map<string, number[]>>());
-        }
-
-        const testGroup = fileGroup.get(d.test)!;
+        const testGroup = groups.get(d.test)!;
 
         if (!testGroup.has(d.browser)) {
-          testGroup.set(d.browser, new Map<string, number[]>());
+          testGroup.set(d.browser, new Map<string, Map<string, number[]>>());
         }
 
         const browserGroup = testGroup.get(d.browser)!;
 
         if (!browserGroup.has(d.reference)) {
-          browserGroup.set(d.reference, new Array<number>());
+          browserGroup.set(d.reference, new Map<string, number[]>());
         }
 
-        browserGroup.get(d.reference)?.push(d.time);
+        const fileGroup = browserGroup.get(d.reference)!;
+
+        if (!fileGroup.has(d.file)) {
+          fileGroup.set(d.file, new Array<number>());
+        }
+
+        fileGroup.get(d.file)?.push(d.time);
       });
 
       // - Create report
@@ -342,26 +342,39 @@ class BenchmarkReporter implements Reporter {
         '## Benchmark report',
         '',
         'The execution time (in milliseconds) are grouped by test file, test type and browser.',
-        'For each case, the following values are computed: _min_ <- || _1st quartile_ | _median_ | _3rd quartile_ || -> _max_.',
+        'For each case, the following values are computed: _min_ <- [_1st quartile_ - _median_ - _3rd quartile_] -> _max_.',
         ''
       );
-      for (const [file, fileGroup] of groups) {
-        reportContent.push(`### Test file \`${file}\``, '');
-        for (const [test, testGroup] of fileGroup) {
-          reportContent.push(`#### Test \`${test}\``, '');
-          for (const [browser, browserGroup] of testGroup) {
-            reportContent.push(`**Browser ${browser}**`);
-            for (const [reference, dataGroup] of browserGroup) {
+
+      let header = '| Test file |';
+      let nFiles = 0;
+      for (const [
+        file
+      ] of groups.values().next().value.values().next().value.values().next()
+        .value) {
+        header += ` ${file} |`;
+        nFiles++;
+      }
+      reportContent.push(header);
+      reportContent.push(new Array(nFiles + 2).fill('|').join(' --- '));
+      const filler = new Array(nFiles).fill('|').join(' ');
+
+      for (const [test, testGroup] of groups) {
+        reportContent.push(`| **${test}** | ` + filler);
+        for (const [browser, browserGroup] of testGroup) {
+          reportContent.push(`| \`${browser}\` | ` + filler);
+          for (const [reference, fileGroup] of browserGroup) {
+            let line = `| ${reference} |`;
+            for (const [_, dataGroup] of fileGroup) {
               const [q1, median, q3] = vs.quartiles(dataGroup);
-              reportContent.push(
-                `${reference}: ${Math.min(
-                  ...dataGroup
-                ).toFixed()} <- || ${q1.toFixed()} | ${median.toFixed()} | ${q3.toFixed()} || -> ${Math.max(
-                  ...dataGroup
-                ).toFixed()}`
-              );
+              line += ` ${Math.min(
+                ...dataGroup
+              ).toFixed()} <- [${q1.toFixed()} - ${median.toFixed()} - ${q3.toFixed()}] -> ${Math.max(
+                ...dataGroup
+              ).toFixed()} |`;
             }
-            reportContent.push('');
+
+            reportContent.push(line);
           }
         }
       }

@@ -268,7 +268,7 @@ export const test: TestType<
    * @param page Playwright Page model
    * @param helpers JupyterLab helpers
    */
-  waitForApplication: async ({}, use, testInfo) => {
+  waitForApplication: async ({ baseURL }, use, testInfo) => {
     const waitIsReady = async (
       page: Page,
       helpers: IJupyterLabPage
