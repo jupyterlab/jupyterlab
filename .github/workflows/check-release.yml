@@ -71,7 +71,7 @@ jobs:
         run: |
           set -eux
           version=$(python setup.py --version)
-          if [[ $version =~ ^[0-9]\.[0-9]\.[0-9]$ ]]; then
+          if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             version_spec=patch
           else
             version_spec=build
