@@ -58,11 +58,7 @@ export const SettingsMetadataEditor = ({
 
   const reset = () => {
     settings.resetAll();
-    try {
-      updateSchema();
-    } catch (error) {
-      console.log(error);
-    }
+    updateSchema();
   };
 
   const updateSchema = () => {

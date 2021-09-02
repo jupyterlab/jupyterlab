@@ -132,6 +132,10 @@
   background-color: var(--jp-layout-color0);
 }
 
+#setting-editor .jp-PluginList-Searcher {
+  margin: 5px;
+}
+
 #setting-editor
   ul.jp-PluginList
   li.jp-mod-selected

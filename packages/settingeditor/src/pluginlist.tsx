@@ -6,7 +6,12 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { classes, InputGroup, LabIcon, settingsIcon } from '@jupyterlab/ui-components';
+import {
+  classes,
+  InputGroup,
+  LabIcon,
+  settingsIcon
+} from '@jupyterlab/ui-components';
 import { StringExt } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -30,11 +35,10 @@ const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
  */
 const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
 
-
 /**
  * A text match score with associated content item.
  */
- interface IScore {
+interface IScore {
   /**
    * The numerical score for the text match.
    */
@@ -57,7 +61,7 @@ interface ISearcherProps {
 /**
  * Perform a fuzzy search on a single item.
  */
- function fuzzySearch(source: string, query: string): IScore | null {
+function fuzzySearch(source: string, query: string): IScore | null {
   // Set up the match score and indices array.
   let score = Infinity;
   let indices: number[] | null = null;
@@ -124,7 +128,7 @@ const Searcher = (props: ISearcherProps) => {
     props.setFilter((item: ISettingRegistry.IPlugin) => {
       if (props.useFuzzyFilter) {
         // Run the fuzzy search for the item and query.
-        const name = item.id.toLowerCase();
+        const name = item.schema?.title?.toLowerCase() ?? '';
         const query = target.value.toLowerCase();
         let score = fuzzySearch(name, query);
         // Ignore the item if it is not a match.
@@ -152,6 +156,7 @@ const Searcher = (props: ISearcherProps) => {
       placeholder={props.placeholder}
       onChange={handleChange}
       value={filter}
+      className="jp-PluginList-Searcher"
     />
   );
 };
@@ -184,7 +189,7 @@ export class PluginList extends ReactWidget {
       const editable = Object.keys(schema.properties || {}).length > 0;
       const extensible = schema.additionalProperties !== false;
 
-      return !deprecated && (editable || extensible) && (this._filter?.(plugin));
+      return !deprecated && (editable || extensible) && this._filter?.(plugin);
     });
   }
 
@@ -320,6 +325,7 @@ export class PluginList extends ReactWidget {
 
   setFilter(filter: (item: ISettingRegistry.IPlugin) => boolean) {
     this._filter = filter;
+    this.update();
   }
 
   mapPlugins(plugin: ISettingRegistry.IPlugin) {
@@ -339,7 +345,11 @@ export class PluginList extends ReactWidget {
     return (
       <button
         onClick={this._evtMousedown}
-        className={id === this.selection ? 'jp-mod-selected jp-PluginList-entry' : 'jp-PluginList-entry'}
+        className={
+          id === this.selection
+            ? 'jp-mod-selected jp-PluginList-entry'
+            : 'jp-PluginList-entry'
+        }
         data-id={id}
         key={id}
         title={itemTitle}
@@ -361,9 +371,14 @@ export class PluginList extends ReactWidget {
 
   render(): React.ReactElement<any> {
     console.log('render');
-    const modifiedItems = this._modifiedPlugins.map(this.mapPlugins);
+    const modifiedItems = this._modifiedPlugins
+      .filter(this._filter)
+      .map(this.mapPlugins);
     const otherItems = this._allPlugins
-      .filter(plugin => !this._modifiedPlugins.includes(plugin))
+      .filter(
+        plugin =>
+          !this._modifiedPlugins.includes(plugin) && this._filter(plugin)
+      )
       .map(this.mapPlugins);
 
     return (
