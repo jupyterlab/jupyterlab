@@ -178,7 +178,7 @@ export namespace Commands {
   ): void {
     config = filterUserSettings({
       ...CodeEditor.defaultConfig,
-      ...JSON.parse(settings.raw).editorConfig
+      ...(settings.get('editorConfig').composite as JSONObject)
     });
 
     // Trigger a refresh of the rendered commands
