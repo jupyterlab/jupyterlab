@@ -66,11 +66,12 @@ commander
       if (options.yes) {
         cmd += '  --yes ';
       }
-      if (curr.indexOf('rc') === -1 && curr.indexOf('a') === -1) {
-        utils.run(`${cmd} -m "Publish"`);
-      } else {
-        utils.run(`${cmd} --dist-tag=next -m "Publish"`);
+
+      let tag = 'latest';
+      if (!/\d+\.\d+\.\d+$/.test(curr)) {
+        tag = 'next';
       }
+      utils.run(`${cmd} --dist-tag=${tag} -m "Publish"`);
     }
 
     // Fix up any tagging issues.

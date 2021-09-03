@@ -251,9 +251,17 @@ function fixLinks(package_dir: string) {
  */
 function publishPackages(dist_dir: string) {
   const paths = glob.sync(path.join(dist_dir, '*.tgz'));
+  const curr = utils.getPythonVersion();
+  let tag = 'latest';
+  if (!/\d+\.\d+\.\d+$/.test(curr)) {
+    tag = 'next';
+  }
   paths.forEach(package_path => {
     const filename = path.basename(package_path);
-    utils.run(`npm publish ${filename}`, { cwd: dist_dir });
+    utils.run(`npm publish ${filename} --tag ${tag}`, {
+      cwd: dist_dir,
+      stdio: 'pipe'
+    });
   });
 }
 
