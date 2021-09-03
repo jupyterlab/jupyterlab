@@ -186,7 +186,8 @@ namespace Private {
     constructor(options: WorkspaceFactory.IOptions) {
       const trans = (options.translator || nullTranslator).load('jupyterlab');
       super({
-        name: trans.__('Workspace loader'),
+        name: 'Workspace loader',
+        label: trans.__('Workspace loader'),
         fileTypes: [WORKSPACE_NAME],
         defaultFor: [WORKSPACE_NAME],
         readOnly: true

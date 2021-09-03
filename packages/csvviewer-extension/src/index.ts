@@ -138,8 +138,11 @@ function activateCsv(
     }
   }
 
+  const trans = translator.load('jupyterlab');
+
   const factory = new CSVViewerFactory({
     name: FACTORY_CSV,
+    label: trans.__('CSV Viewer'),
     fileTypes: ['csv'],
     defaultFor: ['csv'],
     readOnly: true,
@@ -249,8 +252,11 @@ function activateTsv(
     }
   }
 
+  const trans = translator.load('jupyterlab');
+
   const factory = new TSVViewerFactory({
     name: FACTORY_TSV,
+    label: trans.__('TSV Viewer'),
     fileTypes: ['tsv'],
     defaultFor: ['tsv'],
     readOnly: true,

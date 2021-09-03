@@ -545,17 +545,17 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
       // get the widget factories that could be used to open all of the items
       // in the current filebrowser selection
       const factories = tracker.currentWidget
-        ? Private.OpenWith.intersection<string>(
+        ? Private.OpenWith.intersection<DocumentRegistry.WidgetFactory>(
             map(tracker.currentWidget.selectedItems(), i => {
               return Private.OpenWith.getFactories(docRegistry, i);
             })
           )
-        : new Set<string>();
+        : new Set<DocumentRegistry.WidgetFactory>();
 
       // make new menu items from the widget factories
       factories.forEach(factory => {
         openWith.addItem({
-          args: { factory: factory },
+          args: { factory: factory.name, label: factory.label || factory.name },
           command: CommandIDs.open
         });
       });
@@ -1214,11 +1214,9 @@ namespace Private {
     export function getFactories(
       docRegistry: DocumentRegistry,
       item: Contents.IModel
-    ): Array<string> {
-      const factories = docRegistry
-        .preferredWidgetFactories(item.path)
-        .map(f => f.name);
-      const notebookFactory = docRegistry.getWidgetFactory('notebook')?.name;
+    ): Array<DocumentRegistry.WidgetFactory> {
+      const factories = docRegistry.preferredWidgetFactories(item.path);
+      const notebookFactory = docRegistry.getWidgetFactory('notebook');
       if (
         notebookFactory &&
         item.type === 'notebook' &&

@@ -97,6 +97,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     dataType: 'json',
     documentWidgetFactoryOptions: {
       name: 'JSON',
+      // TODO: how to translate label of the factory?
       primaryFileType: 'json',
       fileTypes: ['json', 'notebook', 'geojson'],
       defaultFor: ['json']
