@@ -3,6 +3,12 @@
 
 import { KernelSpec, Session } from '@jupyterlab/services';
 
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
@@ -35,6 +41,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._specsManager = options.specsManager ?? null;
     this._model = new Debugger.Model();
     this._debuggerSources = options.debuggerSources ?? null;
+    this._trans = (options.translator || nullTranslator).load('jupyterlab');
   }
 
   /**
@@ -318,7 +325,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const variableScopes = [
       {
-        name: 'Globals',
+        name: this._trans.__('Globals'),
         variables: variables
       }
     ];
@@ -853,6 +860,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     this
   );
   private _specsManager: KernelSpec.IManager | null;
+  private _trans: TranslationBundle;
 }
 
 /**
@@ -877,5 +885,10 @@ export namespace DebuggerService {
      * The optional kernel specs manager.
      */
     specsManager?: KernelSpec.IManager | null;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator | null;
   }
 }
