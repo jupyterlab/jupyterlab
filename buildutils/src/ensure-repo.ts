@@ -736,7 +736,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   // Handle buildutils
   ensureBuildUtils();
 
-  // Handle the pyproject.toml package
+  // Handle the pyproject.toml file
   const pyprojectPath = path.resolve('.', 'pyproject.toml');
   const curr = utils.getPythonVersion();
   let tag = 'latest';
