@@ -378,6 +378,7 @@ class BenchmarkReporter implements Reporter {
           }
         }
       }
+      reportContent.push('');
 
       const reportFile = path.resolve(outputDir, `${baseName}.md`);
       fs.writeFileSync(reportFile, reportContent.join('\n'), 'utf-8');
