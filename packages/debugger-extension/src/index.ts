@@ -450,8 +450,10 @@ const variables: JupyterFrontEndPlugin<void> = {
           return;
         }
 
+        const variablesModel = service.model.variables;
+
         const widget = new Debugger.VariableRenderer({
-          dataLoader: service.inspectRichVariable(name, frameId),
+          dataLoader: () => service.inspectRichVariable(name!, frameId),
           rendermime: activeRendermime
         });
         widget.addClass('jp-DebuggerVariables');
@@ -461,9 +463,24 @@ const variables: JupyterFrontEndPlugin<void> = {
         void trackerMime.add(widget);
         const disposeWidget = () => {
           widget.dispose();
-          service.model.variables.changed.disconnect(disposeWidget);
+          variablesModel.changed.disconnect(refreshWidget);
+          activeWidget?.disposed.disconnect(disposeWidget);
         };
-        service.model.variables.changed.connect(disposeWidget);
+        const refreshWidget = () => {
+          if (
+            name &&
+            variablesModel.scopes
+              .map(s => s.variables.map(v => v.name))
+              .findIndex(variables => variables.includes(name!)) >= 0
+          ) {
+            widget.refresh();
+          } else {
+            disposeWidget();
+          }
+        };
+        variablesModel.changed.connect(refreshWidget);
+        activeWidget?.disposed.connect(disposeWidget);
+
         shell.add(widget, 'main', {
           mode: trackerMime.currentWidget ? 'split-right' : 'split-bottom',
           activate: false

@@ -93,12 +93,12 @@ export interface IDebugger {
    * Request rich representation of a variable.
    *
    * @param variableName The variable name to request
-   * @param variablesReference The variable reference to request
+   * @param frameId The current frame id in which to request the variable
    * @returns The mime renderer data model
    */
   inspectRichVariable(
     variableName: string,
-    variablesReference?: number
+    frameId?: number
   ): Promise<IDebugger.IRichVariable>;
 
   /**
