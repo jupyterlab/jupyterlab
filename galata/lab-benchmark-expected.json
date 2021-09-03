@@ -4,1280 +4,1440 @@
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 7124.200000000012,
+      "time": 8204,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 509.5999999999767,
+      "time": 549.3999999999069,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1975.6999999999534,
+      "time": 2015.0999999999767,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 14028.099999999977,
+      "time": 6769.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 6377.099999999977,
+      "time": 8096.800000000047,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 483.80000000004657,
+      "time": 788.7999999999302,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1694.5999999999767,
+      "time": 1941.0999999999767,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 11954.300000000047,
+      "time": 18824.199999999953,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 6993.899999999907,
+      "time": 7808,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 550.1999999999534,
+      "time": 465.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1841.2999999999302,
+      "time": 1706.4000000000233,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 9813.300000000047,
+      "time": 5274.199999999953,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 7178.099999999977,
+      "time": 6937.699999999953,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 546.8000000000466,
+      "time": 484.0999999999767,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1798.0999999999767,
+      "time": 1770.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 9366.699999999953,
+      "time": 16993.900000000023,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 7487.699999999953,
+      "time": 7594.70000000007,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 440.0999999999767,
+      "time": 527.3999999999069,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1725.6000000000931,
+      "time": 1792.0999999999767,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 10757.900000000023,
+      "time": 14461.29999999993,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 6905.599999999977,
+      "time": 7484.599999999977,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 552.8000000000466,
+      "time": 477.29999999993015,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1726.2999999999302,
+      "time": 1715,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 17524.20000000007,
+      "time": 15053.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 5456.300000000047,
+      "time": 7603.800000000047,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 433.19999999995343,
+      "time": 488.70000000006985,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1558.5999999999767,
+      "time": 1814.6999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 4809.600000000093,
+      "time": 14589,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 5509.300000000047,
+      "time": 7622.099999999977,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 460.5,
+      "time": 492.9000000000233,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1625.0999999999767,
+      "time": 1768.8000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 4477.900000000023,
+      "time": 5520.300000000047,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 7468.699999999953,
+      "time": 7738.699999999953,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 546.8000000000466,
+      "time": 497,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 2020.9000000000233,
+      "time": 1755,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 5347.70000000007,
+      "time": 16715.599999999977,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 7058.599999999977,
+      "time": 7530,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 461.30000000004657,
+      "time": 489.69999999995343,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1566.2000000000698,
+      "time": 1759.6999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 5277.5,
+      "time": 5824.599999999977,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 5553.5,
+      "time": 7838.300000000047,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 512.0999999999767,
+      "time": 486.69999999995343,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1877.9000000000233,
+      "time": 1716.8000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 4954,
+      "time": 10364,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 5666.400000000023,
+      "time": 7602.800000000047,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 573.6000000000931,
+      "time": 472.69999999995343,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1688.5999999999767,
+      "time": 1731.4000000000233,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 4558.29999999993,
+      "time": 5685.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 7331,
+      "time": 7608.70000000007,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 485.20000000006985,
+      "time": 496.89999999990687,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1880.1999999999534,
+      "time": 1741,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 10439.400000000023,
+      "time": 5175.599999999977,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 8863.199999999953,
+      "time": 7551.400000000023,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 480.10000000009313,
+      "time": 516.8000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1813.7999999999302,
+      "time": 1815,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 11243.20000000007,
+      "time": 5823,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 7832.099999999977,
+      "time": 7682.800000000047,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 470.5999999999767,
+      "time": 481.5999999999767,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1597,
+      "time": 1813.6999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 10029.400000000023,
+      "time": 5797.899999999907,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 7501.199999999953,
+      "time": 7776.800000000047,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 569,
+      "time": 497.69999999995343,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1641.1999999999534,
+      "time": 1857,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 4498.800000000047,
+      "time": 10815.199999999953,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 5610.79999999993,
+      "time": 7699.199999999953,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 473.4000000000233,
+      "time": 464.20000000018626,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1616.5,
+      "time": 1758.8000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 4870.300000000047,
+      "time": 11567.09999999986,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 5568.79999999993,
+      "time": 7613.100000000093,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 459.19999999995343,
+      "time": 503.60000000009313,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1656.6000000000931,
+      "time": 1721.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 4957.399999999907,
+      "time": 12340.800000000047,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 7407.700000000186,
+      "time": 7754,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 528.2999999998137,
+      "time": 467.60000000009313,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1849.6000000000931,
+      "time": 1788.8999999999069,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 7451.800000000047,
+      "time": 10702.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 7533.300000000047,
+      "time": 7333.600000000093,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 544.1999999999534,
+      "time": 481.19999999995343,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1755.8000000000466,
+      "time": 1725.3999999999069,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_code_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 4601.600000000093,
+      "time": 5463.699999999953,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3360.7999999998137,
+      "time": 3491.4000000001397,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 311.30000000004657,
+      "time": 363.4000000001397,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1484.1000000000931,
+      "time": 1563.8999999999069,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3226.8000000000466,
+      "time": 3726.399999999907,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3299.5999999998603,
+      "time": 3460.9000000001397,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 301.5,
+      "time": 351.89999999990687,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1576.3000000000466,
+      "time": 1547.8999999999069,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3324.8000000000466,
+      "time": 3884,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3286.3000000000466,
+      "time": 3529.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 301.69999999995343,
+      "time": 350,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1591.5,
+      "time": 1540.6999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3617.6999999999534,
+      "time": 3896.1999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3395,
+      "time": 3853,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 322.39999999990687,
+      "time": 334.9000000001397,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1602.8000000000466,
+      "time": 1596.4000000001397,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3457.5999999998603,
+      "time": 3325.1999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3155.600000000093,
+      "time": 3829.6999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 411.89999999990687,
+      "time": 348.80000000004657,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1576.3000000000466,
+      "time": 1607.8000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3596.399999999907,
+      "time": 4058.3000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3100.5999999998603,
+      "time": 4136.09999999986,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 346.39999999990687,
+      "time": 363.10000000009313,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1516.0999999998603,
+      "time": 1577.5999999998603,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3679.2999999998137,
+      "time": 3568,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3224.9000000001397,
+      "time": 3632.6999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 304.9000000001397,
+      "time": 310.30000000004657,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1606.8999999999069,
+      "time": 1559.8000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3414.9000000001397,
+      "time": 3974.5999999998603,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3215.5999999998603,
+      "time": 3547.3000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 325.5999999998603,
+      "time": 327.39999999990687,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1544,
+      "time": 1559.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3512.5,
+      "time": 3961.600000000093,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3154.4000000001397,
+      "time": 3495.2999999998137,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 312.39999999990687,
+      "time": 345.89999999990687,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1532.1999999999534,
+      "time": 1542.1000000000931,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3445.0999999998603,
+      "time": 3592.6999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3036.7999999998137,
+      "time": 3545,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 322.39999999990687,
+      "time": 341.9000000001397,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1529.8999999999069,
+      "time": 1567.8000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3604.3000000000466,
+      "time": 3693.100000000093,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3215.1999999999534,
+      "time": 3530.6999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 343.69999999995343,
+      "time": 354.89999999990687,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1603.6999999999534,
+      "time": 1559.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3727,
+      "time": 3974.5999999998603,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3102.3000000000466,
+      "time": 3851.899999999907,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 317.79999999981374,
+      "time": 369.89999999990687,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1683.1999999999534,
+      "time": 1549.2999999998137,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3490.6999999999534,
+      "time": 3931.399999999907,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3069.100000000093,
+      "time": 3523.3000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 328.19999999995343,
+      "time": 351.80000000004657,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1491.3999999999069,
+      "time": 1573.1999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3439.399999999907,
+      "time": 4073.3000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3081,
+      "time": 3525.1999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 293.60000000009313,
+      "time": 328.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1583.5,
+      "time": 1549.4000000001397,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3349.399999999907,
+      "time": 3685.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3179.0999999998603,
+      "time": 3529.0999999998603,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 313.19999999995343,
+      "time": 349.10000000009313,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1525.2999999998137,
+      "time": 1546.3000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3619.9000000001397,
+      "time": 3931,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3049.100000000093,
+      "time": 3544.7000000001863,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 318.5,
+      "time": 323.9000000001397,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1543.0999999998603,
+      "time": 1579.6000000000931,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3535.8000000000466,
+      "time": 3818.8000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3182.6999999999534,
+      "time": 3536.899999999907,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 315.80000000004657,
+      "time": 342.10000000009313,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1614,
+      "time": 1558.1999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3641.4000000001397,
+      "time": 3666,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 2979.3000000000466,
+      "time": 3575.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 315.5,
+      "time": 340.69999999995343,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1513.1000000000931,
+      "time": 1569.8999999999069,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3678.3000000000466,
+      "time": 3908.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3497.1999999999534,
+      "time": 3524.6999999999534,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 305.60000000009313,
+      "time": 340,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1542.1999999999534,
+      "time": 1569.8000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3667.899999999907,
+      "time": 3744,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "open",
-      "time": 3247.8000000000466,
+      "time": 3508.8000000000466,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-from",
-      "time": 315.89999999990687,
+      "time": 338.60000000009313,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "switch-to",
-      "time": 1537.6000000000931,
+      "time": 1584.5,
       "reference": "expected"
     },
     {
       "nSamples": 20,
       "browser": "chromium",
       "file": "large_md_notebook",
+      "project": "benchmark",
       "test": "close",
-      "time": 3564.3000000000466,
+      "time": 3921.6999999999534,
       "reference": "expected"
     }
   ],
@@ -1292,11 +1452,11 @@
     "systemInformation": {
       "cpu": {
         "manufacturer": "Intel®",
-        "brand": "Xeon® Platinum 8272CL",
+        "brand": "Xeon® Platinum 8171M",
         "vendor": "GenuineIntel",
         "family": "6",
         "model": "85",
-        "stepping": "7",
+        "stepping": "4",
         "revision": "",
         "voltage": "",
         "speed": 2.6,
@@ -1317,18 +1477,18 @@
         }
       },
       "mem": {
-        "total": 7291699200
+        "total": 7291695104
       },
       "osInfo": {
         "platform": "linux",
         "distro": "Ubuntu",
-        "release": "20.04.2 LTS",
+        "release": "20.04.3 LTS",
         "codename": "Focal Fossa",
-        "kernel": "5.8.0-1039-azure",
+        "kernel": "5.8.0-1040-azure",
         "arch": "x64",
         "codepage": "UTF-8",
         "logofile": "ubuntu",
-        "serial": "7f7f37c78b7c4116b0acfb78e51a655d",
+        "serial": "0f5fd491ff264b5f9d56e03599b4fae0",
         "build": "",
         "servicepack": "",
         "uefi": false
