@@ -330,7 +330,7 @@ export class NotebookModel implements INotebookModel {
         msg = this._trans.__(
           `This notebook has been converted from an older notebook format (v%1)
 to the current notebook format (v%2).
-The next time you save this notebook, the current notebook format (vthis._nbformat) will be used.
+The next time you save this notebook, the current notebook format (v%2) will be used.
 'Older versions of Jupyter may not be able to read the new format.' To preserve the original format version,
 close the notebook without saving it.`,
           origNbformat,
