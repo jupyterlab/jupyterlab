@@ -202,6 +202,7 @@ export type IOPubMessageType =
   | 'error'
   | 'execute_input'
   | 'execute_result'
+  | 'shutdown_reply'
   | 'status'
   | 'stream'
   | 'update_display_data'
