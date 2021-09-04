@@ -25,7 +25,7 @@ describe('escapeMarkdown', () => {
   });
   it('escapes escaped italics', () => {
     expect(escapeMarkdown('pre \\*non-italic\\* post')).to.equal(
-      'pre \\\\*non-italic\\\\* post'
+      'pre \\\\\\*non-italic\\\\\\* post'
     );
   });
   it('escapes bold', () => {
