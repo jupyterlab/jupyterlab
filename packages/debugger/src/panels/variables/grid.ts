@@ -23,6 +23,11 @@ import { Debugger } from '../../';
 import { IDebugger } from '../../tokens';
 
 import { VariablesModel } from './model';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 /**
  * A data grid that displays variables in a debugger session.
@@ -35,8 +40,8 @@ export class VariablesBodyGrid extends Panel {
    */
   constructor(options: VariablesBodyGrid.IOptions) {
     super();
-    const { model, commands, themeManager, scopes } = options;
-    this._grid = new Grid({ commands, themeManager });
+    const { model, commands, themeManager, scopes, translator } = options;
+    this._grid = new Grid({ commands, themeManager, translator });
     this._grid.addClass('jp-DebuggerVariables-grid');
     this._model = model;
     this._model.changed.connect((model: VariablesModel): void => {
@@ -112,6 +117,11 @@ export namespace VariablesBodyGrid {
      * An optional application theme manager to detect theme changes.
      */
     themeManager?: IThemeManager | null;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -127,7 +137,7 @@ class Grid extends Panel {
   constructor(options: Grid.IOptions) {
     super();
     const { commands, themeManager } = options;
-    const dataModel = new GridModel();
+    const dataModel = new GridModel(options.translator);
     const grid = new DataGrid();
     const mouseHandler = new Private.MouseHandler();
     mouseHandler.doubleClicked.connect((_, hit) =>
@@ -236,6 +246,11 @@ namespace Grid {
      * An optional application theme manager to detect theme changes.
      */
     themeManager?: IThemeManager | null;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -243,6 +258,16 @@ namespace Grid {
  * A data grid model for variables.
  */
 class GridModel extends DataModel {
+  /**
+   * Create gird model
+   * @param translator optional translator
+   */
+  constructor(translator?: ITranslator) {
+    super();
+    translator = translator || nullTranslator;
+    this._trans = translator.load('jupyterlab');
+  }
+
   /**
    * Set the variable filter list.
    */
@@ -295,10 +320,10 @@ class GridModel extends DataModel {
     }
 
     if (region === 'column-header') {
-      return column === 1 ? 'Value' : 'Type';
+      return column === 1 ? this._trans.__('Value') : this._trans.__('Type');
     }
     if (region === 'corner-header') {
-      return 'Name';
+      return this._trans.__('Name');
     }
 
     return column === 1 ? this._data.value[row] : this._data.type[row];
@@ -325,7 +350,7 @@ class GridModel extends DataModel {
   /**
    * Set the datagrid model data from the list of variables.
    *
-   * @param variables The list of variables.
+   * @param scopes The list of variables.
    */
   setData(scopes: IDebugger.IScope[]): void {
     this._clearData();
@@ -366,6 +391,7 @@ class GridModel extends DataModel {
 
   private _filter = new Set<string>();
   private _scope = '';
+  private _trans: TranslationBundle;
   private _data: {
     name: string[];
     type: string[];

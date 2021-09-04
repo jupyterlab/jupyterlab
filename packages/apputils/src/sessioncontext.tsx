@@ -1484,7 +1484,7 @@ namespace Private {
     }
 
     // Add an option for no kernel
-    node.appendChild(optionForNone());
+    node.appendChild(optionForNone(translator));
 
     const other = document.createElement('optgroup');
     other.label = trans.__('Start Other Kernel');
