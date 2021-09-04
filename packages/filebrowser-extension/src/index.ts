@@ -497,9 +497,9 @@ const shareFile: JupyterFrontEndPlugin<void> = {
         Clipboard.copyToSystem(
           URLExt.normalize(
             PageConfig.getUrl({
-              mode: 'single-document',
               workspace: PageConfig.defaultWorkspace,
-              treePath: model.path
+              treePath: model.path,
+              toShare: true
             })
           )
         );
