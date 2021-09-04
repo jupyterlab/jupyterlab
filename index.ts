@@ -149,7 +149,7 @@ export class LSPExtension implements ILSPExtension {
     public user_console: ILoggerRegistry,
     status_bar: IStatusBar | null
   ) {
-    const trans = (translator || nullTranslator).load('jupyterlab-lsp');
+    const trans = (translator || nullTranslator).load('jupyterlab_lsp');
     this.language_server_manager = new LanguageServerManager({
       console: this.console.scope('LanguageServerManager')
     });

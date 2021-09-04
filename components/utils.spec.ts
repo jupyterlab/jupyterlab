@@ -1,10 +1,11 @@
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import { WidgetAdapter } from '../adapters/adapter';
 import { BrowserConsole } from '../virtual/console';
 import { VirtualDocument } from '../virtual/document';
 
-import { get_breadcrumbs } from './utils';
+import { getBreadcrumbs } from './utils';
 
 function create_dummy_document(options: Partial<VirtualDocument.IOptions>) {
   return new VirtualDocument({
@@ -20,13 +21,18 @@ function create_dummy_document(options: Partial<VirtualDocument.IOptions>) {
 }
 
 describe('get_breadcrumbs', () => {
+  const trans = nullTranslator.load('jupyterlab_lsp');
   it('should collapse long paths', () => {
     let document = create_dummy_document({
       path: 'dir1/dir2/Test.ipynb'
     });
-    let breadcrumbs = get_breadcrumbs(document, {
-      has_multiple_editors: false
-    } as WidgetAdapter<IDocumentWidget>);
+    let breadcrumbs = getBreadcrumbs(
+      document,
+      {
+        has_multiple_editors: false
+      } as WidgetAdapter<IDocumentWidget>,
+      trans
+    );
     expect(breadcrumbs[0].props['title']).toBe('dir1/dir2/Test.ipynb');
     expect(breadcrumbs[0].props['children']).toBe('dir1/.../Test.ipynb');
   });
@@ -37,9 +43,13 @@ describe('get_breadcrumbs', () => {
       file_extension: 'py',
       has_lsp_supported_file: false
     });
-    let breadcrumbs = get_breadcrumbs(document, {
-      has_multiple_editors: false
-    } as WidgetAdapter<IDocumentWidget>);
+    let breadcrumbs = getBreadcrumbs(
+      document,
+      {
+        has_multiple_editors: false
+      } as WidgetAdapter<IDocumentWidget>,
+      trans
+    );
     expect(breadcrumbs[0].props['children']).toBe('Test.ipynb');
   });
 
@@ -49,9 +59,13 @@ describe('get_breadcrumbs', () => {
       file_extension: 'py',
       has_lsp_supported_file: true
     });
-    let breadcrumbs = get_breadcrumbs(document, {
-      has_multiple_editors: false
-    } as WidgetAdapter<IDocumentWidget>);
+    let breadcrumbs = getBreadcrumbs(
+      document,
+      {
+        has_multiple_editors: false
+      } as WidgetAdapter<IDocumentWidget>,
+      trans
+    );
     expect(breadcrumbs[0].props['children']).toBe('test.py');
   });
 });

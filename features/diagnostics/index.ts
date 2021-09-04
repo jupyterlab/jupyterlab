@@ -56,7 +56,7 @@ export const DIAGNOSTICS_PLUGIN: JupyterFrontEndPlugin<void> = {
     translator: ITranslator
   ) => {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
-    const trans = translator.load('jupyterlab-lsp');
+    const trans = translator.load('jupyterlab_lsp');
 
     featureManager.register({
       feature: {

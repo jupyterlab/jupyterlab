@@ -1,12 +1,14 @@
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { TranslationBundle } from '@jupyterlab/translation';
 import React from 'react';
 
 import { WidgetAdapter } from '../adapters/adapter';
 import { VirtualDocument } from '../virtual/document';
 
-export function get_breadcrumbs(
+export function getBreadcrumbs(
   document: VirtualDocument,
   adapter: WidgetAdapter<IDocumentWidget>,
+  trans: TranslationBundle,
   collapse = true
 ): JSX.Element[] {
   return document.ancestry.map((document: VirtualDocument) => {
@@ -46,8 +48,8 @@ export function get_breadcrumbs(
 
         let cell_locator =
           first_cell === last_cell
-            ? `cell ${first_cell + 1}`
-            : `cells: ${first_cell + 1}-${last_cell + 1}`;
+            ? trans.__('cell %1', first_cell + 1)
+            : trans.__('cells: %1-%2', first_cell + 1, last_cell + 1);
 
         return (
           <span key={document.uri}>
@@ -73,6 +75,7 @@ export function focus_on(node: HTMLElement) {
 export function DocumentLocator(props: {
   document: VirtualDocument;
   adapter: WidgetAdapter<any>;
+  trans?: TranslationBundle;
 }) {
   let { document, adapter } = props;
   let target: HTMLElement = null;
@@ -84,7 +87,7 @@ export function DocumentLocator(props: {
       console.warn('Could not get first line of ', document);
     }
   }
-  let breadcrumbs = get_breadcrumbs(document, adapter);
+  let breadcrumbs = getBreadcrumbs(document, adapter, props.trans);
   return (
     <div
       className={'lsp-document-locator'}

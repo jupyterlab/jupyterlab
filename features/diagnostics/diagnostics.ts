@@ -78,7 +78,7 @@ class DiagnosticsPanel {
     this._content.addClass('lsp-diagnostics-panel-content');
     const widget = new MainAreaWidget({ content: this._content });
     widget.id = 'lsp-diagnostics-panel';
-    widget.title.label = this.trans?.__('Diagnostics Panel');
+    widget.title.label = this.trans.__('Diagnostics Panel');
     widget.title.closable = true;
     widget.title.icon = diagnosticsIcon;
     return widget;
@@ -95,10 +95,10 @@ class DiagnosticsPanel {
   register(app: JupyterFrontEnd) {
     const widget = this.widget;
 
-    let get_column = (name: string) => {
+    let get_column = (id: string) => {
       // TODO: a hashmap in the panel itself?
       for (let column of widget.content.columns) {
-        if (column.name === name) {
+        if (column.id === id) {
           return column;
         }
       }
@@ -110,13 +110,13 @@ class DiagnosticsPanel {
 
     app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
       execute: args => {
-        let column = get_column(args['name'] as string);
+        let column = get_column(args['id'] as string);
         column.is_visible = !column.is_visible;
         widget.update();
       },
-      label: args => this.trans.__(`${args['name']}`) as string,
+      label: args => this.trans.__(args['id'] as string),
       isToggled: args => {
-        let column = get_column(args['name'] as string);
+        let column = get_column(args['id'] as string);
         return column.is_visible;
       }
     });
@@ -124,7 +124,7 @@ class DiagnosticsPanel {
     for (let column of widget.content.columns) {
       columns_menu.addItem({
         command: CMD_COLUMN_VISIBILITY,
-        args: { name: column.name }
+        args: { id: column.id }
       });
     }
     app.contextMenu.addItem({
@@ -238,7 +238,7 @@ class DiagnosticsPanel {
           .writeText(message)
           .then(() => {
             this.content.model.status_message.set(
-              this.trans.__(`Successfully copied "%1" to clipboard`, message)
+              this.trans.__('Successfully copied "%1" to clipboard', message)
             );
           })
           .catch(() => {

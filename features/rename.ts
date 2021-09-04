@@ -247,7 +247,7 @@ export const RENAME_PLUGIN: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry,
     translator: ITranslator
   ) => {
-    const trans = (translator || nullTranslator).load('jupyterlab-lsp');
+    const trans = (translator || nullTranslator).load('jupyterlab_lsp');
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
 
     featureManager.register({
