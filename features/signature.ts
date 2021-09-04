@@ -279,7 +279,7 @@ export class SignatureCM extends CodeMirrorIntegration {
       return;
     }
 
-    let root_position = position_at_request;
+    let root_position = this.virtual_editor.get_cursor_position();
 
     // if the cursor advanced in the same line, the previously retrieved signature may still be useful
     // if the line changed or cursor moved backwards then no reason to keep the suggestions
