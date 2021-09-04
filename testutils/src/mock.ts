@@ -245,9 +245,12 @@ export const KernelMock = jest.fn<
     Kernel.IKernelConnection,
     Kernel.Status
   >(thisObject);
-
+  const pendingInputSignal = new Signal<Kernel.IKernelConnection, boolean>(
+    thisObject
+  );
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
+  (thisObject as any).pendingInput = pendingInputSignal;
   (thisObject as any).hasPendingInput = false;
   return thisObject;
 });
