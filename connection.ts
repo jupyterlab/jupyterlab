@@ -188,6 +188,7 @@ class ClientRequestHandler<
     protected emitter: LSPConnection
   ) {}
   request(params: IClientRequestParams[T]): Promise<IClientResult[T]> {
+    // TODO check if is ready?
     this.emitter.log(MessageKind.client_requested, {
       method: this.method,
       message: params

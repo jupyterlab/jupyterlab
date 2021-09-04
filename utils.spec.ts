@@ -41,4 +41,9 @@ describe('escapeMarkdown', () => {
       'pre \\[link\\](https://example.com) post'
     );
   });
+  it('replaces indents with non-breaking spaces', () => {
+    expect(escapeMarkdown('    indented')).to.equal(
+      '\u00A0\u00A0\u00A0\u00A0indented'
+    );
+  });
 });

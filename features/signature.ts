@@ -12,7 +12,7 @@ import { EditorTooltipManager } from '../components/free_tooltip';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import { FeatureSettings, IFeatureLabIntegration } from '../feature';
 import { IEditorPosition, IRootPosition } from '../positioning';
-import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { ILogConsoleCore, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { escapeMarkdown } from '../utils';
 import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 import { IEditorChange } from '../virtual/editor';
@@ -32,8 +32,89 @@ function getMarkdown(item: string | lsProtocol.MarkupContent) {
   }
 }
 
+/**
+ * Represent signature as a Markdown element.
+ */
+export function signatureToMarkdown(
+  item: lsProtocol.SignatureInformation,
+  language: string,
+  codeHighlighter: (
+    source: string,
+    variable: string,
+    language: string
+  ) => string,
+  logger: ILogConsoleCore,
+  activeParameterFallback?: number | null
+): string {
+  const activeParameter: number | null =
+    typeof item.activeParameter !== 'undefined'
+      ? item.activeParameter
+      : activeParameterFallback;
+  let markdown: string;
+  let label = item.label;
+  if (item.parameters && activeParameter != null) {
+    if (activeParameter > item.parameters.length) {
+      logger.error(
+        'LSP server returned wrong number for activeSignature for: ',
+        item
+      );
+      markdown = '```' + language + '\n' + label + '\n```';
+    } else {
+      const parameter = item.parameters[activeParameter];
+      let substring: string =
+        typeof parameter.label === 'string'
+          ? parameter.label
+          : label.slice(parameter.label[0], parameter.label[1]);
+      markdown = codeHighlighter(label, substring, language);
+    }
+  } else {
+    markdown = '```' + language + '\n' + label + '\n```';
+  }
+  if (item.documentation) {
+    markdown += '\n';
+    if (
+      typeof item.documentation === 'string' ||
+      item.documentation.kind === 'plaintext'
+    ) {
+      const plainTextDocumentation =
+        typeof item.documentation === 'string'
+          ? item.documentation
+          : item.documentation.value;
+      let in_text_block = false;
+      // TODO: make use of the MarkupContent object instead
+      for (let line of plainTextDocumentation.split('\n')) {
+        if (line.trim() === item.label.trim()) {
+          continue;
+        }
+
+        markdown += getMarkdown(line) + '\n';
+      }
+      // close off the text block - if any
+      if (in_text_block) {
+        markdown += '```';
+      }
+    } else {
+      if (item.documentation.kind !== 'markdown') {
+        this.console.warn(
+          'Unknown MarkupContent kind:',
+          item.documentation.kind
+        );
+      }
+      markdown += item.documentation.value;
+    }
+  } else if (item.parameters) {
+    markdown +=
+      '\n\n' +
+      item.parameters
+        .filter(parameter => parameter.documentation)
+        .map(parameter => '- ' + getMarkdown(parameter.documentation))
+        .join('\n');
+  }
+  return markdown;
+}
+
 export class SignatureCM extends CodeMirrorIntegration {
-  protected signature_character: IRootPosition;
+  protected signatureCharacter: IRootPosition;
   protected _signatureCharacters: string[];
 
   get settings() {
@@ -110,7 +191,7 @@ export class SignatureCM extends CodeMirrorIntegration {
         const item = response.signatures[response.activeSignature];
         return {
           kind: 'markdown',
-          value: this.markdown_from_signature(
+          value: this.signatureToMarkdown(
             item,
             language,
             response.activeParameter
@@ -120,7 +201,7 @@ export class SignatureCM extends CodeMirrorIntegration {
     }
 
     response.signatures.forEach(item => {
-      let markdown = this.markdown_from_signature(item, language);
+      let markdown = this.signatureToMarkdown(item, language);
       signatures.push(markdown);
     });
 
@@ -130,114 +211,49 @@ export class SignatureCM extends CodeMirrorIntegration {
     };
   }
 
+  protected highlightCode(source: string, variable: string, language: string) {
+    const pre = document.createElement('pre');
+    const code = document.createElement('code');
+    pre.appendChild(code);
+    code.className = `cm-s-jupyter language-${language}`;
+    this.lab_integration.codeMirror.CodeMirror.runMode(
+      source,
+      language,
+      (token: string, className: string) => {
+        let element: HTMLElement | Node;
+        if (className) {
+          element = document.createElement('span');
+          (element as HTMLElement).classList.add('cm-' + className);
+          element.textContent = token;
+        } else {
+          element = document.createTextNode(token);
+        }
+        if (className === 'variable' && token === variable) {
+          const mark = document.createElement('mark');
+          mark.appendChild(element);
+          element = mark;
+        }
+        code.appendChild(element);
+      }
+    );
+    return pre.outerHTML + '\n\n';
+  }
+
   /**
-   * A temporary workaround for the LSP servers returning plain text (e.g. docstrings)
-   * (providing not-the-best UX) instead of markdown and me being unable to force
-   * them to return markdown instead.
+   * Represent signature as a Markdown element.
    */
-  private markdown_from_signature(
+  protected signatureToMarkdown(
     item: lsProtocol.SignatureInformation,
     language: string,
     activeParameterFallback?: number | null
   ): string {
-    const activeParameter: number | null =
-      typeof item.activeParameter !== 'undefined'
-        ? item.activeParameter
-        : activeParameterFallback;
-    let markdown: string;
-    let label = item.label;
-    if (item.parameters && activeParameter != null) {
-      if (activeParameter > item.parameters.length) {
-        this.console.error(
-          'LSP server returned wrong number for activeSignature for: ',
-          item
-        );
-        markdown = '```' + language + '\n' + label + '\n```';
-      } else {
-        const parameter = item.parameters[activeParameter];
-        let substring: string =
-          typeof parameter.label === 'string'
-            ? parameter.label
-            : label.slice(parameter.label[0], parameter.label[1]);
-        const pre = document.createElement('pre');
-        const code = document.createElement('code');
-        pre.appendChild(code);
-        code.className = `cm-s-jupyter language-${language}`;
-        this.lab_integration.codeMirror.CodeMirror.runMode(
-          label,
-          language,
-          (token: string, className: string) => {
-            let element: HTMLElement | Node;
-            if (className) {
-              element = document.createElement('span');
-              (element as HTMLElement).classList.add('cm-' + className);
-              element.textContent = token;
-            } else {
-              element = document.createTextNode(token);
-            }
-            if (className === 'variable' && token === substring) {
-              const mark = document.createElement('mark');
-              mark.appendChild(element);
-              element = mark;
-            }
-            code.appendChild(element);
-          }
-        );
-        markdown = pre.outerHTML + '\n\n';
-      }
-    } else {
-      markdown = '```' + language + '\n' + label + '\n```';
-    }
-    if (item.documentation) {
-      markdown += '\n';
-      if (
-        typeof item.documentation === 'string' ||
-        item.documentation.kind === 'plaintext'
-      ) {
-        let in_text_block = false;
-        // TODO: make use of the MarkupContent object instead
-        for (let line of item.documentation.toString().split('\n')) {
-          if (line.trim() === item.label.trim()) {
-            continue;
-          }
-
-          if (line.startsWith('>>>')) {
-            if (in_text_block) {
-              markdown += '```\n\n';
-              in_text_block = false;
-            }
-            line = '```' + language + '\n' + line.substr(3) + '\n```';
-          } else {
-            // start new text block
-            if (!in_text_block) {
-              markdown += '```\n';
-              in_text_block = true;
-            }
-          }
-          markdown += line + '\n';
-        }
-        // close off the text block - if any
-        if (in_text_block) {
-          markdown += '```';
-        }
-      } else {
-        if (item.documentation.kind !== 'markdown') {
-          this.console.warn(
-            'Unknown MarkupContent kind:',
-            item.documentation.kind
-          );
-        }
-        markdown += item.documentation.value;
-      }
-    } else if (item.parameters) {
-      markdown +=
-        '\n\n' +
-        item.parameters
-          .filter(parameter => parameter.documentation)
-          .map(parameter => '- ' + getMarkdown(parameter.documentation))
-          .join('\n');
-    }
-    return markdown;
+    return signatureToMarkdown(
+      item,
+      language,
+      this.highlightCode.bind(this),
+      this.console,
+      activeParameterFallback
+    );
   }
 
   private _hideTooltip() {
@@ -256,7 +272,7 @@ export class SignatureCM extends CodeMirrorIntegration {
       this._hideTooltip();
     }
 
-    if (!this.signature_character || !response || !response.signatures.length) {
+    if (!this.signatureCharacter || !response || !response.signatures.length) {
       this.console.debug(
         'Ignoring signature response: cursor lost or response empty'
       );
@@ -353,20 +369,30 @@ export class SignatureCM extends CodeMirrorIntegration {
     root_position: IRootPosition,
     previousPosition: IEditorPosition | null
   ) {
-    this.signature_character = root_position;
+    if (
+      !(
+        this.connection.isReady &&
+        this.connection.serverCapabilities?.signatureHelpProvider
+      )
+    ) {
+      return;
+    }
+    this.signatureCharacter = root_position;
 
     let virtual_position = this.virtual_editor.root_position_to_virtual_position(
       root_position
     );
 
-    this.console.log('Signature will be requested for', virtual_position);
-
-    return this.connection
-      .getSignatureHelp(
-        virtual_position,
-        this.virtual_document.document_info,
-        false
-      )
+    return this.connection.clientRequests['textDocument/signatureHelp']
+      .request({
+        position: {
+          line: virtual_position.line,
+          character: virtual_position.ch
+        },
+        textDocument: {
+          uri: this.virtual_document.document_info.uri
+        }
+      })
       .then(help =>
         this.handleSignature(help, root_position, previousPosition)
       );

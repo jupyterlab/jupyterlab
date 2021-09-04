@@ -28,7 +28,7 @@ describe('Rename', () => {
 
     PageConfig.setOption('rootUri', 'file://');
 
-    it('renders inspections', async () => {
+    it('renames files', async () => {
       env.ce_editor.model.value.text = 'x = 1\n';
       await env.adapter.update_documents();
       let main_document = env.virtual_editor.virtual_document;

@@ -204,5 +204,5 @@ export function escapeMarkdown(text: string) {
   // escape HTML
   const span = document.createElement('span');
   span.textContent = text;
-  return span.innerHTML.replace(/\n/g, '<br>').replace(/ /, '\u00A0');
+  return span.innerHTML.replace(/\n/g, '<br>').replace(/ {2}/g, '\u00A0\u00A0');
 }
