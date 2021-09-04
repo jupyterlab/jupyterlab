@@ -4,7 +4,11 @@
 import { HoverBox } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  IRenderMime,
+  MimeModel,
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
 import { Tooltip } from '@jupyterlab/tooltip';
 import { Widget } from '@lumino/widgets';
 import * as lsProtocol from 'vscode-languageserver-protocol';
@@ -45,6 +49,16 @@ interface IFreeTooltipOptions extends Tooltip.IOptions {
 export class FreeTooltip extends Tooltip {
   constructor(protected options: IFreeTooltipOptions) {
     super(options);
+    this._setGeometry();
+    // TODO: remove once https://github.com/jupyterlab/jupyterlab/pull/11010 is merged & released
+    const model = new MimeModel({ data: options.bundle });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const content: IRenderMime.IRenderer = this._content;
+    content
+      .renderModel(model)
+      .then(() => this._setGeometry())
+      .catch(console.warn);
   }
 
   handleEvent(event: Event): void {
