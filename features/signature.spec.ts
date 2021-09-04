@@ -2,9 +2,58 @@ import { expect } from 'chai';
 
 import { BrowserConsole } from '../virtual/console';
 
-import { signatureToMarkdown } from './signature';
+import { extractLead, signatureToMarkdown } from './signature';
 
 describe('Signature', () => {
+  describe('extractLead', () => {
+    it('Extracts standalone one-line paragraph', () => {
+      const split = extractLead(
+        ['This function does foo', '', 'But there are more details'],
+        1
+      );
+      expect(split.lead).to.equal('This function does foo');
+      expect(split.remainder).to.equal('But there are more details');
+    });
+    it('Does not extracts when it would break markdown', () => {
+      let split = extractLead(
+        ['This is **not the end', '', 'of this spread sentence**'],
+        1
+      );
+      expect(split).to.equal(null);
+
+      split = extractLead(
+        ['This is <b>not the end', '', 'of this spread sentence</b>'],
+        1
+      );
+      expect(split).to.equal(null);
+    });
+    it('Extracts standalone two-line paragraph', () => {
+      const split = extractLead(
+        [
+          'This function does foo,',
+          'and it does bar',
+          '',
+          'But there are more details'
+        ],
+        2
+      );
+      expect(split.lead).to.equal('This function does foo,\nand it does bar');
+      expect(split.remainder).to.equal('But there are more details');
+    });
+    it('Does not extract too long paragraph', () => {
+      const split = extractLead(
+        [
+          'This function does foo,',
+          'and it does bar',
+          '',
+          'But there are more details'
+        ],
+        1
+      );
+      expect(split).to.equal(null);
+    });
+  });
+
   describe('SignatureToMarkdown', () => {
     const MockHighlighter = (code: string, fragment: string) =>
       code.replace(fragment, `<u>${fragment}</u>`);

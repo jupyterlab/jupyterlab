@@ -7,7 +7,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 
-import { SignatureHelp as LSPSignatureSettings } from '../_signature';
+import { CodeSignature as LSPSignatureSettings } from '../_signature';
 import { EditorTooltipManager } from '../components/free_tooltip';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import { FeatureSettings, IFeatureLabIntegration } from '../feature';
@@ -32,6 +32,37 @@ function getMarkdown(item: string | lsProtocol.MarkupContent) {
   }
 }
 
+interface ISplit {
+  lead: string;
+  remainder: string;
+}
+
+export function extractLead(lines: string[], size: number): ISplit | null {
+  // try to split after paragraph
+  const leadLines = [];
+  let splitOnParagraph = false;
+
+  for (const line of lines.slice(0, size + 1)) {
+    const isEmpty = line.trim() == '';
+    if (isEmpty) {
+      splitOnParagraph = true;
+      break;
+    }
+    leadLines.push(line);
+  }
+  // see if we got something which does not include Markdown formatting
+  // (so it won't lead to broken formatting if we split after it);
+  const leadCandidate = leadLines.join('\n');
+
+  if (splitOnParagraph && leadCandidate.search(/[\\*#[\]<>_]/g) === -1) {
+    return {
+      lead: leadCandidate,
+      remainder: lines.slice(leadLines.length + 1).join('\n')
+    };
+  }
+  return null;
+}
+
 /**
  * Represent signature as a Markdown element.
  */
@@ -44,7 +75,8 @@ export function signatureToMarkdown(
     language: string
   ) => string,
   logger: ILogConsoleCore,
-  activeParameterFallback?: number | null
+  activeParameterFallback?: number | null,
+  maxLinesBeforeCollapse: number = 4
 ): string {
   const activeParameter: number | null =
     typeof item.activeParameter !== 'undefined'
@@ -70,8 +102,9 @@ export function signatureToMarkdown(
   } else {
     markdown = '```' + language + '\n' + label + '\n```';
   }
+  let details = '';
   if (item.documentation) {
-    markdown += '\n';
+    details += '\n';
     if (
       typeof item.documentation === 'string' ||
       item.documentation.kind === 'plaintext'
@@ -80,18 +113,13 @@ export function signatureToMarkdown(
         typeof item.documentation === 'string'
           ? item.documentation
           : item.documentation.value;
-      let in_text_block = false;
       // TODO: make use of the MarkupContent object instead
       for (let line of plainTextDocumentation.split('\n')) {
         if (line.trim() === item.label.trim()) {
           continue;
         }
 
-        markdown += getMarkdown(line) + '\n';
-      }
-      // close off the text block - if any
-      if (in_text_block) {
-        markdown += '```';
+        details += getMarkdown(line) + '\n';
       }
     } else {
       if (item.documentation.kind !== 'markdown') {
@@ -100,15 +128,28 @@ export function signatureToMarkdown(
           item.documentation.kind
         );
       }
-      markdown += item.documentation.value;
+      details += item.documentation.value;
     }
   } else if (item.parameters) {
-    markdown +=
+    details +=
       '\n\n' +
       item.parameters
         .filter(parameter => parameter.documentation)
         .map(parameter => '- ' + getMarkdown(parameter.documentation))
         .join('\n');
+  }
+  if (details) {
+    const lines = details.trim().split('\n');
+    if (lines.length > maxLinesBeforeCollapse) {
+      const split = extractLead(lines, maxLinesBeforeCollapse);
+      if (split) {
+        details =
+          split.lead + '\n<details>\n' + split.remainder + '\n</details>';
+      } else {
+        details = '<details>\n' + details + '\n</details>';
+      }
+    }
+    markdown += details;
   }
   return markdown;
 }
@@ -252,7 +293,8 @@ export class SignatureCM extends CodeMirrorIntegration {
       language,
       this.highlightCode.bind(this),
       this.console,
-      activeParameterFallback
+      activeParameterFallback,
+      this.settings.composite.maxLines
     );
   }
 
