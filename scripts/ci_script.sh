@@ -7,8 +7,6 @@ set -ex
 set -o pipefail
 
 export YARN_ENABLE_GLOBAL_CACHE=1
-export YARN_ENABLE_IMMUTABLE_INSTALLS=0
-export YARN_ENABLE_INLINE_BUILDS=0
 
 if [[ $GROUP != nonode ]]; then
     python -c "from jupyterlab.commands import build_check; build_check()"
