@@ -60,6 +60,7 @@ jobs:
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
+          YARN_ENABLE_GLOBAL_CACHE: 1
         run: |
           bash ./scripts/ci_install.sh
 
@@ -67,12 +68,15 @@ jobs:
         env:
           GROUP: ${{ matrix.group }}
           JLAB_BROWSER_TYPE: firefox
+          YARN_ENABLE_GLOBAL_CACHE: 1
         run: |
           bash ./scripts/ci_script.sh
 
       - name: Upload ${{ matrix.group }} results
         if: ${{ matrix.upload-output && always() }}
         uses: actions/upload-artifact@v3
+        env:
+          YARN_ENABLE_GLOBAL_CACHE: 1
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: ./build/${{ matrix.group }}_output
