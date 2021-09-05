@@ -24,6 +24,7 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
       diagnostics_feature.switchDiagnosticsPanelSource();
 
       if (!diagnostics_panel.is_registered) {
+        diagnostics_panel.trans = trans;
         diagnostics_panel.register(app);
       }
 
