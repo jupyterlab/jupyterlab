@@ -7,7 +7,7 @@ describe('@jupyterlab/coreutils', () => {
   describe('PageConfig', () => {
     beforeEach(() => {
       PageConfig.setOption('foo', 'bar');
-      PageConfig.setOption('workspace', 'default');
+      PageConfig.setOption('workspace', PageConfig.defaultWorkspace);
     });
 
     describe('#getOption()', () => {
@@ -68,7 +68,7 @@ describe('@jupyterlab/coreutils', () => {
 
       it('should return shortest url by default', () => {
         const url = PageConfig.getUrl({});
-        expect(url).toEqual('http://localhost/lab/workspaces/default');
+        expect(url).toEqual('http://localhost/lab');
       });
 
       it('should return a local shareable url if shareUrl is undefined', () => {
