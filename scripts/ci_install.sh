@@ -6,8 +6,6 @@ set -ex
 set -o pipefail
 
 export YARN_ENABLE_GLOBAL_CACHE=1
-export YARN_ENABLE_IMMUTABLE_INSTALLS=0
-export YARN_ENABLE_INLINE_BUILDS=0
 
 # Building should work without yarn installed globally, so uninstall the
 # global yarn installed by default.
