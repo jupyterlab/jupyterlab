@@ -72,14 +72,10 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        env:
-          YARN_ENABLE_GLOBAL_CACHE: 1
-        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+        run: echo "::set-output name=dir::$(YARN_ENABLE_GLOBAL_CACHE=1 yarn config get cacheFolder)"
       - name: Cache yarn
         uses: actions/cache@v2
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        env:
-          YARN_ENABLE_GLOBAL_CACHE: 1
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
@@ -89,7 +85,6 @@ jobs:
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
-          YARN_ENABLE_GLOBAL_CACHE: 1
         run: |
           bash ./scripts/ci_install.sh
 
@@ -97,15 +92,12 @@ jobs:
         env:
           GROUP: ${{ matrix.group }}
           JLAB_BROWSER_TYPE: firefox
-          YARN_ENABLE_GLOBAL_CACHE: 1
         run: |
           bash ./scripts/ci_script.sh
 
       - name: Upload ${{ matrix.group }} results
         if: ${{ matrix.upload-output && always() }}
         uses: actions/upload-artifact@v2
-        env:
-          YARN_ENABLE_GLOBAL_CACHE: 1
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: ./build/${{ matrix.group }}_output
