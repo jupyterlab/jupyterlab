@@ -17,7 +17,9 @@ if [[ $GROUP == python ]]; then
     export JUPYTERLAB_DIR="${HOME}/share/jupyter/lab/"
     mkdir -p $JUPYTERLAB_DIR
 
-    jupyter lab build --debug --minimize=False
+    # the env var ensures that `yarn.lock` in app dir does not change on a simple `jupyter lab build` call
+    YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
+
     # Run the python tests
     python -m pytest
 fi
