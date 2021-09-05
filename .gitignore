@@ -112,12 +112,9 @@ yarn-error.log
 
 # yarn >=2.x local files
 .yarn/*
-!.yarn/patches
-!.yarn/releases
-!.yarn/plugins
-!.yarn/sdks
-!.yarn/versions
 .pnp.*
+jupyterlab/staging/.yarn/*
+jupyterlab/staging/.pnp.*
 
 # copied changelog file
 docs/source/getting_started/changelog.md
