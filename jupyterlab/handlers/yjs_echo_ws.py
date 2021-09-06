@@ -36,6 +36,11 @@ class YjsRoom:
 class YjsEchoWebSocket(WebSocketHandler):
     rooms = {}
 
+    # Override max_message size to 1GB
+    @property
+    def max_message_size(self):
+        return 1024 * 1024 * 1024
+
     def open(self, guid):
         #print("[YJSEchoWS]: open", guid)
         cls = self.__class__
