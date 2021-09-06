@@ -437,7 +437,8 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.
     app.shell.modeChanged.connect((_, args: DockPanel.Mode) => {
-      const path = PageConfig.getUrl({ mode: args as string });
+      const url = PageConfig.getUrl({ mode: args as string });
+      const path = URLExt.parse(url).pathname;
       router.navigate(path, { skipRouting: true });
       // Persist this mode change to PageConfig as it is used elsewhere at runtime.
       PageConfig.setOption('mode', args as string);

@@ -22,7 +22,7 @@ import {
   ToolbarButton,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import {
@@ -482,13 +482,11 @@ const shareFile: JupyterFrontEndPlugin<void> = {
         }
 
         Clipboard.copyToSystem(
-          URLExt.normalize(
-            PageConfig.getUrl({
-              mode: 'single-document',
-              workspace: PageConfig.defaultWorkspace,
-              treePath: model.path
-            })
-          )
+          PageConfig.getUrl({
+            workspace: PageConfig.defaultWorkspace,
+            treePath: model.path,
+            toShare: true
+          })
         );
       },
       isVisible: () =>
