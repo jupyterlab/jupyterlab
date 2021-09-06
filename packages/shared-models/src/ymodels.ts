@@ -326,7 +326,7 @@ export class YNotebook
    */
   getMetadata(): nbformat.INotebookMetadata {
     const meta = this.ymeta.get('metadata');
-    return meta ? deepCopy(meta) : { orig_nbformat: 1 };
+    return meta ? deepCopy(meta) : { orig_nbformat: 4 };
   }
 
   /**
