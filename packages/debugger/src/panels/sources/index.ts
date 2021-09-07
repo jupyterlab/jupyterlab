@@ -9,6 +9,7 @@ import { ToolbarButton } from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
 import { viewBreakpointIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
+import { PanelHeader } from '../header';
 import { SourcesBody } from './body';
 import { SourcesHeader } from './header';
 
@@ -27,13 +28,13 @@ export class Sources extends Panel {
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
-    const header = new SourcesHeader(model, translator);
+    this._header = new SourcesHeader(model, translator);
     const body = new SourcesBody({
       service,
       model,
       editorServices
     });
-    header.toolbar.addItem(
+    this._header.toolbar.addItem(
       'open',
       new ToolbarButton({
         icon: viewBreakpointIcon,
@@ -41,9 +42,15 @@ export class Sources extends Panel {
         tooltip: trans.__('Open in the Main Area')
       })
     );
-    this.addWidget(header);
+
     this.addWidget(body);
   }
+
+  get header(): PanelHeader{
+    return this._header;
+  }
+
+  private _header:  PanelHeader;
 }
 
 /**

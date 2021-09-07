@@ -1,35 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { Toolbar } from '@jupyterlab/ui-components';
-import { PanelLayout, Widget } from '@lumino/widgets';
-
+import { ITranslator } from '@jupyterlab/translation';
+import { PanelHeader } from '../header';
 /**
  * The header for a Breakpoints Panel.
  */
-export class BreakpointsHeader extends Widget {
+export class BreakpointsHeader extends PanelHeader {
   /**
    * Instantiate a new BreakpointsHeader.
    */
   constructor(translator?: ITranslator) {
-    super({ node: document.createElement('div') });
-    this.node.classList.add('jp-stack-panel-header');
-
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-
-    const title = new Widget({ node: document.createElement('h2') });
-    title.node.textContent = trans.__('Breakpoints');
-
-    const layout = new PanelLayout();
-    layout.addWidget(title);
-    layout.addWidget(this.toolbar);
-    this.layout = layout;
+    super(translator);
+    this.titleWidget.node.textContent = this._trans.__('Breakpoints');
   }
-
-  /**
-   * The toolbar for the breakpoints header.
-   */
-  readonly toolbar = new Toolbar();
 }

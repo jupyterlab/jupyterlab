@@ -11,6 +11,7 @@ import {
 import { CommandRegistry } from '@lumino/commands';
 import { Panel, Widget } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
+import { PanelHeader } from '../header';
 import { VariablesBodyGrid } from './grid';
 import { VariablesHeader } from './header';
 import { ScopeSwitcher } from './scope';
@@ -107,6 +108,11 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
     this.addWidget(this._tree);
     this.addWidget(this._table);
     this.addClass('jp-DebuggerVariables');
+
+  }
+
+  get header(): PanelHeader{
+    return this._header;
   }
 
   /**

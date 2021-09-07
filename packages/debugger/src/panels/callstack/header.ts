@@ -1,35 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { Toolbar } from '@jupyterlab/ui-components';
-import { PanelLayout, Widget } from '@lumino/widgets';
+import { ITranslator } from '@jupyterlab/translation';
+import { PanelHeader } from '../header';
 
 /**
  * The header for a Callstack Panel.
  */
-export class CallstackHeader extends Widget {
+export class CallstackHeader extends PanelHeader {
   /**
    * Instantiate a new CallstackHeader.
    */
   constructor(translator?: ITranslator) {
-    super({ node: document.createElement('div') });
-    this.node.classList.add('jp-stack-panel-header');
-
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-
-    const title = new Widget({ node: document.createElement('h2') });
-    title.node.textContent = trans.__('Callstack');
-
-    const layout = new PanelLayout();
-    layout.addWidget(title);
-    layout.addWidget(this.toolbar);
-    this.layout = layout;
+    super(translator);
+    this.titleWidget.node.textContent = this._trans.__('Callstack');
   }
 
-  /**
-   * The toolbar for the callstack header.
-   */
-  readonly toolbar = new Toolbar();
 }

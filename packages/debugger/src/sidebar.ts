@@ -11,6 +11,8 @@ import { bugIcon } from '@jupyterlab/ui-components';
 
 import { Panel, SplitPanel, Widget } from '@lumino/widgets';
 
+import {AccordionPanel} from '@jupyterlab/ui-components'
+
 import { Breakpoints as BreakpointsPanel } from './panels/breakpoints';
 
 import { Callstack as CallstackPanel } from './panels/callstack';
@@ -79,7 +81,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
       header.title.label = title;
     });
 
-    this._body = new SplitPanel();
+    this._body = new AccordionPanel();
     this._body.orientation = 'vertical';
     this._body.addClass('jp-DebuggerSidebar-body');
     this.addWidget(this._body);

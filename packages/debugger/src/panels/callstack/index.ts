@@ -6,6 +6,7 @@ import { CommandToolbarButton } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
+import { PanelHeader } from '../header';
 import { CallstackBody } from './body';
 import { CallstackHeader } from './header';
 
@@ -72,12 +73,17 @@ export class Callstack extends Panel {
         id: commands.evaluate
       })
     );
-
-    this.addWidget(header);
+    this._header = header;
     this.addWidget(body);
-
+    
     this.addClass('jp-DebuggerCallstack');
   }
+
+  get header(): PanelHeader{
+    return this._header;
+  }
+
+  private _header:  PanelHeader;
 }
 
 /**
