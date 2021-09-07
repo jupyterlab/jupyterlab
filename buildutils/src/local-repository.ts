@@ -30,9 +30,13 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
   let prev_npm = utils.run('npm config get registry', { stdio: 'pipe' }, true);
   let prev_yarn = '';
   try {
-    prev_yarn = utils.run('yarn config get registry', { stdio: 'pipe' }, true);
+    prev_yarn = utils.run(
+      'yarn config get npmRegistryServer',
+      { stdio: 'pipe' },
+      true
+    );
   } catch (e) {
-    // Do nothing
+    console.log('WARNING: unable to get registry from yarn config');
   }
   if (!prev_npm || prev_npm.indexOf('localhost') !== -1) {
     prev_npm = 'https://registry.npmjs.org/';
@@ -123,9 +127,11 @@ packages:
   const local_registry = `http://localhost:${port}`;
   child_process.execSync(`npm config set registry "${local_registry}"`);
   try {
-    child_process.execSync(`yarn config set registry "${local_registry}"`);
+    child_process.execSync(
+      `yarn config set npmRegistryServer "${local_registry}"`
+    );
   } catch (e) {
-    // yarn not available
+    console.log('WARNING: unable to set registry in yarn config');
   }
 
   // Log in using cli and temp credentials
@@ -207,12 +213,16 @@ async function stopLocalRegistry(out_dir: string) {
     child_process.execSync(`npm config rm registry`);
   }
   if (data.prev_yarn) {
-    child_process.execSync(`yarn config set registry ${data.prev_yarn}`);
+    child_process.execSync(
+      `yarn config set npmRegistryServer ${data.prev_yarn}`
+    );
   } else {
     try {
-      child_process.execSync(`yarn config delete registry`);
+      child_process.execSync(`yarn config unset npmRegistryServer`);
     } catch (e) {
-      // yarn not available
+      console.log(
+        'WARNING: unable to revert registry to previous value in yarn config'
+      );
     }
   }
 }
@@ -223,9 +233,13 @@ async function stopLocalRegistry(out_dir: string) {
 function fixLinks(package_dir: string) {
   let yarn_reg = '';
   try {
-    yarn_reg = utils.run('yarn config get registry', { stdio: 'pipe' }, true);
+    yarn_reg = utils.run(
+      'yarn config get npmRegistryServer',
+      { stdio: 'pipe' },
+      true
+    );
   } catch (e) {
-    // Do nothing
+    console.log('WARNING: unable to get registry from yarn config');
   }
   yarn_reg = yarn_reg || 'https://registry.yarnpkg.com';
   const lock_file = path.join(package_dir, 'yarn.lock');
