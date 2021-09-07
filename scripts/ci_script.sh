@@ -390,6 +390,7 @@ if [[ $GROUP == usage ]]; then
     pip install -q pexpect
     python scripts/create_theme.py
     mv foo packages
+    jlpm install
     jlpm run integrity
     jlpm run build:packages
     jlpm run build:dev
