@@ -1979,16 +1979,6 @@ namespace Private {
             });
             break;
           }
-          if (sessionContext.pendingInput) {
-            void showDialog({
-              title: trans.__('Cell not executed due to pending input'),
-              body: trans.__(
-                'The cell has not been executed to avoid kernel deadlock as there is another pending input! Submit your pending input and try again.'
-              ),
-              buttons: [Dialog.okButton({ label: trans.__('Ok') })]
-            });
-            return Promise.resolve(false);
-          }
           const deletedCells = notebook.model?.deletedCells ?? [];
           executionScheduled.emit({ notebook, cell });
           return CodeCell.execute(cell as CodeCell, sessionContext, {
