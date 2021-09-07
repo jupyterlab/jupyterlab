@@ -172,7 +172,6 @@ export type ShellMessageType =
   | 'is_complete_request'
   | 'kernel_info_reply'
   | 'kernel_info_request'
-  | 'shutdown_reply'
   | 'shutdown_request';
 
 /**
