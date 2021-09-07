@@ -1,7 +1,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-$ErrorActionPreference = 'stop'
+$Env:YARN_ENABLE_GLOBAL_CACHE = "1"
+$ErrorActionPreference = "stop"
 
 # create jupyter base dir (needed for config retrieval)
 New-Item -Path $Env:USERPROFILE\.jupyter -ItemType "directory" -Force
