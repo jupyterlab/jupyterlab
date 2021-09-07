@@ -23749,6 +23749,36 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"test-hyphens-underscore@workspace:jupyterlab/tests/mock_packages/test-hyphens-underscore":
+  version: 0.0.0-use.local
+  resolution: "test-hyphens-underscore@workspace:jupyterlab/tests/mock_packages/test-hyphens-underscore"
+  dependencies:
+    "@jupyterlab/builder": ^3.3.0-alpha.7
+    "@jupyterlab/launcher": ^3.3.0-alpha.7
+    rimraf: ~3.0.0
+  languageName: unknown
+  linkType: soft
+
+"test-hyphens@workspace:jupyterlab/tests/mock_packages/test-hyphens":
+  version: 0.0.0-use.local
+  resolution: "test-hyphens@workspace:jupyterlab/tests/mock_packages/test-hyphens"
+  dependencies:
+    "@jupyterlab/builder": ^3.3.0-alpha.7
+    "@jupyterlab/launcher": ^3.3.0-alpha.7
+    rimraf: ~3.0.0
+  languageName: unknown
+  linkType: soft
+
+"test_no_hyphens@workspace:jupyterlab/tests/mock_packages/test_no_hyphens":
+  version: 0.0.0-use.local
+  resolution: "test_no_hyphens@workspace:jupyterlab/tests/mock_packages/test_no_hyphens"
+  dependencies:
+    "@jupyterlab/builder": ^3.3.0-alpha.7
+    "@jupyterlab/launcher": ^3.3.0-alpha.7
+    rimraf: ~3.0.0
+  languageName: unknown
+  linkType: soft
+
 "text-encoding@npm:^0.7.0":
   version: 0.7.0
   resolution: "text-encoding@npm:0.7.0"

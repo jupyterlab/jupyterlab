@@ -20,7 +20,8 @@
     "tests/test-*",
     "testutils",
     "jupyterlab/tests/mock_packages/extension",
-    "jupyterlab/tests/mock_packages/interop/*"
+    "jupyterlab/tests/mock_packages/interop/*",
+    "jupyterlab/tests/mock_packages/test*hyphens*"
   ],
   "scripts": {
     "add:sibling": "node buildutils/lib/add-sibling.js",
