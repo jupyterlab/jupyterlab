@@ -8,8 +8,13 @@ python -c "from jupyterlab.commands import build_check; build_check()"
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
 if ($Env:GROUP -eq "python") {
+    $Env:JUPYTERLAB_DIR = "$Env:HOME/share/jupyter/lab/"
+    mkdir $Env:JUPYTERLAB_DIR -ea 0
+
+    $Env:YARN_ENABLE_IMMUTABLE_INSTALLS = 1
     jupyter lab build --debug
     if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
+    Remove-Item Env:\YARN_ENABLE_IMMUTABLE_INSTALLS
 
     # Run the python tests
     python -m pytest
