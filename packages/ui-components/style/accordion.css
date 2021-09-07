@@ -1,0 +1,18 @@
+.lm-AccordionPanel .jp-AccordionPanel-title {
+  box-sizing: border-box;
+  background: #e5e5e500;
+  border-bottom: none;
+  font: 12px Helvetica, Arial, sans-serif;
+  min-height: 25px;
+  max-height: 25px;
+  min-width: 35px;
+  line-height: 20px;
+  margin: 0px;
+}
+
+.lm-AccordionPanel[data-orientation='horizontal'] > .jp-AccordionPanel-title {
+  /* Title is rotated for horizontal accordion panel using CSS */
+  display: block;
+  transform-origin: top left;
+  transform: rotate(-90deg) translate(-100%);
+}
