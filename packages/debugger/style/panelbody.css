@@ -6,7 +6,7 @@
   min-height: 25px;
   max-height: 25px;
   min-width: 35px;
-  line-height: 20px;
+  line-height: 25px;
   margin: 0px;
 }
 
@@ -15,4 +15,14 @@
   display: block;
   transform-origin: top left;
   transform: rotate(-90deg) translate(-100%);
+}
+
+.jp-DebuggerSidebar-panel-header-IconExpanding {
+  transform: rotate(-90deg);
+  margin-top: 8px;
+}
+
+.jp-DebuggerSidebar-panel-header-IconContracting  {
+  transform: rotate(0deg);
+  margin-top: 8px;
 }

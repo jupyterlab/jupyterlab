@@ -9,6 +9,7 @@
 @import './sidebar.css';
 @import './sources.css';
 @import './variables.css';
+@import './panelbody.css';
 
 .jp-left-truncated {
   overflow: hidden;

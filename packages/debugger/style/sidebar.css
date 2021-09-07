@@ -57,3 +57,7 @@
   background: var(--jp-layout-color2);
   box-shadow: none;
 }
+
+.jp-DebuggerSidebar-body .lm-SplitPanel-handle.p-SplitPanel-handle:hover {
+  background: var(--jp-layout-color3);
+}

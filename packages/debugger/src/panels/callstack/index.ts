@@ -30,7 +30,8 @@ export class Callstack extends Panel {
       'continue',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.continue
+        id: commands.continue,
+        label: ''
       })
     );
 
@@ -38,7 +39,8 @@ export class Callstack extends Panel {
       'terminate',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.terminate
+        id: commands.terminate,
+        label: ''
       })
     );
 
@@ -46,7 +48,8 @@ export class Callstack extends Panel {
       'step-over',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.next
+        id: commands.next,
+        label: ''
       })
     );
 
@@ -54,7 +57,8 @@ export class Callstack extends Panel {
       'step-in',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.stepIn
+        id: commands.stepIn,
+        label: ''
       })
     );
 
@@ -62,7 +66,8 @@ export class Callstack extends Panel {
       'step-out',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.stepOut
+        id: commands.stepOut,
+        label: ''
       })
     );
 
@@ -70,7 +75,8 @@ export class Callstack extends Panel {
       'evaluate',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.evaluate
+        id: commands.evaluate,
+        label: ''
       })
     );
     this._header = header;

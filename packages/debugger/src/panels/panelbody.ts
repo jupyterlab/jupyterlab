@@ -1,6 +1,7 @@
 import { AccordionLayout, AccordionPanel } from '@lumino/widgets';
 import { ArrayExt } from '@lumino/algorithm';
-import {  SplitPanel, Title, Widget } from '@lumino/widgets';
+import { SplitPanel, Title, Widget } from '@lumino/widgets';
+import { PanelHeader } from './header';
 
 export class PanelBody extends AccordionPanel {
   constructor(options: AccordionPanel.IOptions = {}) {
@@ -13,26 +14,33 @@ export class PanelBody extends AccordionPanel {
         this.handleClick(event as MouseEvent);
         break;
       default:
-          super.handleEvent(event);
+        super.handleEvent(event);
     }
-
   }
 
   private handleClick(event: MouseEvent): void {
     const target = event.target as HTMLElement | null;
 
     if (target) {
-      if( !['DIV', 'H2', 'H3'].includes(target.nodeName) ){
-        return
+      if (!['DIV', 'H2', 'H3'].includes(target.nodeName)) {
+        return;
       }
-      
-      const index = ArrayExt.findFirstIndex(this.titles, (title) => {
+
+      const index = ArrayExt.findFirstIndex(this.titles, title => {
         return title.contains(target);
       });
-
       if (index >= 0) {
         event.preventDefault();
         event.stopPropagation();
+
+        const title = this.titles[index];
+        const headerIcon = title.firstChild?.firstChild
+          ?.firstChild as HTMLElement;
+        if (headerIcon) {
+          const classList = headerIcon.classList;
+          classList.toggle(PanelHeader.ICON_EXPANDING_CLASS);
+          classList.toggle(PanelHeader.ICON_CONTRACTING_CLASS);
+        }
 
         const widget = (this.layout as AccordionLayout).widgets[index];
         if (widget.isHidden) {
@@ -47,13 +55,10 @@ export class PanelBody extends AccordionPanel {
       }
     }
   }
-
 }
 
 export namespace DebuggerPanelBody {
-
-
-export class Renderer extends SplitPanel.Renderer  {
+  export class Renderer extends SplitPanel.Renderer {
     /**
      * A selector which matches any title node in the accordion.
      */
@@ -79,18 +84,18 @@ export class Renderer extends SplitPanel.Renderer  {
      */
     createSectionTitle(data: Title<Widget>): HTMLElement {
       //@ts-ignore
-      const header : Widget =  data.owner.header
-      
-      const handle =  document.createElement('h3');
+      const header: Widget = data.owner.header;
+
+      const handle = document.createElement('h3');
       handle.setAttribute('role', 'button');
       handle.setAttribute('tabindex', '0');
       handle.id = this.createTitleKey(data);
       handle.className = this.titleClassName;
-      if(header){
+      if (header) {
         console.log('adding', header.node);
-        header.processMessage(Widget.Msg.BeforeAttach)
-        handle.appendChild(header.node)
-        header.processMessage(Widget.Msg.AfterAttach)
+        header.processMessage(Widget.Msg.BeforeAttach);
+        handle.appendChild(header.node);
+        header.processMessage(Widget.Msg.AfterAttach);
       }
       return handle;
     }
@@ -118,5 +123,4 @@ export class Renderer extends SplitPanel.Renderer  {
     private _titleID = 0;
     private _titleKeys = new WeakMap<Title<Widget>, string>();
   }
-
 }
