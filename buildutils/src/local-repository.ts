@@ -130,6 +130,9 @@ packages:
     child_process.execSync(
       `yarn config set npmRegistryServer "${local_registry}"`
     );
+    child_process.execSync(
+      `yarn config set unsafeHttpWhitelist --json '["localhost"]'`
+    );
   } catch (e) {
     console.log('WARNING: unable to set registry in yarn config');
   }
@@ -217,9 +220,11 @@ async function stopLocalRegistry(out_dir: string) {
     child_process.execSync(
       `yarn config set npmRegistryServer ${data.prev_yarn}`
     );
+    child_process.execSync(`yarn config unset unsafeHttpWhitelist`);
   } else {
     try {
       child_process.execSync(`yarn config unset npmRegistryServer`);
+      child_process.execSync(`yarn config unset unsafeHttpWhitelist`);
     } catch (e) {
       console.log(
         'WARNING: unable to revert registry to previous value in yarn config'
