@@ -1,7 +1,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-$ErrorActionPreference = 'stop'
+$Env:YARN_ENABLE_GLOBAL_CACHE = "1"
+$ErrorActionPreference = "stop"
 
 python -c "from jupyterlab.commands import build_check; build_check()"
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
