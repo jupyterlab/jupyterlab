@@ -162,11 +162,12 @@ packages:
           loginPs.stdin.write(email + '\n');
           break;
         default:
-          reject(`Unexpected prompt: "${data}"`);
-      }
-      if (data.indexOf('Logged in as') !== -1) {
-        loginPs.stdin.end();
-        // do not accept here yet, the token may not have been written
+          if (data.indexOf('Logged in as') !== -1) {
+            loginPs.stdin.end();
+            // do not accept here yet, the token may not have been written
+          } else {
+            reject(`Unexpected prompt: "${data}"`);
+          }
       }
       loginPs.stderr.on('data', (chunk: string) => {
         const data = Buffer.from(chunk, 'utf-8').toString().trim();
