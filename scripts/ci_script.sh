@@ -71,12 +71,8 @@ if [[ $GROUP == integrity2 ]]; then
     # Make sure we can build for release
     jlpm run build:dev:prod:release
 
-    jlpm config set prefix ~/.yarn
-
     # Make sure we have CSS that can be converted with postcss
-    jlpm global add postcss postcss-cli
-
-    ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
+    jlpm dlx -p postcss -p postcss-cli postcss packages/**/style/*.css --dir /tmp --config scripts/postcss.config.js
 
     # run twine check on the python build assets.
     # this must be done before altering any versions below.
