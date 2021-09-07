@@ -57,14 +57,12 @@ const notice =
   }
 });
 
+// base staging lockfile on repo-top lockfile
+fs.copySync(path.join('.', 'yarn.lock'), path.join(staging, 'yarn.lock'));
+
 // Create a new yarn.lock file to ensure it is correct.
 utils.run('jlpm', { cwd: staging });
-try {
-  utils.run('jlpm yarn-deduplicate -s fewer --fail', { cwd: staging });
-} catch {
-  // re-run install if we deduped packages!
-  utils.run('jlpm', { cwd: staging });
-}
+utils.run('jlpm dedupe', { cwd: staging });
 
 // Build the core assets.
 utils.run('jlpm run build:prod:release', { cwd: staging });

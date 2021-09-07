@@ -306,6 +306,10 @@
       "yjs"
     ],
     "linkedPackages": {
+      "@jupyterlab/builder": "../builder",
+      "@jupyterlab/buildutils": "../buildutils",
+      "@jupyterlab/template": "../buildutils/template",
+      "@jupyterlab/galata": "../galata",
       "@jupyterlab/application": "../packages/application",
       "@jupyterlab/application-extension": "../packages/application-extension",
       "@jupyterlab/apputils": "../packages/apputils",
@@ -397,11 +401,8 @@
       "@jupyterlab/vdom": "../packages/vdom",
       "@jupyterlab/vdom-extension": "../packages/vdom-extension",
       "@jupyterlab/vega5-extension": "../packages/vega5-extension",
-      "@jupyterlab/builder": "../builder",
-      "@jupyterlab/buildutils": "../buildutils",
-      "@jupyterlab/template": "../buildutils/template",
-      "@jupyterlab/galata": "../galata",
       "@jupyterlab/testutils": "../testutils"
     }
-  }
+  },
+  "packageManager": "yarn@3.0.1"
 }
