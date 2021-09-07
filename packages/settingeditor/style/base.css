@@ -63,10 +63,10 @@
   min-width: 175px;
   max-width: 275px;
   overflow-y: scroll;
+  background-color: var(--jp-layout-color2);
 }
 
 #setting-editor .jp-PluginList ul {
-  background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   list-style-type: none;
@@ -236,6 +236,11 @@
   overflow: hidden;
 }
 
+#setting-editor .jp-FormComponent {
+  display: flex;
+  align-items: center;
+}
+
 #setting-editor .jp-SettingsTableEditor tr {
   color: var(--jp-ui-font-color2);
   height: var(--jp-private-settingeditor-row-height);
@@ -274,6 +279,12 @@
 #setting-editor .jp-SettingsHeader-Name {
   text-transform: inherit;
   font-size: var(--jp-content-font-size3);
+}
+
+#setting-editor .jp-modifiedIndicator {
+  width: 5px;
+  background-color: var(--jp-brand-color2);
+  height: 24px;
 }
 
 #setting-editor .jp-SettingsEditor {

@@ -8,14 +8,15 @@ import {
   FormComponentRegistry,
   TextInput
 } from '@jupyterlab/formeditor';
-import { checkIcon } from '@jupyterlab/ui-components';
 
 export const renderDropdown = (
   props: FormComponentRegistry.IRendererProps
 ): any => {
   return (
-    <div>
-      {props.uihints.default !== props.value ? <checkIcon.react /> : undefined}
+    <div className="jp-FormComponent">
+      {props.uihints.default !== props.value ? (
+        <div className="jp-modifiedIndicator" />
+      ) : undefined}
       <DropDown
         value={props.value}
         handleChange={props.handleChange}
@@ -29,8 +30,10 @@ export const renderTextInput = (
   props: FormComponentRegistry.IRendererProps
 ): any => {
   return (
-    <div>
-      {props.uihints.default !== props.value ? <checkIcon.react /> : undefined}
+    <div className="jp-FormComponent">
+      {props.uihints.default !== props.value ? (
+        <div className="jp-modifiedIndicator" />
+      ) : undefined}
       <TextInput
         label={props.uihints.title}
         description={props.uihints.description}
@@ -54,10 +57,12 @@ export const renderCheckbox = (
 ): any => {
   return (
     <div
-      className="jp-metadataEditor-formInput"
+      className="jp-FormComponent"
       key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
     >
-      {props.uihints.default !== props.value ? <checkIcon.react /> : undefined}
+      {props.uihints.default !== props.value ? (
+        <div className="jp-modifiedIndicator" />
+      ) : undefined}
       <FormControlLabel
         className="jp-metadataEditor-formInput"
         key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
@@ -80,7 +85,7 @@ export const renderStringArray = (
 ): any => {
   return (
     <div
-      className="jp-metadataEditor-formInput"
+      className="jp-metadataEditor-formInput jp-FormComponent"
       key={`${props.uihints.title?.replace(' ', '')}Array`}
       style={{ flexBasis: '100%' }}
     >

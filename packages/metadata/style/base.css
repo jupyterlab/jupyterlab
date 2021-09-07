@@ -149,6 +149,7 @@
 .jp-metadataEditor-formInput {
   margin: 10px;
   flex-basis: 100%;
+  padding-left: 11px;
 }
 
 .jp-metadata-editor {
