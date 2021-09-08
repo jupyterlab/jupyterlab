@@ -26,7 +26,7 @@
   ],
   "scripts": {
     "build": "jlpm run tsc -b",
-    "build:all": "npm run build",
+    "build:all": "$npm_execpath run build",
     "build:test": "jlpm run tsc --build tsconfig.test.json",
     "clean": "jlpm run rimraf lib && jlpm run rimraf tsconfig.tsbuildinfo",
     "docs": "jlpm node build-doc-index.js",
