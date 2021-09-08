@@ -4,8 +4,8 @@
   "private": true,
   "main": "./index.js",
   "scripts": {
-    "build": "npm run clean && yarn run build-labextension --development --core-path ../core_package .",
-    "clean": "yarn run rimraf ../labextensions/@jupyterlab/example-federated-md"
+    "build": "jlpm run clean && jlpm run build-labextension --development --core-path ../core_package .",
+    "clean": "jlpm run rimraf ../labextensions/@jupyterlab/example-federated-md"
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.21",

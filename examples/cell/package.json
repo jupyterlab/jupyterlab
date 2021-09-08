@@ -3,8 +3,8 @@
   "version": "4.0.0-alpha.21",
   "private": true,
   "scripts": {
-    "build": "yarn run tsc -p src && yarn run webpack",
-    "clean": "yarn run rimraf build"
+    "build": "jlpm run tsc -p src && jlpm run webpack",
+    "clean": "jlpm run rimraf build"
   },
   "dependencies": {
     "@jupyter/ydoc": "^0.3.4",
