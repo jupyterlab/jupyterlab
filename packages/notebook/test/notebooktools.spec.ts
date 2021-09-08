@@ -15,7 +15,7 @@ import {
   NotebookPanel,
   NotebookTools,
   NotebookTracker
-} from '../src';
+} from '..';
 import * as utils from './utils';
 
 class LogTool extends NotebookTools.Tool {
