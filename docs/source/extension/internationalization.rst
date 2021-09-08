@@ -78,7 +78,7 @@ the schema. The following example will pick the default value for ``myprop`` pro
         "domain": "my_jlab_extension"
     }
 
-In the example above, a specific domain in which the translation are defined is also
+In the example above, a specific domain in which the translations are defined is also
 specified (here ``my_jlab_extension``). If no domain is specified, it defaults to
 ``jupyterlab``.
 
