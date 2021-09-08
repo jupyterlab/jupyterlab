@@ -52,7 +52,13 @@ function ensurePackage(p) {
   }
 
   if (!current) {
-    childProcess.execSync('$npm_execpath run build', {
+    // this script gets called as part of the dev install of the `jupyterlab` py pkg.
+    // These cmds use `yarn` instead of `jlpm` as `jlpm` may not be properly installed yet
+    childProcess.execSync('yarn run clean', {
+      stdio: [0, 1, 2],
+      cwd: path.resolve('./' + p)
+    });
+    childProcess.execSync('yarn run build', {
       stdio: [0, 1, 2],
       cwd: path.resolve('./' + p)
     });
