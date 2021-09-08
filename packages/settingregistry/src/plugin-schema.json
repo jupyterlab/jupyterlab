@@ -6,6 +6,22 @@
   "type": "object",
   "additionalProperties": true,
   "properties": {
+    "jupyter.lab.internationalization": {
+      "type": "object",
+      "properties": {
+        "selectors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "jupyter.lab.menus": {
       "type": "object",
       "properties": {
