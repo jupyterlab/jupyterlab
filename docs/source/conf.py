@@ -87,8 +87,10 @@ release = version_ns['__version__']
 # for a list of supported languages.
 #
 # This is also used if you do content translation via gettext catalogs.
-# Usually you set "language" from the command line for these cases.
-language = None
+# language = None # Must be set from the command line to generate various languages
+
+locale_dirs = ['locale/']
+gettext_compact = False
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -276,7 +278,9 @@ def setup(app):
     dest = osp.join(HERE, 'getting_started/changelog.md')
     shutil.copy(osp.join(HERE, '..', '..', 'CHANGELOG.md'), dest)
     app.add_css_file('css/custom.css')  # may also be an URL
-    build_api_docs(app.outdir)
+    # Skip we are dealing with internationalization
+    if os.path.basename(app.outdir) != "gettext":
+        build_api_docs(app.outdir)
 
     copy_code_files(osp.join(app.srcdir, SNIPPETS_FOLDER))
 
