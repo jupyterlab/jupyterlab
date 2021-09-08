@@ -4,7 +4,9 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../application"
@@ -22,13 +24,13 @@
       "path": "../rendermime"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     },
     {
       "path": "../vdom"
-    },
-    {
-      "path": "../translation"
     }
   ]
 }
