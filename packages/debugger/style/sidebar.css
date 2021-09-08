@@ -31,6 +31,10 @@
   height: var(--jp-debugger-header-height);
 }
 
+.jp-DebuggerSidebar .jp-stack-panel-header .jp-Toolbar {
+  background: transparent;
+}
+
 .jp-DebuggerSidebar > .jp-stack-panel-header {
   background-color: var(--jp-layout-color1);
 }

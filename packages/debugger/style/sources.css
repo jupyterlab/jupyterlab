@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-DebuggerSources {
+  min-height: 50px;
+}
+
 [data-jp-debugger='true'].jp-Editor .jp-mod-readOnly {
   background: var(--jp-layout-color2);
   height: 100%;
@@ -13,7 +17,7 @@
 }
 
 .jp-DebuggerSources-body {
-  height: calc(100% - var(--jp-statusbar-height));
+  height: 100%;
 }
 
 .jp-DebuggerSources-header > div > span {

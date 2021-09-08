@@ -44,13 +44,14 @@ export class Sources extends Panel {
     );
 
     this.addWidget(body);
+    this.addClass('jp-DebuggerSources');
   }
 
-  get header(): PanelHeader{
+  get header(): PanelHeader {
     return this._header;
   }
 
-  private _header:  PanelHeader;
+  private _header: PanelHeader;
 }
 
 /**
