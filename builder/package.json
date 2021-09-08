@@ -27,10 +27,10 @@
     "lib/*.js"
   ],
   "scripts": {
-    "build": "yarn run tsc",
-    "build:all": "yarn run build",
-    "clean": "yarn run rimraf lib && yarn run rimraf tsconfig.tsbuildinfo",
-    "watch": "yarn run -w --listEmittedFiles"
+    "build": "jlpm run tsc",
+    "build:all": "jlpm run build",
+    "clean": "jlpm run rimraf lib && jlpm run rimraf tsconfig.tsbuildinfo",
+    "watch": "jlpm run -w --listEmittedFiles"
   },
   "dependencies": {
     "@jupyterlab/buildutils": "^3.3.0-alpha.7",

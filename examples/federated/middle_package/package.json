@@ -3,8 +3,8 @@
   "version": "2.4.0-alpha.7",
   "private": true,
   "scripts": {
-    "build": "npm run clean && yarn run build-labextension --core-path ../core_package .",
-    "clean": "yarn run rimraf ../labextensions/@jupyterlab/example-federated-middle"
+    "build": "jlpm run clean && jlpm run build-labextension --core-path ../core_package .",
+    "clean": "jlpm run rimraf ../labextensions/@jupyterlab/example-federated-middle"
   },
   "dependencies": {
     "@lumino/coreutils": "^1.5.3"

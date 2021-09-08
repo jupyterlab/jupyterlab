@@ -52,11 +52,7 @@ function ensurePackage(p) {
   }
 
   if (!current) {
-    // childProcess.execSync('npm run clean', {
-    //   stdio: [0, 1, 2],
-    //   cwd: path.resolve('./' + p)
-    // });
-    childProcess.execSync('yarn run build', {
+    childProcess.execSync('$npm_execpath run build', {
       stdio: [0, 1, 2],
       cwd: path.resolve('./' + p)
     });

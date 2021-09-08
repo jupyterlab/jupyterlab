@@ -3,8 +3,8 @@
   "version": "3.3.0-alpha.7",
   "private": true,
   "scripts": {
-    "build": "yarn run webpack",
-    "clean": "yarn run rimraf build"
+    "build": "jlpm run webpack",
+    "clean": "jlpm run rimraf build"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.7",

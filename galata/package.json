@@ -30,16 +30,16 @@
   ],
   "scripts": {
     "build": "jlpm run clean && jlpm run build:galata && jlpm run build:inpage",
-    "build:all": "yarn run build",
-    "build:galata": "tsc -b",
-    "build:inpage": "webpack --mode=production",
-    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "build:all": "jlpm run build",
+    "build:galata": "jlpm run tsc -b",
+    "build:inpage": "jlpm run webpack --mode=production",
+    "clean": "jlpm run rimraf lib tsconfig.tsbuildinfo",
     "start": "jupyter lab --config ./jupyter_server_config.py",
     "start:detached": "(jlpm run start&)",
-    "test": "playwright test",
-    "test:debug": "PWDEBUG=1 playwright test",
-    "test:report": "http-server ./playwright-report -a localhost -o",
-    "test:update": "playwright test --update-snapshots"
+    "test": "jlpm run playwright test",
+    "test:debug": "PWDEBUG=1 jlpm run playwright test",
+    "test:report": "jlpm run http-server ./playwright-report -a localhost -o",
+    "test:update": "jlpm run playwright test --update-snapshots"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.7",

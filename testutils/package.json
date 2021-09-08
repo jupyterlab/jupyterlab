@@ -25,15 +25,15 @@
     "tsconfigtestbase.json"
   ],
   "scripts": {
-    "build": "yarn run tsc -b",
-    "build:all": "yarn run build",
-    "build:test": "yarn run tsc --build tsconfig.test.json",
-    "clean": "yarn run rimraf lib && yarn run rimraf tsconfig.tsbuildinfo",
-    "test": "yarn run jest",
-    "test:cov": "yarn run jest --collect-coverage",
-    "test:debug": "yarn node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "yarn node --inspect-brk node_modules/.bin/jest --runInBand --watch",
-    "watch": "yarn run tsc -b --watch"
+    "build": "jlpm run tsc -b",
+    "build:all": "jlpm run build",
+    "build:test": "jlpm run tsc --build tsconfig.test.json",
+    "clean": "jlpm run rimraf lib && jlpm run rimraf tsconfig.tsbuildinfo",
+    "test": "jlpm run jest",
+    "test:cov": "jlpm run jest --collect-coverage",
+    "test:debug": "jlpm node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "jlpm node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "watch": "jlpm run tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/apputils": "^3.3.0-alpha.7",

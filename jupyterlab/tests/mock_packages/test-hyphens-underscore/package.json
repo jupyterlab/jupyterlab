@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build:labextension": "jupyter labextension build .",
-    "clean": "rimraf ./test_hyphens_underscore/labextension"
+    "clean": "jlpm run rimraf ./test_hyphens_underscore/labextension"
   },
   "dependencies": {
     "@jupyterlab/launcher": "^3.3.0-alpha.7"
