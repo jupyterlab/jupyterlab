@@ -545,7 +545,7 @@ export async function ensurePackage(
     (pkgPath.indexOf('packages') == -1 || buildScript.indexOf('tsc') == -1) &&
     !isPrivate
   ) {
-    data.scripts['build:all'] = 'yarn run build';
+    data.scripts['build:all'] = 'jlpm run build';
   }
 
   // Ensure the main module has an @packageDocumentation comment
