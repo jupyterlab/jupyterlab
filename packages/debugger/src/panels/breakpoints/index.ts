@@ -55,7 +55,6 @@ export class Breakpoints extends Panel {
       })
     );
 
-    //this.addWidget(header);
     this.addWidget(body);
     this.addClass('jp-DebuggerBreakpoints');
   }
@@ -64,7 +63,12 @@ export class Breakpoints extends Panel {
     return this._header;
   }
 
+  /**
+   * The toolbar widget, it is not attached to current widget
+   * but is rendered by the sidebar panel.
+   */
   private _header: PanelHeader;
+
   readonly clicked = new Signal<this, IDebugger.IBreakpoint>(this);
 }
 

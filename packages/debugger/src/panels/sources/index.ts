@@ -51,6 +51,10 @@ export class Sources extends Panel {
     return this._header;
   }
 
+  /**
+   * The toolbar widget, it is not attached to current widget
+   * but is rendered by the sidebar panel.
+   */
   private _header: PanelHeader;
 }
 

@@ -1,24 +1,42 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { AccordionLayout, AccordionPanel } from '@lumino/widgets';
 import { ArrayExt } from '@lumino/algorithm';
 import { SplitPanel, Title, Widget } from '@lumino/widgets';
 import { PanelHeader } from './header';
+import { Breakpoints } from './breakpoints';
+import { Callstack } from './callstack';
+import { Sources } from './sources';
+import { Variables } from './variables';
+
+type DebuggerPanelWidget = Breakpoints | Callstack | Sources | Variables;
 
 export class PanelBody extends AccordionPanel {
   constructor(options: AccordionPanel.IOptions = {}) {
     super({ ...options, renderer: new DebuggerPanelBody.Renderer() });
   }
 
+  /**
+   * Override mouse click event handler of `AccordionPanel` with
+   * `this.handleClick`
+   */
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'click':
-        this.handleClick(event as MouseEvent);
+        this._handleClick(event as MouseEvent);
         break;
       default:
         super.handleEvent(event);
     }
   }
 
-  private handleClick(event: MouseEvent): void {
+  /**
+   * onClick event handler, this method will toggle widget visibility on
+   * click. Since the toolbar contains buttons, icons..., we need to check
+   * the type of `env.target` before activating handler.
+   */
+  private _handleClick(event: MouseEvent): void {
     const target = event.target as HTMLElement | null;
 
     if (target) {
@@ -83,8 +101,7 @@ export namespace DebuggerPanelBody {
      * @returns A element representing the section title.
      */
     createSectionTitle(data: Title<Widget>): HTMLElement {
-      //@ts-ignore
-      const header: Widget = data.owner.header;
+      const header: Widget = (data.owner as DebuggerPanelWidget).header;
 
       const handle = document.createElement('h3');
       handle.setAttribute('role', 'button');
@@ -120,7 +137,14 @@ export namespace DebuggerPanelBody {
       return key;
     }
 
+    /**
+     * Counter for number of titles added.
+     */
     private _titleID = 0;
+
+    /**
+     * Mapping to hold the `Title` widget of current panel.
+     */
     private _titleKeys = new WeakMap<Title<Widget>, string>();
   }
 }

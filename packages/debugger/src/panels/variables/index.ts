@@ -104,7 +104,6 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
 
     this._header.toolbar.addItem('view-VariableTableView', tableViewButton);
 
-    this.addWidget(this._header);
     this.addWidget(this._tree);
     this.addWidget(this._table);
     this.addClass('jp-DebuggerVariables');
@@ -158,7 +157,12 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
     this._tree.node.style.height = `${height}px`;
   }
 
+  /**
+   * The toolbar widget, it is not attached to current widget
+   * but is rendered by the sidebar panel.
+   */
   private _header: VariablesHeader;
+
   private _tree: VariablesBodyTree;
   private _table: VariablesBodyGrid;
 }

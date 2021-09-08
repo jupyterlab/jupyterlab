@@ -23,6 +23,7 @@ export class PanelHeader extends Widget {
   constructor(translator?: ITranslator) {
     super({ node: document.createElement('div') });
     this.node.classList.add('jp-stack-panel-header');
+    this.node.classList.add('jp-PanelHeader');
 
     translator = translator || nullTranslator;
     this._trans = translator.load('jupyterlab');
@@ -30,15 +31,10 @@ export class PanelHeader extends Widget {
 
     this._expandIcon = new Widget({ node: document.createElement('div') });
 
-    this._iconAngle = 0;
     this._iconElement = caretDownEmptyIcon.element({
       container: this._expandIcon.node
     });
     this._iconElement.classList.add(PanelHeader.ICON_EXPANDING_CLASS);
-
-    this._paddingDiv = new Widget({ node: document.createElement('div') });
-    this._paddingDiv.node.style.flexGrow = '1';
-    this._paddingDiv.node.style.height = '100%';
 
     this.layout = new PanelLayout();
     this.toolbar = new Toolbar();
@@ -46,33 +42,7 @@ export class PanelHeader extends Widget {
     this.layout.addWidget(this._expandIcon);
     this.layout.addWidget(this.titleWidget);
     this.layout.addWidget(this.toolbar);
-    this.layout.addWidget(this._paddingDiv);
   }
-
-  /**
-   *  Toggler for expanding/contracting icon of header
-   *
-   * @param angle - angle of rotation of icon
-   */
-  public toggleIcon(angle: 0 | -90): void {
-    if (angle !== this._iconAngle) {
-      this._iconElement.classList.remove(
-        PanelHeader.ICON_EXPANDING_CLASS,
-        PanelHeader.ICON_CONTRACTING_CLASS
-      );
-      if (angle === -90) {
-        this._iconElement.classList.add(PanelHeader.ICON_CONTRACTING_CLASS);
-      } else {
-        this._iconElement.classList.add(PanelHeader.ICON_EXPANDING_CLASS);
-      }
-      this._iconAngle = angle;
-    }
-  }
-
-  /**
-   * Angle of expanding / contracting icon.
-   */
-  private _iconAngle: number;
 
   /**
    * HTML element which hold the `caretDownEmptyIcon` icon.
@@ -83,12 +53,6 @@ export class PanelHeader extends Widget {
    * Expanding / contracting icon widget.
    */
   private _expandIcon: Widget;
-
-  /**
-   * A widget that stretch all remaining width of header.
-   * It is used to receive click event.
-   */
-  private _paddingDiv: Widget;
 
   /**
    * The translation service.
