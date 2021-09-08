@@ -5,7 +5,12 @@
 set -ex
 set -o pipefail
 
+# use a single global cache dir
 export YARN_ENABLE_GLOBAL_CACHE=1
+
+# display verbose output for pkg builds run during `jlpm install`
+export YARN_ENABLE_INLINE_BUILDS=1
+
 
 # Building should work without yarn installed globally, so uninstall the
 # global yarn installed by default.
