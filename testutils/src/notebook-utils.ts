@@ -171,7 +171,7 @@ export namespace NBTestUtils {
   }
 
   export function createNotebookWidgetFactory(
-  toolbarFactory?: (widget: NotebookPanel) => DocumentRegistry.IToolbarItem[]
+    toolbarFactory?: (widget: NotebookPanel) => DocumentRegistry.IToolbarItem[]
   ): NotebookWidgetFactory {
     return new NotebookWidgetFactory({
       name: 'notebook',

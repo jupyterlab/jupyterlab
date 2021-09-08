@@ -8,7 +8,7 @@ import {
   Notebook,
   NotebookPanel,
   NotebookWidgetFactory
-} from '../src';
+} from '..';
 
 /**
  * Local versions of the NBTestUtils that import from `src` instead of `lib`.
