@@ -49,6 +49,39 @@ You could also look at the following pull requests on the
 There are two options: you can either add your extension to the JupyterLab `language packs <https://github.com/jupyterlab/language-packs/#adding-a-new-extension>`_
 or you can create a python package to distribute your extension translation (see `test example <https://github.com/jupyterlab/jupyterlab_server/tree/master/jupyterlab_server/tests/translations/jupyterlab-some-package>`_).
 
+
+Settings translation
+--------------------
+
+Settings schema can also be translated. The translatable strings are extracted using regex selectors
+on JSON path. By default, the following selectors are used:
+
+- ``title``: Settings title
+- ``description``: Settings description
+- ``properties/.*/title``: Property titles
+- ``properties/.*/description``: Property descriptions
+- ``definitions/.*/properties/.*/title``: Property titles in definitions
+- ``definitions/.*/properties/.*/description``: Property descriptions in definitions
+- ``jupyter\.lab\.setting-icon-label``: Settings icon label in JupyterLab
+- ``jupyter\.lab\.menus/.*/label``: Menu label in JupyterLab
+- ``jupyter\.lab\.toolbars/.*/label``: Toolbar item label in JupyterLab
+
+Those selectors can be configured using the ``jupyter.lab.internationalization`` key in
+the schema. The following example will pick the default value for ``myprop`` property:
+
+.. code:: json
+
+    "jupyter.lab.internationalization": {
+        "selectors": [
+            "properties/myprop/default",
+        ],
+        "domain": "my_jlab_extension"
+    }
+
+In the example above, a specific domain in which the translation are defined is also
+specified (here ``my_jlab_extension``). If no domain is specified, it defaults to
+``jupyterlab``.
+
 .. _internationalization-rules:
 
 Rules
