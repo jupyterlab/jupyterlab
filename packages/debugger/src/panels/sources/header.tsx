@@ -27,7 +27,6 @@ export class SourcesHeader extends PanelHeader {
     this.layout.insertWidget(3, sourcePath);
     this.addClass('jp-DebuggerSources-header');
   }
-
 }
 
 /**

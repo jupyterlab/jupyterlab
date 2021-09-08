@@ -108,10 +108,9 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
     this.addWidget(this._tree);
     this.addWidget(this._table);
     this.addClass('jp-DebuggerVariables');
-
   }
 
-  get header(): PanelHeader{
+  get header(): PanelHeader {
     return this._header;
   }
 

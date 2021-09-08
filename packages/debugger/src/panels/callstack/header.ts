@@ -15,5 +15,4 @@ export class CallstackHeader extends PanelHeader {
     super(translator);
     this.titleWidget.node.textContent = this._trans.__('Callstack');
   }
-
 }

@@ -81,15 +81,15 @@ export class Callstack extends Panel {
     );
     this._header = header;
     this.addWidget(body);
-    
+
     this.addClass('jp-DebuggerCallstack');
   }
 
-  get header(): PanelHeader{
+  get header(): PanelHeader {
     return this._header;
   }
 
-  private _header:  PanelHeader;
+  private _header: PanelHeader;
 }
 
 /**

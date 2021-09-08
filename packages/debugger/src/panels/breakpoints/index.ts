@@ -60,11 +60,11 @@ export class Breakpoints extends Panel {
     this.addClass('jp-DebuggerBreakpoints');
   }
 
-  get header(): PanelHeader{
+  get header(): PanelHeader {
     return this._header;
   }
 
-  private _header:  PanelHeader;
+  private _header: PanelHeader;
   readonly clicked = new Signal<this, IDebugger.IBreakpoint>(this);
 }
 

@@ -11,7 +11,7 @@ import { bugIcon } from '@jupyterlab/ui-components';
 
 import { Panel, SplitPanel, Widget } from '@lumino/widgets';
 
-import {PanelBody} from './panels/panelbody'
+import { PanelBody } from './panels/panelbody';
 
 import { Breakpoints as BreakpointsPanel } from './panels/breakpoints';
 
