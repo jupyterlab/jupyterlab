@@ -29,7 +29,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
     :depth: 1
 
 General Guidelines for Contributing
-------------------------------------
+-----------------------------------
 
 For general documentation about contributing to Jupyter projects, see
 the `Project Jupyter Contributor
@@ -296,6 +296,15 @@ function to get a ``Promise`` for a ``requestAnimationFrame``. We
 sometimes have to set a sentinel value inside a ``Promise`` and then
 check that the sentinel was set if we need a promise to run without
 blocking.
+
+Internationalization
+--------------------
+
+Translatable strings update
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The translatable strings update cannot occur on patch release. They 
+must be delayed on minor or major versions.
 
 Performance Testing
 -------------------
