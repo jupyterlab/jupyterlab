@@ -22,13 +22,13 @@
       "path": "../rendermime"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     },
     {
       "path": "../vdom"
-    },
-    {
-      "path": "../translation"
     }
   ]
 }

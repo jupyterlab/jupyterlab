@@ -71,13 +71,17 @@ describe('Debugging support', () => {
 
   describe('#isAvailable', () => {
     it('should return true for kernels that have support for debugging', async () => {
-      const enabled = await service.isAvailable({kernel: {name: 'xpython'}} as any);
+      const enabled = await service.isAvailable({
+        kernel: { name: 'xpython' }
+      } as any);
       expect(enabled).toBe(true);
     });
 
     it('should return false for kernels that do not have support for debugging', async () => {
       // The kernel spec are mocked in KERNELSPECS
-      const enabled = await service.isAvailable({kernel: {name: 'python3'}} as any);
+      const enabled = await service.isAvailable({
+        kernel: { name: 'python3' }
+      } as any);
       expect(enabled).toBe(false);
     });
   });
