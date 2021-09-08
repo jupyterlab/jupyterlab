@@ -989,9 +989,15 @@ export namespace DocumentRegistry {
    */
   export interface IWidgetFactoryOptions<T extends Widget = Widget> {
     /**
-     * The name of the widget to display in dialogs.
+     * A unique name identifying of the widget.
      */
     readonly name: string;
+
+    /**
+     * The label of the widget to display in dialogs.
+     * If not given, name is used instead.
+     */
+    readonly label?: string;
 
     /**
      * The file types the widget can view.
@@ -1515,7 +1521,7 @@ namespace Private {
   /**
    * Get the extension name of a path.
    *
-   * @param file - string.
+   * @param path - string.
    *
    * #### Notes
    * Dotted filenames (e.g. `".table.json"` are allowed).

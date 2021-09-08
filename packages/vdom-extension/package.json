@@ -37,6 +37,7 @@
     "@jupyterlab/docregistry": "^3.3.0-alpha.7",
     "@jupyterlab/notebook": "^3.3.0-alpha.7",
     "@jupyterlab/rendermime": "^3.3.0-alpha.7",
+    "@jupyterlab/translation": "^3.3.0-alpha.7",
     "@jupyterlab/ui-components": "^3.3.0-alpha.7",
     "@jupyterlab/vdom": "^3.3.0-alpha.7"
   },

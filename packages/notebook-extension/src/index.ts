@@ -736,8 +736,11 @@ function activateWidgetFactory(
     );
   }
 
+  const trans = translator.load('jupyterlab');
+
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
+    label: trans.__('Notebook'),
     fileTypes: ['notebook'],
     modelName: 'notebook',
     defaultFor: ['notebook'],

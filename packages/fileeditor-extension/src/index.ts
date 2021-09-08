@@ -182,6 +182,7 @@ function activate(
     editorServices,
     factoryOptions: {
       name: FACTORY,
+      label: trans.__('Editor'),
       fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
       defaultFor: ['markdown', '*'], // it outranks the defaultRendered viewer.
       toolbarFactory,

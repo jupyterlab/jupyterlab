@@ -138,6 +138,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     dataType: 'string',
     documentWidgetFactoryOptions: {
       name: 'PDF',
+      // TODO: translate label
       modelName: 'base64',
       primaryFileType: 'PDF',
       fileTypes: ['PDF'],
