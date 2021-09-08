@@ -34,10 +34,10 @@
     "verdaccio.yml"
   ],
   "scripts": {
-    "build": "jlpm run tsc",
-    "build:all": "jlpm run build",
-    "clean": "jlpm run rimraf lib && jlpm run rimraf tsconfig.tsbuildinfo",
-    "watch": "jlpm run tsc -w --listEmittedFiles"
+    "build": "$npm_execpath run tsc",
+    "build:all": "$npm_execpath run build",
+    "clean": "$npm_execpath run rimraf lib && $npm_execpath run rimraf tsconfig.tsbuildinfo",
+    "watch": "$npm_execpath run tsc -w --listEmittedFiles"
   },
   "dependencies": {
     "@lumino/coreutils": "^1.5.3",

@@ -26,7 +26,7 @@
   ],
   "scripts": {
     "build": "webpack --mode=production",
-    "build:all": "jlpm run build",
+    "build:all": "$npm_execpath run build",
     "clean": "rimraf style/",
     "watch": "webpack --watch"
   },

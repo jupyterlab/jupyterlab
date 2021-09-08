@@ -4683,6 +4683,7 @@ __metadata:
     "@types/jest": ^26.0.10
     "@types/node-fetch": ^2.5.4
     child_process: ~1.0.2
+    deepmerge: ^4.2.2
     fs-extra: ^9.0.1
     identity-obj-proxy: ^3.0.0
     jest: ^26.4.2
@@ -4915,6 +4916,7 @@ __metadata:
     "@jupyterlab/docregistry": ^3.3.0-alpha.7
     "@jupyterlab/notebook": ^3.3.0-alpha.7
     "@jupyterlab/rendermime": ^3.3.0-alpha.7
+    "@jupyterlab/translation": ^3.3.0-alpha.7
     "@jupyterlab/ui-components": ^3.3.0-alpha.7
     "@jupyterlab/vdom": ^3.3.0-alpha.7
     rimraf: ~3.0.0
