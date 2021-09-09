@@ -13,7 +13,10 @@
       ]
     },
     "moduleResolution": "node",
-    "types": ["jest", "node"]
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "references": [
     {

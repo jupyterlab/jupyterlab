@@ -303,7 +303,7 @@ export async function ensurePackage(
       dirName = path.dirname(dirName);
       prefix += '../';
     }
-    tsConfigData.extends = path.join(prefix, 'tsconfigbase');
+    tsConfigData.extends = path.posix.join(prefix, 'tsconfigbase');
     utils.writeJSONFile(tsConfigPath, tsConfigData);
   }
 
