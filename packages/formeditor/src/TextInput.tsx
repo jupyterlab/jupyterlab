@@ -36,6 +36,7 @@ export interface ITextFieldProps {
   secure?: boolean;
   defaultError?: string;
   placeholder?: string;
+  multiline?: boolean;
   onChange: (value: string) => any;
 }
 
@@ -56,6 +57,7 @@ export const TextInput: React.FC<ITextFieldProps> = ({
   required,
   placeholder,
   onChange,
+  multiline,
   fieldName
 }) => {
   const [error, setError] = React.useState(defaultError);
@@ -89,7 +91,7 @@ export const TextInput: React.FC<ITextFieldProps> = ({
           required={required}
           variant="outlined"
           error={!!error}
-          multiline={typeof defaultValue !== 'string' && !numeric}
+          multiline={multiline}
           maxRows={15}
           onChange={(event): void => {
             const newValue = event.target.value;

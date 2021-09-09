@@ -12,11 +12,7 @@ import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import { find } from '@lumino/algorithm';
 import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
-import {
-  Button,
-  Link,
-  styled
-} from '@material-ui/core';
+import { Button, Link, styled } from '@material-ui/core';
 
 import * as React from 'react';
 
@@ -90,7 +86,7 @@ export class MetadataEditor extends ReactWidget {
     this.clearDirty = null;
     this.namespace = props.namespace;
     this.schemaName = props.schema;
-    this.formSchema = { '_noCategory': {} };
+    this.formSchema = {};
     this.allTags = [];
     this.onSave = props.onSave;
     this.name = props.name;
@@ -136,12 +132,11 @@ export class MetadataEditor extends ReactWidget {
             if (!category) {
               category = '_noCategory';
             }
-            if (!this.formSchema[category]) {
-              this.formSchema[category] = {};
-            }
-            this.formSchema[category][schemaProperty] = {
+            this.formSchema[schemaProperty] = {
               value: this.metadata[schemaProperty],
-              handleChange: (newValue: any) => { this.handleChange(schemaProperty, newValue); },
+              handleChange: (newValue: any) => {
+                this.handleChange(schemaProperty, newValue);
+              },
               uihints: this.schema[schemaProperty].uihints
             };
           }
@@ -186,7 +181,7 @@ export class MetadataEditor extends ReactWidget {
 
   handleChange(fieldName: string, value: any): void {
     if (this.schema[fieldName].uihints.type === 'string') {
-        this.handleTextInputChange(fieldName, value);
+      this.handleTextInputChange(fieldName, value);
     }
   }
 
@@ -478,7 +473,6 @@ export class MetadataEditor extends ReactWidget {
         <FormEditor
           componentRegistry={this.componentRegistry}
           schema={this.schema}
-          initialData={this.metadata}
           handleChange={this.handleChange}
         />
         {this.renderSaveButton()}

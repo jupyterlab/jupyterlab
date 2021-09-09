@@ -44,8 +44,23 @@ export const renderTextInput = (
         secure={props.uihints.secure}
         defaultError={props.uihints.error}
         placeholder={props.uihints.placeholder}
+        multiline={props.uihints.field_type === 'object'}
         onChange={(value: any): void => {
-          props.handleChange(value);
+          if (
+            (props.uihints.field_type === 'number' ||
+              props.uihints.field_type === 'integer') &&
+            !isNaN(value)
+          ) {
+            props.handleChange(parseInt(value));
+          } else if (props.uihints.field_type === 'object') {
+            try {
+              props.handleChange(JSON.parse(value));
+            } catch (e) {
+              props.handleChange(value);
+            }
+          } else {
+            props.handleChange(value);
+          }
         }}
       />
     </div>
@@ -72,6 +87,7 @@ export const renderCheckbox = (
             onChange={(e: any, checked: boolean) => {
               props.handleChange(checked);
             }}
+            color="primary"
           />
         }
         label={props.uihints.title}

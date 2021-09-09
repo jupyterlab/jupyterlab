@@ -20,7 +20,10 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { FormComponentRegistry, IFormComponentRegistry } from '@jupyterlab/formeditor';
+import {
+  FormComponentRegistry,
+  IFormComponentRegistry
+} from '@jupyterlab/formeditor';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   ISettingEditorTracker,
@@ -28,7 +31,7 @@ import {
   renderDropdown,
   renderStringArray,
   renderTextInput,
-  SettingEditor,
+  SettingEditor
 } from '@jupyterlab/settingeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -103,6 +106,7 @@ function activate(
   });
 
   editorRegistry.addRenderer('textinput', renderTextInput);
+  editorRegistry.addRenderer('object', renderTextInput);
   editorRegistry.addRenderer('number', renderTextInput);
   editorRegistry.addRenderer('integer', renderTextInput);
   editorRegistry.addRenderer('string', renderTextInput);

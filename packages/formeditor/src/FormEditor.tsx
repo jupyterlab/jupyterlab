@@ -13,23 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { map, toArray } from '@lumino/algorithm';
 import * as React from 'react';
-import { FormComponentRegistry, IFormComponentRegistry } from './FormComponentRegistry';
+import {
+  FormComponentRegistry,
+  IFormComponentRegistry
+} from './FormComponentRegistry';
 
 const FORM_EDITOR_CLASS = 'jp-formEditor';
 export const DIRTY_CLASS = 'jp-mod-dirty';
 
 export interface IFormEditorProps {
   schema: FormEditor.ISchema;
-  initialData: FormEditor.IData;
   handleChange: (fieldName: string, value: any) => void;
   componentRegistry: IFormComponentRegistry;
 }
 
 export namespace FormEditor {
-  export type ISchema = { [category: string]: ICategory };
-
-  export type ICategory = { [fieldName: string]: FormComponentRegistry.IRendererProps };
+  export type ISchema = {
+    [fieldName: string]: FormComponentRegistry.IRendererProps;
+  };
 
   export type IData = { [fieldName: string]: any };
 }
@@ -37,47 +40,46 @@ export namespace FormEditor {
 /**
  * Form editor widget
  */
-export const FormEditor =
-  ({
-    schema,
-    initialData,
-    handleChange,
-    componentRegistry
-  }: IFormEditorProps) => {
-  const renderField = (fieldName: string, props: FormComponentRegistry.IRendererProps) => {
-    let uihints = props.uihints;
-    uihints = {
-      ...props,
-      ...uihints
-    };
-    return componentRegistry.getRenderer(uihints.field_type ?? 'string')?.({
-      value: initialData[fieldName],
-      handleChange: (value: any) => {
-        handleChange(fieldName, value);
-      },
-      uihints
-    });
-  }
+export const FormEditor = ({ schema, componentRegistry }: IFormEditorProps) => {
+  const renderField = (
+    fieldName: string,
+    props: FormComponentRegistry.IRendererProps
+  ) => {
+    return componentRegistry.getRenderer(
+      props.uihints.field_type ?? 'string'
+    )?.(props);
+  };
 
-  const inputElements = [];
-  for (const category in schema) {
-    if (category !== '_noCategory') {
-      inputElements.push(
-        <h4
-          style={{ flexBasis: '100%', padding: '10px' }}
-          key={`${category}Category`}
-        >
-          {category}
-        </h4>
-      );
-    }
-    for (const schemaProperty in schema[category]) {
-      inputElements.push(renderField(schemaProperty, schema[category][schemaProperty]));
+  const categorizedInputElements: { [category: string]: any } = {};
+  const uncategorizedInputElements = [];
+  for (const field in schema) {
+    const props = schema[field];
+    if (props.uihints.category) {
+      const category = props.uihints.category;
+      if (!categorizedInputElements[category]) {
+        categorizedInputElements[category] = [];
+      }
+      categorizedInputElements[category].push(renderField(field, props));
+    } else {
+      uncategorizedInputElements.push(renderField(field, props));
     }
   }
   return (
     <div className={FORM_EDITOR_CLASS}>
-      {inputElements}
+      {toArray(
+        map(Object.keys(categorizedInputElements), (category: string) => {
+          return [
+            <h4
+              style={{ flexBasis: '100%', padding: '10px' }}
+              key={`${category}Category`}
+            >
+              {category}
+            </h4>,
+            ...categorizedInputElements[category]
+          ];
+        })
+      )}
+      {uncategorizedInputElements}
     </div>
   );
-}
+};
