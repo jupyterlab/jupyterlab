@@ -39,6 +39,5 @@ jobs:
           python -m pip install -U pip
           python -m pip install jupyterlab-translate~=1.0
 
-      - name: Compute hash
-        run: |
-          python scripts/i18n_check.py
+      - name: Check hash
+        run: python scripts/i18n_check.py
