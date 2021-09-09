@@ -40,15 +40,11 @@ import { DebuggerModel } from '../src/model';
 
 import { SourcesBody } from '../src/panels/sources/body';
 
-// import { SourcesHeader } from '../src/panels/sources/header';
-
 import { IDebugger } from '../src/tokens';
-import { PanelBody } from '../src/panels/panelbody';
-import { DebuggerPanelWidget } from '../src/panels/panelbody';
-import { PanelHeader } from '../src/panels/header';
-import { SourcesHeader } from '../src/panels/sources/header';
 
-// import { PanelHeader } from '../src/panels/header';
+import { PanelBody } from '../src/panels/panelbody';
+
+import { SourcesHeader } from '../src/panels/sources/header';
 
 /**
  * A test sidebar.
@@ -163,37 +159,37 @@ describe('Debugger', () => {
 
   describe('PanelBody', () => {
     let body: PanelBody;
+    let toolbarList: any;
     beforeEach(() => {
       body = sidebar.widgets[1] as PanelBody;
+      toolbarList = body.node.querySelectorAll('.jp-AccordionPanel-title');
     });
     it('should have 4 child widgets', () => {
       expect(body.widgets.length).toBe(4);
     });
 
     it('should have 4 toolbars', () => {
-      const toolbarList = body.node.querySelectorAll('.jp-stack-panel-header');
       expect(toolbarList.length).toBe(4);
     });
     describe('Variable toolbar', () => {
       let toolbar: Element;
       beforeEach(() => {
-        const toolbarList = body.node.querySelectorAll(
-          '.jp-stack-panel-header'
-        );
         toolbar = toolbarList.item(0);
       });
       it('should have expanding icon', () => {
-        const title = toolbar.querySelectorAll('svg');
-        expect(title[0].classList).toContain(
-          'jp-DebuggerSidebar-panel-header-IconExpanding'
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
         );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down-empty');
       });
       it('should have title', () => {
-        const title = toolbar.querySelectorAll('h2');
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Variables');
       });
-      it('should have two buttons', () => {
+      it('should have three buttons', () => {
         const buttons = toolbar.querySelectorAll('button');
         expect(buttons.length).toBe(3);
         expect(buttons[0].title).toBe('Tree View');
@@ -203,19 +199,18 @@ describe('Debugger', () => {
     describe('Callstack toolbar', () => {
       let toolbar: Element;
       beforeEach(() => {
-        const toolbarList = body.node.querySelectorAll(
-          '.jp-stack-panel-header'
-        );
         toolbar = toolbarList.item(1);
       });
       it('should have expanding icon', () => {
-        const title = toolbar.querySelectorAll('svg');
-        expect(title[0].classList).toContain(
-          'jp-DebuggerSidebar-panel-header-IconExpanding'
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
         );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down-empty');
       });
       it('should have title', () => {
-        const title = toolbar.querySelectorAll('h2');
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Callstack');
       });
@@ -227,19 +222,18 @@ describe('Debugger', () => {
     describe('Breakpoints toolbar', () => {
       let toolbar: Element;
       beforeEach(() => {
-        const toolbarList = body.node.querySelectorAll(
-          '.jp-stack-panel-header'
-        );
         toolbar = toolbarList.item(2);
       });
       it('should have expanding icon', () => {
-        const title = toolbar.querySelectorAll('svg');
-        expect(title[0].classList).toContain(
-          'jp-DebuggerSidebar-panel-header-IconExpanding'
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
         );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down-empty');
       });
       it('should have title', () => {
-        const title = toolbar.querySelectorAll('h2');
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Breakpoints');
       });
@@ -249,22 +243,26 @@ describe('Debugger', () => {
       });
     });
     describe('Source toolbar', () => {
-      let toolbar: PanelHeader;
+      let toolbar: Element;
       beforeEach(() => {
-        toolbar = (body.widgets[3] as DebuggerPanelWidget).header;
+        toolbar = toolbarList.item(3);
       });
       it('should have expanding icon', () => {
-        const title = toolbar.node.querySelectorAll('svg');
-        expect(title[0].classList).toContain(
-          'jp-DebuggerSidebar-panel-header-IconExpanding'
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
         );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down-empty');
       });
       it('should have title', () => {
-        const title = toolbar.titleWidget;
-        expect(title.node.innerHTML).toContain('Source');
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Sources');
       });
+
       it('should have two buttons', () => {
-        const buttons = toolbar.node.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('button');
         expect(buttons.length).toBe(2);
       });
     });
@@ -364,8 +362,8 @@ describe('Debugger', () => {
     });
 
     it('should display the source path in the header', () => {
-      const header = sidebar.sources.widgets[0] as SourcesHeader;
-      const pathWidget = header.layout.widgets[3].node.innerHTML;
+      const header = sidebar.sources.header as SourcesHeader;
+      const pathWidget = header.layout.widgets[1].node.innerHTML;
       expect(pathWidget).toContain(path);
     });
 

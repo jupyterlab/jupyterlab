@@ -38,7 +38,8 @@
   background-color: var(--jp-layout-color1);
 }
 
-.jp-DebuggerSidebar .jp-AccordionPanel-title span.lm-AccordionPanel-titleLabel, .jp-DebuggerSidebar .jp-stack-panel-header h2 {
+.jp-DebuggerSidebar .jp-AccordionPanel-title span.lm-AccordionPanel-titleLabel,
+.jp-DebuggerSidebar .jp-stack-panel-header h2 {
   text-transform: uppercase;
   font-weight: 600;
   font-size: var(--jp-ui-font-size0);

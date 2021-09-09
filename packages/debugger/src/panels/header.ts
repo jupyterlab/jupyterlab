@@ -11,7 +11,6 @@ import {
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
-
 /**
  * The base header for a debugger panels.
  */
@@ -31,7 +30,6 @@ export class PanelHeader extends Widget {
 
     this.layout.addWidget(this.toolbar);
   }
-
 
   /**
    * The translation service.

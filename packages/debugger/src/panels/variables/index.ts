@@ -32,7 +32,7 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     this._header = new PanelHeader(translator);
-    this._header.addClass('jp-DebuggerVariables-toolbar')
+    this._header.addClass('jp-DebuggerVariables-toolbar');
     this._tree = new VariablesBodyTree({
       model,
       service,

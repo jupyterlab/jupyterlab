@@ -9,7 +9,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { bugIcon } from '@jupyterlab/ui-components';
 
-import { Panel,  Widget } from '@lumino/widgets';
+import { Panel, Widget } from '@lumino/widgets';
 
 import { PanelBody } from './panels/panelbody';
 
