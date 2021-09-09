@@ -154,7 +154,7 @@ const VariablesComponent = (props: IVariablesComponentProps): JSX.Element => {
           variable => !(filter || new Set()).has(variable.evaluateName || '')
         )
         .map(variable => {
-          const key = `${variable.name}-${variable.evaluateName}-${variable.type}-${variable.value}`;
+          const key = `${variable.name}-${variable.evaluateName}-${variable.type}-${variable.value}-${variable.variablesReference}`;
           return (
             <VariableComponent
               key={key}
