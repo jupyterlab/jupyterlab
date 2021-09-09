@@ -12,7 +12,12 @@
       "@jupyterlab/*": [
         "./packages/*/src"
       ]
-    }
+    },
+    "moduleResolution": "node",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "references": [
     {

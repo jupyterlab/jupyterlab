@@ -74,7 +74,7 @@ const tsconfigPath = path.join(
 );
 const tsconfig = utils.readJSONFile(tsconfigPath);
 tsconfig.references.push({
-  path: path.join('..', '..', packageDirName)
+  path: path.posix.join('..', '..', packageDirName)
 });
 utils.writeJSONFile(tsconfigPath, tsconfig);
 
