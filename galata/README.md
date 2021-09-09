@@ -12,8 +12,6 @@ Galata is a set of helpers and fixtures for JupyterLab UI Testing using [Playwri
 - **[Rich High Level API](src/jupyterlabpage.ts)** to control and inspect JupyterLab UI programmatically
 - **[Dedicated fixtures](src/fixtures.ts)** to hooks the helpers in the Playwright Page and ensure state isolation between tests.
 
-![screencast](https://raw.githubusercontent.com/jupyterlab/jupyterlab/master/galata/media/screencast.gif)
-
 ## Getting Started
 
 ### Installation
