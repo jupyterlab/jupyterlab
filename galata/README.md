@@ -388,9 +388,9 @@ Benchmark of JupyterLab is done automatically using Playwright. The actions meas
 - Switching back to the file
 - Closing the file
 
-Two files are tested a notebook with many code cells and another with many markdown cells.
+Two files are tested: a notebook with many code cells and another with many markdown cells.
 
-The tests are place in the subfolder [test/benchmark](./test/benchmark). And they can be
+The tests are located in the subfolder [test/benchmark](./test/benchmark). And they can be
 executed with the following command:
 
 ```bash
