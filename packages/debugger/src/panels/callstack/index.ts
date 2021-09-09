@@ -80,6 +80,7 @@ export class Callstack extends Panel {
       })
     );
     this._header = header;
+    this.addWidget(header);
     this.addWidget(body);
 
     this.addClass('jp-DebuggerCallstack');

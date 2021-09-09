@@ -10,7 +10,7 @@ import { Callstack } from './callstack';
 import { Sources } from './sources';
 import { Variables } from './variables';
 
-type DebuggerPanelWidget = Breakpoints | Callstack | Sources | Variables;
+export type DebuggerPanelWidget = Breakpoints | Callstack | Sources | Variables;
 
 export class PanelBody extends AccordionPanel {
   constructor(options: AccordionPanel.IOptions = {}) {
@@ -109,10 +109,7 @@ export namespace DebuggerPanelBody {
       handle.id = this.createTitleKey(data);
       handle.className = this.titleClassName;
       if (header) {
-        console.log('adding', header.node);
-        header.processMessage(Widget.Msg.BeforeAttach);
         handle.appendChild(header.node);
-        header.processMessage(Widget.Msg.AfterAttach);
       }
       return handle;
     }

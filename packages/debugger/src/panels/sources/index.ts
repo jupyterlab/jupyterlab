@@ -42,7 +42,7 @@ export class Sources extends Panel {
         tooltip: trans.__('Open in the Main Area')
       })
     );
-
+    this.addWidget(this._header);
     this.addWidget(body);
     this.addClass('jp-DebuggerSources');
   }

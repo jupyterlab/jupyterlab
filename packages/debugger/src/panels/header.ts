@@ -23,7 +23,6 @@ export class PanelHeader extends Widget {
   constructor(translator?: ITranslator) {
     super({ node: document.createElement('div') });
     this.node.classList.add('jp-stack-panel-header');
-    this.node.classList.add('jp-PanelHeader');
 
     translator = translator || nullTranslator;
     this._trans = translator.load('jupyterlab');

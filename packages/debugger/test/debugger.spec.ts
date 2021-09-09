@@ -40,9 +40,15 @@ import { DebuggerModel } from '../src/model';
 
 import { SourcesBody } from '../src/panels/sources/body';
 
-import { SourcesHeader } from '../src/panels/sources/header';
+// import { SourcesHeader } from '../src/panels/sources/header';
 
 import { IDebugger } from '../src/tokens';
+import { PanelBody } from '../src/panels/panelbody';
+import { DebuggerPanelWidget } from '../src/panels/panelbody';
+import { PanelHeader } from '../src/panels/header';
+import { SourcesHeader } from '../src/panels/sources/header';
+
+// import { PanelHeader } from '../src/panels/header';
 
 /**
  * A test sidebar.
@@ -155,6 +161,115 @@ describe('Debugger', () => {
     });
   });
 
+  describe('PanelBody', () => {
+    let body: PanelBody;
+    beforeEach(() => {
+      body = sidebar.widgets[1] as PanelBody;
+    });
+    it('should have 4 child widgets', () => {
+      expect(body.widgets.length).toBe(4);
+    });
+
+    it('should have 4 toolbars', () => {
+      const toolbarList = body.node.querySelectorAll('.jp-stack-panel-header');
+      expect(toolbarList.length).toBe(4);
+    });
+    describe('Variable toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        const toolbarList = body.node.querySelectorAll(
+          '.jp-stack-panel-header'
+        );
+        toolbar = toolbarList.item(0);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll('svg');
+        expect(title[0].classList).toContain(
+          'jp-DebuggerSidebar-panel-header-IconExpanding'
+        );
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll('h2');
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Variables');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(3);
+        expect(buttons[0].title).toBe('Tree View');
+        expect(buttons[1].title).toBe('Table View');
+      });
+    });
+    describe('Callstack toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        const toolbarList = body.node.querySelectorAll(
+          '.jp-stack-panel-header'
+        );
+        toolbar = toolbarList.item(1);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll('svg');
+        expect(title[0].classList).toContain(
+          'jp-DebuggerSidebar-panel-header-IconExpanding'
+        );
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll('h2');
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Callstack');
+      });
+      it('should have seven buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(7);
+      });
+    });
+    describe('Breakpoints toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        const toolbarList = body.node.querySelectorAll(
+          '.jp-stack-panel-header'
+        );
+        toolbar = toolbarList.item(2);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll('svg');
+        expect(title[0].classList).toContain(
+          'jp-DebuggerSidebar-panel-header-IconExpanding'
+        );
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll('h2');
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Breakpoints');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(2);
+      });
+    });
+    describe('Source toolbar', () => {
+      let toolbar: PanelHeader;
+      beforeEach(() => {
+        toolbar = (body.widgets[3] as DebuggerPanelWidget).header;
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.node.querySelectorAll('svg');
+        expect(title[0].classList).toContain(
+          'jp-DebuggerSidebar-panel-header-IconExpanding'
+        );
+      });
+      it('should have title', () => {
+        const title = toolbar.titleWidget;
+        expect(title.node.innerHTML).toContain('Source');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.node.querySelectorAll('button');
+        expect(buttons.length).toBe(2);
+      });
+    });
+  });
+
   describe('#callstack', () => {
     it('should have a header and a body', () => {
       expect(sidebar.callstack.widgets.length).toEqual(2);
@@ -162,18 +277,6 @@ describe('Debugger', () => {
 
     it('should have the jp-DebuggerCallstack class', () => {
       expect(sidebar.callstack.hasClass('jp-DebuggerCallstack')).toBe(true);
-    });
-
-    it('should have the debug buttons', () => {
-      const node = sidebar.callstack.node;
-      const items = node.querySelectorAll('button');
-
-      expect(items.length).toEqual(7);
-      items.forEach(item => {
-        expect(Array.from(items[0].classList)).toEqual(
-          expect.arrayContaining(['jp-ToolbarButtonComponent'])
-        );
-      });
     });
 
     it('should display the stack frames', () => {
@@ -261,10 +364,9 @@ describe('Debugger', () => {
     });
 
     it('should display the source path in the header', () => {
-      const body = sidebar.sources.widgets[0] as SourcesHeader;
-      const children = toArray(body.children());
-      const sourcePath = children[2].node.querySelector('span');
-      expect(sourcePath!.innerHTML).toEqual(path);
+      const header = sidebar.sources.widgets[0] as SourcesHeader;
+      const pathWidget = header.layout.widgets[3].node.innerHTML;
+      expect(pathWidget).toContain(path);
     });
 
     it('should display the source code in the body', () => {

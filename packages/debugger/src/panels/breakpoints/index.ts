@@ -55,6 +55,7 @@ export class Breakpoints extends Panel {
       })
     );
 
+    this.addWidget(this._header);
     this.addWidget(body);
     this.addClass('jp-DebuggerBreakpoints');
   }
