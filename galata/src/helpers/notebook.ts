@@ -64,15 +64,12 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async open(name: string): Promise<boolean> {
-    const fileItem = await this.page.$(
-      `xpath=${this.filebrowser.xpBuildFileSelector(name)}`
-    );
-    if (fileItem) {
-      await fileItem.click({ clickCount: 2 });
-      await this.page.waitForSelector(Utils.xpBuildActivityTabSelector(name), {
-        state: 'visible'
-      });
+    const isListed = await this.filebrowser.isFileListedInBrowser(name);
+    if (!isListed) {
+      return false;
     }
+
+    await this.filebrowser.open(name);
 
     return await this.isOpen(name);
   }
@@ -86,9 +83,9 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async openByPath(filePath: string): Promise<boolean> {
-    await this.filebrowser.revealFileInBrowser(filePath);
-    const notebookName = path.basename(filePath);
-    return await this.open(notebookName);
+    await this.filebrowser.open(filePath);
+    const name = path.basename(filePath);
+    return await this.isOpen(name);
   }
 
   /**

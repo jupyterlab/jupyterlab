@@ -151,6 +151,59 @@ export class ContentsHelper {
   }
 
   /**
+   * Upload content as file to JupyterLab.
+   *
+   * Note: the destinationPath is the filepath on the server.
+   *
+   * @param content Content file to upload
+   * @param format Content format
+   * @param destinationPath Destination filepath
+   * @returns Whether the action succeeded or not.
+   */
+
+  async uploadContent(
+    content: string,
+    format: 'base64' | 'text' | 'json',
+    destinationPath: string
+  ): Promise<boolean> {
+    const pos = destinationPath.lastIndexOf('/');
+    if (pos !== -1) {
+      const destDir = destinationPath?.substring(0, pos);
+      if (destDir && !(await this.directoryExists(destDir))) {
+        await this.createDirectory(destDir);
+      }
+    }
+
+    const data = JSON.stringify({
+      content,
+      format,
+      type: 'file'
+    });
+
+    let response: Response | null = null;
+
+    try {
+      response = await this._fetch(destinationPath, {
+        method: 'PUT',
+        body: data
+      });
+    } catch (error) {
+      console.error(
+        `Failed to upload content to server ${destinationPath}`,
+        error
+      );
+    }
+
+    const succeeded = response?.status === 201;
+
+    if (succeeded) {
+      return await this.fileExists(destinationPath);
+    }
+
+    return false;
+  }
+
+  /**
    * Upload a file to JupyterLab.
    *
    * Note: the destinationPath is the filepath on the server.
@@ -163,44 +216,11 @@ export class ContentsHelper {
     sourcePath: string,
     destinationPath?: string
   ): Promise<boolean> {
-    const fileName = destinationPath
-      ? destinationPath
-      : path.basename(sourcePath);
-    const pos = destinationPath ? destinationPath.lastIndexOf('/') : -1;
-    if (pos !== -1) {
-      const destDir = destinationPath?.substring(0, pos);
-      if (destDir && !(await this.directoryExists(destDir))) {
-        await this.createDirectory(destDir);
-      }
-    }
-
-    const data = JSON.stringify({
-      content: Utils.base64EncodeFile(sourcePath),
-      format: 'base64',
-      type: 'file'
-    });
-
-    let response: Response | null = null;
-
-    try {
-      response = await this._fetch(fileName, {
-        method: 'PUT',
-        body: data
-      });
-    } catch (error) {
-      console.error(
-        `Failed to move file ${sourcePath} to server ${destinationPath}`,
-        error
-      );
-    }
-
-    const succeeded = response?.status === 201;
-
-    if (succeeded) {
-      return await this.fileExists(fileName);
-    }
-
-    return false;
+    return this.uploadContent(
+      Utils.base64EncodeFile(sourcePath),
+      'base64',
+      destinationPath ?? path.basename(sourcePath)
+    );
   }
 
   /**

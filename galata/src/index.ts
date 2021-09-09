@@ -6,6 +6,7 @@
  * @module galata
  */
 
+export * from './benchmarkReporter';
 export * from './galata';
 export * from './global';
 export * from './inpage/tokens';

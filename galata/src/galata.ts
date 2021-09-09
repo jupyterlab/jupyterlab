@@ -1,9 +1,15 @@
+/* eslint-disable camelcase */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as nbformat from '@jupyterlab/nbformat';
 import { Browser, Page } from '@playwright/test';
 import { ContentsHelper } from './contents';
-import { IJupyterLabPageFixture, JupyterLabPage } from './jupyterlabpage';
+import {
+  IJupyterLabPage,
+  IJupyterLabPageFixture,
+  JupyterLabPage
+} from './jupyterlabpage';
 
 /**
  * Galata namespace
@@ -73,15 +79,22 @@ export namespace galata {
    *
    * @param page Playwright page model
    * @param baseURL Application base URL
+   * @param waitForApplication Callback that resolved when the application page is ready
    * @param appPath Application URL path fragment
    * @returns Playwright page model with Galata helpers
    */
   export function addHelpersToPage(
     page: Page,
     baseURL: string,
-    appPath: string
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
+    appPath?: string
   ): IJupyterLabPageFixture {
-    const jlabPage = new JupyterLabPage(page, baseURL, appPath);
+    const jlabPage = new JupyterLabPage(
+      page,
+      baseURL,
+      waitForApplication,
+      appPath
+    );
 
     const handler = {
       get: function (obj: JupyterLabPage, prop: string) {
@@ -114,18 +127,20 @@ export namespace galata {
    *
    * @param browser Playwright browser model
    * @param baseURL Application base URL
+   * @param waitForApplication Callback that resolved when the application page is ready
    * @param appPath Application URL path fragment
    * @returns Playwright page model with Galata helpers
    */
   export async function newPage(
     browser: Browser,
     baseURL: string,
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
     appPath: string = '/lab'
   ): Promise<IJupyterLabPageFixture> {
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    return addHelpersToPage(page, baseURL, appPath);
+    return addHelpersToPage(page, baseURL, waitForApplication, appPath);
   }
 
   /**
@@ -176,5 +191,113 @@ export namespace galata {
      * The id will be suffixed by '/'.
      */
     export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)/;
+  }
+
+  /**
+   * Notebook generation helpers
+   */
+  export namespace Notebook {
+    /**
+     * Generate a notebook with identical cells
+     *
+     * @param nCells Number of cells
+     * @param cellType Type of cells
+     * @param defaultInput Default input source
+     * @param defaultOutput Default outputs
+     * @returns The notebook
+     */
+    export function generateNotebook(
+      nCells: number = 0,
+      cellType: nbformat.CellType = 'code',
+      defaultInput: string[] = [],
+      defaultOutput: nbformat.IOutput[] = []
+    ): nbformat.INotebookContent {
+      const cells = new Array<nbformat.ICell>();
+      for (let i = 0; i < nCells; i++) {
+        const execution_count =
+          cellType === 'code'
+            ? defaultOutput.length > 0
+              ? i + 1
+              : null
+            : undefined;
+        const cell = makeCell({
+          cell_type: cellType,
+          source: [...defaultInput],
+          outputs: cellType === 'code' ? [...defaultOutput] : undefined,
+          execution_count
+        });
+        cells.push(cell);
+      }
+
+      return makeNotebook(cells);
+    }
+
+    /**
+     * Generate a cell object
+     *
+     * @param skeleton Cell description template
+     * @returns A cell
+     */
+    export function makeCell(
+      skeleton: Partial<nbformat.ICell>
+    ): nbformat.ICell {
+      switch (skeleton.cell_type ?? 'code') {
+        case 'code':
+          return {
+            cell_type: 'code',
+            execution_count: null,
+            metadata: {},
+            outputs: [],
+            source: [],
+            ...skeleton
+          };
+        default: {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { execution_count, outputs, ...others } = skeleton;
+          return {
+            cell_type: 'markdown',
+            metadata: {},
+            source: [],
+            ...others
+          };
+        }
+      }
+    }
+
+    /**
+     * Generate a notebook object from a cell list
+     *
+     * @param cells Notebook cells
+     * @returns Notebook
+     */
+    export function makeNotebook(
+      cells: Array<nbformat.ICell>
+    ): nbformat.INotebookContent {
+      return {
+        cells,
+        metadata: {
+          kernelspec: {
+            display_name: 'Python 3',
+            language: 'python',
+            name: 'python3'
+          },
+          language_info: {
+            codemirror_mode: {
+              name: 'ipython',
+              version: 3
+            },
+            file_extension: '.py',
+            mimetype: 'text/x-python',
+            name: 'python',
+            nbconvert_exporter: 'python',
+            pygments_lexer: 'ipython3',
+            version: '3.8.0'
+          },
+          orig_nbformat: 4
+        },
+        nbformat: 4,
+        nbformat_minor: 4
+      };
+    }
   }
 }

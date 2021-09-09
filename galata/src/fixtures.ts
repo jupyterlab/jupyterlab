@@ -17,7 +17,7 @@ import * as json5 from 'json5';
 import fetch from 'node-fetch';
 import { ContentsHelper } from './contents';
 import { galata } from './galata';
-import { IJupyterLabPageFixture } from './jupyterlabpage';
+import { IJupyterLabPage, IJupyterLabPageFixture } from './jupyterlabpage';
 
 /**
  * Galata test arguments
@@ -120,6 +120,13 @@ export type GalataOptions = {
    * folder and cleaning it.
    */
   tmpPath: string;
+  /**
+   * Wait for the application page to be ready
+   *
+   * @param page Playwright Page model
+   * @param helpers JupyterLab helpers
+   */
+  waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>;
 };
 
 /**
@@ -256,6 +263,31 @@ export const test: TestType<
     }
   },
   /**
+   * Wait for the application page to be ready
+   *
+   * @param page Playwright Page model
+   * @param helpers JupyterLab helpers
+   */
+  waitForApplication: async ({ baseURL }, use, testInfo) => {
+    const waitIsReady = async (
+      page: Page,
+      helpers: IJupyterLabPage
+    ): Promise<void> => {
+      await page.waitForSelector('#jupyterlab-splash', {
+        state: 'detached'
+      });
+      await helpers.waitForCondition(() => {
+        return helpers.activity.isTabActive('Launcher');
+      });
+
+      // Oddly current tab is not always set to active
+      if (!(await helpers.isInSimpleMode())) {
+        await helpers.activity.activateTab('Launcher');
+      }
+    };
+    await use(waitIsReady);
+  },
+  /**
    * JupyterLab test page.
    *
    * It brings the following feature on top of Playwright Page object:
@@ -281,12 +313,18 @@ export const test: TestType<
       page,
       sessions,
       terminals,
-      tmpPath
+      tmpPath,
+      waitForApplication
     },
     use
   ) => {
     // Hook the helpers
-    const jlabWithPage = galata.addHelpersToPage(page, baseURL!, appPath!);
+    const jlabWithPage = galata.addHelpersToPage(
+      page,
+      baseURL!,
+      waitForApplication,
+      appPath
+    );
 
     // Add server mocks
     const settings: ISettingRegistry.IPlugin[] = [];

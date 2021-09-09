@@ -7,6 +7,7 @@ export * from './kernel';
 export * from './logconsole';
 export * from './menu';
 export * from './notebook';
+export * from './performance';
 export * from './sidebar';
 export * from './statusbar';
 export * from './theme';

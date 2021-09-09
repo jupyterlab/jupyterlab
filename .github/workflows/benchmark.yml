@@ -1,0 +1,139 @@
+name: Benchmark Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches: ['master']
+
+permissions:
+  pull-requests: write
+
+jobs:
+  build:
+    name: Execute benchmark tests
+    timeout-minutes: 40
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Cache pip on Linux
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-3.8
+  
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Cache yarn
+        uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+
+      - name: Launch JupyterLab
+        run: |
+          # Mount a volume to overwrite the server configuration
+          jlpm start 2>&1 > /tmp/jupyterlab_server.log &
+        working-directory: galata
+
+      - name: Install browser
+        run: |
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+        working-directory: galata
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
+
+      - uses: iterative/setup-cml@v1
+      - name: Execute benchmark tests
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPORT: ./benchmark-results/lab-benchmark.md
+        shell: bash
+        run: |
+          jlpm run test:benchmark
+
+          # Publish image to cml.dev
+          echo "" >> ${REPORT}
+          cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
+          echo "" >> ${REPORT}
+          
+          # Test if metadata have changed
+          export METADATA_DIFF="/tmp/metadata.diff"
+          diff -u <(jq --sort-keys .metadata benchmark-results/lab-benchmark.json) <(jq --sort-keys .metadata lab-benchmark-expected.json) > ${METADATA_DIFF} || true
+          [ -s ${METADATA_DIFF} ] && echo ":exclamation: Test metadata have changed" >> ${REPORT}  && echo "\`\`\`diff" >> ${REPORT} && cat ${METADATA_DIFF} >> ${REPORT} && echo "\`\`\`" >> ${REPORT}
+
+          echo 'BENCH_REPORT<<EOF' >> $GITHUB_ENV
+          cat ${REPORT} >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+        working-directory: galata
+
+      - name: Comment on PR with benchmark report
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Source https://github.com/actions/github-script/actions/runs/187348077/workflow
+          script: |
+            // Get the existing comments.
+            const {data: comments} = await github.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+            // Find any comment already made by the bot.
+            const botComment = comments.find(comment => comment.user.id === 41898282)
+            if (botComment) {
+              await github.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: process.env.BENCH_REPORT
+              })
+            } else {
+              await github.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: process.env.BENCH_REPORT
+              })
+            }
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: benchmark-test-assets
+          path: |
+            galata/benchmark-results
+            galata/test-results
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log

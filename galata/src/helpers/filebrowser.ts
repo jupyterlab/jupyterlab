@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Page } from '@playwright/test';
+import * as path from 'path';
 import { ContentsHelper } from '../contents';
 import * as Utils from '../utils';
 
@@ -44,10 +45,11 @@ export class FileBrowserHelper {
    */
   async revealFileInBrowser(filePath: string): Promise<void> {
     const pos = filePath.lastIndexOf('/');
-    const dirPath = filePath.substring(0, pos);
-    const fileName = filePath.substring(pos + 1);
-
-    await this.openDirectory(dirPath);
+    const fileName = path.basename(filePath);
+    if (pos >= 0) {
+      const dirPath = filePath.substring(0, pos);
+      await this.openDirectory(dirPath);
+    }
 
     await Utils.waitForCondition(async () => {
       return await this.isFileListedInBrowser(fileName);
@@ -85,6 +87,34 @@ export class FileBrowserHelper {
 
       return directory;
     });
+  }
+
+  /**
+   * Open a file
+   *
+   * Note: This will double click on the file;
+   * an editor needs to be available for the given file type.
+   *
+   * @param filePath Notebook path
+   * @returns Action success status
+   */
+  async open(filePath: string): Promise<boolean> {
+    await this.revealFileInBrowser(filePath);
+    const name = path.basename(filePath);
+
+    const fileItem = await this.page.$(
+      `xpath=${this.xpBuildFileSelector(name)}`
+    );
+    if (fileItem) {
+      await fileItem.click({ clickCount: 2 });
+      await this.page.waitForSelector(Utils.xpBuildActivityTabSelector(name), {
+        state: 'visible'
+      });
+    } else {
+      return false;
+    }
+
+    return true;
   }
 
   /**

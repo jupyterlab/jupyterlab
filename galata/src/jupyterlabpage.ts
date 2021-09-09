@@ -11,6 +11,7 @@ import {
   LogConsoleHelper,
   MenuHelper,
   NotebookHelper,
+  PerformanceHelper,
   SidebarHelper,
   StatusBarHelper,
   ThemeHelper
@@ -60,6 +61,11 @@ export interface IJupyterLabPage {
    * JupyterLab notebook helpers
    */
   readonly notebook: NotebookHelper;
+
+  /**
+   * Webbrowser performance helpers
+   */
+  readonly performance: PerformanceHelper;
   /**
    * JupyterLab status bar helpers
    */
@@ -237,13 +243,16 @@ export class JupyterLabPage implements IJupyterLabPage {
    *
    * @param page Playwright page object
    * @param baseURL Server base URL
+   * @param waitForApplication Callback that resolved when the application page is ready
    * @param appPath Application URL path fragment
    */
   constructor(
     readonly page: Page,
     readonly baseURL: string,
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
     readonly appPath: string = '/lab'
   ) {
+    this.waitIsReady = waitForApplication;
     this.activity = new ActivityHelper(page);
     this.contents = new ContentsHelper(baseURL, page);
     this.filebrowser = new FileBrowserHelper(page, this.contents);
@@ -257,6 +266,7 @@ export class JupyterLabPage implements IJupyterLabPage {
       this.filebrowser,
       this.menu
     );
+    this.performance = new PerformanceHelper(page);
     this.statusbar = new StatusBarHelper(page, this.menu);
     this.sidebar = new SidebarHelper(page, this.menu);
     this.theme = new ThemeHelper(page);
@@ -296,6 +306,11 @@ export class JupyterLabPage implements IJupyterLabPage {
    * JupyterLab notebook helpers
    */
   readonly notebook: NotebookHelper;
+
+  /**
+   * Webbrowser performance helpers
+   */
+  readonly performance: PerformanceHelper;
 
   /**
    * JupyterLab status bar helpers
@@ -418,7 +433,7 @@ export class JupyterLabPage implements IJupyterLabPage {
     });
     await this.waitForAppStarted();
     await this.hookHelpersUp();
-    await this.waitIsReady();
+    await this.waitIsReady(this.page, this);
 
     return response;
   }
@@ -472,7 +487,7 @@ export class JupyterLabPage implements IJupyterLabPage {
     });
     await this.waitForAppStarted();
     await this.hookHelpersUp();
-    await this.waitIsReady();
+    await this.waitIsReady(this.page, this);
     return response;
   }
 
@@ -616,6 +631,10 @@ export class JupyterLabPage implements IJupyterLabPage {
           // Wait for plugins to be loaded
           await window.jupyterlab.started;
           return true;
+        } else if (typeof window.jupyterapp === 'object') {
+          // Wait for plugins to be loaded
+          await window.jupyterapp.started;
+          return true;
         }
         return false;
       })
@@ -625,17 +644,8 @@ export class JupyterLabPage implements IJupyterLabPage {
   /**
    * Wait for the splash screen to be hidden and the launcher to be the active tab.
    */
-  protected waitIsReady = async (): Promise<void> => {
-    await this.page.waitForSelector('#jupyterlab-splash', {
-      state: 'detached'
-    });
-    await this.waitForCondition(() => {
-      return this.activity.isTabActive('Launcher');
-    });
-
-    // Oddly current tab is not always set to active
-    if (!(await this.isInSimpleMode())) {
-      await this.activity.activateTab('Launcher');
-    }
-  };
+  protected waitIsReady: (
+    page: Page,
+    helpers: IJupyterLabPage
+  ) => Promise<void>;
 }
