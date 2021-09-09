@@ -20,9 +20,10 @@ export class Callstack extends Panel {
    */
   constructor(options: Callstack.IOptions) {
     super();
-    this.title.label = 'Callstack';
     const { commands, model } = options;
     const translator = options.translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    this.title.label = trans.__('Callstack');
     const header = new PanelHeader(translator);
     const body = new CallstackBody(model);
 

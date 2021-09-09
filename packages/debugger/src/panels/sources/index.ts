@@ -24,10 +24,10 @@ export class Sources extends Panel {
    */
   constructor(options: Sources.IOptions) {
     super();
-    this.title.label = 'Sources';
     const { model, service, editorServices } = options;
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
+    this.title.label = trans.__('Sources');
 
     this._header = new SourcesHeader(model, translator);
     const body = new SourcesBody({
