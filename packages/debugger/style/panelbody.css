@@ -8,6 +8,20 @@
   min-width: 35px;
   line-height: 25px;
   margin: 0px;
+  display: flex;
+  background-color: var(--jp-layout-color2);
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+  border-top: solid var(--jp-border-width) var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+
+.jp-AccordionPanel-title .lm-AccordionPanel-titleCollapser {
+  transform: rotate(0deg);
+  margin-top: 3px;
+  height: 16px;
+}
+.jp-AccordionPanel-title.lm-mod-expanded .lm-AccordionPanel-titleCollapser {
+  transform: rotate(-90deg);
 }
 
 .lm-AccordionPanel[data-orientation='horizontal'] > .jp-AccordionPanel-title {
@@ -15,14 +29,4 @@
   display: block;
   transform-origin: top left;
   transform: rotate(-90deg) translate(-100%);
-}
-
-.jp-DebuggerSidebar-panel-header-IconExpanding {
-  transform: rotate(-90deg);
-  margin-top: 8px;
-}
-
-.jp-DebuggerSidebar-panel-header-IconContracting {
-  transform: rotate(0deg);
-  margin-top: 8px;
 }

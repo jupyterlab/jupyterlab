@@ -8,7 +8,6 @@ import { Panel } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
 import { PanelHeader } from '../header';
 import { CallstackBody } from './body';
-import { CallstackHeader } from './header';
 
 /**
  * A Panel to show a callstack.
@@ -21,9 +20,10 @@ export class Callstack extends Panel {
    */
   constructor(options: Callstack.IOptions) {
     super();
+    this.title.label = 'Callstack';
     const { commands, model } = options;
     const translator = options.translator || nullTranslator;
-    const header = new CallstackHeader(translator);
+    const header = new PanelHeader(translator);
     const body = new CallstackBody(model);
 
     header.toolbar.addItem(

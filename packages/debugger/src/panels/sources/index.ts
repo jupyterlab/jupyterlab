@@ -24,6 +24,7 @@ export class Sources extends Panel {
    */
   constructor(options: Sources.IOptions) {
     super();
+    this.title.label = 'Sources';
     const { model, service, editorServices } = options;
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');

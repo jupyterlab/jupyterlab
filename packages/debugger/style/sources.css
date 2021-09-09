@@ -5,7 +5,7 @@
 
 .jp-DebuggerSources {
   min-height: 50px;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 [data-jp-debugger='true'].jp-Editor .jp-mod-readOnly {

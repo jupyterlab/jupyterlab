@@ -10,7 +10,6 @@ import { closeAllIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
 import { PanelHeader } from '../header';
 import { BreakpointsBody } from './body';
-import { BreakpointsHeader } from './header';
 
 /**
  * A Panel to show a list of breakpoints.
@@ -23,11 +22,12 @@ export class Breakpoints extends Panel {
    */
   constructor(options: Breakpoints.IOptions) {
     super();
+    this.title.label = 'Breakpoints';
     const { model, service } = options;
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
-    this._header = new BreakpointsHeader(translator);
+    this._header = new PanelHeader(translator);
     const body = new BreakpointsBody(model);
 
     this._header.toolbar.addItem(

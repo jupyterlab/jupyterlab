@@ -7,6 +7,7 @@
   display: flex;
   flex-direction: column;
   min-height: 50px;
+  padding-top: 3px;
 }
 
 .jp-DebuggerVariables-body {
@@ -69,7 +70,7 @@
   margin-left: 12px;
 }
 
-.jp-DebuggerVariables .jp-stack-panel-header .jp-Toolbar {
+.jp-stack-panel-header.jp-DebuggerVariables-toolbar {
   margin-left: auto;
 }
 

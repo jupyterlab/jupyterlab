@@ -18,13 +18,12 @@ export class SourcesHeader extends PanelHeader {
    */
   constructor(model: IDebugger.Model.ISources, translator?: ITranslator) {
     super(translator);
-    this.titleWidget.node.textContent = this._trans.__('Source');
 
     const sourcePath = ReactWidget.create(
       <SourcePathComponent model={model} />
     );
 
-    this.layout.insertWidget(3, sourcePath);
+    this.layout.insertWidget(1, sourcePath);
     this.addClass('jp-DebuggerSources-header');
   }
 }

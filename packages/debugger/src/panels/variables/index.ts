@@ -13,7 +13,6 @@ import { Panel, Widget } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
 import { PanelHeader } from '../header';
 import { VariablesBodyGrid } from './grid';
-import { VariablesHeader } from './header';
 import { ScopeSwitcher } from './scope';
 import { VariablesBodyTree } from './tree';
 
@@ -28,11 +27,12 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
    */
   constructor(options: Variables.IOptions) {
     super();
-
+    this.title.label = 'Variables';
     const { model, service, commands, themeManager } = options;
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
-    this._header = new VariablesHeader(translator);
+    this._header = new PanelHeader(translator);
+    this._header.addClass('jp-DebuggerVariables-toolbar')
     this._tree = new VariablesBodyTree({
       model,
       service,
@@ -162,7 +162,7 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
    * The toolbar widget, it is not attached to current widget
    * but is rendered by the sidebar panel.
    */
-  private _header: VariablesHeader;
+  private _header: PanelHeader;
 
   private _tree: VariablesBodyTree;
   private _table: VariablesBodyGrid;

@@ -23,7 +23,6 @@
 
 .jp-DebuggerSidebar .jp-stack-panel-header {
   border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
-  box-shadow: var(--jp-toolbar-box-shadow);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -39,7 +38,7 @@
   background-color: var(--jp-layout-color1);
 }
 
-.jp-DebuggerSidebar .jp-stack-panel-header h2 {
+.jp-DebuggerSidebar .jp-AccordionPanel-title span.lm-AccordionPanel-titleLabel, .jp-DebuggerSidebar .jp-stack-panel-header h2 {
   text-transform: uppercase;
   font-weight: 600;
   font-size: var(--jp-ui-font-size0);
@@ -49,7 +48,6 @@
 }
 
 .jp-DebuggerSidebar-body .jp-stack-panel-header {
-  border-top: solid var(--jp-border-width) var(--jp-border-color1);
   background-color: var(--jp-layout-color2);
 }
 
