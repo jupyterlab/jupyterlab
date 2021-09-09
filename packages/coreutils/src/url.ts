@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PartialJSONObject } from '@lumino/coreutils';
-import * as posix from 'path';
+import { posix } from 'path';
 import urlparse from 'url-parse';
 
 /**
