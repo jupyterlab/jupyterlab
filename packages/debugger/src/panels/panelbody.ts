@@ -20,12 +20,9 @@ export class PanelBody extends AccordionPanel {
    * Check the clicked element before propagating click event.
    */
   handleEvent(event: Event): void {
-
     switch (event.type) {
       case 'click': {
         const target = event.target as HTMLElement | null;
-        console.log('target', target, target!.nodeName );
-        
         if (!target || !['DIV', 'H2', 'H3', 'SPAN'].includes(target.nodeName)) {
           return;
         }
@@ -52,6 +49,14 @@ export namespace DebuggerPanelBody {
       caretDownEmptyIcon.element({
         container: iconDiv
       });
+      const icon = iconDiv.firstChild as SVGElement;
+      if (icon) {
+        icon.onclick = (ev: MouseEvent) => {
+          ev.stopPropagation();
+          iconDiv.click();
+        };
+      }
+
       return iconDiv;
     }
 

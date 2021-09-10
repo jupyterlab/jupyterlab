@@ -19,7 +19,9 @@ import { VariablesBodyTree } from './tree';
 /**
  * A Panel to show a variable explorer.
  */
-export class Variables extends PanelWidget implements IDebugger.IVariablesPanel {
+export class Variables
+  extends PanelWidget
+  implements IDebugger.IVariablesPanel {
   /**
    * Instantiate a new Variables Panel.
    *
@@ -107,7 +109,6 @@ export class Variables extends PanelWidget implements IDebugger.IVariablesPanel 
     this.addWidget(this._table);
     this.addClass('jp-DebuggerVariables');
   }
-
 
   /**
    * Latest variable selected.
