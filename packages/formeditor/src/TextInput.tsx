@@ -72,6 +72,14 @@ export const TextInput: React.FC<ITextFieldProps> = ({
     setError(defaultError);
   }, [defaultError]);
 
+  React.useEffect(() => {
+    setValue(
+      typeof defaultValue === 'string'
+        ? defaultValue
+        : JSON.stringify(defaultValue, null, '\t')
+    );
+  }, [defaultValue]);
+
   const [showPassword, setShowPassword] = React.useState(false);
 
   const toggleShowPassword = (): void => {
