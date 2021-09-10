@@ -116,12 +116,14 @@ if [[ $GROUP == integrity3 ]]; then
     jlpm bumpversion release --force # switch to beta
     jlpm bumpversion release --force # switch to rc
     jlpm bumpversion build --force
+    jlpm bumpversion next --force
     VERSION=$(python setup.py --version)
-    if [[ $VERSION != *rc1 ]]; then exit 1; fi
+    if [[ $VERSION != *rc2 ]]; then exit 1; fi
 
     # make sure we can patch release
     jlpm bumpversion release --force  # switch to final
     jlpm bumpversion patch --force
+    jlpm bumpversion next --force
 
     # make sure we can bump major JS releases
     jlpm bumpversion minor --force

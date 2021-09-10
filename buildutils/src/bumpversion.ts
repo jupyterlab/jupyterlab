@@ -18,9 +18,15 @@ commander
 
     // Get the previous version.
     const prev = utils.getPythonVersion();
+    const isFinal = /\d+\.\d+\.\d+$/.test(prev);
 
     // Whether to commit after bumping
     const commit = opts.skipCommit !== true;
+
+    // for "next", determine whether to use "patch" or "build"
+    if (spec == 'next') {
+      spec = isFinal ? 'patch' : 'build';
+    }
 
     // For patch, defer to `patch:release` command
     if (spec === 'patch') {
@@ -40,20 +46,10 @@ commander
     if (options.indexOf(spec) === -1) {
       throw new Error(`Version spec must be one of: ${options}`);
     }
-    if (
-      prev.indexOf('a') === -1 &&
-      prev.indexOf('b') === -1 &&
-      prev.indexOf('rc') === -1 &&
-      spec === 'release'
-    ) {
+    if (isFinal && spec === 'release') {
       throw new Error('Use "major" or "minor" to switch back to alpha release');
     }
-    if (
-      prev.indexOf('a') === -1 &&
-      prev.indexOf('b') === -1 &&
-      prev.indexOf('rc') === -1 &&
-      spec === 'build'
-    ) {
+    if (isFinal && spec === 'build') {
       throw new Error('Cannot increment a build on a final release');
     }
 
