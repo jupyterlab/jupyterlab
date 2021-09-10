@@ -3,8 +3,8 @@
   background: #e5e5e500;
   border-bottom: none;
   font: 12px Helvetica, Arial, sans-serif;
-  min-height: 25px;
-  max-height: 25px;
+  min-height: 22px;
+  max-height: 22px;
   min-width: 35px;
   line-height: 25px;
   margin: 0px;
@@ -20,7 +20,7 @@
   margin-top: 3px;
   height: 16px;
 }
-.jp-AccordionPanel-title.lm-mod-expanded .lm-AccordionPanel-titleCollapser {
+.jp-AccordionPanel-title.jp-DebuggerPanel-expanded .lm-AccordionPanel-titleCollapser {
   transform: rotate(-90deg);
 }
 
@@ -29,4 +29,8 @@
   display: block;
   transform-origin: top left;
   transform: rotate(-90deg) translate(-100%);
+}
+
+.jp-AccordionPanel-title .lm-AccordionPanel-titleLabel{
+  user-select: none;
 }

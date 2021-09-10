@@ -502,6 +502,7 @@ export namespace ToolbarButtonComponent {
     pressedIcon?: LabIcon.IMaybeResolvable;
     pressedTooltip?: string;
     disabledTooltip?: string;
+    stopPropagation?: boolean
 
     /**
      * Trigger the button on the actual onClick event rather than onMouseDown.
@@ -530,10 +531,14 @@ export function ToolbarButtonComponent(
   // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
   // We avoid a click event by calling preventDefault in mousedown, and
   // we bind the button action to `mousedown`.
-  const handleMouseDown = (event: React.MouseEvent) => {
+  const handleMouseDown = (event: React.MouseEvent) => {   
     // Fire action only when left button is pressed.
+    console.log('props.stopPropagation', props.stopPropagation);
     if (event.button === 0) {
       event.preventDefault();
+      if(props.stopPropagation){
+        event.stopPropagation()
+      }
       props.onClick?.();
     }
   };
@@ -546,7 +551,13 @@ export function ToolbarButtonComponent(
   };
 
   const handleClick = (event: React.MouseEvent) => {
-    if (event.button === 0) {
+    if (event.button === 0) { 
+      
+      
+      if(props.stopPropagation){
+        event.preventDefault()
+        event.stopPropagation()
+      }
       props.onClick?.();
     }
   };

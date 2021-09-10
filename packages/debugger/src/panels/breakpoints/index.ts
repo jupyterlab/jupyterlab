@@ -2,35 +2,31 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { Toolbar, ToolbarButton } from '@jupyterlab/ui-components';
+import { ITranslator } from '@jupyterlab/translation';
+import {  ToolbarButton } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { closeAllIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
 import { BreakpointsBody } from './body';
-
+import { PanelWidget } from '../panelwidget';
 /**
  * A Panel to show a list of breakpoints.
  */
-export class Breakpoints extends Panel {
+export class Breakpoints extends PanelWidget {
   /**
    * Instantiate a new Breakpoints Panel.
    *
    * @param options The instantiation options for a Breakpoints Panel.
    */
   constructor(options: Breakpoints.IOptions) {
-    super();
+    super(options);
     const { model, service } = options;
-    const translator = options.translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    this.title.label = trans.__('Breakpoints');
+    this.title.label = this.trans.__('Breakpoints');
 
-    this._header = new Toolbar();
-    this._header.addClass('jp-stack-panel-header');
     const body = new BreakpointsBody(model);
 
-    this._header.addItem(
+    this.header.addItem(
       'closeAll',
       new ToolbarButton({
         icon: closeAllIcon,
@@ -39,11 +35,11 @@ export class Breakpoints extends Panel {
             return;
           }
           const result = await showDialog({
-            title: trans.__('Remove All Breakpoints'),
-            body: trans.__('Are you sure you want to remove all breakpoints?'),
+            title: this.trans.__('Remove All Breakpoints'),
+            body: this.trans.__('Are you sure you want to remove all breakpoints?'),
             buttons: [
-              Dialog.okButton({ label: trans.__('Remove breakpoints') }),
-              Dialog.cancelButton({ label: trans.__('Cancel') })
+              Dialog.okButton({ label: this.trans.__('Remove breakpoints') }),
+              Dialog.cancelButton({ label: this.trans.__('Cancel') })
             ],
             hasClose: true
           });
@@ -51,24 +47,16 @@ export class Breakpoints extends Panel {
             return service.clearBreakpoints();
           }
         },
-        tooltip: trans.__('Remove All Breakpoints')
+        tooltip: this.trans.__('Remove All Breakpoints'),
+        stopPropagation: true
       })
     );
 
-    this.addWidget(this._header);
+    this.addWidget(this.header);
     this.addWidget(body);
     this.addClass('jp-DebuggerBreakpoints');
-  }
 
-  get header(): Toolbar {
-    return this._header;
   }
-
-  /**
-   * The toolbar widget, it is not attached to current widget
-   * but is rendered by the sidebar panel.
-   */
-  private _header: Toolbar;
 
   readonly clicked = new Signal<this, IDebugger.IBreakpoint>(this);
 }

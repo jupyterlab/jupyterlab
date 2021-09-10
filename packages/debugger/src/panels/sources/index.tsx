@@ -4,68 +4,56 @@
 |----------------------------------------------------------------------------*/
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { Toolbar, ToolbarButton } from '@jupyterlab/ui-components';
-import { Panel } from '@lumino/widgets';
+import { ITranslator } from '@jupyterlab/translation';
+import { ToolbarButton } from '@jupyterlab/ui-components';
 import { viewBreakpointIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
 import { SourcePathComponent } from './sourcepath';
 import { SourcesBody } from './body';
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React from 'react';
+import { PanelWidget } from '../panelwidget';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
  */
-export class Sources extends Panel {
+export class Sources extends PanelWidget {
   /**
    * Instantiate a new Sources preview Panel.
    *
    * @param options The Sources instantiation options.
    */
   constructor(options: Sources.IOptions) {
-    super();
+    super(options);
     const { model, service, editorServices } = options;
-    const translator = options.translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    this.title.label = trans.__('Sources');
+    this.title.label = this.trans.__('Sources');
 
-    this._header = new Toolbar();
-    this._header.addClass('jp-stack-panel-header');
-    this._header.addClass('jp-DebuggerSources-header');
+    this.header.addClass('jp-DebuggerSources-header');
     const body = new SourcesBody({
       service,
       model,
       editorServices
     });
-    this._header.addItem(
+    this.header.addItem(
       'open',
       new ToolbarButton({
         icon: viewBreakpointIcon,
         onClick: (): void => model.open(),
-        tooltip: trans.__('Open in the Main Area')
+        tooltip: this.trans.__('Open in the Main Area'),
+        stopPropagation:true
       })
     );
     const sourcePath = ReactWidget.create(
       <SourcePathComponent model={model} />
     );
 
-    this._header.addItem('sourcePath', sourcePath);
+    this.header.addItem('sourcePath', sourcePath);
     this.addClass('jp-DebuggerSources-header');
-    this.addWidget(this._header);
+    this.addWidget(this.header);
     this.addWidget(body);
     this.addClass('jp-DebuggerSources');
   }
 
-  get header(): Toolbar {
-    return this._header;
-  }
-
-  /**
-   * The toolbar widget, it is not attached to current widget
-   * but is rendered by the sidebar panel.
-   */
-  private _header: Toolbar;
 }
 
 /**

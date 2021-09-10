@@ -5,13 +5,13 @@ import { IThemeManager } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   tableRowsIcon,
-  Toolbar,
   ToolbarButton,
   treeViewIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel, Widget } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
+import { PanelWidget } from '../panelwidget';
 import { VariablesBodyGrid } from './grid';
 import { ScopeSwitcher } from './scope';
 import { VariablesBodyTree } from './tree';
@@ -19,21 +19,18 @@ import { VariablesBodyTree } from './tree';
 /**
  * A Panel to show a variable explorer.
  */
-export class Variables extends Panel implements IDebugger.IVariablesPanel {
+export class Variables extends PanelWidget implements IDebugger.IVariablesPanel {
   /**
    * Instantiate a new Variables Panel.
    *
    * @param options The instantiation options for a Variables Panel.
    */
   constructor(options: Variables.IOptions) {
-    super();
+    super(options);
     const { model, service, commands, themeManager } = options;
     const translator = options.translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    this.title.label = trans.__('Variables');
-    this._header = new Toolbar();
-    this._header.addClass('jp-stack-panel-header');
-    this._header.addClass('jp-DebuggerVariables-toolbar');
+    this.title.label = this.trans.__('Variables');
+    this.header.addClass('jp-DebuggerVariables-toolbar');
     this._tree = new VariablesBodyTree({
       model,
       service,
@@ -48,7 +45,7 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
     });
     this._table.hide();
 
-    this._header.addItem(
+    this.header.addItem(
       'scope-switcher',
       new ScopeSwitcher({
         translator,
@@ -77,14 +74,14 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
       icon: treeViewIcon,
       className: 'jp-TreeView',
       onClick: onViewChange,
-      tooltip: trans.__('Tree View')
+      tooltip: this.trans.__('Tree View')
     });
 
     const tableViewButton = new ToolbarButton({
       icon: tableRowsIcon,
       className: 'jp-TableView',
       onClick: onViewChange,
-      tooltip: trans.__('Table View')
+      tooltip: this.trans.__('Table View')
     });
 
     const markViewButtonSelection = (selectedView: string): void => {
@@ -101,19 +98,16 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
 
     markViewButtonSelection(this.viewMode);
 
-    this._header.addItem('view-VariableTreeView', treeViewButton);
+    this.header.addItem('view-VariableTreeView', treeViewButton);
 
-    this._header.addItem('view-VariableTableView', tableViewButton);
+    this.header.addItem('view-VariableTableView', tableViewButton);
 
-    this.addWidget(this._header);
+    this.addWidget(this.header);
     this.addWidget(this._tree);
     this.addWidget(this._table);
     this.addClass('jp-DebuggerVariables');
   }
 
-  get header(): Toolbar {
-    return this._header;
-  }
 
   /**
    * Latest variable selected.
@@ -155,15 +149,9 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
    * @param msg The resize message.
    */
   private _resizeBody(msg: Widget.ResizeMessage): void {
-    const height = msg.height - this._header.node.offsetHeight;
+    const height = msg.height - this.header.node.offsetHeight;
     this._tree.node.style.height = `${height}px`;
   }
-
-  /**
-   * The toolbar widget, it is not attached to current widget
-   * but is rendered by the sidebar panel.
-   */
-  private _header: Toolbar;
 
   private _tree: VariablesBodyTree;
   private _table: VariablesBodyGrid;

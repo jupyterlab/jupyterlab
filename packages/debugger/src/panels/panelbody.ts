@@ -20,9 +20,12 @@ export class PanelBody extends AccordionPanel {
    * Check the clicked element before propagating click event.
    */
   handleEvent(event: Event): void {
+
     switch (event.type) {
       case 'click': {
         const target = event.target as HTMLElement | null;
+        console.log('target', target, target!.nodeName );
+        
         if (!target || !['DIV', 'H2', 'H3', 'SPAN'].includes(target.nodeName)) {
           return;
         }

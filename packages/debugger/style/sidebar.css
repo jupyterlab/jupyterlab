@@ -26,18 +26,16 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  min-height: 24px !important;
+  min-height: 20px !important;
   padding: 0px !important;
   height: var(--jp-debugger-header-height);
 }
 
-.jp-DebuggerSidebar .jp-stack-panel-header .jp-Toolbar {
-  background: transparent;
+.jp-DebuggerSidebar .jp-stack-panel-header.jp-Toolbar {
+  background: transparent!important;
+  border-bottom: none;
 }
 
-.jp-DebuggerSidebar > .jp-stack-panel-header {
-  background-color: var(--jp-layout-color1);
-}
 
 .jp-DebuggerSidebar .jp-AccordionPanel-title span.lm-AccordionPanel-titleLabel,
 .jp-DebuggerSidebar .jp-stack-panel-header h2 {
@@ -47,6 +45,9 @@
   color: var(--jp-ui-font-color1);
   padding-left: 8px;
   padding-right: 4px;
+}
+.jp-DebuggerSidebar .jp-stack-panel-header.jp-Toolbar button.jp-ToolbarButtonComponent {
+  height: 20px;
 }
 
 .jp-DebuggerSidebar-body .jp-stack-panel-header {
@@ -60,6 +61,7 @@
 .jp-DebuggerSidebar-body .jp-Toolbar {
   background: var(--jp-layout-color2);
   box-shadow: none;
+  height: 20px;
 }
 
 .jp-DebuggerSidebar-body .lm-SplitPanel-handle.p-SplitPanel-handle:hover {
