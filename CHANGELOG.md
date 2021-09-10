@@ -229,19 +229,43 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.1.x/CHANGELOG.md'
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.0.6...60f37be54a714c391fad5500cb57055af1492591))
 
-From JupyterLab 3.1, file documents and notebooks have collaborative
-editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
-Editors are not collaborative by default; to activate it, start JupyterLab
-with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/stable/user/rtc.html).
+### User-facing changes
+
+- From JupyterLab 3.1, file documents and notebooks have collaborative
+  editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
+  Editors are not collaborative by default; to activate it, start JupyterLab
+  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/stable/user/rtc.html).
+- The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future verisions will enable restoring the previous behaviour of per-cell undo/redo.
+- Table of Contents recieved multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/stable/user/toc.html).
+- The debugger recived many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
+- The closing bracket is no longer automatically added by default; the old behaviour can be re-enabled from the menu bar (`Settings` -> `Auto Close Brackets`) or from the Advanced Settings Editor.
+- A new visual indicator was introduced to highlight cells in which the code changed in the editor since last execution:
+  <img alt="A GIF of the visual indicator showing up after editing a cell." src="https://user-images.githubusercontent.com/21197331/120619861-ae957d80-c45c-11eb-8640-b25b8b659ad4.gif">
+- Many other new features were added as documented below.
 
 ### New features added
 
-- Focus cells on split and leave cursor in cell with selection when splitting [#10297](https://github.com/jupyterlab/jupyterlab/pull/10297) ([@goanpeca](https://github.com/goanpeca))
-- Debugger: show button shortcuts in tooltips [#10199](https://github.com/jupyterlab/jupyterlab/pull/10199) ([@jess-x](https://github.com/jess-x))
-- Shared editing with collaborative notebook model. [#10118](https://github.com/jupyterlab/jupyterlab/pull/10118) ([@dmonad](https://github.com/dmonad))
+- General: Shared editing with collaborative notebook model. [#10118](https://github.com/jupyterlab/jupyterlab/pull/10118) ([@dmonad](https://github.com/dmonad))
+- Debugger: Implemented variable inspection when the debugger has started [#10025](https://github.com/jupyterlab/jupyterlab/pull/10025) ([@JohanMabille](https://github.com/JohanMabille))
+- Debugger: Basic support for evaluating code at a breakpoint [#9930](https://github.com/jupyterlab/jupyterlab/pull/9930) ([@jtpio](https://github.com/jtpio))
+- Notebook: Show a visual indicator that the cell has been edited [#10296](https://github.com/jupyterlab/jupyterlab/pull/10296) ([@martinRenou](https://github.com/martinRenou))
+- Notebook: Find and replace within a single cell [#10067](https://github.com/jupyterlab/jupyterlab/pull/10067) ([@jess-x](https://github.com/jess-x))
+- Notebook: Copy cell output to clipboard [#10282](https://github.com/jupyterlab/jupyterlab/pull/10282) ([@cameron-toy](https://github.com/cameron-toy))
+- Notebook: Add support for collapsing hierarchy of headings [#10260](https://github.com/jupyterlab/jupyterlab/pull/10260) ([@marthacryan](https://github.com/marthacryan))
+- File Browser: Add shortcuts [#10206](https://github.com/jupyterlab/jupyterlab/pull/10206) ([@martinRenou](https://github.com/martinRenou))
+- Table of Contents: Add capacity to skip H1 Headers [#9994](https://github.com/jupyterlab/jupyterlab/pull/9994) ([@skyetim](https://github.com/skyetim))
+- Table of Contents: Add context menus to sections containing runnable code cells [#10167](https://github.com/jupyterlab/jupyterlab/pull/10167) ([@jess-x](https://github.com/jess-x))
+- Completer: Added tab cycling to Completer [#10147](https://github.com/jupyterlab/jupyterlab/pull/10147) ([@cameron-toy](https://github.com/cameron-toy))
+- Customization: Build context menu from settings for easy customization [#10373](https://github.com/jupyterlab/jupyterlab/pull/10373) ([@fcollonval](https://github.com/fcollonval))
+- Customization: Build menus from settings [#10254](https://github.com/jupyterlab/jupyterlab/pull/10254) ([@fcollonval](https://github.com/fcollonval))
+- Customization: Disable `autoClosingBrackets` by default everywhere [#9488](https://github.com/jupyterlab/jupyterlab/pull/9488) ([@telamonian](https://github.com/telamonian))
+- Customization: Add `cursorBlinkRate` settings for editors [#10485](https://github.com/jupyterlab/jupyterlab/pull/10485) ([@fcollonval](https://github.com/fcollonval))
+- Licenses: Add a list of licenses accessible from the UI [#9779](https://github.com/jupyterlab/jupyterlab/pull/9779) ([@bollwyvl](https://github.com/bollwyvl))
 
 ### Enhancements made
 
+- Add license-webpack-plugin [#9519](https://github.com/jupyterlab/jupyterlab/pull/9519) ([@bollwyvl](https://github.com/bollwyvl))
+- Focus cells on split and leave cursor in cell with selection when splitting [#10297](https://github.com/jupyterlab/jupyterlab/pull/10297) ([@goanpeca](https://github.com/goanpeca))
 - Fixes doc string for toc syncCollapseState setting [#10639](https://github.com/jupyterlab/jupyterlab/pull/10639) ([@andrewfulton9](https://github.com/andrewfulton9))
 - Allow to set custom position for `Tooltip` [#10590](https://github.com/jupyterlab/jupyterlab/pull/10590) ([@krassowski](https://github.com/krassowski))
 - Rename files in collaborative mode [#10564](https://github.com/jupyterlab/jupyterlab/pull/10564) ([@hbcarlos](https://github.com/hbcarlos))
@@ -254,30 +278,23 @@ with the `--collaborative` flag. See full documentation on [collaboration](https
 - Make current kernel the default in kernel selector [#10510](https://github.com/jupyterlab/jupyterlab/pull/10510) ([@gereleth](https://github.com/gereleth))
 - Add selectionExecuted and executionScheduled signals + update executed signal to include error status/info [#10493](https://github.com/jupyterlab/jupyterlab/pull/10493) ([@mwakaba2](https://github.com/mwakaba2))
 - Scroll cell into view after output collapse [#10491](https://github.com/jupyterlab/jupyterlab/pull/10491) ([@gereleth](https://github.com/gereleth))
-- Add cursorBlinkRate settings for editors [#10485](https://github.com/jupyterlab/jupyterlab/pull/10485) ([@fcollonval](https://github.com/fcollonval))
 - Collaborative renaming & moving of files [#10470](https://github.com/jupyterlab/jupyterlab/pull/10470) ([@dmonad](https://github.com/dmonad))
 - Update inspector open [#10449](https://github.com/jupyterlab/jupyterlab/pull/10449) ([@legendb317](https://github.com/legendb317))
 - dirty cell: Store the code source as true source of output [#10438](https://github.com/jupyterlab/jupyterlab/pull/10438) ([@fcollonval](https://github.com/fcollonval))
 - Add ability to hide side tab bars [#10425](https://github.com/jupyterlab/jupyterlab/pull/10425) ([@fcollonval](https://github.com/fcollonval))
 - RTC: Anonymous user names based on the moons of Jupyter [#10411](https://github.com/jupyterlab/jupyterlab/pull/10411) ([@dmonad](https://github.com/dmonad))
 - Add icon for .jl files in explorer [#10397](https://github.com/jupyterlab/jupyterlab/pull/10397) ([@shngt](https://github.com/shngt))
-- Build context menu from settings for easy customization [#10373](https://github.com/jupyterlab/jupyterlab/pull/10373) ([@fcollonval](https://github.com/fcollonval))
 - Support arrow keys for button navigation [#10349](https://github.com/jupyterlab/jupyterlab/pull/10349) ([@jahn96](https://github.com/jahn96))
 - Feature: select all cells with tags in toc [#10346](https://github.com/jupyterlab/jupyterlab/pull/10346) ([@NPetz](https://github.com/NPetz))
 - [licenses] use serverSettings from serviceManager, style tweaks [#10329](https://github.com/jupyterlab/jupyterlab/pull/10329) ([@bollwyvl](https://github.com/bollwyvl))
-- Notebook Cells: Show a visual indicator that the cell has been edited [#10296](https://github.com/jupyterlab/jupyterlab/pull/10296) ([@martinRenou](https://github.com/martinRenou))
 - Filebrowser ContextMenu: Use separators [#10293](https://github.com/jupyterlab/jupyterlab/pull/10293) ([@martinRenou](https://github.com/martinRenou))
-- Copy cell output to clipboard [#10282](https://github.com/jupyterlab/jupyterlab/pull/10282) ([@cameron-toy](https://github.com/cameron-toy))
-- Add support for collapsing hierarchy of headings [#10260](https://github.com/jupyterlab/jupyterlab/pull/10260) ([@marthacryan](https://github.com/marthacryan))
 - Add a plugin to be able to swap the doc provider [#10256](https://github.com/jupyterlab/jupyterlab/pull/10256) ([@jtpio](https://github.com/jtpio))
-- Build menus from settings [#10254](https://github.com/jupyterlab/jupyterlab/pull/10254) ([@fcollonval](https://github.com/fcollonval))
 - Completer: expose `activeIndex` and `indexChanged` [#10244](https://github.com/jupyterlab/jupyterlab/pull/10244) ([@hbcarlos](https://github.com/hbcarlos))
 - DirListing: Refactor selection so that it's based on path not name [#10237](https://github.com/jupyterlab/jupyterlab/pull/10237) ([@martinRenou](https://github.com/martinRenou))
 - DirListing: Allow for no sorting when clicking on headers [#10236](https://github.com/jupyterlab/jupyterlab/pull/10236) ([@martinRenou](https://github.com/martinRenou))
 - Improve error handling in labextension install [#10233](https://github.com/jupyterlab/jupyterlab/pull/10233) ([@akx](https://github.com/akx))
 - FileBrowser: Add protected method for creating the dirlisting [#10216](https://github.com/jupyterlab/jupyterlab/pull/10216) ([@martinRenou](https://github.com/martinRenou))
 - added new command called runAllEnabled [#10215](https://github.com/jupyterlab/jupyterlab/pull/10215) ([@sarahspak](https://github.com/sarahspak))
-- FileBrowser: Add shortcuts [#10206](https://github.com/jupyterlab/jupyterlab/pull/10206) ([@martinRenou](https://github.com/martinRenou))
 - Filebrowser: Allow for escaping renaming [#10205](https://github.com/jupyterlab/jupyterlab/pull/10205) ([@martinRenou](https://github.com/martinRenou))
 - Add new widget area below the dockpanel [#10201](https://github.com/jupyterlab/jupyterlab/pull/10201) ([@fcollonval](https://github.com/fcollonval))
 - Debugger: show button shortcuts in tooltips [#10199](https://github.com/jupyterlab/jupyterlab/pull/10199) ([@jess-x](https://github.com/jess-x))
@@ -285,10 +302,8 @@ with the `--collaborative` flag. See full documentation on [collaboration](https
 - Move open-with to its own plugin, so it can be disabled independently. [#10193](https://github.com/jupyterlab/jupyterlab/pull/10193) ([@robertpyke](https://github.com/robertpyke))
 - key-bindings to codemirror search in single cell [#10184](https://github.com/jupyterlab/jupyterlab/pull/10184) ([@jess-x](https://github.com/jess-x))
 - Rename at file creation [#10181](https://github.com/jupyterlab/jupyterlab/pull/10181) ([@martinRenou](https://github.com/martinRenou))
-- Add context menus to sections containing runnable code cells [#10167](https://github.com/jupyterlab/jupyterlab/pull/10167) ([@jess-x](https://github.com/jess-x))
 - Scroll into view on each step/frame changes/... [#10160](https://github.com/jupyterlab/jupyterlab/pull/10160) ([@mlucool](https://github.com/mlucool))
 - Added support for namespace packages in labextensions. [#10150](https://github.com/jupyterlab/jupyterlab/pull/10150) ([@mellesies](https://github.com/mellesies))
-- Added tab cycling to Completer [#10147](https://github.com/jupyterlab/jupyterlab/pull/10147) ([@cameron-toy](https://github.com/cameron-toy))
 - Color contrast adjustments for sidebar and command palette [#10146](https://github.com/jupyterlab/jupyterlab/pull/10146) ([@isabela-pf](https://github.com/isabela-pf))
 - Rename simple interface documents from the title widget [#10140](https://github.com/jupyterlab/jupyterlab/pull/10140) ([@cameron-toy](https://github.com/cameron-toy))
 - Perf: Add virtual Notebook for delayed cell rendering [#10131](https://github.com/jupyterlab/jupyterlab/pull/10131) ([@goanpeca](https://github.com/goanpeca))
@@ -301,21 +316,15 @@ with the `--collaborative` flag. See full documentation on [collaboration](https
 - Fix last modified column toggle, allow to set it permanently [#10100](https://github.com/jupyterlab/jupyterlab/pull/10100) ([@krassowski](https://github.com/krassowski))
 - TOC current position [#10099](https://github.com/jupyterlab/jupyterlab/pull/10099) ([@andrewfulton9](https://github.com/andrewfulton9))
 - Add 'merge cell above/below' commands with shortcuts [#10076](https://github.com/jupyterlab/jupyterlab/pull/10076) ([@krassowska](https://github.com/krassowska))
-- Find and replace within a single cell [#10067](https://github.com/jupyterlab/jupyterlab/pull/10067) ([@jess-x](https://github.com/jess-x))
 - Disable escape key and click-outside-dialog behaviors if hasClose = false [#10049](https://github.com/jupyterlab/jupyterlab/pull/10049) ([@DianeHu](https://github.com/DianeHu))
 - Name (un-renamed) file on first save [#10043](https://github.com/jupyterlab/jupyterlab/pull/10043) ([@jess-x](https://github.com/jess-x))
 - Improve UX when a user restarts their Notebook server via JupyterHub [#10032](https://github.com/jupyterlab/jupyterlab/pull/10032) ([@vkaidalov-rft](https://github.com/vkaidalov-rft))
-- Implemented variable inspection when the debugger has started [#10025](https://github.com/jupyterlab/jupyterlab/pull/10025) ([@JohanMabille](https://github.com/JohanMabille))
 - Create New commands for common file types associated with available kernels [#10009](https://github.com/jupyterlab/jupyterlab/pull/10009) ([@ohrely](https://github.com/ohrely))
-- Add capacity to skip H1 Headers [#9994](https://github.com/jupyterlab/jupyterlab/pull/9994) ([@skyetim](https://github.com/skyetim))
-- [Debugger] Basic support for evaluating code at a breakpoint [#9930](https://github.com/jupyterlab/jupyterlab/pull/9930) ([@jtpio](https://github.com/jtpio))
 - feat: CommandLinker Support in Markdown cells [#9909](https://github.com/jupyterlab/jupyterlab/pull/9909) ([@0618](https://github.com/0618))
 - Add support for Gitpod editor [#9883](https://github.com/jupyterlab/jupyterlab/pull/9883) ([@saulshanabrook](https://github.com/saulshanabrook))
 - Move documentation panel rendering to renderer [#9663](https://github.com/jupyterlab/jupyterlab/pull/9663) ([@krassowski](https://github.com/krassowski))
 - transition header element to div.header for accessibility [#9648](https://github.com/jupyterlab/jupyterlab/pull/9648) ([@tonyfast](https://github.com/tonyfast))
 - Add aria roles and labels [#9622](https://github.com/jupyterlab/jupyterlab/pull/9622) ([@marthacryan](https://github.com/marthacryan))
-- Add license-webpack-plugin [#9519](https://github.com/jupyterlab/jupyterlab/pull/9519) ([@bollwyvl](https://github.com/bollwyvl))
-- disable autoClosingBrackets by default everywhere [#9488](https://github.com/jupyterlab/jupyterlab/pull/9488) ([@telamonian](https://github.com/telamonian))
 - Vertical notebook cell prompts on mobile [#9464](https://github.com/jupyterlab/jupyterlab/pull/9464) ([@jtpio](https://github.com/jtpio))
 - Debugger keyboard shortcuts [#9154](https://github.com/jupyterlab/jupyterlab/pull/9154) ([@mnowacki-b](https://github.com/mnowacki-b))
 - Implement a guard for pending user input to avoid deadlocks [#8713](https://github.com/jupyterlab/jupyterlab/pull/8713) ([@echarles](https://github.com/echarles))
@@ -542,7 +551,6 @@ with the `--collaborative` flag. See full documentation on [collaboration](https
 - Clean up Release Scripts and Test in CI [#9821](https://github.com/jupyterlab/jupyterlab/pull/9821) ([@afshin](https://github.com/afshin))
 - Update CI script timeouts [#9814](https://github.com/jupyterlab/jupyterlab/pull/9814) ([@afshin](https://github.com/afshin))
 - Update MANIFEST.in to include package_data files. [#9780](https://github.com/jupyterlab/jupyterlab/pull/9780) ([@jasongrout](https://github.com/jasongrout))
-- More license updates [#9779](https://github.com/jupyterlab/jupyterlab/pull/9779) ([@bollwyvl](https://github.com/bollwyvl))
 - Add hash to webpack requests to enable caching [#9776](https://github.com/jupyterlab/jupyterlab/pull/9776) ([@afshin](https://github.com/afshin))
 - Updates the locking configuration [#9754](https://github.com/jupyterlab/jupyterlab/pull/9754) ([@jasongrout](https://github.com/jasongrout))
 - Use get_package_url from jupyterlab-server [#9743](https://github.com/jupyterlab/jupyterlab/pull/9743) ([@krassowski](https://github.com/krassowski))
@@ -2506,7 +2514,7 @@ extensible for other widgets who wish to support it.
 
 ### Status Bar
 
-<img alt= "A screenshot of the updated JupyterLab status bar." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.1.x/docs/source/getting_started/statusbar.png" class="jp-screenshot">
+<img alt="A screenshot of the updated JupyterLab status bar." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.1.x/docs/source/getting_started/statusbar.png" class="jp-screenshot">
 
 We have integrated the [JupyterLab Status Bar
 package](https://github.com/jupyterlab/jupyterlab-statusbar) package
