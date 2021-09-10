@@ -24,6 +24,7 @@ const CustomTooltip = withStyles(_theme => ({
 export const renderDropdown = (
   props: FormComponentRegistry.IRendererProps
 ): any => {
+  props.uihints.options = props.uihints.enum;
   return (
     <div className="jp-FormComponent">
       {props.uihints.default !== props.value ? (

@@ -36,7 +36,7 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
-import { saveIcon, settingsIcon } from '@jupyterlab/ui-components';
+import { settingsIcon } from '@jupyterlab/ui-components';
 
 // import { IDisposable } from '@lumino/disposable';
 
@@ -136,29 +136,6 @@ function activate(
         when
       });
 
-      // let disposable: IDisposable | null = null;
-      // Notify the command registry when the visibility status of the setting
-      // editor's commands change. The setting editor toolbar listens for this
-      // signal from the command registry.
-      // editor.commandsChanged.connect((sender: any, args: string[]) => {
-      //   args.forEach(id => {
-      //     commands.notifyCommandChanged(id);
-      //   });
-      //   if (editor.canSaveRaw) {
-      //     if (!disposable) {
-      //       disposable = status.setDirty();
-      //     }
-      //   } else if (disposable) {
-      //     disposable.dispose();
-      //     disposable = null;
-      //   }
-      //   editor.disposed.connect(() => {
-      //     if (disposable) {
-      //       disposable.dispose();
-      //     }
-      //   });
-      // });
-
       editor.id = namespace;
       editor.title.icon = settingsIcon;
       editor.title.label = trans.__('Settings');
@@ -175,22 +152,6 @@ function activate(
       command: CommandIDs.open
     });
   }
-
-  // commands.addCommand(CommandIDs.revert, {
-  //   execute: () => {
-  //     tracker.currentWidget?.content.revert();
-  //   },
-  //   icon: undoIcon,
-  //   label: trans.__('Revert User Settings'),
-  //   isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
-  // });
-
-  commands.addCommand(CommandIDs.save, {
-    execute: () => tracker.currentWidget?.content.save(),
-    icon: saveIcon,
-    label: trans.__('Save User Settings'),
-    isEnabled: () => true
-  });
 
   return tracker;
 }

@@ -122,39 +122,11 @@ export class SettingEditor extends Widget {
   readonly state: IStateDB;
 
   /**
-   * Whether the raw editor revert functionality is enabled.
-   */
-  // get canRevertRaw(): boolean {
-  //   return this._editor.raw.canRevert;
-  // }
-
-  /**
-   * Whether the raw editor save functionality is enabled.
-   */
-  // get canSaveRaw(): boolean {
-  //   return this._editor.raw.canSave;
-  // }
-
-  /**
-   * Emits when the commands passed in at instantiation change.
-   */
-  // get commandsChanged(): ISignal<any, string[]> {
-  //   return this._editor.raw.commandsChanged;
-  // }
-
-  /**
    * The currently loaded settings.
    */
   get settings(): ISettingRegistry.ISettings | null {
     return this._editor.settings;
   }
-
-  /**
-   * The inspectable raw user editor source for the currently loaded settings.
-   */
-  // get source(): CodeEditor.IEditor {
-  //   return this._editor.raw.source;
-  // }
 
   /**
    * Dispose of the resources held by the setting editor.
@@ -169,20 +141,6 @@ export class SettingEditor extends Widget {
     this._instructions.dispose();
     this._list.dispose();
     this._panel.dispose();
-  }
-
-  /**
-   * Revert raw editor back to original settings.
-   */
-  // revert(): void {
-  //   this._editor.raw.revert();
-  // }
-
-  /**
-   * Save the contents of the raw editor.
-   */
-  save(): void {
-    // return this._editor.raw.onSave?.();
   }
 
   /**

@@ -39,60 +39,48 @@ export class PluginEditor extends Widget {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
 
-    this.node.addEventListener('scroll', (ev: Event) => {
-      for (const editor of this._editors) {
-        const offsetTop =
-          editor.node.offsetTop + (editor.parent?.node?.offsetTop ?? 0);
-        if (
-          this.node.scrollTop + 1 >= (editor.parent?.node?.offsetTop ?? 0) &&
-          // If top of editor is visible
-          (offsetTop >= this.node.scrollTop ||
-            // If the top is above the view and the bottom is below the view
-            (offsetTop < this.node.scrollTop &&
-              offsetTop + editor.node.scrollHeight >
-                this.node.scrollTop + this.node.clientHeight))
-        ) {
-          this.selection = editor.plugin.id;
-          break;
-        }
-      }
-    });
+    this.node.addEventListener('scroll', this.scrollToEditor);
 
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
-    // TODO: Remove this layout. We were using this before when we
-    // when we had a way to switch between the raw and table editor
-    // Now, the raw editor is the only child and probably could merged into
-    // this class directly in the future.
     const layout = (this.layout = new PanelLayout());
-    const plugins = PluginList.sortPlugins(options.registry).filter(
-      plugin => {
-        const { schema } = plugin;
-        const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
-        const editable = Object.keys(schema.properties || {}).length > 0;
-        const extensible = schema.additionalProperties !== false;
+    const plugins = PluginList.sortPlugins(options.registry).filter(plugin => {
+      const { schema } = plugin;
+      const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
+      const editable = Object.keys(schema.properties || {}).length > 0;
+      const extensible = schema.additionalProperties !== false;
 
-        return !deprecated && (editable || extensible);
-      }
-    );
+      return !deprecated && (editable || extensible);
+    });
     for (const plugin of plugins) {
       const newEditor = new SettingsFormEditorWidget({
         plugin,
         registry: options.registry,
         componentRegistry: options.editorRegistry
-      })
+      });
       this._editors.push(newEditor);
       layout.addWidget(newEditor);
     }
-
-    // this.raw = this._rawEditor = new SettingsMetadataEditor(options);
-    // this._rawEditor.handleMoved.connect(this._onStateChanged, this);
   }
 
-  /**
-   * The plugin editor's raw editor.
-   */
-  // readonly raw: SettingsMetadataEditor;
+  scrollToEditor = () => {
+    for (const editor of this._editors) {
+      const offsetTop =
+        editor.node.offsetTop + (editor.parent?.node?.offsetTop ?? 0);
+      if (
+        this.node.scrollTop + 1 >= (editor.parent?.node?.offsetTop ?? 0) &&
+        // If top of editor is visible
+        (offsetTop >= this.node.scrollTop ||
+          // If the top is above the view and the bottom is below the view
+          (offsetTop < this.node.scrollTop &&
+            offsetTop + editor.node.scrollHeight >
+              this.node.scrollTop + this.node.clientHeight))
+      ) {
+        this.selection = editor.plugin.id;
+        break;
+      }
+    }
+  };
 
   /**
    * Tests whether the settings have been modified and need saving.
@@ -109,8 +97,6 @@ export class PluginEditor extends Widget {
   }
   set settings(settings: ISettingRegistry.ISettings | null) {
     this._settings = settings;
-    // this._rawEditor.settings = settings;
-
     this.update();
   }
 
@@ -131,8 +117,6 @@ export class PluginEditor extends Widget {
    */
   get state(): SettingEditor.IPluginLayout {
     const plugin = this._settings ? this._settings.id : '';
-    // const { sizes } = this._rawEditor;
-
     return { plugin };
   }
   set state(state: SettingEditor.IPluginLayout) {
@@ -140,7 +124,6 @@ export class PluginEditor extends Widget {
       return;
     }
 
-    // this._rawEditor.sizes = state.sizes;
     this.update();
   }
 
@@ -210,15 +193,7 @@ export class PluginEditor extends Widget {
 
     this.show();
     void this.confirm(this.selection);
-    // raw.show();
   }
-
-  /**
-   * Handle layout state changes that need to be saved.
-   */
-  // private _onStateChanged(): void {
-  //   (this.stateChanged as Signal<any, void>).emit(undefined);
-  // }
 
   protected translator: ITranslator;
   private _selection: string;
@@ -253,22 +228,3 @@ export namespace PluginEditor {
     translator?: ITranslator;
   }
 }
-
-/**
- * A namespace for private module data.
- */
-// namespace Private {
-//   /**
-//    * Handle save errors.
-//    */
-//   export function onSaveError(reason: any, translator?: ITranslator): void {
-//     translator = translator || nullTranslator;
-//     const trans = translator.load('jupyterlab');
-//     console.error(`Saving setting editor value failed: ${reason.message}`);
-//     void showDialog({
-//       title: trans.__('Your changes were not saved.'),
-//       body: reason.message,
-//       buttons: [Dialog.okButton({ label: trans.__('Ok') })]
-//     });
-//   }
-// }
