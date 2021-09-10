@@ -84,8 +84,11 @@ export const SettingsMetadataEditor = ({
         handleChange(fieldName, newValue, category),
       uihints: {
         category: category,
+        label: options.title,
         field_type: options.enum
           ? 'dropdown'
+          : typeof options.field_type === 'object'
+          ? options.field_type[0]
           : options.renderer_id ?? options.type ?? typeof options.default,
         title: options.title ?? fieldName,
         ...options

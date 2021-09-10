@@ -1,6 +1,12 @@
 import React from 'react';
 
-import { FormControlLabel, InputLabel, Switch } from '@material-ui/core';
+import {
+  FormControlLabel,
+  InputLabel,
+  Switch,
+  Tooltip,
+  withStyles
+} from '@material-ui/core';
 
 import {
   ArrayInput,
@@ -8,6 +14,12 @@ import {
   FormComponentRegistry,
   TextInput
 } from '@jupyterlab/formeditor';
+
+const CustomTooltip = withStyles(_theme => ({
+  tooltip: {
+    fontSize: 13
+  }
+}))(Tooltip);
 
 export const renderDropdown = (
   props: FormComponentRegistry.IRendererProps
@@ -78,20 +90,22 @@ export const renderCheckbox = (
       {props.uihints.default !== props.value ? (
         <div className="jp-modifiedIndicator" />
       ) : undefined}
-      <FormControlLabel
-        className="jp-metadataEditor-formInput"
-        key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
-        control={
-          <Switch
-            checked={props.value}
-            onChange={(e: any, checked: boolean) => {
-              props.handleChange(checked);
-            }}
-            color="primary"
-          />
-        }
-        label={props.uihints.title}
-      />
+      <CustomTooltip title={props.uihints.description ?? ''}>
+        <FormControlLabel
+          className="jp-metadataEditor-formInput"
+          key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
+          control={
+            <Switch
+              checked={props.value}
+              onChange={(e: any, checked: boolean) => {
+                props.handleChange(checked);
+              }}
+              color="primary"
+            />
+          }
+          label={props.uihints.title}
+        />
+      </CustomTooltip>
     </div>
   );
 };

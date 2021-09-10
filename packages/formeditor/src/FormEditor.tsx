@@ -66,6 +66,7 @@ export const FormEditor = ({ schema, componentRegistry }: IFormEditorProps) => {
   }
   return (
     <div className={FORM_EDITOR_CLASS}>
+      {uncategorizedInputElements}
       {toArray(
         map(Object.keys(categorizedInputElements), (category: string) => {
           return [
@@ -79,7 +80,6 @@ export const FormEditor = ({ schema, componentRegistry }: IFormEditorProps) => {
           ];
         })
       )}
-      {uncategorizedInputElements}
     </div>
   );
 };
