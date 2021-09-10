@@ -2,11 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { CommandToolbarButton } from '@jupyterlab/ui-components';
+import { CommandToolbarButton, Toolbar } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
-import { PanelHeader } from '../header';
 import { CallstackBody } from './body';
 
 /**
@@ -24,10 +23,11 @@ export class Callstack extends Panel {
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     this.title.label = trans.__('Callstack');
-    const header = new PanelHeader(translator);
+    const header = new Toolbar();
+    header.addClass('jp-stack-panel-header');
     const body = new CallstackBody(model);
 
-    header.toolbar.addItem(
+    header.addItem(
       'continue',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -36,7 +36,7 @@ export class Callstack extends Panel {
       })
     );
 
-    header.toolbar.addItem(
+    header.addItem(
       'terminate',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -45,7 +45,7 @@ export class Callstack extends Panel {
       })
     );
 
-    header.toolbar.addItem(
+    header.addItem(
       'step-over',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -54,7 +54,7 @@ export class Callstack extends Panel {
       })
     );
 
-    header.toolbar.addItem(
+    header.addItem(
       'step-in',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -63,7 +63,7 @@ export class Callstack extends Panel {
       })
     );
 
-    header.toolbar.addItem(
+    header.addItem(
       'step-out',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -72,7 +72,7 @@ export class Callstack extends Panel {
       })
     );
 
-    header.toolbar.addItem(
+    header.addItem(
       'evaluate',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -87,7 +87,7 @@ export class Callstack extends Panel {
     this.addClass('jp-DebuggerCallstack');
   }
 
-  get header(): PanelHeader {
+  get header(): Toolbar {
     return this._header;
   }
 
@@ -95,7 +95,7 @@ export class Callstack extends Panel {
    * The toolbar widget, it is not attached to current widget
    * but is rendered by the sidebar panel.
    */
-  private _header: PanelHeader;
+  private _header: Toolbar;
 }
 
 /**

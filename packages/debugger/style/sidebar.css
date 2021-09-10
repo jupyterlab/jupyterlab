@@ -26,7 +26,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  min-height: 24px;
+  min-height: 24px !important;
+  padding: 0px !important;
   height: var(--jp-debugger-header-height);
 }
 

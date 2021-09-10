@@ -5,13 +5,14 @@
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { ToolbarButton } from '@jupyterlab/ui-components';
+import { Toolbar, ToolbarButton } from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
 import { viewBreakpointIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
-import { PanelHeader } from '../header';
+import { SourcePathComponent } from './sourcepath';
 import { SourcesBody } from './body';
-import { SourcesHeader } from './header';
+import { ReactWidget } from '@jupyterlab/ui-components';
+import React from 'react';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
@@ -29,13 +30,15 @@ export class Sources extends Panel {
     const trans = translator.load('jupyterlab');
     this.title.label = trans.__('Sources');
 
-    this._header = new SourcesHeader(model, translator);
+    this._header = new Toolbar();
+    this._header.addClass('jp-stack-panel-header');
+    this._header.addClass('jp-DebuggerSources-header');
     const body = new SourcesBody({
       service,
       model,
       editorServices
     });
-    this._header.toolbar.addItem(
+    this._header.addItem(
       'open',
       new ToolbarButton({
         icon: viewBreakpointIcon,
@@ -43,12 +46,18 @@ export class Sources extends Panel {
         tooltip: trans.__('Open in the Main Area')
       })
     );
+    const sourcePath = ReactWidget.create(
+      <SourcePathComponent model={model} />
+    );
+
+    this._header.addItem('sourcePath', sourcePath);
+    this.addClass('jp-DebuggerSources-header');
     this.addWidget(this._header);
     this.addWidget(body);
     this.addClass('jp-DebuggerSources');
   }
 
-  get header(): PanelHeader {
+  get header(): Toolbar {
     return this._header;
   }
 
@@ -56,7 +65,7 @@ export class Sources extends Panel {
    * The toolbar widget, it is not attached to current widget
    * but is rendered by the sidebar panel.
    */
-  private _header: PanelHeader;
+  private _header: Toolbar;
 }
 
 /**

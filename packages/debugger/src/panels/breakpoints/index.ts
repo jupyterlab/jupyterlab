@@ -3,12 +3,11 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { ToolbarButton } from '@jupyterlab/ui-components';
+import { Toolbar, ToolbarButton } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { closeAllIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
-import { PanelHeader } from '../header';
 import { BreakpointsBody } from './body';
 
 /**
@@ -27,10 +26,11 @@ export class Breakpoints extends Panel {
     const trans = translator.load('jupyterlab');
     this.title.label = trans.__('Breakpoints');
 
-    this._header = new PanelHeader(translator);
+    this._header = new Toolbar();
+    this._header.addClass('jp-stack-panel-header');
     const body = new BreakpointsBody(model);
 
-    this._header.toolbar.addItem(
+    this._header.addItem(
       'closeAll',
       new ToolbarButton({
         icon: closeAllIcon,
@@ -60,7 +60,7 @@ export class Breakpoints extends Panel {
     this.addClass('jp-DebuggerBreakpoints');
   }
 
-  get header(): PanelHeader {
+  get header(): Toolbar {
     return this._header;
   }
 
@@ -68,7 +68,7 @@ export class Breakpoints extends Panel {
    * The toolbar widget, it is not attached to current widget
    * but is rendered by the sidebar panel.
    */
-  private _header: PanelHeader;
+  private _header: Toolbar;
 
   readonly clicked = new Signal<this, IDebugger.IBreakpoint>(this);
 }

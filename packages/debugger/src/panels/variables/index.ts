@@ -5,13 +5,13 @@ import { IThemeManager } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   tableRowsIcon,
+  Toolbar,
   ToolbarButton,
   treeViewIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel, Widget } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
-import { PanelHeader } from '../header';
 import { VariablesBodyGrid } from './grid';
 import { ScopeSwitcher } from './scope';
 import { VariablesBodyTree } from './tree';
@@ -31,7 +31,8 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     this.title.label = trans.__('Variables');
-    this._header = new PanelHeader(translator);
+    this._header = new Toolbar();
+    this._header.addClass('jp-stack-panel-header');
     this._header.addClass('jp-DebuggerVariables-toolbar');
     this._tree = new VariablesBodyTree({
       model,
@@ -47,7 +48,7 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
     });
     this._table.hide();
 
-    this._header.toolbar.addItem(
+    this._header.addItem(
       'scope-switcher',
       new ScopeSwitcher({
         translator,
@@ -100,9 +101,9 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
 
     markViewButtonSelection(this.viewMode);
 
-    this._header.toolbar.addItem('view-VariableTreeView', treeViewButton);
+    this._header.addItem('view-VariableTreeView', treeViewButton);
 
-    this._header.toolbar.addItem('view-VariableTableView', tableViewButton);
+    this._header.addItem('view-VariableTableView', tableViewButton);
 
     this.addWidget(this._header);
     this.addWidget(this._tree);
@@ -110,7 +111,7 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
     this.addClass('jp-DebuggerVariables');
   }
 
-  get header(): PanelHeader {
+  get header(): Toolbar {
     return this._header;
   }
 
@@ -162,7 +163,7 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
    * The toolbar widget, it is not attached to current widget
    * but is rendered by the sidebar panel.
    */
-  private _header: PanelHeader;
+  private _header: Toolbar;
 
   private _tree: VariablesBodyTree;
   private _table: VariablesBodyGrid;

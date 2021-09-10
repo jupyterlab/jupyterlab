@@ -44,8 +44,6 @@ import { IDebugger } from '../src/tokens';
 
 import { PanelBody } from '../src/panels/panelbody';
 
-import { SourcesHeader } from '../src/panels/sources/header';
-
 /**
  * A test sidebar.
  */
@@ -362,8 +360,8 @@ describe('Debugger', () => {
     });
 
     it('should display the source path in the header', () => {
-      const header = sidebar.sources.header as SourcesHeader;
-      const pathWidget = header.layout.widgets[1].node.innerHTML;
+      const header = sidebar.sources.header;
+      const pathWidget = header.node.innerHTML;
       expect(pathWidget).toContain(path);
     });
 
