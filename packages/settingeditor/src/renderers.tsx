@@ -31,7 +31,7 @@ export const renderTextInput = (
 ): any => {
   return (
     <div className="jp-FormComponent">
-      {props.uihints.default !== props.value ? (
+      {JSON.stringify(props.uihints.default) !== JSON.stringify(props.value) ? (
         <div className="jp-modifiedIndicator" />
       ) : undefined}
       <TextInput

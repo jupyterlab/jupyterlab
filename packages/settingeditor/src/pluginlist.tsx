@@ -370,7 +370,6 @@ export class PluginList extends ReactWidget {
   }
 
   render(): React.ReactElement<any> {
-    console.log('render');
     const modifiedItems = this._modifiedPlugins
       .filter(this._filter)
       .map(this.mapPlugins);

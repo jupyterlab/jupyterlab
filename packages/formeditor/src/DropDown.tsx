@@ -86,7 +86,6 @@ export const DropDown: React.FC<FormComponentRegistry.IRendererProps> = ({
             <InputLabel error={!!error}>{label}</InputLabel>
             <Select
               value={updatedValue}
-              id={`${label}DropDown`}
               label={label}
               error={!!error}
               onChange={(event: any): void => {
@@ -113,7 +112,6 @@ export const DropDown: React.FC<FormComponentRegistry.IRendererProps> = ({
           </FormControl>
         ) : (
           <Autocomplete
-            id="combo-box-demo"
             freeSolo
             key="jp-DropDown"
             options={options ?? []}

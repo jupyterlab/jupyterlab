@@ -64,8 +64,10 @@ export const SettingsMetadataEditor = ({
   const [schema, setSchema] = React.useState({} as FormEditor.ISchema);
   const [title, setTitle] = React.useState('');
 
-  const reset = () => {
-    settings.resetAll();
+  const reset = async () => {
+    for (const field of settings.modifiedFields) {
+      await settings.remove(field);
+    }
     updateSchema();
   };
 
@@ -74,35 +76,21 @@ export const SettingsMetadataEditor = ({
     fieldName: string,
     category?: string
   ): FormComponentRegistry.IRendererProps => {
-    if (options.enum) {
-      return {
-        value: category
-          ? (settings.get(category).composite as any)[fieldName]
-          : settings.get(fieldName).composite,
-        handleChange: (newValue: any) =>
-          handleChange(fieldName, newValue, category),
-        uihints: {
-          field_type: 'dropdown',
-          category: category,
-          ...options
-        }
-      };
-    } else {
-      return {
-        value: category
-          ? (settings.get(category).composite as any)[fieldName]
-          : settings.get(fieldName).composite,
-        handleChange: (newValue: any) =>
-          handleChange(fieldName, newValue, category),
-        uihints: {
-          category: category,
-          field_type:
-            options.renderer_id ?? options.type ?? typeof options.default,
-          title: options.title ?? fieldName,
-          ...options
-        }
-      };
-    }
+    return {
+      value: category
+        ? (settings.get(category).composite as any)[fieldName]
+        : settings.get(fieldName).composite,
+      handleChange: (newValue: any) =>
+        handleChange(fieldName, newValue, category),
+      uihints: {
+        category: category,
+        field_type: options.enum
+          ? 'dropdown'
+          : options.renderer_id ?? options.type ?? typeof options.default,
+        title: options.title ?? fieldName,
+        ...options
+      }
+    };
   };
 
   const updateSchema = (errors?: ISchemaValidator.IError[]) => {
@@ -157,7 +145,10 @@ export const SettingsMetadataEditor = ({
       updateSchema(errors);
     } else {
       settings
-        .save(JSON.stringify(current))
+        .set(
+          category ?? fieldName,
+          category ? current[category] : current[fieldName]
+        )
         .then(() => {
           updateSchema();
         })
