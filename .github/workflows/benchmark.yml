@@ -80,7 +80,15 @@ jobs:
           # Test if metadata have changed
           export METADATA_DIFF="/tmp/metadata.diff"
           diff -u <(jq --sort-keys .metadata benchmark-results/lab-benchmark.json) <(jq --sort-keys .metadata lab-benchmark-expected.json) > ${METADATA_DIFF} || true
-          [ -s ${METADATA_DIFF} ] && echo ":exclamation: Test metadata have changed" >> ${REPORT}  && echo "\`\`\`diff" >> ${REPORT} && cat ${METADATA_DIFF} >> ${REPORT} && echo "\`\`\`" >> ${REPORT}
+          if [[ -s ${METADATA_DIFF} ]]; then
+            echo "<details><summary>:exclamation: Test metadata have changed</summary>" >> ${REPORT}
+            echo "" >> ${REPORT}
+            echo "\`\`\`diff" >> ${REPORT}
+            cat ${METADATA_DIFF} >> ${REPORT}
+            echo "\`\`\`" >> ${REPORT}
+            echo "" >> ${REPORT}
+            echo "</details>" >> ${REPORT}
+          fi
 
           # Save PR number for comment publication
           echo "${{ github.event.number }}" > ./benchmark-results/NR
