@@ -39,8 +39,7 @@ export class Sources extends PanelWidget {
       new ToolbarButton({
         icon: viewBreakpointIcon,
         onClick: (): void => model.open(),
-        tooltip: this.trans.__('Open in the Main Area'),
-        stopPropagation:true
+        tooltip: this.trans.__('Open in the Main Area')
       })
     );
     const sourcePath = ReactWidget.create(
@@ -53,7 +52,6 @@ export class Sources extends PanelWidget {
     this.addWidget(body);
     this.addClass('jp-DebuggerSources');
   }
-
 }
 
 /**

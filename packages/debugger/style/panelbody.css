@@ -20,7 +20,8 @@
   margin-top: 3px;
   height: 16px;
 }
-.jp-AccordionPanel-title.jp-DebuggerPanel-expanded .lm-AccordionPanel-titleCollapser {
+.jp-AccordionPanel-title.jp-DebuggerPanel-expanded
+  .lm-AccordionPanel-titleCollapser {
   transform: rotate(-90deg);
 }
 
@@ -31,6 +32,6 @@
   transform: rotate(-90deg) translate(-100%);
 }
 
-.jp-AccordionPanel-title .lm-AccordionPanel-titleLabel{
+.jp-AccordionPanel-title .lm-AccordionPanel-titleLabel {
   user-select: none;
 }

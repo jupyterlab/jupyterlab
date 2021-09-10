@@ -3,7 +3,7 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ITranslator } from '@jupyterlab/translation';
-import {  ToolbarButton } from '@jupyterlab/ui-components';
+import { ToolbarButton } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { closeAllIcon } from '../../icons';
@@ -36,7 +36,9 @@ export class Breakpoints extends PanelWidget {
           }
           const result = await showDialog({
             title: this.trans.__('Remove All Breakpoints'),
-            body: this.trans.__('Are you sure you want to remove all breakpoints?'),
+            body: this.trans.__(
+              'Are you sure you want to remove all breakpoints?'
+            ),
             buttons: [
               Dialog.okButton({ label: this.trans.__('Remove breakpoints') }),
               Dialog.cancelButton({ label: this.trans.__('Cancel') })
@@ -47,15 +49,13 @@ export class Breakpoints extends PanelWidget {
             return service.clearBreakpoints();
           }
         },
-        tooltip: this.trans.__('Remove All Breakpoints'),
-        stopPropagation: true
+        tooltip: this.trans.__('Remove All Breakpoints')
       })
     );
 
     this.addWidget(this.header);
     this.addWidget(body);
     this.addClass('jp-DebuggerBreakpoints');
-
   }
 
   readonly clicked = new Signal<this, IDebugger.IBreakpoint>(this);

@@ -32,10 +32,9 @@
 }
 
 .jp-DebuggerSidebar .jp-stack-panel-header.jp-Toolbar {
-  background: transparent!important;
+  background: transparent !important;
   border-bottom: none;
 }
-
 
 .jp-DebuggerSidebar .jp-AccordionPanel-title span.lm-AccordionPanel-titleLabel,
 .jp-DebuggerSidebar .jp-stack-panel-header h2 {
@@ -46,7 +45,9 @@
   padding-left: 8px;
   padding-right: 4px;
 }
-.jp-DebuggerSidebar .jp-stack-panel-header.jp-Toolbar button.jp-ToolbarButtonComponent {
+.jp-DebuggerSidebar
+  .jp-stack-panel-header.jp-Toolbar
+  button.jp-ToolbarButtonComponent {
   height: 20px;
 }
 

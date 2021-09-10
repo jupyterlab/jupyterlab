@@ -1,11 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, nullTranslator, TranslationBundle } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { Toolbar } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { Panel } from '@lumino/widgets';
-
 
 /**
  * A base class for debugger panel element.
@@ -26,22 +29,24 @@ export class PanelWidget extends Panel {
   }
 
   /**
-   * Handler to notify `AccordionPanel`'s title that its child widget is expanded.
+   * Handler to notify `AccordionPanel` title that its child widget is expanded.
    * We can not rely on `lm-mod-expande` class of Lumino to detect this event
    * since this class is added to the target of `onClick` event, which is not
    * always the title of `AccordionPanel`.
    * @param {Message} msg
    */
-  protected onAfterShow(msg: Message): void{
-    this.header.node.parentElement?.classList.add('jp-DebuggerPanel-expanded')
+  protected onAfterShow(msg: Message): void {
+    this.header.node.parentElement?.classList.add('jp-DebuggerPanel-expanded');
   }
 
   /**
    * Handler to notify `AccordionPanel`'s title that its child widget is closed.
    * @param {Message} msg
    */
-  protected onAfterHide(msg: Message): void{
-    this.header.node.parentElement?.classList.remove('jp-DebuggerPanel-expanded')
+  protected onAfterHide(msg: Message): void {
+    this.header.node.parentElement?.classList.remove(
+      'jp-DebuggerPanel-expanded'
+    );
   }
 
   get header(): Toolbar {
@@ -54,7 +59,7 @@ export class PanelWidget extends Panel {
    */
   private _header: Toolbar;
 
-  protected trans : TranslationBundle
+  protected trans: TranslationBundle;
 }
 
 /**
