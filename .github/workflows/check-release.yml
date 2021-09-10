@@ -65,24 +65,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-linkcheck-
 
-      - name: Configure Version Spec
-        id: version-spec
-        if: ${{ matrix.group == 'check_release' }}
-        run: |
-          set -eux
-          version=$(python setup.py --version)
-          if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            version_spec=patch
-          else
-            version_spec=build
-          fi
-          echo "::set-output name=spec::${version_spec}"
-
       - name: Check Release
         if: ${{ matrix.group == 'check_release' }}
         uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1
         env:
-          RH_VERSION_SPEC: ${{ steps.version-spec.outputs.spec }}
+          RH_VERSION_SPEC: next
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
