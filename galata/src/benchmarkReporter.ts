@@ -343,6 +343,8 @@ class BenchmarkReporter implements Reporter {
         '',
         'The execution time (in milliseconds) are grouped by test file, test type and browser.',
         'For each case, the following values are computed: _min_ <- [_1st quartile_ - _median_ - _3rd quartile_] -> _max_.',
+        '',
+        '<details><summary>Results table</summary>',
         ''
       );
 
@@ -378,7 +380,7 @@ class BenchmarkReporter implements Reporter {
           }
         }
       }
-      reportContent.push('');
+      reportContent.push('', '</details>', '');
 
       const reportFile = path.resolve(outputDir, `${baseName}.md`);
       fs.writeFileSync(reportFile, reportContent.join('\n'), 'utf-8');
