@@ -1,14 +1,7 @@
 name: Benchmark Tests
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
-    branches: ['master']
-
-permissions:
-  pull-requests: write
 
 jobs:
   build:
@@ -34,7 +27,7 @@ jobs:
           key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
           restore-keys: |
             ${{ runner.os }}-pip-3.8
-  
+
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -83,52 +76,22 @@ jobs:
           echo "" >> ${REPORT}
           cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
           echo "" >> ${REPORT}
-          
+
           # Test if metadata have changed
           export METADATA_DIFF="/tmp/metadata.diff"
           diff -u <(jq --sort-keys .metadata benchmark-results/lab-benchmark.json) <(jq --sort-keys .metadata lab-benchmark-expected.json) > ${METADATA_DIFF} || true
           [ -s ${METADATA_DIFF} ] && echo ":exclamation: Test metadata have changed" >> ${REPORT}  && echo "\`\`\`diff" >> ${REPORT} && cat ${METADATA_DIFF} >> ${REPORT} && echo "\`\`\`" >> ${REPORT}
 
-          echo 'BENCH_REPORT<<EOF' >> $GITHUB_ENV
-          cat ${REPORT} >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-        working-directory: galata
+          # Save PR number for comment publication
+          echo "${{ github.event.number }}" > ./benchmark-results/NR
 
-      - name: Comment on PR with benchmark report
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          # Source https://github.com/actions/github-script/actions/runs/187348077/workflow
-          script: |
-            // Get the existing comments.
-            const {data: comments} = await github.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            })
-            // Find any comment already made by the bot.
-            const botComment = comments.find(comment => comment.user.id === 41898282)
-            if (botComment) {
-              await github.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body: process.env.BENCH_REPORT
-              })
-            } else {
-              await github.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: process.env.BENCH_REPORT
-              })
-            }
+        working-directory: galata
 
       - name: Upload Galata Test assets
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: benchmark-test-assets
+          name: benchmark-assets
           path: |
             galata/benchmark-results
             galata/test-results
