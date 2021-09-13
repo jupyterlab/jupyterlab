@@ -286,7 +286,7 @@ export const savingStatusPlugin: JupyterFrontEndPlugin<void> = {
     statusBar.registerStatusItem(savingStatusPlugin.id, {
       item: saving,
       align: 'middle',
-      isActive: () => true,
+      isActive: () => saving.model !== null && saving.model.status !== null,
       activeStateChanged: saving.model!.stateChanged
     });
   }
@@ -321,8 +321,7 @@ export const pathStatusPlugin: JupyterFrontEndPlugin<void> = {
     statusBar.registerStatusItem(pathStatusPlugin.id, {
       item: path,
       align: 'right',
-      rank: 0,
-      isActive: () => true
+      rank: 0
     });
   }
 };
