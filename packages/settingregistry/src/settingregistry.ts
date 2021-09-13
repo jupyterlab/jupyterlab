@@ -723,10 +723,16 @@ export class Settings implements ISettingRegistry.ISettings {
     for (const key in this.schema.properties) {
       const user = this.get(key).user;
       const defaultValue = this.default(key);
-      if (
-        user !== undefined &&
-        JSON.stringify(user) !== JSON.stringify(defaultValue)
-      ) {
+      if (user === undefined || user === null) {
+        continue;
+      }
+      if (JSONExt.isArray(user) && Object.keys(user).length === 0) {
+        continue;
+      }
+      if (!defaultValue) {
+        continue;
+      }
+      if (!JSONExt.deepEqual(user, defaultValue)) {
         modifiedFields.push(key);
       }
     }
