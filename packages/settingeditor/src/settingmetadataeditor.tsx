@@ -72,7 +72,7 @@ export const SettingsMetadataEditor = ({
           ] as PartialJSONObject)
         };
       }
-      if (options.properties) {
+      if (options.properties && ref) {
         for (const subProp in options.properties) {
           const subOptions = options.properties[subProp];
           subOptions.default = (options.default as any)[subProp];
