@@ -101,10 +101,9 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
    */
   render(): JSX.Element | null {
     if (this.model === null || this.model.version === 0) {
-      this.hide();
       return null;
     }
-    this.show();
+
     const {
       flashEnabled,
       messages,
