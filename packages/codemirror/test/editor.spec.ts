@@ -120,7 +120,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getOption()', () => {
     it('should get whether line numbers should be shown', () => {
-      expect(editor.getOption('lineNumbers')).toBe(true);
+      expect(editor.getOption('lineNumbers')).toBe(false);
     });
 
     it('should get whether horizontally scrolling should be used', () => {
