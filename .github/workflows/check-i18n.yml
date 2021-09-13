@@ -47,9 +47,10 @@ jobs:
 
       - name: Checkout target
         run: |
-          echo Checking ${GITHUB_BASE_REF}... 
+          echo Checking ${GITHUB_BASE_REF}...
+          # Ref https://github.com/actions/checkout/issues/93
+          git fetch --depth=1 origin +refs/heads/${GITHUB_BASE_REF}:refs/remotes/origin/${GITHUB_BASE_REF}
           git checkout ${GITHUB_BASE_REF}
-          git status
 
       - name: Check hash
         run: |
