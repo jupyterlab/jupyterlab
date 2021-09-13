@@ -40,7 +40,7 @@ jobs:
           python -m pip install jupyterlab-translate~=1.0
 
       - name: Compute hash
-        id: current-hash
+        id: currentHash
         run: |
           set -eux
           HASH=$(python scripts/i18n_check.py | tail -n1)
@@ -54,6 +54,8 @@ jobs:
           git checkout ${GITHUB_BASE_REF}
 
       - name: Check hash
+        env:
+          CURRENT: ${{ steps.currentHash.outputs.i18n }}
         run: |
           set -eux
           EXPECTED=$(python scripts/i18n_check.py | tail -n1)
