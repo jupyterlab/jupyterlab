@@ -74,14 +74,14 @@ export const SettingsMetadataEditor = ({
   const getProperties = (
     options: any,
     fieldName: string,
-    category?: string
+    category?: { id: string; label: string }
   ): FormComponentRegistry.IRendererProps => {
     return {
-      value: category
-        ? (settings.get(category).composite as any)[fieldName]
+      value: category?.id
+        ? (settings.get(category?.id).composite as any)[fieldName]
         : settings.get(fieldName).composite,
       handleChange: (newValue: any) =>
-        handleChange(fieldName, newValue, category),
+        handleChange(fieldName, newValue, category?.id),
       uihints: {
         category: category,
         label: options.title ?? fieldName,
@@ -121,7 +121,10 @@ export const SettingsMetadataEditor = ({
             );
             subOptions.error = error?.[0]?.message;
           }
-          properties[subProp] = getProperties(subOptions, subProp, prop);
+          properties[subProp] = getProperties(subOptions, subProp, {
+            id: prop,
+            label: options.title ?? prop
+          });
         }
       } else {
         const options = settings.schema.properties[prop];

@@ -53,10 +53,10 @@ export const FormEditor = ({ schema, componentRegistry }: IFormEditorProps) => {
     const props = schema[field];
     if (props.uihints?.category) {
       const category = props.uihints.category;
-      if (!categorizedInputElements[category]) {
-        categorizedInputElements[category] = [];
+      if (!categorizedInputElements[category.label]) {
+        categorizedInputElements[category.label] = [];
       }
-      categorizedInputElements[category].push(renderField(props));
+      categorizedInputElements[category.label].push(renderField(props));
     } else {
       uncategorizedInputElements.push(renderField(props));
     }
