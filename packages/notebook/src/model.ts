@@ -19,6 +19,7 @@ import {
   IModelDB,
   IObservableJSON,
   IObservableList,
+  IObservableMap,
   IObservableUndoableList,
   ModelDB
 } from '@jupyterlab/observables';
@@ -28,7 +29,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { UUID } from '@lumino/coreutils';
+import { JSONObject, ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 
@@ -105,7 +106,7 @@ export class NotebookModel implements INotebookModel {
       metadata.set('language_info', { name });
     }
     this._ensureMetadata();
-    metadata.changed.connect(this.triggerContentChange, this);
+    metadata.changed.connect(this._onMetadataChanged, this);
     this._deletedCells = [];
 
     this.sharedModel.changed.connect(this._onStateChanged, this);
@@ -428,6 +429,30 @@ close the notebook without saving it.`,
         this.triggerStateChange(value);
       });
     }
+
+    if (changes.metadataChange) {
+      const metadata = changes.metadataChange.newValue as JSONObject;
+      this._modelDBMutex(() => {
+        console.debug('_onStateChanged:');
+        Object.entries(metadata).forEach(([key, value]) => {
+          console.debug(key, value);
+          this.metadata.set(key, value);
+        });
+      });
+    }
+  }
+
+  private _onMetadataChanged(
+    metadata: IObservableJSON,
+    change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
+  ): void {
+    console.debug('_onMetadataChanged');
+    console.debug(metadata.toJSON());
+    console.debug(change);
+    this._modelDBMutex(() => {
+      this.sharedModel.updateMetadata(metadata.toJSON());
+    });
+    this.triggerContentChange();
   }
 
   /**
@@ -474,6 +499,11 @@ close the notebook without saving it.`,
    * The shared notebook model.
    */
   readonly sharedModel = models.YNotebook.create() as models.ISharedNotebook;
+
+  /**
+   * A mutex to update the shared model.
+   */
+  protected readonly _modelDBMutex = models.createMutex();
 
   /**
    * The underlying `IModelDB` instance in which model
