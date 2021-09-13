@@ -167,16 +167,12 @@ export class PluginEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    const raw = this._rawEditor;
     const settings = this._settings;
 
     if (!settings) {
       this.hide();
       return;
     }
-
-    this.show();
-    raw.show();
   }
 
   /**
