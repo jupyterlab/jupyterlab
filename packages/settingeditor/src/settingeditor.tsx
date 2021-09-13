@@ -91,6 +91,7 @@ export class SettingEditor extends Widget {
     });
 
     const switchButton = new Switch();
+    switchButton.label = 'JSON Editor';
     switchButton.addClass('jp-SettingEditor-Switch');
     switchButton.valueChanged.connect(
       (sender, args) => (this.isRawEditor = args.newValue)
