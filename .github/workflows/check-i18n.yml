@@ -39,5 +39,24 @@ jobs:
           python -m pip install -U pip
           python -m pip install jupyterlab-translate~=1.0
 
+      - name: Compute hash
+        id: current-hash
+        run: |
+          HASH=$(python scripts/i18n_check.py | tail -n1)
+          echo "::set-output name=i18n::${HASH}"
+
+      - name: Checkout target
+        run: |
+          echo Checking ${GITHUB_BASE_REF}... 
+          git checkout ${GITHUB_BASE_REF}
+          git status
+
       - name: Check hash
-        run: python scripts/i18n_check.py
+        run: |
+          EXPECTED=$(python scripts/i18n_check.py | tail -n1)
+          if [[ "${CURRENT}" != "${EXPECTED}" ]]; then
+            echo "Translatable strings have changed, this is only allowed on major or minor version bumps."
+            if [[ "${GITHUB_BASE_REF}" != "master" ]]; then
+              exit 1
+            fi
+          fi
