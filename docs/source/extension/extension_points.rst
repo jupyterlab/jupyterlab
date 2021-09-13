@@ -256,15 +256,14 @@ A list of CSS selectors currently used by context menu commands is given in :ref
 
 Item must follow this definition:
 
-.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/jupyter.lab.menus.json
    :language: json
-   :lines: 21-39
+   :lines: 14-34
 
 where ``menuItem`` definition is:
 
-.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/menuItem.json
    :language: json
-   :lines: 142-180
 
 
 The same example using the API is shown below. See the Lumino `docs
@@ -603,15 +602,14 @@ The default main menu is defined in the ``mainmenu-extension`` package settings.
 
 A menu must respect the following schema:
 
-.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/jupyter.lab.menus.json
    :language: json
-   :lines: 85-141
+   :lines: 5-13
 
 And an item must follow:
 
-.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/menu.json
    :language: json
-   :lines: 142-180
 
 Menus added to the settings system will be editable by users using the ``mainmenu-extension``
 settings. In particular, they can be disabled at the item or the menu level by setting the
@@ -883,11 +881,10 @@ The current widget factories supporting the toolbar customization are:
 - ``CSVTable``: CSV (Comma Separated Value) Viewer toolbar
 - ``TSVTable``: TSV (Tabulation Separated Value) Viewer toolbar
 
-Add the toolbar item must follow this definition:
+And the toolbar item must follow this definition:
 
-.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/toolbarItem.json
    :language: json
-   :lines: 207-252
 
 .. _widget-tracker:
 
