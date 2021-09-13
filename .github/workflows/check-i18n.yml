@@ -42,6 +42,7 @@ jobs:
       - name: Compute hash
         id: current-hash
         run: |
+          set -eux
           HASH=$(python scripts/i18n_check.py | tail -n1)
           echo "::set-output name=i18n::${HASH}"
 
@@ -54,6 +55,7 @@ jobs:
 
       - name: Check hash
         run: |
+          set -eux
           EXPECTED=$(python scripts/i18n_check.py | tail -n1)
           if [[ "${CURRENT}" != "${EXPECTED}" ]]; then
             echo "Translatable strings have changed, this is only allowed on major or minor version bumps."
