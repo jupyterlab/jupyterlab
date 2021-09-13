@@ -3,19 +3,24 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ILabStatus } from '@jupyterlab/application';
-import { IThemeManager } from '@jupyterlab/apputils';
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import { ReactWidget } from '@jupyterlab/apputils';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IFormComponentRegistry } from '@jupyterlab/formeditor';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
+import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
+import React from 'react';
 import { PluginEditor } from './plugineditor';
 import { PluginList } from './pluginlist';
+import { SettingsPanel } from './settingspanel';
 import { SplitPanel } from './splitpanel';
+import { Switch } from '@jupyterlab/ui-components';
 
 /**
  * The ratio panes in the setting editor.
@@ -43,14 +48,7 @@ export class SettingEditor extends Widget {
     this.key = options.key;
     this.state = options.state;
 
-    const {
-      name,
-      code,
-      editorServices,
-      status,
-      themeManager,
-      editorRegistry
-    } = options;
+    const { commands, editorFactory, rendermime, editorRegistry } = options;
     const layout = (this.layout = new PanelLayout());
     const registry = (this.registry = options.registry);
     const panel = (this._panel = new SplitPanel({
@@ -58,17 +56,60 @@ export class SettingEditor extends Widget {
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
     }));
+
+    void Promise.all(
+      PluginList.sortPlugins(options.registry)
+        .filter(plugin => {
+          const { schema } = plugin;
+          const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
+          const editable = Object.keys(schema.properties || {}).length > 0;
+          const extensible = schema.additionalProperties !== false;
+
+          return !deprecated && (editable || extensible);
+        })
+        .map(async plugin => await options.registry.load(plugin.id))
+    ).then(settings => {
+      this._settings = settings as Settings[];
+      const settingsPanel = (this._settingsPanel = ReactWidget.create(
+        <SettingsPanel
+          settings={settings as Settings[]}
+          editorRegistry={editorRegistry}
+          handleSelectSignal={this._handleSelectSignal}
+          onSelect={(id: string) => (this._list.selection = id)}
+        />
+      ));
+      const currentSettings = settings.find(
+        plugin => plugin.id === list.selection
+      );
+      if (currentSettings) {
+        editor.settings = currentSettings;
+      }
+      settingsPanel.addClass('jp-SettingsPanel');
+      panel.addWidget(settingsPanel);
+    });
+
+    const switchButton = new Switch();
+    switchButton.addClass('jp-SettingEditor-Switch');
+    switchButton.valueChanged.connect(
+      (sender, args) => (this.isRawEditor = args.newValue)
+    );
+    layout.addWidget(switchButton);
+
     const editor = (this._editor = new PluginEditor({
-      name,
-      code,
-      editorServices,
-      status,
-      themeManager,
+      commands,
+      editorFactory,
       registry,
-      editorRegistry
+      rendermime,
+      translator: this.translator
     }));
+
     const confirm = (id: string) => {
-      return editor.confirm(id);
+      this._handleSelectSignal.emit(id);
+      const newSettings = this._settings.find(plugin => plugin.id === id);
+      if (newSettings) {
+        editor.settings = newSettings;
+      }
+      return editor.confirm();
     };
     const list = (this._list = new PluginList({
       confirm,
@@ -84,13 +125,11 @@ export class SettingEditor extends Widget {
     panel.addClass('jp-SettingEditor-main');
     layout.addWidget(panel);
     panel.addWidget(list);
+    panel.addWidget(editor);
+    editor.hide();
 
     SplitPanel.setStretch(list, 0);
     SplitPanel.setStretch(editor, 1);
-
-    editor.onSelectionChanged.connect((sender: PluginEditor, value: string) => {
-      list.selection = value;
-    }, this);
 
     editor.stateChanged.connect(this._onStateChanged, this);
     list.changed.connect(this._onStateChanged, this);
@@ -117,6 +156,21 @@ export class SettingEditor extends Widget {
    */
   get settings(): ISettingRegistry.ISettings | null {
     return this._editor.settings;
+  }
+
+  get isRawEditor(): boolean {
+    return this._isRawEditor;
+  }
+  set isRawEditor(value: boolean) {
+    this._isRawEditor = value;
+
+    if (this._isRawEditor) {
+      this._settingsPanel.hide();
+      this._editor.show();
+    } else if (!this._isRawEditor) {
+      this._editor.hide();
+      this._settingsPanel.show();
+    }
   }
 
   /**
@@ -156,7 +210,7 @@ export class SettingEditor extends Widget {
    */
   protected onCloseRequest(msg: Message): void {
     this._editor
-      .confirm('')
+      .confirm()
       .then(() => {
         super.onCloseRequest(msg);
         this.dispose();
@@ -243,7 +297,7 @@ export class SettingEditor extends Widget {
   private _setState(): void {
     const editor = this._editor;
     const list = this._list;
-    const panel = this._panel;
+    // const panel = this._panel;
     const { container } = this._state;
 
     if (!container.plugin) {
@@ -257,27 +311,14 @@ export class SettingEditor extends Widget {
       this._setLayout();
       return;
     }
-
-    this.registry
-      .load(container.plugin)
-      .then(settings => {
-        if (!editor.isAttached) {
-          panel.addWidget(editor);
-        }
-        editor.settings = settings;
-        list.selection = container.plugin;
-        this._setLayout();
-      })
-      .catch(reason => {
-        console.error(`Loading ${container.plugin} settings failed.`, reason);
-        list.selection = this._state.container.plugin = '';
-        editor.settings = null;
-        this._setLayout();
-      });
   }
 
   protected translator: ITranslator;
   private _editor: PluginEditor;
+  private _handleSelectSignal = new Signal<this, string>(this);
+  private _settingsPanel: ReactWidget;
+  private _isRawEditor: boolean = false;
+  private _settings: Settings[];
   private _fetching: Promise<void> | null = null;
   private _list: PluginList;
   private _panel: SplitPanel;
@@ -294,22 +335,46 @@ export namespace SettingEditor {
    * The instantiation options for a setting editor.
    */
   export interface IOptions {
-    name?: string;
-    code?: string[];
-    editorServices: IEditorServices | null;
-    status: ILabStatus;
-    themeManager?: IThemeManager;
-
-    registry: ISettingRegistry;
-
     editorRegistry: IFormComponentRegistry;
+    /**
+     * The toolbar commands and registry for the setting editor toolbar.
+     */
+    commands: {
+      /**
+       * The command registry.
+       */
+      registry: CommandRegistry;
+
+      /**
+       * The revert command ID.
+       */
+      revert: string;
+
+      /**
+       * The save command ID.
+       */
+      save: string;
+    };
 
     /**
-     * The application language translator.
+     * The editor factory used by the setting editor.
      */
-    translator?: ITranslator;
+    editorFactory: CodeEditor.Factory;
 
+    /**
+     * The state database key for the editor's state management.
+     */
     key: string;
+
+    /**
+     * The setting registry the editor modifies.
+     */
+    registry: ISettingRegistry;
+
+    /**
+     * The optional MIME renderer to use for rendering debug messages.
+     */
+    rendermime?: IRenderMimeRegistry;
 
     /**
      * The state database used to store layout.
@@ -320,6 +385,11 @@ export namespace SettingEditor {
      * The point after which the editor should restore its state.
      */
     when?: Promise<any> | Array<Promise<any>>;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**
@@ -345,6 +415,7 @@ export namespace SettingEditor {
      * The current plugin being displayed.
      */
     plugin: string;
+    sizes: number[];
   }
 }
 

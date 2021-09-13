@@ -3,23 +3,22 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ILabStatus } from '@jupyterlab/application';
-import { Dialog, IThemeManager, showDialog } from '@jupyterlab/apputils';
-import { IEditorServices } from '@jupyterlab/codeeditor';
-import { IFormComponentRegistry } from '@jupyterlab/formeditor';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { PanelLayout, Widget } from '@lumino/widgets';
-import { PluginList } from './pluginlist';
+import { StackedLayout, Widget } from '@lumino/widgets';
+import { RawEditor } from './raweditor';
 import { SettingEditor } from './settingeditor';
-import { SettingsFormEditorWidget } from './settingmetadataeditor';
 
 /**
  * The class name added to all plugin editors.
@@ -39,55 +38,46 @@ export class PluginEditor extends Widget {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
 
-    this.node.addEventListener('scroll', this.updateSelectedPlugin);
-
-    this.translator = options.translator || nullTranslator;
+    const {
+      commands,
+      editorFactory,
+      registry,
+      rendermime,
+      translator
+    } = options;
+    this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
-    const layout = (this.layout = new PanelLayout());
-    const plugins = PluginList.sortPlugins(options.registry).filter(plugin => {
-      const { schema } = plugin;
-      const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
-      const editable = Object.keys(schema.properties || {}).length > 0;
-      const extensible = schema.additionalProperties !== false;
 
-      return !deprecated && (editable || extensible);
+    // TODO: Remove this layout. We were using this before when we
+    // when we had a way to switch between the raw and table editor
+    // Now, the raw editor is the only child and probably could merged into
+    // this class directly in the future.
+    const layout = (this.layout = new StackedLayout());
+    const { onSaveError } = Private;
+
+    this.raw = this._rawEditor = new RawEditor({
+      commands,
+      editorFactory,
+      onSaveError,
+      registry,
+      rendermime,
+      translator
     });
-    for (const plugin of plugins) {
-      const newEditor = new SettingsFormEditorWidget({
-        plugin,
-        registry: options.registry,
-        componentRegistry: options.editorRegistry
-      });
-      this._editors.push(newEditor);
-      layout.addWidget(newEditor);
-    }
+    this._rawEditor.handleMoved.connect(this._onStateChanged, this);
+
+    layout.addWidget(this._rawEditor);
   }
 
-  // TODO: is this efficient?
-  updateSelectedPlugin = () => {
-    for (const editor of this._editors) {
-      const offsetTop =
-        editor.node.offsetTop + (editor.parent?.node?.offsetTop ?? 0);
-      if (
-        this.node.scrollTop + 1 >= (editor.parent?.node?.offsetTop ?? 0) &&
-        // If top of editor is visible
-        (offsetTop >= this.node.scrollTop ||
-          // If the top is above the view and the bottom is below the view
-          (offsetTop < this.node.scrollTop &&
-            offsetTop + editor.node.scrollHeight >
-              this.node.scrollTop + this.node.clientHeight))
-      ) {
-        this.selection = editor.plugin.id;
-        break;
-      }
-    }
-  };
+  /**
+   * The plugin editor's raw editor.
+   */
+  readonly raw: RawEditor;
 
   /**
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
-    return false;
+    return this._rawEditor.isDirty;
   }
 
   /**
@@ -97,20 +87,14 @@ export class PluginEditor extends Widget {
     return this._settings;
   }
   set settings(settings: ISettingRegistry.ISettings | null) {
-    this._settings = settings;
+    if (this._settings === settings) {
+      return;
+    }
+
+    const raw = this._rawEditor;
+
+    this._settings = raw.settings = settings;
     this.update();
-  }
-
-  get selection(): string {
-    return this._selection;
-  }
-  set selection(value: string) {
-    this._selection = value;
-    this._onSelectionChanged.emit(value);
-  }
-
-  get onSelectionChanged(): Signal<this, string> {
-    return this._onSelectionChanged;
   }
 
   /**
@@ -118,13 +102,16 @@ export class PluginEditor extends Widget {
    */
   get state(): SettingEditor.IPluginLayout {
     const plugin = this._settings ? this._settings.id : '';
-    return { plugin };
+    const { sizes } = this._rawEditor;
+
+    return { plugin, sizes };
   }
   set state(state: SettingEditor.IPluginLayout) {
     if (JSONExt.deepEqual(this.state, state)) {
       return;
     }
 
+    this._rawEditor.sizes = state.sizes;
     this.update();
   }
 
@@ -138,11 +125,7 @@ export class PluginEditor extends Widget {
   /**
    * If the editor is in a dirty state, confirm that the user wants to leave.
    */
-  confirm(id: string): Promise<void> {
-    const editor = this._editors.find(editor => editor.plugin.id === id);
-    if (editor) {
-      editor.node?.scrollIntoView();
-    }
+  confirm(): Promise<void> {
     if (this.isHidden || !this.isAttached || !this.isDirty) {
       return Promise.resolve(undefined);
     }
@@ -170,7 +153,7 @@ export class PluginEditor extends Widget {
     }
 
     super.dispose();
-    this._editors.forEach(editor => editor.dispose());
+    this._rawEditor.dispose();
   }
 
   /**
@@ -184,7 +167,7 @@ export class PluginEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    // const raw = this._rawEditor;
+    const raw = this._rawEditor;
     const settings = this._settings;
 
     if (!settings) {
@@ -193,15 +176,20 @@ export class PluginEditor extends Widget {
     }
 
     this.show();
-    void this.confirm(this.selection);
+    raw.show();
+  }
+
+  /**
+   * Handle layout state changes that need to be saved.
+   */
+  private _onStateChanged(): void {
+    (this.stateChanged as Signal<any, void>).emit(undefined);
   }
 
   protected translator: ITranslator;
-  private _selection: string;
   private _trans: TranslationBundle;
-  private _editors: SettingsFormEditorWidget[] = [];
+  private _rawEditor: RawEditor;
   private _settings: ISettingRegistry.ISettings | null = null;
-  private _onSelectionChanged = new Signal<this, string>(this);
   private _stateChanged = new Signal<this, void>(this);
 }
 
@@ -213,19 +201,63 @@ export namespace PluginEditor {
    * The instantiation options for a plugin editor.
    */
   export interface IOptions {
-    name?: string;
-    code?: string[];
-    editorServices: IEditorServices | null;
-    status: ILabStatus;
-    themeManager?: IThemeManager;
+    /**
+     * The toolbar commands and registry for the setting editor toolbar.
+     */
+    commands: {
+      /**
+       * The command registry.
+       */
+      registry: CommandRegistry;
 
+      /**
+       * The revert command ID.
+       */
+      revert: string;
+
+      /**
+       * The save command ID.
+       */
+      save: string;
+    };
+
+    /**
+     * The editor factory used by the plugin editor.
+     */
+    editorFactory: CodeEditor.Factory;
+
+    /**
+     * The setting registry used by the editor.
+     */
     registry: ISettingRegistry;
 
-    editorRegistry: IFormComponentRegistry;
+    /**
+     * The optional MIME renderer to use for rendering debug messages.
+     */
+    rendermime?: IRenderMimeRegistry;
 
     /**
      * The application language translator.
      */
     translator?: ITranslator;
+  }
+}
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * Handle save errors.
+   */
+  export function onSaveError(reason: any, translator?: ITranslator): void {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    console.error(`Saving setting editor value failed: ${reason.message}`);
+    void showDialog({
+      title: trans.__('Your changes were not saved.'),
+      body: reason.message,
+      buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+    });
   }
 }

@@ -291,6 +291,16 @@
   padding: 20px;
 }
 
+#setting-editor .jp-SettingEditor-Switch .jp-switch {
+  position: absolute;
+  bottom: 0;
+  z-index: 999;
+}
+
+#setting-editor .jp-SettingsPanel {
+  overflow-y: scroll;
+}
+
 #setting-editor .MuiCheckbox-colorSecondary.Mui-checked {
   color: var(--jp-brand-color1);
 }

@@ -3,54 +3,15 @@ import {
   FormEditor,
   IFormComponentRegistry
 } from '@jupyterlab/formeditor';
-import {
-  ISchemaValidator,
-  ISettingRegistry,
-  Settings
-} from '@jupyterlab/settingregistry';
+import { ISchemaValidator, Settings } from '@jupyterlab/settingregistry';
 import { PartialJSONObject } from '@lumino/coreutils';
-import { ReactWidget, showDialog } from '@jupyterlab/apputils';
+import { showDialog } from '@jupyterlab/apputils';
 import React from 'react';
 import { Button } from '@jupyterlab/ui-components';
-
-interface IWidgetProps {
-  plugin: ISettingRegistry.IPlugin;
-  registry: ISettingRegistry;
-  componentRegistry: IFormComponentRegistry;
-}
 
 interface IProps {
   settings: Settings;
   componentRegistry: IFormComponentRegistry;
-}
-
-export class SettingsFormEditorWidget extends ReactWidget {
-  plugin: ISettingRegistry.IPlugin;
-  componentRegistry: IFormComponentRegistry;
-  settings?: Settings;
-
-  constructor(props: IWidgetProps) {
-    super();
-    this.plugin = props.plugin;
-    this.componentRegistry = props.componentRegistry;
-    void props.registry.load(this.plugin.id).then((value: Settings) => {
-      this.settings = value;
-      this.update();
-    });
-  }
-
-  render() {
-    if (this.settings) {
-      return (
-        <SettingsMetadataEditor
-          componentRegistry={this.componentRegistry}
-          settings={this.settings}
-        />
-      );
-    } else {
-      return <div />;
-    }
-  }
 }
 
 /**

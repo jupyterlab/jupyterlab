@@ -15,6 +15,8 @@ import {
   TextInput
 } from '@jupyterlab/formeditor';
 
+import { JSONExt } from '@lumino/coreutils';
+
 const CustomTooltip = withStyles(_theme => ({
   tooltip: {
     fontSize: 13
@@ -45,7 +47,7 @@ export const renderTextInput = (
 ): any => {
   return (
     <div className="jp-FormComponent">
-      {JSON.stringify(props.uihints.default) !== JSON.stringify(props.value) ? (
+      {!JSONExt.deepEqual(props.uihints.default, props.value) ? (
         <div className="jp-modifiedIndicator" />
       ) : undefined}
       <TextInput

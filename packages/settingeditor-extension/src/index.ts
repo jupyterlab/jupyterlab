@@ -91,8 +91,8 @@ function activate(
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const namespace = 'setting-editor';
-  // const factoryService = editorServices.factoryService;
-  // const editorFactory = factoryService.newInlineEditor;
+  const factoryService = editorServices.factoryService;
+  const editorFactory = factoryService.newInlineEditor;
   const tracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
     namespace
   });
@@ -125,14 +125,18 @@ function activate(
       const when = app.restored;
 
       editor = new SettingEditor({
-        editorServices,
-        status,
-        themeManager,
+        commands: {
+          registry: commands,
+          revert: CommandIDs.revert,
+          save: CommandIDs.save
+        },
+        editorRegistry,
+        editorFactory,
         key,
         registry,
+        rendermime,
         state,
         translator,
-        editorRegistry,
         when
       });
 
