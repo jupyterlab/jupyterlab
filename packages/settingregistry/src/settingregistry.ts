@@ -840,12 +840,6 @@ export class Settings implements ISettingRegistry.ISettings {
     return this.registry.set(this.plugin.id, key, value);
   }
 
-  resetAll() {
-    for (const key in this.schema.properties) {
-      void this.remove(key);
-    }
-  }
-
   /**
    * Validates raw settings with comments.
    *

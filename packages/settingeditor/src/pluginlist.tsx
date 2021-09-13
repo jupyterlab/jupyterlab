@@ -191,6 +191,8 @@ export class PluginList extends ReactWidget {
 
       return !deprecated && (editable || extensible) && this._filter?.(plugin);
     });
+
+    this.selection = this._allPlugins[0].id;
   }
 
   /**

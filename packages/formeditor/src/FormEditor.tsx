@@ -41,10 +41,7 @@ export namespace FormEditor {
  * Form editor widget
  */
 export const FormEditor = ({ schema, componentRegistry }: IFormEditorProps) => {
-  const renderField = (
-    fieldName: string,
-    props: FormComponentRegistry.IRendererProps
-  ) => {
+  const renderField = (props: FormComponentRegistry.IRendererProps) => {
     return componentRegistry.getRenderer(
       props.uihints.field_type ?? 'string'
     )?.(props);
@@ -54,14 +51,14 @@ export const FormEditor = ({ schema, componentRegistry }: IFormEditorProps) => {
   const uncategorizedInputElements = [];
   for (const field in schema) {
     const props = schema[field];
-    if (props.uihints.category) {
+    if (props.uihints?.category) {
       const category = props.uihints.category;
       if (!categorizedInputElements[category]) {
         categorizedInputElements[category] = [];
       }
-      categorizedInputElements[category].push(renderField(field, props));
+      categorizedInputElements[category].push(renderField(props));
     } else {
-      uncategorizedInputElements.push(renderField(field, props));
+      uncategorizedInputElements.push(renderField(props));
     }
   }
   return (

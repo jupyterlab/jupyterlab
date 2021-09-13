@@ -39,7 +39,7 @@ export class PluginEditor extends Widget {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
 
-    this.node.addEventListener('scroll', this.scrollToEditor);
+    this.node.addEventListener('scroll', this.updateSelectedPlugin);
 
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
@@ -63,7 +63,8 @@ export class PluginEditor extends Widget {
     }
   }
 
-  scrollToEditor = () => {
+  // TODO: is this efficient?
+  updateSelectedPlugin = () => {
     for (const editor of this._editors) {
       const offsetTop =
         editor.node.offsetTop + (editor.parent?.node?.offsetTop ?? 0);

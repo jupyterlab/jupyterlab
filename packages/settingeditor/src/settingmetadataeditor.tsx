@@ -84,7 +84,7 @@ export const SettingsMetadataEditor = ({
         handleChange(fieldName, newValue, category),
       uihints: {
         category: category,
-        label: options.title,
+        label: options.title ?? fieldName,
         field_type: options.enum
           ? 'dropdown'
           : typeof options.field_type === 'object'
@@ -101,14 +101,17 @@ export const SettingsMetadataEditor = ({
     setTitle(settings.schema.title ?? '');
     for (const prop in settings.schema.properties) {
       let ref = settings.schema.properties[prop]['$ref'] as string;
+      let options = settings.schema.properties[prop];
       if (ref) {
         ref = ref.substring(14);
-        const options = {
-          ...settings.schema.properties[prop],
+        options = {
+          ...options,
           ...((settings.schema.definitions as PartialJSONObject)?.[
             ref
           ] as PartialJSONObject)
         };
+      }
+      if (options.properties) {
         for (const subProp in options.properties) {
           const subOptions = options.properties[subProp];
           subOptions.default = (options.default as any)[subProp];

@@ -10,12 +10,9 @@ import { IFormComponentRegistry } from '@jupyterlab/formeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { jupyterIcon } from '@jupyterlab/ui-components';
 import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import { PluginEditor } from './plugineditor';
 import { PluginList } from './pluginlist';
 import { SplitPanel } from './splitpanel';
@@ -61,7 +58,6 @@ export class SettingEditor extends Widget {
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
     }));
-    const instructions = (this._instructions = new Widget());
     const editor = (this._editor = new PluginEditor({
       name,
       code,
@@ -81,9 +77,6 @@ export class SettingEditor extends Widget {
     }));
     const when = options.when;
 
-    instructions.addClass('jp-SettingEditorInstructions');
-    Private.populateInstructionsNode(instructions.node, this.translator);
-
     if (when) {
       this._when = Array.isArray(when) ? Promise.all(when) : when;
     }
@@ -91,10 +84,8 @@ export class SettingEditor extends Widget {
     panel.addClass('jp-SettingEditor-main');
     layout.addWidget(panel);
     panel.addWidget(list);
-    panel.addWidget(instructions);
 
     SplitPanel.setStretch(list, 0);
-    SplitPanel.setStretch(instructions, 1);
     SplitPanel.setStretch(editor, 1);
 
     editor.onSelectionChanged.connect((sender: PluginEditor, value: string) => {
@@ -138,7 +129,6 @@ export class SettingEditor extends Widget {
 
     super.dispose();
     this._editor.dispose();
-    this._instructions.dispose();
     this._list.dispose();
     this._panel.dispose();
   }
@@ -268,14 +258,9 @@ export class SettingEditor extends Widget {
       return;
     }
 
-    const instructions = this._instructions;
-
     this.registry
       .load(container.plugin)
       .then(settings => {
-        if (instructions.isAttached) {
-          instructions.parent = null;
-        }
         if (!editor.isAttached) {
           panel.addWidget(editor);
         }
@@ -294,7 +279,6 @@ export class SettingEditor extends Widget {
   protected translator: ITranslator;
   private _editor: PluginEditor;
   private _fetching: Promise<void> | null = null;
-  private _instructions: Widget;
   private _list: PluginList;
   private _panel: SplitPanel;
   private _saving = false;
@@ -361,7 +345,6 @@ export namespace SettingEditor {
      * The current plugin being displayed.
      */
     plugin: string;
-    // sizes: number[];
   }
 }
 
@@ -369,37 +352,6 @@ export namespace SettingEditor {
  * A namespace for private module data.
  */
 namespace Private {
-  /**
-   * Populate the instructions text node.
-   */
-  export function populateInstructionsNode(
-    node: HTMLElement,
-    translator?: ITranslator
-  ): void {
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    ReactDOM.render(
-      <React.Fragment>
-        <h2>
-          <jupyterIcon.react
-            className="jp-SettingEditorInstructions-icon"
-            tag="span"
-            elementPosition="center"
-            height="auto"
-            width="60px"
-          />
-          <span className="jp-SettingEditorInstructions-title">Settings</span>
-        </h2>
-        <span className="jp-SettingEditorInstructions-text">
-          {trans.__(
-            'Select a plugin from the list to view and edit its preferences.'
-          )}
-        </span>
-      </React.Fragment>,
-      node
-    );
-  }
-
   /**
    * Return a normalized restored layout state that defaults to the presets.
    */
