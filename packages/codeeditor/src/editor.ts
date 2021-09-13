@@ -806,7 +806,7 @@ export namespace CodeEditor {
     fontFamily: null,
     fontSize: null,
     lineHeight: null,
-    lineNumbers: true,
+    lineNumbers: false,
     lineWrap: 'on',
     wordWrapColumn: 80,
     readOnly: false,
