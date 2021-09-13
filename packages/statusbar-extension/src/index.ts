@@ -381,7 +381,6 @@ const modeSwitch: JupyterFrontEndPlugin<void> = {
       {
         item: modeSwitch,
         align: 'left',
-        isActive: () => true,
         rank: -1
       }
     );
