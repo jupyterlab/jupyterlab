@@ -15,6 +15,7 @@
   "sideEffects": false,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
@@ -22,7 +23,9 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "schema/*.json"
+    "schema/*.json",
+    "style/index.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -32,9 +35,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0-rc.1",
-    "@jupyterlab/settingregistry": "^3.1.0-rc.1",
-    "@jupyterlab/translation": "^3.1.0-rc.1",
+    "@jupyterlab/application": "^3.3.0-alpha.0",
+    "@jupyterlab/settingregistry": "^3.3.0-alpha.0",
+    "@jupyterlab/translation": "^3.3.0-alpha.0",
     "@lumino/commands": "^1.12.0",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/disposable": "^1.4.3"
@@ -50,5 +53,6 @@
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"
-  }
+  },
+  "styleModule": "style/index.js"
 }

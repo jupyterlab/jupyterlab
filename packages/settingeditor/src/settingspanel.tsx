@@ -12,6 +12,7 @@ interface ISettingsPanelProps {
   editorRegistry: IFormComponentRegistry;
 
   onSelect?: (id: string) => void;
+
   handleSelectSignal?: ISignal<SettingEditor, string>;
 
   /**
@@ -78,6 +79,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
             <SettingsMetadataEditor
               settings={pluginSettings}
               componentRegistry={editorRegistry}
+              translator={translator}
             />
           </div>
         );

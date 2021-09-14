@@ -108,7 +108,7 @@
     "@jupyterlab/settingeditor-extension": "^3.3.0-alpha.0",
     "@jupyterlab/settingregistry": "^3.3.0-alpha.0",
     "@jupyterlab/shared-models": "^3.3.0-alpha.0",
-    "@jupyterlab/shortcuts-extension": "^3.3.0-alpha.0",
+    "@jupyterlab/shortcuts-extension": "^3.1.0-rc.1",
     "@jupyterlab/statedb": "^3.3.0-alpha.0",
     "@jupyterlab/statusbar": "^3.3.0-alpha.0",
     "@jupyterlab/statusbar-extension": "^3.3.0-alpha.0",

@@ -8,10 +8,12 @@ import { PartialJSONObject } from '@lumino/coreutils';
 import { showDialog } from '@jupyterlab/apputils';
 import React from 'react';
 import { Button } from '@jupyterlab/ui-components';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 interface IProps {
   settings: Settings;
   componentRegistry: IFormComponentRegistry;
+  translator?: ITranslator;
 }
 
 /**
@@ -20,10 +22,14 @@ interface IProps {
  */
 export const SettingsMetadataEditor = ({
   settings,
-  componentRegistry
+  componentRegistry,
+  translator
 }: IProps) => {
   const [schema, setSchema] = React.useState({} as FormEditor.ISchema);
   const [title, setTitle] = React.useState('');
+
+  const trans = translator || nullTranslator;
+  const _trans = trans.load('jupyterlab');
 
   const reset = async () => {
     for (const field of settings.modifiedFields) {
@@ -45,13 +51,13 @@ export const SettingsMetadataEditor = ({
         handleChange(fieldName, newValue, category?.id),
       uihints: {
         category: category,
-        label: options.title ?? fieldName,
+        label: options.title ? _trans.__(options.title) : fieldName,
         field_type: options.enum
           ? 'dropdown'
           : typeof options.field_type === 'object'
           ? options.field_type[0]
           : options.renderer_id ?? options.type ?? typeof options.default,
-        title: options.title ?? fieldName,
+        title: options.title ? _trans.__(options.title) : fieldName,
         ...options
       }
     };
@@ -84,7 +90,7 @@ export const SettingsMetadataEditor = ({
           }
           properties[subProp] = getProperties(subOptions, subProp, {
             id: prop,
-            label: options.title ?? prop
+            label: options.title ? _trans.__(options.title) : prop
           });
         }
       } else {
@@ -131,7 +137,7 @@ export const SettingsMetadataEditor = ({
   return (
     <div className="jp-SettingsEditor">
       <div className="jp-SettingsHeader">
-        <h3>{title}</h3>
+        <h3>{_trans.__(title)}</h3>
         {settings.modifiedFields.length > 0 ? (
           <Button onClick={reset}> Restore to Defaults </Button>
         ) : undefined}

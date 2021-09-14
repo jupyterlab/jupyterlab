@@ -18,6 +18,7 @@
   background-color: var(--jp-layout-color0);
   margin-top: -1px;
   outline: none;
+  color: var(--jp-content-font-color0) !important;
   /* This is needed so that all font sizing of children done in ems is
    * relative to this base size */
   font-size: var(--jp-ui-font-size1);
@@ -122,6 +123,19 @@
 #setting-editor .jp-PluginList button.jp-mod-selected span {
   font-weight: var(--jp-content-heading-font-weight);
   color: var(--jp-brand-color1);
+}
+
+#setting-editor .jp-PluginList button span {
+  color: var(--jp-content-font-color0);
+}
+
+#setting-editor .MuiInputBase-root,
+#setting-editor .MuiFormLabel-root {
+  color: var(--jp-content-font-color0);
+}
+
+#setting-editor .MuiOutlinedInput-notchedOutline {
+  border-color: var(--jp-content-font-color1);
 }
 
 #setting-editor .jp-SettingEditor-header {
