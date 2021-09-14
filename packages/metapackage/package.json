@@ -88,8 +88,6 @@
     "@jupyterlab/markdownviewer-extension": "^3.3.0-alpha.0",
     "@jupyterlab/mathjax2": "^3.3.0-alpha.0",
     "@jupyterlab/mathjax2-extension": "^3.3.0-alpha.0",
-    "@jupyterlab/metadata": "^3.0.0-alpha.0",
-    "@jupyterlab/metadata-editor-extension": "^3.0.0-alpha.0",
     "@jupyterlab/nbconvert-css": "^3.3.0-alpha.0",
     "@jupyterlab/nbformat": "^3.3.0-alpha.0",
     "@jupyterlab/notebook": "^3.3.0-alpha.0",

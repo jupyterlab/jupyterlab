@@ -175,12 +175,6 @@
       "path": "./packages/mathjax2-extension"
     },
     {
-      "path": "./packages/metadata"
-    },
-    {
-      "path": "./packages/metadata-editor-extension"
-    },
-    {
       "path": "./packages/nbformat"
     },
     {
