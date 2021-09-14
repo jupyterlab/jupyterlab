@@ -2774,5 +2774,5 @@ namespace Private {
     }
   }
 
-  export var renderSideBySide = false;
+  export let renderSideBySide = false;
 }
