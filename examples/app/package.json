@@ -1,10 +1,11 @@
 {
   "name": "@jupyterlab/example-app",
-  "version": "3.3.0-alpha.9",
+  "version": "3.3.0-alpha.0",
   "private": true,
   "scripts": {
     "build": "webpack",
-    "clean": "rimraf build"
+    "clean": "rimraf build",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.0",
@@ -30,7 +31,7 @@
     "@jupyterlab/rendermime-extension": "^3.3.0-alpha.0",
     "@jupyterlab/running-extension": "^3.3.0-alpha.0",
     "@jupyterlab/settingeditor-extension": "^3.3.0-alpha.0",
-    "@jupyterlab/shortcuts-extension": "^3.3.0-alpha.9",
+    "@jupyterlab/shortcuts-extension": "^3.3.0-alpha.0",
     "@jupyterlab/statusbar-extension": "^3.3.0-alpha.0",
     "@jupyterlab/terminal-extension": "^3.3.0-alpha.0",
     "@jupyterlab/theme-dark-extension": "^3.3.0-alpha.0",
