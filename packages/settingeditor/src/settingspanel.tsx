@@ -7,12 +7,27 @@ import { SettingEditor } from '.';
 import { SettingsMetadataEditor } from './settingmetadataeditor';
 
 interface ISettingsPanelProps {
+  /**
+   * List of Settings objects that provide schema and values
+   * of plugins.
+   */
   settings: Settings[];
 
+  /**
+   * Form component registry that provides renderers
+   * for the form editor.
+   */
   editorRegistry: IFormComponentRegistry;
 
+  /**
+   * Handler for when selection change is triggered by scrolling
+   * in the SettingsPanel.
+   */
   onSelect?: (id: string) => void;
 
+  /**
+   * Signal that fires when a selection is made in the plugin list.
+   */
   handleSelectSignal?: ISignal<SettingEditor, string>;
 
   /**
@@ -21,6 +36,9 @@ interface ISettingsPanelProps {
   translator?: ITranslator;
 }
 
+/**
+ * React component that displays a list of
+ */
 export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   settings,
   editorRegistry,
@@ -28,6 +46,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   handleSelectSignal,
   translator
 }) => {
+  // Refs used to keep track of "selected" plugin based on scroll location
   const editorRefs: {
     [pluginId: string]: React.RefObject<HTMLDivElement>;
   } = {};
@@ -36,11 +55,15 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   }
   const wrapperRef: React.RefObject<HTMLDivElement> = React.useRef(null);
 
+  // Scroll to the plugin when a selection is made in the left panel.
   handleSelectSignal?.connect?.((editor, pluginId) =>
     editorRefs[pluginId].current?.scrollIntoView()
   );
 
   // TODO: is this efficient?
+  /**
+   * Calculates the currently "selected" plugin based on scroll location
+   */
   const updateSelectedPlugin = () => {
     for (const refId in editorRefs) {
       const ref = editorRefs[refId];

@@ -31,6 +31,11 @@ export const SettingsMetadataEditor = ({
   const trans = translator || nullTranslator;
   const _trans = trans.load('jupyterlab');
 
+  /**
+   * Handler for the "Restore to defaults" button - clears all
+   * modified settings then calls `updateSchema` to restore the
+   * values.
+   */
   const reset = async () => {
     for (const field of settings.modifiedFields) {
       await settings.remove(field);
@@ -38,6 +43,14 @@ export const SettingsMetadataEditor = ({
     updateSchema();
   };
 
+  /**
+   * Converts the schema info for a given field
+   * to the expected values for the form editor.
+   * @param options - Various UI info about the field
+   * @param fieldName - The id of the field in the schema
+   * @param category - Optional information if the field has a category
+   * @returns Props for rendering the component in the form editor.
+   */
   const getProperties = (
     options: any,
     fieldName: string,
@@ -63,6 +76,11 @@ export const SettingsMetadataEditor = ({
     };
   };
 
+  /**
+   * Updates the schema that's passed to the FormEditor component.
+   * @param errors - Optional list of errors from the setting registry.
+   * Used for rendering components with error indicators.
+   */
   const updateSchema = (errors?: ISchemaValidator.IError[]) => {
     const properties: FormEditor.ISchema = {};
     setTitle(settings.schema.title ?? '');
@@ -109,6 +127,12 @@ export const SettingsMetadataEditor = ({
     updateSchema();
   }, []);
 
+  /**
+   * Handler for edits made in the form editor.
+   * @param fieldName - ID of field being edited
+   * @param value - New value for field
+   * @param category - Optional category if field is under a category
+   */
   const handleChange = (fieldName: string, value: any, category?: string) => {
     const current: any = settings.composite;
     if (category) {

@@ -13,7 +13,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import React from 'react';
 import { PluginEditor } from './plugineditor';
@@ -59,6 +59,9 @@ export class SettingEditor extends Widget {
     }));
     const instructions = (this._instructions = new Widget());
 
+    /**
+     * Initializes the settings panel after loading the schema for all plugins.
+     */
     void Promise.all(
       PluginList.sortPlugins(options.registry)
         .filter(plugin => {
@@ -89,6 +92,10 @@ export class SettingEditor extends Widget {
       panel.addWidget(settingsPanel);
     });
 
+    /**
+     * Creates a button to switch between the original JSON
+     * editor and the form editor.
+     */
     const switchButton = new Switch();
     switchButton.label = 'JSON Editor';
     switchButton.addClass('jp-SettingEditor-Switch');
@@ -114,6 +121,13 @@ export class SettingEditor extends Widget {
       if (instructions.isAttached) {
         instructions.parent = null;
       }
+      if (this._isRawEditor) {
+        this._editor.show();
+        this._settingsPanel.hide();
+      } else {
+        this._editor.hide();
+        this._settingsPanel.show();
+      }
       return editor.confirm();
     };
     const list = (this._list = new PluginList({
@@ -133,7 +147,7 @@ export class SettingEditor extends Widget {
     panel.addClass('jp-SettingEditor-main');
     layout.addWidget(panel);
     panel.addWidget(list);
-    if (!list.selection) {
+    if (list.selection === '') {
       panel.addWidget(instructions);
     }
     panel.addWidget(editor);
@@ -164,12 +178,44 @@ export class SettingEditor extends Widget {
   readonly state: IStateDB;
 
   /**
+   * Whether the raw editor revert functionality is enabled.
+   */
+  get canRevertRaw(): boolean {
+    return this._editor.raw.canRevert;
+  }
+
+  /**
+   * Whether the raw editor save functionality is enabled.
+   */
+  get canSaveRaw(): boolean {
+    return this._editor.raw.canSave;
+  }
+
+  /**
+   * Emits when the commands passed in at instantiation change.
+   */
+  get commandsChanged(): ISignal<any, string[]> {
+    return this._editor.raw.commandsChanged;
+  }
+
+  /**
    * The currently loaded settings.
    */
   get settings(): ISettingRegistry.ISettings | null {
     return this._editor.settings;
   }
 
+  /**
+   * The inspectable raw user editor source for the currently loaded settings.
+   */
+  get source(): CodeEditor.IEditor {
+    return this._editor.raw.source;
+  }
+
+  /**
+   * Whether the "raw" JSON editor is being displayed
+   * If false, the form editor is being displayed.
+   */
   get isRawEditor(): boolean {
     return this._isRawEditor;
   }
@@ -198,6 +244,20 @@ export class SettingEditor extends Widget {
     this._instructions.dispose();
     this._list.dispose();
     this._panel.dispose();
+  }
+
+  /**
+   * Revert raw editor back to original settings.
+   */
+  revert(): void {
+    this._editor.raw.revert();
+  }
+
+  /**
+   * Save the contents of the raw editor.
+   */
+  save(): Promise<void> {
+    return this._editor.raw.save();
   }
 
   /**
@@ -310,7 +370,6 @@ export class SettingEditor extends Widget {
   private _setState(): void {
     const editor = this._editor;
     const list = this._list;
-    // const panel = this._panel;
     const { container } = this._state;
 
     if (!container.plugin) {
@@ -324,6 +383,15 @@ export class SettingEditor extends Widget {
       this._setLayout();
       return;
     }
+
+    const newSettings = this._settings.find(
+      value => value.id === container.plugin
+    );
+    if (newSettings) {
+      editor.settings = newSettings;
+    }
+    list.selection = container.plugin;
+    this._setLayout();
   }
 
   protected translator: ITranslator;
