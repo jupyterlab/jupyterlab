@@ -4,16 +4,10 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*", "src/*/*"],
+  "include": ["src/*"],
   "references": [
     {
       "path": "../application"
-    },
-    {
-      "path": "../formeditor"
-    },
-    {
-      "path": "../settingeditor"
     },
     {
       "path": "../settingregistry"
