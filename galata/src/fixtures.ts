@@ -240,7 +240,7 @@ export const test: TestType<
   tmpPath: async ({ baseURL, serverFiles }, use, testInfo) => {
     const parts = testInfo.outputDir.split('/');
     // Remove appended retry part for reproductibility
-    const testFolder = parts[parts.length - 1].replace(/-retry\d+$/ig, '');
+    const testFolder = parts[parts.length - 1].replace(/-retry\d+$/i, '');
 
     const contents = new ContentsHelper(baseURL!);
 
