@@ -64,7 +64,11 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   };
 
   return (
-    <div ref={wrapperRef} onScroll={updateSelectedPlugin}>
+    <div
+      className="jp-SettingsPanel"
+      ref={wrapperRef}
+      onScroll={updateSelectedPlugin}
+    >
       {settings.map(pluginSettings => {
         return (
           <div

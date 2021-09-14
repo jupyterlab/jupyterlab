@@ -299,6 +299,7 @@
 
 #setting-editor .jp-SettingsPanel {
   overflow-y: scroll;
+  height: 100%;
 }
 
 #setting-editor .MuiCheckbox-colorSecondary.Mui-checked {

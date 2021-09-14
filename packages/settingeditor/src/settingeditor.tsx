@@ -86,7 +86,6 @@ export class SettingEditor extends Widget {
       if (currentSettings) {
         editor.settings = currentSettings;
       }
-      settingsPanel.addClass('jp-SettingsPanel');
       panel.addWidget(settingsPanel);
     });
 
