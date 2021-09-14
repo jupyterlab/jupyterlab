@@ -22,6 +22,7 @@ import {
   FocusTracker,
   Panel,
   SplitPanel,
+  StackedLayout,
   StackedPanel,
   TabBar,
   TabPanel,
@@ -273,7 +274,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     bottomPanel.node.setAttribute('role', 'contentinfo');
     const hboxPanel = new BoxPanel();
     const vsplitPanel = (this._vsplitPanel = new Private.RestorableSplitPanel());
-    const dockPanel = (this._dockPanel = new DockPanelSvg());
+    const dockPanel = (this._dockPanel = new DockPanelSvg({
+      hiddenMode: Widget.HiddenMode.Composition
+    }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     const hsplitPanel = (this._hsplitPanel = new Private.RestorableSplitPanel());
@@ -1622,7 +1625,9 @@ namespace Private {
         allowDeselect: true,
         orientation: 'vertical'
       });
-      this._stackedPanel = new StackedPanel();
+      this._stackedPanel = new StackedPanel({
+        layout: new StackedLayout({ hiddenMode: Widget.HiddenMode.Composition })
+      });
       this._sideBar.hide();
       this._stackedPanel.hide();
       this._lastCurrent = null;
