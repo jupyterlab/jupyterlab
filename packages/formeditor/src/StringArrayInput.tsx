@@ -149,7 +149,6 @@ export function ArrayListItem({
       <ButtonGroup>
         <IconButton
           title="Edit"
-          className="elyricon elyricon-edit"
           onClick={() => {
             onEdit?.();
           }}
@@ -158,7 +157,6 @@ export function ArrayListItem({
         </IconButton>
         <IconButton
           title="Delete"
-          className="elyricon elyricon-delete"
           onClick={() => {
             onDelete?.();
           }}
