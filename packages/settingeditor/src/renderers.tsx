@@ -119,7 +119,7 @@ export const renderStringArray = (
 ): any => {
   return (
     <div
-      className="jp-metadataEditor-formInput jp-FormComponent"
+      className="jp-metadataEditor-formInput jp-FormComponent jp-StringArrayInput"
       key={`${props.uihints.title?.replace(' ', '')}Array`}
       style={{ flexBasis: '100%' }}
     >
