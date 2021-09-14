@@ -4,11 +4,10 @@ import produce from 'immer';
 import React from 'react';
 import {
   Button,
-  ButtonGroup,
   IconButton,
+  InputAdornment,
   List,
   ListItem,
-  ListItemText,
   TextField
 } from '@material-ui/core';
 import { editIcon, trashIcon } from '@jupyterlab/ui-components';
@@ -97,6 +96,8 @@ export function ArrayListItem({
       <div>
         <TextField
           inputProps={{ ref: inputRef }}
+          className="jp-StringArray-entry"
+          variant="outlined"
           defaultValue={
             typeof value === 'string'
               ? value ?? ''
@@ -115,23 +116,27 @@ export function ArrayListItem({
               return;
             }
           }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Button
+                  onClick={() => {
+                    onSubmit?.(inputRef.current!.value);
+                  }}
+                >
+                  OK
+                </Button>
+                <Button
+                  onClick={() => {
+                    onCancel?.();
+                  }}
+                >
+                  Cancel
+                </Button>
+              </InputAdornment>
+            )
+          }}
         />
-        <ButtonGroup>
-          <Button
-            onClick={() => {
-              // onSubmit?.(inputRef.current!.value);
-            }}
-          >
-            OK
-          </Button>
-          <Button
-            onClick={() => {
-              onCancel?.();
-            }}
-          >
-            Cancel
-          </Button>
-        </ButtonGroup>
       </div>
     );
   }
@@ -141,29 +146,41 @@ export function ArrayListItem({
         onEdit?.();
       }}
     >
-      <ListItemText style={{ whiteSpace: 'pre' }}>
-        {typeof value === 'string'
-          ? value ?? ''
-          : JSON.stringify(value, null, '\t')}
-      </ListItemText>
-      <ButtonGroup>
-        <IconButton
-          title="Edit"
-          onClick={() => {
-            onEdit?.();
-          }}
-        >
-          {<editIcon.react />}
-        </IconButton>
-        <IconButton
-          title="Delete"
-          onClick={() => {
-            onDelete?.();
-          }}
-        >
-          {<trashIcon.react />}
-        </IconButton>
-      </ButtonGroup>
+      <TextField
+        style={{ whiteSpace: 'pre' }}
+        className="jp-StringArray-entry"
+        variant="outlined"
+        value={
+          typeof value === 'string'
+            ? value ?? ''
+            : JSON.stringify(value, null, '\t')
+        }
+        InputProps={{
+          readOnly: true,
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="edit button"
+                onClick={(): void => {
+                  onEdit?.();
+                }}
+                edge="end"
+              >
+                {<editIcon.react />}
+              </IconButton>
+              <IconButton
+                aria-label="delete button"
+                onClick={(): void => {
+                  onDelete?.();
+                }}
+                edge="end"
+              >
+                {<trashIcon.react />}
+              </IconButton>
+            </InputAdornment>
+          )
+        }}
+      />
     </ListItem>
   );
 }
