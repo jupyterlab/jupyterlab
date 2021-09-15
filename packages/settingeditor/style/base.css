@@ -129,17 +129,8 @@
   color: var(--jp-content-font-color1);
 }
 
-#setting-editor .MuiInputBase-root,
-#setting-editor .MuiFormLabel-root {
-  color: var(--jp-content-font-color1);
-}
-
 #setting-editor .jp-StringArray-entry {
   width: 100%;
-}
-
-#setting-editor .MuiOutlinedInput-notchedOutline {
-  border-color: var(--jp-content-font-color2);
 }
 
 #setting-editor .jp-FormComponent li span {
@@ -326,10 +317,6 @@
 #setting-editor .jp-SettingsPanel {
   overflow-y: scroll;
   height: 100%;
-}
-
-#setting-editor .MuiCheckbox-colorSecondary.Mui-checked {
-  color: var(--jp-brand-color1);
 }
 
 #setting-editor .jp-SettingsHeader button {

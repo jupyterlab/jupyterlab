@@ -6,14 +6,6 @@
 import React from 'react';
 
 import {
-  FormControlLabel,
-  InputLabel,
-  Switch,
-  Tooltip,
-  withStyles
-} from '@material-ui/core';
-
-import {
   ArrayInput,
   DropDown,
   FormComponentRegistry,
@@ -21,12 +13,6 @@ import {
 } from '@jupyterlab/formeditor';
 
 import { JSONExt } from '@lumino/coreutils';
-
-const CustomTooltip = withStyles(_theme => ({
-  tooltip: {
-    fontSize: 13
-  }
-}))(Tooltip);
 
 export const renderDropdown = (
   props: FormComponentRegistry.IRendererProps
@@ -93,28 +79,23 @@ export const renderCheckbox = (
 ): any => {
   return (
     <div
-      className="jp-FormComponent"
+      className="jp-FormComponent jp-BooleanInput"
       key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
     >
       {props.uihints.default !== props.value ? (
         <div className="jp-modifiedIndicator" />
       ) : undefined}
-      <CustomTooltip title={props.uihints.description ?? ''}>
-        <FormControlLabel
-          className="jp-metadataEditor-formInput"
-          key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
-          control={
-            <Switch
-              checked={props.value}
-              onChange={(e: any, checked: boolean) => {
-                props.handleChange(checked);
-              }}
-              color="primary"
-            />
-          }
-          label={props.uihints.title}
+      <div className="jp-InputLabelWrapper">
+        <input
+          type="checkbox"
+          checked={props.value}
+          onChange={(e: any) => {
+            props.handleChange(!props.value);
+          }}
         />
-      </CustomTooltip>
+        <h2>{props.uihints.title}</h2>
+      </div>
+      <p> {props.uihints.description} </p>
     </div>
   );
 };
@@ -128,7 +109,6 @@ export const renderStringArray = (
       key={`${props.uihints.title?.replace(' ', '')}Array`}
       style={{ flexBasis: '100%' }}
     >
-      <InputLabel> {props.uihints.title} </InputLabel>
       <ArrayInput
         onChange={(values: string[]) => {
           props.handleChange(values);

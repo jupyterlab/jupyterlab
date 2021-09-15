@@ -7,14 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import produce from 'immer';
 import React from 'react';
-import {
-  Button,
-  IconButton,
-  InputAdornment,
-  List,
-  ListItem,
-  TextField
-} from '@material-ui/core';
+
 import { editIcon, trashIcon } from '@jupyterlab/ui-components';
 
 interface IProps {
@@ -86,7 +79,7 @@ export function ArrayListItem({
   onDelete,
   onEdit
 }: IListItemProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<any>(null);
 
   useEffect(() => {
     // We want this to be called anytime isEditing becomes true.
@@ -99,94 +92,103 @@ export function ArrayListItem({
   if (isEditing) {
     return (
       <div>
-        <TextField
-          inputProps={{ ref: inputRef }}
-          className="jp-StringArray-entry"
-          variant="outlined"
-          defaultValue={
-            typeof value === 'string'
-              ? value ?? ''
-              : JSON.stringify(value, null, '\t')
-          }
-          multiline={typeof value !== 'string'}
-          maxRows={15}
-          placeholder={placeholder}
-          onKeyDown={e => {
-            if (e.code === 'Enter') {
+        {typeof value !== 'string' ? (
+          <textarea
+            ref={inputRef}
+            className="jp-StringArray-entry"
+            value={
+              typeof value === 'string'
+                ? value ?? ''
+                : JSON.stringify(value, null, '\t')
+            }
+            placeholder={placeholder}
+            onKeyDown={e => {
+              if (e.code === 'Enter') {
+                onSubmit?.(inputRef.current!.value);
+                return;
+              }
+              if (e.code === 'Escape') {
+                onCancel?.();
+                return;
+              }
+            }}
+          />
+        ) : (
+          <input
+            ref={inputRef}
+            className="jp-StringArray-entry"
+            value={
+              typeof value === 'string'
+                ? value ?? ''
+                : JSON.stringify(value, null, '\t')
+            }
+            placeholder={placeholder}
+            onKeyDown={e => {
+              if (e.code === 'Enter') {
+                onSubmit?.(inputRef.current!.value);
+                return;
+              }
+              if (e.code === 'Escape') {
+                onCancel?.();
+                return;
+              }
+            }}
+          />
+        )}
+        <div className="jp-StringArray-buttonGroup">
+          <button
+            onClick={() => {
               onSubmit?.(inputRef.current!.value);
-              return;
-            }
-            if (e.code === 'Escape') {
+            }}
+          >
+            OK
+          </button>
+          <button
+            onClick={() => {
               onCancel?.();
-              return;
-            }
-          }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Button
-                  onClick={() => {
-                    onSubmit?.(inputRef.current!.value);
-                  }}
-                >
-                  OK
-                </Button>
-                <Button
-                  onClick={() => {
-                    onCancel?.();
-                  }}
-                >
-                  Cancel
-                </Button>
-              </InputAdornment>
-            )
-          }}
-        />
+            }}
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     );
   }
   return (
-    <ListItem
+    <div
       onDoubleClick={() => {
         onEdit?.();
       }}
     >
-      <TextField
+      <input
         style={{ whiteSpace: 'pre' }}
         className="jp-StringArray-entry"
-        variant="outlined"
         value={
           typeof value === 'string'
             ? value ?? ''
             : JSON.stringify(value, null, '\t')
         }
-        InputProps={{
-          readOnly: true,
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="edit button"
-                onClick={(): void => {
-                  onEdit?.();
-                }}
-                edge="end"
-              >
-                {<editIcon.react />}
-              </IconButton>
-              <IconButton
-                aria-label="delete button"
-                onClick={(): void => {
-                  onDelete?.();
-                }}
-                edge="end"
-              >
-                {<trashIcon.react />}
-              </IconButton>
-            </InputAdornment>
-          )
-        }}
+        readOnly
       />
-    </ListItem>
+      <div>
+        <button
+          aria-label="edit button"
+          onClick={(): void => {
+            onEdit?.();
+          }}
+        >
+          {<editIcon.react />}
+        </button>
+        <button
+          aria-label="delete button"
+          onClick={(): void => {
+            onDelete?.();
+          }}
+        >
+          {<trashIcon.react />}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -205,62 +207,59 @@ export function ArrayInput({ placeholder, onChange, values }: IProps) {
   );
 
   return (
-    <div>
-      <List>
-        {items.map((item: string, index: number) => (
-          <ArrayListItem
-            key={index}
-            value={item}
-            placeholder={placeholder}
-            isEditing={index === editingIndex}
-            onSubmit={value => {
-              setEditingIndex(undefined);
-              handleAction({
-                type: 'UPSERT_ITEM',
-                payload: { index, value }
-              });
-            }}
-            onCancel={() => {
-              setEditingIndex(undefined);
-            }}
-            onDelete={() => {
-              handleAction({
-                type: 'DELETE_ITEM',
-                payload: { index }
-              });
-            }}
-            onEdit={() => {
-              setEditingIndex(index);
-            }}
-          />
-        ))}
-        {editingIndex === 'new' && (
-          <ArrayListItem
-            placeholder={placeholder}
-            isEditing
-            onSubmit={value => {
-              setEditingIndex(undefined);
-              handleAction({
-                type: 'UPSERT_ITEM',
-                payload: { value }
-              });
-            }}
-            onCancel={() => {
-              setEditingIndex(undefined);
-            }}
-          />
-        )}
-      </List>
-
+    <ul>
+      {items.map((item: string, index: number) => (
+        <ArrayListItem
+          key={index}
+          value={item}
+          placeholder={placeholder}
+          isEditing={index === editingIndex}
+          onSubmit={value => {
+            setEditingIndex(undefined);
+            handleAction({
+              type: 'UPSERT_ITEM',
+              payload: { index, value }
+            });
+          }}
+          onCancel={() => {
+            setEditingIndex(undefined);
+          }}
+          onDelete={() => {
+            handleAction({
+              type: 'DELETE_ITEM',
+              payload: { index }
+            });
+          }}
+          onEdit={() => {
+            setEditingIndex(index);
+          }}
+        />
+      ))}
+      {editingIndex === 'new' && (
+        <ArrayListItem
+          placeholder={placeholder}
+          isEditing
+          onSubmit={value => {
+            setEditingIndex(undefined);
+            handleAction({
+              type: 'UPSERT_ITEM',
+              payload: { value }
+            });
+          }}
+          onCancel={() => {
+            setEditingIndex(undefined);
+          }}
+        />
+      )}
       {editingIndex !== 'new' && (
-        <Button
+        <button
           onClick={() => {
             setEditingIndex('new');
           }}
         >
           Add Item
-        </Button>
+        </button>
       )}
-    </div>
+    </ul>
   );
 }

@@ -231,7 +231,7 @@ export class PluginList extends ReactWidget {
       const settings: Settings = (await this.registry.load(
         plugin.id
       )) as Settings;
-      if (settings.modifiedFields.length > 0) {
+      if (settings.isModified) {
         modifiedPlugins.push(plugin);
       }
     }

@@ -13,3 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+.jp-metadataEditor-formInput h2 {
+  font-size: var(--jp-content-font-size4);
+  font-weight: var(--jp-content-heading-font-weight);
+  color: var(--jp-ui-font-color0);
+}
+
+.jp-metadataEditor-formInput p {
+  font-size: var(--jp-content-font-size2);
+}
+
+.jp-BooleanInput .jp-InputLabelWrapper {
+  display: flex;
+}
+
+.jp-FormComponent.jp-BooleanInput {
+  flex-direction: column;
+  align-items: flex-start;
+}

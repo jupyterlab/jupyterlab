@@ -3,18 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Tooltip,
-  withStyles
-} from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-
 import * as React from 'react';
 import { FormComponentRegistry } from './FormComponentRegistry';
 
@@ -30,12 +18,6 @@ export interface IDropDownProps {
   placeholder?: string;
   readonly?: boolean;
 }
-
-const CustomTooltip = withStyles(_theme => ({
-  tooltip: {
-    fontSize: 13
-  }
-}))(Tooltip);
 
 export const DropDown: React.FC<FormComponentRegistry.IRendererProps> = ({
   value,
@@ -68,67 +50,37 @@ export const DropDown: React.FC<FormComponentRegistry.IRendererProps> = ({
   };
 
   return (
-    <div className={`jp-metadataEditor-formInput ${DROPDOWN_ITEM_CLASS}`}>
-      <CustomTooltip title={description ?? ''} placement="top">
-        {readonly ? (
-          <FormControl variant="outlined">
-            <InputLabel error={!!error}>{label}</InputLabel>
-            <Select
-              value={updatedValue}
-              label={label}
-              error={!!error}
-              onChange={(event: any): void => {
-                handleInputChange(event.target.value);
+    <div
+      className={`jp-metadataEditor-formInput ${DROPDOWN_ITEM_CLASS} ${
+        !!error && 'jp-SettingEditor-error'
+      }`}
+    >
+      <h2>{label}</h2>
+      <p> {description} </p>
+      <select
+        value={updatedValue}
+        onChange={(event: any): void => {
+          handleInputChange(event.target.value);
+        }}
+      >
+        {options?.map((option: string) => {
+          return (
+            <option
+              key={`${option}MenuItem`}
+              value={option}
+              style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'flex-start',
+                padding: '18.5px 14px'
               }}
             >
-              {options?.map((option: string) => {
-                return (
-                  <MenuItem
-                    key={`${option}MenuItem`}
-                    value={option}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      justifyContent: 'flex-start',
-                      padding: '18.5px 14px'
-                    }}
-                  >
-                    {option}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-        ) : (
-          <Autocomplete
-            freeSolo
-            key="jp-DropDown"
-            options={options ?? []}
-            style={{ width: 300 }}
-            value={updatedValue ?? ''}
-            onChange={(event: any, newValue: string | null): void => {
-              handleInputChange(newValue ?? '');
-            }}
-            renderInput={(params): React.ReactNode => (
-              <TextField
-                {...params}
-                label={label}
-                required={required}
-                error={!!error}
-                onChange={(event: any): void => {
-                  handleInputChange(event.target.value);
-                }}
-                placeholder={
-                  placeholder ||
-                  `Create or select ${label?.toLocaleLowerCase()}`
-                }
-                variant="outlined"
-              />
-            )}
-          />
-        )}
-      </CustomTooltip>
-      {!!error && <FormHelperText error>{error}</FormHelperText>}
+              {option}
+            </option>
+          );
+        })}
+      </select>
+      {!!error && <p>{error}</p>}
     </div>
   );
 };
