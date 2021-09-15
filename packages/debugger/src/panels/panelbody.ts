@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { AccordionPanel, Title, Widget } from '@lumino/widgets';
-import { caretDownEmptyIcon } from '@jupyterlab/ui-components';
+import { caretDownIcon } from '@jupyterlab/ui-components';
 import { PanelWithToolbar } from './panelwithtoolbar';
 
 /**
@@ -22,7 +22,7 @@ export namespace DebuggerAccordionPanel {
      */
     createCollapseIcon(data: Title<Widget>): HTMLElement {
       const iconDiv = document.createElement('div');
-      caretDownEmptyIcon.element({
+      caretDownIcon.element({
         container: iconDiv
       });
       return iconDiv;
