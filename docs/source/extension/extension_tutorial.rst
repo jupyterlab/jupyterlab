@@ -968,7 +968,7 @@ You may want to also publish your extension as a JavaScript package to the
 
 
 Automated Releases
-~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^
 
 If you used the cookiecutter to bootstrap your extension, the repository should already
 be compatible with the `Jupyter Releaser <https://github.com/jupyter-server/jupyter_releaser>`_.
