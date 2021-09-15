@@ -17,13 +17,15 @@
 .jp-metadataEditor-formInput h3 {
   font-size: var(--jp-content-font-size2);
   color: var(--jp-ui-font-color0);
-  padding: 10px;
+  padding: 5px;
   font-weight: var(--jp-content-header-font-weight);
   border-bottom: 1px solid var(--jp-border-color2);
 }
 
 .jp-metadataEditor-formInput p {
   font-size: var(--jp-content-font-size2);
+  margin-bottom: 5px;
+  margin-left: 5px;
 }
 
 .jp-metadataEditor-formInput input,
@@ -34,6 +36,8 @@
   border-radius: 5px;
   border-width: 1px;
   padding: 6px 8px;
+  background: none;
+  color: var(--jp-content-font-color0);
 }
 
 .jp-StringArray-entry input {
@@ -73,4 +77,27 @@
   border: none;
   margin: 3px;
   cursor: pointer;
+}
+
+.jp-FormComponent {
+  padding-left: 8px;
+}
+
+.jp-StringArrayInput button.jp-StringArray-addItem {
+  white-space: nowrap;
+  background: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  font-size: var(--jp-content-font-size1);
+  color: var(--jp-brand-color1);
+}
+
+.jp-StringArrayInput button.jp-StringArray-addItem:hover {
+  color: var(--jp-brand-color0);
+}
+
+.jp-StringArray-entry textarea {
+  height: 200px;
+  width: 100%;
 }

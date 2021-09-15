@@ -316,6 +316,8 @@
   position: absolute;
   bottom: 0;
   z-index: 999;
+  background-color: var(--jp-border-color3);
+  border: 1px solid var(--jp-border-color1);
 }
 
 #setting-editor .jp-SettingsPanel {
@@ -325,11 +327,16 @@
 
 #setting-editor .jp-SettingsHeader button {
   white-space: nowrap;
+  background: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  font-size: var(--jp-content-font-size2);
+  color: var(--jp-brand-color1);
 }
 
 #setting-editor .jp-SettingsHeader button:hover {
-  background-color: transparent;
-  color: var(--jp-brand-color1);
+  color: var(--jp-brand-color0);
 }
 
 #setting-editor .jp-SettingsTableEditor td {

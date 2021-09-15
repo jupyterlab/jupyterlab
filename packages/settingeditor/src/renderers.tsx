@@ -13,7 +13,6 @@ import {
 } from '@jupyterlab/formeditor';
 
 import { JSONExt } from '@lumino/coreutils';
-import { checkIcon } from '@jupyterlab/ui-components';
 
 export const renderDropdown = (
   props: FormComponentRegistry.IRendererProps
@@ -89,7 +88,6 @@ export const renderCheckbox = (
       ) : undefined}
       <h3>{props.uihints.title}</h3>
       <div className="jp-InputLabelWrapper">
-        <checkIcon.react />
         <input
           type="checkbox"
           checked={props.value}
@@ -119,7 +117,7 @@ export const renderStringArray = (
       key={`${props.uihints.title?.replace(' ', '')}Array`}
       style={{ flexBasis: '100%' }}
     >
-      {props.uihints.default !== props.value ? (
+      {!JSONExt.deepEqual(props.uihints.default, props.value) ? (
         <div className="jp-modifiedIndicator" />
       ) : undefined}
       <ArrayInput

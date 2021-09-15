@@ -18,9 +18,10 @@ interface IProps {
 }
 
 interface IListItemProps {
-  value?: any;
+  defaultValue?: any;
   isEditing?: boolean;
   placeholder?: string;
+  multiline?: boolean;
   onSubmit?: (value: string) => any;
   onCancel?: () => any;
   onDelete?: () => any;
@@ -72,14 +73,19 @@ export const reducer = produce((draft: string[], action) => {
 });
 
 export function ArrayListItem({
-  value,
+  defaultValue,
   isEditing,
   placeholder,
+  multiline,
   onSubmit,
   onCancel,
   onDelete,
   onEdit
 }: IListItemProps) {
+  const [value, setValue] = React.useState(
+    multiline ? JSON.stringify(defaultValue, null, '\t') : defaultValue
+  );
+
   const inputRef = useRef<any>(null);
 
   useEffect(() => {
@@ -90,17 +96,19 @@ export function ArrayListItem({
     }
   }, [isEditing]);
 
+  React.useEffect(() => {
+    setValue(
+      multiline ? JSON.stringify(defaultValue, null, '\t') : defaultValue
+    );
+  }, [defaultValue]);
+
   if (isEditing) {
     return (
       <div className="jp-StringArray-entry">
-        {typeof value !== 'string' ? (
+        {multiline ? (
           <textarea
             ref={inputRef}
-            value={
-              typeof value === 'string'
-                ? value ?? ''
-                : JSON.stringify(value, null, '\t')
-            }
+            value={value}
             placeholder={placeholder}
             onKeyDown={e => {
               if (e.code === 'Enter') {
@@ -116,11 +124,7 @@ export function ArrayListItem({
         ) : (
           <input
             ref={inputRef}
-            value={
-              typeof value === 'string'
-                ? value ?? ''
-                : JSON.stringify(value, null, '\t')
-            }
+            value={value}
             placeholder={placeholder}
             onKeyDown={e => {
               if (e.code === 'Enter') {
@@ -163,11 +167,7 @@ export function ArrayListItem({
       <input
         style={{ whiteSpace: 'pre' }}
         className="jp-StringArray-entry"
-        value={
-          typeof value === 'string'
-            ? value ?? ''
-            : JSON.stringify(value, null, '\t')
-        }
+        value={value}
         readOnly
       />
       <div className="jp-StringArray-buttonGroup">
@@ -213,8 +213,9 @@ export function ArrayInput({ placeholder, onChange, values, label }: IProps) {
         {items.map((item: string, index: number) => (
           <ArrayListItem
             key={index}
-            value={item}
+            defaultValue={item}
             placeholder={placeholder}
+            multiline={typeof item !== 'string' && !!item}
             isEditing={index === editingIndex}
             onSubmit={value => {
               setEditingIndex(undefined);
@@ -258,6 +259,7 @@ export function ArrayInput({ placeholder, onChange, values, label }: IProps) {
             onClick={() => {
               setEditingIndex('new');
             }}
+            className="jp-StringArray-addItem"
           >
             Add Item
           </button>
