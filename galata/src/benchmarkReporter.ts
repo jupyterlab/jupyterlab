@@ -180,15 +180,31 @@ class BenchmarkReporter implements Reporter {
    *    - 'project': This will compare the different project
    */
   constructor(
-    options: { outputFile?: string; comparison?: 'snapshot' | 'project' } = {}
+    options: {
+      outputFile?: string;
+      comparison?: 'snapshot' | 'project';
+      graphConfigFactory?: (
+        allData: Array<IReportRecord>,
+        comparison: 'snapshot' | 'project'
+      ) => Record<string, any>;
+      mdTableFactory?: (allData: Array<IReportRecord>) => Array<string>;
+    } = {}
   ) {
     this._outputFile =
       options.outputFile ??
       process.env['BENCHMARK_OUTPUTFILE'] ??
       benchmark.DEFAULT_OUTPUT;
+
     this._comparison = options.comparison ?? 'snapshot';
+
     this._reference =
       process.env['BENCHMARK_REFERENCE'] ?? benchmark.DEFAULT_REFERENCE;
+
+    this._buildReportGraphConfig =
+      options.graphConfigFactory ?? this.defaultBuildReportGraphConfig;
+
+    this._buildMarkdownTable =
+      options.mdTableFactory ?? this.defaultBuildMarkdownTable;
   }
 
   /**
@@ -291,101 +307,15 @@ class BenchmarkReporter implements Reporter {
         allData.push(...expectations.values);
       }
 
-      // Create graph file
-      const graphConfigFile = path.resolve(outputDir, `${baseName}.vl.json`);
-      const config = generateVegaLiteSpec(
-        [...new Set(allData.map(d => d.test))],
-        this._comparison == 'snapshot' ? 'reference' : 'project',
-        [...new Set(allData.map(d => d.file))]
-      );
-      config.data.values = allData;
-      fs.writeFileSync(graphConfigFile, JSON.stringify(config), 'utf-8');
-
-      // Compute statistics
-      // - Groupby (test, browser, reference, file)
-      const groups = new Map<
-        string,
-        Map<string, Map<string, Map<string, number[]>>>
-      >();
-
-      allData.forEach(d => {
-        if (!groups.has(d.test)) {
-          groups.set(
-            d.test,
-            new Map<string, Map<string, Map<string, number[]>>>()
-          );
-        }
-
-        const testGroup = groups.get(d.test)!;
-
-        if (!testGroup.has(d.browser)) {
-          testGroup.set(d.browser, new Map<string, Map<string, number[]>>());
-        }
-
-        const browserGroup = testGroup.get(d.browser)!;
-
-        if (!browserGroup.has(d.reference)) {
-          browserGroup.set(d.reference, new Map<string, number[]>());
-        }
-
-        const fileGroup = browserGroup.get(d.reference)!;
-
-        if (!fileGroup.has(d.file)) {
-          fileGroup.set(d.file, new Array<number>());
-        }
-
-        fileGroup.get(d.file)?.push(d.time);
-      });
-
       // - Create report
-      const reportContent = new Array<string>(
-        '## Benchmark report',
-        '',
-        'The execution time (in milliseconds) are grouped by test file, test type and browser.',
-        'For each case, the following values are computed: _min_ <- [_1st quartile_ - _median_ - _3rd quartile_] -> _max_.',
-        '',
-        '<details><summary>Results table</summary>',
-        ''
-      );
-
-      let header = '| Test file |';
-      let nFiles = 0;
-      for (const [
-        file
-      ] of groups.values().next().value.values().next().value.values().next()
-        .value) {
-        header += ` ${file} |`;
-        nFiles++;
-      }
-      reportContent.push(header);
-      reportContent.push(new Array(nFiles + 2).fill('|').join(' --- '));
-      const filler = new Array(nFiles).fill('|').join(' ');
-
-      for (const [test, testGroup] of groups) {
-        reportContent.push(`| **${test}** | ` + filler);
-        for (const [browser, browserGroup] of testGroup) {
-          reportContent.push(`| \`${browser}\` | ` + filler);
-          for (const [reference, fileGroup] of browserGroup) {
-            let line = `| ${reference} |`;
-            for (const [_, dataGroup] of fileGroup) {
-              const [q1, median, q3] = vs.quartiles(dataGroup);
-              line += ` ${Math.min(
-                ...dataGroup
-              ).toFixed()} <- [${q1.toFixed()} - ${median.toFixed()} - ${q3.toFixed()}] -> ${Math.max(
-                ...dataGroup
-              ).toFixed()} |`;
-            }
-
-            reportContent.push(line);
-          }
-        }
-      }
-      reportContent.push('', '</details>', '');
-
+      const reportContent = this._buildMarkdownTable(allData);
       const reportFile = path.resolve(outputDir, `${baseName}.md`);
       fs.writeFileSync(reportFile, reportContent.join('\n'), 'utf-8');
 
-      // Generate image
+      // Generate graph file and image
+      const graphConfigFile = path.resolve(outputDir, `${baseName}.vl.json`);
+      const config = this._buildReportGraphConfig(allData, this._comparison);
+      fs.writeFileSync(graphConfigFile, JSON.stringify(config), 'utf-8');
       const vegaSpec = vl.compile(config as any).spec;
 
       const view = new vega.View(vega.parse(vegaSpec), {
@@ -411,6 +341,106 @@ class BenchmarkReporter implements Reporter {
     } else {
       console.log(reportString);
     }
+  }
+
+  protected defaultBuildMarkdownTable(allData: IReportRecord[]): Array<string> {
+    // Compute statistics
+    // - Groupby (test, browser, reference, file)
+    
+    const groups = new Map<
+      string,
+      Map<string, Map<string, Map<string, number[]>>>
+    >();
+
+    allData.forEach(d => {
+      if (!groups.has(d.test)) {
+        groups.set(
+          d.test,
+          new Map<string, Map<string, Map<string, number[]>>>()
+        );
+      }
+
+      const testGroup = groups.get(d.test)!;
+
+      if (!testGroup.has(d.browser)) {
+        testGroup.set(d.browser, new Map<string, Map<string, number[]>>());
+      }
+
+      const browserGroup = testGroup.get(d.browser)!;
+
+      if (!browserGroup.has(d.reference)) {
+        browserGroup.set(d.reference, new Map<string, number[]>());
+      }
+
+      const fileGroup = browserGroup.get(d.reference)!;
+
+      if (!fileGroup.has(d.file)) {
+        fileGroup.set(d.file, new Array<number>());
+      }
+
+      fileGroup.get(d.file)?.push(d.time);
+    });
+
+    // - Create report
+    const reportContent = new Array<string>(
+      '## Benchmark report',
+      '',
+      'The execution time (in milliseconds) are grouped by test file, test type and browser.',
+      'For each case, the following values are computed: _min_ <- [_1st quartile_ - _median_ - _3rd quartile_] -> _max_.',
+      '',
+      '<details><summary>Results table</summary>',
+      ''
+    );
+
+    let header = '| Test file |';
+    let nFiles = 0;
+    for (const [
+      file
+    ] of groups.values().next().value.values().next().value.values().next()
+      .value) {
+      header += ` ${file} |`;
+      nFiles++;
+    }
+    reportContent.push(header);
+    reportContent.push(new Array(nFiles + 2).fill('|').join(' --- '));
+    const filler = new Array(nFiles).fill('|').join(' ');
+
+    for (const [test, testGroup] of groups) {
+      reportContent.push(`| **${test}** | ` + filler);
+      for (const [browser, browserGroup] of testGroup) {
+        reportContent.push(`| \`${browser}\` | ` + filler);
+        for (const [reference, fileGroup] of browserGroup) {
+          let line = `| ${reference} |`;
+          for (const [_, dataGroup] of fileGroup) {
+            const [q1, median, q3] = vs.quartiles(dataGroup);
+            line += ` ${Math.min(
+              ...dataGroup
+            ).toFixed()} <- [${q1.toFixed()} - ${median.toFixed()} - ${q3.toFixed()}] -> ${Math.max(
+              ...dataGroup
+            ).toFixed()} |`;
+          }
+
+          reportContent.push(line);
+        }
+      }
+    }
+    reportContent.push('', '</details>', '');
+
+    return reportContent;
+  }
+
+  protected defaultBuildReportGraphConfig(
+    allData: IReportRecord[],
+    comparison: 'snapshot' | 'project'
+  ): Record<string, any> {
+
+    const config = generateVegaLiteSpec(
+      [...new Set(allData.map(d => d.test))],
+      comparison == 'snapshot' ? 'reference' : 'project',
+      [...new Set(allData.map(d => d.file))]
+    );
+    config.data.values = allData;
+    return config;
   }
 
   protected async getMetadata(browser?: string): Promise<any> {
@@ -469,6 +499,11 @@ class BenchmarkReporter implements Reporter {
   private _outputFile: string;
   private _reference: string;
   private _report: IReportRecord[];
+  private _buildReportGraphConfig: (
+    allData: IReportRecord[],
+    comparison: 'snapshot' | 'project'
+  ) => Record<string, any>;
+  private _buildMarkdownTable: (allData: IReportRecord[]) => Array<string>;
 }
 
 export default BenchmarkReporter;
