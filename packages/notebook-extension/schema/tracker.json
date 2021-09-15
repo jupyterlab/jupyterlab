@@ -582,26 +582,32 @@
     "editorConfig": {
       "properties": {
         "autoClosingBrackets": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "cursorBlinkRate": {
           "type": "number",
           "title": "Cursor blinking rate",
-          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely."
+          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely.",
+          "default": 530
         },
         "fontFamily": {
-          "type": ["string", "null"]
+          "type": ["string", "null"],
+          "default": null
         },
         "fontSize": {
           "type": ["integer", "null"],
           "minimum": 1,
-          "maximum": 100
+          "maximum": 100,
+          "default": null
         },
         "lineHeight": {
-          "type": ["number", "null"]
+          "type": ["number", "null"],
+          "default": null
         },
         "lineNumbers": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "lineWrap": {
           "type": "string",
@@ -611,28 +617,39 @@
           "type": "boolean"
         },
         "readOnly": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "insertSpaces": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "tabSize": {
-          "type": "number"
+          "type": "number",
+          "default": 4
         },
         "wordWrapColumn": {
-          "type": "integer"
+          "type": "integer",
+          "default": 80
         },
         "rulers": {
           "type": "array",
           "items": {
             "type": "number"
-          }
+          },
+          "default": []
         },
         "codeFolding": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "lineWiseCopyCut": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
+        },
+        "showTrailingSpace": {
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false,
@@ -644,6 +661,14 @@
       "title": "Code Cell Configuration",
       "description": "The configuration for all code cells.",
       "$ref": "#/definitions/editorConfig",
+      "properties": {
+        "lineWarp": {
+          "default": "off"
+        },
+        "matchBrackets": {
+          "default": true
+        }
+      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,
@@ -679,6 +704,14 @@
       "title": "Markdown Cell Configuration",
       "description": "The configuration for all markdown cells.",
       "$ref": "#/definitions/editorConfig",
+      "properties": {
+        "lineWarp": {
+          "default": "on"
+        },
+        "matchBrackets": {
+          "default": false
+        }
+      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,
@@ -701,6 +734,14 @@
       "title": "Raw Cell Configuration",
       "description": "The configuration for all raw cells.",
       "$ref": "#/definitions/editorConfig",
+      "properties": {
+        "lineWarp": {
+          "default": "on"
+        },
+        "matchBrackets": {
+          "default": false
+        }
+      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,

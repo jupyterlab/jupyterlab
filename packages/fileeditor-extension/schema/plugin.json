@@ -146,54 +146,72 @@
     "editorConfig": {
       "properties": {
         "autoClosingBrackets": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "codeFolding": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "cursorBlinkRate": {
           "type": "number",
           "title": "Cursor blinking rate",
-          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely."
+          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely.",
+          "cursorBlinkRate": 530
         },
         "fontFamily": {
-          "type": ["string", "null"]
+          "type": ["string", "null"],
+          "default": null
         },
         "fontSize": {
           "type": ["integer", "null"],
           "minimum": 1,
-          "maximum": 100
+          "maximum": 100,
+          "default": null
         },
         "insertSpaces": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "lineHeight": {
-          "type": ["number", "null"]
+          "type": ["number", "null"],
+          "default": null
         },
         "lineNumbers": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "lineWrap": {
           "type": "string",
-          "enum": ["off", "on", "wordWrapColumn", "bounded"]
+          "enum": ["off", "on", "wordWrapColumn", "bounded"],
+          "default": "on"
         },
         "matchBrackets": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "readOnly": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "rulers": {
           "type": "array",
           "items": {
             "type": "number"
-          }
+          },
+          "default": []
+        },
+        "showTrailingSpace": {
+          "type": "boolean",
+          "default": false
         },
         "tabSize": {
-          "type": "number"
+          "type": "number",
+          "default": 4
         },
         "wordWrapColumn": {
-          "type": "integer"
+          "type": "integer",
+          "default": 80
         }
       },
       "additionalProperties": false,
