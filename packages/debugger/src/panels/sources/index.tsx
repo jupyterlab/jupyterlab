@@ -26,7 +26,7 @@ export class Sources extends PanelWidget {
   constructor(options: Sources.IOptions) {
     super(options);
     const { model, service, editorServices } = options;
-    this.title.label = this.trans.__('Sources');
+    this.title.label = this.trans.__('Source');
 
     this.header.addClass('jp-DebuggerSources-header');
     const body = new SourcesBody({

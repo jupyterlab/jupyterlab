@@ -256,7 +256,7 @@ describe('Debugger', () => {
           'span.lm-AccordionPanel-titleLabel'
         );
         expect(title.length).toBe(1);
-        expect(title[0].innerHTML).toContain('Sources');
+        expect(title[0].innerHTML).toContain('Source');
       });
 
       it('should have two buttons', () => {
