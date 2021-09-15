@@ -176,7 +176,7 @@ describe('Debugger', () => {
         const title = toolbar.querySelectorAll(
           '.lm-AccordionPanel-titleCollapser'
         );
-        expect(title[0].innerHTML).toContain('ui-components:caret-down-empty');
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
       });
       it('should have title', () => {
         const title = toolbar.querySelectorAll(
@@ -201,7 +201,7 @@ describe('Debugger', () => {
         const title = toolbar.querySelectorAll(
           '.lm-AccordionPanel-titleCollapser'
         );
-        expect(title[0].innerHTML).toContain('ui-components:caret-down-empty');
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
       });
       it('should have title', () => {
         const title = toolbar.querySelectorAll(
@@ -224,7 +224,7 @@ describe('Debugger', () => {
         const title = toolbar.querySelectorAll(
           '.lm-AccordionPanel-titleCollapser'
         );
-        expect(title[0].innerHTML).toContain('ui-components:caret-down-empty');
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
       });
       it('should have title', () => {
         const title = toolbar.querySelectorAll(
@@ -247,7 +247,7 @@ describe('Debugger', () => {
         const title = toolbar.querySelectorAll(
           '.lm-AccordionPanel-titleCollapser'
         );
-        expect(title[0].innerHTML).toContain('ui-components:caret-down-empty');
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
       });
       it('should have title', () => {
         const title = toolbar.querySelectorAll(
