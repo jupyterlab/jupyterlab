@@ -36,4 +36,5 @@
 
 .jp-AccordionPanel-title .lm-AccordionPanel-titleLabel {
   user-select: none;
+  line-height: 22px;
 }
