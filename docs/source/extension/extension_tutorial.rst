@@ -966,6 +966,22 @@ You may want to also publish your extension as a JavaScript package to the
    package to npm so other extensions can depend on it and import and require
    your token.
 
+
+Automated Releases
+^^^^^^^^^^^^^^^^^^
+
+If you used the cookiecutter to bootstrap your extension, the repository should already
+be compatible with the `Jupyter Releaser <https://github.com/jupyter-server/jupyter_releaser>`_.
+
+The Jupyter Releaser provides a set of GitHub Actions Workflows to:
+
+- Generate a new entry in the Changelog
+- Draft a new release
+- Publish the release to ``PyPI`` and ``npm``
+
+For more information on how to run the release workflows,
+check out the documentation: https://github.com/jupyter-server/jupyter_releaser
+
 Learn more
 ----------
 
