@@ -46,8 +46,7 @@
     "@jupyterlab/settingregistry": "^3.3.0-alpha.10",
     "@jupyterlab/statedb": "^3.3.0-alpha.10",
     "@jupyterlab/translation": "^3.3.0-alpha.10",
-    "@jupyterlab/ui-components": "^3.3.0-alpha.10",
-    "@lumino/disposable": "^1.4.3"
+    "@jupyterlab/ui-components": "^3.3.0-alpha.10"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
