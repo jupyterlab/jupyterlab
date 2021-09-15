@@ -483,7 +483,6 @@ export namespace NotebookTools {
       const model = this._model;
       const editorWidget = new CodeEditorWrapper({ model, factory });
       editorWidget.addClass('jp-InputArea-editor');
-      editorWidget.addClass('jp-InputArea-editor');
       editorWidget.editor.setOption('readOnly', true);
       layout.addWidget(prompt);
       layout.addWidget(editorWidget);
