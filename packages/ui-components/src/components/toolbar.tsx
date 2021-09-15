@@ -332,6 +332,9 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * Handle a DOM click event.
    */
   protected handleClick(event: Event): void {
+    // Stop propagating the click outside the toolbar
+    event.stopPropagation();
+
     // Clicking a label focuses the corresponding control
     // that is linked with `for` attribute, so let it be.
     if (event.target instanceof HTMLLabelElement) {

@@ -4,45 +4,53 @@
 |----------------------------------------------------------------------------*/
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ITranslator } from '@jupyterlab/translation';
 import { ToolbarButton } from '@jupyterlab/ui-components';
-import { Panel } from '@lumino/widgets';
 import { viewBreakpointIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
+import { SourcePathComponent } from './sourcepath';
 import { SourcesBody } from './body';
-import { SourcesHeader } from './header';
+import { ReactWidget } from '@jupyterlab/ui-components';
+import React from 'react';
+import { PanelWithToolbar } from '../panelwithtoolbar';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
  */
-export class Sources extends Panel {
+export class Sources extends PanelWithToolbar {
   /**
    * Instantiate a new Sources preview Panel.
    *
    * @param options The Sources instantiation options.
    */
   constructor(options: Sources.IOptions) {
-    super();
+    super(options);
     const { model, service, editorServices } = options;
-    const translator = options.translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
+    this.title.label = this.trans.__('Source');
 
-    const header = new SourcesHeader(model, translator);
+    this.toolbar.addClass('jp-DebuggerSources-header');
     const body = new SourcesBody({
       service,
       model,
       editorServices
     });
-    header.toolbar.addItem(
+    this.toolbar.addItem(
       'open',
       new ToolbarButton({
         icon: viewBreakpointIcon,
         onClick: (): void => model.open(),
-        tooltip: trans.__('Open in the Main Area')
+        tooltip: this.trans.__('Open in the Main Area')
       })
     );
-    this.addWidget(header);
+    const sourcePath = ReactWidget.create(
+      <SourcePathComponent model={model} />
+    );
+
+    this.toolbar.addItem('sourcePath', sourcePath);
+    this.addClass('jp-DebuggerSources-header');
+
     this.addWidget(body);
+    this.addClass('jp-DebuggerSources');
   }
 }
 
