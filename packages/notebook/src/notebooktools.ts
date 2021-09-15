@@ -464,7 +464,6 @@ export namespace NotebookTools {
       if (!activeCell) {
         const cell = new Widget();
         cell.addClass('jp-InputArea-editor');
-        cell.addClass('jp-InputArea-editor');
         layout.addWidget(cell);
         this._cellModel = null;
         return;
