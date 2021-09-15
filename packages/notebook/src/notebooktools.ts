@@ -464,7 +464,6 @@ export namespace NotebookTools {
       if (!activeCell) {
         const cell = new Widget();
         cell.addClass('jp-InputArea-editor');
-        cell.addClass('jp-InputArea-editor');
         layout.addWidget(cell);
         this._cellModel = null;
         return;
@@ -483,7 +482,6 @@ export namespace NotebookTools {
 
       const model = this._model;
       const editorWidget = new CodeEditorWrapper({ model, factory });
-      editorWidget.addClass('jp-InputArea-editor');
       editorWidget.addClass('jp-InputArea-editor');
       editorWidget.editor.setOption('readOnly', true);
       layout.addWidget(prompt);
