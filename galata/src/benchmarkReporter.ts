@@ -178,6 +178,8 @@ class BenchmarkReporter implements Reporter {
    *   comparison: Logic of test comparisons: 'snapshot' or 'project'
    *    - 'snapshot': (default) This will compare the 'actual' result with the 'expected' one
    *    - 'project': This will compare the different project
+   *   graphConfigFactory: Function to create  VegaLite configuration from test records.
+   *   mdTableFactory: Function to create  markdown table from test records.
    */
   constructor(
     options: {
@@ -343,10 +345,21 @@ class BenchmarkReporter implements Reporter {
     }
   }
 
-  protected defaultBuildMarkdownTable(allData: IReportRecord[]): Array<string> {
+  /**
+   * Default markdown table builder of `BenchmarkReporter`, this method will
+   * be used by to generate markdown report. Users can customize the builder
+   * by supplying another builder to constructor's option or override this
+   * method on a sub-class.
+   *
+   * @param {Array<IReportRecord>} allData: all test records.
+   * @return {Array<string>} an array of markdown strings.
+   */
+  protected defaultBuildMarkdownTable(
+    allData: Array<IReportRecord>
+  ): Array<string> {
     // Compute statistics
     // - Groupby (test, browser, reference, file)
-    
+
     const groups = new Map<
       string,
       Map<string, Map<string, Map<string, number[]>>>
@@ -429,11 +442,20 @@ class BenchmarkReporter implements Reporter {
     return reportContent;
   }
 
+  /**
+   * Default graph builder of `BenchmarkReporter`, this method will
+   * be used by to generate VegaLite configuration. Users can customize
+   * the builder by supplying another builder to constructor's option or
+   * override this method on a sub-class.
+   * @param {Array<IReportRecord>} allData: all test records.
+   * @param {('snapshot' | 'project')} comparison: logic of test comparisons:
+   * 'snapshot' or 'project'.
+   * @return {*}  {Record<string, any>} :  VegaLite configuration
+   */
   protected defaultBuildReportGraphConfig(
-    allData: IReportRecord[],
+    allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project'
   ): Record<string, any> {
-
     const config = generateVegaLiteSpec(
       [...new Set(allData.map(d => d.test))],
       comparison == 'snapshot' ? 'reference' : 'project',
@@ -500,10 +522,10 @@ class BenchmarkReporter implements Reporter {
   private _reference: string;
   private _report: IReportRecord[];
   private _buildReportGraphConfig: (
-    allData: IReportRecord[],
+    allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project'
   ) => Record<string, any>;
-  private _buildMarkdownTable: (allData: IReportRecord[]) => Array<string>;
+  private _buildMarkdownTable: (allData: Array<IReportRecord>) => Array<string>;
 }
 
 export default BenchmarkReporter;

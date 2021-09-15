@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import { TestResult } from '@playwright/test/reporter';
@@ -72,7 +75,7 @@ function createReporter(options?: {
 }
 
 test.describe('BenchmarkReporter', () => {
-  test('should generate report with default builder', async () => {
+  test('should generate report with default builders', async () => {
     const reporter = createReporter({
       outputFile: 'test.json',
       comparison: 'snapshot'
@@ -91,7 +94,7 @@ test.describe('BenchmarkReporter', () => {
     expect(pngData).toMatchSnapshot('test.png');
   });
 
-  test('should generate report with user defined builder', async () => {
+  test('should generate report with user defined builders', async () => {
     const reporter = createReporter({
       outputFile: 'test.json',
       comparison: 'snapshot',
