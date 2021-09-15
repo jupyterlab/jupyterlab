@@ -129,7 +129,7 @@ export class Completer extends Widget {
   /**
    * Dispose of the resources held by the completer widget.
    */
-  dispose() {
+  dispose(): void {
     this._model = null;
     super.dispose();
   }

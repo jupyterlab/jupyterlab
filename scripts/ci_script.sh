@@ -48,35 +48,6 @@ if [[ $GROUP == docs ]]; then
     popd
 fi
 
-if [[ $GROUP == linkcheck ]]; then
-    # Run the link check using the jupyter-releaser CLI
-
-    # Set up caching
-    CACHE_DIR="${HOME}/.cache/pytest-link-check"
-    mkdir -p ${CACHE_DIR}
-    echo "Existing cache:"
-    ls -ltr ${CACHE_DIR}
-
-    # Set up env variables for releaser
-    export RH_CACHE_FILE=${CACHE_DIR}/cache
-    # Expire links after a week
-    export RH_LINKS_EXPIRE=604800
-
-    # Handle the branch
-    if [ ! -z ${GITHUB_BASE_REF} ]; then
-      echo "Using GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
-      export RH_BRANCH=${GITHUB_BASE_REF}
-    else
-      # e.g refs/head/foo or refs/tag/bar
-      echo "Using GITHUB_REF: ${GITHUB_REF}"
-      export RH_BRANCH=$(echo ${GITHUB_REF} | cut -d'/' -f 3)
-    fi
-
-    pip install jupyter_releaser
-    jupyter-releaser prep-git
-    jupyter-releaser check-links
-fi
-
 
 if [[ $GROUP == integrity ]]; then
     # Run the integrity script first
@@ -93,7 +64,9 @@ fi
 
 if [[ $GROUP == lint ]]; then
     # Lint our files.
-    jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
+    jlpm run prettier:check || (echo 'Please run `jlpm run prettier` locally and push changes' && exit 1)
+    jlpm run eslint:check || (echo 'Please run `jlpm run eslint` locally and push changes' && exit 1)
+    jlpm run eslint:check:typed || (echo echo 'Please run `jlpm run eslint:typed` locally and push changes' && exit 1)
 fi
 
 
@@ -143,12 +116,14 @@ if [[ $GROUP == integrity3 ]]; then
     jlpm bumpversion release --force # switch to beta
     jlpm bumpversion release --force # switch to rc
     jlpm bumpversion build --force
+    jlpm bumpversion next --force
     VERSION=$(python setup.py --version)
-    if [[ $VERSION != *rc1 ]]; then exit 1; fi
+    if [[ $VERSION != *rc2 ]]; then exit 1; fi
 
     # make sure we can patch release
     jlpm bumpversion release --force  # switch to final
     jlpm bumpversion patch --force
+    jlpm bumpversion next --force
 
     # make sure we can bump major JS releases
     jlpm bumpversion minor --force

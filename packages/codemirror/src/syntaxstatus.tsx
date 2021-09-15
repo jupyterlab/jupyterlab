@@ -1,4 +1,3 @@
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import {
@@ -8,6 +7,7 @@ import {
   TextItem
 } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu } from '@lumino/widgets';
@@ -69,7 +69,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
   /**
    * Render the status item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (!this.model) {
       return null;
     }

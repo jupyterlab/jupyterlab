@@ -50,7 +50,9 @@ export abstract class JupyterFrontEnd<
     // render context menu/submenus with inline svg icon tweaks
     this.contextMenu = new ContextMenuSvg({
       commands: this.commands,
-      renderer: options.contextMenuRenderer
+      renderer: options.contextMenuRenderer,
+      groupByTarget: false,
+      sortBySelector: false
     });
 
     // The default restored promise if one does not exist in the options.
@@ -289,7 +291,7 @@ export namespace JupyterFrontEnd {
    * @param path - Full URL of JupyterLab
    * @param paths - The current IPaths object hydrated from PageConfig.
    */
-  export function inDocMode(path: string, paths: IPaths) {
+  export function inDocMode(path: string, paths: IPaths): boolean {
     const docPattern = new RegExp(`^${paths.urls.doc}`);
     const match = path.match(docPattern);
     if (match) {

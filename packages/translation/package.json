@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation",
-  "version": "3.3.0-alpha.0",
+  "version": "3.3.0-alpha.10",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -32,7 +32,6 @@
     "docs": "typedoc src",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "eslint:check": "eslint . --ext .ts,.tsx",
-    "prepublishOnly": "npm run build",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
@@ -40,13 +39,13 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^5.3.0-alpha.0",
-    "@jupyterlab/services": "^6.3.0-alpha.0",
-    "@jupyterlab/statedb": "^3.3.0-alpha.0",
+    "@jupyterlab/coreutils": "^5.3.0-alpha.10",
+    "@jupyterlab/services": "^6.3.0-alpha.10",
+    "@jupyterlab/statedb": "^3.3.0-alpha.10",
     "@lumino/coreutils": "^1.5.3"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.3.0-alpha.0",
+    "@jupyterlab/testutils": "^3.3.0-alpha.10",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

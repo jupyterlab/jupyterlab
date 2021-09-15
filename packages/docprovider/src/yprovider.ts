@@ -112,11 +112,11 @@ export class WebSocketProviderWithLocks
     }
 
     const user = state.fetch(USER);
-    user.then(param => {
+    void user.then(param => {
       if (param === undefined) {
         name = getAnonymousUserName();
         color = '#' + getRandomColor().slice(1);
-        state.save(USER, { userName: name, userColor: color });
+        void state.save(USER, { userName: name, userColor: color });
       } else {
         const { userName, userColor } = param as JSONObject;
         name = userName as string;
@@ -195,7 +195,10 @@ export class WebSocketProviderWithLocks
     }
     this._sendMessage(new Uint8Array([127]));
     // try to acquire lock in regular interval
-    const intervalID = setInterval(() => {
+    if (this._requestLockInterval) {
+      clearInterval(this._requestLockInterval);
+    }
+    this._requestLockInterval = setInterval(() => {
       if (this.wsconnected) {
         // try to acquire lock
         this._sendMessage(new Uint8Array([127]));
@@ -207,10 +210,6 @@ export class WebSocketProviderWithLocks
       reject = _reject;
     });
     this._currentLockRequest = { promise, resolve, reject };
-    const _finally = () => {
-      clearInterval(intervalID);
-    };
-    promise.then(_finally, _finally);
     return promise;
   }
 
@@ -226,6 +225,9 @@ export class WebSocketProviderWithLocks
     encoding.writeUint32(encoder, lock);
     // releasing lock
     this._sendMessage(encoding.toUint8Array(encoder));
+    if (this._requestLockInterval) {
+      clearInterval(this._requestLockInterval);
+    }
   }
 
   /**
@@ -269,6 +271,7 @@ export class WebSocketProviderWithLocks
   private _contentType: string;
   private _serverUrl: string;
   private _isInitialized: boolean;
+  private _requestLockInterval: number;
   private _currentLockRequest: {
     promise: Promise<number>;
     resolve: (lock: number) => void;

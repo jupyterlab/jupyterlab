@@ -6,7 +6,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import { ModelDB } from '@jupyterlab/observables';
 import { acceptDialog } from '@jupyterlab/testutils';
 import { ArrayExt, toArray } from '@lumino/algorithm';
-import { NotebookModel } from '../src';
+import { NotebookModel } from '..';
 import * as utils from './utils';
 
 describe('@jupyterlab/notebook', () => {
@@ -137,7 +137,9 @@ describe('@jupyterlab/notebook', () => {
           const model = new NotebookModel();
           const cell = model.contentFactory.createCodeCell({});
           model.cells.push(cell);
-          cell.value.text = 'foo';
+          expect(() => {
+            cell.value.text = 'foo';
+          }).not.toThrow();
         });
 
         it('should emit the `contentChanged` signal', () => {

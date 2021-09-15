@@ -24,31 +24,13 @@
       "path": "../translation"
     },
     {
+      "path": "../ui-components"
+    },
+    {
       "path": "."
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docprovider"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statusbar"
-    },
-    {
-      "path": "../translation"
     }
   ]
 }

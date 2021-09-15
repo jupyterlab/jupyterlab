@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 import { Session } from '@jupyterlab/services';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { JSONArray, JSONExt } from '@lumino/coreutils';
 import React from 'react';
 import { interactiveItem, TextItem } from '..';
@@ -86,7 +87,7 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
   /**
    * Render the kernel status item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (this.model === null) {
       return null;
     } else {
@@ -140,14 +141,14 @@ export namespace KernelStatus {
     /**
      * The name of the kernel.
      */
-    get kernelName() {
+    get kernelName(): string {
       return this._kernelName;
     }
 
     /**
      * The current status of the kernel.
      */
-    get status() {
+    get status(): string | undefined {
       return this._kernelStatus
         ? this._statusNames[this._kernelStatus]
         : undefined;

@@ -11,7 +11,8 @@ import {
   IRouter,
   ITreePathUpdater,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  JupyterLab
 } from '@jupyterlab/application';
 import {
   Clipboard,
@@ -19,10 +20,9 @@ import {
   InputDialog,
   MainAreaWidget,
   showErrorMessage,
-  ToolbarButton,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import {
@@ -51,7 +51,8 @@ import {
   newFolderIcon,
   pasteIcon,
   stopIcon,
-  textEditorIcon
+  textEditorIcon,
+  ToolbarButton
 } from '@jupyterlab/ui-components';
 import { find, IIterator, map, reduce, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -138,7 +139,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     ICommandPalette
   ],
   autoStart: true,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     factory: IFileBrowserFactory,
     translator: ITranslator,
@@ -146,7 +147,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     treePathUpdater: ITreePathUpdater | null,
     commandPalette: ICommandPalette | null
-  ): void => {
+  ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const browser = factory.defaultBrowser;
     browser.node.setAttribute('role', 'region');
@@ -160,6 +161,12 @@ const browser: JupyterFrontEndPlugin<void> = {
     // responsible for their own restoration behavior, if any.
     if (restorer) {
       restorer.add(browser, namespace);
+    }
+
+    // Navigate to preferred-dir trait if found
+    const preferredPath = PageConfig.getOption('preferredPath');
+    if (preferredPath) {
+      await browser.model.cd(preferredPath);
     }
 
     addCommands(app, factory, translator, settingRegistry, commandPalette);
@@ -240,14 +247,20 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
   requires: [IDocumentManager, ITranslator],
-  optional: [IStateDB, IRouter, JupyterFrontEnd.ITreeResolver],
+  optional: [
+    IStateDB,
+    IRouter,
+    JupyterFrontEnd.ITreeResolver,
+    JupyterLab.IInfo
+  ],
   activate: async (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     translator: ITranslator,
     state: IStateDB | null,
     router: IRouter | null,
-    tree: JupyterFrontEnd.ITreeResolver | null
+    tree: JupyterFrontEnd.ITreeResolver | null,
+    info: JupyterLab.IInfo | null
   ): Promise<IFileBrowserFactory> => {
     const { commands } = app;
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
@@ -261,6 +274,12 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
         manager: docManager,
         driveName: options.driveName || '',
         refreshInterval: options.refreshInterval,
+        refreshStandby: () => {
+          if (info) {
+            return !info.isConnected || 'when-hidden';
+          }
+          return 'when-hidden';
+        },
         state:
           options.state === null
             ? undefined
@@ -476,13 +495,11 @@ const shareFile: JupyterFrontEndPlugin<void> = {
         }
 
         Clipboard.copyToSystem(
-          URLExt.normalize(
-            PageConfig.getUrl({
-              mode: 'single-document',
-              workspace: PageConfig.defaultWorkspace,
-              treePath: model.path
-            })
-          )
+          PageConfig.getUrl({
+            workspace: PageConfig.defaultWorkspace,
+            treePath: model.path,
+            toShare: true
+          })
         );
       },
       isVisible: () =>
@@ -526,17 +543,17 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
       // get the widget factories that could be used to open all of the items
       // in the current filebrowser selection
       const factories = tracker.currentWidget
-        ? Private.OpenWith.intersection<string>(
+        ? Private.OpenWith.intersection<DocumentRegistry.WidgetFactory>(
             map(tracker.currentWidget.selectedItems(), i => {
               return Private.OpenWith.getFactories(docRegistry, i);
             })
           )
-        : new Set<string>();
+        : new Set<DocumentRegistry.WidgetFactory>();
 
       // make new menu items from the widget factories
       factories.forEach(factory => {
         openWith.addItem({
-          args: { factory: factory },
+          args: { factory: factory.name, label: factory.label || factory.name },
           command: CommandIDs.open
         });
       });
@@ -1195,11 +1212,9 @@ namespace Private {
     export function getFactories(
       docRegistry: DocumentRegistry,
       item: Contents.IModel
-    ): Array<string> {
-      const factories = docRegistry
-        .preferredWidgetFactories(item.path)
-        .map(f => f.name);
-      const notebookFactory = docRegistry.getWidgetFactory('notebook')?.name;
+    ): Array<DocumentRegistry.WidgetFactory> {
+      const factories = docRegistry.preferredWidgetFactories(item.path);
+      const notebookFactory = docRegistry.getWidgetFactory('notebook');
       if (
         notebookFactory &&
         item.type === 'notebook' &&

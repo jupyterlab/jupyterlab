@@ -284,6 +284,7 @@ export abstract class ABCWidgetFactory<
   constructor(options: DocumentRegistry.IWidgetFactoryOptions<T>) {
     this._translator = options.translator || nullTranslator;
     this._name = options.name;
+    this._label = options.label || options.name;
     this._readOnly = options.readOnly === undefined ? false : options.readOnly;
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
     this._defaultRendered = (options.defaultRendered || []).slice();
@@ -329,10 +330,18 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The name of the widget to display in dialogs.
+   * A unique name identifying of the widget.
    */
   get name(): string {
     return this._name;
+  }
+
+  /**
+   * The label of the widget to display in dialogs.
+   * If not given, name is used instead.
+   */
+  get label(): string {
+    return this._label;
   }
 
   /**
@@ -443,6 +452,7 @@ export abstract class ABCWidgetFactory<
   private _isDisposed = false;
   private _translator: ITranslator;
   private _name: string;
+  private _label: string;
   private _readOnly: boolean;
   private _canStartKernel: boolean;
   private _shutdownOnClose: boolean;
@@ -570,6 +580,10 @@ export namespace DocumentWidget {
     U extends DocumentRegistry.IModel = DocumentRegistry.IModel
   > extends MainAreaWidget.IOptionsOptionalContent<T> {
     context: DocumentRegistry.IContext<U>;
+
+    /**
+     * The application language translator.
+     */
     translator?: ITranslator;
   }
 }

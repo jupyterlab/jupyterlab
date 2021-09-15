@@ -47,7 +47,7 @@ export class Popup extends Widget {
   /**
    * Attach the popup widget to the page.
    */
-  launch() {
+  launch(): void {
     this._setGeometry();
     Widget.attach(this, document.body);
     this.update();
@@ -91,7 +91,7 @@ export class Popup extends Widget {
   /**
    * Dispose of the widget.
    */
-  dispose() {
+  dispose(): void {
     super.dispose();
     this._anchor.removeClass(clickedItem);
     this._anchor.addClass(interactiveItem);

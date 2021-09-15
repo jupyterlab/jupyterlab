@@ -29,6 +29,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

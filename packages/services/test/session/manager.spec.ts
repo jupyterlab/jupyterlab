@@ -96,7 +96,7 @@ describe('session/manager', () => {
 
     describe('#ready', () => {
       it('should resolve when the manager is ready', async () => {
-        await manager.ready;
+        await expect(manager.ready).resolves.not.toThrow();
       });
     });
 
@@ -230,7 +230,7 @@ describe('session/manager', () => {
         const session1 = manager.connectTo({ model: session0.model });
         const emission = testEmission(session1.disposed);
         await session0.shutdown();
-        await emission;
+        await expect(emission).resolves.not.toThrow();
       });
     });
   });

@@ -156,11 +156,12 @@ describe('protocol', () => {
             threadId = msg.body.threadId;
             break;
           }
-          case 'stopped':
+          case 'stopped': {
             const msg = event as DebugProtocol.StoppedEvent;
             threadId = msg.body.threadId!;
             stoppedFuture.resolve();
             break;
+          }
           default:
             break;
         }

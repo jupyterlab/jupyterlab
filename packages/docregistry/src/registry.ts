@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, Toolbar } from '@jupyterlab/apputils';
+import { ISessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IChangedArgs as IChangedArgsGeneric,
@@ -25,6 +25,7 @@ import {
   pythonIcon,
   rKernelIcon,
   spreadsheetIcon,
+  Toolbar,
   yamlIcon
 } from '@jupyterlab/ui-components';
 import {
@@ -705,10 +706,8 @@ export namespace DocumentRegistry {
   /**
    * The item to be added to document toolbar.
    */
-  export interface IToolbarItem {
-    name: string;
-    widget: Widget;
-  }
+  export interface IToolbarItem extends ToolbarRegistry.IToolbarItem {}
+
   /**
    * The options used to create a document registry.
    */
@@ -990,9 +989,15 @@ export namespace DocumentRegistry {
    */
   export interface IWidgetFactoryOptions<T extends Widget = Widget> {
     /**
-     * The name of the widget to display in dialogs.
+     * A unique name identifying of the widget.
      */
     readonly name: string;
+
+    /**
+     * The label of the widget to display in dialogs.
+     * If not given, name is used instead.
+     */
+    readonly label?: string;
 
     /**
      * The file types the widget can view.
@@ -1516,7 +1521,7 @@ namespace Private {
   /**
    * Get the extension name of a path.
    *
-   * @param file - string.
+   * @param path - string.
    *
    * #### Notes
    * Dotted filenames (e.g. `".table.json"` are allowed).

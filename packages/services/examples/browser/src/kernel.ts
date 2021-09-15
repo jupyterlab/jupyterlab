@@ -5,7 +5,7 @@ import { KernelAPI, KernelManager, KernelMessage } from '@jupyterlab/services';
 
 import { log } from './log';
 
-export async function main() {
+export async function main(): Promise<void> {
   // Start a python kernel
   const kernelManager = new KernelManager();
   const kernel = await kernelManager.startNew({ name: 'python' });

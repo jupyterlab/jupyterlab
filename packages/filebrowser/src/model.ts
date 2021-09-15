@@ -103,7 +103,7 @@ export class FileBrowserModel implements IDisposable {
         backoff: true,
         max: 300 * 1000
       },
-      standby: 'when-hidden'
+      standby: options.refreshStandby || 'when-hidden'
     });
   }
 
@@ -696,6 +696,11 @@ export namespace FileBrowserModel {
     refreshInterval?: number;
 
     /**
+     * When the model stops polling the API. Defaults to `when-hidden`.
+     */
+    refreshStandby?: Poll.Standby | (() => boolean | Poll.Standby);
+
+    /**
      * An optional state database. If provided, the model will restore which
      * folder was last opened when it is restored.
      */
@@ -733,7 +738,7 @@ export class FilterFileBrowserModel extends FileBrowserModel {
     });
   }
 
-  setFilter(filter: (value: Contents.IModel) => boolean) {
+  setFilter(filter: (value: Contents.IModel) => boolean): void {
     this._filter = filter;
     void this.refresh();
   }

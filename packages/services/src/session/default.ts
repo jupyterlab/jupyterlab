@@ -334,7 +334,7 @@ export class SessionConnection implements Session.ISessionConnection {
   protected onKernelStatus(
     sender: Kernel.IKernelConnection,
     state: Kernel.Status
-  ) {
+  ): void {
     this._statusChanged.emit(state);
   }
 
@@ -344,7 +344,7 @@ export class SessionConnection implements Session.ISessionConnection {
   protected onKernelConnectionStatus(
     sender: Kernel.IKernelConnection,
     state: Kernel.ConnectionStatus
-  ) {
+  ): void {
     this._connectionStatusChanged.emit(state);
   }
 
@@ -361,7 +361,7 @@ export class SessionConnection implements Session.ISessionConnection {
   protected onIOPubMessage(
     sender: Kernel.IKernelConnection,
     msg: KernelMessage.IIOPubMessage
-  ) {
+  ): void {
     this._iopubMessage.emit(msg);
   }
 
@@ -371,7 +371,7 @@ export class SessionConnection implements Session.ISessionConnection {
   protected onUnhandledMessage(
     sender: Kernel.IKernelConnection,
     msg: KernelMessage.IMessage
-  ) {
+  ): void {
     this._unhandledMessage.emit(msg);
   }
 
@@ -381,7 +381,7 @@ export class SessionConnection implements Session.ISessionConnection {
   protected onAnyMessage(
     sender: Kernel.IKernelConnection,
     args: Kernel.IAnyMessageArgs
-  ) {
+  ): void {
     this._anyMessage.emit(args);
   }
 

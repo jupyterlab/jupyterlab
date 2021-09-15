@@ -48,7 +48,7 @@ export const SetupCommands = (
   palette: CommandPalette,
   nbWidget: NotebookPanel,
   handler: CompletionHandler
-) => {
+): void => {
   // Add commands.
   commands.addCommand(cmdIds.invoke, {
     label: 'Completer: Invoke',

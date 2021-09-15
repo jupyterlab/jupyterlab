@@ -227,7 +227,7 @@
       {
         "command": "filemenu:create-console",
         "selector": "[data-type=\"document-title\"].jp-mod-current",
-        "rank": 6
+        "rank": 10
       }
     ]
   },

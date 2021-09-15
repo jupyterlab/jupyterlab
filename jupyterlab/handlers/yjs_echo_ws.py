@@ -36,6 +36,11 @@ class YjsRoom:
 class YjsEchoWebSocket(WebSocketHandler):
     rooms = {}
 
+    # Override max_message size to 1GB
+    @property
+    def max_message_size(self):
+        return 1024 * 1024 * 1024
+
     def open(self, guid):
         #print("[YJSEchoWS]: open", guid)
         cls = self.__class__
@@ -56,17 +61,23 @@ class YjsEchoWebSocket(WebSocketHandler):
         room = cls.rooms.get(room_id)
         if message[0] == ServerMessageType.ACQUIRE_LOCK:
             now = int(time.time())
-            if room.lock is None or now - room.lock > 15: # no lock or timeout
+            if room.lock is None or now - room.lock > (10 * len(room.clients)) : # no lock or timeout
                 room.lock = now
+                room.lock_holder = self.id 
                 # print('Acquired new lock: ', room.lock)
                 # return acquired lock
                 self.write_message(bytes([ServerMessageType.ACQUIRE_LOCK]) + room.lock.to_bytes(4, byteorder = 'little'), binary=True)
+            
+            elif room.lock_holder == self.id :
+                room.lock = now
+
         elif message[0] == ServerMessageType.RELEASE_LOCK:
             releasedLock = int.from_bytes(message[1:], byteorder = 'little')
             # print("trying release lock: ", releasedLock)
             if room.lock == releasedLock:
                 # print('released lock: ', room.lock)
                 room.lock = None
+                room.lock_holder = None
         elif message[0] == ServerMessageType.REQUEST_INITIALIZED_CONTENT:
             # print("client requested initial content")
             self.write_message(bytes([ServerMessageType.REQUEST_INITIALIZED_CONTENT]) + room.content, binary=True)

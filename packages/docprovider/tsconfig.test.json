@@ -13,12 +13,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../shared-models"
-    },
-    {
-      "path": "../statedb"
     }
   ]
 }

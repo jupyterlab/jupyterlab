@@ -246,7 +246,10 @@ namespace Private {
   /**
    * Handle save errors.
    */
-  export function onSaveError(reason: any, translator?: ITranslator): void {
+  export function onSaveError(
+    reason: Dialog.IError,
+    translator?: ITranslator
+  ): void {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     console.error(`Saving setting editor value failed: ${reason.message}`);

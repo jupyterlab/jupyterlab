@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { TextItem } from '@jupyterlab/statusbar';
+import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { Title, Widget } from '@lumino/widgets';
 import React from 'react';
 import { IDocumentManager } from './tokens';
@@ -57,7 +57,7 @@ export class PathStatus extends VDomRenderer<PathStatus.Model> {
   /**
    * Render the status item.
    */
-  render() {
+  render(): JSX.Element {
     return (
       <PathStatusComponent
         fullPath={this.model!.path}

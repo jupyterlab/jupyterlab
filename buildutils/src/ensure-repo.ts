@@ -43,6 +43,7 @@ const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['path', 'webpack'],
   '@jupyterlab/builder': ['path'],
+  '@jupyterlab/galata': ['fs', 'path'],
   '@jupyterlab/testutils': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
@@ -83,8 +84,9 @@ const UNUSED: Dict<string[]> = {
     'webpack-cli',
     'worker-loader'
   ],
-  '@jupyterlab/buildutils': ['npm-cli-login', 'verdaccio'],
+  '@jupyterlab/buildutils': ['verdaccio'],
   '@jupyterlab/coreutils': ['path-browserify'],
+  '@jupyterlab/galata': ['node-fetch', 'http-server'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testutils': [
@@ -385,6 +387,9 @@ function ensureMetaPackage(): string[] {
     }
   });
 
+  // Add to build:all target
+  mpData.scripts['build:all'] = 'npm run build';
+
   // Write the files.
   if (messages.length > 0) {
     utils.writePackageData(mpJson, mpData);
@@ -521,6 +526,10 @@ function ensureJupyterlab(): string[] {
     );
     corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
   });
+
+  // Update the dev mode version.
+  const curr = utils.getPythonVersion();
+  corePackage.jupyterlab.version = curr;
 
   // Write the package.json back to disk.
   if (utils.writePackageData(corePath, corePackage)) {
@@ -720,12 +729,33 @@ export async function ensureIntegrity(): Promise<boolean> {
     .getCorePaths()
     .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
     .map(pth => {
-      return { path: './' + path.relative('.', pth) };
+      return { path: './' + path.relative('.', pth).replace('\\/g', '/') };
     });
   utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
 
   // Handle buildutils
   ensureBuildUtils();
+
+  // Handle the pyproject.toml file
+  const pyprojectPath = path.resolve('.', 'pyproject.toml');
+  const curr = utils.getPythonVersion();
+  let tag = 'latest';
+  if (!/\d+\.\d+\.\d+$/.test(curr)) {
+    tag = 'next';
+  }
+  const publishCommand = `npm publish --tag ${tag}`;
+  let pyprojectText = fs.readFileSync(pyprojectPath, { encoding: 'utf8' });
+  if (pyprojectText.indexOf(publishCommand) === -1) {
+    pyprojectText = pyprojectText.replace(
+      /npm publish --tag [a-z]+/,
+      publishCommand
+    );
+    fs.writeFileSync(pyprojectPath, pyprojectText, { encoding: 'utf8' });
+    if (!messages['top']) {
+      messages['top'] = [];
+    }
+    messages['top'].push('Update npm publish command in pyproject.toml');
+  }
 
   // Handle the JupyterLab application top package.
   pkgMessages = ensureJupyterlab();

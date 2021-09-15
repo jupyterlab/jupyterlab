@@ -260,7 +260,7 @@ export class AttachmentsModel implements IAttachmentsModel {
    * #### Notes
    * This will clear any existing data.
    */
-  fromJSON(values: nbformat.IAttachments) {
+  fromJSON(values: nbformat.IAttachments): void {
     this.clear();
     Object.keys(values).forEach(key => {
       if (values[key] !== undefined) {

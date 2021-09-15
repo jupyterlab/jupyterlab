@@ -1,47 +1,53 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IThemeManager, ToolbarButton } from '@jupyterlab/apputils';
-
+import { IThemeManager } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
-import { tableRowsIcon, treeViewIcon } from '@jupyterlab/ui-components';
-
+import {
+  tableRowsIcon,
+  ToolbarButton,
+  treeViewIcon
+} from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-
 import { Panel, Widget } from '@lumino/widgets';
-
 import { IDebugger } from '../../tokens';
-
+import { PanelWithToolbar } from '../panelwithtoolbar';
 import { VariablesBodyGrid } from './grid';
-
-import { VariablesHeader } from './header';
-
 import { ScopeSwitcher } from './scope';
-
 import { VariablesBodyTree } from './tree';
 
 /**
  * A Panel to show a variable explorer.
  */
-export class Variables extends Panel {
+export class Variables
+  extends PanelWithToolbar
+  implements IDebugger.IVariablesPanel {
   /**
    * Instantiate a new Variables Panel.
    *
    * @param options The instantiation options for a Variables Panel.
    */
   constructor(options: Variables.IOptions) {
-    super();
-
+    super(options);
     const { model, service, commands, themeManager } = options;
     const translator = options.translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    this._header = new VariablesHeader(translator);
-    this._tree = new VariablesBodyTree({ model, service });
-    this._table = new VariablesBodyGrid({ model, commands, themeManager });
+    this.title.label = this.trans.__('Variables');
+    this.toolbar.addClass('jp-DebuggerVariables-toolbar');
+    this._tree = new VariablesBodyTree({
+      model,
+      service,
+      commands,
+      translator
+    });
+    this._table = new VariablesBodyGrid({
+      model,
+      commands,
+      themeManager,
+      translator
+    });
     this._table.hide();
 
-    this._header.toolbar.addItem(
+    this.toolbar.addItem(
       'scope-switcher',
       new ScopeSwitcher({
         translator,
@@ -70,14 +76,14 @@ export class Variables extends Panel {
       icon: treeViewIcon,
       className: 'jp-TreeView',
       onClick: onViewChange,
-      tooltip: trans.__('Tree View')
+      tooltip: this.trans.__('Tree View')
     });
 
     const tableViewButton = new ToolbarButton({
       icon: tableRowsIcon,
       className: 'jp-TableView',
       onClick: onViewChange,
-      tooltip: trans.__('Table View')
+      tooltip: this.trans.__('Table View')
     });
 
     const markViewButtonSelection = (selectedView: string): void => {
@@ -92,16 +98,32 @@ export class Variables extends Panel {
       }
     };
 
-    markViewButtonSelection(this._table.isHidden ? 'tree' : 'table');
+    markViewButtonSelection(this.viewMode);
 
-    this._header.toolbar.addItem('view-VariableTreeView', treeViewButton);
+    this.toolbar.addItem('view-VariableTreeView', treeViewButton);
 
-    this._header.toolbar.addItem('view-VariableTableView', tableViewButton);
+    this.toolbar.addItem('view-VariableTableView', tableViewButton);
 
-    this.addWidget(this._header);
+    this.addWidget(this.toolbar);
     this.addWidget(this._tree);
     this.addWidget(this._table);
     this.addClass('jp-DebuggerVariables');
+  }
+
+  /**
+   * Latest variable selected.
+   */
+  get latestSelection(): IDebugger.IVariableSelection | null {
+    return this._table.isHidden
+      ? this._tree.latestSelection
+      : this._table.latestSelection;
+  }
+
+  /**
+   * Get the variable explorer view mode
+   */
+  get viewMode(): 'tree' | 'table' {
+    return this._table.isHidden ? 'tree' : 'table';
   }
 
   /**
@@ -128,11 +150,10 @@ export class Variables extends Panel {
    * @param msg The resize message.
    */
   private _resizeBody(msg: Widget.ResizeMessage): void {
-    const height = msg.height - this._header.node.offsetHeight;
+    const height = msg.height - this.toolbar.node.offsetHeight;
     this._tree.node.style.height = `${height}px`;
   }
 
-  private _header: VariablesHeader;
   private _tree: VariablesBodyTree;
   private _table: VariablesBodyGrid;
 }

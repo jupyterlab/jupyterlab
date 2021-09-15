@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/buildutils",
-  "version": "3.3.0-alpha.0",
+  "version": "3.3.0-alpha.10",
   "description": "JupyterLab - Build Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,8 +35,8 @@
   ],
   "scripts": {
     "build": "tsc",
+    "build:all": "npm run build",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "prepublishOnly": "npm run build",
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
@@ -48,9 +48,8 @@
     "dependency-graph": "^0.9.0",
     "fs-extra": "^9.0.1",
     "glob": "~7.1.6",
-    "inquirer": "^7.0.0",
+    "inquirer": "^7.1.0",
     "minimatch": "~3.0.4",
-    "npm-cli-login": "^0.1.1",
     "os": "~0.1.1",
     "package-json": "^6.5.0",
     "prettier": "~2.1.1",

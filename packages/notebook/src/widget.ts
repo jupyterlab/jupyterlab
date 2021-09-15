@@ -16,6 +16,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, each, findIndex } from '@lumino/algorithm';
 import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
@@ -146,6 +147,7 @@ export type NotebookMode = 'command' | 'edit';
 if ((window as any).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
+  // eslint-disable-next-line @typescript-eslint/ban-types
   (window as any).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {
@@ -183,6 +185,7 @@ export class StaticNotebook extends Widget {
     this.node.dataset[UNDOER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
     this.rendermime = options.rendermime;
+    this.translator = options.translator || nullTranslator;
     this.layout = new Private.NotebookPanelLayout();
     this.contentFactory =
       options.contentFactory || StaticNotebook.defaultContentFactory;
@@ -260,6 +263,11 @@ export class StaticNotebook extends Widget {
   readonly rendermime: IRenderMimeRegistry;
 
   /**
+   * Translator to be used by cell renderers
+   */
+  readonly translator: ITranslator;
+
+  /**
    * The model for the widget.
    */
   get model(): INotebookModel | null {
@@ -335,7 +343,7 @@ export class StaticNotebook extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
@@ -543,7 +551,8 @@ export class StaticNotebook extends Widget {
       this._observer &&
       insertType === 'push' &&
       this._renderedCellsCount >=
-        this.notebookConfig.numberCellsToRenderDirectly
+        this.notebookConfig.numberCellsToRenderDirectly &&
+      cell.type !== 'markdown'
     ) {
       // We have an observer and we are have been asked to push (not to insert).
       // and we are above the number of cells to render directly, then
@@ -581,9 +590,8 @@ export class StaticNotebook extends Widget {
       this._renderedCellsCount >=
         this.notebookConfig.numberCellsToRenderDirectly
     ) {
-      const index = this._renderedCellsCount;
-      const cell = this._cellsArray[index];
-      this._renderPlaceholderCell(cell, index);
+      const ci = this._toRenderMap.entries().next();
+      this._renderPlaceholderCell(ci.value[1].cell, ci.value[1].index);
     }
   }
 
@@ -611,6 +619,7 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false,
       placeholder: false,
+      translator: this.translator,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs
     };
     const cell = this.contentFactory.createCodeCell(options, this);
@@ -836,6 +845,11 @@ export namespace StaticNotebook {
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**
@@ -2512,7 +2526,9 @@ namespace Private {
    * #### Notes
    * This defaults the content factory to that in the `Notebook` namespace.
    */
-  export function processNotebookOptions(options: Notebook.IOptions) {
+  export function processNotebookOptions(
+    options: Notebook.IOptions
+  ): Notebook.IOptions {
     if (options.contentFactory) {
       return options;
     } else {

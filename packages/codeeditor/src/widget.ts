@@ -63,7 +63,7 @@ export class CodeEditorWrapper extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     if (this.isDisposed) {
       return;
     }

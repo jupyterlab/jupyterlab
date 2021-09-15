@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 // / <reference types="codemirror"/>
@@ -41,6 +42,7 @@ import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/selection/active-line';
 import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/addon/selection/selection-pointer';
+import 'codemirror/addon/edit/trailingspace.js';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
 import { CodemirrorBinding } from 'y-codemirror';
@@ -1602,6 +1604,9 @@ namespace Private {
       case 'codeFolding':
         (editor.setOption as any)('foldGutter', value);
         editor.setOption('gutters', getActiveGutters(config));
+        break;
+      case 'showTrailingSpace':
+        (editor.setOption as any)(option, value);
         break;
       default:
         (editor.setOption as any)(option, value);

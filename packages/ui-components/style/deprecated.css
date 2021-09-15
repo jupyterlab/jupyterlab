@@ -13,6 +13,7 @@
 
 :root {
   --jp-icon-add: url('icons/toolbar/add.svg');
+  --jp-icon-bug-dot: url('icons/toolbar/bug-dot.svg');
   --jp-icon-bug: url('icons/toolbar/bug.svg');
   --jp-icon-build: url('icons/sidebar/build.svg');
   --jp-icon-caret-down-empty-thin: url('icons/arrow/caret-down-empty-thin.svg');
@@ -97,6 +98,9 @@
 
 .jp-AddIcon {
   background-image: var(--jp-icon-add);
+}
+.jp-BugDotIcon {
+  background-image: var(--jp-icon-bug-dot);
 }
 .jp-BugIcon {
   background-image: var(--jp-icon-bug);

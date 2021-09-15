@@ -42,6 +42,7 @@ export class DocumentManager implements IDocumentManager {
     this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._docProviderFactory = options.docProviderFactory;
+    this._isConnectedCallback = options.isConnectedCallback || (() => true);
 
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
@@ -477,6 +478,7 @@ export class DocumentManager implements IDocumentManager {
     });
     const handler = new SaveHandler({
       context,
+      isConnectedCallback: this._isConnectedCallback,
       saveInterval: this.autosaveInterval
     });
     Private.saveHandlerProperty.set(context, handler);
@@ -602,6 +604,7 @@ export class DocumentManager implements IDocumentManager {
   private _dialogs: ISessionContext.IDialogs;
   private _docProviderFactory: IDocumentProviderFactory | undefined;
   private _collaborative: boolean;
+  private _isConnectedCallback: () => boolean;
 }
 
 /**
@@ -657,6 +660,12 @@ export namespace DocumentManager {
      * If true, the context will connect through yjs_ws_server to share information if possible.
      */
     collaborative?: boolean;
+
+    /**
+     * Autosaving should be paused while this callback function returns `false`.
+     * By default, it always returns `true`.
+     */
+    isConnectedCallback?: () => boolean;
   }
 
   /**

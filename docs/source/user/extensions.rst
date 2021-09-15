@@ -27,8 +27,44 @@ A JupyterLab extension contains JavaScript that is installed into Jupyterlab and
 
 JupyterLab extensions can be installed in a number of ways, including:
 
-- Python ``pip`` or ``conda`` packages can include either a source extension or a prebuilt extension. These packages may also include a server-side component necessary for the extension to function.
+- Python :ref:`pip <user_trove_classifiers>` or ``conda`` packages can include either a source extension or a prebuilt extension. These packages may also include a server-side component necessary for the extension to function.
 - The Extension Manager in JupyterLab and the ``jupyter labextension install`` command can install source extension packages from `npm <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__. Installing a source extension requires Node.js and a JupyterLab rebuild to activate. See :ref:`installing_nodejs` and :ref:`install_command`.
+
+.. _user_trove_classifiers:
+
+Browsing Extensions on PyPI
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Python Package Index (PyPI) is a repository of software for the Python
+programming language, and the default source of packages for the ``pip`` package
+manager. While a `simple text search <https://pypi.org/search/?q=jupyterlab&o=>`__
+will reveal hundreds of packages, a number of
+`trove classifiers <https://pypi.org/classifiers>`__ are available for packages
+to self-describe the features and compatibility provided:
+
+- `Framework :: Jupyter :: JupyterLab <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab>`__
+- `Framework :: Jupyter :: JupyterLab :: 1 <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+1>`__
+- `Framework :: Jupyter :: JupyterLab :: 2 <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+2>`__
+- `Framework :: Jupyter :: JupyterLab :: 3 <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+3>`__
+- `Framework :: Jupyter :: JupyterLab :: 4 <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+4>`__
+- `Framework :: Jupyter :: JupyterLab :: Extensions <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions>`__
+- `Framework :: Jupyter :: JupyterLab :: Extensions :: Mime Renderers <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Mime+Renderers>`__
+- `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt>`__
+- `Framework :: Jupyter :: JupyterLab :: Extensions :: Themes <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Themes>`__
+
+.. note::
+
+   These classifiers were accepted in early August 2021, and it will take some
+   time for them to be broadly adopted.
+
+   *You can help!* The proposal of classifiers to a packages's ``setup.py``,
+   ``setup.cfg``, or ``pyproject.toml`` can make a *great* first open source
+   :ref:`contribution <dev_trove_classifiers>`, as such contributions are:
+
+   - easy for *you*, often possible directly through a project's source code
+     website, e.g. GitHub or GitLab,
+   - easy for maintainers to review and merge, and
+   - can have a positive impact on the discoverability of the package
 
 .. _installing_nodejs:
 
@@ -42,7 +78,7 @@ JupyterLab and activate the extension. If you use ``conda`` with
 .. code:: bash
 
     conda install -c conda-forge nodejs
-    
+
 If you use ``conda`` with default Anaconda packages (i.e., you don't normally
 use ``conda-forge``), you should install Node.js from the Anaconda default
 channel with ``conda install nodejs`` instead.
@@ -58,7 +94,7 @@ Managing Extensions with ``jupyter labextension``
 -------------------------------------------------
 
 The ``jupyter labextension`` command enables you to install or uninstall
-source extensions from `npm <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__, list all installed extensions, or disable any extension. See the help with ``jupyter labextension --help``. 
+source extensions from `npm <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__, list all installed extensions, or disable any extension. See the help with ``jupyter labextension --help``.
 
 Installing and Uninstalling Source Extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -150,12 +186,12 @@ Extensions or individual plugins within an extension can be disabled by another 
 
 The priority order for determining whether an extension is enabled or disabled is as follows:
 
-- Presence of ``<jupyter_config_path>/labconfig/pageconfig.json`` file(s) with a ``disabledExtensions`` key that is a object with package names as keys and boolean values. 
+- Presence of ``<jupyter_config_path>/labconfig/pageconfig.json`` file(s) with a ``disabledExtensions`` key that is a object with package names as keys and boolean values.
 - (deprecated) Presence of ``disabledExtensions`` key in ``<lab_app_dir>/settings/pageconfig.json``.   This value is a list of extensions to disable, but is deprecated in favor of the layered configuration approach in the `labconfig` location(s).
 - Presence of ``disabledExtensions`` key in another JupyterLab extension's metadata that disables a given extension.  The key is ignored if that extension itself is disabled.
 
 When using the command line, you can target the ``--level`` of the config: ``user``, ``system``, or ``sys-prefix`` (default).
-      
+
 An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as follows:
 
 .. code:: json
@@ -178,7 +214,7 @@ The Extension Manager is in the :ref:`left sidebar <left-sidebar>`.
 
 .. figure:: images/extension_manager_default.png
    :align: center
-   :class: jp-screenshotls 
+   :class: jp-screenshotls
 
    **Figure:** The default view has three components: a search bar, an "Installed"
    section, and a "Discover" section.
@@ -214,7 +250,7 @@ but can not install it (no install button is available).
 
 
 To install an extension, you first have to explicitly acknowledge the disclaimer.
-Once done, this will remain across sessions and the user does not have to 
+Once done, this will remain across sessions and the user does not have to
 check it again.
 
 .. figure:: images/listings/disclaimer_checked.png
@@ -330,7 +366,7 @@ will be up to you to take these into account or not.
 Listings
 ^^^^^^^^
 
-When searching source extensions in the Extension Manager, JupyterLab displays the complete search result and 
+When searching source extensions in the Extension Manager, JupyterLab displays the complete search result and
 the user is free to install any source extension. This is the :ref:`default_mode`.
 
 To bring more security, you or your administrator can enable ``blocklists`` or ``allowlists``
@@ -350,7 +386,7 @@ mode. JupyterLab will check the extensions against the defined listings.
 
 
 The following details the behavior for the :ref:`blocklist_mode` and the :ref:`allowlist_mode`.
-The details to enable configure the listings can be read :ref:`listings_conf`. 
+The details to enable configure the listings can be read :ref:`listings_conf`.
 
 .. _default_mode:
 
@@ -366,8 +402,8 @@ Blocklist mode
 """"""""""""""
 
 Extensions can be freely downloaded without going through a vetting process.
-However, users can add malicious extensions to a blocklist. The extension manager 
-will show all extensions except for those that have 
+However, users can add malicious extensions to a blocklist. The extension manager
+will show all extensions except for those that have
 been explicitly added to the blocklist. Therefore, the extension manager
 does not allow you to install blocklisted extensions.
 
@@ -392,9 +428,9 @@ your mouse on the question mark icon to read the instructions.
 Allowlist mode
 """"""""""""""
 
-An allowlist maintains a set of approved extensions that users can freely 
-search and install. Extensions need to go through some sort of vetting process 
-before they are added to the allowlist. When using an allowlist, the extension manager 
+An allowlist maintains a set of approved extensions that users can freely
+search and install. Extensions need to go through some sort of vetting process
+before they are added to the allowlist. When using an allowlist, the extension manager
 will only show extensions that have been explicitly added to the allowlist.
 
 If you, or your administrator, has enabled the allowlist mode
@@ -402,8 +438,8 @@ JupyterLab will use the allowlist and only show extensions present
 in the allowlist. The other extensions will not be show in the search result.
 
 If you have installed an allowlisted extension and at some point
-in time that extension is removed from the allowlist, the extension entry 
-in the installed list will be highlighted in red. It is recommended that 
+in time that extension is removed from the allowlist, the extension entry
+in the installed list will be highlighted in red. It is recommended that
 you uninstall it. You can move your mouse on the question mark icon to
 read the instructions.
 
@@ -428,7 +464,7 @@ You or your administrator can use the following traits to define the listings lo
 For example, to set blocked extensions, launch the server with ``--LabServerApp.blocked_extensions_uris=http://example.com/blocklist.json`` where ``http://example.com/blocklist.json`` is a JSON file as described below.
 
 The details for the listings_request_options are listed
-on `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__  
+on `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__
 (for example, you could pass ``{'timeout': 10}`` to change the HTTP request timeout value).
 
 The listings are json files hosted on the URIs you have given.
@@ -456,7 +492,7 @@ This is an example of a blocklist file.
    }
 
 
-In the following allowed extensions ``@jupyterlab/*`` will allow 
+In the following allowed extensions ``@jupyterlab/*`` will allow
 all jupyterlab organization extensions.
 
 .. code:: json
@@ -472,5 +508,3 @@ all jupyterlab organization extensions.
        }
      ]
    }
-
-

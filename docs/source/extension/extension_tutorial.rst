@@ -897,7 +897,7 @@ Packaging your extension
 
 JupyterLab extensions for JupyterLab 3.0 can be distributed as Python
 packages. The cookiecutter template we used contains all of the Python
-packaging instructions in the ``setup.py`` file to wrap your extension in a
+packaging instructions in the ``pyproject.toml`` file to wrap your extension in a
 Python package. Before generating a package, we first need to install ``build``.
 
 .. code:: bash
@@ -917,9 +917,9 @@ To create a Python wheel package (``.whl``) in the ``dist/`` directory, do:
     python -m build
 
 Both of these commands will build the JavaScript into a bundle in the
-``jupyterlab_apod/static`` directory, which is then distributed with the
+``jupyterlab_apod/labextension/static`` directory, which is then distributed with the
 Python package. This bundle will include any necessary JavaScript dependencies
-as well. You may want to check in the ``jupyterlab_apod/static`` directory to
+as well. You may want to check in the ``jupyterlab_apod/labextension/static`` directory to
 retain a record of what JavaScript is distributed in your package, or you may
 want to keep this "build artifact" out of your source repository history.
 
@@ -965,6 +965,22 @@ You may want to also publish your extension as a JavaScript package to the
    for other extensions to use, you will need to publish your JavaScript
    package to npm so other extensions can depend on it and import and require
    your token.
+
+
+Automated Releases
+^^^^^^^^^^^^^^^^^^
+
+If you used the cookiecutter to bootstrap your extension, the repository should already
+be compatible with the `Jupyter Releaser <https://github.com/jupyter-server/jupyter_releaser>`_.
+
+The Jupyter Releaser provides a set of GitHub Actions Workflows to:
+
+- Generate a new entry in the Changelog
+- Draft a new release
+- Publish the release to ``PyPI`` and ``npm``
+
+For more information on how to run the release workflows,
+check out the documentation: https://github.com/jupyter-server/jupyter_releaser
 
 Learn more
 ----------

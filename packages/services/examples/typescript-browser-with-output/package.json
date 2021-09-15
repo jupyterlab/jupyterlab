@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-services-outputarea",
-  "version": "3.3.0-alpha.0",
+  "version": "3.3.0-alpha.10",
   "private": true,
   "sideEffects": [
     "style/*"
@@ -13,14 +13,13 @@
   ],
   "scripts": {
     "build": "tsc && webpack",
-    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "prepublishOnly": "npm run build"
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^5.3.0-alpha.0",
-    "@jupyterlab/outputarea": "^3.3.0-alpha.0",
-    "@jupyterlab/rendermime": "^3.3.0-alpha.0",
-    "@jupyterlab/services": "^6.3.0-alpha.0"
+    "@jupyterlab/coreutils": "^5.3.0-alpha.10",
+    "@jupyterlab/outputarea": "^3.3.0-alpha.10",
+    "@jupyterlab/rendermime": "^3.3.0-alpha.10",
+    "@jupyterlab/services": "^6.3.0-alpha.10"
   },
   "devDependencies": {
     "css-loader": "^5.0.1",

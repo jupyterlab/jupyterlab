@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/* global __webpack_init_sharing__ __webpack_share_scopes__ */
+
 // We copy some of the pageconfig parsing logic in @jupyterlab/coreutils
 // below, since this must run before any other files are loaded (including
 // @jupyterlab/coreutils).

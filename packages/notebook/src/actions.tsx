@@ -99,7 +99,7 @@ export class NotebookActions {
   }
 
   /**
-   * A signal that emits whenever a cell execution is scheduled.
+   * A signal that emits when one notebook's cells are all executed.
    */
   static get selectionExecuted(): ISignal<
     any,
@@ -129,16 +129,16 @@ export namespace NotebookActions {
   /**
    * Split the active cell into two or more cells.
    *
-   * @param widget - The target notebook widget.
+   * @param notebook The target notebook widget.
    *
    * #### Notes
    * It will preserve the existing mode.
    * The last cell will be activated if no selection is found.
    * If text was selected, the cell containing the selection will
-     be activated.
+   * be activated.
    * The existing selection will be cleared.
-   * The activated cell will have focus and the cursor will move
-     to the end of the cell.
+   * The activated cell will have focus and the cursor will
+   * remain in the initial position.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells will be created.
    * Both cells will have the same type as the original cell.
@@ -215,9 +215,6 @@ export namespace NotebookActions {
     notebook.activeCellIndex = index + clones.length - activeCellDelta;
     const focusedEditor = notebook.activeCell.editor;
     focusedEditor.focus();
-
-    // Move to the end of the cell that now contains the cursor
-    focusedEditor.setCursorPosition({ line: editor.lineCount, column: 0 });
 
     Private.handleState(notebook, state);
   }
@@ -1425,7 +1422,7 @@ export namespace NotebookActions {
    * There will always be one blank space after the header.
    * The cells will be unrendered.
    */
-  export function setMarkdownHeader(notebook: Notebook, level: number) {
+  export function setMarkdownHeader(notebook: Notebook, level: number): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -1737,10 +1734,14 @@ export namespace NotebookActions {
           'Selecting trust will re-render this notebook in a trusted state.'
         )}
         <br />
-        {trans.__(
-          'For more information, see the <a href="https://jupyter-server.readthedocs.io/en/stable/operators/security.html">%1</a>',
-          trans.__('Jupyter security documentation')
-        )}
+        {trans.__('For more information, see')}{' '}
+        <a
+          href="https://jupyter-server.readthedocs.io/en/stable/operators/security.html"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {trans.__('the Jupyter security documentation')}
+        </a>
       </p>
     );
 
@@ -1980,9 +1981,9 @@ namespace Private {
           }
           if (sessionContext.pendingInput) {
             void showDialog({
-              title: trans.__('Waiting on User Input'),
+              title: trans.__('Cell not executed due to pending input'),
               body: trans.__(
-                'Did not run selected cell because there is a cell waiting on input! Submit your input and try again.'
+                'The cell has not been executed to avoid kernel deadlock as there is another pending input! Submit your pending input and try again.'
               ),
               buttons: [Dialog.okButton({ label: trans.__('Ok') })]
             });
@@ -2241,7 +2242,7 @@ namespace Private {
   /**
    * Set the markdown header level of a cell.
    */
-  export function setMarkdownHeader(cell: ICellModel, level: number) {
+  export function setMarkdownHeader(cell: ICellModel, level: number): void {
     // Remove existing header or leading white space.
     let source = cell.value.text;
     const regex = /^(#+\s*)|^(\s*)/;

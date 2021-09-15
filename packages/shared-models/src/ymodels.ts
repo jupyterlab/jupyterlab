@@ -86,6 +86,7 @@ export class YDocument<T> implements models.ISharedDocument {
   public isDisposed = false;
   public ydoc = new Y.Doc();
   public source = this.ydoc.getText('source');
+  public ystate: Y.Map<any> = this.ydoc.getMap('state');
   public undoManager = new Y.UndoManager([this.source], {
     trackedOrigins: new Set([this])
   });
@@ -99,6 +100,15 @@ export class YFile
   constructor() {
     super();
     this.ysource.observe(this._modelObserver);
+    this.ystate.observe(this._onStateChanged);
+  }
+
+  /**
+   * Dispose of the resources.
+   */
+  dispose(): void {
+    this.ysource.unobserve(this._modelObserver);
+    this.ystate.unobserve(this._onStateChanged);
   }
 
   /**
@@ -108,6 +118,24 @@ export class YFile
     const changes: models.FileChange = {};
     changes.sourceChange = event.changes.delta as any;
     this._changed.emit(changes);
+  };
+
+  /**
+   * Handle a change to the ystate.
+   */
+  private _onStateChanged = (event: Y.YMapEvent<any>) => {
+    const stateChange: any = [];
+
+    event.keysChanged.forEach(key => {
+      const change = event.changes.keys.get(key);
+      stateChange.push({
+        name: key,
+        oldValue: change?.oldValue ? change!.oldValue : 0,
+        newValue: this.ystate.get(key)
+      });
+    });
+
+    this._changed.emit({ stateChange });
   };
 
   public static create(): YFile {
@@ -180,6 +208,36 @@ export class YNotebook
       }
       return this._ycellMapping.get(ycell) as YCellType;
     });
+
+    this.ystate.observe(this._onStateChanged);
+  }
+
+  get nbformat(): number {
+    return this.ystate.get('nbformat');
+  }
+
+  set nbformat(value: number) {
+    this.transact(() => {
+      this.ystate.set('nbformat', value);
+    }, false);
+  }
+
+  get nbformat_minor(): number {
+    return this.ystate.get('nbformatMinor');
+  }
+
+  set nbformat_minor(value: number) {
+    this.transact(() => {
+      this.ystate.set('nbformatMinor', value);
+    }, false);
+  }
+
+  /**
+   * Dispose of the resources.
+   */
+  dispose(): void {
+    this.ycells.unobserve(this._onYCellsChanged);
+    this.ystate.unobserve(this._onStateChanged);
   }
 
   /**
@@ -214,8 +272,7 @@ export class YNotebook
   insertCells(index: number, cells: YCellType[]): void {
     cells.forEach(cell => {
       this._ycellMapping.set(cell.ymodel, cell);
-      // cell.yawareness = this.yawareness;
-      // cell.yUndoManager = this.yUndoManager;
+      cell.undoManager = this.undoManager;
     });
     this.transact(() => {
       this.ycells.insert(
@@ -269,7 +326,7 @@ export class YNotebook
    */
   getMetadata(): nbformat.INotebookMetadata {
     const meta = this.ymeta.get('metadata');
-    return meta ? deepCopy(meta) : { orig_nbformat: 1 };
+    return meta ? deepCopy(meta) : { orig_nbformat: 4 };
   }
 
   /**
@@ -295,13 +352,6 @@ export class YNotebook
    */
   public static create(): models.ISharedNotebook {
     return new YNotebook();
-  }
-
-  /**
-   * Dispose of the resources.
-   */
-  dispose(): void {
-    this.ycells.unobserve(this._onYCellsChanged);
   }
 
   /**
@@ -351,6 +401,23 @@ export class YNotebook
     });
   };
 
+  /**
+   * Handle a change to the ystate.
+   */
+  private _onStateChanged = (event: Y.YMapEvent<any>) => {
+    const stateChange: any = [];
+    event.keysChanged.forEach(key => {
+      const change = event.changes.keys.get(key);
+      stateChange.push({
+        name: key,
+        oldValue: change?.oldValue ? change!.oldValue : 0,
+        newValue: this.ystate.get(key)
+      });
+    });
+
+    this._changed.emit({ stateChange });
+  };
+
   public ycells: Y.Array<Y.Map<any>> = this.ydoc.getArray('cells');
   public ymeta: Y.Map<any> = this.ydoc.getMap('meta');
   public ymodel: Y.Map<any> = this.ydoc.getMap('model');
@@ -358,8 +425,6 @@ export class YNotebook
     trackedOrigins: new Set([this])
   });
   private _ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
-  public nbformat_minor: number = nbformat.MINOR_VERSION;
-  public nbformat: number = nbformat.MAJOR_VERSION;
   public cells: YCellType[];
 }
 
@@ -429,6 +494,13 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    */
   get undoManager(): Y.UndoManager | null {
     return this.notebook ? this.notebook.undoManager : this._undoManager;
+  }
+
+  /**
+   * Set the undoManager when adding new cells.
+   */
+  set undoManager(undoManager: Y.UndoManager | null) {
+    this._undoManager = undoManager;
   }
 
   /**

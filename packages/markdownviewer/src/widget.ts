@@ -75,7 +75,7 @@ export class MarkdownViewer extends Widget {
   /**
    * Set URI fragment identifier.
    */
-  setFragment(fragment: string) {
+  setFragment(fragment: string): void {
     this._fragment = fragment;
     this.update();
   }
@@ -262,7 +262,7 @@ export namespace MarkdownViewer {
     lineWidth: number | null;
 
     /**
-     * Whether to hide the YALM front matter.
+     * Whether to hide the YAML front matter.
      */
     hideFrontMatter: boolean;
 
@@ -318,7 +318,7 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
     });
     const renderer = rendermime.createRenderer(MIMETYPE);
     const content = new MarkdownViewer({ context, renderer });
-    content.title.icon = this._fileType?.icon!;
+    content.title.icon = this._fileType?.icon;
     content.title.iconClass = this._fileType?.iconClass ?? '';
     content.title.iconLabel = this._fileType?.iconLabel ?? '';
     const widget = new MarkdownDocument({ content, context });
@@ -367,7 +367,7 @@ namespace Private {
   }
 
   /**
-   * Remove YALM front matter from source.
+   * Remove YAML front matter from source.
    */
   export function removeFrontMatter(source: string): string {
     const re = /^---\n[^]*?\n(---|...)\n/;

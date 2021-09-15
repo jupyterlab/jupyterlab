@@ -116,8 +116,6 @@ export interface IKernelConnection extends IObservableDisposable {
    * #### Notes
    * This is a guard to avoid deadlock is the user asks input
    * as second time before submitting his first input
-   *
-   * See https://github.com/jupyterlab/jupyterlab/issues/8632
    */
   hasPendingInput: boolean;
 
@@ -466,6 +464,11 @@ export interface IKernelConnection extends IObservableDisposable {
     msgId: string,
     hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
   ): void;
+
+  /**
+   * Remove the input guard, if any.
+   */
+  removeInputGuard(): void;
 
   /**
    * A signal emitted when the kernel status changes.

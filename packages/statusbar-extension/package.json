@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/statusbar-extension",
-  "version": "3.3.0-alpha.0",
+  "version": "3.3.0-alpha.10",
   "description": "JupyterLab - Statusbar Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,23 +33,22 @@
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.3.0-alpha.0",
-    "@jupyterlab/apputils": "^3.3.0-alpha.0",
-    "@jupyterlab/cells": "^3.3.0-alpha.0",
-    "@jupyterlab/console": "^3.3.0-alpha.0",
-    "@jupyterlab/docregistry": "^3.3.0-alpha.0",
-    "@jupyterlab/fileeditor": "^3.3.0-alpha.0",
-    "@jupyterlab/notebook": "^3.3.0-alpha.0",
-    "@jupyterlab/settingregistry": "^3.3.0-alpha.0",
-    "@jupyterlab/statusbar": "^3.3.0-alpha.0",
-    "@jupyterlab/translation": "^3.3.0-alpha.0",
-    "@jupyterlab/ui-components": "^3.3.0-alpha.0",
+    "@jupyterlab/application": "^3.3.0-alpha.10",
+    "@jupyterlab/apputils": "^3.3.0-alpha.10",
+    "@jupyterlab/cells": "^3.3.0-alpha.10",
+    "@jupyterlab/console": "^3.3.0-alpha.10",
+    "@jupyterlab/docregistry": "^3.3.0-alpha.10",
+    "@jupyterlab/fileeditor": "^3.3.0-alpha.10",
+    "@jupyterlab/notebook": "^3.3.0-alpha.10",
+    "@jupyterlab/settingregistry": "^3.3.0-alpha.10",
+    "@jupyterlab/statusbar": "^3.3.0-alpha.10",
+    "@jupyterlab/translation": "^3.3.0-alpha.10",
+    "@jupyterlab/ui-components": "^3.3.0-alpha.10",
     "@lumino/commands": "^1.12.0",
-    "@lumino/widgets": "^1.19.0"
+    "@lumino/widgets": "^1.26.0"
   },
   "devDependencies": {
     "@types/react": "^17.0.0",

@@ -63,7 +63,7 @@ class TOCTree extends React.Component<IProperties, IState> {
   /**
    * Renders a table of contents tree.
    */
-  render() {
+  render(): JSX.Element {
     const Toolbar = this.props.toolbar;
 
     // Map the heading objects onto a list of JSX elements...

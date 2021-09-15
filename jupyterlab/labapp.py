@@ -538,7 +538,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     )
     flags['expose-app-in-browser'] = (
         {'LabApp': {'expose_app_in_browser': True}},
-        "Expose the global app instance to browser via window.jupyterlab."
+        """Expose the global app instance to browser via window.jupyterapp. 
+        It is also available via the deprecated window.jupyterlab name."""
     )
     flags['extensions-in-dev-mode'] = (
         {'LabApp': {'extensions_in_dev_mode': True}},

@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactWidget } from '@jupyterlab/apputils';
 import { Contents } from '@jupyterlab/services';
-import { InputGroup } from '@jupyterlab/ui-components';
+import { InputGroup, ReactWidget } from '@jupyterlab/ui-components';
 import { StringExt } from '@lumino/algorithm';
 import React, { useEffect, useState } from 'react';
 import { DirListing } from './listing';
@@ -138,7 +137,7 @@ const FilterBox = (props: IFilterBoxProps) => {
 /**
  * A widget which hosts a input textbox to filter on file names.
  */
-export const FilenameSearcher = (props: IFilterBoxProps) => {
+export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
   return ReactWidget.create(
     <FilterBox
       listing={props.listing}

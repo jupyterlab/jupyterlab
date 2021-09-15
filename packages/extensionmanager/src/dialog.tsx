@@ -15,7 +15,7 @@ export function reportInstallError(
   name: string,
   errorMessage?: string,
   translator?: ITranslator
-) {
+): void {
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
   const entries = [];

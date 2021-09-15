@@ -401,17 +401,17 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * A signal emitted when the kernel status changes, proxied from the kernel.
-   */
-  get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
-    return this._connectionStatusChanged;
-  }
-
-  /**
    * A flag indicating if the session has ending input, proxied from the kernel.
    */
   get pendingInput(): boolean {
     return this._pendingInput;
+  }
+
+  /**
+   * A signal emitted when the kernel status changes, proxied from the kernel.
+   */
+  get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
+    return this._connectionStatusChanged;
   }
 
   /**
@@ -967,7 +967,6 @@ export class SessionContext implements ISessionContext {
     }
     const body = (
       <div>
-        <pre>{err.message}</pre>
         {message && <pre>{message}</pre>}
         {traceback && (
           <details className="jp-mod-wide">
@@ -1087,6 +1086,9 @@ export class SessionContext implements ISessionContext {
     sender: Session.ISessionConnection,
     message: KernelMessage.IIOPubMessage
   ): void {
+    if (message.header.msg_type === 'shutdown_reply') {
+      this.session!.kernel!.removeInputGuard();
+    }
     this._iopubMessage.emit(message);
   }
 
@@ -1251,7 +1253,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
 
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
-      body: new Private.KernelSelector(sessionContext),
+      body: new Private.KernelSelector(sessionContext, translator),
       buttons
     });
 
@@ -1332,8 +1334,8 @@ namespace Private {
     /**
      * Create a new kernel selector widget.
      */
-    constructor(sessionContext: ISessionContext) {
-      super({ node: createSelectorNode(sessionContext) });
+    constructor(sessionContext: ISessionContext, translator?: ITranslator) {
+      super({ node: createSelectorNode(sessionContext, translator) });
     }
 
     /**
@@ -1510,7 +1512,7 @@ namespace Private {
     }
 
     // Add an option for no kernel
-    node.appendChild(optionForNone());
+    node.appendChild(optionForNone(translator));
 
     const other = document.createElement('optgroup');
     other.label = trans.__('Start Other Kernel');

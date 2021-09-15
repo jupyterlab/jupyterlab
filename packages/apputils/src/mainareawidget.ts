@@ -2,12 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { Spinner, Toolbar } from '@jupyterlab/ui-components';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
 import { DOMUtils } from './domutils';
 import { Printing } from './printing';
-import { Spinner } from './spinner';
-import { Toolbar } from './toolbar';
 
 /**
  * A widget meant to be contained in the JupyterLab main area.
@@ -88,6 +87,7 @@ export class MainAreaWidget<T extends Widget = Widget>
         .catch(e => {
           // Show a revealed promise error.
           const error = new Widget();
+          error.addClass('jp-MainAreaWidget-error');
           // Show the error to the user.
           const pre = document.createElement('pre');
           pre.textContent = String(e);

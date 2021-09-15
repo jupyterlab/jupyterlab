@@ -33,6 +33,12 @@ import {
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import {
+  fastForwardIcon,
+  refreshIcon,
+  runIcon,
+  stopIcon
+} from '@jupyterlab/ui-components';
 import { each, find } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -385,10 +391,23 @@ export function createFileMenu(
           Dialog.cancelButton(),
           Dialog.warnButton({ label: trans.__('Shut Down') })
         ]
-      }).then(result => {
+      }).then(async result => {
         if (result.button.accept) {
           const setting = ServerConnection.makeSettings();
           const apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
+
+          // Shutdown all kernel and terminal sessions before shutting down the server
+          // If this fails, we continue execution so we can post an api/shutdown request
+          try {
+            await Promise.all([
+              app.serviceManager.sessions.shutdownAll(),
+              app.serviceManager.terminals.shutdownAll()
+            ]);
+          } catch (e) {
+            // Do nothing
+            console.log(`Failed to shutdown sessions and terminals: ${e}`);
+          }
+
           return ServerConnection.makeRequest(
             apiURL,
             { method: 'POST' },
@@ -450,6 +469,8 @@ export function createKernelMenu(
 
   commands.addCommand(CommandIDs.interruptKernel, {
     label: trans.__('Interrupt Kernel'),
+    caption: trans.__('Interrupt the kernel'),
+    icon: args => (args.toolbar ? stopIcon : undefined),
     isEnabled: Private.delegateEnabled(
       app,
       menu.kernelUsers,
@@ -470,6 +491,8 @@ export function createKernelMenu(
 
   commands.addCommand(CommandIDs.restartKernel, {
     label: trans.__('Restart Kernel…'),
+    caption: trans.__('Restart the kernel'),
+    icon: args => (args.toolbar ? refreshIcon : undefined),
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'restartKernel'),
     execute: Private.delegateExecute(app, menu.kernelUsers, 'restartKernel')
   });
@@ -621,6 +644,16 @@ export function createRunMenu(
       const enabled = Private.delegateEnabled(app, menu.codeRunners, 'run')();
       return enabled ? localizedLabel : trans.__('Run Selected');
     },
+    caption: () => {
+      const localizedCaption = Private.delegateLabel(
+        app,
+        menu.codeRunners,
+        'runCaption'
+      );
+      const enabled = Private.delegateEnabled(app, menu.codeRunners, 'run')();
+      return enabled ? localizedCaption : trans.__('Run Selected');
+    },
+    icon: args => (args.toolbar ? runIcon : undefined),
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'run'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'run')
   });
@@ -642,6 +675,22 @@ export function createRunMenu(
       }
       return localizedLabel;
     },
+    caption: () => {
+      let localizedCaption = trans.__('Run All');
+      const enabled = Private.delegateEnabled(
+        app,
+        menu.codeRunners,
+        'runAll'
+      )();
+      if (enabled) {
+        localizedCaption = Private.delegateLabel(
+          app,
+          menu.codeRunners,
+          'runAllCaption'
+        );
+      }
+      return localizedCaption;
+    },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
   });
@@ -662,6 +711,23 @@ export function createRunMenu(
       }
       return localizedLabel;
     },
+    caption: () => {
+      let localizedCaption = trans.__('Restart Kernel and Run All');
+      const enabled = Private.delegateEnabled(
+        app,
+        menu.codeRunners,
+        'restartAndRunAll'
+      )();
+      if (enabled) {
+        localizedCaption = Private.delegateLabel(
+          app,
+          menu.codeRunners,
+          'restartAndRunAllLabel'
+        );
+      }
+      return localizedCaption;
+    },
+    icon: args => (args.toolbar ? fastForwardIcon : undefined),
     isEnabled: Private.delegateEnabled(
       app,
       menu.codeRunners,
@@ -786,7 +852,7 @@ namespace Private {
       ? find(s, value => value.tracker.has(widget!))
       : undefined;
 
-    if (!extender) {
+    if (!extender || !extender[label]) {
       return '';
     } else {
       const count: number = extender.tracker.size;
@@ -932,9 +998,11 @@ namespace Private {
 
         const defaults = canonical.properties?.menus?.default ?? [];
         const user = {
+          ...plugin.data.user,
           menus: plugin.data.user.menus ?? []
         };
         const composite = {
+          ...plugin.data.composite,
           menus: SettingRegistry.reconcileMenus(
             defaults as ISettingRegistry.IMenu[],
             user.menus as ISettingRegistry.IMenu[]
