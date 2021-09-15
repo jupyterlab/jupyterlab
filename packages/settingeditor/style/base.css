@@ -306,6 +306,7 @@
   background-color: var(--jp-brand-color2);
   height: 91px;
   float: left;
+  margin-left: -10px;
 }
 
 #setting-editor .jp-SettingsEditor {

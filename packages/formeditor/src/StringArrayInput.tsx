@@ -117,8 +117,13 @@ export function ArrayListItem({
               }
               if (e.code === 'Escape') {
                 onCancel?.();
+                setValue(defaultValue);
                 return;
               }
+            }}
+            onChange={event => {
+              const newValue = event.target.value;
+              setValue(newValue);
             }}
           />
         ) : (
@@ -133,8 +138,13 @@ export function ArrayListItem({
               }
               if (e.code === 'Escape') {
                 onCancel?.();
+                setValue(defaultValue);
                 return;
               }
+            }}
+            onChange={event => {
+              const newValue = event.target.value;
+              setValue(newValue);
             }}
           />
         )}
@@ -149,6 +159,7 @@ export function ArrayListItem({
           <button
             onClick={() => {
               onCancel?.();
+              setValue(defaultValue);
             }}
           >
             Cancel
@@ -205,6 +216,10 @@ export function ArrayInput({ placeholder, onChange, values, label }: IProps) {
     },
     [items, setItems]
   );
+
+  React.useEffect(() => {
+    setItems(values ?? []);
+  }, [values]);
 
   return (
     <div className="jp-metadataEditor-formInput">
