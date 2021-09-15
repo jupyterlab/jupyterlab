@@ -20,8 +20,7 @@ import { PluginEditor } from './plugineditor';
 import { PluginList } from './pluginlist';
 import { SettingsPanel } from './settingspanel';
 import { SplitPanel } from './splitpanel';
-import { jupyterIcon, Switch } from '@jupyterlab/ui-components';
-import ReactDOM from 'react-dom';
+import { Switch } from '@jupyterlab/ui-components';
 
 /**
  * The ratio panes in the setting editor.
@@ -57,7 +56,6 @@ export class SettingEditor extends Widget {
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
     }));
-    const instructions = (this._instructions = new Widget());
 
     /**
      * Initializes the settings panel after loading the schema for all plugins.
@@ -118,9 +116,6 @@ export class SettingEditor extends Widget {
       if (newSettings) {
         editor.settings = newSettings;
       }
-      if (instructions.isAttached) {
-        instructions.parent = null;
-      }
       if (this._isRawEditor) {
         this._editor.show();
         this._settingsPanel.hide();
@@ -137,9 +132,6 @@ export class SettingEditor extends Widget {
     }));
     const when = options.when;
 
-    instructions.addClass('jp-SettingEditorInstructions');
-    Private.populateInstructionsNode(instructions.node, this.translator);
-
     if (when) {
       this._when = Array.isArray(when) ? Promise.all(when) : when;
     }
@@ -147,14 +139,10 @@ export class SettingEditor extends Widget {
     panel.addClass('jp-SettingEditor-main');
     layout.addWidget(panel);
     panel.addWidget(list);
-    if (list.selection === '') {
-      panel.addWidget(instructions);
-    }
     panel.addWidget(editor);
     editor.hide();
 
     SplitPanel.setStretch(list, 0);
-    SplitPanel.setStretch(instructions, 1);
     SplitPanel.setStretch(editor, 1);
 
     editor.stateChanged.connect(this._onStateChanged, this);
@@ -241,7 +229,6 @@ export class SettingEditor extends Widget {
 
     super.dispose();
     this._editor.dispose();
-    this._instructions.dispose();
     this._list.dispose();
     this._panel.dispose();
   }
@@ -400,7 +387,6 @@ export class SettingEditor extends Widget {
   private _settingsPanel: ReactWidget;
   private _isRawEditor: boolean = false;
   private _settings: Settings[];
-  private _instructions: Widget;
   private _fetching: Promise<void> | null = null;
   private _list: PluginList;
   private _panel: SplitPanel;
@@ -505,37 +491,6 @@ export namespace SettingEditor {
  * A namespace for private module data.
  */
 namespace Private {
-  /**
-   * Populate the instructions text node.
-   */
-  export function populateInstructionsNode(
-    node: HTMLElement,
-    translator?: ITranslator
-  ): void {
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    ReactDOM.render(
-      <React.Fragment>
-        <h2>
-          <jupyterIcon.react
-            className="jp-SettingEditorInstructions-icon"
-            tag="span"
-            elementPosition="center"
-            height="auto"
-            width="60px"
-          />
-          <span className="jp-SettingEditorInstructions-title">Settings</span>
-        </h2>
-        <span className="jp-SettingEditorInstructions-text">
-          {trans.__(
-            'Select a plugin from the list to view and edit its preferences.'
-          )}
-        </span>
-      </React.Fragment>,
-      node
-    );
-  }
-
   /**
    * Return a normalized restored layout state that defaults to the presets.
    */

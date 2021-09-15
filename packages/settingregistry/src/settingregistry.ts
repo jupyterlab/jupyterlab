@@ -718,8 +718,10 @@ export class Settings implements ISettingRegistry.ISettings {
     return this.plugin.raw;
   }
 
-  get modifiedFields(): string[] {
-    const modifiedFields = [];
+  /**
+   * Checks if any fields are different from the default value.
+   */
+  get isModified(): boolean {
     for (const key in this.schema.properties) {
       const user = this.get(key).user;
       const defaultValue = this.default(key);
@@ -733,10 +735,10 @@ export class Settings implements ISettingRegistry.ISettings {
         continue;
       }
       if (!JSONExt.deepEqual(user, defaultValue)) {
-        modifiedFields.push(key);
+        return true;
       }
     }
-    return modifiedFields;
+    return false;
   }
 
   /**

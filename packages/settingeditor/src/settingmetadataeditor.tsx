@@ -42,7 +42,7 @@ export const SettingsMetadataEditor = ({
    * values.
    */
   const reset = async () => {
-    for (const field of settings.modifiedFields) {
+    for (const field in settings.user) {
       await settings.remove(field);
     }
     updateSchema();
@@ -105,6 +105,10 @@ export const SettingsMetadataEditor = ({
         for (const subProp in options.properties) {
           const subOptions = options.properties[subProp];
           subOptions.default = (options.default as any)[subProp];
+          subOptions.field_type =
+            typeof subOptions.type === 'object'
+              ? subOptions.type[0]
+              : subOptions.type;
           if (errors) {
             const error = errors.filter(
               err => err.dataPath === `.${prop}.${subProp}`
@@ -167,7 +171,7 @@ export const SettingsMetadataEditor = ({
     <div className="jp-SettingsEditor">
       <div className="jp-SettingsHeader">
         <h3>{_trans.__(title)}</h3>
-        {settings.modifiedFields.length > 0 ? (
+        {settings.isModified ? (
           <Button onClick={reset}> Restore to Defaults </Button>
         ) : undefined}
       </div>

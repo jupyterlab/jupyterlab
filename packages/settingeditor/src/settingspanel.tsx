@@ -42,7 +42,8 @@ interface ISettingsPanelProps {
 }
 
 /**
- * React component that displays a list of
+ * React component that displays a list of SettingsMetadataEditor
+ * components.
  */
 export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   settings,
