@@ -45,9 +45,9 @@ export namespace FormEditor {
  */
 export const FormEditor = ({ schema, componentRegistry }: IFormEditorProps) => {
   const renderField = (props: FormComponentRegistry.IRendererProps) => {
-    return componentRegistry.getRenderer(
-      props.uihints.field_type ?? 'string'
-    )?.(props);
+    return componentRegistry.getRenderer(props.uihints.type ?? 'string')?.(
+      props
+    );
   };
 
   /**

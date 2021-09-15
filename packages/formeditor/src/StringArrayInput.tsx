@@ -123,7 +123,9 @@ export function ArrayListItem({
             }}
             onChange={event => {
               const newValue = event.target.value;
-              setValue(newValue);
+              setValue(
+                multiline ? JSON.stringify(newValue, null, '\t') : newValue
+              );
             }}
           />
         ) : (
@@ -144,7 +146,9 @@ export function ArrayListItem({
             }}
             onChange={event => {
               const newValue = event.target.value;
-              setValue(newValue);
+              setValue(
+                multiline ? JSON.stringify(newValue, null, '\t') : newValue
+              );
             }}
           />
         )}

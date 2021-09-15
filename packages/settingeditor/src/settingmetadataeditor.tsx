@@ -68,15 +68,15 @@ export const SettingsMetadataEditor = ({
       handleChange: (newValue: any) =>
         handleChange(fieldName, newValue, category?.id),
       uihints: {
+        ...options,
         category: category,
         label: options.title ? _trans.__(options.title) : fieldName,
-        field_type: options.enum
+        type: options.enum
           ? 'dropdown'
-          : typeof options.field_type === 'object'
-          ? options.field_type[0]
+          : typeof options.type === 'object'
+          ? options.type[0]
           : options.renderer_id ?? options.type ?? typeof options.default,
-        title: options.title ? _trans.__(options.title) : fieldName,
-        ...options
+        title: options.title ? _trans.__(options.title) : fieldName
       }
     };
   };
@@ -105,10 +105,6 @@ export const SettingsMetadataEditor = ({
         for (const subProp in options.properties) {
           const subOptions = options.properties[subProp];
           subOptions.default = (options.default as any)[subProp];
-          subOptions.field_type =
-            typeof subOptions.type === 'object'
-              ? subOptions.type[0]
-              : subOptions.type;
           if (errors) {
             const error = errors.filter(
               err => err.dataPath === `.${prop}.${subProp}`
@@ -121,7 +117,6 @@ export const SettingsMetadataEditor = ({
           });
         }
       } else {
-        const options = settings.schema.properties[prop];
         if (errors) {
           const error = errors.filter(err => err.dataPath === `.${prop}`);
           options.error = error?.[0]?.message;

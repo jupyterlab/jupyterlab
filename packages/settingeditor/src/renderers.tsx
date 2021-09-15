@@ -36,6 +36,8 @@ export const renderDropdown = (
 export const renderTextInput = (
   props: FormComponentRegistry.IRendererProps
 ): any => {
+  const numeric =
+    props.uihints.type === 'number' || props.uihints.type === 'integer';
   return (
     <div className="jp-FormComponent">
       {!JSONExt.deepEqual(props.uihints.default, props.value) ? (
@@ -46,27 +48,23 @@ export const renderTextInput = (
         description={props.uihints.description}
         key={`${props.uihints.title?.replace(' ', '')}TextInput`}
         fieldName={props.uihints.title?.replace(' ', '')}
-        numeric={props.uihints.field_type === 'number'}
+        numeric={numeric}
         defaultValue={props.value || props.uihints.default || ''}
         secure={props.uihints.secure}
         defaultError={props.uihints.error}
         placeholder={props.uihints.placeholder}
-        multiline={props.uihints.field_type === 'object'}
+        multiline={props.uihints.type === 'object'}
         onChange={(value: any): void => {
-          if (
-            (props.uihints.field_type === 'number' ||
-              props.uihints.field_type === 'integer') &&
-            !isNaN(value)
-          ) {
+          if (numeric && !isNaN(value)) {
             props.handleChange(parseInt(value));
-          } else if (props.uihints.field_type === 'object') {
+          } else if (props.uihints.type === 'object') {
             try {
               props.handleChange(JSON.parse(value));
             } catch (e) {
               props.handleChange(value);
             }
           } else {
-            props.handleChange(value);
+            props.handleChange(value === '' ? null : value);
           }
         }}
       />

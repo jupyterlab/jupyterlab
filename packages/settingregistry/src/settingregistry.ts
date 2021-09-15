@@ -729,7 +729,7 @@ export class Settings implements ISettingRegistry.ISettings {
         continue;
       }
       if (defaultValue === undefined || defaultValue === null) {
-        continue;
+        return true;
       }
       if (JSONExt.isArray(user) && Object.keys(user).length === 0) {
         continue;

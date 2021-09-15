@@ -33,7 +33,9 @@ export const TextInput: React.FC<ITextFieldProps> = ({
 }) => {
   const [error, setError] = React.useState(defaultError);
   const [value, setValue] = React.useState(
-    multiline ? JSON.stringify(defaultValue, null, '\t') : defaultValue
+    multiline && typeof defaultValue === 'object'
+      ? JSON.stringify(defaultValue, null, '\t')
+      : defaultValue
   );
 
   // This is necessary to rerender with error when clicking the save button.
@@ -43,7 +45,9 @@ export const TextInput: React.FC<ITextFieldProps> = ({
 
   React.useEffect(() => {
     setValue(
-      multiline ? JSON.stringify(defaultValue, null, '\t') : defaultValue
+      multiline && typeof defaultValue === 'object'
+        ? JSON.stringify(defaultValue, null, '\t')
+        : defaultValue
     );
   }, [defaultValue]);
 
@@ -85,7 +89,7 @@ export const TextInput: React.FC<ITextFieldProps> = ({
           value={value ?? ''}
         />
       )}
-      {!!error && <p className="jp-SettingEditor-error">{error}</p>}
+      {!!error && <p className="jp-SettingEditor-errorMessage">{error}</p>}
     </div>
   );
 };

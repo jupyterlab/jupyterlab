@@ -29,7 +29,8 @@
 }
 
 .jp-metadataEditor-formInput input,
-.jp-metadataEditor-formInput select {
+.jp-metadataEditor-formInput select,
+.jp-metadataEditor-formInput textarea {
   font-size: var(--jp-content-font-size2);
   border-color: var(--jp-input-border-color);
   border-style: solid;
@@ -100,4 +101,12 @@
 .jp-StringArray-entry textarea {
   height: 200px;
   width: 100%;
+}
+
+.jp-SettingEditor-error input {
+  border-color: var(--jp-error-color2);
+}
+
+.jp-SettingEditor-errorMessage {
+  color: var(--jp-error-color2);
 }
