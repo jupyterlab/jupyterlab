@@ -103,10 +103,6 @@
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
-#setting-editor .jp-FormComponent.jp-StringArrayInput {
-  display: block;
-}
-
 #setting-editor .jp-PluginList button:hover span {
   font-weight: var(--jp-content-heading-font-weight);
 }
@@ -127,10 +123,6 @@
 
 #setting-editor .jp-PluginList button span {
   color: var(--jp-content-font-color1);
-}
-
-#setting-editor .jp-StringArray-entry {
-  width: 100%;
 }
 
 #setting-editor .jp-FormComponent li span {
@@ -253,9 +245,10 @@
   overflow: hidden;
 }
 
-#setting-editor .jp-FormComponent {
-  display: flex;
-  align-items: center;
+#setting-editor h1 {
+  font-size: var(--jp-content-font-size4);
+  font-weight: var(--jp-content-heading-font-weight);
+  color: var(--jp-ui-font-color0);
 }
 
 #setting-editor .jp-SettingsTableEditor tr {
@@ -271,10 +264,20 @@
   height: var(--jp-private-settingeditor-row-height);
 }
 
+#setting-editor h2 {
+  font-size: var(--jp-content-font-size3);
+  color: var(--jp-ui-font-color0);
+  flex-basis: 100%;
+  padding: 10px;
+  font-weight: var(--jp-content-header-font-weight);
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
 #setting-editor .jp-SettingsHeader {
   display: flex;
   flex: auto;
   justify-content: space-between;
+  border-bottom: 1px solid var(--jp-border-color2);
 }
 
 #setting-editor .jp-PluginList-entry:hover {
@@ -301,7 +304,8 @@
 #setting-editor .jp-modifiedIndicator {
   width: 5px;
   background-color: var(--jp-brand-color2);
-  height: 24px;
+  height: 91px;
+  float: left;
 }
 
 #setting-editor .jp-SettingsEditor {

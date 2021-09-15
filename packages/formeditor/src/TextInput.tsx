@@ -57,7 +57,7 @@ export const TextInput: React.FC<ITextFieldProps> = ({
         error ? 'jp-SettingEditor-error' : undefined
       }`}
     >
-      <h2> {label} </h2>
+      <h3> {label} </h3>
       <p> {description} </p>
       {multiline ? (
         <textarea

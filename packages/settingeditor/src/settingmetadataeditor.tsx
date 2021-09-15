@@ -170,7 +170,7 @@ export const SettingsMetadataEditor = ({
   return (
     <div className="jp-SettingsEditor">
       <div className="jp-SettingsHeader">
-        <h3>{_trans.__(title)}</h3>
+        <h1>{_trans.__(title)}</h1>
         {settings.isModified ? (
           <Button onClick={reset}> Restore to Defaults </Button>
         ) : undefined}

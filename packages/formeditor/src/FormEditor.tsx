@@ -78,12 +78,7 @@ export const FormEditor = ({ schema, componentRegistry }: IFormEditorProps) => {
       {toArray(
         map(Object.keys(categorizedInputElements), (category: string) => {
           return [
-            <h4
-              style={{ flexBasis: '100%', padding: '10px' }}
-              key={`${category}Category`}
-            >
-              {category}
-            </h4>,
+            <h2 key={`${category}Category`}>{category}</h2>,
             ...categorizedInputElements[category]
           ];
         })

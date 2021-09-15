@@ -13,6 +13,7 @@ import {
 } from '@jupyterlab/formeditor';
 
 import { JSONExt } from '@lumino/coreutils';
+import { checkIcon } from '@jupyterlab/ui-components';
 
 export const renderDropdown = (
   props: FormComponentRegistry.IRendererProps
@@ -77,15 +78,18 @@ export const renderTextInput = (
 export const renderCheckbox = (
   props: FormComponentRegistry.IRendererProps
 ): any => {
+  const description = props.uihints.description ?? props.uihints.title;
   return (
     <div
-      className="jp-FormComponent jp-BooleanInput"
+      className="jp-FormComponent jp-metadataEditor-formInput jp-BooleanInput"
       key={`${props.uihints.title?.replace(' ', '')}BooleanInput`}
     >
       {props.uihints.default !== props.value ? (
         <div className="jp-modifiedIndicator" />
       ) : undefined}
+      <h3>{props.uihints.title}</h3>
       <div className="jp-InputLabelWrapper">
+        <checkIcon.react />
         <input
           type="checkbox"
           checked={props.value}
@@ -93,9 +97,15 @@ export const renderCheckbox = (
             props.handleChange(!props.value);
           }}
         />
-        <h2>{props.uihints.title}</h2>
+        <p
+          onClick={(e: any) => {
+            props.handleChange(!props.value);
+          }}
+        >
+          {' '}
+          {description}{' '}
+        </p>
       </div>
-      <p> {props.uihints.description} </p>
     </div>
   );
 };
@@ -109,11 +119,15 @@ export const renderStringArray = (
       key={`${props.uihints.title?.replace(' ', '')}Array`}
       style={{ flexBasis: '100%' }}
     >
+      {props.uihints.default !== props.value ? (
+        <div className="jp-modifiedIndicator" />
+      ) : undefined}
       <ArrayInput
         onChange={(values: string[]) => {
           props.handleChange(values);
         }}
         values={props.value ?? ([] as string[])}
+        label={props.uihints.label}
       />
     </div>
   );

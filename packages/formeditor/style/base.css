@@ -14,21 +14,63 @@
  * limitations under the License.
  */
 
-.jp-metadataEditor-formInput h2 {
-  font-size: var(--jp-content-font-size4);
-  font-weight: var(--jp-content-heading-font-weight);
+.jp-metadataEditor-formInput h3 {
+  font-size: var(--jp-content-font-size2);
   color: var(--jp-ui-font-color0);
+  padding: 10px;
+  font-weight: var(--jp-content-header-font-weight);
+  border-bottom: 1px solid var(--jp-border-color2);
 }
 
 .jp-metadataEditor-formInput p {
   font-size: var(--jp-content-font-size2);
 }
 
+.jp-metadataEditor-formInput input,
+.jp-metadataEditor-formInput select {
+  font-size: var(--jp-content-font-size2);
+  border-color: var(--jp-input-border-color);
+  border-style: solid;
+  border-radius: 5px;
+  border-width: 1px;
+  padding: 6px 8px;
+}
+
+.jp-StringArray-entry input {
+  width: 100%;
+}
+
+.jp-BooleanInput > input:checked + svg {
+  display: block;
+}
+
+.jp-BooleanInput svg {
+  display: none;
+}
+
 .jp-BooleanInput .jp-InputLabelWrapper {
   display: flex;
 }
 
-.jp-FormComponent.jp-BooleanInput {
-  flex-direction: column;
-  align-items: flex-start;
+.jp-StringArray-entry {
+  display: flex;
+  margin-bottom: 5px;
+  position: relative;
+  width: 50%;
+}
+
+.jp-StringArray-buttonGroup {
+  display: flex;
+  position: absolute;
+  right: 0;
+}
+
+.jp-StringArrayInput ul {
+  padding-left: 0;
+}
+
+.jp-StringArray-buttonGroup button {
+  border: none;
+  margin: 3px;
+  cursor: pointer;
 }

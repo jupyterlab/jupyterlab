@@ -14,6 +14,7 @@ interface IProps {
   placeholder?: string;
   values?: string[];
   onChange: (values: string[]) => void;
+  label: string;
 }
 
 interface IListItemProps {
@@ -91,11 +92,10 @@ export function ArrayListItem({
 
   if (isEditing) {
     return (
-      <div>
+      <div className="jp-StringArray-entry">
         {typeof value !== 'string' ? (
           <textarea
             ref={inputRef}
-            className="jp-StringArray-entry"
             value={
               typeof value === 'string'
                 ? value ?? ''
@@ -116,7 +116,6 @@ export function ArrayListItem({
         ) : (
           <input
             ref={inputRef}
-            className="jp-StringArray-entry"
             value={
               typeof value === 'string'
                 ? value ?? ''
@@ -159,6 +158,7 @@ export function ArrayListItem({
       onDoubleClick={() => {
         onEdit?.();
       }}
+      className="jp-StringArray-entry"
     >
       <input
         style={{ whiteSpace: 'pre' }}
@@ -170,7 +170,7 @@ export function ArrayListItem({
         }
         readOnly
       />
-      <div>
+      <div className="jp-StringArray-buttonGroup">
         <button
           aria-label="edit button"
           onClick={(): void => {
@@ -192,7 +192,7 @@ export function ArrayListItem({
   );
 }
 
-export function ArrayInput({ placeholder, onChange, values }: IProps) {
+export function ArrayInput({ placeholder, onChange, values, label }: IProps) {
   const [items, setItems] = React.useState(values ?? []);
 
   const [editingIndex, setEditingIndex] = useState<number | 'new'>();
@@ -207,59 +207,62 @@ export function ArrayInput({ placeholder, onChange, values }: IProps) {
   );
 
   return (
-    <ul>
-      {items.map((item: string, index: number) => (
-        <ArrayListItem
-          key={index}
-          value={item}
-          placeholder={placeholder}
-          isEditing={index === editingIndex}
-          onSubmit={value => {
-            setEditingIndex(undefined);
-            handleAction({
-              type: 'UPSERT_ITEM',
-              payload: { index, value }
-            });
-          }}
-          onCancel={() => {
-            setEditingIndex(undefined);
-          }}
-          onDelete={() => {
-            handleAction({
-              type: 'DELETE_ITEM',
-              payload: { index }
-            });
-          }}
-          onEdit={() => {
-            setEditingIndex(index);
-          }}
-        />
-      ))}
-      {editingIndex === 'new' && (
-        <ArrayListItem
-          placeholder={placeholder}
-          isEditing
-          onSubmit={value => {
-            setEditingIndex(undefined);
-            handleAction({
-              type: 'UPSERT_ITEM',
-              payload: { value }
-            });
-          }}
-          onCancel={() => {
-            setEditingIndex(undefined);
-          }}
-        />
-      )}
-      {editingIndex !== 'new' && (
-        <button
-          onClick={() => {
-            setEditingIndex('new');
-          }}
-        >
-          Add Item
-        </button>
-      )}
-    </ul>
+    <div className="jp-metadataEditor-formInput">
+      <h3> {label} </h3>
+      <ul>
+        {items.map((item: string, index: number) => (
+          <ArrayListItem
+            key={index}
+            value={item}
+            placeholder={placeholder}
+            isEditing={index === editingIndex}
+            onSubmit={value => {
+              setEditingIndex(undefined);
+              handleAction({
+                type: 'UPSERT_ITEM',
+                payload: { index, value }
+              });
+            }}
+            onCancel={() => {
+              setEditingIndex(undefined);
+            }}
+            onDelete={() => {
+              handleAction({
+                type: 'DELETE_ITEM',
+                payload: { index }
+              });
+            }}
+            onEdit={() => {
+              setEditingIndex(index);
+            }}
+          />
+        ))}
+        {editingIndex === 'new' && (
+          <ArrayListItem
+            placeholder={placeholder}
+            isEditing
+            onSubmit={value => {
+              setEditingIndex(undefined);
+              handleAction({
+                type: 'UPSERT_ITEM',
+                payload: { value }
+              });
+            }}
+            onCancel={() => {
+              setEditingIndex(undefined);
+            }}
+          />
+        )}
+        {editingIndex !== 'new' && (
+          <button
+            onClick={() => {
+              setEditingIndex('new');
+            }}
+          >
+            Add Item
+          </button>
+        )}
+      </ul>
+    </div>
   );
 }

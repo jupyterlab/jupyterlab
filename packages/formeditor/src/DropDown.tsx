@@ -55,7 +55,7 @@ export const DropDown: React.FC<FormComponentRegistry.IRendererProps> = ({
         !!error && 'jp-SettingEditor-error'
       }`}
     >
-      <h2>{label}</h2>
+      <h3>{label}</h3>
       <p> {description} </p>
       <select
         value={updatedValue}
