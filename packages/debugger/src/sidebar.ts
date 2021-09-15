@@ -9,13 +9,13 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { bugIcon } from '@jupyterlab/ui-components';
 
-import { Panel, Widget } from '@lumino/widgets';
-
-import { PanelBody } from './panels/panelbody';
+import { AccordionPanel, Panel, Widget } from '@lumino/widgets';
 
 import { Breakpoints as BreakpointsPanel } from './panels/breakpoints';
 
 import { Callstack as CallstackPanel } from './panels/callstack';
+
+import { DebuggerAccordionPanel } from './panels/panelbody';
 
 import { Sources as SourcesPanel } from './panels/sources';
 
@@ -81,7 +81,9 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
       header.title.label = title;
     });
 
-    this._body = new PanelBody();
+    this._body = new AccordionPanel({
+      renderer: new DebuggerAccordionPanel.Renderer()
+    });
     this._body.orientation = 'vertical';
     this._body.addClass('jp-DebuggerSidebar-body');
     this.addWidget(this._body);
@@ -165,7 +167,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
   /**
    * Container for debugger panels.
    */
-  private _body: PanelBody;
+  private _body: AccordionPanel;
 }
 
 /**

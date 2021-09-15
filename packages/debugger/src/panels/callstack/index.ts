@@ -6,13 +6,13 @@ import { CommandToolbarButton } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
-import { PanelWidget } from '../panelwidget';
+import { PanelWithToolbar } from '../panelwithtoolbar';
 import { CallstackBody } from './body';
 
 /**
  * A Panel to show a callstack.
  */
-export class Callstack extends PanelWidget {
+export class Callstack extends PanelWithToolbar {
   /**
    * Instantiate a new Callstack Panel.
    *
@@ -24,7 +24,7 @@ export class Callstack extends PanelWidget {
     this.title.label = this.trans.__('Callstack');
     const body = new CallstackBody(model);
 
-    this.header.addItem(
+    this.toolbar.addItem(
       'continue',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -33,7 +33,7 @@ export class Callstack extends PanelWidget {
       })
     );
 
-    this.header.addItem(
+    this.toolbar.addItem(
       'terminate',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -42,7 +42,7 @@ export class Callstack extends PanelWidget {
       })
     );
 
-    this.header.addItem(
+    this.toolbar.addItem(
       'step-over',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -51,7 +51,7 @@ export class Callstack extends PanelWidget {
       })
     );
 
-    this.header.addItem(
+    this.toolbar.addItem(
       'step-in',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -60,7 +60,7 @@ export class Callstack extends PanelWidget {
       })
     );
 
-    this.header.addItem(
+    this.toolbar.addItem(
       'step-out',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -69,7 +69,7 @@ export class Callstack extends PanelWidget {
       })
     );
 
-    this.header.addItem(
+    this.toolbar.addItem(
       'evaluate',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -77,9 +77,8 @@ export class Callstack extends PanelWidget {
         label: ''
       })
     );
-    this.addWidget(this.header);
-    this.addWidget(body);
 
+    this.addWidget(body);
     this.addClass('jp-DebuggerCallstack');
   }
 }

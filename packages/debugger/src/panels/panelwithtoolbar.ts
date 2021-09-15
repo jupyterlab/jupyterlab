@@ -13,51 +13,61 @@ import { Panel } from '@lumino/widgets';
 /**
  * A base class for debugger panel element.
  */
-export class PanelWidget extends Panel {
+export class PanelWithToolbar extends Panel {
   /**
    * Instantiate a new Panel.
    *
    * @param options The instantiation options for a Debugger Panel.
    */
-  constructor(options: PanelWidget.IOptions) {
-    super();
+  constructor(options: PanelWithToolbar.IOptions) {
+    super(options);
     const translator = options.translator || nullTranslator;
     this.trans = translator.load('jupyterlab');
 
-    this._header = new Toolbar();
-    this._header.addClass('jp-stack-panel-header');
+    this._toolbar = new Toolbar();
+    this._toolbar.addClass('jp-stack-panel-header');
+    // Add toolbar as widget to get notified by the lumino widget
+    this.addWidget(this._toolbar);
   }
 
   /**
    * Handler to notify `AccordionPanel` title that its child widget is expanded.
-   * We can not rely on `lm-mod-expande` class of Lumino to detect this event
+   * We can not rely on `lm-mod-expanded` class of Lumino to detect this event
    * since this class is added to the target of `onClick` event, which is not
    * always the title of `AccordionPanel`.
+   *
    * @param {Message} msg
+   *
+   * TODO remove when @lumino/widgets 1.26.3 is released
    */
   protected onAfterShow(msg: Message): void {
-    this.header.node.parentElement?.classList.add('jp-DebuggerPanel-expanded');
+    this.toolbar.node.parentElement?.classList.add('jp-DebuggerPanel-expanded');
   }
 
   /**
    * Handler to notify `AccordionPanel`'s title that its child widget is closed.
    * @param {Message} msg
+   *
+   * TODO remove when @lumino/widgets 1.26.3 is released
    */
   protected onAfterHide(msg: Message): void {
-    this.header.node.parentElement?.classList.remove(
+    this.toolbar.node.parentElement?.classList.remove(
       'jp-DebuggerPanel-expanded'
     );
   }
 
-  get header(): Toolbar {
-    return this._header;
+  /**
+   * Widget toolbar
+   */
+  get toolbar(): Toolbar {
+    return this._toolbar;
   }
 
   /**
    * The toolbar widget, it is not attached to current widget
    * but is rendered by the sidebar panel.
    */
-  private _header: Toolbar;
+  private _toolbar: Toolbar;
 
   protected trans: TranslationBundle;
 }
@@ -65,13 +75,13 @@ export class PanelWidget extends Panel {
 /**
  * A namespace for PanelWidget `statics`.
  */
-export namespace PanelWidget {
+export namespace PanelWithToolbar {
   /**
    * Instantiation options for `PanelWidget`.
    */
   export interface IOptions extends Panel.IOptions {
     /**
-     * The application language translator..
+     * The application language translator.
      */
     translator?: ITranslator;
   }

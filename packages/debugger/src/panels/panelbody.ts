@@ -1,41 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { AccordionPanel } from '@lumino/widgets';
-import { Title, Widget } from '@lumino/widgets';
-import { Breakpoints } from './breakpoints';
-import { Callstack } from './callstack';
-import { Sources } from './sources';
-import { Variables } from './variables';
+import { AccordionPanel, Title, Widget } from '@lumino/widgets';
 import { caretDownEmptyIcon } from '@jupyterlab/ui-components';
+import { PanelWithToolbar } from './panelwithtoolbar';
 
-export type DebuggerPanelWidget = Breakpoints | Callstack | Sources | Variables;
-
-export class PanelBody extends AccordionPanel {
-  constructor(options: AccordionPanel.IOptions = {}) {
-    super({ ...options, renderer: new DebuggerPanelBody.Renderer() });
-  }
-
+/**
+ * Debugger accordion panel customization
+ */
+export namespace DebuggerAccordionPanel {
   /**
-   * Check the clicked element before propagating click event.
+   * Custom renderer for the debugger sidebar
    */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-      case 'click': {
-        const target = event.target as HTMLElement | null;
-        if (!target || !['DIV', 'H2', 'H3', 'SPAN'].includes(target.nodeName)) {
-          return;
-        }
-        super.handleEvent(event);
-        break;
-      }
-      default:
-        super.handleEvent(event);
-    }
-  }
-}
-
-export namespace DebuggerPanelBody {
   export class Renderer extends AccordionPanel.Renderer {
     /**
      * Render the collapse indicator for a section title.
@@ -49,14 +25,6 @@ export namespace DebuggerPanelBody {
       caretDownEmptyIcon.element({
         container: iconDiv
       });
-      const icon = iconDiv.firstChild as SVGElement;
-      if (icon) {
-        icon.onclick = (ev: MouseEvent) => {
-          ev.stopPropagation();
-          iconDiv.click();
-        };
-      }
-
       return iconDiv;
     }
 
@@ -68,11 +36,11 @@ export namespace DebuggerPanelBody {
      * @returns A element representing the section title.
      */
     createSectionTitle(data: Title<Widget>): HTMLElement {
-      const header: Widget = (data.owner as DebuggerPanelWidget).header;
+      const toolbar = (data.owner as PanelWithToolbar).toolbar;
       const handle = super.createSectionTitle(data);
       handle.classList.add('jp-AccordionPanel-title');
-      if (header) {
-        handle.appendChild(header.node);
+      if (toolbar) {
+        handle.appendChild(toolbar.node);
       }
       return handle;
     }

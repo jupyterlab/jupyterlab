@@ -30,7 +30,7 @@ import { UUID } from '@lumino/coreutils';
 
 import { MessageLoop } from '@lumino/messaging';
 
-import { Widget } from '@lumino/widgets';
+import { AccordionPanel, Widget } from '@lumino/widgets';
 
 import { Debugger } from '../src/debugger';
 
@@ -41,8 +41,6 @@ import { DebuggerModel } from '../src/model';
 import { SourcesBody } from '../src/panels/sources/body';
 
 import { IDebugger } from '../src/tokens';
-
-import { PanelBody } from '../src/panels/panelbody';
 
 /**
  * A test sidebar.
@@ -155,11 +153,11 @@ describe('Debugger', () => {
     });
   });
 
-  describe('PanelBody', () => {
-    let body: PanelBody;
+  describe('Panel', () => {
+    let body: AccordionPanel;
     let toolbarList: any;
     beforeEach(() => {
-      body = sidebar.widgets[1] as PanelBody;
+      body = sidebar.widgets[1] as AccordionPanel;
       toolbarList = body.node.querySelectorAll('.jp-AccordionPanel-title');
     });
     it('should have 4 child widgets', () => {
@@ -360,7 +358,7 @@ describe('Debugger', () => {
     });
 
     it('should display the source path in the header', () => {
-      const header = sidebar.sources.header;
+      const header = sidebar.sources.toolbar;
       const pathWidget = header.node.innerHTML;
       expect(pathWidget).toContain(path);
     });

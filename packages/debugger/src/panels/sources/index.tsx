@@ -12,12 +12,12 @@ import { SourcePathComponent } from './sourcepath';
 import { SourcesBody } from './body';
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React from 'react';
-import { PanelWidget } from '../panelwidget';
+import { PanelWithToolbar } from '../panelwithtoolbar';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
  */
-export class Sources extends PanelWidget {
+export class Sources extends PanelWithToolbar {
   /**
    * Instantiate a new Sources preview Panel.
    *
@@ -28,13 +28,13 @@ export class Sources extends PanelWidget {
     const { model, service, editorServices } = options;
     this.title.label = this.trans.__('Source');
 
-    this.header.addClass('jp-DebuggerSources-header');
+    this.toolbar.addClass('jp-DebuggerSources-header');
     const body = new SourcesBody({
       service,
       model,
       editorServices
     });
-    this.header.addItem(
+    this.toolbar.addItem(
       'open',
       new ToolbarButton({
         icon: viewBreakpointIcon,
@@ -46,9 +46,9 @@ export class Sources extends PanelWidget {
       <SourcePathComponent model={model} />
     );
 
-    this.header.addItem('sourcePath', sourcePath);
+    this.toolbar.addItem('sourcePath', sourcePath);
     this.addClass('jp-DebuggerSources-header');
-    this.addWidget(this.header);
+
     this.addWidget(body);
     this.addClass('jp-DebuggerSources');
   }

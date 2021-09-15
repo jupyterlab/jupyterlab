@@ -11,7 +11,7 @@ import {
 import { CommandRegistry } from '@lumino/commands';
 import { Panel, Widget } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
-import { PanelWidget } from '../panelwidget';
+import { PanelWithToolbar } from '../panelwithtoolbar';
 import { VariablesBodyGrid } from './grid';
 import { ScopeSwitcher } from './scope';
 import { VariablesBodyTree } from './tree';
@@ -20,7 +20,7 @@ import { VariablesBodyTree } from './tree';
  * A Panel to show a variable explorer.
  */
 export class Variables
-  extends PanelWidget
+  extends PanelWithToolbar
   implements IDebugger.IVariablesPanel {
   /**
    * Instantiate a new Variables Panel.
@@ -32,7 +32,7 @@ export class Variables
     const { model, service, commands, themeManager } = options;
     const translator = options.translator || nullTranslator;
     this.title.label = this.trans.__('Variables');
-    this.header.addClass('jp-DebuggerVariables-toolbar');
+    this.toolbar.addClass('jp-DebuggerVariables-toolbar');
     this._tree = new VariablesBodyTree({
       model,
       service,
@@ -47,7 +47,7 @@ export class Variables
     });
     this._table.hide();
 
-    this.header.addItem(
+    this.toolbar.addItem(
       'scope-switcher',
       new ScopeSwitcher({
         translator,
@@ -100,11 +100,11 @@ export class Variables
 
     markViewButtonSelection(this.viewMode);
 
-    this.header.addItem('view-VariableTreeView', treeViewButton);
+    this.toolbar.addItem('view-VariableTreeView', treeViewButton);
 
-    this.header.addItem('view-VariableTableView', tableViewButton);
+    this.toolbar.addItem('view-VariableTableView', tableViewButton);
 
-    this.addWidget(this.header);
+    this.addWidget(this.toolbar);
     this.addWidget(this._tree);
     this.addWidget(this._table);
     this.addClass('jp-DebuggerVariables');
@@ -150,7 +150,7 @@ export class Variables
    * @param msg The resize message.
    */
   private _resizeBody(msg: Widget.ResizeMessage): void {
-    const height = msg.height - this.header.node.offsetHeight;
+    const height = msg.height - this.toolbar.node.offsetHeight;
     this._tree.node.style.height = `${height}px`;
   }
 

@@ -16,13 +16,15 @@
 }
 
 .jp-AccordionPanel-title .lm-AccordionPanel-titleCollapser {
-  transform: rotate(0deg);
+  transform: rotate(-90deg);
   margin-top: 3px;
   height: 16px;
 }
+/* TODO remove first selector when @lumino/widgets 1.26.3 is released */
 .jp-AccordionPanel-title.jp-DebuggerPanel-expanded
-  .lm-AccordionPanel-titleCollapser {
-  transform: rotate(-90deg);
+  .lm-AccordionPanel-titleCollapser
+/* .jp-AccordionPanel-title.lm-mod-expanded .lm-AccordionPanel-titleCollapser */ {
+  transform: rotate(0deg);
 }
 
 .lm-AccordionPanel[data-orientation='horizontal'] > .jp-AccordionPanel-title {

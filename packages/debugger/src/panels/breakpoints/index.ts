@@ -9,11 +9,11 @@ import { Panel } from '@lumino/widgets';
 import { closeAllIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
 import { BreakpointsBody } from './body';
-import { PanelWidget } from '../panelwidget';
+import { PanelWithToolbar } from '../panelwithtoolbar';
 /**
  * A Panel to show a list of breakpoints.
  */
-export class Breakpoints extends PanelWidget {
+export class Breakpoints extends PanelWithToolbar {
   /**
    * Instantiate a new Breakpoints Panel.
    *
@@ -26,7 +26,7 @@ export class Breakpoints extends PanelWidget {
 
     const body = new BreakpointsBody(model);
 
-    this.header.addItem(
+    this.toolbar.addItem(
       'closeAll',
       new ToolbarButton({
         icon: closeAllIcon,
@@ -53,7 +53,6 @@ export class Breakpoints extends PanelWidget {
       })
     );
 
-    this.addWidget(this.header);
     this.addWidget(body);
     this.addClass('jp-DebuggerBreakpoints');
   }
