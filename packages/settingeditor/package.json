@@ -50,7 +50,6 @@
     "@lumino/messaging": "^1.4.3",
     "@lumino/signaling": "^1.4.3",
     "@lumino/widgets": "^1.26.0",
-    "@material-ui/core": "^4.12.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },

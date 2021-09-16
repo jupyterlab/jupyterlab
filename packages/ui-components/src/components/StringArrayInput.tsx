@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import produce from 'immer';
 import React from 'react';
 
-import { editIcon, trashIcon } from '@jupyterlab/ui-components';
+import { editIcon, trashIcon } from '../icon';
 
 interface IProps {
   placeholder?: string;

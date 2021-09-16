@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import * as React from 'react';
-import { FormComponentRegistry } from './FormComponentRegistry';
+import { FormComponentRegistry } from '../FormComponentRegistry';
 
 const DROPDOWN_ITEM_CLASS = 'jp-form-DropDown-item';
 
