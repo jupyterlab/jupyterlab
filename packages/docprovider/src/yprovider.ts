@@ -60,11 +60,11 @@ export class WebSocketProviderWithLocks
       messageType
     ) => {
       // acquired lock
-      const timestamp = decoding.readUint32(decoder);
+      this._currentLock = decoding.readUint32(decoder);
       const lockRequest = this._currentLockRequest;
       this._currentLockRequest = null;
       if (lockRequest) {
-        lockRequest.resolve(timestamp);
+        lockRequest.resolve(this._currentLock);
       }
     };
     // Message handler that receives the initial content
@@ -201,6 +201,7 @@ export class WebSocketProviderWithLocks
     this._requestLockInterval = setInterval(() => {
       if (this.wsconnected) {
         // try to acquire lock
+        console.debug('Request lock');
         this._sendMessage(new Uint8Array([127]));
       }
     }, 500);
@@ -222,10 +223,12 @@ export class WebSocketProviderWithLocks
     const encoder = encoding.createEncoder();
     // reply with release lock
     encoding.writeVarUint(encoder, 126);
-    encoding.writeUint32(encoder, lock);
+    encoding.writeUint32(encoder, this._currentLock || lock);
     // releasing lock
+    console.debug('Release lock', this._requestLockInterval);
     this._sendMessage(encoding.toUint8Array(encoder));
     if (this._requestLockInterval) {
+      console.debug('Clear interval', this._requestLockInterval);
       clearInterval(this._requestLockInterval);
     }
   }
@@ -272,6 +275,7 @@ export class WebSocketProviderWithLocks
   private _serverUrl: string;
   private _isInitialized: boolean;
   private _requestLockInterval: number;
+  private _currentLock: number;
   private _currentLockRequest: {
     promise: Promise<number>;
     resolve: (lock: number) => void;
