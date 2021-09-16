@@ -1,3 +1,4 @@
+import { JSONObject } from '@lumino/coreutils';
 import { chromium, firefox, webkit } from '@playwright/test';
 import {
   FullConfig,
@@ -122,7 +123,7 @@ export namespace benchmark {
 /**
  * Report record interface
  */
-interface IReportRecord extends benchmark.IRecord {
+export interface IReportRecord extends benchmark.IRecord {
   /**
    * Test suite reference
    */
@@ -174,22 +175,25 @@ interface IReport {
 class BenchmarkReporter implements Reporter {
   /**
    * @param options
-   *   outputFile: Name of the output file (default to env BENCHMARK_OUTPUTFILE)
-   *   comparison: Logic of test comparisons: 'snapshot' or 'project'
-   *    - 'snapshot': (default) This will compare the 'actual' result with the 'expected' one
-   *    - 'project': This will compare the different project
-   *   graphConfigFactory: Function to create  VegaLite configuration from test records.
-   *   mdTableFactory: Function to create  markdown table from test records.
+   *   - outputFile: Name of the output file (default to env BENCHMARK_OUTPUTFILE)
+   *   - comparison: Logic of test comparisons: 'snapshot' or 'project'
+   *      * 'snapshot': (default) This will compare the 'actual' result with the 'expected' one
+   *      * 'project': This will compare the different project
+   *   - vegaLiteConfigFactory: Function to create  VegaLite configuration from test records.
+   *   - textReportFactory: Function to create  text report from test records, this function
+   *   should return the content and extension of report file.
    */
   constructor(
     options: {
       outputFile?: string;
       comparison?: 'snapshot' | 'project';
-      graphConfigFactory?: (
+      vegaLiteConfigFactory?: (
         allData: Array<IReportRecord>,
         comparison: 'snapshot' | 'project'
-      ) => Record<string, any>;
-      mdTableFactory?: (allData: Array<IReportRecord>) => Array<string>;
+      ) => JSONObject;
+      textReportFactory?: (
+        allData: Array<IReportRecord>
+      ) => Promise<[string, string]>;
     } = {}
   ) {
     this._outputFile =
@@ -203,10 +207,10 @@ class BenchmarkReporter implements Reporter {
       process.env['BENCHMARK_REFERENCE'] ?? benchmark.DEFAULT_REFERENCE;
 
     this._buildReportGraphConfig =
-      options.graphConfigFactory ?? this.defaultBuildReportGraphConfig;
+      options.vegaLiteConfigFactory ?? this.defaultBuildReportGraphConfig;
 
     this._buildMarkdownTable =
-      options.mdTableFactory ?? this.defaultBuildMarkdownTable;
+      options.textReportFactory ?? this.defaultBuildMarkdownTable;
   }
 
   /**
@@ -310,9 +314,15 @@ class BenchmarkReporter implements Reporter {
       }
 
       // - Create report
-      const reportContent = this._buildMarkdownTable(allData);
-      const reportFile = path.resolve(outputDir, `${baseName}.md`);
-      fs.writeFileSync(reportFile, reportContent.join('\n'), 'utf-8');
+      const [
+        reportContentString,
+        reportExtension
+      ] = await this._buildMarkdownTable(allData);
+      const reportFile = path.resolve(
+        outputDir,
+        `${baseName}.${reportExtension}`
+      );
+      fs.writeFileSync(reportFile, reportContentString, 'utf-8');
 
       // Generate graph file and image
       const graphConfigFile = path.resolve(outputDir, `${baseName}.vl.json`);
@@ -352,11 +362,12 @@ class BenchmarkReporter implements Reporter {
    * method on a sub-class.
    *
    * @param {Array<IReportRecord>} allData: all test records.
-   * @return {Array<string>} an array of markdown strings.
+   * @return {Promise<[string, string]>} A list of two strings, the first one
+   * is the content of report, the second one is the extension of report file.
    */
-  protected defaultBuildMarkdownTable(
+  protected async defaultBuildMarkdownTable(
     allData: Array<IReportRecord>
-  ): Array<string> {
+  ): Promise<[string, string]> {
     // Compute statistics
     // - Groupby (test, browser, reference, file)
 
@@ -438,8 +449,11 @@ class BenchmarkReporter implements Reporter {
       }
     }
     reportContent.push('', '</details>', '');
-
-    return reportContent;
+    const reportExtension = 'md';
+    const reportContentString = reportContent.join('\n');
+    return new Promise((resolve, reject) => {
+      resolve([reportContentString, reportExtension]);
+    });
   }
 
   /**
@@ -525,7 +539,9 @@ class BenchmarkReporter implements Reporter {
     allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project'
   ) => Record<string, any>;
-  private _buildMarkdownTable: (allData: Array<IReportRecord>) => Array<string>;
+  private _buildMarkdownTable: (
+    allData: Array<IReportRecord>
+  ) => Promise<[string, string]>;
 }
 
 export default BenchmarkReporter;

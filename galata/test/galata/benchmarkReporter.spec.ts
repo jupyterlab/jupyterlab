@@ -4,9 +4,13 @@
 import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import { TestResult } from '@playwright/test/reporter';
-import BenchmarkReporter, { benchmark } from '../../src/benchmarkReporter';
+import BenchmarkReporter, {
+  benchmark,
+  IReportRecord
+} from '../../src/benchmarkReporter';
 import fs from 'fs';
 import path from 'path';
+import { JSONObject } from '@lumino/coreutils';
 
 const MOCK_DATA = {
   nSamples: 20,
@@ -52,11 +56,13 @@ function mockTestResult(
 function createReporter(options?: {
   outputFile?: string;
   comparison?: 'snapshot' | 'project';
-  graphConfigFactory?: (
-    allData: Array<any>,
+  vegaLiteConfigFactory?: (
+    allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project'
-  ) => Record<string, any>;
-  mdTableFactory?: (allData: Array<any>) => string[];
+  ) => JSONObject;
+  textReportFactory?: (
+    allData: Array<IReportRecord>
+  ) => Promise<[string, string]>;
 }): BenchmarkReporter {
   const rootDir = '../../';
   const reporter = new BenchmarkReporter(options);
@@ -98,11 +104,14 @@ test.describe('BenchmarkReporter', () => {
     const reporter = createReporter({
       outputFile: 'test.json',
       comparison: 'snapshot',
-      mdTableFactory: allData => ['## This is a custom table'],
-      graphConfigFactory: (allData, comparison) => GENERAL_CONFIG
+      textReportFactory: allData =>
+        new Promise((resolve, reject) =>
+          resolve(['## This is a custom table', 'txt'])
+        ),
+      vegaLiteConfigFactory: (allData, comparison) => GENERAL_CONFIG
     });
     await reporter.onEnd({ status: 'passed' });
-    const outputMd = path.resolve('.', 'benchmark-results', 'test.md');
+    const outputMd = path.resolve('.', 'benchmark-results', 'test.txt');
     const mdData = fs.readFileSync(outputMd, 'utf-8');
     expect(mdData).toContain('## This is a custom table');
 

@@ -442,6 +442,34 @@ By default, both projects will be executed when running `jlpm run test`. But you
 
 Galata can be configured by using [command line arguments](https://playwright.dev/docs/cli) or using [`playwright.config.js` file](https://playwright.dev/docs/test-configuration). Full list of config options can be accessed using `jlpm playwright test --help`.
 
+### Custom benchmark report
+
+By default, Galata will generate a text report in the form of `markdown` table and a  [_Vega-Lite_](https://vega.github.io/vega-lite) graph of execution time distribution. Users can customize these report in two ways:
+
+- Using `playwright.config.js` file: in `reporter` section, users can supply two functions `vegaLiteConfigFactory` and `textReportFactory` to the reporter's constructor options. These functions will be used to create Vega-Lite configuration (`vegaLiteConfigFactory`) or to create a text report (`textReportFactory`) from test records.
+
+```javascript
+//An example of `playwright.config.js` with customized builder
+  reporter: [
+    ...,
+    [
+      '@jupyterlab/galata/lib/benchmarkReporter',
+      { outputFile: 'lab-benchmark.json',
+        vegaLiteConfigFactory: (
+          allData: Array<IReportRecord>, // All test records
+          comparison: 'snapshot' | 'project'// Logic of test comparisons:'snapshot' or 'project'.
+        ) => JSONObject = ..., // Return the Vega-Lite graph configuration.
+        textReportFactory: (
+          allData: Array<IReportRecord> // All test records
+        ) => Promise<[string, string]> = ... // Return a promise of two strings, the first one
+        //is the content of report, the second one this the extension of report file      
+      }
+    ],
+    ...
+  ]
+```
+- The second way to customize the reports is to override the default text report builder (`defaultBuildMarkdownTable`) and Vega-Lite graph builder (`defaultBuildReportGraphConfig`) of `BenchmarkReporter` class in a sub-class and then use it as a reporter in `playwright.config.js` file.
+
 ## Reference Image Captures
 
 Reference image are saved next to test files in `<test-file-name>-snapshots` folders. If a reference screenshots does not exist, it will be generated at the first execution
