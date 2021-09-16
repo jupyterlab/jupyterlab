@@ -22,30 +22,22 @@ export interface IDropDownProps {
 export const DropDown: React.FC<FormComponentRegistry.IRendererProps> = ({
   value,
   handleChange,
-  uihints: {
-    defaultError,
-    defaultValue,
-    options,
-    label,
-    description,
-    required,
-    placeholder,
-    readonly
-  }
+  uihints: { defaultError, options, label, description }
 }) => {
   const [error, setError] = React.useState(defaultError);
-  const [updatedValue, setValue] = React.useState(value || defaultValue);
+  const [updatedValue, setValue] = React.useState(value);
 
   // This is necessary to rerender with error when clicking the save button.
   React.useEffect(() => {
     setError(defaultError);
   }, [defaultError]);
 
+  React.useEffect(() => {
+    setValue(value);
+  }, [value]);
+
   const handleInputChange = (newValue: string): void => {
     setValue(newValue);
-    if (required && newValue === '') {
-      setError('This field is required.');
-    }
     handleChange(newValue);
   };
 

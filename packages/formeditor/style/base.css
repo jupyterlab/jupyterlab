@@ -96,14 +96,21 @@
   display: flex;
 }
 
+.jp-metadataEditor-formInput {
+  width: 100%;
+}
+
 .jp-StringArrayInput button.jp-StringArray-addItem {
   white-space: nowrap;
-  background: none;
+  background-color: var(--jp-brand-color4);
   border: none;
   outline: none;
   box-shadow: none;
   font-size: var(--jp-content-font-size1);
   color: var(--jp-brand-color1);
+  padding: 9px;
+  margin-top: 7px;
+  cursor: pointer;
 }
 
 .jp-StringArrayInput button.jp-StringArray-addItem:hover {
@@ -115,7 +122,9 @@
   width: 100%;
 }
 
-.jp-SettingEditor-error input {
+.jp-SettingEditor-error input,
+.jp-SettingEditor-error textarea,
+.jp-SettingEditor-error select {
   border-color: var(--jp-error-color2);
 }
 
