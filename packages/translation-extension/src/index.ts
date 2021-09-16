@@ -50,9 +50,11 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
     const displayStringsPrefix: boolean = setting.get('displayStringsPrefix')
       .composite as boolean;
     stringsPrefix = displayStringsPrefix ? stringsPrefix : '';
+    const serverSettings = app.serviceManager.serverSettings;
     const translationManager = new TranslationManager(
       paths.urls.translations,
-      stringsPrefix
+      stringsPrefix,
+      serverSettings
     );
     await translationManager.fetch(currentLocale);
     return translationManager;
@@ -104,8 +106,9 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 
         let command: string;
 
+        const serverSettings = app.serviceManager.serverSettings;
         // Get list of available locales
-        requestTranslationsAPI<any>('')
+        requestTranslationsAPI<any>('', '', {}, serverSettings)
           .then(data => {
             for (const locale in data['data']) {
               const value = data['data'][locale];
