@@ -23,7 +23,7 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 import {
   FormComponentRegistry,
   IFormComponentRegistry
-} from '@jupyterlab/formeditor';
+} from '@jupyterlab/ui-components';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   ISettingEditorTracker,

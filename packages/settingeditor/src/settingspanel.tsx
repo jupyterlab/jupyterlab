@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IFormComponentRegistry } from '@jupyterlab/formeditor';
+import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { ISignal } from '@lumino/signaling';

@@ -10,7 +10,7 @@ import {
   DropDown,
   FormComponentRegistry,
   TextInput
-} from '@jupyterlab/formeditor';
+} from '@jupyterlab/ui-components';
 
 import { JSONExt } from '@lumino/coreutils';
 

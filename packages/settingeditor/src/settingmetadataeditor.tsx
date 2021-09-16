@@ -7,7 +7,7 @@ import {
   FormComponentRegistry,
   FormEditor,
   IFormComponentRegistry
-} from '@jupyterlab/formeditor';
+} from '@jupyterlab/ui-components';
 import { ISchemaValidator, Settings } from '@jupyterlab/settingregistry';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { showDialog } from '@jupyterlab/apputils';

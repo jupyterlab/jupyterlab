@@ -38,7 +38,6 @@
   "dependencies": {
     "@jupyterlab/apputils": "^3.3.0-alpha.10",
     "@jupyterlab/codeeditor": "^3.3.0-alpha.10",
-    "@jupyterlab/formeditor": "^3.0.0-alpha.0",
     "@jupyterlab/inspector": "^3.3.0-alpha.10",
     "@jupyterlab/rendermime": "^3.3.0-alpha.10",
     "@jupyterlab/settingregistry": "^3.3.0-alpha.10",

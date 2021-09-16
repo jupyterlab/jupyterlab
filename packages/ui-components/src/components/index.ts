@@ -11,3 +11,6 @@ export * from './styling';
 export * from './switch';
 export * from './toolbar';
 export * from './vdom';
+export * from './TextInput';
+export * from './StringArrayInput';
+export * from './DropDown';

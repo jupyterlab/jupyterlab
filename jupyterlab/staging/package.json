@@ -49,7 +49,6 @@
     "@jupyterlab/filebrowser-extension": "~3.3.0-alpha.10",
     "@jupyterlab/fileeditor": "~3.3.0-alpha.10",
     "@jupyterlab/fileeditor-extension": "~3.3.0-alpha.10",
-    "@jupyterlab/formeditor": "file:/Users/martha.cryanibm.com/gitrepos/jupyterlab/packages/formeditor",
     "@jupyterlab/help-extension": "~3.3.0-alpha.10",
     "@jupyterlab/htmlviewer": "~3.3.0-alpha.10",
     "@jupyterlab/htmlviewer-extension": "~3.3.0-alpha.10",
