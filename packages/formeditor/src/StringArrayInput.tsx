@@ -273,17 +273,17 @@ export function ArrayInput({ placeholder, onChange, values, label }: IProps) {
             }}
           />
         )}
-        {editingIndex !== 'new' && (
-          <button
-            onClick={() => {
-              setEditingIndex('new');
-            }}
-            className="jp-StringArray-addItem"
-          >
-            Add Item
-          </button>
-        )}
       </ul>
+      {editingIndex !== 'new' && (
+        <button
+          onClick={() => {
+            setEditingIndex('new');
+          }}
+          className="jp-StringArray-addItem"
+        >
+          Add Item
+        </button>
+      )}
     </div>
   );
 }

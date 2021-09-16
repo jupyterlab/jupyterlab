@@ -61,17 +61,28 @@
   display: flex;
   margin-bottom: 5px;
   position: relative;
-  width: 50%;
 }
 
 .jp-StringArray-buttonGroup {
   display: flex;
   position: absolute;
   right: 0;
+  top: 0;
+  bottom: 5px;
 }
 
 .jp-StringArrayInput ul {
   padding-left: 0;
+  max-height: 500px;
+  overflow-y: auto;
+  width: 90%;
+  border: 1px solid var(--jp-border-color0);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.jp-StringArrayInput input {
+  padding: 8px;
 }
 
 .jp-StringArray-buttonGroup button {
@@ -82,6 +93,7 @@
 
 .jp-FormComponent {
   padding-left: 8px;
+  display: flex;
 }
 
 .jp-StringArrayInput button.jp-StringArray-addItem {

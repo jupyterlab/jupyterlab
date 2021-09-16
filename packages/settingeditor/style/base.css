@@ -304,9 +304,9 @@
 #setting-editor .jp-modifiedIndicator {
   width: 5px;
   background-color: var(--jp-brand-color2);
-  height: 91px;
-  float: left;
-  margin-left: -10px;
+  margin-left: -15px;
+  margin-right: 10px;
+  margin-top: 16px;
 }
 
 #setting-editor .jp-SettingsEditor {

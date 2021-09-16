@@ -84,23 +84,25 @@ export const renderCheckbox = (
       {props.uihints.default !== props.value ? (
         <div className="jp-modifiedIndicator" />
       ) : undefined}
-      <h3>{props.uihints.title}</h3>
-      <div className="jp-InputLabelWrapper">
-        <input
-          type="checkbox"
-          checked={props.value}
-          onChange={(e: any) => {
-            props.handleChange(!props.value);
-          }}
-        />
-        <p
-          onClick={(e: any) => {
-            props.handleChange(!props.value);
-          }}
-        >
-          {' '}
-          {description}{' '}
-        </p>
+      <div>
+        <h3>{props.uihints.title}</h3>
+        <div className="jp-InputLabelWrapper">
+          <input
+            type="checkbox"
+            checked={props.value}
+            onChange={(e: any) => {
+              props.handleChange(!props.value);
+            }}
+          />
+          <p
+            onClick={(e: any) => {
+              props.handleChange(!props.value);
+            }}
+          >
+            {' '}
+            {description}{' '}
+          </p>
+        </div>
       </div>
     </div>
   );
