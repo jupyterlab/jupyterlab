@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ServerConnection } from '@jupyterlab/services';
 import { Gettext } from './gettext';
 import { ITranslator, TranslationBundle, TranslatorConnector } from './tokens';
 import { normalizeDomain } from './utils';
@@ -9,8 +10,12 @@ import { normalizeDomain } from './utils';
  * Translation Manager
  */
 export class TranslationManager implements ITranslator {
-  constructor(translationsUrl: string = '', stringsPrefix?: string) {
-    this._connector = new TranslatorConnector(translationsUrl);
+  constructor(
+    translationsUrl: string = '',
+    stringsPrefix?: string,
+    serverSettings?: ServerConnection.ISettings
+  ) {
+    this._connector = new TranslatorConnector(translationsUrl, serverSettings);
     this._stringsPrefix = stringsPrefix || '';
     this._englishBundle = new Gettext({ stringsPrefix: this._stringsPrefix });
   }
