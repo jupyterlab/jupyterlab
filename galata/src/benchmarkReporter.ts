@@ -451,9 +451,7 @@ class BenchmarkReporter implements Reporter {
     reportContent.push('', '</details>', '');
     const reportExtension = 'md';
     const reportContentString = reportContent.join('\n');
-    return new Promise((resolve, reject) => {
-      resolve([reportContentString, reportExtension]);
-    });
+    return [reportContentString, reportExtension];
   }
 
   /**

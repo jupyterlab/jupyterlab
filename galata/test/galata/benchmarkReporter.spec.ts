@@ -104,10 +104,7 @@ test.describe('BenchmarkReporter', () => {
     const reporter = createReporter({
       outputFile: 'test.json',
       comparison: 'snapshot',
-      textReportFactory: allData =>
-        new Promise((resolve, reject) =>
-          resolve(['## This is a custom table', 'txt'])
-        ),
+      textReportFactory: async allData => ['## This is a custom table', 'txt'],
       vegaLiteConfigFactory: (allData, comparison) => GENERAL_CONFIG
     });
     await reporter.onEnd({ status: 'passed' });
