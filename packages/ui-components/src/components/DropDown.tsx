@@ -22,57 +22,56 @@ export interface IDropDownProps {
 export const DropDown: React.FC<FormComponentRegistry.IRendererProps> = ({
   value,
   handleChange,
-  uihints: { defaultError, options, label, description }
+  uihints: { defaultError, options, label, description, defaultValue }
 }) => {
   const [error, setError] = React.useState(defaultError);
-  const [updatedValue, setValue] = React.useState(value);
 
   // This is necessary to rerender with error when clicking the save button.
   React.useEffect(() => {
     setError(defaultError);
   }, [defaultError]);
 
-  React.useEffect(() => {
-    setValue(value);
-  }, [value]);
-
   const handleInputChange = (newValue: string): void => {
-    setValue(newValue);
     handleChange(newValue);
   };
 
   return (
     <div
-      className={`jp-metadataEditor-formInput ${DROPDOWN_ITEM_CLASS} ${
+      className={`jp-FormComponent ${DROPDOWN_ITEM_CLASS} ${
         !!error && 'jp-SettingEditor-error'
       }`}
     >
-      <h3>{label}</h3>
-      <p> {description} </p>
-      <select
-        value={updatedValue}
-        onChange={(event: any): void => {
-          handleInputChange(event.target.value);
-        }}
-      >
-        {options?.map((option: string) => {
-          return (
-            <option
-              key={`${option}MenuItem`}
-              value={option}
-              style={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'flex-start',
-                padding: '18.5px 14px'
-              }}
-            >
-              {option}
-            </option>
-          );
-        })}
-      </select>
-      {!!error && <p>{error}</p>}
+      {defaultValue !== value ? (
+        <div className="jp-modifiedIndicator" />
+      ) : undefined}
+      <div>
+        <h3>{label}</h3>
+        <p> {description} </p>
+        <select
+          value={value}
+          onChange={(event: any): void => {
+            handleInputChange(event.target.value);
+          }}
+        >
+          {options?.map((option: string) => {
+            return (
+              <option
+                key={`${option}MenuItem`}
+                value={option}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'flex-start',
+                  padding: '18.5px 14px'
+                }}
+              >
+                {option}
+              </option>
+            );
+          })}
+        </select>
+        {!!error && <p>{error}</p>}
+      </div>
     </div>
   );
 };

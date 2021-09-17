@@ -7,4 +7,3 @@
 
 export * from './settingeditor';
 export * from './tokens';
-export * from './renderers';

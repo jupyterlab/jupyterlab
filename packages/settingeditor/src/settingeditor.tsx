@@ -77,6 +77,7 @@ export class SettingEditor extends Widget {
         <SettingsPanel
           settings={settings as Settings[]}
           editorRegistry={editorRegistry}
+          editorFactory={editorFactory}
           handleSelectSignal={this._handleSelectSignal}
           onSelect={(id: string) => (this._list.selection = id)}
         />

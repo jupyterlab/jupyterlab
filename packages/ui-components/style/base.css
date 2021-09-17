@@ -15,6 +15,7 @@
 @import './styling.css';
 @import './switch.css';
 @import './toolbar.css';
+@import './formeditor.css';
 
 /* Override Blueprint's _reset.scss styles */
 html {

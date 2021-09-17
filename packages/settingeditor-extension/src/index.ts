@@ -15,22 +15,14 @@ import {
 } from '@jupyterlab/application';
 import {
   ICommandPalette,
-  IThemeManager,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import {
-  FormComponentRegistry,
-  IFormComponentRegistry
-} from '@jupyterlab/ui-components';
+import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   ISettingEditorTracker,
-  renderCheckbox,
-  renderDropdown,
-  renderStringArray,
-  renderTextInput,
   SettingEditor
 } from '@jupyterlab/settingeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -66,7 +58,7 @@ const trackerPlugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     ITranslator,
     IFormComponentRegistry
   ],
-  optional: [ICommandPalette, IThemeManager],
+  optional: [ICommandPalette],
   autoStart: true,
   provides: ISettingEditorTracker,
   activate
@@ -85,8 +77,7 @@ function activate(
   status: ILabStatus,
   translator: ITranslator,
   editorRegistry: IFormComponentRegistry,
-  palette: ICommandPalette | null,
-  themeManager?: IThemeManager
+  palette: ICommandPalette | null
 ): ISettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -104,15 +95,6 @@ function activate(
     args: widget => ({}),
     name: widget => namespace
   });
-
-  editorRegistry.addRenderer('textinput', renderTextInput);
-  editorRegistry.addRenderer('object', renderTextInput);
-  editorRegistry.addRenderer('number', renderTextInput);
-  editorRegistry.addRenderer('integer', renderTextInput);
-  editorRegistry.addRenderer('string', renderTextInput);
-  editorRegistry.addRenderer('dropdown', renderDropdown);
-  editorRegistry.addRenderer('boolean', renderCheckbox);
-  editorRegistry.addRenderer('array', renderStringArray);
 
   commands.addCommand(CommandIDs.open, {
     execute: () => {
@@ -160,15 +142,4 @@ function activate(
   return tracker;
 }
 
-const activateRegistry = (app: JupyterFrontEnd): IFormComponentRegistry => {
-  return new FormComponentRegistry();
-};
-
-const registryPlugin: JupyterFrontEndPlugin<IFormComponentRegistry> = {
-  id: '@jupyterlab/settingeditor-extension:registry-plugin',
-  provides: IFormComponentRegistry,
-  autoStart: true,
-  activate: activateRegistry
-};
-
-export default [trackerPlugin, registryPlugin];
+export default trackerPlugin;

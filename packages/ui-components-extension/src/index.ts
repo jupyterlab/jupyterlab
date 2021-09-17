@@ -9,7 +9,16 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ILabIconManager } from '@jupyterlab/ui-components';
+import {
+  ArrayInput,
+  CheckBox,
+  CodeBlock,
+  DropDown,
+  FormComponentRegistry,
+  IFormComponentRegistry,
+  ILabIconManager,
+  TextInput
+} from '@jupyterlab/ui-components';
 
 /**
  * Placeholder for future extension that will provide an icon manager class
@@ -24,4 +33,25 @@ const labiconManager: JupyterFrontEndPlugin<ILabIconManager> = {
   }
 };
 
-export default labiconManager;
+/**
+ * Sets up the component registry to be used by the FormEditor component.
+ */
+const registryPlugin: JupyterFrontEndPlugin<IFormComponentRegistry> = {
+  id: '@jupyterlab/settingeditor-extension:registry-plugin',
+  provides: IFormComponentRegistry,
+  autoStart: true,
+  activate: (app: JupyterFrontEnd): IFormComponentRegistry => {
+    const editorRegistry = new FormComponentRegistry();
+    editorRegistry.addRenderer('textinput', TextInput);
+    editorRegistry.addRenderer('object', CodeBlock);
+    editorRegistry.addRenderer('number', TextInput);
+    editorRegistry.addRenderer('integer', TextInput);
+    editorRegistry.addRenderer('string', TextInput);
+    editorRegistry.addRenderer('dropdown', DropDown);
+    editorRegistry.addRenderer('boolean', CheckBox);
+    editorRegistry.addRenderer('array', ArrayInput);
+    return editorRegistry;
+  }
+};
+
+export default [labiconManager, registryPlugin];

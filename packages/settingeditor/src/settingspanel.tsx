@@ -3,13 +3,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { ISignal } from '@lumino/signaling';
 import React from 'react';
-import { SettingEditor } from '.';
-import { SettingsMetadataEditor } from './settingmetadataeditor';
+import { SettingEditor } from './settingeditor';
+import { SettingsFormEditor } from './settingmetadataeditor';
 
 interface ISettingsPanelProps {
   /**
@@ -23,6 +24,8 @@ interface ISettingsPanelProps {
    * for the form editor.
    */
   editorRegistry: IFormComponentRegistry;
+
+  editorFactory: CodeEditor.Factory;
 
   /**
    * Handler for when selection change is triggered by scrolling
@@ -42,12 +45,13 @@ interface ISettingsPanelProps {
 }
 
 /**
- * React component that displays a list of SettingsMetadataEditor
+ * React component that displays a list of SettingsFormEditor
  * components.
  */
 export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   settings,
   editorRegistry,
+  editorFactory,
   onSelect,
   handleSelectSignal,
   translator
@@ -105,8 +109,9 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
             ref={editorRefs[pluginSettings.id]}
             key={`${pluginSettings.id}SettingsEditor`}
           >
-            <SettingsMetadataEditor
+            <SettingsFormEditor
               settings={pluginSettings}
+              editorFactory={editorFactory}
               componentRegistry={editorRegistry}
               translator={translator}
             />

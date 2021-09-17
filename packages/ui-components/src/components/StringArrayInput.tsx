@@ -4,18 +4,14 @@
 |----------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { FormComponentRegistry } from '../FormComponentRegistry';
 
 import produce from 'immer';
 import React from 'react';
 
-import { editIcon, trashIcon } from '../icon';
+import { JSONExt } from '@lumino/coreutils';
 
-interface IProps {
-  placeholder?: string;
-  values?: string[];
-  onChange: (values: string[]) => void;
-  label: string;
-}
+import { editIcon, trashIcon } from '../icon';
 
 interface IListItemProps {
   defaultValue?: any;
@@ -207,8 +203,12 @@ export function ArrayListItem({
   );
 }
 
-export function ArrayInput({ placeholder, onChange, values, label }: IProps) {
-  const [items, setItems] = React.useState(values ?? []);
+export const ArrayInput: React.FC<FormComponentRegistry.IRendererProps> = ({
+  value,
+  handleChange,
+  uihints: { placeholder, defaultValue, label }
+}) => {
+  const [items, setItems] = React.useState(value ?? []);
 
   const [editingIndex, setEditingIndex] = useState<number | 'new'>();
 
@@ -216,78 +216,83 @@ export function ArrayInput({ placeholder, onChange, values, label }: IProps) {
     action => {
       const newItems = reducer(items, action);
       setItems(newItems);
-      onChange(newItems);
+      handleChange(newItems);
     },
     [items, setItems]
   );
 
   React.useEffect(() => {
-    setItems(values ?? []);
-  }, [values]);
+    setItems(value ?? []);
+  }, [value]);
 
   return (
-    <div className="jp-metadataEditor-formInput">
-      <h3> {label} </h3>
-      {items.length === 0 ? (
-        <p> No items defined for this field. </p>
-      ) : (
-        <ul>
-          {items.map((item: string, index: number) => (
-            <ArrayListItem
-              key={index}
-              defaultValue={item}
-              placeholder={placeholder}
-              multiline={typeof item !== 'string' && !!item}
-              isEditing={index === editingIndex}
-              onSubmit={value => {
-                setEditingIndex(undefined);
-                handleAction({
-                  type: 'UPSERT_ITEM',
-                  payload: { index, value }
-                });
-              }}
-              onCancel={() => {
-                setEditingIndex(undefined);
-              }}
-              onDelete={() => {
-                handleAction({
-                  type: 'DELETE_ITEM',
-                  payload: { index }
-                });
-              }}
-              onEdit={() => {
-                setEditingIndex(index);
-              }}
-            />
-          ))}
-          {editingIndex === 'new' && (
-            <ArrayListItem
-              placeholder={placeholder}
-              isEditing
-              onSubmit={value => {
-                setEditingIndex(undefined);
-                handleAction({
-                  type: 'UPSERT_ITEM',
-                  payload: { value }
-                });
-              }}
-              onCancel={() => {
-                setEditingIndex(undefined);
-              }}
-            />
-          )}
-        </ul>
-      )}
-      {editingIndex !== 'new' && (
-        <button
-          onClick={() => {
-            setEditingIndex('new');
-          }}
-          className="jp-StringArray-addItem"
-        >
-          Add Item
-        </button>
-      )}
+    <div className="jp-FormComponent jp-StringArrayInput">
+      {!JSONExt.deepEqual(defaultValue, value) ? (
+        <div className="jp-modifiedIndicator" />
+      ) : undefined}
+      <div style={{ width: '100%' }}>
+        <h3> {label} </h3>
+        {items.length === 0 ? (
+          <p> No items defined for this field. </p>
+        ) : (
+          <ul>
+            {items.map((item: string, index: number) => (
+              <ArrayListItem
+                key={index}
+                defaultValue={item}
+                placeholder={placeholder}
+                multiline={typeof item !== 'string' && !!item}
+                isEditing={index === editingIndex}
+                onSubmit={value => {
+                  setEditingIndex(undefined);
+                  handleAction({
+                    type: 'UPSERT_ITEM',
+                    payload: { index, value }
+                  });
+                }}
+                onCancel={() => {
+                  setEditingIndex(undefined);
+                }}
+                onDelete={() => {
+                  handleAction({
+                    type: 'DELETE_ITEM',
+                    payload: { index }
+                  });
+                }}
+                onEdit={() => {
+                  setEditingIndex(index);
+                }}
+              />
+            ))}
+            {editingIndex === 'new' && (
+              <ArrayListItem
+                placeholder={placeholder}
+                isEditing
+                onSubmit={value => {
+                  setEditingIndex(undefined);
+                  handleAction({
+                    type: 'UPSERT_ITEM',
+                    payload: { value }
+                  });
+                }}
+                onCancel={() => {
+                  setEditingIndex(undefined);
+                }}
+              />
+            )}
+          </ul>
+        )}
+        {editingIndex !== 'new' && (
+          <button
+            onClick={() => {
+              setEditingIndex('new');
+            }}
+            className="jp-StringArray-addItem"
+          >
+            Add Item
+          </button>
+        )}
+      </div>
     </div>
   );
-}
+};

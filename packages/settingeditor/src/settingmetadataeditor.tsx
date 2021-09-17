@@ -11,6 +11,7 @@ import {
 import { ISchemaValidator, Settings } from '@jupyterlab/settingregistry';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { showDialog } from '@jupyterlab/apputils';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import React from 'react';
 import { Button } from '@jupyterlab/ui-components';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -18,6 +19,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 interface IProps {
   settings: Settings;
   componentRegistry: IFormComponentRegistry;
+  editorFactory: CodeEditor.Factory;
   translator?: ITranslator;
 }
 
@@ -25,9 +27,10 @@ interface IProps {
  * A React component that prepares the settings for a
  * given plugin to be rendered in the FormEditor.
  */
-export const SettingsMetadataEditor = ({
+export const SettingsFormEditor = ({
   settings,
   componentRegistry,
+  editorFactory,
   translator
 }: IProps) => {
   const [schema, setSchema] = React.useState({} as FormEditor.ISchema);
@@ -61,7 +64,7 @@ export const SettingsMetadataEditor = ({
     fieldName: string,
     category?: { id: string; label: string }
   ): FormComponentRegistry.IRendererProps => {
-    return {
+    const props = {
       value: category?.id
         ? (settings.get(category?.id).composite as any)[fieldName]
         : settings.get(fieldName).composite,
@@ -70,7 +73,9 @@ export const SettingsMetadataEditor = ({
       uihints: {
         ...options,
         category: category,
+        defaultValue: options.default,
         label: options.title ? _trans.__(options.title) : fieldName,
+        options: options.enum,
         type: options.enum
           ? 'dropdown'
           : typeof options.type === 'object'
@@ -79,6 +84,10 @@ export const SettingsMetadataEditor = ({
         title: options.title ? _trans.__(options.title) : fieldName
       }
     };
+    if (props.uihints.type === 'object') {
+      options.editorFactory = editorFactory;
+    }
+    return props;
   };
 
   /**

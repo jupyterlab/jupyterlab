@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-.jp-metadataEditor-formInput h3 {
+.jp-FormComponent h3 {
   font-size: var(--jp-content-font-size2);
   color: var(--jp-ui-font-color0);
   padding: 5px;
@@ -22,15 +22,15 @@
   border-bottom: 1px solid var(--jp-border-color2);
 }
 
-.jp-metadataEditor-formInput p {
+.jp-FormComponent p {
   font-size: var(--jp-content-font-size2);
   margin-bottom: 5px;
   margin-left: 5px;
 }
 
-.jp-metadataEditor-formInput input,
-.jp-metadataEditor-formInput select,
-.jp-metadataEditor-formInput textarea {
+.jp-FormComponent input,
+.jp-FormComponent select,
+.jp-FormComponent textarea {
   font-size: var(--jp-content-font-size2);
   border-color: var(--jp-input-border-color);
   border-style: solid;
@@ -96,7 +96,7 @@
   display: flex;
 }
 
-.jp-metadataEditor-formInput {
+.jp-FormComponent {
   width: 100%;
 }
 
