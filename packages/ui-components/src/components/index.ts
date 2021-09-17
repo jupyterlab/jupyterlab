@@ -14,4 +14,4 @@ export * from './vdom';
 export * from './TextInput';
 export * from './StringArrayInput';
 export * from './DropDown';
-export * from './Checkbox';
+export * from './CheckBox';
