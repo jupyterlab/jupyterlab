@@ -251,8 +251,6 @@ export class Context<
     const lock = await this._provider.acquireLock();
     const contentIsInitialized = await this._provider.requestInitialContent();
     let promise;
-    console.debug('Saving content');
-    await new Promise(f => setTimeout(f, 10000));
     if (isNew || contentIsInitialized) {
       promise = this._save();
     } else {
