@@ -458,7 +458,10 @@ By default, Galata will generate a text report in the form of `markdown` table a
         vegaLiteConfigFactory: (
           allData: Array<IReportRecord>, // All test records
           comparison: 'snapshot' | 'project'// Logic of test comparisons:'snapshot' or 'project'.
-        ) => JSONObject = ..., // Return the Vega-Lite graph configuration.
+        ) => {
+          // Return a Vega-Lite graph configuration object
+          return {};
+        }
         textReportFactory: (
           allData: Array<IReportRecord> // All test records
         ) => Promise<[string, string]> = ... // Return a promise of two strings, the first one
