@@ -408,7 +408,6 @@ export class YNotebook
    * Handle a change to the ystate.
    */
   private _onMetadataChanged = (event: Y.YMapEvent<any>) => {
-    console.debug('YModel: ', event);
     if (event.keysChanged.has('metadata')) {
       const change = event.changes.keys.get('metadata');
       const metadataChange = {

@@ -433,9 +433,7 @@ close the notebook without saving it.`,
     if (changes.metadataChange) {
       const metadata = changes.metadataChange.newValue as JSONObject;
       this._modelDBMutex(() => {
-        console.debug('_onStateChanged:');
         Object.entries(metadata).forEach(([key, value]) => {
-          console.debug(key, value);
           this.metadata.set(key, value);
         });
       });
@@ -446,11 +444,8 @@ close the notebook without saving it.`,
     metadata: IObservableJSON,
     change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
   ): void {
-    console.debug('_onMetadataChanged');
-    console.debug(change);
     if (change.key !== 'kernelspec' && change.key !== 'language_info') {
       this._modelDBMutex(() => {
-        console.debug(metadata.toJSON());
         this.sharedModel.updateMetadata(metadata.toJSON());
       });
     }
