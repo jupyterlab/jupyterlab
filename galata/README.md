@@ -446,7 +446,7 @@ Galata can be configured by using [command line arguments](https://playwright.de
 
 By default, Galata will generate a text report in the form of `markdown` table and a [_Vega-Lite_](https://vega.github.io/vega-lite) graph of execution time distribution. Users can customize these reports in two ways:
 
-- Using `playwright.config.js` file: in `reporter` section, users can supply two functions `vegaLiteConfigFactory` and `textReportFactory` to the reporter's constructor options. These functions will be used to create Vega-Lite configuration (`vegaLiteConfigFactory`) or to create a text report (`textReportFactory`) from test records.
+- Using `playwright.config.js` file: in `reporter` section, users can supply two functions `vegaLiteConfigFactory` and `textReportFactory` to the reporter's constructor options. These functions will be used to create [Vega-Lite configuration](https://vega.github.io/vega-lite/docs/) (`vegaLiteConfigFactory`) or to create a text report (`textReportFactory`) from test records.
 
 ```javascript
 //An example of `playwright.config.js` with customized builder
