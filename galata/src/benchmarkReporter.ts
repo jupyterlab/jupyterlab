@@ -179,7 +179,7 @@ class BenchmarkReporter implements Reporter {
    *   - comparison: Logic of test comparisons: 'snapshot' or 'project'
    *      * 'snapshot': (default) This will compare the 'actual' result with the 'expected' one
    *      * 'project': This will compare the different project
-   *   - vegaLiteConfigFactory: Function to create  VegaLite configuration from test records.
+   *   - vegaLiteConfigFactory: Function to create VegaLite configuration from test records; see https://vega.github.io/vega-lite/docs/.
    *   - textReportFactory: Function to create  text report from test records, this function
    *   should return the content and extension of report file.
    */
