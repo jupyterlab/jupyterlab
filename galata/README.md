@@ -464,8 +464,10 @@ By default, Galata will generate a text report in the form of `markdown` table a
         }
         textReportFactory: (
           allData: Array<IReportRecord> // All test records
-        ) => Promise<[string, string]> = ... // Return a promise of two strings, the first one
-        //is the content of report, the second one this the extension of report file
+        ) => {
+          // Return a promise of with the tuple [report content, file extension]
+          return Promise.resolve(['My report content', 'md']);
+        }
       }
     ],
     ...
