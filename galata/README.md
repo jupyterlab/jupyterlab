@@ -449,7 +449,7 @@ By default, Galata will generate a text report in the form of `markdown` table a
 - Using `playwright.config.js` file: in `reporter` section, users can supply two functions `vegaLiteConfigFactory` and `textReportFactory` to the reporter's constructor options. These functions will be used to create [Vega-Lite configuration](https://vega.github.io/vega-lite/docs/) (`vegaLiteConfigFactory`) or to create a text report (`textReportFactory`) from test records.
 
 ```javascript
-//An example of `playwright.config.js` with customized builder
+  // An example of `playwright.config.js` with customized builder
   reporter: [
     ...,
     [
