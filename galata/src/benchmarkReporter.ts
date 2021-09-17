@@ -206,11 +206,11 @@ class BenchmarkReporter implements Reporter {
     this._reference =
       process.env['BENCHMARK_REFERENCE'] ?? benchmark.DEFAULT_REFERENCE;
 
-    this._buildReportGraphConfig =
-      options.vegaLiteConfigFactory ?? this.defaultBuildReportGraphConfig;
+    this._buildVegaLiteGraph =
+      options.vegaLiteConfigFactory ?? this.defaultVegaLiteConfigFactory;
 
-    this._buildMarkdownTable =
-      options.textReportFactory ?? this.defaultBuildMarkdownTable;
+    this._buildTextReport =
+      options.textReportFactory ?? this.defaultTextReportFactory;
   }
 
   /**
@@ -317,7 +317,7 @@ class BenchmarkReporter implements Reporter {
       const [
         reportContentString,
         reportExtension
-      ] = await this._buildMarkdownTable(allData);
+      ] = await this._buildTextReport(allData);
       const reportFile = path.resolve(
         outputDir,
         `${baseName}.${reportExtension}`
@@ -326,7 +326,7 @@ class BenchmarkReporter implements Reporter {
 
       // Generate graph file and image
       const graphConfigFile = path.resolve(outputDir, `${baseName}.vl.json`);
-      const config = this._buildReportGraphConfig(allData, this._comparison);
+      const config = this._buildVegaLiteGraph(allData, this._comparison);
       fs.writeFileSync(graphConfigFile, JSON.stringify(config), 'utf-8');
       const vegaSpec = vl.compile(config as any).spec;
 
@@ -356,7 +356,7 @@ class BenchmarkReporter implements Reporter {
   }
 
   /**
-   * Default markdown table builder of `BenchmarkReporter`, this method will
+   * Default text report factory of `BenchmarkReporter`, this method will
    * be used by to generate markdown report. Users can customize the builder
    * by supplying another builder to constructor's option or override this
    * method on a sub-class.
@@ -365,7 +365,7 @@ class BenchmarkReporter implements Reporter {
    * @return {Promise<[string, string]>} A list of two strings, the first one
    * is the content of report, the second one is the extension of report file.
    */
-  protected async defaultBuildMarkdownTable(
+  protected async defaultTextReportFactory(
     allData: Array<IReportRecord>
   ): Promise<[string, string]> {
     // Compute statistics
@@ -455,7 +455,7 @@ class BenchmarkReporter implements Reporter {
   }
 
   /**
-   * Default graph builder of `BenchmarkReporter`, this method will
+   * Default Vega Lite config factory of `BenchmarkReporter`, this method will
    * be used by to generate VegaLite configuration. Users can customize
    * the builder by supplying another builder to constructor's option or
    * override this method on a sub-class.
@@ -464,7 +464,7 @@ class BenchmarkReporter implements Reporter {
    * 'snapshot' or 'project'.
    * @return {*}  {Record<string, any>} :  VegaLite configuration
    */
-  protected defaultBuildReportGraphConfig(
+  protected defaultVegaLiteConfigFactory(
     allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project'
   ): Record<string, any> {
@@ -533,11 +533,11 @@ class BenchmarkReporter implements Reporter {
   private _outputFile: string;
   private _reference: string;
   private _report: IReportRecord[];
-  private _buildReportGraphConfig: (
+  private _buildVegaLiteGraph: (
     allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project'
   ) => Record<string, any>;
-  private _buildMarkdownTable: (
+  private _buildTextReport: (
     allData: Array<IReportRecord>
   ) => Promise<[string, string]>;
 }

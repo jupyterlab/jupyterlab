@@ -474,7 +474,7 @@ By default, Galata will generate a text report in the form of `markdown` table a
   ]
 ```
 
-- The second way to customize the reports is to override the default text report builder (`defaultBuildMarkdownTable`) and Vega-Lite graph builder (`defaultBuildReportGraphConfig`) of `BenchmarkReporter` class in a sub-class and then use it as a reporter in `playwright.config.js` file.
+- The second way to customize the reports is to override the default text report factory (`defaultTextReportFactory`) and Vega-Lite graph config factory (`defaultVegaLiteConfigFactory`) of `BenchmarkReporter` class in a sub-class and then use it as a reporter in `playwright.config.js` file.
 
 ## Reference Image Captures
 
