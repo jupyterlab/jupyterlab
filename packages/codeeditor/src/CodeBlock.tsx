@@ -4,11 +4,11 @@
 |----------------------------------------------------------------------------*/
 
 import React from 'react';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeEditor } from './editor';
 
 import { JSONExt } from '@lumino/coreutils';
 
-import { FormComponentRegistry } from '../FormComponentRegistry';
+import { FormComponentRegistry } from '@jupyterlab/ui-components';
 
 interface ICodeBlockRendererProps extends FormComponentRegistry.IRendererProps {
   uihints: {
@@ -44,10 +44,6 @@ export const CodeBlock: React.FC<ICodeBlockRendererProps> = ({
     return (): void => {
       editorRef.current?.model.value.changed.disconnect(handleChange);
     };
-    // NOTE: The parent component is unstable so props change frequently causing
-    // new editors to be created unnecessarily. This effect on mount should only
-    // run on mount. Keep in mind this could have side effects, for example if
-    // the `handleChange` callback actually does change.
   }, []);
 
   React.useEffect(() => {

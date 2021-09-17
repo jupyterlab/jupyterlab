@@ -12,6 +12,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../codeeditor"
     }
   ]
 }

@@ -9,10 +9,10 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { CodeBlock } from '@jupyterlab/codeeditor';
 import {
   ArrayInput,
   CheckBox,
-  CodeBlock,
   DropDown,
   FormComponentRegistry,
   IFormComponentRegistry,
