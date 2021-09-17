@@ -447,11 +447,13 @@ close the notebook without saving it.`,
     change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
   ): void {
     console.debug('_onMetadataChanged');
-    console.debug(metadata.toJSON());
     console.debug(change);
-    this._modelDBMutex(() => {
-      this.sharedModel.updateMetadata(metadata.toJSON());
-    });
+    if (change.key !== 'kernelspec' && change.key !== 'language_info') {
+      this._modelDBMutex(() => {
+        console.debug(metadata.toJSON());
+        this.sharedModel.updateMetadata(metadata.toJSON());
+      });
+    }
     this.triggerContentChange();
   }
 

@@ -305,6 +305,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     event: IObservableJSON.IChangedArgs
   ): void {
     const metadata = this.sharedModel.getMetadata();
+    console.debug('CELL.onModelDBMetadataChange:', event);
     this._modelDBMutex(() => {
       switch (event.type) {
         case 'add':
@@ -333,6 +334,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     metadata: Partial<models.ISharedBaseCellMetadata>,
     event: IObservableJSON.IChangedArgs
   ): void {
+    console.debug('CELL._changeCellMetadata:', event);
     switch (event.key) {
       case 'jupyter':
         metadata.jupyter = event.newValue as any;
@@ -373,6 +375,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     sender: models.ISharedCodeCell,
     change: models.CellChange<models.ISharedBaseCellMetadata>
   ): void {
+    console.debug('CELL._onSharedModelChanged:', change);
     super._onSharedModelChanged(sender, change);
     this._modelDBMutex(() => {
       if (change.metadataChange) {
@@ -380,6 +383,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
           ?.newValue as models.ISharedBaseCellMetadata;
         if (newValue) {
           Object.keys(newValue).map(key => {
+            console.debug(key);
             switch (key) {
               case 'collapsed':
                 this.metadata.set('collapsed', newValue.jupyter);

@@ -209,6 +209,10 @@ export class TagTool extends NotebookTools.Tool {
         this.refreshTags();
         this.loadActiveTags();
       });
+      this.tracker.currentWidget.content.activeCellChanged.connect(() => {
+        this.refreshTags();
+        this.loadActiveTags();
+      });
     }
     this.tracker.currentChanged.connect(() => {
       this.refreshTags();
