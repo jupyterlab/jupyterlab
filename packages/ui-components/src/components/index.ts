@@ -15,4 +15,3 @@ export * from './TextInput';
 export * from './StringArrayInput';
 export * from './DropDown';
 export * from './Checkbox';
-export * from './CodeBlock';
