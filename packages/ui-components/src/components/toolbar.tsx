@@ -163,13 +163,6 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     super();
     this.addClass(TOOLBAR_CLASS);
     this.layout = new ToolbarLayout();
-    this.insertItem(
-      0,
-      'toolbar-popup-opener',
-      (this.popupOpener as unknown) as T
-    );
-    this.popupOpener.hide();
-    this._resizer = new Throttler(this._onResize.bind(this), 500);
   }
 
   /**
@@ -201,22 +194,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   addItem(name: string, widget: T): boolean {
     const layout = this.layout as ToolbarLayout;
-    return this.insertItem(layout.widgets.length - 1, name, widget);
-  }
-
-  /**
-   * Dispose of the widget and its descendant widgets.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-
-    if (this._resizer) {
-      this._resizer.dispose();
-    }
-
-    super.dispose();
+    return this.insertItem(layout.widgets.length, name, widget);
   }
 
   /**
@@ -242,12 +220,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     }
     widget.addClass(TOOLBAR_ITEM_CLASS);
     const layout = this.layout as ToolbarLayout;
-    if (widget instanceof ToolbarPopupOpener) {
-      layout.insertWidget(index, widget);
-    } else {
-      const j = Math.max(0, Math.min(index, layout.widgets.length - 1));
-      layout.insertWidget(j, widget);
-    }
+
+    const j = Math.max(0, Math.min(index, layout.widgets.length));
+    layout.insertWidget(j, widget);
+
     Private.nameProperty.set(widget, name);
     return true;
   }
@@ -302,7 +278,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
       return { name: name, index: i };
     });
     const target = find(nameWithIndex, x => x.name === at);
-    if (target && !(target instanceof ToolbarPopupOpener)) {
+    if (target) {
       return this.insertItem(target.index + offset, name, widget);
     }
     return false;
@@ -367,6 +343,68 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
+  }
+}
+
+/**
+ * A class which provides a toolbar widget.
+ */
+export class ReactiveToolbar<T extends Widget = Widget> extends Toolbar<T> {
+  /**
+   * Construct a new toolbar widget.
+   */
+  constructor() {
+    super();
+    this.insertItem(
+      0,
+      'toolbar-popup-opener',
+      (this.popupOpener as unknown) as T
+    );
+    this.popupOpener.hide();
+    this._resizer = new Throttler(this._onResize.bind(this), 500);
+  }
+
+  /**
+   * Dispose of the widget and its descendant widgets.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    if (this._resizer) {
+      this._resizer.dispose();
+    }
+
+    super.dispose();
+  }
+
+  /**
+   * Insert an item into the toolbar at the specified index.
+   *
+   * @param index - The index at which to insert the item.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertItem(index: number, name: string, widget: T): boolean {
+    if (widget instanceof ToolbarPopupOpener) {
+      return super.insertItem(index, name, widget);
+    } else {
+      const j = Math.max(
+        0,
+        Math.min(index, (this.layout as ToolbarLayout).widgets.length - 1)
+      );
+      return super.insertItem(j, name, widget);
+    }
   }
 
   protected onResize(msg: Widget.ResizeMessage): void {
@@ -464,7 +502,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     return this._widgetWidths![widgetName];
   }
 
-  readonly popupOpener: ToolbarPopupOpener = new ToolbarPopupOpener();
+  protected readonly popupOpener: ToolbarPopupOpener = new ToolbarPopupOpener();
   private readonly _widgetWidths: { [key: string]: number } = {};
   private readonly _resizer: Throttler;
 }
@@ -679,7 +717,7 @@ export class ToolbarButton extends ReactWidget {
   /**
    * Returns the click handler for the button
    */
-  get onClick() {
+  get onClick(): () => void {
     return this._onClick!;
   }
 
@@ -860,8 +898,6 @@ class ToolbarPopup extends Widget {
  *  the toolbar items overflow toolbar width
  */
 class ToolbarPopupOpener extends ToolbarButton {
-  readonly _popup: ToolbarPopup;
-
   /**
    *  Create a new popup opener
    */
@@ -873,14 +909,20 @@ class ToolbarPopupOpener extends ToolbarButton {
       }
     });
     this.addClass('jp-Toolbar-responsive-opener');
-    this._popup = new ToolbarPopup();
+    this.popup = new ToolbarPopup();
+  }
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.popup.dispose();
+    super.dispose();
   }
 
   protected handleClick() {
-    const popup = this._popup;
-    popup.updateWidth(this.parent!.node.clientWidth);
-    popup.alignTo(this.parent!);
-    popup.setHidden(!popup.isHidden);
+    this.updatePopup();
+    this.popup.setHidden(!this.popup.isHidden);
   }
 
   /**
@@ -888,8 +930,8 @@ class ToolbarPopupOpener extends ToolbarButton {
    *  to align with the toolbar
    */
   updatePopup() {
-    this._popup.updateWidth(this.parent!.node.clientWidth);
-    this._popup.alignTo(this.parent!);
+    this.popup.updateWidth(this.parent!.node.clientWidth);
+    this.popup.alignTo(this.parent!);
   }
 
   /**
@@ -897,14 +939,14 @@ class ToolbarPopupOpener extends ToolbarButton {
    * @param widget the widget to add
    */
   addWidget(widget: Widget) {
-    this._popup.insertWidget(0, widget);
+    this.popup.insertWidget(0, widget);
   }
 
   /**
    *  Returns total no of widgets in the popup
    */
   widgetCount() {
-    return this._popup.widgetCount();
+    return this.popup.widgetCount();
   }
 
   /**
@@ -912,7 +954,7 @@ class ToolbarPopupOpener extends ToolbarButton {
    * @param index
    */
   widgetAt(index: number) {
-    return this._popup.widgetAt(index);
+    return this.popup.widgetAt(index);
   }
 
   /**
@@ -920,8 +962,10 @@ class ToolbarPopupOpener extends ToolbarButton {
    */
   hide() {
     super.hide();
-    this._popup.hide();
+    this.popup.hide();
   }
+
+  protected popup: ToolbarPopup;
 }
 
 /**
