@@ -258,6 +258,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this
     ));
     this._skipLinkWidget.show();
+    //  Wrap the skip widget to customize its position and size
+    const skipLinkWrapper = new Panel();
+    skipLinkWrapper.addClass('jp-skiplink-wrapper');
+    skipLinkWrapper.addWidget(skipLinkWidget);
 
     const headerPanel = (this._headerPanel = new BoxPanel());
     const menuHandler = (this._menuHandler = new Private.PanelHandler());
@@ -365,7 +369,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     BoxLayout.setStretch(hboxPanel, 1);
     BoxLayout.setStretch(bottomPanel, 0);
 
-    rootLayout.addWidget(skipLinkWidget);
+    rootLayout.addWidget(skipLinkWrapper);
     rootLayout.addWidget(headerPanel);
     rootLayout.addWidget(topHandler.panel);
     rootLayout.addWidget(hboxPanel);
