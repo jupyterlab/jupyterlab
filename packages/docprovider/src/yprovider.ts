@@ -190,8 +190,6 @@ export class WebSocketProviderWithLocks
    * Returns a Promise that resolves to the lock number.
    */
   acquireLock(): Promise<number> {
-    // keep two locks the first and the second
-    // the first one to identify and the second to keep updating the timeout
     if (this._currentLockRequest) {
       return this._currentLockRequest.promise;
     }
