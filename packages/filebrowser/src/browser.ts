@@ -10,6 +10,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
+  FilenameSearcher,
   newFolderIcon,
   ReactWidget,
   refreshIcon,
@@ -21,7 +22,6 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
 import { FilterFileBrowserModel } from './model';
-import { FilenameSearcher } from './search';
 import { Uploader } from './upload';
 
 /**
