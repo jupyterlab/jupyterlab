@@ -346,6 +346,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   }
 }
 
+const TOOLBAR_OPENER_NAME = 'toolbar-popup-opener';
 /**
  * A class which provides a toolbar widget.
  */
@@ -355,11 +356,7 @@ export class ReactiveToolbar<T extends Widget = Widget> extends Toolbar<T> {
    */
   constructor() {
     super();
-    this.insertItem(
-      0,
-      'toolbar-popup-opener',
-      (this.popupOpener as unknown) as T
-    );
+    this.insertItem(0, TOOLBAR_OPENER_NAME, (this.popupOpener as unknown) as T);
     this.popupOpener.hide();
     this._resizer = new Throttler(this._onResize.bind(this), 500);
   }
@@ -377,6 +374,30 @@ export class ReactiveToolbar<T extends Widget = Widget> extends Toolbar<T> {
     }
 
     super.dispose();
+  }
+
+  /**
+   * Insert an item into the toolbar at the after a target item.
+   *
+   * @param at - The target item to insert after.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar or if the target
+   *   is the toolbar pop-up opener.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertAfter(at: string, name: string, widget: T): boolean {
+    if (at === TOOLBAR_OPENER_NAME) {
+      return false;
+    }
+    return super.insertAfter(at, name, widget);
   }
 
   /**

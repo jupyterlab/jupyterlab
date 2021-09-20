@@ -7,6 +7,7 @@ import {
   bugIcon,
   CommandToolbarButton,
   jupyterIcon,
+  ReactiveToolbar,
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
@@ -14,7 +15,7 @@ import { framePromise, JupyterServer } from '@jupyterlab/testutils';
 import { toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 const server = new JupyterServer();
@@ -149,12 +150,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('foo', new Widget());
         widget.addItem('bar', new Widget());
         widget.addItem('baz', new Widget());
-        expect(toArray(widget.names())).toEqual([
-          'foo',
-          'bar',
-          'baz',
-          'toolbar-popup-opener'
-        ]);
+        expect(toArray(widget.names())).toEqual(['foo', 'bar', 'baz']);
       });
     });
 
@@ -182,24 +178,14 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
-        expect(toArray(widget.names())).toEqual([
-          'a',
-          'c',
-          'b',
-          'toolbar-popup-opener'
-        ]);
+        expect(toArray(widget.names())).toEqual(['a', 'c', 'b']);
       });
 
       it('should clamp the bounds', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(10, 'c', new Widget());
-        expect(toArray(widget.names())).toEqual([
-          'a',
-          'b',
-          'c',
-          'toolbar-popup-opener'
-        ]);
+        expect(toArray(widget.names())).toEqual(['a', 'b', 'c']);
       });
     });
 
@@ -209,13 +195,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
         widget.insertAfter('c', 'd', new Widget());
-        expect(toArray(widget.names())).toEqual([
-          'a',
-          'c',
-          'd',
-          'b',
-          'toolbar-popup-opener'
-        ]);
+        expect(toArray(widget.names())).toEqual(['a', 'c', 'd', 'b']);
       });
 
       it('should return false if the target item does not exist', () => {
@@ -232,13 +212,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
         widget.insertBefore('c', 'd', new Widget());
-        expect(toArray(widget.names())).toEqual([
-          'a',
-          'd',
-          'c',
-          'b',
-          'toolbar-popup-opener'
-        ]);
+        expect(toArray(widget.names())).toEqual(['a', 'd', 'c', 'b']);
       });
 
       it('should return false if the target item does not exist', () => {
@@ -395,6 +369,60 @@ describe('@jupyterlab/ui-components', () => {
         const iconNode = wrapperNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains(iconClassValue)).toBe(true);
         cmd.dispose();
+      });
+    });
+  });
+
+  describe('ReactiveToolbar', () => {
+    let toolbar: ReactiveToolbar;
+
+    beforeEach(() => {
+      toolbar = new ReactiveToolbar();
+      Widget.attach(toolbar, document.body);
+    });
+
+    afterEach(() => {
+      toolbar.dispose();
+    });
+
+    describe('#constructor()', () => {
+      it('should append a node to body for the pop-up', () => {
+        const popup = document.body.querySelector(
+          '.jp-Toolbar-responsive-popup'
+        );
+        expect(popup).toBeDefined();
+        expect(popup!.parentNode!.nodeName).toEqual('BODY');
+      });
+    });
+
+    describe('#addItem()', () => {
+      it('should insert item before the toolbar pop-up button', () => {
+        const w = new Widget();
+        toolbar.addItem('test', w);
+        expect(
+          (toolbar.layout as PanelLayout).widgets.findIndex(v => v === w)
+        ).toEqual((toolbar.layout as PanelLayout).widgets.length - 2);
+      });
+    });
+
+    describe('#insertItem()', () => {
+      it('should insert item before the toolbar pop-up button', () => {
+        const w = new Widget();
+        toolbar.insertItem(2, 'test', w);
+        expect(
+          (toolbar.layout as PanelLayout).widgets.findIndex(v => v === w)
+        ).toEqual((toolbar.layout as PanelLayout).widgets.length - 2);
+      });
+    });
+
+    describe('#insertAfter()', () => {
+      it('should not insert item after the toolbar pop-up button', () => {
+        const w = new Widget();
+        const r = toolbar.insertAfter('toolbar-popup-opener', 'test', w);
+        expect(r).toEqual(false);
+        expect(
+          (toolbar.layout as PanelLayout).widgets.findIndex(v => v === w)
+        ).toEqual(-1);
       });
     });
   });
