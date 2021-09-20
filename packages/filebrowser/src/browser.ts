@@ -113,7 +113,11 @@ export class FileBrowser extends Widget {
     });
 
     this._filenameSearcher = FilenameSearcher({
-      listing: this.listing,
+      updateFilter: (filterFn: (item: string) => boolean) => {
+        this.listing.model.setFilter(value => {
+          return filterFn(value.name.toLowerCase());
+        });
+      },
       useFuzzyFilter: this._useFuzzyFilter,
       placeholder: this._trans.__('Filter files by name')
     });
@@ -183,7 +187,11 @@ export class FileBrowser extends Widget {
     this._useFuzzyFilter = value;
 
     this._filenameSearcher = FilenameSearcher({
-      listing: this.listing,
+      updateFilter: (filterFn: (item: string) => boolean) => {
+        this.listing.model.setFilter(value => {
+          return filterFn(value.name.toLowerCase());
+        });
+      },
       useFuzzyFilter: this._useFuzzyFilter,
       placeholder: this._trans.__('Filter files by name'),
       forceRefresh: true

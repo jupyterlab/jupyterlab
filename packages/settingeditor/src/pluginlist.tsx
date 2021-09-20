@@ -8,14 +8,13 @@ import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   classes,
-  InputGroup,
+  FilterBox,
   LabIcon,
   settingsIcon
 } from '@jupyterlab/ui-components';
-import { StringExt } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 /**
  * The JupyterLab plugin schema key for the setting editor
@@ -34,132 +33,6 @@ const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
  * icon label of a plugin.
  */
 const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
-
-/**
- * A text match score with associated content item.
- */
-interface IScore {
-  /**
-   * The numerical score for the text match.
-   */
-  score: number;
-
-  /**
-   * The indices of the text matches.
-   */
-  indices: number[] | null;
-}
-
-interface ISearcherProps {
-  listing: ISettingRegistry.IPlugin[];
-  setFilter: (filter: (plugin: ISettingRegistry.IPlugin) => boolean) => void;
-  useFuzzyFilter: boolean;
-  placeholder?: string;
-  forceRefresh?: boolean;
-}
-
-/**
- * Perform a fuzzy search on a single item.
- */
-function fuzzySearch(source: string, query: string): IScore | null {
-  // Set up the match score and indices array.
-  let score = Infinity;
-  let indices: number[] | null = null;
-
-  // The regex for search word boundaries
-  const rgx = /\b\w/g;
-
-  let continueSearch = true;
-
-  // Search the source by word boundary.
-  while (continueSearch) {
-    // Find the next word boundary in the source.
-    let rgxMatch = rgx.exec(source);
-
-    // Break if there is no more source context.
-    if (!rgxMatch) {
-      break;
-    }
-
-    // Run the string match on the relevant substring.
-    let match = StringExt.matchSumOfDeltas(source, query, rgxMatch.index);
-
-    // Break if there is no match.
-    if (!match) {
-      break;
-    }
-
-    // Update the match if the score is better.
-    if (match && match.score <= score) {
-      score = match.score;
-      indices = match.indices;
-    }
-  }
-
-  // Bail if there was no match.
-  if (!indices || score === Infinity) {
-    return null;
-  }
-
-  // Handle a split match.
-  return {
-    score,
-    indices
-  };
-}
-
-const Searcher = (props: ISearcherProps) => {
-  const [filter, setFilter] = useState('');
-
-  if (props.forceRefresh) {
-    useEffect(() => {
-      props.setFilter((item: ISettingRegistry.IPlugin) => {
-        return true;
-      });
-    }, []);
-  }
-
-  /**
-   * Handler for search input changes.
-   */
-  const handleChange = (e: React.FormEvent<HTMLElement>) => {
-    const target = e.target as HTMLInputElement;
-    setFilter(target.value);
-    props.setFilter((item: ISettingRegistry.IPlugin) => {
-      if (props.useFuzzyFilter) {
-        // Run the fuzzy search for the item and query.
-        const name = item.schema?.title?.toLowerCase() ?? '';
-        const query = target.value.toLowerCase();
-        let score = fuzzySearch(name, query);
-        // Ignore the item if it is not a match.
-        if (!score) {
-          item.indices = [];
-          return false;
-        }
-        item.indices = score.indices;
-        return true;
-      }
-      const i = item.id.indexOf(target.value);
-      if (i === -1) {
-        item.indices = [];
-        return false;
-      }
-      item.indices = [...Array(target.value.length).keys()].map(x => x + i);
-      return true;
-    });
-  };
-
-  return (
-    <InputGroup
-      type="text"
-      rightIcon="ui-components:search"
-      placeholder={props.placeholder}
-      onChange={handleChange}
-      value={filter}
-      className="jp-PluginList-Searcher"
-    />
-  );
-};
 
 /**
  * A list of plugins with editable settings.
@@ -325,8 +198,10 @@ export class PluginList extends ReactWidget {
     return typeof hint === 'string' ? hint : '';
   }
 
-  setFilter(filter: (item: ISettingRegistry.IPlugin) => boolean) {
-    this._filter = filter;
+  setFilter(filter: (item: string) => boolean) {
+    this._filter = (value: ISettingRegistry.IPlugin) => {
+      return filter(value.schema.title?.toLowerCase() ?? '');
+    };
     this.update();
   }
 
@@ -384,9 +259,8 @@ export class PluginList extends ReactWidget {
 
     return (
       <div>
-        <Searcher
-          listing={this._allPlugins}
-          setFilter={this.setFilter}
+        <FilterBox
+          updateFilter={this.setFilter}
           useFuzzyFilter={true}
           placeholder={'Search...'}
           forceRefresh={false}
