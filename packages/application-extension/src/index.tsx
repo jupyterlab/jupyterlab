@@ -77,6 +77,8 @@ namespace CommandIDs {
 
   export const resetLayout: string = 'application:reset-layout';
 
+  export const toggleHeader: string = 'application:toggle-header';
+
   export const toggleMode: string = 'application:toggle-mode';
 
   export const toggleLeftArea: string = 'application:toggle-left-area';
@@ -281,8 +283,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         }
       });
 
+      commands.addCommand(CommandIDs.toggleHeader, {
+        label: trans.__('Show Header'),
+        execute: () => {
+          if (labShell.mode === 'single-document') {
+            labShell.toggleTopInSimpleModeVisibility();
+          }
+        },
+        isToggled: () => labShell.isTopInSimpleModeVisible(),
+        isVisible: () => labShell.mode === 'single-document'
+      });
+
       commands.addCommand(CommandIDs.toggleLeftArea, {
-        label: () => trans.__('Show Left Sidebar'),
+        label: trans.__('Show Left Sidebar'),
         execute: () => {
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
@@ -298,7 +311,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
 
       commands.addCommand(CommandIDs.toggleRightArea, {
-        label: () => trans.__('Show Right Sidebar'),
+        label: trans.__('Show Right Sidebar'),
         execute: () => {
           if (labShell.rightCollapsed) {
             labShell.expandRight();
@@ -381,6 +394,15 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
               .catch(reason => {
                 console.error('Failed to undo presentation mode.', reason);
               });
+          }
+          // Display title header
+          if (
+            labShell.mode === 'single-document' &&
+            !labShell.isTopInSimpleModeVisible()
+          ) {
+            commands.execute(CommandIDs.resetLayout).catch(reason => {
+              console.error('Failed to display title header.', reason);
+            });
           }
           // Display side tabbar
           (['left', 'right'] as ('left' | 'right')[]).forEach(side => {

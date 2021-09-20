@@ -157,6 +157,11 @@ export namespace ILabShell {
     readonly rightArea: ISideArea | null;
 
     /**
+     * The top area of the user interface.
+     */
+    readonly topArea: ITopArea | null;
+
+    /**
      * The relatives sizes of the areas of the user interface.
      */
     readonly relativeSizes: number[] | null;
@@ -223,6 +228,16 @@ export namespace ILabShell {
 }
 
 /**
+ * The restorable description of the top area in the user interface.
+ */
+export interface ITopArea {
+  /**
+   * Top area visibility in simple mode.
+   */
+  readonly simpleVisibility: boolean;
+}
+
+/**
  * The application shell for JupyterLab.
  */
 export class LabShell extends Widget implements JupyterFrontEnd.IShell {
@@ -237,6 +252,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const trans = ((options && options.translator) || nullTranslator).load(
       'jupyterlab'
     );
+
+    // Skip Links
+    const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
+      this
+    ));
+    this._skipLinkWidget.show();
+
     const headerPanel = (this._headerPanel = new BoxPanel());
     const menuHandler = (this._menuHandler = new Private.PanelHandler());
     menuHandler.panel.node.setAttribute('role', 'navigation');
@@ -343,6 +365,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     BoxLayout.setStretch(hboxPanel, 1);
     BoxLayout.setStretch(bottomPanel, 0);
 
+    rootLayout.addWidget(skipLinkWidget);
     rootLayout.addWidget(headerPanel);
     rootLayout.addWidget(topHandler.panel);
     rootLayout.addWidget(hboxPanel);
@@ -388,16 +411,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._topHandler.addWidget(this._menuHandler.panel, 100);
       titleHandler.hide();
     } else {
-      rootLayout.insertWidget(2, this._menuHandler.panel);
+      rootLayout.insertWidget(3, this._menuHandler.panel);
     }
-
-    // Skip Links
-    const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
-      this
-    ));
-
-    this.add(skipLinkWidget, 'top', { rank: 0 });
-    this._skipLinkWidget.show();
 
     // Wire up signals to update the title panel of the simple interface mode to
     // follow the title of this.currentWidget
@@ -531,9 +546,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       }
 
       // Adjust menu and title
-      (this.layout as BoxLayout).insertWidget(2, this._menuHandler.panel);
+      (this.layout as BoxLayout).insertWidget(3, this._menuHandler.panel);
       this._titleHandler.show();
       this._updateTitlePanelTitle();
+      if (this._topHandlerHiddenByUser) {
+        this._topHandler.panel.hide();
+      }
     } else {
       // Cache a reference to every widget currently in the dock panel.
       const widgets = toArray(dock.widgets());
@@ -816,6 +834,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Whether the top bar in simple mode is visible or not.
+   *
+   * @returns Top bar visibility
+   */
+  isTopInSimpleModeVisible(): boolean {
+    return !this._topHandlerHiddenByUser;
+  }
+
+  /**
    * True if the given area is empty.
    */
   isEmpty(area: ILabShell.Area): boolean {
@@ -845,7 +872,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Restore the layout state for the application shell.
    */
   restoreLayout(mode: DockPanel.Mode, layout: ILabShell.ILayout): void {
-    const { mainArea, downArea, leftArea, rightArea, relativeSizes } = layout;
+    const {
+      mainArea,
+      downArea,
+      leftArea,
+      rightArea,
+      topArea,
+      relativeSizes
+    } = layout;
     // Rehydrate the main area.
     if (mainArea) {
       const { currentWidget, dock } = mainArea;
@@ -863,6 +897,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       // This is needed when loading in an empty workspace in single doc mode
       if (mode) {
         this.mode = mode;
+      }
+    }
+
+    if (topArea?.simpleVisibility !== undefined) {
+      this._topHandlerHiddenByUser = !topArea.simpleVisibility;
+      if (this.mode === 'single-document') {
+        this._topHandler.panel.setHidden(this._topHandlerHiddenByUser);
       }
     }
 
@@ -969,10 +1010,31 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate(),
+      topArea: { simpleVisibility: !this._topHandlerHiddenByUser },
       relativeSizes: this._hsplitPanel.relativeSizes()
     };
 
     return layout;
+  }
+
+  /**
+   * Toggle top header visibility in simple mode
+   *
+   * Note: Does nothing in multi-document mode
+   */
+  toggleTopInSimpleModeVisibility(): void {
+    if (this.mode === 'single-document') {
+      if (this._topHandler.panel.isVisible) {
+        this._topHandlerHiddenByUser = true;
+        this._topHandler.panel.hide();
+      } else {
+        this._topHandlerHiddenByUser = false;
+        this._topHandler.panel.show();
+
+        this._updateTitlePanelTitle();
+      }
+      this._onLayoutModified();
+    }
   }
 
   /**
@@ -1423,6 +1485,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _hsplitPanel: Private.RestorableSplitPanel;
   private _vsplitPanel: Private.RestorableSplitPanel;
   private _topHandler: Private.PanelHandler;
+  private _topHandlerHiddenByUser = false;
   private _menuHandler: Private.PanelHandler;
   private _skipLinkWidget: Private.SkipLinkWidget;
   private _titleHandler: Private.TitleHandler;

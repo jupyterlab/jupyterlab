@@ -162,6 +162,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       downArea: null,
       leftArea: null,
       rightArea: null,
+      topArea: null,
       relativeSizes: null
     };
     const layout = this._connector.fetch(KEY);
@@ -178,7 +179,8 @@ export class LayoutRestorer implements ILayoutRestorer {
         down,
         left,
         right,
-        relativeSizes
+        relativeSizes,
+        top
       } = data as Private.ILayout;
 
       // If any data exists, then this is not a fresh session.
@@ -202,7 +204,8 @@ export class LayoutRestorer implements ILayoutRestorer {
         downArea,
         leftArea,
         rightArea,
-        relativeSizes: relativeSizes || null
+        relativeSizes: relativeSizes || null,
+        topArea: (top as any) ?? null
       };
     } catch (error) {
       return blank;
@@ -292,6 +295,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     dehydrated.left = this._dehydrateSideArea(data.leftArea);
     dehydrated.right = this._dehydrateSideArea(data.rightArea);
     dehydrated.relativeSizes = data.relativeSizes;
+    dehydrated.top = { ...data.topArea };
 
     return this._connector.save(KEY, dehydrated);
   }
@@ -537,6 +541,11 @@ namespace Private {
      * The relatives sizes of the areas of the user interface.
      */
     relativeSizes?: number[] | null;
+
+    /**
+     * The restorable description of the top area in the user interface.
+     */
+    top?: ITopArea | null;
   }
 
   /**
@@ -602,6 +611,16 @@ namespace Private {
      * The index of the selected tab.
      */
     currentIndex: number;
+  }
+
+  /**
+   * The restorable description of the top area in the user interface.
+   */
+  export interface ITopArea extends PartialJSONObject {
+    /**
+     * Top area visibility in simple mode.
+     */
+    readonly simpleVisibility?: boolean;
   }
 
   /**
