@@ -80,6 +80,7 @@ import { ResizeHandle } from './resizeHandle';
 
 import { Signal } from '@lumino/signaling';
 import { addIcon } from '@jupyterlab/ui-components';
+import { Mode } from '@jupyterlab/codemirror';
 
 /**
  * The CSS class added to cell widgets.
@@ -219,6 +220,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     const input = (this._input = new InputArea({
       model,
       contentFactory,
+      editorConfig: options.editorConfig,
       updateOnShow: options.updateEditorOnShow,
       placeholder: options.placeholder
     }));
@@ -236,18 +238,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
 
-    // Editor settings
-    if (options.editorConfig) {
-      let editorOptions: any = {};
-      Object.keys(options.editorConfig).forEach(
-        (key: keyof CodeEditor.IConfig) => {
-          editorOptions[key] = options.editorConfig?.[key] ?? null;
-        }
-      );
-      this.editor.setOptions(editorOptions);
-    }
-
     model.metadata.changed.connect(this.onMetadataChanged, this);
+
+    this.rendered = true;
   }
 
   /**
@@ -283,14 +276,14 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Get the CodeEditorWrapper used by the cell.
    */
-  get editorWidget(): CodeEditorWrapper {
+  get editorWidget(): CodeEditorWrapper | null {
     return this._input.editorWidget;
   }
 
   /**
    * Get the CodeEditor used by the cell.
    */
-  get editor(): CodeEditor.IEditor {
+  get editor(): CodeEditor.IEditor | null {
     return this._input.editor;
   }
 
@@ -323,6 +316,27 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       this.saveEditableState();
     }
     this.update();
+  }
+
+  /**
+   * Whether the cell is rendered.
+   */
+  get rendered(): boolean {
+    return this._rendered;
+  }
+  set rendered(value: boolean) {
+    if (value === this._rendered) {
+      return;
+    }
+    this._rendered = value;
+    this._handleRendered();
+    // Refreshing an editor can be really expensive, so we don't call it from
+    // _handleRendered, since _handledRendered is also called on every update
+    // request.
+    if (!this._rendered) {
+      this.showEditor();
+      this.editor?.refresh();
+    }
   }
 
   /**
@@ -498,6 +512,53 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
+   * Render an input instead of the text editor.
+   */
+  protected renderInput(widget: Widget): void {
+    this.addClass(RENDERED_CLASS);
+    this.inputArea.renderInput(widget);
+  }
+
+  /**
+   * Show the text editor instead of rendered input.
+   */
+  protected showEditor(): void {
+    this.removeClass(RENDERED_CLASS);
+    this.inputArea.showEditor();
+  }
+
+  /**
+   * Handle the rendered state.
+   */
+  protected _handleRendered(): void {
+    if (!this._rendered) {
+      this.showEditor();
+    } else {
+      // TODO: It would be nice for the cell to provide a way for
+      // its consumers to hook into when the rendering is done.
+      const text = this.model?.value.text ?? '';
+      if (text !== this._prevText) {
+        const view = new Widget({ node: document.createElement('div') });
+        view.addClass('jp-CodeMirrorEditor');
+        view.addClass('jp-Editor');
+        view.addClass('jp-InputArea-editor');
+        const pre = document.createElement('pre');
+        // TODO use theme
+        pre.classList.add('cm-s-jupyter');
+        view.node.appendChild(pre);
+
+        void Mode.ensure(this.model.mimeType).then(mode => {
+          if (mode) {
+            Mode.run(text, mode.mime, pre);
+          }
+        });
+
+        this.renderInput(view);
+      }
+    }
+  }
+
+  /**
    * Handle `after-attach` messages.
    */
   protected onAfterAttach(msg: Message): void {
@@ -508,7 +569,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.editor.focus();
+    this.editor?.focus();
   }
 
   /**
@@ -516,7 +577,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    */
   protected onFitRequest(msg: Message): void {
     // need this for for when a theme changes font size
-    this.editor.refresh();
+    this.editor!.refresh();
   }
 
   /**
@@ -527,8 +588,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       return;
     }
     // Handle read only state.
-    if (this.editor.getOption('readOnly') !== this._readOnly) {
-      this.editor.setOption('readOnly', this._readOnly);
+    if (this.editor?.getOption('readOnly') !== this._readOnly) {
+      this.editor?.setOption('readOnly', this._readOnly);
       this.toggleClass(READONLY_CLASS, this._readOnly);
     }
   }
@@ -557,6 +618,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   // Used in clone() to instantiate a new instance of the current widget
+  protected _prevText: string;
+  protected _rendered = false;
   protected translator: ITranslator;
   private _readOnly = false;
   private _model: T;
@@ -1300,7 +1363,7 @@ export abstract class AttachmentsCell<
             continue;
           }
           items[i].getAsString(text => {
-            this.editor.replaceSelection?.(text);
+            // TODO this.editor.replaceSelection?.(text);
           });
         }
         this._attachFiles(event.clipboardData.items);
@@ -1450,7 +1513,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Construct a Markdown cell widget.
    */
   constructor(options: MarkdownCell.IOptions) {
-    super(options);
+    super({
+      ...options,
+      // Stop codemirror handling paste
+      editorConfig: { ...options.editorConfig, handlePaste: false }
+    });
     this.addClass(MARKDOWN_CELL_CLASS);
     const trans = this.translator.load('jupyterlab');
     this.node.setAttribute('aria-label', trans.__('Markdown Cell Content'));
@@ -1461,9 +1528,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         model: this.model.attachments
       })
     });
-
-    // Stop codemirror handling paste
-    this.editor.setOption('handlePaste', false);
 
     // Check if heading cell is set to be collapsed
     this._headingCollapsed = (this.model.metadata.get(
@@ -1554,26 +1618,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return this._toggleCollapsedSignal;
   }
 
-  /**
-   * Whether the cell is rendered.
-   */
-  get rendered(): boolean {
-    return this._rendered;
-  }
-  set rendered(value: boolean) {
-    if (value === this._rendered) {
-      return;
-    }
-    this._rendered = value;
-    this._handleRendered();
-    // Refreshing an editor can be really expensive, so we don't call it from
-    // _handleRendered, since _handledRendered is also called on every update
-    // request.
-    if (!this._rendered) {
-      this.editor.refresh();
-    }
-  }
-
   protected maybeCreateCollapseButton(): void {
     if (
       this.headingInfo.level > 0 &&
@@ -1652,17 +1696,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Render an input instead of the text editor.
    */
   protected renderInput(widget: Widget): void {
-    this.addClass(RENDERED_CLASS);
     this.renderCollapseButtons(widget);
-    this.inputArea.renderInput(widget);
-  }
-
-  /**
-   * Show the text editor instead of rendered input.
-   */
-  protected showEditor(): void {
-    this.removeClass(RENDERED_CLASS);
-    this.inputArea.showEditor();
+    super.renderInput(widget);
   }
 
   /*
@@ -1681,23 +1716,25 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     attachmentName: string,
     URI?: string
   ): void {
-    const textToBeAppended = `![${attachmentName}](attachment:${
-      URI ?? attachmentName
-    })`;
-    this.editor.replaceSelection?.(textToBeAppended);
+    // const textToBeAppended = `![${attachmentName}](attachment:${
+    //   URI ?? attachmentName
+    // })`;
+    // TODO this.editor.replaceSelection?.(textToBeAppended);
   }
 
   /**
    * Handle the rendered state.
    */
-  private _handleRendered(): void {
+  protected _handleRendered(): void {
     if (!this._rendered) {
       this.showEditor();
     } else {
       // TODO: It would be nice for the cell to provide a way for
       // its consumers to hook into when the rendering is done.
-      void this._updateRenderedInput();
-      this.renderInput(this._renderer!);
+      if (this._rendermime) {
+        void this._updateRenderedInput();
+        this.renderInput(this._renderer!);
+      }
     }
   }
 
@@ -1740,8 +1777,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _toggleCollapsedSignal = new Signal<this, boolean>(this);
   private _renderer: IRenderMime.IRenderer | null = null;
   private _rendermime: IRenderMimeRegistry;
-  private _rendered = true;
-  private _prevText = '';
   private _ready = new PromiseDelegate<void>();
 }
 

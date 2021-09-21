@@ -91,7 +91,15 @@ export namespace Mode {
   export function run(
     code: string,
     mode: string | ISpec,
-    el: HTMLElement
+    el:
+      | HTMLElement
+      | ((
+          text: string,
+          style?: string | null,
+          row?: number,
+          column?: number,
+          state?: any
+        ) => void)
   ): void {
     CodeMirror.runMode(code, mode, el);
   }

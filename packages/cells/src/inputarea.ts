@@ -56,19 +56,15 @@ export class InputArea extends Widget {
     prompt.addClass(INPUT_AREA_PROMPT_CLASS);
 
     // Editor
-    const editorOptions = {
+    this._editorConfig = {
+      config: options.editorConfig,
       model,
       factory: contentFactory.editorFactory,
       updateOnShow: options.updateOnShow
     };
-    const editor = (this._editor = new CodeEditorWrapper(editorOptions));
-    editor.addClass(INPUT_AREA_EDITOR_CLASS);
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(prompt);
-    if (!options.placeholder) {
-      layout.addWidget(editor);
-    }
   }
 
   /**
@@ -84,15 +80,15 @@ export class InputArea extends Widget {
   /**
    * Get the CodeEditorWrapper used by the cell.
    */
-  get editorWidget(): CodeEditorWrapper {
+  get editorWidget(): CodeEditorWrapper | null {
     return this._editor;
   }
 
   /**
    * Get the CodeEditor used by the cell.
    */
-  get editor(): CodeEditor.IEditor {
-    return this._editor.editor;
+  get editor(): CodeEditor.IEditor | null {
+    return this._editor?.editor ?? null;
   }
 
   /**
@@ -110,9 +106,11 @@ export class InputArea extends Widget {
     if (this._rendered) {
       this._rendered.parent = null;
     }
-    this._editor.hide();
+    this._editor?.hide();
     this._rendered = widget;
     layout.addWidget(widget);
+    this._editor?.dispose();
+    this._editor = null;
   }
 
   /**
@@ -121,6 +119,11 @@ export class InputArea extends Widget {
   showEditor(): void {
     if (this._rendered) {
       this._rendered.parent = null;
+    }
+    if (this._editor === null) {
+      this._editor = new CodeEditorWrapper(this._editorConfig);
+      this._editor.addClass(INPUT_AREA_EDITOR_CLASS);
+      (this.layout as PanelLayout).addWidget(this._editor);
     }
     this._editor.show();
   }
@@ -146,8 +149,9 @@ export class InputArea extends Widget {
     super.dispose();
   }
 
+  protected _editorConfig: CodeEditorWrapper.IOptions;
   private _prompt: IInputPrompt;
-  private _editor: CodeEditorWrapper;
+  private _editor: CodeEditorWrapper | null;
   private _rendered: Widget;
 }
 
@@ -170,6 +174,8 @@ export namespace InputArea {
      * Defaults to one that uses CodeMirror.
      */
     contentFactory?: IContentFactory;
+
+    editorConfig?: Partial<CodeEditor.IConfig>;
 
     /**
      * Whether to send an update request to the editor when it is shown.

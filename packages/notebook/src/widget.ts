@@ -450,7 +450,12 @@ export class StaticNotebook extends Widget {
     const cells = newValue.cells;
     if (!cells.length && newValue.isInitialized) {
       cells.push(
-        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
+        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {
+          mimeType:
+            this.notebookConfig.defaultCell === 'code'
+              ? this._mimetype
+              : undefined
+        })
       );
     }
 
@@ -496,7 +501,12 @@ export class StaticNotebook extends Widget {
               model.cells.push(
                 model.contentFactory.createCell(
                   this.notebookConfig.defaultCell,
-                  {}
+                  {
+                    mimeType:
+                      this.notebookConfig.defaultCell === 'code'
+                        ? this._mimetype
+                        : undefined
+                  }
                 )
               );
             }
@@ -531,17 +541,18 @@ export class StaticNotebook extends Widget {
     let widget: Cell;
     switch (cell.type) {
       case 'code':
+        // Set first the mimetype to avoid triggering widget update
+        // cell.mimeType = this._mimetype;
         widget = this._createCodeCell(cell as ICodeCellModel);
-        widget.model.mimeType = this._mimetype;
         break;
       case 'markdown':
         widget = this._createMarkdownCell(cell as IMarkdownCellModel);
-        if (cell.value.text === '') {
-          (widget as MarkdownCell).rendered = false;
-        }
         break;
       default:
         widget = this._createRawCell(cell as IRawCellModel);
+    }
+    if (cell.value.text === '') {
+      widget.rendered = false;
     }
     widget.addClass(NB_CELL_CLASS);
 
@@ -766,12 +777,10 @@ export class StaticNotebook extends Widget {
           config = this._editorConfig.raw;
           break;
       }
-      let editorOptions: any = {};
-      Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-        editorOptions[key] = config[key] ?? null;
-      });
-      cell.editor.setOptions(editorOptions);
-      cell.editor.refresh();
+
+      // TODO set the config at the cell level (aka update the model)
+      cell.editor!.setOptions({ ...config });
+      cell.editor!.refresh();
     }
   }
 
@@ -1132,9 +1141,7 @@ export class Notebook extends StaticNotebook {
         this.deselect(widget);
       });
       //  Edit mode unrenders an active markdown widget.
-      if (activeCell instanceof MarkdownCell) {
-        activeCell.rendered = false;
-      }
+      activeCell!.rendered = false;
       activeCell!.inputHidden = false;
     } else {
       // Focus on the notebook document, which blurs the active cell.
@@ -1173,7 +1180,7 @@ export class Notebook extends StaticNotebook {
       this._activeCell = cell;
       this._activeCellChanged.emit(cell);
     }
-    if (this.mode === 'edit' && cell instanceof MarkdownCell) {
+    if (this.mode === 'edit') {
       cell.rendered = false;
     }
     this._ensureFocus();
@@ -1613,7 +1620,7 @@ export class Notebook extends StaticNotebook {
     // Fallback:
     for (const w of this.widgets) {
       if (w instanceof Cell) {
-        w.editorWidget.update();
+        w.editorWidget?.update();
       }
     }
   }
@@ -1692,15 +1699,19 @@ export class Notebook extends StaticNotebook {
         if (!cell.isDisposed) {
           // Setup the selection style for collaborators.
           const localCollaborator = modelDB.collaborators!.localCollaborator;
-          cell.editor.uuid = localCollaborator.sessionId;
-          cell.editor.selectionStyle = {
-            ...CodeEditor.defaultSelectionStyle,
-            color: localCollaborator.color
-          };
+          // TODO
+          if (cell.editor) {
+            cell.editor.uuid = localCollaborator.sessionId;
+            cell.editor.selectionStyle = {
+              ...CodeEditor.defaultSelectionStyle,
+              color: localCollaborator.color
+            };
+          }
         }
       });
     }
-    cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
+    // TODO
+    cell.editor?.edgeRequested.connect(this._onEdgeRequest, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
     this.activeCellIndex =
@@ -1763,7 +1774,7 @@ export class Notebook extends StaticNotebook {
     if (location === 'top') {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
-      if (this.activeCellIndex < prev) {
+      if (this.activeCellIndex < prev && this.activeCell?.editor) {
         const editor = this.activeCell!.editor;
         const lastLine = editor.lineCount - 1;
         editor.setCursorPosition({ line: lastLine, column: 0 });
@@ -1771,7 +1782,7 @@ export class Notebook extends StaticNotebook {
     } else if (location === 'bottom') {
       this.activeCellIndex++;
       // Move the cursor to the first character.
-      if (this.activeCellIndex > prev) {
+      if (this.activeCellIndex > prev && this.activeCell?.editor) {
         const editor = this.activeCell!.editor;
         editor.setCursorPosition({ line: 0, column: 0 });
       }
@@ -1785,8 +1796,8 @@ export class Notebook extends StaticNotebook {
   private _ensureFocus(force = false): void {
     const activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
-      if (!activeCell.editor.hasFocus()) {
-        activeCell.editor.focus();
+      if (!activeCell.editor?.hasFocus()) {
+        activeCell.editor?.focus();
       }
     }
     if (force && !this.node.contains(document.activeElement)) {
@@ -1857,7 +1868,7 @@ export class Notebook extends StaticNotebook {
     const [target, index] = this._findEventTargetAndCell(event);
     const widget = this.widgets[index];
 
-    if (widget && widget.editorWidget.node.contains(target)) {
+    if (widget && widget.editorWidget?.node.contains(target)) {
       // Prevent CodeMirror from focusing the editor.
       // TODO: find an editor-agnostic solution.
       event.preventDefault();
@@ -1880,7 +1891,7 @@ export class Notebook extends StaticNotebook {
       button === 2 &&
       !shiftKey &&
       widget &&
-      widget.editorWidget.node.contains(target)
+      widget.editorWidget?.node.contains(target)
     ) {
       this.mode = 'command';
 
@@ -1911,7 +1922,7 @@ export class Notebook extends StaticNotebook {
 
     let targetArea: 'input' | 'prompt' | 'cell' | 'notebook';
     if (widget) {
-      if (widget.editorWidget.node.contains(target)) {
+      if (widget.editorWidget?.node.contains(target)) {
         targetArea = 'input';
       } else if (widget.promptNode.contains(target)) {
         targetArea = 'prompt';
@@ -2295,13 +2306,13 @@ export class Notebook extends StaticNotebook {
     if (index !== -1) {
       const widget = this.widgets[index];
       // If the editor itself does not have focus, ensure command mode.
-      if (!widget.editorWidget.node.contains(target)) {
+      if (!widget.editorWidget?.node.contains(target)) {
         this.mode = 'command';
       }
       this.activeCellIndex = index;
       // If the editor has focus, ensure edit mode.
-      const node = widget.editorWidget.node;
-      if (node.contains(target)) {
+      const node = widget.editorWidget?.node;
+      if (node?.contains(target)) {
         this.mode = 'edit';
       }
       this.activeCellIndex = index;
@@ -2328,7 +2339,7 @@ export class Notebook extends StaticNotebook {
     const index = this._findCell(relatedTarget);
     if (index !== -1) {
       const widget = this.widgets[index];
-      if (widget.editorWidget.node.contains(relatedTarget)) {
+      if (widget.editorWidget?.node.contains(relatedTarget)) {
         return;
       }
     }
@@ -2366,10 +2377,10 @@ export class Notebook extends StaticNotebook {
       return;
     }
     this.activeCellIndex = index;
-    if (model.cells.get(index).type === 'markdown') {
-      const widget = this.widgets[index] as MarkdownCell;
-      widget.rendered = false;
-    } else if (target.localName === 'img') {
+
+    this.widgets[index].rendered = false;
+
+    if (target.localName === 'img') {
       target.classList.toggle(UNCONFINED_CLASS);
     }
   }
@@ -2382,7 +2393,9 @@ export class Notebook extends StaticNotebook {
     for (let i = 0; i < this.widgets.length; i++) {
       if (i !== this._activeCellIndex) {
         const cell = this.widgets[i];
-        cell.model.selections.delete(cell.editor.uuid);
+        if (cell.editor) {
+          cell.model.selections.delete(cell.editor.uuid);
+        }
       }
     }
   }

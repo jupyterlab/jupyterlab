@@ -124,7 +124,7 @@ export class DebuggerSources implements IDebugger.ISources {
           }
           this._shell.activateById(notebookPanel.id);
         }
-        editors.push(cell.editor);
+        editors.push(cell.editor!);
       });
     });
     return editors;
@@ -161,7 +161,7 @@ export class DebuggerSources implements IDebugger.ISources {
         if (source !== codeId) {
           return;
         }
-        editors.push(cell.editor);
+        editors.push(cell.editor!);
         if (focus) {
           this._shell.activateById(consoleWidget.id);
         }

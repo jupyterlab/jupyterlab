@@ -66,7 +66,7 @@ class CodeComponent extends React.Component<IProperties, IState> {
    */
   render(): JSX.Element {
     // Get the current rendered CodeMirror:
-    let html = this.state.heading.cellRef!.editor.host.innerHTML;
+    let html = this.state.heading.cellRef!.editor?.host.innerHTML ?? '';
 
     // Sanitize the HTML:
     html = this.props.sanitizer.sanitize(html, sanitizerOptions);

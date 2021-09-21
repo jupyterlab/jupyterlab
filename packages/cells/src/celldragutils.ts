@@ -97,7 +97,7 @@ export namespace CellDragUtils {
   ): ICellTargetArea {
     let targetArea: ICellTargetArea;
     if (cell) {
-      if (cell.editorWidget.node.contains(target)) {
+      if (cell.editorWidget?.node.contains(target)) {
         targetArea = 'input';
       } else if (cell.promptNode.contains(target)) {
         targetArea = 'prompt';

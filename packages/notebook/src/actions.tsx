@@ -158,7 +158,7 @@ export namespace NotebookActions {
     const nbModel = notebook.model;
     const index = notebook.activeCellIndex;
     const child = notebook.widgets[index];
-    const editor = child.editor;
+    const editor = child.editor!;
     const selections = editor.getSelections();
     const orig = child.model.value.text;
 
@@ -216,7 +216,7 @@ export namespace NotebookActions {
     const activeCellDelta = start !== end ? 2 : 1;
     notebook.activeCellIndex = index + clones.length - activeCellDelta;
     const focusedEditor = notebook.activeCell.editor;
-    focusedEditor.focus();
+    focusedEditor?.focus();
 
     Private.handleState(notebook, state);
   }
@@ -320,9 +320,9 @@ export namespace NotebookActions {
 
     // If the original cell is a markdown cell, make sure
     // the new cell is unrendered.
-    if (primary instanceof MarkdownCell) {
-      (notebook.activeCell as MarkdownCell).rendered = false;
-    }
+    // if (primary instanceof MarkdownCell) {
+    (notebook.activeCell as MarkdownCell).rendered = false;
+    // }
 
     Private.handleState(notebook, state);
   }
@@ -752,7 +752,7 @@ export namespace NotebookActions {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
-    notebook.activeCell.editor.replaceSelection?.(text);
+    notebook.activeCell.editor?.replaceSelection?.(text);
   }
 
   /**
@@ -1993,9 +1993,9 @@ namespace Private {
   ): Promise<boolean> {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
+    cell.rendered = true;
     switch (cell.model.type) {
       case 'markdown':
-        (cell as MarkdownCell).rendered = true;
         cell.inputHidden = false;
         executed.emit({ notebook, cell, success: true });
         break;
@@ -2207,8 +2207,8 @@ namespace Private {
       if (value === 'markdown') {
         // Fetch the new widget and unrender it.
         child = notebook.widgets[index];
-        (child as MarkdownCell).rendered = false;
       }
+      child.rendered = false;
     });
     cells.endCompoundOperation();
     notebook.deselectAll();

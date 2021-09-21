@@ -305,11 +305,11 @@ export class CodeConsole extends Widget {
     if (shouldExecute) {
       // Create a new prompt cell before kernel execution to allow typeahead.
       this.newPromptCell();
-      this.promptCell!.editor.focus();
+      this.promptCell!.editor?.focus();
       await this._execute(promptCell);
     } else {
       // add a newline if we shouldn't execute
-      promptCell.editor.newIndentedLine();
+      promptCell.editor?.newIndentedLine();
     }
   }
 
@@ -347,7 +347,7 @@ export class CodeConsole extends Widget {
     if (!promptCell) {
       return;
     }
-    promptCell.editor.newIndentedLine();
+    promptCell.editor?.newIndentedLine();
   }
 
   /**
@@ -360,7 +360,7 @@ export class CodeConsole extends Widget {
     if (!promptCell) {
       return;
     }
-    promptCell.editor.replaceSelection?.(text);
+    promptCell.editor?.replaceSelection?.(text);
   }
 
   /**
@@ -543,7 +543,7 @@ export class CodeConsole extends Widget {
     if (!this.promptCell) {
       this.newPromptCell();
     } else {
-      this.promptCell.editor.focus();
+      this.promptCell.editor?.focus();
       this.update();
     }
   }
@@ -597,7 +597,7 @@ export class CodeConsole extends Widget {
 
     // Suppress the default "Enter" key handling.
     const editor = promptCell.editor;
-    editor.addKeydownHandler(this._onEditorKeydown);
+    editor?.addKeydownHandler(this._onEditorKeydown);
 
     this._history.editor = editor;
     this._promptCellCreated.emit(promptCell);
@@ -637,7 +637,7 @@ export class CodeConsole extends Widget {
       this.promptCell &&
       this.promptCell.node.contains(event.target as HTMLElement)
     ) {
-      this.promptCell.editor.focus();
+      this.promptCell.editor?.focus();
     }
   }
 
