@@ -395,12 +395,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
                 console.error('Failed to undo presentation mode.', reason);
               });
           }
-          // Display title header
+          // Display top header
           if (
             labShell.mode === 'single-document' &&
             !labShell.isTopInSimpleModeVisible()
           ) {
-            commands.execute(CommandIDs.resetLayout).catch(reason => {
+            commands.execute(CommandIDs.toggleHeader).catch(reason => {
               console.error('Failed to display title header.', reason);
             });
           }
@@ -434,6 +434,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.closeAll,
         CommandIDs.closeOtherTabs,
         CommandIDs.closeRightTabs,
+        CommandIDs.toggleHeader,
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
         CommandIDs.togglePresentationMode,
