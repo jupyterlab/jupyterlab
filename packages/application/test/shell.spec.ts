@@ -174,14 +174,14 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'top');
       // top-level title and menu area are added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(4);
+      expect(toArray(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'top');
       // top-level title and menu area are added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(3);
+      expect(toArray(shell.widgets('top')).length).toEqual(2);
     });
 
     it('should accept options', () => {
@@ -189,7 +189,7 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'top', { rank: 10 });
       // top-level title and menu area are added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(4);
+      expect(toArray(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should add widgets according to their ranks', () => {
