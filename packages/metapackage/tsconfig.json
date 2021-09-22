@@ -265,6 +265,9 @@
       "path": "../ui-components-extension"
     },
     {
+      "path": "../user"
+    },
+    {
       "path": "../vdom"
     },
     {

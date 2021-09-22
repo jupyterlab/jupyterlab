@@ -89,6 +89,7 @@
   --jp-icon-tree-view: url('icons/toolbar/tree-view.svg');
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
   --jp-icon-undo: url('icons/toolbar/undo.svg');
+  --jp-icon-user: url('icons/sidebar/user.svg');
   --jp-icon-vega: url('icons/filetype/vega.svg');
   --jp-icon-yaml: url('icons/filetype/yaml.svg');
 }
@@ -325,6 +326,9 @@
 }
 .jp-UndoIcon {
   background-image: var(--jp-icon-undo);
+}
+.jp-UserIcon {
+  background-image: var(--jp-icon-user);
 }
 .jp-VegaIcon {
   background-image: var(--jp-icon-vega);
