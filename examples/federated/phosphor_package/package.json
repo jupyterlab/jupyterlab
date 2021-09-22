@@ -1,17 +1,17 @@
 {
   "name": "@jupyterlab/example-federated-phosphor",
-  "version": "2.2.12",
+  "version": "2.2.13",
   "private": true,
   "scripts": {
     "build": "npm run clean && build-labextension --core-path ../core_package .",
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-phosphor"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.1.11",
+    "@jupyterlab/apputils": "^3.1.12",
     "@phosphor/coreutils": "^1.0.0"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.1.12",
+    "@jupyterlab/builder": "^3.1.13",
     "rimraf": "~3.0.0"
   },
   "publishConfig": {
