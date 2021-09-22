@@ -5,5 +5,21 @@
     "rootDir": "src"
   },
   "include": ["src/*"],
-  "references": []
+  "references": [
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docprovider"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../ui-components"
+    }
+  ]
 }

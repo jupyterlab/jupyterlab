@@ -41,6 +41,16 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@jupyterlab/apputils": "^3.3.0-alpha.10",
+    "@jupyterlab/coreutils": "^5.3.0-alpha.10",
+    "@jupyterlab/docprovider": "^3.3.0-alpha.10",
+    "@jupyterlab/services": "^6.3.0-alpha.10",
+    "@jupyterlab/ui-components": "^3.3.0-alpha.10",
+    "@lumino/commands": "^1.12.0",
+    "@lumino/coreutils": "^1.5.3",
+    "@lumino/signaling": "^1.4.3",
+    "@lumino/widgets": "^1.26.0",
+    "react": "^17.0.1"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.3.0-alpha.10",
@@ -54,7 +64,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "jupyterlab": {
-  },
+  "jupyterlab": {},
   "styleModule": "style/index.js"
 }

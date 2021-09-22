@@ -1,4 +1,4 @@
 {
-  "out": "../../docs/api/terminal",
+  "out": "../../docs/api/user",
   "theme": "../../typedoc-theme"
 }
