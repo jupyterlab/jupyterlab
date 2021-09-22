@@ -668,7 +668,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 - Collaborative renaming & moving of files [#10470](https://github.com/jupyterlab/jupyterlab/pull/10470) ([@dmonad](https://github.com/dmonad))
 - Update inspector open [#10449](https://github.com/jupyterlab/jupyterlab/pull/10449) ([@legendb317](https://github.com/legendb317))
 - dirty cell: Store the code source as true source of output [#10438](https://github.com/jupyterlab/jupyterlab/pull/10438) ([@fcollonval](https://github.com/fcollonval))
-- Add ability to hide side tab bars [#10425](https://github.com/jupyterlab/jupyterlab/pull/10425) ([@fcollonval](https://github.com/fcollonval))
 - RTC: Anonymous user names based on the moons of Jupyter [#10411](https://github.com/jupyterlab/jupyterlab/pull/10411) ([@dmonad](https://github.com/dmonad))
 - Add icon for .jl files in explorer [#10397](https://github.com/jupyterlab/jupyterlab/pull/10397) ([@shngt](https://github.com/shngt))
 - Support arrow keys for button navigation [#10349](https://github.com/jupyterlab/jupyterlab/pull/10349) ([@jahn96](https://github.com/jahn96))
