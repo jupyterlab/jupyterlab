@@ -205,6 +205,9 @@
           "type": "boolean",
           "default": false
         },
+        "showTrailingSpace": {
+          "type": "boolean"
+        },
         "tabSize": {
           "type": "number",
           "default": 4
@@ -236,6 +239,7 @@
         "matchBrackets": true,
         "readOnly": false,
         "rulers": [],
+        "showTrailingSpace": false,
         "tabSize": 4,
         "wordWrapColumn": 80
       }
