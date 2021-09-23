@@ -4,7 +4,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.1.x/CHANGELOG.md'
 
 # JupyterLab Changelog
 
-## v3.1
+## v3.2
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
@@ -13,6 +13,8 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.1.x/CHANGELOG.md'
 No merged PRs
 
 <!-- <END NEW CHANGELOG ENTRY> -->
+
+## v3.1
 
 ## 3.1.13
 
