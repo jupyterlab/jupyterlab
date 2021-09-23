@@ -28,8 +28,8 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const { exec } = require("child_process");
-            exec(`git merge-base ${pull_request.head.sha} ${pull_request.base.sha}`, (error, stdout, stderr) => {
+            const { exec as execute } = require("child_process");
+            execute(`git merge-base ${pull_request.head.sha} ${pull_request.base.sha}`, (error, stdout, stderr) => {
               if (error) {
                 console.log(error);
                 process.exit(1);
