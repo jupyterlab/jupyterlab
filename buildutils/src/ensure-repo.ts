@@ -33,7 +33,7 @@ type Dict<T> = { [key: string]: T };
 // Master should target latest
 // All other release branches should target a specific named version
 const URL_CONFIG = {
-  source: 'master',
+  source: '3.1.x',
   target: '3.2.x',
   rtdVersion: '3.2.x'
 };
