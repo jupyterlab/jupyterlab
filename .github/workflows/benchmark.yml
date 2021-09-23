@@ -15,12 +15,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          # Need to fetch enough nodes to get the common ancestor - but don't want to fetch everything
+          fetch-depth: 100
 
       - name: Get hashes for schedule event
         if: ${{ github.event_name == 'schedule' }}
         run: |
           echo "OLD_REF_SHA=$(git rev-parse 'master@{7 days ago}')" >> $GITHUB_ENV
-          // echo "NEW_REF_SHA=$(git rev-parse 'master')" >> $GITHUB_ENV
+          echo "NEW_REF_SHA=$(git rev-parse 'master')" >> $GITHUB_ENV
 
       - name: Get hashes for PR review event
         # if: ${{ github.event_name == 'pull_request_review' && github.event.pull_request_review.state == 'APPROVED' }}
@@ -29,8 +32,7 @@ jobs:
         with:
           script: |
             const child_process = require("child_process");
-            const pullRequestUrl = context.payload.pull_request_review.pull_request_url;
-            const pull_request = github.request(pullRequestUrl);
+            const pull_request = context.payload.pull_request;
 
             child_process.exec(`git merge-base ${pull_request.head.sha} ${pull_request.base.sha}`, (error, stdout, stderr) => {
               if (error) {
@@ -44,9 +46,32 @@ jobs:
                 return;
               }
 
-              core.export_variable('OLD_REF_SHA', stdout.trim());
-              // core.export_variable('NEW_REF_SHA', pull_request.head.sha);
+              core.exportVariable('OLD_REF_SHA', stdout.trim());
+              core.exportVariable('NEW_REF_SHA', pull_request.head.sha);
             });
+
+      - name: Cancel if old reference is not set
+        id: should-run-test
+        uses: actions/github-script@v4
+        with:
+          script: |
+            if ( process.env.OLD_REF_SHA === undefined || process.env.NEW_REF_SHA === undefined ) {
+              console.log('Cancelling ...');
+              await github.actions.cancelWorkflowRun({ owner: context.repo.owner, repo: context.repo.repo, run_id: context.runId });
+
+              // Cancel request can take some times
+              const sleep = new Promise((resolve) => {
+                setTimeout(resolve, 60000)
+              });
+
+              await sleep;
+
+              return 'stop';
+            } else {
+              return 'test';
+            }
+          result-encoding: string
+      - run: test "${{ steps.should-run-test.outputs.result }}" = "test"
 
       - name: Install node
         uses: actions/setup-node@v2
@@ -83,7 +108,6 @@ jobs:
       - name: Checkout old reference
         run: |
           echo Checking out ${OLD_REF_SHA}...
-          git fetch --depth=1 origin ${OLD_REF_SHA}
           git checkout ${OLD_REF_SHA}
 
       # - name: Install dependencies
@@ -122,9 +146,8 @@ jobs:
       # Second run the benchmark on the PR head
       - name: Checkout latest version
         run: |
-          echo Checking out ${{ github.sha }}...
-          git fetch --depth=1 origin ${{ github.sha }}
-          git checkout ${{ github.sha }}
+          echo Checking out ${NEW_REF_SHA}...
+          git checkout ${NEW_REF_SHA}
 
       # - name: Install dependencies
       #   run: |
