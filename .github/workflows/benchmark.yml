@@ -110,109 +110,113 @@ jobs:
           echo Checking out ${OLD_REF_SHA}...
           git checkout ${OLD_REF_SHA}
 
-      # - name: Install dependencies
-      #   run: |
-      #     bash ./scripts/ci_install.sh
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
 
-      # - name: Launch JupyterLab
-      #   shell: bash
-      #   run: |
-      #     # Mount a volume to overwrite the server configuration
-      #     jlpm start 2>&1 > /tmp/jupyterlab_server.log &
-      #   working-directory: galata
+      - name: Launch JupyterLab
+        shell: bash
+        run: |
+          # Mount a volume to overwrite the server configuration
+          jlpm start 2>&1 > /tmp/jupyterlab_server_old.log &
+        working-directory: galata
 
-      # - name: Install browser
-      #   run: |
-      #     # Install only Chromium browser
-      #     jlpm playwright install chromium
-      #     jlpm run build
-      #   working-directory: galata
+      - name: Install browser
+        run: |
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+        working-directory: galata
 
-      # - name: Wait for JupyterLab
-      #   uses: ifaxity/wait-on-action@v1
-      #   with:
-      #     resource: http-get://localhost:8888/lab
-      #     timeout: 360000
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
 
-      # - name: Execute benchmark tests
-      #   run: |
-      #     jlpm run test:benchmark -u
+      - name: Execute benchmark tests
+        working-directory: galata
+        run: |
+          jlpm run test:benchmark -u
 
-      # - name: Kill the server
-      #   shell: bash
-      #   run: |
-      #     kill -s SIGKILL $(pgrep jupyter-lab)
+      - name: Kill the server
+        shell: bash
+        run: |
+          kill -s SIGKILL $(pgrep jupyter-lab)
 
       # Second run the benchmark on the PR head
       - name: Checkout latest version
         run: |
+          cp galata/lab-benchmark-expected.json /tmp/
+          git restore galata/lab-benchmark-expected.json
           echo Checking out ${NEW_REF_SHA}...
           git checkout ${NEW_REF_SHA}
+          cp /tmp/lab-benchmark-expected.json galata/
 
-      # - name: Install dependencies
-      #   run: |
-      #     bash ./scripts/ci_install.sh
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
 
-      # - name: Launch JupyterLab
-      #   run: |
-      #     # Mount a volume to overwrite the server configuration
-      #     jlpm start 2>&1 > /tmp/jupyterlab_server.log &
-      #   working-directory: galata
+      - name: Launch JupyterLab
+        working-directory: galata
+        run: |
+          # Mount a volume to overwrite the server configuration
+          jlpm start 2>&1 > /tmp/jupyterlab_server_new.log &
 
-      # - name: Install browser
-      #   run: |
-      #     # Install only Chromium browser
-      #     jlpm playwright install chromium
-      #     jlpm run build
-      #   working-directory: galata
+      - name: Install browser
+        working-directory: galata
+        run: |
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
 
-      # - name: Wait for JupyterLab
-      #   uses: ifaxity/wait-on-action@v1
-      #   with:
-      #     resource: http-get://localhost:8888/lab
-      #     timeout: 360000
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
 
-      # - name: Execute benchmark tests
-      #   env:
-      #     REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     REPORT: ./benchmark-results/lab-benchmark.md
-      #   shell: bash
-      #   run: |
-      #     jlpm run test:benchmark
+      - name: Execute benchmark tests
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPORT: ./benchmark-results/lab-benchmark.md
+        shell: bash
+        working-directory: galata
+        run: |
+          jlpm run test:benchmark
 
-      #     # Publish image to cml.dev
-      #     echo "" >> ${REPORT}
-      #     cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
-      #     echo "" >> ${REPORT}
+          # Publish image to cml.dev
+          echo "" >> ${REPORT}
+          cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
+          echo "" >> ${REPORT}
 
-      #     # Test if metadata have changed
-      #     export METADATA_DIFF="/tmp/metadata.diff"
-      #     diff -u <(jq --sort-keys .metadata benchmark-results/lab-benchmark.json) <(jq --sort-keys .metadata lab-benchmark-expected.json) > ${METADATA_DIFF} || true
-      #     if [[ -s ${METADATA_DIFF} ]]; then
-      #       echo "<details><summary>:exclamation: Test metadata have changed</summary>" >> ${REPORT}
-      #       echo "" >> ${REPORT}
-      #       echo "\`\`\`diff" >> ${REPORT}
-      #       cat ${METADATA_DIFF} >> ${REPORT}
-      #       echo "\`\`\`" >> ${REPORT}
-      #       echo "" >> ${REPORT}
-      #       echo "</details>" >> ${REPORT}
-      #     fi
+          # Test if metadata have changed
+          export METADATA_DIFF="/tmp/metadata.diff"
+          diff -u <(jq --sort-keys .metadata benchmark-results/lab-benchmark.json) <(jq --sort-keys .metadata lab-benchmark-expected.json) > ${METADATA_DIFF} || true
+          if [[ -s ${METADATA_DIFF} ]]; then
+            echo "<details><summary>:exclamation: Test metadata have changed</summary>" >> ${REPORT}
+            echo "" >> ${REPORT}
+            echo "\`\`\`diff" >> ${REPORT}
+            cat ${METADATA_DIFF} >> ${REPORT}
+            echo "\`\`\`" >> ${REPORT}
+            echo "" >> ${REPORT}
+            echo "</details>" >> ${REPORT}
+          fi
 
-      #     # Save PR number for comment publication
-      #     echo "${{ github.event.number }}" > ./benchmark-results/NR
+          # Save PR number for comment publication
+          echo "${{ github.event.number }}" > ./benchmark-results/NR
 
-      #   working-directory: galata
-
-      # - name: Upload Galata Test assets
-      #   if: always()
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: benchmark-assets
-      #     path: |
-      #       galata/benchmark-results
-      #       galata/test-results
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: benchmark-assets
+          path: |
+            galata/benchmark-results
+            galata/test-results
 
       # - name: Print JupyterLab logs
       #   if: always()
       #   run: |
-      #     cat /tmp/jupyterlab_server.log
+      #     cat /tmp/jupyterlab_server_old.log
+      #     cat /tmp/jupyterlab_server_new.log

@@ -30,6 +30,7 @@ jobs:
         uses: actions/github-script@v3.1.0
         with:
           script: |
+            console.log(context)
             var artifacts = await github.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,

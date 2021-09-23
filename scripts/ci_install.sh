@@ -13,7 +13,7 @@ if [ $OSTYPE == "Linux" ]; then
 fi
 
 # create jupyter base dir (needed for config retrieval)
-mkdir ~/.jupyter
+mkdir -p ~/.jupyter
 
 # Install and enable the server extension
 pip install -q --upgrade pip --user
