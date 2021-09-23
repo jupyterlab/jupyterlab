@@ -28,8 +28,11 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const { exec as execute } = require("child_process");
-            execute(`git merge-base ${pull_request.head.sha} ${pull_request.base.sha}`, (error, stdout, stderr) => {
+            const child_process = require("child_process");
+            const pullRequestUrl = context.payload.pull_request_review.pull_request_url;
+            const pull_request = github.request(pullRequestUrl);
+
+            child_process.exec(`git merge-base ${pull_request.head.sha} ${pull_request.base.sha}`, (error, stdout, stderr) => {
               if (error) {
                 console.log(error);
                 process.exit(1);
@@ -41,8 +44,6 @@ jobs:
                 return;
               }
 
-              const pullRequestUrl = context.payload.pull_request_review.pull_request_url;
-              const pull_request = github.request(pullRequestUrl);
               core.export_variable('OLD_REF_SHA', stdout.trim());
               // core.export_variable('NEW_REF_SHA', pull_request.head.sha);
             });
