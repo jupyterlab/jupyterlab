@@ -8,6 +8,7 @@ import {
   TestCase,
   TestResult
 } from '@playwright/test/reporter';
+import { dists, meanpw, variancepn } from '@stdlib/stats/base';
 import * as canvas from 'canvas';
 import fs from 'fs';
 import path from 'path';
@@ -118,6 +119,138 @@ export namespace benchmark {
       body: Buffer.from(JSON.stringify(data))
     };
   }
+  /**
+   * Change between two distributions
+   */
+  export interface IDistributionChange {
+    /**
+     * Mean value
+     */
+    mean: number;
+    /**
+     * Spread around the mean value
+     */
+    confidenceInterval: number;
+  }
+
+  /**
+   * Statistical description of a distribution
+   */
+  interface IDistribution {
+    /**
+     * Mean
+     */
+    mean: number;
+    /**
+     * Variance
+     */
+    variance: number;
+  }
+
+  /**
+   * Quantifies the performance changes between two measures systems. Assumes we gathered
+   * n independent measurement from each, and calculated their means and variance.
+   *
+   * Based on the work by Tomas Kalibera and Richard Jones. See their paper
+   * "Quantifying Performance Changes with Effect Size Confidence Intervals", section 6.2,
+   * formula "Quantifying Performance Change".
+   *
+   * However, it simplifies it to only assume one level of benchmarks, not multiple levels.
+   * If you do have multiple levels, simply use the mean of the lower levels as your data,
+   * like they do in the paper.
+   *
+   * @param oldDistribution The old distribution description
+   * @param newDistribution The new distribution description
+   * @param n The number of samples from each system (must be equal)
+   * @param confidenceInterval The confidence interval for the results.
+   *  The default is a 95% confidence interval (95% of the time the true mean will be
+   *  between the resulting mean +- the resulting CI)
+   */
+  function performanceChange(
+    oldDistribution: IDistribution,
+    newDistribution: IDistribution,
+    n: number,
+    confidenceInterval: number = 0.95
+  ): IDistributionChange {
+    const { mean: yO, variance: sO } = oldDistribution;
+    const { mean: yN, variance: sN } = newDistribution;
+    const dof = n - 1;
+    const t = dists.t.quantile(1 - (1 - confidenceInterval) / 2, dof);
+    const oldFactor = sq(yO) - (sq(t) * sO) / n;
+    const newFactor = sq(yN) - (sq(t) * sN) / n;
+    const meanNum = yO * yN;
+    const ciNum = Math.sqrt(sq(yO * yN) - newFactor * oldFactor);
+    return {
+      mean: meanNum / oldFactor,
+      confidenceInterval: ciNum / oldFactor
+    };
+  }
+
+  /**
+   * Compute the performance change based on a number of old and new measurements.
+   *
+   * Based on the work by Tomas Kalibera and Richard Jones. See their paper
+   * "Quantifying Performance Changes with Effect Size Confidence Intervals", section 6.2,
+   * formula "Quantifying Performance Change".
+   *
+   * However, it simplifies it to only assume one level of benchmarks, not multiple levels.
+   * If you do have multiple levels, simply use the mean of the lower levels as your data,
+   * like they do in the paper.
+   *
+   * Note: The measurements must have the same length.
+   *
+   * @param oldMeasures The old measurements
+   * @param newMeasures The new measurements
+   * @param confidenceInterval The confidence interval for the results.
+   */
+  export function distributionChange(
+    oldMeasures: number[],
+    newMeasures: number[],
+    confidenceInterval: number = 0.95
+  ): IDistributionChange {
+    const n = oldMeasures.length;
+    if (n !== newMeasures.length) {
+      throw new Error('Data have different length');
+    }
+    return performanceChange(
+      { mean: mean(...oldMeasures), variance: variance(...oldMeasures) },
+      { mean: mean(...newMeasures), variance: variance(...newMeasures) },
+      n,
+      confidenceInterval
+    );
+  }
+
+  /**
+   * Format a performance changes like `between 20.1% slower and 30.3% faster`.
+   *
+   * @param distribution The distribution change
+   * @returns The formatted distribution change
+   */
+  export function formatChange(distribution: IDistributionChange): string {
+    const { mean, confidenceInterval } = distribution;
+    return `between ${formatPercent(
+      mean + confidenceInterval
+    )} and ${formatPercent(mean - confidenceInterval)}`;
+  }
+
+  function formatPercent(percent: number): string {
+    if (percent < 1) {
+      return `${((1 - percent) * 100).toFixed(1)}% faster`;
+    }
+    return `${((percent - 1) * 100).toFixed(1)}% slower`;
+  }
+
+  function sq(x: number): number {
+    return Math.pow(x, 2);
+  }
+
+  function mean(...x: number[]): number {
+    return meanpw(x.length, x, 1);
+  }
+
+  function variance(...x: number[]): number {
+    return variancepn(x.length, 1, x, 1);
+  }
 }
 
 /**
@@ -189,10 +322,11 @@ class BenchmarkReporter implements Reporter {
       comparison?: 'snapshot' | 'project';
       vegaLiteConfigFactory?: (
         allData: Array<IReportRecord>,
-        comparison: 'snapshot' | 'project'
+        comparison?: 'snapshot' | 'project'
       ) => JSONObject;
       textReportFactory?: (
-        allData: Array<IReportRecord>
+        allData: Array<IReportRecord>,
+        comparison?: 'snapshot' | 'project'
       ) => Promise<[string, string]>;
     } = {}
   ) {
@@ -361,15 +495,18 @@ class BenchmarkReporter implements Reporter {
    * by supplying another builder to constructor's option or override this
    * method on a sub-class.
    *
-   * @param {Array<IReportRecord>} allData: all test records.
-   * @return {Promise<[string, string]>} A list of two strings, the first one
+   * @param allData all test records.
+   * @param comparison logic of test comparisons:
+   * 'snapshot' or 'project'; default 'snapshot'.
+   * @return A list of two strings, the first one
    * is the content of report, the second one is the extension of report file.
    */
   protected async defaultTextReportFactory(
-    allData: Array<IReportRecord>
+    allData: Array<IReportRecord>,
+    comparison: 'snapshot' | 'project' = 'snapshot'
   ): Promise<[string, string]> {
     // Compute statistics
-    // - Groupby (test, browser, reference, file)
+    // - Groupby (test, browser, reference | project, file)
 
     const groups = new Map<
       string,
@@ -392,11 +529,13 @@ class BenchmarkReporter implements Reporter {
 
       const browserGroup = testGroup.get(d.browser)!;
 
-      if (!browserGroup.has(d.reference)) {
-        browserGroup.set(d.reference, new Map<string, number[]>());
+      const lastLevel = comparison === 'snapshot' ? d.reference : d.project;
+
+      if (!browserGroup.has(lastLevel)) {
+        browserGroup.set(lastLevel, new Map<string, number[]>());
       }
 
-      const fileGroup = browserGroup.get(d.reference)!;
+      const fileGroup = browserGroup.get(lastLevel)!;
 
       if (!fileGroup.has(d.file)) {
         fileGroup.set(d.file, new Array<number>());
@@ -429,14 +568,38 @@ class BenchmarkReporter implements Reporter {
     reportContent.push(new Array(nFiles + 2).fill('|').join(' --- '));
     const filler = new Array(nFiles).fill('|').join(' ');
 
+    // If the reference | project lists has two items, the intervals will be compared.
+    const compare =
+      (groups.values().next().value.values().next().value as Map<
+        string,
+        Map<string, number[]>
+      >).size === 2;
+
+    let changeReference = benchmark.DEFAULT_EXPECTED_REFERENCE;
+
     for (const [test, testGroup] of groups) {
       reportContent.push(`| **${test}** | ` + filler);
       for (const [browser, browserGroup] of testGroup) {
         reportContent.push(`| \`${browser}\` | ` + filler);
+        const actual = new Map<string, number[]>();
+        const expected = new Map<string, number[]>();
         for (const [reference, fileGroup] of browserGroup) {
           let line = `| ${reference} |`;
-          for (const [_, dataGroup] of fileGroup) {
+          for (const [filename, dataGroup] of fileGroup) {
             const [q1, median, q3] = vs.quartiles(dataGroup);
+
+            if (compare) {
+              if (
+                reference === benchmark.DEFAULT_REFERENCE ||
+                !actual.has(filename)
+              ) {
+                actual.set(filename, dataGroup);
+              } else {
+                changeReference = reference;
+                expected.set(filename, dataGroup);
+              }
+            }
+
             line += ` ${Math.min(
               ...dataGroup
             ).toFixed()} <- [${q1.toFixed()} - ${median.toFixed()} - ${q3.toFixed()}] -> ${Math.max(
@@ -446,7 +609,34 @@ class BenchmarkReporter implements Reporter {
 
           reportContent.push(line);
         }
+
+        if (compare) {
+          let line = `| Mean comparison |`;
+          for (const [filename, oldDistribution] of expected) {
+            const newDistribution = actual.get(filename)!;
+            const delta = benchmark.distributionChange(
+              oldDistribution,
+              newDistribution
+            );
+            const meanBaseZero = delta.mean - 1;
+            line += `${(
+              (meanBaseZero - delta.confidenceInterval) *
+              100
+            ).toFixed(1)}% -- ${(meanBaseZero * 100).toFixed(1)}% -- ${(
+              (meanBaseZero + delta.confidenceInterval) *
+              100
+            ).toFixed(1)} |`;
+          }
+
+          reportContent.push(line);
+        }
       }
+    }
+    if (compare) {
+      reportContent.push(
+        '',
+        `Changes are computed with _${changeReference}_ as reference.`
+      );
     }
     reportContent.push('', '</details>', '');
     const reportExtension = 'md';
@@ -459,14 +649,15 @@ class BenchmarkReporter implements Reporter {
    * be used by to generate VegaLite configuration. Users can customize
    * the builder by supplying another builder to constructor's option or
    * override this method on a sub-class.
-   * @param {Array<IReportRecord>} allData: all test records.
-   * @param {('snapshot' | 'project')} comparison: logic of test comparisons:
-   * 'snapshot' or 'project'.
-   * @return {*}  {Record<string, any>} :  VegaLite configuration
+   *
+   * @param allData all test records.
+   * @param comparison logic of test comparisons:
+   * 'snapshot' or 'project'; default 'snapshot'.
+   * @return VegaLite configuration
    */
   protected defaultVegaLiteConfigFactory(
     allData: Array<IReportRecord>,
-    comparison: 'snapshot' | 'project'
+    comparison: 'snapshot' | 'project' = 'snapshot'
   ): Record<string, any> {
     const config = generateVegaLiteSpec(
       [...new Set(allData.map(d => d.test))],
