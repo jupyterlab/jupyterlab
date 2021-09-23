@@ -8,11 +8,37 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.2.x/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 3.2.0a1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.2.0a0...65580dabcb5f84dfbd3bbbe2371af66de56f800c))
+
+### Enhancements made
+
+- Backport PR #10632 on branch 3.2.x (Add show trailing whitespace option to Notebook and Text Editor [#11131](https://github.com/jupyterlab/jupyterlab/pull/11131) ([@blink1073](https://github.com/blink1073))
+- Backport PR #10462 on branch 3.2.x (Implemented Restart and debug) [#11129](https://github.com/jupyterlab/jupyterlab/pull/11129) ([@blink1073](https://github.com/blink1073))
+- PR: Add preferred-dir handling [#10667](https://github.com/jupyterlab/jupyterlab/pull/10667) ([@goanpeca](https://github.com/goanpeca))
+
+### Bugs fixed
+
+- Add a guard to avoid kernel deadlock on multiple input request [#10792](https://github.com/jupyterlab/jupyterlab/pull/10792) ([@echarles](https://github.com/echarles))
+
+### Maintenance and upkeep improvements
+
+- Backport PR #11021 on branch 3.2.x (Clean up notebook test utils) [#11133](https://github.com/jupyterlab/jupyterlab/pull/11133) ([@blink1073](https://github.com/blink1073))
+- Backport PR #10904 on branch 3.2.x (Change "Export Notebook As" to "Save and Export Notebook As") [#11132](https://github.com/jupyterlab/jupyterlab/pull/11132) ([@blink1073](https://github.com/blink1073))
+- Make Test Server Configurable [#11015](https://github.com/jupyterlab/jupyterlab/pull/11015) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-09-23&to=2021-09-23&type=c))
+
+[@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-09-23..2021-09-23&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2021-09-23..2021-09-23&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2021-09-23..2021-09-23&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 3.2.0a0
 
 No merged PRs
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## v3.1
 
