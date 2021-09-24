@@ -374,22 +374,41 @@ async function activateConsole(
   const pluginId = '@jupyterlab/console-extension:tracker';
   let interactionMode: string;
   let promptCellConfig: JSONObject;
-  async function updateSettings() {
+
+  /**
+   * Update settings for one console or all consoles.
+   *
+   * @param panel Optional - single console to update.
+   */
+  async function updateSettings(panel?: ConsolePanel) {
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
     promptCellConfig = (await settingRegistry.get(pluginId, 'promptCellConfig'))
       .composite as JSONObject;
-    tracker.forEach(widget => {
+
+    const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
       setOption(widget.console.promptCell?.editor, promptCellConfig);
-    });
+    };
+
+    if (panel) {
+      setWidgetOptions(panel);
+    } else {
+      tracker.forEach(setWidgetOptions);
+    }
   }
+
   settingRegistry.pluginChanged.connect((sender, plugin) => {
     if (plugin === pluginId) {
       void updateSettings();
     }
   });
   await updateSettings();
+
+  // Apply settings when a console is created.
+  tracker.widgetAdded.connect((sender, panel) => {
+    void updateSettings(panel);
+  });
 
   commands.addCommand(CommandIDs.autoClosingBrackets, {
     execute: async args => {
