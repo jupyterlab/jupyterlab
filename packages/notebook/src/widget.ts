@@ -1173,6 +1173,13 @@ export class Notebook extends StaticNotebook {
     return this._activeCell;
   }
 
+  get lastClipboardInteraction(): 'copy' | 'cut' | 'paste' | null {
+    return this._lastClipboardInteraction;
+  }
+  set lastClipboardInteraction(newValue: 'copy' | 'cut' | 'paste' | null) {
+    this._lastClipboardInteraction = newValue;
+  }
+
   /**
    * Dispose of the resources held by the widget.
    */
@@ -2377,6 +2384,8 @@ export class Notebook extends StaticNotebook {
   // Attributes for optimized cell refresh:
   private _cellLayoutStateCache?: { width: number };
   private _checkCacheOnNextResize = false;
+
+  private _lastClipboardInteraction: 'copy' | 'cut' | 'paste' | null = null;
 }
 
 /**
