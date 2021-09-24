@@ -163,6 +163,14 @@
           {
             "type": "separator",
             "rank": 11
+          },
+          {
+            "command": "notebook:toggle-render-side-by-side",
+            "rank": 12
+          },
+          {
+            "type": "separator",
+            "rank": 12
           }
         ]
       },
@@ -581,6 +589,11 @@
     {
       "command": "notebook:undo-cell-action",
       "keys": ["Z"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:toggle-render-side-by-side",
+      "keys": ["Shift R"],
       "selector": ".jp-Notebook:focus"
     }
   ],
