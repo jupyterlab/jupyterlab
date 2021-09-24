@@ -12,8 +12,12 @@ jobs:
     name: Execute benchmark tests
     if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review')
     # if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && github.event.pull_request_review.state == 'APPROVED')
-    timeout-minutes: 360
+
     runs-on: ubuntu-20.04
+
+    env:
+      BENCHMARK_NUMBER_SAMPLES: 100
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -115,8 +119,6 @@ jobs:
 
       - name: Execute benchmark tests
         working-directory: galata
-        env:
-          BENCHMARK_NUMBER_SAMPLES: 50
         run: |
           jlpm run test:benchmark -u
 
@@ -161,7 +163,6 @@ jobs:
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPORT: ./benchmark-results/lab-benchmark.md
-          BENCHMARK_NUMBER_SAMPLES: 50
         shell: bash
         working-directory: galata
         run: |
@@ -189,7 +190,6 @@ jobs:
           cp lab-benchmark-expected.json ./benchmark-results/
 
           # Save PR number for comment publication
-          echo "${{ github.event }}"
           echo "${PULL_REQUEST_ID}" > ./benchmark-results/NR
 
       - name: Upload Galata Test assets
