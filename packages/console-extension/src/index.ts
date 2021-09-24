@@ -391,6 +391,11 @@ async function activateConsole(
   });
   await updateSettings();
 
+  // Apply current settings when a console is created.
+  tracker.widgetAdded.connect((sender, panel) => {
+    updateSettings();
+  });
+
   commands.addCommand(CommandIDs.autoClosingBrackets, {
     execute: async args => {
       promptCellConfig.autoClosingBrackets = !!(
