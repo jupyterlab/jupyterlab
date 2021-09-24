@@ -620,14 +620,21 @@ class BenchmarkReporter implements Reporter {
           let line = `| Mean relative change |`;
           for (const [filename, oldDistribution] of expected) {
             const newDistribution = actual.get(filename)!;
-            const delta = benchmark.distributionChange(
-              oldDistribution,
-              newDistribution
-            );
+            try {
+              const delta = benchmark.distributionChange(
+                oldDistribution,
+                newDistribution
+              );
 
-            line += ` ${((delta.mean - 1) * 100).toFixed(1)}% ± ${(
-              delta.confidenceInterval * 100
-            ).toFixed(1)}% |`;
+              line += ` ${((delta.mean - 1) * 100).toFixed(1)}% ± ${(
+                delta.confidenceInterval * 100
+              ).toFixed(1)}% |`;
+            } catch (error) {
+              console.error(
+                `Reference has length ${oldDistribution.length} and new has ${newDistribution.length}.`
+              );
+              line += ` ${error} |`;
+            }
           }
 
           reportContent.push(line);

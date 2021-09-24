@@ -24,7 +24,6 @@ jobs:
       - name: Get hashes for schedule event
         if: ${{ github.event_name == 'schedule' }}
         run: |
-          echo "${{ github.event.pull_request_review }}"
           echo "OLD_REF_SHA=$(git rev-parse 'master@{7 days ago}')" >> $GITHUB_ENV
           echo "NEW_REF_SHA=$(git rev-parse 'master')" >> $GITHUB_ENV
 
@@ -185,6 +184,9 @@ jobs:
             echo "" >> ${REPORT}
             echo "</details>" >> ${REPORT}
           fi
+
+          # Copy the reference data to upload it as artifact
+          cp lab-benchmark-expected.json ./benchmark-results/
 
           # Save PR number for comment publication
           echo "${{ github.event }}"

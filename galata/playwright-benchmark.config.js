@@ -20,5 +20,6 @@ module.exports = {
   ],
   use: { ...baseConfig.use, video: 'off' },
   preserveOutput: 'failures-only',
+  retries: 0,
   workers: 1
 };
