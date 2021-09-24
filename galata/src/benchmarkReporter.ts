@@ -544,16 +544,29 @@ class BenchmarkReporter implements Reporter {
       fileGroup.get(d.file)?.push(d.time);
     });
 
+    // If the reference | project lists has two items, the intervals will be compared.
+    const compare =
+      (groups.values().next().value.values().next().value as Map<
+        string,
+        Map<string, number[]>
+      >).size === 2;
+
     // - Create report
     const reportContent = new Array<string>(
       '## Benchmark report',
       '',
       'The execution time (in milliseconds) are grouped by test file, test type and browser.',
-      'For each case, the following values are computed: _min_ <- [_1st quartile_ - _median_ - _3rd quartile_] -> _max_.',
-      '',
-      '<details><summary>Results table</summary>',
-      ''
+      'For each case, the following values are computed: _min_ <- [_1st quartile_ - _median_ - _3rd quartile_] -> _max_.'
     );
+
+    if (compare) {
+      reportContent.push(
+        '',
+        'The mean relative comparison is computed with 95% confidence.'
+      );
+    }
+
+    reportContent.push('', '<details><summary>Results table</summary>', '');
 
     let header = '| Test file |';
     let nFiles = 0;
@@ -567,13 +580,6 @@ class BenchmarkReporter implements Reporter {
     reportContent.push(header);
     reportContent.push(new Array(nFiles + 2).fill('|').join(' --- '));
     const filler = new Array(nFiles).fill('|').join(' ');
-
-    // If the reference | project lists has two items, the intervals will be compared.
-    const compare =
-      (groups.values().next().value.values().next().value as Map<
-        string,
-        Map<string, number[]>
-      >).size === 2;
 
     let changeReference = benchmark.DEFAULT_EXPECTED_REFERENCE;
 
@@ -611,21 +617,17 @@ class BenchmarkReporter implements Reporter {
         }
 
         if (compare) {
-          let line = `| Mean comparison |`;
+          let line = `| Mean relative change |`;
           for (const [filename, oldDistribution] of expected) {
             const newDistribution = actual.get(filename)!;
             const delta = benchmark.distributionChange(
               oldDistribution,
               newDistribution
             );
-            const meanBaseZero = delta.mean - 1;
-            line += `${(
-              (meanBaseZero - delta.confidenceInterval) *
-              100
-            ).toFixed(1)}% -- ${(meanBaseZero * 100).toFixed(1)}% -- ${(
-              (meanBaseZero + delta.confidenceInterval) *
-              100
-            ).toFixed(1)} |`;
+
+            line += ` ${((delta.mean - 1) * 100).toFixed(1)}% ± ${(
+              delta.confidenceInterval * 100
+            ).toFixed(1)}% |`;
           }
 
           reportContent.push(line);

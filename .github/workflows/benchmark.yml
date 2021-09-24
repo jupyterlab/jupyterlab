@@ -10,6 +10,8 @@ on:
 jobs:
   test:
     name: Execute benchmark tests
+    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review')
+    # if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && github.event.pull_request_review.state == 'APPROVED')
     timeout-minutes: 360
     runs-on: ubuntu-20.04
     steps:
@@ -22,11 +24,11 @@ jobs:
       - name: Get hashes for schedule event
         if: ${{ github.event_name == 'schedule' }}
         run: |
+          echo "${{ github.event.pull_request_review }}"
           echo "OLD_REF_SHA=$(git rev-parse 'master@{7 days ago}')" >> $GITHUB_ENV
           echo "NEW_REF_SHA=$(git rev-parse 'master')" >> $GITHUB_ENV
 
       - name: Get hashes for PR review event
-        # if: ${{ github.event_name == 'pull_request_review' && github.event.pull_request_review.state == 'APPROVED' }}
         if: ${{ github.event_name == 'pull_request_review' }}
         uses: actions/github-script@v4
         with:
@@ -48,30 +50,8 @@ jobs:
 
               core.exportVariable('OLD_REF_SHA', stdout.trim());
               core.exportVariable('NEW_REF_SHA', pull_request.head.sha);
+              core.exportVariable('PULL_REQUEST_ID', pull_request.number);
             });
-
-      - name: Cancel if old reference is not set
-        id: should-run-test
-        uses: actions/github-script@v4
-        with:
-          script: |
-            if ( process.env.OLD_REF_SHA === undefined || process.env.NEW_REF_SHA === undefined ) {
-              console.log('Cancelling ...');
-              await github.actions.cancelWorkflowRun({ owner: context.repo.owner, repo: context.repo.repo, run_id: context.runId });
-
-              // Cancel request can take some times
-              const sleep = new Promise((resolve) => {
-                setTimeout(resolve, 60000)
-              });
-
-              await sleep;
-
-              return 'stop';
-            } else {
-              return 'test';
-            }
-          result-encoding: string
-      - run: test "${{ steps.should-run-test.outputs.result }}" = "test"
 
       - name: Install node
         uses: actions/setup-node@v2
@@ -136,6 +116,8 @@ jobs:
 
       - name: Execute benchmark tests
         working-directory: galata
+        env:
+          BENCHMARK_NUMBER_SAMPLES: 50
         run: |
           jlpm run test:benchmark -u
 
@@ -180,6 +162,7 @@ jobs:
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPORT: ./benchmark-results/lab-benchmark.md
+          BENCHMARK_NUMBER_SAMPLES: 50
         shell: bash
         working-directory: galata
         run: |
@@ -204,7 +187,8 @@ jobs:
           fi
 
           # Save PR number for comment publication
-          echo "${{ github.event.number }}" > ./benchmark-results/NR
+          echo "${{ github.event }}"
+          echo "${PULL_REQUEST_ID}" > ./benchmark-results/NR
 
       - name: Upload Galata Test assets
         if: always()
@@ -215,8 +199,8 @@ jobs:
             galata/benchmark-results
             galata/test-results
 
-      # - name: Print JupyterLab logs
-      #   if: always()
-      #   run: |
-      #     cat /tmp/jupyterlab_server_old.log
-      #     cat /tmp/jupyterlab_server_new.log
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server_old.log
+          cat /tmp/jupyterlab_server_new.log
