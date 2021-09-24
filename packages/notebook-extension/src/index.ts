@@ -14,6 +14,7 @@ import {
 import {
   Dialog,
   ICommandPalette,
+  InputDialog,
   ISessionContextDialogs,
   MainAreaWidget,
   sessionContextDialogs,
@@ -237,6 +238,10 @@ namespace CommandIDs {
   export const hideAllOutputs = 'notebook:hide-all-cell-outputs';
 
   export const showAllOutputs = 'notebook:show-all-cell-outputs';
+
+  export const toggleRenderSideBySide = 'notebook:toggle-render-side-by-side';
+
+  export const setSideBySideRatio = 'notebook:set-side-by-side-ratio';
 
   export const enableOutputScrolling = 'notebook:enable-output-scrolling';
 
@@ -2137,6 +2142,50 @@ function addCommands(
     },
     isEnabled
   });
+
+  commands.addCommand(CommandIDs.toggleRenderSideBySide, {
+    label: trans.__('Render Side-by-side'),
+    execute: args => {
+      Private.renderSideBySide = !Private.renderSideBySide;
+      tracker.forEach(wideget => {
+        if (wideget) {
+          if (Private.renderSideBySide) {
+            return NotebookActions.renderSideBySide(wideget.content);
+          } else {
+            return NotebookActions.renderNotSideBySide(wideget.content);
+          }
+        }
+      });
+      tracker.currentChanged.connect(() => {
+        if (Private.renderSideBySide && tracker.currentWidget) {
+          return NotebookActions.renderSideBySide(
+            tracker.currentWidget.content
+          );
+        }
+      });
+    },
+    isToggled: () => Private.renderSideBySide,
+    isEnabled
+  });
+
+  commands.addCommand(CommandIDs.setSideBySideRatio, {
+    label: trans.__('Set side-by-side ratio'),
+    execute: args => {
+      InputDialog.getNumber({
+        title: trans.__('Width of the output in side-by-side mode'),
+        value: 1
+      })
+        .then(result => {
+          if (result.value) {
+            document.documentElement.style.setProperty(
+              '--jp-side-by-side-output-size',
+              `${result.value}fr`
+            );
+          }
+        })
+        .catch(console.error);
+    }
+  });
   commands.addCommand(CommandIDs.showAllOutputs, {
     label: trans.__('Expand All Outputs'),
     execute: args => {
@@ -2312,6 +2361,8 @@ function populatePalette(
     CommandIDs.showOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
+    CommandIDs.toggleRenderSideBySide,
+    CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
     CommandIDs.disableOutputScrolling
   ].forEach(command => {
@@ -2670,4 +2721,6 @@ namespace Private {
       translator?: ITranslator;
     }
   }
+
+  export let renderSideBySide = false;
 }

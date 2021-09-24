@@ -33,6 +33,8 @@ import { Notebook } from './widget';
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
+const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
+
 export class KernelError extends Error {
   /**
    * Exception name
@@ -1309,6 +1311,24 @@ export namespace NotebookActions {
       }
     });
     Private.handleState(notebook, state, true);
+  }
+
+  /**
+   * Render side-by-side.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function renderSideBySide(notebook: Notebook): void {
+    notebook.node.classList.add(SIDE_BY_SIDE_CLASS);
+  }
+
+  /**
+   * Render not side-by-side.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function renderNotSideBySide(notebook: Notebook): void {
+    notebook.node.classList.remove(SIDE_BY_SIDE_CLASS);
   }
 
   /**
