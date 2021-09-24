@@ -394,9 +394,7 @@ async function activateConsole(
     if (panel) {
       setWidgetOptions(panel);
     } else {
-      tracker.forEach(widget => {
-        setWidgetOptions(widget);
-      });
+      tracker.forEach(setWidgetOptions);
     }
   }
 
