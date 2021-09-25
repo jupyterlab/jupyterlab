@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     env:
-      BENCHMARK_NUMBER_SAMPLES: 100
+      BENCHMARK_NUMBER_SAMPLES: 50
 
     steps:
       - name: Checkout

@@ -71,13 +71,18 @@ export class MainAreaWidget<T extends Widget = Widget>
     if (options.reveal) {
       this.node.appendChild(this._spinner.node);
       this._revealed = options.reveal
-        .then(() => {
+        .then(async () => {
           if (content.isDisposed) {
             this.dispose();
             return;
           }
           content.disposed.connect(() => this.dispose());
           const active = document.activeElement === this._spinner.node;
+          // Add artificial delay to test benchmark
+          const wait = new Promise(resolve => {
+            setTimeout(resolve, 100);
+          });
+          await wait;
           this._disposeSpinner();
           this._isRevealed = true;
           if (active) {
