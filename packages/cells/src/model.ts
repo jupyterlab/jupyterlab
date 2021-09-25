@@ -196,10 +196,11 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     trusted.set(!!cell.metadata['trusted']);
     delete cell.metadata['trusted'];
 
+    // Set the text value, normalizing line endings to \n
     if (Array.isArray(cell.source)) {
-      this.value.text = (cell.source as string[]).join('');
+      this.value.text = cell.source.map(s => s.replace(/\r\n/g, '\n')).join('');
     } else {
-      this.value.text = cell.source as string;
+      this.value.text = cell.source.replace(/\r\n/g, '\n');
     }
     const metadata = JSONExt.deepCopy(cell.metadata);
     if (this.type !== 'raw') {
