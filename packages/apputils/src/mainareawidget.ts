@@ -80,7 +80,9 @@ export class MainAreaWidget<T extends Widget = Widget>
           const active = document.activeElement === this._spinner.node;
           // Add artificial delay to test benchmark
           const wait = new Promise(resolve => {
-            setTimeout(resolve, 100);
+            setTimeout(() => {
+              resolve(void 0);
+            }, 500);
           });
           await wait;
           this._disposeSpinner();
