@@ -118,6 +118,22 @@ export class DocumentManager implements IDocumentManager {
   }
 
   /**
+   * Defines max acceptable difference, in milliseconds, between last modified timestamps on disk and client
+   */
+  get lastModifiedCheckMargin(): number {
+    return this._lastModifiedCheckMargin;
+  }
+
+  set lastModifiedCheckMargin(value: number) {
+    this._lastModifiedCheckMargin = value;
+
+    // For each existing context, update the margin value.
+    this._contexts.forEach(context => {
+      context.lastModifiedCheckMargin = value;
+    })
+  }
+
+  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
@@ -474,7 +490,8 @@ export class DocumentManager implements IDocumentManager {
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
       collaborative: this._collaborative,
-      docProviderFactory: this._docProviderFactory
+      docProviderFactory: this._docProviderFactory,
+      lastModifiedCheckMargin: this._lastModifiedCheckMargin
     });
     const handler = new SaveHandler({
       context,
@@ -599,6 +616,7 @@ export class DocumentManager implements IDocumentManager {
   private _isDisposed = false;
   private _autosave = true;
   private _autosaveInterval = 120;
+  private _lastModifiedCheckMargin = 500;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;

@@ -240,6 +240,17 @@ describe('docregistry/context', () => {
       });
     });
 
+    describe('#lastModifiedCheckMargin', () => {
+      it('should be 500ms by default', () => {
+        expect(context.lastModifiedCheckMargin).toBe(500);
+      });
+
+      it('should be set-able', () => {
+        context.lastModifiedCheckMargin = 600;
+        expect(context.lastModifiedCheckMargin).toBe(600);
+      })
+    })
+
     describe('#contentsModel', () => {
       it('should be `null` before population', () => {
         expect(context.contentsModel).toBeNull();
