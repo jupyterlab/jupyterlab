@@ -278,6 +278,9 @@
       "path": "./packages/user"
     },
     {
+      "path": "./packages/user-extension"
+    },
+    {
       "path": "./packages/vdom"
     },
     {

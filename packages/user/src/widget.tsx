@@ -3,14 +3,7 @@
 
 import { Dialog, ReactWidget } from '@jupyterlab/apputils';
 
-import { URLExt } from '@jupyterlab/coreutils';
-
-import { ServerConnection } from '@jupyterlab/services';
-
-import {
-  getAnonymousUserName,
-  getRandomColor
-} from '@jupyterlab/docprovider/lib/awareness';
+import { IStateDB } from '@jupyterlab/statedb';
 
 import { userIcon } from '@jupyterlab/ui-components';
 
@@ -18,9 +11,13 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { JSONObject, UUID } from '@lumino/coreutils';
+
 import * as React from 'react';
 
-import { IUser } from './tokens';
+import { IUser, USER } from './tokens';
+
+import { getAnonymousUserName, getRandomColor } from './utils';
 
 export class User implements IUser {
   private _id: string;
@@ -28,19 +25,34 @@ export class User implements IUser {
   private _username: string;
   private _initials: string;
   private _color: string;
+  private _anonymous: boolean;
   private _email?: string;
   private _avatar?: string;
 
-  private _isAnonymous = true;
+  private _familyName?: string;
+  private _birthDate?: Date;
+  private _gender?: string;
+  private _honorificPrefix?: string;
+  private _honorificSuffix?: string;
+  private _nationality?: string;
+  private _affiliation?: string;
+  private _jobTitle?: string;
+  private _telephone?: string;
+  private _address?: string;
+  private _description?: string;
+
   private _isReady = false;
+  private _state: IStateDB;
   private _ready = new Signal<User, boolean>(this);
   private _changed = new Signal<User, void>(this);
 
   private _logInMethods: string[] = [];
 
-  constructor() {
-    this._requestUser().then(() => {
-      this._ready.emit(this._isReady);
+  constructor(state: IStateDB) {
+    this._state = state;
+    this._fetchUser().then(() => {
+      this._isReady = true;
+      this._ready.emit(true);
     });
   }
 
@@ -59,6 +71,9 @@ export class User implements IUser {
   get color(): string {
     return this._color;
   }
+  get anonymous(): boolean {
+    return this._anonymous;
+  }
   get email(): string | undefined {
     return this._email;
   }
@@ -66,9 +81,40 @@ export class User implements IUser {
     return this._avatar;
   }
 
-  get isAnonymous(): boolean {
-    return this._isAnonymous;
+  get familyName(): string | undefined {
+    return this._familyName;
   }
+  get birthDate(): Date | undefined {
+    return this._birthDate;
+  }
+  get gender(): string | undefined {
+    return this._gender;
+  }
+  get honorificPrefix(): string | undefined {
+    return this._honorificPrefix;
+  }
+  get honorificSuffix(): string | undefined {
+    return this._honorificSuffix;
+  }
+  get nationality(): string | undefined {
+    return this._nationality;
+  }
+  get affiliation(): string | undefined {
+    return this._affiliation;
+  }
+  get jobTitle(): string | undefined {
+    return this._jobTitle;
+  }
+  get telephone(): string | undefined {
+    return this._telephone;
+  }
+  get address(): string | undefined {
+    return this._address;
+  }
+  get description(): string | undefined {
+    return this._description;
+  }
+
   get isReady(): boolean {
     return this._isReady;
   }
@@ -86,28 +132,88 @@ export class User implements IUser {
     this._logInMethods.push(command);
   }
 
-  update() {
-    this._requestUser().then(() => {
-      this._changed.emit();
-    });
+  rename(value: string) {
+    if (this._anonymous) {
+      this._name = value;
+      this._username = value;
+      const name = value.split(' ');
+      if (name.length > 0) {
+        this._initials = name[0].substring(0, 1).toLocaleUpperCase();
+      }
+      if (name.length > 1) {
+        this._initials += name[1].substring(0, 1).toLocaleUpperCase();
+      }
+      this._save();
+    }
   }
 
-  private async _requestUser(): Promise<void> {
-    const settings = ServerConnection.makeSettings();
-    const requestUrl = URLExt.join(settings.baseUrl, 'auth', 'user');
-    return ServerConnection.makeRequest(requestUrl, {}, settings)
-      .then(async (resp: any) => {
-        if (!resp.ok) {
-          return Promise.resolve();
-        }
+  update(user: User.User) {
+    this._id = user.id;
+    this._name = user.name;
+    this._username = user.username;
 
-        const data = await resp.json();
-        this._isReady = data.initialized;
-        this._isAnonymous = data.anonymous;
+    const name = this._name.split(' ');
+    if (name.length > 0) {
+      this._initials = name[0].substring(0, 1).toLocaleUpperCase();
+    }
+    if (name.length > 1) {
+      this._initials += name[1].substring(0, 1).toLocaleUpperCase();
+    }
 
-        this._id = data.id;
-        this._name = data.name || getAnonymousUserName();
-        this._username = data.username || this._name;
+    this._color = user.color;
+    this._anonymous = user.anonymous;
+    this._email = user.email;
+    this._avatar = user.avatar;
+
+    this._familyName = user.familyName;
+    this._birthDate = user.birthDate;
+    this._gender = user.gender;
+    this._honorificPrefix = user.honorificPrefix;
+    this._honorificSuffix = user.honorificSuffix;
+    this._nationality = user.nationality;
+    this._affiliation = user.affiliation;
+    this._jobTitle = user.jobTitle;
+    this._telephone = user.telephone;
+    this._address = user.address;
+    this._description = user.description;
+
+    this._save();
+  }
+
+  private _save(): void {
+    this._state.save(USER, {
+      id: this._id,
+      name: this._name,
+      username: this._username,
+      initials: this._initials,
+      color: this._color,
+      anonymous: this._anonymous,
+      email: this._email,
+      avatar: this._avatar,
+
+      familyName: this._familyName,
+      birthDate: this._birthDate?.toLocaleDateString(),
+      gender: this._gender,
+      honorificPrefix: this._honorificPrefix,
+      honorificSuffix: this._honorificSuffix,
+      nationality: this._nationality,
+      affiliation: this._affiliation,
+      jobTitle: this._jobTitle,
+      telephone: this._telephone,
+      address: this._address,
+      description: this._description
+    });
+    this._changed.emit();
+  }
+
+  private _fetchUser(): Promise<void> {
+    return this._state.fetch(USER).then((data: JSONObject) => {
+      if (data !== undefined) {
+        this._anonymous = (data.anonymous as boolean) || false;
+
+        this._id = data.id as string;
+        this._name = data.name as string;
+        this._username = (data.username as string) || this._name;
 
         const name = this._name.split(' ');
         if (name.length > 0) {
@@ -117,14 +223,52 @@ export class User implements IUser {
           this._initials += name[1].substring(0, 1).toLocaleUpperCase();
         }
 
-        this._color = data.color || getRandomColor();
-        this._email = data.email;
-        this._avatar = data.avatar;
+        this._color = data.color as string;
+        this._email = data.email as string;
+        this._avatar = data.avatar as string;
+      } else {
+        // Get random values
+        this._anonymous = true;
+        this._id = UUID.uuid4();
+        this._name = getAnonymousUserName();
+        this._color = '#' + getRandomColor().slice(1);
+        this._username = this._name;
 
-        return Promise.resolve();
-      })
-      .catch((err: any) => console.error(err));
+        const name = this._name.split(' ');
+        if (name.length > 0) {
+          this._initials = name[0].substring(0, 1).toLocaleUpperCase();
+        }
+        if (name.length > 1) {
+          this._initials += name[1].substring(0, 1).toLocaleUpperCase();
+        }
+        this._save();
+      }
+    });
   }
+}
+
+export namespace User {
+  export type User = {
+    id: string;
+    name: string;
+    username: string;
+    color: string;
+    anonymous: boolean;
+    email?: string;
+    avatar?: string;
+
+    familyName?: string;
+    birthDate?: Date;
+    gender?: string;
+    honorificPrefix?: string;
+    honorificSuffix?: string;
+    nationality?: string;
+    affiliation?: string;
+    jobTitle?: string;
+    telephone?: string;
+    address?: string;
+    description?: string;
+  };
 }
 
 export class UserNameInput

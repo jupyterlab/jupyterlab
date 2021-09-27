@@ -122,6 +122,7 @@
     "@jupyterlab/ui-components": "^3.3.0-alpha.10",
     "@jupyterlab/ui-components-extension": "^3.3.0-alpha.10",
     "@jupyterlab/user": "^3.3.0-alpha.10",
+    "@jupyterlab/user-extension": "^3.3.0-alpha.10",
     "@jupyterlab/vdom": "^3.3.0-alpha.10",
     "@jupyterlab/vdom-extension": "^3.3.0-alpha.10",
     "@jupyterlab/vega5-extension": "^3.3.0-alpha.10"

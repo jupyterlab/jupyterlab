@@ -5,6 +5,8 @@ import { Menu } from '@lumino/widgets';
 
 import { Token } from '@lumino/coreutils';
 
+export const USER = '@jupyterlab/user-extension:user';
+
 export const IUserToken = new Token<IUser>('jupyterlab-auth:user');
 
 export const IUserMenuToken = new Token<Menu>('jupyterlab-auth:userMenu');
@@ -16,6 +18,7 @@ export interface IUser {
   readonly username: string;
   readonly initials: string;
   readonly color: string;
+  readonly anonymous: boolean;
   readonly email?: string;
   readonly avatar?: string;
 
@@ -31,7 +34,6 @@ export interface IUser {
   readonly address?: string;
   readonly description?: string;
 
-  readonly isAnonymous: boolean;
   //readonly isReady: boolean;
   //readonly ready: ISignal<IUser, boolean>;
   //readonly changed: ISignal<IUser, void>;

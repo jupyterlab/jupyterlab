@@ -1,0 +1,119 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-AuthWidget {
+  padding: 10px;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: 24px;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  /*  align-items: center; */
+}
+
+#jp-topbar-spacer {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+#jp-UserIcon {
+  width: auto;
+  height: 33px;
+}
+
+#jp-UserMenu {
+  display: flex;
+  flex-direction: row;
+}
+
+.login-container {
+  height: 27px;
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.login-container:hover {
+  cursor: pointer;
+}
+
+.login-icon {
+  margin: auto;
+  margin-top: 1px;
+  width: 25px;
+  height: 25px;
+  border-radius: 90px;
+  display: flex;
+  align-items: center;
+}
+
+.login-icon span {
+  margin: auto;
+  padding-top: 3px;
+  text-align: center;
+  vertical-align: middle;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.user-img {
+  width: 25px;
+  height: 25px;
+  border-radius: 90px;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.login-username {
+  margin: auto;
+  margin-left: 8px;
+  padding-top: 3px;
+  text-align: center;
+  vertical-align: middle;
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-UserMenu-dropdown {
+  height: 30px;
+  padding: 4px;
+  padding-bottom: 0px;
+}
+
+.jp-github-icon {
+  margin-top: 4px;
+}
+
+.jp-Dialog-container {
+  min-height: 140;
+  overflow: hidden;
+}
+
+.jp-UserPanel span {
+  font-size: 12px;
+}
+
+.jp-UserPanel h5 {
+  margin-bottom: 0px;
+}
+
+.panel-container {
+  height: 27px;
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.panel-username {
+  margin: auto;
+  margin-left: 8px;
+  padding-top: 3px;
+  text-align: center;
+  vertical-align: middle;
+  color: var(--jp-ui-font-color1);
+  font-size: 12px;
+}
