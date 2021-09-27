@@ -735,7 +735,10 @@ export class Context<
         const modified = ycontextModified || this.contentsModel?.last_modified;
         const tClient = modified ? new Date(modified) : new Date();
         const tDisk = new Date(model.last_modified);
-        if (modified && tDisk.getTime() - tClient.getTime() > lastModifiedCheckMargin) {
+        if (
+          modified &&
+          tDisk.getTime() - tClient.getTime() > lastModifiedCheckMargin
+        ) {
           return this._timeConflict(tClient, model, options);
         }
         return this._manager.contents.save(path, options);

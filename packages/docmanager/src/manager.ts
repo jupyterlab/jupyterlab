@@ -130,7 +130,7 @@ export class DocumentManager implements IDocumentManager {
     // For each existing context, update the margin value.
     this._contexts.forEach(context => {
       context.lastModifiedCheckMargin = value;
-    })
+    });
   }
 
   /**
