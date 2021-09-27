@@ -10,6 +10,11 @@ See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+v3.0.17
+^^^^^^^
+*  Normalize notebook cell line endings to
+   ``\n`` `#11141 <https://github.com/jupyterlab/jupyterlab/pull/11141>`__
+   
 v3.0.16
 ^^^^^^^
 * Update to ``codemirror~=5.58.0``
