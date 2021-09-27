@@ -13,13 +13,18 @@ import {
 import { IStateDB } from '@jupyterlab/statedb';
 import { Dialog } from '@jupyterlab/apputils';
 import { caretDownIcon } from '@jupyterlab/ui-components';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { YFile, YNotebook } from '@jupyterlab/shared-models';
 import {
   IUser,
   IUserMenuToken,
+  IUserPanelToken,
   IUserToken,
   User,
   UserIcon,
-  UserNameInput
+  UserNameInput,
+  UserPanel
 } from '@jupyterlab/user';
 import { Menu, MenuBar, Widget } from '@lumino/widgets';
 
@@ -34,7 +39,7 @@ export namespace CommandIDs {
 /**
  *
  */
-const userPlugin: JupyterFrontEndPlugin<IUser> = {
+const userPlugin: JupyterFrontEndPlugin<User> = {
   id: '@jupyterlab/user-extension:user',
   autoStart: true,
   requires: [IStateDB],
@@ -125,9 +130,78 @@ const userMemuPlugin: JupyterFrontEndPlugin<Menu> = {
   }
 };
 
+const userPanelPlugin: JupyterFrontEndPlugin<UserPanel> = {
+  id: '@jupyterlab/user-extension:userPanel',
+  autoStart: true,
+  requires: [IUserToken, IEditorTracker, INotebookTracker],
+  provides: IUserPanelToken,
+  activate: (
+    app: JupyterFrontEnd,
+    user: User,
+    editor: IEditorTracker,
+    notebook: INotebookTracker
+  ): UserPanel => {
+    const userPanel = new UserPanel(user);
+    app.shell.add(userPanel, 'left', { rank: 300 });
+
+    const collaboratorsChanged = (
+      tracker: IEditorTracker | INotebookTracker
+    ) => {
+      if (
+        tracker.currentWidget === null ||
+        tracker.currentWidget.context.contentsModel === null
+      ) {
+        userPanel.collaborators = [];
+        return;
+      }
+
+      let model: YNotebook | YFile;
+      if (tracker.currentWidget.context.contentsModel.type === 'notebook') {
+        model = tracker.currentWidget.context.model.sharedModel as YNotebook;
+      } else if (tracker.currentWidget.context.contentsModel.type === 'file') {
+        model = tracker.currentWidget.context.model.sharedModel as YFile;
+      } else {
+        userPanel.collaborators = [];
+        return;
+      }
+
+      const stateChanged = () => {
+        const state = model.awareness.getStates();
+        const collaborators: IUser[] = [];
+        state.forEach((value, key) => {
+          const collaborator: IUser = {
+            anonymous: value.user.anonymous,
+            name: value.user.name,
+            username: value.user.username,
+            initials: value.user.initials,
+            color: value.user.color,
+            email: value.user.email,
+            avatar: value.user.avatar
+          };
+
+          collaborators.push(collaborator);
+        });
+        userPanel.collaborators = collaborators;
+      };
+
+      model.awareness.on('change', stateChanged);
+      stateChanged();
+    };
+
+    notebook.currentChanged.connect(collaboratorsChanged);
+    editor.currentChanged.connect(collaboratorsChanged);
+
+    return userPanel;
+  }
+};
+
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [userPlugin, userMemuPlugin];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  userPlugin,
+  userMemuPlugin,
+  userPanelPlugin
+];
 
 export default plugins;

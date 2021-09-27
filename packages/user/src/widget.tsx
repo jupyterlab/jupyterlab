@@ -271,62 +271,6 @@ export namespace User {
   };
 }
 
-export class UserNameInput
-  extends ReactWidget
-  implements Dialog.IBodyWidget<string> {
-  private _name: string;
-  private _user: User;
-  private _commands: CommandRegistry;
-
-  constructor(user: User, commands: CommandRegistry) {
-    super();
-    this._user = user;
-    this._name = user.name;
-    this._commands = commands;
-  }
-
-  getValue(): string {
-    return this._name;
-  }
-
-  private _handleName = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    this._name = event.target.value;
-    this.update();
-  };
-
-  render(): JSX.Element {
-    const getButtons = () => {
-      return this._user.logInMethods.map(id => {
-        return (
-          <button
-            id="jp-Dialog-button"
-            key={id}
-            className="jp-mod-reject jp-mod-styled"
-            onClick={() => this._commands.execute(id)}
-          >
-            {this._commands.label(id)}
-          </button>
-        );
-      });
-    };
-
-    return (
-      <div className="lm-Widget p-Widget jp-Dialog-body jp-Dialog-container">
-        <label>Who are you?</label>
-        <input
-          id="jp-dialog-input-id"
-          type="text"
-          className="jp-Input-Dialog jp-mod-styled"
-          value={this._name}
-          onChange={this._handleName}
-        />
-        <hr />
-        {getButtons()}
-      </div>
-    );
-  }
-}
-
 export class UserIcon extends ReactWidget {
   private _profile: User;
 
@@ -384,3 +328,104 @@ export const getUserIcon = (user: IUser) => {
     );
   }
 };
+
+export class UserNameInput
+  extends ReactWidget
+  implements Dialog.IBodyWidget<string> {
+  private _name: string;
+  private _user: User;
+  private _commands: CommandRegistry;
+
+  constructor(user: User, commands: CommandRegistry) {
+    super();
+    this._user = user;
+    this._name = user.name;
+    this._commands = commands;
+  }
+
+  getValue(): string {
+    return this._name;
+  }
+
+  private _handleName = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    this._name = event.target.value;
+    this.update();
+  };
+
+  render(): JSX.Element {
+    const getButtons = () => {
+      return this._user.logInMethods.map(id => {
+        return (
+          <button
+            id="jp-Dialog-button"
+            key={id}
+            className="jp-mod-reject jp-mod-styled"
+            onClick={() => this._commands.execute(id)}
+          >
+            {this._commands.label(id)}
+          </button>
+        );
+      });
+    };
+
+    return (
+      <div className="lm-Widget p-Widget jp-Dialog-body jp-Dialog-container">
+        <label>Who are you?</label>
+        <input
+          id="jp-dialog-input-id"
+          type="text"
+          className="jp-Input-Dialog jp-mod-styled"
+          value={this._name}
+          onChange={this._handleName}
+        />
+        <hr />
+        {getButtons()}
+      </div>
+    );
+  }
+}
+
+export class UserPanel extends ReactWidget {
+  private _profile: User;
+  private _collaborators: IUser[];
+
+  constructor(user: User) {
+    super();
+    this.id = 'jp-user-panel';
+    this.title.icon = userIcon;
+    this.addClass('jp-AuthWidget');
+
+    this._profile = user;
+    this._collaborators = [];
+  }
+
+  get collaborators(): IUser[] {
+    return this._collaborators;
+  }
+
+  set collaborators(users: IUser[]) {
+    this._collaborators = users;
+    this.update();
+  }
+
+  render(): JSX.Element {
+    return (
+      <div className="jp-UserPanel">
+        <div className="panel-container">
+          {getUserIcon(this._profile)}
+          <span className="panel-username">{this._profile.name}</span>
+        </div>
+
+        <h5>Collaborators</h5>
+        <hr />
+        <div className="panel-container">
+          {this._collaborators.map(user => {
+            if (this._profile.username !== user.username) {
+              return getUserIcon(user);
+            }
+          })}
+        </div>
+      </div>
+    );
+  }
+}
