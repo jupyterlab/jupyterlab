@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Menu } from '@lumino/widgets';
-
-import { Token } from '@lumino/coreutils';
+import { ISignal } from '@lumino/signaling';
+import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
 
 export const USER = '@jupyterlab/user-extension:user';
 
@@ -34,10 +34,9 @@ export interface IUser {
   readonly address?: string;
   readonly description?: string;
 
-  //readonly isReady: boolean;
-  //readonly ready: ISignal<IUser, boolean>;
-  //readonly changed: ISignal<IUser, void>;
+  readonly isReady: boolean;
+  readonly ready: ISignal<IUser, boolean>;
+  readonly changed: ISignal<IUser, void>;
 
-  //readonly logInMethods: string[];
-  //registerLogInMethod(command: string): void;
+  toJSON(): ReadonlyPartialJSONObject;
 }

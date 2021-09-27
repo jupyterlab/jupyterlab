@@ -17,7 +17,6 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { YFile, YNotebook } from '@jupyterlab/shared-models';
 import {
-  IUser,
   IUserMenuToken,
   IUserPanelToken,
   IUserToken,
@@ -45,7 +44,6 @@ const userPlugin: JupyterFrontEndPlugin<User> = {
   requires: [IStateDB],
   provides: IUserToken,
   activate: (app: JupyterFrontEnd, state: IStateDB): User => {
-    console.debug('User extension activated.');
     return new User(state);
   }
 };
@@ -111,7 +109,6 @@ const userMemuPlugin: JupyterFrontEndPlugin<Menu> = {
           });
         }
       });
-      console.debug('Dialog');
       menu.addItem({ command: CommandIDs.rename });
 
       menu.addItem({ type: 'separator' });
@@ -144,9 +141,10 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserPanel> = {
     const userPanel = new UserPanel(user);
     app.shell.add(userPanel, 'left', { rank: 300 });
 
-    const collaboratorsChanged = (
+    const collaboratorsChanged = async (
       tracker: IEditorTracker | INotebookTracker
     ) => {
+      await tracker.currentWidget?.context.ready;
       if (
         tracker.currentWidget === null ||
         tracker.currentWidget.context.contentsModel === null
@@ -167,9 +165,10 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserPanel> = {
 
       const stateChanged = () => {
         const state = model.awareness.getStates();
-        const collaborators: IUser[] = [];
+        const collaborators: User.User[] = [];
         state.forEach((value, key) => {
-          const collaborator: IUser = {
+          const collaborator: User.User = {
+            id: value.user.id,
             anonymous: value.user.anonymous,
             name: value.user.name,
             username: value.user.username,

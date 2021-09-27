@@ -2,21 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, ReactWidget } from '@jupyterlab/apputils';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
 import { userIcon } from '@jupyterlab/ui-components';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { JSONObject, UUID } from '@lumino/coreutils';
-
+import { JSONObject, ReadonlyPartialJSONObject, UUID } from '@lumino/coreutils';
+//import * as env from 'lib0/environment';
 import * as React from 'react';
 
 import { IUser, USER } from './tokens';
-
 import { getAnonymousUserName, getRandomColor } from './utils';
 
 export class User implements IUser {
@@ -50,6 +44,8 @@ export class User implements IUser {
 
   constructor(state: IStateDB) {
     this._state = state;
+    //let color = '#' + env.getParam('--usercolor', '');
+    //let name = env.getParam('--username', '');
     this._fetchUser().then(() => {
       this._isReady = true;
       this._ready.emit(true);
@@ -128,6 +124,30 @@ export class User implements IUser {
     return this._logInMethods;
   }
 
+  toJSON(): ReadonlyPartialJSONObject {
+    return {
+      id: this._id,
+      name: this._name,
+      username: this._username,
+      initials: this._initials,
+      color: this._color,
+      anonymous: this._anonymous,
+      email: this._email,
+      avatar: this._avatar,
+      familyName: this._familyName,
+      birthDate: this._birthDate?.toLocaleDateString(),
+      gender: this._gender,
+      honorificPrefix: this._honorificPrefix,
+      honorificSuffix: this._honorificSuffix,
+      nationality: this._nationality,
+      affiliation: this._affiliation,
+      jobTitle: this._jobTitle,
+      telephone: this._telephone,
+      address: this._address,
+      description: this._description
+    };
+  }
+
   registerLogInMethod(command: string): void {
     this._logInMethods.push(command);
   }
@@ -181,28 +201,7 @@ export class User implements IUser {
   }
 
   private _save(): void {
-    this._state.save(USER, {
-      id: this._id,
-      name: this._name,
-      username: this._username,
-      initials: this._initials,
-      color: this._color,
-      anonymous: this._anonymous,
-      email: this._email,
-      avatar: this._avatar,
-
-      familyName: this._familyName,
-      birthDate: this._birthDate?.toLocaleDateString(),
-      gender: this._gender,
-      honorificPrefix: this._honorificPrefix,
-      honorificSuffix: this._honorificSuffix,
-      nationality: this._nationality,
-      affiliation: this._affiliation,
-      jobTitle: this._jobTitle,
-      telephone: this._telephone,
-      address: this._address,
-      description: this._description
-    });
+    this._state.save(USER, this.toJSON());
     this._changed.emit();
   }
 
@@ -253,6 +252,7 @@ export namespace User {
     name: string;
     username: string;
     color: string;
+    initials?: string;
     anonymous: boolean;
     email?: string;
     avatar?: string;
@@ -307,7 +307,7 @@ export class UserIcon extends ReactWidget {
   }
 }
 
-export const getUserIcon = (user: IUser) => {
+export const getUserIcon = (user: User.User) => {
   if (user.avatar) {
     return (
       <div key={user.username} className="login-icon">
@@ -387,7 +387,7 @@ export class UserNameInput
 
 export class UserPanel extends ReactWidget {
   private _profile: User;
-  private _collaborators: IUser[];
+  private _collaborators: User.User[];
 
   constructor(user: User) {
     super();
@@ -399,11 +399,11 @@ export class UserPanel extends ReactWidget {
     this._collaborators = [];
   }
 
-  get collaborators(): IUser[] {
+  get collaborators(): User.User[] {
     return this._collaborators;
   }
 
-  set collaborators(users: IUser[]) {
+  set collaborators(users: User.User[]) {
     this._collaborators = users;
     this.update();
   }
