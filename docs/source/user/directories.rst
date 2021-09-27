@@ -117,7 +117,7 @@ against the patterns in ``disabledExtensions`` and ``deferredExtensions``.
    ``"@jupyterlab/apputils-extension:set.*$"``),
    then that specific plugin is disabled (or deferred).
 
-An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as follows:
+An example ``<jupyter_config_path>/labconfig/page_config.json`` could look as follows:
 
 .. code:: json
 
