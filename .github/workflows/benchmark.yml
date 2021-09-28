@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     env:
-      BENCHMARK_NUMBER_SAMPLES: 50
+      BENCHMARK_NUMBER_SAMPLES: 100
 
     steps:
       - name: Checkout
@@ -127,7 +127,7 @@ jobs:
         run: |
           kill -s SIGKILL $(pgrep jupyter-lab)
 
-      # Second run the benchmark on the PR head
+      # Second run the benchmark on the new reference
       - name: Checkout latest version
         run: |
           cp galata/lab-benchmark-expected.json /tmp/
@@ -138,6 +138,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # Clean assets before installing the new version
+          jlpm run clean
+
           bash ./scripts/ci_install.sh
 
       - name: Launch JupyterLab
