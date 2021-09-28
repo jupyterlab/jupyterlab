@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Button as BPButton,
-  IButtonProps as IBPButtonProps
-} from '@blueprintjs/core/lib/cjs/components/button/buttons';
-import {
   Collapse as BPCollapse,
   ICollapseProps
 } from '@blueprintjs/core/lib/cjs/components/collapse/collapse';
@@ -26,27 +22,11 @@ import { LabIcon } from './icon';
 import { classes } from './utils';
 export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
 
-interface IButtonProps extends IBPButtonProps {
-  title?: string;
-  type?: 'button' | 'submit' | 'reset';
-}
-
 interface IInputGroupProps extends IBPInputGroupProps {
   rightIcon?: string;
 }
 
 type CommonProps<T> = React.DOMAttributes<T>;
-
-export const Button = (props: IButtonProps & CommonProps<any>): JSX.Element => (
-  <BPButton
-    {...props}
-    className={classes(
-      props.className,
-      props.minimal ? 'minimal' : '',
-      'jp-Button'
-    )}
-  />
-);
 
 export const InputGroup = (
   props: IInputGroupProps & CommonProps<any>

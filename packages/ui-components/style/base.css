@@ -67,18 +67,34 @@ a:hover {
   border-radius: var(--jp-border-radius);
   padding: 0px 12px;
   font-size: var(--jp-ui-font-size1);
+  /* Copy from blueprint 3 */
+  display: inline-flex;
+  flex-direction: row;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  text-align: left;
+  vertical-align: middle;
+  min-height: 30px;
+  min-width: 30px;
+}
+
+.jp-Button.jp-mod-small {
+  min-height: 24px;
+  min-width: 24px;
+  font-size: 12px;
+  padding: 0 7px;
 }
 
 /* Use our own theme for hover styles */
-button.jp-Button.bp3-button.bp3-minimal:hover {
+.jp-Button.jp-mod-minimal:hover {
   background-color: var(--jp-layout-color2);
 }
-.jp-Button.minimal {
-  color: unset !important;
-}
 
-.jp-Button.jp-ToolbarButtonComponent {
-  text-transform: none;
+.jp-Button.jp-mod-minimal {
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color2);
 }
 
 .jp-InputGroup input {
