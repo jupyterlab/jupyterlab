@@ -41,7 +41,6 @@
     "@jupyterlab/apputils": "^3.3.0-alpha.11",
     "@jupyterlab/codeeditor": "^3.3.0-alpha.11",
     "@jupyterlab/console": "^3.3.0-alpha.11",
-    "@jupyterlab/coreutils": "^5.3.0-alpha.11",
     "@jupyterlab/filebrowser": "^3.3.0-alpha.11",
     "@jupyterlab/launcher": "^3.3.0-alpha.11",
     "@jupyterlab/mainmenu": "^3.3.0-alpha.11",

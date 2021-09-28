@@ -371,10 +371,6 @@ const resources: JupyterFrontEndPlugin<void> = {
         }
         const kernelName = spec.display_name;
         let kernelIconUrl = spec.resources['logo-64x64'];
-        if (kernelIconUrl) {
-          const index = kernelIconUrl.indexOf('kernelspecs');
-          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
-        }
         commands.addCommand(bannerCommand, {
           label: trans.__('About the %1 Kernel', kernelName),
           isVisible: usesKernel,
