@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/notebook",
-  "version": "3.0.12",
+  "version": "3.0.13",
   "description": "JupyterLab - Notebook",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -43,13 +43,13 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^3.0.10",
-    "@jupyterlab/cells": "^3.0.12",
+    "@jupyterlab/cells": "^3.0.13",
     "@jupyterlab/codeeditor": "^3.0.10",
     "@jupyterlab/coreutils": "^5.0.7",
-    "@jupyterlab/docregistry": "^3.0.12",
+    "@jupyterlab/docregistry": "^3.0.13",
     "@jupyterlab/nbformat": "^3.0.7",
     "@jupyterlab/observables": "^4.0.7",
-    "@jupyterlab/rendermime": "^3.0.11",
+    "@jupyterlab/rendermime": "^3.0.12",
     "@jupyterlab/services": "^6.0.10",
     "@jupyterlab/statusbar": "^3.0.10",
     "@jupyterlab/translation": "^3.0.10",
@@ -66,7 +66,7 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.12",
+    "@jupyterlab/testutils": "^3.0.13",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

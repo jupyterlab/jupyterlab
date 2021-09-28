@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation-extension",
-  "version": "3.0.12",
+  "version": "3.0.13",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -40,7 +40,7 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.12",
+    "@jupyterlab/application": "^3.0.13",
     "@jupyterlab/apputils": "^3.0.10",
     "@jupyterlab/mainmenu": "^3.0.10",
     "@jupyterlab/settingregistry": "^3.0.7",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/vdom",
-  "version": "3.0.12",
+  "version": "3.0.13",
   "description": "A viewer for VDOM documents.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^3.0.10",
-    "@jupyterlab/docregistry": "^3.0.12",
+    "@jupyterlab/docregistry": "^3.0.13",
     "@jupyterlab/rendermime-interfaces": "^3.0.10",
     "@jupyterlab/services": "^6.0.10",
     "@lumino/coreutils": "^1.5.3",
