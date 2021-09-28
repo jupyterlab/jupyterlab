@@ -12,9 +12,13 @@ milestone on GitHub for the full list of pull requests and issues closed.
 
 v3.0.17
 ^^^^^^^
-*  Normalize notebook cell line endings to
-   ``\n`` `#11141 <https://github.com/jupyterlab/jupyterlab/pull/11141>`__
-   
+* Normalize notebook cell line endings to
+  ``\n`` `#11141 <https://github.com/jupyterlab/jupyterlab/pull/11141>`__
+* Markdown url resolver no longer throws for malformed URLs in isLocal check
+  `#11160 <https://github.com/jupyterlab/jupyterlab/pull/11160>`__
+* Shutdown sessions/terminals on shutdown 
+  `#11161 <https://github.com/jupyterlab/jupyterlab/pull/11161>`__
+
 v3.0.16
 ^^^^^^^
 * Update to ``codemirror~=5.58.0``
