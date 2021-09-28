@@ -368,7 +368,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
  */
 const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [IRouter, IWindowResolver, ITranslator],
+  requires: [
+    IRouter,
+    IWindowResolver,
+    ITranslator,
+    JupyterFrontEnd.ITreeResolver
+  ],
   optional: [IConnectionLost],
   provides: ITreePathUpdater,
   activate: (
@@ -376,6 +381,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     router: IRouter,
     resolver: IWindowResolver,
     translator: ITranslator,
+    treeResolver: JupyterFrontEnd.ITreeResolver,
     connectionLost: IConnectionLost | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -391,13 +397,17 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     let _defaultBrowserTreePath = '';
 
     function updateTreePath(treePath: string) {
-      _defaultBrowserTreePath = treePath;
-      if (!_docTreePath) {
-        const path = PageConfig.getUrl({ treePath });
-        router.navigate(path, { skipRouting: true });
-        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-        PageConfig.setOption('treePath', treePath);
-      }
+      // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
+      treeResolver.paths.then(() => {
+        _defaultBrowserTreePath = treePath;
+        if (!_docTreePath) {
+          const url = PageConfig.getUrl({ treePath });
+          const path = URLExt.parse(url).pathname;
+          router.navigate(path, { skipRouting: true });
+          // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
+          PageConfig.setOption('treePath', treePath);
+        }
+      });
     }
 
     // Requiring the window resolver guarantees that the application extension
@@ -433,16 +443,20 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
       PageConfig.setOption('mode', args as string);
     });
 
-    // Watch the path of the current widget in the main area and update the page
-    // URL to reflect the change.
-    app.shell.currentPathChanged.connect((_, args) => {
-      const maybeTreePath = args.newValue as string;
-      const treePath = maybeTreePath || _defaultBrowserTreePath;
-      const path = PageConfig.getUrl({ treePath: treePath });
-      router.navigate(path, { skipRouting: true });
-      // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-      PageConfig.setOption('treePath', treePath);
-      _docTreePath = maybeTreePath;
+    // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
+    treeResolver.paths.then(() => {
+      // Watch the path of the current widget in the main area and update the page
+      // URL to reflect the change.
+      app.shell.currentPathChanged.connect((_, args) => {
+        const maybeTreePath = args.newValue as string;
+        const treePath = maybeTreePath || _defaultBrowserTreePath;
+        const url = PageConfig.getUrl({ treePath: treePath });
+        const path = URLExt.parse(url).pathname;
+        router.navigate(path, { skipRouting: true });
+        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
+        PageConfig.setOption('treePath', treePath);
+        _docTreePath = maybeTreePath;
+      });
     });
 
     // If the connection to the server is lost, handle it with the
