@@ -243,7 +243,6 @@ const resources: JupyterFrontEndPlugin<void> = {
     let counter = 0;
     const category = trans.__('Help');
     const namespace = 'help-doc';
-    const baseUrl = PageConfig.getBaseUrl();
     const { commands, shell, serviceManager } = app;
     const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
     const resources = [
