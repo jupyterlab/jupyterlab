@@ -10,6 +10,10 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
+import {
+  IFormComponentRegistry,
+  FormComponentRegistry
+} from '@jupyterlab/formeditor';
 import { ITranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import {
@@ -18,6 +22,28 @@ import {
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
+import { Menu } from '@lumino/widgets';
+import { IShortcutUIexternal, renderShortCut } from './renderer';
+
+function getExternalForJupyterLab(
+  settingRegistry: ISettingRegistry,
+  app: JupyterFrontEnd
+): IShortcutUIexternal {
+  const { commands } = app;
+  const shortcutPluginLocation = '@jupyterlab/shortcuts-extension:shortcuts';
+  return {
+    getAllShortCutSettings: () =>
+      settingRegistry.reload(shortcutPluginLocation),
+    removeShortCut: (key: string) =>
+      settingRegistry.remove(shortcutPluginLocation, key),
+    openAdvanced: () => app.commands.execute('settingeditor:open'),
+    createMenu: () => new Menu({ commands }),
+    hasCommand: (id: string) => commands.hasCommand(id),
+    addCommand: (id: string, options: CommandRegistry.ICommandOptions) =>
+      commands.addCommand(id, options),
+    getLabel: (id: string) => commands.label(id)
+  };
+}
 
 /**
  * The default shortcuts extension.
@@ -50,16 +76,27 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
  */
 const shortcuts: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:shortcuts',
-  requires: [ISettingRegistry, ITranslator],
+  requires: [ISettingRegistry, IFormComponentRegistry, ITranslator],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
+    editorRegistry: IFormComponentRegistry,
     translator: ITranslator
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
+
+    editorRegistry.addRenderer(
+      'shortcuts',
+      (props: FormComponentRegistry.IRendererProps) => {
+        return renderShortCut({
+          external: getExternalForJupyterLab(registry, app),
+          ...props
+        });
+      }
+    );
 
     /**
      * Populate the plugin's schema defaults.
