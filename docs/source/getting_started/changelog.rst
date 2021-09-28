@@ -8,9 +8,11 @@ v3.0
 
 See the `JupyterLab
 3.0 <https://github.com/jupyterlab/jupyterlab/milestone/48?closed=1>`__
-milestone on GitHub for the full list of pull requests and issues closed.
+and `JupyterLab 3.0.x
+<https://github.com/jupyterlab/jupyterlab/milestone/62?closed=1>`__ milestones 
+on GitHub for the full list of pull requests and issues closed.
 
-v3.0.17
+v3.0.18
 ^^^^^^^
 * Normalize notebook cell line endings to
   ``\n`` `#11141 <https://github.com/jupyterlab/jupyterlab/pull/11141>`__
@@ -18,6 +20,17 @@ v3.0.17
   `#11160 <https://github.com/jupyterlab/jupyterlab/pull/11160>`__
 * Shutdown sessions/terminals on shutdown 
   `#11161 <https://github.com/jupyterlab/jupyterlab/pull/11161>`__
+
+v3.0.17
+^^^^^^^
+* Remove the ``form`` tag ``action`` attribute during sanitizing. 
+  `GHSA-4952-p58q-6crx <https://github.com/jupyterlab/jupyterlab/security/advisories/GHSA-4952-p58q-6crx>`__
+* Include all default*.json in @jupyterlab/testutils distributions
+  `#10271 <https://github.com/jupyterlab/jupyterlab/pull/10271>`__
+* Check to make sure process.argv exists before using it.
+  `#10520 <https://github.com/jupyterlab/jupyterlab/pull/10520>`__
+* Normalize translation domain #10735
+  `#10735 <https://github.com/jupyterlab/jupyterlab/pull/10735>`__
 
 v3.0.16
 ^^^^^^^
