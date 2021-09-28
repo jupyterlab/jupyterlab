@@ -198,9 +198,9 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     // Set the text value, normalizing line endings to \n
     if (Array.isArray(cell.source)) {
-      this.value.text = cell.source.map(s => s.replace(/\r\n/g, '\n')).join('');
+      this.value.text = cell.source.map(s => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n')).join('');
     } else {
-      this.value.text = cell.source.replace(/\r\n/g, '\n');
+      this.value.text = cell.source.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     }
     const metadata = JSONExt.deepCopy(cell.metadata);
     if (this.type !== 'raw') {
