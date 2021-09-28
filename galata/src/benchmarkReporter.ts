@@ -197,25 +197,28 @@ export namespace benchmark {
    * If you do have multiple levels, simply use the mean of the lower levels as your data,
    * like they do in the paper.
    *
-   * Note: The measurements must have the same length.
+   * Note: The measurements must have the same length. As fallback, you could use the minimum
+   * size of the two measurement sets.
    *
    * @param oldMeasures The old measurements
    * @param newMeasures The new measurements
    * @param confidenceInterval The confidence interval for the results.
+   * @param minLength Fall back to the minimum length of the two arrays
    */
   export function distributionChange(
     oldMeasures: number[],
     newMeasures: number[],
-    confidenceInterval: number = 0.95
+    confidenceInterval: number = 0.95,
+    minLength = false
   ): IDistributionChange {
     const n = oldMeasures.length;
-    if (n !== newMeasures.length) {
+    if (!minLength && n !== newMeasures.length) {
       throw new Error('Data have different length');
     }
     return performanceChange(
       { mean: mean(...oldMeasures), variance: variance(...oldMeasures) },
       { mean: mean(...newMeasures), variance: variance(...newMeasures) },
-      n,
+      minLength ? Math.min(n, newMeasures.length) : n,
       confidenceInterval
     );
   }
@@ -623,12 +626,19 @@ class BenchmarkReporter implements Reporter {
             try {
               const delta = benchmark.distributionChange(
                 oldDistribution,
-                newDistribution
+                newDistribution,
+                0.95,
+                true
               );
 
-              line += ` ${((delta.mean - 1) * 100).toFixed(1)}% ± ${(
-                delta.confidenceInterval * 100
-              ).toFixed(1)}% |`;
+              let unmatchWarning = '';
+              if (oldDistribution.length != newDistribution.length) {
+                unmatchWarning = `[:warning:](# "Reference size ${oldDistribution.length} != Actual size ${newDistribution.length}")`;
+              }
+
+              line += ` ${unmatchWarning}${((delta.mean - 1) * 100).toFixed(
+                1
+              )}% ± ${(delta.confidenceInterval * 100).toFixed(1)}% |`;
             } catch (error) {
               console.error(
                 `Reference has length ${oldDistribution.length} and new has ${newDistribution.length}.`
