@@ -6,6 +6,7 @@ export * from './collapse';
 export * from './collapser';
 export * from './htmlselect';
 export * from './iframe';
+export * from './inputgroup';
 export * from './interface';
 export * from './menu';
 export * from './spinner';
