@@ -21,14 +21,6 @@ import {
 } from '@jupyterlab/translation';
 
 /**
- * A namespace for command IDs.
- */
-export namespace CommandIDs {
-  export const installAdditionalLanguages =
-    'jupyterlab-translation:install-additional-languages';
-}
-
-/**
  * Translation plugins
  */
 const PLUGIN_ID = '@jupyterlab/translation-extension:plugin';
