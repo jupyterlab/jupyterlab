@@ -62,7 +62,7 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
       }
     } else {
       this._dataHash = null;
-      Promise.reject('Unable to get a view on the variable.');
+      return Promise.reject('Unable to get a view on the variable.');
     }
   }
 
