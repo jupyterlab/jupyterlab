@@ -29,6 +29,7 @@ data_files_spec = [
      'jupyter-config/jupyter_server_config.d', f'{NAME}.json'),
     ('etc/jupyter/jupyter_notebook_config.d',
      'jupyter-config/jupyter_notebook_config.d', f'{NAME}.json'),
+    ('etc/jupyter/', 'jupyter-config/', 'jupyter_server_config.json'),
 ]
 
 def post_dist():
