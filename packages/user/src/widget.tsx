@@ -7,7 +7,6 @@ import { userIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { ISignal, Signal } from '@lumino/signaling';
 import { JSONObject, ReadonlyPartialJSONObject, UUID } from '@lumino/coreutils';
-//import * as env from 'lib0/environment';
 import * as React from 'react';
 
 import { IUser, USER } from './tokens';
@@ -44,8 +43,6 @@ export class User implements IUser {
 
   constructor(state: IStateDB) {
     this._state = state;
-    //let color = '#' + env.getParam('--usercolor', '');
-    //let name = env.getParam('--username', '');
     this._fetchUser().then(() => {
       this._isReady = true;
       this._ready.emit(true);
@@ -152,7 +149,7 @@ export class User implements IUser {
     this._logInMethods.push(command);
   }
 
-  rename(value: string) {
+  rename(value: string): Promise<void> {
     if (this._anonymous) {
       this._name = value;
       this._username = value;
@@ -163,11 +160,12 @@ export class User implements IUser {
       if (name.length > 1) {
         this._initials += name[1].substring(0, 1).toLocaleUpperCase();
       }
-      this._save();
+      return this._save();
     }
+    return Promise.reject();
   }
 
-  update(user: User.User) {
+  update(user: User.User): Promise<void> {
     this._id = user.id;
     this._name = user.name;
     this._username = user.username;
@@ -197,52 +195,66 @@ export class User implements IUser {
     this._address = user.address;
     this._description = user.description;
 
-    this._save();
+    return this._save();
   }
 
-  private _save(): void {
-    this._state.save(USER, this.toJSON());
+  private async _save(): Promise<void> {
+    await this._state.save(USER, this.toJSON());
     this._changed.emit();
+    return Promise.resolve();
   }
 
-  private _fetchUser(): Promise<void> {
-    return this._state.fetch(USER).then((data: JSONObject) => {
-      if (data !== undefined) {
-        this._anonymous = (data.anonymous as boolean) || false;
+  private async _fetchUser(): Promise<void> {
+    const data = (await this._state.fetch(USER)) as JSONObject;
+    if (data !== undefined) {
+      this._anonymous = (data.anonymous as boolean) || false;
+      this._id = data.id as string;
+      this._name = data.name as string;
+      this._username = (data.username as string) || this._name;
 
-        this._id = data.id as string;
-        this._name = data.name as string;
-        this._username = (data.username as string) || this._name;
-
-        const name = this._name.split(' ');
-        if (name.length > 0) {
-          this._initials = name[0].substring(0, 1).toLocaleUpperCase();
-        }
-        if (name.length > 1) {
-          this._initials += name[1].substring(0, 1).toLocaleUpperCase();
-        }
-
-        this._color = data.color as string;
-        this._email = data.email as string;
-        this._avatar = data.avatar as string;
-      } else {
-        // Get random values
-        this._anonymous = true;
-        this._id = UUID.uuid4();
-        this._name = getAnonymousUserName();
-        this._color = '#' + getRandomColor().slice(1);
-        this._username = this._name;
-
-        const name = this._name.split(' ');
-        if (name.length > 0) {
-          this._initials = name[0].substring(0, 1).toLocaleUpperCase();
-        }
-        if (name.length > 1) {
-          this._initials += name[1].substring(0, 1).toLocaleUpperCase();
-        }
-        this._save();
+      const name = this._name.split(' ');
+      if (name.length > 0) {
+        this._initials = name[0].substring(0, 1).toLocaleUpperCase();
       }
-    });
+      if (name.length > 1) {
+        this._initials += name[1].substring(0, 1).toLocaleUpperCase();
+      }
+
+      this._color = data.color as string;
+      this._email = data.email as string;
+      this._avatar = data.avatar as string;
+
+      this._familyName = data.familyName as string;
+      this._birthDate = new Date(data.birthDate as string);
+      this._gender = data.gender as string;
+      this._honorificPrefix = data.honorificPrefix as string;
+      this._honorificSuffix = data.honorificSuffix as string;
+      this._nationality = data.nationality as string;
+      this._affiliation = data.affiliation as string;
+      this._jobTitle = data.jobTitle as string;
+      this._telephone = data.telephone as string;
+      this._address = data.address as string;
+      this._description = data.description as string;
+
+      return Promise.resolve();
+    } else {
+      // Get random values
+      this._anonymous = true;
+      this._id = UUID.uuid4();
+      this._name = getAnonymousUserName();
+      this._color = '#' + getRandomColor().slice(1);
+      this._username = this._name;
+
+      const name = this._name.split(' ');
+      if (name.length > 0) {
+        this._initials = name[0].substring(0, 1).toLocaleUpperCase();
+      }
+      if (name.length > 1) {
+        this._initials += name[1].substring(0, 1).toLocaleUpperCase();
+      }
+
+      return this._save();
+    }
   }
 }
 
@@ -385,6 +397,7 @@ export class UserNameInput
   }
 }
 
+// Use accordion panel https://github.com/jupyterlab/lumino/pull/205
 export class UserPanel extends ReactWidget {
   private _profile: User;
   private _collaborators: User.User[];

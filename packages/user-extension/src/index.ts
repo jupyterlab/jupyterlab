@@ -65,63 +65,52 @@ const userMemuPlugin: JupyterFrontEndPlugin<Menu> = {
     icon.id = 'jp-UserIcon';
     // TODO: remove with next lumino release
     icon.node.onclick = (event: MouseEvent) => {
-      menu.open(window.innerWidth, 30);
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const body = new UserNameInput(user, commands);
+      const dialog = new Dialog({
+        title: 'Anonymous username',
+        body,
+        buttons: [
+          Dialog.okButton({
+            label: 'Send'
+          })
+        ]
+      });
+      dialog.launch().then(data => {
+        if (data.button.accept) {
+          user.rename(data.value as string);
+        }
+      });
     };
 
     const menu = new Menu({ commands });
     menu.id = 'jp-UserMenu-dropdown';
     menu.title.icon = caretDownIcon;
     menu.title.className = 'jp-UserMenu-dropdown';
+    // TODO: remove with next lumino release
+    menu.node.onmousedown = (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      menu.open(window.innerWidth, 30);
+    };
 
     const menuBar = new MenuBar();
     menuBar.id = 'jp-UserMenu';
     menuBar.node.insertBefore(icon.node, menuBar.node.firstChild);
     menuBar.addMenu(menu);
-    // TODO: remove with next lumino release
-    menuBar.node.onmousedown = (event: MouseEvent) => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      menu.open(window.innerWidth, 30);
-    };
     shell.add(menuBar, 'top', { rank: 1002 });
 
-    user.ready.connect((sender, isReady) => {
-      commands.addCommand(CommandIDs.rename, {
-        label: user.name,
-        isEnabled: () => user.anonymous,
-        isVisible: () => isReady,
-        execute: () => {
-          const body = new UserNameInput(user, commands);
-          const dialog = new Dialog({
-            title: 'Anonymous username',
-            body,
-            hasClose: false,
-            buttons: [
-              Dialog.okButton({
-                label: 'Send'
-              })
-            ]
-          });
-          dialog.launch().then(data => {
-            if (data.button.accept) {
-              user.rename(data.value as string);
-            }
-          });
-        }
-      });
-      menu.addItem({ command: CommandIDs.rename });
+    menu.addItem({ type: 'separator' });
 
-      menu.addItem({ type: 'separator' });
-
-      commands.addCommand(CommandIDs.logout, {
-        label: 'Sign Out',
-        isEnabled: () => !user.anonymous,
-        execute: () => {
-          router.navigate('/logout', { hard: true });
-        }
-      });
-      menu.addItem({ command: CommandIDs.logout });
+    commands.addCommand(CommandIDs.logout, {
+      label: 'Sign Out',
+      isEnabled: () => !user.anonymous,
+      execute: () => {
+        router.navigate('/logout', { hard: true });
+      }
     });
+    menu.addItem({ command: CommandIDs.logout });
 
     return menu;
   }

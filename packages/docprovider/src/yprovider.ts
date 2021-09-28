@@ -87,7 +87,6 @@ export class WebSocketProviderWithLocks
     const awareness = options.ymodel.awareness;
     const user = options.user;
     const userChanged = () => {
-      console.debug('User changed', user.toJSON());
       awareness.setLocalStateField('user', user.toJSON());
     };
     if (user.isReady) {
