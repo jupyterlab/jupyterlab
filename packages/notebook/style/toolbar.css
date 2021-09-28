@@ -7,6 +7,10 @@
 | Variables
 |----------------------------------------------------------------------------*/
 
+:root {
+  --jp-notebook-toolbar-padding: 2px 5px 2px 2px;
+}
+
 /*-----------------------------------------------------------------------------
 
 /*-----------------------------------------------------------------------------
@@ -14,7 +18,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-NotebookPanel-toolbar {
-  padding: 2px;
+  padding: var(--jp-notebook-toolbar-padding);
 }
 
 .jp-Toolbar-item.jp-Notebook-toolbarCellType .jp-select-wrapper.jp-mod-focused {
@@ -32,4 +36,25 @@
 
 .jp-Notebook-toolbarCellTypeDropdown span {
   top: 5px !important;
+}
+
+.jp-Toolbar-responsive-popup {
+  position: absolute;
+  height: fit-content;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background: var(--jp-toolbar-background);
+  min-height: var(--jp-toolbar-micro-height);
+  padding: var(--jp-notebook-toolbar-padding);
+  z-index: 1;
+  right: 0px;
+  top: 0px;
+}
+
+.jp-Toolbar > .jp-Toolbar-responsive-opener {
+  margin-left: auto;
 }

@@ -3,6 +3,7 @@
 
 import {
   CommandToolbarButton,
+  ReactiveToolbar,
   SessionContext,
   Toolbar,
   ToolbarButton
@@ -15,7 +16,7 @@ import {
 import { toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 const server = new JupyterServer();
@@ -381,6 +382,60 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           await sessionContext.session?.kernel?.info;
         });
+      });
+    });
+  });
+
+  describe('ReactiveToolbar', () => {
+    let toolbar: ReactiveToolbar;
+
+    beforeEach(() => {
+      toolbar = new ReactiveToolbar();
+      Widget.attach(toolbar, document.body);
+    });
+
+    afterEach(() => {
+      toolbar.dispose();
+    });
+
+    describe('#constructor()', () => {
+      it('should append a node to body for the pop-up', () => {
+        const popup = document.body.querySelector(
+          '.jp-Toolbar-responsive-popup'
+        );
+        expect(popup).toBeDefined();
+        expect(popup!.parentNode!.nodeName).toEqual('BODY');
+      });
+    });
+
+    describe('#addItem()', () => {
+      it('should insert item before the toolbar pop-up button', () => {
+        const w = new Widget();
+        toolbar.addItem('test', w);
+        expect(
+          (toolbar.layout as PanelLayout).widgets.findIndex(v => v === w)
+        ).toEqual((toolbar.layout as PanelLayout).widgets.length - 2);
+      });
+    });
+
+    describe('#insertItem()', () => {
+      it('should insert item before the toolbar pop-up button', () => {
+        const w = new Widget();
+        toolbar.insertItem(2, 'test', w);
+        expect(
+          (toolbar.layout as PanelLayout).widgets.findIndex(v => v === w)
+        ).toEqual((toolbar.layout as PanelLayout).widgets.length - 2);
+      });
+    });
+
+    describe('#insertAfter()', () => {
+      it('should not insert item after the toolbar pop-up button', () => {
+        const w = new Widget();
+        const r = toolbar.insertAfter('toolbar-popup-opener', 'test', w);
+        expect(r).toEqual(false);
+        expect(
+          (toolbar.layout as PanelLayout).widgets.findIndex(v => v === w)
+        ).toEqual(-1);
       });
     });
   });
