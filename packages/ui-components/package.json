@@ -42,10 +42,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.36.0",
-    "@blueprintjs/select": "^3.15.0",
-    "@jupyterlab/coreutils": "^5.3.0-alpha.14",
-    "@jupyterlab/translation": "^3.3.0-alpha.14",
+    "@jupyterlab/coreutils": "^5.3.0-alpha.13",
+    "@jupyterlab/translation": "^3.3.0-alpha.13",
     "@lumino/algorithm": "^1.8.0",
     "@lumino/commands": "^1.17.0",
     "@lumino/coreutils": "^1.10.0",
@@ -82,14 +80,6 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "jupyterlab": {
-    "extraStyles": {
-      "blueprintjs": [
-        "icons/lib/css/blueprint-icons.css",
-        "core/lib/css/blueprint.css"
-      ]
-    }
   },
   "styleModule": "style/index.js"
 }
