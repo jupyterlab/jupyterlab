@@ -209,6 +209,7 @@ export class YNotebook
       return this._ycellMapping.get(ycell) as YCellType;
     });
 
+    this.ymeta.observe(this._onMetadataChanged);
     this.ystate.observe(this._onStateChanged);
   }
 
@@ -237,6 +238,7 @@ export class YNotebook
    */
   dispose(): void {
     this.ycells.unobserve(this._onYCellsChanged);
+    this.ymeta.unobserve(this._onMetadataChanged);
     this.ystate.unobserve(this._onStateChanged);
   }
 
@@ -344,6 +346,7 @@ export class YNotebook
    * @param value: Metadata's attribute to update.
    */
   updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
+    // TODO: Maybe modify only attributes instead of replacing the whole metadata?
     this.ymeta.set('metadata', Object.assign({}, this.getMetadata(), value));
   }
 
@@ -399,6 +402,20 @@ export class YNotebook
     this._changed.emit({
       cellsChange: cellsChange
     });
+  };
+
+  /**
+   * Handle a change to the ystate.
+   */
+  private _onMetadataChanged = (event: Y.YMapEvent<any>) => {
+    if (event.keysChanged.has('metadata')) {
+      const change = event.changes.keys.get('metadata');
+      const metadataChange = {
+        oldValue: change?.oldValue ? change!.oldValue : undefined,
+        newValue: this.getMetadata()
+      };
+      this._changed.emit({ metadataChange });
+    }
   };
 
   /**
