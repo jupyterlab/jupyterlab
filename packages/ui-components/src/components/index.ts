@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 export * from './button';
-export { Collapse as Collapser } from './collapse';
+export * from './collapse';
+export * from './collapser';
 export * from './htmlselect';
 export * from './iframe';
 export * from './interface';

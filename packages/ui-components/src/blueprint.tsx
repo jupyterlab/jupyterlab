@@ -2,25 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Collapse as BPCollapse,
-  ICollapseProps
-} from '@blueprintjs/core/lib/cjs/components/collapse/collapse';
-import {
-  Checkbox as BPCheckbox,
-  ICheckboxProps
-} from '@blueprintjs/core/lib/cjs/components/forms/controls';
-import {
   InputGroup as BPInputGroup,
   IInputGroupProps as IBPInputGroupProps
 } from '@blueprintjs/core/lib/cjs/components/forms/inputGroup';
-import {
-  Select as BPSelect,
-  ISelectProps
-} from '@blueprintjs/select/lib/cjs/components/select/select';
 import * as React from 'react';
 import { LabIcon } from './icon';
 import { classes } from './utils';
-export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
 
 interface IInputGroupProps extends IBPInputGroupProps {
   rightIcon?: string;
@@ -51,19 +38,3 @@ export const InputGroup = (
     />
   );
 };
-
-export const Collapse = (
-  props: ICollapseProps & CommonProps<any>
-): JSX.Element => <BPCollapse {...props} />;
-
-export const Select = (
-  props: ISelectProps<any> & CommonProps<any>
-): JSX.Element => (
-  <BPSelect {...props} className={classes(props.className, 'jp-Select')} />
-);
-
-export const Checkbox = (
-  props: ICheckboxProps & CommonProps<any>
-): JSX.Element => (
-  <BPCheckbox {...props} className={classes(props.className, 'jp-Checkbox')} />
-);

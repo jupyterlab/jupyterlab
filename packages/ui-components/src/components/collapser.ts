@@ -10,8 +10,8 @@ import { caretDownIcon, caretUpIcon } from '../icon';
  * A panel that supports a collapsible header made from the widget's title.
  * Clicking on the title expands or contracts the widget.
  */
-export class Collapse<T extends Widget = Widget> extends Widget {
-  constructor(options: Collapse.IOptions<T>) {
+export class Collapser<T extends Widget = Widget> extends Widget {
+  constructor(options: Collapser.IOptions<T>) {
     super(options);
     const { widget, collapsed = true } = options;
 
@@ -68,7 +68,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
   /**
    * A signal for when the widget collapse state changes.
    */
-  get collapseChanged(): ISignal<Collapse, void> {
+  get collapseChanged(): ISignal<Collapser, void> {
     return this._collapseChanged;
   }
 
@@ -96,7 +96,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
   }
 
   /**
-   * Handle the DOM events for the Collapse widget.
+   * Handle the DOM events for the Collapser widget.
    *
    * @param event - The DOM event sent to the panel.
    *
@@ -168,7 +168,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
   private _widget: T;
 }
 
-export namespace Collapse {
+export namespace Collapser {
   export interface IOptions<T extends Widget = Widget> extends Widget.IOptions {
     widget: T;
     collapsed?: boolean;
