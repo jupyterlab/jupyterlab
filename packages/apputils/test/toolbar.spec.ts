@@ -18,6 +18,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
+import { bugDotIcon, bugIcon } from '@jupyterlab/ui-components';
 
 const server = new JupyterServer();
 
@@ -530,28 +531,117 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    //   describe('#onAfterAttach()', () => {
-    //     it('should add event listeners to the node', () => {
-    //       const button = new LogToolbarButton();
-    //       Widget.attach(button, document.body);
-    //       expect(button.methods).to.contain('onAfterAttach');
-    //       simulate(button.node, 'click');
-    //       expect(button.events).to.contain('click');
-    //       button.dispose();
-    //     });
-    //   });
+    describe('#pressed()', () => {
+      it('should update the pressed state', async () => {
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'tooltip',
+          pressedTooltip: 'pressed tooltip',
+          pressedIcon: bugDotIcon
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        const button = widget.node.firstChild as HTMLElement;
+        expect(widget.pressed).toBe(false);
+        expect(button.title).toBe('tooltip');
+        expect(button.getAttribute('aria-pressed')).toEqual('false');
+        let icon = button.querySelectorAll('svg');
+        expect(icon[0].getAttribute('data-icon')).toEqual('ui-components:bug');
+        widget.pressed = true;
+        await framePromise();
+        expect(widget.pressed).toBe(true);
+        expect(button.title).toBe('pressed tooltip');
+        expect(button.getAttribute('aria-pressed')).toEqual('true');
+        icon = button.querySelectorAll('svg');
+        expect(icon[0].getAttribute('data-icon')).toEqual(
+          'ui-components:bug-dot'
+        );
+        widget.dispose();
+      });
 
-    //   describe('#onBeforeDetach()', () => {
-    //     it('should remove event listeners from the node', async () => {
-    //       const button = new LogToolbarButton();
-    //       Widget.attach(button, document.body);
-    //       await framePromise();
-    //       Widget.detach(button);
-    //       expect(button.methods).to.contain('onBeforeDetach');
-    //       simulate(button.node, 'click');
-    //       expect(button.events).to.not.contain('click');
-    //       button.dispose();
-    //     });
-    //   });
+      it('should not have the pressed state when not enabled', async () => {
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'tooltip',
+          pressedTooltip: 'pressed tooltip',
+          disabledTooltip: 'disabled tooltip',
+          pressedIcon: bugDotIcon,
+          enabled: false
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        const button = widget.node.firstChild as HTMLElement;
+        expect(widget.pressed).toBe(false);
+        expect(button.title).toBe('disabled tooltip');
+        expect(button.getAttribute('aria-pressed')).toEqual('false');
+        widget.pressed = true;
+        await framePromise();
+        expect(widget.pressed).toBe(false);
+        expect(button.title).toBe('disabled tooltip');
+        expect(button.getAttribute('aria-pressed')).toEqual('false');
+        const icon = button.querySelectorAll('svg');
+        expect(icon[0].getAttribute('data-icon')).toEqual('ui-components:bug');
+        widget.dispose();
+      });
+    });
+
+    describe('#enabled()', () => {
+      it('should update the enabled state', async () => {
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'tooltip',
+          pressedTooltip: 'pressed tooltip',
+          disabledTooltip: 'disabled tooltip',
+          pressedIcon: bugDotIcon
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        const button = widget.node.firstChild as HTMLElement;
+        expect(widget.enabled).toBe(true);
+        expect(widget.pressed).toBe(false);
+        expect(button.getAttribute('aria-disabled')).toEqual('false');
+
+        widget.pressed = true;
+        await framePromise();
+        expect(widget.pressed).toBe(true);
+
+        widget.enabled = false;
+        await framePromise();
+        expect(widget.enabled).toBe(false);
+        expect(widget.pressed).toBe(false);
+        expect(button.getAttribute('aria-disabled')).toEqual('true');
+        widget.dispose();
+      });
+    });
+
+    describe('#onClick()', () => {
+      it('should update the onClick state', async () => {
+        let mockCalled = false;
+        const mockOnClick = () => {
+          mockCalled = true;
+        };
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'tooltip',
+          onClick: mockOnClick
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        simulate(widget.node.firstChild as HTMLElement, 'mousedown');
+        expect(mockCalled).toBe(true);
+
+        mockCalled = false;
+        let mockUpdatedCalled = false;
+        const mockOnClickUpdated = () => {
+          mockUpdatedCalled = true;
+        };
+        widget.onClick = mockOnClickUpdated;
+        await framePromise();
+        simulate(widget.node.firstChild as HTMLElement, 'mousedown');
+        expect(mockCalled).toBe(false);
+        expect(mockUpdatedCalled).toBe(true);
+        widget.dispose();
+      });
+    });
   });
 });
