@@ -22,7 +22,6 @@ import {
 } from '@jupyterlab/apputils';
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import {
@@ -192,15 +191,10 @@ async function activateConsole(
           return;
         }
         disposables = new DisposableSet();
-        const baseUrl = PageConfig.getBaseUrl();
         for (const name in specs.kernelspecs) {
           const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
           let kernelIconUrl = spec.resources['logo-64x64'];
-          if (kernelIconUrl) {
-            const index = kernelIconUrl.indexOf('kernelspecs');
-            kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
-          }
           disposables.add(
             launcher.add({
               command: CommandIDs.create,

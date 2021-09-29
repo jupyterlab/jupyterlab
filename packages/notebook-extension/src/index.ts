@@ -25,7 +25,7 @@ import {
 } from '@jupyterlab/apputils';
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -1300,16 +1300,11 @@ function activateNotebookHandler(
           return;
         }
         disposables = new DisposableSet();
-        const baseUrl = PageConfig.getBaseUrl();
 
         for (const name in specs.kernelspecs) {
           const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
           let kernelIconUrl = spec.resources['logo-64x64'];
-          if (kernelIconUrl) {
-            const index = kernelIconUrl.indexOf('kernelspecs');
-            kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
-          }
           disposables.add(
             launcher.add({
               command: CommandIDs.createNew,
