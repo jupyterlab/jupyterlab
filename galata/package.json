@@ -2,13 +2,13 @@
   "name": "@jupyterlab/galata",
   "version": "4.0.0-beta.0",
   "description": "JupyterLab UI Testing Framework",
-  "homepage": "https://github.com/jupyterlab/galata",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
-    "url": "https://github.com/jupyterlab/galata/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jupyterlab/galata.git"
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
