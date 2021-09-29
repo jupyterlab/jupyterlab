@@ -11,6 +11,7 @@ import {
   circleEmptyIcon,
   circleIcon,
   classes,
+  ellipsesIcon,
   LabIcon,
   offlineBoltIcon,
   refreshIcon,
@@ -25,11 +26,17 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { ISessionContext, sessionContextDialogs } from './sessioncontext';
 import { ReactWidget, UseSignal } from './vdom';
+import { Throttler } from '@lumino/polling';
 
 /**
  * The class name added to toolbars.
  */
 const TOOLBAR_CLASS = 'jp-Toolbar';
+
+/**
+ * Toolbar pop-up opener button name
+ */
+const TOOLBAR_OPENER_NAME = 'toolbar-popup-opener';
 
 /**
  * The class name added to toolbar items.
@@ -183,7 +190,6 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   constructor() {
     super();
     this.addClass(TOOLBAR_CLASS);
-    this.addClass('jp-scrollbar-tiny');
     this.layout = new ToolbarLayout();
   }
 
@@ -242,7 +248,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     }
     widget.addClass(TOOLBAR_ITEM_CLASS);
     const layout = this.layout as ToolbarLayout;
-    layout.insertWidget(index, widget);
+
+    const j = Math.max(0, Math.min(index, layout.widgets.length));
+    layout.insertWidget(j, widget);
+
     Private.nameProperty.set(widget, name);
     return true;
   }
@@ -360,6 +369,197 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
   }
+}
+
+/**
+ * A class which provides a toolbar widget.
+ */
+export class ReactiveToolbar extends Toolbar<Widget> {
+  /**
+   * Construct a new toolbar widget.
+   */
+  constructor() {
+    super();
+    this.insertItem(0, TOOLBAR_OPENER_NAME, this.popupOpener);
+    this.popupOpener.hide();
+    this._resizer = new Throttler(this._onResize.bind(this), 500);
+  }
+
+  /**
+   * Dispose of the widget and its descendant widgets.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    if (this._resizer) {
+      this._resizer.dispose();
+    }
+
+    super.dispose();
+  }
+
+  /**
+   * Insert an item into the toolbar at the after a target item.
+   *
+   * @param at - The target item to insert after.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar or if the target
+   *   is the toolbar pop-up opener.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertAfter(at: string, name: string, widget: Widget): boolean {
+    if (at === TOOLBAR_OPENER_NAME) {
+      return false;
+    }
+    return super.insertAfter(at, name, widget);
+  }
+
+  /**
+   * Insert an item into the toolbar at the specified index.
+   *
+   * @param index - The index at which to insert the item.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertItem(index: number, name: string, widget: Widget): boolean {
+    if (widget instanceof ToolbarPopupOpener) {
+      return super.insertItem(index, name, widget);
+    } else {
+      const j = Math.max(
+        0,
+        Math.min(index, (this.layout as ToolbarLayout).widgets.length - 1)
+      );
+      return super.insertItem(j, name, widget);
+    }
+  }
+
+  /**
+   * A message handler invoked on a `'before-hide'` message.
+   *
+   * It will hide the pop-up panel
+   */
+  onBeforeHide(msg: Message): void {
+    this.popupOpener.hidePopup();
+    super.onBeforeHide(msg);
+  }
+
+  protected onResize(msg: Widget.ResizeMessage): void {
+    super.onResize(msg);
+    if (msg.width > 0 && this._resizer) {
+      void this._resizer.invoke();
+    }
+  }
+
+  private _onResize() {
+    if (this.parent && this.parent.isAttached) {
+      const toolbarWidth = this.node.clientWidth;
+      const opener = this.popupOpener;
+      const openerWidth = 30;
+      const toolbarPadding = 2;
+      const layout = this.layout as ToolbarLayout;
+
+      let width = opener.isHidden
+        ? toolbarPadding
+        : toolbarPadding + openerWidth;
+      let index = 0;
+      const widgetsToRemove = [];
+      const toIndex = layout.widgets.length - 1;
+
+      while (index < toIndex) {
+        const widget = layout.widgets[index];
+        this._saveWidgetWidth(widget);
+        width += this._getWidgetWidth(widget);
+        if (
+          widgetsToRemove.length === 0 &&
+          opener.isHidden &&
+          width + openerWidth > toolbarWidth
+        ) {
+          width += openerWidth;
+        }
+        if (width > toolbarWidth) {
+          widgetsToRemove.push(widget);
+        }
+        index++;
+      }
+
+      while (widgetsToRemove.length > 0) {
+        const widget = widgetsToRemove.pop() as Widget;
+        width -= this._getWidgetWidth(widget);
+        opener.addWidget(widget);
+      }
+
+      if (opener.widgetCount() > 0) {
+        const widgetsToAdd = [];
+        let index = 0;
+        let widget = opener.widgetAt(index);
+        const widgetCount = opener.widgetCount();
+
+        width += this._getWidgetWidth(widget);
+
+        if (widgetCount === 1 && width - openerWidth <= toolbarWidth) {
+          width -= openerWidth;
+        }
+
+        while (width < toolbarWidth && index < widgetCount) {
+          widgetsToAdd.push(widget);
+          index++;
+          widget = opener.widgetAt(index);
+          if (widget) {
+            width += this._getWidgetWidth(widget);
+          } else {
+            break;
+          }
+        }
+
+        while (widgetsToAdd.length > 0) {
+          const widget = widgetsToAdd.shift()!;
+          this.addItem(Private.nameProperty.get(widget), widget);
+        }
+      }
+
+      if (opener.widgetCount() > 0) {
+        opener.updatePopup();
+        opener.show();
+      } else {
+        opener.hide();
+      }
+    }
+  }
+
+  private _saveWidgetWidth(widget: Widget) {
+    const widgetName = Private.nameProperty.get(widget);
+    this._widgetWidths![widgetName] = widget.hasClass(TOOLBAR_SPACER_CLASS)
+      ? 2
+      : widget.node.clientWidth;
+  }
+
+  private _getWidgetWidth(widget: Widget): number {
+    const widgetName = Private.nameProperty.get(widget);
+    return this._widgetWidths![widgetName];
+  }
+
+  protected readonly popupOpener: ToolbarPopupOpener = new ToolbarPopupOpener();
+  private readonly _widgetWidths: { [key: string]: number } = {};
+  private readonly _resizer: Throttler;
 }
 
 /**
@@ -640,6 +840,175 @@ export class CommandToolbarButton extends ReactWidget {
   render() {
     return <CommandToolbarButtonComponent {...this.props} />;
   }
+}
+
+/**
+ *  A class which provides a toolbar popup
+ *  used to store widgets that don't fit
+ *  in the toolbar when it is resized
+ */
+class ToolbarPopup extends Widget {
+  width: number = 0;
+
+  /**
+   *  Construct a new ToolbarPopup
+   */
+  constructor() {
+    super();
+    this.addClass('jp-Toolbar-responsive-popup');
+    this.layout = new PanelLayout();
+    Widget.attach(this, document.body);
+    this.hide();
+  }
+
+  /**
+   * Updates the width of the popup, this
+   * should match with the toolbar width
+   *
+   * @param width - The width to resize to
+   * @protected
+   */
+  updateWidth(width: number) {
+    if (width > 0) {
+      this.width = width;
+      this.node.style.width = `${width}px`;
+    }
+  }
+
+  /**
+   * Aligns the popup to left bottom of widget
+   *
+   * @param widget the widget to align to
+   * @private
+   */
+  alignTo(widget: Widget) {
+    const {
+      height: widgetHeight,
+      width: widgetWidth,
+      x: widgetX,
+      y: widgetY
+    } = widget.node.getBoundingClientRect();
+    const width = this.width;
+    this.node.style.left = `${widgetX + widgetWidth - width + 1}px`;
+    this.node.style.top = `${widgetY + widgetHeight + 1}px`;
+  }
+
+  /**
+   * Inserts the widget at specified index
+   * @param index the index
+   * @param widget widget to add
+   */
+  insertWidget(index: number, widget: Widget) {
+    (this.layout as PanelLayout).insertWidget(0, widget);
+  }
+
+  /**
+   *  Total number of widgets in the popup
+   */
+  widgetCount() {
+    return (this.layout as PanelLayout).widgets.length;
+  }
+
+  /**
+   * Returns the widget at index
+   * @param index the index
+   */
+  widgetAt(index: number) {
+    return (this.layout as PanelLayout).widgets[index];
+  }
+}
+
+/**
+ *  A class that provides a ToolbarPopupOpener,
+ *  which is a button added to toolbar when
+ *  the toolbar items overflow toolbar width
+ */
+class ToolbarPopupOpener extends ToolbarButton {
+  /**
+   *  Create a new popup opener
+   */
+  constructor() {
+    super({
+      icon: ellipsesIcon,
+      onClick: () => {
+        this.handleClick();
+      }
+    });
+    this.addClass('jp-Toolbar-responsive-opener');
+    this.popup = new ToolbarPopup();
+  }
+
+  /**
+   * Add widget to the popup, prepends widgets
+   * @param widget the widget to add
+   */
+  addWidget(widget: Widget) {
+    this.popup.insertWidget(0, widget);
+  }
+
+  /**
+   * Dispose of the widget and its descendant widgets.
+   *
+   * #### Notes
+   * It is unsafe to use the widget after it has been disposed.
+   *
+   * All calls made to this method after the first are a no-op.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.popup.dispose();
+    super.dispose();
+  }
+
+  /**
+   * Hides the opener and the popup
+   */
+  hide(): void {
+    super.hide();
+    this.hidePopup();
+  }
+
+  /**
+   * Hides the popup
+   */
+  hidePopup(): void {
+    this.popup.hide();
+  }
+
+  /**
+   *  Updates width and position of the popup
+   *  to align with the toolbar
+   */
+  updatePopup(): void {
+    this.popup.updateWidth(this.parent!.node.clientWidth);
+    this.popup.alignTo(this.parent!);
+  }
+
+  /**
+   * Returns widget at index in the popup
+   * @param index
+   */
+  widgetAt(index: number) {
+    return this.popup.widgetAt(index);
+  }
+
+  /**
+   * Returns total number of widgets in the popup
+   *
+   * @returns Number of widgets
+   */
+  widgetCount(): number {
+    return this.popup.widgetCount();
+  }
+
+  protected handleClick() {
+    this.updatePopup();
+    this.popup.setHidden(!this.popup.isHidden);
+  }
+
+  protected popup: ToolbarPopup;
 }
 
 /**
