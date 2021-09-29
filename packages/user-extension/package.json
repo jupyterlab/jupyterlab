@@ -43,8 +43,9 @@
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.10",
     "@jupyterlab/apputils": "^3.3.0-alpha.10",
-    "@jupyterlab/fileeditor": "3.3.0-alpha.10",
-    "@jupyterlab/notebook": "3.3.0-alpha.10",
+    "@jupyterlab/fileeditor": "^3.3.0-alpha.10",
+    "@jupyterlab/notebook": "^3.3.0-alpha.10",
+    "@jupyterlab/shared-models": "^3.3.0-alpha.10",
     "@jupyterlab/statedb": "^3.3.0-alpha.10",
     "@jupyterlab/ui-components": "^3.3.0-alpha.10",
     "@jupyterlab/user": "^3.3.0-alpha.10",

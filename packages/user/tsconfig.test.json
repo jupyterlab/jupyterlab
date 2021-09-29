@@ -6,15 +6,6 @@
       "path": "../apputils"
     },
     {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docprovider"
-    },
-    {
-      "path": "../services"
-    },
-    {
       "path": "../statedb"
     },
     {

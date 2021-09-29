@@ -17,14 +17,14 @@ import {
   WebSocketProviderWithLocks
 } from '@jupyterlab/docprovider';
 import { ServerConnection } from '@jupyterlab/services';
-import { IUserToken, User } from '@jupyterlab/user';
+import { ICurrentUser, User } from '@jupyterlab/user';
 
 /**
  * The default document provider plugin
  */
 const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   id: '@jupyterlab/docprovider-extension:plugin',
-  requires: [IUserToken],
+  requires: [ICurrentUser],
   provides: IDocumentProviderFactory,
   activate: (app: JupyterFrontEnd, user: User): IDocumentProviderFactory => {
     const server = ServerConnection.makeSettings();

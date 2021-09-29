@@ -12,7 +12,10 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "sideEffects": false,
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "style": "style/index.css",

@@ -17,9 +17,9 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { YFile, YNotebook } from '@jupyterlab/shared-models';
 import {
-  IUserMenuToken,
-  IUserPanelToken,
-  IUserToken,
+  ICurrentUser,
+  IUserMenu,
+  IUserPanel,
   User,
   UserIcon,
   UserNameInput,
@@ -42,7 +42,7 @@ const userPlugin: JupyterFrontEndPlugin<User> = {
   id: '@jupyterlab/user-extension:user',
   autoStart: true,
   requires: [IStateDB],
-  provides: IUserToken,
+  provides: ICurrentUser,
   activate: (app: JupyterFrontEnd, state: IStateDB): User => {
     return new User(state);
   }
@@ -51,8 +51,8 @@ const userPlugin: JupyterFrontEndPlugin<User> = {
 const userMemuPlugin: JupyterFrontEndPlugin<Menu> = {
   id: '@jupyterlab/user-extension:userMenu',
   autoStart: true,
-  requires: [IRouter, IUserToken],
-  provides: IUserMenuToken,
+  requires: [IRouter, ICurrentUser],
+  provides: IUserMenu,
   activate: (app: JupyterFrontEnd, router: IRouter, user: User): Menu => {
     const { shell, commands } = app;
 
@@ -119,8 +119,8 @@ const userMemuPlugin: JupyterFrontEndPlugin<Menu> = {
 const userPanelPlugin: JupyterFrontEndPlugin<UserPanel> = {
   id: '@jupyterlab/user-extension:userPanel',
   autoStart: true,
-  requires: [IUserToken, IEditorTracker, INotebookTracker],
-  provides: IUserPanelToken,
+  requires: [ICurrentUser, IEditorTracker, INotebookTracker],
+  provides: IUserPanel,
   activate: (
     app: JupyterFrontEnd,
     user: User,

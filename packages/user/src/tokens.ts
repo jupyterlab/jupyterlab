@@ -7,11 +7,11 @@ import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
 
 export const USER = '@jupyterlab/user-extension:user';
 
-export const IUserToken = new Token<IUser>('jupyterlab-auth:user');
+export const ICurrentUser = new Token<IUser>('jupyterlab-auth:user');
 
-export const IUserMenuToken = new Token<Menu>('jupyterlab-auth:userMenu');
+export const IUserMenu = new Token<Menu>('jupyterlab-auth:userMenu');
 
-export const IUserPanelToken = new Token<Menu>('jupyterlab-auth:userPanel');
+export const IUserPanel = new Token<Menu>('jupyterlab-auth:userPanel');
 
 export interface IUser {
   readonly name: string;

@@ -13,6 +13,15 @@
       "path": "../apputils"
     },
     {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../shared-models"
+    },
+    {
       "path": "../statedb"
     },
     {
