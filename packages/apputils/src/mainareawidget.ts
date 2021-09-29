@@ -78,13 +78,6 @@ export class MainAreaWidget<T extends Widget = Widget>
           }
           content.disposed.connect(() => this.dispose());
           const active = document.activeElement === this._spinner.node;
-          // Add artificial delay to test benchmark
-          const wait = new Promise(resolve => {
-            setTimeout(() => {
-              resolve(void 0);
-            }, 500);
-          });
-          await wait;
           this._disposeSpinner();
           this._isRevealed = true;
           if (active) {
