@@ -29,7 +29,11 @@ html {
 
 body {
   color: unset;
-  font-family: var(--jp-ui-font-family);
+  /* Blueprint reset rules */
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.28581;
+  text-transform: none;
 }
 
 p {
