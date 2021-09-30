@@ -1,0 +1,95 @@
+name: UI Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    name: Visual Regression Tests
+    timeout-minutes: 40
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Cache pip on Linux
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-3.8
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Cache yarn
+        uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+
+      - name: Launch JupyterLab
+        run: |
+          cd galata
+          # Mount a volume to overwrite the server configuration
+          jlpm start 2>&1 > /tmp/jupyterlab_server.log &
+
+      - name: Install browser
+        run: |
+          cd galata
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
+
+      - name: Test
+        run: |
+          cd galata
+          jlpm run test
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: galata-test-assets
+          path: |
+            galata/test-results
+
+      - name: Upload Galata Test report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: galata-report
+          path: |
+            galata/playwright-report
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log

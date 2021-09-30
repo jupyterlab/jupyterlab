@@ -103,8 +103,7 @@ const entryPoints = packages
 const exclude =
   packages.flatMap(p => [`packages/${p}/test`]) +
   [
-    'packages/application-extension/src/index.tsx',
-    'ui-tests/**/*'
+    'packages/application-extension/src/index.tsx'
     //'packages/*/test/*.spec.ts',
   ];
 

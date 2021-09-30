@@ -39,6 +39,13 @@ packages/theme-*/static
 tests/**/coverage
 tests/**/.cache-loader
 
+# galata
+galata/benchmark-results
+galata/playwright-report
+galata/test-results
+
+package_json.tar.gz
+
 # javascript/typescript
 lib
 node_modules
@@ -113,8 +120,4 @@ junit.xml
 .vscode
 .vs
 
-ui-tests/test-output
-ui-tests/jlab_root
-
-package_json.tar.gz
 .jupyter_releaser_checkout

@@ -3,8 +3,7 @@
   "extends": "./tsconfigbase",
   "exclude": [
     "**/test/**",
-    "**/testutils/**",
-    "**/ui-tests/**"
+    "**/testutils/**"
   ],
   "compilerOptions": {
     "strictNullChecks": false,
