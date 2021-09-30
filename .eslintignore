@@ -17,7 +17,7 @@ dev_mode/workspaces
 docs/_build
 docs/api
 docs/build
-examples/chrome-example-test.js
+examples/example.spec.ts
 examples/federated/core_package/index.template.js
 jupyterlab/chrome-test.js
 jupyterlab/geckodriver

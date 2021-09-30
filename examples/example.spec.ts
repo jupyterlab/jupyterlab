@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { ConsoleMessage, expect, test } from '@playwright/test';
 
 const URL = process.env['BASE_URL'];
 
@@ -6,12 +6,12 @@ test('basic test', async ({ page }) => {
   console.info('Navigating to page:', URL);
 
   let errorLogs = 0;
-  let testEnded;
+  let testEnded: (value: string | PromiseLike<string>) => void;
   const waitForTestEnd = new Promise<string>(resolve => {
     testEnded = resolve;
   });
 
-  const handleMessage = async msg => {
+  const handleMessage = async (msg: ConsoleMessage) => {
     const text = msg.text();
     console.log(msg.type(), '>>', text);
     if (msg.type() === 'error') {
