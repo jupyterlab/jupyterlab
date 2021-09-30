@@ -120,9 +120,9 @@ const SKIP_CSS: Dict<string[]> = {
     '@lumino/virtualdom',
     '@lumino/widgets'
   ],
-  '@jupyterlab/codemirror-extension': ['codemirror'],
+  '@jupyterlab/codemirror-extension': ['@codemirror/basic-setup'],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
-  '@jupyterlab/debugger': ['codemirror'],
+  '@jupyterlab/debugger': ['@codemirror/basic-setup'],
   '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be used by status reporters
   '@jupyterlab/docregistry': [
     '@jupyterlab/codeeditor', // Only used for model
@@ -135,7 +135,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/codemirror',
     '@jupyterlab/fileeditor',
     '@jupyterlab/notebook',
-    'codemirror'
+    '@codemirror/basic-setup'
   ],
   '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
