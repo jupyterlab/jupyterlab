@@ -118,6 +118,7 @@ jobs:
           timeout: 360000
 
       - name: Execute benchmark tests
+        continue-on-error: true
         working-directory: galata
         run: |
           jlpm run test:benchmark -u
@@ -163,14 +164,19 @@ jobs:
           timeout: 360000
 
       - name: Execute benchmark tests
+        continue-on-error: true
+        shell: bash
+        working-directory: galata
+        run: |
+          jlpm run test:benchmark
+
+      - name: Generate the report
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPORT: ./benchmark-results/lab-benchmark.md
         shell: bash
         working-directory: galata
         run: |
-          jlpm run test:benchmark
-
           # Publish image to cml.dev
           echo "" >> ${REPORT}
           cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
