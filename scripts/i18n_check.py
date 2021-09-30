@@ -20,8 +20,10 @@ if __name__ == "__main__":
         )
 
     hash = sha256()
-    for entry in pot:
-        hash.update(str(entry).encode("utf-8"))
+    # Use only the context and the id as the position may changed without impact
+    # Sort the entry because the order in the POT file may changed (likely because code position changed)
+    for entry in sorted(map(lambda e: f"{e.msgctxt!s} {e.msgid!s}", pot)):
+        hash.update(entry.encode("utf-8"))
 
     proof = hash.hexdigest()
 
