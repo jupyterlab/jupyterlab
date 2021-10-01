@@ -278,7 +278,6 @@ export class YNotebook
       if (this.enableDocumentWideUndoRedo) {
         cell.undoManager = this.undoManager;
       }
-      cell.undoManager = this.undoManager;
     });
     this.transact(() => {
       this.ycells.insert(
@@ -363,7 +362,13 @@ export class YNotebook
     return new YNotebook(enableDocumentWideUndoRedo);
   }
 
-  get enableDocumentWideUndoRedo() {
+  /**
+   * Wether the the undo/redo logic should be
+   * considered on the full document across all cells.
+   *
+   * @return The enableDocumentWideUndoRedo setting.
+   */
+  get enableDocumentWideUndoRedo(): boolean {
     return this._enableDocumentWideUndoRedo;
   }
 
@@ -616,7 +621,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     cell.isStandalone = true;
     new Y.Doc().getArray().insert(0, [cell.ymodel]);
     cell._undoManager = new Y.UndoManager([cell.ymodel], {
-      //      trackedOrigins: new Set([cell])
+      trackedOrigins: new Set([cell])
     });
     return cell;
   }

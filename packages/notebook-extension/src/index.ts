@@ -1201,7 +1201,7 @@ function activateNotebookHandler(
       .composite as boolean;
 
     modelFactory.enableDocumentWideUndoRedo = settings.get(
-      'enableDocumentWideUndoRedo'
+      'experimentalEnableDocumentWideUndoRedo'
     ).composite as boolean;
 
     updateTracker({
