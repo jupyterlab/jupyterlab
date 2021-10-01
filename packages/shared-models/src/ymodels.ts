@@ -9,7 +9,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 import * as models from './api';
-import { Delta } from './api';
+import { Delta, ISharedNotebook } from './api';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 
@@ -199,9 +199,9 @@ export class YFile
 export class YNotebook
   extends YDocument<models.NotebookChange>
   implements models.ISharedNotebook {
-  constructor(enableDocumentWideUndoRedo: boolean) {
+  constructor(options: ISharedNotebook.IOptions) {
     super();
-    this._enableDocumentWideUndoRedo = enableDocumentWideUndoRedo;
+    this._enableDocumentWideUndoRedo = options.enableDocumentWideUndoRedo;
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
       if (!this._ycellMapping.has(ycell)) {
@@ -359,7 +359,7 @@ export class YNotebook
   public static create(
     enableDocumentWideUndoRedo: boolean
   ): models.ISharedNotebook {
-    return new YNotebook(enableDocumentWideUndoRedo);
+    return new YNotebook({ enableDocumentWideUndoRedo });
   }
 
   /**
