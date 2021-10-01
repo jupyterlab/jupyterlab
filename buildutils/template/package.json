@@ -1,6 +1,10 @@
 {
   "name": "@jupyterlab/template",
+<<<<<<< HEAD
   "version": "3.3.0-alpha.15",
+=======
+  "version": "4.0.0-alpha.0",
+>>>>>>> 4f4d41a49 (Publish)
   "description": "JupyterLab - Package Template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,7 +41,11 @@
     "watch": "tsc -b --watch"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@jupyterlab/testutils": "^3.3.0-alpha.15",
+=======
+    "@jupyterlab/testutils": "^4.0.0-alpha.0",
+>>>>>>> 4f4d41a49 (Publish)
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

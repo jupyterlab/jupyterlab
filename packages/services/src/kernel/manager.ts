@@ -341,4 +341,74 @@ export namespace KernelManager {
      */
     standby?: Poll.Standby | (() => boolean | Poll.Standby);
   }
+
+  /**
+   * A no-op kernel manager to be used when starting kernels.
+   */
+  export class NoopManager extends KernelManager {
+    /**
+     * Whether the manager is active.
+     */
+    get isActive(): boolean {
+      return false;
+    }
+
+    /**
+     * Used for testing.
+     */
+    get parentReady(): Promise<void> {
+      return super.ready;
+    }
+
+    /**
+     * Start a new kernel - throws an error since it is not supported.
+     */
+    async startNew(
+      createOptions: IKernelOptions = {},
+      connectOptions: Omit<
+        Kernel.IKernelConnection.IOptions,
+        'model' | 'serverSettings'
+      > = {}
+    ): Promise<Kernel.IKernelConnection> {
+      return Promise.reject(
+        new Error('Not implemented in no-op Kernel Manager')
+      );
+    }
+
+    /**
+     * Connect to an existing kernel - throws an error since it is not supported.
+     */
+    connectTo(
+      options: Omit<Kernel.IKernelConnection.IOptions, 'serverSettings'>
+    ): Kernel.IKernelConnection {
+      throw new Error('Not implemented in no-op Kernel Manager');
+    }
+
+    /**
+     * Shut down a kernel by id - throws an error since it is not supported.
+     */
+    async shutdown(id: string): Promise<void> {
+      return Promise.reject(
+        new Error('Not implemented in no-op Kernel Manager')
+      );
+    }
+
+    /**
+     * A promise that fulfills when the manager is ready (never).
+     */
+    get ready(): Promise<void> {
+      return this.parentReady.then(() => this._readyPromise);
+    }
+
+    /**
+     * Execute a request to the server to poll running kernels and update state.
+     */
+    protected async requestRunning(): Promise<void> {
+      return Promise.resolve();
+    }
+
+    private _readyPromise = new Promise<void>(() => {
+      /* no-op */
+    });
+  }
 }

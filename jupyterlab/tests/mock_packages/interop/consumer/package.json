@@ -1,5 +1,6 @@
 {
   "name": "@jupyterlab/mock-consumer",
+<<<<<<< HEAD
   "version": "3.3.0-alpha.15",
   "private": true,
   "dependencies": {
@@ -7,6 +8,15 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.3.0-alpha.15"
+=======
+  "version": "4.0.0-alpha.0",
+  "private": true,
+  "dependencies": {
+    "@jupyterlab/mock-token": "^4.0.0-alpha.0"
+  },
+  "devDependencies": {
+    "@jupyterlab/builder": "^4.0.0-alpha.0"
+>>>>>>> 4f4d41a49 (Publish)
   },
   "jupyterlab": {
     "extension": true,

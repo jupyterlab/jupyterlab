@@ -1,6 +1,10 @@
 {
   "name": "@jupyterlab/example-federated",
+<<<<<<< HEAD
   "version": "2.4.0-alpha.15",
+=======
+  "version": "3.0.0-alpha.0",
+>>>>>>> 4f4d41a49 (Publish)
   "private": true,
   "scripts": {
     "build": "npm run build:core && npm run build:middle && npm run build:md && npm run build:phosphor",
