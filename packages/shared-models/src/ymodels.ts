@@ -634,7 +634,11 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     ymodel.set('cell_type', this.cell_type);
     ymodel.set('id', this.getId());
     const Self: any = this.constructor;
-    return new Self(ymodel);
+    const clone = new Self(ymodel);
+    // TODO The assignmenet of the undoManager does not work for a clone.
+    // See https://github.com/jupyterlab/jupyterlab/issues/11035
+    clone._undoManager = this.undoManager;
+    return clone;
   }
 
   /**
