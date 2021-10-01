@@ -1193,8 +1193,9 @@ function activateNotebookHandler(
       observedBottomMargin: settings.get('observedBottomMargin')
         .composite as string,
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
-      enableDocumentWideUndoRedo: settings.get('enableDocumentWideUndoRedo')
-        .composite as boolean
+      enableDocumentWideUndoRedo: settings.get(
+        'experimentalEnableDocumentWideUndoRedo'
+      ).composite as boolean
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
