@@ -71,7 +71,7 @@ export class MainAreaWidget<T extends Widget = Widget>
     if (options.reveal) {
       this.node.appendChild(this._spinner.node);
       this._revealed = options.reveal
-        .then(async () => {
+        .then(() => {
           if (content.isDisposed) {
             this.dispose();
             return;

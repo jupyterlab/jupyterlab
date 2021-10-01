@@ -169,7 +169,7 @@ test.describe('Benchmark', () => {
           page.notebook.openByPath(`${tmpPath}/${file}`)
         ]);
 
-        page.waitForTimeout(500);
+        await page.waitForTimeout(500);
 
         // Wait for spinner to be hidden
         await page.waitForSelector('[role="main"] >> .jp-SpinnerContent', {
