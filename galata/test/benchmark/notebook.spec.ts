@@ -169,8 +169,6 @@ test.describe('Benchmark', () => {
           page.notebook.openByPath(`${tmpPath}/${file}`)
         ]);
 
-        await page.waitForTimeout(500);
-
         // Wait for spinner to be hidden
         await page.waitForSelector('[role="main"] >> .jp-SpinnerContent', {
           state: 'hidden'
