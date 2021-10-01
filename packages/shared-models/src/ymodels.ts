@@ -199,8 +199,9 @@ export class YFile
 export class YNotebook
   extends YDocument<models.NotebookChange>
   implements models.ISharedNotebook {
-  constructor() {
+  constructor(enableDocumentWideUndoRedo: boolean) {
     super();
+    this._enableDocumentWideUndoRedo = enableDocumentWideUndoRedo;
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
       if (!this._ycellMapping.has(ycell)) {
@@ -274,6 +275,9 @@ export class YNotebook
   insertCells(index: number, cells: YCellType[]): void {
     cells.forEach(cell => {
       this._ycellMapping.set(cell.ymodel, cell);
+      if (this.enableDocumentWideUndoRedo) {
+        cell.undoManager = this.undoManager;
+      }
       cell.undoManager = this.undoManager;
     });
     this.transact(() => {
@@ -353,8 +357,14 @@ export class YNotebook
   /**
    * Create a new YNotebook.
    */
-  public static create(): models.ISharedNotebook {
-    return new YNotebook();
+  public static create(
+    enableDocumentWideUndoRedo: boolean
+  ): models.ISharedNotebook {
+    return new YNotebook(enableDocumentWideUndoRedo);
+  }
+
+  get enableDocumentWideUndoRedo() {
+    return this._enableDocumentWideUndoRedo;
   }
 
   /**
@@ -369,7 +379,11 @@ export class YNotebook
       }
       const cell = this._ycellMapping.get(type) as any;
       cell._notebook = this;
-      cell._undoManager = this.undoManager;
+      if (this.enableDocumentWideUndoRedo) {
+        cell._undoManager = this.undoManager;
+      } else {
+        cell._undoManager = new Y.UndoManager([cell.ymodel], {});
+      }
     });
     event.changes.deleted.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
@@ -441,6 +455,7 @@ export class YNotebook
   public undoManager = new Y.UndoManager([this.ycells], {
     trackedOrigins: new Set([this])
   });
+  private _enableDocumentWideUndoRedo: boolean;
   private _ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
   public cells: YCellType[];
 }
@@ -510,7 +525,9 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    * The notebook that this cell belongs to.
    */
   get undoManager(): Y.UndoManager | null {
-    return this.notebook ? this.notebook.undoManager : this._undoManager;
+    return this.notebook?.enableDocumentWideUndoRedo
+      ? this.notebook.undoManager
+      : this._undoManager;
   }
 
   /**
@@ -599,7 +616,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     cell.isStandalone = true;
     new Y.Doc().getArray().insert(0, [cell.ymodel]);
     cell._undoManager = new Y.UndoManager([cell.ymodel], {
-      trackedOrigins: new Set([cell])
+      //      trackedOrigins: new Set([cell])
     });
     return cell;
   }

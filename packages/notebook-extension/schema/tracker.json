@@ -817,6 +817,12 @@
       "description": "Defines the maximum number of output cells to to to be rendered in the output area for cells with many outputs. The output area will have a head and a tail, and the outputs between will be trimmed and not displayed unless the user clicks on the information message.",
       "type": "number",
       "default": 50
+    },
+    "enableDocumentWideUndoRedo": {
+      "title": "Enable the undo/redo on the notebook document level.",
+      "description": "Enable the undo/redo on the notebook document level, so actions like cells move, change... can have history. The undo/redo never applies on the outputs, in other words, outputs don't have history.",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,

@@ -1120,7 +1120,11 @@ function activateNotebookHandler(
   }
 
   const registry = app.docRegistry;
-  registry.addModelFactory(new NotebookModelFactory({}));
+  const modelFactory = new NotebookModelFactory({
+    enableDocumentWideUndoRedo:
+      factory.notebookConfig.enableDocumentWideUndoRedo
+  });
+  registry.addModelFactory(modelFactory);
 
   addCommands(app, tracker, translator, sessionDialogs);
 
@@ -1188,10 +1192,16 @@ function activateNotebookHandler(
       observedTopMargin: settings.get('observedTopMargin').composite as string,
       observedBottomMargin: settings.get('observedBottomMargin')
         .composite as string,
-      maxNumberOutputs: settings.get('maxNumberOutputs').composite as number
+      maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
+      enableDocumentWideUndoRedo: settings.get('enableDocumentWideUndoRedo')
+        .composite as boolean
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
+
+    modelFactory.enableDocumentWideUndoRedo = settings.get(
+      'enableDocumentWideUndoRedo'
+    ).composite as boolean;
 
     updateTracker({
       editorConfig: factory.editorConfig,
