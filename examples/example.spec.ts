@@ -2,7 +2,7 @@ import { ConsoleMessage, expect, test } from '@playwright/test';
 
 const URL = process.env['BASE_URL'];
 
-test('basic test', async ({ page }) => {
+test('should load the example', async ({ page }) => {
   console.info('Navigating to page:', URL);
 
   let errorLogs = 0;
