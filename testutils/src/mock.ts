@@ -58,7 +58,7 @@ export const KERNELSPECS: { [key: string]: KernelSpec.ISpecModel } = {
       '{connection_file}'
     ],
     display_name: 'R',
-    language: 'python',
+    language: 'r',
     metadata: {},
     name: 'irkernel',
     resources: {}

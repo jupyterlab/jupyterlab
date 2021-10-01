@@ -180,7 +180,7 @@ export namespace JupyterLab {
    * The options used to initialize a JupyterLab object.
    */
   export interface IOptions
-    extends JupyterFrontEnd.IOptions<LabShell>,
+    extends Partial<JupyterFrontEnd.IOptions<ILabShell>>,
       Partial<IInfo> {
     paths?: Partial<JupyterFrontEnd.IPaths>;
   }
