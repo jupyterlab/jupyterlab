@@ -37,7 +37,7 @@ test.describe('mockSettings', () => {
 
   test('should not return mocked settings after save', async ({ page }) => {
     await page.click('text=Settings');
-    await page.click('ul[role="menu"] >> text=JupyterLab Theme');
+    await page.click('ul[role="menu"] >> text=Theme');
     const [response] = await Promise.all([
       page.waitForResponse(
         response =>

@@ -10,7 +10,7 @@
             "type": "submenu",
             "submenu": {
               "id": "jp-mainmenu-settings-apputilstheme",
-              "label": "JupyterLab Theme",
+              "label": "Theme",
               "items": [
                 { "type": "separator" },
                 {
