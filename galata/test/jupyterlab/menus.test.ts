@@ -14,7 +14,7 @@ const menuPaths = [
   'Kernel',
   'Tabs',
   'Settings',
-  'Settings>JupyterLab Theme',
+  'Settings>Theme',
   'Settings>Console Run Keystroke',
   'Settings>Text Editor Key Map',
   'Settings>Text Editor Theme',
