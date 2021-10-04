@@ -43,7 +43,7 @@
     "@jupyterlab/extensionmanager": "^3.3.0-alpha.14",
     "@jupyterlab/settingregistry": "^3.3.0-alpha.14",
     "@jupyterlab/translation": "^3.3.0-alpha.14",
-    "@jupyterlab/ui-components": "^3.3.0-alpha.14"
+    "@jupyterlab/ui-components": "^4.0.0-alpha.14"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
