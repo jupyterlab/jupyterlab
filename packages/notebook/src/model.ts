@@ -89,6 +89,9 @@ export class NotebookModel implements INotebookModel {
     } else {
       this.modelDB = new ModelDB();
     }
+    this.sharedModel = models.YNotebook.create(
+      options.enableDocumentWideUndoRedo || false
+    ) as models.ISharedNotebook;
     this._isInitialized = options.isInitialized === false ? false : true;
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
@@ -497,7 +500,7 @@ close the notebook without saving it.`,
   /**
    * The shared notebook model.
    */
-  readonly sharedModel = models.YNotebook.create() as models.ISharedNotebook;
+  readonly sharedModel: models.ISharedNotebook;
 
   /**
    * A mutex to update the shared model.
@@ -558,6 +561,11 @@ export namespace NotebookModel {
      * If the model is initialized or not.
      */
     isInitialized?: boolean;
+
+    /**
+     * Defines if the document can be undo/redo.
+     */
+    enableDocumentWideUndoRedo?: boolean;
   }
 
   /**

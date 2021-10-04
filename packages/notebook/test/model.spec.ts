@@ -13,7 +13,7 @@ describe('@jupyterlab/notebook', () => {
   describe('NotebookModel', () => {
     describe('#constructor()', () => {
       it('should create a notebook model', () => {
-        const model = new NotebookModel();
+        const model = new NotebookModel({});
         expect(model).toBeInstanceOf(NotebookModel);
       });
 
@@ -72,7 +72,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should allow undoing a change', () => {
-        const model = new NotebookModel();
+        const model = new NotebookModel({
+          enableDocumentWideUndoRedo: true
+        });
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
         const cellJSON = cell.toJSON();
@@ -378,7 +380,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should clear undo state', () => {
-        const model = new NotebookModel();
+        const model = new NotebookModel({
+          enableDocumentWideUndoRedo: true
+        });
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
         model.cells.push(cell);

@@ -384,7 +384,9 @@ namespace Private {
 
   export const textFactory = new TextModelFactory();
 
-  export const notebookFactory = new NotebookModelFactory({});
+  export const notebookFactory = new NotebookModelFactory({
+    enableDocumentWideUndoRedo: true
+  });
 
   /**
    * Get or create the service manager singleton.
