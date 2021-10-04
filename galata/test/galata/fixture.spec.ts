@@ -122,7 +122,7 @@ test.describe('sessions', () => {
     await page.menu.clickMenuItem('File>New>Console');
     await page.waitForSelector('.jp-Dialog');
     await page.click('.jp-Dialog .jp-mod-accept');
-    await page.waitForSelector('text=Idle');
+    await page.waitForSelector('text= | Idle');
 
     expect(sessions.size).toEqual(2);
   });
