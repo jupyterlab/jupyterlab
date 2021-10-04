@@ -633,7 +633,7 @@ class BenchmarkReporter implements Reporter {
 
               let unmatchWarning = '';
               if (oldDistribution.length != newDistribution.length) {
-                unmatchWarning = `[:warning:](# "Reference size ${oldDistribution.length} != Actual size ${newDistribution.length}")`;
+                unmatchWarning = `[:warning:](# "Reference size ${oldDistribution.length} != Actual size ${newDistribution.length}") `;
               }
 
               line += ` ${unmatchWarning}${((delta.mean - 1) * 100).toFixed(
