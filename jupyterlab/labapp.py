@@ -722,6 +722,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         page_config['exposeAppInBrowser'] = self.expose_app_in_browser
         page_config['quitButton'] = self.serverapp.quit_button
         page_config['collaborative'] = self.collaborative
+        page_config['allow_hidden_files'] = self.serverapp.contents_manager.allow_hidden
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
         page_config['notebookVersion'] = json.dumps(jpserver_version_info)
