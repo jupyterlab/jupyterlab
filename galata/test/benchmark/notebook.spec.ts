@@ -126,7 +126,7 @@ test.describe('Benchmark', () => {
           state: 'hidden'
         });
 
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
         // if (file === mdNotebook) {
         //   // Wait for Latex rendering => consider as acceptable to require additional time
