@@ -974,7 +974,13 @@ export namespace StaticNotebook {
      * Defines the maximum number of outputs per cell.
      */
     maxNumberOutputs: number;
+
+    /**
+     * Defines if the document can be undo/redo.
+     */
+    enableDocumentWideUndoRedo: boolean;
   }
+
   /**
    * Default configuration options for notebooks.
    */
@@ -986,7 +992,8 @@ export namespace StaticNotebook {
     renderCellOnIdle: true,
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px',
-    maxNumberOutputs: 50
+    maxNumberOutputs: 50,
+    enableDocumentWideUndoRedo: true
   };
 
   /**
