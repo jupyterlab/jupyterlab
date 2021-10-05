@@ -27,6 +27,7 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import {
   INotebookTracker,
   Notebook,
+  NotebookActions,
   NotebookPanel
 } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -248,6 +249,14 @@ export const executionTime: JupyterFrontEndPlugin<void> = {
       } else {
         currentSession = null;
       }
+      NotebookActions.executionScheduled.connect((_, data) => {
+        item.model.cellScheduledCallback(data.cell);
+      });
+
+      NotebookActions.executed.connect((_, data) => {
+        item.model.cellExecutedCallback(data.cell);
+      });
+
       item.model!.sessionContext = currentSession;
     });
     statusBar.registerStatusItem(

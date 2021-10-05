@@ -10,6 +10,7 @@ import {
 } from '@jupyterlab/translation';
 import React from 'react';
 import { interactiveItem, TextItem } from '..';
+import { Cell } from '@jupyterlab/cells';
 
 /**
  * A react functional component for rendering execution time.
@@ -19,13 +20,19 @@ function ExecutionTimeComponent(
 ): React.ReactElement<ExecutionTimeComponent.IProps> {
   const translator = props.translator || nullTranslator;
   const time = props.time || { total: 0, current: 0 };
+  const scheduledCellNumber = props.scheduledCellNumber || 0;
+  const remainingCellNumber = props.remainingCellNumber || 0;
   const trans = translator.load('jupyterlab');
   if (props.status === 'busy') {
     return (
       <TextItem
         title={''}
         source={trans.__(
-          `Current cell: ${time.current} seconds | Total: ${time.total} seconds `
+          `${
+            scheduledCellNumber - remainingCellNumber
+          } out of ${scheduledCellNumber} cells executed | Current cell: ${
+            time.current
+          } seconds | Total: ${time.total} seconds `
         )}
       />
     );
@@ -59,6 +66,10 @@ namespace ExecutionTimeComponent {
     status?: string;
 
     time?: { total: number; current: number };
+
+    scheduledCellNumber?: number;
+
+    remainingCellNumber?: number;
   }
 }
 
@@ -87,6 +98,8 @@ export class ExecutionTime extends VDomRenderer<ExecutionTime.Model> {
           translator={this.translator}
           status={this.model.status}
           time={this.model.time}
+          scheduledCellNumber={this.model.scheduledCellNumber}
+          remainingCellNumber={this.model.remainingCellNumber}
         />
       );
     }
@@ -133,6 +146,26 @@ export namespace ExecutionTime {
       return { total: this._totalTime, current: this._currentCellTime };
     }
 
+    get scheduledCellNumber(): number {
+      return this._scheduledCellNumber;
+    }
+
+    get remainingCellNumber(): number {
+      return this._scheduledCell.size;
+    }
+
+    public cellExecutedCallback = (cell: Cell): void => {
+      console.log('executed', cell);
+      this._scheduledCell.delete(cell);
+      console.log(this._scheduledCell.size);
+    };
+
+    public cellScheduledCallback = (cell: Cell): void => {
+      console.log('scheduled', cell);
+      this._scheduledCell.add(cell);
+      this._scheduledCellNumber += 1;
+    };
+
     private _tick(): void {
       this._totalTime += 1;
       this._currentCellTime += 1;
@@ -142,6 +175,7 @@ export namespace ExecutionTime {
     private _resetTime(): void {
       this._totalTime = 0;
       this._currentCellTime = 0;
+      this._scheduledCellNumber = 0;
     }
 
     private _onKernelStatusChanged = () => {
@@ -167,6 +201,8 @@ export namespace ExecutionTime {
     private _currentCellTime: number = 0;
     private _interval: number;
     private _timeOut: number;
+    private _scheduledCell: Set<any> = new Set();
+    private _scheduledCellNumber: number = 0;
   }
 
   /**
