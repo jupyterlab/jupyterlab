@@ -660,9 +660,11 @@ export class Context<
    */
   private _revert(initializeModel: boolean = false): Promise<void> {
     const opts: Contents.IFetchOptions = {
-      format: this._factory.fileFormat,
       type: this._factory.contentType,
-      content: this._factory.fileFormat !== null
+      content: this._factory.fileFormat !== null,
+      ...(this._factory.fileFormat !== null
+        ? { format: this._factory.fileFormat }
+        : {})
     };
     const path = this._path;
     const model = this._model;
