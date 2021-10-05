@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/translation';
 import React from 'react';
 import { interactiveItem, TextItem } from '..';
-import { Status } from '@jupyterlab/services/src/kernel/messages';
+// import { Status } from '@jupyterlab/services/src/kernel/messages';
 
 /**
  * A react functional component for rendering execution time.
@@ -127,14 +127,14 @@ export namespace ExecutionTime {
         this._currentSessionContext = sessionContext;
         if (!this._notebookExecutionProgress.has(sessionContext)) {
           this._notebookExecutionProgress.set(sessionContext, {
-            kernelStatus: '',
+            kernelStatus: 'idle',
             totalTime: 0,
             interval: 0,
             timeout: 0,
             scheduledCell: new Set<Private.Cell>(),
             scheduledCellNumber: 0
           });
-          sessionContext.statusChanged.connect(this._onKernelStatusChanged, this);
+          // sessionContext.statusChanged.connect(this._onKernelStatusChanged, this);
         }
       }
     }
@@ -146,9 +146,7 @@ export namespace ExecutionTime {
      * The current status of the kernel.
      */
     get status(): string | undefined {
-      console.log('getting status', this._currentData?.kernelStatus);
-
-      return this._currentData?.kernelStatus;
+        return this._currentData?.kernelStatus;
     }
 
     // get sessionContext(): ISessionContext | null {
@@ -181,6 +179,14 @@ export namespace ExecutionTime {
       const state = this._notebookExecutionProgress.get(context);
       if (state) {
         state.scheduledCell.delete(cell);
+        if(state.scheduledCell.size === 0){
+          state.kernelStatus = 'idle';
+          clearInterval(state.interval);
+          state.timeout = setTimeout(() => {
+            this._resetTime(state);
+          }, 1000);
+          this.stateChanged.emit(void 0);
+        }
       }
     };
 
@@ -189,9 +195,17 @@ export namespace ExecutionTime {
       cell: Private.Cell
     ): void => {
       const state = this._notebookExecutionProgress.get(context);
-      if (state) {
+      if (state && !state.scheduledCell.has(cell)) {
+        
         state.scheduledCell.add(cell);
         state.scheduledCellNumber += 1;
+        if(state.kernelStatus !== 'busy'){
+          state.kernelStatus = 'busy';
+          clearTimeout(state.timeout);
+          state.interval = setInterval(() => {
+            this._tick(state);
+          }, 1000);
+        }
       }
     };
 
@@ -204,41 +218,6 @@ export namespace ExecutionTime {
       data.totalTime = 0;
       data.scheduledCellNumber = 0;
     }
-
-    private _onKernelStatusChanged = (
-      ctx: ISessionContext,
-      newStatus: Status
-    ) => {
-      const progressData = this._notebookExecutionProgress.get(ctx);
-      if (progressData) {
-        progressData.kernelStatus = newStatus;
-        if (newStatus === 'busy') {
-          clearTimeout(progressData.timeout);
-          progressData.interval = setInterval(() => {
-            this._tick(progressData);
-          }, 1000);
-        } else if (newStatus === 'idle') {
-          clearInterval(progressData.interval);
-          progressData.timeout = setTimeout(() => {
-            this._resetTime(progressData);
-          }, 1000);
-          this.stateChanged.emit(void 0);
-        }
-      }
-      // const newStatus = this._sessionContext?.kernelDisplayStatus;
-      // if (this._kernelStatus !== newStatus) {
-      //   this._kernelStatus = newStatus;
-      //   if (newStatus === 'busy') {
-      //     clearTimeout(this._timeOut);
-      //     this._currentCellTime = 0;
-      //     this._interval = setInterval(this._tick, 1000);
-      //   } else if (newStatus === 'idle') {
-      //     clearInterval(this._interval);
-      //     this._timeOut = setTimeout(this._resetTime, 1000);
-      //     this.stateChanged.emit(void 0);
-      //   }
-      // }
-    };
 
     // private _trans: TranslationBundle;
     private _currentSessionContext: ISessionContext;
