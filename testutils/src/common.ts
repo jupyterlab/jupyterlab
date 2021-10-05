@@ -386,7 +386,7 @@ namespace Private {
   export const textFactory = new TextModelFactory();
 
   export const notebookFactory = new NotebookModelFactory({
-    enableDocumentWideUndoRedo: true
+    disableDocumentWideUndoRedo: false
   });
 
   /**

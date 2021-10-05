@@ -978,7 +978,7 @@ export namespace StaticNotebook {
     /**
      * Defines if the document can be undo/redo.
      */
-    enableDocumentWideUndoRedo: boolean;
+    disableDocumentWideUndoRedo: boolean;
   }
 
   /**
@@ -993,7 +993,7 @@ export namespace StaticNotebook {
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px',
     maxNumberOutputs: 50,
-    enableDocumentWideUndoRedo: true
+    disableDocumentWideUndoRedo: false
   };
 
   /**
