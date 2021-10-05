@@ -1,12 +1,12 @@
 {
   "name": "@jupyterlab/mock-provider",
-  "version": "3.1.16",
+  "version": "3.1.17",
   "private": true,
   "dependencies": {
-    "@jupyterlab/mock-token": "^3.1.15"
+    "@jupyterlab/mock-token": "^3.1.16"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.1.16"
+    "@jupyterlab/builder": "^3.1.17"
   },
   "jupyterlab": {
     "extension": true
