@@ -108,7 +108,7 @@ module.exports = {
     aggregateTimeout: 1000
   },
   output: {
-    hashFunction: 'xxhash64'
+    hashFunction: 'sha256'
   },
   plugins: [
     new webpack.ProvidePlugin({
