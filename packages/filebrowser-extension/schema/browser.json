@@ -21,6 +21,15 @@
         ]
       },
       {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "command": "filebrowser:toggle-hidden-files",
+            "rank": 9.95
+          }
+        ]
+      },
+      {
         "id": "jp-mainmenu-settings",
         "items": [
           {
@@ -198,6 +207,12 @@
       "title": "Show last modified column",
       "description": "Whether to show the last modified column",
       "default": true
+    },
+    "showHiddenFiles": {
+      "type": "boolean",
+      "title": "Show hidden files",
+      "description": "Whether to show hidden files",
+      "default": false
     }
   },
   "additionalProperties": false,
