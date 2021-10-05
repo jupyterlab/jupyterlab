@@ -18,20 +18,25 @@ function ExecutionTimeComponent(
   props: ExecutionTimeComponent.IProps
 ): React.ReactElement<ExecutionTimeComponent.IProps> {
   const translator = props.translator || nullTranslator;
-  const time = props.time || 0;
+  const time = props.time || { total: 0, current: 0 };
   const trans = translator.load('jupyterlab');
   if (props.status === 'busy') {
     return (
-      <TextItem title={''} source={trans.__(`Elapsed: ${time} seconds`)} />
+      <TextItem
+        title={''}
+        source={trans.__(
+          `Current cell: ${time.current} seconds | Total: ${time.total} seconds `
+        )}
+      />
     );
   } else {
-    if (time === 0) {
+    if (time.total === 0) {
       return <TextItem title={''} source={trans.__(``)} />;
     } else {
       return (
         <TextItem
           title={''}
-          source={trans.__(`Finished after ${time} seconds`)}
+          source={trans.__(`Finished after ${time.total} seconds`)}
         />
       );
     }
@@ -53,7 +58,7 @@ namespace ExecutionTimeComponent {
 
     status?: string;
 
-    time?: number;
+    time?: { total: number; current: number };
   }
 }
 
@@ -102,6 +107,8 @@ export namespace ExecutionTime {
       super();
       translator = translator || nullTranslator;
       //   this._trans = translator.load('jupyterlab');
+      this._tick = this._tick.bind(this);
+      this._resetTime = this._resetTime.bind(this);
     }
 
     /**
@@ -122,24 +129,32 @@ export namespace ExecutionTime {
       );
     }
 
-    get time(): number {
-      return this._time;
+    get time(): { total: number; current: number } {
+      return { total: this._totalTime, current: this._currentCellTime };
     }
 
-    private _tick = (): void => {
-      this._time += 1;
+    private _tick(): void {
+      this._totalTime += 1;
+      this._currentCellTime += 1;
       this.stateChanged.emit(void 0);
-    };
+    }
+
+    private _resetTime(): void {
+      this._totalTime = 0;
+      this._currentCellTime = 0;
+    }
 
     private _onKernelStatusChanged = () => {
       const newStatus = this._sessionContext?.kernelDisplayStatus;
       if (this._kernelStatus !== newStatus) {
         this._kernelStatus = newStatus;
         if (newStatus === 'busy') {
-          this._time = 0;
+          clearTimeout(this._timeOut);
+          this._currentCellTime = 0;
           this._interval = setInterval(this._tick, 1000);
         } else if (newStatus === 'idle') {
           clearInterval(this._interval);
+          this._timeOut = setTimeout(this._resetTime, 1000);
           this.stateChanged.emit(void 0);
         }
       }
@@ -148,8 +163,10 @@ export namespace ExecutionTime {
     // private _trans: TranslationBundle;
     private _sessionContext: ISessionContext | null = null;
     private _kernelStatus: string | undefined = '';
-    private _time: number = 0;
+    private _totalTime: number = 0;
+    private _currentCellTime: number = 0;
     private _interval: number;
+    private _timeOut: number;
   }
 
   /**
