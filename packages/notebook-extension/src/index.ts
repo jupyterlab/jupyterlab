@@ -6,6 +6,7 @@
  */
 
 import {
+  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -15,6 +16,7 @@ import {
   Dialog,
   ICommandPalette,
   InputDialog,
+  ISessionContext,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
@@ -25,7 +27,13 @@ import {
 } from '@jupyterlab/apputils';
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+
+import {
+  ConsolePanel,
+  IConsoleTracker
+} from '@jupyterlab/console';
+
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -43,6 +51,7 @@ import {
 import * as nbformat from '@jupyterlab/nbformat';
 import {
   CommandEditStatus,
+  ExecutionTime,
   INotebookTools,
   INotebookTracker,
   INotebookWidgetFactory,
@@ -353,6 +362,65 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that provides a execution time item to the status bar.
+ */
+ export const executionTime: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:execution-time',
+  autoStart: true,
+  requires: [
+    INotebookTracker,
+    IConsoleTracker,
+    ILabShell,
+    ITranslator
+  ],
+  optional: [IStatusBar],
+  activate: (
+    app: JupyterFrontEnd,
+    notebookTracker: INotebookTracker,
+    consoleTracker: IConsoleTracker,
+    labShell: ILabShell,
+    translator: ITranslator,
+    statusBar: IStatusBar | null
+  ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
+    // Create the status item.
+    const item = new ExecutionTime(translator);
+    let currentSession: ISessionContext | null = null;
+    labShell.currentChanged.connect((_, change) => {
+      const { newValue } = change;
+      // Grab the session off of the current widget, if it exists.
+      if (newValue && consoleTracker.has(newValue)) {
+        currentSession = (newValue as ConsolePanel).sessionContext;
+      } else if (newValue && notebookTracker.has(newValue)) {
+        currentSession = (newValue as NotebookPanel).sessionContext;
+      } else {
+        currentSession = null;
+      }
+      item.model!.attachSessionContext(currentSession);
+    });
+    statusBar.registerStatusItem(
+      '@jupyterlab/notebook-extension:execution-time',
+      {
+        item,
+        align: 'left',
+        rank: 3,
+        isActive: () => {
+          const current = labShell.currentWidget;
+          return (
+            !!current &&
+            (notebookTracker.has(current) || consoleTracker.has(current))
+          );
+        }
+      }
+    );
+  }
+};
+
+
+/**
  * A plugin providing export commands in the main menu and command palette
  */
 export const exportPlugin: JupyterFrontEndPlugin<void> = {
@@ -559,6 +627,7 @@ const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   trackerPlugin,
+  executionTime,
   exportPlugin,
   tools,
   commandEditItem,

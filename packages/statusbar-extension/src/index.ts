@@ -27,12 +27,10 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import {
   INotebookTracker,
   Notebook,
-  NotebookActions,
   NotebookPanel
 } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  ExecutionTime,
   IStatusBar,
   KernelStatus,
   LineCol,
@@ -61,6 +59,7 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
     settingRegistry: ISettingRegistry | null,
     palette: ICommandPalette | null
   ) => {
+    
     const trans = translator.load('jupyterlab');
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';
@@ -198,71 +197,6 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
 
     statusBar.registerStatusItem(
       '@jupyterlab/statusbar-extension:kernel-status',
-      {
-        item,
-        align: 'left',
-        rank: 1,
-        isActive: () => {
-          const current = labShell.currentWidget;
-          return (
-            !!current &&
-            (notebookTracker.has(current) || consoleTracker.has(current))
-          );
-        }
-      }
-    );
-  }
-};
-/**
- * A plugin that provides a execution time item to the status bar.
- */
-export const executionTime: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/statusbar-extension:execution-time',
-  autoStart: true,
-  requires: [
-    IStatusBar,
-    INotebookTracker,
-    IConsoleTracker,
-    ILabShell,
-    ITranslator
-  ],
-  optional: [ISessionContextDialogs],
-  activate: (
-    app: JupyterFrontEnd,
-    statusBar: IStatusBar,
-    notebookTracker: INotebookTracker,
-    consoleTracker: IConsoleTracker,
-    labShell: ILabShell,
-    translator: ITranslator,
-    sessionDialogs: ISessionContextDialogs | null
-  ) => {
-    // Create the status item.
-    const item = new ExecutionTime(translator);
-    let currentSession: ISessionContext | null = null;
-    labShell.currentChanged.connect((_, change) => {
-      const { newValue } = change;
-      // Grab the session off of the current widget, if it exists.
-      if (newValue && consoleTracker.has(newValue)) {
-        currentSession = (newValue as ConsolePanel).sessionContext;
-      } else if (newValue && notebookTracker.has(newValue)) {
-        currentSession = (newValue as NotebookPanel).sessionContext;
-      } else {
-        currentSession = null;
-      }
-      NotebookActions.executionScheduled.connect((_, data) => {
-        const ctx = (data.notebook.parent as NotebookPanel).sessionContext;
-        item.model.cellScheduledCallback(ctx, data.cell);
-      });
-
-      NotebookActions.executed.connect((_, data) => {
-        const ctx = (data.notebook.parent as NotebookPanel).sessionContext;
-        item.model.cellExecutedCallback(ctx, data.cell);
-      });
-
-      item.model!.attachSessionContext(currentSession);
-    });
-    statusBar.registerStatusItem(
-      '@jupyterlab/statusbar-extension:execution-time',
       {
         item,
         align: 'left',
@@ -459,7 +393,6 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   statusBar,
   lineColItem,
   kernelStatus,
-  executionTime,
   runningSessionsItem,
   modeSwitch
 ];

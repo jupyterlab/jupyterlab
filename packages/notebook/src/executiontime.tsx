@@ -9,8 +9,10 @@ import {
   //TranslationBundle
 } from '@jupyterlab/translation';
 import React from 'react';
-import { interactiveItem, TextItem } from '..';
-// import { Status } from '@jupyterlab/services/src/kernel/messages';
+import { interactiveItem } from '@jupyterlab/statusbar';
+import { Cell } from '@jupyterlab/cells';
+import { NotebookActions } from './actions';
+import { NotebookPanel } from './panel';
 
 /**
  * A react functional component for rendering execution time.
@@ -19,30 +21,46 @@ function ExecutionTimeComponent(
   props: ExecutionTimeComponent.IProps
 ): React.ReactElement<ExecutionTimeComponent.IProps> {
   const translator = props.translator || nullTranslator;
-  const time = props.time || 0;
-  const scheduledCellNumber = props.scheduledCellNumber || 0;
-  const remainingCellNumber = props.remainingCellNumber || 0;
+  const state = props.state;
+  const emptyDiv =  <div className={'jp-Notebook-ExecutionTime'}></div>
+  if (!state) {
+    return emptyDiv;
+  }
+  const time = state.totalTime;
+  const scheduledCellNumber = state.scheduledCellNumber || 0;
+  const remainingCellNumber = state.scheduledCell.size || 0;
   const trans = translator.load('jupyterlab');
-  if (props.status === 'busy') {
+  const executedCellNumber = scheduledCellNumber - remainingCellNumber;
+  let percentage = (100 * executedCellNumber) / scheduledCellNumber;
+  if (state.kernelStatus === 'busy') {
     return (
-      <TextItem
-        title={''}
-        source={trans.__(
-          `${
-            scheduledCellNumber - remainingCellNumber
-          }/${scheduledCellNumber} cells executed | Total: ${time} seconds `
-        )}
-      />
+      <div className={'jp-Notebook-ExecutionTime'}>
+        <div className="jp-Notebook-ExecutionTime-progress-bar">
+          <div style={{ width: `${percentage}%` }}>
+            <p>
+              {executedCellNumber} / {scheduledCellNumber}
+            </p>
+          </div>
+        </div>
+        <span> {trans.__(`Total time: ${time} seconds`)} </span>
+      </div>
     );
   } else {
     if (time === 0) {
-      return <TextItem title={''} source={trans.__(``)} />;
+      return emptyDiv;
     } else {
+      percentage = 100;
       return (
-        <TextItem
-          title={''}
-          source={trans.__(`Finished after ${time} seconds`)}
-        />
+        <div className={'jp-Notebook-ExecutionTime'}>
+          <div className="jp-Notebook-ExecutionTime-progress-bar">
+            <div style={{ width: `${percentage}%` }}>
+              <p>
+                {scheduledCellNumber} / {scheduledCellNumber}
+              </p>
+            </div>
+          </div>
+          <span> {trans.__(`Total time: ${time} seconds`)} </span>
+        </div>
       );
     }
   }
@@ -61,13 +79,7 @@ namespace ExecutionTimeComponent {
      */
     translator?: ITranslator;
 
-    status?: string;
-
-    time?: number;
-
-    scheduledCellNumber?: number;
-
-    remainingCellNumber?: number;
+    state?: Private.ExecutionState;
   }
 }
 
@@ -91,13 +103,20 @@ export class ExecutionTime extends VDomRenderer<ExecutionTime.Model> {
     if (this.model === null) {
       return null;
     } else {
+      const ctx = this.model.sessionContext;
+
+      if (!ctx) {
+        return (
+          <ExecutionTimeComponent
+            translator={this.translator}
+            state={undefined}
+          />
+        );
+      }
       return (
         <ExecutionTimeComponent
           translator={this.translator}
-          status={this.model.status}
-          time={this.model.time}
-          scheduledCellNumber={this.model.scheduledCellNumber}
-          remainingCellNumber={this.model.remainingCellNumber}
+          state={this.model.executionState(ctx)}
         />
       );
     }
@@ -131,75 +150,80 @@ export namespace ExecutionTime {
             totalTime: 0,
             interval: 0,
             timeout: 0,
-            scheduledCell: new Set<Private.Cell>(),
-            scheduledCellNumber: 0
+            scheduledCell: new Set<Cell>(),
+            scheduledCellNumber: 0,
+            needReset: true
           });
-          // sessionContext.statusChanged.connect(this._onKernelStatusChanged, this);
+          NotebookActions.executionScheduled.connect((_, data) => {
+            const ctx = (data.notebook.parent as NotebookPanel).sessionContext;
+            this._cellScheduledCallback(ctx, data.cell);
+          });
+
+          NotebookActions.executed.connect((_, data) => {
+            const ctx = (data.notebook.parent as NotebookPanel).sessionContext;
+            this._cellExecutedCallback(ctx, data.cell);
+          });
         }
       }
     }
 
-    private get _currentData(): Private.ExecutionState | undefined {
-      return this._notebookExecutionProgress.get(this._currentSessionContext);
-    }
-    /**
-     * The current status of the kernel.
-     */
-    get status(): string | undefined {
-        return this._currentData?.kernelStatus;
+    get sessionContext(): ISessionContext | null {
+      return this._currentSessionContext;
     }
 
-    // get sessionContext(): ISessionContext | null {
-    //   return this._sessionContext;
-    // }
-    // set sessionContext(sessionContext: ISessionContext | null) {
-    //   this._sessionContext = sessionContext;
-    //   this._sessionContext?.statusChanged.connect(
-    //     this._onKernelStatusChanged,
-    //     this
-    //   );
-    // }
-
-    get time(): number | undefined {
-      return this._currentData?.totalTime;
+    public executionState(
+      ctx: ISessionContext
+    ): Private.ExecutionState | undefined {
+      return this._notebookExecutionProgress.get(ctx);
     }
 
-    get scheduledCellNumber(): number | undefined {
-      return this._currentData?.scheduledCellNumber;
-    }
-
-    get remainingCellNumber(): number | undefined {
-      return this._currentData?.scheduledCell.size;
-    }
-
-    public cellExecutedCallback = (
+    private _cellExecutedCallback = (
       context: ISessionContext,
-      cell: Private.Cell
+      cell: Cell
     ): void => {
       const state = this._notebookExecutionProgress.get(context);
-      if (state) {
+      if (state && state.scheduledCell.has(cell)) {
         state.scheduledCell.delete(cell);
-        if(state.scheduledCell.size === 0){
+        if (state.scheduledCell.size === 0) {
           state.kernelStatus = 'idle';
           clearInterval(state.interval);
+
           state.timeout = setTimeout(() => {
-            this._resetTime(state);
+            state.needReset = true;
           }, 1000);
+          console.log(
+            'return to idle',
+            state.totalTime,
+            state.scheduledCellNumber,
+            state.timeout,
+            context
+          );
           this.stateChanged.emit(void 0);
         }
       }
     };
 
-    public cellScheduledCallback = (
+    private _cellScheduledCallback = (
       context: ISessionContext,
-      cell: Private.Cell
+      cell: Cell
     ): void => {
       const state = this._notebookExecutionProgress.get(context);
+
       if (state && !state.scheduledCell.has(cell)) {
-        
+        if (state.needReset) {
+          this._resetTime(state);
+        }
+        console.log(
+          'set busy',
+          state?.totalTime,
+          state?.scheduledCellNumber,
+          state.kernelStatus
+        );
         state.scheduledCell.add(cell);
         state.scheduledCellNumber += 1;
-        if(state.kernelStatus !== 'busy'){
+        if (state.kernelStatus !== 'busy') {
+          console.log('remove timeout', state.timeout);
+
           state.kernelStatus = 'busy';
           clearTimeout(state.timeout);
           state.interval = setInterval(() => {
@@ -217,6 +241,8 @@ export namespace ExecutionTime {
     private _resetTime(data: Private.ExecutionState): void {
       data.totalTime = 0;
       data.scheduledCellNumber = 0;
+      data.needReset = false;
+      console.log('reset after idle');
     }
 
     // private _trans: TranslationBundle;
@@ -241,6 +267,6 @@ namespace Private {
     timeout: number;
     scheduledCell: Set<Cell>;
     scheduledCellNumber: number;
+    needReset: boolean;
   };
-  export type Cell = any;
 }
