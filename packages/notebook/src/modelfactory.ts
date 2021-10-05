@@ -16,8 +16,8 @@ export class NotebookModelFactory
    * Construct a new notebook model factory.
    */
   constructor(options: NotebookModelFactory.IOptions) {
-    this._enableDocumentWideUndoRedo =
-      options.enableDocumentWideUndoRedo || false;
+    this._disableDocumentWideUndoRedo =
+      options.disableDocumentWideUndoRedo || false;
     const codeCellContentFactory = options.codeCellContentFactory;
     this.contentFactory =
       options.contentFactory ||
@@ -30,10 +30,10 @@ export class NotebookModelFactory
   readonly contentFactory: NotebookModel.IContentFactory;
 
   /**
-   * Define the enableDocumentWideUndoRedo property.
+   * Define the disableDocumentWideUndoRedo property.
    */
-  set enableDocumentWideUndoRedo(enableDocumentWideUndoRedo: boolean) {
-    this._enableDocumentWideUndoRedo = enableDocumentWideUndoRedo;
+  set disableDocumentWideUndoRedo(disableDocumentWideUndoRedo: boolean) {
+    this._disableDocumentWideUndoRedo = disableDocumentWideUndoRedo;
   }
 
   /**
@@ -89,7 +89,7 @@ export class NotebookModelFactory
       contentFactory,
       modelDB,
       isInitialized,
-      enableDocumentWideUndoRedo: this._enableDocumentWideUndoRedo
+      disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo
     });
   }
 
@@ -103,7 +103,7 @@ export class NotebookModelFactory
   /**
    * Defines if the document can be undo/redo.
    */
-  private _enableDocumentWideUndoRedo: boolean;
+  private _disableDocumentWideUndoRedo: boolean;
 
   private _disposed = false;
 }
@@ -119,7 +119,7 @@ export namespace NotebookModelFactory {
     /**
      * Defines if the document can be undo/redo.
      */
-    enableDocumentWideUndoRedo?: boolean;
+    disableDocumentWideUndoRedo?: boolean;
 
     /**
      * The factory for code cell content.

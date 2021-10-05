@@ -73,7 +73,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should allow undoing a change', () => {
         const model = new NotebookModel({
-          enableDocumentWideUndoRedo: true
+          disableDocumentWideUndoRedo: true
         });
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
@@ -381,7 +381,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should clear undo state', () => {
         const model = new NotebookModel({
-          enableDocumentWideUndoRedo: true
+          disableDocumentWideUndoRedo: true
         });
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
