@@ -61,7 +61,10 @@ jobs:
           EXPECTED=$(python scripts/i18n_check.py | tail -n1)
           if [[ "${CURRENT}" != "${EXPECTED}" ]]; then
             echo "Translatable strings have changed, this is only allowed on major or minor version bumps."
-            if [[ "${GITHUB_BASE_REF}" != "master" ]]; then
+            # Set job status as failed if
+            # - branch is not "master"
+            # - and current version is not a pre release of a zeroed patch version
+            if [[ "${GITHUB_BASE_REF}" != "master" && ! ( $(python setup.py --version) =~ ^[0-9]+\.[0-9]+\.0(\.dev|a|b|rc)[0-9]+$ ) ]]; then
               exit 1
             fi
           fi
