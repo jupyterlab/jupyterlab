@@ -303,7 +303,7 @@ Internationalization
 Translatable strings update
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The translatable strings update cannot occur on patch release. They 
+The translatable strings update cannot occur on patch release. They
 must be delayed on minor or major versions.
 
 Performance Testing
@@ -546,13 +546,13 @@ Main reasons for UI test failures are:
 
 1. **A visual regression caused by code changes**:
 
-   Sometimes unintentional UI changes are introduced by modifications to project source code. Goal of visual regression testing is to detect this kind of UI changes. If your PR / commit is causing visual regression, then debug and fix the regression caused. You can locally run and debug the UI tests to fix the visual regression. Follow the instructions in steps 5-7 of ``Adding a new UI test suite guide`` in `UI Testing documentation <https://github.com/jupyterlab/jupyterlab/blob/3.2.x/ui-tests/README.md#adding-a-new-ui-test-suite>`__ to locally debug and fix UI tests. Once you have a fix, you can push the change to your GitHub branch and test with GitHub actions.
+   Sometimes unintentional UI changes are introduced by modifications to project source code. Goal of visual regression testing is to detect this kind of UI changes. If your PR / commit is causing visual regression, then debug and fix the regression caused. You can locally run and debug the UI tests to fix the visual regression. Follow the instructions in steps 5-7 of ``Adding a new UI test suite guide`` in `UI Testing documentation <https://github.com/jupyterlab/jupyterlab/blob/3.2.x/galata/README.md#adding-a-new-ui-test-suite>`__ to locally debug and fix UI tests. Once you have a fix, you can push the change to your GitHub branch and test with GitHub actions.
 
 2. **An intended update to user interface**:
 
    If your code change is introducing an update to UI which causes existing UI Tests to fail, then you will need to update reference image(s) for the failing tests. In order to do that, simply go to GitHub Actions page for the failed test and download test artifacts. It will contain test captures in directory ``test/screenshots``. You can copy the capture for the failed test and paste into reference screenshots directory in JupyterLab source code, replacing the failing test's reference capture. Reference captures are located in ``ui-tests/reference-output/screenshots`` in JupyterLab source code.
 
-For more information on UI Testing, please read the `UI Testing developer documentation <.https://github.com/jupyterlab/jupyterlab/blob/3.2.x/ui-tests/README.md>`__ and `Galata documentation <https://github.com/jupyterlab/galata/blob/main/README.md>`__.
+For more information on UI Testing, please read the `UI Testing developer documentation <.https://github.com/jupyterlab/jupyterlab/blob/3.2.x/galata/README.md>`__ and `Galata documentation <https://github.com/jupyterlab/galata/blob/main/README.md>`__.
 
 Good Practices for Integration tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
