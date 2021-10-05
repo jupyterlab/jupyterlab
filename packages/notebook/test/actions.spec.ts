@@ -63,7 +63,7 @@ describe('@jupyterlab/notebook', () => {
         mimeTypeService: utils.mimeTypeService
       });
       const model = new NotebookModel({
-        enableDocumentWideUndoRedo: true
+        disableDocumentWideUndoRedo: true
       });
       model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;

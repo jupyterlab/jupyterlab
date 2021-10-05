@@ -42,7 +42,7 @@ const notebookConfig = {
   observedTopMargin: '1000px',
   observedBottomMargin: '1000px',
   maxNumberOutputs: 50,
-  enableDocumentWideUndoRedo: true
+  disableDocumentWideUndoRedo: true
 };
 
 const options: Notebook.IOptions = {
