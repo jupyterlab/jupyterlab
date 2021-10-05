@@ -43,7 +43,7 @@ python -m pip install $(ls dist/*.whl)
 # back to testing
 pushd $TEST_DIR
 
-jupyter lab build
+jupyter lab build --debug
 
 JLAB_BROWSER_CHECK_OUTPUT=${OUTPUT_DIR} python -m jupyterlab.browser_check
 

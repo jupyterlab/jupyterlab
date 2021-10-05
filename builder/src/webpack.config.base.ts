@@ -107,6 +107,9 @@ module.exports = {
     poll: 500,
     aggregateTimeout: 1000
   },
+  output: {
+    hashFunction: 'xxhash64'
+  },
   plugins: [
     new webpack.ProvidePlugin({
       process: 'process/browser'
