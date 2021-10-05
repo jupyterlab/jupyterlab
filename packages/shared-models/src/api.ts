@@ -225,7 +225,7 @@ export namespace ISharedNotebook {
      * Wether the the undo/redo logic should be
      * considered on the full document across all cells.
      */
-    enableDocumentWideUndoRedo: boolean;
+    disableDocumentWideUndoRedo: boolean;
   }
 }
 
