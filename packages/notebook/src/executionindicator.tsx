@@ -517,6 +517,9 @@ export namespace ExecutionIndicator {
       Private.IExecutionState
     >();
 
+    /**
+     * A flag to show or hide the indicator.
+     */
     private _renderFlag: boolean;
   }
 
