@@ -250,14 +250,16 @@ export const executionTime: JupyterFrontEndPlugin<void> = {
         currentSession = null;
       }
       NotebookActions.executionScheduled.connect((_, data) => {
-        item.model.cellScheduledCallback(data.cell);
+        const ctx = (data.notebook.parent as NotebookPanel).sessionContext;
+        item.model.cellScheduledCallback(ctx, data.cell);
       });
 
       NotebookActions.executed.connect((_, data) => {
-        item.model.cellExecutedCallback(data.cell);
+        const ctx = (data.notebook.parent as NotebookPanel).sessionContext;
+        item.model.cellExecutedCallback(ctx, data.cell);
       });
 
-      item.model!.sessionContext = currentSession;
+      item.model!.attachSessionContext(currentSession);
     });
     statusBar.registerStatusItem(
       '@jupyterlab/statusbar-extension:execution-time',

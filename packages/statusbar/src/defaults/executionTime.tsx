@@ -8,9 +8,10 @@ import {
   nullTranslator
   //TranslationBundle
 } from '@jupyterlab/translation';
+import { Cell } from '@jupyterlab/cells';
 import React from 'react';
 import { interactiveItem, TextItem } from '..';
-import { Cell } from '@jupyterlab/cells';
+import { Status } from '@jupyterlab/services/src/kernel/messages';
 
 /**
  * A react functional component for rendering execution time.
@@ -19,7 +20,7 @@ function ExecutionTimeComponent(
   props: ExecutionTimeComponent.IProps
 ): React.ReactElement<ExecutionTimeComponent.IProps> {
   const translator = props.translator || nullTranslator;
-  const time = props.time || { total: 0, current: 0 };
+  const time = props.time || 0;
   const scheduledCellNumber = props.scheduledCellNumber || 0;
   const remainingCellNumber = props.remainingCellNumber || 0;
   const trans = translator.load('jupyterlab');
@@ -30,20 +31,18 @@ function ExecutionTimeComponent(
         source={trans.__(
           `${
             scheduledCellNumber - remainingCellNumber
-          } out of ${scheduledCellNumber} cells executed | Current cell: ${
-            time.current
-          } seconds | Total: ${time.total} seconds `
+          } out of ${scheduledCellNumber} cells executed | Total: ${time} seconds `
         )}
       />
     );
   } else {
-    if (time.total === 0) {
+    if (time === 0) {
       return <TextItem title={''} source={trans.__(``)} />;
     } else {
       return (
         <TextItem
           title={''}
-          source={trans.__(`Finished after ${time.total} seconds`)}
+          source={trans.__(`Finished after ${time} seconds`)}
         />
       );
     }
@@ -65,7 +64,7 @@ namespace ExecutionTimeComponent {
 
     status?: string;
 
-    time?: { total: number; current: number };
+    time?: number;
 
     scheduledCellNumber?: number;
 
@@ -124,89 +123,143 @@ export namespace ExecutionTime {
       this._resetTime = this._resetTime.bind(this);
     }
 
+    attachSessionContext(sessionContext: ISessionContext | null): void {
+      if (sessionContext) {
+        this._currentSessionContext = sessionContext;
+        this._notebookExecutionProgress.set(sessionContext, {
+          kernelStatus: '',
+          totalTime: 0,
+          interval: 0,
+          timeout: 0,
+          scheduledCell: new Set<Cell>(),
+          scheduledCellNumber: 0
+        });
+        sessionContext.statusChanged.connect(this._onKernelStatusChanged, this);
+      }
+    }
+
+    private get _currentData(): Private.ExecutionState | undefined {
+      return this._notebookExecutionProgress.get(this._currentSessionContext);
+    }
     /**
      * The current status of the kernel.
      */
     get status(): string | undefined {
-      return this._kernelStatus;
+      console.log('getting status', this._currentData?.kernelStatus);
+
+      return this._currentData?.kernelStatus;
     }
 
-    get sessionContext(): ISessionContext | null {
-      return this._sessionContext;
-    }
-    set sessionContext(sessionContext: ISessionContext | null) {
-      this._sessionContext = sessionContext;
-      this._sessionContext?.statusChanged.connect(
-        this._onKernelStatusChanged,
-        this
-      );
-    }
+    // get sessionContext(): ISessionContext | null {
+    //   return this._sessionContext;
+    // }
+    // set sessionContext(sessionContext: ISessionContext | null) {
+    //   this._sessionContext = sessionContext;
+    //   this._sessionContext?.statusChanged.connect(
+    //     this._onKernelStatusChanged,
+    //     this
+    //   );
+    // }
 
-    get time(): { total: number; current: number } {
-      return { total: this._totalTime, current: this._currentCellTime };
-    }
-
-    get scheduledCellNumber(): number {
-      return this._scheduledCellNumber;
+    get time(): number | undefined {
+      return this._currentData?.totalTime;
     }
 
-    get remainingCellNumber(): number {
-      return this._scheduledCell.size;
+    get scheduledCellNumber(): number | undefined {
+      return this._currentData?.scheduledCellNumber;
     }
 
-    public cellExecutedCallback = (cell: Cell): void => {
-      console.log('executed', cell);
-      this._scheduledCell.delete(cell);
-      console.log(this._scheduledCell.size);
-    };
-
-    public cellScheduledCallback = (cell: Cell): void => {
-      console.log('scheduled', cell);
-      this._scheduledCell.add(cell);
-      this._scheduledCellNumber += 1;
-    };
-
-    private _tick(): void {
-      this._totalTime += 1;
-      this._currentCellTime += 1;
-      this.stateChanged.emit(void 0);
+    get remainingCellNumber(): number | undefined {
+      return this._currentData?.scheduledCell.size;
     }
 
-    private _resetTime(): void {
-      this._totalTime = 0;
-      this._currentCellTime = 0;
-      this._scheduledCellNumber = 0;
-    }
-
-    private _onKernelStatusChanged = () => {
-      const newStatus = this._sessionContext?.kernelDisplayStatus;
-      if (this._kernelStatus !== newStatus) {
-        this._kernelStatus = newStatus;
-        if (newStatus === 'busy') {
-          clearTimeout(this._timeOut);
-          this._currentCellTime = 0;
-          this._interval = setInterval(this._tick, 1000);
-        } else if (newStatus === 'idle') {
-          clearInterval(this._interval);
-          this._timeOut = setTimeout(this._resetTime, 1000);
-          this.stateChanged.emit(void 0);
-        }
+    public cellExecutedCallback = (
+      context: ISessionContext,
+      cell: Cell
+    ): void => {
+      const state = this._notebookExecutionProgress.get(context);
+      if (state) {
+        state.scheduledCell.delete(cell);
       }
     };
 
+    public cellScheduledCallback = (
+      context: ISessionContext,
+      cell: Cell
+    ): void => {
+      const state = this._notebookExecutionProgress.get(context);
+      if (state) {
+        state.scheduledCell.add(cell);
+        state.scheduledCellNumber += 1;
+      }
+    };
+
+    private _tick(data: Private.ExecutionState): void {
+      data.totalTime += 1;
+      this.stateChanged.emit(void 0);
+    }
+
+    private _resetTime(data: Private.ExecutionState): void {
+      data.totalTime = 0;
+      data.scheduledCellNumber = 0;
+    }
+
+    private _onKernelStatusChanged = (
+      ctx: ISessionContext,
+      newStatus: Status
+    ) => {
+      const progressData = this._notebookExecutionProgress.get(ctx);
+      if (progressData) {
+        progressData.kernelStatus = newStatus;
+        if (newStatus === 'busy') {
+          clearTimeout(progressData.timeout);
+          progressData.interval = setInterval(() => {
+            this._tick(progressData);
+          }, 1000);
+        } else if (newStatus === 'idle') {
+          clearInterval(progressData.interval);
+          progressData.timeout = setTimeout(() => {
+            this._resetTime(progressData);
+          }, 1000);
+          this.stateChanged.emit(void 0);
+        }
+      }
+      // const newStatus = this._sessionContext?.kernelDisplayStatus;
+      // if (this._kernelStatus !== newStatus) {
+      //   this._kernelStatus = newStatus;
+      //   if (newStatus === 'busy') {
+      //     clearTimeout(this._timeOut);
+      //     this._currentCellTime = 0;
+      //     this._interval = setInterval(this._tick, 1000);
+      //   } else if (newStatus === 'idle') {
+      //     clearInterval(this._interval);
+      //     this._timeOut = setTimeout(this._resetTime, 1000);
+      //     this.stateChanged.emit(void 0);
+      //   }
+      // }
+    };
+
     // private _trans: TranslationBundle;
-    private _sessionContext: ISessionContext | null = null;
-    private _kernelStatus: string | undefined = '';
-    private _totalTime: number = 0;
-    private _currentCellTime: number = 0;
-    private _interval: number;
-    private _timeOut: number;
-    private _scheduledCell: Set<any> = new Set();
-    private _scheduledCellNumber: number = 0;
+    private _currentSessionContext: ISessionContext;
+    private _notebookExecutionProgress = new WeakMap<
+      ISessionContext,
+      Private.ExecutionState
+    >();
   }
 
   /**
    * Options for creating a ExecutionTime object.
    */
   export interface IOptions {}
+}
+
+namespace Private {
+  export type ExecutionState = {
+    kernelStatus: string;
+    totalTime: number;
+    interval: number;
+    timeout: number;
+    scheduledCell: Set<Cell>;
+    scheduledCellNumber: number;
+  };
 }
