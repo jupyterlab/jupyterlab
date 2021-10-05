@@ -9,7 +9,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 import * as models from './api';
-import { Delta } from './api';
+import { Delta, ISharedNotebook } from './api';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 
@@ -199,8 +199,9 @@ export class YFile
 export class YNotebook
   extends YDocument<models.NotebookChange>
   implements models.ISharedNotebook {
-  constructor() {
+  constructor(options: ISharedNotebook.IOptions) {
     super();
+    this._enableDocumentWideUndoRedo = options.enableDocumentWideUndoRedo;
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
       if (!this._ycellMapping.has(ycell)) {
@@ -274,7 +275,9 @@ export class YNotebook
   insertCells(index: number, cells: YCellType[]): void {
     cells.forEach(cell => {
       this._ycellMapping.set(cell.ymodel, cell);
-      cell.undoManager = this.undoManager;
+      if (this.enableDocumentWideUndoRedo) {
+        cell.undoManager = this.undoManager;
+      }
     });
     this.transact(() => {
       this.ycells.insert(
@@ -353,8 +356,20 @@ export class YNotebook
   /**
    * Create a new YNotebook.
    */
-  public static create(): models.ISharedNotebook {
-    return new YNotebook();
+  public static create(
+    enableDocumentWideUndoRedo: boolean
+  ): models.ISharedNotebook {
+    return new YNotebook({ enableDocumentWideUndoRedo });
+  }
+
+  /**
+   * Wether the the undo/redo logic should be
+   * considered on the full document across all cells.
+   *
+   * @return The enableDocumentWideUndoRedo setting.
+   */
+  get enableDocumentWideUndoRedo(): boolean {
+    return this._enableDocumentWideUndoRedo;
   }
 
   /**
@@ -369,7 +384,11 @@ export class YNotebook
       }
       const cell = this._ycellMapping.get(type) as any;
       cell._notebook = this;
-      cell._undoManager = this.undoManager;
+      if (this.enableDocumentWideUndoRedo) {
+        cell._undoManager = this.undoManager;
+      } else {
+        cell._undoManager = new Y.UndoManager([cell.ymodel], {});
+      }
     });
     event.changes.deleted.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
@@ -441,6 +460,7 @@ export class YNotebook
   public undoManager = new Y.UndoManager([this.ycells], {
     trackedOrigins: new Set([this])
   });
+  private _enableDocumentWideUndoRedo: boolean;
   private _ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
   public cells: YCellType[];
 }
@@ -510,7 +530,9 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    * The notebook that this cell belongs to.
    */
   get undoManager(): Y.UndoManager | null {
-    return this.notebook ? this.notebook.undoManager : this._undoManager;
+    return this.notebook?.enableDocumentWideUndoRedo
+      ? this.notebook.undoManager
+      : this._undoManager;
   }
 
   /**
@@ -617,7 +639,11 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     ymodel.set('cell_type', this.cell_type);
     ymodel.set('id', this.getId());
     const Self: any = this.constructor;
-    return new Self(ymodel);
+    const clone = new Self(ymodel);
+    // TODO The assignmenet of the undoManager does not work for a clone.
+    // See https://github.com/jupyterlab/jupyterlab/issues/11035
+    clone._undoManager = this.undoManager;
+    return clone;
   }
 
   /**
