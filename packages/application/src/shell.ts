@@ -537,11 +537,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     const applicationCurrentWidget = this.currentWidget;
 
-    // Toggle back to multiple document mode.
-    dock.mode = mode;
-
     if (mode === 'single-document') {
+      // Cache the current multi-document layout before changing the mode.
       this._cachedLayout = dock.saveLayout();
+      dock.mode = mode;
 
       // In case the active widget in the dock panel is *not* the active widget
       // of the application, defer to the application.
@@ -557,8 +556,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         this._topHandler.panel.hide();
       }
     } else {
-      // Cache a reference to every widget currently in the dock panel.
+      // Cache a reference to every widget currently in the dock panel before
+      // changing its mode.
       const widgets = toArray(dock.widgets());
+      dock.mode = mode;
 
       // Restore the original layout.
       if (this._cachedLayout) {
