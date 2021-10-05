@@ -400,20 +400,16 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
           download: true,
           path: current.context.path
         });
-        const child = window.open('', '_blank');
         const { context } = current;
 
-        if (child) {
-          child.opener = null;
-        }
         if (context.model.dirty && !context.model.readOnly) {
           return context.save().then(() => {
-            child?.location.assign(url);
+            window.open(url, '_blank', 'noopener');
           });
         }
 
         return new Promise<void>(resolve => {
-          child?.location.assign(url);
+          window.open(url, '_blank', 'noopener');
           resolve(undefined);
         });
       },
