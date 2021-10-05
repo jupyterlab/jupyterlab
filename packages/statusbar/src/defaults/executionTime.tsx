@@ -8,7 +8,6 @@ import {
   nullTranslator
   //TranslationBundle
 } from '@jupyterlab/translation';
-import { Cell } from '@jupyterlab/cells';
 import React from 'react';
 import { interactiveItem, TextItem } from '..';
 import { Status } from '@jupyterlab/services/src/kernel/messages';
@@ -31,7 +30,7 @@ function ExecutionTimeComponent(
         source={trans.__(
           `${
             scheduledCellNumber - remainingCellNumber
-          } out of ${scheduledCellNumber} cells executed | Total: ${time} seconds `
+          }/${scheduledCellNumber} cells executed | Total: ${time} seconds `
         )}
       />
     );
@@ -126,15 +125,17 @@ export namespace ExecutionTime {
     attachSessionContext(sessionContext: ISessionContext | null): void {
       if (sessionContext) {
         this._currentSessionContext = sessionContext;
-        this._notebookExecutionProgress.set(sessionContext, {
-          kernelStatus: '',
-          totalTime: 0,
-          interval: 0,
-          timeout: 0,
-          scheduledCell: new Set<Cell>(),
-          scheduledCellNumber: 0
-        });
-        sessionContext.statusChanged.connect(this._onKernelStatusChanged, this);
+        if (!this._notebookExecutionProgress.has(sessionContext)) {
+          this._notebookExecutionProgress.set(sessionContext, {
+            kernelStatus: '',
+            totalTime: 0,
+            interval: 0,
+            timeout: 0,
+            scheduledCell: new Set<Private.Cell>(),
+            scheduledCellNumber: 0
+          });
+          sessionContext.statusChanged.connect(this._onKernelStatusChanged, this);
+        }
       }
     }
 
@@ -175,7 +176,7 @@ export namespace ExecutionTime {
 
     public cellExecutedCallback = (
       context: ISessionContext,
-      cell: Cell
+      cell: Private.Cell
     ): void => {
       const state = this._notebookExecutionProgress.get(context);
       if (state) {
@@ -185,7 +186,7 @@ export namespace ExecutionTime {
 
     public cellScheduledCallback = (
       context: ISessionContext,
-      cell: Cell
+      cell: Private.Cell
     ): void => {
       const state = this._notebookExecutionProgress.get(context);
       if (state) {
@@ -262,4 +263,5 @@ namespace Private {
     scheduledCell: Set<Cell>;
     scheduledCellNumber: number;
   };
+  export type Cell = any;
 }
