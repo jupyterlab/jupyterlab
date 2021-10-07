@@ -47,16 +47,6 @@
   overflow: visible;
 }
 
-button.jp-Dialog-button:focus {
-  outline: 1px solid var(--jp-brand-color1);
-  outline-offset: 4px;
-  -moz-outline-radius: 0px;
-}
-
-button.jp-Dialog-button:focus::-moz-focus-inner {
-  border: 0;
-}
-
 button.jp-Dialog-close-button {
   padding: 0;
   height: 100%;

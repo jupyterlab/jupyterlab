@@ -86,13 +86,13 @@
   .jp-Toolbar-item:first-child
   .jp-ToolbarButtonComponent {
   width: 72px;
-  background: var(--jp-brand-color1);
+  background: var(--jp-button-accept-normal-color);
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar
   .jp-Toolbar-item:first-child
   .jp-ToolbarButtonComponent:focus-visible {
-  background-color: var(--jp-brand-color0);
+  background-color: var(--jp-button-accept-active-color);
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar
