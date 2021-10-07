@@ -9,15 +9,10 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-// import { CodeBlock } from '@jupyterlab/codeeditor';
 import {
-  // ArrayInput,
-  // CheckBox,
-  // DropDown,
   FormComponentRegistry,
   IFormComponentRegistry,
   ILabIconManager
-  // TextInput
 } from '@jupyterlab/ui-components';
 
 /**
@@ -42,8 +37,6 @@ const registryPlugin: JupyterFrontEndPlugin<IFormComponentRegistry> = {
   autoStart: true,
   activate: (app: JupyterFrontEnd): IFormComponentRegistry => {
     const editorRegistry = new FormComponentRegistry();
-    // editorRegistry.addRenderer('CheckboxWidget', CheckBox);
-    // editorRegistry.addRenderer('TextWidget', TextInput);
     return editorRegistry;
   }
 };
