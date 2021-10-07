@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingeditor",
-  "version": "3.1.16",
+  "version": "3.1.17",
   "description": "The JupyterLab default setting editor interface",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,14 +36,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.1.16",
-    "@jupyterlab/codeeditor": "^3.1.16",
-    "@jupyterlab/inspector": "^3.1.16",
-    "@jupyterlab/rendermime": "^3.1.16",
-    "@jupyterlab/settingregistry": "^3.1.16",
-    "@jupyterlab/statedb": "^3.1.16",
-    "@jupyterlab/translation": "^3.1.16",
-    "@jupyterlab/ui-components": "^3.1.16",
+    "@jupyterlab/apputils": "^3.1.17",
+    "@jupyterlab/codeeditor": "^3.1.17",
+    "@jupyterlab/inspector": "^3.1.17",
+    "@jupyterlab/rendermime": "^3.1.17",
+    "@jupyterlab/settingregistry": "^3.1.17",
+    "@jupyterlab/statedb": "^3.1.17",
+    "@jupyterlab/translation": "^3.1.17",
+    "@jupyterlab/ui-components": "^3.1.17",
     "@lumino/commands": "^1.12.0",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",
