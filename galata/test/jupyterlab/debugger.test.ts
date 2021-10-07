@@ -29,7 +29,7 @@ test.describe('Debugger Tests', () => {
 
   test('Start debug session', async ({ page }) => {
     await page.waitForSelector(page.launcherSelector);
-    await page.click('.jp-LauncherCard[title*=XPython]');
+    await page.click('.jp-LauncherCard[title*=ipykernel]');
     await populateNotebook(page);
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
@@ -39,7 +39,7 @@ test.describe('Debugger Tests', () => {
 
     await page.waitForTimeout(2000);
     const breakpointsPanel = await page.debugger.getBreakPointsPanel();
-    expect(await breakpointsPanel.innerText()).toMatch(/xpython/);
+    expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
 
     const callStackPanel = await page.debugger.getCallStackPanel();
     expect(await callStackPanel.innerText()).toBe('');
@@ -48,7 +48,7 @@ test.describe('Debugger Tests', () => {
     page.notebook.run();
     await page.waitForTimeout(2000);
 
-    expect(await callStackPanel.innerText()).toMatch(/xpython/);
+    expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
 
     const variablesPanel = await page.debugger.getVariablesPanel();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
