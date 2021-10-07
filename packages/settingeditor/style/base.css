@@ -245,12 +245,6 @@
   overflow: hidden;
 }
 
-#setting-editor h1 {
-  font-size: var(--jp-content-font-size4);
-  font-weight: var(--jp-content-heading-font-weight);
-  color: var(--jp-ui-font-color0);
-}
-
 #setting-editor .jp-SettingsTableEditor tr {
   color: var(--jp-ui-font-color2);
   height: var(--jp-private-settingeditor-row-height);
@@ -264,13 +258,107 @@
   height: var(--jp-private-settingeditor-row-height);
 }
 
-#setting-editor h2 {
+#setting-editor fieldset input,
+#setting-editor fieldset select,
+#setting-editor fieldset textarea {
+  font-size: var(--jp-content-font-size2);
+  border-color: var(--jp-input-border-color);
+  border-style: solid;
+  border-radius: 5px;
+  border-width: 1px;
+  padding: 6px 8px;
+  background: none;
+  color: var(--jp-content-font-color0);
+}
+
+#setting-editor button[type='submit'] {
+  display: none;
+}
+
+#setting-editor .form-group {
+  padding: 0 26px 16px 30px;
+  display: flex;
+}
+
+#setting-editor .checkbox {
+  padding-top: 20px;
+}
+
+#setting-editor fieldset {
+  border: none;
+}
+
+#setting-editor .form-group.small-field:hover {
+  background: var(--jp-border-color3);
+}
+
+#setting-editor i.glyphicon {
+  display: none;
+}
+#setting-editor .btn-add::after {
+  content: 'Add';
+}
+#setting-editor .array-item-move-up::after {
+  content: 'Move Up';
+}
+#setting-editor .array-item-move-down::after {
+  content: 'Move Down';
+}
+#setting-editor .array-item-remove::after {
+  content: 'Remove';
+}
+
+#setting-editor p {
+  max-height: 70px;
+  text-overflow: ellipsis;
+  overflow: auto;
+}
+
+#setting-editor .array-item button.btn,
+#setting-editor .array-item-add button {
+  box-shadow: none;
+  border: none;
+  padding: 5px;
+}
+
+#setting-editor .array-item {
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+  margin: 4px;
+}
+
+#setting-editor legend#root__title {
+  font-size: var(--jp-content-font-size4);
+  font-weight: var(--jp-content-heading-font-weight);
+  color: var(--jp-ui-font-color0);
+}
+
+#setting-editor p {
+  font-size: var(--jp-content-font-size2);
+  margin-bottom: 5px;
+  margin-left: 5px;
+}
+
+#setting-editor h3 {
+  font-size: var(--jp-content-font-size2);
+  color: var(--jp-ui-font-color0);
+  padding: 5px;
+  font-weight: var(--jp-content-header-font-weight);
+  border-bottom: 1px solid var(--jp-border-color2);
+  margin-bottom: 5px;
+}
+
+#setting-editor legend {
   font-size: var(--jp-content-font-size3);
   color: var(--jp-ui-font-color0);
   flex-basis: 100%;
   padding: 10px;
   font-weight: var(--jp-content-header-font-weight);
   border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-SettingsForm {
+  position: relative;
 }
 
 #setting-editor .jp-SettingsHeader {
@@ -326,7 +414,7 @@
   height: 100%;
 }
 
-#setting-editor .jp-SettingsHeader button {
+#setting-editor .jp-SettingsForm button.jp-RestoreButton {
   white-space: nowrap;
   background: none;
   border: none;
@@ -334,6 +422,10 @@
   box-shadow: none;
   font-size: var(--jp-content-font-size2);
   color: var(--jp-brand-color1);
+  position: absolute;
+  cursor: pointer;
+  top: 30px;
+  right: 15px;
 }
 
 #setting-editor .jp-SettingsHeader button:hover {

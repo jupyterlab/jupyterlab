@@ -42,6 +42,10 @@ export class FormComponentRegistry implements IFormComponentRegistry {
     return true;
   }
 
+  get renderers(): { [id: string]: (props: any) => any } {
+    return this._renderers;
+  }
+
   /**
    *
    * @param id - The unique id for the renderer.
@@ -64,6 +68,8 @@ export interface IFormComponentRegistry {
   getRenderer: (
     id: string
   ) => (props: FormComponentRegistry.IRendererProps) => any;
+
+  renderers: { [id: string]: (props: any) => any };
 }
 
 export const IFormComponentRegistry = new Token<IFormComponentRegistry>(

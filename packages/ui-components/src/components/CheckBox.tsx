@@ -2,39 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { FormComponentRegistry } from '../FormComponentRegistry';
+// import { FormComponentRegistry } from '../FormComponentRegistry';
 
-export const CheckBox: React.FC<FormComponentRegistry.IRendererProps> = ({
-  value,
-  handleChange,
-  uihints: { description, title, defaultValue }
-}) => {
+export const CheckBox: React.FC<any> = ({ value, onChange, schema }) => {
   return (
-    <div
-      className="jp-FormComponent jp-BooleanInput"
-      key={`${title?.replace(' ', '')}BooleanInput`}
-    >
-      {defaultValue !== value ? (
-        <div className="jp-modifiedIndicator" />
-      ) : undefined}
-      <div>
-        <h3>{title}</h3>
-        <div className="jp-InputLabelWrapper">
-          <input
-            type="checkbox"
-            checked={value}
-            onChange={(e: any) => {
-              handleChange(!value);
-            }}
-          />
-          <p
-            onClick={(e: any) => {
-              handleChange(!value);
-            }}
-          >
-            {description ?? title}
-          </p>
-        </div>
+    <div>
+      <div className="jp-InputLabelWrapper">
+        <input
+          type="checkbox"
+          checked={value ?? schema.default}
+          onChange={() => onChange(!value)}
+        />
+        <p onClick={() => onChange(!value)}>
+          {schema.description ?? schema.title}
+        </p>
       </div>
     </div>
   );

@@ -84,7 +84,10 @@
     "variableFilters": {
       "properties": {
         "xpython": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

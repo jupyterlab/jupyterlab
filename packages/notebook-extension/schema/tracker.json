@@ -670,10 +670,12 @@
       "description": "The configuration for all code cells.",
       "$ref": "#/definitions/editorConfig",
       "properties": {
-        "lineWarp": {
+        "lineWrap": {
+          "type": "string",
           "default": "off"
         },
         "matchBrackets": {
+          "type": "string",
           "default": true
         }
       },
@@ -714,10 +716,12 @@
       "description": "The configuration for all markdown cells.",
       "$ref": "#/definitions/editorConfig",
       "properties": {
-        "lineWarp": {
+        "lineWrap": {
+          "type": "string",
           "default": "on"
         },
         "matchBrackets": {
+          "type": "string",
           "default": false
         }
       },
@@ -745,10 +749,12 @@
       "description": "The configuration for all raw cells.",
       "$ref": "#/definitions/editorConfig",
       "properties": {
-        "lineWarp": {
+        "lineWrap": {
+          "type": "string",
           "default": "on"
         },
         "matchBrackets": {
+          "type": "string",
           "default": false
         }
       },

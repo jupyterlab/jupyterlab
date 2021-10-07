@@ -723,7 +723,7 @@ export class Settings implements ISettingRegistry.ISettings {
    */
   get isModified(): boolean {
     for (const key in this.schema.properties) {
-      const user = this.get(key).user;
+      const user = this.get(key).composite;
       const defaultValue = this.default(key);
       if (user === undefined || user === null) {
         continue;
@@ -731,7 +731,10 @@ export class Settings implements ISettingRegistry.ISettings {
       if (defaultValue === undefined || defaultValue === null) {
         return true;
       }
-      if (JSONExt.isArray(user) && Object.keys(user).length === 0) {
+      if (
+        JSONExt.deepEqual(user, JSONExt.emptyObject) ||
+        JSONExt.deepEqual(user, JSONExt.emptyArray)
+      ) {
         continue;
       }
       if (!JSONExt.deepEqual(user, defaultValue)) {
@@ -861,7 +864,7 @@ export class Settings implements ISettingRegistry.ISettings {
     const validator = this.registry.validator;
     const version = this.version;
 
-    return validator.validateData({ data, id, raw, schema, version }, false);
+    return validator.validateData({ data, id, raw, schema, version });
   }
 
   /**

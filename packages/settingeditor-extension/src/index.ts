@@ -28,7 +28,8 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
-import { settingsIcon } from '@jupyterlab/ui-components';
+import { saveIcon, settingsIcon, undoIcon } from '@jupyterlab/ui-components';
+import { IDisposable } from '@lumino/disposable';
 
 // import { IDisposable } from '@lumino/disposable';
 
@@ -46,7 +47,7 @@ namespace CommandIDs {
 /**
  * The default setting editor extension.
  */
-const trackerPlugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
+const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
   requires: [
     ILayoutRestorer,
@@ -103,7 +104,7 @@ function activate(
         return;
       }
 
-      const key = trackerPlugin.id;
+      const key = plugin.id;
       const when = app.restored;
 
       editor = new SettingEditor({
@@ -120,6 +121,29 @@ function activate(
         state,
         translator,
         when
+      });
+
+      let disposable: IDisposable | null = null;
+      // Notify the command registry when the visibility status of the setting
+      // editor's commands change. The setting editor toolbar listens for this
+      // signal from the command registry.
+      editor.commandsChanged.connect((sender: any, args: string[]) => {
+        args.forEach(id => {
+          commands.notifyCommandChanged(id);
+        });
+        if (editor.canSaveRaw) {
+          if (!disposable) {
+            disposable = status.setDirty();
+          }
+        } else if (disposable) {
+          disposable.dispose();
+          disposable = null;
+        }
+        editor.disposed.connect(() => {
+          if (disposable) {
+            disposable.dispose();
+          }
+        });
       });
 
       editor.id = namespace;
@@ -139,7 +163,23 @@ function activate(
     });
   }
 
+  commands.addCommand(CommandIDs.revert, {
+    execute: () => {
+      tracker.currentWidget?.content.revert();
+    },
+    icon: undoIcon,
+    label: trans.__('Revert User Settings'),
+    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
+  });
+
+  commands.addCommand(CommandIDs.save, {
+    execute: () => tracker.currentWidget?.content.save(),
+    icon: saveIcon,
+    label: trans.__('Save User Settings'),
+    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
+  });
+
   return tracker;
 }
 
-export default trackerPlugin;
+export default plugin;

@@ -3,45 +3,41 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import * as React from 'react';
-import { FormComponentRegistry } from '../FormComponentRegistry';
 
-export const TextInput: React.FC<FormComponentRegistry.IRendererProps> = ({
+export const TextInput: React.FC<any> = ({
+  id,
   value,
-  handleChange,
-  uihints: { error, defaultValue, description, label, placeholder, type }
+  onChange,
+  onBlur,
+  placeholder,
+  schema
 }) => {
-  const numeric = type === 'number' || type === 'integer';
-
+  const descriptionRef: React.RefObject<HTMLParagraphElement> = React.createRef();
+  const expandOrCollapseDescription = () => {
+    console.log(descriptionRef.current?.clientHeight);
+  };
   return (
-    <div
-      className={`jp-FormComponent ${error ? 'jp-SettingEditor-error' : ''}`}
-    >
-      {defaultValue !== value ? (
+    <div>
+      {value && schema.default !== value ? (
         <div className="jp-modifiedIndicator" />
       ) : undefined}
       <div>
-        <h3> {label} </h3>
-        <p> {description} </p>
+        <h3> {schema.title} </h3>
+        <p ref={descriptionRef} onClick={expandOrCollapseDescription}>
+          {' '}
+          {schema.description}{' '}
+        </p>
 
         <input
-          onChange={(event): void => {
-            const newValue = event.target.value;
-            if (numeric) {
-              try {
-                const intValue = parseInt(newValue);
-                handleChange(intValue);
-              } catch {
-                handleChange(newValue);
-              }
-            } else {
-              handleChange(newValue === '' ? null : newValue);
-            }
+          onChange={e => {
+            onChange(e.target.value);
           }}
-          type={numeric ? 'numeric' : 'text'}
           placeholder={placeholder}
-          value={value ?? ''}
+          onBlur={e => {
+            onBlur(id, e.target.value);
+          }}
+          value={value ?? schema.default ?? ''}
         />
-        {!!error && <p className="jp-SettingEditor-errorMessage">{error}</p>}
       </div>
     </div>
   );

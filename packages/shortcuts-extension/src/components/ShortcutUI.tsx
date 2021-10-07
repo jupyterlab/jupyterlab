@@ -221,7 +221,9 @@ function getShortcutObjects(
     const command: string = userSetting.command;
     const selector: string = userSetting.selector;
     const keyTo = command + '_' + selector;
-    shortcutObjects[keyTo].source = 'Custom';
+    if (shortcutObjects[keyTo]) {
+      shortcutObjects[keyTo].source = 'Custom';
+    }
   });
   return shortcutObjects;
 }

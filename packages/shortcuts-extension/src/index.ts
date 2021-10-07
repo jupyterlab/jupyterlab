@@ -10,10 +10,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  IFormComponentRegistry,
-  FormComponentRegistry
-} from '@jupyterlab/formeditor';
+import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { ITranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import {
@@ -88,15 +85,12 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
-    editorRegistry.addRenderer(
-      'shortcuts',
-      (props: FormComponentRegistry.IRendererProps) => {
-        return renderShortCut({
-          external: getExternalForJupyterLab(registry, app),
-          ...props
-        });
-      }
-    );
+    editorRegistry.addRenderer('shortcuts', (props: any) => {
+      return renderShortCut({
+        external: getExternalForJupyterLab(registry, app),
+        ...props
+      });
+    });
 
     /**
      * Populate the plugin's schema defaults.

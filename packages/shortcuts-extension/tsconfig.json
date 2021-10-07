@@ -10,16 +10,13 @@
       "path": "../application"
     },
     {
-      "path": "../formeditor"
-    },
-    {
-      "path": "../settingeditor"
-    },
-    {
       "path": "../settingregistry"
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

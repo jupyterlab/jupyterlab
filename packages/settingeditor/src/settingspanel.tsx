@@ -107,13 +107,12 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
         return (
           <div
             ref={editorRefs[pluginSettings.id]}
+            className="jp-SettingsForm"
             key={`${pluginSettings.id}SettingsEditor`}
           >
             <SettingsFormEditor
               settings={pluginSettings}
-              editorFactory={editorFactory}
-              componentRegistry={editorRegistry}
-              translator={translator}
+              renderers={editorRegistry.renderers}
             />
           </div>
         );
