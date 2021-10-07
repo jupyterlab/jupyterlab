@@ -11,4 +11,3 @@ export * from './widget';
 export * from './factory';
 export * from './mimetype';
 export * from './tokens';
-export * from './CodeBlock';
