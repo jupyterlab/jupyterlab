@@ -133,7 +133,7 @@ jobs:
       - name: Checkout latest version
         run: |
           cp galata/lab-benchmark-expected.json /tmp/
-          git restore galata/lab-benchmark-expected.json
+          git restore galata/lab-benchmark-expected.json || true  # Not versioned any more
           echo Checking out ${NEW_REF_SHA}...
           git checkout ${NEW_REF_SHA}
           cp /tmp/lab-benchmark-expected.json galata/

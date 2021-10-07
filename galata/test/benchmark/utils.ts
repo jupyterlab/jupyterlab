@@ -360,7 +360,7 @@ export namespace Performance {
   export async function measure(
     page: Page,
     fn: () => Promise<void>,
-    mark = 'duration'
+    mark = 'action-duration'
   ): Promise<number> {
     await startTimer(page, mark);
 
