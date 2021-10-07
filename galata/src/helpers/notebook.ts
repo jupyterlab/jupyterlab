@@ -705,6 +705,62 @@ export class NotebookHelper {
   }
 
   /**
+   * Clicks a cell gutter line for code cells
+   *
+   * @param cellIndex Cell index
+   * @param lineNumber Cell line number, starts at 1
+   */
+  async clickCellGutter(
+    cellIndex: number,
+    lineNumber: number
+  ): Promise<boolean> {
+    if (lineNumber < 1) {
+      return false;
+    }
+
+    if (!(await this.isCellGutterPresent(cellIndex))) {
+      return false;
+    }
+
+    const cell = await this.getCell(cellIndex);
+    const gutters = await cell!.$$(
+      '.CodeMirror-gutter-wrapper > .CodeMirror-linenumber'
+    );
+    if (gutters.length < lineNumber) {
+      return false;
+    }
+    await gutters[lineNumber - 1].click();
+    return true;
+  }
+
+  /**
+   * Check if cell gutter is present
+   *
+   * @param cellIndex
+   */
+  async isCellGutterPresent(cellIndex: number): Promise<boolean> {
+    const cell = await this.getCell(cellIndex);
+    if (!cell) {
+      return false;
+    }
+    return (await cell.$('.CodeMirror-gutter-wrapper')) !== null;
+  }
+
+  /**
+   * Wait until cell gutter is visible
+   *
+   * @param cellIndex
+   */
+  async waitForCellGutter(cellIndex: number) {
+    const cell = await this.getCell(cellIndex);
+    if (cell) {
+      await this.page.waitForSelector('.CodeMirror-gutter-wrapper', {
+        state: 'attached'
+      });
+    }
+  }
+
+  /**
    * Select cells
    *
    * @param startIndex Start cell index
