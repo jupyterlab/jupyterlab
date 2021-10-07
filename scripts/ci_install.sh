@@ -15,6 +15,10 @@ fi
 # create jupyter base dir (needed for config retrieval)
 mkdir ~/.jupyter
 
+# Set up git config
+git config --global user.name foo
+git config --global user.email foo@bar.com
+
 # Install and enable the server extension
 pip install -q --upgrade pip --user
 pip --version
@@ -29,6 +33,7 @@ jupyter serverextension list 1>serverextensions 2>&1
 cat serverextensions
 cat serverextensions | grep -i "jupyterlab.*enabled"
 cat serverextensions | grep -i "jupyterlab.*OK"
+rm serverextensions
 
 if [[ $GROUP == integrity ]]; then
     pip install notebook==4.3.1

@@ -42,7 +42,7 @@ const URL_CONFIG = {
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['path', 'webpack'],
-  '@jupyterlab/builder': ['path'],
+  '@jupyterlab/builder': ['path', 'crypto'],
   '@jupyterlab/galata': ['fs', 'path'],
   '@jupyterlab/testutils': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
