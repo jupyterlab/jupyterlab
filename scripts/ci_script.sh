@@ -135,18 +135,19 @@ if [[ $GROUP == integrity3 ]]; then
 fi
 
 
-if [[ $GROUP == release_check ]]; then
-    jlpm run publish:js --dry-run
-    jlpm run prepare:python-release
-    ./scripts/release_test.sh
+if [[ $GROUP == release_test ]]; then
+    # bump the version
+    git checkout -b test HEAD
+    jlpm bumpversion next --force
 
-    # Prep for using verdaccio during publish
+    # Use verdaccio during publish
     node buildutils/lib/local-repository.js start
     npm whoami
-    pushd packages/application
-    npm version patch
-    npm publish
-    popd
+
+    jlpm run publish:js --yes
+    jlpm run prepare:python-release
+    cat jupyterlab/staging/package.json
+    ./scripts/release_test.sh
     node buildutils/lib/local-repository.js stop
 fi
 

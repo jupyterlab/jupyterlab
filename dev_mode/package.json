@@ -4,7 +4,7 @@
   "private": true,
   "license": "BSD-3-Clause",
   "scripts": {
-    "build": "npm run clean && webpack",
+    "build": "cat package.json && npm run clean && webpack",
     "build:dev": "npm run build",
     "build:prod": "webpack --config webpack.prod.config.js",
     "build:prod:minimize": "webpack --config webpack.prod.minimize.config.js",
