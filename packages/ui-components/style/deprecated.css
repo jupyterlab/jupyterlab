@@ -13,7 +13,6 @@
 
 :root {
   --jp-icon-add: url('icons/toolbar/add.svg');
-  --jp-icon-bug-dot: url('icons/toolbar/bug-dot.svg');
   --jp-icon-bug: url('icons/toolbar/bug.svg');
   --jp-icon-build: url('icons/sidebar/build.svg');
   --jp-icon-caret-down-empty-thin: url('icons/arrow/caret-down-empty-thin.svg');
@@ -86,7 +85,6 @@
   --jp-icon-terminal: url('icons/statusbar/terminal.svg');
   --jp-icon-text-editor: url('icons/filetype/text-editor.svg');
   --jp-icon-toc: url('icons/sidebar/toc.svg');
-  --jp-icon-trash: url('icons/sidebar/trash.svg');
   --jp-icon-tree-view: url('icons/toolbar/tree-view.svg');
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
   --jp-icon-undo: url('icons/toolbar/undo.svg');
@@ -98,9 +96,6 @@
 
 .jp-AddIcon {
   background-image: var(--jp-icon-add);
-}
-.jp-BugDotIcon {
-  background-image: var(--jp-icon-bug-dot);
 }
 .jp-BugIcon {
   background-image: var(--jp-icon-bug);
@@ -317,9 +312,6 @@
 }
 .jp-TocIcon {
   background-image: var(--jp-icon-toc);
-}
-.jp-TrashIcon {
-  background-image: var(--jp-icon-trash);
 }
 .jp-TreeViewIcon {
   background-image: var(--jp-icon-tree-view);
