@@ -457,6 +457,20 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ## v3.1
 
+## 3.1.18
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.17...c6dc40f16ea6fd1b5a58167dec6ed066de3304a9))
+
+### Bugs fixed
+
+- Backport PR #11249 on branch 3.1.x (Fix Webpack crypto handling) [#11252](https://github.com/jupyterlab/jupyterlab/pull/11252) ([@blink1073](https://github.com/blink1073))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-10-05&to=2021-10-07&type=c))
+
+[@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-10-05..2021-10-07&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2021-10-05..2021-10-07&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2021-10-05..2021-10-07&type=Issues)
+
 ## 3.1.17
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.1.16...a899a8b9da2216d91a2426c4956bc2e711a93ecd))
