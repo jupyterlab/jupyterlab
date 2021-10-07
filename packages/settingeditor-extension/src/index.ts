@@ -31,8 +31,6 @@ import { ITranslator } from '@jupyterlab/translation';
 import { saveIcon, settingsIcon, undoIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 
-// import { IDisposable } from '@lumino/disposable';
-
 /**
  * The command IDs used by the setting editor.
  */
@@ -181,5 +179,4 @@ function activate(
 
   return tracker;
 }
-
 export default plugin;

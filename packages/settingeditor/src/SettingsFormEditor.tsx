@@ -53,6 +53,7 @@ const CustomTemplate = (props: FieldTemplateProps) => {
     !schema.properties &&
     schema.type !== 'array' &&
     !JSONExt.deepEqual(formData, defaultValue);
+  console.log(schemaId);
   return (
     <div
       className={`form-group ${

@@ -10,7 +10,7 @@ import { ITranslator } from '@jupyterlab/translation';
 import { ISignal } from '@lumino/signaling';
 import React from 'react';
 import { SettingEditor } from './settingeditor';
-import { SettingsFormEditor } from './settingmetadataeditor';
+import { SettingsFormEditor } from './SettingsFormEditor';
 
 interface ISettingsPanelProps {
   /**
