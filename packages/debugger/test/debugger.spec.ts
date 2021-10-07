@@ -185,9 +185,9 @@ describe('Debugger', () => {
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Variables');
       });
-      it('should have three buttons', () => {
+      it('should have two buttons', () => {
         const buttons = toolbar.querySelectorAll('button');
-        expect(buttons.length).toBe(3);
+        expect(buttons.length).toBe(2);
         expect(buttons[0].title).toBe('Tree View');
         expect(buttons[1].title).toBe('Table View');
       });
@@ -210,9 +210,9 @@ describe('Debugger', () => {
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Callstack');
       });
-      it('should have seven buttons', () => {
+      it('should have six buttons', () => {
         const buttons = toolbar.querySelectorAll('button');
-        expect(buttons.length).toBe(7);
+        expect(buttons.length).toBe(6);
       });
     });
     describe('Breakpoints toolbar', () => {
@@ -233,9 +233,9 @@ describe('Debugger', () => {
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Breakpoints');
       });
-      it('should have two buttons', () => {
+      it('should have one button', () => {
         const buttons = toolbar.querySelectorAll('button');
-        expect(buttons.length).toBe(2);
+        expect(buttons.length).toBe(1);
       });
     });
     describe('Source toolbar', () => {
@@ -257,9 +257,9 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('Source');
       });
 
-      it('should have two buttons', () => {
+      it('should have one button', () => {
         const buttons = toolbar.querySelectorAll('button');
-        expect(buttons.length).toBe(2);
+        expect(buttons.length).toBe(1);
       });
     });
   });

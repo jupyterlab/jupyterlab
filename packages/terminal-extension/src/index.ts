@@ -172,7 +172,7 @@ function activate(
   addCommands(app, tracker, settingRegistry, translator, options);
 
   if (mainMenu) {
-    // Add "Terminal Theme" menu below "JupyterLab Themes" menu.
+    // Add "Terminal Theme" menu below "Theme" menu.
     const themeMenu = new Menu({ commands });
     themeMenu.title.label = trans._p('menu', 'Terminal Theme');
     themeMenu.addItem({

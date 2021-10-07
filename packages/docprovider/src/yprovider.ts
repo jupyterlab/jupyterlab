@@ -135,10 +135,6 @@ export class WebSocketProviderWithLocks
   setPath(newPath: string): void {
     if (newPath !== this._path) {
       this._path = newPath;
-      // The next time the provider connects, we should connect through a different server url
-      this.bcChannel =
-        this._serverUrl + '/' + this._contentType + ':' + this._path;
-      this.url = this.bcChannel;
       const encoder = encoding.createEncoder();
       encoding.write(encoder, 123);
       // writing a utf8 string to the encoder
@@ -152,6 +148,13 @@ export class WebSocketProviderWithLocks
         );
       }
       this._sendMessage(encoding.toUint8Array(encoder));
+      // prevent publishing messages to the old channel id.
+      this.disconnectBc();
+      // The next time the provider connects, we should connect through a different server url
+      this.bcChannel =
+        this._serverUrl + '/' + this._contentType + ':' + this._path;
+      this.url = this.bcChannel;
+      this.connectBc();
     }
   }
 

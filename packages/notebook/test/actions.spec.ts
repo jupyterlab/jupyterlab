@@ -62,7 +62,9 @@ describe('@jupyterlab/notebook', () => {
         contentFactory: utils.createNotebookFactory(),
         mimeTypeService: utils.mimeTypeService
       });
-      const model = new NotebookModel();
+      const model = new NotebookModel({
+        disableDocumentWideUndoRedo: true
+      });
       model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
       model.sharedModel.clearUndoHistory();

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/vdom-extension",
-  "version": "3.3.0-alpha.10",
+  "version": "3.3.0-alpha.12",
   "description": "JupyterLab - VDOM Renderer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,14 +32,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.3.0-alpha.10",
-    "@jupyterlab/apputils": "^3.3.0-alpha.10",
-    "@jupyterlab/docregistry": "^3.3.0-alpha.10",
-    "@jupyterlab/notebook": "^3.3.0-alpha.10",
-    "@jupyterlab/rendermime": "^3.3.0-alpha.10",
-    "@jupyterlab/translation": "^3.3.0-alpha.10",
-    "@jupyterlab/ui-components": "^3.3.0-alpha.10",
-    "@jupyterlab/vdom": "^3.3.0-alpha.10"
+    "@jupyterlab/application": "^3.3.0-alpha.12",
+    "@jupyterlab/apputils": "^3.3.0-alpha.12",
+    "@jupyterlab/docregistry": "^3.3.0-alpha.12",
+    "@jupyterlab/notebook": "^3.3.0-alpha.12",
+    "@jupyterlab/rendermime": "^3.3.0-alpha.12",
+    "@jupyterlab/translation": "^3.3.0-alpha.12",
+    "@jupyterlab/ui-components": "^3.3.0-alpha.12",
+    "@jupyterlab/vdom": "^3.3.0-alpha.12"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

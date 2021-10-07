@@ -55,6 +55,7 @@ export class Context<
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
+    this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
@@ -143,6 +144,17 @@ export class Context<
    */
   get disposed(): ISignal<this, void> {
     return this._disposed;
+  }
+
+  /**
+   * Configurable margin used to detect document modification conflicts, in milliseconds
+   */
+  get lastModifiedCheckMargin(): number {
+    return this._lastModifiedCheckMargin;
+  }
+
+  set lastModifiedCheckMargin(value: number) {
+    this._lastModifiedCheckMargin = value;
   }
 
   /**
@@ -648,9 +660,11 @@ export class Context<
    */
   private _revert(initializeModel: boolean = false): Promise<void> {
     const opts: Contents.IFetchOptions = {
-      format: this._factory.fileFormat,
       type: this._factory.contentType,
-      content: this._factory.fileFormat !== null
+      content: this._factory.fileFormat !== null,
+      ...(this._factory.fileFormat !== null
+        ? { format: this._factory.fileFormat }
+        : {})
     };
     const path = this._path;
     const model = this._model;
@@ -716,15 +730,17 @@ export class Context<
         }
         // We want to check last_modified (disk) > last_modified (client)
         // (our last save)
-        // In some cases the filesystem reports an inconsistent time,
-        // so we allow 0.5 seconds difference before complaining.
+        // In some cases the filesystem reports an inconsistent time, so we allow buffer when comparing.
+        const lastModifiedCheckMargin = this._lastModifiedCheckMargin;
         const ycontextModified = this._ycontext.get('last_modified');
         // prefer using the timestamp from ycontext because it is more up to date
         const modified = ycontextModified || this.contentsModel?.last_modified;
         const tClient = modified ? new Date(modified) : new Date();
         const tDisk = new Date(model.last_modified);
-        if (modified && tDisk.getTime() - tClient.getTime() > 500) {
-          // 500 ms
+        if (
+          modified &&
+          tDisk.getTime() - tClient.getTime() > lastModifiedCheckMargin
+        ) {
           return this._timeConflict(tClient, model, options);
         }
         return this._manager.contents.save(path, options);
@@ -887,6 +903,7 @@ or load the version on disk (revert)?`,
   private _provider: IDocumentProvider;
   private _ydoc: Y.Doc;
   private _ycontext: Y.Map<string>;
+  private _lastModifiedCheckMargin = 500;
 }
 
 /**
@@ -951,6 +968,11 @@ export namespace Context {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client
+     */
+    lastModifiedCheckMargin?: number;
   }
 }
 

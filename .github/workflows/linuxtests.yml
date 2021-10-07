@@ -13,10 +13,10 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
+        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
         python: [3.6, 3.8]
         include:
-          - group: release_check
+          - group: release_test
             upload-output: true
         exclude:
           - group: integrity
@@ -25,7 +25,7 @@ jobs:
             python: 3.6
           - group: integrity3
             python: 3.6
-          - group: release_check
+          - group: release_test
             python: 3.6
           - group: docs
             python: 3.6

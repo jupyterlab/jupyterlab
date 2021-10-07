@@ -851,6 +851,11 @@ export namespace DocumentRegistry {
     disposed: ISignal<this, void>;
 
     /**
+     * Configurable margin used to detect document modification conflicts, in milliseconds
+     */
+    lastModifiedCheckMargin: number;
+
+    /**
      * The data model for the document.
      */
     readonly model: T;

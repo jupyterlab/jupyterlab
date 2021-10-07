@@ -68,7 +68,8 @@ describe('apputils', () => {
             widgets: null,
             visible: false
           },
-          relativeSizes: null
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);
@@ -101,7 +102,8 @@ describe('apputils', () => {
             widgets: null,
             visible: false
           },
-          relativeSizes: null
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);
@@ -148,7 +150,8 @@ describe('apputils', () => {
             widgets: null,
             visible: false
           },
-          relativeSizes: null
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);
@@ -213,7 +216,8 @@ describe('apputils', () => {
             widgets: null,
             visible: false
           },
-          relativeSizes: null
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
         };
 
         await expect(restorer.save(dehydrated)).rejects.toBe(
@@ -246,7 +250,8 @@ describe('apputils', () => {
             widgets: null,
             visible: false
           },
-          relativeSizes: null
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);

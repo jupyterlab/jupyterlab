@@ -170,6 +170,10 @@ export const KernelMock = jest.fn<
     ...jest.requireActual('@jupyterlab/services'),
     ...options,
     ...model,
+    model,
+    serverSettings: ServerConnection.makeSettings(
+      options.serverSettings as Partial<ServerConnection.ISettings>
+    ),
     status: 'idle',
     spec: Promise.resolve(spec),
     dispose: jest.fn(),
@@ -235,7 +239,7 @@ export const KernelMock = jest.fn<
         KernelMessage.IExecuteReplyMsg
       >;
     })
-  } as any; // FIXME: fix the typing error this any cast is ignoring
+  };
   // Add signals.
   const iopubMessageSignal = new Signal<
     Kernel.IKernelConnection,
@@ -271,6 +275,7 @@ export const SessionConnectionMock = jest.fn<
   const name = kernel?.name || options.model?.kernel?.name || DEFAULT_NAME;
   kernel = kernel || new KernelMock({ model: { name } });
   const model = {
+    id: UUID.uuid4(),
     path: 'foo',
     type: 'notebook',
     name: 'foo',
@@ -279,11 +284,13 @@ export const SessionConnectionMock = jest.fn<
   };
   const thisObject: Session.ISessionConnection = {
     ...jest.requireActual('@jupyterlab/services'),
-    id: UUID.uuid4(),
     ...options,
     model,
     ...model,
     kernel,
+    serverSettings: ServerConnection.makeSettings(
+      options.serverSettings as Partial<ServerConnection.ISettings>
+    ),
     dispose: jest.fn(),
     changeKernel: jest.fn(partialModel => {
       return Private.changeKernel(kernel!, partialModel!);
@@ -304,7 +311,7 @@ export const SessionConnectionMock = jest.fn<
       propertyChangedSignal.emit('type');
       return Promise.resolve();
     })
-  } as any; // FIXME: fix the typing error this any cast is ignoring
+  };
   const disposedSignal = new Signal<Session.ISessionConnection, undefined>(
     thisObject
   );
@@ -388,10 +395,9 @@ export const SessionContextMock = jest.fn<
     path: session.path,
     type: session.type,
     name: session.name,
-    kernel: session.kernel,
     session,
     dispose: jest.fn(),
-    initialize: jest.fn(() => Promise.resolve()),
+    initialize: jest.fn(() => Promise.resolve(false)),
     ready: Promise.resolve(),
     changeKernel: jest.fn(partialModel => {
       return Private.changeKernel(
@@ -400,7 +406,7 @@ export const SessionContextMock = jest.fn<
       );
     }),
     shutdown: jest.fn(() => Promise.resolve())
-  } as any; // FIXME: fix the typing error this any cast is ignoring
+  };
 
   const disposedSignal = new Signal<ISessionContext, undefined>(thisObject);
 
@@ -826,7 +832,7 @@ namespace Private {
   export function changeKernel(
     kernel: Kernel.IKernelConnection,
     partialModel: Partial<Kernel.IModel>
-  ): Promise<Kernel.IModel> {
+  ): Promise<Kernel.IKernelConnection> {
     if (partialModel.id) {
       const kernelIdx = KERNEL_MODELS.findIndex(model => {
         return model.id === partialModel.id;

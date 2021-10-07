@@ -41,7 +41,8 @@ const notebookConfig = {
   renderCellOnIdle: true,
   observedTopMargin: '1000px',
   observedBottomMargin: '1000px',
-  maxNumberOutputs: 50
+  maxNumberOutputs: 50,
+  disableDocumentWideUndoRedo: true
 };
 
 const options: Notebook.IOptions = {

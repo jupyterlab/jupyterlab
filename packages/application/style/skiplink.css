@@ -4,6 +4,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-skiplink-wrapper {
+  overflow: visible;
+}
+
 .jp-skiplink {
   position: absolute;
   top: -100em;

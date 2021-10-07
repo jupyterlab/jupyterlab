@@ -33,6 +33,8 @@ import { Notebook } from './widget';
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
+const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
+
 export class KernelError extends Error {
   /**
    * Exception name
@@ -989,7 +991,18 @@ export namespace NotebookActions {
     const newCells = values.map(cell => {
       switch (cell.cell_type) {
         case 'code':
-          return model.contentFactory.createCodeCell({ cell });
+          if (
+            notebook.lastClipboardInteraction === 'cut' &&
+            typeof cell.id === 'string'
+          ) {
+            let cell_id = cell.id as string;
+            return model.contentFactory.createCodeCell({
+              id: cell_id,
+              cell: cell
+            });
+          } else {
+            return model.contentFactory.createCodeCell({ cell });
+          }
         case 'markdown':
           return model.contentFactory.createMarkdownCell({ cell });
         default:
@@ -1043,6 +1056,7 @@ export namespace NotebookActions {
 
     notebook.activeCellIndex += newCells.length;
     notebook.deselectAll();
+    notebook.lastClipboardInteraction = 'paste';
     Private.handleState(notebook, state);
   }
 
@@ -1309,6 +1323,24 @@ export namespace NotebookActions {
       }
     });
     Private.handleState(notebook, state, true);
+  }
+
+  /**
+   * Render side-by-side.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function renderSideBySide(notebook: Notebook): void {
+    notebook.node.classList.add(SIDE_BY_SIDE_CLASS);
+  }
+
+  /**
+   * Render not side-by-side.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function renderNotSideBySide(notebook: Notebook): void {
+    notebook.node.classList.remove(SIDE_BY_SIDE_CLASS);
   }
 
   /**
@@ -1943,6 +1975,7 @@ namespace Private {
           notebook,
           lastCell: notebook.widgets[lastIndex]
         });
+
         notebook.update();
 
         return false;
@@ -2115,6 +2148,11 @@ namespace Private {
       deleteCells(notebook);
     } else {
       notebook.deselectAll();
+    }
+    if (cut) {
+      notebook.lastClipboardInteraction = 'cut';
+    } else {
+      notebook.lastClipboardInteraction = 'copy';
     }
     handleState(notebook, state);
   }

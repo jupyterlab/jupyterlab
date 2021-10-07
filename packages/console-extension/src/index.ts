@@ -22,7 +22,6 @@ import {
 } from '@jupyterlab/apputils';
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import {
@@ -192,15 +191,10 @@ async function activateConsole(
           return;
         }
         disposables = new DisposableSet();
-        const baseUrl = PageConfig.getBaseUrl();
         for (const name in specs.kernelspecs) {
           const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
           let kernelIconUrl = spec.resources['logo-64x64'];
-          if (kernelIconUrl) {
-            const index = kernelIconUrl.indexOf('kernelspecs');
-            kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
-          }
           disposables.add(
             launcher.add({
               command: CommandIDs.create,
@@ -374,22 +368,41 @@ async function activateConsole(
   const pluginId = '@jupyterlab/console-extension:tracker';
   let interactionMode: string;
   let promptCellConfig: JSONObject;
-  async function updateSettings() {
+
+  /**
+   * Update settings for one console or all consoles.
+   *
+   * @param panel Optional - single console to update.
+   */
+  async function updateSettings(panel?: ConsolePanel) {
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
     promptCellConfig = (await settingRegistry.get(pluginId, 'promptCellConfig'))
       .composite as JSONObject;
-    tracker.forEach(widget => {
+
+    const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
       setOption(widget.console.promptCell?.editor, promptCellConfig);
-    });
+    };
+
+    if (panel) {
+      setWidgetOptions(panel);
+    } else {
+      tracker.forEach(setWidgetOptions);
+    }
   }
+
   settingRegistry.pluginChanged.connect((sender, plugin) => {
     if (plugin === pluginId) {
       void updateSettings();
     }
   });
   await updateSettings();
+
+  // Apply settings when a console is created.
+  tracker.widgetAdded.connect((sender, panel) => {
+    void updateSettings(panel);
+  });
 
   commands.addCommand(CommandIDs.autoClosingBrackets, {
     execute: async args => {

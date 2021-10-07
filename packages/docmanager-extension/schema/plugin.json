@@ -117,6 +117,12 @@
       "description": "Length of save interval in seconds",
       "default": 120
     },
+    "lastModifiedCheckMargin": {
+      "type": "number",
+      "title": "Margin for last modified timestamp check",
+      "description": "Max acceptable difference, in milliseconds, between last modified timestamps on disk and client",
+      "default": 500
+    },
     "defaultViewers": {
       "type": "object",
       "title": "Default Viewers",

@@ -14,6 +14,7 @@ import {
   createToolbarFactory,
   Dialog,
   ICommandPalette,
+  InputDialog,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
@@ -24,7 +25,7 @@ import {
 } from '@jupyterlab/apputils';
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -227,6 +228,10 @@ namespace CommandIDs {
 
   export const showAllOutputs = 'notebook:show-all-cell-outputs';
 
+  export const toggleRenderSideBySide = 'notebook:toggle-render-side-by-side';
+
+  export const setSideBySideRatio = 'notebook:set-side-by-side-ratio';
+
   export const enableOutputScrolling = 'notebook:enable-output-scrolling';
 
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
@@ -389,20 +394,16 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
           download: true,
           path: current.context.path
         });
-        const child = window.open('', '_blank');
         const { context } = current;
 
-        if (child) {
-          child.opener = null;
-        }
         if (context.model.dirty && !context.model.readOnly) {
           return context.save().then(() => {
-            child?.location.assign(url);
+            window.open(url, '_blank', 'noopener');
           });
         }
 
         return new Promise<void>(resolve => {
-          child?.location.assign(url);
+          window.open(url, '_blank', 'noopener');
           resolve(undefined);
         });
       },
@@ -1155,7 +1156,11 @@ function activateNotebookHandler(
   }
 
   const registry = app.docRegistry;
-  registry.addModelFactory(new NotebookModelFactory({}));
+  const modelFactory = new NotebookModelFactory({
+    disableDocumentWideUndoRedo:
+      factory.notebookConfig.disableDocumentWideUndoRedo
+  });
+  registry.addModelFactory(modelFactory);
 
   addCommands(app, tracker, translator, sessionDialogs);
 
@@ -1223,10 +1228,17 @@ function activateNotebookHandler(
       observedTopMargin: settings.get('observedTopMargin').composite as string,
       observedBottomMargin: settings.get('observedBottomMargin')
         .composite as string,
-      maxNumberOutputs: settings.get('maxNumberOutputs').composite as number
+      maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
+      disableDocumentWideUndoRedo: settings.get(
+        'experimentalDisableDocumentWideUndoRedo'
+      ).composite as boolean
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
+
+    modelFactory.disableDocumentWideUndoRedo = settings.get(
+      'experimentalDisableDocumentWideUndoRedo'
+    ).composite as boolean;
 
     updateTracker({
       editorConfig: factory.editorConfig,
@@ -1295,16 +1307,11 @@ function activateNotebookHandler(
           return;
         }
         disposables = new DisposableSet();
-        const baseUrl = PageConfig.getBaseUrl();
 
         for (const name in specs.kernelspecs) {
           const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
           let kernelIconUrl = spec.resources['logo-64x64'];
-          if (kernelIconUrl) {
-            const index = kernelIconUrl.indexOf('kernelspecs');
-            kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
-          }
           disposables.add(
             launcher.add({
               command: CommandIDs.createNew,
@@ -2185,6 +2192,50 @@ function addCommands(
     },
     isEnabled
   });
+
+  commands.addCommand(CommandIDs.toggleRenderSideBySide, {
+    label: trans.__('Render Side-by-side'),
+    execute: args => {
+      Private.renderSideBySide = !Private.renderSideBySide;
+      tracker.forEach(wideget => {
+        if (wideget) {
+          if (Private.renderSideBySide) {
+            return NotebookActions.renderSideBySide(wideget.content);
+          } else {
+            return NotebookActions.renderNotSideBySide(wideget.content);
+          }
+        }
+      });
+      tracker.currentChanged.connect(() => {
+        if (Private.renderSideBySide && tracker.currentWidget) {
+          return NotebookActions.renderSideBySide(
+            tracker.currentWidget.content
+          );
+        }
+      });
+    },
+    isToggled: () => Private.renderSideBySide,
+    isEnabled
+  });
+
+  commands.addCommand(CommandIDs.setSideBySideRatio, {
+    label: trans.__('Set side-by-side ratio'),
+    execute: args => {
+      InputDialog.getNumber({
+        title: trans.__('Width of the output in side-by-side mode'),
+        value: 1
+      })
+        .then(result => {
+          if (result.value) {
+            document.documentElement.style.setProperty(
+              '--jp-side-by-side-output-size',
+              `${result.value}fr`
+            );
+          }
+        })
+        .catch(console.error);
+    }
+  });
   commands.addCommand(CommandIDs.showAllOutputs, {
     label: trans.__('Expand All Outputs'),
     execute: args => {
@@ -2360,6 +2411,8 @@ function populatePalette(
     CommandIDs.showOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
+    CommandIDs.toggleRenderSideBySide,
+    CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
     CommandIDs.disableOutputScrolling
   ].forEach(command => {
@@ -2722,4 +2775,6 @@ namespace Private {
       translator?: ITranslator;
     }
   }
+
+  export let renderSideBySide = false;
 }

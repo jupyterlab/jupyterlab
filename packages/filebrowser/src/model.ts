@@ -297,7 +297,11 @@ export class FileBrowserModel implements IDisposable {
       .catch(error => {
         this._pendingPath = null;
         this._pending = null;
-        if (error.response && error.response.status === 404) {
+        if (
+          error.response &&
+          error.response.status === 404 &&
+          newValue !== '/'
+        ) {
           error.message = this._trans.__(
             'Directory not found: "%1"',
             this._model.path
@@ -714,12 +718,57 @@ export namespace FileBrowserModel {
 }
 
 /**
+ * File browser model where hidden files inclusion can be toggled on/off.
+ */
+export class TogglableHiddenFileBrowserModel extends FileBrowserModel {
+  constructor(options: TogglableHiddenFileBrowserModel.IOptions) {
+    super(options);
+    this._includeHiddenFiles = options.includeHiddenFiles || false;
+  }
+
+  /**
+   * Create an iterator over the model's items filtering hidden files out if necessary.
+   *
+   * @returns A new iterator over the model's items.
+   */
+  items(): IIterator<Contents.IModel> {
+    return this._includeHiddenFiles
+      ? super.items()
+      : filter(super.items(), value => !value.name.startsWith('.'));
+  }
+
+  /**
+   * Set the inclusion of hidden files. Triggers a model refresh.
+   */
+  showHiddenFiles(value: boolean): void {
+    this._includeHiddenFiles = value;
+    void this.refresh();
+  }
+
+  private _includeHiddenFiles: boolean;
+}
+
+/**
+ * Namespace for the togglable hidden file browser model
+ */
+export namespace TogglableHiddenFileBrowserModel {
+  /**
+   * Constructor options
+   */
+  export interface IOptions extends FileBrowserModel.IOptions {
+    /**
+     * Whether hidden files should be included in the items.
+     */
+    includeHiddenFiles?: boolean;
+  }
+}
+
+/**
  * File browser model with optional filter on element.
  */
-export class FilterFileBrowserModel extends FileBrowserModel {
+export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   constructor(options: FilterFileBrowserModel.IOptions) {
     super(options);
-    this.translator = options.translator || nullTranslator;
     this._filter = options.filter ? options.filter : model => true;
   }
 
@@ -753,7 +802,7 @@ export namespace FilterFileBrowserModel {
   /**
    * Constructor options
    */
-  export interface IOptions extends FileBrowserModel.IOptions {
+  export interface IOptions extends TogglableHiddenFileBrowserModel.IOptions {
     /**
      * Filter function on file browser item model
      */

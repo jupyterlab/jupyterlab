@@ -208,6 +208,18 @@ export class FileBrowser extends Widget {
   }
 
   /**
+   * Whether to show hidden files
+   */
+  get showHiddenFiles(): boolean {
+    return this._showHiddenFiles;
+  }
+
+  set showHiddenFiles(value: boolean) {
+    this.model.showHiddenFiles(value);
+    this._showHiddenFiles = value;
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
@@ -422,6 +434,7 @@ export class FileBrowser extends Widget {
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
+  private _showHiddenFiles: boolean = false;
 }
 
 /**
