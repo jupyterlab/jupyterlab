@@ -42,7 +42,7 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
       if (this._dataHash !== hash) {
         if (this.content.layout) {
           this.content.widgets.forEach(w => {
-            this.content.layout?.removeWidget(w);
+            this.content.layout!.removeWidget(w);
           });
         }
 
