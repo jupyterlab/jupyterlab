@@ -52,7 +52,7 @@ jobs:
               }
 
               // FIXME core.exportVariable('OLD_REF_SHA', stdout.trim());
-              core.exportVariable('OLD_REF_SHA', 'd1f6066145a125f48dcd531d97fccf7dc78f5c97');
+              core.exportVariable('OLD_REF_SHA', 'a956fe4c57399f73e673e9e723c999586821d90b');
               core.exportVariable('NEW_REF_SHA', pull_request.head.sha);
               core.exportVariable('PULL_REQUEST_ID', pull_request.number);
             });
