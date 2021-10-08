@@ -1144,7 +1144,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       )
     });
     console.warn(
-      'Please paste the following to https://github.com/jupyterlab/jupyterlab/issues/2951'
+      'If you are able and willing to publicly share the text or code in your editor, you can help us debug the "Code Editor out of Sync" message by pasting the following to the public issue at https://github.com/jupyterlab/jupyterlab/issues/2951. Please note that the data below includes the text/code in your editor.'
     );
     console.warn(
       JSON.stringify({
