@@ -116,8 +116,6 @@ test.describe('Benchmark', () => {
         await page.waitForSelector('[role="main"] >> .jp-SpinnerContent', {
           state: 'hidden'
         });
-
-        await page.waitForTimeout(500);
       });
 
       // Check the notebook is correctly opened
