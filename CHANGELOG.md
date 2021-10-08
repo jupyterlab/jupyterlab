@@ -12,6 +12,10 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a12...e35f100082cbfed37eeca587d1b87ae79ef418ee))
 
+### Bugs fixed
+
+-  Fix Webpack crypto handling [#11249](https://github.com/jupyterlab/jupyterlab/pull/11249) ([@blink1073](https://github.com/blink1073))
+
 ### Maintenance and upkeep improvements
 
 - Add documentation label to markdown files [#11262](https://github.com/jupyterlab/jupyterlab/pull/11262) ([@blink1073](https://github.com/blink1073))
