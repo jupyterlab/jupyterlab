@@ -1,17 +1,14 @@
 name: Benchmark Tests
 
 on:
-  schedule:
-    - cron: '12 1 * * 0'
+  # schedule:
+  #   - cron: '12 1 * * 0'
   pull_request_review:
-    # types:
-    #   - submitted
 
 jobs:
   test:
     name: Execute benchmark tests
-    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review')
-    # if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && github.event.pull_request_review.state == 'APPROVED')
+    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && (github.event.pull_request_review.state == 'approved' || contains(github.event.pull_request_review.body, 'please run benchmark'))
 
     runs-on: ubuntu-20.04
 
@@ -51,8 +48,7 @@ jobs:
                 return;
               }
 
-              // FIXME core.exportVariable('OLD_REF_SHA', stdout.trim());
-              core.exportVariable('OLD_REF_SHA', 'a956fe4c57399f73e673e9e723c999586821d90b');
+              core.exportVariable('OLD_REF_SHA', stdout.trim());
               core.exportVariable('NEW_REF_SHA', pull_request.head.sha);
               core.exportVariable('PULL_REQUEST_ID', pull_request.number);
             });

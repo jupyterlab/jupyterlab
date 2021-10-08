@@ -9,6 +9,7 @@ import { Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
 import fetch from 'node-fetch';
 import { ContentsHelper } from './contents';
+import { PerformanceHelper } from './helpers';
 import {
   IJupyterLabPage,
   IJupyterLabPageFixture,
@@ -221,6 +222,16 @@ export namespace galata {
       tmpPath,
       waitForApplication
     );
+  }
+
+  /**
+   * Create a new performance helper
+   *
+   * @param page Playwright page model
+   * @returns Performance helper
+   */
+  export function newPerformanceHelper(page: Page): PerformanceHelper {
+    return new PerformanceHelper(page);
   }
 
   /**
