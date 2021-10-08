@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     name: Execute benchmark tests
-    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && (github.event.pull_request_review.state == 'approved' || contains(github.event.pull_request_review.body, 'please run benchmark'))
+    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && (github.event.review.state == 'approved' || contains(github.event.review.body, 'please run benchmark')))
 
     runs-on: ubuntu-20.04
 
