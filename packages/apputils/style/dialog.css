@@ -47,6 +47,36 @@
   overflow: visible;
 }
 
+button.jp-Dialog-button:focus {
+  outline: 1px solid var(--jp-brand-color1);
+  outline-offset: 4px;
+  -moz-outline-radius: 0px;
+}
+
+button.jp-Dialog-button:focus::-moz-focus-inner {
+  border: 0;
+}
+
+button.jp-Dialog-button.jp-mod-styled.jp-mod-accept:focus,
+button.jp-Dialog-button.jp-mod-styled.jp-mod-warn:focus,
+button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
+  outline-offset: 4px;
+  -moz-outline-radius: 0px;
+}
+
+button.jp-Dialog-button.jp-mod-styled.jp-mod-accept:focus {
+  outline: 1px solid
+    var(--jp-button-accept-normal-color, var(--jp-brand-color1));
+}
+
+button.jp-Dialog-button.jp-mod-styled.jp-mod-warn:focus {
+  outline: 1px solid var(--jp-button-warn-normal-color, var(--jp-error-color1));
+}
+
+button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
+  outline: 1px solid var(--jp-button-reject-normal-color, var(--md-grey-600));
+}
+
 button.jp-Dialog-close-button {
   padding: 0;
   height: 100%;

@@ -412,11 +412,11 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-button-accept-hover-color: var(--md-blue-800);
   --jp-button-accept-active-color: var(--md-blue-900);
 
-  --jp-button-reject-normal-color: var(--md-red-700);
-  --jp-button-reject-hover-color: var(--md-red-800);
-  --jp-button-reject-active-color: var(--md-red-900);
+  --jp-button-warn-normal-color: var(--md-red-700);
+  --jp-button-warn-hover-color: var(--md-red-800);
+  --jp-button-warn-active-color: var(--md-red-900);
 
-  --jp-button-warn-normal-color: var(--md-grey-600);
-  --jp-button-warn-hover-color: var(--md-grey-700);
-  --jp-button-warn-active-color: var(--md-grey-800);
+  --jp-button-reject-normal-color: var(--md-grey-600);
+  --jp-button-reject-hover-color: var(--md-grey-700);
+  --jp-button-reject-active-color: var(--md-grey-800);
 }
