@@ -117,7 +117,7 @@ test.describe('Benchmark', () => {
           state: 'hidden'
         });
 
-        await page.waitForTimeout(500);
+        // await page.waitForTimeout(500);
       });
 
       // Check the notebook is correctly opened
