@@ -14,7 +14,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ### Bugs fixed
 
--  Fix Webpack crypto handling [#11249](https://github.com/jupyterlab/jupyterlab/pull/11249) ([@blink1073](https://github.com/blink1073))
+- Fix Webpack crypto handling [#11249](https://github.com/jupyterlab/jupyterlab/pull/11249) ([@blink1073](https://github.com/blink1073))
 
 ### Maintenance and upkeep improvements
 
