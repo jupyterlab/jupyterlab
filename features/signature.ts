@@ -180,9 +180,11 @@ export class SignatureCM extends CodeMirrorIntegration {
   }
 
   onBlur(virtualEditor: CodeMirrorVirtualEditor, event: FocusEvent) {
+    // hide unless the focus moved to the signature itself
+    // (allowing user to select/copy from signature)
     if (
       this.isSignatureShown() &&
-      (event.target as Element).closest('.' + CLASS_NAME) !== null
+      (event.target as Element).closest('.' + CLASS_NAME) === null
     ) {
       this._hideTooltip();
     }
