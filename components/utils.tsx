@@ -1,5 +1,5 @@
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 import React from 'react';
 
 import { WidgetAdapter } from '../adapters/adapter';
@@ -8,9 +8,12 @@ import { VirtualDocument } from '../virtual/document';
 export function getBreadcrumbs(
   document: VirtualDocument,
   adapter: WidgetAdapter<IDocumentWidget>,
-  trans: TranslationBundle,
+  trans?: TranslationBundle,
   collapse = true
 ): JSX.Element[] {
+  if (!trans) {
+    trans = nullTranslator.load('');
+  }
   return document.ancestry.map((document: VirtualDocument) => {
     if (!document.parent) {
       let path = document.path;
@@ -62,6 +65,17 @@ export function getBreadcrumbs(
     }
     return <span key={document.uri}>{document.language}</span>;
   });
+}
+
+/**
+ * @deprecated please use getBreadcrumbs instead; `get_breadcrumbs` will be removed in 4.0
+ */
+export function get_breadcrumbs(
+  document: VirtualDocument,
+  adapter: WidgetAdapter<IDocumentWidget>,
+  collapse = true
+) {
+  return getBreadcrumbs(document, adapter, null, collapse);
 }
 
 export function focus_on(node: HTMLElement) {

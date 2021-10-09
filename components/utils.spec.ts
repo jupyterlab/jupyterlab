@@ -20,7 +20,7 @@ function create_dummy_document(options: Partial<VirtualDocument.IOptions>) {
   });
 }
 
-describe('get_breadcrumbs', () => {
+describe('getBreadcrumbs', () => {
   const trans = nullTranslator.load('jupyterlab_lsp');
   it('should collapse long paths', () => {
     let document = create_dummy_document({
