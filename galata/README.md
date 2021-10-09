@@ -379,7 +379,7 @@ test.describe.serial('Table of Contents', () => {
 
 ## Benchmark
 
-Benchmark of JupyterLab is done automatically using Playwright. The actions measured are:
+Benchmark of JupyterLab is done using Playwright. The actions measured are:
 
 - Opening a file
 - Switching from the file to a simple text file
@@ -387,6 +387,12 @@ Benchmark of JupyterLab is done automatically using Playwright. The actions meas
 - Closing the file
 
 Two files are tested: a notebook with many code cells and another with many markdown cells.
+
+The test is run on the CI by comparing the result in the commit at which a PR branch started and the PR branch head on
+the same CI job to ensure using the same hardware.  
+The benchmark job is triggered on:
+- Approved PR review
+- PR review that contains the sentence `please run benchmark`
 
 The tests are located in the subfolder [test/benchmark](./test/benchmark). And they can be
 executed with the following command:
@@ -402,8 +408,8 @@ A special report will be generated in the folder `benchmark-results` that will c
 - `lab-benchmark.png`: A comparison of execution time distribution
 - `lab-benchmark.vl.json`: The [_Vega-Lite_](https://vega.github.io/vega-lite) description used to produce the PNG file.
 
-The reference, tagged _expected_, is stored in [`lab-benchmark-expected.json`](lab-benchmark-expected.json). It can be
-updated using the `-u` option of Playwright; i.e. `jlpm run test:benchmark -u`.
+The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
+created using the `-u` option of Playwright; i.e. `jlpm run test:benchmark -u`.
 
 ### Benchmark parameters
 
