@@ -156,7 +156,7 @@ export class HoverCM extends CodeMirrorIntegration {
       return (
         line >= range.start.line &&
         line <= range.end.line &&
-        // need to be non-overlapping see https://github.com/krassowski/jupyterlab-lsp/issues/628
+        // need to be non-overlapping see https://github.com/jupyter-lsp/jupyterlab-lsp/issues/628
         (line != range.start.line || ch > range.start.character) &&
         (line != range.end.line || ch <= range.end.character)
       );

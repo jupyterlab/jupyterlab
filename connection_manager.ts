@@ -404,7 +404,7 @@ export namespace DocumentConnectionManager {
       throw `No language server installed for language ${language}`;
     }
 
-    // workaround url-parse bug(s) (see https://github.com/krassowski/jupyterlab-lsp/issues/595)
+    // workaround url-parse bug(s) (see https://github.com/jupyter-lsp/jupyterlab-lsp/issues/595)
     let documentUri = URLExt.join(baseUri, virtual_document.uri);
     if (
       !documentUri.startsWith('file:///') &&
