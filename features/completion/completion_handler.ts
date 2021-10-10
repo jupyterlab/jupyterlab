@@ -260,7 +260,9 @@ export class LSPConnector
         // TODO: should it be cashed?
         const kernelLanguage = await this._kernel_language();
 
-        if (document.language === kernelLanguage) {
+        if (
+          document.language.toLocaleLowerCase() === kernelLanguage.toLowerCase()
+        ) {
           let default_kernel_promise = this._kernel_connector.fetch(request);
           let kernel_promise: Promise<CompletionHandler.IReply>;
 
