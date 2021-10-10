@@ -23,7 +23,8 @@ import { ILSPLogConsole } from '../tokens';
 import { DefaultMap, uris_equal } from '../utils';
 import {
   CodeMirrorHandler,
-  CodeMirrorVirtualEditor
+  CodeMirrorVirtualEditor,
+  EventName as CodeMirrorEventName
 } from '../virtual/codemirror_editor';
 import { VirtualDocument } from '../virtual/document';
 import { IEditorChange } from '../virtual/editor';
@@ -70,22 +71,6 @@ interface IHTMLEventMap<
   ): this;
   get<E extends T>(k: E): (event: HTMLElementEventMap[E]) => void;
 }
-
-type CodeMirrorEventName =
-  | CodeMirror.DOMEvent
-  | 'change'
-  | 'changes'
-  | 'beforeChange'
-  | 'cursorActivity'
-  | 'beforeSelectionChange'
-  | 'viewportChange'
-  | 'gutterClick'
-  | 'focus'
-  | 'blur'
-  | 'scroll'
-  | 'update'
-  | 'renderLine'
-  | 'overwriteToggle';
 
 /**
  * One feature of each type exists per VirtualDocument

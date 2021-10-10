@@ -1,6 +1,6 @@
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { expect } from 'chai';
-import type { TextMarker, TextMarkerOptions } from 'codemirror';
+import type { MarkerRange, TextMarker, TextMarkerOptions } from 'codemirror';
 import type * as lsProtocol from 'vscode-languageserver-protocol';
 
 import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
@@ -305,7 +305,7 @@ describe('Diagnostics', () => {
       expect(marks_cell_1.length).to.equal(0);
       expect(marks_cell_2.length).to.equal(1);
 
-      let mark = marks_cell_2[0];
+      let mark = marks_cell_2[0] as TextMarker<MarkerRange>;
 
       let mark_position = mark.find();
 
