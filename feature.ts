@@ -56,6 +56,7 @@ export interface IFeatureCommand {
 export interface IFeatureSettings<T> {
   readonly composite: T;
   readonly changed: Signal<IFeatureSettings<T>, void>;
+  readonly ready?: Promise<void>;
 
   set(setting: keyof T, value: any): void;
 }
@@ -63,6 +64,7 @@ export interface IFeatureSettings<T> {
 export class FeatureSettings<T> implements IFeatureSettings<T> {
   protected settings: ISettingRegistry.ISettings;
   public changed: Signal<FeatureSettings<T>, void>;
+  public ready: Promise<void>;
 
   constructor(protected settingRegistry: ISettingRegistry, featureID: string) {
     this.changed = new Signal(this);
@@ -71,17 +73,20 @@ export class FeatureSettings<T> implements IFeatureSettings<T> {
         `${featureID} settings schema could not be found and was not loaded`
       );
     } else {
-      settingRegistry
-        .load(featureID)
-        .then(settings => {
-          this.settings = settings;
-          this.changed.emit();
-          settings.changed.connect(() => {
+      this.ready = new Promise(accept => {
+        settingRegistry
+          .load(featureID)
+          .then(settings => {
             this.settings = settings;
+            accept();
             this.changed.emit();
-          });
-        })
-        .catch(console.warn);
+            settings.changed.connect(() => {
+              this.settings = settings;
+              this.changed.emit();
+            });
+          })
+          .catch(console.warn);
+      });
     }
   }
 

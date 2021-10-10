@@ -107,7 +107,14 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     });
     this.renderer.activeChanged.connect(this.active_completion_changed, this);
     this.renderer.itemShown.connect(this.resolve_and_update, this);
-    adapterManager.adapterChanged.connect(this.swap_adapter, this);
+    // TODO: figure out a better way to disable lab integration elements (postpone initialization?)
+    settings.ready
+      .then(() => {
+        if (!settings.composite.disable) {
+          adapterManager.adapterChanged.connect(this.swap_adapter, this);
+        }
+      })
+      .catch(console.warn);
     settings.changed.connect(() => {
       completionThemeManager.set_theme(this.settings.composite.theme);
       completionThemeManager.set_icons_overrides(
