@@ -1,11 +1,11 @@
 import { IScopedCodeOverride } from '../../overrides/tokens';
 
 function escape(x: string) {
-  return x.replace(/"/g, '\\"');
+  return x.replace(/(["\\])/g, '\\$1');
 }
 
 function unescape(x: string) {
-  return x.replace(/\\"/g, '"');
+  return x.replace(/\\([\\"])/g, '$1');
 }
 
 function empty_or_escaped(x: string) {
