@@ -194,11 +194,13 @@ export class LSPConnector
     if (this.trigger_kind == AdditionalCompletionTriggerKinds.AutoInvoked) {
       if (this.suppress_continuous_hinting_in.indexOf(token.type) !== -1) {
         this.console.debug('Suppressing completer auto-invoke in', token.type);
+        this.trigger_kind = CompletionTriggerKind.Invoked;
         return;
       }
     } else if (this.trigger_kind == CompletionTriggerKind.TriggerCharacter) {
       if (this.suppress_trigger_character_in.indexOf(token.type) !== -1) {
         this.console.debug('Suppressing completer auto-invoke in', token.type);
+        this.trigger_kind = CompletionTriggerKind.Invoked;
         return;
       }
     }
