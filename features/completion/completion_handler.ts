@@ -423,7 +423,7 @@ export class LSPConnector
     });
     this.console.debug('Transformed');
     // required to make the repetitive trigger characters like :: or ::: work for R with R languageserver,
-    // see https://github.com/krassowski/jupyterlab-lsp/issues/436
+    // see https://github.com/jupyter-lsp/jupyterlab-lsp/issues/436
     let prefix_offset = token.value.length;
     // completion of dictionaries for Python with jedi-language-server was
     // causing an issue for dic['<tab>'] case; to avoid this let's make

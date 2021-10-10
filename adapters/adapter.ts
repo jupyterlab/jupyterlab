@@ -291,7 +291,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       // note: must only be send to the appropriate connections as
       // some servers (Julia) break if they receive save notification
       // for a document that was not opened before, see:
-      // https://github.com/krassowski/jupyterlab-lsp/issues/490
+      // https://github.com/jupyter-lsp/jupyterlab-lsp/issues/490
       const documents_to_save = [this.virtual_editor.virtual_document];
 
       for (let virtual_document of documents_to_save) {

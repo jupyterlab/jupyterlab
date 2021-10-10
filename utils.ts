@@ -143,7 +143,7 @@ export function is_win_path(uri: string) {
  */
 export function normalize_win_path(uri: string) {
   // Pyright encodes colon on Windows, see:
-  // https://github.com/krassowski/jupyterlab-lsp/pull/587#issuecomment-844225253
+  // https://github.com/jupyter-lsp/jupyterlab-lsp/pull/587#issuecomment-844225253
   return uri.replace(RE_PATH_ANCHOR, it =>
     it.replace('%3A', ':').toLowerCase()
   );

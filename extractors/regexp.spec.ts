@@ -29,7 +29,7 @@ print(x)`;
 
 describe('getIndexOfCaptureGroup', () => {
   it('extracts index of a captured group', () => {
-    // tests for https://github.com/krassowski/jupyterlab-lsp/issues/559
+    // tests for https://github.com/jupyter-lsp/jupyterlab-lsp/issues/559
     let result = getIndexOfCaptureGroup(
       new RegExp('^%%(python|python2|python3|pypy)( .*?)?\\n([^]*)'),
       '%%python\nh',
@@ -108,7 +108,7 @@ describe('RegExpForeignCodeExtractor', () => {
 
       let result = results[0];
 
-      // test against https://github.com/krassowski/jupyterlab-lsp/issues/559
+      // test against https://github.com/jupyter-lsp/jupyterlab-lsp/issues/559
       expect(result.host_code).to.equal(PYTHON_CELL_MAGIC_WITH_H);
       expect(result.foreign_code).to.equal('h');
 
