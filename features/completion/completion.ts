@@ -324,7 +324,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       this.current_index
     ];
 
-    if (!item || active.insertText != item.insertText) {
+    if (!item || !active || active.insertText != item.insertText) {
       return;
     }
 
