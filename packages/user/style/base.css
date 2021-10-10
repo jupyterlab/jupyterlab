@@ -2,3 +2,46 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+.jp-MenuBar-anonymousIcon {
+  width: 25px;
+  height: 25px;
+  margin: auto;
+  margin-right: 4px;
+  border-radius: 90px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.jp-MenuBar-anonymousIcon span {
+  margin: auto;
+  text-align: center;
+  vertical-align: middle;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-MenuBar-imageIcon {
+  width: 25px;
+  height: 25px;
+  margin: auto;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  border-radius: 90px;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.jp-MenuBar-imageIcon img {
+  width: 25px;
+  height: 25px;
+  border-radius: 90px;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-UserMenu-caretDownIcon {
+  height: 22px;
+  position: relative;
+  top: 15%;
+}

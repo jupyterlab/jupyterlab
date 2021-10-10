@@ -3,10 +3,13 @@
 
 import { Dialog, ReactWidget } from '@jupyterlab/apputils';
 import { IStateDB } from '@jupyterlab/statedb';
-import { userIcon } from '@jupyterlab/ui-components';
+import { caretDownIcon, userIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { ISignal, Signal } from '@lumino/signaling';
 import { JSONObject, ReadonlyPartialJSONObject, UUID } from '@lumino/coreutils';
+import { Menu, MenuBar } from '@lumino/widgets';
+import { h, VirtualElement } from '@lumino/virtualdom';
+
 import * as React from 'react';
 
 import { IUser, USER } from './tokens';
@@ -283,11 +286,88 @@ export namespace User {
   };
 }
 
+export class RendererUserMenu extends MenuBar.Renderer {
+  private _user: IUser;
+
+  constructor(user: IUser) {
+    super();
+    this._user = user;
+  }
+
+  /**
+   * Render the virtual element for a menu bar item.
+   *
+   * @param data - The data to use for rendering the item.
+   *
+   * @returns A virtual element representing the item.
+   */
+  renderItem(data: MenuBar.IRenderData): VirtualElement {
+    let className = this.createItemClass(data);
+    let dataset = this.createItemDataset(data);
+    let aria = this.createItemARIA(data);
+    return h.li(
+      { className, dataset, tabindex: '0', onfocus: data.onfocus, ...aria },
+      this._createUserIcon(),
+      this.renderLabel(data),
+      this.renderIcon(data)
+    );
+  }
+
+  private _createUserIcon(): VirtualElement {
+    if (this._user.avatar) {
+      return h.div(
+        {
+          className:
+            'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-imageIcon'
+        },
+        h.img({ src: this._user.avatar })
+      );
+    } else
+      return h.div(
+        {
+          className:
+            'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-anonymousIcon',
+          style: { backgroundColor: this._user.color }
+        },
+        h.span({}, this._user.initials)
+      );
+  }
+}
+export class UserMenu extends Menu {
+  private _user: IUser;
+
+  constructor(options: UserMenu.IOptions) {
+    super(options);
+    this._user = options.user;
+    this.title.icon = caretDownIcon;
+    this.title.iconClass = 'jp-UserMenu-caretDownIcon';
+    this._user.ready.connect(this._updateLabel);
+    this._user.changed.connect(this._updateLabel);
+  }
+
+  dispose() {
+    this._user.ready.disconnect(this._updateLabel);
+    this._user.changed.disconnect(this._updateLabel);
+  }
+
+  private _updateLabel = (user: IUser) => {
+    this.title.label = user.username;
+    this.update();
+  };
+}
+
+export namespace UserMenu {
+  export interface IOptions extends Menu.IOptions {
+    user: IUser;
+  }
+}
+
 export class UserIcon extends ReactWidget {
   private _profile: User;
 
   constructor(user: User) {
     super();
+    this.id = 'jp-UserIcon';
     this._profile = user;
 
     this._profile.ready.connect(() => this.update());
@@ -297,10 +377,7 @@ export class UserIcon extends ReactWidget {
   render(): React.ReactElement {
     if (this._profile.isReady) {
       return (
-        <div className="login-container">
-          {getUserIcon(this._profile)}
-          <span className="login-username">{this._profile.username}</span>
-        </div>
+        <div className="login-container">{getUserIcon(this._profile)}</div>
       );
     }
 

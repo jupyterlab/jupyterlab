@@ -6,13 +6,11 @@
  */
 
 import {
-  IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IStateDB } from '@jupyterlab/statedb';
 import { Dialog } from '@jupyterlab/apputils';
-import { caretDownIcon } from '@jupyterlab/ui-components';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { YFile, YNotebook } from '@jupyterlab/shared-models';
@@ -20,8 +18,9 @@ import {
   ICurrentUser,
   IUserMenu,
   IUserPanel,
+  RendererUserMenu,
   User,
-  UserIcon,
+  UserMenu,
   UserNameInput,
   UserPanel
 } from '@jupyterlab/user';
@@ -32,7 +31,6 @@ import { Menu, MenuBar, Widget } from '@lumino/widgets';
  */
 export namespace CommandIDs {
   export const rename = 'jupyterlab-auth:rename';
-  export const logout = 'jupyterlab-auth:logout';
 }
 
 /**
@@ -51,9 +49,9 @@ const userPlugin: JupyterFrontEndPlugin<User> = {
 const userMemuPlugin: JupyterFrontEndPlugin<Menu> = {
   id: '@jupyterlab/user-extension:userMenu',
   autoStart: true,
-  requires: [IRouter, ICurrentUser],
+  requires: [ICurrentUser],
   provides: IUserMenu,
-  activate: (app: JupyterFrontEnd, router: IRouter, user: User): Menu => {
+  activate: (app: JupyterFrontEnd, user: User): Menu => {
     const { shell, commands } = app;
 
     const spacer = new Widget();
@@ -61,56 +59,42 @@ const userMemuPlugin: JupyterFrontEndPlugin<Menu> = {
     spacer.addClass('topbar-spacer');
     shell.add(spacer, 'top', { rank: 1000 });
 
-    const icon = new UserIcon(user);
-    icon.id = 'jp-UserIcon';
-    // TODO: remove with next lumino release
-    icon.node.onclick = (event: MouseEvent) => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      const body = new UserNameInput(user, commands);
-      const dialog = new Dialog({
-        title: 'Anonymous username',
-        body,
-        buttons: [
-          Dialog.okButton({
-            label: 'Send'
-          })
-        ]
-      });
-      dialog.launch().then(data => {
-        if (data.button.accept) {
-          user.rename(data.value as string);
-        }
-      });
-    };
-
-    const menu = new Menu({ commands });
-    menu.id = 'jp-UserMenu-dropdown';
-    menu.title.icon = caretDownIcon;
-    menu.title.className = 'jp-UserMenu-dropdown';
-    // TODO: remove with next lumino release
-    menu.node.onmousedown = (event: MouseEvent) => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      menu.open(window.innerWidth, 30);
-    };
-
-    const menuBar = new MenuBar();
+    const menuBar = new MenuBar({
+      forceItemsPosition: {
+        forceX: false,
+        forceY: false
+      },
+      renderer: new RendererUserMenu(user)
+    });
     menuBar.id = 'jp-UserMenu';
-    menuBar.node.insertBefore(icon.node, menuBar.node.firstChild);
+    const menu = new UserMenu({ commands, user });
     menuBar.addMenu(menu);
     shell.add(menuBar, 'top', { rank: 1002 });
 
     menu.addItem({ type: 'separator' });
 
-    commands.addCommand(CommandIDs.logout, {
-      label: 'Sign Out',
-      isEnabled: () => !user.anonymous,
+    commands.addCommand(CommandIDs.rename, {
+      label: 'Rename',
+      isVisible: () => user.anonymous,
       execute: () => {
-        router.navigate('/logout', { hard: true });
+        const body = new UserNameInput(user, commands);
+        const dialog = new Dialog({
+          title: 'Anonymous username',
+          body,
+          buttons: [
+            Dialog.okButton({
+              label: 'Send'
+            })
+          ]
+        });
+        dialog.launch().then(data => {
+          if (data.button.accept) {
+            user.rename(data.value as string);
+          }
+        });
       }
     });
-    menu.addItem({ command: CommandIDs.logout });
+    menu.addItem({ command: 'settingeditor:open' });
 
     return menu;
   }
