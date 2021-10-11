@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { User } from './model';
 import { Menu } from '@lumino/widgets';
 import { ISignal } from '@lumino/signaling';
-import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 
 export const USER = '@jupyterlab/user-extension:user';
 
@@ -38,5 +39,5 @@ export interface IUser {
   readonly ready: ISignal<IUser, boolean>;
   readonly changed: ISignal<IUser, void>;
 
-  toJSON(): ReadonlyPartialJSONObject;
+  toJSON(): User.User;
 }

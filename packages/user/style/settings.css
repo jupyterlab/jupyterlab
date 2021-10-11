@@ -1,0 +1,93 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-UserSettings-Container {
+  margin: 20px;
+  display: inline-flex;
+  flex-direction: row;
+}
+
+.jp-UserSettings-Icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.jp-UserSettings-Icon input {
+  width: 50px;
+  height: 50px;
+  padding: 0px;
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  z-index: -1;
+  border: none;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.jp-UserSettings-Icon span {
+  margin: auto;
+  text-align: center;
+  font-size: 50px;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-UserSettings-Icon:hover {
+  cursor: pointer;
+}
+
+.jp-UserSettings-Info-Container {
+  margin: 20px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.jp-UserSettings-Info {
+  table-layout: auto;
+  width: 100%;
+}
+
+.jp-UserSettings-Info-Container label {
+  margin-right: 10px;
+  font-weight: bold;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-UserSettings-Info-Container input {
+  text-decoration: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-color: var(--jp-ui-font-color1);
+  border-width: 0.5px;
+  background-color: transparent;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-UserSettings-Info-Item {
+  width: 100%;
+  margin-top: 20px;
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.jp-UserSettings-Info-Item textarea {
+  text-decoration: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-color: var(--jp-ui-font-color1);
+  border-width: 0.5px;
+  background-color: transparent;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}

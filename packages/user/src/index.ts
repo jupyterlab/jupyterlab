@@ -7,4 +7,6 @@
 
 export * from './tokens';
 export * from './utils';
+export * from './model';
 export * from './widget';
+export * from './settings';

@@ -6,11 +6,12 @@
  */
 
 import {
+  ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IStateDB } from '@jupyterlab/statedb';
-import { Dialog } from '@jupyterlab/apputils';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { YFile, YNotebook } from '@jupyterlab/shared-models';
@@ -19,9 +20,9 @@ import {
   IUserMenu,
   IUserPanel,
   RendererUserMenu,
+  SettingsWidget,
   User,
   UserMenu,
-  UserNameInput,
   UserPanel
 } from '@jupyterlab/user';
 import { Menu, MenuBar, Widget } from '@lumino/widgets';
@@ -30,7 +31,7 @@ import { Menu, MenuBar, Widget } from '@lumino/widgets';
  * A namespace for command IDs.
  */
 export namespace CommandIDs {
-  export const rename = 'jupyterlab-auth:rename';
+  export const settings = '@jupyterlab/user-extension:settings:open';
 }
 
 /**
@@ -67,36 +68,70 @@ const userMemuPlugin: JupyterFrontEndPlugin<Menu> = {
       renderer: new RendererUserMenu(user)
     });
     menuBar.id = 'jp-UserMenu';
+    user.changed.connect(() => menuBar.update());
     const menu = new UserMenu({ commands, user });
     menuBar.addMenu(menu);
     shell.add(menuBar, 'top', { rank: 1002 });
 
     menu.addItem({ type: 'separator' });
 
-    commands.addCommand(CommandIDs.rename, {
-      label: 'Rename',
-      isVisible: () => user.anonymous,
+    return menu;
+  }
+};
+
+const userSettingsPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/user-extension:userSettings',
+  autoStart: true,
+  requires: [ICurrentUser, IUserMenu, ICommandPalette, ILayoutRestorer],
+  activate: (
+    app: JupyterFrontEnd,
+    user: User,
+    userMenu: Menu,
+    palette: ICommandPalette,
+    restorer: ILayoutRestorer
+  ): void => {
+    const { shell, commands } = app;
+
+    let widget: SettingsWidget | null = null;
+    const tracker = new WidgetTracker<SettingsWidget>({
+      namespace: 'userSettings'
+    });
+
+    restorer.restore(tracker, {
+      command: CommandIDs.settings,
+      name: () => 'userSettings'
+    });
+
+    commands.addCommand(CommandIDs.settings, {
+      label: 'Settings',
+      caption: 'User settings.',
+      isVisible: () => true,
+      isEnabled: () => true,
+      isToggled: () => widget !== null,
       execute: () => {
-        const body = new UserNameInput(user, commands);
-        const dialog = new Dialog({
-          title: 'Anonymous username',
-          body,
-          buttons: [
-            Dialog.okButton({
-              label: 'Send'
-            })
-          ]
-        });
-        dialog.launch().then(data => {
-          if (data.button.accept) {
-            user.rename(data.value as string);
-          }
-        });
+        if (widget) {
+          widget.dispose();
+        } else {
+          widget = new SettingsWidget(user);
+          widget.title.label = 'Settings';
+
+          widget.disposed.connect(() => {
+            widget = null;
+            commands.notifyCommandChanged();
+          });
+
+          shell.add(widget, 'main');
+          tracker.add(widget);
+          restorer.add(widget, 'userSettings');
+
+          widget.update();
+          commands.notifyCommandChanged();
+        }
       }
     });
-    menu.addItem({ command: 'settingeditor:open' });
 
-    return menu;
+    palette.addItem({ command: CommandIDs.settings, category: 'User' });
+    userMenu.addItem({ command: CommandIDs.settings });
   }
 };
 
@@ -173,6 +208,7 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserPanel> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   userPlugin,
   userMemuPlugin,
+  userSettingsPlugin,
   userPanelPlugin
 ];
 
