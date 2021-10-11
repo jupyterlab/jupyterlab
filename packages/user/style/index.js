@@ -9,4 +9,3 @@ import '@jupyterlab/ui-components/style/index.js';
 import '@jupyterlab/apputils/style/index.js';
 
 import './base.css';
-import './settings.css';
