@@ -18,13 +18,13 @@
 }
 
 .jp-UserSettings-Icon input {
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   padding: 0px;
   position: absolute;
-  top: 50px;
-  left: 50px;
-  z-index: -1;
+  top: 35px;
+  left: 35px;
+  z-index: -10;
   border: none;
   background-color: transparent;
   text-decoration: none;

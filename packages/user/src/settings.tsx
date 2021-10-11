@@ -122,6 +122,7 @@ export class SettingsContent extends ReactWidget {
                   <input
                     onChange={this._handlerName}
                     value={this._user.name}
+                    disabled={!this._user.anonymous}
                   ></input>
                 </td>
               </tr>
@@ -133,6 +134,7 @@ export class SettingsContent extends ReactWidget {
                   <input
                     onChange={this._handlerFamilyName}
                     value={this._user.familyName}
+                    disabled={!this._user.anonymous}
                   ></input>
                 </td>
               </tr>
@@ -144,6 +146,7 @@ export class SettingsContent extends ReactWidget {
             <textarea
               onChange={this._handlerDescription}
               value={this._user.description}
+              disabled={!this._user.anonymous}
             ></textarea>
           </div>
         </div>
@@ -175,6 +178,7 @@ const ColorPickerComponent: React.FC<Props> = props => {
 
   return (
     <div
+      title="Select color"
       onClick={openPicker}
       className="jp-UserSettings-Icon"
       style={{ backgroundColor: user.color }}

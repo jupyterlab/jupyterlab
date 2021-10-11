@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import url('./settings.css');
+
 .jp-MenuBar-anonymousIcon {
   width: 25px;
   height: 25px;
