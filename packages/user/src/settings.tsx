@@ -64,6 +64,23 @@ export class SettingsContent extends ReactWidget {
     return this._user;
   }
 
+  private _initials(): void {
+    this._user.username = this._user.name + ' ' + this._user.familyName;
+
+    const name = this._user.name.split(' ');
+    const familyName: string = this._user.familyName
+      ? (this._user.familyName as string)
+      : '';
+    if (name.length > 0) {
+      this._user.initials = name[0].substring(0, 1).toLocaleUpperCase();
+    }
+    if (name.length > 1) {
+      this._user.initials += name[1].substring(0, 1).toLocaleUpperCase();
+    } else if (familyName.length > 1) {
+      this._user.initials += familyName.substring(0, 1).toLocaleUpperCase();
+    }
+  }
+
   private _handlerColor = (event: any) => {
     this._user.color = event.target.value;
     this.update();
@@ -71,12 +88,13 @@ export class SettingsContent extends ReactWidget {
 
   private _handlerName = (event: any) => {
     this._user.name = event.target.value;
-    this._user.username = event.target.value;
+    this._initials();
     this.update();
   };
 
   private _handlerFamilyName = (event: any) => {
     this._user.familyName = event.target.value;
+    this._initials();
     this.update();
   };
 
