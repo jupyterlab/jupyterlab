@@ -73,14 +73,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "jupyterlab": {
-    "extraStyles": {
-      "codemirror": [
-        "lib/codemirror.css",
-        "addon/dialog/dialog.css",
-        "addon/fold/foldgutter.css"
-      ]
-    }
-  },
   "styleModule": "style/index.js"
 }
