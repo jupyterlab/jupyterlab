@@ -43,9 +43,9 @@
     "@jupyterlab/settingregistry": "^3.3.0-alpha.13",
     "@jupyterlab/translation": "^3.3.0-alpha.13",
     "@jupyterlab/ui-components": "^3.3.0-alpha.13",
-    "@lumino/messaging": "^1.4.3",
-    "@lumino/polling": "^1.3.3",
-    "@lumino/signaling": "^1.4.3",
+    "@lumino/messaging": "^1.9.0",
+    "@lumino/polling": "^1.8.0",
+    "@lumino/signaling": "^1.9.0",
     "react": "^17.0.1",
     "react-paginate": "^6.3.2",
     "semver": "^7.3.2"
