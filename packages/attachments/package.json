@@ -40,8 +40,8 @@
     "@jupyterlab/observables": "^4.3.0-alpha.13",
     "@jupyterlab/rendermime": "^3.3.0-alpha.13",
     "@jupyterlab/rendermime-interfaces": "^3.3.0-alpha.13",
-    "@lumino/disposable": "^1.4.3",
-    "@lumino/signaling": "^1.4.3"
+    "@lumino/disposable": "^1.9.0",
+    "@lumino/signaling": "^1.9.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
