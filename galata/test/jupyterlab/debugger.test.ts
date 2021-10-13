@@ -27,9 +27,6 @@ test.describe('Debugger Tests', () => {
   });
 
   test('Start debug session', async ({ page, tmpPath }) => {
-    /*await page.waitForSelector(page.launcherSelector);
-    await page.click('.jp-LauncherCard[title*=ipykernel]');
-    await populateNotebook(page);*/
     await openNotebook(page, tmpPath);
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
