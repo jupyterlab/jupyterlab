@@ -577,7 +577,7 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
   const preTextContent = pre.textContent;
 
   if (preTextContent) {
-    // Replace links in text nodes and span elements (only those should be present after sanitization)
+    // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
     const linkedNodes = autolink(preTextContent);
     let inAnchorElement = false;
 
