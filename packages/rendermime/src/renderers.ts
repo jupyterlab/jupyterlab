@@ -501,14 +501,13 @@ function autolink(content: string): Array<HTMLAnchorElement | Text> {
   );
 
   const nodes = [];
-  let previousIndex = 0;
   let lastIndex = 0;
 
   let match: RegExpExecArray | null;
-  while ((match = webLinkRegex.exec(content)) !== null) {
-    if (match.index !== previousIndex) {
+  while (null != (match = webLinkRegex.exec(content))) {
+    if (match.index !== lastIndex) {
       nodes.push(
-        document.createTextNode(content.slice(previousIndex, match.index))
+        document.createTextNode(content.slice(lastIndex, match.index))
       );
     }
     let url = match[0];
@@ -523,7 +522,6 @@ function autolink(content: string): Array<HTMLAnchorElement | Text> {
     anchor.target = '_blank';
     anchor.appendChild(document.createTextNode(url.slice(0, len)));
     nodes.push(anchor);
-    previousIndex = match.index;
     lastIndex = match.index + len;
   }
   if (lastIndex !== content.length) {
