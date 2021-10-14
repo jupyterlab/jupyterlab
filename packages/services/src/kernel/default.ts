@@ -761,6 +761,30 @@ export class KernelConnection implements Kernel.IKernelConnection {
     >;
   }
 
+  requestUsage(
+    content: KernelMessage.IUsageRequestMsg['content'],
+    disposeOnDone: boolean = true
+  ): Kernel.IControlFuture<
+    KernelMessage.IUsageRequestMsg,
+    KernelMessage.IUsageReplyMsg
+  > {
+    const msg = KernelMessage.createMessage({
+      msgType: 'usage_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return this.sendControlMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IControlFuture<
+      KernelMessage.IUsageRequestMsg,
+      KernelMessage.IUsageReplyMsg
+    >;
+  }
+
   /**
    * Send an `is_complete_request` message.
    *

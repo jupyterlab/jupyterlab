@@ -109,6 +109,10 @@ export function createMessage<T extends IDebugRequestMsg>(
   options: IOptions<T>
 ): T;
 
+export function createMessage<T extends IUsageRequestMsg>(
+  options: IOptions<T>
+): T;
+
 /**
  * @hidden
  * #### Notes
@@ -117,6 +121,10 @@ export function createMessage<T extends IDebugRequestMsg>(
  * part of the public API, and may change without notice.
  */
 export function createMessage<T extends IDebugReplyMsg>(
+  options: IOptions<T>
+): T;
+
+export function createMessage<T extends IUsageReplyMsg>(
   options: IOptions<T>
 ): T;
 
@@ -183,7 +191,11 @@ export type ShellMessageType =
  * kernel message specification. As such, debug message types are *NOT*
  * considered part of the public API, and may change without notice.
  */
-export type ControlMessageType = 'debug_request' | 'debug_reply';
+export type ControlMessageType =
+  | 'usage_request'
+  | 'usage_reply'
+  | 'debug_request'
+  | 'debug_reply';
 
 /**
  * IOPub message types.
@@ -385,6 +397,8 @@ export type Message =
   | IUpdateDisplayDataMsg
   | IDebugRequestMsg
   | IDebugReplyMsg
+  | IUsageRequestMsg
+  | IUsageReplyMsg
   | IDebugEventMsg;
 
 // ////////////////////////////////////////////////
@@ -1150,6 +1164,15 @@ export interface IDebugRequestMsg extends IControlMessage<'debug_request'> {
   };
 }
 
+export interface IUsageRequestMsg extends IControlMessage<'usage_request'> {
+  content: {
+    seq: number;
+    type: 'request';
+    command: string;
+    arguments?: any;
+  };
+}
+
 /**
  * Test whether a kernel message is an experimental `'debug_request'` message.
  *
@@ -1175,6 +1198,18 @@ export function isDebugRequestMsg(msg: IMessage): msg is IDebugRequestMsg {
  * part of the public API, and may change without notice.
  */
 export interface IDebugReplyMsg extends IControlMessage<'debug_reply'> {
+  content: {
+    seq: number;
+    type: 'response';
+    request_seq: number;
+    success: boolean;
+    command: string;
+    message?: string;
+    body?: any;
+  };
+}
+
+export interface IUsageReplyMsg extends IControlMessage<'usage_reply'> {
   content: {
     seq: number;
     type: 'response';
