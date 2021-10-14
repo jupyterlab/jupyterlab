@@ -65,16 +65,15 @@ button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
 }
 
 button.jp-Dialog-button.jp-mod-styled.jp-mod-accept:focus {
-  outline: 1px solid
-    var(--jp-button-accept-normal-color, var(--jp-brand-color1));
+  outline: 1px solid var(--jp-accept-color-normal, var(--jp-brand-color1));
 }
 
 button.jp-Dialog-button.jp-mod-styled.jp-mod-warn:focus {
-  outline: 1px solid var(--jp-button-warn-normal-color, var(--jp-error-color1));
+  outline: 1px solid var(--jp-warn-color-normal, var(--jp-error-color1));
 }
 
 button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
-  outline: 1px solid var(--jp-button-reject-normal-color, var(--md-grey-600));
+  outline: 1px solid var(--jp-reject-color-normal, var(--md-grey-600));
 }
 
 button.jp-Dialog-close-button {
