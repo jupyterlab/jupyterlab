@@ -583,17 +583,19 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
     const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
 
     while (preNodes.length && linkedNodes.length) {
-      let preNode = preNodes.shift();
-      let linkNode = linkedNodes.shift();
+      // Use non-null assertions to workaround TypeScript context awareness limitation
+      // (if any of the arrays were empty, we would not enter the body of the loop).
+      let preNode = preNodes.shift()!;
+      let linkNode = linkedNodes.shift()!;
 
       // This should never happen because we modify the arrays in flight so they should end simultaneously,
       // but this makes the coding assistance happy and might make it easier to conceptualize.
       if (typeof preNode === 'undefined') {
-        combinedNodes.push(linkNode as Text | HTMLAnchorElement);
+        combinedNodes.push(linkNode);
         break;
       }
       if (typeof linkNode === 'undefined') {
-        combinedNodes.push(preNode as Text | HTMLSpanElement);
+        combinedNodes.push(preNode);
         break;
       }
 
