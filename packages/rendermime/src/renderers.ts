@@ -604,15 +604,17 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
       if (preLen && linkLen) {
         if (preLen > linkLen) {
           // Split pre node and only keep the shorter part
-          let { pre: keep, post: postpone } = splitShallowNode<
-            Text | HTMLSpanElement
-          >(preNode, linkLen);
+          let { pre: keep, post: postpone } = splitShallowNode(
+            preNode,
+            linkLen
+          );
           preNodes.unshift(postpone);
           preNode = keep;
         } else if (linkLen > preLen) {
-          let { pre: keep, post: postpone } = splitShallowNode<
-            Text | HTMLAnchorElement
-          >(linkNode, preLen);
+          let { pre: keep, post: postpone } = splitShallowNode(
+            linkNode,
+            preLen
+          );
           linkedNodes.unshift(postpone);
           linkNode = keep;
         }
