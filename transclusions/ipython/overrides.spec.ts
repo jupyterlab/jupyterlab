@@ -133,13 +133,22 @@ describe('Default IPython overrides', () => {
     });
 
     it('escapes arguments', () => {
-      const line_magic_with_args = '%MAGIC "arg"';
+      let line_magic_with_args = '%MAGIC "arg"';
       let override = line_magics_map.override_for(line_magic_with_args);
       expect(override).to.equal(
         'get_ipython().run_line_magic("MAGIC", " \\"arg\\"")'
       );
 
       let reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(line_magic_with_args);
+
+      line_magic_with_args = '%MAGIC "arg\\"';
+      override = line_magics_map.override_for(line_magic_with_args);
+      expect(override).to.equal(
+        'get_ipython().run_line_magic("MAGIC", " \\"arg\\\\\\"")'
+      );
+
+      reverse = line_magics_map.reverse.override_for(override);
       expect(reverse).to.equal(line_magic_with_args);
     });
 
