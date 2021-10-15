@@ -7,18 +7,27 @@
     "main": [
       {
         "id": "jp-mainmenu-file",
+        "disabled": false,
         "items": [
           {
             "type": "submenu",
+            "args": {},
+            "disabled": false,
             "submenu": {
               "id": "jp-mainmenu-file-new",
               "items": [
                 {
                   "command": "fileeditor:create-new",
+                  "type": "command",
+                  "args": {},
+                  "disabled": false,
                   "rank": 30
                 },
                 {
                   "command": "fileeditor:create-new-markdown-file",
+                  "type": "command",
+                  "args": {},
+                  "disabled": false,
                   "rank": 30
                 }
               ]
@@ -41,6 +50,8 @@
               "items": [
                 {
                   "command": "fileeditor:change-tabs",
+                  "type": "command",
+                  "disabled": false,
                   "args": {
                     "insertSpaces": false,
                     "size": 4
@@ -48,6 +59,8 @@
                 },
                 {
                   "command": "fileeditor:change-tabs",
+                  "type": "command",
+                  "disabled": false,
                   "args": {
                     "insertSpaces": true,
                     "size": 1
@@ -55,6 +68,8 @@
                 },
                 {
                   "command": "fileeditor:change-tabs",
+                  "type": "command",
+                  "disabled": false,
                   "args": {
                     "insertSpaces": true,
                     "size": 2
@@ -62,6 +77,8 @@
                 },
                 {
                   "command": "fileeditor:change-tabs",
+                  "type": "command",
+                  "disabled": false,
                   "args": {
                     "insertSpaces": true,
                     "size": 4
@@ -69,6 +86,8 @@
                 },
                 {
                   "command": "fileeditor:change-tabs",
+                  "type": "command",
+                  "disabled": false,
                   "args": {
                     "insertSpaces": true,
                     "size": 8
@@ -80,10 +99,14 @@
           },
           {
             "command": "fileeditor:toggle-autoclosing-brackets-universal",
+            "type": "command",
+            "disabled": false,
             "rank": 30
           },
           {
             "command": "fileeditor:change-font-size",
+            "type": "command",
+            "disabled": false,
             "rank": 30,
             "args": {
               "delta": 1,
@@ -92,6 +115,8 @@
           },
           {
             "command": "fileeditor:change-font-size",
+            "type": "command",
+            "disabled": false,
             "rank": 30,
             "args": {
               "delta": -1,
@@ -104,41 +129,57 @@
     "context": [
       {
         "command": "fileeditor:undo",
+        "type": "command",
+        "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 1
       },
       {
         "command": "fileeditor:redo",
+        "type": "command",
+        "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 2
       },
       {
         "command": "fileeditor:cut",
+        "type": "command",
+        "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 3
       },
       {
         "command": "fileeditor:copy",
+        "type": "command",
+        "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 4
       },
       {
         "command": "fileeditor:paste",
+        "type": "command",
+        "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 5
       },
       {
         "command": "fileeditor:select-all",
+        "type": "command",
+        "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 6
       },
       {
         "command": "fileeditor:create-console",
+        "type": "command",
+        "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 10
       },
       {
         "command": "fileeditor:markdown-preview",
+        "type": "command",
+        "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 11
       }
@@ -167,7 +208,8 @@
         "readOnly": false,
         "rulers": [],
         "tabSize": 4,
-        "wordWrapColumn": 80
+        "wordWrapColumn": 80,
+        "showTrailingSpace": false
       }
     },
     "toolbar": {

@@ -3,23 +3,98 @@
   "description": "Notebook Panel settings.",
   "jupyter.lab.toolbars": {
     "Notebook": [
-      { "name": "save", "rank": 10 },
-      { "name": "insert", "command": "notebook:insert-cell-below", "rank": 20 },
-      { "name": "cut", "command": "notebook:cut-cell", "rank": 21 },
-      { "name": "copy", "command": "notebook:copy-cell", "rank": 22 },
-      { "name": "paste", "command": "notebook:paste-cell-below", "rank": 23 },
-      { "name": "run", "command": "runmenu:run", "rank": 30 },
-      { "name": "interrupt", "command": "kernelmenu:interrupt", "rank": 31 },
-      { "name": "restart", "command": "kernelmenu:restart", "rank": 32 },
+      {
+        "name": "save",
+        "args": {},
+        "command": "",
+        "disabled": false,
+        "rank": 10
+      },
+      {
+        "name": "insert",
+        "args": {},
+        "command": "notebook:insert-cell-below",
+        "disabled": false,
+        "rank": 20
+      },
+      {
+        "name": "cut",
+        "args": {},
+        "command": "notebook:cut-cell",
+        "disabled": false,
+        "rank": 21
+      },
+      {
+        "name": "copy",
+        "args": {},
+        "command": "notebook:copy-cell",
+        "disabled": false,
+        "rank": 22
+      },
+      {
+        "name": "paste",
+        "args": {},
+        "command": "notebook:paste-cell-below",
+        "disabled": false,
+        "rank": 23
+      },
+      {
+        "name": "run",
+        "args": {},
+        "command": "runmenu:run",
+        "disabled": false,
+        "rank": 30
+      },
+      {
+        "name": "interrupt",
+        "args": {},
+        "command": "kernelmenu:interrupt",
+        "disabled": false,
+        "rank": 31
+      },
+      {
+        "name": "restart",
+        "args": {},
+        "command": "kernelmenu:restart",
+        "disabled": false,
+        "rank": 32
+      },
       {
         "name": "restart-and-run",
+        "args": {},
         "command": "runmenu:restart-and-run-all",
+        "disabled": false,
         "rank": 33
       },
-      { "name": "cellType", "rank": 40 },
-      { "name": "spacer", "type": "spacer", "rank": 100 },
-      { "name": "kernelName", "rank": 1000 },
-      { "name": "kernelStatus", "rank": 1001 }
+      {
+        "name": "cellType",
+        "args": {},
+        "command": "",
+        "disabled": false,
+        "rank": 40
+      },
+      {
+        "name": "spacer",
+        "args": {},
+        "command": "",
+        "disabled": false,
+        "type": "spacer",
+        "rank": 100
+      },
+      {
+        "name": "kernelName",
+        "args": {},
+        "command": "",
+        "disabled": false,
+        "rank": 1000
+      },
+      {
+        "name": "kernelStatus",
+        "args": {},
+        "command": "",
+        "disabled": false,
+        "rank": 1001
+      }
     ]
   },
   "jupyter.lab.transform": true,

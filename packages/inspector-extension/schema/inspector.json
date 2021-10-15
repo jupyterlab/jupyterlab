@@ -5,17 +5,25 @@
     "main": [
       {
         "id": "jp-mainmenu-help",
+        "disabled": false,
         "items": [
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 0.1
           },
           {
             "command": "inspector:open",
+            "type": "command",
+            "args": {},
+            "disabled": false,
             "rank": 0.1
           },
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 0.1
           }
         ]
@@ -25,6 +33,7 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "inspector:open",
+      "args": {},
       "keys": ["Accel I"],
       "selector": "body"
     }

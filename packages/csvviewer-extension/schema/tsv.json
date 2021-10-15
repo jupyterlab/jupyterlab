@@ -2,7 +2,15 @@
   "title": "TSV Viewer",
   "description": "TSV Viewer settings.",
   "jupyter.lab.toolbars": {
-    "TSVTable": [{ "name": "delimiter", "rank": 10 }]
+    "TSVTable": [
+      {
+        "name": "delimiter",
+        "args": {},
+        "rank": 10,
+        "disabled": false,
+        "command": ""
+      }
+    ]
   },
   "jupyter.lab.transform": true,
   "properties": {

@@ -5,13 +5,20 @@
     "main": [
       {
         "id": "jp-mainmenu-file",
+        "disabled": false,
         "items": [
           {
             "command": "workspace-ui:save-as",
+            "args": {},
+            "type": "command",
+            "disabled": false,
             "rank": 40
           },
           {
             "command": "workspace-ui:save",
+            "args": {},
+            "type": "command",
+            "disabled": false,
             "rank": 40
           }
         ]

@@ -4,6 +4,7 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "completer:invoke-console",
+      "args": {},
       "keys": ["Tab"],
       "selector": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled"
     }

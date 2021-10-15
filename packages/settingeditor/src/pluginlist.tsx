@@ -98,6 +98,13 @@ export class PluginList extends ReactWidget {
     this.update();
   }
 
+  get filter(): (item: ISettingRegistry.IPlugin) => boolean {
+    return this._filter;
+  }
+  set filter(filter: (item: ISettingRegistry.IPlugin) => boolean) {
+    this._filter = filter;
+  }
+
   protected async updateModifiedPlugins(): Promise<void> {
     const modifiedPlugins = [];
     for (const plugin of this._allPlugins) {

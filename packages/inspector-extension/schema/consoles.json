@@ -5,6 +5,9 @@
     "context": [
       {
         "command": "inspector:open",
+        "type": "command",
+        "args": {},
+        "disabled": false,
         "selector": ".jp-CodeConsole-promptCell",
         "rank": 5
       }

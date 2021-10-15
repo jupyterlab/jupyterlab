@@ -5,9 +5,13 @@
     "main": [
       {
         "id": "jp-mainmenu-view",
+        "disabled": false,
         "items": [
           {
             "command": "property-inspector:show-panel",
+            "args": {},
+            "type": "command",
+            "disabled": false,
             "rank": 2
           }
         ]
@@ -17,6 +21,7 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "property-inspector:show-panel",
+      "args": {},
       "keys": ["Accel Shift U"],
       "selector": "body"
     }

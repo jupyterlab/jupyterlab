@@ -8,11 +8,15 @@
         "items": [
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 1
           },
           {
             "type": "submenu",
             "rank": 1,
+            "args": {},
+            "disabled": false,
             "submenu": {
               "id": "jp-mainmenu-settings-language",
               "label": "Language"
@@ -20,6 +24,8 @@
           },
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 1
           }
         ]

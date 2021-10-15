@@ -7,6 +7,8 @@
         "type": "submenu",
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
         "rank": 1.3,
+        "args": {},
+        "disabled": false,
         "submenu": {
           "id": "jp-contextmenu-open-with",
           "label": "Open With",

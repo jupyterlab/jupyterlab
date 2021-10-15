@@ -288,6 +288,27 @@
   border: none;
 }
 
+#setting-editor .jp-SaveSettingsBanner {
+  position: absolute;
+  bottom: 0;
+  padding: 20px;
+  width: 100%;
+  background: var(--jp-border-color3);
+}
+
+#setting-editor .jp-SaveSettingsBanner button {
+  box-shadow: none;
+  outline: none;
+  border: none;
+  color: var(--jp-brand-color1);
+  font-size: var(--jp-ui-font-size1);
+  cursor: pointer;
+}
+
+#setting-editor .jp-SaveSettingsBanner button:hover {
+  color: var(--jp-brand-color0);
+}
+
 #setting-editor .form-group.small-field:hover {
   background: var(--jp-border-color3);
 }

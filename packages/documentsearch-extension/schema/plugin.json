@@ -5,25 +5,40 @@
     "main": [
       {
         "id": "jp-mainmenu-edit",
+        "disabled": false,
+        "mnemonic": -1,
         "items": [
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 10
           },
           {
             "command": "documentsearch:start",
+            "type": "command",
+            "args": {},
+            "disabled": false,
             "rank": 10
           },
           {
             "command": "documentsearch:highlightNext",
+            "type": "command",
+            "args": {},
+            "disabled": false,
             "rank": 10
           },
           {
             "command": "documentsearch:highlightPrevious",
+            "type": "command",
+            "args": {},
+            "disabled": false,
             "rank": 10
           },
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 10
           }
         ]
@@ -33,16 +48,19 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "documentsearch:start",
+      "args": {},
       "keys": ["Accel F"],
       "selector": ".jp-mod-searchable"
     },
     {
       "command": "documentsearch:highlightNext",
+      "args": {},
       "keys": ["Accel G"],
       "selector": ".jp-mod-searchable"
     },
     {
       "command": "documentsearch:highlightPrevious",
+      "args": {},
       "keys": ["Accel Shift G"],
       "selector": ".jp-mod-searchable"
     }

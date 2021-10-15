@@ -5,6 +5,9 @@
     "context": [
       {
         "command": "filebrowser:open-browser-tab",
+        "type": "command",
+        "args": {},
+        "disabled": false,
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
         "rank": 1.6
       }

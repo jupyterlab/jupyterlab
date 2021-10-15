@@ -7,26 +7,38 @@
     "main": [
       {
         "id": "jp-mainmenu-view",
+        "disabled": false,
         "items": [
           {
             "command": "extensionmanager:show-panel",
+            "type": "command",
+            "args": {},
+            "disabled": false,
             "rank": 9
           }
         ]
       },
       {
         "id": "jp-mainmenu-settings",
+        "disabled": false,
         "items": [
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 100
           },
           {
             "command": "extensionmanager:toggle",
+            "type": "command",
+            "args": {},
+            "disabled": false,
             "rank": 100
           },
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 100
           }
         ]
@@ -36,6 +48,7 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "extensionmanager:show-panel",
+      "args": {},
       "keys": ["Accel Shift X"],
       "selector": "body"
     }

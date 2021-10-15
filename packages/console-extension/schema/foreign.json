@@ -5,6 +5,9 @@
     "context": [
       {
         "command": "console:toggle-show-all-kernel-activity",
+        "args": {},
+        "type": "command",
+        "disabled": false,
         "selector": ".jp-CodeConsole",
         "rank": 20
       }

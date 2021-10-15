@@ -7,16 +7,33 @@
     "main": [
       {
         "id": "jp-mainmenu-kernel",
+        "disabled": false,
+        "mnemonic": -1,
         "items": [
-          { "type": "separator", "rank": 1.2 },
-          { "command": "debugger:restart-debug", "rank": 1.2 }
+          {
+            "type": "separator",
+            "args": {},
+            "disabled": false,
+            "rank": 1.2
+          },
+          {
+            "command": "debugger:restart-debug",
+            "type": "command",
+            "args": {},
+            "disabled": false,
+            "rank": 1.2
+          }
         ]
       },
       {
         "id": "jp-mainmenu-view",
+        "disabled": false,
         "items": [
           {
             "command": "debugger:show-panel",
+            "type": "command",
+            "args": {},
+            "disabled": false,
             "rank": 5
           }
         ]
@@ -25,10 +42,16 @@
     "context": [
       {
         "command": "debugger:inspect-variable",
+        "type": "command",
+        "args": {},
+        "disabled": false,
         "selector": ".jp-DebuggerVariables-body .jp-DebuggerVariables-grid"
       },
       {
         "command": "debugger:render-mime-variable",
+        "type": "command",
+        "args": {},
+        "disabled": false,
         "selector": ".jp-DebuggerVariables-body"
       }
     ]
@@ -36,46 +59,55 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "debugger:show-panel",
+      "args": {},
       "keys": ["Accel Shift E"],
       "selector": "body"
     },
     {
       "command": "debugger:debug-console",
+      "args": {},
       "keys": ["Accel Shift I"],
       "selector": ".jp-CodeConsole"
     },
     {
       "command": "debugger:debug-file",
+      "args": {},
       "keys": ["Accel Shift I"],
       "selector": ".jp-FileEditor"
     },
     {
       "command": "debugger:debug-notebook",
+      "args": {},
       "keys": ["Accel Shift I"],
       "selector": ".jp-Notebook"
     },
     {
       "command": "debugger:continue",
+      "args": {},
       "keys": ["F9"],
       "selector": "body"
     },
     {
       "command": "debugger:terminate",
+      "args": {},
       "keys": ["Shift F9"],
       "selector": "body"
     },
     {
       "command": "debugger:next",
+      "args": {},
       "keys": ["F10"],
       "selector": "body"
     },
     {
       "command": "debugger:stepIn",
+      "args": {},
       "keys": ["F11"],
       "selector": "body"
     },
     {
       "command": "debugger:stepOut",
+      "args": {},
       "keys": ["Shift F11"],
       "selector": "body"
     }

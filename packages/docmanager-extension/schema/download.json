@@ -6,12 +6,20 @@
       {
         "id": "jp-mainmenu-file",
         "items": [
-          { "type": "separator", "rank": 6 },
+          { "type": "separator", "args": {}, "disabled": false, "rank": 6 },
           {
             "command": "docmanager:download",
+            "type": "command",
+            "args": {},
+            "disabled": false,
             "rank": 6
           },
-          { "type": "separator", "rank": 6 }
+          {
+            "type": "separator",
+            "args": {},
+            "disabled": false,
+            "rank": 6
+          }
         ]
       }
     ]

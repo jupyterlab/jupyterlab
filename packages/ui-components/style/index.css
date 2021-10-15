@@ -7,5 +7,6 @@
 @import url('~@blueprintjs/core/lib/css/blueprint.css');
 @import url('~@blueprintjs/select/lib/css/blueprint-select.css');
 @import url('~@lumino/widgets/style/index.css');
+@import url('~codemirror/lib/codemirror.css');
 
 @import url('./base.css');

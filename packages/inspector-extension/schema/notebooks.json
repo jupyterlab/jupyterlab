@@ -5,6 +5,9 @@
     "context": [
       {
         "command": "inspector:open",
+        "type": "command",
+        "args": {},
+        "disabled": false,
         "selector": ".jp-Notebook",
         "rank": 50
       }

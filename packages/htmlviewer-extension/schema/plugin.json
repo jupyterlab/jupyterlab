@@ -3,8 +3,20 @@
   "description": "HTML Viewer settings.",
   "jupyter.lab.toolbars": {
     "HTML Viewer": [
-      { "name": "refresh", "rank": 10 },
-      { "name": "trust", "rank": 20 }
+      {
+        "name": "refresh",
+        "args": {},
+        "command": "",
+        "disabled": false,
+        "rank": 10
+      },
+      {
+        "name": "trust",
+        "args": {},
+        "command": "",
+        "disabled": false,
+        "rank": 20
+      }
     ]
   },
   "jupyter.lab.transform": true,

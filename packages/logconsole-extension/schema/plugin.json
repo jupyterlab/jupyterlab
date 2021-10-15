@@ -5,17 +5,25 @@
     "main": [
       {
         "id": "jp-mainmenu-view",
+        "disabled": false,
         "items": [
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 9.9
           },
           {
             "command": "logconsole:open",
+            "type": "command",
+            "args": {},
+            "disabled": false,
             "rank": 9.9
           },
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 9.9
           }
         ]

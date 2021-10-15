@@ -3,13 +3,20 @@
     "main": [
       {
         "id": "jp-mainmenu-help",
+        "disabled": false,
+        "mnemonic": -1,
         "items": [
           {
             "command": "help:about",
+            "type": "command",
+            "args": {},
+            "disabled": false,
             "rank": 0
           },
           {
             "type": "separator",
+            "args": {},
+            "disabled": false,
             "rank": 0
           }
         ]

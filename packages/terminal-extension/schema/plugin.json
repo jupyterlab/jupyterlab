@@ -5,6 +5,9 @@
     "context": [
       {
         "command": "terminal:refresh",
+        "type": "command",
+        "args": {},
+        "disabled": false,
         "selector": ".jp-Terminal",
         "rank": 1
       }
