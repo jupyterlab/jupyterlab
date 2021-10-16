@@ -170,3 +170,12 @@ the file browser and selecting “Download” from the context menu:
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/Wl7Ozl6rMcc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+Displaying Hidden files
+-----------------------
+
+Hidden files and folders can be displayed in JupyterLab by combining two parameters:
+
+1. First the server should be allowed to serve hidden files by setting ``ContentsManager.allow_hidden = True``; see `server documentation <https://jupyter-server.readthedocs.io/en/latest/users/configuration.html>`_.
+2. Then you will be able to display or hide the hidden files through the menu ``View`` -> ``Show Hidden Files``.
+
