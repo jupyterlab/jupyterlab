@@ -211,6 +211,7 @@ export class Completer extends Widget {
   protected onModelStateChanged(): void {
     if (this.isAttached) {
       this._activeIndex = 0;
+      this._indexChanged.emit(this._activeIndex);
       this.update();
     }
   }
