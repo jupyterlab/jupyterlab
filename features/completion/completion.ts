@@ -86,6 +86,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
   protected current_completion_handler: CompletionHandler;
   protected current_adapter: WidgetAdapter<IDocumentWidget> = null;
   protected renderer: LSPCompletionRenderer;
+  private _latestActiveItem: LazyCompletionItem = null;
 
   constructor(
     private app: JupyterFrontEnd,
@@ -134,6 +135,9 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     item
       .resolve()
       .then(resolvedCompletionItem => {
+        if (item.self !== this._latestActiveItem.self) {
+          return;
+        }
         this.set_doc_panel_placeholder(false);
         if (resolvedCompletionItem === null) {
           return;
@@ -141,6 +145,11 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
         this.refresh_doc_panel(item);
       })
       .catch(e => {
+        // disabling placeholder can remove currently displayed documentation,
+        // so only do that if this is really the active item!
+        if (item.self !== this._latestActiveItem.self) {
+          return;
+        }
         this.set_doc_panel_placeholder(false);
         console.warn(e);
       });
@@ -151,6 +160,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     active_completion: ICompletionData
   ) {
     let { item } = active_completion;
+    this._latestActiveItem = item;
     if (!item.supportsResolution()) {
       if (item.isDocumentationMarkdown) {
         // TODO: remove once https://github.com/jupyterlab/jupyterlab/pull/9663 is merged and released
