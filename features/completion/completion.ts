@@ -147,11 +147,10 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       .catch(e => {
         // disabling placeholder can remove currently displayed documentation,
         // so only do that if this is really the active item!
-        if (item.self !== this._latestActiveItem.self) {
-          return;
+        if (item.self === this._latestActiveItem.self) {
+          this.set_doc_panel_placeholder(false);
         }
-        this.set_doc_panel_placeholder(false);
-        console.warn(e);
+        this.console.warn(e);
       });
   }
 
@@ -174,6 +173,10 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       this.fetchDocumentation(item);
     } else if (item.isResolved()) {
       this.refresh_doc_panel(item);
+    } else {
+      // resolution has already started, but the re-render update could have been invalidated
+      // by user action, so let's ensure the documentation will get shown this time.
+      this.fetchDocumentation(item);
     }
 
     // also fetch completion for the previous and the next item to prevent jitter
@@ -328,7 +331,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
   private get current_index() {
     let completer = this.current_completion_handler.completer;
 
-    // TODO upstream: add getActiveItem() to Completer
+    // TODO: use public activeIndex available since 3.1
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return completer._activeIndex;

@@ -142,6 +142,8 @@ export class LSPCompletionRenderer
   }
 
   createDocumentationNode(item: LazyCompletionItem): HTMLElement {
+    // note: not worth trying to `fetchDocumentation()` as this is not
+    // invoked if documentation is empty (as of jlab 3.2)
     if (item.isDocumentationMarkdown) {
       let documentation = item.documentation;
       this.options.markdownRenderer
