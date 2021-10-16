@@ -77,17 +77,26 @@ describe('rendermime/factories', () => {
         expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
       });
 
-      it('should output the correct HTML with ansi colors', async () => {
-        const f = textRendererFactory;
-        const source = 'There is no text but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
-        const mimeType = 'application/vnd.jupyter.console-text';
-        const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
-        await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(
+      it.each([
+        [
+          'There is no text but \x1b[01;41;32mtext\x1b[00m.\nWoo.',
           '<pre>There is no text but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
-        );
-      });
+        ],
+        [
+          '\x1b[48;2;185;0;129mwww.example.\x1b[0m\x1b[48;2;113;0;119mcom\x1b[0m',
+          '<pre><a href="https://www.example.com" rel="noopener" target="_blank"><span style="background-color:rgb(185,0,129)">www.example.</span><span style="background-color:rgb(113,0,119)">com</span></a></pre>'
+        ]
+      ])(
+        'should output the correct HTML with ansi colors',
+        async (source, expected) => {
+          const f = textRendererFactory;
+          const mimeType = 'application/vnd.jupyter.console-text';
+          const model = createModel(mimeType, source);
+          const w = f.createRenderer({ mimeType, ...defaultOptions });
+          await w.renderModel(model);
+          expect(w.node.innerHTML).toBe(expected);
+        }
+      );
 
       it('should escape inline html', async () => {
         const f = textRendererFactory;
@@ -102,7 +111,7 @@ describe('rendermime/factories', () => {
         );
       });
 
-      it('should autolink URLs', async () => {
+      it('should autolink single URL', async () => {
         const f = textRendererFactory;
         const urls = [
           ['https://example.com', '', ''],
@@ -145,13 +154,28 @@ describe('rendermime/factories', () => {
               before,
               after
             ].map(encodeChars);
+            const prefixedUrl = urlEncoded.startsWith('www.')
+              ? 'https://' + urlEncoded
+              : urlEncoded;
             await w.renderModel(model);
             expect(w.node.innerHTML).toBe(
-              `<pre>Text with the URL ${beforeEncoded}<a href="${urlEncoded}" rel="noopener" target="_blank">${urlEncoded}</a>${afterEncoded} inside.</pre>`
+              `<pre>Text with the URL ${beforeEncoded}<a href="${prefixedUrl}" rel="noopener" target="_blank">${urlEncoded}</a>${afterEncoded} inside.</pre>`
             );
           })
         );
       });
+    });
+
+    it('should autolink multiple URLs', async () => {
+      const source = 'www.example.com\nwww.python.org';
+      const expected =
+        '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a>\n<a href="https://www.python.org" rel="noopener" target="_blank">www.python.org</a></pre>';
+      const f = textRendererFactory;
+      const mimeType = 'text/plain';
+      const model = createModel(mimeType, source);
+      const w = f.createRenderer({ mimeType, ...defaultOptions });
+      await w.renderModel(model);
+      expect(w.node.innerHTML).toBe(expected);
     });
   });
 
