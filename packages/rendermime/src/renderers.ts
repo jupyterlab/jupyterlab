@@ -483,11 +483,11 @@ export namespace renderSVG {
 /**
  * Replace URLs with links.
  *
- * @param content - The plain text content.
+ * @param content - The text content of a node.
  *
- * @returns The content where all URLs have been replaced with corresponding links.
+ * @returns A list of text nodes and anchor elements.
  */
-function autolink(content: string): string {
+function autolink(content: string): Array<HTMLAnchorElement | Text> {
   // Taken from Visual Studio Code:
   // https://github.com/microsoft/vscode/blob/9f709d170b06e991502153f281ec3c012add2e42/src/vs/workbench/contrib/debug/browser/linkDetector.ts#L17-L18
   const controlCodes = '\\u0000-\\u0020\\u007f-\\u009f';
@@ -499,17 +499,57 @@ function autolink(content: string): string {
       '"\'(){}\\[\\],:;.!?]',
     'ug'
   );
-  return content.replace(webLinkRegex, url => {
+
+  const nodes = [];
+  let lastIndex = 0;
+
+  let match: RegExpExecArray | null;
+  while (null != (match = webLinkRegex.exec(content))) {
+    if (match.index !== lastIndex) {
+      nodes.push(
+        document.createTextNode(content.slice(lastIndex, match.index))
+      );
+    }
+    let url = match[0];
     // Special case when the URL ends with ">" or "<"
-    const lastChars = url.slice(-3);
-    const endsWithGtLt = ['&gt', '&lt'].indexOf(lastChars) !== -1;
-    const toAppend = endsWithGtLt ? lastChars : '';
-    const len = endsWithGtLt ? url.length - 3 : url.length;
-    return (
-      `<a href="${url.slice(0, len)}" rel="noopener" target="_blank">` +
-      `${url.slice(0, len)}</a>${toAppend}`
+    const lastChars = url.slice(-1);
+    const endsWithGtLt = ['>', '<'].indexOf(lastChars) !== -1;
+    const len = endsWithGtLt ? url.length - 1 : url.length;
+    const anchor = document.createElement('a');
+    url = url.slice(0, len);
+    anchor.href = url.startsWith('www.') ? 'https://' + url : url;
+    anchor.rel = 'noopener';
+    anchor.target = '_blank';
+    anchor.appendChild(document.createTextNode(url.slice(0, len)));
+    nodes.push(anchor);
+    lastIndex = match.index + len;
+  }
+  if (lastIndex !== content.length) {
+    nodes.push(
+      document.createTextNode(content.slice(lastIndex, content.length))
     );
-  });
+  }
+  return nodes;
+}
+
+/**
+ * Split a shallow node (node without nested nodes inside) at a given text content position.
+ *
+ * @param node the shallow node to be split
+ * @param at the position in textContent at which the split should occur
+ */
+function splitShallowNode<T extends Node>(
+  node: T,
+  at: number
+): { pre: T; post: T } {
+  const pre = node.cloneNode() as T;
+  pre.textContent = node.textContent?.substr(0, at) as string;
+  const post = node.cloneNode() as T;
+  post.textContent = node.textContent?.substr(at) as string;
+  return {
+    pre: pre,
+    post: post
+  };
 }
 
 /**
@@ -530,7 +570,92 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
 
   // Set the sanitized content for the host node.
   const pre = document.createElement('pre');
-  pre.innerHTML = autolink(content);
+  pre.innerHTML = content;
+
+  const preTextContent = pre.textContent;
+
+  if (preTextContent) {
+    // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
+    const linkedNodes = autolink(preTextContent);
+    let inAnchorElement = false;
+
+    const combinedNodes: (HTMLAnchorElement | Text | HTMLSpanElement)[] = [];
+    const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
+
+    while (preNodes.length && linkedNodes.length) {
+      // Use non-null assertions to workaround TypeScript context awareness limitation
+      // (if any of the arrays were empty, we would not enter the body of the loop).
+      let preNode = preNodes.shift()!;
+      let linkNode = linkedNodes.shift()!;
+
+      // This should never happen because we modify the arrays in flight so they should end simultaneously,
+      // but this makes the coding assistance happy and might make it easier to conceptualize.
+      if (typeof preNode === 'undefined') {
+        combinedNodes.push(linkNode);
+        break;
+      }
+      if (typeof linkNode === 'undefined') {
+        combinedNodes.push(preNode);
+        break;
+      }
+
+      let preLen = preNode.textContent?.length;
+      let linkLen = linkNode.textContent?.length;
+      if (preLen && linkLen) {
+        if (preLen > linkLen) {
+          // Split pre node and only keep the shorter part
+          let { pre: keep, post: postpone } = splitShallowNode(
+            preNode,
+            linkLen
+          );
+          preNodes.unshift(postpone);
+          preNode = keep;
+        } else if (linkLen > preLen) {
+          let { pre: keep, post: postpone } = splitShallowNode(
+            linkNode,
+            preLen
+          );
+          linkedNodes.unshift(postpone);
+          linkNode = keep;
+        }
+      }
+
+      const lastCombined = combinedNodes[combinedNodes.length - 1];
+
+      // If we are already in an anchor element and the anchor element did not change,
+      // we should insert the node from <pre> which is either Text node or coloured span Element
+      // into the anchor content as a child
+      if (
+        inAnchorElement &&
+        (linkNode as HTMLAnchorElement).href ===
+          (lastCombined as HTMLAnchorElement).href
+      ) {
+        lastCombined.appendChild(preNode);
+      } else {
+        // the `linkNode` is either Text or AnchorElement;
+        const isAnchor = linkNode.nodeType !== Node.TEXT_NODE;
+        // if we are NOT about to start an anchor element, just add the pre Node
+        if (!isAnchor) {
+          combinedNodes.push(preNode);
+          inAnchorElement = false;
+        } else {
+          // otherwise start a new anchor; the contents of the `linkNode` and `preNode` should be the same,
+          // so we just put the neatly formatted `preNode` inside the anchor node (`linkNode`)
+          // and append that to combined nodes.
+          linkNode.textContent = '';
+          linkNode.appendChild(preNode);
+          combinedNodes.push(linkNode);
+          inAnchorElement = true;
+        }
+      }
+    }
+    // TODO: replace with `.replaceChildren()` once the target ES version allows it
+    pre.innerHTML = '';
+    for (const child of combinedNodes) {
+      pre.appendChild(child);
+    }
+  }
+
   host.appendChild(pre);
 
   // Return the rendered promise.
