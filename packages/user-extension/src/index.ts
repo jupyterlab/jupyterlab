@@ -23,7 +23,8 @@ import {
   SettingsWidget,
   User,
   UserMenu,
-  UserPanel
+  UserSidePanel,
+  SharePanel
 } from '@jupyterlab/user';
 import { Menu, MenuBar, Widget } from '@lumino/widgets';
 
@@ -135,7 +136,7 @@ const userSettingsPlugin: JupyterFrontEndPlugin<void> = {
   }
 };
 
-const userPanelPlugin: JupyterFrontEndPlugin<UserPanel> = {
+const userPanelPlugin: JupyterFrontEndPlugin<UserSidePanel> = {
   id: '@jupyterlab/user-extension:userPanel',
   autoStart: true,
   requires: [ICurrentUser, IEditorTracker, INotebookTracker],
@@ -145,9 +146,15 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserPanel> = {
     user: User,
     editor: IEditorTracker,
     notebook: INotebookTracker
-  ): UserPanel => {
-    const userPanel = new UserPanel(user);
+  ): UserSidePanel => {
+    
+    
+
+    const userPanel = new UserSidePanel();
     app.shell.add(userPanel, 'left', { rank: 300 });
+
+    const sharePanel = new SharePanel(user);
+    userPanel.addWidget(sharePanel);
 
     const collaboratorsChanged = async (
       tracker: IEditorTracker | INotebookTracker
@@ -157,7 +164,8 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserPanel> = {
         tracker.currentWidget === null ||
         tracker.currentWidget.context.contentsModel === null
       ) {
-        userPanel.collaborators = [];
+        sharePanel.documentName = "";
+        sharePanel.collaborators = [];
         return;
       }
 
@@ -167,7 +175,8 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserPanel> = {
       } else if (tracker.currentWidget.context.contentsModel.type === 'file') {
         model = tracker.currentWidget.context.model.sharedModel as YFile;
       } else {
-        userPanel.collaborators = [];
+        sharePanel.documentName = tracker.currentWidget.context.localPath;
+        sharePanel.collaborators = [];
         return;
       }
 
@@ -188,7 +197,9 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserPanel> = {
 
           collaborators.push(collaborator);
         });
-        userPanel.collaborators = collaborators;
+        const name = tracker.currentWidget ? tracker.currentWidget.context.localPath : "";
+        sharePanel.documentName = name;
+        sharePanel.collaborators = collaborators;
       };
 
       model.awareness.on('change', stateChanged);

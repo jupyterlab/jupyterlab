@@ -1,0 +1,81 @@
+/************************************************************
+                      Main Panel
+*************************************************************/
+
+.jp-UserSidePanel {
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-UserSidePanel .lm-AccordionPanel-title {
+  box-sizing: border-box;
+  background: #e5e5e500;
+  border-bottom: none;
+  font: 12px Helvetica, Arial, sans-serif;
+  min-height: 22px;
+  max-height: 22px;
+  min-width: 35px;
+  line-height: 25px;
+  margin: 0px;
+  display: flex;
+  background-color: var(--jp-layout-color2);
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+  border-top: solid var(--jp-border-width) var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+
+.lm-AccordionPanel-title .lm-AccordionPanel-titleCollapser {
+  transform: rotate(-90deg);
+  margin-top: 3px;
+  height: 16px;
+}
+
+.lm-AccordionPanel-title.lm-mod-expanded .lm-AccordionPanel-titleCollapser {
+  transform: rotate(0deg);
+}
+
+.lm-AccordionPanel-title .lm-AccordionPanel-titleLabel {
+  user-select: none;
+  line-height: 22px;
+}
+
+/************************************************************
+                      Share Panel
+*************************************************************/
+.jp-SharePanel {
+  margin: 4px;
+}
+
+.jp-SharePanel-Link {
+  width: 100%;
+  margin-bottom: 5px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.jp-SharePanel-Link button {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: var(--jp-brand-color2);
+  border: 0;
+  box-shadow: inset 0 0 0 1px rgb(16 22 26 / 20%), inset 0 -1px 0 rgb(16 22 26 / 10%);
+}
+
+.jp-SharePanel-Link-Icon {
+  margin: 4px;
+  margin-bottom: 0px;
+  color: var(--jp-ui-font-color1);
+  fill: var(--jp-ui-font-color1);
+}
+
+.jp-SharePanel-Link span {
+  color: var(--jp-ui-font-color1);
+  fill: var(--jp-ui-font-color1);
+}
+
+.jp-SharePanel h4 {
+  margin: 2px;
+}

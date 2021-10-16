@@ -32,6 +32,7 @@ from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
 from .handlers.yjs_echo_ws import YjsEchoWebSocket
+from .handlers.link_share import RouteHandler
 
 # TODO: remove when oldest compatible jupyterlab_server contains license tooling
 try:
@@ -738,6 +739,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         # Yjs Echo WebSocket handler
         yjs_echo_handler = (r"/api/yjs/(.*)", YjsEchoWebSocket)
         handlers.append(yjs_echo_handler)
+
+        # Link share handler
+        link_handlers = (r"/api/share", RouteHandler)
+        handlers.append(link_handlers)
 
         errored = False
 

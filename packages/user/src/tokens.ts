@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { User } from './model';
-import { Menu } from '@lumino/widgets';
+import { Menu, AccordionPanel } from '@lumino/widgets';
 import { ISignal } from '@lumino/signaling';
 import { Token } from '@lumino/coreutils';
 
@@ -12,7 +12,7 @@ export const ICurrentUser = new Token<IUser>('jupyterlab-auth:user');
 
 export const IUserMenu = new Token<Menu>('jupyterlab-auth:userMenu');
 
-export const IUserPanel = new Token<Menu>('jupyterlab-auth:userPanel');
+export const IUserPanel = new Token<AccordionPanel>('jupyterlab-auth:userPanel');
 
 export interface IUser {
   readonly name: string;

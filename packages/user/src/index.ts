@@ -6,7 +6,9 @@
  */
 
 export * from './tokens';
-export * from './utils';
 export * from './model';
-export * from './widget';
+export * from './menu';
 export * from './settings';
+export * from './sidepanel';
+export * from './components';
+export * from './utils';

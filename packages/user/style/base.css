@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 @import url('./settings.css');
+@import url('./sidepanel.css');
 
 .jp-MenuBar-anonymousIcon {
   width: 25px;
