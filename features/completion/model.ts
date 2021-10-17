@@ -187,9 +187,7 @@ export namespace GenericCompleterModel {
   };
 }
 
-export class LSPCompleterModel extends GenericCompleterModel<
-  LazyCompletionItem
-> {
+export class LSPCompleterModel extends GenericCompleterModel<LazyCompletionItem> {
   protected getFilterText(item: LazyCompletionItem): string {
     if (item.filterText) {
       return item.filterText;

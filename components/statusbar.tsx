@@ -322,9 +322,8 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
 
     const missing_languages = this.model.missing_languages.map(
       (language, i) => {
-        const specs_for_missing = this.model.language_server_manager.getMatchingSpecs(
-          { language }
-        );
+        const specs_for_missing =
+          this.model.language_server_manager.getMatchingSpecs({ language });
         return (
           <div key={i} className={'lsp-missing-server'}>
             {language}
@@ -500,7 +499,8 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
 }
 
 export class StatusButtonExtension
-  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
+{
   constructor(
     private options: {
       language_server_manager: LanguageServerManager;
@@ -519,7 +519,8 @@ export class StatusButtonExtension
       displayText,
       this.options.translator_bundle
     );
-    status_bar_item.model.language_server_manager = this.options.language_server_manager;
+    status_bar_item.model.language_server_manager =
+      this.options.language_server_manager;
     status_bar_item.model.connection_manager = this.options.connection_manager;
     return status_bar_item;
   }
@@ -665,9 +666,10 @@ export namespace LSPStatus {
 
       for (let document of documents.values()) {
         let language = document.language.toLocaleLowerCase();
-        let server_ids = this._connection_manager.language_server_manager.getMatchingServers(
-          { language: document.language }
-        );
+        let server_ids =
+          this._connection_manager.language_server_manager.getMatchingServers({
+            language: document.language
+          });
         if (server_ids.length === 0) {
           continue;
         }
@@ -739,9 +741,10 @@ export namespace LSPStatus {
 
       detected_documents.forEach((document, uri) => {
         let connection = this._connection_manager.connections.get(uri);
-        let server_ids = this._connection_manager.language_server_manager.getMatchingServers(
-          { language: document.language }
-        );
+        let server_ids =
+          this._connection_manager.language_server_manager.getMatchingServers({
+            language: document.language
+          });
 
         if (server_ids.length !== 0) {
           documents_with_known_servers.add(document);

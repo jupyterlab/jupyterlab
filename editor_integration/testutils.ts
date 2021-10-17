@@ -205,7 +205,8 @@ type TestEnvironmentConstructor = new (...args: any[]) => ITestEnvironment;
 function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
   return class FeatureTestEnvironment
     extends Base
-    implements IFeatureTestEnvironment {
+    implements IFeatureTestEnvironment
+  {
     _connections: Map<CodeMirrorIntegration, LSPConnection>;
 
     init() {

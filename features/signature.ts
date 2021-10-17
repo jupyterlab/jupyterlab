@@ -196,9 +196,8 @@ export class SignatureCM extends CodeMirrorIntegration {
     }
     const newRootPosition = this.virtual_editor.get_cursor_position();
     const previousPosition = this.lab_integration.tooltip.position;
-    let newEditorPosition = this.virtual_editor.root_position_to_editor(
-      newRootPosition
-    );
+    let newEditorPosition =
+      this.virtual_editor.root_position_to_editor(newRootPosition);
     // hide tooltip if exceeded position
     if (
       newEditorPosition.line === previousPosition.line &&
@@ -343,9 +342,8 @@ export class SignatureCM extends CodeMirrorIntegration {
       );
       return;
     }
-    let editor_position = this.virtual_editor.root_position_to_editor(
-      root_position
-    );
+    let editor_position =
+      this.virtual_editor.root_position_to_editor(root_position);
     let language = this.get_language_at(editor_position, cm_editor);
     let markup = this.get_markup_for_signature_help(response, language);
 
@@ -374,7 +372,8 @@ export class SignatureCM extends CodeMirrorIntegration {
 
   get signatureCharacters() {
     if (!this._signatureCharacters?.length) {
-      this._signatureCharacters = this.connection.getLanguageSignatureCharacters();
+      this._signatureCharacters =
+        this.connection.getLanguageSignatureCharacters();
     }
     return this._signatureCharacters;
   }
@@ -423,9 +422,8 @@ export class SignatureCM extends CodeMirrorIntegration {
     }
     this.signatureCharacter = root_position;
 
-    let virtual_position = this.virtual_editor.root_position_to_virtual_position(
-      root_position
-    );
+    let virtual_position =
+      this.virtual_editor.root_position_to_virtual_position(root_position);
 
     return this.connection.clientRequests['textDocument/signatureHelp']
       .request({

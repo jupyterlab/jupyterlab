@@ -143,12 +143,13 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
   }
 }
 
-export const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
-  id: PLUGIN_ID + ':ILSPAdapterManager',
-  activate: app => {
-    let shell = app.shell as ILabShell | IRetroShell;
-    return new WidgetAdapterManager(shell);
-  },
-  provides: ILSPAdapterManager,
-  autoStart: true
-};
+export const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> =
+  {
+    id: PLUGIN_ID + ':ILSPAdapterManager',
+    activate: app => {
+      let shell = app.shell as ILabShell | IRetroShell;
+      return new WidgetAdapterManager(shell);
+    },
+    provides: ILSPAdapterManager,
+    autoStart: true
+  };

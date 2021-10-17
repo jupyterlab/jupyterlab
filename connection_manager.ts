@@ -392,11 +392,10 @@ export namespace DocumentConnectionManager {
       : virtualDocumentsUri;
 
     // for now take the best match only
-    const matchingServers = Private.getLanguageServerManager().getMatchingServers(
-      {
+    const matchingServers =
+      Private.getLanguageServerManager().getMatchingServers({
         language
-      }
-    );
+      });
     const language_server_id =
       matchingServers.length === 0 ? null : matchingServers[0];
 

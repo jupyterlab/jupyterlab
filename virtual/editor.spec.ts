@@ -92,54 +92,48 @@ describe('VirtualEditor', () => {
       // The first (Python) line in the first block
       let root_position = { line: 0, ch: 0 } as IRootPosition;
       let document = editor.document_at_root_position(root_position);
-      let virtual_position = editor.root_position_to_virtual_position(
-        root_position
-      );
+      let virtual_position =
+        editor.root_position_to_virtual_position(root_position);
       expect(document).to.equal(editor.virtual_document);
       expect(virtual_position.line).to.equal(0);
 
       // The second (Python | R) line in the first block - Python fragment
       root_position = { line: 1, ch: 0 } as IRootPosition;
       document = editor.document_at_root_position(root_position);
-      virtual_position = editor.root_position_to_virtual_position(
-        root_position
-      );
+      virtual_position =
+        editor.root_position_to_virtual_position(root_position);
       expect(document).to.equal(editor.virtual_document);
       expect(virtual_position.line).to.equal(1);
 
       // The second (Python | R) line in the first block - R fragment
       root_position = { line: 1, ch: 3 } as IRootPosition;
       document = editor.document_at_root_position(root_position);
-      virtual_position = editor.root_position_to_virtual_position(
-        root_position
-      );
+      virtual_position =
+        editor.root_position_to_virtual_position(root_position);
       expect(document).to.not.equal(editor.virtual_document);
       expect(virtual_position.line).to.equal(0);
 
       // The first (Python) line in the second block
       root_position = { line: 2, ch: 0 } as IRootPosition;
       document = editor.document_at_root_position(root_position);
-      virtual_position = editor.root_position_to_virtual_position(
-        root_position
-      );
+      virtual_position =
+        editor.root_position_to_virtual_position(root_position);
       expect(document).to.equal(editor.virtual_document);
       expect(virtual_position.line).to.equal(2 + 2);
 
       // The second (Python | R) line in the second block - Python fragment
       root_position = { line: 3, ch: 0 } as IRootPosition;
       document = editor.document_at_root_position(root_position);
-      virtual_position = editor.root_position_to_virtual_position(
-        root_position
-      );
+      virtual_position =
+        editor.root_position_to_virtual_position(root_position);
       expect(document).to.equal(editor.virtual_document);
       expect(virtual_position.line).to.equal(2 + 2 + 1);
 
       // The second (Python | R) line in the second block - R fragment
       root_position = { line: 3, ch: 3 } as IRootPosition;
       document = editor.document_at_root_position(root_position);
-      virtual_position = editor.root_position_to_virtual_position(
-        root_position
-      );
+      virtual_position =
+        editor.root_position_to_virtual_position(root_position);
       expect(document).to.not.equal(editor.virtual_document);
       // 0 + 1 (next line) + 2 (between-block spacing)
       expect(virtual_position.line).to.equal(1 + 2);

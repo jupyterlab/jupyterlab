@@ -349,9 +349,8 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   }
 
   private get_cell_at(pos: IVirtualPosition): Cell {
-    let ce_editor = this.virtual_editor.virtual_document.get_editor_at_virtual_line(
-      pos
-    );
+    let ce_editor =
+      this.virtual_editor.virtual_document.get_editor_at_virtual_line(pos);
     return this.ce_editor_to_cell.get(ce_editor);
   }
 }

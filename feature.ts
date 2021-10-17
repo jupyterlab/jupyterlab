@@ -91,7 +91,7 @@ export class FeatureSettings<T> implements IFeatureSettings<T> {
   }
 
   get composite(): T {
-    return (this.settings.composite as unknown) as T;
+    return this.settings.composite as unknown as T;
   }
 
   set(setting: keyof T, value: any) {

@@ -169,12 +169,13 @@ export class VirtualEditorManager implements ILSPVirtualEditorManager {
   }
 }
 
-export const VIRTUAL_EDITOR_MANAGER: JupyterFrontEndPlugin<ILSPVirtualEditorManager> = {
-  id: PLUGIN_ID + ':ILSPVirtualEditorManager',
-  requires: [],
-  activate: app => {
-    return new VirtualEditorManager();
-  },
-  provides: ILSPVirtualEditorManager,
-  autoStart: true
-};
+export const VIRTUAL_EDITOR_MANAGER: JupyterFrontEndPlugin<ILSPVirtualEditorManager> =
+  {
+    id: PLUGIN_ID + ':ILSPVirtualEditorManager',
+    requires: [],
+    activate: app => {
+      return new VirtualEditorManager();
+    },
+    provides: ILSPVirtualEditorManager,
+    autoStart: true
+  };

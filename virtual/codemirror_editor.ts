@@ -57,9 +57,8 @@ class DocDispatcher implements CodeMirror.Doc {
     options?: CodeMirror.TextMarkerOptions
   ): CodeMirror.TextMarker<CodeMirror.MarkerRange> {
     // TODO: edgecase: from and to in different cells
-    let ce_editor = this.virtual_editor.virtual_document.get_editor_at_source_line(
-      from
-    );
+    let ce_editor =
+      this.virtual_editor.virtual_document.get_editor_at_source_line(from);
     let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
     let notebook_map = this.virtual_editor;
     return cm_editor
@@ -92,7 +91,8 @@ class DocDispatcher implements CodeMirror.Doc {
  * virtual documents representing code in complex entities such as notebooks.
  */
 export class CodeMirrorVirtualEditor
-  implements IVirtualEditor<CodeMirrorEditor>, CodeMirror.Editor {
+  implements IVirtualEditor<CodeMirrorEditor>, CodeMirror.Editor
+{
   // TODO: getValue could be made private in the virtual editor and the virtual editor
   //  could stop exposing the full implementation of CodeMirror but rather hide it inside.
   editor_name: IEditorName = 'CodeMirrorEditor';

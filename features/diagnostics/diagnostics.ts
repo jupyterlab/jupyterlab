@@ -193,8 +193,8 @@ class DiagnosticsPanel {
       execute: () => {
         const row = get_row();
         const diagnostic = row.data.diagnostic;
-        let current = this.content.model.settings.composite
-          .ignoreMessagesPatterns;
+        let current =
+          this.content.model.settings.composite.ignoreMessagesPatterns;
         this.content.model.settings.set('ignoreMessagesPatterns', [
           ...current,
           escapeRegExp(diagnostic.message)
@@ -414,9 +414,10 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     const ignoredDiagnosticsCodes = new Set(
       this.settings.composite.ignoreCodes
     );
-    const ignoredMessagesRegExp = this.settings.composite.ignoreMessagesPatterns.map(
-      pattern => new RegExp(pattern)
-    );
+    const ignoredMessagesRegExp =
+      this.settings.composite.ignoreMessagesPatterns.map(
+        pattern => new RegExp(pattern)
+      );
 
     return diagnostics.filter(diagnostic => {
       let code = diagnostic.code;
@@ -486,12 +487,10 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
         let document: VirtualDocument;
         try {
           // assuming that we got a response for this document
-          let start_in_root = this.transform_virtual_position_to_root_position(
-            start
-          );
-          document = this.virtual_editor.document_at_root_position(
-            start_in_root
-          );
+          let start_in_root =
+            this.transform_virtual_position_to_root_position(start);
+          document =
+            this.virtual_editor.document_at_root_position(start_in_root);
         } catch (e) {
           this.console.warn(
             `Could not place inspections from ${response.uri}`,
@@ -535,9 +534,8 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
         const severity = DiagnosticSeverity[highest_severity_code];
 
         let ce_editor = document.get_editor_at_virtual_line(start);
-        let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(
-          ce_editor
-        );
+        let cm_editor =
+          this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
 
         let start_in_editor = document.transform_virtual_to_editor(start);
         let end_in_editor: IEditorPosition;

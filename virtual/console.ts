@@ -78,7 +78,8 @@ class FloatingConsole implements ILogConsoleImplementation {
  * Used both as a console implementation, and as a dummy ILSPLogConsole
  */
 export class BrowserConsole
-  implements ILogConsoleImplementation, ILSPLogConsole {
+  implements ILogConsoleImplementation, ILSPLogConsole
+{
   debug = window.console.debug.bind(window.console);
   log = window.console.log.bind(window.console);
   warn = window.console.warn.bind(window.console);

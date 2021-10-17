@@ -22,12 +22,13 @@ export class CodeExtractorsManager implements ILSPCodeExtractorsManager {
   }
 }
 
-export const CODE_EXTRACTORS_MANAGER: JupyterFrontEndPlugin<ILSPCodeExtractorsManager> = {
-  id: ILSPCodeExtractorsManager.name,
-  requires: [],
-  activate: app => {
-    return new CodeExtractorsManager();
-  },
-  provides: ILSPCodeExtractorsManager,
-  autoStart: true
-};
+export const CODE_EXTRACTORS_MANAGER: JupyterFrontEndPlugin<ILSPCodeExtractorsManager> =
+  {
+    id: ILSPCodeExtractorsManager.name,
+    requires: [],
+    activate: app => {
+      return new CodeExtractorsManager();
+    },
+    provides: ILSPCodeExtractorsManager,
+    autoStart: true
+  };

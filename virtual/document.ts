@@ -556,9 +556,8 @@ export class VirtualDocument {
 
   decode_code_block(raw_code: string): string {
     // TODO: add back previously extracted foreign code
-    let cell_override = this.cell_magics_overrides.reverse.override_for(
-      raw_code
-    );
+    let cell_override =
+      this.cell_magics_overrides.reverse.override_for(raw_code);
     if (cell_override != null) {
       return cell_override;
     } else {
@@ -678,9 +677,8 @@ export class VirtualDocument {
   }
 
   get last_line() {
-    const lines_in_last_block = this.line_blocks[
-      this.line_blocks.length - 1
-    ].split('\n');
+    const lines_in_last_block =
+      this.line_blocks[this.line_blocks.length - 1].split('\n');
     return lines_in_last_block[lines_in_last_block.length - 1];
   }
 
