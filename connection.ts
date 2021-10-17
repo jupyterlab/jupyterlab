@@ -54,7 +54,8 @@ export namespace Method {
   export enum ServerRequest {
     REGISTER_CAPABILITY = 'client/registerCapability',
     SHOW_MESSAGE_REQUEST = 'window/showMessageRequest',
-    UNREGISTER_CAPABILITY = 'client/unregisterCapability'
+    UNREGISTER_CAPABILITY = 'client/unregisterCapability',
+    WORKSPACE_CONFIGURATION = 'workspace/configuration'
   }
 
   /** Client requests */
@@ -95,12 +96,14 @@ export interface IServerRequestParams {
   [Method.ServerRequest.REGISTER_CAPABILITY]: lsp.RegistrationParams;
   [Method.ServerRequest.SHOW_MESSAGE_REQUEST]: lsp.ShowMessageRequestParams;
   [Method.ServerRequest.UNREGISTER_CAPABILITY]: lsp.UnregistrationParams;
+  [Method.ServerRequest.WORKSPACE_CONFIGURATION]: lsp.ConfigurationParams;
 }
 
 export interface IServerResult {
   [Method.ServerRequest.REGISTER_CAPABILITY]: void;
   [Method.ServerRequest.SHOW_MESSAGE_REQUEST]: lsp.MessageActionItem | null;
   [Method.ServerRequest.UNREGISTER_CAPABILITY]: void;
+  [Method.ServerRequest.WORKSPACE_CONFIGURATION]: any[];
 }
 
 export interface IClientRequestParams {
@@ -464,6 +467,17 @@ export class LSPConnection extends LspWsConnection {
         );
       }
     );
+
+    this.serverRequests['workspace/configuration'].setHandler(async params => {
+      return params.items.map(item => {
+        // LSP: "If the client can’t provide a configuration setting for a given scope
+        // then `null` needs to be present in the returned array."
+
+        // for now we do not support configuration, but yaml server does not respect
+        // client capability so we have a handler just for that
+        return null;
+      });
+    });
   }
 
   public sendSelectiveChange(
