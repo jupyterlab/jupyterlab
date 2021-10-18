@@ -602,6 +602,9 @@ export class Context<
       if (this._useCRLF) {
         content = content.replace(/\n/g, '\r\n');
       }
+      if (this._useCR) {
+        content = content.replace(/\n/g, '\r');
+      }
     }
 
     const options = {
@@ -686,11 +689,15 @@ export class Context<
           let content = contents.content;
           // Convert line endings if necessary, marking the file
           // as dirty.
-          if (content.indexOf('\r') !== -1) {
+          if (content.indexOf('\r\n') !== -1) {
             this._useCRLF = true;
             content = content.replace(/\r\n/g, '\n');
+          } else if (content.indexOf('\r') !== -1) {
+            this._useCR = true;
+            content = content.replace(/\r/g, '\n');
           } else {
             this._useCRLF = false;
+            this._useCR = false;
           }
           model.fromString(content);
           if (initializeModel) {
@@ -888,6 +895,7 @@ or load the version on disk (revert)?`,
   private _modelDB: IModelDB;
   private _path = '';
   private _useCRLF = false;
+  private _useCR = false;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;
   private _readyPromise: Promise<void>;
