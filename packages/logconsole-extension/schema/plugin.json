@@ -30,7 +30,14 @@
       }
     ],
     "context": [
-      { "command": "logconsole:open", "selector": ".jp-Notebook", "rank": 60 }
+      {
+        "command": "logconsole:open",
+        "type": "command",
+        "disabled": false,
+        "args": {},
+        "selector": ".jp-Notebook",
+        "rank": 60
+      }
     ]
   },
   "title": "Log Console",

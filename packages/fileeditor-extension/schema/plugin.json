@@ -130,6 +130,7 @@
       {
         "command": "fileeditor:undo",
         "type": "command",
+        "args": {},
         "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 1
@@ -137,6 +138,7 @@
       {
         "command": "fileeditor:redo",
         "type": "command",
+        "args": {},
         "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 2
@@ -144,6 +146,7 @@
       {
         "command": "fileeditor:cut",
         "type": "command",
+        "args": {},
         "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 3
@@ -151,6 +154,7 @@
       {
         "command": "fileeditor:copy",
         "type": "command",
+        "args": {},
         "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 4
@@ -158,6 +162,7 @@
       {
         "command": "fileeditor:paste",
         "type": "command",
+        "args": {},
         "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 5
@@ -165,6 +170,7 @@
       {
         "command": "fileeditor:select-all",
         "type": "command",
+        "args": {},
         "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 6
@@ -172,6 +178,7 @@
       {
         "command": "fileeditor:create-console",
         "type": "command",
+        "args": {},
         "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 10
@@ -179,6 +186,7 @@
       {
         "command": "fileeditor:markdown-preview",
         "type": "command",
+        "args": {},
         "disabled": false,
         "selector": ".jp-FileEditor",
         "rank": 11

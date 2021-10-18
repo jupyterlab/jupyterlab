@@ -5,12 +5,16 @@
     "context": [
       {
         "command": "filebrowser:download",
+        "type": "command",
+        "args": {},
         "disabled": false,
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
         "rank": 9
       },
       {
         "command": "filebrowser:copy-download-link",
+        "type": "command",
+        "args": {},
         "disabled": false,
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
         "rank": 13

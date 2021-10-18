@@ -80,6 +80,10 @@ export const SettingsFormEditor = ({
 }: IProps) => {
   const [formData, setFormData] = React.useState(settings.user);
   const [isModified, setIsModified] = React.useState(settings.isModified);
+  const [hidden, setHidden] = React.useState(
+    settings.id === '@jupyterlab/application-extension:context-menu' ||
+      settings.id === '@jupyterlab/mainmenu-extension:plugin'
+  );
 
   const trans = translator || nullTranslator;
   const _trans = trans.load('jupyterlab');
@@ -131,7 +135,12 @@ export const SettingsFormEditor = ({
       );
   };
 
-  return (
+  return hidden ? (
+    <div onClick={() => setHidden(false)}>
+      <h3> {settings.schema.title} </h3>
+      <p> Very large field. Render settings? </p>
+    </div>
+  ) : (
     <div>
       {isModified ? (
         <button className="jp-RestoreButton" onClick={reset}>
