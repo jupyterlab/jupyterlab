@@ -11,9 +11,12 @@ import Form, { FieldTemplateProps, UiSchema } from '@rjsf/core';
 import { JSONSchema7 } from 'json-schema';
 import { JSONExt } from '@lumino/coreutils';
 import { reduce } from '@lumino/algorithm';
+import { PluginList } from './pluginlist';
+import { ISignal } from '@lumino/signaling';
 interface IProps {
   settings: Settings;
   renderers: { [id: string]: any };
+  handleSelectSignal: ISignal<PluginList, string>;
   translator?: ITranslator;
 }
 
@@ -75,6 +78,7 @@ const CustomTemplate = (props: FieldTemplateProps) => {
 export const SettingsFormEditor = ({
   settings,
   renderers,
+  handleSelectSignal,
   translator
 }: IProps) => {
   const [formData, setFormData] = React.useState(settings.user);
@@ -92,6 +96,12 @@ export const SettingsFormEditor = ({
       };
     }
   }
+
+  handleSelectSignal.connect((list: PluginList, id: string) => {
+    if (id === settings.id) {
+      setHidden(false);
+    }
+  });
 
   /**
    * Handler for the "Restore to defaults" button - clears all

@@ -38,7 +38,6 @@ const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
  * A list of plugins with editable settings.
  */
 export class PluginList extends ReactWidget {
-  private _filter: (item: ISettingRegistry.IPlugin) => boolean;
   /**
    * Create a new plugin list.
    */
@@ -95,6 +94,7 @@ export class PluginList extends ReactWidget {
   }
   set selection(selection: string) {
     this._selection = selection;
+    this._handleSelectSignal.emit(selection);
     this.update();
   }
 
@@ -129,6 +129,10 @@ export class PluginList extends ReactWidget {
     }
   }
 
+  get handleSelectSignal(): ISignal<this, string> {
+    return this._handleSelectSignal;
+  }
+
   /**
    * Handle `'update-request'` messages.
    */
@@ -157,7 +161,7 @@ export class PluginList extends ReactWidget {
     this._confirm(id)
       .then(() => {
         this._scrollTop = this.scrollTop;
-        this._selection = id!;
+        this.selection = id!;
         this._changed.emit(undefined);
         this.update();
       })
@@ -286,6 +290,8 @@ export class PluginList extends ReactWidget {
 
   protected translator: ITranslator;
   private _changed = new Signal<this, void>(this);
+  private _filter: (item: ISettingRegistry.IPlugin) => boolean;
+  private _handleSelectSignal = new Signal<this, string>(this);
   private _modifiedPlugins: ISettingRegistry.IPlugin[] = [];
   private _allPlugins: ISettingRegistry.IPlugin[] = [];
   private _confirm: (id: string) => Promise<void>;

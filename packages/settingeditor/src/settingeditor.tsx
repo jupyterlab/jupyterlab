@@ -13,7 +13,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import { ISignal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import React from 'react';
 import { PluginEditor } from './plugineditor';
@@ -78,7 +78,7 @@ export class SettingEditor extends Widget {
           settings={settings as Settings[]}
           editorRegistry={editorRegistry}
           editorFactory={editorFactory}
-          handleSelectSignal={this._handleSelectSignal}
+          handleSelectSignal={this._list.handleSelectSignal}
           onSelect={(id: string) => (this._list.selection = id)}
         />
       ));
@@ -112,7 +112,6 @@ export class SettingEditor extends Widget {
     }));
 
     const confirm = (id: string) => {
-      this._handleSelectSignal.emit(id);
       const newSettings = this._settings.find(plugin => plugin.id === id);
       if (newSettings) {
         editor.settings = newSettings;
@@ -384,7 +383,6 @@ export class SettingEditor extends Widget {
 
   protected translator: ITranslator;
   private _editor: PluginEditor;
-  private _handleSelectSignal = new Signal<this, string>(this);
   private _settingsPanel: ReactWidget;
   private _isRawEditor: boolean = false;
   private _settings: Settings[];

@@ -9,8 +9,8 @@ import { Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { ISignal } from '@lumino/signaling';
 import React from 'react';
-import { SettingEditor } from './settingeditor';
 import { SettingsFormEditor } from './SettingsFormEditor';
+import { PluginList } from './pluginlist';
 
 interface ISettingsPanelProps {
   /**
@@ -36,7 +36,7 @@ interface ISettingsPanelProps {
   /**
    * Signal that fires when a selection is made in the plugin list.
    */
-  handleSelectSignal?: ISignal<SettingEditor, string>;
+  handleSelectSignal: ISignal<PluginList, string>;
 
   /**
    * The application language translator.
@@ -66,7 +66,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   const wrapperRef: React.RefObject<HTMLDivElement> = React.useRef(null);
 
   // Scroll to the plugin when a selection is made in the left panel.
-  handleSelectSignal?.connect?.((editor, pluginId) =>
+  handleSelectSignal?.connect?.((list, pluginId) =>
     editorRefs[pluginId].current?.scrollIntoView()
   );
 
@@ -113,6 +113,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
             <SettingsFormEditor
               settings={pluginSettings}
               renderers={editorRegistry.renderers}
+              handleSelectSignal={handleSelectSignal}
             />
           </div>
         );
