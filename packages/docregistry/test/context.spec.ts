@@ -312,6 +312,24 @@ describe('docregistry/context', () => {
         expect(model.content).toBe('foo\nbar');
       });
 
+      it('should should preserve CR line endings upon save', async () => {
+        await context.initialize(true);
+        await manager.contents.save(context.path, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo\rbar'
+        });
+        await context.revert();
+        await context.save();
+        const opts: Contents.IFetchOptions = {
+          format: factory.fileFormat,
+          type: factory.contentType,
+          content: true
+        };
+        const model = await manager.contents.get(context.path, opts);
+        expect(model.content).toBe('foo\rbar');
+      });
+
       it('should should preserve CRLF line endings upon save', async () => {
         await context.initialize(true);
         await manager.contents.save(context.path, {
