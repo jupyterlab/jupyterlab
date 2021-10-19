@@ -53,7 +53,6 @@ const CustomTemplate = (props: FieldTemplateProps) => {
     !schema.properties &&
     schema.type !== 'array' &&
     !JSONExt.deepEqual(formData, defaultValue);
-  console.log(schemaId);
   return (
     <div
       className={`form-group ${
@@ -62,7 +61,7 @@ const CustomTemplate = (props: FieldTemplateProps) => {
     >
       {isModified ? <div className="jp-modifiedIndicator" /> : undefined}
       <div>
-        {displayLabel ? <h3> {label} </h3> : undefined}
+        {displayLabel && id !== 'root' ? <h3> {label} </h3> : undefined}
         {children}
       </div>
     </div>
@@ -80,10 +79,7 @@ export const SettingsFormEditor = ({
 }: IProps) => {
   const [formData, setFormData] = React.useState(settings.user);
   const [isModified, setIsModified] = React.useState(settings.isModified);
-  const [hidden, setHidden] = React.useState(
-    settings.id === '@jupyterlab/application-extension:context-menu' ||
-      settings.id === '@jupyterlab/mainmenu-extension:plugin'
-  );
+  const [hidden, setHidden] = React.useState(true);
 
   const trans = translator || nullTranslator;
   const _trans = trans.load('jupyterlab');
@@ -135,35 +131,40 @@ export const SettingsFormEditor = ({
       );
   };
 
-  return hidden ? (
-    <div onClick={() => setHidden(false)}>
-      <h3> {settings.schema.title} </h3>
-      <p> Very large field. Render settings? </p>
-    </div>
-  ) : (
+  return (
     <div>
-      {isModified ? (
-        <button className="jp-RestoreButton" onClick={reset}>
-          {' '}
-          Restore to Defaults{' '}
-        </button>
-      ) : undefined}
-      <Form
-        schema={settings.schema as JSONSchema7}
-        formData={formData}
-        FieldTemplate={CustomTemplate}
-        uiSchema={uiSchema}
-        fields={renderers}
-        formContext={{
-          settings: settings,
-          translator: _trans
+      <div
+        className="jp-SettingsHeader"
+        onClick={() => {
+          setHidden(!hidden);
         }}
-        liveValidate
-        onChange={e => {
-          setFormData(e.formData);
-          handleChange(e.formData);
-        }}
-      />
+      >
+        <h2> {settings.schema.title} </h2>
+        {isModified ? (
+          <button className="jp-RestoreButton" onClick={reset}>
+            {' '}
+            Restore to Defaults{' '}
+          </button>
+        ) : undefined}
+      </div>
+      {hidden ? undefined : (
+        <Form
+          schema={settings.schema as JSONSchema7}
+          formData={formData}
+          FieldTemplate={CustomTemplate}
+          uiSchema={uiSchema}
+          fields={renderers}
+          formContext={{
+            settings: settings,
+            translator: _trans
+          }}
+          noValidate={true}
+          onChange={e => {
+            setFormData(e.formData);
+            handleChange(e.formData);
+          }}
+        />
+      )}
     </div>
   );
 };

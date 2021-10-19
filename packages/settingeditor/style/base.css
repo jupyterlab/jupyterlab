@@ -276,7 +276,7 @@
 }
 
 #setting-editor .form-group {
-  padding: 0 26px 16px 30px;
+  padding: 0 26px 16px 0px;
   display: flex;
 }
 
@@ -328,6 +328,12 @@
 #setting-editor .array-item-remove::after {
   content: 'Remove';
 }
+#setting-editor .array-item button {
+  color: var(--jp-brand-color2);
+}
+#setting-editor .array-item button:disabled {
+  color: var(--jp-brand-color3);
+}
 
 #setting-editor p {
   max-height: 70px;
@@ -349,9 +355,18 @@
 }
 
 #setting-editor legend#root__title {
+  display: none;
+}
+
+#setting-editor .jp-SettingsHeader h2 {
   font-size: var(--jp-content-font-size4);
-  font-weight: var(--jp-content-heading-font-weight);
   color: var(--jp-ui-font-color0);
+  font-weight: 300;
+  margin: 20px;
+}
+
+#setting-editor .jp-SettingsHeader:hover h2 {
+  font-weight: 400;
 }
 
 #setting-editor p {
@@ -386,7 +401,8 @@
   display: flex;
   flex: auto;
   justify-content: space-between;
-  border-bottom: 1px solid var(--jp-border-color2);
+  cursor: pointer;
+  border: 1px solid var(--jp-border-color2);
 }
 
 #setting-editor .jp-PluginList-entry:hover {
@@ -443,7 +459,6 @@
   box-shadow: none;
   font-size: var(--jp-content-font-size2);
   color: var(--jp-brand-color1);
-  position: absolute;
   cursor: pointer;
   top: 30px;
   right: 15px;
