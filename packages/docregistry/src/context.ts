@@ -587,8 +587,8 @@ export class Context<
       content = model.toJSON();
     } else {
       content = model.toString();
-      if (this._useCRLF) {
-        content = content.replace(/\n/g, '\r\n');
+      if (this._lineEnding) {
+        content = content.replace(/\n/g, this._lineEnding);
       }
     }
 
@@ -672,11 +672,14 @@ export class Context<
           let content = contents.content;
           // Convert line endings if necessary, marking the file
           // as dirty.
-          if (content.indexOf('\r') !== -1) {
-            this._useCRLF = true;
+          if (content.indexOf('\r\n') !== -1) {
+            this._lineEnding = '\r\n';
             content = content.replace(/\r\n/g, '\n');
+          } else if (content.indexOf('\r') !== -1) {
+            this._lineEnding = '\r';
+            content = content.replace(/\r/g, '\n');
           } else {
-            this._useCRLF = false;
+            this._lineEnding = null;
           }
           model.fromString(content);
           if (initializeModel) {
@@ -871,7 +874,7 @@ or load the version on disk (revert)?`,
   private _model: T;
   private _modelDB: IModelDB;
   private _path = '';
-  private _useCRLF = false;
+  private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;
   private _readyPromise: Promise<void>;
