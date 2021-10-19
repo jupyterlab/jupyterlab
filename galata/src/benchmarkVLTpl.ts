@@ -29,13 +29,11 @@ function configPerFile(
         transform: [{ filter: `datum.test === '${t}'` }],
         facet: {
           column: { field: 'browser', type: 'nominal' }
-          // row: { field: 'test', type: 'nominal' }
         },
         spec: {
           mark: { type: 'boxplot', extent: 'min-max' },
           encoding: {
             y: { field: comparison, type: 'nominal' },
-            // color: { field: 'file', type: 'nominal', legend: null },
             x: {
               field: 'time',
               title: 'Time (ms)',
