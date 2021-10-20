@@ -12,20 +12,14 @@
   padding: 8px;
 }
 
-[data-jp-theme-light='true']
-  [data-term-theme='inherit']
-  .xterm
-  .xterm-screen
-  canvas,
-[data-term-theme='light'] .xterm .xterm-screen canvas {
-  border: 1px solid white;
+[data-term-theme='inherit'] .xterm .xterm-screen canvas {
+  border: 1px solid var(--jp-layout-color0);
 }
 
-[data-jp-theme-light='false']
-  [data-term-theme='inherit']
-  .xterm
-  .xterm-screen
-  canvas,
+[data-term-theme='light'] .xterm .xterm-screen canvas {
+  border: 1px solid #fff;
+}
+
 [data-term-theme='dark'] .xterm .xterm-screen canvas {
-  border: 1px solid black;
+  border: 1px solid #000;
 }
