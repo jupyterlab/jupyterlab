@@ -17,6 +17,7 @@ export class User implements IUser {
   private _anonymous: boolean;
   private _email?: string;
   private _avatar?: string;
+  private _position?: { cell: number, index: number };
 
   private _familyName?: string;
   private _birthDate?: Date;
@@ -68,6 +69,9 @@ export class User implements IUser {
   }
   get avatar(): string | undefined {
     return this._avatar;
+  }
+  get position(): { cell: number, index: number } | undefined {
+    return this._position;
   }
 
   get familyName(): string | undefined {
@@ -274,6 +278,7 @@ export namespace User {
     anonymous: boolean;
     email?: string;
     avatar?: string;
+    position?: { cell: number, index: number };
 
     familyName?: string;
     birthDate?: string;

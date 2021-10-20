@@ -55,7 +55,8 @@ export namespace UserSidePanel {
 
 export class SharePanel extends ReactWidget {
   private _profile: User;
-  private _collaborators: User.User[];
+  private _collaborators: Map<string, User.User>;
+  private _scrollToCollaborator: (id: string) => {};
 
   constructor(user: User) {
     super();
@@ -64,7 +65,7 @@ export class SharePanel extends ReactWidget {
     this.title.caption = `Share the open notebook to other collaborators`;
 
     this._profile = user;
-    this._collaborators = [];
+    this._collaborators = new Map<string, User.User>();
   }
 
   set documentName(name: string) {
@@ -76,13 +77,16 @@ export class SharePanel extends ReactWidget {
     this.update();
   }
 
-  get collaborators(): User.User[] {
-    return this._collaborators;
+  set scrollToCollaborator(f: any) {
+    this._scrollToCollaborator = f;
   }
 
-  set collaborators(users: User.User[]) {
-    this._collaborators = users;
-    this.update();
+  public getCollaborator(id: string): User.User | undefined {
+    return this._collaborators.get(id);
+  }
+
+  public setCollaborator(collaborator: User.User): void {
+    this._collaborators.set(collaborator.id, collaborator);
   }
 
   private _showLinks = async () => {
@@ -123,6 +127,7 @@ export class SharePanel extends ReactWidget {
   }
 
   render(): JSX.Element {
+
     return (
       <div className="jp-SharePanel">
         <div className="jp-SharePanel-Link">
@@ -139,9 +144,18 @@ export class SharePanel extends ReactWidget {
         <h4>Collaborators</h4>
         <hr />
         <div className="">
-          {this._collaborators.map(user => {
-            if (this._profile.username !== user.username) {
-              return getUserIcon(user);
+          {[...this._collaborators.values()].map( user => {
+            console.debug("Profile:", this._profile.id);
+            console.debug("USER:", user);
+            if (this._profile.id !== user.id) {
+              return (
+                <div
+                  key={user.id}
+                  onClick={() => this._scrollToCollaborator(user.id)}
+                >
+                  {getUserIcon(user)}
+                </div>
+              );
             }
           })}
         </div>

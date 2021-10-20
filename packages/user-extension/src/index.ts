@@ -13,7 +13,7 @@ import {
 import { IStateDB } from '@jupyterlab/statedb';
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { INotebookTracker } from '@jupyterlab/notebook';
+import { INotebookTracker, Notebook } from '@jupyterlab/notebook';
 import { YFile, YNotebook } from '@jupyterlab/shared-models';
 import {
   ICurrentUser,
@@ -27,6 +27,7 @@ import {
   SharePanel
 } from '@jupyterlab/user';
 import { Menu, MenuBar, Widget } from '@lumino/widgets';
+import * as Y from 'yjs';
 
 /**
  * A namespace for command IDs.
@@ -165,7 +166,7 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserSidePanel> = {
         tracker.currentWidget.context.contentsModel === null
       ) {
         sharePanel.documentName = "";
-        sharePanel.collaborators = [];
+        //sharePanel.collaborators = [];
         return;
       }
 
@@ -176,30 +177,55 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserSidePanel> = {
         model = tracker.currentWidget.context.model.sharedModel as YFile;
       } else {
         sharePanel.documentName = tracker.currentWidget.context.localPath;
-        sharePanel.collaborators = [];
+        //sharePanel.collaborators = [];
         return;
       }
 
       const stateChanged = () => {
+        console.debug("CLIENT:",  model.awareness.clientID);
         const state = model.awareness.getStates();
-        const collaborators: User.User[] = [];
-        state.forEach((value, key) => {
-          const collaborator: User.User = {
-            id: value.user.id,
-            anonymous: value.user.anonymous,
-            name: value.user.name,
-            username: value.user.username,
-            initials: value.user.initials,
-            color: value.user.color,
-            email: value.user.email,
-            avatar: value.user.avatar
-          };
 
-          collaborators.push(collaborator);
+        state.forEach((value, key) => {
+          let collaborator = sharePanel.getCollaborator(value.user.id);
+          console.debug(collaborator);
+          if (!collaborator) {
+            collaborator = {
+              id: value.user.id,
+              anonymous: value.user.anonymous,
+              name: value.user.name,
+              username: value.user.username,
+              initials: value.user.initials,
+              color: value.user.color,
+              email: value.user.email,
+              avatar: value.user.avatar
+            };
+          }
+          
+          if (value?.cursor?.head) {
+            console.debug("Cursor:", value.cursor);
+            const pos = Y.createAbsolutePositionFromRelativePosition(JSON.parse(value.cursor.head), model.ydoc);
+            const cell = pos?.type.parent;
+            if (pos && cell) {
+              console.debug("POS:", cell.toJSON());
+              const cellIndex = (model as YNotebook).ycells.toArray().findIndex((item) => {
+                console.debug("Cell:", item.toJSON());
+                return item === cell;
+              });
+              console.debug("Scrolling", cellIndex, pos.index);
+              collaborator.position = { cell: cellIndex, index: pos.index };
+            }
+          }
+          sharePanel.setCollaborator(collaborator);
         });
+
         const name = tracker.currentWidget ? tracker.currentWidget.context.localPath : "";
         sharePanel.documentName = name;
-        sharePanel.collaborators = collaborators;
+        sharePanel.scrollToCollaborator = (id: string): void => {
+          const collaborator = sharePanel.getCollaborator(id)!;
+          console.debug("Move:", collaborator.position);
+          (tracker.currentWidget?.content as Notebook).activeCellIndex = collaborator.position!.cell;
+        }
+        sharePanel.update();
       };
 
       model.awareness.on('change', stateChanged);
