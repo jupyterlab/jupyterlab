@@ -149,7 +149,10 @@ export const SettingsFormEditor = ({
           setHidden(!hidden);
         }}
       >
-        <h2> {settings.schema.title} </h2>
+        <div className="jp-SettingsTitle">
+          <h2> {settings.schema.title} </h2>
+          <h3> {settings.schema.description} </h3>
+        </div>
         {isModified ? (
           <button className="jp-RestoreButton" onClick={reset}>
             {' '}

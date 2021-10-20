@@ -63,7 +63,7 @@
 #setting-editor .jp-PluginList {
   min-width: 175px;
   max-width: 275px;
-  overflow-y: scroll;
+  overflow-y: auto;
   background-color: var(--jp-layout-color2);
 }
 
@@ -276,8 +276,12 @@
 }
 
 #setting-editor .form-group {
-  padding: 0 26px 16px 0px;
+  padding: 0 26px 16px 10px;
   display: flex;
+}
+
+#setting-editor #root__description {
+  display: none;
 }
 
 #setting-editor .checkbox {
@@ -359,9 +363,16 @@
 }
 
 #setting-editor .jp-SettingsHeader h2 {
-  font-size: var(--jp-content-font-size4);
+  font-size: var(--jp-content-font-size3);
   color: var(--jp-ui-font-color0);
   font-weight: 300;
+  margin: 20px;
+}
+
+#setting-editor .jp-SettingsHeader h3 {
+  font-size: var(--jp-content-font-size2);
+  color: var(--jp-ui-font-color1);
+  font-weight: 200;
   margin: 20px;
 }
 
@@ -375,15 +386,6 @@
   margin-left: 5px;
 }
 
-#setting-editor h3 {
-  font-size: var(--jp-content-font-size2);
-  color: var(--jp-ui-font-color0);
-  padding: 5px;
-  font-weight: var(--jp-content-header-font-weight);
-  border-bottom: 1px solid var(--jp-border-color2);
-  margin-bottom: 5px;
-}
-
 #setting-editor legend {
   font-size: var(--jp-content-font-size3);
   color: var(--jp-ui-font-color0);
@@ -391,6 +393,11 @@
   padding: 10px;
   font-weight: var(--jp-content-header-font-weight);
   border-bottom: 1px solid var(--jp-border-color2);
+}
+
+#setting-editor .jp-SettingsTitle {
+  display: flex;
+  align-items: center;
 }
 
 .jp-SettingsForm {
@@ -447,7 +454,7 @@
 }
 
 #setting-editor .jp-SettingsPanel {
-  overflow-y: scroll;
+  overflow-y: auto;
   height: 100%;
 }
 
@@ -460,8 +467,7 @@
   font-size: var(--jp-content-font-size2);
   color: var(--jp-brand-color1);
   cursor: pointer;
-  top: 30px;
-  right: 15px;
+  margin-right: 5px;
 }
 
 #setting-editor .jp-SettingsHeader button:hover {
@@ -498,5 +504,5 @@
 }
 
 #setting-editor .jp-PluginEditor {
-  overflow: scroll;
+  overflow: auto;
 }
