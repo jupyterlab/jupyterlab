@@ -3,6 +3,8 @@ import { SidebarHelper } from './sidebar';
 import { NotebookHelper } from './notebook';
 import { waitForCondition } from '../utils';
 
+const DEBUGGER_ITEM = 'debugger-icon';
+
 /**
  * Debugger Helper
  */
@@ -17,7 +19,10 @@ export class DebuggerHelper {
    * Returns true if debugger toolbar item is enabled, false otherwise
    */
   async isOn(): Promise<boolean> {
-    const item = await this.notebook.getToolbarItem('debugger-icon');
+    if (!(await this.notebook.isAnyActive())) {
+      return false;
+    }
+    const item = await this.notebook.getToolbarItem(DEBUGGER_ITEM);
     if (item) {
       const button = await item.$('button');
       if (button) {
@@ -32,7 +37,7 @@ export class DebuggerHelper {
    */
   async switchOn() {
     await waitForCondition(async () => {
-      const item = await this.notebook.getToolbarItem('debugger-icon');
+      const item = await this.notebook.getToolbarItem(DEBUGGER_ITEM);
       if (item) {
         const button = await item.$('button');
         if (button) {
@@ -40,9 +45,9 @@ export class DebuggerHelper {
         }
       }
       return false;
-    });
+    }, 2000);
     if (!(await this.isOn())) {
-      await this.notebook.clickToolbarItem('debugger-icon');
+      await this.notebook.clickToolbarItem(DEBUGGER_ITEM);
     }
   }
 
@@ -51,7 +56,7 @@ export class DebuggerHelper {
    */
   async switchOff() {
     if (await this.isOn()) {
-      await this.notebook.clickToolbarItem('debugger-icon');
+      await this.notebook.clickToolbarItem(DEBUGGER_ITEM);
     }
   }
 
