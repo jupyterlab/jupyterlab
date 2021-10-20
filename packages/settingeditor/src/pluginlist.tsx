@@ -94,7 +94,6 @@ export class PluginList extends ReactWidget {
   }
   set selection(selection: string) {
     this._selection = selection;
-    this._handleSelectSignal.emit(selection);
     this.update();
   }
 
@@ -161,7 +160,8 @@ export class PluginList extends ReactWidget {
     this._confirm(id)
       .then(() => {
         this._scrollTop = this.scrollTop;
-        this.selection = id!;
+        this._selection = id!;
+        this._handleSelectSignal.emit(id!);
         this._changed.emit(undefined);
         this.update();
       })

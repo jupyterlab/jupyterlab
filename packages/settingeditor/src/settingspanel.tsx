@@ -31,7 +31,7 @@ interface ISettingsPanelProps {
    * Handler for when selection change is triggered by scrolling
    * in the SettingsPanel.
    */
-  onSelect?: (id: string) => void;
+  onSelect: (id: string) => void;
 
   /**
    * Signal that fires when a selection is made in the plugin list.
@@ -91,7 +91,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
             offsetTop + ref.current?.scrollHeight >
               wrapperRef.current?.scrollTop + wrapperRef.current?.clientHeight))
       ) {
-        onSelect?.(refId);
+        onSelect(refId);
         break;
       }
     }
