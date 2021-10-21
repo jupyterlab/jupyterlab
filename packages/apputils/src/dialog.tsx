@@ -101,6 +101,9 @@ export class Dialog<T> extends Widget {
     const layout = (this.layout = new PanelLayout());
     const content = new Panel();
     content.addClass('jp-Dialog-content');
+    if (typeof options.body === 'string') {
+      content.addClass('jp-Dialog-content-small');
+    }
     layout.addWidget(content);
 
     this._body = normalized.body;

@@ -26,8 +26,7 @@
   margin-left: auto;
   margin-right: auto;
   background: var(--jp-layout-color1);
-  padding: 24px;
-  padding-bottom: 12px;
+  padding: 24px 24px 12px 24px;
   min-width: 300px;
   min-height: 150px;
   max-width: 1000px;
@@ -41,6 +40,10 @@
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
   resize: both;
+}
+
+.jp-Dialog-content.jp-Dialog-content-small {
+  max-width: 500px;
 }
 
 .jp-Dialog-button {
