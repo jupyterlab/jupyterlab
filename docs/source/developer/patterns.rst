@@ -86,7 +86,7 @@ additional behavior. If a "default" behavior is intended to be provided
 by another object, then a callback should be provided by that object.
 Wherever possible as signal connection should be made with the pattern
 ``.connect(this._onFoo, this)``. Providing the ``this`` context enables
-the connection to be properly cleared by ``clearSignalData(this)``.
+the connection to be properly cleared by ``Signal.clearData(this)``.
 Using a private method avoids allocating a closure for each connection.
 
 Models
