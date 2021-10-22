@@ -124,6 +124,7 @@ export const SettingsFormEditor = ({
       await settings.remove(field);
     }
     setFormData(settings.user);
+    setIsModified(false);
   };
 
   /**
