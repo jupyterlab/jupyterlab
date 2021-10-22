@@ -3,10 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { Settings } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
 import { ISignal } from '@lumino/signaling';
 import React from 'react';
 import { SettingsFormEditor } from './SettingsFormEditor';
@@ -25,8 +23,6 @@ interface ISettingsPanelProps {
    */
   editorRegistry: IFormComponentRegistry;
 
-  editorFactory: CodeEditor.Factory;
-
   /**
    * Handler for when selection change is triggered by scrolling
    * in the SettingsPanel.
@@ -38,10 +34,7 @@ interface ISettingsPanelProps {
    */
   handleSelectSignal: ISignal<PluginList, string>;
 
-  /**
-   * The application language translator.
-   */
-  translator?: ITranslator;
+  hasError: (id: string, error: boolean) => void;
 }
 
 /**
@@ -51,10 +44,9 @@ interface ISettingsPanelProps {
 export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   settings,
   editorRegistry,
-  editorFactory,
   onSelect,
   handleSelectSignal,
-  translator
+  hasError
 }) => {
   // Refs used to keep track of "selected" plugin based on scroll location
   const editorRefs: {
@@ -114,6 +106,9 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
               settings={pluginSettings}
               renderers={editorRegistry.renderers}
               handleSelectSignal={handleSelectSignal}
+              hasError={(error: boolean) => {
+                hasError(pluginSettings.id, error);
+              }}
             />
           </div>
         );

@@ -77,9 +77,9 @@ export class SettingEditor extends Widget {
         <SettingsPanel
           settings={settings as Settings[]}
           editorRegistry={editorRegistry}
-          editorFactory={editorFactory}
           handleSelectSignal={this._list.handleSelectSignal}
           onSelect={(id: string) => (this._list.selection = id)}
+          hasError={this._list.setError}
         />
       ));
       const currentSettings = settings.find(

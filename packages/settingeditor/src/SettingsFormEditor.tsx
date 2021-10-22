@@ -6,18 +6,17 @@
 import { Settings } from '@jupyterlab/settingregistry';
 import { showDialog } from '@jupyterlab/apputils';
 import React from 'react';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import Form, { FieldTemplateProps, UiSchema } from '@rjsf/core';
+import Form, { FieldTemplateProps, IChangeEvent, UiSchema } from '@rjsf/core';
 import { JSONSchema7 } from 'json-schema';
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { reduce } from '@lumino/algorithm';
 import { PluginList } from './pluginlist';
 import { ISignal } from '@lumino/signaling';
 interface IProps {
   settings: Settings;
-  renderers: { [id: string]: any };
+  renderers: { [id: string]: React.FC };
   handleSelectSignal: ISignal<PluginList, string>;
-  translator?: ITranslator;
+  hasError: (error: boolean) => void;
 }
 
 const CustomTemplate = (props: FieldTemplateProps) => {
@@ -28,6 +27,8 @@ const CustomTemplate = (props: FieldTemplateProps) => {
     displayLabel,
     id,
     formContext,
+    errors,
+    rawErrors,
     children
   } = props;
   const schemaIds = id.split('_');
@@ -62,10 +63,16 @@ const CustomTemplate = (props: FieldTemplateProps) => {
         displayLabel || schema.type === 'boolean' ? 'small-field' : ''
       }`}
     >
-      {isModified ? <div className="jp-modifiedIndicator" /> : undefined}
+      {isModified && !rawErrors ? (
+        <div className="jp-modifiedIndicator" />
+      ) : undefined}
+      {rawErrors ? (
+        <div className="jp-modifiedIndicator jp-errorIndicator" />
+      ) : undefined}
       <div>
         {displayLabel && id !== 'root' ? <h3> {label} </h3> : undefined}
-        {children}
+        <div className="inputFieldWrapper">{children}</div>
+        <div className="validationErrors">{errors}</div>
       </div>
     </div>
   );
@@ -79,15 +86,15 @@ export const SettingsFormEditor = ({
   settings,
   renderers,
   handleSelectSignal,
-  translator
+  hasError
 }: IProps) => {
   const [formData, setFormData] = React.useState(settings.user);
   const [isModified, setIsModified] = React.useState(settings.isModified);
   const [hidden, setHidden] = React.useState(true);
 
-  const trans = translator || nullTranslator;
-  const _trans = trans.load('jupyterlab');
-
+  /**
+   * Construct uiSchema to pass any custom renderers to the form editor.
+   */
   const uiSchema: UiSchema = {};
   for (const id in renderers) {
     if (Object.keys(settings.schema.properties ?? {}).includes(id)) {
@@ -97,6 +104,10 @@ export const SettingsFormEditor = ({
     }
   }
 
+  /**
+   * Automatically expand the settings if this plugin was selected in the
+   * plugin list on the right
+   */
   handleSelectSignal.connect((list: PluginList, id: string) => {
     if (id === settings.id) {
       setHidden(false);
@@ -105,7 +116,7 @@ export const SettingsFormEditor = ({
 
   /**
    * Handler for the "Restore to defaults" button - clears all
-   * modified settings then calls `updateSchema` to restore the
+   * modified settings then calls `setFormData` to restore the
    * values.
    */
   const reset = async () => {
@@ -117,11 +128,9 @@ export const SettingsFormEditor = ({
 
   /**
    * Handler for edits made in the form editor.
-   * @param fieldName - ID of field being edited
-   * @param value - New value for field
-   * @param category - Optional category if field is under a category
+   * @param data - Form data sent from the form editor
    */
-  const handleChange = (data: any) => {
+  const handleChange = (data: ReadonlyPartialJSONObject) => {
     let user = {};
     try {
       user = settings.raw !== '' ? JSON.parse(settings.raw) : {};
@@ -167,14 +176,16 @@ export const SettingsFormEditor = ({
           FieldTemplate={CustomTemplate}
           uiSchema={uiSchema}
           fields={renderers}
-          formContext={{
-            settings: settings,
-            translator: _trans
-          }}
-          noValidate={true}
-          onChange={e => {
+          formContext={{ settings: settings }}
+          liveValidate
+          onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
             setFormData(e.formData);
-            handleChange(e.formData);
+            if (e.errors.length === 0) {
+              handleChange(e.formData);
+              hasError(false);
+            } else {
+              hasError(true);
+            }
           }}
         />
       )}

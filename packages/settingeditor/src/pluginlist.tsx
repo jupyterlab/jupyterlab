@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ReactWidget } from '@jupyterlab/apputils';
+import { Dialog, ReactWidget, showDialog } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -38,6 +38,7 @@ const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
  * A list of plugins with editable settings.
  */
 export class PluginList extends ReactWidget {
+  private _errors: { [id: string]: boolean };
   /**
    * Create a new plugin list.
    */
@@ -53,6 +54,7 @@ export class PluginList extends ReactWidget {
     this.mapPlugins = this.mapPlugins.bind(this);
     this._filter = (item: ISettingRegistry.IPlugin) => true;
     this.setFilter = this.setFilter.bind(this);
+    this.setError = this.setError.bind(this);
     this._evtMousedown = this._evtMousedown.bind(this);
 
     this._allPlugins = PluginList.sortPlugins(this.registry).filter(plugin => {
@@ -64,6 +66,7 @@ export class PluginList extends ReactWidget {
       return !deprecated && (editable || extensible) && this._filter?.(plugin);
     });
 
+    this._errors = {};
     this.selection = this._allPlugins[0].id;
   }
 
@@ -144,6 +147,21 @@ export class PluginList extends ReactWidget {
     super.onUpdateRequest(msg);
   }
 
+  protected onBeforeDetach(msg: Message): void {
+    for (const id in this._errors) {
+      if (this._errors[id]) {
+        showDialog({
+          title: 'Warning: you have unsaved changes due to validation errors.',
+          buttons: [Dialog.okButton(), Dialog.cancelButton()]
+        }).then(value => {
+          if (value.button.accept) {
+            super.onBeforeDetach(msg);
+          }
+        });
+      }
+    }
+  }
+
   /**
    * Handle the `'mousedown'` event for the plugin list.
    *
@@ -176,7 +194,8 @@ export class PluginList extends ReactWidget {
    * #### Notes
    * The order of priority for overridden hints is as follows, from most
    * important to least:
-   * 1. Data set by the end user in a settings file.
+   * import { showDialog } from '@jupyterlab/apputils';
+1. Data set by the end user in a settings file.
    * 2. Data set by the plugin author as a schema default.
    * 3. Data set by the plugin author as a top-level key of the schema.
    */
@@ -216,6 +235,15 @@ export class PluginList extends ReactWidget {
     this.update();
   }
 
+  setError(id: string, error: boolean) {
+    if (this._errors[id] !== error) {
+      this._errors[id] = error;
+      this.update();
+    } else {
+      this._errors[id] = error;
+    }
+  }
+
   mapPlugins(plugin: ISettingRegistry.IPlugin) {
     const { id, schema, version } = plugin;
     const trans = this.translator.load('jupyterlab');
@@ -233,16 +261,16 @@ export class PluginList extends ReactWidget {
     return (
       <button
         onClick={this._evtMousedown}
-        className={
+        className={`${
           id === this.selection
             ? 'jp-mod-selected jp-PluginList-entry'
             : 'jp-PluginList-entry'
-        }
+        } ${this._errors[id] ? 'jp-ErrorPlugin' : ''}`}
         data-id={id}
         key={id}
         title={itemTitle}
       >
-        {id === this.selection ? (
+        {id === this.selection || this._errors[id] ? (
           <div className="jp-SelectedIndicator" />
         ) : undefined}
         <LabIcon.resolveReact

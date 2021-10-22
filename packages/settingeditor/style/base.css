@@ -107,9 +107,18 @@
   font-weight: var(--jp-content-heading-font-weight);
 }
 
-#setting-editor .jp-PluginList button.jp-mod-selected .jp-SelectedIndicator {
+#setting-editor .jp-PluginList .jp-SelectedIndicator {
   width: 3px;
   background-color: var(--jp-brand-color1);
+  height: var(--jp-cell-collapser-min-height);
+}
+
+#setting-editor .jp-PluginList .jp-ErrorPlugin .jp-SelectedIndicator {
+  background-color: var(--jp-error-color0);
+}
+
+#setting-editor .jp-PluginList button.jp-mod-selected.jp-ErrorPlugin span {
+  color: var(--jp-error-color0);
 }
 
 #setting-editor .jp-PluginList button:not(.jp-mod-selected) {
@@ -436,9 +445,25 @@
 #setting-editor .jp-modifiedIndicator {
   width: 5px;
   background-color: var(--jp-brand-color2);
-  margin-left: -15px;
-  margin-right: 10px;
+  margin-left: -22px;
+  margin-right: 17px;
   margin-top: 16px;
+}
+
+#setting-editor .inputFieldWrapper {
+  margin-left: 7px;
+}
+
+#setting-editor .jp-modifiedIndicator.jp-errorIndicator {
+  background-color: var(--jp-error-color0);
+}
+
+#setting-editor .validationErrors {
+  color: var(--jp-error-color0);
+}
+
+#setting-editor .panel.errors {
+  display: none;
 }
 
 #setting-editor .jp-SettingsEditor {
