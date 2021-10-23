@@ -1,6 +1,6 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Signal } from '@lumino/signaling';
-import { IDocumentInfo } from 'lsp-ws-connection/src';
+import { IDocumentInfo } from 'lsp-ws-connection';
 
 import { DocumentConnectionManager } from '../connection_manager';
 import {
