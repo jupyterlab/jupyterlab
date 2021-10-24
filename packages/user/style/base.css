@@ -3,12 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import url('./settings.css');
 @import url('./sidepanel.css');
 
 .jp-MenuBar-anonymousIcon {
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
   margin: auto;
   margin-right: 4px;
   border-radius: 90px;
@@ -25,8 +24,8 @@
 }
 
 .jp-MenuBar-imageIcon {
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
   margin: auto;
   margin-right: 4px;
   margin-bottom: 4px;
@@ -36,8 +35,8 @@
 }
 
 .jp-MenuBar-imageIcon img {
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
   border-radius: 90px;
   fill: var(--jp-ui-font-color1);
   color: var(--jp-ui-font-color1);

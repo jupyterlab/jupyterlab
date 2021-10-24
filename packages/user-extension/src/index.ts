@@ -6,28 +6,29 @@
  */
 
 import {
-  ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IStateDB } from '@jupyterlab/statedb';
-import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
+import { DOMUtils } from '@jupyterlab/apputils';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker, Notebook } from '@jupyterlab/notebook';
 import { YFile, YNotebook } from '@jupyterlab/shared-models';
+import { userIcon } from '@jupyterlab/ui-components';
 import {
   ICurrentUser,
   IUserMenu,
   IUserPanel,
   RendererUserMenu,
-  SettingsWidget,
   User,
   UserMenu,
   UserSidePanel,
-  SharePanel
+  UserInfoPanel,
+  ShareDocumentPanel
 } from '@jupyterlab/user';
-import { Menu, MenuBar, Widget } from '@lumino/widgets';
+import { Menu, MenuBar, Widget, AccordionPanel } from '@lumino/widgets';
 import * as Y from 'yjs';
+
 
 /**
  * A namespace for command IDs.
@@ -49,7 +50,7 @@ const userPlugin: JupyterFrontEndPlugin<User> = {
   }
 };
 
-const userMemuPlugin: JupyterFrontEndPlugin<Menu> = {
+const userMenuPlugin: JupyterFrontEndPlugin<Menu> = {
   id: '@jupyterlab/user-extension:userMenu',
   autoStart: true,
   requires: [ICurrentUser],
@@ -81,80 +82,51 @@ const userMemuPlugin: JupyterFrontEndPlugin<Menu> = {
   }
 };
 
-const userSettingsPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/user-extension:userSettings',
+const userPanelPlugin: JupyterFrontEndPlugin<AccordionPanel> = {
+  id: '@jupyterlab/user-extension:userSidePanel',
   autoStart: true,
-  requires: [ICurrentUser, IUserMenu, ICommandPalette, ILayoutRestorer],
+  requires: [],
+  provides: IUserPanel,
   activate: (
-    app: JupyterFrontEnd,
-    user: User,
-    userMenu: Menu,
-    palette: ICommandPalette,
-    restorer: ILayoutRestorer
-  ): void => {
-    const { shell, commands } = app;
-
-    let widget: SettingsWidget | null = null;
-    const tracker = new WidgetTracker<SettingsWidget>({
-      namespace: 'userSettings'
+    app: JupyterFrontEnd
+  ): AccordionPanel => {
+    const userPanel = new AccordionPanel({
+      renderer: new UserSidePanel.Renderer()
     });
-
-    restorer.restore(tracker, {
-      command: CommandIDs.settings,
-      name: () => 'userSettings'
-    });
-
-    commands.addCommand(CommandIDs.settings, {
-      label: 'Settings',
-      caption: 'User settings.',
-      isVisible: () => true,
-      isEnabled: () => true,
-      isToggled: () => widget !== null,
-      execute: () => {
-        if (widget) {
-          widget.dispose();
-        } else {
-          widget = new SettingsWidget(user);
-          widget.title.label = 'Settings';
-
-          widget.disposed.connect(() => {
-            widget = null;
-            commands.notifyCommandChanged();
-          });
-
-          shell.add(widget, 'main');
-          tracker.add(widget);
-          restorer.add(widget, 'userSettings');
-
-          widget.update();
-          commands.notifyCommandChanged();
-        }
-      }
-    });
-
-    palette.addItem({ command: CommandIDs.settings, category: 'User' });
-    userMenu.addItem({ command: CommandIDs.settings });
+    userPanel.id = DOMUtils.createDomID();
+    userPanel.title.icon = userIcon;
+    userPanel.addClass('jp-UserSidePanel');
+    app.shell.add(userPanel, 'left', { rank: 300 });
+    return userPanel;
   }
 };
 
-const userPanelPlugin: JupyterFrontEndPlugin<UserSidePanel> = {
-  id: '@jupyterlab/user-extension:userPanel',
+const userSettingsPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/user-extension:userInfo',
   autoStart: true,
-  requires: [ICurrentUser, IEditorTracker, INotebookTracker],
-  provides: IUserPanel,
+  requires: [ICurrentUser, IUserPanel],
   activate: (
     app: JupyterFrontEnd,
     user: User,
+    userPanel: AccordionPanel
+  ): void => {
+    const sharePanel = new UserInfoPanel(user);
+    userPanel.addWidget(sharePanel);
+  }
+};
+
+const shareDocumentPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/user-extension:shareDocument',
+  autoStart: true,
+  requires: [ICurrentUser, IUserPanel, IEditorTracker, INotebookTracker],
+  activate: (
+    app: JupyterFrontEnd,
+    user: User,
+    userPanel: AccordionPanel,
     editor: IEditorTracker,
     notebook: INotebookTracker
-  ): UserSidePanel => {
-    
-    
-
-    const userPanel = new UserSidePanel();
-    app.shell.add(userPanel, 'left', { rank: 300 });
-
-    const sharePanel = new SharePanel(user);
+  ): void => {
+    const sharePanel = new ShareDocumentPanel(user);
     userPanel.addWidget(sharePanel);
 
     const collaboratorsChanged = async (
@@ -192,12 +164,9 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserSidePanel> = {
             collaborator = {
               id: value.user.id,
               anonymous: value.user.anonymous,
-              name: value.user.name,
               username: value.user.username,
-              initials: value.user.initials,
               color: value.user.color,
-              email: value.user.email,
-              avatar: value.user.avatar
+              role: value.user.role
             };
           }
           
@@ -212,7 +181,7 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserSidePanel> = {
                 return item === cell;
               });
               console.debug("Scrolling", cellIndex, pos.index);
-              collaborator.position = { cell: cellIndex, index: pos.index };
+              collaborator.cursor = { cell: cellIndex, index: pos.index };
             }
           }
           sharePanel.setCollaborator(collaborator);
@@ -222,8 +191,8 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserSidePanel> = {
         sharePanel.documentName = name;
         sharePanel.scrollToCollaborator = (id: string): void => {
           const collaborator = sharePanel.getCollaborator(id)!;
-          console.debug("Move:", collaborator.position);
-          (tracker.currentWidget?.content as Notebook).activeCellIndex = collaborator.position!.cell;
+          console.debug("Move:", collaborator.cursor);
+          (tracker.currentWidget?.content as Notebook).activeCellIndex = collaborator.cursor!.cell;
         }
         sharePanel.update();
       };
@@ -234,8 +203,6 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserSidePanel> = {
 
     notebook.currentChanged.connect(collaboratorsChanged);
     editor.currentChanged.connect(collaboratorsChanged);
-
-    return userPanel;
   }
 };
 
@@ -244,9 +211,10 @@ const userPanelPlugin: JupyterFrontEndPlugin<UserSidePanel> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   userPlugin,
-  userMemuPlugin,
+  userMenuPlugin,
   userSettingsPlugin,
-  userPanelPlugin
+  userPanelPlugin,
+  shareDocumentPlugin
 ];
 
 export default plugins;

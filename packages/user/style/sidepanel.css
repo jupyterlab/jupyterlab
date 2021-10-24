@@ -3,6 +3,7 @@
 *************************************************************/
 
 .jp-UserSidePanel {
+  min-width: var(--jp-sidebar-min-width) !important;
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size1);
@@ -41,8 +42,112 @@
 }
 
 /************************************************************
+                      PanelWithToolbar
+*************************************************************/
+
+.jp-Toolbar.jp-stack-panel-header {
+  height: 20px;
+  min-height: 20px !important;
+  padding: 0px;
+  margin-left: auto;
+  background: var(--jp-layout-color2);
+  box-shadow: none;
+  border: none;
+}
+
+.jp-stack-panel-header .jp-ToolbarButton.jp-Toolbar-item {
+  height: 20px;
+}
+
+.jp-stack-panel-header .jp-ToolbarButton button.jp-ToolbarButtonComponent {
+  height: 20px;
+}
+
+/************************************************************
+                      User Info Panel
+*************************************************************/
+.jp-UserInfoPanel {
+  display: flex;
+  flex-direction: column;
+  max-height: 140px;
+  padding-top: 3px;
+}
+
+.jp-UserInfo-Container {
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.jp-UserInfo-Icon {
+  margin: auto;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.jp-UserInfo-Icon input {
+  width: 0px;
+  height: 0px;
+  padding: 0px;
+  position: relative;
+  top: 15px;
+  left: 20px;
+  z-index: -10;
+  border: none;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.jp-UserInfo-Icon span {
+  margin: auto;
+  text-align: center;
+  font-size: 25px;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-UserInfo-Icon:hover {
+  cursor: pointer;
+}
+
+.jp-UserInfo-Info {
+  margin: 20px;
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.jp-UserInfo-Info label {
+  font-weight: bold;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-UserInfo-Info input {
+  text-decoration: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-color: var(--jp-ui-font-color1);
+  border-width: 0.5px;
+  background-color: transparent;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+/************************************************************
                       Share Panel
 *************************************************************/
+.jp-ShareDocumentPanel {
+  display: flex;
+  flex-direction: column;
+  min-height: 50px;
+  padding-top: 3px;
+}
+
 .jp-SharePanel {
   margin: 4px;
 }

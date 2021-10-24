@@ -10,6 +10,7 @@ import * as React from 'react';
 
 import { IUser } from './tokens';
 import { User } from './model';
+import { getInitials } from './utils';
 import { getUserIcon } from './components';
 
 export class RendererUserMenu extends MenuBar.Renderer {
@@ -40,13 +41,13 @@ export class RendererUserMenu extends MenuBar.Renderer {
   }
 
   private _createUserIcon(): VirtualElement {
-    if (this._user.avatar) {
+    if (this._user.avatar_url) {
       return h.div(
         {
           className:
             'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-imageIcon'
         },
-        h.img({ src: this._user.avatar })
+        h.img({ src: this._user.avatar_url })
       );
     } else
       return h.div(
@@ -55,7 +56,7 @@ export class RendererUserMenu extends MenuBar.Renderer {
             'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-anonymousIcon',
           style: { backgroundColor: this._user.color }
         },
-        h.span({}, this._user.initials)
+        h.span({}, getInitials(this._user.username))
       );
   }
 }
@@ -68,6 +69,7 @@ export class UserMenu extends Menu {
     this._user = options.user;
     this.title.icon = caretDownIcon;
     this.title.iconClass = 'jp-UserMenu-caretDownIcon';
+    this.addClass('jp-UserMenu');
     this._user.ready.connect(this._updateLabel);
     this._user.changed.connect(this._updateLabel);
   }

@@ -149,3 +149,20 @@ export const userColors = [
 
 export const getRandomColor = (): string =>
   userColors[Math.floor(Math.random() * userColors.length)];
+
+export const getInitials = (name: string, familyName?: string): string => {
+  let initials = "";
+  const tmpName = name.split(' ');
+  const tmpFamilyName = familyName ? familyName.split(' ') : [];
+
+  if (tmpName.length > 0) {
+    initials += tmpName[0].substring(0, 1).toLocaleUpperCase();
+  }
+  if (tmpFamilyName.length > 0) {
+    initials += tmpFamilyName[0].substring(0, 1).toLocaleUpperCase();
+  } else if (tmpName.length > 1) {
+    initials += tmpName[1].substring(0, 1).toLocaleUpperCase();
+  }
+
+  return initials;
+}
