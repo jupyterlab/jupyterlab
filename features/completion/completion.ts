@@ -121,6 +121,10 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       completionThemeManager.set_icons_overrides(
         this.settings.composite.typesMap
       );
+      if (!settings.composite.disable) {
+        document.body.dataset.lspCompleterLayout =
+          this.settings.composite.layout;
+      }
       if (this.current_completion_handler) {
         this.model.settings.caseSensitive =
           this.settings.composite.caseSensitive;
