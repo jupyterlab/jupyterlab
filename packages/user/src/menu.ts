@@ -1,17 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactWidget } from '@jupyterlab/apputils';
 import { caretDownIcon, userIcon } from '@jupyterlab/ui-components';
 import { Menu, MenuBar } from '@lumino/widgets';
 import { h, VirtualElement } from '@lumino/virtualdom';
 
-import * as React from 'react';
-
 import { IUser } from './tokens';
-import { User } from './model';
 import { getInitials } from './utils';
-import { getUserIcon } from './components';
 
 export class RendererUserMenu extends MenuBar.Renderer {
   private _user: IUser;
@@ -41,7 +36,7 @@ export class RendererUserMenu extends MenuBar.Renderer {
   }
 
   private _createUserIcon(): VirtualElement {
-    if (this._user.avatar_url) {
+    if (this._user.isReady && this._user.avatar_url) {
       return h.div(
         {
           className:
@@ -49,15 +44,24 @@ export class RendererUserMenu extends MenuBar.Renderer {
         },
         h.img({ src: this._user.avatar_url })
       );
-    } else
+    } else if (this._user.isReady) {
       return h.div(
         {
           className:
             'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-anonymousIcon',
           style: { backgroundColor: this._user.color }
         },
-        h.span({}, getInitials(this._user.username))
+        h.span({}, getInitials(this._user.name))
       );
+    } else {
+      return h.div(
+        {
+          className:
+            'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-anonymousIcon'
+        },
+        userIcon
+      );
+    }
   }
 }
 
@@ -67,6 +71,7 @@ export class UserMenu extends Menu {
   constructor(options: UserMenu.IOptions) {
     super(options);
     this._user = options.user;
+    this.title.label = "Anonymous";
     this.title.icon = caretDownIcon;
     this.title.iconClass = 'jp-UserMenu-caretDownIcon';
     this.addClass('jp-UserMenu');
@@ -80,7 +85,7 @@ export class UserMenu extends Menu {
   }
 
   private _updateLabel = (user: IUser) => {
-    this.title.label = user.username;
+    this.title.label = user.name;
     this.update();
   };
 }
@@ -88,41 +93,5 @@ export class UserMenu extends Menu {
 export namespace UserMenu {
   export interface IOptions extends Menu.IOptions {
     user: IUser;
-  }
-}
-
-export class UserIcon extends ReactWidget {
-  private _profile: User;
-
-  constructor(user: User) {
-    super();
-    this.id = 'jp-UserIcon';
-    this._profile = user;
-
-    this._profile.ready.connect(() => this.update());
-    this._profile.changed.connect(() => this.update());
-  }
-
-  render(): React.ReactElement {
-    if (this._profile.isReady) {
-      return (
-        <div className="login-container">
-          {getUserIcon(this._profile.toJSON())}
-        </div>
-      );
-    }
-
-    return (
-      <div className="login-container">
-        <div className="login-icon">
-          <userIcon.react
-            className="user-img"
-            tag="span"
-            width="28px"
-            height="28px"
-          />
-        </div>
-      </div>
-    );
   }
 }

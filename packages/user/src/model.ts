@@ -10,6 +10,7 @@ import { getAnonymousUserName, getRandomColor } from './utils';
 
 export class User implements IUser {
   private _id: string;
+  private _name: string;
   private _username: string;
   private _color: string;
   private _anonymous: boolean;
@@ -31,6 +32,9 @@ export class User implements IUser {
 
   get id(): string {
     return this._id;
+  }
+  get name(): string {
+    return this._name;
   }
   get username(): string {
     return this._username;
@@ -60,6 +64,7 @@ export class User implements IUser {
 
   fromJSON(user: IUser.User): void {
     this._id = user.id;
+    this._name = user.name;
     this._username = user.username;
     this._color = user.color;
     this._anonymous = user.anonymous;
@@ -71,6 +76,7 @@ export class User implements IUser {
   toJSON(): IUser.User {
     return {
       id: this._id,
+      name: this._name,
       username: this._username,
       color: this._color,
       anonymous: this._anonymous,
@@ -89,6 +95,8 @@ export class User implements IUser {
     const data = (await this._state.fetch(USER)) as JSONObject;
     if (data !== undefined) {
       this._id = data.id as string;
+
+      this._name = data.name as string;
       this._username = data.username as string;
       this._color = data.color as string;
       this._anonymous = data.anonymous as boolean;
@@ -99,7 +107,8 @@ export class User implements IUser {
     } else {
       // Get random values
       this._id = UUID.uuid4();
-      this._username = getAnonymousUserName();
+      this._name = getAnonymousUserName();
+      this._username = this._name;
       this._color = '#' + getRandomColor().slice(1);
       this._anonymous = true;
       this._role = IUser.ROLE.execute;

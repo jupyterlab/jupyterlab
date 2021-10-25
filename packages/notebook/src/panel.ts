@@ -20,6 +20,7 @@ import { each } from '@lumino/algorithm';
 import { Token } from '@lumino/coreutils';
 import { INotebookModel } from './model';
 import { Notebook, StaticNotebook } from './widget';
+import { ColaboratorsHeader } from './header';
 
 /**
  * The class name added to notebook panels.
@@ -27,6 +28,8 @@ import { Notebook, StaticNotebook } from './widget';
 const NOTEBOOK_PANEL_CLASS = 'jp-NotebookPanel';
 
 const NOTEBOOK_PANEL_TOOLBAR_CLASS = 'jp-NotebookPanel-toolbar';
+
+const NOTEBOOK_PANEL_HEADER_CLASS = 'jp-NotebookPanel-header';
 
 const NOTEBOOK_PANEL_NOTEBOOK_CLASS = 'jp-NotebookPanel-notebook';
 
@@ -55,6 +58,10 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     this.addClass(NOTEBOOK_PANEL_CLASS);
     this.toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
     this.content.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
+    this.contentHeader.addClass(NOTEBOOK_PANEL_HEADER_CLASS);
+
+    // TODO: Create a header factory
+    this.contentHeader.addWidget(new ColaboratorsHeader(options.content));
 
     // Set up things related to the context
     this.content.model = this.context.model;

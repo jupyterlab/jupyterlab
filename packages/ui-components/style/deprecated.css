@@ -78,6 +78,7 @@
   --jp-icon-save: url('icons/toolbar/save.svg');
   --jp-icon-search: url('icons/toolbar/search.svg');
   --jp-icon-settings: url('icons/filetype/settings.svg');
+  --jp-icon-share: url('icons/sidebar/share.svg');
   --jp-icon-spreadsheet: url('icons/filetype/spreadsheet.svg');
   --jp-icon-stop: url('icons/toolbar/stop.svg');
   --jp-icon-tab: url('icons/sidebar/tab.svg');
@@ -290,6 +291,9 @@
 }
 .jp-SearchIcon {
   background-image: var(--jp-icon-search);
+}
+.jp-ShareIcon {
+  background-image: var(--jp-icon-share);
 }
 .jp-SettingsIcon {
   background-image: var(--jp-icon-settings);

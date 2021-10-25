@@ -10,6 +10,5 @@ export * from './model';
 export * from './menu';
 export * from './sidepanel';
 export * from './userinfopanel';
-export * from './sharedocumentpanel';
 export * from './components';
 export * from './utils';

@@ -147,9 +147,15 @@ export const userColors = [
   '#00A1B3'
 ];
 
+/**
+ * Get a random color from the list of colors.
+ */
 export const getRandomColor = (): string =>
   userColors[Math.floor(Math.random() * userColors.length)];
 
+/**
+ * Extract the initials from the name of the user.
+ */
 export const getInitials = (name: string, familyName?: string): string => {
   let initials = "";
   const tmpName = name.split(' ');

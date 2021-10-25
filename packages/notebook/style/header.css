@@ -1,0 +1,36 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {}
+
+/*-----------------------------------------------------------------------------
+
+/*-----------------------------------------------------------------------------
+| Styles
+|----------------------------------------------------------------------------*/
+
+.jp-NotebookPanel-header {
+  height: 30px !important;
+  z-index: 1;
+}
+
+.jp-NotebookPanel-header-collaborators {
+  min-height: 30px;
+  padding: 0px 20px 0px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.jp-NotebookPanel-header-collaborators-container {
+  padding: 2.5px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+}

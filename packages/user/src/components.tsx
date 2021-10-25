@@ -1,28 +1,55 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DOMUtils } from '@jupyterlab/apputils';
+import { userIcon } from '@jupyterlab/ui-components';
+
 import * as React from 'react';
 
+import { User } from './model';
 import { IUser } from './tokens';
 import { getInitials } from './utils';
 
-export const getUserIcon = (user: IUser.User) => {
-  if (user.avatar_url) {
+/**
+ * Function that returns the user icon from the user.
+ *
+ * @returns The React component
+ */
+export const getUserIcon = (user: IUser | IUser.User) => {
+  const isReady = (user instanceof User) ? user.isReady : true;
+
+  if (isReady && user.avatar_url) {
     return (
-      <div key={user.username} className="login-icon">
+      <div
+        key={user.id}
+        className="login-icon"
+      >
         <img className="user-img" src={user.avatar_url} />
       </div>
     );
-  }
 
-  if (!user.avatar_url) {
+  } else if (isReady) {
     return (
       <div
-        key={user.username}
+        key={user.id}
         className="login-icon"
         style={{ backgroundColor: user.color }}
       >
-        <span>{getInitials(user.username)}</span>
+        <span>{getInitials(user.name)}</span>
+      </div>
+    );
+  } else {
+    return (
+      <div 
+        key={DOMUtils.createDomID()}
+        className="login-icon"
+      >
+        <userIcon.react
+          className="user-img"
+          tag="span"
+          width="25px"
+          height="25px"
+        />
       </div>
     );
   }
@@ -62,7 +89,7 @@ export const ColorPickerComponent: React.FC<Props> = props => {
         type="color"
         value={user.color}
       />
-      <span>{getInitials(user.username)}</span>
+      <span>{getInitials(user.name)}</span>
     </div>
   );
 };

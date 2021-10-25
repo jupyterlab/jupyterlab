@@ -76,8 +76,8 @@ export class UserInfoBody extends ReactWidget {
     this.update();
   };
 
-  private _handlerUserName = (event: any) => {
-    this._user.username = event.target.value;
+  private _handlerName = (event: any) => {
+    this._user.name = event.target.value;
     this.update();
   };
 
@@ -90,10 +90,10 @@ export class UserInfoBody extends ReactWidget {
         />
 
         <div className="jp-UserInfo-Info">
-          <label>Username</label>
+          <label>Name</label>
           <input
-            onChange={this._handlerUserName}
-            value={this._user.username}
+            onChange={this._handlerName}
+            value={this._user.name}
             disabled={!this._user.anonymous}
           ></input>
         </div>

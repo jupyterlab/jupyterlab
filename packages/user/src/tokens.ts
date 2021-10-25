@@ -15,13 +15,13 @@ export const IUserPanel = new Token<AccordionPanel>('jupyterlab-auth:userPanel')
 
 export interface IUser {
   readonly id: string;
+  readonly name: string;
   readonly username: string;
   readonly color: string;
   readonly anonymous: boolean;
   readonly role: IUser.ROLE;
   readonly cursor?: IUser.Cursor;
 
-  readonly name?: string;
   readonly familyName?: string;
   readonly email?: string;
   readonly avatar_url?: string;
@@ -47,13 +47,13 @@ export interface IUser {
 export namespace IUser {
   export type User = {
     id: string;
+    name: string;
     username: string;
     color: string;
     anonymous: boolean;
     role: ROLE;
     cursor?: Cursor;
 
-    name?: string;
     familyName?: string;
     email?: string;
     avatar_url?: string;

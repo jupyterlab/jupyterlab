@@ -19,6 +19,7 @@ import {
 } from '@jupyterlab/cells';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
+import { IUser } from '@jupyterlab/user';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, each, findIndex, toArray } from '@lumino/algorithm';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
@@ -1766,6 +1767,28 @@ export namespace NotebookActions {
         });
       }
     });
+  }
+
+  /**
+   * Trust the notebook after prompting the user.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @returns a promise that resolves when the transaction is finished.
+   *
+   * #### Notes
+   * No dialog will be presented if the notebook is already trusted.
+   */
+  export function scrollToCollaborator(notebook: Notebook, cursor: IUser.Cursor): void {
+    console.debug("Scroll:", notebook.widgets.length, cursor);
+    if (notebook.widgets.length > cursor.cell) {
+      const cell = notebook.widgets[cursor.cell];
+      const pos = cell.editor.getPositionAt(cursor.index);
+      console.debug("Pos:", pos);
+      if (pos) {
+        cell.editor.revealSelection({ start: pos, end: pos});
+      }
+    }
   }
 }
 
