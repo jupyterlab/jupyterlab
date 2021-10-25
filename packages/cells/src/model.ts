@@ -625,6 +625,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         executionCount.set(null);
       }
     }
+    this.value.changed.connect(this._onValueChanged, this);
+
     executionCount.changed.connect(this._onExecutionCountChanged, this);
 
     this._modelDBMutex(() => {
@@ -818,13 +820,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
-   * Handle a change to the observable value.
+   * Handle a change to the code cell value.
    */
-  protected onGenericChange(): void {
+  private _onValueChanged(): void {
     if (this.executionCount !== null) {
       this._setDirty(this._executedCode !== this.value.text.trim());
     }
-    this.contentChanged.emit(void 0);
   }
 
   /**
