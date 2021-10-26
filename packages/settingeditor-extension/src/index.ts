@@ -23,7 +23,8 @@ import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   ISettingEditorTracker,
-  SettingEditor
+  SettingEditor,
+  SimpleSettingsEditor
 } from '@jupyterlab/settingeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -36,6 +37,7 @@ import { IDisposable } from '@lumino/disposable';
  */
 namespace CommandIDs {
   export const open = 'settingeditor:open';
+  export const openJSON = 'settingeditor:open-json';
 
   export const revert = 'settingeditor:revert';
 
@@ -86,7 +88,6 @@ function activate(
   const tracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
     namespace
   });
-  let editor: SettingEditor;
 
   // Handle state restoration.
   void restorer.restore(tracker, {
@@ -103,15 +104,42 @@ function activate(
       }
 
       const key = plugin.id;
+
+      const editor = new SimpleSettingsEditor({
+        editorRegistry,
+        key,
+        registry,
+        state,
+        translator
+      });
+
+      editor.id = namespace;
+      editor.title.icon = settingsIcon;
+      editor.title.label = trans.__('Settings');
+
+      const main = new MainAreaWidget({ content: editor });
+      // void tracker.add(main);
+      shell.add(main);
+    },
+    label: trans.__('Simple Settings Editor')
+  });
+
+  commands.addCommand(CommandIDs.openJSON, {
+    execute: () => {
+      if (tracker.currentWidget) {
+        shell.activateById(tracker.currentWidget.id);
+        return;
+      }
+
+      const key = plugin.id;
       const when = app.restored;
 
-      editor = new SettingEditor({
+      const editor = new SettingEditor({
         commands: {
           registry: commands,
           revert: CommandIDs.revert,
           save: CommandIDs.save
         },
-        editorRegistry,
         editorFactory,
         key,
         registry,
@@ -152,12 +180,16 @@ function activate(
       void tracker.add(main);
       shell.add(main);
     },
-    label: trans.__('Advanced Settings Editor')
+    label: trans.__('JSON Settings Editor')
   });
   if (palette) {
     palette.addItem({
       category: trans.__('Settings'),
       command: CommandIDs.open
+    });
+    palette.addItem({
+      category: trans.__('Settings'),
+      command: CommandIDs.openJSON
     });
   }
 

@@ -6,4 +6,5 @@
  */
 
 export * from './settingeditor';
+export * from './SimpleSettingsEditor';
 export * from './tokens';
