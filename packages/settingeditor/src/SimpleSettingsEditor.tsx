@@ -9,8 +9,8 @@ import { SettingsPanel } from './settingspanel';
 
 export class SimpleSettingsEditor extends Widget {
   translator: any;
-  // private _settings: any[];
-  // private _settingsPanel: any;
+  //   private _settings: any[];
+  //   private _settingsPanel: any;
   private _list: any;
   private _panel: SplitPanel;
   constructor(options: IOptions) {
@@ -22,7 +22,11 @@ export class SimpleSettingsEditor extends Widget {
       spacing: 1
     });
     layout.addWidget(this._panel);
-
+    const list = (this._list = new PluginList({
+      registry: options.registry,
+      translator: this.translator
+    }));
+    this._panel.addWidget(list);
     /**
      * Initializes the settings panel after loading the schema for all plugins.
      */
@@ -49,16 +53,6 @@ export class SimpleSettingsEditor extends Widget {
       );
       this._panel.addWidget(settingsPanel);
     });
-    const list = (this._list = new PluginList({
-      confirm: (id: string) => {
-        return new Promise(() => {
-          console.log('here');
-        });
-      },
-      registry: options.registry,
-      translator: this.translator
-    }));
-    this._panel.addWidget(list);
   }
 }
 

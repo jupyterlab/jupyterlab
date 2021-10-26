@@ -175,17 +175,23 @@ export class PluginList extends ReactWidget {
       return;
     }
 
-    this._confirm(id)
-      .then(() => {
-        this._scrollTop = this.scrollTop;
-        this._selection = id!;
-        this._handleSelectSignal.emit(id!);
-        this._changed.emit(undefined);
-        this.update();
-      })
-      .catch(() => {
-        /* no op */
-      });
+    if (this._confirm) {
+      this._confirm(id)
+        .then(() => {
+          this.selection = id!;
+          this._changed.emit(undefined);
+          this.update();
+        })
+        .catch(() => {
+          /* no op */
+        });
+    } else {
+      this._scrollTop = this.scrollTop;
+      this._selection = id!;
+      this._handleSelectSignal.emit(id!);
+      this._changed.emit(undefined);
+      this.update();
+    }
   }
 
   /**
@@ -322,7 +328,7 @@ export class PluginList extends ReactWidget {
   private _handleSelectSignal = new Signal<this, string>(this);
   private _modifiedPlugins: ISettingRegistry.IPlugin[] = [];
   private _allPlugins: ISettingRegistry.IPlugin[] = [];
-  private _confirm: (id: string) => Promise<void>;
+  private _confirm?: (id: string) => Promise<void>;
   private _scrollTop: number | undefined = 0;
   private _selection = '';
 }
@@ -343,7 +349,7 @@ export namespace PluginList {
      * succeed and emit an event. If the promise rejects, the selection is not
      * made.
      */
-    confirm: (id: string) => Promise<void>;
+    confirm?: (id: string) => Promise<void>;
 
     /**
      * The setting registry for the plugin list.
