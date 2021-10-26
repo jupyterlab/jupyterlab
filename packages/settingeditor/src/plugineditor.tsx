@@ -21,7 +21,7 @@ import { StackedLayout, Widget } from '@lumino/widgets';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RawEditor } from './raweditor';
-import { SettingEditor } from './settingeditor';
+import { SettingEditor } from './jsonsettingeditor';
 
 /**
  * The class name added to all plugin editors.

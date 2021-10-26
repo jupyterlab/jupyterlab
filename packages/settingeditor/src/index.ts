@@ -5,6 +5,6 @@
  * @module settingeditor
  */
 
-export * from './settingeditor';
-export * from './SimpleSettingsEditor';
+export * from './settingseditor';
+export * from './jsonsettingeditor';
 export * from './tokens';

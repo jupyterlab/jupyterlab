@@ -3,7 +3,7 @@
 
 import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-import { SettingEditor } from './settingeditor';
+import { SettingEditor } from './jsonsettingeditor';
 
 /* tslint:disable */
 /**
