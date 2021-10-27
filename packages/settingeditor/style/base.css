@@ -450,6 +450,13 @@
   margin-top: 16px;
 }
 
+#setting-editor .form-group h3,
+#setting-editor .form-group p#field-description {
+  font-size: var(--jp-content-font-size1);
+  font-weight: 500;
+  margin-left: 7px;
+}
+
 #setting-editor .inputFieldWrapper {
   margin-left: 7px;
 }

@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Dialog, ReactWidget, showDialog } from '@jupyterlab/apputils';
+import { ReactWidget } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -89,6 +89,15 @@ export class PluginList extends ReactWidget {
     return this.node.querySelector('ul')?.scrollTop;
   }
 
+  get hasErrors(): boolean {
+    for (const id in this._errors) {
+      if (this._errors[id]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * The selection value of the plugin list.
    */
@@ -145,21 +154,6 @@ export class PluginList extends ReactWidget {
       ul.scrollTop = this._scrollTop;
     }
     super.onUpdateRequest(msg);
-  }
-
-  protected onBeforeDetach(msg: Message): void {
-    for (const id in this._errors) {
-      if (this._errors[id]) {
-        showDialog({
-          title: 'Warning: you have unsaved changes due to validation errors.',
-          buttons: [Dialog.okButton(), Dialog.cancelButton()]
-        }).then(value => {
-          if (value.button.accept) {
-            super.onBeforeDetach(msg);
-          }
-        });
-      }
-    }
   }
 
   /**

@@ -34,6 +34,10 @@ interface ISettingsPanelProps {
    */
   handleSelectSignal: ISignal<PluginList, string>;
 
+  /**
+   * Callback to update the plugin list to display plugins with
+   * invalid / unsaved settings in red.
+   */
   hasError: (id: string, error: boolean) => void;
 }
 
@@ -59,7 +63,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
 
   // Scroll to the plugin when a selection is made in the left panel.
   handleSelectSignal?.connect?.((list, pluginId) =>
-    editorRefs[pluginId].current?.scrollIntoView()
+    editorRefs[pluginId].current?.scrollIntoView(true)
   );
 
   // TODO: is this efficient?

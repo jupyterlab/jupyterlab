@@ -22,6 +22,7 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
+  IJSONSettingEditorTracker,
   ISettingEditorTracker,
   SettingEditor,
   SimpleSettingsEditor
@@ -37,6 +38,7 @@ import { IDisposable } from '@lumino/disposable';
  */
 namespace CommandIDs {
   export const open = 'settingeditor:open';
+
   export const openJSON = 'settingeditor:open-json';
 
   export const revert = 'settingeditor:revert';
@@ -52,10 +54,7 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
   requires: [
     ILayoutRestorer,
     ISettingRegistry,
-    IEditorServices,
     IStateDB,
-    IRenderMimeRegistry,
-    ILabStatus,
     ITranslator,
     IFormComponentRegistry
   ],
@@ -72,20 +71,15 @@ function activate(
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   registry: ISettingRegistry,
-  editorServices: IEditorServices,
   state: IStateDB,
-  rendermime: IRenderMimeRegistry,
-  status: ILabStatus,
   translator: ITranslator,
   editorRegistry: IFormComponentRegistry,
-  palette: ICommandPalette | null
+  palette?: ICommandPalette
 ): ISettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const namespace = 'setting-editor';
-  const factoryService = editorServices.factoryService;
-  const editorFactory = factoryService.newInlineEditor;
-  const tracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
+  const tracker = new WidgetTracker<MainAreaWidget<SimpleSettingsEditor>>({
     namespace
   });
 
@@ -95,6 +89,13 @@ function activate(
     args: widget => ({}),
     name: widget => namespace
   });
+
+  if (palette) {
+    palette.addItem({
+      category: trans.__('Settings'),
+      command: CommandIDs.openJSON
+    });
+  }
 
   commands.addCommand(CommandIDs.open, {
     execute: () => {
@@ -118,16 +119,69 @@ function activate(
       editor.title.label = trans.__('Settings');
 
       const main = new MainAreaWidget({ content: editor });
-      // void tracker.add(main);
+      void tracker.add(main);
       shell.add(main);
     },
     label: trans.__('Simple Settings Editor')
   });
 
+  return tracker;
+}
+
+/**
+ * The default setting editor extension.
+ */
+const jsonPlugin: JupyterFrontEndPlugin<IJSONSettingEditorTracker> = {
+  id: '@jupyterlab/settingeditor-extension:json-editor',
+  requires: [
+    ILayoutRestorer,
+    ISettingRegistry,
+    IEditorServices,
+    IStateDB,
+    IRenderMimeRegistry,
+    ILabStatus,
+    ITranslator
+  ],
+  optional: [ICommandPalette],
+  autoStart: true,
+  provides: IJSONSettingEditorTracker,
+  activate: activateJSON
+};
+
+/**
+ * Activate the setting editor extension.
+ */
+function activateJSON(
+  app: JupyterFrontEnd,
+  restorer: ILayoutRestorer,
+  registry: ISettingRegistry,
+  editorServices: IEditorServices,
+  state: IStateDB,
+  rendermime: IRenderMimeRegistry,
+  status: ILabStatus,
+  translator: ITranslator,
+  palette: ICommandPalette | null
+): IJSONSettingEditorTracker {
+  const trans = translator.load('jupyterlab');
+  const { commands, shell } = app;
+  const namespace = 'json-setting-editor';
+  const factoryService = editorServices.factoryService;
+  const editorFactory = factoryService.newInlineEditor;
+  const jsonTracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
+    namespace
+  });
+
+  // Handle state restoration.
+  void restorer.restore(jsonTracker, {
+    command: CommandIDs.openJSON,
+    args: widget => ({}),
+    name: widget => namespace
+  });
+
   commands.addCommand(CommandIDs.openJSON, {
     execute: () => {
-      if (tracker.currentWidget) {
-        shell.activateById(tracker.currentWidget.id);
+      if (jsonTracker.currentWidget) {
+        shell.activateById(jsonTracker.currentWidget.id);
         return;
       }
 
@@ -177,16 +231,12 @@ function activate(
       editor.title.label = trans.__('Settings');
 
       const main = new MainAreaWidget({ content: editor });
-      void tracker.add(main);
+      void jsonTracker.add(main);
       shell.add(main);
     },
     label: trans.__('JSON Settings Editor')
   });
   if (palette) {
-    palette.addItem({
-      category: trans.__('Settings'),
-      command: CommandIDs.open
-    });
     palette.addItem({
       category: trans.__('Settings'),
       command: CommandIDs.openJSON
@@ -195,20 +245,21 @@ function activate(
 
   commands.addCommand(CommandIDs.revert, {
     execute: () => {
-      tracker.currentWidget?.content.revert();
+      jsonTracker.currentWidget?.content.revert();
     },
     icon: undoIcon,
     label: trans.__('Revert User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
+    isEnabled: () => jsonTracker.currentWidget?.content.canRevertRaw ?? false
   });
 
   commands.addCommand(CommandIDs.save, {
-    execute: () => tracker.currentWidget?.content.save(),
+    execute: () => jsonTracker.currentWidget?.content.save(),
     icon: saveIcon,
     label: trans.__('Save User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
+    isEnabled: () => jsonTracker.currentWidget?.content.canSaveRaw ?? false
   });
 
-  return tracker;
+  return jsonTracker;
 }
-export default plugin;
+
+export default [plugin, jsonPlugin];

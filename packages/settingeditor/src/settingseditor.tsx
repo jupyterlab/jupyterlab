@@ -6,6 +6,8 @@ import { PanelLayout, SplitPanel, Widget } from '@lumino/widgets';
 import React from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsPanel } from './settingspanel';
+import { Message } from '@lumino/messaging';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 export class SimpleSettingsEditor extends Widget {
   translator: any;
@@ -53,6 +55,22 @@ export class SimpleSettingsEditor extends Widget {
       );
       this._panel.addWidget(settingsPanel);
     });
+  }
+
+  protected onCloseRequest(msg: Message): void {
+    if (this._list.hasErrors) {
+      showDialog({
+        title:
+          'Unsaved changes due to validation error. Continue without saving?',
+        buttons: [Dialog.okButton(), Dialog.cancelButton()]
+      }).then(value => {
+        if (value.button.accept) {
+          super.onCloseRequest(msg);
+        }
+      });
+    } else {
+      super.onCloseRequest(msg);
+    }
   }
 }
 
