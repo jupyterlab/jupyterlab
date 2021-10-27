@@ -965,6 +965,13 @@ export class SessionContext implements ISessionContext {
     } catch (err) {
       // no-op
     }
+    await this._displayKernelError(message, traceback);
+  }
+
+  /**
+   * Display kernel error
+   */
+  private async _displayKernelError(message: string, traceback: string) {
     const body = (
       <div>
         {message && <pre>{message}</pre>}
@@ -1037,6 +1044,14 @@ export class SessionContext implements ISessionContext {
     sender: Session.ISessionConnection,
     status: Kernel.Status
   ): void {
+    if (status === 'dead') {
+      const model = sender.kernel?.model;
+      if (model?.reason) {
+        const traceback = (model as any).traceback || '';
+        this._displayKernelError(model.reason, traceback);
+      }
+    }
+
     // Set that this kernel is busy, if we haven't already
     // If we have already, and now we aren't busy, dispose
     // of the busy disposable.
