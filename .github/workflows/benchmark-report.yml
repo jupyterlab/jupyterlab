@@ -22,19 +22,16 @@ permissions:
 jobs:
   upload:
     runs-on: ubuntu-latest
-    if: >
-      ${{ github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.conclusion == 'success' }}
+    if: github.event.workflow_run.conclusion == 'success'
     steps:
       - name: 'Download artifact'
-        uses: actions/github-script@v3.1.0
+        uses: actions/github-script@v3.1
         with:
           script: |
-            console.log(context)
             var artifacts = await github.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,
-               run_id: ${{github.event.workflow_run.id }},
+               run_id: ${{ github.event.workflow_run.id }},
             });
             var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "benchmark-assets"
@@ -46,11 +43,11 @@ jobs:
                archive_format: 'zip',
             });
             var fs = require('fs');
-            fs.writeFileSync('${{github.workspace}}/benchmark-assets.zip', Buffer.from(download.data));
+            fs.writeFileSync('${{ github.workspace }}/benchmark-assets.zip', Buffer.from(download.data));
       - run: unzip benchmark-assets.zip
 
       - name: 'Comment on PR'
-        uses: actions/github-script@v3
+        uses: actions/github-script@v3.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
