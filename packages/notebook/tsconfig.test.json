@@ -30,6 +30,9 @@
       "path": "../services"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../shared-models"
     },
     {
@@ -40,9 +43,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../settingregistry"
     },
     {
       "path": "."
