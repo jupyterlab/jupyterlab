@@ -15,7 +15,6 @@ module.exports = {
     // Browser options
     // headless: false,
     // slowMo: 500,
-    // browserName: 'chromium', // Use chromium, firefox or webkit
 
     // Context options
     viewport: { width: 1024, height: 768 },

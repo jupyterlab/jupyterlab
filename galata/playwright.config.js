@@ -12,10 +12,7 @@ module.exports = {
     },
     {
       name: 'jupyterlab',
-      testMatch: 'test/jupyterlab/**',
-      use: {
-        browserName: 'chromium' // Use chromium, firefox or webkit
-      }
+      testMatch: 'test/jupyterlab/**'
     }
   ],
   // Switch to 'always' to keep raw assets for all tests
