@@ -675,6 +675,16 @@
       },
       "additionalProperties": false,
       "type": "object"
+    },
+    "kernelStatusConfig": {
+      "showOnStatusBar": {
+        "type": "boolean",
+        "title": "Show kernel status on toolbar or status bar."
+      },
+      "showProgress": {
+        "type": "boolean",
+        "title": "Show execution progress."
+      }
     }
   },
   "properties": {
@@ -821,10 +831,19 @@
       "default": "1000px"
     },
     "maxNumberOutputs": {
-      "title": "The maximum number of output cells to to be rendered in the output area. Set to 0 to have the complete display.",
+      "title": "The maximum number of output cells to be rendered in the output area. Set to 0 to have the complete display.",
       "description": "Defines the maximum number of output cells to to to be rendered in the output area for cells with many outputs. The output area will have a head and a tail, and the outputs between will be trimmed and not displayed unless the user clicks on the information message.",
       "type": "number",
       "default": 50
+    },
+    "kernelStatus": {
+      "title": "Kernel status icon configuration",
+      "description": "Defines the position and components of execution progress indicator.",
+      "$ref": "#/definitions/kernelStatusConfig",
+      "default": {
+        "showOnStatusBar": false,
+        "showProgress": true
+      }
     },
     "experimentalDisableDocumentWideUndoRedo": {
       "title": "Experimental settings to enable the undo/redo on the notebook document level.",

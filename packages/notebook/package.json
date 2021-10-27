@@ -50,6 +50,7 @@
     "@jupyterlab/observables": "^4.3.0-alpha.14",
     "@jupyterlab/rendermime": "^3.3.0-alpha.14",
     "@jupyterlab/services": "^6.3.0-alpha.14",
+    "@jupyterlab/settingregistry": "^3.3.0-alpha.14",
     "@jupyterlab/shared-models": "^3.3.0-alpha.14",
     "@jupyterlab/statusbar": "^3.3.0-alpha.14",
     "@jupyterlab/translation": "^3.3.0-alpha.14",
