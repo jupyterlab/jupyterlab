@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { INotebookTracker, NotebookActions } from '@jupyterlab/notebook';
-import { ellipsesIcon } from '@jupyterlab/ui-components';
+import { classes, ellipsesIcon } from '@jupyterlab/ui-components';
 import { MARKDOWN_HEADING_COLLAPSED } from '@jupyterlab/cells';
 import { INotebookHeading } from '../../utils/headings';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
@@ -22,100 +22,45 @@ const TOC_TREE_CLASS = 'jp-TableOfContents-content';
 /**
  * Renders a notebook table of contents item.
  *
- * @private
  * @param options - generator options
  * @param tracker - notebook tracker
  * @param item - notebook heading
  * @param toc - current list of notebook headings
  * @returns rendered item
  */
-function render(
+export function render(
   options: OptionsManager,
   tracker: INotebookTracker,
   widget: TableOfContents,
   item: INotebookHeading,
   toc: INotebookHeading[] = []
 ): JSX.Element | null {
-  let jsx;
   if (item.type === 'markdown' || item.type === 'header') {
-    let fontSizeClass = 'toc-level-size-default';
-    let numbering = item.numbering && options.numbering ? item.numbering : '';
-    let cellCollapseMetadata = options.syncCollapseState
+    const fontSizeClass =
+      item.type === 'header'
+        ? `toc-level-size-${item.level}`
+        : 'toc-level-size-default';
+    const numbering = item.numbering && options.numbering ? item.numbering : '';
+    const cellCollapseMetadata = options.syncCollapseState
       ? MARKDOWN_HEADING_COLLAPSED
       : 'toc-hr-collapsed';
-    if (item.type === 'header') {
-      fontSizeClass = 'toc-level-size-' + item.level;
-    }
-    if (item.html && (item.type === 'header' || options.showMarkdown)) {
-      jsx = (
+
+    if (item.type === 'header' || options.showMarkdown) {
+      const header = item.html ? (
         <span
           dangerouslySetInnerHTML={{
             __html:
               numbering +
               options.sanitizer.sanitize(item.html, sanitizerOptions)
           }}
-          className={item.type + '-cell toc-cell-item'}
+          className={`${item.type}-cell toc-cell-item`}
         />
-      );
-      // Render the headers:
-      if (item.type === 'header') {
-        let button = (
-          <div
-            className="jp-Collapser p-Widget lm-Widget"
-            onClick={(event: any) => {
-              event.stopPropagation();
-              onClick(tracker, cellCollapseMetadata, item);
-            }}
-          >
-            <div className="toc-Collapser-child" />
-          </div>
-        );
-
-        let collapsed;
-        if (item.cellRef!.model.metadata.has(cellCollapseMetadata)) {
-          collapsed = item.cellRef!.model.metadata.get(
-            cellCollapseMetadata
-          ) as boolean;
-        }
-        let ellipseButton = collapsed ? (
-          <div
-            className="toc-Ellipses"
-            onClick={(event: any) => {
-              event.stopPropagation();
-              onClick(tracker, cellCollapseMetadata, item);
-            }}
-          >
-            <ellipsesIcon.react />
-          </div>
-        ) : (
-          <div />
-        );
-
-        // Render the heading item:
-        jsx = (
-          <NotebookHeading
-            isActive={
-              tracker.activeCell === item.cellRef ||
-              previousHeader(tracker, item, toc)
-            }
-            className={'toc-entry-holder ' + fontSizeClass}
-            area={widget.node.querySelector(`.${TOC_TREE_CLASS}`) as Element}
-          >
-            {button}
-            {jsx}
-            {ellipseButton}
-          </NotebookHeading>
-        );
-      }
-      return jsx;
-    }
-    if (item.type === 'header' || options.showMarkdown) {
-      // Render headers/markdown for plain text:
-      jsx = (
-        <span className={item.type + '-cell toc-cell-item'}>
+      ) : (
+        <span className={`${item.type}-cell toc-cell-item`}>
           {numbering + item.text}
         </span>
       );
+
       if (item.type === 'header') {
         let button = (
           <div
@@ -128,6 +73,7 @@ function render(
             <div className="toc-Collapser-child" />
           </div>
         );
+
         let collapsed;
         if (item.cellRef!.model.metadata.has(cellCollapseMetadata)) {
           collapsed = item.cellRef!.model.metadata.get(
@@ -144,10 +90,9 @@ function render(
           >
             <ellipsesIcon.react />
           </div>
-        ) : (
-          <div />
-        );
-        jsx = (
+        ) : null;
+
+        return (
           <NotebookHeading
             isActive={
               tracker.activeCell === item.cellRef ||
@@ -157,16 +102,17 @@ function render(
             area={widget.node.querySelector(`.${TOC_TREE_CLASS}`) as Element}
           >
             {button}
-            {jsx}
+            {header}
             {ellipseButton}
           </NotebookHeading>
         );
+      } else {
+        return header;
       }
-      return jsx;
     }
-    return null;
   }
-  if (item.type === 'code' && options.showCode) {
+
+  if (options.showCode && item.type === 'code') {
     // Render code cells:
     return (
       <div className="toc-code-cell-div">
@@ -177,6 +123,7 @@ function render(
       </div>
     );
   }
+
   return null;
 
   /**
@@ -266,7 +213,8 @@ type NotebookHeadingProps = React.PropsWithChildren<{
   area: Element;
 }>;
 
-/** React component for a single toc heading
+/**
+ * React component for a single toc heading
  *
  * @private
  */
@@ -284,14 +232,9 @@ function NotebookHeading(props: NotebookHeadingProps): JSX.Element {
   return (
     <div
       ref={itemRef}
-      className={[props.className, isActive ? 'toc-active-cell' : ''].join(' ')}
+      className={classes(props.className, isActive ? 'toc-active-cell' : '')}
     >
       {props.children}
     </div>
   );
 }
-
-/**
- * Exports.
- */
-export { render };
