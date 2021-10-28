@@ -6,6 +6,7 @@ import * as path from 'path';
 import { ContentsHelper } from './contents';
 import {
   ActivityHelper,
+  DebuggerHelper,
   FileBrowserHelper,
   KernelHelper,
   LogConsoleHelper,
