@@ -1,4 +1,4 @@
-import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 
 test.describe('Terminal Tests', () => {
