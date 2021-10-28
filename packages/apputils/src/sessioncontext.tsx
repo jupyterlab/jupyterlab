@@ -1048,7 +1048,7 @@ export class SessionContext implements ISessionContext {
       const model = sender.kernel?.model;
       if (model?.reason) {
         const traceback = (model as any).traceback || '';
-        this._displayKernelError(model.reason, traceback);
+        void this._displayKernelError(model.reason, traceback);
       }
     }
 
