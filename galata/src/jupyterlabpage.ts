@@ -6,6 +6,7 @@ import * as path from 'path';
 import { ContentsHelper } from './contents';
 import {
   ActivityHelper,
+  DebuggerHelper,
   FileBrowserHelper,
   KernelHelper,
   LogConsoleHelper,
@@ -17,7 +18,6 @@ import {
   ThemeHelper
 } from './helpers';
 import * as Utils from './utils';
-import { DebuggerHelper } from './helpers/debuggerpanel';
 
 /**
  * JupyterLab page interface

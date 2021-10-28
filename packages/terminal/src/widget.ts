@@ -58,6 +58,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
     this.addClass(TERMINAL_CLASS);
 
+    this._setThemeAttribute(theme);
+
     // Create the xterm.
     this._term = new Xterm(xtermOptions);
     this._fitAddon = new FitAddon();
@@ -76,6 +78,17 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     } else {
       session.connectionStatusChanged.connect(this._initialConnection, this);
     }
+  }
+
+  private _setThemeAttribute(theme: string | null | undefined) {
+    if (this.isDisposed) {
+      return;
+    }
+
+    this.node.setAttribute(
+      'data-term-theme',
+      theme ? theme.toLowerCase() : 'inherit'
+    );
   }
 
   private _initialConnection() {
@@ -141,6 +154,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
           'theme',
           Private.getXTermTheme(value as ITerminal.Theme)
         );
+        this._setThemeAttribute(value as ITerminal.Theme);
         break;
       default:
         this._term.setOption(option, value);
