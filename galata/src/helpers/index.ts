@@ -11,4 +11,3 @@ export * from './performance';
 export * from './sidebar';
 export * from './statusbar';
 export * from './theme';
-export * from './debuggerpanel';
