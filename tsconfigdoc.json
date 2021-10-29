@@ -18,6 +18,13 @@
       "node"
     ]
   },
+  "lib": [
+    "es2015",
+    "es2015.collection",
+    "dom",
+    "es2015.iterable",
+    "es2017.object"
+  ],
   "references": [
     {
       "path": "./packages/application"
