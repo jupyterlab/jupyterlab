@@ -340,17 +340,16 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
         );
       }
     );
+    const trans = this.model.trans;
     return (
       <div className={'lsp-popover-content'}>
         <div className={'lsp-servers-menu'}>
-          <h3 className={'lsp-servers-title'}>
-            {this.model.trans.__('LSP servers')}
-          </h3>
+          <h3 className={'lsp-servers-title'}>{trans.__('LSP servers')}</h3>
           <div className={'lsp-servers-lists'}>
             {servers_available.length ? (
               <CollapsibleList
                 key={'available'}
-                title={this.model.trans.__('Available')}
+                title={trans.__('Available')}
                 list={servers_available}
                 startCollapsed={true}
               />
@@ -360,7 +359,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
             {running_servers.length ? (
               <CollapsibleList
                 key={'running'}
-                title={this.model.trans.__('Running')}
+                title={trans.__('Running')}
                 list={running_servers}
               />
             ) : (
@@ -369,7 +368,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
             {missing_languages.length ? (
               <CollapsibleList
                 key={'missing'}
-                title={this.model.trans.__('Missing')}
+                title={trans.__('Missing')}
                 list={missing_languages}
               />
             ) : (
@@ -378,7 +377,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
           </div>
         </div>
         <div className={'lsp-popover-status'}>
-          {this.model.trans.__('Documentation:')}{' '}
+          {trans.__('Documentation:')}{' '}
           <a
             href={
               'https://jupyterlab-lsp.readthedocs.io/en/latest/Language%20Servers.html'
@@ -386,7 +385,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
             target="_blank"
             rel="noreferrer"
           >
-            {this.model.trans.__('Language Servers')}
+            {trans.__('Language Servers')}
           </a>
         </div>
       </div>
