@@ -456,7 +456,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           dataLoader: () => service.inspectRichVariable(name!, frameId),
           rendermime: activeRendermime
         });
-        widget.addClass('jp-DebuggerVariables');
+        widget.addClass('jp-DebuggerRichVariable');
         widget.id = id;
         widget.title.icon = Debugger.Icons.variableIcon;
         widget.title.label = `${service.session?.connection?.name} - ${name}`;
@@ -474,10 +474,16 @@ const variables: JupyterFrontEndPlugin<void> = {
               .findIndex(variables => variables.includes(name!)) >= 0
           ) {
             widget.refresh();
-          } else {
+          } else if (
+            !frameId &&
+            !service.model.callstack.frames.map(f => f.id).includes(frameId!)
+          ) {
+            // Dispose the widget if the frame in which the variable is defined
+            // does not exists any longer.
             disposeWidget();
           }
         };
+        widget.disposed.connect(disposeWidget);
         variablesModel.changed.connect(refreshWidget);
         activeWidget?.disposed.connect(disposeWidget);
 
