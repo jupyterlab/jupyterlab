@@ -4,6 +4,7 @@
 import { IThemeManager } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
+  PanelWithToolbar,
   tableRowsIcon,
   ToolbarButton,
   treeViewIcon
@@ -11,7 +12,6 @@ import {
 import { CommandRegistry } from '@lumino/commands';
 import { Panel, Widget } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
-import { PanelWithToolbar } from '../panelwithtoolbar';
 import { VariablesBodyGrid } from './grid';
 import { ScopeSwitcher } from './scope';
 import { VariablesBodyTree } from './tree';
@@ -31,7 +31,8 @@ export class Variables
     super(options);
     const { model, service, commands, themeManager } = options;
     const translator = options.translator || nullTranslator;
-    this.title.label = this.trans.__('Variables');
+    const trans = translator.load('jupyterlab');
+    this.title.label = trans.__('Variables');
     this.toolbar.addClass('jp-DebuggerVariables-toolbar');
     this._tree = new VariablesBodyTree({
       model,
@@ -76,14 +77,14 @@ export class Variables
       icon: treeViewIcon,
       className: 'jp-TreeView',
       onClick: onViewChange,
-      tooltip: this.trans.__('Tree View')
+      tooltip: trans.__('Tree View')
     });
 
     const tableViewButton = new ToolbarButton({
       icon: tableRowsIcon,
       className: 'jp-TableView',
       onClick: onViewChange,
-      tooltip: this.trans.__('Table View')
+      tooltip: trans.__('Table View')
     });
 
     const markViewButtonSelection = (selectedView: string): void => {
@@ -104,7 +105,6 @@ export class Variables
 
     this.toolbar.addItem('view-VariableTableView', tableViewButton);
 
-    this.addWidget(this.toolbar);
     this.addWidget(this._tree);
     this.addWidget(this._table);
     this.addClass('jp-DebuggerVariables');
