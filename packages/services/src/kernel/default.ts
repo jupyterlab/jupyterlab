@@ -1287,7 +1287,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         this._reason = 'Kernel died unexpectedly';
         this._updateStatus('dead');
       }
-      return undefined;
+      return;
     };
 
     this._ws.onmessage = this._onWSMessage;
