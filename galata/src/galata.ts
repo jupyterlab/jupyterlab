@@ -462,7 +462,7 @@ export namespace galata {
               if (runners.has(id)) {
                 // Proxy the GET request
                 const response = await fetch(request.url(), {
-                  headers: request.headers(),
+                  headers: await request.allHeaders(),
                   method: request.method()
                 });
                 if (!response.ok) {
@@ -497,7 +497,7 @@ export namespace galata {
             } else {
               // Proxy the GET request
               const response = await fetch(request.url(), {
-                headers: request.headers(),
+                headers: await request.allHeaders(),
                 method: request.method()
               });
               if (!response.ok) {
@@ -542,7 +542,7 @@ export namespace galata {
             // Proxy the PATCH request
             const response = await fetch(request.url(), {
               body: request.postDataBuffer()!,
-              headers: request.headers(),
+              headers: await request.allHeaders(),
               method: request.method()
             });
             if (!response.ok) {
@@ -571,7 +571,7 @@ export namespace galata {
             // Proxy the POST request
             const response = await fetch(request.url(), {
               body: request.postDataBuffer()!,
-              headers: request.headers(),
+              headers: await request.allHeaders(),
               method: request.method()
             });
             if (!response.ok) {
@@ -588,7 +588,7 @@ export namespace galata {
             runners.set(id, data);
             if (!page.isClosed() && !isClosed) {
               return route.fulfill({
-                status: 201,
+                status: type === 'sessions' ? 201 : 200,
                 body: JSON.stringify(data),
                 contentType: 'application/json',
                 headers: response.headers as any
