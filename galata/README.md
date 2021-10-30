@@ -79,7 +79,7 @@ c.LabApp.expose_app_in_browser = True
 Then start the server with:
 
 ```bash
-jupyter lab --config jupyter_server_test_config.py
+jupyter lab --LabApp.config jupyter_server_test_config.py
 ```
 
 ### Run test project
@@ -119,8 +119,8 @@ http-server ./playwright-report -a localhost -o
 
 To create tests, the easiest way is to use the code generator tool of playwright:
 
-```
-jupyter lab --config jupyter_server_test_config.py &
+```bash
+jupyter lab --LabApp.config jupyter_server_test_config.py &
 jlpm playwright codegen localhost:8888
 ```
 
@@ -128,8 +128,8 @@ jlpm playwright codegen localhost:8888
 
 To debug tests, a good way is to use the inspector tool of playwright:
 
-```
-jupyter lab --config jupyter_server_test_config.py &
+```bash
+jupyter lab --LabApp.config jupyter_server_test_config.py &
 PWDEBUG=1 jlpm playwright test
 ```
 
@@ -455,7 +455,7 @@ By default, Galata will generate a text report in the form of `markdown` table a
 
 - Using `playwright.config.js` file: in `reporter` section, users can supply two functions `vegaLiteConfigFactory` and `textReportFactory` to the reporter's constructor options. These functions will be used to create [Vega-Lite configuration](https://vega.github.io/vega-lite/docs/) (`vegaLiteConfigFactory`) or to create a text report (`textReportFactory`) from test records.
 
-```javascript
+```ts
   // An example of `playwright.config.js` with customized builder
   reporter: [
     ...,
