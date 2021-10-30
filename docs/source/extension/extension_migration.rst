@@ -23,6 +23,7 @@ bumped their major version (following semver convention):
    from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
    need to switch to the Blueprint components as the interfaces of those components in JupyterLab
    do not match those of Blueprint JS.
+
 JupyterLab 3.0 to 3.1
 ---------------------
 
