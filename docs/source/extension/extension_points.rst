@@ -11,7 +11,7 @@ Following the list of core tokens is a guide for using some of JupyterLab's most
 However, it is not an exhaustive account of how to extend the application components,
 and more detailed descriptions of their public APIs may be found in the
 `JupyterLab <../api/index.html>`__ and
-`Lumino <http://jupyterlab.github.io/lumino/index.html>`__ API documentation.
+`Lumino <https://jupyterlab.github.io/lumino/index.html>`__ API documentation.
 
 .. contents:: Table of contents
     :local:
@@ -178,7 +178,7 @@ a string value or a function that returns a string value.
 
 There are several more options which can be passed into the command registry when
 adding new commands. These are documented
-`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.icommandoptions.html>`__.
+`here <https://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.icommandoptions.html>`__.
 
 After a command has been added to the application command registry
 you can add them to various places in the application user interface,
@@ -400,7 +400,7 @@ the shortcut handler propagates up the DOM tree from the focused element
 and tests each element against the registered selectors. If a match is found,
 then that command is executed with the provided ``args``.
 Full documentation for the options for ``addKeyBinding`` can be found
-`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
+`here <https://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
 
 JupyterLab also provides integration with its settings system for keyboard shortcuts.
 Your extension can provide a settings schema with a ``jupyter.lab.shortcuts`` key,

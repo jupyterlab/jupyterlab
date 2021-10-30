@@ -38,7 +38,7 @@ and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
 All source code is written in
-`TypeScript <http://www.typescriptlang.org/Handbook>`__. See the `Style
+`TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
 All source code is formatted using `prettier <https://prettier.io>`__.
@@ -119,7 +119,7 @@ If you use ``conda``, you can get it with:
 
    conda install -c conda-forge 'nodejs'
 
-If you use `Homebrew <http://brew.sh>`__ on Mac OS X:
+If you use `Homebrew <https://brew.sh>`__ on Mac OS X:
 
 .. code:: bash
 
