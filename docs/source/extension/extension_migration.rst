@@ -14,7 +14,7 @@ JupyterLab 3.x to 4.x
 API breaking changes
 ^^^^^^^^^^^^^^^^^^^^
 
-Here are a list of JupyterLab npm packages that encountered an API changes and therefore have
+Here is a list of JupyterLab npm packages that encountered API changes and therefore have
 bumped their major version (following semver convention):
 
 - ``@jupyterlab/ui-components`` from 3.x to 4.x
@@ -22,8 +22,9 @@ bumped their major version (following semver convention):
    components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly 
    from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
    need to switch to the Blueprint components as the interfaces of those components in JupyterLab
-   does not match the one of Blueprint JS.
-
+   do not match those of Blueprint JS.
+JupyterLab 3.0 to 3.1
+---------------------
 
 New main and context menus customization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
