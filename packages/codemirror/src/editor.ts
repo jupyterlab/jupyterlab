@@ -165,7 +165,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         this.onKeydown(event);
       }
     });
-    CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
+    CodeMirror.on(editor, 'cursorActivity', () => {
+      // Due to delay in value handling introduced by sharedModels we need to
+      // delay the handling of cursor activity, so that the text value is
+      // available when we handle the cursor activity event in completer.
+      window.setTimeout(() => {
+        this._onCursorActivity();
+      }, 0);
+    });
     if (!USE_YCODEMIRROR_BINDING) {
       CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
         this._beforeDocChanged(instance, change);
