@@ -292,8 +292,7 @@ export namespace galata {
             nbconvert_exporter: 'python',
             pygments_lexer: 'ipython3',
             version: '3.8.0'
-          },
-          orig_nbformat: 4
+          }
         },
         nbformat: 4,
         nbformat_minor: 4
