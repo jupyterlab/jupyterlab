@@ -186,7 +186,7 @@ schemas
 ^^^^^^^
 
 The ``schemas`` directory contains `JSON
-Schemas <http://json-schema.org/>`__ that describe the settings used by
+Schemas <https://json-schema.org/>`__ that describe the settings used by
 individual extensions. Users may edit these settings using the
 JupyterLab Advanced Settings Editor.
 

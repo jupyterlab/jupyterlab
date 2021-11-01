@@ -46,14 +46,14 @@ file in *language-packs* repository. The workflow to trigger an update is as fol
 4. That workflow will open a new pull request that will update the source strings and optionally the Crowdin configuration.
 5. Once that pull request is merged, Crowdin will upload the new source strings automatically.
 6. If the placement of strings in the user interface changed (or new interface components were added) consider preparing new screenshots for Crowdin (see note below) and either
-   upload them directly to Crowdin (filename should include the version number), or open an issue in the `language-packs <https://github.com/jupyterlab/language-packs>` repository.
+   upload them directly to Crowdin (filename should include the version number), or open an issue in the `language-packs <https://github.com/jupyterlab/language-packs>`_ repository.
 
 .. note::
    Translating on Crowdin can be difficult when no sufficient context information is present, especially for Jupyter-specific terms.
    While some technically skilled translators will navigate to the codebase to check the context of a string, it is not an efficient workflow
    and prevents other translators from contributing. To enable more translators to contribute, and achieve higher accuracy of translations
    we should provide translators with annotated screenshots of the relevant usage of specific translatable strings
-   (see `Crowdin guide on screenshots <https://support.crowdin.com/adding-screenshots/>`).
+   (see `Crowdin guide on screenshots <https://support.crowdin.com/adding-screenshots/>`_).
 
 .. note::
 
