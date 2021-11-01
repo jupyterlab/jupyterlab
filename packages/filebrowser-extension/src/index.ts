@@ -86,6 +86,8 @@ namespace CommandIDs {
 
   export const openPath = 'filebrowser:open-path';
 
+  export const openUrl = 'filebrowser:open-url';
+
   export const open = 'filebrowser:open';
 
   export const openBrowserTab = 'filebrowser:open-browser-tab';
@@ -858,11 +860,54 @@ function addCommands(
       }
     }
   });
+
+  commands.addCommand(CommandIDs.openUrl, {
+    label: args =>
+      args.path ? trans.__('Open %1', args.path) : trans.__('Open from URL…'),
+    caption: args =>
+      args.path ? trans.__('Open %1', args.path) : trans.__('Open from URL'),
+    execute: async args => {
+      let url: string | undefined = (args?.url as string) ?? '';
+      if (!url) {
+        url =
+          (
+            await InputDialog.getText({
+              label: trans.__('Url'),
+              placeholder: 'https://example.com/path/to/file',
+              title: trans.__('Open Url'),
+              okLabel: trans.__('Open')
+            })
+          ).value ?? undefined;
+      }
+      if (!url) {
+        return;
+      }
+      try {
+        const req = await fetch(url);
+        const blob = await req.blob();
+        const type = req.headers.get('Content-Type') ?? '';
+        const basename = PathExt.basename(url);
+        const file = new File([blob], basename, { type });
+        const model = await browser.model.upload(file);
+        return commands.execute('docmanager:open', {
+          path: model.path
+        });
+      } catch (reason) {
+        if (reason.response && reason.response.status !== 200) {
+          reason.message = trans.__('Could not open Url: %1', url);
+        }
+        return showErrorMessage(trans.__('Cannot open'), reason);
+      }
+    }
+  });
+
   // Add the openPath command to the command palette
   if (commandPalette) {
-    commandPalette.addItem({
-      command: CommandIDs.openPath,
-      category: trans.__('File Operations')
+    [CommandIDs.openPath, CommandIDs.openUrl].forEach(command => {
+      commandPalette.addItem({
+        command,
+        category: trans.__('File Operations')
+      });
     });
   }
 
