@@ -279,8 +279,7 @@ describe('@jupyterlab/ui-components', () => {
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.title).toBe('Test log command caption');
-        const wrapperNode = buttonNode.firstChild as HTMLElement;
-        const iconNode = wrapperNode.firstChild as HTMLElement;
+        const iconNode = buttonNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains('test-icon-class')).toBe(true);
         button.dispose();
       });
@@ -365,8 +364,7 @@ describe('@jupyterlab/ui-components', () => {
         iconClassValue = 'updated-icon-class';
         commands.notifyCommandChanged(id);
         await render(button);
-        const wrapperNode = buttonNode.firstChild as HTMLElement;
-        const iconNode = wrapperNode.firstChild as HTMLElement;
+        const iconNode = buttonNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains(iconClassValue)).toBe(true);
         cmd.dispose();
       });
