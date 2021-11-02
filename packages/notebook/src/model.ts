@@ -297,7 +297,13 @@ export class NotebookModel implements INotebookModel {
       }
       switch (cell.cell_type) {
         case 'code':
-          cells.push(factory.createCodeCell(options));
+          cells.push(
+            factory.createCodeCell({
+              ...options,
+              // Set early the code cell mimetype
+              mimeType: value.metadata.language_info?.mimetype
+            })
+          );
           break;
         case 'markdown':
           cells.push(factory.createMarkdownCell(options));

@@ -57,6 +57,8 @@ export class InputArea extends Widget {
 
     // Editor
     const editorOptions = {
+      // TODO should be part of the initialization - selectionStyle
+      config: options.editorConfig,
       model,
       factory: contentFactory.editorFactory,
       updateOnShow: options.updateOnShow
@@ -170,6 +172,8 @@ export namespace InputArea {
      * Defaults to one that uses CodeMirror.
      */
     contentFactory?: IContentFactory;
+
+    editorConfig?: Partial<CodeEditor.IConfig>;
 
     /**
      * Whether to send an update request to the editor when it is shown.

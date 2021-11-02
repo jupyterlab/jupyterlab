@@ -219,6 +219,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     const input = (this._input = new InputArea({
       model,
       contentFactory,
+      editorConfig: options.editorConfig,
       updateOnShow: options.updateEditorOnShow,
       placeholder: options.placeholder
     }));
@@ -235,17 +236,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     const footer = this.contentFactory.createCellFooter();
     footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
-
-    // Editor settings
-    if (options.editorConfig) {
-      let editorOptions: any = {};
-      Object.keys(options.editorConfig).forEach(
-        (key: keyof CodeEditor.IConfig) => {
-          editorOptions[key] = options.editorConfig?.[key] ?? null;
-        }
-      );
-      this.editor.setOptions(editorOptions);
-    }
 
     model.metadata.changed.connect(this.onMetadataChanged, this);
   }
@@ -1450,7 +1440,12 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Construct a Markdown cell widget.
    */
   constructor(options: MarkdownCell.IOptions) {
-    super(options);
+    super({
+      ...options,
+      // Stop codemirror handling paste
+      editorConfig: { ...options.editorConfig, handlePaste: false }
+    });
+
     this.addClass(MARKDOWN_CELL_CLASS);
     const trans = this.translator.load('jupyterlab');
     this.node.setAttribute('aria-label', trans.__('Markdown Cell Content'));
@@ -1461,9 +1456,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         model: this.model.attachments
       })
     });
-
-    // Stop codemirror handling paste
-    this.editor.setOption('handlePaste', false);
 
     // Check if heading cell is set to be collapsed
     this._headingCollapsed = (this.model.metadata.get(

@@ -450,7 +450,12 @@ export class StaticNotebook extends Widget {
     const cells = newValue.cells;
     if (!cells.length && newValue.isInitialized) {
       cells.push(
-        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
+        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {
+          mimeType:
+            this.notebookConfig.defaultCell === 'code'
+              ? this._mimetype
+              : undefined
+        })
       );
     }
 
@@ -496,7 +501,12 @@ export class StaticNotebook extends Widget {
               model.cells.push(
                 model.contentFactory.createCell(
                   this.notebookConfig.defaultCell,
-                  {}
+                  {
+                    mimeType:
+                      this.notebookConfig.defaultCell === 'code'
+                        ? this._mimetype
+                        : undefined
+                  }
                 )
               );
             }
@@ -532,7 +542,6 @@ export class StaticNotebook extends Widget {
     switch (cell.type) {
       case 'code':
         widget = this._createCodeCell(cell as ICodeCellModel);
-        widget.model.mimeType = this._mimetype;
         break;
       case 'markdown':
         widget = this._createMarkdownCell(cell as IMarkdownCellModel);
@@ -754,7 +763,7 @@ export class StaticNotebook extends Widget {
   private _updateEditorConfig() {
     for (let i = 0; i < this.widgets.length; i++) {
       const cell = this.widgets[i];
-      let config: Partial<CodeEditor.IConfig>;
+      let config: Partial<CodeEditor.IConfig> = {};
       switch (cell.model.type) {
         case 'code':
           config = this._editorConfig.code;
@@ -766,11 +775,8 @@ export class StaticNotebook extends Widget {
           config = this._editorConfig.raw;
           break;
       }
-      let editorOptions: any = {};
-      Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-        editorOptions[key] = config[key] ?? null;
-      });
-      cell.editor.setOptions(editorOptions);
+
+      cell.editor.setOptions({ ...config });
       cell.editor.refresh();
     }
   }

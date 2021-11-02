@@ -20,7 +20,6 @@ import * as models from '@jupyterlab/shared-models';
 import { UUID } from '@lumino/coreutils';
 
 import {
-  IModelDB,
   IObservableJSON,
   IObservableMap,
   IObservableValue,
@@ -174,7 +173,8 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   constructor(options: CellModel.IOptions) {
     super({
       modelDB: options.modelDB,
-      id: options.id || (options.cell?.id as string) || UUID.uuid4()
+      id: options.id || (options.cell?.id as string) || UUID.uuid4(),
+      mimeType: options.mimeType
     });
 
     this.value.changed.connect(this.onGenericChange, this);
@@ -431,21 +431,11 @@ export namespace CellModel {
   /**
    * The options used to initialize a `CellModel`.
    */
-  export interface IOptions {
+  export interface IOptions extends Omit<CodeEditor.Model.IOptions, 'value'> {
     /**
      * The source cell data.
      */
     cell?: nbformat.IBaseCell;
-
-    /**
-     * An IModelDB in which to store cell data.
-     */
-    modelDB?: IModelDB;
-
-    /**
-     * A unique identifier for this cell.
-     */
-    id?: string;
   }
 }
 
