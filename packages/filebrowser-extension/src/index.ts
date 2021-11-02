@@ -751,8 +751,8 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
 
         // upload the content of the file to the server
         try {
-          const basename = PathExt.basename(url);
-          const file = new File([blob], basename, { type });
+          const name = PathExt.basename(url);
+          const file = new File([blob], name, { type });
           const model = await browser.model.upload(file);
           return commands.execute('docmanager:open', {
             path: model.path
