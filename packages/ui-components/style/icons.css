@@ -165,9 +165,6 @@
 }
 
 /* CSS for icons in selected items in the settings editor */
-#setting-editor .jp-PluginList .jp-mod-selected .jp-icon-selectable[fill] {
-  fill: #fff;
-}
 #setting-editor
   .jp-PluginList
   .jp-mod-selected

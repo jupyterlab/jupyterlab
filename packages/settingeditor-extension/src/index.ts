@@ -92,8 +92,8 @@ function activate(
 
   if (palette) {
     palette.addItem({
-      category: trans.__('Settings'),
-      command: CommandIDs.openJSON
+      category: trans.__('Simple Settings'),
+      command: CommandIDs.open
     });
   }
 

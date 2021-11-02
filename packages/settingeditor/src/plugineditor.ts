@@ -12,14 +12,11 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { jupyterIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { StackedLayout, Widget } from '@lumino/widgets';
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { RawEditor } from './raweditor';
 import { SettingEditor } from './jsonsettingeditor';
 
@@ -58,10 +55,6 @@ export class PluginEditor extends Widget {
     const layout = (this.layout = new StackedLayout());
     const { onSaveError } = Private;
 
-    const instructions = (this._instructions = new Widget());
-    instructions.addClass('jp-SettingEditorInstructions');
-    Private.populateInstructionsNode(instructions.node, translator);
-
     this.raw = this._rawEditor = new RawEditor({
       commands,
       editorFactory,
@@ -72,7 +65,6 @@ export class PluginEditor extends Widget {
     });
     this._rawEditor.handleMoved.connect(this._onStateChanged, this);
 
-    layout.addWidget(this._instructions);
     layout.addWidget(this._rawEditor);
   }
 
@@ -97,13 +89,6 @@ export class PluginEditor extends Widget {
   set settings(settings: ISettingRegistry.ISettings | null) {
     if (this._settings === settings) {
       return;
-    }
-    if (!settings) {
-      this._instructions.show();
-      this._rawEditor.hide();
-    } else if (!this._instructions.isHidden) {
-      this._instructions.hide();
-      this._rawEditor.show();
     }
 
     const raw = this._rawEditor;
@@ -182,12 +167,16 @@ export class PluginEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
+    const raw = this._rawEditor;
     const settings = this._settings;
 
     if (!settings) {
-      this._rawEditor.hide();
-      this._instructions.show();
+      this.hide();
+      return;
     }
+
+    this.show();
+    raw.show();
   }
 
   /**
@@ -198,7 +187,6 @@ export class PluginEditor extends Widget {
   }
 
   protected translator: ITranslator;
-  private _instructions: Widget;
   private _trans: TranslationBundle;
   private _rawEditor: RawEditor;
   private _settings: ISettingRegistry.ISettings | null = null;
@@ -260,40 +248,12 @@ export namespace PluginEditor {
  */
 namespace Private {
   /**
-   * Populate the instructions text node.
-   */
-  export function populateInstructionsNode(
-    node: HTMLElement,
-    translator?: ITranslator
-  ): void {
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    ReactDOM.render(
-      <React.Fragment>
-        <h2>
-          <jupyterIcon.react
-            className="jp-SettingEditorInstructions-icon"
-            tag="span"
-            elementPosition="center"
-            height="auto"
-            width="60px"
-          />
-          <span className="jp-SettingEditorInstructions-title">Settings</span>
-        </h2>
-        <span className="jp-SettingEditorInstructions-text">
-          {trans.__(
-            'Select a plugin from the list to view and edit its preferences.'
-          )}
-        </span>
-      </React.Fragment>,
-      node
-    );
-  }
-
-  /**
    * Handle save errors.
    */
-  export function onSaveError(reason: any, translator?: ITranslator): void {
+  export function onSaveError(
+    reason: Dialog.IError,
+    translator?: ITranslator
+  ): void {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     console.error(`Saving setting editor value failed: ${reason.message}`);
