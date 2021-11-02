@@ -652,12 +652,19 @@ export class SessionContext implements ISessionContext {
    */
   async restartKernel(): Promise<void> {
     const kernel = this.session?.kernel || null;
+    if (this._isRestarting) {
+      return;
+    }
     this._isRestarting = true;
     this._isReady = false;
     this._statusChanged.emit('restarting');
-    await this.session?.kernel?.restart();
+    try {
+      await this.session?.kernel?.restart();
+      this._isReady = true;
+    } catch (e) {
+      console.error(e);
+    }
     this._isRestarting = false;
-    this._isReady = true;
     this._statusChanged.emit(this.session?.kernel?.status || 'unknown');
     this._kernelChanged.emit({
       name: 'kernel',
@@ -832,9 +839,7 @@ export class SessionContext implements ISessionContext {
       this._pendingKernelName = model.name;
     }
 
-    if (this._session && !this._isTerminating) {
-      await this._shutdownSession();
-    } else if (!this._session) {
+    if (!this._session) {
       this._kernelChanged.emit({
         name: 'kernel',
         oldValue: null,
@@ -846,6 +851,17 @@ export class SessionContext implements ISessionContext {
     // will be started first.
     if (!this._pendingSessionRequest) {
       this._initStarted.resolve(void 0);
+    }
+
+    // If we already have a session, just change the kernel.
+    if (this._session && !this._isTerminating) {
+      try {
+        await this._session.changeKernel(model);
+        return this._session.kernel;
+      } catch (err) {
+        void this._handleSessionError(err);
+        throw err;
+      }
     }
 
     // Use a UUID for the path to overcome a race condition on the server
