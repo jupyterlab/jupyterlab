@@ -694,6 +694,74 @@ export const launcherToolbarButton: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to open files from remote URLs
+ */
+const openUrlPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-url',
+  autoStart: true,
+  requires: [IFileBrowserFactory, ITranslator],
+  optional: [ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ) => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const { defaultBrowser: browser } = factory;
+    const command = CommandIDs.openUrl;
+
+    commands.addCommand(command, {
+      label: args =>
+        args.path ? trans.__('Open %1', args.path) : trans.__('Open from URL…'),
+      caption: args =>
+        args.path ? trans.__('Open %1', args.path) : trans.__('Open from URL'),
+      execute: async args => {
+        let url: string | undefined = (args?.url as string) ?? '';
+        if (!url) {
+          url =
+            (
+              await InputDialog.getText({
+                label: trans.__('Url'),
+                placeholder: 'https://example.com/path/to/file',
+                title: trans.__('Open Url'),
+                okLabel: trans.__('Open')
+              })
+            ).value ?? undefined;
+        }
+        if (!url) {
+          return;
+        }
+        try {
+          const req = await fetch(url);
+          const blob = await req.blob();
+          const type = req.headers.get('Content-Type') ?? '';
+          const basename = PathExt.basename(url);
+          const file = new File([blob], basename, { type });
+          const model = await browser.model.upload(file);
+          return commands.execute('docmanager:open', {
+            path: model.path
+          });
+        } catch (reason) {
+          if (reason.response && reason.response.status !== 200) {
+            reason.message = trans.__('Could not open Url: %1', url);
+          }
+          return showErrorMessage(trans.__('Cannot open'), reason);
+        }
+      }
+    });
+
+    if (palette) {
+      palette.addItem({
+        command,
+        category: trans.__('File Operations')
+      });
+    }
+  }
+};
+
+/**
  * Add the main file browser commands to the application's command registry.
  */
 function addCommands(
@@ -861,53 +929,11 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.openUrl, {
-    label: args =>
-      args.path ? trans.__('Open %1', args.path) : trans.__('Open from URL…'),
-    caption: args =>
-      args.path ? trans.__('Open %1', args.path) : trans.__('Open from URL'),
-    execute: async args => {
-      let url: string | undefined = (args?.url as string) ?? '';
-      if (!url) {
-        url =
-          (
-            await InputDialog.getText({
-              label: trans.__('Url'),
-              placeholder: 'https://example.com/path/to/file',
-              title: trans.__('Open Url'),
-              okLabel: trans.__('Open')
-            })
-          ).value ?? undefined;
-      }
-      if (!url) {
-        return;
-      }
-      try {
-        const req = await fetch(url);
-        const blob = await req.blob();
-        const type = req.headers.get('Content-Type') ?? '';
-        const basename = PathExt.basename(url);
-        const file = new File([blob], basename, { type });
-        const model = await browser.model.upload(file);
-        return commands.execute('docmanager:open', {
-          path: model.path
-        });
-      } catch (reason) {
-        if (reason.response && reason.response.status !== 200) {
-          reason.message = trans.__('Could not open Url: %1', url);
-        }
-        return showErrorMessage(trans.__('Cannot open'), reason);
-      }
-    }
-  });
-
   // Add the openPath command to the command palette
   if (commandPalette) {
-    [CommandIDs.openPath, CommandIDs.openUrl].forEach(command => {
-      commandPalette.addItem({
-        command,
-        category: trans.__('File Operations')
-      });
+    commandPalette.addItem({
+      command: CommandIDs.openPath,
+      category: trans.__('File Operations')
     });
   }
 
@@ -1271,7 +1297,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   browserWidget,
   launcherToolbarButton,
   openWithPlugin,
-  openBrowserTabPlugin
+  openBrowserTabPlugin,
+  openUrlPlugin
 ];
 export default plugins;
 
