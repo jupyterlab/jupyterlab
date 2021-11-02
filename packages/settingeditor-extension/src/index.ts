@@ -50,7 +50,7 @@ namespace CommandIDs {
  * The default setting editor extension.
  */
 const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
-  id: '@jupyterlab/settingeditor-extension:plugin',
+  id: '@jupyterlab/settingeditor-extension:simple-plugin',
   requires: [
     ILayoutRestorer,
     ISettingRegistry,
@@ -132,7 +132,7 @@ function activate(
  * The default setting editor extension.
  */
 const jsonPlugin: JupyterFrontEndPlugin<IJSONSettingEditorTracker> = {
-  id: '@jupyterlab/settingeditor-extension:json-editor',
+  id: '@jupyterlab/settingeditor-extension:plugin',
   requires: [
     ILayoutRestorer,
     ISettingRegistry,
@@ -164,15 +164,16 @@ function activateJSON(
 ): IJSONSettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
-  const namespace = 'json-setting-editor';
+  const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
-  const jsonTracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
+  const tracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
     namespace
   });
+  let editor: SettingEditor;
 
   // Handle state restoration.
-  void restorer.restore(jsonTracker, {
+  void restorer.restore(tracker, {
     command: CommandIDs.openJSON,
     args: widget => ({}),
     name: widget => namespace
@@ -180,15 +181,15 @@ function activateJSON(
 
   commands.addCommand(CommandIDs.openJSON, {
     execute: () => {
-      if (jsonTracker.currentWidget) {
-        shell.activateById(jsonTracker.currentWidget.id);
+      if (tracker.currentWidget) {
+        shell.activateById(tracker.currentWidget.id);
         return;
       }
 
       const key = plugin.id;
       const when = app.restored;
 
-      const editor = new SettingEditor({
+      editor = new SettingEditor({
         commands: {
           registry: commands,
           revert: CommandIDs.revert,
@@ -231,7 +232,7 @@ function activateJSON(
       editor.title.label = trans.__('Settings');
 
       const main = new MainAreaWidget({ content: editor });
-      void jsonTracker.add(main);
+      void tracker.add(main);
       shell.add(main);
     },
     label: trans.__('JSON Settings Editor')
@@ -245,21 +246,21 @@ function activateJSON(
 
   commands.addCommand(CommandIDs.revert, {
     execute: () => {
-      jsonTracker.currentWidget?.content.revert();
+      tracker.currentWidget?.content.revert();
     },
     icon: undoIcon,
     label: trans.__('Revert User Settings'),
-    isEnabled: () => jsonTracker.currentWidget?.content.canRevertRaw ?? false
+    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
   });
 
   commands.addCommand(CommandIDs.save, {
-    execute: () => jsonTracker.currentWidget?.content.save(),
+    execute: () => tracker.currentWidget?.content.save(),
     icon: saveIcon,
     label: trans.__('Save User Settings'),
-    isEnabled: () => jsonTracker.currentWidget?.content.canSaveRaw ?? false
+    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
   });
 
-  return jsonTracker;
+  return tracker;
 }
 
 export default [plugin, jsonPlugin];
