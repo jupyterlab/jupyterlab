@@ -108,7 +108,6 @@ async function activateTOC(
           if (cell instanceof MarkdownCell && cell.headingInfo.level <= level) {
             break;
           }
-
           if (cell instanceof CodeCell) {
             void CodeCell.execute(cell, panel.sessionContext);
           }
