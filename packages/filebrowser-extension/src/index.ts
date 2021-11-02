@@ -733,21 +733,32 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
         if (!url) {
           return;
         }
+
+        let type = '';
+        let blob;
+
+        // fetch the file from the URL
         try {
           const req = await fetch(url);
-          const blob = await req.blob();
-          const type = req.headers.get('Content-Type') ?? '';
+          blob = await req.blob();
+          type = req.headers.get('Content-Type') ?? '';
+        } catch (reason) {
+          if (reason.response && reason.response.status !== 200) {
+            reason.message = trans.__('Could not open URL: %1', url);
+          }
+          return showErrorMessage(trans.__('Cannot fetch'), reason);
+        }
+
+        // upload the content of the file to the server
+        try {
           const basename = PathExt.basename(url);
           const file = new File([blob], basename, { type });
           const model = await browser.model.upload(file);
           return commands.execute('docmanager:open', {
             path: model.path
           });
-        } catch (reason) {
-          if (reason.response && reason.response.status !== 200) {
-            reason.message = trans.__('Could not open Url: %1', url);
-          }
-          return showErrorMessage(trans.__('Cannot open'), reason);
+        } catch (error) {
+          trans._p('showErrorMessage', 'Upload Error'), error;
         }
       }
     });
