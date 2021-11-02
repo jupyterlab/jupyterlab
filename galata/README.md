@@ -136,6 +136,13 @@ PWDEBUG=1 jlpm playwright test
 
 Here are the new test fixture introduced by Galata on top of [Playwright fixtures](https://playwright.dev/docs/api/class-fixtures).
 
+### baseURL
+
+- type: < string >
+
+Application base URL without `/lab`. It defaults to environment variable `TARGET_URL` or `http://localhost:8888` if nothing
+is defined.
+
 ### appPath
 
 - type: < string >
