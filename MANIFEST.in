@@ -34,7 +34,7 @@ recursive-exclude jupyterlab *.js.map
 
 # Galata
 include galata/README.md
-include galata/jupyter_server_config.py
+include galata/jupyter_server_test_config.py
 include galata/*.js
 recursive-include galata/media *.*
 graft galata/src

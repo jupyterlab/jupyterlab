@@ -26,7 +26,7 @@ jlpm playwright install
 
 Create a Playwright configuration file `playwright.config.js` containing:
 
-```
+```js
 module.exports = require('@jupyterlab/galata/lib/playwright-config');
 ```
 
@@ -67,7 +67,6 @@ from tempfile import mkdtemp
 
 c.ServerApp.port = 8888
 c.ServerApp.open_browser = False
-c.LabApp.dev_mode = True
 
 c.ServerApp.root_dir = mkdtemp(prefix='galata-test-')
 c.ServerApp.token = ""
