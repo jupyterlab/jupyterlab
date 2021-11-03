@@ -562,7 +562,7 @@ namespace Private {
           runners.set(id, data);
           if (!page.isClosed() && !isClosed) {
             return route.fulfill({
-              status: 201,
+              status: type === 'sessions' ? 201 : 200,
               body: JSON.stringify(data),
               contentType: 'application/json',
               headers: response.headers as any
