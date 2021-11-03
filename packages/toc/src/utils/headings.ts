@@ -150,3 +150,4 @@ export { IHeading };
 export { INumberedHeading };
 export { INotebookHeading };
 export { runNestedCodeCells };
+export { isNotebookHeading };
