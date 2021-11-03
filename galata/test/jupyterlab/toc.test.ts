@@ -9,7 +9,7 @@ const fileName = 'toc_notebook.ipynb';
 
 test.use({ tmpPath: 'test-toc' });
 
-test.describe.serial.only('Table of Contents', () => {
+test.describe.serial('Table of Contents', () => {
   test.beforeAll(async ({ baseURL, tmpPath }) => {
     const contents = galata.newContentsHelper(baseURL);
     await contents.uploadFile(
