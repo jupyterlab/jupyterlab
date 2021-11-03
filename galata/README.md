@@ -66,6 +66,7 @@ Create `jupyter_server_test_config.py` with the following content.
 from tempfile import mkdtemp
 
 c.ServerApp.port = 8888
+ServerApp.port_retries = 0
 c.ServerApp.open_browser = False
 
 c.ServerApp.root_dir = mkdtemp(prefix='galata-test-')
