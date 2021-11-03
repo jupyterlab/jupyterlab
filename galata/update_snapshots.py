@@ -4,7 +4,6 @@
 import hashlib
 from pathlib import Path
 import json
-import pprint
 import shutil
 
 import argparse
