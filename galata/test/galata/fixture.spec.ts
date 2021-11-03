@@ -122,7 +122,7 @@ test.describe('sessions', () => {
     await page.menu.clickMenuItem('File>New>Console');
     await page.waitForSelector('.jp-Dialog');
     await page.click('.jp-Dialog .jp-mod-accept');
-    await page.waitForSelector('text=Idle');
+    await page.waitForSelector('text= | Idle');
 
     expect(sessions.size).toEqual(2);
   });
@@ -162,7 +162,7 @@ test.describe('terminals', () => {
 test.describe('tmpPath', () => {
   test('should return an unique test folder', ({ tmpPath }) => {
     expect(tmpPath).toEqual(
-      'test-galata-fixture-should-return-an-unique-test-folder-galata'
+      'test-galata-fixture-tmpPath-should-return-an-unique-test-folder-galata'
     );
   });
 });

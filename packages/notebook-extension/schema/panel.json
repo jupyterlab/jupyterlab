@@ -94,6 +94,13 @@
         "command": "",
         "disabled": false,
         "rank": 1001
+      },
+      {
+        "name": "executionProgress",
+        "rank": 1002,
+        "args": {},
+        "command": "",
+        "disabled": false
       }
     ]
   },

@@ -17,55 +17,67 @@ button {
 }
 
 button:focus-visible {
-  border: 1px solid var(--jp-brand-color1);
+  border: 1px solid var(--jp-accept-color-active, var(--jp-brand-color1));
 }
 
 button.jp-mod-styled.jp-mod-accept {
-  background: var(--md-blue-500);
+  background: var(--jp-accept-color-normal, var(--md-blue-500));
   border: 0;
   color: white;
 }
 
 button.jp-mod-styled.jp-mod-accept:hover {
-  background: var(--md-blue-600);
+  background: var(--jp-accept-color-hover, var(--md-blue-600));
 }
 
 button.jp-mod-styled.jp-mod-accept:active {
-  background: var(--md-blue-700);
+  background: var(--jp-accept-color-active, var(--md-blue-700));
+}
+
+button.jp-mod-styled.jp-mod-accept:focus-visible {
+  border: 1px solid var(--jp-accept-color-active, var(--jp-brand-color1));
 }
 
 button.jp-mod-styled.jp-mod-reject {
-  background: var(--md-grey-500);
+  background: var(--jp-reject-color-normal, var(--md-grey-500));
   border: 0;
   color: white;
 }
 
 button.jp-mod-styled.jp-mod-reject:hover {
-  background: var(--md-grey-600);
+  background: var(--jp-reject-color-hover, var(--md-grey-600));
 }
 
 button.jp-mod-styled.jp-mod-reject:active {
-  background: var(--md-grey-700);
+  background: var(--jp-reject-color-active, var(--md-grey-700));
+}
+
+button.jp-mod-styled.jp-mod-reject:focus-visible {
+  border: 1px solid var(--jp-reject-color-active, var(--md-grey-700));
 }
 
 button.jp-mod-styled.jp-mod-warn {
-  background: var(--jp-error-color1);
+  background: var(--jp-warn-color-normal, var(--jp-error-color1));
   border: 0;
   color: white;
 }
 
 button.jp-mod-styled.jp-mod-warn:hover {
-  background: var(--md-red-600);
+  background: var(--jp-warn-color-hover, var(--md-red-600));
 }
 
 button.jp-mod-styled.jp-mod-warn:active {
-  background: var(--md-red-700);
+  background: var(--jp-warn-color-active, var(--md-red-700));
+}
+
+button.jp-mod-styled.jp-mod-warn:focus-visible {
+  border: 1px solid var(--jp-warn-color-active, var(--md-red-700));
 }
 
 .jp-Button-flat {
   text-decoration: none;
   padding: var(--jp-flat-button-padding);
-  color: var(--jp-warn-color1);
+  color: var(--jp-warn-color-normal, var(--jp-warn-color1));
   font-weight: 500;
   background-color: transparent;
   height: var(--jp-private-running-shutdown-button-height);
@@ -75,11 +87,11 @@ button.jp-mod-styled.jp-mod-warn:active {
 }
 
 .jp-Button-flat:hover {
-  background-color: rgba(153, 153, 153, 0.1);
+  background-color: var(--jp-warn-color-hover, rgba(153, 153, 153, 0.1));
 }
 
 .jp-Button-flat:focus {
   border: none;
   box-shadow: none;
-  background-color: rgba(153, 153, 153, 0.2);
+  background-color: var(--jp-warn-color-active, rgba(153, 153, 153, 0.2));
 }

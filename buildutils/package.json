@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/buildutils",
-  "version": "3.3.0-alpha.12",
+  "version": "3.3.0-alpha.14",
   "description": "JupyterLab - Build Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,7 +40,7 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@lumino/coreutils": "^1.5.3",
+    "@lumino/coreutils": "^1.10.0",
     "@yarnpkg/lockfile": "^1.1.0",
     "child_process": "~1.0.2",
     "commander": "~6.0.0",

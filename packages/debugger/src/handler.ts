@@ -17,6 +17,8 @@ import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
 import { IDebugger } from './tokens';
 
+const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
+
 /**
  * Add a bug icon to the widget toolbar to enable and disable debugging.
  *
@@ -44,7 +46,9 @@ function updateIconButton(
     pressed,
     onClick
   });
-  widget.toolbar.insertBefore('kernelName', 'debugger-icon', icon);
+  if (!widget.toolbar.insertBefore('kernelName', TOOLBAR_DEBUGGER_ITEM, icon)) {
+    widget.toolbar.addItem(TOOLBAR_DEBUGGER_ITEM, icon);
+  }
 
   return icon;
 }
@@ -355,7 +359,11 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       await this._service.displayDefinedVariables();
     }
 
-    updateIconButtonState(this._iconButtons[widget.id]!, false, true);
+    updateIconButtonState(
+      this._iconButtons[widget.id]!,
+      this._service.isStarted,
+      true
+    );
 
     // check the state of the debug session
     if (!this._service.isStarted) {

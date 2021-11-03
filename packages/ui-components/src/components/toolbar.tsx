@@ -10,7 +10,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import * as React from 'react';
-import { Button } from '../blueprint';
+import { Button } from './button';
 import { ellipsesIcon, LabIcon } from '../icon';
 import { classes } from '../utils';
 import { ReactWidget, UseSignal } from './vdom';

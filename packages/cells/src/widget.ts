@@ -1583,7 +1583,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       let collapseButton = this.inputArea.promptNode.appendChild(
         document.createElement('button')
       );
-      collapseButton.className = `bp3-button bp3-minimal jp-Button minimal ${HEADING_COLLAPSER_CLASS}`;
+      collapseButton.className = `jp-Button jp-mod-minimal ${HEADING_COLLAPSER_CLASS}`;
       collapseButton.style.background = `${
         this._headingCollapsed
           ? 'var(--jp-icon-caret-right)'
@@ -1607,7 +1607,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       this._numberChildNodes > 0
     ) {
       const numberChildNodes = document.createElement('button');
-      numberChildNodes.className = `bp3-button bp3-minimal jp-Button ${SHOW_HIDDEN_CELLS_CLASS}`;
+      numberChildNodes.className = `jp-mod-minimal jp-Button ${SHOW_HIDDEN_CELLS_CLASS}`;
       addIcon.render(numberChildNodes);
       const numberChildNodesText = document.createElement('div');
       numberChildNodesText.nodeValue = `${this._numberChildNodes} cell${

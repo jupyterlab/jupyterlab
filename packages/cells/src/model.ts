@@ -198,9 +198,11 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     // Set the text value, normalizing line endings to \n
     if (Array.isArray(cell.source)) {
-      this.value.text = cell.source.map(s => s.replace(/\r\n/g, '\n')).join('');
+      this.value.text = cell.source
+        .map(s => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n'))
+        .join('');
     } else {
-      this.value.text = cell.source.replace(/\r\n/g, '\n');
+      this.value.text = cell.source.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     }
     const metadata = JSONExt.deepCopy(cell.metadata);
     if (this.type !== 'raw') {
@@ -623,6 +625,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         executionCount.set(null);
       }
     }
+    this.value.changed.connect(this._onValueChanged, this);
+
     executionCount.changed.connect(this._onExecutionCountChanged, this);
 
     this._modelDBMutex(() => {
@@ -816,13 +820,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
-   * Handle a change to the observable value.
+   * Handle a change to the code cell value.
    */
-  protected onGenericChange(): void {
+  private _onValueChanged(): void {
     if (this.executionCount !== null) {
       this._setDirty(this._executedCode !== this.value.text.trim());
     }
-    this.contentChanged.emit(void 0);
   }
 
   /**

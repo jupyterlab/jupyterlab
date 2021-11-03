@@ -38,7 +38,7 @@ and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
 All source code is written in
-`TypeScript <http://www.typescriptlang.org/Handbook>`__. See the `Style
+`TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
 All source code is formatted using `prettier <https://prettier.io>`__.
@@ -119,7 +119,7 @@ If you use ``conda``, you can get it with:
 
    conda install -c conda-forge 'nodejs'
 
-If you use `Homebrew <http://brew.sh>`__ on Mac OS X:
+If you use `Homebrew <https://brew.sh>`__ on Mac OS X:
 
 .. code:: bash
 
@@ -171,6 +171,12 @@ Notes:
    installation, make sure Python 3.0+ is installed. Also, try using the
    Python 3.0+ version of ``pip`` or ``pip3 install -e .`` command to
    install JupyterLab from the forked repository.
+-  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
+   returned exit status 127 while in binding.gyp`` while running the 
+   ``pip install`` command above, you may be missing packages required
+   by ``canvas``. On macOS with Homebrew, you can add these packages by
+   running 
+   ``brew install pkg-config cairo pango libpng jpeg giflib librsvg``.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://yarnpkg.com/en>`__ package manager. If you have
    ``yarn`` installed already, you can use the ``yarn`` command when

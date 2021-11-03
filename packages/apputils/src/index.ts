@@ -52,6 +52,7 @@ export {
 } from './toolbar';
 export * from './widgettracker';
 export * from './windowresolver';
+export * from './kernelstatuses';
 
 // Merge Toolbar namespace to preserve API
 /**

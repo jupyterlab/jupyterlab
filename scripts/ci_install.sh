@@ -13,7 +13,7 @@ if [ $OSTYPE == "Linux" ]; then
 fi
 
 # create jupyter base dir (needed for config retrieval)
-mkdir ~/.jupyter
+mkdir -p ~/.jupyter
 
 # Set up git config
 git config --global user.name foo

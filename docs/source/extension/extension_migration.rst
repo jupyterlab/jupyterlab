@@ -3,17 +3,37 @@
 Extension Migration Guide
 ================================================
 
-JupyterLab 3.0 to 3.1
+JupyterLab 3.x to 4.x
 ---------------------
 
-Following semver rules, API are compatible.
+.. note::
+
+   With JupyterLab 4.x, the npm package version policy changed to not bump major version with 
+   the Python package unless required to ease extension compatibility.
+
+API breaking changes
+^^^^^^^^^^^^^^^^^^^^
+
+Here is a list of JupyterLab npm packages that encountered API changes and therefore have
+bumped their major version (following semver convention):
+
+- ``@jupyterlab/ui-components`` from 3.x to 4.x
+   Major version bumped following removal of Blueprint JS dependency. Extensions using proxied
+   components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly 
+   from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
+   need to switch to the Blueprint components as the interfaces of those components in JupyterLab
+   do not match those of Blueprint JS.
+
+JupyterLab 3.0 to 3.1
+---------------------
 
 New main and context menus customization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 JupyterLab 3.1 introduces a new way to hook commands into :ref:`mainmenu` and :ref:`context_menu`.
 It allows the final user to customize those menus through settings as it is already possible for
-the shortcuts.
+the shortcuts.  
+Using the API is not recommended any longer except to create dynamic menus.
 
 
 Jest configuration update

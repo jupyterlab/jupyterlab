@@ -17,7 +17,7 @@
 [![Discourse](https://img.shields.io/badge/help_forum-discourse-blue.svg)](https://discourse.jupyter.org/c/jupyterlab)
 [![Gitter](https://img.shields.io/badge/social_chat-gitter-blue.svg)](https://gitter.im/jupyterlab/jupyterlab)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/0b99d22459b65b9de1593a8ba2e4f34df9f76c9f?urlpath=lab/tree/demo)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/7390762294552deb550b486928646705bbb24333?urlpath=lab/tree/demo)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/jupyterlab/jupyterlab)
 
@@ -181,4 +181,6 @@ Anyone is welcome to attend, if they would like to discuss a topic or just to li
 
 - When: Wednesdays [9AM Pacific Time](https://www.thetimezoneconverter.com/?t=9%3A00%20am&tz=San%20Francisco&)
 - Where: [`jovyan` Zoom](https://zoom.us/my/jovyan?pwd=c0JZTHlNdS9Sek9vdzR3aTJ4SzFTQT09)
-- What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both)
+- What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both) - Notes are now taken on Binder using JupyterLab with RTC.
+
+> Notes are archived on [GitHub JupyterLab team compass](https://github.com/jupyterlab/team-compass/issues).

@@ -6,6 +6,7 @@ import * as path from 'path';
 import { ContentsHelper } from './contents';
 import {
   ActivityHelper,
+  DebuggerHelper,
   FileBrowserHelper,
   KernelHelper,
   LogConsoleHelper,
@@ -83,6 +84,11 @@ export interface IJupyterLabPage {
    * Selector for launcher tab
    */
   readonly launcherSelector: string;
+
+  /**
+   * Debugger helper
+   */
+  readonly debugger: DebuggerHelper;
 
   /**
    * Getter for JupyterLab base URL
@@ -270,6 +276,7 @@ export class JupyterLabPage implements IJupyterLabPage {
     this.statusbar = new StatusBarHelper(page, this.menu);
     this.sidebar = new SidebarHelper(page, this.menu);
     this.theme = new ThemeHelper(page);
+    this.debugger = new DebuggerHelper(page, this.sidebar, this.notebook);
   }
 
   /**
@@ -325,6 +332,11 @@ export class JupyterLabPage implements IJupyterLabPage {
    * JupyterLab theme helpers
    */
   readonly theme: ThemeHelper;
+
+  /**
+   * JupyterLab debugger helper
+   */
+  readonly debugger: DebuggerHelper;
 
   /**
    * Selector for launcher tab
