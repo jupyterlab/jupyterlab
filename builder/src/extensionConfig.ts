@@ -273,7 +273,7 @@ function generateConfig({
 
   if (mode === 'development') {
     const logPath = path.join(outputPath, 'build_log.json');
-    function regExpReplacer(key, value) {
+    function regExpReplacer(key: any, value: any) {
       if (value instanceof RegExp) {
         return value.toString();
       } else {
