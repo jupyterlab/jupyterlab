@@ -136,10 +136,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # Clean assets before installing the new version
-          jlpm run clean
-
-          bash ./scripts/ci_install.sh
+          # Reset installation
+          jlpm run clean:slate
+          jlpm run build
 
       - name: Launch JupyterLab
         working-directory: galata
