@@ -162,7 +162,7 @@ test.describe('terminals', () => {
 test.describe('tmpPath', () => {
   test('should return an unique test folder', ({ tmpPath }) => {
     expect(tmpPath).toEqual(
-      'test-galata-fixture-should-return-an-unique-test-folder-galata'
+      'test-galata-fixture-tmpPath-should-return-an-unique-test-folder-galata'
     );
   });
 });
