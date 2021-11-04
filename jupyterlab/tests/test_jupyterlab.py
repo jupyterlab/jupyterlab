@@ -24,9 +24,8 @@ from jupyterlab.commands import (
     AppOptions, _compare_ranges, _test_overlap,
     build, build_check, check_extension,
     disable_extension, enable_extension,
-    get_app_info, install_extension, link_package,
-    list_extensions, uninstall_extension,
-    unlink_package, update_extension, get_app_version
+    get_app_info, link_package,
+    list_extensions, unlink_package, get_app_version
 )
 from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
 

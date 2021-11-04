@@ -15,10 +15,8 @@ from jupyter_server.extension.handler import ExtensionHandlerMixin
 from tornado import gen, web
 
 from ..commands import (
-    get_app_info, install_extension, uninstall_extension,
-    enable_extension, disable_extension, read_package,
-    _AppHandler, get_latest_compatible_package_versions,
-    AppOptions, _ensure_options
+    get_app_info, enable_extension, disable_extension, read_package,
+    _AppHandler, get_latest_compatible_package_versions, _ensure_options
 )
 
 
@@ -152,22 +150,6 @@ class ExtensionManager(object):
                     pkg_type='prebuilt'
                 ))
         raise gen.Return(extensions)
-
-    @gen.coroutine
-    def install(self, extension):
-        """Handle an install/update request"""
-        try:
-            install_extension(extension, app_options=self.app_options)
-        except ValueError as e:
-            raise gen.Return(dict(status='error', message=str(e)))
-        raise gen.Return(dict(status='ok',))
-
-    @gen.coroutine
-    def uninstall(self, extension):
-        """Handle an uninstall request"""
-        did_uninstall = uninstall_extension(
-            extension, app_options=self.app_options)
-        raise gen.Return(dict(status='ok' if did_uninstall else 'error',))
 
     @gen.coroutine
     def enable(self, extension):
