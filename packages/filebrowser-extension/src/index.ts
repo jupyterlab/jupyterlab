@@ -714,18 +714,18 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(command, {
       label: args =>
-        args.path ? trans.__('Open %1', args.path) : trans.__('Open from URL…'),
+        args.url ? trans.__('Open %1', args.url) : trans.__('Open from URL…'),
       caption: args =>
-        args.path ? trans.__('Open %1', args.path) : trans.__('Open from URL'),
+        args.url ? trans.__('Open %1', args.url) : trans.__('Open from URL'),
       execute: async args => {
         let url: string | undefined = (args?.url as string) ?? '';
         if (!url) {
           url =
             (
               await InputDialog.getText({
-                label: trans.__('Url'),
+                label: trans.__('URL'),
                 placeholder: 'https://example.com/path/to/file',
-                title: trans.__('Open Url'),
+                title: trans.__('Open URL'),
                 okLabel: trans.__('Open')
               })
             ).value ?? undefined;
@@ -758,7 +758,10 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
             path: model.path
           });
         } catch (error) {
-          trans._p('showErrorMessage', 'Upload Error'), error;
+          return showErrorMessage(
+            trans._p('showErrorMessage', 'Upload Error'),
+            error
+          );
         }
       }
     });
