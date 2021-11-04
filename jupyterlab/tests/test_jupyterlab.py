@@ -386,68 +386,68 @@ class TestExtension(AppHandlerTest):
         assert _compare_ranges('^3 || ^4', '^1 || ^2') == -1
         assert _compare_ranges('^2 || ^3', '^1 || ^4') is None
 
-    def test_install_compatible(self):
-        core_data = _get_default_core_data()
-        current_app_dep = core_data['dependencies']['@jupyterlab/application']
-        def _gen_dep(ver):
-            return { "dependencies": {
-                '@jupyterlab/application': ver
-            }}
-        def _mock_metadata(registry, name, logger):
-            assert name == 'mockextension'
-            return {
-                "name": name,
-                "versions": {
-                    "0.9.0": _gen_dep(current_app_dep),
-                    "1.0.0": _gen_dep(current_app_dep),
-                    "1.1.0": _gen_dep(current_app_dep),
-                    "2.0.0": _gen_dep('^2000.0.0'),
-                    "2.0.0-b0": _gen_dep(current_app_dep),
-                    "2.1.0-b0": _gen_dep('^2000.0.0'),
-                    "2.1.0": _gen_dep('^2000.0.0'),
-                }
-            }
+    # def test_install_compatible(self):
+    #     core_data = _get_default_core_data()
+    #     current_app_dep = core_data['dependencies']['@jupyterlab/application']
+    #     def _gen_dep(ver):
+    #         return { "dependencies": {
+    #             '@jupyterlab/application': ver
+    #         }}
+    #     def _mock_metadata(registry, name, logger):
+    #         assert name == 'mockextension'
+    #         return {
+    #             "name": name,
+    #             "versions": {
+    #                 "0.9.0": _gen_dep(current_app_dep),
+    #                 "1.0.0": _gen_dep(current_app_dep),
+    #                 "1.1.0": _gen_dep(current_app_dep),
+    #                 "2.0.0": _gen_dep('^2000.0.0'),
+    #                 "2.0.0-b0": _gen_dep(current_app_dep),
+    #                 "2.1.0-b0": _gen_dep('^2000.0.0'),
+    #                 "2.1.0": _gen_dep('^2000.0.0'),
+    #             }
+    #         }
 
-        def _mock_extract(self, source, tempdir, *args, **kwargs):
-            data = dict(
-                name=source, version='2.1.0',
-                jupyterlab=dict(extension=True),
-                jupyterlab_extracted_files=['index.js'],
-            )
-            data.update(_gen_dep('^2000.0.0'))
-            info = dict(
-                source=source, is_dir=False, data=data,
-                name=source, version=data['version'],
-                filename='mockextension.tgz',
-                path=pjoin(tempdir, 'mockextension.tgz'),
-            )
-            return info
+    #     def _mock_extract(self, source, tempdir, *args, **kwargs):
+    #         data = dict(
+    #             name=source, version='2.1.0',
+    #             jupyterlab=dict(extension=True),
+    #             jupyterlab_extracted_files=['index.js'],
+    #         )
+    #         data.update(_gen_dep('^2000.0.0'))
+    #         info = dict(
+    #             source=source, is_dir=False, data=data,
+    #             name=source, version=data['version'],
+    #             filename='mockextension.tgz',
+    #             path=pjoin(tempdir, 'mockextension.tgz'),
+    #         )
+    #         return info
 
-        class Success(Exception):
-            pass
+    #     class Success(Exception):
+    #         pass
 
-        def _mock_install(self, name, *args, **kwargs):
-            assert name in ('mockextension', 'mockextension@1.1.0')
-            if name == 'mockextension@1.1.0':
-                raise Success()
-            return orig_install(self, name, *args, **kwargs)
+    #     def _mock_install(self, name, *args, **kwargs):
+    #         assert name in ('mockextension', 'mockextension@1.1.0')
+    #         if name == 'mockextension@1.1.0':
+    #             raise Success()
+    #         return orig_install(self, name, *args, **kwargs)
 
-        p1 = patch.object(
-            commands,
-            '_fetch_package_metadata',
-            _mock_metadata)
-        p2 = patch.object(
-            commands._AppHandler,
-            '_extract_package',
-            _mock_extract)
-        p3 = patch.object(
-            commands._AppHandler,
-            '_install_extension',
-            _mock_install)
-        with p1, p2:
-            orig_install = commands._AppHandler._install_extension
-            # with p3, pytest.raises(Success):
-            #     assert install_extension('mockextension') is True
+    #     p1 = patch.object(
+    #         commands,
+    #         '_fetch_package_metadata',
+    #         _mock_metadata)
+    #     p2 = patch.object(
+    #         commands._AppHandler,
+    #         '_extract_package',
+    #         _mock_extract)
+    #     p3 = patch.object(
+    #         commands._AppHandler,
+    #         '_install_extension',
+    #         _mock_install)
+    #     with p1, p2:
+    #         orig_install = commands._AppHandler._install_extension
+    #         with p3, pytest.raises(Success):
+    #             assert install_extension('mockextension') is True
 
 
 def test_load_extension(jp_serverapp, make_lab_app):
