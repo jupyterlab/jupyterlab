@@ -18,7 +18,6 @@ import site
 import subprocess
 import sys
 import tarfile
-import warnings
 from copy import deepcopy
 from glob import glob
 from pathlib import Path
@@ -35,7 +34,7 @@ from jupyterlab_server.config import (LabConfig, get_federated_extensions,
                                       write_page_config)
 from jupyterlab_server.process import Process, WatchHelper, list2cmdline, which
 from packaging.version import Version
-from traitlets import Bool, Dict, HasTraits, Instance, List, Unicode, default
+from traitlets import Bool, HasTraits, Instance, List, Unicode, default
 
 from jupyterlab.coreconfig import CoreConfig
 from jupyterlab.jlpmapp import HERE, YARN_PATH
@@ -397,47 +396,6 @@ def watch(app_options=None):
     return package_procs + handler.watch()
 
 
-
-def install_extension(extension, app_options=None, pin=None):
-    """Install an extension package into JupyterLab.
-
-    The extension is first validated.
-
-    Returns `True` if a rebuild is recommended, `False` otherwise.
-    """
-    app_options = _ensure_options(app_options)
-    _node_check(app_options.logger)
-    handler = _AppHandler(app_options)
-    return handler.install_extension(extension, pin=pin)
-
-
-def uninstall_extension(name=None, app_options=None, all_=False):
-    """Uninstall an extension by name or path.
-
-    Returns `True` if a rebuild is recommended, `False` otherwise.
-    """
-    app_options = _ensure_options(app_options)
-    _node_check(app_options.logger)
-    handler = _AppHandler(app_options)
-    if all_ is True:
-        return handler.uninstall_all_extensions()
-    return handler.uninstall_extension(name)
-
-
-def update_extension(name=None, all_=False, app_dir=None, app_options=None):
-    """Update an extension by name, or all extensions.
-    Either `name` must be given as a string, or `all_` must be `True`.
-    If `all_` is `True`, the value of `name` is ignored.
-    Returns `True` if a rebuild is recommended, `False` otherwise.
-    """
-    app_options = _ensure_options(app_options)
-    _node_check(app_options.logger)
-    handler = _AppHandler(app_options)
-    if all_ is True:
-        return handler.update_all_extensions()
-    return handler.update_extension(name)
-
-
 def clean(app_options=None):
     """Clean the JupyterLab application directory."""
     app_options = _ensure_options(app_options)
@@ -602,53 +560,6 @@ class _AppHandler(object):
         # Do this last since it relies on other attributes
         self.info = self._get_app_info()
 
-
-
-    def install_extension(self, extension, existing=None, pin=None):
-        """Install an extension package into JupyterLab.
-
-        The extension is first validated.
-
-        Returns `True` if a rebuild is recommended, `False` otherwise.
-        """
-        extension = _normalize_path(extension)
-        extensions = self.info['extensions']
-
-        # Check for a core extensions.
-        if extension in self.info['core_extensions']:
-            config = self._read_build_config()
-            uninstalled = config.get('uninstalled_core_extensions', [])
-            if extension in uninstalled:
-                self.logger.info('Installing core extension %s' % extension)
-                uninstalled.remove(extension)
-                config['uninstalled_core_extensions'] = uninstalled
-                self._write_build_config(config)
-                return True
-            return False
-
-        # Create the app dirs if needed.
-        self._ensure_app_dirs()
-
-        # Install the package using a temporary directory.
-        with TemporaryDirectory() as tempdir:
-            info = self._install_extension(extension, tempdir, pin=pin)
-
-        name = info['name']
-
-        # Local directories get name mangled and stored in metadata.
-        if info['is_dir']:
-            config = self._read_build_config()
-            local = config.setdefault('local_extensions', dict())
-            local[name] = info['source']
-            self._write_build_config(config)
-
-        # Remove an existing extension with the same name and different path
-        if name in extensions:
-            other = extensions[name]
-            if other['path'] != info['path'] and other['location'] == 'app':
-                os.remove(other['path'])
-
-        return True
 
     def build(self, name=None, version=None, static_url=None,
               clean_staging=False, production=True, minimize=True):
