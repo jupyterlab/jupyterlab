@@ -26,7 +26,7 @@ jlpm playwright install
 
 Create a Playwright configuration file `playwright.config.js` containing:
 
-```
+```js
 module.exports = require('@jupyterlab/galata/lib/playwright-config');
 ```
 
@@ -66,8 +66,8 @@ Create `jupyter_server_test_config.py` with the following content.
 from tempfile import mkdtemp
 
 c.ServerApp.port = 8888
+c.ServerApp.port_retries = 0
 c.ServerApp.open_browser = False
-c.LabApp.dev_mode = True
 
 c.ServerApp.root_dir = mkdtemp(prefix='galata-test-')
 c.ServerApp.token = ""
@@ -136,6 +136,13 @@ PWDEBUG=1 jlpm playwright test
 ## Fixtures
 
 Here are the new test fixture introduced by Galata on top of [Playwright fixtures](https://playwright.dev/docs/api/class-fixtures).
+
+### baseURL
+
+- type: < string >
+
+Application base URL without `/lab`. It defaults to environment variable `TARGET_URL` or `http://localhost:8888` if nothing
+is defined.
 
 ### appPath
 
