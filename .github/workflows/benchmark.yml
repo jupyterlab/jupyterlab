@@ -132,13 +132,15 @@ jobs:
           git restore galata/lab-benchmark-expected.json || true  # Not versioned any more
           echo Checking out ${NEW_REF_SHA}...
           git checkout ${NEW_REF_SHA}
-          cp /tmp/lab-benchmark-expected.json galata/
 
       - name: Install dependencies
         run: |
           # Reset installation
           jlpm run clean:slate
           jlpm run build
+          
+          # Copy reference after clean:slate as it remove untracked files
+          cp /tmp/lab-benchmark-expected.json galata/
 
       - name: Launch JupyterLab
         working-directory: galata
