@@ -492,24 +492,6 @@ def list_extensions(app_options=None):
     return handler.list_extensions()
 
 
-def link_package(path, app_options=None):
-    """Link a package against the JupyterLab build.
-
-    Returns `True` if a rebuild is recommended, `False` otherwise.
-    """
-    handler = _AppHandler(app_options)
-    return handler.link_package(path)
-
-
-def unlink_package(package, app_options=None):
-    """Unlink a package from JupyterLab by path or name.
-
-    Returns `True` if a rebuild is recommended, `False` otherwise.
-    """
-    handler = _AppHandler(app_options)
-    return handler.unlink_package(package)
-
-
 def get_app_version(app_options=None):
     """Get the application version."""
     handler = _AppHandler(app_options)
@@ -771,69 +753,6 @@ class _AppHandler(object):
                 messages.append('%s content changed' % name)
 
         return messages
-
-    def link_package(self, path):
-        """Link a package at the given path.
-
-        Returns `True` if a rebuild is recommended, `False` otherwise.
-        """
-        path = _normalize_path(path)
-        if not osp.exists(path) or not osp.isdir(path):
-            msg = 'Cannot install "%s" only link local directories'
-            raise ValueError(msg % path)
-
-        with TemporaryDirectory() as tempdir:
-            info = self._extract_package(path, tempdir)
-
-        messages = _validate_extension(info['data'])
-        if not messages:
-            return self.install_extension(path)
-
-        # Warn that it is a linked package.
-        self.logger.warning('Installing %s as a linked package because it does not have extension metadata:', path)
-        [self.logger.warning('   %s' % m) for m in messages]
-
-        # Add to metadata.
-        config = self._read_build_config()
-        linked = config.setdefault('linked_packages', dict())
-        linked[info['name']] = info['source']
-        self._write_build_config(config)
-
-        return True
-
-    def unlink_package(self, path):
-        """Unlink a package by name or at the given path.
-
-        A ValueError is raised if the path is not an unlinkable package.
-
-        Returns `True` if a rebuild is recommended, `False` otherwise.
-        """
-        path = _normalize_path(path)
-        config = self._read_build_config()
-        linked = config.setdefault('linked_packages', dict())
-
-        found = None
-        for (name, source) in linked.items():
-            if name == path or source == path:
-                found = name
-
-        if found:
-            del linked[found]
-        else:
-            local = config.setdefault('local_extensions', dict())
-            for (name, source) in local.items():
-                if name == path or source == path:
-                    found = name
-            if found:
-                del local[found]
-                path = self.info['extensions'][found]['path']
-                os.remove(path)
-
-        if not found:
-            raise ValueError('No linked package for %s' % path)
-
-        self._write_build_config(config)
-        return True
 
     def toggle_extension(self, extension, value, level='sys_prefix'):
         """Enable or disable a lab extension.

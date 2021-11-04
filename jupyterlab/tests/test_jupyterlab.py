@@ -20,10 +20,9 @@ from jupyter_core import paths
 from jupyterlab import commands
 from jupyterlab.commands import (
     AppOptions, _compare_ranges, _test_overlap,
-    build, build_check, check_extension,
+    build, check_extension,
     disable_extension, enable_extension,
-    get_app_info, link_package,
-    list_extensions, unlink_package, get_app_version
+    get_app_info, list_extensions, get_app_version
 )
 from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
 
@@ -45,12 +44,6 @@ def touch(file, mtime=None):
         os.utime(file, (atime, mtime))
     return os.stat(file).st_mtime
 
-
-# @pytest.fixture()
-# def resource():
-#     print("setup")
-#     yield "resource"
-#    print("teardown")
 
 class AppHandlerTest(TestCase):
 
@@ -138,41 +131,6 @@ class AppHandlerTest(TestCase):
 
 
 class TestExtension(AppHandlerTest):
-    def test_link_extension(self):
-        path = self.mock_extension
-        name = self.pkg_names['extension']
-        link_package(path)
-        linked = get_app_info()['linked_packages']
-        assert name not in linked
-        assert name in get_app_info()['extensions']
-        assert check_extension(name)
-        assert unlink_package(path) is True
-        linked = get_app_info()['linked_packages']
-        assert name not in linked
-        assert name not in get_app_info()['extensions']
-        assert not check_extension(name)
-
-    def test_link_package(self):
-        path = self.mock_package
-        name = self.pkg_names['package']
-        assert link_package(path) is True
-        linked = get_app_info()['linked_packages']
-        assert name in linked
-        assert name not in get_app_info()['extensions']
-        assert check_extension(name)
-        assert unlink_package(path)
-        linked = get_app_info()['linked_packages']
-        assert name not in linked
-        assert not check_extension(name)
-
-    def test_unlink_package(self):
-        target = self.mock_package
-        assert link_package(target) is True
-        assert unlink_package(target) is True
-        linked = get_app_info()['linked_packages']
-        name = self.pkg_names['package']
-        assert name not in linked
-        assert not check_extension(name)
 
     def test_list_extensions(self):
         # assert install_extension(self.mock_extension) is True
@@ -196,17 +154,6 @@ class TestExtension(AppHandlerTest):
         extensions = get_app_info(app_options=options)['extensions']
         assert ext_name not in extensions
         assert not check_extension(ext_name, app_options=options)
-
-        assert link_package(self.mock_package, app_options=options) is True
-        linked = get_app_info(app_options=options)['linked_packages']
-        pkg_name = self.pkg_names['package']
-        assert pkg_name in linked
-        assert check_extension(pkg_name, app_options=options)
-
-        assert unlink_package(self.mock_package, app_options=options) is True
-        linked = get_app_info(app_options=options)['linked_packages']
-        assert pkg_name not in linked
-        assert not check_extension(pkg_name, app_options=options)
 
     def test_app_dir_use_sys_prefix(self):
         app_dir = self.tempdir()
@@ -278,6 +225,7 @@ class TestExtension(AppHandlerTest):
         # assert install_extension(self.mock_extension) is True
         build()
         # check staging directory.
+        # TODO: check something else
         entry = pjoin(self.app_dir, 'staging', 'build', 'index.out.js')
         with open(entry) as fid:
             data = fid.read()
@@ -411,51 +359,6 @@ class TestExtension(AppHandlerTest):
         assert check_extension(name, app_options=options)
         assert not check_extension('@jupyterlab/notebook-extension', app_options=options)
 
-    @pytest.mark.slow
-    def test_build_check(self):
-        # Do the initial build.
-        assert build_check()
-        # assert install_extension(self.mock_extension) is True
-        assert link_package(self.mock_package) is True
-        build()
-        assert not build_check()
-
-        # Check installed extensions.
-        # assert install_extension(self.mock_mimeextension) is True
-        assert build_check()
-        # assert uninstall_extension(self.pkg_names['mimeextension']) is True
-        assert not build_check()
-
-        # Check local extensions.
-        pkg_path = pjoin(self.mock_extension, 'package.json')
-        with open(pkg_path) as fid:
-            data = json.load(fid)
-        with open(pkg_path, 'rb') as fid:
-            orig = fid.read()
-        data['foo'] = 'bar'
-        with open(pkg_path, 'w') as fid:
-            json.dump(data, fid)
-        assert build_check()
-        assert build_check()
-
-        with open(pkg_path, 'wb') as fid:
-            fid.write(orig)
-
-        assert not build_check()
-
-        # Check linked packages.
-        pkg_path = pjoin(self.mock_package, 'index.js')
-        with open(pkg_path, 'rb') as fid:
-            orig = fid.read()
-        with open(pkg_path, 'wb') as fid:
-            fid.write(orig + b'\nconsole.log("hello");')
-        assert build_check()
-        assert build_check()
-
-        with open(pkg_path, 'wb') as fid:
-            fid.write(orig)
-        assert not build_check()
-
     def test_compatibility(self):
         assert _test_overlap('^0.6.0', '^0.6.1')
         assert _test_overlap('>0.1', '0.6')
@@ -482,7 +385,6 @@ class TestExtension(AppHandlerTest):
         assert _compare_ranges('^1 || ^2', '^3 || ^4') == 1
         assert _compare_ranges('^3 || ^4', '^1 || ^2') == -1
         assert _compare_ranges('^2 || ^3', '^1 || ^4') is None
-
 
     def test_install_compatible(self):
         core_data = _get_default_core_data()

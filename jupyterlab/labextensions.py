@@ -17,7 +17,7 @@ from jupyterlab.debuglog import DebugLogFileMixin
 from .commands import (
     HERE, AppOptions, build, check_extension,
     disable_extension, enable_extension, get_app_version,
-    link_package, list_extensions, unlink_package
+    list_extensions
 )
 from .federated_labextensions import build_labextension, develop_labextension_py, watch_labextension
 from .labapp import LabApp
@@ -219,48 +219,6 @@ class WatchLabExtensionApp(BaseExtensionApp):
         core_path = self.core_path or None)
 
 
-class LinkLabExtensionApp(BaseExtensionApp):
-    description = """
-    Link local npm packages that are not lab extensions.
-
-    Links a package to the JupyterLab build process. A linked
-    package is manually re-installed from its source location when
-    `jupyter lab build` is run.
-    """
-    should_build = Bool(True, config=True,
-        help="Whether to build the app after the action")
-
-    def run_task(self):
-        self.extra_args = self.extra_args or [os.getcwd()]
-        options = AppOptions(
-            app_dir=self.app_dir, logger=self.log,
-            labextensions_path=self.labextensions_path,
-            core_config=self.core_config)
-        return any([
-            link_package(
-                arg,
-                app_options=options)
-            for arg in self.extra_args
-        ])
-
-
-class UnlinkLabExtensionApp(BaseExtensionApp):
-    description = "Unlink packages by name or path"
-
-    def run_task(self):
-        self.extra_args = self.extra_args or [os.getcwd()]
-        options = AppOptions(
-            app_dir=self.app_dir, logger=self.log,
-            labextensions_path=self.labextensions_path,
-            core_config=self.core_config)
-        return any([
-            unlink_package(
-                arg,
-                app_options=options)
-            for arg in self.extra_args
-        ])
-
-
 class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
 
@@ -337,8 +295,6 @@ class LabExtensionApp(JupyterApp):
         build=(BuildLabExtensionApp, "Build labextension"),
         watch=(WatchLabExtensionApp, "Watch labextension"),
         list=(ListLabExtensionsApp, "List labextensions"),
-        link=(LinkLabExtensionApp, "Link labextension(s)"),
-        unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
         enable=(EnableLabExtensionsApp, "Enable labextension(s)"),
         disable=(DisableLabExtensionsApp, "Disable labextension(s)"),
         check=(CheckLabExtensionsApp, "Check labextension(s)"),
