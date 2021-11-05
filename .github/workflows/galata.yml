@@ -31,7 +31,7 @@ jobs:
           key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
           restore-keys: |
             ${{ runner.os }}-pip-3.8
-  
+
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -92,3 +92,15 @@ jobs:
         if: always()
         run: |
           cat /tmp/jupyterlab_server.log
+
+      - name: Generate updated snapshots
+        if: ${{ failure() }}
+        run: |
+          cd galata
+          jlpm run test --update-snapshots
+      - if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-galata-updated-snapshots
+          path: |
+            galata/test/**/*-snapshots/*.*
