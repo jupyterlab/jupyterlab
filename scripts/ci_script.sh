@@ -289,7 +289,8 @@ if [[ $GROUP == usage2 ]]; then
     python -m jupyterlab.browser_check --core-mode
 
     # Make sure we can run the built app.
-    jupyter labextension install ./jupyterlab/tests/mock_packages/extension --debug
+    # TODO: install a prebuilt extension
+    # jupyter labextension install ./jupyterlab/tests/mock_packages/extension --debug
     python -m jupyterlab.browser_check
     jupyter labextension list --debug
 
