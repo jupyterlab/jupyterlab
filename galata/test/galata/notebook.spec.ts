@@ -76,7 +76,7 @@ test.describe('Notebook Tests', () => {
     await page.notebook.createNew();
 
     await page.notebook.setCell(0, 'markdown', '## This is a markdown cell');
-    await page.notebook.addCell('raw', 'This is a raw cell');
+    await page.notebook.addCell('raw', 'This is one raw cell');
     await page.notebook.addCell('code', '2 + 2');
 
     await page.notebook.run();
