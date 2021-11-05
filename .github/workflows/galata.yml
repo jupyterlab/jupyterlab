@@ -76,7 +76,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: galata-test-assets
+          name: jupyterlab-galata-test-assets
           path: |
             galata/test-results
 
@@ -84,7 +84,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: galata-report
+          name: jupyterlab-galata-report
           path: |
             galata/playwright-report
 
