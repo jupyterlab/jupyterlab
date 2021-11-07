@@ -185,7 +185,8 @@ export class TableOfContents extends Widget {
     });
 
     // scroll active toc item into view
-    let activeItem = this.node.querySelector(`.${ACTIVE_ITEM_CLASS}`)?.parentElement as Element;
+    let activeItem = this.node.querySelector(`.${ACTIVE_ITEM_CLASS}`)
+      ?.parentElement as Element;
     let tocItems = this.node.querySelector(`.${TOC_TREE_CLASS}`) as Element;
     if (tocItems && activeItem) {
       ElementExt.scrollIntoViewIfNeeded(tocItems, activeItem);
