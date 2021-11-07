@@ -18,6 +18,7 @@ import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCTree } from './toc_tree';
 import { Signal } from '@lumino/signaling';
 import { TOCItem } from './toc_item';
+import { ElementExt } from '@lumino/domutils';
 
 /**
  * Timeout for throttling ToC rendering.
@@ -25,6 +26,20 @@ import { TOCItem } from './toc_item';
  * @private
  */
 const RENDER_TIMEOUT = 1000;
+
+/**
+ * Class name of the active toc item.
+ *
+ * @private
+ */
+const ACTIVE_ITEM_CLASS = 'toc-active-cell';
+
+/**
+ * Class name of the toc item list.
+ *
+ * @private
+ */
+const TOC_TREE_CLASS = 'jp-TableOfContents-content';
 
 /**
  * Widget for hosting a notebook table of contents.
@@ -168,6 +183,13 @@ export class TableOfContents extends Widget {
         this._rendermime.latexTypesetter.typeset(this.node);
       }
     });
+
+    // scroll active toc item into view
+    let activeItem = this.node.querySelector(`.${ACTIVE_ITEM_CLASS}`)?.parentElement as Element;
+    let tocItems = this.node.querySelector(`.${TOC_TREE_CLASS}`) as Element;
+    if (tocItems && activeItem) {
+      ElementExt.scrollIntoViewIfNeeded(tocItems, activeItem);
+    }
   }
 
   /**
