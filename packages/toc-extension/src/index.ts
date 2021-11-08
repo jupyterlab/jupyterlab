@@ -58,12 +58,12 @@ async function activateTOC(
   app: JupyterFrontEnd,
   docmanager: IDocumentManager,
   editorTracker: IEditorTracker,
-  labShell: ILabShell,
   restorer: ILayoutRestorer,
   markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
+  labShell?: ILabShell,
   settingRegistry?: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
@@ -84,7 +84,7 @@ async function activateTOC(
   toc.node.setAttribute('role', 'region');
   toc.node.setAttribute('aria-label', trans.__('Table of Contents section'));
 
-  labShell.add(toc, 'left', { rank: 400 });
+  app.shell.add(toc, 'left', { rank: 400 });
 
   app.commands.addCommand(CommandIDs.runCells, {
     execute: args => {
@@ -152,7 +152,9 @@ async function activateTOC(
   registry.add(pythonGenerator);
 
   // Update the ToC when the active widget changes:
-  labShell.currentChanged.connect(onConnect);
+  if (labShell) {
+    labShell.currentChanged.connect(onConnect);
+  }
 
   return registry;
 
