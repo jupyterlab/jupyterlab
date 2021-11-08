@@ -191,14 +191,13 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   requires: [
     IDocumentManager,
     IEditorTracker,
-    ILabShell,
     ILayoutRestorer,
     IMarkdownViewerTracker,
     INotebookTracker,
     IRenderMimeRegistry,
     ITranslator
   ],
-  optional: [ISettingRegistry],
+  optional: [ILabShell, ISettingRegistry],
   activate: activateTOC
 };
 
