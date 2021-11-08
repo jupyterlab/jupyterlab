@@ -66,7 +66,7 @@ async function activateTOC(
   app: JupyterFrontEnd,
   docmanager: IDocumentManager,
   editorTracker: IEditorTracker,
-  labShell: ILabShell,
+  labShell: ILabShell | null,
   restorer: ILayoutRestorer,
   markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
@@ -92,7 +92,7 @@ async function activateTOC(
   toc.node.setAttribute('role', 'region');
   toc.node.setAttribute('aria-label', trans.__('Table of Contents section'));
 
-  labShell.add(toc, 'left', { rank: 400 });
+  app.shell.add(toc, 'left', { rank: 400 });
 
   app.commands.addCommand(CommandIDs.runCells, {
     execute: args => {
@@ -132,7 +132,7 @@ async function activateTOC(
   app.commands.addCommand(CommandIDs.showPanel, {
     label: trans.__('Table of Contents'),
     execute: () => {
-      labShell.activateById(toc.id);
+      app.shell.activateById(toc.id);
     }
   });
 
@@ -190,7 +190,9 @@ async function activateTOC(
   registry.add(pythonGenerator);
 
   // Update the ToC when the active widget changes:
-  labShell.currentChanged.connect(onConnect);
+  if (labShell) {
+    labShell.currentChanged.connect(onConnect);
+  }
 
   return registry;
 
@@ -229,14 +231,16 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   requires: [
     IDocumentManager,
     IEditorTracker,
-    ILabShell,
     ILayoutRestorer,
     IMarkdownViewerTracker,
     INotebookTracker,
     IRenderMimeRegistry,
-    ITranslator
+    ITranslator,
   ],
-  optional: [ISettingRegistry],
+  optional: [
+    ILabShell,
+    ISettingRegistry,
+  ],
   activate: activateTOC
 };
 
