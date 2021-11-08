@@ -28,6 +28,7 @@ import {
 } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
+const globalModelDBMutex = models.createMutex();
 
 /**
  * The definition of a model object for a cell.
@@ -308,7 +309,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     event: IObservableJSON.IChangedArgs
   ): void {
     const metadata = this.sharedModel.getMetadata();
-    this._modelDBMutex(() => {
+    globalModelDBMutex(() => {
       switch (event.type) {
         case 'add':
           this._changeCellMetadata(metadata, event);
@@ -377,7 +378,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     change: models.CellChange<models.ISharedBaseCellMetadata>
   ): void {
     super._onSharedModelChanged(sender, change);
-    this._modelDBMutex(() => {
+    globalModelDBMutex(() => {
       if (change.metadataChange) {
         const newValue = change.metadataChange
           ?.newValue as models.ISharedBaseCellMetadata;
@@ -420,11 +421,6 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   protected onGenericChange(): void {
     this.contentChanged.emit(void 0);
   }
-
-  /**
-   * A mutex to update the shared model.
-   */
-  protected readonly _modelDBMutex = models.createMutex();
   sharedModel: models.ISharedCell;
 }
 
@@ -629,7 +625,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
 
     executionCount.changed.connect(this._onExecutionCountChanged, this);
 
-    this._modelDBMutex(() => {
+    globalModelDBMutex(() => {
       const sharedCell = this.sharedModel as models.ISharedCodeCell;
       sharedCell.setOutputs(outputs);
     });
@@ -790,7 +786,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     event: IOutputAreaModel.ChangedArgs
   ): void {
     const codeCell = this.sharedModel as models.YCodeCell;
-    this._modelDBMutex(() => {
+    globalModelDBMutex(() => {
       switch (event.type) {
         case 'add': {
           const outputs = event.newValues.map(output => output.toJSON());
@@ -842,7 +838,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     change: models.CellChange<models.ISharedBaseCellMetadata>
   ): void {
     super._onSharedModelChanged(sender, change);
-    this._modelDBMutex(() => {
+    globalModelDBMutex(() => {
       if (change.outputsChange) {
         this.clearExecution();
         sender.getOutputs().forEach(output => this._outputs.add(output));
@@ -864,7 +860,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     args: ObservableValue.IChangedArgs
   ): void {
     const codeCell = this.sharedModel as models.YCodeCell;
-    this._modelDBMutex(() => {
+    globalModelDBMutex(() => {
       codeCell.execution_count = args.newValue
         ? (args.newValue as number)
         : null;
