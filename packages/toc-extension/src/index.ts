@@ -36,6 +36,7 @@ import { runNestedCodeCells } from '@jupyterlab/toc';
  */
 namespace CommandIDs {
   export const runCells = 'toc:run-cells';
+  export const showPanel = 'toc:show-panel';
 }
 
 /**
@@ -93,9 +94,11 @@ async function activateTOC(
     label: trans.__('Run Cell(s)')
   });
 
-  app.contextMenu.addItem({
-    selector: '.jp-tocItem',
-    command: CommandIDs.runCells
+  app.commands.addCommand(CommandIDs.showPanel, {
+    label: trans.__('Table of Contents'),
+    execute: () => {
+      app.shell.activateById(toc.id);
+    }
   });
 
   // Add the ToC widget to the application restorer:
@@ -197,7 +200,7 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
     IMarkdownViewerTracker,
     INotebookTracker,
     IRenderMimeRegistry,
-    ITranslator
+    ITranslator,
   ],
   optional: [ILabShell, ISettingRegistry],
   activate: activateTOC
