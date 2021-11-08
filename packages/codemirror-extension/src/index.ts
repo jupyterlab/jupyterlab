@@ -127,7 +127,7 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
     const item = new LineCol(translator);
 
     const providers = new Set<
-      (widget: Widget | null) => CodeEditor.IEditor | null
+      (widget: Widget | null) => Promise<CodeEditor.IEditor | null>
     >();
 
     if (statusBar) {
@@ -141,7 +141,7 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
     }
 
     const addEditorProvider = (
-      provider: (widget: Widget | null) => CodeEditor.IEditor | null
+      provider: (widget: Widget | null) => Promise<CodeEditor.IEditor | null>
     ): void => {
       providers.add(provider);
 
@@ -164,10 +164,14 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
       shell: JupyterFrontEnd.IShell,
       changes: ILabShell.IChangedArgs
     ) {
-      item.model.editor =
-        [...providers]
-          .map(provider => provider(changes.newValue))
-          .filter(editor => editor !== null)[0] ?? null;
+      Promise.all([...providers].map(provider => provider(changes.newValue)))
+        .then(editors => {
+          item.model.editor =
+            editors.filter(editor => editor !== null)[0] ?? null;
+        })
+        .catch(reason => {
+          console.error('Get editors', reason);
+        });
     }
 
     if (labShell) {

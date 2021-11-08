@@ -148,7 +148,11 @@ export namespace NBTestUtils {
     return new Notebook({
       rendermime: defaultRenderMime(),
       contentFactory: createNotebookFactory(),
-      mimeTypeService
+      mimeTypeService,
+      notebookConfig: {
+        ...StaticNotebook.defaultNotebookConfig,
+        windowingMode: 'none'
+      }
     });
   }
 

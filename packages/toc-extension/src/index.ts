@@ -53,7 +53,7 @@ namespace CommandIDs {
  *
  * @private
  * @param app - Jupyter application
- * @param registry - Table of contents registry
+ * @param tocRegistry - Table of contents registry
  * @param translator - translator
  * @param restorer - application layout restorer
  * @param labShell - Jupyter lab shell
@@ -287,11 +287,15 @@ async function activateTOC(
     }
 
     if (toc.model) {
+      toc.model.headingsChanged.disconnect(onCollapseChange);
       toc.model.collapseChanged.disconnect(onCollapseChange);
     }
 
     toc.model = model;
-    toc.model?.collapseChanged.connect(onCollapseChange);
+    if (toc.model) {
+      toc.model.headingsChanged.connect(onCollapseChange);
+      toc.model.collapseChanged.connect(onCollapseChange);
+    }
     setToolbarButtonsState();
   }
 

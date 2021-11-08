@@ -17,7 +17,7 @@ test.describe('ToC Running indicator', () => {
 
     await page.sidebar.openTab('table-of-contents');
     await page.waitForSelector(
-      '.jp-TableOfContents-content[data-document-type="notebook"]'
+      '.jp-TableOfContents-content[data-document-type="notebook"] >> text=Title 1.2'
     );
   });
 
@@ -26,7 +26,7 @@ test.describe('ToC Running indicator', () => {
       await page.sidebar.getTabPosition('table-of-contents')
     );
     const executed = page.notebook.run();
-
+    await page.pause();
     await tocPanel.waitForSelector('[data-running="1"]');
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicators.png'

@@ -32,6 +32,7 @@ describe('@jupyterlab/notebook', () => {
       beforeEach(async () => {
         context = await utils.createMockContext();
         panel = utils.createNotebookPanel(context);
+        panel.content.notebookConfig.windowingMode = 'none';
         context.model.fromJSON(utils.DEFAULT_CONTENT);
       });
 

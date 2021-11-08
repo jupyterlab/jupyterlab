@@ -78,7 +78,12 @@ export class ConsoleHandler implements IDisposable {
     const codeCell = cell as CodeCell;
     const editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,
-      editor: codeCell.editor
+      editorReady: async () => {
+        await codeCell.ready;
+        return codeCell.editor!;
+      },
+      getEditor: () => codeCell.editor,
+      src: cell.model.value
     });
     codeCell.disposed.connect(() => {
       this._cellMap.delete(modelId);

@@ -18,12 +18,12 @@ import {
   isRawCellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
+import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
-import { ElementExt } from '@lumino/domutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
 import { INotebookModel } from './model';
@@ -150,9 +150,6 @@ export namespace NotebookActions {
       return;
     }
 
-    if (!Private.isNotebookRendered(notebook)) {
-      return;
-    }
     const state = Private.getState(notebook);
 
     notebook.deselectAll();
@@ -161,6 +158,10 @@ export namespace NotebookActions {
     const index = notebook.activeCellIndex;
     const child = notebook.widgets[index];
     const editor = child.editor;
+    if (!editor) {
+      // TODO
+      return;
+    }
     const selections = editor.getSelections();
     const orig = child.model.value.text;
 
@@ -217,8 +218,14 @@ export namespace NotebookActions {
     // If there is a selection the selected cell will be activated
     const activeCellDelta = start !== end ? 2 : 1;
     notebook.activeCellIndex = index + clones.length - activeCellDelta;
-    const focusedEditor = notebook.activeCell.editor;
-    focusedEditor.focus();
+    notebook
+      .scrollToItem(notebook.activeCellIndex)
+      .then(() => {
+        notebook.activeCell?.editor!.focus();
+      })
+      .catch(reason => {
+        // no-op
+      });
 
     Private.handleState(notebook, state);
   }
@@ -248,9 +255,6 @@ export namespace NotebookActions {
       return;
     }
 
-    if (!Private.isNotebookRendered(notebook)) {
-      return;
-    }
     const state = Private.getState(notebook);
     const toMerge: string[] = [];
     const toDelete: ICellModel[] = [];
@@ -347,9 +351,6 @@ export namespace NotebookActions {
       return;
     }
 
-    if (!Private.isNotebookRendered(notebook)) {
-      return;
-    }
     const state = Private.getState(notebook);
 
     Private.deleteCells(notebook);
@@ -372,9 +373,6 @@ export namespace NotebookActions {
       return;
     }
 
-    if (!Private.isNotebookRendered(notebook)) {
-      return;
-    }
     const state = Private.getState(notebook);
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
@@ -407,9 +405,6 @@ export namespace NotebookActions {
       return;
     }
 
-    if (!Private.isNotebookRendered(notebook)) {
-      return;
-    }
     const state = Private.getState(notebook);
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
@@ -435,9 +430,6 @@ export namespace NotebookActions {
       return;
     }
 
-    if (!Private.isNotebookRendered(notebook)) {
-      return;
-    }
     const state = Private.getState(notebook);
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
@@ -469,9 +461,6 @@ export namespace NotebookActions {
       return;
     }
 
-    if (!Private.isNotebookRendered(notebook)) {
-      return;
-    }
     const state = Private.getState(notebook);
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
@@ -563,7 +552,7 @@ export namespace NotebookActions {
    * If the last selected cell is the last cell, a new code cell
    * will be created in `'edit'` mode.  The new cell creation can be undone.
    */
-  export function runAndAdvance(
+  export async function runAndAdvance(
     notebook: Notebook,
     sessionContext?: ISessionContext
   ): Promise<boolean> {
@@ -585,6 +574,13 @@ export namespace NotebookActions {
       // to make sure no placeholder widget is rendered.
       model.cells.insert(notebook.widgets.length, cell);
       notebook.activeCellIndex++;
+      if (notebook.activeCell?.inViewport === false) {
+        await signalToPromise(notebook.activeCell.inViewportChanged, 200).catch(
+          () => {
+            // no-op
+          }
+        );
+      }
       notebook.mode = 'edit';
     } else {
       notebook.activeCellIndex++;
@@ -608,7 +604,7 @@ export namespace NotebookActions {
    * The cell insert can be undone.
    * The new cell will be scrolled into view.
    */
-  export function runAndInsert(
+  export async function runAndInsert(
     notebook: Notebook,
     sessionContext?: ISessionContext
   ): Promise<boolean> {
@@ -616,9 +612,6 @@ export namespace NotebookActions {
       return Promise.resolve(false);
     }
 
-    if (!Private.isNotebookRendered(notebook)) {
-      return Promise.resolve(false);
-    }
     const state = Private.getState(notebook);
     const promise = Private.runSelected(notebook, sessionContext);
     const model = notebook.model;
@@ -629,6 +622,13 @@ export namespace NotebookActions {
 
     model.cells.insert(notebook.activeCellIndex + 1, cell);
     notebook.activeCellIndex++;
+    if (notebook.activeCell?.inViewport === false) {
+      await signalToPromise(notebook.activeCell.inViewportChanged, 200).catch(
+        () => {
+          // no-op
+        }
+      );
+    }
     notebook.mode = 'edit';
     Private.handleRunState(notebook, state, true);
     return promise;
@@ -772,7 +772,7 @@ export namespace NotebookActions {
    * @param text - The text to replace the selection.
    */
   export function replaceSelection(notebook: Notebook, text: string): void {
-    if (!notebook.model || !notebook.activeCell) {
+    if (!notebook.model || !notebook.activeCell?.editor) {
       return;
     }
     notebook.activeCell.editor.replaceSelection?.(text);
@@ -864,7 +864,9 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget
    */
-  export function insertSameLevelHeadingAbove(notebook: Notebook) {
+  export async function insertSameLevelHeadingAbove(
+    notebook: Notebook
+  ): Promise<void> {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -873,9 +875,9 @@ export namespace NotebookActions {
       notebook
     );
     if (headingLevel == -1) {
-      Private.Headings.insertHeadingAboveCellIndex(0, 1, notebook);
+      await Private.Headings.insertHeadingAboveCellIndex(0, 1, notebook);
     } else {
-      Private.Headings.insertHeadingAboveCellIndex(
+      await Private.Headings.insertHeadingAboveCellIndex(
         notebook.activeCellIndex!,
         headingLevel,
         notebook
@@ -887,7 +889,9 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget
    */
-  export function insertSameLevelHeadingBelow(notebook: Notebook) {
+  export async function insertSameLevelHeadingBelow(
+    notebook: Notebook
+  ): Promise<void> {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -902,7 +906,7 @@ export namespace NotebookActions {
         notebook,
         true
       ) as number;
-    Private.Headings.insertHeadingAboveCellIndex(
+    await Private.Headings.insertHeadingAboveCellIndex(
       cellIdxOfHeadingBelow == -1
         ? notebook.model.cells.length
         : cellIdxOfHeadingBelow,
@@ -1093,9 +1097,6 @@ export namespace NotebookActions {
    * A new code cell is added if all cells are cut.
    */
   export function cut(notebook: Notebook): void {
-    if (!Private.isNotebookRendered(notebook)) {
-      return;
-    }
     Private.copyOrCut(notebook, true);
   }
 
@@ -1119,10 +1120,6 @@ export namespace NotebookActions {
     notebook: Notebook,
     mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
   ): void {
-    if (!Private.isNotebookRendered(notebook)) {
-      return;
-    }
-
     const clipboard = Clipboard.getInstance();
 
     if (!clipboard.hasData(JUPYTER_CELL_MIME)) {
@@ -1294,9 +1291,6 @@ export namespace NotebookActions {
       return;
     }
 
-    if (!Private.isNotebookRendered(notebook)) {
-      return;
-    }
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
@@ -1920,7 +1914,9 @@ export namespace NotebookActions {
         notebook
       );
     }
-    ElementExt.scrollIntoViewIfNeeded(notebook.node, notebook.activeCell.node);
+    notebook.scrollToItem(notebook.activeCellIndex).catch(reason => {
+      // no-op
+    });
   }
 
   /**
@@ -2077,30 +2073,6 @@ namespace Private {
     activeCell: Cell | null;
   }
 
-  export function isNotebookRendered(notebook: Notebook): boolean {
-    const translator = notebook.translator;
-    const trans = translator.load('jupyterlab');
-
-    if (notebook.remainingCellToRenderCount !== 0) {
-      showDialog({
-        body: trans.__(
-          `Notebook is still rendering and has for now (%1) remaining cells to render.
-
-Please wait for the complete rendering before invoking that action.`,
-          notebook.remainingCellToRenderCount
-        ),
-        buttons: [Dialog.okButton()]
-      }).catch(reason => {
-        console.error(
-          'An error occurred when displaying notebook rendering warning',
-          reason
-        );
-      });
-      return false;
-    }
-    return true;
-  }
-
   /**
    * Get the state of a widget before running an action.
    */
@@ -2119,14 +2091,16 @@ Please wait for the complete rendering before invoking that action.`,
     state: IState,
     scrollIfNeeded = false
   ): void {
-    const { activeCell, node } = notebook;
+    const { activeCell, activeCellIndex } = notebook;
 
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
 
     if (scrollIfNeeded && activeCell) {
-      ElementExt.scrollIntoViewIfNeeded(node, activeCell.node);
+      notebook.scrollToItem(activeCellIndex).catch(reason => {
+        // no-op
+      });
     }
   }
 
@@ -2141,11 +2115,12 @@ Please wait for the complete rendering before invoking that action.`,
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
-    if (scroll && state.activeCell) {
-      // Scroll to the top of the previous active cell output.
-      const rect = state.activeCell.inputArea.node.getBoundingClientRect();
-
-      notebook.scrollToPosition(rect.bottom, 45);
+    if (scroll && state.activeCell?.inputArea) {
+      notebook
+        .scrollToItem(notebook.widgets.findIndex(w => w === state.activeCell))
+        .catch(reason => {
+          // no-op
+        });
     }
   }
 
@@ -2730,16 +2705,23 @@ Please wait for the complete rendering before invoking that action.`,
      * #### Notes
      * Enters edit mode after insert.
      */
-    export function insertHeadingAboveCellIndex(
+    export async function insertHeadingAboveCellIndex(
       cellIndex: number,
       headingLevel: number,
       notebook: Notebook
-    ) {
+    ): Promise<void> {
       const state = Private.getState(notebook);
       const newCell = notebook.model!.contentFactory.createMarkdownCell({});
       notebook.model!.cells.insert(cellIndex, newCell);
       Private.setMarkdownHeader(newCell, headingLevel);
       notebook.activeCellIndex = cellIndex;
+      if (notebook.activeCell?.inViewport === false) {
+        await signalToPromise(notebook.activeCell.inViewportChanged, 200).catch(
+          () => {
+            // no-op
+          }
+        );
+      }
       notebook.deselectAll();
       Private.handleState(notebook, state, true);
       notebook.mode = 'edit';

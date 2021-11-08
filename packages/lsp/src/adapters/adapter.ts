@@ -1,9 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@lumino/disposable';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
   ITranslator,
@@ -11,19 +9,21 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import mergeWith from 'lodash.mergewith';
 
 import { ClientCapabilities, LanguageIdentifier } from '../lsp';
 import { IVirtualPosition } from '../positioning';
 import {
+  Document,
   IDocumentConnectionData,
   ILSPCodeExtractorsManager,
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
   ISocketConnectionOptions
 } from '../tokens';
-import { IForeignContext, VirtualDocument } from '../virtual/document';
+import { VirtualDocument } from '../virtual/document';
 
 type IButton = Dialog.IButton;
 const createButton = Dialog.createButton;
@@ -42,7 +42,7 @@ export interface IEditorChangedData {
   /**
    * The CM editor invoking the change event.
    */
-  editor: CodeEditor.IEditor;
+  editor: Document.IEditor;
 }
 
 export interface IAdapterOptions {
@@ -121,7 +121,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
       let [type, subtype] = withoutParameters.split('/');
       if (type === 'application' || type === 'text') {
         if (subtype.startsWith('x-')) {
-          return subtype.substr(2);
+          return subtype.substring(2);
         } else {
           return subtype;
         }
@@ -192,16 +192,13 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   /**
    * Get the activated CM editor.
    */
-  abstract get activeEditor(): CodeEditor.IEditor | undefined;
+  abstract get activeEditor(): Document.IEditor | undefined;
 
   /**
-   *  Get the list of CM editors in the document, there is only one editor
+   * Get the list of CM editors in the document, there is only one editor
    * in the case of file editor.
    */
-  abstract get editors(): {
-    ceEditor: CodeEditor.IEditor;
-    type: string;
-  }[];
+  abstract get editors(): Document.ICodeBlockOptions[];
 
   /**
    * The virtual document is connected or not
@@ -297,15 +294,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
       console.warn('Cannot update documents: adapter disposed');
       return Promise.reject('Cannot update documents: adapter disposed');
     }
-    return this.virtualDocument.updateManager.updateDocuments(
-      this.editors.map(({ ceEditor, type }) => {
-        return {
-          ceEditor: ceEditor,
-          value: ceEditor.model.value.text,
-          type
-        };
-      })
-    );
+    return this.virtualDocument.updateManager.updateDocuments(this.editors);
   }
 
   /**
@@ -357,14 +346,14 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    *
    * @param ceEditor - instance of the code editor
    */
-  abstract getEditorIndex(ceEditor: CodeEditor.IEditor): number;
+  abstract getEditorIndex(ceEditor: Document.IEditor): number;
 
   /**
    * Get the wrapper of input editor.
    *
    * @param ceEditor
    */
-  abstract getEditorWrapper(ceEditor: CodeEditor.IEditor): HTMLElement;
+  abstract getEditorWrapper(ceEditor: Document.IEditor): HTMLElement;
 
   // equivalent to triggering didClose and didOpen, as per syncing specification,
   // but also reloads the connection; used during file rename (or when it was moved)
@@ -558,7 +547,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    */
   protected async onForeignDocumentOpened(
     _: VirtualDocument,
-    context: IForeignContext
+    context: Document.IForeignContext
   ): Promise<void> {
     const { foreignDocument } = context;
 
@@ -610,7 +599,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    */
   private _onForeignDocumentClosed(
     _: VirtualDocument,
-    context: IForeignContext
+    context: Document.IForeignContext
   ): void {
     const { foreignDocument } = context;
     foreignDocument.foreignDocumentClosed.disconnect(

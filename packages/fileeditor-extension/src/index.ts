@@ -173,9 +173,11 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
     positionModel: IPositionModel
   ) => {
     positionModel.addEditorProvider((widget: Widget | null) =>
-      widget && tracker.has(widget)
-        ? (widget as IDocumentWidget<FileEditor>).content.editor
-        : null
+      Promise.resolve(
+        widget && tracker.has(widget)
+          ? (widget as IDocumentWidget<FileEditor>).content.editor
+          : null
+      )
     );
   },
   requires: [IEditorTracker, IPositionModel],

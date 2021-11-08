@@ -264,7 +264,7 @@ test.describe('Customized', () => {
     await page.click('text=Lorenz.ipynb', { button: 'right' });
 
     await page.hover('ul[role="menu"] >> text=New File');
-    await page.pause();
+
     expect(
       await page.screenshot({ clip: { x: 0, y: 0, width: 500, height: 500 } })
     ).toMatchSnapshot('customized-context-menu.png');

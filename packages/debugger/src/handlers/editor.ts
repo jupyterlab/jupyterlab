@@ -52,13 +52,14 @@ export class EditorHandler implements IDisposable {
    * @param options The instantiation options for a EditorHandler.
    */
   constructor(options: EditorHandler.IOptions) {
+    this._src = options.src;
     this._id = options.debuggerService.session?.connection?.id ?? '';
     this._path = options.path ?? '';
     this._debuggerService = options.debuggerService;
-    this._editor = options.editor;
+    this._editor = options.getEditor;
 
     this._editorMonitor = new ActivityMonitor({
-      signal: this._editor.model.value.changed,
+      signal: this._src.changed,
       timeout: EDITOR_CHANGED_TIMEOUT
     });
     this._editorMonitor.activityStopped.connect(() => {
@@ -66,21 +67,26 @@ export class EditorHandler implements IDisposable {
     }, this);
 
     this._debuggerService.model.breakpoints.changed.connect(async () => {
-      if (!this._editor || this._editor.isDisposed) {
+      const editor = this.editor;
+      if (!editor || editor.isDisposed) {
         return;
       }
       this._addBreakpointsToEditor();
     });
 
     this._debuggerService.model.breakpoints.restored.connect(async () => {
-      if (!this._editor || this._editor.isDisposed) {
+      const editor = this.editor;
+      if (!editor || editor.isDisposed) {
         return;
       }
       this._addBreakpointsToEditor();
     });
 
     this._debuggerService.model.callstack.currentFrameChanged.connect(() => {
-      EditorHandler.clearHighlight(this._editor);
+      const editor = this.editor;
+      if (editor) {
+        EditorHandler.clearHighlight(editor);
+      }
     });
 
     this._breakpointEffect = StateEffect.define<{ pos: number[] }>({
@@ -137,14 +143,16 @@ export class EditorHandler implements IDisposable {
       provide: f => EditorView.decorations.from(f)
     });
 
-    this._setupEditor();
+    void options.editorReady().then(() => {
+      this._setupEditor();
+    });
   }
 
   /**
    * The editor
    */
-  get editor(): CodeEditor.IEditor {
-    return this._editor;
+  get editor(): CodeEditor.IEditor | null {
+    return this._editor();
   }
 
   /**
@@ -176,11 +184,11 @@ export class EditorHandler implements IDisposable {
    * Setup the editor.
    */
   private _setupEditor(): void {
-    if (!this._editor || this._editor.isDisposed) {
+    const editor = this.editor as CodeMirrorEditor | null;
+    if (!editor || editor.isDisposed) {
       return;
     }
 
-    const editor = this._editor as CodeMirrorEditor;
     editor.setOption('lineNumbers', true);
     const breakpointGutter = [
       this._breakpointState,
@@ -209,10 +217,11 @@ export class EditorHandler implements IDisposable {
    * Clear the editor by removing visual elements and handlers.
    */
   private _clearEditor(): void {
-    if (!this._editor || this._editor.isDisposed) {
+    const editor = this.editor as CodeMirrorEditor | null;
+    if (!editor || editor.isDisposed) {
       return;
     }
-    const editor = this._editor as CodeMirrorEditor;
+
     EditorHandler.clearHighlight(editor);
     this._clearGutter(editor);
     editor.setOption('lineNumbers', false);
@@ -225,7 +234,7 @@ export class EditorHandler implements IDisposable {
    * Send the breakpoints from the editor UI via the debug service.
    */
   private _sendEditorBreakpoints(): void {
-    if (this._editor.isDisposed) {
+    if (this.editor?.isDisposed) {
       return;
     }
 
@@ -237,7 +246,7 @@ export class EditorHandler implements IDisposable {
     });
 
     void this._debuggerService.updateBreakpoints(
-      this._editor.model.value.text,
+      this._src.text,
       breakpoints,
       this._path
     );
@@ -247,17 +256,17 @@ export class EditorHandler implements IDisposable {
    * Handle a click on the gutter.
    *
    * @param editor The editor from where the click originated.
-   * @param lineNumber The line corresponding to the click event.
+   * @param position The position corresponding to the click event.
    */
-  private _onGutterClick(editor: EditorView, pos: number): void {
+  private _onGutterClick(editor: EditorView, position: number): void {
     if (this._id !== this._debuggerService.session?.connection?.id) {
       return;
     }
 
-    const lineNumber = editor.state.doc.lineAt(pos).number;
+    const lineNumber = editor.state.doc.lineAt(position).number;
     let stateBreakpoints = editor.state.field(this._breakpointState);
     let hasBreakpoint = false;
-    stateBreakpoints.between(pos, pos, () => {
+    stateBreakpoints.between(position, position, () => {
       hasBreakpoint = true;
     });
     let breakpoints: IDebugger.IBreakpoint[] = this._getBreakpoints();
@@ -277,7 +286,7 @@ export class EditorHandler implements IDisposable {
     });
 
     void this._debuggerService.updateBreakpoints(
-      this._editor.model.value.text,
+      this._src.text,
       breakpoints,
       this._path
     );
@@ -291,7 +300,7 @@ export class EditorHandler implements IDisposable {
       return;
     }
 
-    const editor = this._editor as CodeMirrorEditor;
+    const editor = this.editor as CodeMirrorEditor;
     const breakpoints = this._getBreakpoints();
 
     this._clearGutter(editor);
@@ -308,7 +317,7 @@ export class EditorHandler implements IDisposable {
    * Retrieve the breakpoints from the editor.
    */
   private _getBreakpointsFromEditor(): number[] {
-    const editor = this._editor as CodeMirrorEditor;
+    const editor = this.editor as CodeMirrorEditor;
     const breakpoints = editor.editor.state.field(this._breakpointState);
     let lines: number[] = [];
     breakpoints.between(0, editor.doc.length, (from: number) => {
@@ -334,17 +343,15 @@ export class EditorHandler implements IDisposable {
    * or its path (if it exists).
    */
   private _getBreakpoints(): IDebugger.IBreakpoint[] {
-    const editor = this._editor as CodeMirrorEditor;
-    const code = editor.doc.toString();
+    const code = this._src.text;
     return this._debuggerService.model.breakpoints.getBreakpoints(
       this._path || this._debuggerService.getCodeId(code)
     );
   }
 
   private _id: string;
-  private _path: string;
-  private _editor: CodeEditor.IEditor;
   private _debuggerService: IDebugger;
+  private _editor: () => CodeEditor.IEditor | null;
   private _editorMonitor: ActivityMonitor<
     IObservableString,
     IObservableString.IChangedArgs
@@ -354,6 +361,8 @@ export class EditorHandler implements IDisposable {
   private _gutter: Compartment;
   private _highlightDeco: Decoration;
   private _highlightState: StateField<DecorationSet>;
+  private _path: string;
+  private _src: IObservableString;
 }
 
 /**
@@ -370,14 +379,24 @@ export namespace EditorHandler {
     debuggerService: IDebugger;
 
     /**
-     * The code editor to handle.
+     * Promise resolving when the editor is ready.
      */
-    editor: CodeEditor.IEditor;
+    editorReady(): Promise<CodeEditor.IEditor>;
+
+    /**
+     * Get the code editor to handle.
+     */
+    getEditor(): CodeEditor.IEditor | null;
 
     /**
      * An optional path to a source file.
      */
     path?: string;
+
+    /**
+     * The code source to debug
+     */
+    src: IObservableString;
   }
 
   export const _highlightEffect = StateEffect.define<{ pos: number[] }>({

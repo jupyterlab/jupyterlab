@@ -1,12 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, ICellModel } from '@jupyterlab/cells';
 import {
-  CodeEditor,
-  CodeEditorWrapper,
-  JSONEditor
-} from '@jupyterlab/codeeditor';
+  Cell,
+  CodeCellModel,
+  ICellModel,
+  InputPrompt
+} from '@jupyterlab/cells';
+import { CodeEditor, JSONEditor } from '@jupyterlab/codeeditor';
+import { Mode } from '@jupyterlab/codemirror';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 import {
@@ -429,82 +431,66 @@ export namespace NotebookTools {
     constructor() {
       super();
       this.addClass('jp-ActiveCellTool');
-      this.addClass('jp-InputArea');
       this.layout = new PanelLayout();
-    }
 
-    /**
-     * Dispose of the resources used by the tool.
-     */
-    dispose(): void {
-      if (this._model === null) {
-        return;
-      }
-      this._model.dispose();
-      this._model = null!;
-      super.dispose();
+      this._inputPrompt = new InputPrompt();
+      (this.layout as PanelLayout).addWidget(this._inputPrompt);
+
+      // First code line container
+      const node = document.createElement('div');
+      const container = node.appendChild(document.createElement('div'));
+      const editor = container.appendChild(document.createElement('pre'));
+      container.className = 'jp-Cell-Content';
+      this._editorEl = editor;
+      (this.layout as PanelLayout).addWidget(new Widget({ node }));
     }
 
     /**
      * Handle a change to the active cell.
      */
-    protected onActiveCellChanged(): void {
+    protected async onActiveCellChanged(): Promise<void> {
       const activeCell = this.notebookTools.activeCell;
-      const layout = this.layout as PanelLayout;
-      const count = layout.widgets.length;
-      for (let i = 0; i < count; i++) {
-        layout.widgets[0].dispose();
-      }
+
       if (this._cellModel && !this._cellModel.isDisposed) {
-        this._cellModel.value.changed.disconnect(this._onValueChanged, this);
-        this._cellModel.mimeTypeChanged.disconnect(
-          this._onMimeTypeChanged,
-          this
-        );
+        this._cellModel.value.changed.disconnect(this.refresh, this);
+        this._cellModel.mimeTypeChanged.disconnect(this.refresh, this);
       }
       if (!activeCell) {
-        const cell = new Widget();
-        cell.addClass('jp-InputArea-editor');
-        layout.addWidget(cell);
         this._cellModel = null;
         return;
       }
-      const promptNode = activeCell.promptNode
-        ? (activeCell.promptNode.cloneNode(true) as HTMLElement)
-        : undefined;
-      const prompt = new Widget({ node: promptNode });
-      const factory = activeCell.contentFactory.editorFactory;
-
       const cellModel = (this._cellModel = activeCell.model);
-      cellModel.value.changed.connect(this._onValueChanged, this);
-      cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
-      this._model.value.text = cellModel.value.text.split('\n')[0];
-      this._model.mimeType = cellModel.mimeType;
-
-      const model = this._model;
-      const editorWidget = new CodeEditorWrapper({ model, factory });
-      editorWidget.addClass('jp-InputArea-editor');
-      editorWidget.editor.setOption('readOnly', true);
-      layout.addWidget(prompt);
-      layout.addWidget(editorWidget);
+      cellModel.value.changed.connect(this.refresh, this);
+      cellModel.mimeTypeChanged.connect(this.refresh, this);
+      await this.refresh();
     }
 
-    /**
-     * Handle a change to the current editor value.
-     */
-    private _onValueChanged(): void {
-      this._model.value.text = this._cellModel!.value.text.split('\n')[0];
+    protected async refresh(): Promise<void> {
+      this._editorEl.innerHTML = '';
+      if (this._cellModel?.type === 'code') {
+        this._inputPrompt.executionCount = `${
+          (this._cellModel as CodeCellModel).executionCount ?? ''
+        }`;
+      } else {
+        this._inputPrompt.executionCount = null;
+      }
+
+      if (this._cellModel) {
+        const spec = await Mode.ensure(
+          Mode.findByMIME(this._cellModel.mimeType) ??
+            Mode.findByMIME('text/plain')!
+        );
+        Mode.run(
+          this._cellModel.value.text.split('\n')[0],
+          spec!,
+          this._editorEl
+        );
+      }
     }
 
-    /**
-     * Handle a change to the current editor mimetype.
-     */
-    private _onMimeTypeChanged(): void {
-      this._model.mimeType = this._cellModel!.mimeType;
-    }
-
-    private _model = new CodeEditor.Model();
-    private _cellModel: CodeEditor.IModel | null;
+    private _cellModel: ICellModel | null;
+    private _editorEl: HTMLPreElement;
+    private _inputPrompt: InputPrompt;
   }
 
   /**

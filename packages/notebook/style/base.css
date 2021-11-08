@@ -237,23 +237,19 @@
 
 .jp-ActiveCellTool {
   padding: 12px;
-  background-color: var(--jp-layout-color1);
-  border-top: none !important;
 }
 
-.jp-ActiveCellTool .jp-InputArea-prompt {
-  flex: 0 0 auto;
-  padding-left: 0;
-}
-
-.jp-ActiveCellTool .jp-InputArea-editor {
-  flex: 1 1 auto;
+.jp-ActiveCellTool .jp-Cell-Content {
   background: var(--jp-cell-editor-background);
-  border-color: var(--jp-cell-editor-border-color);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border-radius: 0;
+  min-height: 29px;
 }
 
-.jp-ActiveCellTool .jp-InputArea-editor .CodeMirror {
-  background: transparent;
+.jp-Cell-Content > pre {
+  padding: 5px 4px;
+  margin: 0;
+  white-space: normal;
 }
 
 .jp-MetadataEditorTool {

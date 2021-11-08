@@ -57,6 +57,7 @@
     "@jupyterlab/settingregistry": "^4.0.0-alpha.13",
     "@lumino/algorithm": "^2.0.0-alpha.1",
     "@lumino/coreutils": "^2.0.0-alpha.1",
+    "@lumino/signaling": "^2.0.0-alpha.1",
     "@playwright/test": "^1.17.0",
     "@stdlib/stats": "~0.0.13",
     "fs-extra": "^9.0.1",

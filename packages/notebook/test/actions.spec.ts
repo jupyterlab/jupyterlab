@@ -3,6 +3,7 @@
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
@@ -13,7 +14,13 @@ import {
 } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
-import { KernelError, Notebook, NotebookActions, NotebookModel } from '..';
+import {
+  KernelError,
+  Notebook,
+  NotebookActions,
+  NotebookModel,
+  StaticNotebook
+} from '..';
 import * as utils from './utils';
 
 const ERROR_INPUT = 'a = foo';
@@ -59,7 +66,11 @@ describe('@jupyterlab/notebook', () => {
       widget = new Notebook({
         rendermime,
         contentFactory: utils.createNotebookFactory(),
-        mimeTypeService: utils.mimeTypeService
+        mimeTypeService: utils.mimeTypeService,
+        notebookConfig: {
+          ...StaticNotebook.defaultNotebookConfig,
+          windowingMode: 'none'
+        }
       });
       const model = new NotebookModel({
         disableDocumentWideUndoRedo: true
@@ -160,7 +171,7 @@ describe('@jupyterlab/notebook', () => {
         const source = 'thisisasamplestringwithnospaces';
         cell.model.value.text = source;
         const index = widget.activeCellIndex;
-        const editor = cell.editor;
+        const editor = cell.editor as CodeEditor.IEditor;
         editor.setCursorPosition(editor.getPositionAt(10)!);
         NotebookActions.splitCell(widget);
         const cells = widget.model!.cells;
@@ -173,7 +184,7 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.activeCell!;
         const source = 'this\n\n   is a test';
         cell.model.value.text = source;
-        const editor = cell.editor;
+        const editor = cell.editor as CodeEditor.IEditor;
         editor.setCursorPosition(editor.getPositionAt(4)!);
         NotebookActions.splitCell(widget);
         expect(widget.activeCell!.model.value.text).toBe('   is a test');
@@ -1458,22 +1469,24 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#toggleAllLineNumbers()', () => {
       it('should toggle line numbers on all cells', () => {
-        const state = widget.activeCell!.editor.getOption('lineNumbers');
+        const state = widget.activeCell!.editor!.getOption('lineNumbers');
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          const lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
+          const lineNumbers =
+            widget.widgets[i].editor!.getOption('lineNumbers');
           expect(lineNumbers).toBe(!state);
         }
       });
 
       it('should be based on the state of the active cell', () => {
-        const state = widget.activeCell!.editor.getOption('lineNumbers');
+        const state = widget.activeCell!.editor!.getOption('lineNumbers');
         for (let i = 1; i < widget.widgets.length; i++) {
-          widget.widgets[i].editor.setOption('lineNumbers', !state);
+          widget.widgets[i].editor!.setOption('lineNumbers', !state);
         }
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          const lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
+          const lineNumbers =
+            widget.widgets[i].editor!.getOption('lineNumbers');
           expect(lineNumbers).toBe(!state);
         }
       });

@@ -12,7 +12,8 @@ module.exports = {
     JSX: 'readonly',
     NodeJS: 'readonly',
     RequestInit: 'readonly',
-    RequestInfo: 'readonly'
+    RequestInfo: 'readonly',
+    ScrollLogicalPosition: 'readonly'
   },
   root: true,
   extends: [

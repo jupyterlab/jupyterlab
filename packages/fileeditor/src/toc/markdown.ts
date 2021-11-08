@@ -41,12 +41,15 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
 
     const content = this.widget.content.model.value.text;
 
-    const headings = TableOfContentsUtils.Markdown.getHeadings(content, {
-      ...this.configuration,
-      // Force removing numbering as they cannot be displayed
-      // in the document
-      numberHeaders: false
-    });
+    const headings = TableOfContentsUtils.filterHeadings(
+      TableOfContentsUtils.Markdown.getHeadings(content),
+      {
+        ...this.configuration,
+        // Force removing numbering as they cannot be displayed
+        // in the document
+        numberHeaders: false
+      }
+    );
     return Promise.resolve(headings);
   }
 }

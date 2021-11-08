@@ -29,7 +29,9 @@ export class FileHandler implements IDisposable {
     this._hasLineNumber = this._fileEditor.editor.getOption('lineNumbers');
     this._editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,
-      editor: this._fileEditor.editor
+      editorReady: () => Promise.resolve(this._fileEditor.editor),
+      getEditor: () => this._fileEditor.editor,
+      src: this._fileEditor.model.value
     });
   }
 
@@ -48,7 +50,7 @@ export class FileHandler implements IDisposable {
     this.isDisposed = true;
     this._editorHandler?.dispose();
     // Restore editor options
-    this._editorHandler?.editor.setOptions({
+    this._editorHandler?.editor!.setOptions({
       lineNumbers: this._hasLineNumber
     });
     Signal.clearData(this);

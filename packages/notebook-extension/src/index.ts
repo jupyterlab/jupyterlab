@@ -8,6 +8,7 @@
 import {
   ILabShell,
   ILayoutRestorer,
+  IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -322,15 +323,17 @@ const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory, ITranslator],
+  requires: [INotebookWidgetFactory],
   optional: [
     ICommandPalette,
     IFileBrowserFactory,
     ILauncher,
     ILayoutRestorer,
     IMainMenu,
+    IRouter,
     ISettingRegistry,
-    ISessionContextDialogs
+    ISessionContextDialogs,
+    ITranslator
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -751,7 +754,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   ) => {
     let previousWidget: NotebookPanel | null = null;
 
-    const provider = (widget: Widget | null) => {
+    const provider = async (widget: Widget | null) => {
       let editor: CodeEditor.IEditor | null = null;
       if (widget !== previousWidget) {
         previousWidget?.content.activeCellChanged.disconnect(
@@ -763,11 +766,21 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
           (widget as NotebookPanel).content.activeCellChanged.connect(
             positionModel.update
           );
-          editor = (widget as NotebookPanel).content.activeCell?.editor ?? null;
+          const activeCell = (widget as NotebookPanel).content.activeCell;
+          editor = null;
+          if (activeCell) {
+            await activeCell.ready;
+            editor = activeCell.editor;
+          }
           previousWidget = widget as NotebookPanel;
         }
       } else if (widget) {
-        editor = (widget as NotebookPanel).content.activeCell?.editor ?? null;
+        const activeCell = (widget as NotebookPanel).content.activeCell;
+        editor = null;
+        if (activeCell) {
+          await activeCell.ready;
+          editor = activeCell.editor;
+        }
       }
       return editor;
     };
@@ -1205,6 +1218,9 @@ function activateCodeConsole(
 
       let code: string;
       const editor = cell.editor;
+      if (!editor) {
+        return;
+      }
       const selection = editor.getSelection();
       const { start, end } = selection;
       const selected = start.column !== end.column || start.line !== end.line;
@@ -1381,20 +1397,34 @@ function activateCopyOutput(
 function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
-  translator: ITranslator,
   palette: ICommandPalette | null,
   browserFactory: IFileBrowserFactory | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
+  router: IRouter | null,
   settingRegistry: ISettingRegistry | null,
-  sessionDialogs: ISessionContextDialogs | null
+  sessionDialogs: ISessionContextDialogs | null,
+  translator: ITranslator | null
 ): INotebookTracker {
+  translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab');
   const services = app.serviceManager;
 
   const { commands, shell } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
+
+  // Use the router to deal with hash navigation on windowed notebook
+  function onRouted(router: IRouter, location: IRouter.ILocation): void {
+    if (
+      factory.notebookConfig.windowingMode === 'full' &&
+      location.hash &&
+      tracker.currentWidget
+    ) {
+      tracker.currentWidget.setFragment(location.hash);
+    }
+  }
+  router?.routed.connect(onRouted);
 
   const isEnabled = (): boolean => {
     return Private.isEnabled(shell, tracker);
@@ -1552,15 +1582,7 @@ function activateNotebookHandler(
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
-      numberCellsToRenderDirectly: settings.get('numberCellsToRenderDirectly')
-        .composite as number,
-      remainingTimeBeforeRescheduling: settings.get(
-        'remainingTimeBeforeRescheduling'
-      ).composite as number,
-      renderCellOnIdle: settings.get('renderCellOnIdle').composite as boolean,
-      observedTopMargin: settings.get('observedTopMargin').composite as string,
-      observedBottomMargin: settings.get('observedBottomMargin')
-        .composite as string,
+      overscanCount: settings.get('overscanCount').composite as number,
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
       showEditorForReadOnlyMarkdown: settings.get(
         'showEditorForReadOnlyMarkdown'
@@ -1577,7 +1599,11 @@ function activateNotebookHandler(
         'sideBySideRightMarginOverride'
       ).composite as string,
       sideBySideOutputRatio: settings.get('sideBySideOutputRatio')
-        .composite as number
+        .composite as number,
+      windowingMode: settings.get('windowingMode').composite as
+        | 'defer'
+        | 'full'
+        | 'none'
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
@@ -1748,20 +1774,30 @@ function activateNotebookCompleterService(
     };
     await manager.updateCompleter(completerContext);
     notebook.content.activeCellChanged.connect((_, cell) => {
-      const newCompleterContext = {
-        editor: cell.editor,
-        session: notebook.sessionContext.session,
-        widget: notebook
-      };
-      manager.updateCompleter(newCompleterContext).catch(console.error);
+      // Ensure the editor will exist on the cell before adding the completer
+      cell.ready
+        .then(() => {
+          const newCompleterContext = {
+            editor: cell.editor,
+            session: notebook.sessionContext.session,
+            widget: notebook
+          };
+          return manager.updateCompleter(newCompleterContext);
+        })
+        .catch(console.error);
     });
     notebook.sessionContext.sessionChanged.connect(() => {
-      const newCompleterContext = {
-        editor: notebook.content.activeCell?.editor ?? null,
-        session: notebook.sessionContext.session,
-        widget: notebook
-      };
-      manager.updateCompleter(newCompleterContext).catch(console.error);
+      // Ensure the editor will exist on the cell before adding the completer
+      notebook.content.activeCell?.ready
+        .then(() => {
+          const newCompleterContext = {
+            editor: notebook.content.activeCell?.editor ?? null,
+            session: notebook.sessionContext.session,
+            widget: notebook
+          };
+          return manager.updateCompleter(newCompleterContext);
+        })
+        .catch(console.error);
     });
   };
   notebooks.widgetAdded.connect(updateCompleter);
@@ -2550,7 +2586,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return current.content.activeCell?.editor.redo();
+        return current.content.activeCell?.editor?.redo();
       }
     }
   });
@@ -2560,7 +2596,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return current.content.activeCell?.editor.undo();
+        return current.content.activeCell?.editor?.undo();
       }
     }
   });

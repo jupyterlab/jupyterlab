@@ -20,8 +20,6 @@
 }
 
 .jp-OutputPrompt {
-  display: table-cell;
-  vertical-align: top;
   width: var(--jp-cell-prompt-width);
   color: var(--jp-cell-outprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
@@ -43,6 +41,11 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.jp-OutputArea-prompt {
+  display: table-cell;
+  vertical-align: top;
 }
 
 .jp-OutputArea-output {

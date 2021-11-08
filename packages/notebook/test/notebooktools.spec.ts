@@ -286,7 +286,7 @@ describe('@jupyterlab/notebook', () => {
         const widget = tracker.currentWidget!;
         widget.content.activeCellIndex++;
         widget.content.activeCell!.model.metadata.set('bar', 1);
-        expect(tool.node.querySelector('.jp-InputArea-editor')).toBeTruthy();
+        expect(tool.node.querySelector('pre')).toBeTruthy();
       });
     });
 
