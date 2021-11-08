@@ -66,12 +66,12 @@ async function activateTOC(
   app: JupyterFrontEnd,
   docmanager: IDocumentManager,
   editorTracker: IEditorTracker,
-  labShell: ILabShell | null,
   restorer: ILayoutRestorer,
   markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
+  labShell?: ILabShell,
   settingRegistry?: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
