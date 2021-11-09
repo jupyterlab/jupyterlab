@@ -14,13 +14,13 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ### Enhancements made
 
-- Remove Blueprint [#11173](https://github.com/jupyterlab/jupyterlab/pull/11173) ([@fcollonval](https://github.com/fcollonval))
+- Remove `Blueprint` [#11173](https://github.com/jupyterlab/jupyterlab/pull/11173) ([@fcollonval](https://github.com/fcollonval))
 - Add execution progress indicator [#10730](https://github.com/jupyterlab/jupyterlab/pull/10730) ([@trungleduc](https://github.com/trungleduc))
 
 ### Bugs fixed
 
-- fix #11377 & bump Yjs dependencies & fix modeldb overwriting yjs content [#11398](https://github.com/jupyterlab/jupyterlab/pull/11398) ([@dmonad](https://github.com/dmonad))
-- Make orig_nbformat optional #11005 [#11370](https://github.com/jupyterlab/jupyterlab/pull/11370) ([@nanoant](https://github.com/nanoant))
+- Bump Yjs dependencies and fix modeldb overwriting yjs content [#11398](https://github.com/jupyterlab/jupyterlab/pull/11398) ([@dmonad](https://github.com/dmonad))
+- Make `orig_nbformat` optional #11005 [#11370](https://github.com/jupyterlab/jupyterlab/pull/11370) ([@nanoant](https://github.com/nanoant))
 - Fix Handling of WebSocket Startup Errors [#11358](https://github.com/jupyterlab/jupyterlab/pull/11358) ([@blink1073](https://github.com/blink1073))
 - Only trigger dirty status update on value changes [#11346](https://github.com/jupyterlab/jupyterlab/pull/11346) ([@krassowski](https://github.com/krassowski))
 - Updated dialog with text to a reasonable width [#11331](https://github.com/jupyterlab/jupyterlab/pull/11331) ([@3coins](https://github.com/3coins))
@@ -28,12 +28,12 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ### Maintenance and upkeep improvements
 
-- Makes ILabShell optional in toc extension [#11420](https://github.com/jupyterlab/jupyterlab/pull/11420) ([@jweill-aws](https://github.com/jweill-aws))
-- Add `jupyterlab` prefix to the Galata artifacts [#11405](https://github.com/jupyterlab/jupyterlab/pull/11405) ([@jtpio](https://github.com/jtpio))
+- Makes `ILabShell` optional in `toc` extension [#11420](https://github.com/jupyterlab/jupyterlab/pull/11420) ([@jweill-aws](https://github.com/jweill-aws))
+- Add `jupyterlab` prefix to the `Galata` artifacts [#11405](https://github.com/jupyterlab/jupyterlab/pull/11405) ([@jtpio](https://github.com/jtpio))
 - Fix rebuilding JLab in benchmark CI [#11399](https://github.com/jupyterlab/jupyterlab/pull/11399) ([@fcollonval](https://github.com/fcollonval))
-- Modify dump of webpack config to include RegEx expressions [#11397](https://github.com/jupyterlab/jupyterlab/pull/11397) ([@rfox12](https://github.com/rfox12))
-- Fix release_test [#11390](https://github.com/jupyterlab/jupyterlab/pull/11390) ([@fcollonval](https://github.com/fcollonval))
-- removed cat package.json [#11372](https://github.com/jupyterlab/jupyterlab/pull/11372) ([@ceesu](https://github.com/ceesu))
+- Modify dump of `webpack` config to include `RegEx` expressions [#11397](https://github.com/jupyterlab/jupyterlab/pull/11397) ([@rfox12](https://github.com/rfox12))
+- Fix `release_test` [#11390](https://github.com/jupyterlab/jupyterlab/pull/11390) ([@fcollonval](https://github.com/fcollonval))
+- Removed `cat package.json` [#11372](https://github.com/jupyterlab/jupyterlab/pull/11372) ([@ceesu](https://github.com/ceesu))
 - Fix comment on PR action [#11354](https://github.com/jupyterlab/jupyterlab/pull/11354) ([@fcollonval](https://github.com/fcollonval))
 - Relax `@playright/test` dependency in Galata [#11112](https://github.com/jupyterlab/jupyterlab/pull/11112) ([@jtpio](https://github.com/jtpio))
 
@@ -41,14 +41,11 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 - Improve documentation on galata setup [#11391](https://github.com/jupyterlab/jupyterlab/pull/11391) ([@fcollonval](https://github.com/fcollonval))
 - Fix links [#11378](https://github.com/jupyterlab/jupyterlab/pull/11378) ([@krassowski](https://github.com/krassowski))
-- Adds command to docs to install canvas dependencies [#11365](https://github.com/jupyterlab/jupyterlab/pull/11365) ([@jweill-aws](https://github.com/jweill-aws))
+- Adds command to docs to install `canvas` dependencies [#11365](https://github.com/jupyterlab/jupyterlab/pull/11365) ([@jweill-aws](https://github.com/jweill-aws))
 - Recommend providing screenshots for translators [#11357](https://github.com/jupyterlab/jupyterlab/pull/11357) ([@krassowski](https://github.com/krassowski))
 - Fix outdated `clearSignalData` reference (now `Signal.clearData`) [#11339](https://github.com/jupyterlab/jupyterlab/pull/11339) ([@krassowski](https://github.com/krassowski))
-- Remove Blueprint [#11173](https://github.com/jupyterlab/jupyterlab/pull/11173) ([@fcollonval](https://github.com/fcollonval))
-
-### Other merged PRs
-
-- Adds recommendation to install Prettier extension [#11363](https://github.com/jupyterlab/jupyterlab/pull/11363) ([@jweill-aws](https://github.com/jweill-aws))
+- Remove `Blueprint` [#11173](https://github.com/jupyterlab/jupyterlab/pull/11173) ([@fcollonval](https://github.com/fcollonval))
+- Adds recommendation to install `Prettier` extension [#11363](https://github.com/jupyterlab/jupyterlab/pull/11363) ([@jweill-aws](https://github.com/jweill-aws))
 
 ### Contributors to this release
 
