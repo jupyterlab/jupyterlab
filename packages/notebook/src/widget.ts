@@ -445,40 +445,6 @@ export class StaticNotebook extends Widget {
   }
 
   /**
-   * A message handler invoked on an `'update-request'` message.
-   *
-   * #### Notes
-   * The default implementation of this handler is a no-op.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    const [startIndex, stopIndex] = this._getRangeToRender();
-
-    const cells = [];
-    for (let index = startIndex; index <= stopIndex; index++) {
-      cells
-        .push
-        // Render widget - with smart memoizing...
-        ();
-    }
-
-    // Read this value after creating the cells.
-    // So their actual sizes are taken into account
-    const estimatedTotalHeight = this._getEstimatedTotalHeight();
-
-    // Update inner container height
-
-    // Update visible widget in layout
-  }
-
-  private _getEstimatedTotalHeight(): number {
-    return 250;
-  }
-
-  private _getRangeToRender(): [number, number] {
-    return [0, Infinity];
-  }
-
-  /**
    * Handle a new model on the widget.
    */
   private _onModelChanged(

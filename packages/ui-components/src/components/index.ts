@@ -14,3 +14,4 @@ export * from './styling';
 export * from './switch';
 export * from './toolbar';
 export * from './vdom';
+export * from './windowedlist';
