@@ -36,7 +36,6 @@ import { runNestedCodeCells } from '@jupyterlab/toc';
  */
 namespace CommandIDs {
   export const runCells = 'toc:run-cells';
-  export const showPanel = 'toc:show-panel';
 }
 
 /**
@@ -92,13 +91,6 @@ async function activateTOC(
       return runNestedCodeCells(toc.headings, toc.activeEntry);
     },
     label: trans.__('Run Cell(s)')
-  });
-
-  app.commands.addCommand(CommandIDs.showPanel, {
-    label: trans.__('Table of Contents'),
-    execute: () => {
-      app.shell.activateById(toc.id);
-    }
   });
 
   // Add the ToC widget to the application restorer:
