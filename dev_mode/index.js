@@ -213,6 +213,7 @@ export async function main() {
 
   if (exposeAppInBrowser || devMode) {
     window.jupyterlab = lab;
+    window.jupyterapp = lab;
   }
 
   // Handle a browser test.
