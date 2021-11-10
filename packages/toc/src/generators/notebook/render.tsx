@@ -99,11 +99,12 @@ function render(
               previousHeader(tracker, item, toc)
             }
             className={'toc-entry-holder ' + fontSizeClass}
-            button={button}
-            jsx={jsx}
-            ellipseButton={ellipseButton}
             area={widget.node.querySelector(`.${TOC_TREE_CLASS}`) as Element}
-          />
+          >
+            {button}
+            {jsx}
+            {ellipseButton}
+          </NotebookHeading>
         );
       }
       return jsx;
@@ -263,7 +264,7 @@ type NotebookHeadingProps = React.PropsWithChildren<{
   isActive: boolean;
   className: string;
   area: Element;
-}>
+}>;
 
 /** React component for a single toc heading
  *
