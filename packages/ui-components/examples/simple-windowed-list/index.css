@@ -42,3 +42,9 @@ body {
   border: 1px solid #505050;
   overflow: auto;
 }
+
+.content > div > textarea {
+  border: none;
+  margin: 2px;
+  padding: 0px;
+}
