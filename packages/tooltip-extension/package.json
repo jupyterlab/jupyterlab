@@ -46,9 +46,9 @@
     "@jupyterlab/rendermime": "^3.3.0-alpha.15",
     "@jupyterlab/services": "^6.3.0-alpha.15",
     "@jupyterlab/tooltip": "^3.3.0-alpha.15",
-    "@lumino/algorithm": "^1.8.0",
-    "@lumino/coreutils": "^1.10.0",
-    "@lumino/widgets": "^1.28.0"
+    "@lumino/algorithm": "^1.9.1",
+    "@lumino/coreutils": "^1.11.1",
+    "@lumino/widgets": "^1.30.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
