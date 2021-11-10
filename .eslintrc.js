@@ -53,6 +53,7 @@ module.exports = {
     '@typescript-eslint/no-inferrable-types': 'off',
     'jest/no-conditional-expect': 'warn',
     'jest/valid-title': 'warn',
+    'id-match': ['error', '^[a-zA-Z_]+[a-zA-Z0-9_]*$'], // https://certitude.consulting/blog/en/invisible-backdoor/
     'no-inner-declarations': 'off',
     'no-prototype-builtins': 'off',
     'no-control-regex': 'warn',
