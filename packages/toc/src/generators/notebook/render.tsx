@@ -153,11 +153,12 @@ function render(
               previousHeader(tracker, item, toc)
             }
             className={'toc-entry-holder ' + fontSizeClass}
-            button={button}
-            jsx={jsx}
-            ellipseButton={ellipseButton}
             area={widget.node.querySelector(`.${TOC_TREE_CLASS}`) as Element}
-          />
+          >
+            {button}
+            {jsx}
+            {ellipseButton}
+          </NotebookHeading>
         );
       }
       return jsx;
@@ -258,18 +259,17 @@ function previousHeader(
   return false;
 }
 
+type NotebookHeadingProps = React.PropsWithChildren<{
+  isActive: boolean;
+  className: string;
+  area: Element;
+}>
+
 /** React component for a single toc heading
  *
  * @private
  */
-function NotebookHeading(props: {
-  isActive: boolean;
-  className: string;
-  button: JSX.Element;
-  jsx: JSX.Element;
-  ellipseButton: JSX.Element;
-  area: Element;
-}): JSX.Element {
+function NotebookHeading(props: NotebookHeadingProps): JSX.Element {
   const itemRef = React.useRef<HTMLDivElement>(null);
   const isActive = props.isActive;
   React.useEffect(() => {
@@ -285,9 +285,7 @@ function NotebookHeading(props: {
       ref={itemRef}
       className={[props.className, isActive ? 'toc-active-cell' : ''].join(' ')}
     >
-      {props.button}
-      {props.jsx}
-      {props.ellipseButton}
+      {props.children}
     </div>
   );
 }
