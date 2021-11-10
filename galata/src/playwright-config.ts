@@ -17,6 +17,9 @@ module.exports = {
     viewport: { width: 1024, height: 768 },
 
     // Artifacts
-    video: 'retain-on-failure'
+    video: 'retain-on-failure',
+
+    // Allow downloading files
+    acceptDownloads: true
   }
 } as PlaywrightTestConfig;
