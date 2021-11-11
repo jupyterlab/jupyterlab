@@ -8,6 +8,10 @@ The recommended way to make a release is to use [`jupyter_releaser`](https://git
 
 ### Workflow
 
+The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#making-your-first-release.
+
+Here is a quick summary of a different steps:
+
 #### Draft Changelog
 
 The first step is to generate a new changelog entry for the upcoming release.
