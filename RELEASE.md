@@ -2,10 +2,65 @@
 
 This document guides a contributor through creating a release of JupyterLab.
 
+## Automated Releases with the Jupyter Releaser
+
+The recommended way to make a release is to use [`jupyter_releaser`](https://github.com/jupyter-server/jupyter_releaser#checklist-for-adoption).
+
+### Workflow
+
+#### Draft Changelog
+
+The first step is to generate a new changelog entry for the upcoming release.
+
+We use the "Draft Changelog" workflow as documented here: https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#draft-changelog
+
+The workflow takes a couple of input parameters, for example:
+
+| Input  | Value |
+| ------------- | ------------- |
+| Target | jupyterlab/jupyterlab  |
+| Branch  | master  |
+| Version Spec | next |
+| Since | v4.0.0a15 |
+
+The version spec follows the specification documented bellow in the [Bump Version](#bump-version) section.
+
+You can use `next` when making a `patch` release or a `build` pre-release.
+
+Here is an example screenshot of what it should look like:
+
+![draft-changelog-example](https://user-images.githubusercontent.com/591645/141277239-571c2e6a-e8d5-4af9-aee4-dd52a7dae8ba.png)
+
+We then wait for:
+
+1. the PR to be created on the repo. Example: https://github.com/jupyterlab/jupyterlab/pull/11422
+2. Tests to pass
+3. Merge the changelog PR
+
+### Full Release
+
+Using the information in the body of the changelog PR, for example:
+
+![changelog-pr](https://user-images.githubusercontent.com/591645/141277401-50b9ed8e-81ed-4256-88f6-4228aa228a3f.png)
+
+We use the Full Release workflow:
+
+![full-release-example](https://user-images.githubusercontent.com/591645/141277586-ba8672ea-7102-4803-a1a5-57c69bb2df44.png)
+
+The workflow:
+
+- builds and uploads the `jupyterlab` Python package to PyPI
+- builds the `@jupyterlab/*` packages and uploads them to `npm`
+- creates a new GitHub Release with the new changelog entry as release notes
+
+Then follow the [Post release candidate checklist](#post-release-candidate-checklist) if applicable.
+
+## Manual Release Process
+
 Review `CONTRIBUTING.md`. Make sure all the tools needed to generate the
 built JavaScript files are properly installed.
 
-## Creating a full release
+### Creating a full release
 
 We publish the npm packages, a Python source package, and a Python universal
 binary wheel. We also publish a conda package on conda-forge (see below). See
@@ -13,7 +68,7 @@ the Python docs on [package
 uploading](https://packaging.python.org/guides/tool-recommendations/) for twine
 setup instructions and for why twine is the recommended method.
 
-## Getting a clean environment
+### Getting a clean environment
 
 For convenience, here is a script for getting a completely clean repo. This
 makes sure that we don't have any extra tags or commits in our repo (especially
@@ -26,7 +81,7 @@ Make sure you are running an sh-compatible shell, and it is set up to be able to
 source scripts/release_prep.sh <branch_name>
 ```
 
-## Bump version
+### Bump version
 
 The next step is to bump the appropriate version numbers. We use
 [bump2version](https://github.com/c4urself/bump2version) to manage the Python
@@ -54,7 +109,7 @@ top level JupyterLab application.
 Other note: It's ok if `yarn-deduplicate` exits with a non zero code. This is
 expected!
 
-### JS major release(s)
+#### JS major release(s)
 
 In a major Python release, we can have one or more JavaScript packages also have
 a major bump. During the prerelease stage of a major release, if there is a
@@ -70,7 +125,7 @@ Results:
 - Packages that have already had a major bump in this prerelease cycle are not affected.
 - All affected packages changed to match the current release type of the Python package (`alpha`, `beta`, or `rc`).
 
-## Publishing Packages
+### Publishing Packages
 
 Now publish the JS packages
 
@@ -102,7 +157,7 @@ from ipywidgets import IntSlider
 IntSlider()
 ```
 
-## Finish
+### Finish
 
 Follow instructions printed at the end of the publish step above:
 
@@ -260,7 +315,7 @@ shasum -a 256 dist/*.tar.gz
 
 Run `source scripts/docs_push.sh` to update the `gh-pages` branch that backs http://jupyterlab.github.io/jupyterlab/.
 
-## Making a patch release
+## Making a manual patch release
 
 - Backport the change to the previous release branch
 - Run the following script, where the package is in `/packages/package-folder-name` (note that multiple packages can be given, or no packages for a Python-only patch release):
