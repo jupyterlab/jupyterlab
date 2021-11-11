@@ -7,6 +7,9 @@
   "include": ["src/*"],
   "references": [
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../coreutils"
     },
     {
@@ -14,6 +17,9 @@
     },
     {
       "path": "../statedb"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

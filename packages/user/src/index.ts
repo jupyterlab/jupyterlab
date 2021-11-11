@@ -7,4 +7,6 @@
 
 export * from './tokens';
 export * from './model';
+export * from './menu';
 export * from './utils';
+export * from './components';

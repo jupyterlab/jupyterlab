@@ -40,6 +40,11 @@ export const IUserPanel = new Token<AccordionPanel>(
  */
 export interface IUser {
   /**
+   * User's unique identifier.
+   */
+  readonly id: string;
+
+  /**
    * User's name.
    */
   readonly name: string;
@@ -183,6 +188,11 @@ export namespace IUser {
    * Convenience for treating the user's info as a JSON object.
    */
   export type User = {
+    /**
+     * User's unique identifier.
+     */
+    id: string;
+
     /**
      * User's name.
      */

@@ -43,7 +43,8 @@
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.15",
     "@jupyterlab/statedb": "^3.3.0-alpha.15",
-    "@jupyterlab/user": "^3.3.0-alpha.10"
+    "@jupyterlab/user": "^3.3.0-alpha.10",
+    "@lumino/widgets": "^1.28.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

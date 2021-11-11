@@ -1,0 +1,70 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/************************************************************
+                      User Icon
+*************************************************************/
+
+.jp-User-icon {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  margin: auto;
+  border-radius: 100%;
+}
+
+.jp-User-icon div {
+  margin: auto;
+  text-align: center;
+  vertical-align: middle;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-User-img {
+  width: 25px;
+  height: 25px;
+  border-radius: 100%;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+/************************************************************
+                      Color Picker
+*************************************************************/
+.jp-User-ColorPickerIcon {
+  margin: auto;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.jp-User-ColorPickerIcon input {
+  width: 0px;
+  height: 0px;
+  padding: 0px;
+  position: relative;
+  top: 15px;
+  left: 20px;
+  z-index: -10;
+  border: none;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.jp-User-ColorPickerIcon span {
+  margin: auto;
+  text-align: center;
+  font-size: 25px;
+  fill: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-User-ColorPickerIcon:hover {
+  cursor: pointer;
+}

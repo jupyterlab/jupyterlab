@@ -124,6 +124,7 @@ export class User implements IUser {
    * Convenience method to modify the user as a JSON object.
    */
   fromJSON(user: IUser.User): void {
+    this._id = user.id;
     this._name = user.name;
     this._username = user.username;
     this._color = user.color;
@@ -138,6 +139,7 @@ export class User implements IUser {
    */
   toJSON(): IUser.User {
     return {
+      id: this._id,
       name: this._name,
       username: this._username,
       color: this._color,
