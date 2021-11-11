@@ -43,6 +43,7 @@ tests/**/.cache-loader
 galata/benchmark-results
 galata/playwright-report
 galata/test-results
+galata/*benchmark-expected.json
 
 package_json.tar.gz
 
