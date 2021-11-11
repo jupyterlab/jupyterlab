@@ -165,8 +165,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         this.onKeydown(event);
       }
     });
-    CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-    if (!USE_YCODEMIRROR_BINDING) {
+
+    if (USE_YCODEMIRROR_BINDING) {
+      this._yeditorBinding?.on('cursorActivity', () =>
+        this._onCursorActivity()
+      );
+    } else {
+      CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
       CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
         this._beforeDocChanged(instance, change);
       });

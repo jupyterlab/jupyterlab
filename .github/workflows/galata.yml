@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     name: Visual Regression Tests
-    timeout-minutes: 40
+    timeout-minutes: 80
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -76,7 +76,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: galata-test-assets
+          name: jupyterlab-galata-test-assets
           path: |
             galata/test-results
 
@@ -84,9 +84,22 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: galata-report
+          name: jupyterlab-galata-report
           path: |
             galata/playwright-report
+
+      - name: Update snapshots
+        if: failure()
+        run: |
+          cd galata
+          jlpm run test:update
+
+      - name: Upload updated snapshots
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-galata-updated-snapshots
+          path: galata/test/**/*-snapshots/*.*
 
       - name: Print JupyterLab logs
         if: always()
