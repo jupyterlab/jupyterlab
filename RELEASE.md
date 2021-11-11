@@ -20,12 +20,12 @@ We use the "Draft Changelog" workflow as documented here: https://jupyter-releas
 
 The workflow takes a couple of input parameters, for example:
 
-| Input  | Value |
-| ------------- | ------------- |
-| Target | jupyterlab/jupyterlab  |
-| Branch  | master  |
-| Version Spec | next |
-| Since | v4.0.0a15 |
+| Input        | Value                 |
+| ------------ | --------------------- |
+| Target       | jupyterlab/jupyterlab |
+| Branch       | master                |
+| Version Spec | next                  |
+| Since        | v4.0.0a15             |
 
 The version spec follows the specification documented bellow in the [Bump Version](#bump-version) section.
 
