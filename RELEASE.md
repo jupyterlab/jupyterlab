@@ -10,7 +10,7 @@ The recommended way to make a release is to use [`jupyter_releaser`](https://git
 
 The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#making-your-first-release.
 
-Here is a quick summary of a different steps:
+Here is a quick summary of the different steps.
 
 #### Draft Changelog
 
@@ -29,7 +29,7 @@ The workflow takes a couple of input parameters, for example:
 
 The version spec follows the specification documented bellow in the [Bump Version](#bump-version) section.
 
-You can use `next` when making a `patch` release or a `build` pre-release.
+We can use `next` when making a `patch` release or a `build` pre-release.
 
 Here is an example screenshot of what it should look like:
 
@@ -56,6 +56,7 @@ The workflow:
 - builds and uploads the `jupyterlab` Python package to PyPI
 - builds the `@jupyterlab/*` packages and uploads them to `npm`
 - creates a new GitHub Release with the new changelog entry as release notes
+- creates a PR to forward port the new changelog entry to the main branch (when releasing from a branch that is not the default)
 
 Then follow the [Post release candidate checklist](#post-release-candidate-checklist) if applicable.
 
