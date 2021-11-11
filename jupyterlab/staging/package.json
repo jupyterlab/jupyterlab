@@ -104,6 +104,8 @@
     "@jupyterlab/translation-extension": "~4.0.0-alpha.1",
     "@jupyterlab/ui-components": "~4.0.0-alpha.16",
     "@jupyterlab/ui-components-extension": "~4.0.0-alpha.1",
+    "@jupyterlab/user": "~4.0.0-alpha.1",
+    "@jupyterlab/user-extension": "~4.0.0-alpha.1",
     "@jupyterlab/vdom": "~4.0.0-alpha.1",
     "@jupyterlab/vdom-extension": "~4.0.0-alpha.1",
     "@jupyterlab/vega5-extension": "~4.0.0-alpha.1",
@@ -166,6 +168,7 @@
     "@jupyterlab/tooltip-extension": "~4.0.0-alpha.1",
     "@jupyterlab/translation-extension": "~4.0.0-alpha.1",
     "@jupyterlab/ui-components-extension": "~4.0.0-alpha.1",
+    "@jupyterlab/user-extension": "~4.0.0-alpha.1",
     "@jupyterlab/vdom-extension": "~4.0.0-alpha.1",
     "@jupyterlab/vega5-extension": "~4.0.0-alpha.1"
   },
@@ -243,6 +246,7 @@
       "@jupyterlab/tooltip-extension": "",
       "@jupyterlab/translation-extension": "",
       "@jupyterlab/ui-components-extension": "",
+      "@jupyterlab/user-extension": "",
       "@jupyterlab/vdom-extension": ""
     },
     "mimeExtensions": {
@@ -289,6 +293,7 @@
       "@jupyterlab/tooltip",
       "@jupyterlab/translation",
       "@jupyterlab/ui-components",
+      "@jupyterlab/user",
       "@lumino/algorithm",
       "@lumino/application",
       "@lumino/commands",
