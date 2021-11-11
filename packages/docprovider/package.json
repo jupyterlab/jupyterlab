@@ -40,7 +40,6 @@
   },
   "dependencies": {
     "@jupyterlab/shared-models": "^4.0.0-alpha.1",
-    "@jupyterlab/statedb": "^4.0.0-alpha.1",
     "@jupyterlab/user": "^4.0.0-alpha.1",
     "@lumino/coreutils": "^1.11.1",
     "lib0": "^0.2.42",

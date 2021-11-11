@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/user",
-  "version": "3.3.0-alpha.10",
+  "version": "3.3.0-alpha.15",
   "description": "JupyterLab - User Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {

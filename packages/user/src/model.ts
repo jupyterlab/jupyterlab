@@ -33,10 +33,12 @@ export class User implements IUser {
    */
   constructor(state: IStateDB) {
     this._state = state;
-    this._fetchUser().then(() => {
-      this._isReady = true;
-      this._ready.emit(true);
-    });
+    this._fetchUser()
+      .then(() => {
+        this._isReady = true;
+        this._ready.emit(true);
+      })
+      .catch(e => console.error(e));
   }
 
   /**
@@ -131,7 +133,7 @@ export class User implements IUser {
     this._anonymous = user.anonymous;
     this._role = user.role;
     this._cursor = user.cursor;
-    this._save();
+    this._save().catch(e => console.error(e));
   }
 
   /**

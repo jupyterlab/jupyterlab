@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/user-extension",
-  "version": "3.3.0-alpha.10",
+  "version": "3.3.0-alpha.15",
   "description": "JupyterLab - User Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -43,7 +43,7 @@
   "dependencies": {
     "@jupyterlab/application": "^3.3.0-alpha.15",
     "@jupyterlab/statedb": "^3.3.0-alpha.15",
-    "@jupyterlab/user": "^3.3.0-alpha.10",
+    "@jupyterlab/user": "^3.3.0-alpha.15",
     "@lumino/widgets": "^1.28.0"
   },
   "devDependencies": {
