@@ -4,6 +4,7 @@
 import { IStateDB } from '@jupyterlab/statedb';
 import { ISignal, Signal } from '@lumino/signaling';
 import { JSONObject, ReadonlyPartialJSONObject, UUID } from '@lumino/coreutils';
+import * as env from 'lib0/environment';
 
 import { IUser, USER } from './tokens';
 import { getAnonymousUserName, getRandomColor } from './utils';
@@ -160,23 +161,32 @@ export class User implements IUser {
    * the user as anonymous if doesn't exists.
    */
   private async _fetchUser(): Promise<void> {
+    // Read username and color from URL
+    let name = env.getParam('--username', '');
+    let color = env.getParam('--usercolor', '');
+
     const data = (await this._state.fetch(USER)) as JSONObject;
     if (data !== undefined) {
       this._id = data.id as string;
 
-      this._name = data.name as string;
-      this._username = data.username as string;
-      this._color = data.color as string;
+      this._name = name !== '' ? name : (data.name as string);
+      this._username = name !== '' ? name : (data.username as string);
+      this._color = color !== '' ? '#' + color : (data.color as string);
       this._anonymous = data.anonymous as boolean;
       this._role = data.role as IUser.ROLE;
       this._cursor = (data.cursor as IUser.Cursor) || undefined;
+
+      if (name !== '' || color !== '') {
+        return this._save();
+      }
+
       return Promise.resolve();
     } else {
       // Get random values
       this._id = UUID.uuid4();
-      this._name = getAnonymousUserName();
+      this._name = name !== '' ? name : getAnonymousUserName();
       this._username = this._name;
-      this._color = '#' + getRandomColor().slice(1);
+      this._color = '#' + (color !== '' ? color : getRandomColor().slice(1));
       this._anonymous = true;
       this._role = IUser.ROLE.ADMIN;
       this._cursor = undefined;

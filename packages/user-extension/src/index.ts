@@ -28,7 +28,6 @@ const userPlugin: JupyterFrontEndPlugin<User> = {
   requires: [IStateDB],
   provides: ICurrentUser,
   activate: (app: JupyterFrontEnd, state: IStateDB): User => {
-    console.debug('User extension');
     return new User(state);
   }
 };
