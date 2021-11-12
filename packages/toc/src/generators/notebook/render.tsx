@@ -9,6 +9,15 @@ import { INotebookHeading } from '../../utils/headings';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { CodeComponent } from './codemirror';
 import { OptionsManager } from './options_manager';
+import { ElementExt } from '@lumino/domutils';
+import { TableOfContents } from '../..';
+
+/**
+ * Class name of the toc item list.
+ *
+ * @private
+ */
+const TOC_TREE_CLASS = 'jp-TableOfContents-content';
 
 /**
  * Renders a notebook table of contents item.
@@ -23,6 +32,7 @@ import { OptionsManager } from './options_manager';
 function render(
   options: OptionsManager,
   tracker: INotebookTracker,
+  widget: TableOfContents,
   item: INotebookHeading,
   toc: INotebookHeading[] = []
 ) {
@@ -83,21 +93,18 @@ function render(
 
         // Render the heading item:
         jsx = (
-          <div
-            className={
-              'toc-entry-holder ' +
-              fontSizeClass +
-              (tracker.activeCell === item.cellRef
-                ? ' toc-active-cell'
-                : previousHeader(tracker, item, toc)
-                ? ' toc-active-cell'
-                : '')
+          <NotebookHeading
+            isActive={
+              tracker.activeCell === item.cellRef ||
+              previousHeader(tracker, item, toc)
             }
+            className={'toc-entry-holder ' + fontSizeClass}
+            area={widget.node.querySelector(`.${TOC_TREE_CLASS}`) as Element}
           >
             {button}
             {jsx}
             {ellipseButton}
-          </div>
+          </NotebookHeading>
         );
       }
       return jsx;
@@ -141,21 +148,18 @@ function render(
           <div />
         );
         jsx = (
-          <div
-            className={
-              'toc-entry-holder ' +
-              fontSizeClass +
-              (tracker.activeCell === item.cellRef
-                ? ' toc-active-cell'
-                : previousHeader(tracker, item, toc)
-                ? ' toc-active-cell'
-                : '')
+          <NotebookHeading
+            isActive={
+              tracker.activeCell === item.cellRef ||
+              previousHeader(tracker, item, toc)
             }
+            className={'toc-entry-holder ' + fontSizeClass}
+            area={widget.node.querySelector(`.${TOC_TREE_CLASS}`) as Element}
           >
             {button}
             {jsx}
             {ellipseButton}
-          </div>
+          </NotebookHeading>
         );
       }
       return jsx;
@@ -254,6 +258,37 @@ function previousHeader(
     }
   }
   return false;
+}
+
+type NotebookHeadingProps = React.PropsWithChildren<{
+  isActive: boolean;
+  className: string;
+  area: Element;
+}>;
+
+/** React component for a single toc heading
+ *
+ * @private
+ */
+function NotebookHeading(props: NotebookHeadingProps): JSX.Element {
+  const itemRef = React.useRef<HTMLDivElement>(null);
+  const isActive = props.isActive;
+  React.useEffect(() => {
+    if (isActive && itemRef.current) {
+      ElementExt.scrollIntoViewIfNeeded(
+        props.area,
+        itemRef.current.parentElement as Element
+      );
+    }
+  }, [isActive]);
+  return (
+    <div
+      ref={itemRef}
+      className={[props.className, isActive ? 'toc-active-cell' : ''].join(' ')}
+    >
+      {props.children}
+    </div>
+  );
 }
 
 /**
