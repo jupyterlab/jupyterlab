@@ -18,7 +18,41 @@ The first step is to generate a new changelog entry for the upcoming release.
 
 We use the "Draft Changelog" workflow as documented here: https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#draft-changelog
 
-The workflow takes a couple of input parameters, for example:
+The workflow takes a couple of input parameters. Here is an overview with example values:
+
+| Input        | Description                                             | Example Value           |
+| ------------ | ------------------------------------------------------- | ----------------------- |
+| Target       | The owner/repo GitHub target                            | `jupyterlab/jupyterlab` |
+| Branch       | The branch to target                                    | `master`                |
+| Version Spec | New Version Spec                                        | `next`                  |
+| Since        | Use PRs since activity since this date or git reference | `v4.0.0a15`             |
+
+The version spec follows the specification documented below in the [Bump Version](#bump-version) section.
+
+We can use `next` when making a `patch` release or a `build` pre-release.
+
+Click on "Run workflow", then wait for:
+
+1. the PR to be created on the repo. Example: https://github.com/jupyterlab/jupyterlab/pull/11422
+2. Tests to pass
+3. Merge the changelog PR
+
+### Full Release
+
+#### PyPI and npm tokens
+
+Before running the "Full Release" workflow, make sure you have been added to:
+
+- the `jupyterlab` project on PyPI: https://pypi.org/project/jupyterlab/
+- the `@jupyterlab` organization on npm: https://www.npmjs.com/settings/jupyterlab/packages
+
+Then create the PyPI and npm tokens. Check out the links in the [Jupyter Releaser Setup Documentation](https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#set-up) for more information.
+
+#### Running the workflow
+
+On the `jupyter_releaser` fork, select the "Full Release" workflow.
+
+Fill in the information as mentioned in the body of the changelog PR, for example:
 
 | Input        | Value                 |
 | ------------ | --------------------- |
@@ -27,31 +61,7 @@ The workflow takes a couple of input parameters, for example:
 | Version Spec | next                  |
 | Since        | v4.0.0a15             |
 
-The version spec follows the specification documented below in the [Bump Version](#bump-version) section.
-
-We can use `next` when making a `patch` release or a `build` pre-release.
-
-Here is an example screenshot of what it should look like:
-
-![draft-changelog-example](https://user-images.githubusercontent.com/591645/141277239-571c2e6a-e8d5-4af9-aee4-dd52a7dae8ba.png)
-
-We then wait for:
-
-1. the PR to be created on the repo. Example: https://github.com/jupyterlab/jupyterlab/pull/11422
-2. Tests to pass
-3. Merge the changelog PR
-
-### Full Release
-
-Using the information in the body of the changelog PR, for example:
-
-![changelog-pr](https://user-images.githubusercontent.com/591645/141277401-50b9ed8e-81ed-4256-88f6-4228aa228a3f.png)
-
-We use the Full Release workflow:
-
-![full-release-example](https://user-images.githubusercontent.com/591645/141277586-ba8672ea-7102-4803-a1a5-57c69bb2df44.png)
-
-The workflow:
+The "Full Release" workflow:
 
 - builds and uploads the `jupyterlab` Python package to PyPI
 - builds the `@jupyterlab/*` packages and uploads them to `npm`
