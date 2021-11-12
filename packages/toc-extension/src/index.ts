@@ -53,12 +53,12 @@ namespace CommandIDs {
  * @param app - Jupyter application
  * @param docmanager - document manager
  * @param editorTracker - editor tracker
- * @param labShell - Jupyter lab shell
- * @param restorer - application layout restorer
  * @param markdownViewerTracker - Markdown viewer tracker
  * @param notebookTracker - notebook tracker
  * @param rendermime - rendered MIME registry
  * @param translator - translator
+ * @param restorer - application layout restorer
+ * @param labShell - Jupyter lab shell
  * @param settingRegistry - setting registry
  * @returns table of contents registry
  */
@@ -66,11 +66,11 @@ async function activateTOC(
   app: JupyterFrontEnd,
   docmanager: IDocumentManager,
   editorTracker: IEditorTracker,
-  restorer: ILayoutRestorer,
   markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
+  restorer?: ILayoutRestorer,
   labShell?: ILabShell,
   settingRegistry?: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
@@ -136,8 +136,10 @@ async function activateTOC(
     }
   });
 
-  // Add the ToC widget to the application restorer:
-  restorer.add(toc, '@jupyterlab/toc:plugin');
+  if (restorer) {
+    // Add the ToC widget to the application restorer:
+    restorer.add(toc, '@jupyterlab/toc:plugin');
+  }
 
   // Attempt to load plugin settings:
   let settings: ISettingRegistry.ISettings | undefined;
@@ -231,13 +233,12 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   requires: [
     IDocumentManager,
     IEditorTracker,
-    ILayoutRestorer,
     IMarkdownViewerTracker,
     INotebookTracker,
     IRenderMimeRegistry,
     ITranslator
   ],
-  optional: [ILabShell, ISettingRegistry],
+  optional: [ILayoutRestorer, ILabShell, ISettingRegistry],
   activate: activateTOC
 };
 
