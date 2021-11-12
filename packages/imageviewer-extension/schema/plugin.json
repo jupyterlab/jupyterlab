@@ -4,49 +4,41 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "imageviewer:flip-horizontal",
-      "args": {},
       "keys": ["H"],
       "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:flip-vertical",
-      "args": {},
       "keys": ["V"],
       "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:invert-colors",
-      "args": {},
       "keys": ["I"],
       "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:reset-image",
-      "args": {},
       "keys": ["0"],
       "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:rotate-clockwise",
-      "args": {},
       "keys": ["]"],
       "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:rotate-counterclockwise",
-      "args": {},
       "keys": ["["],
       "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:zoom-in",
-      "args": {},
       "keys": ["="],
       "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:zoom-out",
-      "args": {},
       "keys": ["-"],
       "selector": ".jp-ImageViewer"
     }

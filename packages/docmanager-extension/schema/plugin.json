@@ -11,95 +11,59 @@
         "items": [
           {
             "command": "docmanager:clone",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 2
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 4
           },
           {
             "command": "docmanager:save",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 4
           },
           {
             "command": "docmanager:save-as",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 4
           },
           {
             "command": "docmanager:save-all",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 4
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "command": "docmanager:reload",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "command": "docmanager:restore-checkpoint",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "command": "docmanager:rename",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 5
           }
         ]
       },
       {
         "id": "jp-mainmenu-settings",
-        "disabled": false,
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 4
           },
           {
             "command": "docmanager:toggle-autosave",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 4
           },
           {
             "command": "docmanager:toggle-name-file-on-save",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 4
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 4
           }
         ]
@@ -108,34 +72,22 @@
     "context": [
       {
         "command": "docmanager:rename",
-        "type": "command",
-        "args": {},
-        "disabled": false,
         "selector": "[data-type=\"document-title\"]",
         "rank": 20
       },
       {
         "command": "docmanager:delete",
-        "type": "command",
         "selector": "[data-type=\"document-title\"]",
-        "args": {},
-        "disabled": false,
         "rank": 21
       },
       {
         "command": "docmanager:clone",
-        "type": "command",
         "selector": "[data-type=\"document-title\"]",
-        "args": {},
-        "disabled": false,
         "rank": 22
       },
       {
         "command": "docmanager:show-in-file-browser",
-        "type": "command",
         "selector": "[data-type=\"document-title\"]",
-        "args": {},
-        "disabled": false,
         "rank": 23
       }
     ]
@@ -143,13 +95,11 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "docmanager:save",
-      "args": {},
       "keys": ["Accel S"],
       "selector": "body"
     },
     {
       "command": "docmanager:save-as",
-      "args": {},
       "keys": ["Accel Shift S"],
       "selector": "body"
     }

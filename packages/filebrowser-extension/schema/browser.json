@@ -5,71 +5,47 @@
     "main": [
       {
         "id": "jp-mainmenu-file",
-        "disabled": false,
         "items": [
           {
             "command": "filebrowser:create-main-launcher",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 1
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 1
           },
           {
             "command": "filebrowser:open-path",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 1
           }
         ]
       },
       {
         "id": "jp-mainmenu-view",
-        "disabled": false,
         "items": [
           {
             "command": "filebrowser:toggle-main",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 1
           },
           {
             "command": "filebrowser:toggle-hidden-files",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 9.95
           }
         ]
       },
       {
         "id": "jp-mainmenu-settings",
-        "disabled": false,
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "command": "filebrowser:toggle-navigate-to-current-directory",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 5
           }
         ]
@@ -79,140 +55,91 @@
       {
         "type": "separator",
         "selector": ".jp-DirListing-content",
-        "args": {},
-        "disabled": false,
         "rank": 0
       },
       {
         "command": "filebrowser:open",
-        "type": "command",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "args": {},
-        "disabled": false,
         "rank": 1
       },
       {
         "type": "separator",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "args": {},
-        "disabled": false,
         "rank": 4
       },
       {
         "command": "filebrowser:rename",
-        "type": "command",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "args": {},
-        "disabled": false,
         "rank": 5
       },
       {
         "command": "filebrowser:delete",
-        "type": "command",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "args": {},
-        "disabled": false,
         "rank": 6
       },
       {
         "command": "filebrowser:cut",
-        "type": "command",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "args": {},
-        "disabled": false,
         "rank": 7
       },
       {
         "command": "filebrowser:copy",
-        "type": "command",
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
-        "args": {},
-        "disabled": false,
         "rank": 8
       },
       {
         "command": "filebrowser:paste",
-        "type": "command",
         "selector": ".jp-DirListing-content",
-        "args": {},
-        "disabled": false,
         "rank": 8.5
       },
       {
         "command": "filebrowser:duplicate",
-        "type": "command",
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
-        "args": {},
-        "disabled": false,
         "rank": 9
       },
       {
         "type": "separator",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "args": {},
-        "disabled": false,
         "rank": 10
       },
       {
         "command": "filebrowser:shutdown",
-        "type": "command",
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
-        "args": {},
-        "disabled": false,
         "rank": 11
       },
       {
         "type": "separator",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "args": {},
-        "disabled": false,
         "rank": 12
       },
       {
         "command": "filebrowser:copy-path",
-        "type": "command",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "args": {},
-        "disabled": false,
         "rank": 14
       },
       {
         "command": "filebrowser:toggle-last-modified",
-        "type": "command",
-        "args": {},
-        "disabled": false,
         "selector": ".jp-DirListing-header",
         "rank": 14
       },
       {
         "command": "filebrowser:share-main",
-        "type": "command",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "args": {},
-        "disabled": false,
         "rank": 15
       },
       {
         "type": "separator",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "args": {},
-        "disabled": false,
         "rank": 50
       },
       {
         "command": "filebrowser:create-new-file",
-        "type": "command",
         "selector": ".jp-DirListing-content",
-        "args": {},
-        "disabled": false,
         "rank": 51
       },
       {
         "command": "filebrowser:create-new-directory",
-        "type": "command",
         "selector": ".jp-DirListing-content",
-        "args": {},
-        "disabled": false,
         "rank": 55
       }
     ]
@@ -222,55 +149,46 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "filebrowser:create-main-launcher",
-      "args": {},
       "keys": ["Accel Shift L"],
       "selector": "body"
     },
     {
       "command": "filebrowser:toggle-main",
-      "args": {},
       "keys": ["Accel Shift F"],
       "selector": "body"
     },
     {
       "command": "filebrowser:go-up",
-      "args": {},
       "keys": ["Backspace"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:delete",
-      "args": {},
       "keys": ["Delete"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:cut",
-      "args": {},
       "keys": ["Accel X"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:copy",
-      "args": {},
       "keys": ["Accel C"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:paste",
-      "args": {},
       "keys": ["Accel V"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:rename",
-      "args": {},
       "keys": ["F2"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:duplicate",
-      "args": {},
       "keys": ["Accel D"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     }

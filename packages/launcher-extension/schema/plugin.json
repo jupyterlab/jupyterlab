@@ -4,7 +4,6 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "launcher:create",
-      "args": {},
       "keys": [""],
       "selector": "body"
     }

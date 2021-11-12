@@ -5,19 +5,17 @@
     "main": [
       {
         "id": "jp-mainmenu-settings",
-        "disabled": false,
-        "mnemonic": -1,
         "items": [
           {
             "type": "submenu",
-            "args": {},
-            "disabled": false,
             "submenu": {
               "id": "jp-mainmenu-settings-apputilstheme",
               "label": "Theme",
               "items": [
                 { "type": "separator" },
-                { "command": "apputils:theme-scrollbars" },
+                {
+                  "command": "apputils:theme-scrollbars"
+                },
                 { "type": "separator" },
                 {
                   "command": "apputils:incr-font-size",

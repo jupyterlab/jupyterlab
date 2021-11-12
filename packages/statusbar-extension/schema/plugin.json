@@ -5,12 +5,9 @@
     "main": [
       {
         "id": "jp-mainmenu-view",
-        "disabled": false,
         "items": [
           {
             "type": "submenu",
-            "args": {},
-            "disabled": false,
             "submenu": {
               "id": "jp-mainmenu-view-appearance",
               "items": [

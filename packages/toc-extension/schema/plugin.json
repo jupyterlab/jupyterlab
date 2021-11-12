@@ -7,13 +7,9 @@
     "main": [
       {
         "id": "jp-mainmenu-view",
-        "disabled": false,
         "items": [
           {
             "command": "toc:show-panel",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 4
           }
         ]
@@ -22,9 +18,6 @@
     "context": [
       {
         "command": "toc:run-cells",
-        "type": "command",
-        "args": {},
-        "disabled": false,
         "selector": ".jp-tocItem"
       }
     ]
@@ -32,7 +25,6 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "toc:show-panel",
-      "args": {},
       "keys": ["Accel Shift K"],
       "selector": "body"
     }

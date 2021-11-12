@@ -5,39 +5,24 @@
     "main": [
       {
         "id": "jp-mainmenu-view",
-        "disabled": false,
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 9.9
           },
           {
             "command": "logconsole:open",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 9.9
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 9.9
           }
         ]
       }
     ],
     "context": [
-      {
-        "command": "logconsole:open",
-        "type": "command",
-        "disabled": false,
-        "args": {},
-        "selector": ".jp-Notebook",
-        "rank": 60
-      }
+      { "command": "logconsole:open", "selector": ".jp-Notebook", "rank": 60 }
     ]
   },
   "title": "Log Console",

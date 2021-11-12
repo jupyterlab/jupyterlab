@@ -5,18 +5,13 @@
     "main": [
       {
         "id": "jp-mainmenu-view",
-        "disabled": false,
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 40
           },
           {
             "type": "submenu",
-            "args": {},
-            "disabled": false,
             "submenu": {
               "id": "jp-mainmenu-view-codemirror-theme",
               "label": "Text Editor Syntax Highlighting"
@@ -25,20 +20,15 @@
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 40
           }
         ]
       },
       {
         "id": "jp-mainmenu-settings",
-        "disabled": false,
         "items": [
           {
             "type": "submenu",
-            "args": {},
-            "disabled": false,
             "submenu": {
               "id": "jp-mainmenu-view-codemirror-keymap",
               "label": "Text Editor Key Map",
@@ -73,8 +63,6 @@
           },
           {
             "type": "submenu",
-            "args": {},
-            "disabled": false,
             "submenu": {
               "id": "jp-mainmenu-view-codemirror-theme",
               "label": "Text Editor Theme",
@@ -175,8 +163,6 @@
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 39
           }
         ]
@@ -205,14 +191,7 @@
       "default": true
     },
     "styleActiveLine": {
-      "oneOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "object"
-        }
-      ],
+      "type": ["boolean", "object"],
       "title": "Style Active Line",
       "description": "Value is boolean, or { nonEmpty: boolean }",
       "default": false
@@ -224,7 +203,7 @@
       "default": true
     },
     "selectionPointer": {
-      "oneOf": [{ "type": "boolean" }, { "type": "string" }],
+      "type": ["boolean", "string"],
       "title": "Selection Pointer",
       "description": "Value is boolean or string, e.g. 'pointer'",
       "default": false

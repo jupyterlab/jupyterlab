@@ -5,12 +5,9 @@
     "main": [
       {
         "id": "jp-mainmenu-file",
-        "disabled": false,
         "items": [
           {
             "type": "submenu",
-            "args": {},
-            "disabled": false,
             "submenu": {
               "id": "jp-mainmenu-file-new",
               "items": [
@@ -28,156 +25,94 @@
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 4
           },
           {
             "command": "notebook:undo-cell-action",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 4
           },
           {
             "command": "notebook:redo-cell-action",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 4
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "command": "notebook:cut-cell",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "command": "notebook:copy-cell",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "command": "notebook:paste-cell-below",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "command": "notebook:paste-cell-above",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "command": "notebook:paste-and-replace-cell",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 5
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 6
           },
           {
             "command": "notebook:delete-cell",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 6
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 7
           },
           {
             "command": "notebook:select-all",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 7
           },
           {
             "command": "notebook:deselect-all",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 7
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 8
           },
           {
             "command": "notebook:move-cell-up",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 8
           },
           {
             "command": "notebook:move-cell-down",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 8
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 9
           },
           {
             "command": "notebook:split-cell-at-cursor",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 9
           },
           {
             "command": "notebook:merge-cells",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 9
           },
           {
             "command": "notebook:merge-cell-above",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 9
           },
           {
             "command": "notebook:merge-cell-below",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 9
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 9
           }
         ]
@@ -187,89 +122,54 @@
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "command": "notebook:hide-cell-code",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "command": "notebook:hide-cell-outputs",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "command": "notebook:hide-all-cell-code",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "command": "notebook:hide-all-cell-outputs",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "command": "notebook:show-cell-code",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 11
           },
           {
             "command": "notebook:show-cell-outputs",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 11
           },
           {
             "command": "notebook:show-all-cell-code",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 11
           },
           {
             "command": "notebook:show-all-cell-outputs",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 11
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 11
           },
           {
             "command": "notebook:toggle-render-side-by-side",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 12
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 12
           }
         ]
@@ -279,68 +179,42 @@
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "command": "notebook:run-cell-and-insert-below",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "command": "notebook:run-cell",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "command": "notebook:run-in-console",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 11
           },
           {
             "command": "notebook:run-all-above",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 11
           },
           {
             "command": "notebook:run-all-below",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 11
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 12
           },
           {
             "command": "notebook:render-all-markdown",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 12
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 12
           }
         ]
@@ -350,9 +224,6 @@
         "items": [
           {
             "command": "notebook:restart-and-run-to-selected",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 1
           }
         ]
@@ -362,200 +233,131 @@
       {
         "type": "separator",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 0
       },
       {
         "command": "notebook:cut-cell",
-        "type": "command",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 1
       },
       {
         "command": "notebook:copy-cell",
-        "type": "command",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 2
       },
       {
         "command": "notebook:paste-cell-below",
-        "type": "command",
-        "args": {},
-        "disabled": false,
         "selector": ".jp-Notebook .jp-Cell",
         "rank": 3
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 4
       },
       {
         "command": "notebook:delete-cell",
-        "type": "command",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 5
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 6
       },
       {
         "command": "notebook:split-cell-at-cursor",
-        "type": "command",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 7
       },
       {
         "command": "notebook:merge-cells",
-        "type": "command",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 8
       },
       {
         "command": "notebook:merge-cell-above",
-        "type": "command",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 8
       },
       {
         "command": "notebook:merge-cell-below",
-        "type": "command",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 8
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook .jp-Cell",
-        "args": {},
-        "disabled": false,
         "rank": 9
       },
       {
         "command": "notebook:create-output-view",
-        "type": "command",
         "selector": ".jp-Notebook .jp-CodeCell",
-        "args": {},
-        "disabled": false,
         "rank": 10
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook .jp-CodeCell",
-        "args": {},
-        "disabled": false,
         "rank": 11
       },
       {
         "command": "notebook:clear-cell-output",
-        "type": "command",
         "selector": ".jp-Notebook .jp-CodeCell",
-        "args": {},
-        "disabled": false,
         "rank": 12
       },
       {
         "command": "notebook:clear-all-cell-outputs",
-        "type": "command",
         "selector": ".jp-Notebook",
-        "args": {},
-        "disabled": false,
         "rank": 13
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook",
-        "args": {},
-        "disabled": false,
         "rank": 20
       },
       {
         "command": "notebook:enable-output-scrolling",
-        "type": "command",
         "selector": ".jp-Notebook",
-        "args": {},
-        "disabled": false,
         "rank": 21
       },
       {
         "command": "notebook:disable-output-scrolling",
-        "type": "command",
         "selector": ".jp-Notebook",
-        "args": {},
-        "disabled": false,
         "rank": 22
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook",
-        "args": {},
-        "disabled": false,
         "rank": 30
       },
       {
         "command": "notebook:undo-cell-action",
-        "type": "command",
         "selector": ".jp-Notebook",
-        "args": {},
-        "disabled": false,
         "rank": 31
       },
       {
         "command": "notebook:redo-cell-action",
-        "type": "command",
         "selector": ".jp-Notebook",
-        "args": {},
-        "disabled": false,
         "rank": 32
       },
       {
         "command": "notebook:restart-kernel",
-        "type": "command",
         "selector": ".jp-Notebook",
-        "args": {},
-        "disabled": false,
         "rank": 33
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook",
-        "args": {},
-        "disabled": false,
         "rank": 40
       },
       {
         "command": "notebook:create-console",
-        "type": "command",
         "selector": ".jp-Notebook",
-        "args": {},
-        "disabled": false,
         "rank": 41
       },
       {
         "command": "notebook:create-new",
-        "type": "command",
         "selector": ".jp-DirListing-content",
-        "disabled": false,
         "rank": 52,
         "args": {
           "isContextMenu": true
@@ -566,277 +368,231 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "notebook:change-cell-to-code",
-      "args": {},
       "keys": ["Y"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-1",
-      "args": {},
       "keys": ["1"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-2",
-      "args": {},
       "keys": ["2"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-3",
-      "args": {},
       "keys": ["3"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-4",
-      "args": {},
       "keys": ["4"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-5",
-      "args": {},
       "keys": ["5"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-6",
-      "args": {},
       "keys": ["6"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-markdown",
-      "args": {},
       "keys": ["M"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-raw",
-      "args": {},
       "keys": ["R"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:copy-cell",
-      "args": {},
       "keys": ["C"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:cut-cell",
-      "args": {},
       "keys": ["X"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:delete-cell",
-      "args": {},
       "keys": ["D", "D"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:enter-command-mode",
-      "args": {},
       "keys": ["Escape"],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:enter-command-mode",
-      "args": {},
       "keys": ["Ctrl M"],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:enter-edit-mode",
-      "args": {},
       "keys": ["Enter"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:extend-marked-cells-above",
-      "args": {},
       "keys": ["Shift ArrowUp"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:extend-marked-cells-above",
-      "args": {},
       "keys": ["Shift K"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:extend-marked-cells-top",
-      "args": {},
       "keys": ["Shift Home"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:extend-marked-cells-below",
-      "args": {},
       "keys": ["Shift ArrowDown"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:extend-marked-cells-bottom",
-      "args": {},
       "keys": ["Shift End"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:extend-marked-cells-below",
-      "args": {},
       "keys": ["Shift J"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:insert-cell-above",
-      "args": {},
       "keys": ["A"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:insert-cell-below",
-      "args": {},
       "keys": ["B"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:merge-cells",
-      "args": {},
       "keys": ["Shift M"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:merge-cell-above",
-      "args": {},
       "keys": ["Ctrl Backspace"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:merge-cell-below",
-      "args": {},
       "keys": ["Ctrl Shift M"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:move-cursor-down",
-      "args": {},
       "keys": ["ArrowDown"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:move-cursor-down",
-      "args": {},
       "keys": ["J"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:move-cursor-up",
-      "args": {},
       "keys": ["ArrowUp"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:move-cursor-up",
-      "args": {},
       "keys": ["K"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:paste-cell-below",
-      "args": {},
       "keys": ["V"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:redo-cell-action",
-      "args": {},
       "keys": ["Shift Z"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:run-cell",
-      "args": {},
       "keys": ["Ctrl Enter"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:run-cell",
-      "args": {},
       "keys": ["Ctrl Enter"],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:run-cell-and-insert-below",
-      "args": {},
       "keys": ["Alt Enter"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:run-cell-and-insert-below",
-      "args": {},
       "keys": ["Alt Enter"],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:run-in-console",
-      "args": {},
       "keys": [""],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:run-cell-and-select-next",
-      "args": {},
       "keys": ["Shift Enter"],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "viewmenu:line-numbering",
-      "args": {},
       "keys": [""],
       "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {
       "command": "viewmenu:match-brackets",
-      "args": {},
       "keys": [""],
       "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {
       "command": "notebook:select-all",
-      "args": {},
       "keys": ["Accel A"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:split-cell-at-cursor",
-      "args": {},
       "keys": ["Ctrl Shift -"],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:toggle-all-cell-line-numbers",
-      "args": {},
       "keys": ["Shift L"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:toggle-cell-line-numbers",
-      "args": {},
       "keys": ["L"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:undo-cell-action",
-      "args": {},
       "keys": ["Z"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:toggle-render-side-by-side",
-      "args": {},
       "keys": ["Shift R"],
       "selector": ".jp-Notebook:focus"
     }
@@ -937,12 +693,10 @@
       "description": "The configuration for all code cells.",
       "$ref": "#/definitions/editorConfig",
       "properties": {
-        "lineWrap": {
-          "type": "string",
+        "lineWarp": {
           "default": "off"
         },
         "matchBrackets": {
-          "type": "string",
           "default": true
         }
       },
@@ -983,12 +737,10 @@
       "description": "The configuration for all markdown cells.",
       "$ref": "#/definitions/editorConfig",
       "properties": {
-        "lineWrap": {
-          "type": "string",
+        "lineWarp": {
           "default": "on"
         },
         "matchBrackets": {
-          "type": "string",
           "default": false
         }
       },
@@ -1016,12 +768,10 @@
       "description": "The configuration for all raw cells.",
       "$ref": "#/definitions/editorConfig",
       "properties": {
-        "lineWrap": {
-          "type": "string",
+        "lineWarp": {
           "default": "on"
         },
         "matchBrackets": {
-          "type": "string",
           "default": false
         }
       },

@@ -3,18 +3,13 @@
     "main": [
       {
         "id": "jp-mainmenu-file",
-        "disabled": false,
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 10
           },
           {
             "type": "submenu",
-            "args": {},
-            "disabled": false,
             "rank": 10,
             "submenu": {
               "id": "jp-mainmenu-file-notebookexport",
@@ -23,8 +18,6 @@
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 10
           }
         ]

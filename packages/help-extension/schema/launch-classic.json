@@ -3,25 +3,17 @@
     "main": [
       {
         "id": "jp-mainmenu-help",
-        "disabled": false,
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 1
           },
           {
             "command": "help:launch-classic-notebook",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 1
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 1
           }
         ]

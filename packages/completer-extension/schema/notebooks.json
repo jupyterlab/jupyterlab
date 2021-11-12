@@ -4,7 +4,6 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "completer:invoke-notebook",
-      "args": {},
       "keys": ["Tab"],
       "selector": ".jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled"
     }

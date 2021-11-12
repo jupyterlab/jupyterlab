@@ -3,32 +3,21 @@
     "main": [
       {
         "id": "jp-mainmenu-file",
-        "disabled": false,
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 100
           },
           {
             "command": "hub:control-panel",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 100
           },
           {
             "command": "hub:logout",
-            "type": "command",
-            "args": {},
-            "disabled": false,
             "rank": 100
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 100
           }
         ]

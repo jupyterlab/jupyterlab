@@ -6,9 +6,6 @@
     "context": [
       {
         "command": "sidebar:switch",
-        "args": {},
-        "type": "command",
-        "disabled": false,
         "selector": ".jp-SideBar .lm-TabBar-tab",
         "rank": 500
       }

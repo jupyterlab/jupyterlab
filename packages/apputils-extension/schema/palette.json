@@ -5,19 +5,13 @@
     "main": [
       {
         "id": "jp-mainmenu-view",
-        "disabled": false,
         "items": [
           {
             "command": "apputils:activate-command-palette",
-            "args": {},
-            "disabled": false,
-            "type": "command",
             "rank": 0
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 0
           }
         ]
@@ -27,7 +21,6 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "apputils:activate-command-palette",
-      "args": {},
       "keys": ["Accel Shift C"],
       "selector": "body"
     }

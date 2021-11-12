@@ -2,15 +2,7 @@
   "title": "CSV Viewer",
   "description": "CSV Viewer settings.",
   "jupyter.lab.toolbars": {
-    "CSVTable": [
-      {
-        "name": "delimiter",
-        "args": {},
-        "rank": 10,
-        "disabled": false,
-        "command": ""
-      }
-    ]
+    "CSVTable": [{ "name": "delimiter", "rank": 10 }]
   },
   "jupyter.lab.transform": true,
   "properties": {

@@ -4,13 +4,11 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "tooltip:dismiss",
-      "args": {},
       "keys": ["Escape"],
       "selector": "body.jp-mod-tooltip .jp-CodeConsole-promptCell"
     },
     {
       "command": "tooltip:launch-console",
-      "args": {},
       "keys": ["Shift Tab"],
       "selector": ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
     }

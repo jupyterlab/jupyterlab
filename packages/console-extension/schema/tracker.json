@@ -7,12 +7,9 @@
     "main": [
       {
         "id": "jp-mainmenu-file",
-        "disabled": false,
         "items": [
           {
             "type": "submenu",
-            "args": {},
-            "disabled": false,
             "submenu": {
               "id": "jp-mainmenu-file-new",
               "items": [
@@ -27,18 +24,13 @@
       },
       {
         "id": "jp-mainmenu-settings",
-        "disabled": false,
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 9
           },
           {
             "type": "submenu",
-            "args": {},
-            "disabled": false,
             "submenu": {
               "id": "jp-mainmenu-settings-consoleexecute",
               "label": "Console Run Keystroke",
@@ -61,8 +53,6 @@
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 9
           }
         ]
@@ -71,15 +61,11 @@
     "context": [
       {
         "command": "console:clear",
-        "args": {},
-        "disabled": false,
         "selector": ".jp-CodeConsole-content",
         "rank": 10
       },
       {
         "command": "console:restart-kernel",
-        "args": {},
-        "disabled": false,
         "selector": ".jp-CodeConsole",
         "rank": 30
       }
@@ -88,31 +74,26 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "console:linebreak",
-      "args": {},
       "keys": ["Enter"],
       "selector": ".jp-CodeConsole[data-jp-interaction-mode='notebook'] .jp-CodeConsole-promptCell"
     },
     {
       "command": "console:run-forced",
-      "args": {},
       "keys": ["Shift Enter"],
       "selector": ".jp-CodeConsole[data-jp-interaction-mode='notebook'] .jp-CodeConsole-promptCell"
     },
     {
       "command": "console:linebreak",
-      "args": {},
       "keys": ["Accel Enter"],
       "selector": ".jp-CodeConsole[data-jp-interaction-mode='terminal'] .jp-CodeConsole-promptCell"
     },
     {
       "command": "console:run-forced",
-      "args": {},
       "keys": ["Shift Enter"],
       "selector": ".jp-CodeConsole[data-jp-interaction-mode='terminal'] .jp-CodeConsole-promptCell"
     },
     {
       "command": "console:run-unforced",
-      "args": {},
       "keys": ["Enter"],
       "selector": ".jp-CodeConsole[data-jp-interaction-mode='terminal'] .jp-CodeConsole-promptCell"
     }

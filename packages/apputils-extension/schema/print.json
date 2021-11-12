@@ -5,19 +5,13 @@
     "main": [
       {
         "id": "jp-mainmenu-file",
-        "disabled": false,
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 98
           },
           {
             "command": "apputils:print",
-            "args": {},
-            "type": "command",
-            "disabled": false,
             "rank": 98
           }
         ]
@@ -27,7 +21,6 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "apputils:print",
-      "args": {},
       "keys": ["Accel P"],
       "selector": "body"
     }

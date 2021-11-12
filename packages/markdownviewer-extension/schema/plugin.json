@@ -7,9 +7,6 @@
     "context": [
       {
         "command": "markdownviewer:edit",
-        "type": "command",
-        "args": {},
-        "disabled": false,
         "selector": ".jp-RenderedMarkdown"
       }
     ]

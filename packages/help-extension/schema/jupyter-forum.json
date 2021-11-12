@@ -3,25 +3,17 @@
     "main": [
       {
         "id": "jp-mainmenu-help",
-        "disabled": false,
         "items": [
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 2
           },
           {
             "command": "help:jupyter-forum",
-            "args": {},
-            "disabled": false,
-            "type": "command",
             "rank": 2
           },
           {
             "type": "separator",
-            "args": {},
-            "disabled": false,
             "rank": 2
           }
         ]

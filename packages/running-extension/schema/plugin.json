@@ -5,13 +5,9 @@
     "main": [
       {
         "id": "jp-mainmenu-view",
-        "disabled": false,
         "items": [
           {
             "command": "running:show-panel",
-            "args": {},
-            "type": "command",
-            "disabled": false,
             "rank": 3
           }
         ]
@@ -21,7 +17,6 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "running:show-panel",
-      "args": {},
       "keys": ["Accel Shift B"],
       "selector": "body"
     }
