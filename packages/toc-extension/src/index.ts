@@ -193,11 +193,7 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   id: '@jupyterlab/toc:plugin',
   autoStart: true,
   provides: ITableOfContentsRegistry,
-  requires: [
-    IDocumentManager,
-    IRenderMimeRegistry,
-    ITranslator
-  ],
+  requires: [IDocumentManager, IRenderMimeRegistry, ITranslator],
   optional: [
     IEditorTracker,
     ILayoutRestorer,
