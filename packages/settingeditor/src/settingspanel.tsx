@@ -10,7 +10,7 @@ import React from 'react';
 import { SettingsFormEditor } from './SettingsFormEditor';
 import { PluginList } from './pluginlist';
 
-interface ISettingsPanelProps {
+export interface ISettingsPanelProps {
   /**
    * List of Settings objects that provide schema and values
    * of plugins.

@@ -73,24 +73,27 @@ function getExternalForJupyterLab(
  */
 const shortcuts: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:shortcuts',
-  requires: [ISettingRegistry, IFormComponentRegistry, ITranslator],
+  requires: [ISettingRegistry, ITranslator],
+  optional: [IFormComponentRegistry],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
-    editorRegistry: IFormComponentRegistry,
-    translator: ITranslator
+    translator: ITranslator,
+    editorRegistry?: IFormComponentRegistry
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
-    editorRegistry.addRenderer('shortcuts', (props: any) => {
-      return renderShortCut({
-        external: getExternalForJupyterLab(registry, app),
-        ...props
+    if (editorRegistry) {
+      editorRegistry.addRenderer('shortcuts', (props: any) => {
+        return renderShortCut({
+          external: getExternalForJupyterLab(registry, app),
+          ...props
+        });
       });
-    });
+    }
 
     /**
      * Populate the plugin's schema defaults.

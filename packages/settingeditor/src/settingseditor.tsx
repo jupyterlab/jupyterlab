@@ -1,6 +1,6 @@
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IFormComponentRegistry, ReactWidget } from '@jupyterlab/ui-components';
 import { PanelLayout, SplitPanel, Widget } from '@lumino/widgets';
 import React from 'react';
@@ -9,15 +9,14 @@ import { SettingsPanel } from './settingspanel';
 import { Message } from '@lumino/messaging';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-export class SimpleSettingsEditor extends Widget {
-  translator: any;
-  //   private _settings: any[];
-  //   private _settingsPanel: any;
-  private _list: any;
-  private _panel: SplitPanel;
-  constructor(options: IOptions) {
+/**
+ * Form based interface for editing settings.
+ */
+export class SettingsEditor extends Widget {
+  constructor(options: SettingsEditor.IOptions) {
     super();
     const layout = (this.layout = new PanelLayout());
+    this.translator = options.translator || nullTranslator;
     this._panel = new SplitPanel({
       orientation: 'horizontal',
       renderer: SplitPanel.defaultRenderer,
@@ -72,28 +71,34 @@ export class SimpleSettingsEditor extends Widget {
       super.onCloseRequest(msg);
     }
   }
+
+  protected translator: ITranslator;
+  private _list: PluginList;
+  private _panel: SplitPanel;
 }
 
-interface IOptions {
-  editorRegistry: IFormComponentRegistry;
+export namespace SettingsEditor {
+  export interface IOptions {
+    editorRegistry: IFormComponentRegistry;
 
-  /**
-   * The state database key for the editor's state management.
-   */
-  key: string;
+    /**
+     * The state database key for the editor's state management.
+     */
+    key: string;
 
-  /**
-   * The setting registry the editor modifies.
-   */
-  registry: ISettingRegistry;
+    /**
+     * The setting registry the editor modifies.
+     */
+    registry: ISettingRegistry;
 
-  /**
-   * The state database used to store layout.
-   */
-  state: IStateDB;
+    /**
+     * The state database used to store layout.
+     */
+    state: IStateDB;
 
-  /**
-   * The application language translator.
-   */
-  translator?: ITranslator;
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+  }
 }

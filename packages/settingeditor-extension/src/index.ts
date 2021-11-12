@@ -24,8 +24,8 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   IJSONSettingEditorTracker,
   ISettingEditorTracker,
-  SettingEditor,
-  SimpleSettingsEditor
+  JsonSettingEditor,
+  SettingsEditor
 } from '@jupyterlab/settingeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -50,7 +50,7 @@ namespace CommandIDs {
  * The default setting editor extension.
  */
 const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
-  id: '@jupyterlab/settingeditor-extension:simple-plugin',
+  id: '@jupyterlab/settingeditor-extension:form-ui',
   requires: [
     ILayoutRestorer,
     ISettingRegistry,
@@ -79,7 +79,7 @@ function activate(
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const namespace = 'setting-editor';
-  const tracker = new WidgetTracker<MainAreaWidget<SimpleSettingsEditor>>({
+  const tracker = new WidgetTracker<MainAreaWidget<SettingsEditor>>({
     namespace
   });
 
@@ -92,7 +92,7 @@ function activate(
 
   if (palette) {
     palette.addItem({
-      category: trans.__('Simple Settings'),
+      category: trans.__('Settings'),
       command: CommandIDs.open
     });
   }
@@ -106,7 +106,7 @@ function activate(
 
       const key = plugin.id;
 
-      const editor = new SimpleSettingsEditor({
+      const editor = new SettingsEditor({
         editorRegistry,
         key,
         registry,
@@ -122,7 +122,7 @@ function activate(
       void tracker.add(main);
       shell.add(main);
     },
-    label: trans.__('Simple Settings Editor')
+    label: trans.__('Setting Editor')
   });
 
   return tracker;
@@ -167,10 +167,10 @@ function activateJSON(
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
-  const tracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
+  const tracker = new WidgetTracker<MainAreaWidget<JsonSettingEditor>>({
     namespace
   });
-  let editor: SettingEditor;
+  let editor: JsonSettingEditor;
 
   // Handle state restoration.
   void restorer.restore(tracker, {
@@ -189,7 +189,7 @@ function activateJSON(
       const key = plugin.id;
       const when = app.restored;
 
-      editor = new SettingEditor({
+      editor = new JsonSettingEditor({
         commands: {
           registry: commands,
           revert: CommandIDs.revert,
@@ -229,7 +229,7 @@ function activateJSON(
 
       editor.id = namespace;
       editor.title.icon = settingsIcon;
-      editor.title.label = trans.__('Settings');
+      editor.title.label = trans.__('JSON Settings Editor');
 
       const main = new MainAreaWidget({ content: editor });
       void tracker.add(main);
@@ -239,7 +239,7 @@ function activateJSON(
   });
   if (palette) {
     palette.addItem({
-      category: trans.__('Settings'),
+      category: trans.__('JSON Settings Editor'),
       command: CommandIDs.openJSON
     });
   }

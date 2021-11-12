@@ -18,7 +18,7 @@ import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { StackedLayout, Widget } from '@lumino/widgets';
 import { RawEditor } from './raweditor';
-import { SettingEditor } from './jsonsettingeditor';
+import { JsonSettingEditor } from './jsonsettingeditor';
 
 /**
  * The class name added to all plugin editors.
@@ -100,13 +100,13 @@ export class PluginEditor extends Widget {
   /**
    * The plugin editor layout state.
    */
-  get state(): SettingEditor.IPluginLayout {
+  get state(): JsonSettingEditor.IPluginLayout {
     const plugin = this._settings ? this._settings.id : '';
     const { sizes } = this._rawEditor;
 
     return { plugin, sizes };
   }
-  set state(state: SettingEditor.IPluginLayout) {
+  set state(state: JsonSettingEditor.IPluginLayout) {
     if (JSONExt.deepEqual(this.state, state)) {
       return;
     }

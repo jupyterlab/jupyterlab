@@ -32,7 +32,7 @@ const labiconManager: JupyterFrontEndPlugin<ILabIconManager> = {
  * Sets up the component registry to be used by the FormEditor component.
  */
 const registryPlugin: JupyterFrontEndPlugin<IFormComponentRegistry> = {
-  id: '@jupyterlab/settingeditor-extension:registry-plugin',
+  id: '@jupyterlab/settingeditor-extension:form-registry',
   provides: IFormComponentRegistry,
   autoStart: true,
   activate: (app: JupyterFrontEnd): IFormComponentRegistry => {

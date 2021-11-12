@@ -23,7 +23,7 @@ import { SplitPanel } from './splitpanel';
 /**
  * The ratio panes in the setting editor.
  */
-const DEFAULT_LAYOUT: SettingEditor.ILayoutState = {
+const DEFAULT_LAYOUT: JsonSettingEditor.ILayoutState = {
   sizes: [1, 3],
   container: {
     editor: 'raw',
@@ -35,11 +35,11 @@ const DEFAULT_LAYOUT: SettingEditor.ILayoutState = {
 /**
  * An interface for modifying and saving application settings.
  */
-export class SettingEditor extends Widget {
+export class JsonSettingEditor extends Widget {
   /**
    * Create a new setting editor.
    */
-  constructor(options: SettingEditor.IOptions) {
+  constructor(options: JsonSettingEditor.IOptions) {
     super();
     this.translator = options.translator || nullTranslator;
     this.addClass('jp-SettingEditor');
@@ -325,14 +325,16 @@ export class SettingEditor extends Widget {
   private _list: PluginList;
   private _panel: SplitPanel;
   private _saving = false;
-  private _state: SettingEditor.ILayoutState = JSONExt.deepCopy(DEFAULT_LAYOUT);
+  private _state: JsonSettingEditor.ILayoutState = JSONExt.deepCopy(
+    DEFAULT_LAYOUT
+  );
   private _when: Promise<any>;
 }
 
 /**
- * A namespace for `SettingEditor` statics.
+ * A namespace for `JsonSettingEditor` statics.
  */
-export namespace SettingEditor {
+export namespace JsonSettingEditor {
   /**
    * The instantiation options for a setting editor.
    */
@@ -460,8 +462,8 @@ namespace Private {
    */
   export function normalizeState(
     saved: JSONObject | null,
-    current: SettingEditor.ILayoutState
-  ): SettingEditor.ILayoutState {
+    current: JsonSettingEditor.ILayoutState
+  ): JsonSettingEditor.ILayoutState {
     if (!saved) {
       return JSONExt.deepCopy(DEFAULT_LAYOUT);
     }
@@ -471,7 +473,7 @@ namespace Private {
     }
     if (!('container' in saved)) {
       saved.container = JSONExt.deepCopy(DEFAULT_LAYOUT.container);
-      return saved as SettingEditor.ILayoutState;
+      return saved as JsonSettingEditor.ILayoutState;
     }
 
     const container =
@@ -491,7 +493,7 @@ namespace Private {
         : JSONExt.deepCopy(DEFAULT_LAYOUT.container.sizes)
     };
 
-    return saved as SettingEditor.ILayoutState;
+    return saved as JsonSettingEditor.ILayoutState;
   }
 
   /**

@@ -3,8 +3,8 @@
 
 import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-import { SettingEditor } from './jsonsettingeditor';
-import { SimpleSettingsEditor } from './settingseditor';
+import { JsonSettingEditor } from './jsonsettingeditor';
+import { SettingsEditor } from './settingseditor';
 
 /* tslint:disable */
 /**
@@ -26,10 +26,10 @@ export const IJSONSettingEditorTracker = new Token<IJSONSettingEditorTracker>(
  * A class that tracks the setting editor.
  */
 export interface IJSONSettingEditorTracker
-  extends IWidgetTracker<MainAreaWidget<SettingEditor>> {}
+  extends IWidgetTracker<MainAreaWidget<JsonSettingEditor>> {}
 
 /**
  * A class that tracks the setting editor.
  */
 export interface ISettingEditorTracker
-  extends IWidgetTracker<MainAreaWidget<SimpleSettingsEditor>> {}
+  extends IWidgetTracker<MainAreaWidget<SettingsEditor>> {}

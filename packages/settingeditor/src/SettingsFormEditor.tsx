@@ -163,14 +163,14 @@ export const SettingsFormEditor = ({
           <h2> {settings.schema.title} </h2>
           <h3> {settings.schema.description} </h3>
         </div>
-        {isModified ? (
+        {isModified && (
           <button className="jp-RestoreButton" onClick={reset}>
             {' '}
             Restore to Defaults{' '}
           </button>
-        ) : undefined}
+        )}
       </div>
-      {hidden ? undefined : (
+      {!hidden && (
         <Form
           schema={settings.schema as JSONSchema7}
           formData={formData}

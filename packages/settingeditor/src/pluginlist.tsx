@@ -195,7 +195,7 @@ export class PluginList extends ReactWidget {
    * The order of priority for overridden hints is as follows, from most
    * important to least:
    * import { showDialog } from '@jupyterlab/apputils';
-1. Data set by the end user in a settings file.
+   * 1. Data set by the end user in a settings file.
    * 2. Data set by the plugin author as a schema default.
    * 3. Data set by the plugin author as a top-level key of the schema.
    */
@@ -338,7 +338,7 @@ export namespace PluginList {
     /**
      * A function that allows for asynchronously confirming a selection.
      *
-     * #### Notest
+     * #### Notes
      * If the promise returned by the function resolves, then the selection will
      * succeed and emit an event. If the promise rejects, the selection is not
      * made.
