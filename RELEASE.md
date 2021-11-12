@@ -27,7 +27,7 @@ The workflow takes a couple of input parameters, for example:
 | Version Spec | next                  |
 | Since        | v4.0.0a15             |
 
-The version spec follows the specification documented bellow in the [Bump Version](#bump-version) section.
+The version spec follows the specification documented below in the [Bump Version](#bump-version) section.
 
 We can use `next` when making a `patch` release or a `build` pre-release.
 
