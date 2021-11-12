@@ -44,26 +44,26 @@ namespace CommandIDs {
  * @private
  * @param app - Jupyter application
  * @param docmanager - document manager
- * @param editorTracker - editor tracker
- * @param markdownViewerTracker - Markdown viewer tracker
- * @param notebookTracker - notebook tracker
  * @param rendermime - rendered MIME registry
  * @param translator - translator
+ * @param editorTracker - editor tracker
  * @param restorer - application layout restorer
  * @param labShell - Jupyter lab shell
+ * @param markdownViewerTracker - Markdown viewer tracker
+ * @param notebookTracker - notebook tracker
  * @param settingRegistry - setting registry
  * @returns table of contents registry
  */
 async function activateTOC(
   app: JupyterFrontEnd,
   docmanager: IDocumentManager,
-  editorTracker: IEditorTracker,
-  markdownViewerTracker: IMarkdownViewerTracker,
-  notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
+  editorTracker?: IEditorTracker,
   restorer?: ILayoutRestorer,
   labShell?: ILabShell,
+  markdownViewerTracker?: IMarkdownViewerTracker,
+  notebookTracker?: INotebookTracker,
   settingRegistry?: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
@@ -111,42 +111,48 @@ async function activateTOC(
   }
 
   // Create a notebook generator:
-  const notebookGenerator = createNotebookGenerator(
-    notebookTracker,
-    toc,
-    rendermime.sanitizer,
-    translator,
-    settings
-  );
-  registry.add(notebookGenerator);
+  if (notebookTracker) {
+    const notebookGenerator = createNotebookGenerator(
+      notebookTracker,
+      toc,
+      rendermime.sanitizer,
+      translator,
+      settings
+    );
+    registry.add(notebookGenerator);
+  }
 
   // Create a Markdown generator:
-  const markdownGenerator = createMarkdownGenerator(
-    editorTracker,
-    toc,
-    rendermime.sanitizer,
-    translator,
-    settings
-  );
-  registry.add(markdownGenerator);
+  if (editorTracker) {
+    const markdownGenerator = createMarkdownGenerator(
+      editorTracker,
+      toc,
+      rendermime.sanitizer,
+      translator,
+      settings
+    );
+    registry.add(markdownGenerator);
+
+    // Create a LaTeX generator:
+    const latexGenerator = createLatexGenerator(editorTracker);
+    registry.add(latexGenerator);
+
+    // Create a Python generator:
+    const pythonGenerator = createPythonGenerator(editorTracker);
+    registry.add(pythonGenerator);
+  }
 
   // Create a rendered Markdown generator:
-  const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
-    markdownViewerTracker,
-    toc,
-    rendermime.sanitizer,
-    translator,
-    settings
-  );
-  registry.add(renderedMarkdownGenerator);
-
-  // Create a LaTeX generator:
-  const latexGenerator = createLatexGenerator(editorTracker);
-  registry.add(latexGenerator);
-
-  // Create a Python generator:
-  const pythonGenerator = createPythonGenerator(editorTracker);
-  registry.add(pythonGenerator);
+  if (markdownViewerTracker) {
+    const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
+      markdownViewerTracker,
+      toc,
+      rendermime.sanitizer,
+      translator,
+      settings
+    );
+    registry.add(renderedMarkdownGenerator);
+  }
 
   // Update the ToC when the active widget changes:
   if (labShell) {
@@ -189,13 +195,17 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   provides: ITableOfContentsRegistry,
   requires: [
     IDocumentManager,
-    IEditorTracker,
-    IMarkdownViewerTracker,
-    INotebookTracker,
     IRenderMimeRegistry,
     ITranslator
   ],
-  optional: [ILayoutRestorer, ILabShell, ISettingRegistry],
+  optional: [
+    IEditorTracker,
+    ILayoutRestorer,
+    ILabShell,
+    IMarkdownViewerTracker,
+    INotebookTracker,
+    ISettingRegistry
+  ],
   activate: activateTOC
 };
 
