@@ -16,7 +16,7 @@ export const USER = '@jupyterlab/user:userDB';
  * NOTE: Requirer this token in your extension to access the
  * current connected user information.
  */
-export const ICurrentUser = new Token<IUser>('@jupyterlab/user:user');
+export const ICurrentUser = new Token<IUser>('@jupyterlab/user:ICurrentUser');
 
 /**
  * The user menu token.
@@ -24,7 +24,7 @@ export const ICurrentUser = new Token<IUser>('@jupyterlab/user:user');
  * NOTE: Requirer this token in your extension to access the user menu
  * (top-right menu in JupyterLab's interface).
  */
-export const IUserMenu = new Token<Menu>('@jupyterlab/user:userMenu');
+export const IUserMenu = new Token<Menu>('@jupyterlab/user:IUserMenu');
 
 /**
  * The user panel token.
@@ -32,7 +32,7 @@ export const IUserMenu = new Token<Menu>('@jupyterlab/user:userMenu');
  * NOTE: The left side bar panel. Useful to add user related widgets.
  */
 export const IUserPanel = new Token<AccordionPanel>(
-  '@jupyterlab/user:userPanel'
+  '@jupyterlab/user:IUserPanel'
 );
 
 /**
