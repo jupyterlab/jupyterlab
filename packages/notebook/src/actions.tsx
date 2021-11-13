@@ -2023,8 +2023,7 @@ namespace Private {
             return Promise.resolve(false);
           }
           const deletedCells = notebook.model?.deletedCells ?? [];
-          executionScheduled.emit({ notebook, cell });
-          return CodeCell.execute(cell as CodeCell, sessionContext, {
+          const executePromise = CodeCell.execute(cell as CodeCell, sessionContext, {
             deletedCells,
             recordTiming: notebook.notebookConfig.recordTiming
           })
@@ -2063,6 +2062,8 @@ namespace Private {
 
               return ran;
             });
+          executionScheduled.emit({ notebook, cell });
+          return executePromise;
         }
         (cell.model as ICodeCellModel).clearExecution();
         break;
