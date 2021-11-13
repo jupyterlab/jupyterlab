@@ -67,8 +67,6 @@ const userMenuPlugin: JupyterFrontEndPlugin<Menu> = {
     menuBar.addMenu(menu);
     shell.add(menuBar, 'top', { rank: 1002 });
 
-    menu.addItem({ type: 'separator' });
-
     return menu;
   }
 };
