@@ -2023,10 +2023,14 @@ namespace Private {
             return Promise.resolve(false);
           }
           const deletedCells = notebook.model?.deletedCells ?? [];
-          const executePromise = CodeCell.execute(cell as CodeCell, sessionContext, {
-            deletedCells,
-            recordTiming: notebook.notebookConfig.recordTiming
-          })
+          const executePromise = CodeCell.execute(
+            cell as CodeCell,
+            sessionContext,
+            {
+              deletedCells,
+              recordTiming: notebook.notebookConfig.recordTiming
+            }
+          )
             .then(reply => {
               deletedCells.splice(0, deletedCells.length);
               if (cell.isDisposed) {
