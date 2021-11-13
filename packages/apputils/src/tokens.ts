@@ -47,6 +47,25 @@ export interface ICommandPalette {
   addItem(options: IPaletteItem): IDisposable;
 }
 
+export const IKernelStatusModel = new Token<IKernelStatusModel>(
+  '@jupyterlab/apputils:IKernelStatusModel'
+);
+
+/**
+ * Kernel status indicator model.
+ */
+export interface IKernelStatusModel {
+  /**
+   * A display name for the activity.
+   */
+  sessionContext: ISessionContext | null;
+
+  /**
+   * The current client session associated with the kernel status indicator.
+   */
+  activityName: string;
+}
+
 /**
  * An interface for the session context dialogs.
  */

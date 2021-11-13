@@ -17,7 +17,11 @@ import {
   IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  IEditorServices,
+  IPositionModel
+} from '@jupyterlab/codeeditor';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
@@ -139,9 +143,41 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Cursor position.
+ */
+const lineColStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extensions:cursor-position',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IEditorTracker,
+    positionModel: IPositionModel
+  ) => {
+    function updateCurrent() {
+      if (
+        tracker.currentWidget &&
+        tracker.currentWidget === app.shell.currentWidget
+      ) {
+        positionModel.editor = tracker.currentWidget.content.editor;
+      }
+    }
+
+    if (tracker.currentWidget) {
+      updateCurrent();
+    }
+    tracker.currentChanged.connect(updateCurrent);
+  },
+  requires: [IEditorTracker, IPositionModel],
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [plugin, tabSpaceStatus];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  plugin,
+  lineColStatus,
+  tabSpaceStatus
+];
 export default plugins;
 
 /**

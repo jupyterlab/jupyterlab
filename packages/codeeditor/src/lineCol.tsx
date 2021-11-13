@@ -8,24 +8,20 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
+  classes,
   lineFormIcon,
   ReactWidget,
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import React from 'react';
-import { classes } from 'typestyle/lib';
-import { interactiveItem, Popup, showPopup, TextItem } from '..';
 import {
-  lineFormButton,
-  lineFormButtonDiv,
-  lineFormButtonIcon,
-  lineFormCaption,
-  lineFormInput,
-  lineFormSearch,
-  lineFormWrapper,
-  lineFormWrapperFocusWithin
-} from '../style/lineForm';
+  interactiveItem,
+  Popup,
+  showPopup,
+  TextItem
+} from '@jupyterlab/statusbar';
+import { IPositionModel } from '.';
 
 /**
  * A namespace for LineFormComponent statics.
@@ -105,18 +101,18 @@ class LineFormComponent extends React.Component<
    */
   render() {
     return (
-      <div className={lineFormSearch}>
+      <div className="jp-lineFormSearch">
         <form name="lineColumnForm" onSubmit={this._handleSubmit} noValidate>
           <div
             className={classes(
-              lineFormWrapper,
+              'jp-lineFormWrapper',
               'lm-lineForm-wrapper',
-              this.state.hasFocus ? lineFormWrapperFocusWithin : undefined
+              this.state.hasFocus ? 'jp-lineFormWrapperFocusWithin' : undefined
             )}
           >
             <input
               type="text"
-              className={lineFormInput}
+              className="jp-lineFormInput"
               onChange={this._handleChange}
               onFocus={this._handleFocus}
               onBlur={this._handleBlur}
@@ -125,15 +121,19 @@ class LineFormComponent extends React.Component<
                 this._textInput = input;
               }}
             />
-            <div className={lineFormButtonDiv}>
+            <div className="jp-baseLineForm jp-lineFormButtonDiv">
               <lineFormIcon.react
-                className={lineFormButtonIcon}
+                className="jp-baseLineForm jp-lineFormButtonIcon"
                 elementPosition="center"
               />
-              <input type="submit" className={lineFormButton} value="" />
+              <input
+                type="submit"
+                className="jp-baseLineForm jp-lineFormButton"
+                value=""
+              />
             </div>
           </div>
-          <label className={lineFormCaption}>
+          <label className="jp-lineFormCaption">
             {this._trans.__(
               'Go to line number between 1 and %1',
               this.props.maxLine
@@ -312,7 +312,7 @@ export namespace LineCol {
   /**
    * A VDom model for a status item tracking the line/column of an editor.
    */
-  export class Model extends VDomModel {
+  export class Model extends VDomModel implements IPositionModel {
     /**
      * The current editor of the model.
      */

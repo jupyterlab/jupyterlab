@@ -1,8 +1,5 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-
-import { ISessionContext, translateKernelStatuses } from '@jupyterlab/apputils';
 import { Session } from '@jupyterlab/services';
+import { interactiveItem, TextItem } from '@jupyterlab/statusbar';
 import {
   ITranslator,
   nullTranslator,
@@ -11,7 +8,38 @@ import {
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { JSONArray, JSONExt } from '@lumino/coreutils';
 import React from 'react';
-import { interactiveItem, TextItem } from '..';
+import { ISessionContext } from './sessioncontext';
+import { IKernelStatusModel } from './tokens';
+
+/**
+ * Helper function to translate kernel statuses mapping by using
+ * input translator.
+ *
+ * @param translator - - Language translator.
+ * @return The translated kernel status mapping.
+ */
+export function translateKernelStatuses(
+  translator?: ITranslator
+): Record<ISessionContext.KernelDisplayStatus, string> {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
+  const translated: Record<ISessionContext.KernelDisplayStatus, string> = {
+    unknown: trans.__('Unknown'),
+    starting: trans.__('Starting'),
+    idle: trans.__('Idle'),
+    busy: trans.__('Busy'),
+    terminating: trans.__('Terminating'),
+    restarting: trans.__('Restarting'),
+    autorestarting: trans.__('Autorestarting'),
+    dead: trans.__('Dead'),
+    connected: trans.__('Connected'),
+    connecting: trans.__('Connecting'),
+    disconnected: trans.__('Disconnected'),
+    initializing: trans.__('Initializing'),
+    '': ''
+  };
+  return translated;
+}
 
 /**
  * A pure functional component for rendering kernel status.
@@ -114,7 +142,7 @@ export namespace KernelStatus {
   /**
    * A VDomModel for the kernel status indicator.
    */
-  export class Model extends VDomModel {
+  export class Model extends VDomModel implements IKernelStatusModel {
     constructor(translator?: ITranslator) {
       super();
       translator = translator || nullTranslator;

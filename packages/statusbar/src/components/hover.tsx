@@ -4,12 +4,7 @@
 import { HoverBox } from '@jupyterlab/apputils';
 import { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { style } from 'typestyle/lib';
-import { clickedItem, interactiveItem } from '../style/statusbar';
-
-const hoverItem = style({
-  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
-});
+import { clickedItem, hoverItem, interactiveItem } from '../style/statusbar';
 
 /**
  * Create and show a popup component.

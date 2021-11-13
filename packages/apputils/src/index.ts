@@ -38,9 +38,11 @@ export * from './dialog';
 export * from './domutils';
 export * from './hoverbox';
 export * from './inputdialog';
+export * from './kernelstatuses';
 export * from './mainareawidget';
 export * from './menufactory';
 export * from './printing';
+export * from './runningSessions';
 export * from './sanitizer';
 export * from './semanticCommand';
 export * from './sessioncontext';
@@ -53,7 +55,6 @@ export {
 } from './toolbar';
 export * from './widgettracker';
 export * from './windowresolver';
-export * from './kernelstatuses';
 
 // Merge Toolbar namespace to preserve API
 /**

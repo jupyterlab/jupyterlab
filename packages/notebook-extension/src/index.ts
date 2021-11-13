@@ -15,6 +15,7 @@ import {
   createToolbarFactory,
   Dialog,
   ICommandPalette,
+  IKernelStatusModel,
   InputDialog,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
@@ -25,7 +26,7 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import { PageConfig } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -675,6 +676,74 @@ const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Kernel status indicator.
+ */
+const kernelStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extensions:kernel-status',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    kernelStatus: IKernelStatusModel
+  ) => {
+    function updateCurrent() {
+      if (
+        tracker.currentWidget &&
+        tracker.currentWidget === app.shell.currentWidget
+      ) {
+        kernelStatus.sessionContext = tracker.currentWidget.sessionContext;
+      }
+    }
+
+    if (tracker.currentWidget) {
+      updateCurrent();
+    }
+    tracker.currentChanged.connect(updateCurrent);
+  },
+  requires: [INotebookTracker, IKernelStatusModel],
+  autoStart: true
+};
+
+/**
+ * Cursor position.
+ */
+const lineColStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extensions:cursor-position',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    positionModel: IPositionModel
+  ) => {
+    let previousWidget: NotebookPanel | null = null;
+
+    const onActiveCellChanged = (notebook: Notebook, cell: Cell | null) => {
+      positionModel.editor = cell && cell.editor;
+    };
+
+    function updateCurrent() {
+      if (
+        tracker.currentWidget &&
+        tracker.currentWidget === app.shell.currentWidget
+      ) {
+        previousWidget?.content.activeCellChanged.disconnect(
+          onActiveCellChanged
+        );
+        const notebook = tracker.currentWidget.content;
+        onActiveCellChanged(notebook, notebook.activeCell);
+        notebook.activeCellChanged.connect(onActiveCellChanged);
+      }
+      previousWidget = tracker.currentWidget;
+    }
+
+    if (tracker.currentWidget) {
+      updateCurrent();
+    }
+    tracker.currentChanged.connect(updateCurrent);
+  },
+  requires: [INotebookTracker, IPositionModel],
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -689,7 +758,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   logNotebookOutput,
   clonedOutputsPlugin,
   codeConsolePlugin,
-  copyOutputPlugin
+  copyOutputPlugin,
+  kernelStatus,
+  lineColStatus
 ];
 export default plugins;
 

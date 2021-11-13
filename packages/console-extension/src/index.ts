@@ -14,14 +14,24 @@ import {
 import {
   Dialog,
   ICommandPalette,
+  IKernelStatusModel,
   ISessionContext,
   ISessionContextDialogs,
   sessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
-import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
+import { CodeCell } from '@jupyterlab/cells';
+import {
+  CodeEditor,
+  IEditorServices,
+  IPositionModel
+} from '@jupyterlab/codeeditor';
+import {
+  CodeConsole,
+  ConsolePanel,
+  IConsoleTracker
+} from '@jupyterlab/console';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -123,9 +133,81 @@ const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
 };
 
 /**
+ * Kernel status indicator.
+ */
+const kernelStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/console-extensions:kernel-status',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IConsoleTracker,
+    kernelStatus: IKernelStatusModel
+  ) => {
+    function updateCurrent() {
+      if (
+        tracker.currentWidget &&
+        tracker.currentWidget === app.shell.currentWidget
+      ) {
+        kernelStatus.sessionContext = tracker.currentWidget.sessionContext;
+      }
+    }
+
+    if (tracker.currentWidget) {
+      updateCurrent();
+    }
+    tracker.currentChanged.connect(updateCurrent);
+  },
+  requires: [IConsoleTracker, IKernelStatusModel],
+  autoStart: true
+};
+
+/**
+ * Cursor position.
+ */
+const lineColStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/console-extensions:cursor-position',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IConsoleTracker,
+    positionModel: IPositionModel
+  ) => {
+    let previousWidget: ConsolePanel | null = null;
+
+    const onPromptCreated = (console: CodeConsole, prompt: CodeCell | null) => {
+      positionModel.editor = prompt && prompt.editor;
+    };
+
+    function updateCurrent() {
+      if (
+        tracker.currentWidget &&
+        tracker.currentWidget === app.shell.currentWidget
+      ) {
+        previousWidget?.console.promptCellCreated.disconnect(onPromptCreated);
+        const console = tracker.currentWidget.console;
+        onPromptCreated(console, console.promptCell);
+        console.promptCellCreated.connect(onPromptCreated);
+      }
+      previousWidget = tracker.currentWidget;
+    }
+
+    if (tracker.currentWidget) {
+      updateCurrent();
+    }
+    tracker.currentChanged.connect(updateCurrent);
+  },
+  requires: [IConsoleTracker, IPositionModel],
+  autoStart: true
+};
+
+/**
  * Export the plugins as the default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [factory, tracker, foreign];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  factory,
+  tracker,
+  foreign,
+  kernelStatus,
+  lineColStatus
+];
 export default plugins;
 
 /**

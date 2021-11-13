@@ -10,7 +10,11 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  IEditorServices,
+  IPositionModel,
+  LineCol
+} from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditor,
   editorServices,
@@ -113,12 +117,40 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin providing a line/column status item to the application.
+ */
+export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
+  id: '@jupyterlab/codemirror-extension:line-col-status',
+  autoStart: true,
+  requires: [IStatusBar, ITranslator],
+  provides: IPositionModel,
+  activate: (
+    _: JupyterFrontEnd,
+    statusBar: IStatusBar,
+    translator: ITranslator
+  ): IPositionModel => {
+    const item = new LineCol(translator);
+
+    // Add the status item to the status bar.
+    statusBar.registerStatusItem(lineColItem.id, {
+      item,
+      align: 'right',
+      rank: 2,
+      isActive: () => !!item.model.editor
+    });
+
+    return item.model;
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
   editorSyntaxStatus,
+  lineColItem,
   codemirrorSingleton
 ];
 export default plugins;

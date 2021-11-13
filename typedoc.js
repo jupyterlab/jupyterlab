@@ -68,6 +68,7 @@ const packages = [
   'rendermime',
   'running-extension',
   'running',
+  'services-extension',
   'services',
   'settingeditor-extension',
   'settingeditor',
