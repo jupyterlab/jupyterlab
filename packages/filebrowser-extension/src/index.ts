@@ -85,6 +85,8 @@ namespace CommandIDs {
 
   export const openPath = 'filebrowser:open-path';
 
+  export const openUrl = 'filebrowser:open-url';
+
   export const open = 'filebrowser:open';
 
   export const openBrowserTab = 'filebrowser:open-browser-tab';
@@ -683,6 +685,88 @@ export const launcherToolbarButton: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to open files from remote URLs
+ */
+const openUrlPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-url',
+  autoStart: true,
+  requires: [IFileBrowserFactory, ITranslator],
+  optional: [ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ) => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const { defaultBrowser: browser } = factory;
+    const command = CommandIDs.openUrl;
+
+    commands.addCommand(command, {
+      label: args =>
+        args.url ? trans.__('Open %1', args.url) : trans.__('Open from URL…'),
+      caption: args =>
+        args.url ? trans.__('Open %1', args.url) : trans.__('Open from URL'),
+      execute: async args => {
+        let url: string | undefined = (args?.url as string) ?? '';
+        if (!url) {
+          url =
+            (
+              await InputDialog.getText({
+                label: trans.__('URL'),
+                placeholder: 'https://example.com/path/to/file',
+                title: trans.__('Open URL'),
+                okLabel: trans.__('Open')
+              })
+            ).value ?? undefined;
+        }
+        if (!url) {
+          return;
+        }
+
+        let type = '';
+        let blob;
+
+        // fetch the file from the URL
+        try {
+          const req = await fetch(url);
+          blob = await req.blob();
+          type = req.headers.get('Content-Type') ?? '';
+        } catch (reason) {
+          if (reason.response && reason.response.status !== 200) {
+            reason.message = trans.__('Could not open URL: %1', url);
+          }
+          return showErrorMessage(trans.__('Cannot fetch'), reason);
+        }
+
+        // upload the content of the file to the server
+        try {
+          const name = PathExt.basename(url);
+          const file = new File([blob], name, { type });
+          const model = await browser.model.upload(file);
+          return commands.execute('docmanager:open', {
+            path: model.path
+          });
+        } catch (error) {
+          return showErrorMessage(
+            trans._p('showErrorMessage', 'Upload Error'),
+            error
+          );
+        }
+      }
+    });
+
+    if (palette) {
+      palette.addItem({
+        command,
+        category: trans.__('File Operations')
+      });
+    }
+  }
+};
+
+/**
  * Add the main file browser commands to the application's command registry.
  */
 function addCommands(
@@ -849,6 +933,7 @@ function addCommands(
       }
     }
   });
+
   // Add the openPath command to the command palette
   if (commandPalette) {
     commandPalette.addItem({
@@ -1216,7 +1301,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   browserWidget,
   launcherToolbarButton,
   openWithPlugin,
-  openBrowserTabPlugin
+  openBrowserTabPlugin,
+  openUrlPlugin
 ];
 export default plugins;
 
