@@ -33,16 +33,11 @@ import { INotebookHeading } from '@jupyterlab/toc';
 import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
 
 /**
- * The command IDs used by TOC item.
- */
-namespace CommandIDs {
-  export const runCells = 'toc:run-cells';
-}
-
-/**
  * A namespace for command IDs of table of contents plugin.
  */
 namespace CommandIDs {
+  export const runCells = 'toc:run-cells';
+
   export const showPanel = 'toc:show-panel';
 }
 
