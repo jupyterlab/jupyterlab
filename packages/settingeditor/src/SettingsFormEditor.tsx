@@ -19,6 +19,9 @@ interface IProps {
   hasError: (error: boolean) => void;
 }
 
+/**
+ * Renders the modified indicator and errors
+ */
 const CustomTemplate = (props: FieldTemplateProps) => {
   const {
     formData,
@@ -31,6 +34,12 @@ const CustomTemplate = (props: FieldTemplateProps) => {
     rawErrors,
     children
   } = props;
+  /**
+   * Determine if the field has been modified
+   * Schema Id is formatted as 'root_<field name>.<nexted field name>'
+   * This logic parses out the field name to find the default value
+   * before determining if the field has been modified.
+   */
   const schemaIds = id.split('_');
   schemaIds.shift();
   const schemaId = schemaIds.join('.');
@@ -57,18 +66,21 @@ const CustomTemplate = (props: FieldTemplateProps) => {
     !schema.properties &&
     schema.type !== 'array' &&
     !JSONExt.deepEqual(formData, defaultValue);
+
   return (
     <div
       className={`form-group ${
         displayLabel || schema.type === 'boolean' ? 'small-field' : ''
       }`}
     >
-      {isModified && !rawErrors ? (
-        <div className="jp-modifiedIndicator" />
-      ) : undefined}
-      {rawErrors ? (
-        <div className="jp-modifiedIndicator jp-errorIndicator" />
-      ) : undefined}
+      {
+        // Only show the modified indicator if there are no errors
+        isModified && !rawErrors && <div className="jp-modifiedIndicator" />
+      }
+      {
+        // Shows a red indicator for fields that have validation errors
+        rawErrors && <div className="jp-modifiedIndicator jp-errorIndicator" />
+      }
       <div>
         {displayLabel && id !== 'root' ? <h3> {label} </h3> : undefined}
         <div className="inputFieldWrapper">{children}</div>
