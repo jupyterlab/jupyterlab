@@ -10,9 +10,24 @@ import React, { useEffect, useState } from 'react';
  * The class name added to the filebrowser crumbs node.
  */
 export interface IFilterBoxProps {
+  /**
+   * A function to callback when filter is updated.
+   */
   updateFilter: (filterFn: (item: string) => boolean) => void;
+
+  /**
+   * Whether to use the fuzzy filter.
+   */
   useFuzzyFilter: boolean;
+
+  /**
+   * Optional placeholder for the search box.
+   */
   placeholder?: string;
+
+  /**
+   * Whether to force a refresh.
+   */
   forceRefresh?: boolean;
 }
 

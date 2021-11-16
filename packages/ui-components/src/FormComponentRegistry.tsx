@@ -4,37 +4,20 @@
 |----------------------------------------------------------------------------*/
 
 import { Token } from '@lumino/coreutils';
-
-export namespace FormComponentRegistry {
-  /**
-   * Props to pass to renderers in the component registry
-   */
-  export interface IRendererProps {
-    // The current value of the component
-    value: any;
-
-    // A callback for when edits are made to a component
-    handleChange: (newValue: any) => void;
-
-    // Any information needed to render a component (i.e. label, field type, etc.)
-    uihints?: any;
-  }
-}
+import { Field } from '@rjsf/core';
 
 /**
  * A registry for rendering fields used in the FormEditor component.
  */
 export class FormComponentRegistry implements IFormComponentRegistry {
   /**
-   *
+   * Adds a renderer for a given id - if the id is already in use, returns false.
+   * Otherwise, returns true.
    * @param id - Unique ID for the given renderer.
    * @param renderer - A function that takes props and returns a rendered component
    * @returns - Whether the renderer was added successfully. False if the id is already in use.
    */
-  addRenderer(
-    id: string,
-    renderer: (props: FormComponentRegistry.IRendererProps) => any
-  ): boolean {
+  addRenderer(id: string, renderer: Field): boolean {
     if (this._renderers[id]) {
       return false;
     }
@@ -42,36 +25,53 @@ export class FormComponentRegistry implements IFormComponentRegistry {
     return true;
   }
 
-  get renderers(): { [id: string]: (props: any) => any } {
+  /**
+   * Returns all registered renderers in dictionary form.
+   * @returns - A dictionary that maps an id to a renderer.
+   */
+  get renderers(): { [id: string]: Field } {
     return this._renderers;
   }
 
   /**
-   *
+   * Returns the renderer for the given id
    * @param id - The unique id for the renderer.
    * @returns - A function that takes props and returns a rendered component.
    */
-  getRenderer(
-    id: string
-  ): (props: FormComponentRegistry.IRendererProps) => any {
+  getRenderer(id: string): Field {
     return this._renderers[id];
   }
 
-  private _renderers: { [id: string]: (props: any) => any } = {};
+  private _renderers: { [id: string]: Field } = {};
 }
 
+/**
+ * A registry for rendering fields used in the FormEditor component.
+ */
 export interface IFormComponentRegistry {
-  addRenderer: (
-    id: string,
-    renderer: (props: FormComponentRegistry.IRendererProps) => any
-  ) => void;
-  getRenderer: (
-    id: string
-  ) => (props: FormComponentRegistry.IRendererProps) => any;
+  /**
+   * Adds a renderer for a given id - if the id is already in use, returns false.
+   * Otherwise, returns true.
+   * @param id - Unique ID for the given renderer.
+   * @param renderer - A function that takes props and returns a rendered component
+   * @returns - Whether the renderer was added successfully. False if the id is already in use.
+   */
+  addRenderer: (id: string, renderer: Field) => void;
 
-  renderers: { [id: string]: (props: any) => any };
+  /**
+   * Returns the renderer for the given id
+   * @param id - The unique id for the renderer.
+   * @returns - A function that takes props and returns a rendered component.
+   */
+  getRenderer: (id: string) => Field;
+
+  /**
+   * Returns all registered renderers in dictionary form.
+   * @returns - A dictionary that maps an id to a renderer.
+   */
+  renderers: { [id: string]: Field };
 }
 
 export const IFormComponentRegistry = new Token<IFormComponentRegistry>(
-  '@jupyterlab/settingeditor:ISettingEditorRegistry'
+  '@jupyterlab/ui-components:ISettingEditorRegistry'
 );

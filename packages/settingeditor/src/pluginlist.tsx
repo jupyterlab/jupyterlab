@@ -194,7 +194,6 @@ export class PluginList extends ReactWidget {
    * #### Notes
    * The order of priority for overridden hints is as follows, from most
    * important to least:
-   * import { showDialog } from '@jupyterlab/apputils';
    * 1. Data set by the end user in a settings file.
    * 2. Data set by the plugin author as a schema default.
    * 3. Data set by the plugin author as a top-level key of the schema.
@@ -272,7 +271,7 @@ export class PluginList extends ReactWidget {
       >
         {id === this.selection || this._errors[id] ? (
           <div className="jp-SelectedIndicator" />
-        ) : undefined}
+        ) : null}
         <LabIcon.resolveReact
           icon={icon || (iconClass ? undefined : settingsIcon)}
           iconClass={classes(iconClass, 'jp-Icon')}
@@ -304,12 +303,12 @@ export class PluginList extends ReactWidget {
           placeholder={'Search...'}
           forceRefresh={false}
         />
-        {modifiedItems.length > 0 ? (
+        {modifiedItems.length > 0 && (
           <div>
             <p className="jp-PluginList-header">Modified</p>
             <ul>{modifiedItems}</ul>
           </div>
-        ) : undefined}
+        )}
         <p className="jp-PluginList-header">Settings</p>
         <ul>{otherItems}</ul>
       </div>
