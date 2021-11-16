@@ -51,14 +51,8 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:form-ui',
-  requires: [
-    ILayoutRestorer,
-    ISettingRegistry,
-    IStateDB,
-    ITranslator,
-    IFormComponentRegistry
-  ],
-  optional: [ICommandPalette],
+  requires: [ISettingRegistry, IStateDB, ITranslator, IFormComponentRegistry],
+  optional: [ILayoutRestorer, ICommandPalette],
   autoStart: true,
   provides: ISettingEditorTracker,
   activate
@@ -69,11 +63,11 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
  */
 function activate(
   app: JupyterFrontEnd,
-  restorer: ILayoutRestorer,
   registry: ISettingRegistry,
   state: IStateDB,
   translator: ITranslator,
   editorRegistry: IFormComponentRegistry,
+  restorer?: ILayoutRestorer,
   palette?: ICommandPalette
 ): ISettingEditorTracker {
   const trans = translator.load('jupyterlab');
@@ -84,11 +78,13 @@ function activate(
   });
 
   // Handle state restoration.
-  void restorer.restore(tracker, {
-    command: CommandIDs.open,
-    args: widget => ({}),
-    name: widget => namespace
-  });
+  if (restorer) {
+    void restorer.restore(tracker, {
+      command: CommandIDs.open,
+      args: widget => ({}),
+      name: widget => namespace
+    });
+  }
 
   if (palette) {
     palette.addItem({
@@ -134,7 +130,6 @@ function activate(
 const jsonPlugin: JupyterFrontEndPlugin<IJSONSettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
   requires: [
-    ILayoutRestorer,
     ISettingRegistry,
     IEditorServices,
     IStateDB,
@@ -142,7 +137,7 @@ const jsonPlugin: JupyterFrontEndPlugin<IJSONSettingEditorTracker> = {
     ILabStatus,
     ITranslator
   ],
-  optional: [ICommandPalette],
+  optional: [ILayoutRestorer, ICommandPalette],
   autoStart: true,
   provides: IJSONSettingEditorTracker,
   activate: activateJSON
@@ -153,13 +148,13 @@ const jsonPlugin: JupyterFrontEndPlugin<IJSONSettingEditorTracker> = {
  */
 function activateJSON(
   app: JupyterFrontEnd,
-  restorer: ILayoutRestorer,
   registry: ISettingRegistry,
   editorServices: IEditorServices,
   state: IStateDB,
   rendermime: IRenderMimeRegistry,
   status: ILabStatus,
   translator: ITranslator,
+  restorer: ILayoutRestorer | null,
   palette: ICommandPalette | null
 ): IJSONSettingEditorTracker {
   const trans = translator.load('jupyterlab');
@@ -173,11 +168,13 @@ function activateJSON(
   let editor: JsonSettingEditor;
 
   // Handle state restoration.
-  void restorer.restore(tracker, {
-    command: CommandIDs.openJSON,
-    args: widget => ({}),
-    name: widget => namespace
-  });
+  if (restorer) {
+    void restorer.restore(tracker, {
+      command: CommandIDs.openJSON,
+      args: widget => ({}),
+      name: widget => namespace
+    });
+  }
 
   commands.addCommand(CommandIDs.openJSON, {
     execute: () => {
