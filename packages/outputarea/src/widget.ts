@@ -461,8 +461,6 @@ export class OutputArea extends Widget {
     if (index < this.maxNumberOutputs || this.maxNumberOutputs === 0) {
       layout.insertWidget(index, output);
     } else if (index >= this.maxNumberOutputs) {
-      //      layout.removeWidgetAt(this.headTailNumberOutputs + 1);
-      //      layout.insertWidget(index, output);
     }
     if (index >= this.maxNumberOutputs && this.maxNumberOutputs !== 0) {
       this.trimmedOutputModels.push(model);
