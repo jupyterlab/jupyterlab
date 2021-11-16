@@ -129,7 +129,7 @@ export const SettingsFormEditor = ({
   handleSelectSignal,
   hasError
 }: SettingsFormEditor.IProps) => {
-  const [formData, setFormData] = React.useState(settings.user);
+  const [formData, setFormData] = React.useState(settings.composite);
   const [isModified, setIsModified] = React.useState(settings.isModified);
   const [hidden, setHidden] = React.useState(true);
 
@@ -173,13 +173,7 @@ export const SettingsFormEditor = ({
    * @param data - Form data sent from the form editor
    */
   const handleChange = (data: ReadonlyPartialJSONObject) => {
-    let user = {};
-    try {
-      user = settings.raw !== '' ? JSON.parse(settings.raw) : {};
-    } catch {
-      console.log('Error parsing raw settings.');
-    }
-    if (JSONExt.deepEqual(data, user)) {
+    if (JSONExt.deepEqual(data, settings.user)) {
       return;
     }
     settings

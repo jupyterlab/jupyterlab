@@ -159,7 +159,7 @@ function activateJSON(
 ): IJSONSettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
-  const namespace = 'setting-editor';
+  const namespace = 'json-setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
   const tracker = new WidgetTracker<MainAreaWidget<JsonSettingEditor>>({
