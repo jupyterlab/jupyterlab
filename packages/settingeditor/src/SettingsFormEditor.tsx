@@ -6,7 +6,12 @@
 import { Settings } from '@jupyterlab/settingregistry';
 import { showDialog } from '@jupyterlab/apputils';
 import React from 'react';
-import Form, { FieldTemplateProps, IChangeEvent, UiSchema } from '@rjsf/core';
+import Form, {
+  Field,
+  FieldTemplateProps,
+  IChangeEvent,
+  UiSchema
+} from '@rjsf/core';
 import { JSONSchema7 } from 'json-schema';
 import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { reduce } from '@lumino/algorithm';
@@ -14,7 +19,7 @@ import { PluginList } from './pluginlist';
 import { ISignal } from '@lumino/signaling';
 interface IProps {
   settings: Settings;
-  renderers: { [id: string]: React.FC };
+  renderers: { [id: string]: Field };
   handleSelectSignal: ISignal<PluginList, string>;
   hasError: (error: boolean) => void;
 }
