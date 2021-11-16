@@ -1,16 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
+import { MARKDOWN_HEADING_COLLAPSED } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookActions } from '@jupyterlab/notebook';
 import { classes, ellipsesIcon } from '@jupyterlab/ui-components';
-import { MARKDOWN_HEADING_COLLAPSED } from '@jupyterlab/cells';
-import { INotebookHeading } from '../../utils/headings';
+import { ElementExt } from '@lumino/domutils';
+import * as React from 'react';
+import { TableOfContents } from '../..';
+import { INotebookHeading, RunningStatus } from '../../utils/headings';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { CodeComponent } from './codemirror';
 import { OptionsManager } from './options_manager';
-import { ElementExt } from '@lumino/domutils';
-import { TableOfContents } from '../..';
 
 /**
  * Class name of the toc item list.
@@ -99,7 +99,8 @@ export function render(
               previousHeader(tracker, item, toc)
             }
             className={'toc-entry-holder ' + fontSizeClass}
-            area={widget.node.querySelector(`.${TOC_TREE_CLASS}`) as Element}
+            isRunning={item.isRunning}
+            area={widget.node.querySelector(`.${TOC_TREE_CLASS}`)}
           >
             {button}
             {header}
@@ -210,7 +211,8 @@ function previousHeader(
 type NotebookHeadingProps = React.PropsWithChildren<{
   isActive: boolean;
   className: string;
-  area: Element;
+  area: Element | null;
+  isRunning?: RunningStatus;
 }>;
 
 /**
@@ -222,7 +224,7 @@ function NotebookHeading(props: NotebookHeadingProps): JSX.Element {
   const itemRef = React.useRef<HTMLDivElement>(null);
   const isActive = props.isActive;
   React.useEffect(() => {
-    if (isActive && itemRef.current) {
+    if (isActive && itemRef.current && props.area) {
       ElementExt.scrollIntoViewIfNeeded(
         props.area,
         itemRef.current.parentElement as Element
@@ -233,6 +235,7 @@ function NotebookHeading(props: NotebookHeadingProps): JSX.Element {
     <div
       ref={itemRef}
       className={classes(props.className, isActive ? 'toc-active-cell' : '')}
+      data-running={props.isRunning}
     >
       {props.children}
     </div>

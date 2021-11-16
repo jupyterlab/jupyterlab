@@ -80,6 +80,7 @@ class NotebookGenerator implements Registry.IGenerator<NotebookPanel> {
   ) {
     this.sanitizer = sanitizer;
     this.tracker = tracker;
+    this.widget = widget;
     this._runningCells = new Array<Cell>();
 
     let numberingH1 = true;
@@ -189,67 +190,145 @@ class NotebookGenerator implements Registry.IGenerator<NotebookPanel> {
           : RunningStatus.Scheduled
         : RunningStatus.Idle;
 
-      if (model.type === 'code') {
-        if (!this.widget || (this.widget && this.options.showCode)) {
-          const onClick = (line: number) => {
-            return () => {
-              panel.content.activeCellIndex = i;
-              cell.node.scrollIntoView();
-            };
-          };
-          const count = (cell as CodeCell).model.executionCount as
-            | number
-            | null;
-          const executionIndicator =
-            count ?? (isRunning !== RunningStatus.Idle ? '*' : ' ');
-          let executionCount = `[${executionIndicator}]: `;
-          let heading = getCodeCellHeading(
-            (model as CodeCellModel).value.text,
-            onClick,
-            executionCount,
-            getLastHeadingLevel(headings),
-            cell,
-            i,
-            isRunning
-          );
-          [headings, prev] = appendHeading(
-            headings,
-            heading,
-            prev,
-            collapseLevel,
-            this.options.filtered
-          );
-        }
-        if (this.options.includeOutput) {
-          // Iterate over the code cell outputs to check for Markdown or HTML from which we can generate ToC headings...
-          for (let j = 0; j < (model as CodeCellModel).outputs.length; j++) {
-            const m = (model as CodeCellModel).outputs.get(j);
-
-            let dtypes = Object.keys(m.data);
-            dtypes = dtypes.filter(t => isMarkdown(t) || isDOM(t));
-            if (!dtypes.length) {
-              continue;
-            }
-            const onClick = (el: Element) => {
+      switch (model.type) {
+        case 'code': {
+          if (!this.widget || (this.widget && this.options.showCode)) {
+            const onClick = (line: number) => {
               return () => {
                 panel.content.activeCellIndex = i;
-                panel.content.mode = 'command';
-                el.scrollIntoView();
+                cell.node.scrollIntoView();
               };
             };
-            let htmlHeadings = getRenderedHTMLHeadings(
-              (cell as CodeCell).outputArea.widgets[j].node,
+            const count = (cell as CodeCell).model.executionCount as
+              | number
+              | null;
+            const executionIndicator =
+              count ?? (isRunning !== RunningStatus.Idle ? '*' : ' ');
+            let executionCount = `[${executionIndicator}]: `;
+            let heading = getCodeCellHeading(
+              (model as CodeCellModel).value.text,
+              onClick,
+              executionCount,
+              getLastHeadingLevel(headings),
+              cell,
+              i,
+              isRunning
+            );
+            [headings, prev] = appendHeading(
+              headings,
+              heading,
+              prev,
+              collapseLevel,
+              this.options.filtered
+            );
+          }
+          if (this.options.includeOutput) {
+            // Iterate over the code cell outputs to check for Markdown or HTML from which we can generate ToC headings...
+            for (let j = 0; j < (model as CodeCellModel).outputs.length; j++) {
+              const m = (model as CodeCellModel).outputs.get(j);
+
+              let dtypes = Object.keys(m.data);
+              dtypes = dtypes.filter(t => isMarkdown(t) || isDOM(t));
+              if (!dtypes.length) {
+                continue;
+              }
+              const onClick = (el: Element) => {
+                return () => {
+                  panel.content.activeCellIndex = i;
+                  panel.content.mode = 'command';
+                  el.scrollIntoView();
+                };
+              };
+              let htmlHeadings = getRenderedHTMLHeadings(
+                (cell as CodeCell).outputArea.widgets[j].node,
+                onClick,
+                this.sanitizer,
+                dict,
+                getLastHeadingLevel(headings),
+                this.options.numbering,
+                this.options.numberingH1,
+                cell,
+                i,
+                isRunning
+              );
+              for (const heading of htmlHeadings) {
+                [headings, prev, collapseLevel] = appendMarkdownHeading(
+                  heading,
+                  headings,
+                  prev,
+                  collapseLevel,
+                  this.options.filtered,
+                  collapsed,
+                  this.options.showMarkdown,
+                  cellCollapseMetadata
+                );
+              }
+            }
+          }
+
+          break;
+        }
+        case 'markdown': {
+          let mcell = cell as MarkdownCell;
+          let heading: INotebookHeading | undefined;
+          let lastLevel = getLastHeadingLevel(headings);
+
+          // If the cell is rendered, generate the ToC items from the HTML...
+          if (mcell.rendered && !mcell.inputHidden) {
+            const onClick = (el: Element) => {
+              return () => {
+                if (!mcell.rendered) {
+                  panel.content.activeCellIndex = i;
+                  el.scrollIntoView();
+                } else {
+                  panel.content.mode = 'command';
+                  cell.node.scrollIntoView();
+                  panel.content.activeCellIndex = i;
+                }
+              };
+            };
+            const htmlHeadings = getRenderedHTMLHeadings(
+              cell.node,
               onClick,
               this.sanitizer,
               dict,
-              getLastHeadingLevel(headings),
+              lastLevel,
               this.options.numbering,
               this.options.numberingH1,
               cell,
               i,
               isRunning
             );
-            for (const heading of htmlHeadings) {
+            for (heading of htmlHeadings) {
+              [headings, prev, collapseLevel] = appendMarkdownHeading(
+                heading,
+                headings,
+                prev,
+                collapseLevel,
+                this.options.filtered,
+                collapsed,
+                this.options.showMarkdown,
+                cellCollapseMetadata
+              );
+            }
+            // If not rendered, generate ToC items from the cell text...
+          } else {
+            const onClick = (line: number) => {
+              return () => {
+                panel.content.activeCellIndex = i;
+                cell.node.scrollIntoView();
+              };
+            };
+            const markdownHeadings = getMarkdownHeadings(
+              model!.value.text,
+              onClick,
+              dict,
+              lastLevel,
+              cell,
+              i,
+              isRunning
+            );
+            for (heading of markdownHeadings) {
               [headings, prev, collapseLevel] = appendMarkdownHeading(
                 heading,
                 headings,
@@ -262,82 +341,15 @@ class NotebookGenerator implements Registry.IGenerator<NotebookPanel> {
               );
             }
           }
-        }
-        continue;
-      }
-      if (model.type === 'markdown') {
-        let mcell = cell as MarkdownCell;
-        let heading: INotebookHeading | undefined;
-        let lastLevel = getLastHeadingLevel(headings);
 
-        // If the cell is rendered, generate the ToC items from the HTML...
-        if (mcell.rendered && !mcell.inputHidden) {
-          const onClick = (el: Element) => {
-            return () => {
-              if (!mcell.rendered) {
-                panel.content.activeCellIndex = i;
-                el.scrollIntoView();
-              } else {
-                panel.content.mode = 'command';
-                cell.node.scrollIntoView();
-                panel.content.activeCellIndex = i;
-              }
-            };
-          };
-          const htmlHeadings = getRenderedHTMLHeadings(
-            cell.node,
-            onClick,
-            this.sanitizer,
-            dict,
-            lastLevel,
-            this.options.numbering,
-            this.options.numberingH1,
-            cell,
-            i,
-            isRunning
-          );
-          for (heading of htmlHeadings) {
-            [headings, prev, collapseLevel] = appendMarkdownHeading(
-              heading,
-              headings,
-              prev,
-              collapseLevel,
-              this.options.filtered,
-              collapsed,
-              this.options.showMarkdown,
-              cellCollapseMetadata
-            );
-          }
-          // If not rendered, generate ToC items from the cell text...
-        } else {
-          const onClick = (line: number) => {
-            return () => {
-              panel.content.activeCellIndex = i;
-              cell.node.scrollIntoView();
-            };
-          };
-          const markdownHeadings = getMarkdownHeadings(
-            model!.value.text,
-            onClick,
-            dict,
-            lastLevel,
-            cell,
-            i,
-            isRunning
-          );
-          for (heading of markdownHeadings) {
-            [headings, prev, collapseLevel] = appendMarkdownHeading(
-              heading,
-              headings,
-              prev,
-              collapseLevel,
-              this.options.filtered,
-              collapsed,
-              this.options.showMarkdown,
-              cellCollapseMetadata
-            );
-          }
+          break;
         }
+      }
+
+      // Must be done afterwards as `heading.hasChild` needs to be up to date.
+      const lastHeading = headings[headings.length - 1];
+      if (lastHeading) {
+        lastHeading.isRunning = Math.max(lastHeading.isRunning, isRunning);
       }
     }
     return headings;

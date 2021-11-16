@@ -24,17 +24,12 @@ export function appendHeading(
 ): [INotebookHeading[], INotebookHeading | null] {
   if (heading && !isHeadingFiltered(heading, tags) && heading.text) {
     // Determine whether this heading is a child of a "header" notebook heading...
-    for (let j = headings.length - 1; j >= 0; j--) {
-      if (prev?.type === 'header' && headings[j] === prev) {
-        // TODO: can a heading be the child of multiple headings? If not, we can `break` here upon finding a parent heading, so we don't traverse the entire heading list...
-        headings[j].hasChild = true;
-      }
-      if (headings[j].hasChild) {
-        headings[j].isRunning = Math.max(
-          headings[j].isRunning,
-          heading.isRunning
-        );
-        break;
+    if (prev && prev.type === 'header') {
+      for (let j = headings.length - 1; j >= 0; j--) {
+        if (headings[j] === prev) {
+          // TODO: can a heading be the child of multiple headings? If not, we can `break` here upon finding a parent heading, so we don't traverse the entire heading list...
+          headings[j].hasChild = true;
+        }
       }
     }
     if (collapseLevel < 0) {
