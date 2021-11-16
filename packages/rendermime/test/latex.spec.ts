@@ -19,6 +19,34 @@ describe('jupyter-ui', () => {
       expect(math).toEqual([]);
     });
 
+    it('should handle fenced code blocks', () => {
+      const input = '```\n$foo\n$bar\n```';
+      const { text, math } = removeMath(input);
+      expect(text).toBe(input);
+      expect(math).toEqual([]);
+    });
+
+    it('should handle tilde fenced code blocks', () => {
+      const input = '~~~\n$foo\n$bar\n~~~';
+      const { text, math } = removeMath(input);
+      expect(text).toBe(input);
+      expect(math).toEqual([]);
+    });
+
+    it('should handle long fenced code blocks', () => {
+      const input = '````\n$foo\n$bar\n```\n``````';
+      const { text, math } = removeMath(input);
+      expect(text).toBe(input);
+      expect(math).toEqual([]);
+    });
+
+    it('should handle fenced code blocks with info string', () => {
+      const input = '```R\ndata[data$foo > 1 & data$bar < 2,]\n```';
+      const { text, math } = removeMath(input);
+      expect(text).toBe(input);
+      expect(math).toEqual([]);
+    });
+
     it('should handle math markers', () => {
       const input = ' @@0@@ hello, $ /alpha $, there';
       const { text, math } = removeMath(input);
