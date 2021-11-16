@@ -496,7 +496,6 @@ export class OutputArea extends Widget {
     layout.removeWidgetAt(this.headEndIndex);
     for (
       let i = 0;
-      //      i < this.trimmedOutputModels.length - this.headTailNumberOutputs;
       i < this.trimmedOutputModels.length;
       i++
     ) {
