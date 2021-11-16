@@ -30,6 +30,9 @@ test.describe('Notebook Markdown', () => {
     const imageName = 'do-not-highlight-not-latex.png';
     await page.notebook.enterCellEditingMode(1);
     const cell = await page.notebook.getCell(1);
+    // Make sure cursor is consistently in the same position to avoid screenshot flake
+    await page.keyboard.press('Home');
+    await page.keyboard.press('PageUp');
     // Add some timeout to stabilize codemirror bounding box
     const cellBox = await cell.boundingBox();
     const cellNew = await page.notebook.getCell(1);
