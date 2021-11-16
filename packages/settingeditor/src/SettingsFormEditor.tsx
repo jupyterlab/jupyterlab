@@ -17,13 +17,37 @@ import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { reduce } from '@lumino/algorithm';
 import { PluginList } from './pluginlist';
 import { ISignal } from '@lumino/signaling';
-interface IProps {
-  settings: Settings;
-  renderers: { [id: string]: Field };
-  handleSelectSignal: ISignal<PluginList, string>;
-  hasError: (error: boolean) => void;
-}
 
+/**
+ * Namespace for a React component that prepares the settings for a
+ * given plugin to be rendered in the FormEditor.
+ */
+export namespace SettingsFormEditor {
+  /**
+   * Props passed to the SettingsFormEditor component
+   */
+  export interface IProps {
+    /**
+     * Settings object with schema and user defined values.
+     */
+    settings: Settings;
+
+    /**
+     * Dictionary used for custom field renderers in the form.
+     */
+    renderers: { [id: string]: Field };
+
+    /**
+     * Signal used to expand the plugin settings when selected.
+     */
+    handleSelectSignal: ISignal<PluginList, string>;
+
+    /**
+     * Callback to update the plugin list when a validation error occurs.
+     */
+    hasError: (error: boolean) => void;
+  }
+}
 /**
  * Renders the modified indicator and errors
  */
@@ -104,7 +128,7 @@ export const SettingsFormEditor = ({
   renderers,
   handleSelectSignal,
   hasError
-}: IProps) => {
+}: SettingsFormEditor.IProps) => {
   const [formData, setFormData] = React.useState(settings.user);
   const [isModified, setIsModified] = React.useState(settings.isModified);
   const [hidden, setHidden] = React.useState(true);
