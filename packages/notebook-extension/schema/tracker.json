@@ -677,6 +677,7 @@
       "type": "object"
     },
     "kernelStatusConfig": {
+      "type": "object",
       "showOnStatusBar": {
         "type": "boolean",
         "title": "Show kernel status on toolbar or status bar."
@@ -694,9 +695,11 @@
       "$ref": "#/definitions/editorConfig",
       "properties": {
         "lineWrap": {
+          "type": "string",
           "default": "off"
         },
         "matchBrackets": {
+          "type": "boolean",
           "default": true
         }
       },
@@ -738,9 +741,11 @@
       "$ref": "#/definitions/editorConfig",
       "properties": {
         "lineWrap": {
+          "type": "string",
           "default": "on"
         },
         "matchBrackets": {
+          "type": "boolean",
           "default": false
         }
       },
@@ -769,9 +774,11 @@
       "$ref": "#/definitions/editorConfig",
       "properties": {
         "lineWrap": {
+          "type": "string",
           "default": "on"
         },
         "matchBrackets": {
+          "type": "boolean",
           "default": false
         }
       },
