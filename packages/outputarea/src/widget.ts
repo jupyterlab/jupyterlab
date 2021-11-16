@@ -441,7 +441,7 @@ export class OutputArea extends Widget {
           output_type: 'display_data',
           data: {
             'text/html': `
-              <a style="margin: 10px; text-decoration: none;">
+              <a style="margin: 10px; text-decoration: none; cursor: pointer;">
                 <pre>Output of this cell has been trimmed on the initial display.</pre>
                 <pre>Displaying the first ${this.maxNumberOutputs} top outputs.</pre>
                 <pre>Click on this message to get the complete output.</pre>
