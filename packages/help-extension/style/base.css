@@ -12,6 +12,8 @@
 
 .jp-Help > iframe {
   border: none;
+  /* Forcing white color to avoid contrast issues see issue #11320 */
+  background: white;
 }
 
 .jp-About-body {
