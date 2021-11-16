@@ -10,7 +10,7 @@ import { Toolbar as ApputilsToolbar } from './toolbar';
 
 /**
  * @deprecated since v4
- * The widgets are now in @jupyterlab/ui-components
+ * Those widgets are now in @jupyterlab/ui-components
  */
 export {
   addCommandToolbarButtonClass,
@@ -21,6 +21,7 @@ export {
   IFrame,
   IUseSignalProps,
   IUseSignalState,
+  HoverBox,
   ReactWidget,
   Spinner,
   Styling,
@@ -36,7 +37,6 @@ export * from './commandlinker';
 export * from './commandpalette';
 export * from './dialog';
 export * from './domutils';
-export * from './hoverbox';
 export * from './inputdialog';
 export * from './kernelstatuses';
 export * from './mainareawidget';
