@@ -21,9 +21,7 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js",
-    "style/index.css",
-    "style/index.js"
+    "lib/*.js"
   ],
   "scripts": {
     "build": "tsc -b",
