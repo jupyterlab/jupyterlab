@@ -642,18 +642,20 @@ export async function ensureIntegrity(): Promise<boolean> {
     cssImports[name] = [];
     cssModuleImports[name] = [];
 
-    graph.dependenciesOf(name).forEach(depName => {
-      if (depName in cssData) {
-        cssData[depName].forEach(cssPath => {
-          cssImports[name].push(`${depName}/${cssPath}`);
-        });
-      }
-      if (depName in cssModuleData) {
-        cssModuleData[depName].forEach(cssModulePath => {
-          cssModuleImports[name].push(`${depName}/${cssModulePath}`);
-        });
-      }
-    });
+    if (name !== '@jupyterlab/metapackage') {
+      graph.dependenciesOf(name).forEach(depName => {
+        if (depName in cssData) {
+          cssData[depName].forEach(cssPath => {
+            cssImports[name].push(`${depName}/${cssPath}`);
+          });
+        }
+        if (depName in cssModuleData) {
+          cssModuleData[depName].forEach(cssModulePath => {
+            cssModuleImports[name].push(`${depName}/${cssModulePath}`);
+          });
+        }
+      });
+    }
   });
 
   // Update the metapackage.
