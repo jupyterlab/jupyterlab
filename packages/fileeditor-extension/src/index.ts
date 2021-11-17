@@ -37,7 +37,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
-import { Menu } from '@lumino/widgets';
+import { Menu, Widget } from '@lumino/widgets';
 import { Commands, FACTORY, IFileTypeData } from './commands';
 
 export { Commands } from './commands';
@@ -146,25 +146,17 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
  * Cursor position.
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extensions:cursor-position',
+  id: '@jupyterlab/fileeditor-extensions:cursor-position',
   activate: (
     app: JupyterFrontEnd,
     tracker: IEditorTracker,
     positionModel: IPositionModel
   ) => {
-    function updateCurrent() {
-      if (
-        tracker.currentWidget &&
-        tracker.currentWidget === app.shell.currentWidget
-      ) {
-        positionModel.editor = tracker.currentWidget.content.editor;
-      }
-    }
-
-    if (tracker.currentWidget) {
-      updateCurrent();
-    }
-    tracker.currentChanged.connect(updateCurrent);
+    positionModel.addEditorProvider((widget: Widget | null) =>
+      widget && tracker.has(widget)
+        ? (widget as IDocumentWidget<FileEditor>).content.editor
+        : null
+    );
   },
   requires: [IEditorTracker, IPositionModel],
   autoStart: true

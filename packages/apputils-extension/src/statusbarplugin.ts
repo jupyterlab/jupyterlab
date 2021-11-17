@@ -83,8 +83,8 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
     statusBar.registerStatusItem(kernelStatus.id, {
       item,
       align: 'left',
-      rank: 1,
-      isActive: () => !!item.model!.sessionContext
+      rank: 1
+      // isActive: () => !!item.model!.sessionContext
     });
 
     return item.model;
@@ -95,7 +95,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
  * A plugin providing running terminals and sessions information
  * to the status bar.
  */
-export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
+export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:running-sessions-status',
   autoStart: true,
   requires: [IStatusBar, ITranslator],
@@ -110,17 +110,10 @@ export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
       translator
     });
 
-    statusBar.registerStatusItem(runningSessionsItem.id, {
+    statusBar.registerStatusItem(runningSessionsStatus.id, {
       item,
       align: 'left',
       rank: 0
     });
   }
 };
-
-const plugins: JupyterFrontEndPlugin<any>[] = [
-  kernelStatus,
-  runningSessionsItem
-];
-
-export default plugins;

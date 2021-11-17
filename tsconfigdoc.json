@@ -215,9 +215,6 @@
       "path": "./packages/services"
     },
     {
-      "path": "./packages/services-extension"
-    },
-    {
       "path": "./packages/settingeditor"
     },
     {

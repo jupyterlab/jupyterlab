@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 import { CodeEditor } from './editor';
 import { IEditorFactoryService } from './factory';
 import { IEditorMimeTypeService } from './mimetype';
@@ -42,7 +43,17 @@ export const IPositionModel = new Token<IPositionModel>(
  */
 export interface IPositionModel {
   /**
-   * The current editor of the model.
+   * Add a editor provider.
+   *
+   * A provider will receive the currently active widget and must return the
+   * associated editor if it can or null otherwise.
    */
-  editor: CodeEditor.IEditor | null;
+  addEditorProvider: (
+    provider: (widget: Widget | null) => CodeEditor.IEditor | null
+  ) => void;
+
+  /**
+   * Callback to force updating the provider
+   */
+  update(): void;
 }

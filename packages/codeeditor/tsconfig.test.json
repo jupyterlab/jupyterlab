@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": ["src/*", "test/*"],
+  "include": [
+    "src/*",
+    "test/*"
+  ],
   "references": [
     {
       "path": "../coreutils"
@@ -13,6 +16,9 @@
     },
     {
       "path": "../shared-models"
+    },
+    {
+      "path": "../statusbar"
     },
     {
       "path": "../translation"

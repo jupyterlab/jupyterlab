@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import {
+  interactiveItem,
+  Popup,
+  showPopup,
+  TextItem
+} from '@jupyterlab/statusbar';
 import {
   ITranslator,
   nullTranslator,
@@ -15,13 +20,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import React from 'react';
-import {
-  interactiveItem,
-  Popup,
-  showPopup,
-  TextItem
-} from '@jupyterlab/statusbar';
-import { IPositionModel } from '.';
+import { CodeEditor } from './editor';
 
 /**
  * A namespace for LineFormComponent statics.
@@ -312,7 +311,7 @@ export namespace LineCol {
   /**
    * A VDom model for a status item tracking the line/column of an editor.
    */
-  export class Model extends VDomModel implements IPositionModel {
+  export class Model extends VDomModel {
     /**
      * The current editor of the model.
      */

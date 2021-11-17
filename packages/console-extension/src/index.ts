@@ -21,17 +21,12 @@ import {
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeCell } from '@jupyterlab/cells';
 import {
   CodeEditor,
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
-import {
-  CodeConsole,
-  ConsolePanel,
-  IConsoleTracker
-} from '@jupyterlab/console';
+import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -48,7 +43,7 @@ import {
   UUID
 } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
-import { DockLayout } from '@lumino/widgets';
+import { DockLayout, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 
 /**
@@ -172,27 +167,26 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   ) => {
     let previousWidget: ConsolePanel | null = null;
 
-    const onPromptCreated = (console: CodeConsole, prompt: CodeCell | null) => {
-      positionModel.editor = prompt && prompt.editor;
+    const provider = (widget: Widget | null) => {
+      let editor: CodeEditor.IEditor | null = null;
+      if (widget !== previousWidget) {
+        previousWidget?.console.promptCellCreated.disconnect(
+          positionModel.update
+        );
+
+        previousWidget = null;
+        if (widget && tracker.has(widget)) {
+          (widget as ConsolePanel).console.promptCellCreated.connect(
+            positionModel.update
+          );
+          editor = (widget as ConsolePanel).console.promptCell?.editor ?? null;
+          previousWidget = widget as ConsolePanel;
+        }
+      }
+      return editor;
     };
 
-    function updateCurrent() {
-      if (
-        tracker.currentWidget &&
-        tracker.currentWidget === app.shell.currentWidget
-      ) {
-        previousWidget?.console.promptCellCreated.disconnect(onPromptCreated);
-        const console = tracker.currentWidget.console;
-        onPromptCreated(console, console.promptCell);
-        console.promptCellCreated.connect(onPromptCreated);
-      }
-      previousWidget = tracker.currentWidget;
-    }
-
-    if (tracker.currentWidget) {
-      updateCurrent();
-    }
-    tracker.currentChanged.connect(updateCurrent);
+    positionModel.addEditorProvider(provider);
   },
   requires: [IConsoleTracker, IPositionModel],
   autoStart: true

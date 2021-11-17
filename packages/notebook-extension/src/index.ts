@@ -26,7 +26,11 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
-import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  IEditorServices,
+  IPositionModel
+} from '@jupyterlab/codeeditor';
 import { PageConfig } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -83,7 +87,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Menu, Panel } from '@lumino/widgets';
+import { Menu, Panel, Widget } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
 
 /**
@@ -715,29 +719,26 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   ) => {
     let previousWidget: NotebookPanel | null = null;
 
-    const onActiveCellChanged = (notebook: Notebook, cell: Cell | null) => {
-      positionModel.editor = cell && cell.editor;
+    const provider = (widget: Widget | null) => {
+      let editor: CodeEditor.IEditor | null = null;
+      if (widget !== previousWidget) {
+        previousWidget?.content.activeCellChanged.disconnect(
+          positionModel.update
+        );
+
+        previousWidget = null;
+        if (widget && tracker.has(widget)) {
+          (widget as NotebookPanel).content.activeCellChanged.connect(
+            positionModel.update
+          );
+          editor = (widget as NotebookPanel).content.activeCell?.editor ?? null;
+          previousWidget = widget as NotebookPanel;
+        }
+      }
+      return editor;
     };
 
-    function updateCurrent() {
-      if (
-        tracker.currentWidget &&
-        tracker.currentWidget === app.shell.currentWidget
-      ) {
-        previousWidget?.content.activeCellChanged.disconnect(
-          onActiveCellChanged
-        );
-        const notebook = tracker.currentWidget.content;
-        onActiveCellChanged(notebook, notebook.activeCell);
-        notebook.activeCellChanged.connect(onActiveCellChanged);
-      }
-      previousWidget = tracker.currentWidget;
-    }
-
-    if (tracker.currentWidget) {
-      updateCurrent();
-    }
-    tracker.currentChanged.connect(updateCurrent);
+    positionModel.addEditorProvider(provider);
   },
   requires: [INotebookTracker, IPositionModel],
   autoStart: true

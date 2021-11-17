@@ -4,22 +4,18 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../application"
-    },
-    {
-      "path": "../cells"
     },
     {
       "path": "../codeeditor"
     },
     {
       "path": "../codemirror"
-    },
-    {
-      "path": "../console"
     },
     {
       "path": "../docregistry"
@@ -29,9 +25,6 @@
     },
     {
       "path": "../mainmenu"
-    },
-    {
-      "path": "../notebook"
     },
     {
       "path": "../settingregistry"
