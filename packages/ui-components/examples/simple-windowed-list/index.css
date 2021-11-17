@@ -19,8 +19,14 @@ body {
 }
 
 .jp-WindowedPanel-outer {
+  border: solid 1px transparent;
   height: 500px;
   width: 250px;
+}
+
+.jp-WindowedPanel-outer:active,
+.jp-WindowedPanel-outer:focus {
+  border: solid 1px lightskyblue;
 }
 
 .content {
@@ -35,6 +41,11 @@ body {
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
+.content:active,
+.content:focus {
+  box-shadow: 1px 1px 2px lightseagreen;
+}
+
 .content > div {
   flex: 1 1 auto;
   display: flex;
@@ -44,7 +55,12 @@ body {
 }
 
 .content > div > textarea {
-  border: none;
+  border: solid 1px transparent;
   margin: 2px;
   padding: 0px;
+}
+
+.content > div > textarea:active,
+.content > div > textarea:focus {
+  border: solid 1px lightsalmon;
 }
