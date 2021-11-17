@@ -700,13 +700,20 @@
       "type": "object"
     },
     "kernelStatusConfig": {
-      "showOnStatusBar": {
-        "type": "boolean",
-        "title": "Show kernel status on toolbar or status bar."
-      },
-      "showProgress": {
-        "type": "boolean",
-        "title": "Show execution progress."
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "showOnStatusBar": {
+          "type": "boolean",
+          "title": "Show kernel status on toolbar or status bar.",
+          "description": "If `true`, the kernel status progression will be displayed in the status bar otherwise it will be in the toolbar.",
+          "default": false
+        },
+        "showProgress": {
+          "type": "boolean",
+          "title": "Show execution progress.",
+          "default": true
+        }
       }
     }
   },
