@@ -31,13 +31,16 @@ try {
 }
 
 /* TODOs
-  - Append all rendered widget in one command to not reflow the window uselessly
+  x Append all rendered widget in one command to not reflow the window uselessly
     Valuable at init and scroll to events (scroll to will be triggered by search)
+    => Overoptimization probably
   - Deal with focus lost 
     - when for example tab trigger a scroll event to an hidden widget
-    - when using Ctrl+Home or Ctrl+End
-  - Probably loosing selection too - so needs to deal with that... 
+    - when using Home or End
+    Apparently it depends if the focus is on the container or on an item that may disappear when scrolling with keyboard...
+  x Probably loosing selection too - so needs to deal with that... 
     https://stackoverflow.com/questions/7987172/can-i-move-a-domelement-while-preserving-focus/7987309
+    => Assume it is ok to loose the selection of hidden items
   v Support Dynamic Sizing - Resize Observer? or do we use a window container that does not enforce positioning
     https://developer.mozilla.org/en-US/docs/Web/API/Resize_Observer_API
   - What if items have margin... resizeobserver is not bringing that in
@@ -49,8 +52,20 @@ try {
   v one loop too much onUpdate -> resize -> onUpate -> resize 
     x use mutation observer to populate resize observer => bad idea because the layout detach/attach the node when moving it
     v resizer: don't unobserve all widgets before adding them all - just change status for changed widget
+  - Jitter trouble: :s
+      Updating range 157,163,158,162 -> 158,166,159,165...
+      Calling _onWidgetResize...
+      Updating range 158,166,159,165 -> 157,163,158,162...
+      Calling _onWidgetResize...
+      Updating range 157,163,158,162 -> 158,166,159,165...
+      Calling _onWidgetResize...
+      Updating range 158,166,159,165 -> 157,164,158,163...
+      Calling _onWidgetResize...
+      Updating range 157,164,158,163 -> 158,166,159,165...
+      Calling _onWidgetResize...
 
-  => We need to update the cached sizing object to
+
+  => We need to update the cached sizing object to ?
   {
     // Top offset of the item
     offset: number
@@ -222,19 +237,30 @@ export class WindowedList extends Widget {
       this._currentWindow[0] !== startIndex ||
       this._currentWindow[1] !== stopIndex
     ) {
+      const toAdd: Widget[] = [];
       for (let index = startIndex; index <= stopIndex; index++) {
-        const item = this._widgetRenderer(index);
+        toAdd.push(this._widgetRenderer(index));
+      }
+      const nWidgets = this.layout.widgets.length;
+      // Remove not needed widgets
+      for (let itemIdx = nWidgets - 1; itemIdx >= 0; itemIdx--) {
+        if (!toAdd.includes(this.layout.widgets[itemIdx])) {
+          this._resizeObserver.unobserve(this.layout.widgets[itemIdx].node);
+          this.layout.removeWidget(this.layout.widgets[itemIdx]);
+        }
+      }
+
+      for (let index = 0; index < toAdd.length; index++) {
+        const item = toAdd[index];
         if (!this.layout.widgets.includes(item)) {
           this._resizeObserver.observe(item.node);
+          this.layout.insertWidget(index, item);
+        } else {
+          const position = this.layout.widgets.findIndex(w => w === item);
+          if (position !== index) {
+            console.error(`Check widget at ${position} should be at ${index}`);
+          }
         }
-        this.layout.insertWidget(index - startIndex, item);
-      }
-      const nVisible = stopIndex - startIndex + 1;
-      const nWidgets = this.layout.widgets.length;
-      // Detach not needed widgets
-      for (let itemIdx = nWidgets; itemIdx > nVisible; itemIdx--) {
-        this._resizeObserver.unobserve(this.layout.widgets[itemIdx - 1].node);
-        this.layout.removeWidgetAt(itemIdx - 1);
       }
 
       this._currentWindow = newWindowIndex;
@@ -564,9 +590,7 @@ export class WindowedLayout extends PanelLayout {
     toIndex: number,
     widget: Widget
   ): void {
-    // TODO it looks skipped !?!
     // Optimize move without de-/attaching as motion appends with parent attached
-    console.log(`moveWidget ${fromIndex} to ${toIndex}`);
 
     // Case fromIndex === toIndex, already checked in PanelLayout.insertWidget
 
