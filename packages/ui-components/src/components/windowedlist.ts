@@ -84,9 +84,6 @@ export class WindowedList extends Widget {
     this._scrollRepaint = null;
     this._scrollUpdateWasRequested = false;
     this._currentWindow = [-1, -1, -1, -1];
-    this._mutationObserver = new MutationObserver(
-      this._onChildChange.bind(this)
-    );
     this._resizeObserver = new ResizeObserver(this._onWidgetResize.bind(this));
     this._widgetRenderer = options.widgetRenderer;
     this._widgetSize = options.estimateWidgetHeight;
@@ -95,8 +92,6 @@ export class WindowedList extends Widget {
     this._widgetSizers = [];
     this._widgetCount = options.widgetCount;
     this.layout = options.layout ?? new WindowedLayout();
-
-    this._mutationObserver.observe(windowContainer, { childList: true });
   }
 
   readonly layout: WindowedLayout;
@@ -158,9 +153,6 @@ export class WindowedList extends Widget {
 
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    for (const widget of this.layout.widgets) {
-      this._resizeObserver.observe(widget.node);
-    }
     this.node.addEventListener('scroll', this, passiveIfSupported);
     this._height = this.node.getBoundingClientRect().height;
   }
@@ -223,8 +215,13 @@ export class WindowedList extends Widget {
       this._currentWindow[0] !== startIndex ||
       this._currentWindow[1] !== stopIndex
     ) {
+      // Due to the following line the resize event is emitted even if nodes are not changing
+      // Probably better to use a MutationObserver like in virtual-scroller
+      this._resizeObserver.disconnect();
+
       for (let index = startIndex; index <= stopIndex; index++) {
         const item = this._widgetRenderer(index);
+        this._resizeObserver.observe(item.node);
         this.layout.insertWidget(index - startIndex, item);
       }
       const nVisible = stopIndex - startIndex + 1;
@@ -418,33 +415,6 @@ export class WindowedList extends Widget {
     return totalSizeOfMeasuredItems + totalSizeOfUnmeasuredItems;
   }
 
-  private _onChildChange(
-    mutations: MutationRecord[],
-    observer: MutationObserver
-  ): void {
-    mutations.forEach(mutation => {
-      switch (mutation.type) {
-        case 'childList':
-          {
-            for (const node of mutation.removedNodes) {
-              if (node.nodeType === Node.ELEMENT_NODE) {
-                this._resizeObserver.unobserve(node as Element);
-              }
-            }
-            for (const node of mutation.addedNodes) {
-              if (node.nodeType === Node.ELEMENT_NODE) {
-                this._resizeObserver.observe(node as Element);
-              }
-            }
-          }
-          break;
-
-        default:
-          break;
-      }
-    });
-  }
-
   private _onWidgetResize(entries: ResizeObserverEntry[]): void {
     console.log('Calling _onWidgetResize...');
     // TODO should update the all list as a reduction in size may implies needing more items to be rendered
@@ -482,7 +452,6 @@ export class WindowedList extends Widget {
   private _scrollRepaint: number | null;
   private _scrollUpdateWasRequested: boolean;
   private _currentWindow: WindowedList.WindowIndex;
-  private _mutationObserver: MutationObserver;
   private _resizeObserver: ResizeObserver;
 }
 
