@@ -46,7 +46,9 @@ try {
   - On idle cycle call estimated size on not rendered element
   - Check what happens if the inner container is bigger than the list requires
   - Ctrl+End not bringing to the bottom of the list due to height estimation.
-  v one loop too much onUpdate -> resize -> onUpate -> resize [use mutation observer to populate resize observer]
+  v one loop too much onUpdate -> resize -> onUpate -> resize 
+    x use mutation observer to populate resize observer => bad idea because the layout detach/attach the node when moving it
+    v resizer: don't unobserve all widgets before adding them all - just change status for changed widget
 
   => We need to update the cached sizing object to
   {
@@ -153,6 +155,9 @@ export class WindowedList extends Widget {
 
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
+    for (const widget of this.layout.widgets) {
+      this._resizeObserver.observe(widget.node);
+    }
     this.node.addEventListener('scroll', this, passiveIfSupported);
     this._height = this.node.getBoundingClientRect().height;
   }
@@ -207,27 +212,28 @@ export class WindowedList extends Widget {
   }
 
   private _update(): void {
-    console.log('Calling onUpdateRequest...');
     const newWindowIndex = this._getRangeToRender();
     const [startIndex, stopIndex] = newWindowIndex;
+    console.log(
+      `Updating range ${this._currentWindow} -> ${newWindowIndex}...`
+    );
 
     if (
       this._currentWindow[0] !== startIndex ||
       this._currentWindow[1] !== stopIndex
     ) {
-      // Due to the following line the resize event is emitted even if nodes are not changing
-      // Probably better to use a MutationObserver like in virtual-scroller
-      this._resizeObserver.disconnect();
-
       for (let index = startIndex; index <= stopIndex; index++) {
         const item = this._widgetRenderer(index);
-        this._resizeObserver.observe(item.node);
+        if (!this.layout.widgets.includes(item)) {
+          this._resizeObserver.observe(item.node);
+        }
         this.layout.insertWidget(index - startIndex, item);
       }
       const nVisible = stopIndex - startIndex + 1;
       const nWidgets = this.layout.widgets.length;
       // Detach not needed widgets
       for (let itemIdx = nWidgets; itemIdx > nVisible; itemIdx--) {
+        this._resizeObserver.unobserve(this.layout.widgets[itemIdx - 1].node);
         this.layout.removeWidgetAt(itemIdx - 1);
       }
 
