@@ -460,7 +460,6 @@ export class OutputArea extends Widget {
     const layout = this.layout as PanelLayout;
     if (index < this.maxNumberOutputs || this.maxNumberOutputs === 0) {
       layout.insertWidget(index, output);
-    } else if (index >= this.maxNumberOutputs) {
     }
     if (index >= this.maxNumberOutputs && this.maxNumberOutputs !== 0) {
       this.trimmedOutputModels.push(model);
@@ -494,11 +493,7 @@ export class OutputArea extends Widget {
   private _showTrimmedOutputs() {
     const layout = this.layout as PanelLayout;
     layout.removeWidgetAt(this.headEndIndex);
-    for (
-      let i = 0;
-      i < this.trimmedOutputModels.length;
-      i++
-    ) {
+    for (let i = 0; i < this.trimmedOutputModels.length; i++) {
       const output = this._createOutput(this.trimmedOutputModels[i]);
       layout.insertWidget(this.headEndIndex + i, output);
     }
