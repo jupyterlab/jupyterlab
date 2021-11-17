@@ -8,7 +8,7 @@ The recommended way to make a release is to use [`jupyter_releaser`](https://git
 
 ### Workflow
 
-The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#making-your-first-release.
+The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#making-your-first-release. There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
 
 Here is a quick summary of the different steps.
 
@@ -351,3 +351,60 @@ https://github.com/jupyter/repo2docker/pull/169/files
 
 This needs to be done in both the conda and pip buildpacks in both the
 frozen and non-frozen version of the files.
+
+## Making a Minor Release
+
+### Planning
+
+- Create a pinned issue
+- Create a milestone
+- Decide on a scope for the release and set a target final release date
+
+## Alpha and Beta Phase
+
+- Create a new branch from the previous release branch
+- Use a ".x" in the branch name so we can continue to use it for patches
+- Update branch and RTD config in `ensure_repo.ts` and run `jlpm integrity` to update links - source should be the previous release branch
+- Update readthedocs branch config as appropriate
+- Automated Release using "minor" - edit changelog for new section
+- Move through alpha and beta phases as appropriate
+
+### RC Phase
+
+- Roll up the release notes using the "Use PRs with activity since the last stable git tag" option when running the workflows
+- Update the release issue with an updated date
+
+### Final Release
+
+- Roll up the release notes using the "Use PRs with activity since the last stable git tag" option when running the workflows
+- Close the release issue
+- Rename milestone to use ".x"
+- Make an announcement on Discourse
+
+## Making a Major Release
+
+### Planning
+
+- Create a pinned issue
+- Create a milestone
+- Decide on a scope for the release and set a target final release date
+
+### Alpha and Beta Phase
+
+- Update branch and RTD config in `ensure_repo.ts` and `jlpm integrity` to update links - source should be the previous branch
+- Update readthedocs branch config as appropriate
+- Automated Release using "major" - edit changelog for new section
+- Move through alpha and beta phases as appropriate
+
+### RC Phase
+
+- Roll up the release notes using the "Use PRs with activity since the last stable git tag" option when running the workflows
+- Create a new branch from the default branch with ".x" in the name so we can continue to use it for patches
+- Update the release issue with an updated date
+
+### Final Release
+
+- Roll up the release notes using the "Use PRs with activity since the last stable git tag" option when running the workflows
+- Close the release issue and rename milestone to use ".x"
+- Make an announcement on Discourse
+- Make a blog post
