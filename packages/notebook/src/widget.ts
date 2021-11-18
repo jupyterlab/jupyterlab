@@ -179,17 +179,7 @@ export class StaticNotebook extends Widget {
    * Construct a notebook widget.
    */
   constructor(options: StaticNotebook.IOptions) {
-    const innerElement = document.createElement('div');
-    super({ node: innerElement });
-    this._innerElement = innerElement;
-    this._mimetype = 'text/plain';
-    this._model = null;
-    this._modelChanged = new Signal<this, void>(this);
-    this._modelContentChanged = new Signal<this, void>(this);
-    this._fullyRendered = new Signal<this, boolean>(this);
-    this._placeholderCellRendered = new Signal<this, Cell>(this);
-    this._renderedCellsCount = 0;
-
+    super();
     this.addClass(NB_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[UNDOER] = 'true';
@@ -205,56 +195,50 @@ export class StaticNotebook extends Widget {
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._mimetypeService = options.mimeTypeService;
 
-    this.innerNode.style.width = '100%';
-    if (this.isWindowed) {
-      this.node.style.position = 'relative';
-      this.node.style.overflowY = 'auto';
-    }
-
     // Section for the virtual-notebook behavior.
-    // this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
-    // this._cellsArray = new Array<Cell>();
-    // if ('IntersectionObserver' in window) {
-    //   this._observer = new IntersectionObserver(
-    //     (entries, observer) => {
-    //       entries.forEach(o => {
-    //         if (o.isIntersecting) {
-    //           observer.unobserve(o.target);
-    //           const ci = this._toRenderMap.get(o.target.id);
-    //           if (ci) {
-    //             const { cell, index } = ci;
-    //             this._renderPlaceholderCell(cell, index);
-    //           }
-    //         }
-    //       });
-    //     },
-    //     {
-    //       root: this.node,
-    //       threshold: 1,
-    //       rootMargin: `${this.notebookConfig.observedTopMargin} 0px ${this.notebookConfig.observedBottomMargin} 0px`
-    //     }
-    //   );
-    // }
+    this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
+    this._cellsArray = new Array<Cell>();
+    if ('IntersectionObserver' in window) {
+      this._observer = new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach(o => {
+            if (o.isIntersecting) {
+              observer.unobserve(o.target);
+              const ci = this._toRenderMap.get(o.target.id);
+              if (ci) {
+                const { cell, index } = ci;
+                this._renderPlaceholderCell(cell, index);
+              }
+            }
+          });
+        },
+        {
+          root: this.node,
+          threshold: 1,
+          rootMargin: `${this.notebookConfig.observedTopMargin} 0px ${this.notebookConfig.observedBottomMargin} 0px`
+        }
+      );
+    }
   }
 
   /**
    * A signal emitted when the notebook is fully rendered.
    */
-  get fullyRendered(): ISignal<StaticNotebook, boolean> {
+  get fullyRendered(): ISignal<this, boolean> {
     return this._fullyRendered;
   }
 
   /**
    * A signal emitted when the a placeholder cell is rendered.
    */
-  get placeholderCellRendered(): ISignal<StaticNotebook, Cell> {
+  get placeholderCellRendered(): ISignal<this, Cell> {
     return this._placeholderCellRendered;
   }
 
   /**
    * A signal emitted when the model of the notebook changes.
    */
-  get modelChanged(): ISignal<StaticNotebook, void> {
+  get modelChanged(): ISignal<this, void> {
     return this._modelChanged;
   }
 
@@ -264,7 +248,7 @@ export class StaticNotebook extends Widget {
    * #### Notes
    * This is a convenience signal that follows the current model.
    */
-  get modelContentChanged(): ISignal<StaticNotebook, void> {
+  get modelContentChanged(): ISignal<this, void> {
     return this._modelContentChanged;
   }
 
@@ -354,10 +338,6 @@ export class StaticNotebook extends Widget {
   set notebookConfig(value: StaticNotebook.INotebookConfig) {
     this._notebookConfig = value;
     this._updateNotebookConfig();
-  }
-
-  get isWindowed(): boolean {
-    return (this._notebookConfig.overscanCount ?? 0) > 0;
   }
 
   /**
@@ -548,46 +528,6 @@ export class StaticNotebook extends Widget {
     cell: ICellModel,
     insertType: InsertType
   ): void {
-    // let widget: Cell = this._renderCellModel(cell);
-    // const layout = this.layout as PanelLayout;
-    // this._cellsArray.push(widget);
-    // if (
-    //   this._observer &&
-    //   insertType === 'push' &&
-    //   this._renderedCellsCount >=
-    //     this.notebookConfig.numberCellsToRenderDirectly &&
-    //   cell.type !== 'markdown'
-    // ) {
-    //   // We have an observer and we are have been asked to push (not to insert).
-    //   // and we are above the number of cells to render directly, then
-    //   // we will add a placeholder and let the intersection observer or the
-    //   // idle browser render those placeholder cells.
-    //   this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
-    //   const placeholder = this._createPlaceholderCell(
-    //     cell as IRawCellModel,
-    //     index
-    //   );
-    //   placeholder.node.id = widget.model.id;
-    //   layout.insertWidget(index, placeholder);
-    //   this.onCellInserted(index, placeholder);
-    //   this._fullyRendered.emit(false);
-    //   this._observer.observe(placeholder.node);
-    // } else {
-    //   // We have no intersection observer, or we insert, or we are below
-    //   // the number of cells to render directly, so we render directly.
-    //   layout.insertWidget(index, widget);
-    //   this._incrementRenderedCount();
-    //   this.onCellInserted(index, widget);
-    // }
-    // if (this._observer && this.notebookConfig.renderCellOnIdle) {
-    //   const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
-    //   (window as any).requestIdleCallback(renderPlaceholderCells, {
-    //     timeout: 1000
-    //   });
-    // }
-  }
-
-  private _renderCellModel(cell: ICellModel) {
     let widget: Cell;
     switch (cell.type) {
       case 'code':
@@ -604,19 +544,56 @@ export class StaticNotebook extends Widget {
         widget = this._createRawCell(cell as IRawCellModel);
     }
     widget.addClass(NB_CELL_CLASS);
-    return widget;
+
+    const layout = this.layout as PanelLayout;
+    this._cellsArray.push(widget);
+    if (
+      this._observer &&
+      insertType === 'push' &&
+      this._renderedCellsCount >=
+        this.notebookConfig.numberCellsToRenderDirectly &&
+      cell.type !== 'markdown'
+    ) {
+      // We have an observer and we are have been asked to push (not to insert).
+      // and we are above the number of cells to render directly, then
+      // we will add a placeholder and let the intersection observer or the
+      // idle browser render those placeholder cells.
+      this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
+      const placeholder = this._createPlaceholderCell(
+        cell as IRawCellModel,
+        index
+      );
+      placeholder.node.id = widget.model.id;
+      layout.insertWidget(index, placeholder);
+      this.onCellInserted(index, placeholder);
+      this._fullyRendered.emit(false);
+      this._observer.observe(placeholder.node);
+    } else {
+      // We have no intersection observer, or we insert, or we are below
+      // the number of cells to render directly, so we render directly.
+      layout.insertWidget(index, widget);
+      this._incrementRenderedCount();
+      this.onCellInserted(index, widget);
+    }
+
+    if (this._observer && this.notebookConfig.renderCellOnIdle) {
+      const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
+      (window as any).requestIdleCallback(renderPlaceholderCells, {
+        timeout: 1000
+      });
+    }
   }
 
-  // private _renderPlaceholderCells(deadline: any) {
-  //   if (
-  //     this._renderedCellsCount < this._cellsArray.length &&
-  //     this._renderedCellsCount >=
-  //       this.notebookConfig.numberCellsToRenderDirectly
-  //   ) {
-  //     const ci = this._toRenderMap.entries().next();
-  //     this._renderPlaceholderCell(ci.value[1].cell, ci.value[1].index);
-  //   }
-  // }
+  private _renderPlaceholderCells(deadline: any) {
+    if (
+      this._renderedCellsCount < this._cellsArray.length &&
+      this._renderedCellsCount >=
+        this.notebookConfig.numberCellsToRenderDirectly
+    ) {
+      const ci = this._toRenderMap.entries().next();
+      this._renderPlaceholderCell(ci.value[1].cell, ci.value[1].index);
+    }
+  }
 
   private _renderPlaceholderCell(cell: Cell, index: number) {
     const pl = this.layout as PanelLayout;
@@ -676,27 +653,27 @@ export class StaticNotebook extends Widget {
   /**
    * Create a placeholder cell widget from a raw cell model.
    */
-  // private _createPlaceholderCell(model: IRawCellModel, index: number): RawCell {
-  //   const contentFactory = this.contentFactory;
-  //   const editorConfig = this.editorConfig.raw;
-  //   const options = {
-  //     editorConfig,
-  //     model,
-  //     contentFactory,
-  //     updateEditorOnShow: false,
-  //     placeholder: true
-  //   };
-  //   const cell = this.contentFactory.createRawCell(options, this);
-  //   cell.node.innerHTML = `
-  //     <div class="jp-Cell-Placeholder">
-  //       <div class="jp-Cell-Placeholder-wrapper">
-  //       </div>
-  //     </div>`;
-  //   cell.inputHidden = true;
-  //   cell.syncCollapse = true;
-  //   cell.syncEditable = true;
-  //   return cell;
-  // }
+  private _createPlaceholderCell(model: IRawCellModel, index: number): RawCell {
+    const contentFactory = this.contentFactory;
+    const editorConfig = this.editorConfig.raw;
+    const options = {
+      editorConfig,
+      model,
+      contentFactory,
+      updateEditorOnShow: false,
+      placeholder: true
+    };
+    const cell = this.contentFactory.createRawCell(options, this);
+    cell.node.innerHTML = `
+      <div class="jp-Cell-Placeholder">
+        <div class="jp-Cell-Placeholder-wrapper">
+        </div>
+      </div>`;
+    cell.inputHidden = true;
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    return cell;
+  }
 
   /**
    * Create a raw cell widget from a raw cell model.
@@ -816,17 +793,17 @@ export class StaticNotebook extends Widget {
     this._renderedCellsCount++;
   }
 
-  private _editorConfig: StaticNotebook.IEditorConfig;
-  private _notebookConfig: StaticNotebook.INotebookConfig;
-  private _mimetype: string;
-  private _model: INotebookModel | null;
+  private _editorConfig = StaticNotebook.defaultEditorConfig;
+  private _notebookConfig = StaticNotebook.defaultNotebookConfig;
+  private _mimetype = 'text/plain';
+  private _model: INotebookModel | null = null;
   private _mimetypeService: IEditorMimeTypeService;
-  private _modelChanged: Signal<StaticNotebook, void>;
-  private _modelContentChanged: Signal<StaticNotebook, void>;
-  private _fullyRendered: Signal<StaticNotebook, boolean>;
-  private _placeholderCellRendered: Signal<StaticNotebook, Cell>;
-  // private _observer: IntersectionObserver;
-  private _renderedCellsCount: number;
+  private _modelChanged = new Signal<this, void>(this);
+  private _modelContentChanged = new Signal<this, void>(this);
+  private _fullyRendered = new Signal<this, boolean>(this);
+  private _placeholderCellRendered = new Signal<this, Cell>(this);
+  private _observer: IntersectionObserver;
+  private _renderedCellsCount = 0;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
   private _cellsArray: Array<Cell>;
 }
@@ -1002,21 +979,6 @@ export namespace StaticNotebook {
      * Defines if the document can be undo/redo.
      */
     disableDocumentWideUndoRedo: boolean;
-
-    /**
-     * The number of cells to render outside the visible area. This property can be important for two reasons:
-     *
-     *  Overscanning by one cell allows the tab key to focus on the next (not yet visible) cell.
-     *  Overscanning slightly can reduce or prevent a flash of empty space when a user first starts scrolling.
-     *
-     * #### Notes
-     *  Overscanning too much can negatively impact performance.
-     *  If overscanCount is > 0, numberCellsToRenderDirectly, renderCellOnIdle, observedTopMargin and observedBottomMargin
-     *  won't be used.
-     *
-     * @alpha
-     */
-    overscanCount?: number;
   }
 
   /**
@@ -1031,8 +993,7 @@ export namespace StaticNotebook {
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px',
     maxNumberOutputs: 50,
-    disableDocumentWideUndoRedo: false,
-    overscanCount: 1
+    disableDocumentWideUndoRedo: false
   };
 
   /**
