@@ -12,13 +12,9 @@ import { caretDownIcon } from '../icon';
 import { Toolbar } from './toolbar';
 
 /**
- * Accordion panel layout that add a toolbar in widget title if present.
+ * Accordion panel layout that adds a toolbar in widget title if present.
  */
 class AccordionToolbarLayout extends AccordionLayout {
-  constructor(options: AccordionLayout.IOptions) {
-    super(options);
-  }
-
   /**
    * Insert a widget into the layout at the specified index.
    *

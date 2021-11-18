@@ -260,7 +260,7 @@ describe('Debugger', () => {
   });
 
   describe('#callstack', () => {
-    it('should have a header and a body', () => {
+    it('should have a body', () => {
       expect(sidebar.callstack.widgets.length).toEqual(1);
     });
 
@@ -348,7 +348,7 @@ describe('Debugger', () => {
   });
 
   describe('#sources', () => {
-    it('should have a header and a body', () => {
+    it('should have a body', () => {
       expect(sidebar.sources.widgets.length).toEqual(1);
     });
 
