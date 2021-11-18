@@ -1462,6 +1462,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       })
     });
 
+    // Store option for heading collapsing behaviour
+    this._showHiddenCellsButton = options.showHiddenCellsButton;
+    console.log('initialized sHCB', this._showHiddenCellsButton)
+
     // Stop codemirror handling paste
     this.editor.setOption('handlePaste', false);
 
@@ -1552,6 +1556,15 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 
   get toggleCollapsedSignal(): Signal<this, boolean> {
     return this._toggleCollapsedSignal;
+  }
+
+  /**
+   * Allow updating 
+   */
+  set showHiddenCellsButton(value: boolean) {
+    this._showHiddenCellsButton = value;
+    
+    console.log('updated sHCB', this._showHiddenCellsButton)
   }
 
   /**
@@ -1730,7 +1743,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       contentFactory: this.contentFactory,
       rendermime: this._rendermime,
       placeholder: false,
-      translator: this.translator
+      translator: this.translator,
+      showHiddenCellsButton: this._showHiddenCellsButton
     });
   }
 
@@ -1743,6 +1757,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendered = true;
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
+  private _showHiddenCellsButton = true;
 }
 
 /**
@@ -1757,6 +1772,11 @@ export namespace MarkdownCell {
      * The mime renderer for the cell widget.
      */
     rendermime: IRenderMimeRegistry;
+
+    /**
+     * Option for showing hidden cells button if heading is collapsed.
+     */
+    showHiddenCellsButton: boolean;
   }
 }
 

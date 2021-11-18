@@ -642,7 +642,8 @@ export class StaticNotebook extends Widget {
       rendermime,
       contentFactory,
       updateEditorOnShow: false,
-      placeholder: false
+      placeholder: false,
+      showHiddenCellsButton: this.notebookConfig.showHiddenCellsButton
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
@@ -784,6 +785,14 @@ export class StaticNotebook extends Widget {
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
+
+    // Update showHiddenCellsButton property in markdown cells
+    for (let i = 0; i < this.widgets.length; i++) {
+      const cell = this.widgets[i];
+      if (cell.model.type == 'markdown') {
+        (<MarkdownCell>cell).showHiddenCellsButton = this._notebookConfig.showHiddenCellsButton;
+      }
+    }
   }
 
   private _incrementRenderedCount() {
