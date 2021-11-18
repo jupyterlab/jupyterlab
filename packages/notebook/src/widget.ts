@@ -3,6 +3,7 @@
 
 import {
   Cell,
+  CellModel,
   CodeCell,
   ICellModel,
   ICodeCellModel,
@@ -17,6 +18,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { WindowedListModel } from '@jupyterlab/ui-components';
 import { ArrayExt, each, findIndex } from '@lumino/algorithm';
 import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
@@ -163,6 +165,437 @@ if ((window as any).requestIdleCallback === undefined) {
   (window as any).cancelIdleCallback = function (id: number) {
     clearTimeout(id);
   };
+}
+
+export class NotebookViewModel extends WindowedListModel {
+  /**
+   * Construct a notebook widget.
+   */
+  constructor(options: StaticNotebook.IOptions) {
+    super();
+    this.rendermime = options.rendermime;
+    this.translator = options.translator || nullTranslator;
+    this.contentFactory =
+      options.contentFactory || StaticNotebook.defaultContentFactory;
+    this.editorConfig =
+      options.editorConfig || StaticNotebook.defaultEditorConfig;
+    this.notebookConfig =
+      options.notebookConfig || StaticNotebook.defaultNotebookConfig;
+    this._mimetypeService = options.mimeTypeService;
+  }
+  estimateWidgetHeight = (index: number | null): number => {
+    // TODO
+    return 120;
+  };
+
+  widgetRenderer = (index: number): Widget => {
+    let widget: Cell;
+    switch (cell.type) {
+      case 'code':
+        widget = this._createCodeCell(cell as ICodeCellModel);
+        widget.model.mimeType = this._mimetype;
+        break;
+      case 'markdown':
+        widget = this._createMarkdownCell(cell as IMarkdownCellModel);
+        if (cell.value.text === '') {
+          (widget as MarkdownCell).rendered = false;
+        }
+        break;
+      default:
+        widget = this._createRawCell(cell as IRawCellModel);
+    }
+    widget.addClass(NB_CELL_CLASS);
+
+    return widget;
+  };
+
+  /**
+   * A signal emitted when the model of the notebook changes.
+   */
+  get modelChanged(): ISignal<this, void> {
+    return this._modelChanged;
+  }
+
+  /**
+   * A signal emitted when the model content changes.
+   *
+   * #### Notes
+   * This is a convenience signal that follows the current model.
+   */
+  get modelContentChanged(): ISignal<this, void> {
+    return this._modelContentChanged;
+  }
+
+  /**
+   * The cell factory used by the widget.
+   */
+  readonly contentFactory: StaticNotebook.IContentFactory;
+
+  /**
+   * The Rendermime instance used by the widget.
+   */
+  readonly rendermime: IRenderMimeRegistry;
+
+  /**
+   * Translator to be used by cell renderers
+   */
+  readonly translator: ITranslator;
+
+  /**
+   * The model for the widget.
+   */
+  get model(): INotebookModel | null {
+    return this._model;
+  }
+  set model(newValue: INotebookModel | null) {
+    newValue = newValue || null;
+    if (this._model === newValue) {
+      return;
+    }
+    const oldValue = this._model;
+    this._model = newValue;
+
+    if (oldValue && oldValue.modelDB.isCollaborative) {
+      void oldValue.modelDB.connected.then(() => {
+        oldValue!.modelDB.collaborators!.changed.disconnect(
+          this._onCollaboratorsChanged,
+          this
+        );
+      });
+    }
+    if (newValue && newValue.modelDB.isCollaborative) {
+      void newValue.modelDB.connected.then(() => {
+        newValue!.modelDB.collaborators!.changed.connect(
+          this._onCollaboratorsChanged,
+          this
+        );
+      });
+    }
+
+    // Trigger private, protected, and public changes.
+    this._onModelChanged(oldValue, newValue);
+    this.onModelChanged(oldValue, newValue);
+    this._modelChanged.emit(void 0);
+  }
+
+  /**
+   * Get the mimetype for code cells.
+   */
+  get codeMimetype(): string {
+    return this._mimetype;
+  }
+
+  /**
+   * A configuration object for cell editor settings.
+   */
+  get editorConfig(): StaticNotebook.IEditorConfig {
+    return this._editorConfig;
+  }
+  set editorConfig(value: StaticNotebook.IEditorConfig) {
+    this._editorConfig = value;
+    this._updateEditorConfig();
+  }
+
+  /**
+   * A configuration object for notebook settings.
+   */
+  get notebookConfig(): StaticNotebook.INotebookConfig {
+    return this._notebookConfig;
+  }
+  set notebookConfig(value: StaticNotebook.INotebookConfig) {
+    this._notebookConfig = value;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    this._model = null;
+    super.dispose();
+  }
+
+  /**
+   * Handle a new model.
+   *
+   * #### Notes
+   * This method is called after the model change has been handled
+   * internally and before the `modelChanged` signal is emitted.
+   * The default implementation is a no-op.
+   */
+  protected onModelChanged(
+    oldValue: INotebookModel | null,
+    newValue: INotebookModel | null
+  ): void {
+    // No-op.
+  }
+
+  /**
+   * Handle changes to the notebook model content.
+   *
+   * #### Notes
+   * The default implementation emits the `modelContentChanged` signal.
+   */
+  protected onModelContentChanged(model: INotebookModel, args: void): void {
+    this._modelContentChanged.emit(void 0);
+  }
+
+  /**
+   * Handle changes to the notebook model metadata.
+   *
+   * #### Notes
+   * The default implementation updates the mimetypes of the code cells
+   * when the `language_info` metadata changes.
+   */
+  protected onMetadataChanged(
+    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
+    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
+  ): void {
+    switch (args.key) {
+      case 'language_info':
+        this._updateMimetype();
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Handle a new model on the widget.
+   */
+  private _onModelChanged(
+    oldValue: INotebookModel | null,
+    newValue: INotebookModel | null
+  ): void {
+    if (oldValue) {
+      oldValue.cells.changed.disconnect(this._onCellsChanged, this);
+      oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
+      oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
+
+      // TODO: reuse existing cell widgets if possible. Remember to initially
+      // clear the history of each cell if we do this.
+      this.widgetCount = 0;
+      // Clear widget cache
+      this._widgetsCache = new WeakMap<ICellModel, Cell>();
+    }
+    if (!newValue) {
+      this._mimetype = 'text/plain';
+      return;
+    }
+    this._updateMimetype();
+    const cells = newValue.cells;
+    if (!cells.length && newValue.isInitialized) {
+      cells.push(
+        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
+      );
+    }
+
+    cells.changed.connect(this._onCellsChanged, this);
+    newValue.contentChanged.connect(this.onModelContentChanged, this);
+    newValue.metadata.changed.connect(this.onMetadataChanged, this);
+
+    this.stateChanged.emit({ name: 'data', newValue, oldValue });
+  }
+
+  /**
+   * Handle a change cells event.
+   */
+  private _onCellsChanged(
+    sender: IObservableList<ICellModel>,
+    args: IObservableList.IChangedArgs<ICellModel>
+  ) {
+    let index = 0;
+    switch (args.type) {
+      case 'add':
+        index = args.newIndex;
+        // eslint-disable-next-line no-case-declarations
+        const insertType: InsertType = args.oldIndex == -1 ? 'push' : 'insert';
+        each(args.newValues, value => {
+          this._insertCell(index++, value, insertType);
+        });
+        break;
+      case 'move':
+        this._moveCell(args.oldIndex, args.newIndex);
+        break;
+      case 'remove':
+        each(args.oldValues, value => {
+          this._removeCell(args.oldIndex);
+        });
+        // Add default cell if there are no cells remaining.
+        if (!sender.length) {
+          const model = this.model;
+          // Add the cell in a new context to avoid triggering another
+          // cell changed event during the handling of this signal.
+          requestAnimationFrame(() => {
+            if (model && !model.isDisposed && !model.cells.length) {
+              model.cells.push(
+                model.contentFactory.createCell(
+                  this.notebookConfig.defaultCell,
+                  {}
+                )
+              );
+            }
+          });
+        }
+        break;
+      case 'set':
+        // TODO: reuse existing widgets if possible.
+        index = args.newIndex;
+        each(args.newValues, value => {
+          // Note: this ordering (insert then remove)
+          // is important for getting the active cell
+          // index for the editable notebook correct.
+          this._insertCell(index, value, 'set');
+          this._removeCell(index + 1);
+          index++;
+        });
+        break;
+      default:
+        return;
+    }
+  }
+
+  /**
+   * Create a code cell widget from a code cell model.
+   */
+  private _createCodeCell(model: ICodeCellModel): CodeCell {
+    const rendermime = this.rendermime;
+    const contentFactory = this.contentFactory;
+    const editorConfig = this.editorConfig.code;
+    const options = {
+      editorConfig,
+      model,
+      rendermime,
+      contentFactory,
+      updateEditorOnShow: false,
+      placeholder: false,
+      translator: this.translator,
+      maxNumberOutputs: this.notebookConfig.maxNumberOutputs
+    };
+    const cell = this.contentFactory.createCodeCell(options);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    cell.syncScrolled = true;
+    return cell;
+  }
+
+  /**
+   * Create a markdown cell widget from a markdown cell model.
+   */
+  private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCell {
+    const rendermime = this.rendermime;
+    const contentFactory = this.contentFactory;
+    const editorConfig = this.editorConfig.markdown;
+    const options = {
+      editorConfig,
+      model,
+      rendermime,
+      contentFactory,
+      updateEditorOnShow: false,
+      placeholder: false
+    };
+    const cell = this.contentFactory.createMarkdownCell(options);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    return cell;
+  }
+
+  /**
+   * Create a raw cell widget from a raw cell model.
+   */
+  private _createRawCell(model: IRawCellModel): RawCell {
+    const contentFactory = this.contentFactory;
+    const editorConfig = this.editorConfig.raw;
+    const options = {
+      editorConfig,
+      model,
+      contentFactory,
+      updateEditorOnShow: false,
+      placeholder: false
+    };
+    const cell = this.contentFactory.createRawCell(options);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    return cell;
+  }
+
+  /**
+   * Update the mimetype of the notebook.
+   */
+  private _updateMimetype(): void {
+    const info = this._model?.metadata.get(
+      'language_info'
+    ) as nbformat.ILanguageInfoMetadata;
+    if (!info) {
+      return;
+    }
+    this._mimetype = this._mimetypeService.getMimeTypeByLanguage(info);
+    each(this._model?.cells.iter() ?? [], model => {
+      if (model.type === 'code') {
+        model.mimeType = this._mimetype;
+      }
+    });
+  }
+
+  /**
+   * Handle an update to the collaborators.
+   */
+  private _onCollaboratorsChanged(): void {
+    // If there are selections corresponding to non-collaborators,
+    // they are stale and should be removed.
+    if (this._model) {
+      each(this._model.cells.iter(), cell => {
+        for (const key of cell.selections.keys()) {
+          if (false === this._model?.modelDB?.collaborators?.has(key)) {
+            cell.selections.delete(key);
+          }
+        }
+      });
+    }
+  }
+
+  /**
+   * Update editor settings for notebook cells.
+   */
+  private _updateEditorConfig() {
+    if (this._model) {
+      each(this._model.cells.iter(), cellModel => {
+        const cell = this._widgetsCache.get(cellModel);
+        if (cell) {
+          let config: Partial<CodeEditor.IConfig>;
+          switch (cell.model.type) {
+            case 'code':
+              config = this._editorConfig.code;
+              break;
+            case 'markdown':
+              config = this._editorConfig.markdown;
+              break;
+            default:
+              config = this._editorConfig.raw;
+              break;
+          }
+          let editorOptions: any = {};
+          Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
+            editorOptions[key] = config[key] ?? null;
+          });
+          cell.editor.setOptions(editorOptions);
+          cell.editor.refresh();
+        }
+      });
+    }
+  }
+
+  private _editorConfig = StaticNotebook.defaultEditorConfig;
+  private _notebookConfig = StaticNotebook.defaultNotebookConfig;
+  private _mimetype = 'text/plain';
+  private _model: INotebookModel | null = null;
+  private _mimetypeService: IEditorMimeTypeService;
+  private _modelChanged = new Signal<this, void>(this);
+  private _modelContentChanged = new Signal<this, void>(this);
+  private _widgetsCache = new WeakMap<ICellModel, Cell>();
 }
 
 /**
@@ -622,7 +1055,7 @@ export class StaticNotebook extends Widget {
       translator: this.translator,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs
     };
-    const cell = this.contentFactory.createCodeCell(options, this);
+    const cell = this.contentFactory.createCodeCell(options);
     cell.syncCollapse = true;
     cell.syncEditable = true;
     cell.syncScrolled = true;
@@ -644,7 +1077,7 @@ export class StaticNotebook extends Widget {
       updateEditorOnShow: false,
       placeholder: false
     };
-    const cell = this.contentFactory.createMarkdownCell(options, this);
+    const cell = this.contentFactory.createMarkdownCell(options);
     cell.syncCollapse = true;
     cell.syncEditable = true;
     return cell;
@@ -663,7 +1096,7 @@ export class StaticNotebook extends Widget {
       updateEditorOnShow: false,
       placeholder: true
     };
-    const cell = this.contentFactory.createRawCell(options, this);
+    const cell = this.contentFactory.createRawCell(options);
     cell.node.innerHTML = `
       <div class="jp-Cell-Placeholder">
         <div class="jp-Cell-Placeholder-wrapper">
@@ -688,7 +1121,7 @@ export class StaticNotebook extends Widget {
       updateEditorOnShow: false,
       placeholder: false
     };
-    const cell = this.contentFactory.createRawCell(options, this);
+    const cell = this.contentFactory.createRawCell(options);
     cell.syncCollapse = true;
     cell.syncEditable = true;
     return cell;
@@ -864,23 +1297,17 @@ export namespace StaticNotebook {
     /**
      * Create a new code cell widget.
      */
-    createCodeCell(
-      options: CodeCell.IOptions,
-      parent: StaticNotebook
-    ): CodeCell;
+    createCodeCell(options: CodeCell.IOptions): CodeCell;
 
     /**
      * Create a new markdown cell widget.
      */
-    createMarkdownCell(
-      options: MarkdownCell.IOptions,
-      parent: StaticNotebook
-    ): MarkdownCell;
+    createMarkdownCell(options: MarkdownCell.IOptions): MarkdownCell;
 
     /**
      * Create a new raw cell widget.
      */
-    createRawCell(options: RawCell.IOptions, parent: StaticNotebook): RawCell;
+    createRawCell(options: RawCell.IOptions): RawCell;
   }
 
   /**
@@ -1009,10 +1436,7 @@ export namespace StaticNotebook {
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.
      */
-    createCodeCell(
-      options: CodeCell.IOptions,
-      parent: StaticNotebook
-    ): CodeCell {
+    createCodeCell(options: CodeCell.IOptions): CodeCell {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
@@ -1026,10 +1450,7 @@ export namespace StaticNotebook {
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.
      */
-    createMarkdownCell(
-      options: MarkdownCell.IOptions,
-      parent: StaticNotebook
-    ): MarkdownCell {
+    createMarkdownCell(options: MarkdownCell.IOptions): MarkdownCell {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
@@ -1043,7 +1464,7 @@ export namespace StaticNotebook {
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.
      */
-    createRawCell(options: RawCell.IOptions, parent: StaticNotebook): RawCell {
+    createRawCell(options: RawCell.IOptions): RawCell {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }

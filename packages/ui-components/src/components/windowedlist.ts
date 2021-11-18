@@ -131,13 +131,15 @@ export interface IWindowedListModel extends IDisposable {
    * A signal emitted when any model state changes.
    *
    * TODO do we need to provide a change arg (probably to deal with invalidate cache)
+   *      Improve doc
+   *      Naming? overscanCount -> margin
    */
   readonly stateChanged: ISignal<
     IWindowedListModel,
     IChangedArgs<
-      number | boolean,
-      number | boolean,
-      'count' | 'overscanCount' | 'windowingActive'
+      any,
+      any,
+      'count' | 'data' | 'overscanCount' | 'windowingActive'
     >
   >;
 }
@@ -248,9 +250,9 @@ export abstract class WindowedListModel implements IWindowedListModel {
   readonly stateChanged = new Signal<
     WindowedListModel,
     IChangedArgs<
-      number | boolean,
-      number | boolean,
-      'count' | 'overscanCount' | 'windowingActive'
+      any,
+      any,
+      'count' | 'data' | 'overscanCount' | 'windowingActive'
     >
   >(this);
 
