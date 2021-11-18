@@ -930,6 +930,11 @@ export namespace StaticNotebook {
    */
   export interface INotebookConfig {
     /**
+     * Show hidden cells button if collapsed
+     */
+     showHiddenCellsButton: boolean;
+
+    /**
      * Enable scrolling past the last cell
      */
     scrollPastEnd: boolean;
@@ -985,6 +990,7 @@ export namespace StaticNotebook {
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
+    showHiddenCellsButton: true,
     scrollPastEnd: true,
     defaultCell: 'code',
     recordTiming: false,
