@@ -11,7 +11,7 @@ import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
-import { WindowedList } from '@jupyterlab/ui-components';
+import { WindowedList, WindowedListModel } from '@jupyterlab/ui-components';
 
 import { Widget } from '@lumino/widgets';
 import { Message } from '@lumino/messaging';
@@ -114,39 +114,77 @@ class ContentWidget extends Widget {
   protected textarea: HTMLTextAreaElement;
 }
 
-function main(): void {
-  const nItems = 1000;
-  const widgetsCache = new WeakMap<{ index: number }, Widget>();
-  const models = new Array<{ index: number }>(nItems);
-  for (let i = 0; i < nItems; i++) {
-    models[i] = { index: i };
+class MyList extends WindowedListModel {
+  constructor(nItems: number) {
+    super({ count: nItems });
+    this.models = [];
   }
 
-  // Lay out the widgets.
-  const widgetRenderer = (i: number) => {
-    let widget = widgetsCache.get(models[i]);
+  widgetRenderer = (i: number): Widget => {
+    let widget = this.widgetsCache.get(this.models[i]);
     if (!widget) {
       widget = new ContentWidget(`item-${i}`);
-      widgetsCache.set(models[i], widget);
+      this.widgetsCache.set(this.models[i], widget);
     }
     return widget;
   };
 
+  estimateWidgetHeight = (index: number | null): number => {
+    return 90;
+  };
+
+  models: Array<{ index: number }>;
+  private widgetsCache = new WeakMap<{ index: number }, Widget>();
+}
+
+function main(): void {
+  const nItems = 1000;
+  const model = new MyList(nItems);
+  setModels(nItems);
+
   const panel = new WindowedList({
-    widgetCount: nItems,
-    widgetRenderer,
-    // Best set to the minimal height if no clue
-    estimateWidgetHeight: (i: number | null) => 90
+    model
   });
   panel.id = 'main';
 
+  const inputs = document.createElement('div');
+  inputs.insertAdjacentHTML(
+    'afterbegin',
+    `<label>Number of items:</label><input type="number"></input><br/><label>Overscan items:<input type="number"></input><br/>`
+  );
+  const [count, overscan] = Array.from(inputs.querySelectorAll('input'));
+  count.value = `${nItems}`;
+  count.addEventListener('change', ev => {
+    const count = parseInt((ev.target! as HTMLInputElement).value, 10);
+    model.widgetCount = count;
+    console.log(`Set count to ${model.widgetCount}`);
+
+    setModels(count);
+  });
+  overscan.addEventListener('change', ev => {
+    model.overscanCount = parseInt((ev.target! as HTMLInputElement).value, 10);
+    console.log(`Set overscan count to ${model.overscanCount}`);
+  });
+  overscan.value = '1';
+  document.body.insertAdjacentElement('afterbegin', inputs);
+
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
+
   // Handle widget state.
   window.addEventListener('resize', () => {
     panel.update();
   });
   panel.update();
+
+  function setModels(count: number) {
+    if (count > model.models?.length ?? 0) {
+      model.models = new Array<{ index: number }>(count);
+      for (let i = 0; i < count; i++) {
+        model.models[i] = { index: i };
+      }
+    }
+  }
 }
 
 window.addEventListener('load', main);

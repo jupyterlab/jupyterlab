@@ -5,7 +5,9 @@
  * - https://github.com/WICG/virtual-scroller/
  * Licensed by Contributors under the [W3C Software and Document License](http://www.w3.org/Consortium/Legal/2015/copyright-software-and-document)
  */
+import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
+import { ISignal, Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /*
@@ -68,6 +70,7 @@ try {
     Correction to reuse as much as possible measured size
   v Navigation with tab between element works
   - Deal with dynamic list
+  - If active element is child that is removed, scrolling with keyboard breaks when that node is detached
 
 
   => We need to update the cached sizing object to ?
@@ -83,10 +86,159 @@ try {
   }
  */
 
+export interface IWindowedListModel extends IDisposable {
+  /**
+   * Number of widgets to render in addition to those
+   * visible in the viewport.
+   */
+  overscanCount?: number;
+  /**
+   * Total number of widgets in the list
+   *
+   * TODO should be settable
+   */
+  widgetCount: number;
+  /**
+   * Widget factory for the list items.
+   *
+   * Caching the resulting widgets should be done by the callee.
+   *
+   * @param index List index
+   * @returns The widget at the given position
+   */
+  widgetRenderer: (index: number) => Widget;
+  /**
+   * Provide a best guess for the widget height at position index
+   *
+   * If the index is null, returned the estimated default height.
+   *
+   * #### Notes
+   *
+   * This function should be very light to compute especially when
+   * returning the default height.
+   * The default value should be constant (i.e. two calls with `null` should
+   * return the same value). But it can change for a given `index`.
+   *
+   * @param index Widget position or null
+   * @returns Estimated widget height
+   *
+   * TODO make optional to switch between windowing and not windowing.
+   */
+  estimateWidgetHeight: (index: number | null) => number;
+
+  /**
+   * A signal emitted when any model state changes.
+   *
+   * TODO trigger widget update / do we need to provide a change arg (probably to deal with invalidate cache)
+   */
+  readonly stateChanged: ISignal<IWindowedListModel, void>;
+}
+
+export abstract class WindowedListModel implements IWindowedListModel {
+  constructor(options: IWindowedListModel.IOptions = {}) {
+    this._widgetCount = options.count ?? 0;
+    this._overscanCount = options.overscanCount ?? 1;
+  }
+  /**
+   * Number of widgets to render in addition to those
+   * visible in the viewport.
+   */
+  get overscanCount(): number {
+    return this._overscanCount;
+  }
+  set overscanCount(v: number) {
+    // TODO support overscan > count
+    if (v >= 1 && this._overscanCount !== v) {
+      this._overscanCount = v;
+      this.stateChanged.emit();
+    }
+  }
+
+  /**
+   * Total number of widgets in the list
+   *
+   * TODO should be settable
+   */
+  get widgetCount(): number {
+    return this._widgetCount;
+  }
+  set widgetCount(v: number) {
+    // TODO protect against < 0 value
+    if (v >= 0 && this._widgetCount !== v) {
+      this._widgetCount = v;
+      this.stateChanged.emit();
+    }
+  }
+
+  /**
+   * Widget factory for the list items.
+   *
+   * Caching the resulting widgets should be done by the callee.
+   *
+   * @param index List index
+   * @returns The widget at the given position
+   */
+  abstract widgetRenderer: (index: number) => Widget;
+
+  /**
+   * Provide a best guess for the widget height at position index
+   *
+   * If the index is null, returned the estimated default height.
+   *
+   * #### Notes
+   *
+   * This function should be very light to compute especially when
+   * returning the default height.
+   * The default value should be constant (i.e. two calls with `null` should
+   * return the same value). But it can change for a given `index`.
+   *
+   * @param index Widget position or null
+   * @returns Estimated widget height
+   *
+   * TODO? make optional to switch between windowing and not windowing
+   */
+  abstract estimateWidgetHeight: (index: number | null) => number;
+
+  /**
+   * A signal emitted when any model state changes.
+   */
+  readonly stateChanged = new Signal<this, void>(this);
+
+  /**
+   * Test whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose the model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
+  }
+
+  private _isDisposed = false;
+  private _overscanCount = 1;
+  private _widgetCount = 0;
+}
+
+export namespace IWindowedListModel {
+  export interface IOptions {
+    count?: number;
+    overscanCount?: number;
+  }
+}
+
 export class WindowedList extends Widget {
   static readonly DEFAULT_WIDGET_SIZE = 50;
 
   constructor(options: WindowedList.IOptions) {
+    // TODO probably needs to be able to customize outer HTML tag (could be ul / ol / table, ...)
     const node = document.createElement('div');
     node.className = 'jp-WindowedPanel-outer';
     const innerElement = node.appendChild(document.createElement('div'));
@@ -96,23 +248,22 @@ export class WindowedList extends Widget {
     );
     windowContainer.className = 'jp-WindowedPanel-window';
     super({ node });
+    this._model = options.model;
     this._height = 0;
     this._innerElement = innerElement;
     this._windowElement = windowContainer;
     this._lastMeasuredIndex = -1;
-    this._overscanCount = options.overscanCount ?? 1;
     this._scrollOffset = 0;
     this._scrollRepaint = null;
     this._scrollUpdateWasRequested = false;
     this._currentWindow = [-1, -1, -1, -1];
     this._resizeObserver = new ResizeObserver(this._onWidgetResize.bind(this));
-    this._widgetRenderer = options.widgetRenderer;
-    this._widgetSize = options.estimateWidgetHeight;
     this._estimatedWidgetSize =
-      this._widgetSize(null) ?? WindowedList.DEFAULT_WIDGET_SIZE;
+      this.widgetSize(null) ?? WindowedList.DEFAULT_WIDGET_SIZE;
     this._widgetSizers = {};
-    this._widgetCount = options.widgetCount;
     this.layout = options.layout ?? new WindowedLayout();
+
+    this._model.stateChanged.connect(this.update, this);
   }
 
   readonly layout: WindowedLayout;
@@ -170,6 +321,22 @@ export class WindowedList extends Widget {
    */
   scrollToItem(index: number, align: string = 'auto'): void {
     // TODO
+  }
+
+  protected get overscanCount(): number {
+    return this._model.overscanCount ?? 1;
+  }
+
+  protected get widgetRenderer(): (index: number) => Widget {
+    return this._model.widgetRenderer;
+  }
+
+  protected get widgetSize(): (index: number | null) => number {
+    return this._model.estimateWidgetHeight;
+  }
+
+  protected get widgetCount(): number {
+    return this._model.widgetCount;
   }
 
   protected onAfterAttach(msg: Message): void {
@@ -243,7 +410,7 @@ export class WindowedList extends Widget {
     ) {
       const toAdd: Widget[] = [];
       for (let index = startIndex; index <= stopIndex; index++) {
-        toAdd.push(this._widgetRenderer(index));
+        toAdd.push(this.widgetRenderer(index));
       }
       const nWidgets = this.layout.widgets.length;
       // Remove not needed widgets
@@ -291,7 +458,7 @@ export class WindowedList extends Widget {
   }
 
   private _getRangeToRender(): WindowedList.WindowIndex {
-    const widgetCount = this._widgetCount;
+    const widgetCount = this.widgetCount;
 
     if (widgetCount === 0) {
       return [0, 0, 0, 0];
@@ -303,8 +470,8 @@ export class WindowedList extends Widget {
       this._scrollOffset
     );
 
-    const overscanBackward = Math.max(1, this._overscanCount);
-    const overscanForward = Math.max(1, this._overscanCount);
+    const overscanBackward = Math.max(1, this.overscanCount);
+    const overscanForward = Math.max(1, this.overscanCount);
 
     return [
       Math.max(0, startIndex - overscanBackward),
@@ -325,7 +492,7 @@ export class WindowedList extends Widget {
       for (let i = this._lastMeasuredIndex + 1; i <= index; i++) {
         let size = this._widgetSizers[i]?.measured
           ? this._widgetSizers[i].size
-          : this._widgetSize(i);
+          : this.widgetSize(i);
 
         this._widgetSizers[i] = {
           offset,
@@ -398,7 +565,7 @@ export class WindowedList extends Widget {
     let interval = 1;
 
     while (
-      index < this._widgetCount &&
+      index < this.widgetCount &&
       this._getItemMetadata(index).offset < offset
     ) {
       index += interval;
@@ -406,7 +573,7 @@ export class WindowedList extends Widget {
     }
 
     return this._findNearestItemBinarySearch(
-      Math.min(index, this._widgetCount - 1),
+      Math.min(index, this.widgetCount - 1),
       Math.floor(index / 2),
       offset
     );
@@ -427,7 +594,7 @@ export class WindowedList extends Widget {
     let offset = itemMetadata.offset + itemMetadata.size;
     let stopIndex = startIndex;
 
-    while (stopIndex < this._widgetCount - 1 && offset < maxOffset) {
+    while (stopIndex < this.widgetCount - 1 && offset < maxOffset) {
       stopIndex++;
       offset += this._getItemMetadata(stopIndex).size;
     }
@@ -438,14 +605,14 @@ export class WindowedList extends Widget {
   private _getEstimatedTotalSize(): number {
     let totalSizeOfMeasuredItems = 0;
 
-    if (this._lastMeasuredIndex >= this._widgetCount) {
-      this._lastMeasuredIndex = this._widgetCount - 1;
+    if (this._lastMeasuredIndex >= this.widgetCount) {
+      this._lastMeasuredIndex = this.widgetCount - 1;
     }
 
     // Update lastMeasuredIndex if following items have been measured (offset is wrong)
     for (
       let index = this._lastMeasuredIndex + 1;
-      index < this._widgetCount;
+      index < this.widgetCount;
       index++
     ) {
       if (this._widgetSizers[index]?.measured) {
@@ -464,7 +631,7 @@ export class WindowedList extends Widget {
     }
 
     // We can do better than this
-    const numUnmeasuredItems = this._widgetCount - this._lastMeasuredIndex - 1;
+    const numUnmeasuredItems = this.widgetCount - this._lastMeasuredIndex - 1;
     const totalSizeOfUnmeasuredItems =
       numUnmeasuredItems * this._estimatedWidgetSize;
 
@@ -507,16 +674,13 @@ export class WindowedList extends Widget {
     this.update();
   }
 
+  protected _model: IWindowedListModel;
   private _height: number;
   private _innerElement: HTMLDivElement;
   private _windowElement: HTMLDivElement;
   private _lastMeasuredIndex: number;
-  private _widgetRenderer: (index: number) => Widget;
-  private _widgetCount: number;
-  private _widgetSize: (index: number | null) => number;
   private _widgetSizers: { [index: number]: WindowedList.ItemMetadata };
   private _estimatedWidgetSize: number;
-  private _overscanCount: number;
   private _scrollOffset: number;
   private _scrollRepaint: number | null;
   private _scrollUpdateWasRequested: boolean;
@@ -654,45 +818,8 @@ export class WindowedLayout extends PanelLayout {
 
 export namespace WindowedList {
   export interface IOptions {
+    model: IWindowedListModel;
     layout?: WindowedLayout;
-    /**
-     * Number of widgets to render in addition to those
-     * visible in the viewport.
-     */
-    overscanCount?: number;
-    /**
-     * Total number of widgets in the list
-     *
-     * TODO should be settable
-     */
-    widgetCount: number;
-    /**
-     * Widget factory for the list items.
-     *
-     * Caching the resulting widgets should be done by the callee.
-     *
-     * @param index List index
-     * @returns The widget at the given position
-     */
-    widgetRenderer: (index: number) => Widget;
-    /**
-     * Provide a best guess for the widget height at position index
-     *
-     * If the index is null, returned the estimated default height.
-     *
-     * #### Notes
-     *
-     * This function should be very light to compute especially when
-     * returning the default height.
-     * The default value should be constant (i.e. two calls with `null` should
-     * return the same value). But it can change for a given `index`.
-     *
-     * @param index Widget position or null
-     * @returns Estimated widget height
-     *
-     * TODO make optional to switch between windowing and not windowing.
-     */
-    estimateWidgetHeight: (index: number | null) => number;
   }
 
   export type ItemMetadata = {
