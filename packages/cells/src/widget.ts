@@ -1464,7 +1464,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 
     // Store option for heading collapsing behaviour
     this._showHiddenCellsButton = options.showHiddenCellsButton;
-    console.log('initialized sHCB', this._showHiddenCellsButton)
 
     // Stop codemirror handling paste
     this.editor.setOption('handlePaste', false);
@@ -1563,8 +1562,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   set showHiddenCellsButton(value: boolean) {
     this._showHiddenCellsButton = value;
-    
-    console.log('updated sHCB', this._showHiddenCellsButton)
   }
 
   /**
@@ -1613,6 +1610,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     const expandButton = this.node.getElementsByClassName(
       SHOW_HIDDEN_CELLS_CLASS
     );
+    // Early exit and removal of button if button should not be shown
+    if(!this._showHiddenCellsButton) {
+      // remove the button if it is there
+      for (const el of expandButton) {
+        this.node.removeChild(el);
+      }
+      return;
+    }
     // Create the "show hidden" button if not already created
     if (
       this.headingCollapsed &&
