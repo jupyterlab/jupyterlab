@@ -5,6 +5,7 @@
  * - https://github.com/WICG/virtual-scroller/
  * Licensed by Contributors under the [W3C Software and Document License](http://www.w3.org/Consortium/Legal/2015/copyright-software-and-document)
  */
+import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -72,7 +73,10 @@ try {
   v Navigation with tab between element works
   v Deal with dynamic list
   - If active element is child that is removed, scrolling with keyboard breaks when that node is detached
-  - Turn off windowing
+  v Turn off windowing
+  - Scroll after end
+  - onScroll vs intersection observer
+  - Check is size cache based on mapping per node HTML a good idea? May cost too much to retrieve the size?
  */
 
 export interface IWindowedListModel extends IDisposable {
@@ -81,12 +85,19 @@ export interface IWindowedListModel extends IDisposable {
    * visible in the viewport.
    */
   overscanCount?: number;
+
   /**
    * Total number of widgets in the list
-   *
-   * TODO should be settable
    */
   widgetCount: number;
+
+  /**
+   * Whether windowing is active or not.
+   *
+   * This is true by default.
+   */
+  windowingActive?: boolean;
+
   /**
    * Widget factory for the list items.
    *
@@ -96,6 +107,7 @@ export interface IWindowedListModel extends IDisposable {
    * @returns The widget at the given position
    */
   widgetRenderer: (index: number) => Widget;
+
   /**
    * Provide a best guess for the widget height at position index
    *
@@ -111,22 +123,30 @@ export interface IWindowedListModel extends IDisposable {
    * @param index Widget position or null
    * @returns Estimated widget height
    *
-   * TODO make optional to switch between windowing and not windowing.
+   * TODO? make optional to switch between windowing and not windowing.
    */
   estimateWidgetHeight: (index: number | null) => number;
 
   /**
    * A signal emitted when any model state changes.
    *
-   * TODO trigger widget update / do we need to provide a change arg (probably to deal with invalidate cache)
+   * TODO do we need to provide a change arg (probably to deal with invalidate cache)
    */
-  readonly stateChanged: ISignal<IWindowedListModel, void>;
+  readonly stateChanged: ISignal<
+    IWindowedListModel,
+    IChangedArgs<
+      number | boolean,
+      number | boolean,
+      'count' | 'overscanCount' | 'windowingActive'
+    >
+  >;
 }
 
 export abstract class WindowedListModel implements IWindowedListModel {
   constructor(options: IWindowedListModel.IOptions = {}) {
     this._widgetCount = options.count ?? 0;
     this._overscanCount = options.overscanCount ?? 1;
+    this._windowingActive = options.windowingActive ?? true;
   }
   /**
    * Number of widgets to render in addition to those
@@ -135,28 +155,62 @@ export abstract class WindowedListModel implements IWindowedListModel {
   get overscanCount(): number {
     return this._overscanCount;
   }
-  set overscanCount(v: number) {
+  set overscanCount(newValue: number) {
     // TODO support overscan > count
-    if (v >= 1 && this._overscanCount !== v) {
-      this._overscanCount = v;
-      this.stateChanged.emit();
+    if (newValue >= 1 && this._overscanCount !== newValue) {
+      const oldValue = this._overscanCount;
+      this._overscanCount = newValue;
+      this.stateChanged.emit({ name: 'overscanCount', newValue, oldValue });
     }
   }
 
   /**
    * Total number of widgets in the list
-   *
-   * TODO should be settable
    */
   get widgetCount(): number {
     return this._widgetCount;
   }
-  set widgetCount(v: number) {
+  set widgetCount(newValue: number) {
     // TODO protect against < 0 value
-    if (v >= 0 && this._widgetCount !== v) {
-      this._widgetCount = v;
-      this.stateChanged.emit();
+    if (newValue >= 0 && this._widgetCount !== newValue) {
+      const oldValue = this._widgetCount;
+      this._widgetCount = newValue;
+      this.stateChanged.emit({ name: 'count', newValue, oldValue });
     }
+  }
+
+  /**
+   * Whether windowing is active or not.
+   *
+   * This is true by default.
+   */
+  get windowingActive(): boolean {
+    return this._windowingActive;
+  }
+  set windowingActive(newValue: boolean) {
+    if (newValue !== this._windowingActive) {
+      const oldValue = this._windowingActive;
+      this._windowingActive = newValue;
+      this.stateChanged.emit({ name: 'windowingActive', newValue, oldValue });
+    }
+  }
+
+  /**
+   * Test whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose the model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
   }
 
   /**
@@ -191,35 +245,32 @@ export abstract class WindowedListModel implements IWindowedListModel {
   /**
    * A signal emitted when any model state changes.
    */
-  readonly stateChanged = new Signal<this, void>(this);
-
-  /**
-   * Test whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
-   * Dispose the model.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    Signal.clearData(this);
-  }
+  readonly stateChanged = new Signal<
+    WindowedListModel,
+    IChangedArgs<
+      number | boolean,
+      number | boolean,
+      'count' | 'overscanCount' | 'windowingActive'
+    >
+  >(this);
 
   private _isDisposed = false;
   private _overscanCount = 1;
   private _widgetCount = 0;
+  private _windowingActive = true;
 }
 
 export namespace IWindowedListModel {
   export interface IOptions {
     count?: number;
     overscanCount?: number;
+
+    /**
+     * Whether windowing is active or not.
+     *
+     * This is true by default.
+     */
+    windowingActive?: boolean;
   }
 }
 
@@ -246,14 +297,14 @@ export class WindowedList extends Widget {
     this._scrollRepaint = null;
     this._scrollUpdateWasRequested = false;
     this._currentWindow = [-1, -1, -1, -1];
-    this._resizeObserver = new ResizeObserver(this._onWidgetResize.bind(this));
+    this._resizeObserver = null;
     this._estimatedWidgetSize =
       this.widgetSize(null) ?? WindowedList.DEFAULT_WIDGET_SIZE;
     this._sizeCache = new WeakMap<HTMLElement, number>();
     this._widgetOffsets = {};
     this.layout = options.layout ?? new WindowedLayout();
 
-    this._model.stateChanged.connect(this.update, this);
+    this._model.stateChanged.connect(this.onStateChanged, this);
   }
 
   readonly layout: WindowedLayout;
@@ -329,18 +380,44 @@ export class WindowedList extends Widget {
     return this._model.widgetCount;
   }
 
+  protected get windowingActive(): boolean {
+    return this._model.windowingActive ?? true;
+  }
+
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
+    if (this.windowingActive) {
+      this.addListeners();
+    }
+    this._height = this.node.getBoundingClientRect().height;
+  }
+
+  private addListeners() {
+    if (!this._resizeObserver) {
+      this._resizeObserver = new ResizeObserver(
+        this._onWidgetResize.bind(this)
+      );
+    }
     for (const widget of this.layout.widgets) {
       this._resizeObserver.observe(widget.node);
     }
     this.node.addEventListener('scroll', this, passiveIfSupported);
-    this._height = this.node.getBoundingClientRect().height;
+    this._windowElement.style.position = 'absolute';
   }
 
   protected onBeforeDetach(msg: Message): void {
+    if (this.windowingActive) {
+      this.removeListeners();
+    }
+  }
+
+  private removeListeners() {
     this.node.removeEventListener('scroll', this);
-    this._resizeObserver.disconnect();
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = null;
+    this._innerElement.style.height = '100%';
+    this._windowElement.style.position = 'relative';
+    this._windowElement.style.top = '0px';
   }
 
   protected onScroll(event: Event): void {
@@ -362,6 +439,25 @@ export class WindowedList extends Widget {
     this._scrollOffset = scrollOffset;
     this._scrollUpdateWasRequested = false;
 
+    this.update();
+  }
+
+  protected onStateChanged(
+    model: IWindowedListModel,
+    changes: IChangedArgs<
+      number | boolean,
+      number | boolean,
+      'count' | 'overscanCount' | 'windowingActive'
+    >
+  ): void {
+    switch (changes.name) {
+      case 'windowingActive':
+        if (this.windowingActive) {
+          this.addListeners();
+        } else {
+          this.removeListeners();
+        }
+    }
     this.update();
   }
 
@@ -388,7 +484,15 @@ export class WindowedList extends Widget {
   }
 
   private _update(): void {
-    const newWindowIndex = this._getRangeToRender();
+    let newWindowIndex: [number, number, number, number] = [
+      0,
+      Math.max(this.widgetCount - 1, 0),
+      0,
+      Math.max(this.widgetCount - 1, 0)
+    ];
+    if (this.windowingActive) {
+      newWindowIndex = this._getRangeToRender();
+    }
     const [startIndex, stopIndex] = newWindowIndex;
     console.log(
       `Updating range ${this._currentWindow} -> ${newWindowIndex}...`
@@ -406,7 +510,7 @@ export class WindowedList extends Widget {
       // Remove not needed widgets
       for (let itemIdx = nWidgets - 1; itemIdx >= 0; itemIdx--) {
         if (!toAdd.includes(this.layout.widgets[itemIdx])) {
-          this._resizeObserver.unobserve(this.layout.widgets[itemIdx].node);
+          this._resizeObserver?.unobserve(this.layout.widgets[itemIdx].node);
           this.layout.removeWidget(this.layout.widgets[itemIdx]);
         }
       }
@@ -414,7 +518,7 @@ export class WindowedList extends Widget {
       for (let index = 0; index < toAdd.length; index++) {
         const item = toAdd[index];
         if (!this.layout.widgets.includes(item)) {
-          this._resizeObserver.observe(item.node);
+          this._resizeObserver?.observe(item.node);
           this.layout.insertWidget(index, item);
         } else {
           const position = this.layout.widgets.findIndex(w => w === item);
@@ -426,23 +530,26 @@ export class WindowedList extends Widget {
 
       this._currentWindow = newWindowIndex;
     }
-    // Read this value after creating the cells.
-    // So their actual sizes are taken into account
-    const estimatedTotalHeight = this._getEstimatedTotalSize();
 
-    // Update inner container height
-    this._innerElement.style.height = `${estimatedTotalHeight}px`;
+    if (this.windowingActive) {
+      // Read this value after creating the cells.
+      // So their actual sizes are taken into account
+      const estimatedTotalHeight = this._getEstimatedTotalSize();
 
-    // Update position of window container
-    const startOffset =
-      startIndex > 0 ? this._getItemMetadata(startIndex - 1).offset : 0;
-    this._windowElement.style.top = `${startOffset}px`;
-    const stopOffsize = this._getItemMetadata(stopIndex).offset;
-    this._windowElement.style.minHeight = `${stopOffsize - startOffset}px`;
+      // Update inner container height
+      this._innerElement.style.height = `${estimatedTotalHeight}px`;
 
-    // Update scroll
-    if (this._scrollUpdateWasRequested) {
-      this.node.scrollTop = this._scrollOffset;
+      // Update position of window container
+      const startOffset =
+        startIndex > 0 ? this._getItemMetadata(startIndex - 1).offset : 0;
+      this._windowElement.style.top = `${startOffset}px`;
+      const stopOffsize = this._getItemMetadata(stopIndex).offset;
+      this._windowElement.style.minHeight = `${stopOffsize - startOffset}px`;
+
+      // Update scroll
+      if (this._scrollUpdateWasRequested) {
+        this.node.scrollTop = this._scrollOffset;
+      }
     }
   }
 
@@ -674,7 +781,7 @@ export class WindowedList extends Widget {
   private _scrollRepaint: number | null;
   private _scrollUpdateWasRequested: boolean;
   private _currentWindow: WindowedList.WindowIndex;
-  private _resizeObserver: ResizeObserver;
+  private _resizeObserver: ResizeObserver | null;
 }
 
 export class WindowedLayout extends PanelLayout {

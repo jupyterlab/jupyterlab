@@ -1,15 +1,15 @@
 .jp-WindowedPanel-outer {
   position: relative;
-  overflow-y: auto !important;
+  overflow-y: auto;
 }
 
 .jp-WindowedPanel-inner {
-  position: relative !important;
-  width: 100% !important;
+  position: relative;
+  width: 100%;
 }
 
 .jp-WindowedPanel-window {
-  position: absolute !important;
-  overflow: visible !important;
-  width: 100% !important;
+  position: absolute;
+  overflow: visible;
+  width: 100%;
 }

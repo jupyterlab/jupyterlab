@@ -150,9 +150,11 @@ function main(): void {
   const inputs = document.createElement('div');
   inputs.insertAdjacentHTML(
     'afterbegin',
-    `<label>Number of items:</label><input type="number"></input><br/><label>Overscan items:<input type="number"></input><br/>`
+    `<label>Number of items:</label><input type="number"></input><br/><label>Overscan items:<input type="number"></input><br/><label>Windowing:</label><input type="checkbox"></input><br/>`
   );
-  const [count, overscan] = Array.from(inputs.querySelectorAll('input'));
+  const [count, overscan, windowing] = Array.from(
+    inputs.querySelectorAll('input')
+  );
   count.value = `${nItems}`;
   count.addEventListener('change', ev => {
     const count = parseInt((ev.target! as HTMLInputElement).value, 10);
@@ -166,6 +168,14 @@ function main(): void {
     console.log(`Set overscan count to ${model.overscanCount}`);
   });
   overscan.value = '1';
+  overscan.addEventListener('change', ev => {
+    model.overscanCount = parseInt((ev.target! as HTMLInputElement).value, 10);
+    console.log(`Set overscan count to ${model.overscanCount}`);
+  });
+  windowing.addEventListener('change', ev => {
+    model.windowingActive = (ev.target! as HTMLInputElement).checked;
+  });
+  windowing.checked = true;
   document.body.insertAdjacentElement('afterbegin', inputs);
 
   // Attach the panel to the DOM.
