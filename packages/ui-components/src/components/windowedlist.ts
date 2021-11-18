@@ -48,9 +48,10 @@ try {
     https://developer.mozilla.org/en-US/docs/Web/API/Resize_Observer_API
   - What if items have margin... resizeobserver is not bringing that in
   - What about Safari and ResizeObserverEntry.borderBoxSize
-  v Support treeview --> item in the range can be hidden; don't insert them and cache the fact that they are hidden
+  - Support treeview --> item in the range can be hidden; don't insert them and cache the fact that they are hidden
     Probably want to deal with that in the model providing the data - keeping this as simple as possible
-    => Finally cached size is based on node html pointer to keep it simple and to handle move node and 
+    o Trial with size caching in WeakMap with HTML element as key (to keep size history even when widgets is moved or hidden) --> performance issue
+    o TODO add itemKey method to create the caching using a user provided uid for the widgets
   - On idle cycle call estimated size on not rendered element?
   - Check what happens if the inner container is bigger than the list requires
   - End not bringing to the bottom of the list due to height estimation.
@@ -71,7 +72,7 @@ try {
   v Computing the visible widget range is wrong (may be linked with previous error seen)
     Correction to reuse as much as possible measured size
   v Navigation with tab between element works
-  v Deal with dynamic list
+  - Deal with dynamic list
   - If active element is child that is removed, scrolling with keyboard breaks when that node is detached
   v Turn off windowing
   - Scroll after end
@@ -302,8 +303,7 @@ export class WindowedList extends Widget {
     this._resizeObserver = null;
     this._estimatedWidgetSize =
       this.widgetSize(null) ?? WindowedList.DEFAULT_WIDGET_SIZE;
-    this._sizeCache = new WeakMap<HTMLElement, number>();
-    this._widgetOffsets = {};
+    this._widgetSizers = {};
     this.layout = options.layout ?? new WindowedLayout();
 
     this._model.stateChanged.connect(this.onStateChanged, this);
@@ -542,11 +542,12 @@ export class WindowedList extends Widget {
       this._innerElement.style.height = `${estimatedTotalHeight}px`;
 
       // Update position of window container
-      const startOffset =
-        startIndex > 0 ? this._getItemMetadata(startIndex - 1).offset : 0;
-      this._windowElement.style.top = `${startOffset}px`;
-      const stopOffsize = this._getItemMetadata(stopIndex).offset;
-      this._windowElement.style.minHeight = `${stopOffsize - startOffset}px`;
+      const startSize = this._getItemMetadata(startIndex);
+      this._windowElement.style.top = `${startSize.offset}px`;
+      const stopSize = this._getItemMetadata(stopIndex);
+      this._windowElement.style.minHeight = `${
+        stopSize.offset - startSize.offset + stopSize.size
+      }px`;
 
       // Update scroll
       if (this._scrollUpdateWasRequested) {
@@ -583,33 +584,34 @@ export class WindowedList extends Widget {
     if (index > this._lastMeasuredIndex) {
       let offset = 0;
       if (this._lastMeasuredIndex >= 0) {
-        const itemMetadata = this._widgetOffsets[this._lastMeasuredIndex];
-        offset = itemMetadata.offset;
+        const itemMetadata = this._widgetSizers[this._lastMeasuredIndex];
+        offset = itemMetadata.offset + itemMetadata.size;
       }
 
       for (let i = this._lastMeasuredIndex + 1; i <= index; i++) {
-        const node = this._widgetOffsets[i]?.node;
-        // Preferred measured cached size to size estimator
-        let size = (node && this._sizeCache.get(node)) ?? this.widgetSize(i);
+        let size = this._widgetSizers[i]?.measured
+          ? this._widgetSizers[i].size
+          : this.widgetSize(i);
+
+        this._widgetSizers[i] = {
+          offset,
+          size,
+          measured: this._widgetSizers[i]?.measured
+        };
 
         offset += size;
-
-        this._widgetOffsets[i] = {
-          offset,
-          node
-        };
       }
 
       this._lastMeasuredIndex = index;
     }
 
-    return this._widgetOffsets[index];
+    return this._widgetSizers[index];
   }
 
   private _findNearestItem(offset: number): number {
     const lastMeasuredItemOffset =
       this._lastMeasuredIndex > 0
-        ? this._widgetOffsets[this._lastMeasuredIndex].offset
+        ? this._widgetSizers[this._lastMeasuredIndex].offset
         : 0;
 
     if (lastMeasuredItemOffset >= offset) {
@@ -637,15 +639,13 @@ export class WindowedList extends Widget {
   ): number {
     while (low <= high) {
       const middle = low + Math.floor((high - low) / 2);
-      const previousOffset =
-        middle > 0 ? this._getItemMetadata(middle - 1).offset : 0;
       const currentOffset = this._getItemMetadata(middle).offset;
 
-      if (previousOffset <= offset && offset < currentOffset) {
+      if (currentOffset === offset) {
         return middle;
       } else if (currentOffset < offset) {
         low = middle + 1;
-      } else if (previousOffset > offset) {
+      } else if (currentOffset > offset) {
         high = middle - 1;
       }
     }
@@ -690,12 +690,12 @@ export class WindowedList extends Widget {
     const itemMetadata = this._getItemMetadata(startIndex);
     const maxOffset = scrollOffset + size;
 
-    let offset = itemMetadata.offset;
+    let offset = itemMetadata.offset + itemMetadata.size;
     let stopIndex = startIndex;
 
     while (stopIndex < this.widgetCount - 1 && offset < maxOffset) {
       stopIndex++;
-      offset = this._getItemMetadata(stopIndex).offset;
+      offset += this._getItemMetadata(stopIndex).size;
     }
 
     return stopIndex;
@@ -714,11 +714,10 @@ export class WindowedList extends Widget {
       index < this.widgetCount;
       index++
     ) {
-      const node = this._widgetOffsets[index]?.node;
-      const cachedSize = node ? this._sizeCache.get(node) : null;
-      if (typeof cachedSize === 'number') {
-        this._widgetOffsets[index].offset =
-          this._widgetOffsets[this._lastMeasuredIndex].offset + cachedSize;
+      if (this._widgetSizers[index]?.measured) {
+        this._widgetSizers[index].offset =
+          this._widgetSizers[this._lastMeasuredIndex].offset +
+          this._widgetSizers[this._lastMeasuredIndex].size;
         this._lastMeasuredIndex++;
       } else {
         break;
@@ -726,8 +725,8 @@ export class WindowedList extends Widget {
     }
 
     if (this._lastMeasuredIndex >= 0) {
-      const itemMetadata = this._widgetOffsets[this._lastMeasuredIndex];
-      totalSizeOfMeasuredItems = itemMetadata.offset;
+      const itemMetadata = this._widgetSizers[this._lastMeasuredIndex];
+      totalSizeOfMeasuredItems = itemMetadata.offset + itemMetadata.size;
     }
 
     // We can do better than this
@@ -749,17 +748,20 @@ export class WindowedList extends Widget {
           entry.target
         );
 
-      const node = entry.target as HTMLElement;
-      this._widgetOffsets[index].node = node;
+      // Does the cache needs to be updated?
       const measuredSize = entry.borderBoxSize[0].blockSize;
-      if (this._sizeCache.get(node) != measuredSize) {
-        this._sizeCache.set(node, measuredSize);
+      if (this._widgetSizers[index].size != measuredSize) {
+        this._widgetSizers[index].size = measuredSize;
         // Update offset
-        const previousOffset =
-          index > 0 ? this._widgetOffsets[index - 1].offset : 0;
-        this._widgetOffsets[index].offset = previousOffset + measuredSize;
+        if (index > this._currentWindow[0]) {
+          const previousSize = this._widgetSizers[index - 1];
+          this._widgetSizers[index].offset =
+            previousSize.offset + previousSize.size;
+        }
         maxIndex = Math.max(maxIndex, index);
       }
+      // Always set the flag in case the size estimator provides perfect result
+      this._widgetSizers[index].measured = true;
     }
 
     // Invalid follow-up index
@@ -776,8 +778,7 @@ export class WindowedList extends Widget {
   private _innerElement: HTMLDivElement;
   private _windowElement: HTMLDivElement;
   private _lastMeasuredIndex: number;
-  private _widgetOffsets: { [index: number]: WindowedList.ItemMetadata };
-  private _sizeCache: WeakMap<HTMLElement, number>;
+  private _widgetSizers: { [index: number]: WindowedList.ItemMetadata };
   private _estimatedWidgetSize: number;
   private _scrollOffset: number;
   private _scrollRepaint: number | null;
@@ -921,14 +922,9 @@ export namespace WindowedList {
   }
 
   export type ItemMetadata = {
-    /**
-     * Offset at which the following item must be positioned
-     */
     offset: number;
-    /**
-     * Widget node
-     */
-    node?: HTMLElement;
+    size: number;
+    measured?: boolean;
   };
 
   export type WindowIndex = [number, number, number, number];
