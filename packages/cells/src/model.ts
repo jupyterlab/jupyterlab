@@ -301,6 +301,19 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     /* no-op */
   }
 
+  public switchSharedModel(
+    sharedModel: models.ISharedCodeCell,
+    reinitialize?: boolean
+  ): void {
+    if (reinitialize) {
+      const newValue = sharedModel.getMetadata();
+      if (newValue) {
+        this._updateModelDBMetadata(newValue);
+      }
+    }
+    super.switchSharedModel(sharedModel, reinitialize);
+  }
+
   /**
    * Handle a change to the cell metadata modelDB and reflect it in the shared model.
    */
@@ -383,34 +396,40 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
         const newValue = change.metadataChange
           ?.newValue as models.ISharedBaseCellMetadata;
         if (newValue) {
-          Object.keys(newValue).map(key => {
-            switch (key) {
-              case 'collapsed':
-                this.metadata.set('collapsed', newValue.jupyter);
-                break;
-              case 'jupyter':
-                this.metadata.set('jupyter', newValue.jupyter);
-                break;
-              case 'name':
-                this.metadata.set('name', newValue.name);
-                break;
-              case 'scrolled':
-                this.metadata.set('scrolled', newValue.scrolled);
-                break;
-              case 'tags':
-                this.metadata.set('tags', newValue.tags);
-                break;
-              case 'trusted':
-                this.metadata.set('trusted', newValue.trusted);
-                break;
-              default:
-                // The default is applied for custom metadata that are not
-                // defined in the official nbformat but which are defined
-                // by the user.
-                this.metadata.set(key, newValue[key]);
-            }
-          });
+          this._updateModelDBMetadata(newValue);
         }
+      }
+    });
+  }
+
+  private _updateModelDBMetadata(
+    metadata: Partial<models.ISharedBaseCellMetadata>
+  ): void {
+    Object.keys(metadata).map(key => {
+      switch (key) {
+        case 'collapsed':
+          this.metadata.set('collapsed', metadata.jupyter);
+          break;
+        case 'jupyter':
+          this.metadata.set('jupyter', metadata.jupyter);
+          break;
+        case 'name':
+          this.metadata.set('name', metadata.name);
+          break;
+        case 'scrolled':
+          this.metadata.set('scrolled', metadata.scrolled);
+          break;
+        case 'tags':
+          this.metadata.set('tags', metadata.tags);
+          break;
+        case 'trusted':
+          this.metadata.set('trusted', metadata.trusted);
+          break;
+        default:
+          // The default is applied for custom metadata that are not
+          // defined in the official nbformat but which are defined
+          // by the user.
+          this.metadata.set(key, metadata[key]);
       }
     });
   }
