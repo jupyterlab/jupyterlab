@@ -21,6 +21,8 @@
   --jp-icon-caret-down: url('icons/arrow/caret-down.svg');
   --jp-icon-caret-left: url('icons/arrow/caret-left.svg');
   --jp-icon-caret-right: url('icons/arrow/caret-right.svg');
+  --jp-icon-caret-right-large-emph: url('icons/arrow/caret-right-large-emph.svg');
+  --jp-icon-caret-down-large: url('icons/arrow/caret-down-large.svg');
   --jp-icon-caret-up-empty-thin: url('icons/arrow/caret-up-empty-thin.svg');
   --jp-icon-caret-up: url('icons/arrow/caret-up.svg');
   --jp-icon-case-sensitive: url('icons/search/case-sensitive.svg');
@@ -121,6 +123,9 @@
 }
 .jp-CaretRightIcon {
   background-image: var(--jp-icon-caret-right);
+}
+.jp-CaretRightLargeEmphIcon {
+  background-image: var(--jp-icon-caret-right-large-emph);
 }
 .jp-CaretUpEmptyThinIcon {
   background-image: var(--jp-icon-caret-up-empty-thin);
