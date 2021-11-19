@@ -3,68 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-DebuggerSidebar {
-  --jp-debugger-header-height: 24px;
-}
-
-.jp-DebuggerSidebar {
-  color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
-  font-size: var(--jp-ui-font-size1);
-}
-
-.jp-DebuggerSidebar .p-SplitPanel-child {
-  z-index: auto;
-}
-
-.jp-DebuggerSidebar .jp-DebuggerSidebar-body {
-  height: calc(100% - var(--jp-debugger-header-height));
-}
-
-.jp-DebuggerSidebar .jp-stack-panel-header {
-  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  min-height: 20px !important;
-  padding: 0px !important;
-  height: var(--jp-debugger-header-height);
-}
-
-.jp-DebuggerSidebar .jp-stack-panel-header.jp-Toolbar {
-  background: transparent !important;
-  border-bottom: none;
-}
-
-.jp-DebuggerSidebar .jp-AccordionPanel-title span.lm-AccordionPanel-titleLabel,
-.jp-DebuggerSidebar .jp-stack-panel-header h2 {
-  text-transform: uppercase;
+.jp-SidePanel-header > h2 {
+  /* Set font-size to override default h2 sizing but keeping default --jp-ui-font-size0 */
+  font-size: 100%;
   font-weight: 600;
-  font-size: var(--jp-ui-font-size0);
-  color: var(--jp-ui-font-color1);
-  padding-left: 8px;
-  padding-right: 4px;
-}
-.jp-DebuggerSidebar
-  .jp-stack-panel-header.jp-Toolbar
-  button.jp-ToolbarButtonComponent {
-  height: 20px;
-}
-
-.jp-DebuggerSidebar-body .jp-stack-panel-header {
-  background-color: var(--jp-layout-color2);
-}
-
-.jp-DebuggerSidebar-body .jp-DebuggerVariables .jp-stack-panel-header {
-  border-top: none;
-}
-
-.jp-DebuggerSidebar-body .jp-Toolbar {
-  background: var(--jp-layout-color2);
-  box-shadow: none;
-  height: 20px;
-}
-
-.jp-DebuggerSidebar-body .lm-SplitPanel-handle.p-SplitPanel-handle:hover {
-  background: var(--jp-layout-color3);
+  margin: 0px auto 0px 0px;
+  padding: 4px 10px;
 }
