@@ -24,7 +24,7 @@ export const ICurrentUser = new Token<IUser>('@jupyterlab/user:ICurrentUser');
  * NOTE: Requirer this token in your extension to access the user menu
  * (top-right menu in JupyterLab's interface).
  */
-export const IUserMenu = new Token<Menu>('@jupyterlab/user:IUserMenu');
+export const IUserMenu = new Token<IMenu>('@jupyterlab/user:IUserMenu');
 
 /**
  * The user panel token.
@@ -38,119 +38,7 @@ export const IUserPanel = new Token<AccordionPanel>(
 /**
  * An interface describing an user.
  */
-export interface IUser {
-  /**
-   * User's unique identifier.
-   */
-  readonly id: string;
-
-  /**
-   * User's name.
-   */
-  readonly name: string;
-
-  /**
-   * User's Username.
-   */
-  readonly username: string;
-
-  /**
-   * User's cursor color and icon color if avatar_url is undefined
-   * (there is no image).
-   */
-  readonly color: string;
-
-  /**
-   * Whether the user is anonymous or not.
-   *
-   * NOTE: Jupyter server doesn't handle user's identity so, by default every user
-   * is anonymous unless a third-party extension provides the ICurrentUser token retrieving
-   * the user identity from a third-party identity provider as GitHub, Google, etc.
-   */
-  readonly anonymous: boolean;
-
-  /**
-   * User's role.
-   *
-   * NOTE: Jupyter Server and JupyterLab doesn't implement a role-base access control (RBAC) yet.
-   * This attribute is here to start introducing RBAC to JupyterLab's interface. At the moment every
-   * user has the role ADMIN.
-   */
-  readonly role: IUser.ROLE;
-
-  /**
-   * User's cursor position on the document.
-   *
-   * If undefined, the user is not on a document.
-   */
-  readonly cursor?: IUser.Cursor;
-
-  /**
-   * User's family name.
-   */
-  readonly familyName?: string;
-
-  /**
-   * User's email.
-   */
-  readonly email?: string;
-
-  /**
-   * User's avatar url.
-   * The url to the user's image for the icon.
-   */
-  readonly avatar_url?: string;
-
-  /**
-   * User's birth date.
-   */
-  readonly birthDate?: Date;
-
-  /**
-   * User's gender.
-   */
-  readonly gender?: string;
-
-  /**
-   * User's honorific prefix.
-   */
-  readonly honorificPrefix?: string;
-
-  /**
-   * User's honorific suffix.
-   */
-  readonly honorificSuffix?: string;
-
-  /**
-   * User's nationality.
-   */
-  readonly nationality?: string;
-
-  /**
-   * User's affiliation.
-   */
-  readonly affiliation?: string;
-
-  /**
-   * User's job title.
-   */
-  readonly jobTitle?: string;
-
-  /**
-   * User's telephone.
-   */
-  readonly telephone?: string;
-
-  /**
-   * User's address.
-   */
-  readonly address?: string;
-
-  /**
-   * User's description.
-   */
-  readonly description?: string;
-
+export interface IUser extends IUser.User {
   /**
    * Whether the user information is loaded or not.
    */
@@ -191,23 +79,23 @@ export namespace IUser {
     /**
      * User's unique identifier.
      */
-    id: string;
+    readonly id: string;
 
     /**
      * User's name.
      */
-    name: string;
+    readonly name: string;
 
     /**
      * User's Username.
      */
-    username: string;
+    readonly username: string;
 
     /**
      * User's cursor color and icon color if avatar_url is undefined
      * (there is no image).
      */
-    color: string;
+    readonly color: string;
 
     /**
      * Whether the user is anonymous or not.
@@ -216,7 +104,7 @@ export namespace IUser {
      * is anonymous unless a third-party extension provides the ICurrentUser token retrieving
      * the user identity from a third-party identity provider as GitHub, Google, etc.
      */
-    anonymous: boolean;
+    readonly anonymous: boolean;
 
     /**
      * User's role.
@@ -231,80 +119,20 @@ export namespace IUser {
      * This attribute is here to start introducing RBAC to JupyterLab's interface. At the moment every
      * user has the role ADMIN.
      */
-    role: IUser.ROLE;
+    readonly role: IUser.ROLE;
 
     /**
      * User's cursor position on the document.
      *
      * If undefined, the user is not on a document.
      */
-    cursor?: IUser.Cursor;
-
-    /**
-     * User's family name.
-     */
-    familyName?: string;
-
-    /**
-     * User's email.
-     */
-    email?: string;
+    readonly cursor?: IUser.Cursor;
 
     /**
      * User's avatar url.
      * The url to the user's image for the icon.
      */
-    avatar_url?: string;
-
-    /**
-     * User's birth date.
-     */
-    birthDate?: string;
-
-    /**
-     * User's gender.
-     */
-    gender?: string;
-
-    /**
-     * User's honorific prefix.
-     */
-    honorificPrefix?: string;
-
-    /**
-     * User's honorific suffix.
-     */
-    honorificSuffix?: string;
-
-    /**
-     * User's nationality.
-     */
-    nationality?: string;
-
-    /**
-     * User's affiliation.
-     */
-    affiliation?: string;
-
-    /**
-     * User's job title.
-     */
-    jobTitle?: string;
-
-    /**
-     * User's telephone.
-     */
-    telephone?: string;
-
-    /**
-     * User's address.
-     */
-    address?: string;
-
-    /**
-     * User's description.
-     */
-    description?: string;
+    readonly avatar_url?: string;
   };
 
   /**
@@ -349,4 +177,69 @@ export namespace IUser {
      */
     index: number;
   };
+}
+
+export interface IMenu {
+  /**
+   * Dispose of the resources held by the menu.
+   */
+  dispose(): void;
+
+  /**
+   * Test whether the widget has been disposed.
+   */
+  readonly isDisposed: boolean;
+
+  /**
+   * A read-only array of the menu items in the menu.
+   */
+  readonly items: ReadonlyArray<Menu.IItem>;
+
+  /**
+   * Add a menu item to the end of the menu.
+   *
+   * @param options - The options for creating the menu item.
+   *
+   * @returns The menu item added to the menu.
+   */
+  addItem(options: Menu.IItemOptions): Menu.IItem;
+
+  /**
+   * Insert a menu item into the menu at the specified index.
+   *
+   * @param index - The index at which to insert the item.
+   *
+   * @param options - The options for creating the menu item.
+   *
+   * @returns The menu item added to the menu.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   */
+  insertItem(index: number, options: Menu.IItemOptions): Menu.IItem;
+
+  /**
+   * Remove an item from the menu.
+   *
+   * @param item - The item to remove from the menu.
+   *
+   * #### Notes
+   * This is a no-op if the item is not in the menu.
+   */
+  removeItem(item: Menu.IItem): void;
+
+  /**
+   * Remove the item at a given index from the menu.
+   *
+   * @param index - The index of the item to remove.
+   *
+   * #### Notes
+   * This is a no-op if the index is out of range.
+   */
+  removeItemAt(index: number): void;
+
+  /**
+   * Remove all menu items from the menu.
+   */
+  clearItems(): void;
 }

@@ -3,8 +3,7 @@
 
 import { DOMUtils } from '@jupyterlab/apputils';
 import { userIcon } from '@jupyterlab/ui-components';
-
-import * as React from 'react';
+import React from 'react';
 
 import { User } from './model';
 import { IUser } from './tokens';
@@ -15,7 +14,7 @@ import { getInitials } from './utils';
  *
  * @param user User information as IUser or JSON object.
  */
-export const getUserIcon = (user: IUser | IUser.User) => {
+export function getUserIcon(user: IUser | IUser.User): JSX.Element {
   const isReady = user instanceof User ? user.isReady : true;
 
   if (isReady && user.avatar_url) {
@@ -46,10 +45,20 @@ export const getUserIcon = (user: IUser | IUser.User) => {
       </div>
     );
   }
-};
+}
 
-type Props = {
+/**
+ * ColorPickerComponent properties.
+ */
+export type Props = {
+  /**
+   * Current user as a JSON object.
+   */
   user: IUser.User;
+
+  /**
+   * Callback to invoke when the color changes.
+   */
   handlerColor: (event: any) => void;
 };
 
@@ -59,7 +68,7 @@ type Props = {
  * @param user User information as JSON object.
  * @param handlerColor callback to call when color changes.
  */
-export const ColorPickerComponent: React.FC<Props> = props => {
+export function ColorPickerComponent(props: Props): JSX.Element {
   const { user, handlerColor } = props;
   const inputRef = React.useRef(null);
 
@@ -86,4 +95,4 @@ export const ColorPickerComponent: React.FC<Props> = props => {
       <span>{getInitials(user.name)}</span>
     </div>
   );
-};
+}
