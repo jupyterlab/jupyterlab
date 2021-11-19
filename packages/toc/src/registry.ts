@@ -90,7 +90,7 @@ export namespace TableOfContentsRegistry {
   /**
    * Abstract class for managing options affecting how a table of contents is generated for a particular widget type.
    */
-  export abstract class IOptionsManager {}
+  export interface IOptionsManager {}
 
   /**
    * Interface for the arguments needed in the collapse signal of a generator
