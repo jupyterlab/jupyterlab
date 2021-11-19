@@ -647,6 +647,14 @@ export class StaticNotebook extends Widget {
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
     cell.syncEditable = true;
+    // Connect collapsed signal for each markdown cell widget
+    if(this instanceof Notebook) {
+      let notebook = <Notebook> this;
+      cell.toggleCollapsedSignal.connect(
+        (newCell: MarkdownCell, collapsed: boolean) => {
+          NotebookActions.setHeadingCollapse(newCell, collapsed, notebook);
+        });
+      }
     return cell;
   }
 

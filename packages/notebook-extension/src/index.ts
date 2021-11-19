@@ -1518,6 +1518,7 @@ function addCommands(
           list: IObservableUndoableList<ICellModel>,
           args: IObservableList.IChangedArgs<ICellModel>
         ) => {
+          /* probably this can go away
           const cell = panel.content.widgets[args.newIndex];
           if (
             cell instanceof MarkdownCell &&
@@ -1533,6 +1534,7 @@ function addCommands(
               }
             );
           }
+          */
           // Might be overkill to refresh this every time, but
           // it helps to keep the collapse state consistent.
           refreshCellCollapsed(panel.content);
