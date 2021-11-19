@@ -114,11 +114,20 @@
   background-color: var(--jp-border-color2) !important;
 }
 
-.jp-collapseHeadingButton {
+.jp-collapseHeadingButtonHover {
   display: none;
 }
 
-.jp-MarkdownCell:hover .jp-collapseHeadingButton {
+.jp-MarkdownCell:hover .jp-collapseHeadingButtonHover {
+  display: flex;
+  min-height: var(--jp-cell-collapser-min-height);
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.jp-MarkdownCell .jp-collapseHeadingButton {
   display: flex;
   min-height: var(--jp-cell-collapser-min-height);
   position: absolute;

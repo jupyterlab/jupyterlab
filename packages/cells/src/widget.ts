@@ -153,8 +153,15 @@ const MARKDOWN_OUTPUT_CLASS = 'jp-MarkdownOutput';
 
 export const MARKDOWN_HEADING_COLLAPSED = 'jp-MarkdownHeadingCollapsed';
 
+/**
+ * The class names added to heading collapse button.
+ */
+const HEADING_COLLAPSER_HOVER_CLASS = 'jp-collapseHeadingButtonHover';
 const HEADING_COLLAPSER_CLASS = 'jp-collapseHeadingButton';
 
+/**
+ * The class names added to hidden cells button.
+ */
 const SHOW_HIDDEN_CELLS_CLASS = 'jp-showHiddenCellsButton';
 
 /**
@@ -1531,14 +1538,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       this.model.metadata.delete(MARKDOWN_HEADING_COLLAPSED);
     }
     const collapseButton = this.inputArea.promptNode.getElementsByClassName(
-      HEADING_COLLAPSER_CLASS
+      this._showHiddenCellsButton ? HEADING_COLLAPSER_HOVER_CLASS : HEADING_COLLAPSER_CLASS
     )[0];
     if (collapseButton) {
       collapseButton.setAttribute(
         'style',
         `background:
       ${
-        value ? 'var(--jp-icon-caret-right)' : 'var(--jp-icon-caret-down)'
+        value ? 'var(--jp-icon-caret-right-large-emph)' : 'var(--jp-icon-caret-down-large)'
       } no-repeat center`
       );
     }
@@ -1558,10 +1565,15 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   /**
-   * Allow updating 
+   * Allow updating settings
    */
   set showHiddenCellsButton(value: boolean) {
+    let previousHeadingCollapserClass = this._showHiddenCellsButton ? HEADING_COLLAPSER_HOVER_CLASS : HEADING_COLLAPSER_CLASS;
     this._showHiddenCellsButton = value;
+    // Update collapse button class (the arrow left of the heading) and hidden-cells button
+    let collapseButton = this.inputArea.promptNode.getElementsByClassName(previousHeadingCollapserClass)[0];
+    collapseButton.className = `jp-Button jp-mod-minimal ${this._showHiddenCellsButton ? HEADING_COLLAPSER_HOVER_CLASS : HEADING_COLLAPSER_CLASS}`;
+    this.maybeCreateOrUpdateExpandButton();
   }
 
   /**
@@ -1585,19 +1597,20 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   protected maybeCreateCollapseButton(): void {
+    let HEADING_COLLAPSER_CLASS_TO_USE = this._showHiddenCellsButton ? HEADING_COLLAPSER_HOVER_CLASS : HEADING_COLLAPSER_CLASS;
     if (
       this.headingInfo.level > 0 &&
-      this.inputArea.promptNode.getElementsByClassName(HEADING_COLLAPSER_CLASS)
+      this.inputArea.promptNode.getElementsByClassName(HEADING_COLLAPSER_CLASS_TO_USE)
         .length == 0
     ) {
       let collapseButton = this.inputArea.promptNode.appendChild(
         document.createElement('button')
       );
-      collapseButton.className = `jp-Button jp-mod-minimal ${HEADING_COLLAPSER_CLASS}`;
+      collapseButton.className = `jp-Button jp-mod-minimal ${HEADING_COLLAPSER_CLASS_TO_USE}`;
       collapseButton.style.background = `${
         this._headingCollapsed
-          ? 'var(--jp-icon-caret-right)'
-          : 'var(--jp-icon-caret-down)'
+          ? 'var(--jp-icon-caret-right-large-emph)'
+          : 'var(--jp-icon-caret-down-large)'
       } no-repeat center`;
       collapseButton.onclick = (event: Event) => {
         this.headingCollapsed = !this.headingCollapsed;
@@ -1607,45 +1620,40 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   protected maybeCreateOrUpdateExpandButton(): void {
-    const expandButton = this.node.getElementsByClassName(
-      SHOW_HIDDEN_CELLS_CLASS
-    );
+    const expandButtonList = this.node.getElementsByClassName(SHOW_HIDDEN_CELLS_CLASS);
     // Early exit and removal of button if button should not be shown
     if(!this._showHiddenCellsButton) {
       // remove the button if it is there
-      for (const el of expandButton) {
+      for (const el of expandButtonList) {
         this.node.removeChild(el);
       }
       return;
     }
     // Create the "show hidden" button if not already created
+    let cellText = `${this._numberChildNodes} cell${this._numberChildNodes > 1 ? 's' : ''} hidden`;
     if (
       this.headingCollapsed &&
-      expandButton.length === 0 &&
+      expandButtonList.length === 0 &&
       this._numberChildNodes > 0
     ) {
-      const numberChildNodes = document.createElement('button');
-      numberChildNodes.className = `jp-mod-minimal jp-Button ${SHOW_HIDDEN_CELLS_CLASS}`;
-      addIcon.render(numberChildNodes);
-      const numberChildNodesText = document.createElement('div');
-      numberChildNodesText.nodeValue = `${this._numberChildNodes} cell${
-        this._numberChildNodes > 1 ? 's' : ''
-      } hidden`;
-      numberChildNodes.appendChild(numberChildNodesText);
-      numberChildNodes.onclick = () => {
+      const newExpandButton = document.createElement('button');
+      newExpandButton.className = `jp-mod-minimal jp-Button ${SHOW_HIDDEN_CELLS_CLASS}`;
+      addIcon.render(newExpandButton);
+      const expandButtonText = document.createElement('div');
+      expandButtonText.textContent = cellText;
+      newExpandButton.appendChild(expandButtonText);
+      newExpandButton.onclick = () => {
         this.headingCollapsed = false;
         this._toggleCollapsedSignal.emit(this._headingCollapsed);
       };
-      this.node.appendChild(numberChildNodes);
-    } else if (expandButton?.[0]?.childNodes?.length > 1) {
+      this.node.appendChild(newExpandButton);
+    } else if (expandButtonList?.[0]?.childNodes?.length > 1) {
       // If the heading is collapsed, update text
       if (this._headingCollapsed) {
-        expandButton[0].childNodes[1].textContent = `${
-          this._numberChildNodes
-        } cell${this._numberChildNodes > 1 ? 's' : ''} hidden`;
+        expandButtonList[0].childNodes[1].textContent = cellText;
         // If the heading isn't collapsed, remove the button
       } else {
-        for (const el of expandButton) {
+        for (const el of expandButtonList) {
           this.node.removeChild(el);
         }
       }
