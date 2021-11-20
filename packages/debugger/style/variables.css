@@ -70,10 +70,6 @@
   margin-left: 12px;
 }
 
-.jp-stack-panel-header.jp-DebuggerVariables-toolbar {
-  margin-left: auto;
-}
-
 .jp-DebuggerVariables-grid {
   flex: 1 1 auto;
 }

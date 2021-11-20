@@ -664,7 +664,7 @@ export namespace Cell {
     }
 
     /**
-     * Create a new cell header for the parent widget.
+     * Create a new cell footer for the parent widget.
      */
     createCellFooter(): ICellFooter {
       return new CellFooter();

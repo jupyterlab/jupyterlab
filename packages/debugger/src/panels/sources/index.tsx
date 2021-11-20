@@ -4,15 +4,14 @@
 |----------------------------------------------------------------------------*/
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { ITranslator } from '@jupyterlab/translation';
-import { ToolbarButton } from '@jupyterlab/ui-components';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
 import { viewBreakpointIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
 import { SourcePathComponent } from './sourcepath';
 import { SourcesBody } from './body';
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React from 'react';
-import { PanelWithToolbar } from '../panelwithtoolbar';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
@@ -24,9 +23,10 @@ export class Sources extends PanelWithToolbar {
    * @param options The Sources instantiation options.
    */
   constructor(options: Sources.IOptions) {
-    super(options);
+    super();
     const { model, service, editorServices } = options;
-    this.title.label = this.trans.__('Source');
+    const trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    this.title.label = trans.__('Source');
 
     this.toolbar.addClass('jp-DebuggerSources-header');
     const body = new SourcesBody({
@@ -39,7 +39,7 @@ export class Sources extends PanelWithToolbar {
       new ToolbarButton({
         icon: viewBreakpointIcon,
         onClick: (): void => model.open(),
-        tooltip: this.trans.__('Open in the Main Area')
+        tooltip: trans.__('Open in the Main Area')
       })
     );
     const sourcePath = ReactWidget.create(

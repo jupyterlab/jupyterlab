@@ -547,6 +547,16 @@ export class ReactiveToolbar extends Toolbar<Widget> {
  */
 export namespace Toolbar {
   /**
+   * Widget with associated toolbar
+   */
+  export interface IWidgetToolbar extends Widget {
+    /**
+     * Toolbar of actions on the widget
+     */
+    toolbar?: Toolbar;
+  }
+
+  /**
    * Create a toolbar spacer item.
    *
    * #### Notes
