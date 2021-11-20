@@ -651,7 +651,8 @@ export class StaticNotebook extends Widget {
     cell.toggleCollapsedSignal.connect(
       (newCell: MarkdownCell, collapsed: boolean) => {
         NotebookActions.setHeadingCollapse(newCell, collapsed, this);
-      });
+      }
+    );
     return cell;
   }
 
