@@ -301,7 +301,14 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     /* no-op */
   }
 
-  public switchSharedModel(
+  /**
+   * When we initialize a cell model, we create a standalone model that cannot be shared in a YNotebook.
+   * Call this function to re-initialize the local representation based on a fresh shared model (e.g. models.YFile or models.YCodeCell).
+   *
+   * @param sharedModel
+   * @param reinitialize Whether to reinitialize the shared model.
+   */
+  switchSharedModel(
     sharedModel: models.ISharedCodeCell,
     reinitialize?: boolean
   ): void {
