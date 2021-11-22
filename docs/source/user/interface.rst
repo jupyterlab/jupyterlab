@@ -51,25 +51,46 @@ default menus are:
 :ref:`JupyterLab extensions <user_extensions>` can also create new top-level menus in the menu
 bar.
 
+.. _sidebars:
+
+Left and Right Sidebar
+----------------------
+
 .. _left-sidebar:
 
-Left Sidebar
-------------
+The left sidebar contains a number of commonly-used tabs including:
 
-The left sidebar contains a number of commonly-used tabs, such as a file
-browser, a list of running kernels and terminals, the command palette,
-and a list of tabs in the main work area:
+- a file browser,
+- a list of tabs in the main work and of running kernels and terminals,
+- the command palette (in 3.0+ moved to a modal window accessible with a :ref:`keyboard shortcut <access-palette>`),
+- the :ref:`table of contents <toc>`,
+- the :ref:`extension manager <extension_manager>`.
 
 .. image:: images/interface_left.png
    :align: center
    :class: jp-screenshot
    :alt: A screenshot of the primary JupyterLab sidebar showing a variety of files in the file browser.
 
+.. _right-sidebar:
+
+The right sidebar contains:
+
+- the property inspector (active in notebooks),
+- the :ref:`debugger <debugger>`.
+
+.. image:: images/interface_right.png
+   :align: center
+   :class: jp-screenshot
+   :alt: A screenshot of the secondary JupyterLab sidebar showing the property inspector.
+
+The column that allows to switch between tabs is called Activity Bar in JupyterLab.
+
 .. _left-sidebar-toggle:
 
-The left sidebar can be collapsed or expanded by selecting "Show Left Sidebar"
-in the View menu or by clicking on the active sidebar tab:
+The sidebars can be collapsed or expanded by selecting "Show Left Sidebar"
+or "Show Right Sidebar" in the View menu or by clicking on the active sidebar tab:
 
+The location of tabs can be switched between the left and the right sidebar from the :ref:`context menu <context-menus-rightclick>`.
 
 .. raw:: html
 
@@ -77,7 +98,7 @@ in the View menu or by clicking on the active sidebar tab:
      <iframe src="https://www.youtube-nocookie.com/embed/PlJGecfetek?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-JupyterLab extensions can add additional panels to the left sidebar.
+JupyterLab extensions can add additional panels to the sidebars.
 
 .. _main-area:
 

@@ -171,6 +171,8 @@ See :ref:`documentation on LabConfig directories <labconfig_directories>` for mo
 Managing Extensions Using the Extension Manager
 -----------------------------------------------
 
+.. _extension_manager:
+
 You can use the Extension Manager in JupyterLab to manage extensions that are
 distributed as single JavaScript packages on npm.
 
