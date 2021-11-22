@@ -1601,9 +1601,16 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Note that the actual visibility is controlled in Static Notebook by toggling jp-mod-showHiddenCellsButton class.
    */
   protected maybeCreateOrUpdateExpandButton(): void {
-    const showHiddenCellsButtonList = this.node.getElementsByClassName(SHOW_HIDDEN_CELLS_CLASS);
-    let buttonText = `${this._numberChildNodes} cell${this._numberChildNodes > 1 ? 's' : ''} hidden`;
-    let needToCreateButton = this.headingCollapsed && this._numberChildNodes > 0 && showHiddenCellsButtonList.length == 0;
+    const showHiddenCellsButtonList = this.node.getElementsByClassName(
+      SHOW_HIDDEN_CELLS_CLASS
+    );
+    let buttonText = `${this._numberChildNodes} cell${
+      this._numberChildNodes > 1 ? 's' : ''
+    } hidden`;
+    let needToCreateButton =
+      this.headingCollapsed &&
+      this._numberChildNodes > 0 &&
+      showHiddenCellsButtonList.length == 0;
     if (needToCreateButton) {
       const newShowHiddenCellsButton = document.createElement('button');
       newShowHiddenCellsButton.className = `jp-mod-minimal jp-Button ${SHOW_HIDDEN_CELLS_CLASS}`;
@@ -1616,12 +1623,17 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         this._toggleCollapsedSignal.emit(this._headingCollapsed);
       };
       this.node.appendChild(newShowHiddenCellsButton);
-    } 
-    let needToUpdateButtonText = this.headingCollapsed && this._numberChildNodes > 0 && showHiddenCellsButtonList.length == 1;
+    }
+    let needToUpdateButtonText =
+      this.headingCollapsed &&
+      this._numberChildNodes > 0 &&
+      showHiddenCellsButtonList.length == 1;
     if (needToUpdateButtonText) {
       showHiddenCellsButtonList[0].childNodes[1].textContent = buttonText;
     }
-    let needToRemoveButton = !(this.headingCollapsed && this._numberChildNodes > 0);
+    let needToRemoveButton = !(
+      this.headingCollapsed && this._numberChildNodes > 0
+    );
     if (needToRemoveButton) {
       for (const button of showHiddenCellsButtonList) {
         this.node.removeChild(button);

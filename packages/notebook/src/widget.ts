@@ -142,7 +142,8 @@ const HEADING_COLLAPSER_CLASS = 'jp-collapseHeadingButton';
 /**
  * The class that controls the visibility of "heading collapser" and "show hidden cells" buttons.
  */
-const HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS = 'jp-mod-showHiddenCellsButton';
+const HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS =
+  'jp-mod-showHiddenCellsButton';
 
 /**
  * The interactivity modes for the notebook.
@@ -797,7 +798,10 @@ export class StaticNotebook extends Widget {
       this._notebookConfig.scrollPastEnd
     );
     // Control visibility of heading collapser UI
-    this.toggleClass(HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS, this._notebookConfig.showHiddenCellsButton);
+    this.toggleClass(
+      HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS,
+      this._notebookConfig.showHiddenCellsButton
+    );
   }
 
   private _incrementRenderedCount() {
@@ -946,7 +950,7 @@ export namespace StaticNotebook {
     /**
      * Show hidden cells button if collapsed
      */
-     showHiddenCellsButton: boolean;
+    showHiddenCellsButton: boolean;
 
     /**
      * Enable scrolling past the last cell

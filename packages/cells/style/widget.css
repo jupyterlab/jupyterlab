@@ -118,7 +118,9 @@
   display: none;
 }
 
-.jp-Notebook.jp-mod-showHiddenCellsButton .jp-MarkdownCell:hover .jp-collapseHeadingButton {
+.jp-Notebook.jp-mod-showHiddenCellsButton
+  .jp-MarkdownCell:hover
+  .jp-collapseHeadingButton {
   display: flex;
 }
 
