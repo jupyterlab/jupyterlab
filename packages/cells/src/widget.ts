@@ -1596,40 +1596,35 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
   }
 
+  /**
+   * Create, update or remove the hidden cells button.
+   * Note that the actual visibility is controlled in Static Notebook by toggling jp-mod-showHiddenCellsButton class.
+   */
   protected maybeCreateOrUpdateExpandButton(): void {
-    const expandButton = this.node.getElementsByClassName(
-      SHOW_HIDDEN_CELLS_CLASS
-    );
-    // Create the "show hidden" button if not already created
-    if (
-      this.headingCollapsed &&
-      expandButton.length === 0 &&
-      this._numberChildNodes > 0
-    ) {
-      const numberChildNodes = document.createElement('button');
-      numberChildNodes.className = `jp-mod-minimal jp-Button ${SHOW_HIDDEN_CELLS_CLASS}`;
-      addIcon.render(numberChildNodes);
-      const numberChildNodesText = document.createElement('div');
-      numberChildNodesText.nodeValue = `${this._numberChildNodes} cell${
-        this._numberChildNodes > 1 ? 's' : ''
-      } hidden`;
-      numberChildNodes.appendChild(numberChildNodesText);
-      numberChildNodes.onclick = () => {
+    const showHiddenCellsButtonList = this.node.getElementsByClassName(SHOW_HIDDEN_CELLS_CLASS);
+    let buttonText = `${this._numberChildNodes} cell${this._numberChildNodes > 1 ? 's' : ''} hidden`;
+    let needToCreateButton = this.headingCollapsed && this._numberChildNodes > 0 && showHiddenCellsButtonList.length == 0;
+    if (needToCreateButton) {
+      const newShowHiddenCellsButton = document.createElement('button');
+      newShowHiddenCellsButton.className = `jp-mod-minimal jp-Button ${SHOW_HIDDEN_CELLS_CLASS}`;
+      addIcon.render(newShowHiddenCellsButton);
+      const buttonTextElement = document.createElement('div');
+      buttonTextElement.textContent = buttonText;
+      newShowHiddenCellsButton.appendChild(buttonTextElement);
+      newShowHiddenCellsButton.onclick = () => {
         this.headingCollapsed = false;
         this._toggleCollapsedSignal.emit(this._headingCollapsed);
       };
-      this.node.appendChild(numberChildNodes);
-    } else if (expandButton?.[0]?.childNodes?.length > 1) {
-      // If the heading is collapsed, update text
-      if (this._headingCollapsed) {
-        expandButton[0].childNodes[1].textContent = `${
-          this._numberChildNodes
-        } cell${this._numberChildNodes > 1 ? 's' : ''} hidden`;
-        // If the heading isn't collapsed, remove the button
-      } else {
-        for (const el of expandButton) {
-          this.node.removeChild(el);
-        }
+      this.node.appendChild(newShowHiddenCellsButton);
+    } 
+    let needToUpdateButtonText = this.headingCollapsed && this._numberChildNodes > 0 && showHiddenCellsButtonList.length == 1;
+    if (needToUpdateButtonText) {
+      showHiddenCellsButtonList[0].childNodes[1].textContent = buttonText;
+    }
+    let needToRemoveButton = !(this.headingCollapsed && this._numberChildNodes > 0);
+    if (needToRemoveButton) {
+      for (const button of showHiddenCellsButtonList) {
+        this.node.removeChild(button);
       }
     }
   }
