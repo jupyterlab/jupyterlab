@@ -1349,7 +1349,7 @@ function addCommands(
     return Private.isEnabledAndHeadingSelected(shell, tracker);
   };
 
-  // Set up collapse signal for each header cell in a notebook
+  // Set up signal handler to keep the collapse state consistent
   tracker.currentChanged.connect(
     (sender: INotebookTracker, panel: NotebookPanel) => {
       if (!panel?.content?.model?.cells) {
@@ -1360,21 +1360,6 @@ function addCommands(
           list: IObservableUndoableList<ICellModel>,
           args: IObservableList.IChangedArgs<ICellModel>
         ) => {
-          const cell = panel.content.widgets[args.newIndex];
-          if (
-            cell instanceof MarkdownCell &&
-            (args.type === 'add' || args.type === 'set')
-          ) {
-            cell.toggleCollapsedSignal.connect(
-              (newCell: MarkdownCell, collapsing: boolean) => {
-                NotebookActions.setHeadingCollapse(
-                  newCell,
-                  collapsing,
-                  panel.content
-                );
-              }
-            );
-          }
           // Might be overkill to refresh this every time, but
           // it helps to keep the collapse state consistent.
           refreshCellCollapsed(panel.content);
