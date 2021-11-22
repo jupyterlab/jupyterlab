@@ -66,7 +66,9 @@ CodeMirror.defineMode(
         delimStyle: 'delimit'
       },
       {
-        open: '$',
+        // `$math mode$` is only matched if both opening
+        // and closing $ are in the same line
+        open: /\$(?=.*\$)/,
         close: '$',
         mode: texMode,
         delimStyle: 'delimit'
