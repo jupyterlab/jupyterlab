@@ -212,6 +212,8 @@ export class YNotebook
 
     this.ymeta.observe(this._onMetadataChanged);
     this.ystate.observe(this._onStateChanged);
+
+    this.awareness.on('change', this._onAwarenessChange);
   }
 
   get nbformat(): number {
@@ -232,6 +234,20 @@ export class YNotebook
     this.transact(() => {
       this.ystate.set('nbformatMinor', value);
     }, false);
+  }
+
+  /**
+   * Send an update of the current mode to other collaborators.
+   */
+  updateMode(oldValue: 'command' | 'edit', newValue: 'command' | 'edit') {
+    this.awareness.setLocalStateField('mode', { oldValue, newValue });
+  }
+
+  /**
+   * Send an update of the active cell index to other collaborators.
+   */
+  updateActiveCellIndex(oldValue: number, newValue: number) {
+    this.awareness.setLocalStateField('activeCellIndex', { oldValue, newValue });
   }
 
   /**
@@ -373,6 +389,13 @@ export class YNotebook
   }
 
   /**
+   * The ui-changed signal. This is triggered when a change in the Notebook ui happened (Markdown cell rendered etc).
+   */
+   get uiChanged(): ISignal<this, models.NotebookUIChange> {
+    return this._uiChanged;
+  }
+
+  /**
    * Handle a change to the list of cells.
    */
   private _onYCellsChanged = (event: Y.YArrayEvent<Y.Map<any>>) => {
@@ -454,6 +477,23 @@ export class YNotebook
     this._changed.emit({ stateChange });
   };
 
+  /**
+   * Handle a change in the document awareness.
+   */
+  private _onAwarenessChange = () => {
+    const state = this.awareness.getStates();
+
+    state.forEach((value: any, key: any) => {
+      // TODO: Do nothing if it's the local user state?
+      console.log('emit changed', value);
+
+      this._uiChanged.emit({
+        activeCellIndexChange: value.activeCellIndex,
+        modeChange: value.mode
+      });
+    });
+  };
+
   public ycells: Y.Array<Y.Map<any>> = this.ydoc.getArray('cells');
   public ymeta: Y.Map<any> = this.ydoc.getMap('meta');
   public ymodel: Y.Map<any> = this.ydoc.getMap('model');
@@ -463,6 +503,7 @@ export class YNotebook
   private _disableDocumentWideUndoRedo: boolean;
   private _ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
   public cells: YCellType[];
+  private _uiChanged = new Signal<this, models.NotebookUIChange>(this);
 }
 
 /**

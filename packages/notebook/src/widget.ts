@@ -16,6 +16,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { NotebookUIChange, YNotebook } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, each, findIndex } from '@lumino/algorithm';
 import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
@@ -1126,6 +1127,9 @@ export class Notebook extends StaticNotebook {
     const oldValue = this._mode;
     this._mode = newValue;
 
+    // Update the YJS mode
+    (this.model?.sharedModel as YNotebook).updateMode(oldValue, newValue);
+
     if (newValue === 'edit') {
       // Edit mode deselects all cells.
       each(this.widgets, widget => {
@@ -1166,6 +1170,10 @@ export class Notebook extends StaticNotebook {
     }
 
     this._activeCellIndex = newValue;
+
+    // Update the YJS active cell
+    (this.model?.sharedModel as YNotebook).updateActiveCellIndex(oldValue, newValue);
+
     const cell = this.widgets[newValue];
     if (cell !== this._activeCell) {
       // Post an update request.
@@ -1209,6 +1217,7 @@ export class Notebook extends StaticNotebook {
       return;
     }
     this._activeCell = null;
+    this.model?.sharedModel.uiChanged.disconnect(this._onUiChanged, this);
     super.dispose();
   }
 
@@ -1750,6 +1759,11 @@ export class Notebook extends StaticNotebook {
     // Try to set the active cell index to 0.
     // It will be set to `-1` if there is no new model or the model is empty.
     this.activeCellIndex = 0;
+
+    if (oldValue) {
+      oldValue.sharedModel.uiChanged.disconnect(this._onUiChanged, this);
+    }
+    this.model?.sharedModel.uiChanged.connect(this._onUiChanged, this);
   }
 
   /**
@@ -2384,6 +2398,20 @@ export class Notebook extends StaticNotebook {
         const cell = this.widgets[i];
         cell.model.selections.delete(cell.editor.uuid);
       }
+    }
+  }
+
+  /**
+   * Handle UI change from other collaborators
+   */
+  private _onUiChanged(sharedModel: YNotebook, change: NotebookUIChange) {
+    // Force edit mode for the markdown cells on which other collaborators are working
+    console.log('receive ui change', change);
+    if (change.modeChange?.newValue === 'edit' &&
+        change.activeCellIndexChange &&
+        this.widgets[change.activeCellIndexChange?.newValue].model.type === 'markdown') {
+      console.log('setting rendered to false');
+      (this.widgets[change.activeCellIndexChange?.newValue] as MarkdownCell).rendered = false;
     }
   }
 

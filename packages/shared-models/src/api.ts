@@ -116,6 +116,12 @@ export interface ISharedNotebook extends ISharedDocument {
    * The changed signal.
    */
   readonly changed: ISignal<this, NotebookChange>;
+
+  /**
+   * The ui-changed signal.
+   */
+   readonly uiChanged: ISignal<this, NotebookUIChange>;
+
   /**
    * The minor version number of the nbformat.
    */
@@ -478,6 +484,17 @@ export type NotebookChange = {
     oldValue: any;
     newValue: any;
   }>;
+};
+
+export type NotebookUIChange = {
+  modeChange?: {
+    oldValue: 'command' | 'edit';
+    newValue: 'command' | 'edit';
+  };
+  activeCellIndexChange?: {
+    oldValue: number;
+    newValue: number;
+  };
 };
 
 export type FileChange = {
