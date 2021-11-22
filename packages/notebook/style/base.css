@@ -62,7 +62,6 @@
 
 .jp-Notebook .jp-Cell .jp-InputPrompt {
   cursor: move;
-  float: left;
 }
 
 /*-----------------------------------------------------------------------------

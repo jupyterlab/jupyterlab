@@ -76,11 +76,9 @@
 }
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-prompt {
-  flex: 0 0
-    calc(
-      var(--jp-cell-prompt-width) -
-        var(--jp-private-cell-scrolling-output-offset)
-    );
+  min-width: calc(
+    var(--jp-cell-prompt-width) - var(--jp-private-cell-scrolling-output-offset)
+  );
 }
 
 /*-----------------------------------------------------------------------------
@@ -92,7 +90,8 @@
 |----------------------------------------------------------------------------*/
 
 .jp-MarkdownOutput {
-  flex: 1 1 auto;
+  display: table-cell;
+  width: 100%;
   margin-top: 0;
   margin-bottom: 0;
   padding-left: var(--jp-code-padding);
