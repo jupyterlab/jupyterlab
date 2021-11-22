@@ -140,6 +140,11 @@ type InsertType = 'push' | 'insert' | 'set';
 const HEADING_COLLAPSER_CLASS = 'jp-collapseHeadingButton';
 
 /**
+ * The class that controls the visibility of "heading collapser" and "show hidden cells" buttons.
+ */
+const HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS = 'jp-mod-showHiddenCellsButton';
+
+/**
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
@@ -193,6 +198,7 @@ export class StaticNotebook extends Widget {
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
+    this._updateNotebookConfig();
     this._mimetypeService = options.mimeTypeService;
 
     // Section for the virtual-notebook behavior.
@@ -784,6 +790,8 @@ export class StaticNotebook extends Widget {
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
+    // Control visibility of heading collapser UI
+    this.toggleClass(HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS, this._notebookConfig.showHiddenCellsButton);
   }
 
   private _incrementRenderedCount() {
