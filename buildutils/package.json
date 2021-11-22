@@ -1,10 +1,6 @@
 {
   "name": "@jupyterlab/buildutils",
-<<<<<<< HEAD
-  "version": "3.3.0-alpha.15",
-=======
   "version": "4.0.0-alpha.0",
->>>>>>> 4f4d41a49 (Publish)
   "description": "JupyterLab - Build Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -44,7 +40,7 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@lumino/coreutils": "^1.10.0",
+    "@lumino/coreutils": "^1.5.3",
     "@yarnpkg/lockfile": "^1.1.0",
     "child_process": "~1.0.2",
     "commander": "~6.0.0",

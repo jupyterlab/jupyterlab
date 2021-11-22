@@ -1,29 +1,17 @@
 {
   "name": "@jupyterlab/example-federated-phosphor",
-<<<<<<< HEAD
-  "version": "2.4.0-alpha.15",
-=======
   "version": "3.0.0-alpha.0",
->>>>>>> 4f4d41a49 (Publish)
   "private": true,
   "scripts": {
     "build": "npm run clean && build-labextension --core-path ../core_package .",
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-phosphor"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@jupyterlab/apputils": "^3.3.0-alpha.15",
-    "@phosphor/coreutils": "^1.0.0"
-  },
-  "devDependencies": {
-    "@jupyterlab/builder": "^3.3.0-alpha.15",
-=======
     "@jupyterlab/apputils": "^4.0.0-alpha.0",
     "@phosphor/coreutils": "^1.0.0"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-alpha.0",
->>>>>>> 4f4d41a49 (Publish)
     "rimraf": "~3.0.0"
   },
   "publishConfig": {

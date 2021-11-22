@@ -50,7 +50,7 @@
     "@jupyterlab/settingregistry": "^4.0.0-alpha.0",
     "@jupyterlab/toc": "^6.0.0-alpha.0",
     "@jupyterlab/translation": "^4.0.0-alpha.0",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.0"
+    "@jupyterlab/ui-components": "^4.0.0-alpha.15"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

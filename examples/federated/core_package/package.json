@@ -1,10 +1,6 @@
 {
   "name": "@jupyterlab/example-federated-core",
-<<<<<<< HEAD
-  "version": "2.4.0-alpha.15",
-=======
   "version": "3.0.0-alpha.0",
->>>>>>> 4f4d41a49 (Publish)
   "private": true,
   "scripts": {
     "build": "npm run clean && webpack",
@@ -114,51 +110,6 @@
     "react-dom": "^17.0.1"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@jupyterlab/application": "^3.3.0-alpha.15",
-    "@jupyterlab/application-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/apputils-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/celltags-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/codemirror-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/completer-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/console-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/coreutils": "^5.3.0-alpha.15",
-    "@jupyterlab/csvviewer-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/docmanager-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/documentsearch-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/extensionmanager-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/filebrowser-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/fileeditor-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/help-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/htmlviewer-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/hub-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/imageviewer-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/inspector-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/javascript-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/json-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/launcher-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/logconsole-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/mainmenu-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/mathjax2-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/notebook-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/pdf-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/rendermime-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/settingeditor-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/shortcuts-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/statusbar-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/terminal-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/theme-light-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/toc-extension": "^5.3.0-alpha.15",
-    "@jupyterlab/tooltip-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/translation": "^3.3.0-alpha.15",
-    "@jupyterlab/translation-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/ui-components-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/vdom-extension": "^3.3.0-alpha.15",
-    "@jupyterlab/vega5-extension": "^3.3.0-alpha.15"
-  },
-  "devDependencies": {
-    "@jupyterlab/builder": "^3.3.0-alpha.15",
-=======
     "@jupyterlab/application": "^4.0.0-alpha.0",
     "@jupyterlab/application-extension": "^4.0.0-alpha.0",
     "@jupyterlab/apputils-extension": "^4.0.0-alpha.0",
@@ -202,7 +153,6 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-alpha.0",
->>>>>>> 4f4d41a49 (Publish)
     "copy-webpack-plugin": "^6.0.1",
     "css-loader": "^5.0.1",
     "file-loader": "~6.0.0",
