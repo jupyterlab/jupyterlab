@@ -80,6 +80,12 @@ import { ResizeHandle } from './resizeHandle';
 
 import { Signal } from '@lumino/signaling';
 import { addIcon } from '@jupyterlab/ui-components';
+import {
+  CellChange,
+  ISharedBaseCellMetadata,
+  ISharedMarkdownCell,
+  YMarkdownCell
+} from '@jupyterlab/shared-models';
 
 /**
  * The CSS class added to cell widgets.
@@ -1465,6 +1471,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     // Stop codemirror handling paste
     this.editor.setOption('handlePaste', false);
 
+    // Initialize rendered to true
+    if (this.rendered === null) {
+      (this.model.sharedModel as YMarkdownCell).rendered = true;
+    }
+
     // Check if heading cell is set to be collapsed
     this._headingCollapsed = (this.model.metadata.get(
       MARKDOWN_HEADING_COLLAPSED
@@ -1476,7 +1487,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       timeout: RENDER_TIMEOUT
     });
     this._monitor.activityStopped.connect(() => {
-      if (this._rendered) {
+      if (this.rendered) {
         this.update();
       }
     }, this);
@@ -1486,6 +1497,17 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
     this.renderCollapseButtons(this._renderer!);
     this.renderInput(this._renderer!);
+
+    (this.model.sharedModel as YMarkdownCell).changed.connect(
+      this._onSharedModelChanged,
+      this
+    );
+    this.model.sharedModelSwitched.connect(() => {
+      (this.model.sharedModel as YMarkdownCell).changed.connect(
+        this._onSharedModelChanged,
+        this
+      );
+    }, this);
   }
 
   /**
@@ -1557,21 +1579,15 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   /**
    * Whether the cell is rendered.
    */
-  get rendered(): boolean {
-    return this._rendered;
+  get rendered(): boolean | null {
+    return (this.model.sharedModel as YMarkdownCell).rendered;
   }
-  set rendered(value: boolean) {
-    if (value === this._rendered) {
+  set rendered(value: boolean | null) {
+    if (value === this.rendered) {
       return;
     }
-    this._rendered = value;
-    this._handleRendered();
-    // Refreshing an editor can be really expensive, so we don't call it from
-    // _handleRendered, since _handledRendered is also called on every update
-    // request.
-    if (!this._rendered) {
-      this.editor.refresh();
-    }
+
+    (this.model.sharedModel as YMarkdownCell).rendered = value;
   }
 
   protected maybeCreateCollapseButton(): void {
@@ -1688,10 +1704,35 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   /**
+   * Handle a change to the cell shared model.
+   */
+  protected _onSharedModelChanged(
+    sender: ISharedMarkdownCell,
+    change: CellChange<ISharedBaseCellMetadata>
+  ): void {
+    if (change.stateChange) {
+      change.stateChange.forEach(stateChange => {
+        switch (stateChange.name) {
+          case 'rendered':
+            this._handleRendered();
+
+            // Refreshing an editor can be really expensive, so we don't call it from
+            // _handleRendered, since _handledRendered is also called on every update
+            // request.
+            if (!this.rendered) {
+              this.editor.refresh();
+            }
+            break;
+        }
+      });
+    }
+  }
+
+  /**
    * Handle the rendered state.
    */
   private _handleRendered(): void {
-    if (!this._rendered) {
+    if (!this.rendered) {
       this.showEditor();
     } else {
       // TODO: It would be nice for the cell to provide a way for
@@ -1740,7 +1781,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _toggleCollapsedSignal = new Signal<this, boolean>(this);
   private _renderer: IRenderMime.IRenderer | null = null;
   private _rendermime: IRenderMimeRegistry;
-  private _rendered = true;
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
 }

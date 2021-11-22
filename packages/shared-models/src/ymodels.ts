@@ -505,6 +505,14 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     this.ymodel = ymodel;
     const ysource = ymodel.get('source');
     this._prevSourceLength = ysource ? ysource.length : 0;
+
+    if (this.ymodel.get('state')) {
+      this.ystate = this.ymodel.get('state');
+    } else {
+      this.ystate = new Y.Map();
+      this.ymodel.set('state', this.ystate);
+    }
+
     this.ymodel.observeDeep(this._modelObserver);
   }
 
@@ -641,6 +649,13 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     ymodel.set('metadata', this.getMetadata());
     ymodel.set('cell_type', this.cell_type);
     ymodel.set('id', this.getId());
+
+    const ystate = new Y.Map();
+    for (const key in this.ystate.keys()) {
+      ystate.set(key, this.ystate.get(key));
+    }
+    ymodel.set('state', ystate);
+
     const Self: any = this.constructor;
     const clone = new Self(ymodel);
     // TODO The assignment of the undoManager does not work for a clone.
@@ -696,6 +711,25 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
         { insert: ysource.toString() }
       ];
     }
+
+    // Other state changes
+    const stateEvent = events.find(event => event.target === this.ystate) as
+      | undefined
+      | Y.YMapEvent<any>;
+
+    if (stateEvent) {
+      const stateChanges: any = [];
+      stateEvent.keysChanged.forEach(key => {
+        const change = stateEvent.changes.keys.get(key);
+        stateChanges.push({
+          name: key,
+          oldValue: change?.oldValue,
+          newValue: this.ystate.get(key)
+        });
+      });
+      changes.stateChange = stateChanges;
+    }
+
     this._prevSourceLength = ysource.length;
     this._changed.emit(changes);
   };
@@ -831,6 +865,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
 
   public isDisposed = false;
   public ymodel: Y.Map<any>;
+  public ystate: Y.Map<any>;
   private _undoManager: Y.UndoManager | null = null;
   private _changed = new Signal<this, models.CellChange<Metadata>>(this);
   private _prevSourceLength: number;
@@ -1030,6 +1065,16 @@ export class YMarkdownCell
       metadata: this.getMetadata(),
       attachments: this.getAttachments()
     };
+  }
+
+  /**
+   * Whether or not the cell is rendered.
+   */
+  get rendered(): boolean | null {
+    return this.ystate.get('rendered');
+  }
+  set rendered(rendered: boolean | null) {
+    this.ystate.set('rendered', rendered);
   }
 }
 

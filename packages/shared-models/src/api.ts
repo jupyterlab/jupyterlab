@@ -116,6 +116,7 @@ export interface ISharedNotebook extends ISharedDocument {
    * The changed signal.
    */
   readonly changed: ISignal<this, NotebookChange>;
+
   /**
    * The minor version number of the nbformat.
    */
@@ -504,6 +505,11 @@ export type CellChange<MetadataType> = {
     oldValue: Partial<MetadataType> | undefined;
     newValue: Partial<MetadataType> | undefined;
   };
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 export type DocumentChange = {
