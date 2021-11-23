@@ -382,7 +382,9 @@ async function activateConsole(
 
     const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
-      setOption(widget.console.promptCell?.editor, promptCellConfig);
+      // TODO
+      widget.console.promptCell?.editor &&
+        setOption(widget.console.promptCell?.editor, promptCellConfig);
     };
 
     if (panel) {

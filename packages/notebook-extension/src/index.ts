@@ -1023,6 +1023,10 @@ function activateCodeConsole(
 
       let code: string;
       const editor = cell.editor;
+      if (!editor) {
+        // TODO
+        return;
+      }
       const selection = editor.getSelection();
       const { start, end } = selection;
       const selected = start.column !== end.column || start.line !== end.line;
@@ -2556,10 +2560,10 @@ function populateMenus(
   mainMenu.editMenu.undoers.add({
     tracker,
     undo: widget => {
-      widget.content.activeCell?.editor.undo();
+      widget.content.activeCell?.editor?.undo();
     },
     redo: widget => {
-      widget.content.activeCell?.editor.redo();
+      widget.content.activeCell?.editor?.redo();
     }
   } as IEditMenu.IUndoer<NotebookPanel>);
 

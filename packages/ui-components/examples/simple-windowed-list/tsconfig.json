@@ -5,7 +5,25 @@
     "rootDir": "src",
     "module": "commonjs",
     "strictNullChecks": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ],
+  "references": [
+    {
+      "path": "../../../application"
+    },
+    {
+      "path": "../../../coreutils"
+    },
+    {
+      "path": "../../../theme-light-extension"
+    },
+    {
+      "path": "../.."
+    }
+  ]
 }

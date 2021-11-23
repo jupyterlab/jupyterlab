@@ -159,6 +159,10 @@ export namespace NotebookActions {
     const index = notebook.activeCellIndex;
     const child = notebook.widgets[index];
     const editor = child.editor;
+    if (!editor) {
+      // TODO
+      return;
+    }
     const selections = editor.getSelections();
     const orig = child.model.value.text;
 
@@ -216,7 +220,7 @@ export namespace NotebookActions {
     const activeCellDelta = start !== end ? 2 : 1;
     notebook.activeCellIndex = index + clones.length - activeCellDelta;
     const focusedEditor = notebook.activeCell.editor;
-    focusedEditor.focus();
+    focusedEditor?.focus();
 
     Private.handleState(notebook, state);
   }
@@ -749,7 +753,7 @@ export namespace NotebookActions {
    * @param text - The text to replace the selection.
    */
   export function replaceSelection(notebook: Notebook, text: string): void {
-    if (!notebook.model || !notebook.activeCell) {
+    if (!notebook.model || !notebook.activeCell?.editor) {
       return;
     }
     notebook.activeCell.editor.replaceSelection?.(text);
@@ -1889,7 +1893,7 @@ namespace Private {
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
-    if (scroll && state.activeCell) {
+    if (scroll && state.activeCell?.inputArea) {
       // Scroll to the top of the previous active cell output.
       const rect = state.activeCell.inputArea.node.getBoundingClientRect();
 

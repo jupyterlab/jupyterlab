@@ -134,7 +134,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
    */
   protected onActivateRequest(msg: Message): void {
     const prompt = this.console.promptCell;
-    if (prompt) {
+    if (prompt?.editor) {
       prompt.editor.focus();
     }
   }

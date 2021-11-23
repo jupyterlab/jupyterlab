@@ -200,52 +200,15 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this.addClass(CELL_CLASS);
     const model = (this._model = options.model);
 
-    const contentFactory = (this.contentFactory =
-      options.contentFactory || Cell.defaultContentFactory);
+    this.contentFactory = options.contentFactory || Cell.defaultContentFactory;
     this.layout = new PanelLayout();
     // Set up translator for aria labels
     this.translator = options.translator || nullTranslator;
 
-    // Header
-    const header = contentFactory.createCellHeader();
-    header.addClass(CELL_HEADER_CLASS);
-    (this.layout as PanelLayout).addWidget(header);
-
-    // Input
-    const inputWrapper = (this._inputWrapper = new Panel());
-    inputWrapper.addClass(CELL_INPUT_WRAPPER_CLASS);
-    const inputCollapser = new InputCollapser();
-    inputCollapser.addClass(CELL_INPUT_COLLAPSER_CLASS);
-    const input = (this._input = new InputArea({
-      model,
-      contentFactory,
-      updateOnShow: options.updateEditorOnShow,
-      placeholder: options.placeholder
-    }));
-    input.addClass(CELL_INPUT_AREA_CLASS);
-    inputWrapper.addWidget(inputCollapser);
-    inputWrapper.addWidget(input);
-    (this.layout as PanelLayout).addWidget(inputWrapper);
-
-    this._inputPlaceholder = new InputPlaceholder(() => {
-      this.inputHidden = !this.inputHidden;
-    });
-
-    // Footer
-    const footer = this.contentFactory.createCellFooter();
-    footer.addClass(CELL_FOOTER_CLASS);
-    (this.layout as PanelLayout).addWidget(footer);
-
-    // Editor settings
-    if (options.editorConfig) {
-      let editorOptions: any = {};
-      Object.keys(options.editorConfig).forEach(
-        (key: keyof CodeEditor.IConfig) => {
-          editorOptions[key] = options.editorConfig?.[key] ?? null;
-        }
-      );
-      this.editor.setOptions(editorOptions);
-    }
+    this._editorConfig = options.editorConfig ?? {};
+    this.placeholder = options.placeholder ?? true;
+    this.updateEditorOnShow = options.updateEditorOnShow;
+    // this.createDOM(contentFactory, model, options);
 
     model.metadata.changed.connect(this.onMetadataChanged, this);
   }
@@ -271,9 +234,13 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Get the prompt node used by the cell.
    */
-  get promptNode(): HTMLElement {
+  get promptNode(): HTMLElement | null {
+    if (this.placeholder) {
+      return null;
+    }
+
     if (!this._inputHidden) {
-      return this._input.promptNode;
+      return this._input!.promptNode;
     } else {
       return (this._inputPlaceholder!.node as HTMLElement)
         .firstElementChild as HTMLElement;
@@ -283,15 +250,23 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Get the CodeEditorWrapper used by the cell.
    */
-  get editorWidget(): CodeEditorWrapper {
-    return this._input.editorWidget;
+  get editorWidget(): CodeEditorWrapper | null {
+    return this._input?.editorWidget ?? null;
   }
 
   /**
    * Get the CodeEditor used by the cell.
    */
-  get editor(): CodeEditor.IEditor {
-    return this._input.editor;
+  get editor(): CodeEditor.IEditor | null {
+    return this._input?.editor ?? null;
+  }
+
+  get editorConfig(): Partial<CodeEditor.IConfig> {
+    return this._editorConfig;
+  }
+  setEditorConfig(v: Partial<CodeEditor.IConfig>): void {
+    this._editorConfig = { ...this._editorConfig, ...v };
+    this.editor?.refresh();
   }
 
   /**
@@ -304,7 +279,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Get the input area for the cell.
    */
-  get inputArea(): InputArea {
+  get inputArea(): InputArea | null {
     return this._input;
   }
 
@@ -364,7 +339,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Set the prompt for the widget.
    */
   setPrompt(value: string): void {
-    this._input.setPrompt(value);
+    this.prompt = value;
+    this._input?.setPrompt(value);
   }
 
   /**
@@ -377,13 +353,15 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     if (this._inputHidden === value) {
       return;
     }
-    const layout = this._inputWrapper.layout as PanelLayout;
-    if (value) {
-      this._input.parent = null;
-      layout.addWidget(this._inputPlaceholder);
-    } else {
-      this._inputPlaceholder.parent = null;
-      layout.addWidget(this._input);
+    if (!this.placeholder) {
+      const layout = this._inputWrapper!.layout as PanelLayout;
+      if (value) {
+        this._input!.parent = null;
+        layout.addWidget(this._inputPlaceholder!);
+      } else {
+        this._inputPlaceholder!.parent = null;
+        layout.addWidget(this._input!);
+      }
     }
     this._inputHidden = value;
     if (this.syncCollapse) {
@@ -497,6 +475,61 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     super.dispose();
   }
 
+  protected initializeDOM(): void {
+    const contentFactory = this.contentFactory;
+    const model = this._model;
+    console.log(`Calling initializeDOM for ${model.id}...`);
+
+    // Header
+    const header = contentFactory.createCellHeader();
+    header.addClass(CELL_HEADER_CLASS);
+    (this.layout as PanelLayout).addWidget(header);
+
+    // Input
+    const inputWrapper = (this._inputWrapper = new Panel());
+    inputWrapper.addClass(CELL_INPUT_WRAPPER_CLASS);
+    const inputCollapser = new InputCollapser();
+    inputCollapser.addClass(CELL_INPUT_COLLAPSER_CLASS);
+    const input = (this._input = new InputArea({
+      model,
+      contentFactory,
+      updateOnShow: this.updateEditorOnShow,
+      placeholder: this.placeholder
+    }));
+    input.addClass(CELL_INPUT_AREA_CLASS);
+    input.setPrompt(this.prompt);
+    inputWrapper.addWidget(inputCollapser);
+    inputWrapper.addWidget(input);
+    (this.layout as PanelLayout).addWidget(inputWrapper);
+
+    this._inputPlaceholder = new InputPlaceholder(() => {
+      this.inputHidden = !this.inputHidden;
+    });
+
+    // Footer
+    const footer = this.contentFactory.createCellFooter();
+    footer.addClass(CELL_FOOTER_CLASS);
+    (this.layout as PanelLayout).addWidget(footer);
+
+    // Editor settings
+    if (this._editorConfig) {
+      let editorOptions: any = {};
+      Object.keys(this._editorConfig).forEach(
+        (key: keyof CodeEditor.IConfig) => {
+          editorOptions[key] = this._editorConfig?.[key] ?? null;
+        }
+      );
+      this.editor!.setOptions(editorOptions);
+    }
+  }
+
+  protected onBeforeAttach(msg: Message): void {
+    if (this.placeholder) {
+      this.placeholder = false;
+      this.initializeDOM();
+    }
+  }
+
   /**
    * Handle `after-attach` messages.
    */
@@ -508,7 +541,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.editor.focus();
+    this.editor?.focus();
   }
 
   /**
@@ -516,7 +549,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    */
   protected onFitRequest(msg: Message): void {
     // need this for for when a theme changes font size
-    this.editor.refresh();
+    this.editor?.refresh();
   }
 
   /**
@@ -527,8 +560,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       return;
     }
     // Handle read only state.
-    if (this.editor.getOption('readOnly') !== this._readOnly) {
-      this.editor.setOption('readOnly', this._readOnly);
+    if (this.editor?.getOption('readOnly') !== this._readOnly) {
+      this.editor?.setOption('readOnly', this._readOnly);
       this.toggleClass(READONLY_CLASS, this._readOnly);
     }
   }
@@ -556,14 +589,18 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     }
   }
 
-  // Used in clone() to instantiate a new instance of the current widget
+  private _editorConfig: Partial<CodeEditor.IConfig> = {};
+  protected placeholder: boolean;
+  protected prompt = '';
+  protected updateEditorOnShow?: boolean;
   protected translator: ITranslator;
+
   private _readOnly = false;
   private _model: T;
   private _inputHidden = false;
-  private _input: InputArea;
-  private _inputWrapper: Widget;
-  private _inputPlaceholder: InputPlaceholder;
+  private _input: InputArea | null;
+  private _inputWrapper: Widget | null;
+  private _inputPlaceholder: InputPlaceholder | null;
   private _syncCollapse = false;
   private _syncEditable = false;
 }
@@ -1300,7 +1337,7 @@ export abstract class AttachmentsCell<
             continue;
           }
           items[i].getAsString(text => {
-            this.editor.replaceSelection?.(text);
+            this.editor!.replaceSelection?.(text);
           });
         }
         this._attachFiles(event.clipboardData.items);
@@ -1462,9 +1499,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       })
     });
 
-    // Stop codemirror handling paste
-    this.editor.setOption('handlePaste', false);
-
     // Check if heading cell is set to be collapsed
     this._headingCollapsed = (this.model.metadata.get(
       MARKDOWN_HEADING_COLLAPSED
@@ -1527,10 +1561,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     } else if (this.model.metadata.has(MARKDOWN_HEADING_COLLAPSED)) {
       this.model.metadata.delete(MARKDOWN_HEADING_COLLAPSED);
     }
-    const collapseButton = this.inputArea.promptNode.getElementsByClassName(
+    const collapseButton = this.inputArea?.promptNode.getElementsByClassName(
       HEADING_COLLAPSER_CLASS
     )[0];
     if (collapseButton) {
+      // TODO this should be done through CSS...
       collapseButton.setAttribute(
         'style',
         `background:
@@ -1570,14 +1605,38 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     // _handleRendered, since _handledRendered is also called on every update
     // request.
     if (!this._rendered) {
-      this.editor.refresh();
+      this.editor!.refresh();
     }
+  }
+
+  protected initializeDOM(): void {
+    super.initializeDOM();
+
+    // Stop codemirror handling paste
+    this.editor!.setOption('handlePaste', false);
+
+    const collapseButton = this.inputArea?.promptNode.getElementsByClassName(
+      HEADING_COLLAPSER_CLASS
+    )[0];
+    if (collapseButton) {
+      // TODO this should be done through CSS...
+      collapseButton.setAttribute(
+        'style',
+        `background:
+      ${
+        this._headingCollapsed
+          ? 'var(--jp-icon-caret-right)'
+          : 'var(--jp-icon-caret-down)'
+      } no-repeat center`
+      );
+    }
+    this.renderCollapseButtons(this._renderer!);
   }
 
   protected maybeCreateCollapseButton(): void {
     if (
       this.headingInfo.level > 0 &&
-      this.inputArea.promptNode.getElementsByClassName(HEADING_COLLAPSER_CLASS)
+      this.inputArea?.promptNode.getElementsByClassName(HEADING_COLLAPSER_CLASS)
         .length == 0
     ) {
       let collapseButton = this.inputArea.promptNode.appendChild(
@@ -1653,8 +1712,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   protected renderInput(widget: Widget): void {
     this.addClass(RENDERED_CLASS);
-    this.renderCollapseButtons(widget);
-    this.inputArea.renderInput(widget);
+    if (!this.placeholder) {
+      this.renderCollapseButtons(widget);
+      this.inputArea!.renderInput(widget);
+    }
   }
 
   /**
@@ -1662,7 +1723,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   protected showEditor(): void {
     this.removeClass(RENDERED_CLASS);
-    this.inputArea.showEditor();
+    if (!this.placeholder) {
+      this.inputArea!.showEditor();
+    }
   }
 
   /*
@@ -1684,13 +1747,18 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     const textToBeAppended = `![${attachmentName}](attachment:${
       URI ?? attachmentName
     })`;
-    this.editor.replaceSelection?.(textToBeAppended);
+    // TODO this should be done on the model...
+    this.editor?.replaceSelection?.(textToBeAppended);
   }
 
   /**
    * Handle the rendered state.
    */
   private _handleRendered(): void {
+    if (this.placeholder) {
+      return;
+    }
+
     if (!this._rendered) {
       this.showEditor();
     } else {

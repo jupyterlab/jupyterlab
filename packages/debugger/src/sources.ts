@@ -117,14 +117,15 @@ export class DebuggerSources implements IDebugger.ISources {
         }
         if (focus) {
           notebook.activeCellIndex = i;
-          if (notebook.activeCell) {
+          if (notebook.activeCell?.inputArea) {
             const node = notebook.activeCell.inputArea.node;
             const rect = node.getBoundingClientRect();
             notebook.scrollToPosition(rect.bottom, 45);
           }
           this._shell.activateById(notebookPanel.id);
         }
-        editors.push(cell.editor);
+        // TODO
+        cell.editor && editors.push(cell.editor);
       });
     });
     return editors;
@@ -161,7 +162,8 @@ export class DebuggerSources implements IDebugger.ISources {
         if (source !== codeId) {
           return;
         }
-        editors.push(cell.editor);
+        // TDOO
+        cell.editor && editors.push(cell.editor);
         if (focus) {
           this._shell.activateById(consoleWidget.id);
         }

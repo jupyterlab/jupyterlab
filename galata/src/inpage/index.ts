@@ -553,7 +553,7 @@ export class GalataInpage implements IGalataInpage {
 
       const rectNode = output
         ? cell.node.querySelector('.jp-Cell-outputArea')
-        : cell.inputArea.node;
+        : cell.inputArea?.node;
       const rect = rectNode?.getBoundingClientRect();
 
       const scrollThreshold = 45;

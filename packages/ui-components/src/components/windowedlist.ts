@@ -77,7 +77,9 @@ try {
   v Turn off windowing
   - Scroll after end
   - onScroll vs intersection observer
-  - Check is size cache based on mapping per node HTML a good idea? May cost too much to retrieve the size?
+  v Check is size cache based on mapping per node HTML a good idea? May cost too much to retrieve the size?
+    WeakMap is a bad idea
+  - Test drag and drop
  */
 
 export interface IWindowedListModel extends IDisposable {
@@ -129,6 +131,16 @@ export interface IWindowedListModel extends IDisposable {
   estimateWidgetHeight: (index: number | null) => number;
 
   /**
+   * VariableSizeList caches offsets and measurements for each index for performance purposes. This method clears that cached data for all items after (and including) the specified index. It should be called whenever a item's size changes. (Note that this is not a typical occurrance.)
+   *
+   * By default the list will automatically re-render after the index is reset. If you would like to delay this re-render until e.g. a state update has completed in the parent component, specify a value of false for the second, optional parameter.
+   *
+   * @param index
+   * @param shouldForceUpdate
+   */
+  resetAfterIndex(index: number, shouldForceUpdate?: boolean): void;
+
+  /**
    * A signal emitted when any model state changes.
    *
    * TODO do we need to provide a change arg (probably to deal with invalidate cache)
@@ -140,7 +152,7 @@ export interface IWindowedListModel extends IDisposable {
     IChangedArgs<
       any,
       any,
-      'count' | 'data' | 'overscanCount' | 'windowingActive'
+      'count' | 'data' | 'overscanCount' | 'windowingActive' | string
     >
   >;
 }
@@ -246,6 +258,19 @@ export abstract class WindowedListModel implements IWindowedListModel {
   abstract estimateWidgetHeight: (index: number | null) => number;
 
   /**
+   * VariableSizeList caches offsets and measurements for each index for performance purposes. This method clears that cached data for all items after (and including) the specified index. It should be called whenever a item's size changes. (Note that this is not a typical occurrance.)
+   *
+   * By default the list will automatically re-render after the index is reset. If you would like to delay this re-render until e.g. a state update has completed in the parent component, specify a value of false for the second, optional parameter.
+   *
+   * @param index
+   * @param shouldForceUpdate
+   */
+  resetAfterIndex(index: number, shouldForceUpdate: boolean = true): void {
+    // TODO
+    this.stateChanged.emit({ name: 'data', newValue: null, oldValue: null });
+  }
+
+  /**
    * A signal emitted when any model state changes.
    */
   readonly stateChanged = new Signal<
@@ -253,7 +278,7 @@ export abstract class WindowedListModel implements IWindowedListModel {
     IChangedArgs<
       any,
       any,
-      'count' | 'data' | 'overscanCount' | 'windowingActive'
+      'count' | 'data' | 'overscanCount' | 'windowingActive' | string
     >
   >(this);
 
@@ -277,10 +302,12 @@ export namespace IWindowedListModel {
   }
 }
 
-export class WindowedList extends Widget {
+export class WindowedList<
+  T extends IWindowedListModel = IWindowedListModel
+> extends Widget {
   static readonly DEFAULT_WIDGET_SIZE = 50;
 
-  constructor(options: WindowedList.IOptions) {
+  constructor(options: WindowedList.IOptions<T>) {
     // TODO probably needs to be able to customize outer HTML tag (could be ul / ol / table, ...)
     const node = document.createElement('div');
     node.className = 'jp-WindowedPanel-outer';
@@ -291,7 +318,7 @@ export class WindowedList extends Widget {
     );
     windowContainer.className = 'jp-WindowedPanel-window';
     super({ node });
-    this._model = options.model;
+    this._viewModel = options.model;
     this._height = 0;
     this._innerElement = innerElement;
     this._windowElement = windowContainer;
@@ -306,7 +333,7 @@ export class WindowedList extends Widget {
     this._widgetSizers = {};
     this.layout = options.layout ?? new WindowedLayout();
 
-    this._model.stateChanged.connect(this.onStateChanged, this);
+    this._viewModel.stateChanged.connect(this.onStateChanged, this);
   }
 
   readonly layout: WindowedLayout;
@@ -317,6 +344,10 @@ export class WindowedList extends Widget {
 
   get innerNode(): HTMLDivElement {
     return this._windowElement;
+  }
+
+  get viewModel(): T {
+    return this._viewModel;
   }
 
   handleEvent(event: Event): void {
@@ -367,23 +398,23 @@ export class WindowedList extends Widget {
   }
 
   protected get overscanCount(): number {
-    return this._model.overscanCount ?? 1;
+    return this._viewModel.overscanCount ?? 1;
   }
 
   protected get widgetRenderer(): (index: number) => Widget {
-    return this._model.widgetRenderer;
+    return this._viewModel.widgetRenderer;
   }
 
   protected get widgetSize(): (index: number | null) => number {
-    return this._model.estimateWidgetHeight;
+    return this._viewModel.estimateWidgetHeight;
   }
 
   protected get widgetCount(): number {
-    return this._model.widgetCount;
+    return this._viewModel.widgetCount;
   }
 
   protected get windowingActive(): boolean {
-    return this._model.windowingActive ?? true;
+    return this._viewModel.windowingActive ?? true;
   }
 
   protected onAfterAttach(msg: Message): void {
@@ -488,9 +519,9 @@ export class WindowedList extends Widget {
   private _update(): void {
     let newWindowIndex: [number, number, number, number] = [
       0,
-      Math.max(this.widgetCount - 1, 0),
+      Math.max(this.widgetCount - 1, -1),
       0,
-      Math.max(this.widgetCount - 1, 0)
+      Math.max(this.widgetCount - 1, -1)
     ];
     if (this.windowingActive) {
       newWindowIndex = this._getRangeToRender();
@@ -505,8 +536,10 @@ export class WindowedList extends Widget {
       this._currentWindow[1] !== stopIndex
     ) {
       const toAdd: Widget[] = [];
-      for (let index = startIndex; index <= stopIndex; index++) {
-        toAdd.push(this.widgetRenderer(index));
+      if (stopIndex >= 0) {
+        for (let index = startIndex; index <= stopIndex; index++) {
+          toAdd.push(this.widgetRenderer(index));
+        }
       }
       const nWidgets = this.layout.widgets.length;
       // Remove not needed widgets
@@ -534,20 +567,29 @@ export class WindowedList extends Widget {
     }
 
     if (this.windowingActive) {
-      // Read this value after creating the cells.
-      // So their actual sizes are taken into account
-      const estimatedTotalHeight = this._getEstimatedTotalSize();
+      if (stopIndex >= 0) {
+        // Read this value after creating the cells.
+        // So their actual sizes are taken into account
+        const estimatedTotalHeight = this._getEstimatedTotalSize();
 
-      // Update inner container height
-      this._innerElement.style.height = `${estimatedTotalHeight}px`;
+        // Update inner container height
+        this._innerElement.style.height = `${estimatedTotalHeight}px`;
 
-      // Update position of window container
-      const startSize = this._getItemMetadata(startIndex);
-      this._windowElement.style.top = `${startSize.offset}px`;
-      const stopSize = this._getItemMetadata(stopIndex);
-      this._windowElement.style.minHeight = `${
-        stopSize.offset - startSize.offset + stopSize.size
-      }px`;
+        // Update position of window container
+        const startSize = this._getItemMetadata(startIndex);
+        this._windowElement.style.top = `${startSize.offset}px`;
+        const stopSize = this._getItemMetadata(stopIndex);
+        this._windowElement.style.minHeight = `${
+          stopSize.offset - startSize.offset + stopSize.size
+        }px`;
+      } else {
+        // Update inner container height
+        this._innerElement.style.height = `0px`;
+
+        // Update position of window container
+        this._windowElement.style.top = `0px`;
+        this._windowElement.style.minHeight = `0px`;
+      }
 
       // Update scroll
       if (this._scrollUpdateWasRequested) {
@@ -560,7 +602,7 @@ export class WindowedList extends Widget {
     const widgetCount = this.widgetCount;
 
     if (widgetCount === 0) {
-      return [0, 0, 0, 0];
+      return [-1, -1, -1, -1];
     }
 
     const startIndex = this._getStartIndexForOffset(this._scrollOffset);
@@ -773,7 +815,7 @@ export class WindowedList extends Widget {
     this.update();
   }
 
-  protected _model: IWindowedListModel;
+  protected _viewModel: T;
   private _height: number;
   private _innerElement: HTMLDivElement;
   private _windowElement: HTMLDivElement;
@@ -916,8 +958,8 @@ export class WindowedLayout extends PanelLayout {
 }
 
 export namespace WindowedList {
-  export interface IOptions {
-    model: IWindowedListModel;
+  export interface IOptions<T extends IWindowedListModel = IWindowedListModel> {
+    model: T;
     layout?: WindowedLayout;
   }
 

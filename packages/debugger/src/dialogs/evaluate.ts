@@ -108,7 +108,7 @@ class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
     }).initializeState();
 
     // explicitly remove the prompt in front of the input area
-    this._prompt.inputArea.promptNode.remove();
+    this._prompt.inputArea?.promptNode.remove();
 
     this.node.appendChild(this._prompt.node);
   }

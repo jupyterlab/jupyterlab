@@ -183,7 +183,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
     const refreshNextNCells = () => {
       for (let stop = i + n; i < stop && i < cells.length; i++) {
-        cells[i].editor.refresh();
+        cells[i].editor?.refresh();
       }
       if (i < cells.length) {
         window.setTimeout(refreshNextNCells, 0);
@@ -197,7 +197,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    */
   private _refreshCurrentCellEditor() {
     const notebook = this._searchTarget!.content;
-    notebook.activeCell!.editor.refresh();
+    notebook.activeCell!.editor?.refresh();
   }
 
   /**
