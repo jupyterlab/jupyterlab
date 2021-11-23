@@ -768,47 +768,63 @@ export class CodeCell extends Cell<ICodeCellModel> {
    */
   constructor(options: CodeCell.IOptions) {
     super(options);
+    this.maxNumberOutputs = options.maxNumberOutputs;
+
     this.addClass(CODE_CELL_CLASS);
     const trans = this.translator.load('jupyterlab');
 
     // Only save options not handled by parent constructor.
-    const rendermime = (this._rendermime = options.rendermime);
-    const contentFactory = this.contentFactory;
     const model = this.model;
 
     // Note that modifying the below label warrants one to also modify
     // the same in this._outputLengthHandler. Ideally, this label must
     // have been a constant and used in both places but it is not done
     // so because of limitations in the translation manager.
-    let ariaLabel = trans.__('Code Cell Content with Output');
+    let ariaLabel =
+      model.outputs.length === 0
+        ? trans.__('Code Cell Content')
+        : trans.__('Code Cell Content with Output');
+    model.stateChanged.connect(this.onStateChanged, this);
+    this.node.setAttribute('aria-label', ariaLabel);
+  }
 
-    if (!options.placeholder) {
+  protected initializeDOM(): void {
+    super.initializeDOM();
+
+    if (!this.placeholder) {
+      const trans = this.translator.load('jupyterlab');
+
       // Insert the output before the cell footer.
       const outputWrapper = (this._outputWrapper = new Panel());
       outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
       const outputCollapser = new OutputCollapser();
       outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
       const output = (this._output = new OutputArea({
-        model: model.outputs,
-        rendermime,
-        contentFactory: contentFactory,
-        maxNumberOutputs: options.maxNumberOutputs
+        model: this.model.outputs,
+        rendermime: this._rendermime,
+        contentFactory: this.contentFactory,
+        maxNumberOutputs: this.maxNumberOutputs
       }));
       output.addClass(CELL_OUTPUT_AREA_CLASS);
       // Set a CSS if there are no outputs, and connect a signal for future
       // changes to the number of outputs. This is for conditional styling
       // if there are no outputs.
-      if (model.outputs.length === 0) {
+      if (this.model.outputs.length === 0) {
         this.addClass(NO_OUTPUTS_CLASS);
-        ariaLabel = trans.__('Code Cell Content');
       }
+      const ariaLabel =
+        this.model.outputs.length === 0
+          ? trans.__('Code Cell Content')
+          : trans.__('Code Cell Content with Output');
+      this.node.setAttribute('aria-label', ariaLabel);
+
       output.outputLengthChanged.connect(this._outputLengthHandler, this);
       outputWrapper.addWidget(outputCollapser);
       outputWrapper.addWidget(output);
       (this.layout as PanelLayout).insertWidget(2, new ResizeHandle(this.node));
       (this.layout as PanelLayout).insertWidget(3, outputWrapper);
 
-      if (model.isDirty) {
+      if (this.model.isDirty) {
         this.addClass(DIRTY_CLASS);
       }
 
@@ -816,8 +832,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
         this.outputHidden = !this.outputHidden;
       });
     }
-    model.stateChanged.connect(this.onStateChanged, this);
-    this.node.setAttribute('aria-label', ariaLabel);
   }
 
   /**
@@ -1089,6 +1103,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
     }
     super.onMetadataChanged(model, args);
   }
+
+  readonly maxNumberOutputs: number | undefined;
 
   /**
    * Handle changes in the number of outputs in the output area.
