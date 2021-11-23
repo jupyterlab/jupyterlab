@@ -47,67 +47,15 @@ export function createSemanticCommand(
   trans: TranslationBundle
 ): CommandRegistry.ICommandOptions {
   const { commands, shell } = app;
-  const commandList =
-    semanticCommands instanceof Array ? semanticCommands : [semanticCommands];
+  const commandList = Array.isArray(semanticCommands)
+    ? semanticCommands
+    : [semanticCommands];
 
   return {
-    label: () => {
-      const widget = shell.currentWidget;
-      const commandIds = commandList.map(cmd =>
-        widget !== null ? cmd.getActiveCommandId(widget) : null
-      );
-      const labels = commandIds
-        .filter(commandId => commandId !== null)
-        .map(commandId => commands.label(commandId!));
-      switch (labels.length) {
-        case 0:
-          return defaultValues.label ?? '';
-        case 1:
-          return labels[0];
-        default: {
-          const hasEllipsis = labels.some(l => /…$/.test(l));
-          const main = labels
-            .slice(undefined, -1)
-            .map(l => l.replace(/…$/, ''))
-            .join(', ');
-          const end = labels.slice(-1)[0] + (hasEllipsis ? '…' : '');
-          return trans.__('%1 and %2', main, end);
-        }
-      }
-    },
-    caption: () => {
-      const widget = shell.currentWidget;
-      const commandIds = commandList.map(cmd =>
-        widget !== null ? cmd.getActiveCommandId(widget) : null
-      );
-      const captions = commandIds
-        .filter(commandId => commandId !== null)
-        .map(commandId => commands.caption(commandId!));
-
-      switch (captions.length) {
-        case 0:
-          return defaultValues.label ?? '';
-        case 1:
-          return captions[0];
-        default: {
-          const hasEllipsis = captions.some(c => /…$/.test(c));
-          const main = captions
-            .slice(undefined, -1)
-            .map(c => c.replace(/…$/, ''))
-            .join(', ');
-          const end = captions.slice(-1)[0] + (hasEllipsis ? '…' : '');
-          return trans.__('%1 and %2', main, end);
-        }
-      }
-    },
+    label: concatenateTexts('label'),
+    caption: concatenateTexts('caption'),
     isEnabled: () => {
-      const widget = shell.currentWidget;
-      const commandIds = commandList.map(cmd =>
-        widget !== null ? cmd.getActiveCommandId(widget) : null
-      );
-      const isEnabled = commandIds
-        .filter(commandId => commandId !== null)
-        .map(commandId => commands.isEnabled(commandId!));
+      const isEnabled = reduceAttribute('isEnabled');
       return (
         (isEnabled.length > 0 &&
           !isEnabled.some(enabled => enabled === false)) ||
@@ -115,28 +63,17 @@ export function createSemanticCommand(
       );
     },
     isToggled: () => {
-      const widget = shell.currentWidget;
-      const commandIds = commandList.map(cmd =>
-        widget !== null ? cmd.getActiveCommandId(widget) : null
-      );
-      const isToggled = commandIds
-        .filter(commandId => commandId !== null)
-        .map(commandId => commands.isToggled(commandId!));
+      const isToggled = reduceAttribute('isToggled');
       return (
         isToggled.some(enabled => enabled === true) ||
         (defaultValues.isToggled ?? false)
       );
     },
     isVisible: () => {
-      const widget = shell.currentWidget;
-      const commandIds = commandList.map(cmd =>
-        widget !== null ? cmd.getActiveCommandId(widget) : null
-      );
-      const isVisible = commandIds
-        .filter(commandId => commandId !== null)
-        .map(commandId => commands.isVisible(commandId!));
+      const isVisible = reduceAttribute('isVisible');
       return (
-        !isVisible.some(visible => visible === false) ||
+        (isVisible.length > 0 &&
+          !isVisible.some(visible => visible === false)) ||
         (defaultValues.isVisible ?? true)
       );
     },
@@ -165,4 +102,40 @@ export function createSemanticCommand(
       return result;
     }
   };
+
+  function reduceAttribute(
+    attribute: keyof CommandRegistry.ICommandOptions
+  ): any[] {
+    const widget = shell.currentWidget;
+    const commandIds = commandList.map(cmd =>
+      widget !== null ? cmd.getActiveCommandId(widget) : null
+    );
+    const attributes = commandIds
+      .filter(commandId => commandId !== null)
+      .map(commandId => commands[attribute](commandId!));
+    return attributes;
+  }
+
+  function concatenateTexts(
+    attribute: 'label' | 'caption'
+  ): string | CommandRegistry.CommandFunc<string> | undefined {
+    return () => {
+      const texts = reduceAttribute(attribute);
+      switch (texts.length) {
+        case 0:
+          return defaultValues.label ?? '';
+        case 1:
+          return texts[0];
+        default: {
+          const hasEllipsis = texts.some(l => /…$/.test(l));
+          const main = texts
+            .slice(undefined, -1)
+            .map(l => l.replace(/…$/, ''))
+            .join(', ');
+          const end = texts.slice(-1)[0] + (hasEllipsis ? '…' : '');
+          return trans.__('%1 and %2', main, end);
+        }
+      }
+    };
+  }
 }
