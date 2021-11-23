@@ -26,7 +26,7 @@ import { ElementExt } from '@lumino/domutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
 import { INotebookModel } from './model';
-import { Notebook } from './widget';
+import { Notebook, StaticNotebook } from './widget';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -1604,7 +1604,7 @@ export namespace NotebookActions {
   export function setHeadingCollapse(
     cell: Cell,
     collapsing: boolean,
-    notebook: Notebook
+    notebook: StaticNotebook
   ): number {
     const which = findIndex(
       notebook.widgets,
