@@ -1358,6 +1358,10 @@ function activateNotebookHandler(
       'experimentalDisableDocumentWideUndoRedo'
     ).composite as boolean;
 
+    Private.renderSideBySide = !settings.get('sideBySideRendering')
+      .composite as boolean;
+    commands.execute(CommandIDs.toggleRenderSideBySide);
+
     updateTracker({
       editorConfig: factory.editorConfig,
       notebookConfig: factory.notebookConfig,
@@ -2319,9 +2323,8 @@ function addCommands(
         if (wideget) {
           if (Private.renderSideBySide) {
             return NotebookActions.renderSideBySide(wideget.content);
-          } else {
-            return NotebookActions.renderNotSideBySide(wideget.content);
           }
+          return NotebookActions.renderNotSideBySide(wideget.content);
         }
       });
       tracker.currentChanged.connect(() => {
