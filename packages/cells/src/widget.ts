@@ -1604,9 +1604,12 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     const showHiddenCellsButtonList = this.node.getElementsByClassName(
       SHOW_HIDDEN_CELLS_CLASS
     );
-    let buttonText = `${this._numberChildNodes} cell${
-      this._numberChildNodes > 1 ? 's' : ''
-    } hidden`;
+    let trans = this.translator.load('jupyterlab');
+    let buttonText = trans._n(
+      '%1 cell hidden',
+      '%1 cells hidden',
+      this._numberChildNodes
+    );
     let needToCreateButton =
       this.headingCollapsed &&
       this._numberChildNodes > 0 &&
