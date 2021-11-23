@@ -656,9 +656,15 @@ describe('docregistry/registry', () => {
         expect(ft[1].name).toBe('json');
       });
 
-      it('should be case insensitive', () => {
-        const ft = registry.getFileTypesForPath('foo/bar/baz.PY');
-        expect(ft[0].name).toBe('python');
+      it.each([
+        ['python', null, 'foo/bar/baz.PY'],
+        ['r-markdown', ['.Rmd'], 'foo/bar/baz.Rmd']
+      ])('should be case insensitive', (name, extensions, filename) => {
+        if (extensions) {
+          registry.addFileType({ name, extensions });
+        }
+        const ft = registry.getFileTypesForPath(filename);
+        expect(ft[0].name).toBe(name);
       });
 
       it('should support pattern matching', () => {

@@ -662,7 +662,14 @@ export class DocumentRegistry implements IDisposable {
     // Then look by extension name, starting with the longest
     let ext = Private.extname(name);
     while (ext.length > 1) {
-      ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
+      ft = find(
+        this._fileTypes,
+        ft =>
+          ft.extensions
+            // In Private.extname, the extension is transformed to lower case
+            .map(extension => extension.toLowerCase())
+            .indexOf(ext) !== -1
+      );
       if (ft) {
         fts.push(ft);
       }
