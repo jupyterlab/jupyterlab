@@ -1663,7 +1663,11 @@ export class Notebook extends StaticNotebook {
     if (this._fragment) {
       let el;
       try {
-        el = this.node.querySelector(this._fragment);
+        el = this.node.querySelector(
+          this._fragment.startsWith('#')
+            ? `#${CSS.escape(this._fragment.slice(1))}`
+            : this._fragment
+        );
       } catch (error) {
         console.warn('Unable to set URI fragment identifier', error);
       }
