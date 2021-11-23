@@ -34,6 +34,7 @@ const contentFactory = utils.createNotebookFactory();
 const editorConfig = utils.defaultEditorConfig;
 const rendermime = utils.defaultRenderMime();
 const notebookConfig = {
+  showHiddenCellsButton: true,
   scrollPastEnd: true,
   defaultCell: 'code' as nbformat.CellType,
   recordTiming: false,
