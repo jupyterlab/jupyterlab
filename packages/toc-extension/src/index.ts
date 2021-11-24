@@ -242,6 +242,4 @@ const registry: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [registry];
-
-export default plugins;
+export default registry;
