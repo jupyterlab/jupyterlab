@@ -4,8 +4,6 @@
 import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 
-test.use({ autoGoto: false });
-
 test.describe('General Tests', () => {
   test('Launch Screen', async ({ page }) => {
     const imageName = 'launch.png';
