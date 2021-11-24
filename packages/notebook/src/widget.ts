@@ -167,6 +167,12 @@ if ((window as any).requestIdleCallback === undefined) {
   };
 }
 
+/*
+ TODO
+ - Quid of outputs that request stdin
+ 
+ */
+
 export class NotebookViewModel extends WindowedListModel {
   /**
    * Construct a notebook widget.

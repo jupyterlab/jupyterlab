@@ -775,49 +775,69 @@ export class CodeCell extends Cell<ICodeCellModel> {
     const rendermime = (this._rendermime = options.rendermime);
     const contentFactory = this.contentFactory;
     const model = this.model;
+    this.maxNumberOutputs = options.maxNumberOutputs;
 
     // Note that modifying the below label warrants one to also modify
     // the same in this._outputLengthHandler. Ideally, this label must
     // have been a constant and used in both places but it is not done
     // so because of limitations in the translation manager.
-    let ariaLabel = trans.__('Code Cell Content with Output');
+    const ariaLabel =
+      model.outputs.length === 0
+        ? trans.__('Code Cell Content')
+        : trans.__('Code Cell Content with Output');
+    this.node.setAttribute('aria-label', ariaLabel);
 
-    if (!options.placeholder) {
+    // if (!this.placeholder) {
+    const output = (this._output = new OutputArea({
+      model: this.model.outputs,
+      rendermime,
+      contentFactory: contentFactory,
+      maxNumberOutputs: this.maxNumberOutputs
+    }));
+    output.addClass(CELL_OUTPUT_AREA_CLASS);
+    // }
+
+    model.stateChanged.connect(this.onStateChanged, this);
+  }
+
+  protected maxNumberOutputs: number | undefined;
+
+  protected initializeDOM(): void {
+    super.initializeDOM();
+
+    if (!this.placeholder) {
       // Insert the output before the cell footer.
       const outputWrapper = (this._outputWrapper = new Panel());
       outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
       const outputCollapser = new OutputCollapser();
       outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
-      const output = (this._output = new OutputArea({
-        model: model.outputs,
-        rendermime,
-        contentFactory: contentFactory,
-        maxNumberOutputs: options.maxNumberOutputs
-      }));
-      output.addClass(CELL_OUTPUT_AREA_CLASS);
+      outputWrapper.addWidget(outputCollapser);
       // Set a CSS if there are no outputs, and connect a signal for future
       // changes to the number of outputs. This is for conditional styling
       // if there are no outputs.
-      if (model.outputs.length === 0) {
+      if (this.model.outputs.length === 0) {
         this.addClass(NO_OUTPUTS_CLASS);
-        ariaLabel = trans.__('Code Cell Content');
       }
-      output.outputLengthChanged.connect(this._outputLengthHandler, this);
-      outputWrapper.addWidget(outputCollapser);
-      outputWrapper.addWidget(output);
+      this._output.outputLengthChanged.connect(this._outputLengthHandler, this);
+      outputWrapper.addWidget(this._output);
       (this.layout as PanelLayout).insertWidget(2, new ResizeHandle(this.node));
       (this.layout as PanelLayout).insertWidget(3, outputWrapper);
 
-      if (model.isDirty) {
+      if (this.model.isDirty) {
         this.addClass(DIRTY_CLASS);
       }
 
       this._outputPlaceholder = new OutputPlaceholder(() => {
         this.outputHidden = !this.outputHidden;
       });
+
+      const trans = this.translator.load('jupyterlab');
+      const ariaLabel =
+        this.model.outputs.length === 0
+          ? trans.__('Code Cell Content')
+          : trans.__('Code Cell Content with Output');
+      this.node.setAttribute('aria-label', ariaLabel);
     }
-    model.stateChanged.connect(this.onStateChanged, this);
-    this.node.setAttribute('aria-label', ariaLabel);
   }
 
   /**
@@ -852,19 +872,22 @@ export class CodeCell extends Cell<ICodeCellModel> {
     if (this._outputHidden === value) {
       return;
     }
-    const layout = this._outputWrapper.layout as PanelLayout;
-    if (value) {
-      layout.removeWidget(this._output);
-      layout.addWidget(this._outputPlaceholder);
-      if (this.inputHidden && !this._outputWrapper.isHidden) {
-        this._outputWrapper.hide();
+
+    if (!this.placeholder) {
+      const layout = this._outputWrapper!.layout as PanelLayout;
+      if (value) {
+        layout.removeWidget(this._output);
+        layout.addWidget(this._outputPlaceholder!);
+        if (this.inputHidden && !this._outputWrapper!.isHidden) {
+          this._outputWrapper!.hide();
+        }
+      } else {
+        if (this._outputWrapper!.isHidden) {
+          this._outputWrapper!.show();
+        }
+        layout.removeWidget(this._outputPlaceholder!);
+        layout.addWidget(this._output);
       }
-    } else {
-      if (this._outputWrapper.isHidden) {
-        this._outputWrapper.show();
-      }
-      layout.removeWidget(this._outputPlaceholder);
-      layout.addWidget(this._output);
     }
     this._outputHidden = value;
     if (this.syncCollapse) {
@@ -992,10 +1015,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * is hidden without accessing private state.
    */
   protected handleInputHidden(value: boolean): void {
-    if (!value && this._outputWrapper.isHidden) {
-      this._outputWrapper.show();
-    } else if (value && !this._outputWrapper.isHidden && this._outputHidden) {
-      this._outputWrapper.hide();
+    if (this.placeholder) {
+      return;
+    }
+    if (!value && this._outputWrapper!.isHidden) {
+      this._outputWrapper!.show();
+    } else if (value && !this._outputWrapper!.isHidden && this._outputHidden) {
+      this._outputWrapper!.hide();
     }
   }
 
@@ -1106,8 +1132,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _rendermime: IRenderMimeRegistry;
   private _outputHidden = false;
   private _outputsScrolled: boolean;
-  private _outputWrapper: Widget;
-  private _outputPlaceholder: OutputPlaceholder;
+  private _outputWrapper: Widget | null = null;
+  private _outputPlaceholder: OutputPlaceholder | null = null;
   private _output: OutputArea;
   private _syncScrolled = false;
   private _savingMetadata = false;
