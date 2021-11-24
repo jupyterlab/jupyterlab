@@ -9,6 +9,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { PageConfig } from '@jupyterlab/coreutils';
 import { IStateDB } from '@jupyterlab/statedb';
 import {
   ICurrentUser,
@@ -37,13 +38,17 @@ const userPlugin: JupyterFrontEndPlugin<IUser> = {
 /**
  * Jupyter plugin providing the IUserMenu.
  */
-const userMenuPlugin: JupyterFrontEndPlugin<IMenu> = {
+const userMenuPlugin: JupyterFrontEndPlugin<IMenu | undefined> = {
   id: '@jupyterlab/user-extension:userMenu',
   autoStart: true,
   requires: [ICurrentUser],
   provides: IUserMenu,
-  activate: (app: JupyterFrontEnd, user: IUser): IMenu => {
+  activate: (app: JupyterFrontEnd, user: IUser): IMenu | undefined => {
     const { shell, commands } = app;
+
+    if (PageConfig.getOption('collaborative') !== 'true') {
+      return undefined;
+    }
 
     const spacer = new Widget();
     spacer.id = 'jp-topbar-spacer';

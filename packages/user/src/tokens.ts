@@ -24,7 +24,9 @@ export const ICurrentUser = new Token<IUser>('@jupyterlab/user:ICurrentUser');
  * NOTE: Requirer this token in your extension to access the user menu
  * (top-right menu in JupyterLab's interface).
  */
-export const IUserMenu = new Token<IMenu>('@jupyterlab/user:IUserMenu');
+export const IUserMenu = new Token<IMenu | undefined>(
+  '@jupyterlab/user:IUserMenu'
+);
 
 /**
  * The user panel token.
