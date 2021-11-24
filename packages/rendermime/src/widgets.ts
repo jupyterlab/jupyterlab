@@ -134,7 +134,11 @@ export abstract class RenderedHTMLCommon extends RenderedCommon {
   setFragment(fragment: string) {
     let el;
     try {
-      el = this.node.querySelector(fragment);
+      el = this.node.querySelector(
+        fragment.startsWith('#')
+          ? `#${CSS.escape(fragment.slice(1))}`
+          : fragment
+      );
     } catch (error) {
       console.warn('Unable to set URI fragment identifier.', error);
     }
