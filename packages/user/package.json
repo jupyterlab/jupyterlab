@@ -41,7 +41,6 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.3.0-alpha.15",
     "@jupyterlab/coreutils": "^5.3.0-alpha.15",
     "@jupyterlab/services": "^6.3.0-alpha.15",
     "@jupyterlab/statedb": "^3.3.0-alpha.15",
@@ -50,8 +49,7 @@
     "@lumino/signaling": "^1.9.0",
     "@lumino/virtualdom": "^1.13.0",
     "@lumino/widgets": "^1.28.0",
-    "lib0": "^0.2.42",
-    "react": "^17.0.1"
+    "lib0": "^0.2.42"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.3.0-alpha.15",
