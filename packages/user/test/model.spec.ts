@@ -1,20 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterServer, signalToPromise } from '@jupyterlab/testutils';
+import { signalToPromise } from '@jupyterlab/testutils';
 import { StateDB } from '@jupyterlab/statedb';
 
 import { User } from './../src/model';
-
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
 
 describe('user/model', () => {
   describe('User', () => {
