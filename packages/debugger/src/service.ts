@@ -839,7 +839,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: Map<string, IDebugger.IBreakpoint[]>
   ): Promise<void> {
     for (const [source, points] of breakpoints) {
-      console.log(source);
       await this._setBreakpoints(
         points
           .filter(({ line }) => typeof line === 'number')

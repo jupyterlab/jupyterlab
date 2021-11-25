@@ -803,6 +803,11 @@ export namespace IDebugger {
       readonly sources: ISources;
 
       /**
+       * The kernel sources UI model.
+       */
+      readonly kernelSources: ISources;
+
+      /**
        * The set of threads in stopped state.
        */
       stoppedThreads: Set<number>;
