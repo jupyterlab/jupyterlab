@@ -865,6 +865,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
       model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
       model.sources.currentSourceOpened.connect(onCurrentSourceOpened);
+      model.kernelSources.currentSourceOpened.connect(onCurrentSourceOpened);
       model.breakpoints.clicked.connect(async (_, breakpoint) => {
         const path = breakpoint.source?.path;
         const source = await service.getSource({
