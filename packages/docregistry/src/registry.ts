@@ -1431,7 +1431,7 @@ export namespace DocumentRegistry {
         name: 'r',
         displayName: trans.__('R File'),
         mimeTypes: ['text/x-rsrc'],
-        extensions: ['.r'],
+        extensions: ['.R'],
         icon: rKernelIcon
       },
       {
