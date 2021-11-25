@@ -55,8 +55,7 @@ export class DocumentModel
     return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
-    const oldValue = this.sharedModel.dirty;
-    if (newValue === oldValue) {
+    if (newValue === this.dirty) {
       return;
     }
     (this.sharedModel as models.YFile).dirty = newValue;
@@ -159,7 +158,9 @@ export class DocumentModel
   ): void {
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        this.triggerStateChange(value);
+        if (value.name !== 'dirty' || value.oldValue !== value.newValue) {
+          this.triggerStateChange(value);
+        }
       });
     }
   }
@@ -569,7 +570,10 @@ export class DocumentWidget<
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (this.context.model.dirty) {
+    if (
+      this.context.model.dirty &&
+      !this.title.className.includes(DIRTY_CLASS)
+    ) {
       this.title.className += ` ${DIRTY_CLASS}`;
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');

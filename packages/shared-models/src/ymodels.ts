@@ -456,11 +456,13 @@ export class YNotebook
     const stateChange: any = [];
     event.keysChanged.forEach(key => {
       const change = event.changes.keys.get(key);
-      stateChange.push({
-        name: key,
-        oldValue: change?.oldValue ? change!.oldValue : 0,
-        newValue: this.ystate.get(key)
-      });
+      if (change) {
+        stateChange.push({
+          name: key,
+          oldValue: change.oldValue,
+          newValue: this.ystate.get(key)
+        });
+      }
     });
 
     this._changed.emit({ stateChange });

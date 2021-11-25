@@ -138,8 +138,7 @@ export class NotebookModel implements INotebookModel {
     return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
-    const oldValue = this.sharedModel.dirty;
-    if (newValue === oldValue) {
+    if (newValue === this.dirty) {
       return;
     }
     (this.sharedModel as models.YNotebook).dirty = newValue;
@@ -428,7 +427,9 @@ close the notebook without saving it.`,
         if (value.name === 'nbformatMinor') {
           this._nbformatMinor = value.newValue;
         }
-        this.triggerStateChange(value);
+        if (value.name !== 'dirty' || value.oldValue !== value.newValue) {
+          this.triggerStateChange(value);
+        }
       });
     }
 
