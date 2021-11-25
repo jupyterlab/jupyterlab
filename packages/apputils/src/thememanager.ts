@@ -80,7 +80,7 @@ export class ThemeManager implements IThemeManager {
    *
    * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
    *
-   * @return value - The current value of the Jupyterlab CSS variable
+   * @returns value - The current value of the Jupyterlab CSS variable
    */
   getCSS(key: string): string {
     return (

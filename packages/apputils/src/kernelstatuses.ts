@@ -6,7 +6,7 @@ import { ISessionContext } from './sessioncontext';
  * input translator.
  *
  * @param translator - - Language translator.
- * @return The translated kernel status mapping.
+ * @returns The translated kernel status mapping.
  */
 export function translateKernelStatuses(
   translator?: ITranslator
