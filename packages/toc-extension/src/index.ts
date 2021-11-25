@@ -51,12 +51,18 @@ namespace CommandIDs {
   export const showPanel = 'toc:show-panel';
 }
 
+//
+/**
+ * The id for the Table of Contents plugin.
+ * TODO: rename to `@jupyterlab/toc-extension:registry` for consistency.
+ */
+const PLUGIN_ID = '@jupyterlab/toc:plugin';
+
 /**
  * A plugin to provide a registry for the table of contents.
  */
 const registry: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
-  // TODO: rename to `@jupyterlab/toc-extension:registry` for consistency.
-  id: '@jupyterlab/toc:plugin',
+  id: PLUGIN_ID,
   autoStart: true,
   provides: ITableOfContentsRegistry,
   requires: [IDocumentManager, IRenderMimeRegistry, ITranslator],
@@ -150,13 +156,14 @@ const registry: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
 
     if (restorer) {
       // Add the ToC widget to the application restorer:
-      restorer.add(toc, '@jupyterlab/toc:plugin');
+      restorer.add(toc, PLUGIN_ID);
     }
 
     // Attempt to load plugin settings:
     let settings: ISettingRegistry.ISettings | undefined;
     if (settingRegistry) {
       try {
+        // TODO: use PLUGIN_ID
         settings = await settingRegistry.load(
           '@jupyterlab/toc-extension:plugin'
         );
