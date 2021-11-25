@@ -1,12 +1,16 @@
+import {
+  createSemanticCommand,
+  JupyterLab,
+  LabShell
+} from '@jupyterlab/application';
 import { SemanticCommand } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
-import { createSemanticCommand, JupyterFrontEnd, LabShell } from '../lib';
 
 describe('@jupyterlab/application', () => {
   describe('createSemanticCommand', () => {
-    let app: JupyterFrontEnd;
+    let app: JupyterLab;
     let commands: CommandRegistry;
     let currentWidget;
     let translator: ITranslator;
@@ -22,10 +26,10 @@ describe('@jupyterlab/application', () => {
         shell: {
           currentWidget
         } as LabShell
-      } as any) as JupyterFrontEnd;
+      } as any) as JupyterLab;
     });
 
-    test.each([
+    it.each([
       [[true, false], false, true],
       [[true, false], true, true],
       [[true, false], undefined, true],
@@ -61,7 +65,7 @@ describe('@jupyterlab/application', () => {
       expect(contextualCommand.isEnabled?.call({})).toEqual(expected);
     });
 
-    test.each([
+    it.each([
       [[true, false], false, true],
       [[true, false], true, true],
       [[true, false], undefined, true],
@@ -97,7 +101,7 @@ describe('@jupyterlab/application', () => {
       expect(contextualCommand.isToggled?.call({})).toEqual(expected);
     });
 
-    test.each([
+    it.each([
       [[true, false], false, true],
       [[true, false], true, true],
       [[true, false], undefined, true],
