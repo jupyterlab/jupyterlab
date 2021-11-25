@@ -113,13 +113,13 @@
   bottom: 0;
 }
 
-/* collapseHeadingButton (show only on hover if hiddenCellsButton is shown) */
+/* collapseHeadingButton (show only on (hover,active) if hiddenCellsButton is shown) */
 .jp-Notebook.jp-mod-showHiddenCellsButton .jp-collapseHeadingButton {
   display: none;
 }
 
 .jp-Notebook.jp-mod-showHiddenCellsButton
-  .jp-MarkdownCell:hover
+  :is(.jp-MarkdownCell:hover, .jp-mod-active) 
   .jp-collapseHeadingButton {
   display: flex;
 }
