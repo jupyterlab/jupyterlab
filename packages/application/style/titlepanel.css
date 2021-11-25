@@ -15,6 +15,7 @@
 }
 
 #jp-title-panel-title {
+  flex: 1 1 auto;
   margin-left: 8px;
 }
 
@@ -22,6 +23,7 @@
   background: transparent;
   margin: 0;
   height: 28px;
+  width: 100%;
   box-sizing: border-box;
   border: none;
   font-size: 18px;
