@@ -119,7 +119,7 @@
 }
 
 .jp-Notebook.jp-mod-showHiddenCellsButton
-  :is(.jp-MarkdownCell:hover, .jp-mod-active) 
+  :is(.jp-MarkdownCell:hover, .jp-mod-active)
   .jp-collapseHeadingButton {
   display: flex;
 }
