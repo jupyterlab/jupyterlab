@@ -30,7 +30,7 @@ export namespace URLExt {
    *
    * @param url - The URL string to parse
    *
-   * @return a hostname string value
+   * @returns a hostname string value
    */
   export function getHostName(url: string): string {
     return urlparse(url).hostname;

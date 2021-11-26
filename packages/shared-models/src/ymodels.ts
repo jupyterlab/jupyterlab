@@ -366,7 +366,7 @@ export class YNotebook
    * Wether the the undo/redo logic should be
    * considered on the full document across all cells.
    *
-   * @return The disableDocumentWideUndoRedo setting.
+   * @returns The disableDocumentWideUndoRedo setting.
    */
   get disableDocumentWideUndoRedo(): boolean {
     return this._disableDocumentWideUndoRedo;

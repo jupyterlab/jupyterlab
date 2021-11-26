@@ -374,7 +374,7 @@ export namespace ExecutionIndicator {
      * @param nb - The notebook used to identify execution
      * state.
      *
-     * @return - The associated execution state.
+     * @returns - The associated execution state.
      */
     public executionState(nb: Notebook): Private.IExecutionState | undefined {
       return this._notebookExecutionProgress.get(nb);
