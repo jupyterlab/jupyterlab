@@ -5,21 +5,21 @@ import { caretDownIcon, userIcon } from '@jupyterlab/ui-components';
 import { Menu, MenuBar } from '@lumino/widgets';
 import { h, VirtualElement } from '@lumino/virtualdom';
 
-import { IUser } from './tokens';
+import { ICurrentUser } from './tokens';
 import { getInitials } from './utils';
 
 /**
  * Custom renderer for the user menu.
  */
 export class RendererUserMenu extends MenuBar.Renderer {
-  private _user: IUser;
+  private _user: ICurrentUser;
 
   /**
    * Constructor of the class RendererUserMenu.
    *
    * @argument user Current user object.
    */
-  constructor(user: IUser) {
+  constructor(user: ICurrentUser) {
     super();
     this._user = user;
   }
@@ -104,7 +104,7 @@ export class RendererUserMenu extends MenuBar.Renderer {
  * Custom lumino Menu for the user menu.
  */
 export class UserMenu extends Menu {
-  private _user: IUser;
+  private _user: ICurrentUser;
 
   constructor(options: UserMenu.IOptions) {
     super(options);
@@ -121,7 +121,7 @@ export class UserMenu extends Menu {
     this._user.changed.disconnect(this._updateLabel);
   }
 
-  private _updateLabel = (user: IUser) => {
+  private _updateLabel = (user: ICurrentUser) => {
     this.title.label = user.name;
     this.update();
   };
@@ -138,6 +138,6 @@ export namespace UserMenu {
     /**
      * Current user object.
      */
-    user: IUser;
+    user: ICurrentUser;
   }
 }

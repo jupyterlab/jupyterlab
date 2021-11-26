@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IUser } from '@jupyterlab/user';
+import { ICurrentUser } from '@jupyterlab/user';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
@@ -263,6 +263,6 @@ export namespace WebSocketProviderWithLocks {
     /**
      * The user data
      */
-    user: IUser;
+    user: ICurrentUser;
   }
 }

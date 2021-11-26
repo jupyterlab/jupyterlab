@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { AccordionPanel, Menu } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 import { ISignal } from '@lumino/signaling';
 import { Token } from '@lumino/coreutils';
 
@@ -16,31 +16,22 @@ export const USER = '@jupyterlab/user:userDB';
  * NOTE: Requirer this token in your extension to access the
  * current connected user information.
  */
-export const ICurrentUser = new Token<IUser>('@jupyterlab/user:ICurrentUser');
+export const ICurrentUser = new Token<ICurrentUser>(
+  '@jupyterlab/user:ICurrentUser'
+);
 
 /**
  * The user menu token.
  *
- * NOTE: Requirer this token in your extension to access the user menu
+ * NOTE: Require this token in your extension to access the user menu
  * (top-right menu in JupyterLab's interface).
  */
-export const IUserMenu = new Token<IMenu | undefined>(
-  '@jupyterlab/user:IUserMenu'
-);
+export const IUserMenu = new Token<IUserMenu>('@jupyterlab/user:IUserMenu');
 
 /**
- * The user panel token.
- *
- * NOTE: The left side bar panel. Useful to add user related widgets.
+ * An interface describing the current user.
  */
-export const IUserPanel = new Token<AccordionPanel>(
-  '@jupyterlab/user:IUserPanel'
-);
-
-/**
- * An interface describing an user.
- */
-export interface IUser extends IUser.User {
+export interface ICurrentUser extends IUser.User {
   /**
    * Whether the user information is loaded or not.
    */
@@ -49,12 +40,12 @@ export interface IUser extends IUser.User {
   /**
    * Signal emitted when the user's information is ready.
    */
-  readonly ready: ISignal<IUser, boolean>;
+  readonly ready: ISignal<ICurrentUser, boolean>;
 
   /**
    * Signal emitted when the user's information changes.
    */
-  readonly changed: ISignal<IUser, void>;
+  readonly changed: ISignal<ICurrentUser, void>;
 
   /**
    * Convenience method to modify the user as a JSON object.
@@ -71,6 +62,9 @@ export interface IUser extends IUser.User {
   toJSON(): IUser.User;
 }
 
+/**
+ * The user namespace.
+ */
 export namespace IUser {
   /**
    * The type for the IUser.
@@ -110,12 +104,6 @@ export namespace IUser {
 
     /**
      * User's role.
-     *
-     * A user can have the following roles:
-     *  - ADMIN: can
-     *  - READ:
-     *  - WRITE:
-     *  - RUN:
      *
      * NOTE: Jupyter Server and JupyterLab doesn't implement a role-base access control (RBAC) yet.
      * This attribute is here to start introducing RBAC to JupyterLab's interface. At the moment every
@@ -181,7 +169,10 @@ export namespace IUser {
   };
 }
 
-export interface IMenu {
+/**
+ * An interface describing the user menu.
+ */
+export interface IUserMenu {
   /**
    * Dispose of the resources held by the menu.
    */

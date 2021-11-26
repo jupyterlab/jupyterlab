@@ -6,13 +6,13 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { JSONObject, ReadonlyPartialJSONObject, UUID } from '@lumino/coreutils';
 import * as env from 'lib0/environment';
 
-import { IUser, USER } from './tokens';
+import { ICurrentUser, IUser, USER } from './tokens';
 import { getAnonymousUserName, getRandomColor } from './utils';
 
 /**
  * Default user implementation.
  */
-export class User implements IUser {
+export class User implements ICurrentUser {
   private _id: string;
   private _name: string;
   private _username: string;
@@ -111,14 +111,14 @@ export class User implements IUser {
   /**
    * Signal emitted when the user's information is ready.
    */
-  get ready(): ISignal<IUser, boolean> {
+  get ready(): ISignal<ICurrentUser, boolean> {
     return this._ready;
   }
 
   /**
    * Signal emitted when the user's information changes.
    */
-  get changed(): ISignal<IUser, void> {
+  get changed(): ISignal<ICurrentUser, void> {
     return this._changed;
   }
 

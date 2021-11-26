@@ -13,24 +13,22 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { IStateDB } from '@jupyterlab/statedb';
 import {
   ICurrentUser,
-  IMenu,
-  IUser,
   IUserMenu,
   RendererUserMenu,
   User,
   UserMenu
 } from '@jupyterlab/user';
-import { MenuBar, Widget } from '@lumino/widgets';
+import { Menu, MenuBar, Widget } from '@lumino/widgets';
 
 /**
  * Jupyter plugin providing the ICurrentUser.
  */
-const userPlugin: JupyterFrontEndPlugin<IUser> = {
+const userPlugin: JupyterFrontEndPlugin<ICurrentUser> = {
   id: '@jupyterlab/user-extension:user',
   autoStart: true,
   requires: [IStateDB],
   provides: ICurrentUser,
-  activate: (app: JupyterFrontEnd, state: IStateDB): IUser => {
+  activate: (app: JupyterFrontEnd, state: IStateDB): ICurrentUser => {
     return new User(state);
   }
 };
@@ -38,16 +36,33 @@ const userPlugin: JupyterFrontEndPlugin<IUser> = {
 /**
  * Jupyter plugin providing the IUserMenu.
  */
-const userMenuPlugin: JupyterFrontEndPlugin<IMenu | undefined> = {
+const userMenuPlugin: JupyterFrontEndPlugin<IUserMenu> = {
   id: '@jupyterlab/user-extension:userMenu',
   autoStart: true,
   requires: [ICurrentUser],
   provides: IUserMenu,
-  activate: (app: JupyterFrontEnd, user: IUser): IMenu | undefined => {
-    const { shell, commands } = app;
+  activate: (app: JupyterFrontEnd, user: ICurrentUser): IUserMenu => {
+    const { commands } = app;
+    return new UserMenu({ commands, user });
+  }
+};
+
+/**
+ * Jupyter plugin adding the IUserMenu to the menu bar if collaborative flag enabled.
+ */
+const menuBarPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/user-extension:userMenu',
+  autoStart: true,
+  requires: [ICurrentUser, ICurrentUser],
+  activate: (
+    app: JupyterFrontEnd,
+    user: ICurrentUser,
+    menu: IUserMenu
+  ): void => {
+    const { shell } = app;
 
     if (PageConfig.getOption('collaborative') !== 'true') {
-      return undefined;
+      return;
     }
 
     const spacer = new Widget();
@@ -63,17 +78,18 @@ const userMenuPlugin: JupyterFrontEndPlugin<IMenu | undefined> = {
     });
     menuBar.id = 'jp-UserMenu';
     user.changed.connect(() => menuBar.update());
-    const menu = new UserMenu({ commands, user });
-    menuBar.addMenu(menu);
+    menuBar.addMenu(menu as Menu);
     shell.add(menuBar, 'top', { rank: 1000 });
-
-    return menu;
   }
 };
 
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [userPlugin, userMenuPlugin];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  userPlugin,
+  userMenuPlugin,
+  menuBarPlugin
+];
 
 export default plugins;
