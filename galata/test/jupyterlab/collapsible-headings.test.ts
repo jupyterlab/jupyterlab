@@ -20,19 +20,23 @@ test.describe('Collapsible Headings', () => {
     await page.notebook.createNew(fileName);
   });
 
-  test('Show Collapser', async ({ page }) => {
+  test('Show Collapser Unselected', async ({ page }) => {
     await populateNotebook(page);
     await page.notebook.run();
-
     expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
       'showHCB_heading_unselected.png'
     );
+  });
 
+  test('Show Collapser Selected', async ({ page }) => {
+    await populateNotebook(page);
+    await page.notebook.run();
     await page.notebook.selectCells(0);
     expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
       'showHCB_heading_selected.png'
     );
   });
+
   /*
   test('Create a Markdown cell', async ({ page }) => {
     await page.notebook.addCell(
