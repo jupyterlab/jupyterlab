@@ -14,13 +14,13 @@ async function populateNotebook(page: IJupyterLabPageFixture) {
   await page.notebook.addCell('code', '2+2');
 }
 
-test.describe('Collapsible Headings', () => {
+test.describe('Collapsible Headings; showHCB', () => {
   // create an empty notebook for each test
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
   });
 
-  test('Show Collapser Unselected', async ({ page }) => {
+  test('Show Collapser Unselected; showHCB', async ({ page }) => {
     await populateNotebook(page);
     await page.notebook.run();
     expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
@@ -37,66 +37,54 @@ test.describe('Collapsible Headings', () => {
     );
   });
 
-  /*
-  test('Create a Markdown cell', async ({ page }) => {
-    await page.notebook.addCell(
-      'markdown',
-      '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)'
+  test('Collapse Heading', async ({ page }) => {
+    await populateNotebook(page);
+    await page.notebook.run();
+    await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
+    expect(await page.screenshot()).toMatchSnapshot(
+      'showHCB_collapse_heading.png'
     );
-    await page.notebook.runCell(1, true);
-    expect(await page.notebook.getCellCount()).toBe(2);
-    expect(await page.notebook.getCellType(1)).toBe('markdown');
   });
 
-  test('Create a Code cell', async ({ page }) => {
-    await page.notebook.addCell('code', '2 ** 3');
-    expect(await page.notebook.getCellCount()).toBe(2);
-    expect(await page.notebook.getCellType(1)).toBe('code');
-  });
-
-  test('Save Notebook', async ({ page }) => {
-    await populateNotebook(page);
-
-    await expect(page.notebook.save()).resolves.not.toThrow();
-  });
-
-  menuPaths.forEach(menuPath => {
-    test(`Open menu item ${menuPath}`, async ({ page, sessions }) => {
-      // Wait for kernel to be idle as some menu depend of kernel information
-      expect(
-        await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
-      ).toBeTruthy();
-
-      await page.menu.open(menuPath);
-      expect(await page.menu.isOpen(menuPath)).toBeTruthy();
-
-      const imageName = `opened-menu-${menuPath.replace(/>/g, '-')}.png`;
-      const menu = await page.menu.getOpenMenu();
-      expect(await menu.screenshot()).toMatchSnapshot(imageName.toLowerCase());
-    });
-  });
-
-  test('Run cells', async ({ page }) => {
+  test('Expand Heading by Collapser Button', async ({ page }) => {
     await populateNotebook(page);
     await page.notebook.run();
-    await page.notebook.save();
-    const imageName = 'run-cells.png';
+    await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
+    await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
+    expect(await page.screenshot()).toMatchSnapshot(
+      'showHCB_expand_heading_by_collapser.png'
+    );
+  });
+});
 
-    expect((await page.notebook.getCellTextOutput(2))[0]).toBe('8');
-
-    const nbPanel = await page.notebook.getNotebookInPanel();
-
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+test.describe('Collapsible Headings; no_showHCB', () => {
+  // create an empty notebook for each test
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew(fileName);
+  });
+  // use non-standard showHiddenCellsButton=false
+  test.use({
+    mockSettings: {
+      '@jupyterlab/notebook-extension:tracker': {
+        showHiddenCellsButton: false
+      }
+    }
   });
 
-  test('Toggle Dark theme', async ({ page }) => {
+  test('Show Collapser Unselected; no_showHCB', async ({ page }) => {
     await populateNotebook(page);
     await page.notebook.run();
-    await page.theme.setDarkTheme();
-    const nbPanel = await page.notebook.getNotebookInPanel();
-    const imageName = 'dark-theme.png';
-
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
+      'no_showHCB_heading_unselected.png'
+    );
   });
-  */
+
+  test('Show Collapser Selected; no_showHCB', async ({ page }) => {
+    await populateNotebook(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(0);
+    expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
+      'no_showHCB_heading_selected.png'
+    );
+  });
 });
