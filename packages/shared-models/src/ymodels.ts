@@ -731,9 +731,9 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   public setAttachments(attachments: nbformat.IAttachments | undefined): void {
     this.transact(() => {
       if (attachments == null) {
-        this.ymodel.set('attachments', attachments);
-      } else {
         this.ymodel.delete('attachments');
+      } else {
+        this.ymodel.set('attachments', attachments);
       }
     });
   }
