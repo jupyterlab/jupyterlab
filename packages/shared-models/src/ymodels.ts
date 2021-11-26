@@ -366,7 +366,7 @@ export class YNotebook
    * Wether the the undo/redo logic should be
    * considered on the full document across all cells.
    *
-   * @return The disableDocumentWideUndoRedo setting.
+   * @returns The disableDocumentWideUndoRedo setting.
    */
   get disableDocumentWideUndoRedo(): boolean {
     return this._disableDocumentWideUndoRedo;
@@ -731,9 +731,9 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   public setAttachments(attachments: nbformat.IAttachments | undefined): void {
     this.transact(() => {
       if (attachments == null) {
-        this.ymodel.set('attachments', attachments);
-      } else {
         this.ymodel.delete('attachments');
+      } else {
+        this.ymodel.set('attachments', attachments);
       }
     });
   }

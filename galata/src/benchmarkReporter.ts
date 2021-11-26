@@ -501,7 +501,7 @@ class BenchmarkReporter implements Reporter {
    * @param allData all test records.
    * @param comparison logic of test comparisons:
    * 'snapshot' or 'project'; default 'snapshot'.
-   * @return A list of two strings, the first one
+   * @returns A list of two strings, the first one
    * is the content of report, the second one is the extension of report file.
    */
   protected async defaultTextReportFactory(
@@ -672,7 +672,7 @@ class BenchmarkReporter implements Reporter {
    * @param allData all test records.
    * @param comparison logic of test comparisons:
    * 'snapshot' or 'project'; default 'snapshot'.
-   * @return VegaLite configuration
+   * @returns VegaLite configuration
    */
   protected defaultVegaLiteConfigFactory(
     allData: Array<IReportRecord>,
