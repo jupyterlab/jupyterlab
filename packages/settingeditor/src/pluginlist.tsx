@@ -305,11 +305,11 @@ export class PluginList extends ReactWidget {
         />
         {modifiedItems.length > 0 && (
           <div>
-            <p className="jp-PluginList-header">Modified</p>
+            <h1 className="jp-PluginList-header">Modified</h1>
             <ul>{modifiedItems}</ul>
           </div>
         )}
-        <p className="jp-PluginList-header">Settings</p>
+        <h1 className="jp-PluginList-header">Settings</h1>
         <ul>{otherItems}</ul>
       </div>
     );

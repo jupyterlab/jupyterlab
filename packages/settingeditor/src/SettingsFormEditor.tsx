@@ -164,7 +164,7 @@ export const SettingsFormEditor = ({
     for (const field in settings.user) {
       await settings.remove(field);
     }
-    setFormData(settings.user);
+    setFormData(settings.composite);
     setIsModified(false);
   };
 
