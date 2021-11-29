@@ -45,7 +45,9 @@ test.describe('Notebook Markdown', () => {
     await page.notebook.enterCellEditingMode(0);
     const cell = await page.notebook.getCell(0);
 
-    expect(await cell.screenshot()).toMatchSnapshot(imageName);
+    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
+      imageName
+    );
   });
 
   test('Do not highlight TeX in code blocks', async ({ page, tmpPath }) => {
@@ -53,7 +55,9 @@ test.describe('Notebook Markdown', () => {
 
     const imageName = 'do-not-highlight-not-latex.png';
     await enterEditingModeForScreenshot(page, 1);
-    expect(await (await page.notebook.getCell(1)).screenshot()).toMatchSnapshot(
+    const cell = await page.notebook.getCell(1);
+
+    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
       imageName
     );
   });
@@ -66,7 +70,9 @@ test.describe('Notebook Markdown', () => {
 
     const imageName = 'do-not-highlight-standalone-dollar.png';
     await enterEditingModeForScreenshot(page, 2);
-    expect(await (await page.notebook.getCell(2)).screenshot()).toMatchSnapshot(
+    const cell = await page.notebook.getCell(2);
+
+    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
       imageName
     );
   });
