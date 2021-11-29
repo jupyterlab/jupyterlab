@@ -22,7 +22,7 @@ addopts="--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
 ignore="tests examples"
 
 [tool.check-manifest]
-ignore = ["binder/**", "builder/**", "buildutils/**", "design/**", "dev_mode/**", "examples/**", "packages/**", "scripts/**", "testutils/**", "*.json", "yarn.lock", "readthedocs.yml", ".bumpversion.cfg", ".*", "clean.py", "lint-staged.config.js", "release/*", "typedoc-theme/**", "typedoc.js", "jupyterlab/schemas/**", "jupyterlab/static/**", "jupyterlab/themes/**", "jupyterlab/style.js"]
+ignore = ["binder/**", "builder/**", "buildutils/**", "design/**", "dev_mode/**", "examples/**", "packages/**", "scripts/**", "testutils/**", "*.json", "yarn.lock", "readthedocs.yml", ".bumpversion.cfg", ".*", "clean.py", "*.config.js", "release/*", "typedoc-theme/**", "typedoc.js", "jupyterlab/schemas/**", "jupyterlab/static/**", "jupyterlab/themes/**", "jupyterlab/style.js"]
 
 [tool.jupyter-releaser]
 skip = ["check-links"]
