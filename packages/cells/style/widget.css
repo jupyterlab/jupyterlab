@@ -102,27 +102,43 @@
   overflow: auto;
 }
 
-.jp-showHiddenCellsButton {
+/* collapseHeadingButton (show always if hiddenCellsButton is _not_ shown) */
+.jp-collapseHeadingButton {
+  display: flex;
+  min-height: var(--jp-cell-collapser-min-height);
+  position: absolute;
+  background-size: 25px !important;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+/* collapseHeadingButton (show only on (hover,active) if hiddenCellsButton is shown) */
+.jp-Notebook.jp-mod-showHiddenCellsButton .jp-collapseHeadingButton {
+  display: none;
+}
+
+.jp-Notebook.jp-mod-showHiddenCellsButton
+  :is(.jp-MarkdownCell:hover, .jp-mod-active)
+  .jp-collapseHeadingButton {
+  display: flex;
+}
+
+/* showHiddenCellsButton (only show if jp-mod-showHiddenCellsButton is set, which 
+is a consequence of the showHiddenCellsButton option in Notebook Settings)*/
+.jp-Notebook.jp-mod-showHiddenCellsButton .jp-showHiddenCellsButton {
   margin-left: calc(var(--jp-cell-prompt-width) + 2 * var(--jp-code-padding));
   margin-top: var(--jp-code-padding);
   border: 1px solid var(--jp-border-color2);
   background-color: var(--jp-border-color3) !important;
   color: var(--jp-content-font-color0) !important;
+  display: flex;
 }
 
-.jp-showHiddenCellsButton:hover {
+.jp-Notebook.jp-mod-showHiddenCellsButton .jp-showHiddenCellsButton:hover {
   background-color: var(--jp-border-color2) !important;
 }
 
-.jp-collapseHeadingButton {
+.jp-showHiddenCellsButton {
   display: none;
-}
-
-.jp-MarkdownCell:hover .jp-collapseHeadingButton {
-  display: flex;
-  min-height: var(--jp-cell-collapser-min-height);
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
 }
