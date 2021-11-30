@@ -61,6 +61,7 @@
     "@jupyterlab/observables": "^5.0.0-alpha.2",
     "@jupyterlab/rendermime": "^4.0.0-alpha.2",
     "@jupyterlab/services": "^7.0.0-alpha.2",
+    "@jupyterlab/shared-models": "^4.0.0-alpha.2",
     "@jupyterlab/translation": "^4.0.0-alpha.2",
     "@jupyterlab/ui-components": "^4.0.0-alpha.17",
     "@lumino/algorithm": "^1.9.1",

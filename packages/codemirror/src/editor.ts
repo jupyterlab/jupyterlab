@@ -6,11 +6,7 @@
 
 import { showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
-  ICollaborator,
-  IObservableMap,
-  IObservableString
-} from '@jupyterlab/observables';
+import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
 import * as models from '@jupyterlab/shared-models';
 import {
   ITranslator,
@@ -85,10 +81,6 @@ const DOWN_ARROW = 40;
  */
 const HOVER_TIMEOUT = 1000;
 
-// @todo Remove the duality of having a modeldb and a y-codemirror
-// binding as it just introduces a lot of additional complexity without gaining anything.
-const USE_YCODEMIRROR_BINDING = true;
-
 /**
  * CodeMirror editor.
  */
@@ -127,12 +119,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // every time the model is switched, we need to re-initialize the editor binding
     this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
 
-    const doc = editor.getDoc();
-
     // Handle initial values for text, mimetype, and selections.
-    if (!USE_YCODEMIRROR_BINDING) {
-      doc.setValue(model.value.text);
-    }
     this._onMimeTypeChanged();
     this._onCursorActivity();
     this._poll = new Poll({
@@ -147,9 +134,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     // Connect to changes.
-    if (!USE_YCODEMIRROR_BINDING) {
-      model.value.changed.connect(this._onValueChanged, this);
-    }
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
@@ -166,16 +150,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }
     });
 
-    if (USE_YCODEMIRROR_BINDING) {
-      this._yeditorBinding?.on('cursorActivity', () =>
-        this._onCursorActivity()
-      );
-    } else {
-      CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-      CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
-        this._beforeDocChanged(instance, change);
-      });
-    }
+    this._yeditorBinding?.on('cursorActivity', () => this._onCursorActivity());
+
     CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
       // Manually refresh after setValue to make sure editor is properly sized.
       if (change.origin === 'setValue' && this.hasFocus()) {
@@ -205,9 +181,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Initialize the editor binding.
    */
   private _initializeEditorBinding(): void {
-    if (!USE_YCODEMIRROR_BINDING) {
-      return;
-    }
     this._yeditorBinding?.destroy();
     const sharedModel = this.model.sharedModel as models.IYText;
     const opts = sharedModel.undoManager
@@ -950,70 +923,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Handle model value changes.
-   */
-  private _onValueChanged(
-    value: IObservableString,
-    args: IObservableString.IChangedArgs
-  ): void {
-    if (this._changeGuard) {
-      return;
-    }
-    this._changeGuard = true;
-    const doc = this.doc;
-    switch (args.type) {
-      case 'insert': {
-        const pos = doc.posFromIndex(args.start);
-        // Replace the range, including a '+input' origin,
-        // which indicates that CodeMirror may merge changes
-        // for undo/redo purposes.
-        doc.replaceRange(args.value, pos, pos, '+input');
-        break;
-      }
-      case 'remove': {
-        const from = doc.posFromIndex(args.start);
-        const to = doc.posFromIndex(args.end);
-        // Replace the range, including a '+input' origin,
-        // which indicates that CodeMirror may merge changes
-        // for undo/redo purposes.
-        doc.replaceRange('', from, to, '+input');
-        break;
-      }
-      case 'set':
-        doc.setValue(args.value);
-        break;
-      default:
-        break;
-    }
-    this._changeGuard = false;
-  }
-
-  /**
-   * Handles document changes.
-   */
-  private _beforeDocChanged(
-    doc: CodeMirror.Doc,
-    change: CodeMirror.EditorChange
-  ) {
-    if (this._changeGuard) {
-      return;
-    }
-    this._changeGuard = true;
-    const value = this._model.value;
-    const start = doc.indexFromPos(change.from);
-    const end = doc.indexFromPos(change.to);
-    const inserted = change.text.join('\n');
-
-    if (end !== start) {
-      value.remove(start, end);
-    }
-    if (inserted) {
-      value.insert(start, inserted);
-    }
-    this._changeGuard = false;
-  }
-
-  /**
    * Handle the DOM events for the editor.
    *
    * @param event - The DOM event sent to the editor.
@@ -1138,7 +1047,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._lastChange = null;
     const editor = this._editor;
     const doc = editor.getDoc();
-    if (doc.getValue() === this._model.value.text) {
+    if (doc.getValue() === this._model.value) {
       return;
     }
 
@@ -1153,7 +1062,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     );
     console.warn(
       JSON.stringify({
-        model: this._model.value.text,
+        model: this._model.value,
         view: doc.getValue(),
         selections: this.getSelections(),
         cursor: this.getCursorPosition(),
@@ -1176,7 +1085,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _hoverTimeout: number;
   private _hoverId: string;
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
-  private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
   private _needsRefresh = false;

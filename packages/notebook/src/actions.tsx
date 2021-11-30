@@ -158,7 +158,7 @@ export namespace NotebookActions {
     const child = notebook.widgets[index];
     const editor = child.editor;
     const selections = editor.getSelections();
-    const orig = child.model.value.text;
+    const orig = child.model.value;
 
     const offsets = [0];
 
@@ -192,7 +192,7 @@ export namespace NotebookActions {
       if (i !== clones.length - 1 && clones[i].type === 'code') {
         (clones[i] as ICodeCellModel).outputs.clear();
       }
-      clones[i].value.text = orig
+      clones[i].value = orig
         .slice(offsets[i], offsets[i + 1])
         .replace(/^\n+/, '')
         .replace(/\n+$/, '');
@@ -256,7 +256,7 @@ export namespace NotebookActions {
     // Get the cells to merge.
     notebook.widgets.forEach((child, index) => {
       if (notebook.isSelectedOrActive(child)) {
-        toMerge.push(child.model.value.text);
+        toMerge.push(child.model.value);
         if (index !== active) {
           toDelete.push(child.model);
         }
@@ -281,7 +281,7 @@ export namespace NotebookActions {
         // Otherwise merge with the previous cell.
         const cellModel = cells.get(active - 1);
 
-        toMerge.unshift(cellModel.value.text);
+        toMerge.unshift(cellModel.value);
         toDelete.push(cellModel);
       } else if (mergeAbove === false) {
         // Bail if it is the last cell.
@@ -291,7 +291,7 @@ export namespace NotebookActions {
         // Otherwise merge with the next cell.
         const cellModel = cells.get(active + 1);
 
-        toMerge.push(cellModel.value.text);
+        toMerge.push(cellModel.value);
         toDelete.push(cellModel);
       }
     }
@@ -301,7 +301,7 @@ export namespace NotebookActions {
     // Create a new cell for the source to preserve history.
     const newModel = Private.cloneCell(model, primary.model);
 
-    newModel.value.text = toMerge.join('\n\n');
+    newModel.value = toMerge.join('\n\n');
     if (isCodeCellModel(newModel)) {
       newModel.outputs.clear();
     } else if (isMarkdownCellModel(newModel) || isRawCellModel(newModel)) {
@@ -2096,7 +2096,7 @@ namespace Private {
     const replace = setNextInput.replace;
 
     if (replace) {
-      cell.model.value.text = text;
+      cell.model.value = text;
       return;
     }
 
@@ -2105,7 +2105,7 @@ namespace Private {
     const cells = notebook.model!.cells;
     const index = ArrayExt.firstIndexOf(toArray(cells), cell.model);
 
-    newCell.value.text = text;
+    newCell.value = text;
     if (index === -1) {
       cells.push(newCell);
     } else {
@@ -2280,7 +2280,7 @@ namespace Private {
    */
   export function setMarkdownHeader(cell: ICellModel, level: number): void {
     // Remove existing header or leading white space.
-    let source = cell.value.text;
+    let source = cell.value;
     const regex = /^(#+\s*)|^(\s*)/;
     const newHeader = Array(level + 1).join('#') + ' ';
     const matches = regex.exec(source);
@@ -2288,6 +2288,6 @@ namespace Private {
     if (matches) {
       source = source.slice(matches[0].length);
     }
-    cell.value.text = newHeader + source;
+    cell.value = newHeader + source;
   }
 }

@@ -7,7 +7,7 @@ import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IModelDB } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
-import * as models from '@jupyterlab/shared-models';
+import { FileChange, ISharedFile, YFile } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -26,13 +26,19 @@ export class DocumentModel
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
-    const filemodel = new models.YFile() as models.ISharedFile;
+    const filemodel = new YFile() as ISharedFile;
     this.switchSharedModel(filemodel, true);
-    this.value.changed.connect(this.triggerContentChange, this);
+    // Deprecate: triggered when the shared model's source changes
+    //this.value.changed.connect(this.triggerContentChange, this);
 
-    (this.sharedModel as models.YFile).dirty = false;
-    this.sharedModel.changed.connect(this._onStateChanged, this);
+    (this.sharedModel as YFile).dirty = false;
+    this.sharedModel.changed.connect(this.onSharedModelChanged, this);
   }
+
+  /**
+   * The shared file model.
+   */
+  readonly sharedModel: ISharedFile;
 
   /**
    * A signal emitted when the document content changes.
@@ -58,7 +64,7 @@ export class DocumentModel
     if (newValue === this.dirty) {
       return;
     }
-    (this.sharedModel as models.YFile).dirty = newValue;
+    (this.sharedModel as YFile).dirty = newValue;
   }
 
   /**
@@ -100,7 +106,7 @@ export class DocumentModel
    * Serialize the model to a string.
    */
   toString(): string {
-    return this.value.text;
+    return this.value;
   }
 
   /**
@@ -110,14 +116,14 @@ export class DocumentModel
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    this.value.text = value;
+    this.value = value;
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): PartialJSONValue {
-    return JSON.parse(this.value.text || 'null');
+    return JSON.parse(this.value || 'null');
   }
 
   /**
@@ -138,6 +144,39 @@ export class DocumentModel
   }
 
   /**
+   * When we initialize a cell model, we create a standalone model that cannot be shared in a YNotebook.
+   * Call this function to re-initialize the local representation based on a fresh shared model (e.g. models.YFile or models.YCodeCell).
+   *
+   * @param sharedModel
+   * @param reinitialize Whether to reinitialize the shared model.
+   */
+  switchSharedModel(sharedModel: ISharedFile, reinitialize?: boolean): void {
+    // Disconnect from old model
+    this.sharedModel.changed.disconnect(this.onSharedModelChanged, this);
+    // parent class changes the model
+    super.switchSharedModel(sharedModel, reinitialize);
+    // connect to new model
+    this.sharedModel.changed.connect(this.onSharedModelChanged, this);
+  }
+
+  protected onSharedModelChanged(
+    sender: ISharedFile,
+    change: FileChange
+  ): void {
+    if (change.sourceChange) {
+      this.triggerContentChange();
+    }
+
+    if (change.stateChange) {
+      change.stateChange.forEach(value => {
+        if (value.name !== 'dirty' || value.oldValue !== value.newValue) {
+          this.triggerStateChange(value);
+        }
+      });
+    }
+  }
+
+  /**
    * Trigger a state change signal.
    */
   protected triggerStateChange(args: IChangedArgs<any>): void {
@@ -152,23 +191,6 @@ export class DocumentModel
     this.dirty = true;
   }
 
-  private _onStateChanged(
-    sender: models.ISharedFile,
-    changes: models.NotebookChange
-  ): void {
-    if (changes.stateChange) {
-      changes.stateChange.forEach(value => {
-        if (value.name !== 'dirty' || value.oldValue !== value.newValue) {
-          this.triggerStateChange(value);
-        }
-      });
-    }
-  }
-
-  /**
-   * The shared notebook model.
-   */
-  readonly sharedModel: models.ISharedFile;
   private _defaultLang = '';
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
