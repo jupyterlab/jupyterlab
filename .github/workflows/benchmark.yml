@@ -93,6 +93,8 @@ jobs:
       - name: Install dependencies
         run: |
           bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm run build
 
       - name: Launch JupyterLab
         shell: bash
@@ -138,7 +140,7 @@ jobs:
           # Reset installation
           jlpm run clean:slate
           jlpm run build
-          
+
           # Reset the reference after clean:slate as it removes non-versioned files
           cp /tmp/lab-benchmark-expected.json galata/
 
