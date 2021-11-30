@@ -913,7 +913,7 @@ Linking/Unlinking Packages to JupyterLab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you want to make changes to one of JupyterLab's external packages
-(for example, `Lumino <https://github.com/jupyterlab/lumino>`__ and test
+(for example, `Lumino <https://github.com/jupyterlab/lumino>`__) and test
 them out against your copy of JupyterLab, you can easily do so using the
 ``link`` command:
 
