@@ -412,7 +412,6 @@ export class OutputArea extends Widget {
       model.trusted ? 'any' : 'ensure'
     );
     if (
-      renderer.renderModel &&
       Private.currentPreferredMimetype.get(renderer) === mimeType &&
       OutputArea.isIsolated(mimeType, model.metadata) ===
         renderer instanceof Private.IsolatedRenderer
