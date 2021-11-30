@@ -98,7 +98,7 @@ test.describe('Benchmark', () => {
         file: path.basename(file, '.ipynb'),
         project: testInfo.project.name
       };
-      const perf = new galata.newPerformanceHelper(page);
+      const perf = galata.newPerformanceHelper(page);
 
       await page.goto(baseURL + '?reset');
 

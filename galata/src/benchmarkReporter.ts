@@ -510,6 +510,7 @@ class BenchmarkReporter implements Reporter {
   ): Promise<[string, string]> {
     // Compute statistics
     // - Groupby (test, browser, reference | project, file)
+    const reportExtension = 'md';
 
     const groups = new Map<
       string,
@@ -548,8 +549,12 @@ class BenchmarkReporter implements Reporter {
     });
 
     // If the reference | project lists has two items, the intervals will be compared.
+    if (!groups.values().next().value) {
+      return ['## Benchmark report\n\nNot enough data', reportExtension];
+    }
+
     const compare =
-      (groups.values().next().value.values().next().value as Map<
+      (groups.values().next().value?.values().next().value as Map<
         string,
         Map<string, number[]>
       >).size === 2;
@@ -658,7 +663,6 @@ class BenchmarkReporter implements Reporter {
       );
     }
     reportContent.push('', '</details>', '');
-    const reportExtension = 'md';
     const reportContentString = reportContent.join('\n');
     return [reportContentString, reportExtension];
   }

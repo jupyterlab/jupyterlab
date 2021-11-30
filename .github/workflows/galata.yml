@@ -72,6 +72,8 @@ jobs:
         run: |
           cd galata
           jlpm run test
+          # Run once benchmark tests to ensure they have no regression
+          BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
 
       - name: Upload Galata Test assets
         if: always()
