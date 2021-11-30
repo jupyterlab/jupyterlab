@@ -47,6 +47,8 @@ jobs:
       - name: Install dependencies
         run: |
           bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm run build
 
       - name: Launch JupyterLab
         run: |
