@@ -676,7 +676,6 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
-        const dirty = false;
         if (contents.format === 'json') {
           model.fromJSON(contents.content);
           if (initializeModel) {
@@ -701,7 +700,7 @@ export class Context<
           }
         }
         this._updateContentsModel(contents);
-        model.dirty = dirty;
+        model.dirty = false;
         if (!this._isPopulated) {
           return this._populate();
         }

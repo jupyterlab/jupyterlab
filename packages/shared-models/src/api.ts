@@ -59,6 +59,11 @@ export interface ISharedBase extends IDisposable {
  */
 export interface ISharedDocument extends ISharedBase {
   /**
+   * Whether the document is saved to disk or not.
+   */
+  readonly dirty: boolean;
+
+  /**
    * The changed signal.
    */
   readonly changed: ISignal<this, DocumentChange>;
