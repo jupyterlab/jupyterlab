@@ -17,7 +17,7 @@ import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import ResizeObserver from 'resize-observer-polyfill';
+import { ResizeObserver } from 'resize-observer';
 import { IOutputAreaModel } from './model';
 
 /**

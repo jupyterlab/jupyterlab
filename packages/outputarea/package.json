@@ -54,7 +54,7 @@
     "@lumino/properties": "^1.8.1",
     "@lumino/signaling": "^1.10.1",
     "@lumino/widgets": "^1.30.0",
-    "resize-observer-polyfill": "^1.5.1"
+    "resize-observer": "^1.0.4"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.1",
