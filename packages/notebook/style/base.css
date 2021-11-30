@@ -304,7 +304,10 @@
 }
 
 .jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
-  margin: 2%;
+  margin-top: 3em;
+  margin-bottom: 3em;
+  margin-left: 5%;
+  margin-right: 5%;
 }
 
 .jp-mod-sideBySide.jp-Notebook .jp-CodeCell {
