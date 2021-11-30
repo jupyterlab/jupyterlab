@@ -29,6 +29,9 @@ export class DocumentModel
     const filemodel = new models.YFile() as models.ISharedFile;
     this.switchSharedModel(filemodel, true);
     this.value.changed.connect(this.triggerContentChange, this);
+
+    (this.sharedModel as models.YFile).dirty = false;
+    this.sharedModel.changed.connect(this._onStateChanged, this);
   }
 
   /**
@@ -49,15 +52,13 @@ export class DocumentModel
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this._dirty;
+    return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
+    if (newValue === this.dirty) {
       return;
     }
-    const oldValue = this._dirty;
-    this._dirty = newValue;
-    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
+    (this.sharedModel as models.YFile).dirty = newValue;
   }
 
   /**
@@ -151,12 +152,24 @@ export class DocumentModel
     this.dirty = true;
   }
 
+  private _onStateChanged(
+    sender: models.ISharedFile,
+    changes: models.NotebookChange
+  ): void {
+    if (changes.stateChange) {
+      changes.stateChange.forEach(value => {
+        if (value.name !== 'dirty' || value.oldValue !== value.newValue) {
+          this.triggerStateChange(value);
+        }
+      });
+    }
+  }
+
   /**
    * The shared notebook model.
    */
   readonly sharedModel: models.ISharedFile;
   private _defaultLang = '';
-  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -547,7 +560,10 @@ export class DocumentWidget<
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (this.context.model.dirty) {
+    if (
+      this.context.model.dirty &&
+      !this.title.className.includes(DIRTY_CLASS)
+    ) {
       this.title.className += ` ${DIRTY_CLASS}`;
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');

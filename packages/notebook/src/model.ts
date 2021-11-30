@@ -114,6 +114,7 @@ export class NotebookModel implements INotebookModel {
     metadata.changed.connect(this._onMetadataChanged, this);
     this._deletedCells = [];
 
+    (this.sharedModel as models.YNotebook).dirty = false;
     this.sharedModel.changed.connect(this._onStateChanged, this);
   }
   /**
@@ -134,15 +135,13 @@ export class NotebookModel implements INotebookModel {
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this._dirty;
+    return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
+    if (newValue === this.dirty) {
       return;
     }
-    const oldValue = this._dirty;
-    this._dirty = newValue;
-    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
+    (this.sharedModel as models.YNotebook).dirty = newValue;
   }
 
   /**
@@ -428,10 +427,9 @@ close the notebook without saving it.`,
         if (value.name === 'nbformatMinor') {
           this._nbformatMinor = value.newValue;
         }
-        if (value.name === 'dirty') {
-          this._dirty = value.newValue;
+        if (value.name !== 'dirty' || value.oldValue !== value.newValue) {
+          this.triggerStateChange(value);
         }
-        this.triggerStateChange(value);
       });
     }
 
@@ -513,7 +511,6 @@ close the notebook without saving it.`,
    */
   readonly modelDB: IModelDB;
 
-  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
