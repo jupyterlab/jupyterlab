@@ -29,7 +29,7 @@ const createContextualFragment = (html: string) => {
       /* no-op */
     },
     getBoundingClientRect: () => ({ right: 0 }),
-    getClientRects: (): ClientRect[] => [],
+    getClientRects: (): DOMRect[] => [],
     createContextualFragment
   };
 };

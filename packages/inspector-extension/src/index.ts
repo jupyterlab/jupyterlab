@@ -123,7 +123,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     }
 
     // Create a proxy to pass the `source` to the current inspector.
-    const proxy: IInspector = Object.defineProperty({}, 'source', {
+    const proxy = Object.defineProperty({} as IInspector, 'source', {
       get: (): IInspector.IInspectable | null =>
         !inspector || inspector.isDisposed ? null : inspector.content.source,
       set: (src: IInspector.IInspectable | null) => {

@@ -581,7 +581,7 @@ export class Completer extends Widget {
 
     const start = model.cursor.start;
     const position = editor.getPositionAt(start) as CodeEditor.IPosition;
-    const anchor = editor.getCoordinateForPosition(position) as ClientRect;
+    const anchor = editor.getCoordinateForPosition(position) as DOMRect;
     const style = window.getComputedStyle(node);
     const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
     const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;

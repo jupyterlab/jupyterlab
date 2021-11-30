@@ -61,27 +61,7 @@ export namespace CodeEditor {
   /**
    * An interface describing editor state coordinates.
    */
-  export interface ICoordinate {
-    /**
-     * The left coordinate.
-     */
-    readonly left: number;
-
-    /**
-     * The right coordinate.
-     */
-    readonly right: number;
-
-    /**
-     * The top coordinate.
-     */
-    readonly top: number;
-
-    /**
-     * The bottom coordinate.
-     */
-    readonly bottom: number;
-  }
+  export interface ICoordinate extends DOMRectReadOnly {}
 
   /**
    * A range.
