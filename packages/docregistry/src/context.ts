@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { PageConfig } from '@jupyterlab/coreutils';
 import {
   Dialog,
   ISessionContext,
@@ -594,13 +595,15 @@ export class Context<
   private async _save(): Promise<void> {
     this._saveState.emit('started');
     const model = this._model;
-    let content: PartialJSONValue;
-    if (this._factory.fileFormat === 'json') {
-      content = model.toJSON();
-    } else {
-      content = model.toString();
-      if (this._lineEnding) {
-        content = content.replace(/\n/g, this._lineEnding);
+    let content: PartialJSONValue = null;
+    if (PageConfig.getOption('collaborative') != 'true') {
+      if (this._factory.fileFormat === 'json') {
+        content = model.toJSON();
+      } else {
+        content = model.toString();
+        if (this._lineEnding) {
+          content = content.replace(/\n/g, this._lineEnding);
+        }
       }
     }
 
@@ -882,8 +885,10 @@ or load the version on disk (revert)?`,
     this._path = newPath;
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
-    await this.save();
+    // we must rename the document before saving with the new path
     this._ycontext.set('path', this._path);
+    await this._provider.renameAck;
+    await this.save();
     await this._maybeCheckpoint(true);
   }
 

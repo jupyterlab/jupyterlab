@@ -151,7 +151,9 @@ export class YFile
   };
 
   public static create(): YFile {
-    return new YFile();
+    const model = new YFile();
+    model.dirty = false;
+    return model;
   }
 
   /**
@@ -371,7 +373,9 @@ export class YNotebook
   public static create(
     disableDocumentWideUndoRedo: boolean
   ): models.ISharedNotebook {
-    return new YNotebook({ disableDocumentWideUndoRedo });
+    const model = new YNotebook({ disableDocumentWideUndoRedo });
+    model.dirty = false;
+    return model;
   }
 
   /**
