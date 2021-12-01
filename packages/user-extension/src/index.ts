@@ -51,9 +51,9 @@ const userMenuPlugin: JupyterFrontEndPlugin<IUserMenu> = {
  * Jupyter plugin adding the IUserMenu to the menu bar if collaborative flag enabled.
  */
 const menuBarPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/user-extension:userMenu',
+  id: '@jupyterlab/user-extension:userMenuBar',
   autoStart: true,
-  requires: [ICurrentUser, ICurrentUser],
+  requires: [ICurrentUser, IUserMenu],
   activate: (
     app: JupyterFrontEnd,
     user: ICurrentUser,
