@@ -8,6 +8,8 @@ import json
 import os
 from os.path import join as pjoin
 
+from tornado import web
+
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
@@ -29,7 +31,7 @@ from .debuglog import DebugLogFileMixin
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
-from .handlers.yjs_echo_ws import YjsEchoWebSocket
+from .handlers.yjs_echo_ws import YjsEchoWebSocket, ROOMS
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -586,6 +588,25 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
 
     def initialize_settings(self):
+        def hook(model, path, **kwargs):
+            if "type" in model and model["type"] == "directory":
+                pass
+            elif "content" in model and model["content"] is not None:
+                # content sent through HTTP, it must not be an RTC session
+                if path in ROOMS:
+                    raise web.HTTPError(409, "Document content cannot be present both in RTC session and HTTP request")
+                # keep the content sent through HTTP
+            else:
+                # no content sent through HTTP, it must be an RTC session
+                if path in ROOMS:
+                    # we found the RTC session as expected
+                    # set the document content from y-py
+                    model["content"] = ROOMS[path].get_source()
+                else:
+                    # RTC session not available, shouldn't happen
+                    raise web.HTTPError(410, "Could not find an RTC session corresponding to this document")
+
+        self.serverapp.contents_manager.register_pre_save_hook(hook)
         super().initialize_settings()
 
 
