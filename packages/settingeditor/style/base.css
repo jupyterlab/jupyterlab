@@ -226,6 +226,10 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   color: var(--jp-content-font-color0);
 }
 
+#setting-editor .checkbox label {
+  cursor: pointer;
+}
+
 #setting-editor button[type='submit'] {
   display: none;
 }
