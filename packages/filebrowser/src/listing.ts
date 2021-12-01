@@ -1123,24 +1123,76 @@ export class DirListing extends Widget {
     if (!files || files.length === 0) {
       return;
     }
-    const length = event.dataTransfer?.items.length;
-    if (!length) {
+    event.preventDefault();
+
+    if (event.dataTransfer && event.dataTransfer.items) {
+      let items = event.dataTransfer.items;
+
+      const addDirectory = async (item: any, path: string) => {
+        console.log('logging path: ', path);
+        if (item.isDirectory) {
+          this._model.manager
+            .newUntitled({
+              path: path,
+              type: 'directory'
+            })
+            .then(async model => {
+              await this._manager.rename(
+                `${path}/${model.name}`,
+                `${path}/${item.name}`
+              );
+              this._model
+                .cd(`${model.path}`)
+                .then(() => {
+                  let directoryReader = item.createReader();
+
+                  directoryReader.readEntries((entries: any) => {
+                    for (let i = 0; i < entries.length; i++) {
+                      void addDirectory(entries[i], `${path}/${item.name}`);
+                    }
+                    // entries.forEach(async (entry: any) => {
+                    //   await addDirectory(entry, this._model.path);
+                    // });
+                  });
+                })
+                .catch(error =>
+                  showErrorMessage(
+                    this._trans._p('showErrorMessage', 'Open directory'),
+                    error
+                  )
+                );
+            })
+            .catch(err => {
+              console.log('error while creating folder: ', err);
+            });
+
+          // let directoryReader = item.createReader();
+
+          // directoryReader.readEntries((entries: any) => {
+          //   entries.forEach((entry: any) => {
+          //     addDirectory(entry);
+          //   });
+          // });
+        } else {
+          item.file((file: any) => {
+            void this._model.upload(file);
+          });
+        }
+      };
+
+      for (let i = 0; i < items.length; i++) {
+        let item = items[i].webkitGetAsEntry();
+
+        if (item) {
+          const addDir = async () => {
+            await addDirectory(item, this._model.path);
+          };
+          void addDir();
+        }
+      }
+
       return;
     }
-    for (let i = 0; i < length; i++) {
-      let entry = event.dataTransfer?.items[i].webkitGetAsEntry();
-      if (entry.isDirectory) {
-        console.log('currently not supporting drag + drop for folders');
-        void showDialog({
-          title: this._trans.__('Error Uploading Folder'),
-          body: this._trans.__(
-            'Drag and Drop is currently not supported for folders'
-          ),
-          buttons: [Dialog.cancelButton({ label: this._trans.__('Close') })]
-        });
-      }
-    }
-    event.preventDefault();
     for (let i = 0; i < files.length; i++) {
       void this._model.upload(files[i]);
     }
