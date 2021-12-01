@@ -303,6 +303,13 @@
   --jp-side-by-side-resized-cell: var(--jp-side-by-side-output-size);
 }
 
+.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
+  margin-top: 3em;
+  margin-bottom: 3em;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
 .jp-mod-sideBySide.jp-Notebook .jp-CodeCell {
   display: grid;
   grid-template-columns: minmax(0, 1fr) min-content minmax(
