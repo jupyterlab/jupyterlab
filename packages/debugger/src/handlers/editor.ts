@@ -139,7 +139,7 @@ export class EditorHandler implements IDisposable {
     });
 
     void this._debuggerService.updateBreakpoints(
-      this._editor.model.value,
+      this._editor.model.sharedModel.getSource(),
       breakpoints,
       this._path
     );
@@ -171,7 +171,7 @@ export class EditorHandler implements IDisposable {
     }
 
     void this._debuggerService.updateBreakpoints(
-      this._editor.model.value,
+      this._editor.model.sharedModel.getSource(),
       breakpoints,
       this._path
     );
@@ -218,7 +218,7 @@ export class EditorHandler implements IDisposable {
    * or its path (if it exists).
    */
   private _getBreakpoints(): IDebugger.IBreakpoint[] {
-    const code = this._editor.model.value;
+    const code = this._editor.model.sharedModel.getSource();
     return this._debuggerService.model.breakpoints.getBreakpoints(
       this._path || this._debuggerService.getCodeId(code)
     );

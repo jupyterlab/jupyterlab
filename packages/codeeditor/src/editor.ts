@@ -179,12 +179,6 @@ export namespace CodeEditor {
     sharedModelSwitched: ISignal<IModel, boolean>;
 
     /**
-     * The text stored in the model.
-     */
-    //readonly value: IObservableString;
-    value: string;
-
-    /**
      * A mime type of the model.
      *
      * #### Notes
@@ -271,16 +265,6 @@ export namespace CodeEditor {
      */
     get sharedModelSwitched(): ISignal<this, boolean> {
       return this._sharedModelSwitched;
-    }
-
-    /**
-     * Get the value of the model.
-     */
-    get value(): string {
-      return this.sharedModel.getSource();
-    }
-    set value(source: string) {
-      this.sharedModel.setSource(source);
     }
 
     /**

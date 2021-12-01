@@ -211,11 +211,15 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     // Set the text value, normalizing line endings to \n
     if (Array.isArray(cell.source)) {
-      this.value = cell.source
-        .map(s => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n'))
-        .join('');
+      this.sharedModel.setSource(
+        cell.source
+          .map(s => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n'))
+          .join('')
+      );
     } else {
-      this.value = cell.source.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      this.sharedModel.setSource(
+        cell.source.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+      );
     }
     const metadata = JSONExt.deepCopy(cell.metadata);
     if (this.type !== 'raw') {
@@ -303,7 +307,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     }
     return {
       cell_type: this.type,
-      source: this.value,
+      source: this.sharedModel.getSource(),
       metadata
     } as nbformat.ICell;
   }
@@ -667,7 +671,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         // TODO load from the notebook file when the dirty state is stored in it
         if (cell.execution_count != null) {
           // True if execution_count is null or undefined
-          this._executedCode = this.value.trim();
+          this._executedCode = this.sharedModel.getSource().trim();
         }
       } else {
         executionCount.set(null);
@@ -755,7 +759,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   private _setDirty(v: boolean) {
     if (v !== this._isDirty) {
       if (!v) {
-        this._executedCode = this.value.trim();
+        this._executedCode = this.sharedModel.getSource().trim();
       }
       this._isDirty = v;
       this.stateChanged.emit({
@@ -912,7 +916,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   private _onValueChanged(): void {
     if (this.executionCount !== null) {
-      this._setDirty(this._executedCode !== this.value.trim());
+      this._setDirty(
+        this._executedCode !== this.sharedModel.getSource().trim()
+      );
     }
   }
 

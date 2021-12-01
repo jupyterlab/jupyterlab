@@ -1099,7 +1099,7 @@ export namespace CodeCell {
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     const model = cell.model;
-    const code = model.value;
+    const code = model.sharedModel.getSource();
     if (!code.trim() || !sessionContext.session?.kernel) {
       model.clearExecution();
       return;
@@ -1500,7 +1500,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Returns empty string if not a heading.
    */
   get headingInfo(): { text: string; level: number } {
-    let text = this.model.value;
+    let text = this.model.sharedModel.getSource();
     const lines = marked.lexer(text);
     let line: any;
     for (line of lines) {
@@ -1716,7 +1716,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   private _updateRenderedInput(): Promise<void> {
     const model = this.model;
-    const text = (model && model.value) || DEFAULT_MARKDOWN_TEXT;
+    const text =
+      (model && model.sharedModel.getSource()) || DEFAULT_MARKDOWN_TEXT;
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });

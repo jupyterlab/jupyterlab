@@ -49,7 +49,12 @@ function generate(
   if (options !== undefined) {
     numberingH1 = options.numberingH1;
   }
-  return getHeadings(editor.content.model.value, onClick, dict, numberingH1);
+  return getHeadings(
+    editor.content.model.sharedModel.getSource(),
+    onClick,
+    dict,
+    numberingH1
+  );
 
   /**
    * Returns a "click" handler.

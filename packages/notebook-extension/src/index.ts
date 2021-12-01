@@ -1032,11 +1032,11 @@ function activateCodeConsole(
         // Get the selected code from the editor.
         const start = editor.getOffsetAt(selection.start);
         const end = editor.getOffsetAt(selection.end);
-        code = editor.model.value.substring(start, end);
+        code = editor.model.sharedModel.getSource().substring(start, end);
       } else {
         // no selection, find the complete statement around the current line
         const cursor = editor.getCursorPosition();
-        const srcLines = editor.model.value.split('\n');
+        const srcLines = editor.model.sharedModel.getSource().split('\n');
         let curLine = selection.start.line;
         while (
           curLine < editor.lineCount &&

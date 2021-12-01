@@ -1047,7 +1047,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._lastChange = null;
     const editor = this._editor;
     const doc = editor.getDoc();
-    if (doc.getValue() === this._model.value) {
+    if (doc.getValue() === this._model.sharedModel.getSource()) {
       return;
     }
 
@@ -1062,7 +1062,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     );
     console.warn(
       JSON.stringify({
-        model: this._model.value,
+        model: this._model.sharedModel.getSource(),
         view: doc.getValue(),
         selections: this.getSelections(),
         cursor: this.getCursorPosition(),

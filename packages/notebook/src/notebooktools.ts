@@ -488,7 +488,9 @@ export namespace NotebookTools {
         this
       );
       cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
-      this._model.value = cellModel.value.split('\n')[0];
+      this._model.sharedModel.setSource(
+        cellModel.sharedModel.getSource().split('\n')[0]
+      );
       this._model.mimeType = cellModel.mimeType;
 
       const model = this._model;
@@ -507,7 +509,9 @@ export namespace NotebookTools {
       changes: CellChange<ISharedBaseCellMetadata>
     ): void {
       if (changes.sourceChange) {
-        this._model.value = this._cellModel!.value.split('\n')[0];
+        this._model.sharedModel.setSource(
+          this._cellModel!.sharedModel.getSource().split('\n')[0]
+        );
       }
     }
 
@@ -640,7 +644,9 @@ export namespace NotebookTools {
 
     private _update() {
       const cell = this.notebookTools.activeCell;
-      this.editor.model.value = cell ? JSON.stringify(cell.model.metadata) : '';
+      this.editor.model.sharedModel.setSource(
+        cell ? JSON.stringify(cell.model.metadata) : ''
+      );
     }
   }
 

@@ -106,7 +106,7 @@ export class DocumentModel
    * Serialize the model to a string.
    */
   toString(): string {
-    return this.value;
+    return this.sharedModel.getSource();
   }
 
   /**
@@ -116,14 +116,14 @@ export class DocumentModel
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    this.value = value;
+    this.sharedModel.setSource(value);
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): PartialJSONValue {
-    return JSON.parse(this.value || 'null');
+    return JSON.parse(this.sharedModel.getSource() || 'null');
   }
 
   /**

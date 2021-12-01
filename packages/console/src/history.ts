@@ -251,18 +251,18 @@ export class ConsoleHistory implements IConsoleHistory {
     location: CodeEditor.EdgeLocation
   ): void {
     const model = editor.model;
-    const source = model.value;
+    const source = model.sharedModel.getSource();
 
     if (location === 'top' || location === 'topLine') {
       void this.back(source).then(value => {
         if (this.isDisposed || !value) {
           return;
         }
-        if (model.value === value) {
+        if (model.sharedModel.getSource() === value) {
           return;
         }
         this._setByHistory = true;
-        model.value = value;
+        model.sharedModel.setSource(value);
         let columnPos = 0;
         columnPos = value.indexOf('\n');
         if (columnPos < 0) {
@@ -276,11 +276,11 @@ export class ConsoleHistory implements IConsoleHistory {
           return;
         }
         const text = value || this.placeholder;
-        if (model.value === text) {
+        if (model.sharedModel.getSource() === text) {
           return;
         }
         this._setByHistory = true;
-        model.value = value;
+        model.sharedModel.setSource(value);
         const pos = editor.getPositionAt(text.length);
         if (pos) {
           editor.setCursorPosition(pos);

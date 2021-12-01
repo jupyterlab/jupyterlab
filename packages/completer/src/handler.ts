@@ -161,7 +161,7 @@ export class CompletionHandler implements IDisposable {
     position: CodeEditor.IPosition
   ): Completer.ITextState {
     return {
-      text: editor.model.value,
+      text: editor.model.sharedModel.getSource(),
       lineHeight: editor.lineHeight,
       charWidth: editor.charWidth,
       line: position.line,
@@ -351,7 +351,7 @@ export class CompletionHandler implements IDisposable {
       return Promise.reject(new Error('No active editor'));
     }
 
-    const text = editor.model.value;
+    const text = editor.model.sharedModel.getSource();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const pending = ++this._pending;
     const state = this.getState(editor, position);

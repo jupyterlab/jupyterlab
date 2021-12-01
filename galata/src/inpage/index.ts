@@ -413,7 +413,7 @@ export class GalataInpage implements IGalataInpage {
    */
   async waitForCellRun(cell: Cell, timeout = 2000): Promise<Node | null> {
     const model = cell.model;
-    const code = model.value;
+    const code = model.sharedModel.getSource();
     if (!code.trim()) {
       return null;
     }
