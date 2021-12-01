@@ -3,14 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PanelWithToolbar } from '@jupyterlab/ui-components';
 import { IDebugger } from '../../tokens';
 import { KernelSourcesBody } from './body';
-// import { KernelSourcePathComponent } from './sourcepath';
-// import { ReactWidget } from '@jupyterlab/ui-components';
-// import React from 'react';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
@@ -23,15 +19,14 @@ export class KernelSources extends PanelWithToolbar {
    */
   constructor(options: KernelSources.IOptions) {
     super();
-    const { model, service, editorServices } = options;
+    const { model, service } = options;
     const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.title.label = trans.__('Kernel Sources');
 
     this.toolbar.addClass('jp-DebuggerKernelSources-header');
     const body = new KernelSourcesBody({
       service,
-      model,
-      editorServices
+      model
     });
     /*
     const button = new ToolbarButton({
@@ -65,11 +60,6 @@ export namespace KernelSources {
      * The model for the sources.
      */
     model: IDebugger.Model.ISources;
-
-    /**
-     * The editor services used to create new read-only editors.
-     */
-    editorServices: IEditorServices;
 
     /**
      * The application language translator
