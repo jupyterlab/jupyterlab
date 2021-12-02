@@ -299,7 +299,9 @@ function activate(
     id,
     isEnabled,
     tracker,
-    browserFactory
+    browserFactory,
+    consoleTracker,
+    sessionDialogs
   );
 
   // Add a launcher item if the launcher is available.
@@ -312,14 +314,7 @@ function activate(
   }
 
   if (menu) {
-    Commands.addMenuItems(
-      menu,
-      commands,
-      tracker,
-      trans,
-      consoleTracker,
-      sessionDialogs
-    );
+    Commands.addMenuItems(menu, tracker, consoleTracker, isEnabled);
   }
 
   getAvailableKernelFileTypes()

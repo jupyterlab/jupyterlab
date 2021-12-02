@@ -42,6 +42,7 @@ export * from './mainareawidget';
 export * from './menufactory';
 export * from './printing';
 export * from './sanitizer';
+export * from './semanticCommand';
 export * from './sessioncontext';
 export * from './thememanager';
 export * from './tokens';

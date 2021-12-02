@@ -2,14 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { ITranslator } from '@jupyterlab/translation';
-import { ToolbarButton } from '@jupyterlab/ui-components';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { closeAllIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
 import { BreakpointsBody } from './body';
-import { PanelWithToolbar } from '../panelwithtoolbar';
 /**
  * A Panel to show a list of breakpoints.
  */
@@ -22,7 +21,8 @@ export class Breakpoints extends PanelWithToolbar {
   constructor(options: Breakpoints.IOptions) {
     super(options);
     const { model, service } = options;
-    this.title.label = this.trans.__('Breakpoints');
+    const trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    this.title.label = trans.__('Breakpoints');
 
     const body = new BreakpointsBody(model);
 
@@ -35,13 +35,11 @@ export class Breakpoints extends PanelWithToolbar {
             return;
           }
           const result = await showDialog({
-            title: this.trans.__('Remove All Breakpoints'),
-            body: this.trans.__(
-              'Are you sure you want to remove all breakpoints?'
-            ),
+            title: trans.__('Remove All Breakpoints'),
+            body: trans.__('Are you sure you want to remove all breakpoints?'),
             buttons: [
-              Dialog.okButton({ label: this.trans.__('Remove breakpoints') }),
-              Dialog.cancelButton({ label: this.trans.__('Cancel') })
+              Dialog.okButton({ label: trans.__('Remove breakpoints') }),
+              Dialog.cancelButton({ label: trans.__('Cancel') })
             ],
             hasClose: true
           });
@@ -49,7 +47,7 @@ export class Breakpoints extends PanelWithToolbar {
             return service.clearBreakpoints();
           }
         },
-        tooltip: this.trans.__('Remove All Breakpoints')
+        tooltip: trans.__('Remove All Breakpoints')
       })
     );
 

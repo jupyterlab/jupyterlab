@@ -26,6 +26,16 @@ export interface IYText extends models.ISharedText {
 export type YCellType = YRawCell | YCodeCell | YMarkdownCell;
 
 export class YDocument<T> implements models.ISharedDocument {
+  get dirty(): boolean {
+    return this.ystate.get('dirty');
+  }
+
+  set dirty(value: boolean) {
+    this.transact(() => {
+      this.ystate.set('dirty', value);
+    }, false);
+  }
+
   /**
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
@@ -128,11 +138,13 @@ export class YFile
 
     event.keysChanged.forEach(key => {
       const change = event.changes.keys.get(key);
-      stateChange.push({
-        name: key,
-        oldValue: change?.oldValue ? change!.oldValue : 0,
-        newValue: this.ystate.get(key)
-      });
+      if (change) {
+        stateChange.push({
+          name: key,
+          oldValue: change.oldValue,
+          newValue: this.ystate.get(key)
+        });
+      }
     });
 
     this._changed.emit({ stateChange });
@@ -366,7 +378,7 @@ export class YNotebook
    * Wether the the undo/redo logic should be
    * considered on the full document across all cells.
    *
-   * @return The disableDocumentWideUndoRedo setting.
+   * @returns The disableDocumentWideUndoRedo setting.
    */
   get disableDocumentWideUndoRedo(): boolean {
     return this._disableDocumentWideUndoRedo;
@@ -444,11 +456,13 @@ export class YNotebook
     const stateChange: any = [];
     event.keysChanged.forEach(key => {
       const change = event.changes.keys.get(key);
-      stateChange.push({
-        name: key,
-        oldValue: change?.oldValue ? change!.oldValue : 0,
-        newValue: this.ystate.get(key)
-      });
+      if (change) {
+        stateChange.push({
+          name: key,
+          oldValue: change.oldValue,
+          newValue: this.ystate.get(key)
+        });
+      }
     });
 
     this._changed.emit({ stateChange });
@@ -731,9 +745,9 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   public setAttachments(attachments: nbformat.IAttachments | undefined): void {
     this.transact(() => {
       if (attachments == null) {
-        this.ymodel.set('attachments', attachments);
-      } else {
         this.ymodel.delete('attachments');
+      } else {
+        this.ymodel.set('attachments', attachments);
       }
     });
   }

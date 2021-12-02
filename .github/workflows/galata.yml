@@ -31,7 +31,7 @@ jobs:
           key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
           restore-keys: |
             ${{ runner.os }}-pip-3.8
-  
+
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -47,6 +47,8 @@ jobs:
       - name: Install dependencies
         run: |
           bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm run build
 
       - name: Launch JupyterLab
         run: |
@@ -71,6 +73,8 @@ jobs:
         run: |
           cd galata
           jlpm run test
+          # Run once benchmark tests to ensure they have no regression
+          BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
 
       - name: Upload Galata Test assets
         if: always()

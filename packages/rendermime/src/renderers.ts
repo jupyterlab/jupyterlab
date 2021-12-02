@@ -16,7 +16,7 @@ import { removeMath, replaceMath } from './latex';
 /**
  * Render HTML into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -158,7 +158,7 @@ export namespace renderHTML {
 /**
  * Render an image into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -258,7 +258,7 @@ export namespace renderImage {
 /**
  * Render LaTeX into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -313,7 +313,7 @@ export namespace renderLatex {
 /**
  * Render Markdown into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -407,7 +407,7 @@ export namespace renderMarkdown {
 /**
  * Render SVG into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -555,7 +555,7 @@ function splitShallowNode<T extends Node>(
 /**
  * Render text into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -738,7 +738,7 @@ namespace Private {
    *
    * @param content - The string of markdown to render.
    *
-   * @return A promise which resolves with the rendered content.
+   * @returns A promise which resolves with the rendered content.
    */
   export function renderMarked(content: string): Promise<string> {
     initializeMarked();

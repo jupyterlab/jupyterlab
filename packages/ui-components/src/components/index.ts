@@ -9,6 +9,8 @@ export * from './iframe';
 export * from './inputgroup';
 export * from './interface';
 export * from './menu';
+export * from './panelwithtoolbar';
+export * from './sidepanel';
 export * from './spinner';
 export * from './styling';
 export * from './switch';

@@ -2,20 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
-import { IMenuExtender } from './tokens';
+import { SemanticCommand } from '@jupyterlab/apputils';
 
 /**
  * An interface for a Run menu.
  */
 export interface IRunMenu extends IRankedMenu {
   /**
-   * A set storing ICodeRunner for the Run menu.
-   *
-   * ### Notes
-   * The key for the set may be used in menu labels.
+   * Semantic commands ICodeRunner for the Run menu.
    */
-  readonly codeRunners: Set<IRunMenu.ICodeRunner<Widget>>;
+  readonly codeRunners: IRunMenu.ICodeRunner;
 }
 
 /**
@@ -27,24 +23,17 @@ export class RunMenu extends RankedMenu implements IRunMenu {
    */
   constructor(options: IRankedMenu.IOptions) {
     super(options);
-    this.codeRunners = new Set<IRunMenu.ICodeRunner<Widget>>();
+    this.codeRunners = {
+      restart: new SemanticCommand(),
+      run: new SemanticCommand(),
+      runAll: new SemanticCommand()
+    };
   }
 
   /**
-   * A set storing ICodeRunner for the Run menu.
-   *
-   * ### Notes
-   * The key for the set may be used in menu labels.
+   * Semantic commands ICodeRunner for the Run menu.
    */
-  readonly codeRunners: Set<IRunMenu.ICodeRunner<Widget>>;
-
-  /**
-   * Dispose of the resources held by the run menu.
-   */
-  dispose(): void {
-    this.codeRunners.clear();
-    super.dispose();
-  }
+  readonly codeRunners: IRunMenu.ICodeRunner;
 }
 
 /**
@@ -55,69 +44,18 @@ export namespace IRunMenu {
    * An object that runs code, which may be
    * registered with the Run menu.
    */
-  export interface ICodeRunner<T extends Widget> extends IMenuExtender<T> {
+  export interface ICodeRunner {
     /**
-     * Return the caption associated to the `run` function.
-     *
-     * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of translations.
+     * A semantic command to run a subpart of a document.
      */
-    runCaption?: (n: number) => string;
-
+    run: SemanticCommand;
     /**
-     * Return the label associated to the `run` function.
-     *
-     * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of translations.
+     * A semantic command to run a whole document
      */
-    runLabel?: (n: number) => string;
-
+    runAll: SemanticCommand;
     /**
-     * Return the caption associated to the `runAll` function.
-     *
-     * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of translations.
+     * A semantic command to restart a kernel
      */
-    runAllCaption?: (n: number) => string;
-
-    /**
-     * Return the label associated to the `runAll` function.
-     *
-     * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of translations.
-     */
-    runAllLabel?: (n: number) => string;
-
-    /**
-     * Return the caption associated to the `restartAndRunAll` function.
-     *
-     * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of translations.
-     */
-    restartAndRunAllCaption?: (n: number) => string;
-
-    /**
-     * Return the label associated to the `restartAndRunAll` function.
-     *
-     * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of translations.
-     */
-    restartAndRunAllLabel?: (n: number) => string;
-
-    /**
-     * A function to run a chunk of code.
-     */
-    run?: (widget: T) => Promise<void>;
-
-    /**
-     * A function to run the entirety of the code hosted by the widget.
-     */
-    runAll?: (widget: T) => Promise<void>;
-
-    /**
-     * A function to restart and run all the code hosted by the widget, which
-     * returns a promise of whether the action was performed.
-     */
-    restartAndRunAll?: (widget: T) => Promise<boolean>;
+    restart: SemanticCommand;
   }
 }

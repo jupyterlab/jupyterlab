@@ -16,3 +16,5 @@ keyboard-driven way to search for and run JupyterLab commands:
 
 The command palette can be accessed from the View menu or using the keyboard shortcut
 ``Command/Ctrl Shift C``.
+
+The command palette can be displayed in the sidebar by adding ``'modal': false`` to the Settings.

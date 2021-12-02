@@ -401,22 +401,33 @@ export class DocumentRegistry implements IDisposable {
    * file types and there is a match in that set, this returns that.
    * Otherwise, this returns the same widget factory as
    * [[defaultWidgetFactory]].
+   *
+   * The user setting `defaultViewers` took precedence on this one too.
    */
   defaultRenderedWidgetFactory(path: string): DocumentRegistry.WidgetFactory {
     // Get the matching file types.
-    const fts = this.getFileTypesForPath(PathExt.basename(path));
+    const ftNames = this.getFileTypesForPath(PathExt.basename(path)).map(
+      ft => ft.name
+    );
 
-    let factory: DocumentRegistry.WidgetFactory | undefined = undefined;
-    // Find if a there is a default rendered factory for this type.
-    for (const ft of fts) {
-      if (ft.name in this._defaultRenderedWidgetFactories) {
-        factory = this._widgetFactories[
-          this._defaultRenderedWidgetFactories[ft.name]
-        ];
-        break;
+    // Start with any user overrides for the defaults.
+    for (const name in ftNames) {
+      if (name in this._defaultWidgetFactoryOverrides) {
+        return this._widgetFactories[this._defaultWidgetFactoryOverrides[name]];
       }
     }
-    return factory || this.defaultWidgetFactory(path);
+
+    // Find if a there is a default rendered factory for this type.
+    for (const name in ftNames) {
+      if (name in this._defaultRenderedWidgetFactories) {
+        return this._widgetFactories[
+          this._defaultRenderedWidgetFactories[name]
+        ];
+      }
+    }
+
+    // Fallback to the default widget factory
+    return this.defaultWidgetFactory(path);
   }
 
   /**
@@ -662,7 +673,14 @@ export class DocumentRegistry implements IDisposable {
     // Then look by extension name, starting with the longest
     let ext = Private.extname(name);
     while (ext.length > 1) {
-      ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
+      ft = find(
+        this._fileTypes,
+        ft =>
+          ft.extensions
+            // In Private.extname, the extension is transformed to lower case
+            .map(extension => extension.toLowerCase())
+            .indexOf(ext) !== -1
+      );
       if (ft) {
         fts.push(ft);
       }
@@ -1424,7 +1442,7 @@ export namespace DocumentRegistry {
         name: 'r',
         displayName: trans.__('R File'),
         mimeTypes: ['text/x-rsrc'],
-        extensions: ['.r'],
+        extensions: ['.R'],
         icon: rKernelIcon
       },
       {

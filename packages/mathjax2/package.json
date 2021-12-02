@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@jupyterlab/rendermime-interfaces": "^3.3.0-alpha.15",
-    "@lumino/coreutils": "^1.10.0"
+    "@lumino/coreutils": "^1.11.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

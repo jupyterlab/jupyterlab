@@ -30,7 +30,7 @@ import { UUID } from '@lumino/coreutils';
 
 import { MessageLoop } from '@lumino/messaging';
 
-import { AccordionPanel, Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { Debugger } from '../src/debugger';
 
@@ -41,11 +41,6 @@ import { DebuggerModel } from '../src/model';
 import { SourcesBody } from '../src/panels/sources/body';
 
 import { IDebugger } from '../src/tokens';
-
-/**
- * A test sidebar.
- */
-class TestSidebar extends Debugger.Sidebar {}
 
 const server = new JupyterServer();
 
@@ -79,7 +74,7 @@ describe('Debugger', () => {
   let session: Debugger.Session;
   let path: string;
   let connection: Session.ISessionConnection;
-  let sidebar: TestSidebar;
+  let sidebar: Debugger.Sidebar;
 
   beforeAll(async () => {
     connection = await createSession({
@@ -92,7 +87,7 @@ describe('Debugger', () => {
     session = new Debugger.Session({ connection });
     service.session = session;
 
-    sidebar = new TestSidebar({
+    sidebar = new Debugger.Sidebar({
       service,
       callstackCommands: {
         registry,
@@ -154,14 +149,14 @@ describe('Debugger', () => {
   });
 
   describe('Panel', () => {
-    let body: AccordionPanel;
     let toolbarList: any;
     beforeEach(() => {
-      body = sidebar.widgets[1] as AccordionPanel;
-      toolbarList = body.node.querySelectorAll('.jp-AccordionPanel-title');
+      toolbarList = sidebar.content.node.querySelectorAll(
+        '.jp-AccordionPanel-title'
+      );
     });
     it('should have 4 child widgets', () => {
-      expect(body.widgets.length).toBe(4);
+      expect(sidebar.widgets.length).toBe(4);
     });
 
     it('should have 4 toolbars', () => {
@@ -265,8 +260,8 @@ describe('Debugger', () => {
   });
 
   describe('#callstack', () => {
-    it('should have a header and a body', () => {
-      expect(sidebar.callstack.widgets.length).toEqual(2);
+    it('should have a body', () => {
+      expect(sidebar.callstack.widgets.length).toEqual(1);
     });
 
     it('should have the jp-DebuggerCallstack class', () => {
@@ -353,8 +348,8 @@ describe('Debugger', () => {
   });
 
   describe('#sources', () => {
-    it('should have a header and a body', () => {
-      expect(sidebar.sources.widgets.length).toEqual(2);
+    it('should have a body', () => {
+      expect(sidebar.sources.widgets.length).toEqual(1);
     });
 
     it('should display the source path in the header', () => {
@@ -364,7 +359,7 @@ describe('Debugger', () => {
     });
 
     it('should display the source code in the body', () => {
-      const body = sidebar.sources.widgets[1] as SourcesBody;
+      const body = sidebar.sources.widgets[0] as SourcesBody;
       const children = toArray(body.children());
       const editor = children[0] as CodeEditorWrapper;
       expect(editor.model.value.text).toEqual(code);

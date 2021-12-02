@@ -387,6 +387,19 @@ describe('docregistry/registry', () => {
         expect(registry.defaultWidgetFactory('a.foo.bar')).toBe(mdFactory);
       });
 
+      it('should override the default rendered widget factory for a file type', () => {
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown', 'foobar'],
+          defaultFor: []
+        });
+        registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('foobar', 'markdown');
+        expect(registry.defaultRenderedWidgetFactory('a.foo.bar')).toBe(
+          mdFactory
+        );
+      });
+
       it('should revert to the default widget factory when unset', () => {
         const factory = createFactory();
         registry.addWidgetFactory(factory);
@@ -656,9 +669,15 @@ describe('docregistry/registry', () => {
         expect(ft[1].name).toBe('json');
       });
 
-      it('should be case insensitive', () => {
-        const ft = registry.getFileTypesForPath('foo/bar/baz.PY');
-        expect(ft[0].name).toBe('python');
+      it.each([
+        ['python', null, 'foo/bar/baz.PY'],
+        ['r-markdown', ['.Rmd'], 'foo/bar/baz.Rmd']
+      ])('should be case insensitive', (name, extensions, filename) => {
+        if (extensions) {
+          registry.addFileType({ name, extensions });
+        }
+        const ft = registry.getFileTypesForPath(filename);
+        expect(ft[0].name).toBe(name);
       });
 
       it('should support pattern matching', () => {

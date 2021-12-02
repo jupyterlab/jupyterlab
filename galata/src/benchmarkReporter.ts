@@ -501,7 +501,7 @@ class BenchmarkReporter implements Reporter {
    * @param allData all test records.
    * @param comparison logic of test comparisons:
    * 'snapshot' or 'project'; default 'snapshot'.
-   * @return A list of two strings, the first one
+   * @returns A list of two strings, the first one
    * is the content of report, the second one is the extension of report file.
    */
   protected async defaultTextReportFactory(
@@ -510,6 +510,7 @@ class BenchmarkReporter implements Reporter {
   ): Promise<[string, string]> {
     // Compute statistics
     // - Groupby (test, browser, reference | project, file)
+    const reportExtension = 'md';
 
     const groups = new Map<
       string,
@@ -548,8 +549,12 @@ class BenchmarkReporter implements Reporter {
     });
 
     // If the reference | project lists has two items, the intervals will be compared.
+    if (!groups.values().next().value) {
+      return ['## Benchmark report\n\nNot enough data', reportExtension];
+    }
+
     const compare =
-      (groups.values().next().value.values().next().value as Map<
+      (groups.values().next().value?.values().next().value as Map<
         string,
         Map<string, number[]>
       >).size === 2;
@@ -658,7 +663,6 @@ class BenchmarkReporter implements Reporter {
       );
     }
     reportContent.push('', '</details>', '');
-    const reportExtension = 'md';
     const reportContentString = reportContent.join('\n');
     return [reportContentString, reportExtension];
   }
@@ -672,7 +676,7 @@ class BenchmarkReporter implements Reporter {
    * @param allData all test records.
    * @param comparison logic of test comparisons:
    * 'snapshot' or 'project'; default 'snapshot'.
-   * @return VegaLite configuration
+   * @returns VegaLite configuration
    */
   protected defaultVegaLiteConfigFactory(
     allData: Array<IReportRecord>,
