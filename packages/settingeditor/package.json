@@ -44,7 +44,7 @@
     "@jupyterlab/statedb": "^3.3.0-alpha.15",
     "@jupyterlab/translation": "^3.3.0-alpha.15",
     "@jupyterlab/ui-components": "^4.0.0-alpha.15",
-    "@lumino/algorithm": "^1.8.0",
+    "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.19.0",
     "@lumino/coreutils": "^1.11.1",
     "@lumino/messaging": "^1.10.1",
