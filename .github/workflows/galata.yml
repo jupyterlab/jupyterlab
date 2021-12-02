@@ -16,34 +16,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install node
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14.x'
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
 
-      - name: Cache pip on Linux
-        uses: actions/cache@v1
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-3.8
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Cache yarn
-        uses: actions/cache@v1
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Install dependencies
         run: |
