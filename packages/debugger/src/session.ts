@@ -89,14 +89,14 @@ export class DebuggerSession implements IDebugger.ISession {
   }
 
   /**
-   * Whether the debug session is started
+   * Whether to pause on exceptions
    */
   get pausingOnExceptions(): boolean {
     return this._pausingOnExceptions;
   }
 
   /**
-   * Whether the debug session is started
+   * Sets pause on exception
    */
   set pausingOnExceptions(value: boolean) {
     this._pausingOnExceptions = value;
@@ -110,7 +110,7 @@ export class DebuggerSession implements IDebugger.ISession {
   }
 
   /**
-   * Exception paths defined by the debugger
+   * Exception breakpoint filters defined by the debugger
    */
   get exceptionBreakpointFilters():
     | DebugProtocol.ExceptionBreakpointsFilter[]
@@ -141,7 +141,6 @@ export class DebuggerSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
-    // console.log("start");
     const reply = await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
@@ -163,7 +162,6 @@ export class DebuggerSession implements IDebugger.ISession {
     this._pausingOnExceptions = false;
     this._exceptionBreakpointFilters = reply.body?.exceptionBreakpointFilters;
 
-    console.log(this._pausingOnExceptions);
     await this.sendRequest('attach', {});
   }
 
@@ -183,7 +181,6 @@ export class DebuggerSession implements IDebugger.ISession {
    */
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
     const message = await this.sendRequest('debugInfo', {});
-    // console.log("DEBUG INFO", message)
     this._isStarted = message.body.isStarted;
     this._exceptionPaths = message.body?.exceptionPaths;
     return message;
@@ -258,7 +255,6 @@ export class DebuggerSession implements IDebugger.ISession {
   private _isStarted = false;
   private _pausingOnExceptions = false;
   private _exceptionPaths: string[] = [];
-  // private _exceptionBreakpointFilters: any = [];
   private _exceptionBreakpointFilters:
     | DebugProtocol.ExceptionBreakpointsFilter[]
     | undefined = [];

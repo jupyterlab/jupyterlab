@@ -85,7 +85,8 @@ export class Callstack extends PanelWithToolbar {
       'pause',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.pause
+        id: commands.pause,
+        label: ''
       })
     );
 
