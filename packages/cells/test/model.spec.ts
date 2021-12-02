@@ -41,7 +41,7 @@ describe('cells/model', () => {
         };
         const model = new CellModel({ cell });
         expect(model).toBeInstanceOf(CellModel);
-        expect(model.value.text).toBe(cell.source);
+        expect(model.sharedModel.getSource()).toBe(cell.source);
       });
 
       it('should accept a base cell argument with a multiline source', () => {
@@ -53,7 +53,9 @@ describe('cells/model', () => {
         };
         const model = new CellModel({ cell });
         expect(model).toBeInstanceOf(CellModel);
-        expect(model.value.text).toBe((cell.source as string[]).join(''));
+        expect(model.sharedModel.getSource()).toBe(
+          (cell.source as string[]).join('')
+        );
       });
 
       it('should use the id argument', () => {
@@ -100,7 +102,7 @@ describe('cells/model', () => {
           called = true;
         });
         expect(called).toBe(false);
-        model.value.text = 'foo';
+        model.sharedModel.setSource('foo');
         expect(called).toBe(true);
       });
     });
@@ -186,14 +188,14 @@ describe('cells/model', () => {
     describe('#source', () => {
       it('should default to an empty string', () => {
         const model = new CellModel({});
-        expect(model.value.text).toHaveLength(0);
+        expect(model.sharedModel.getSource()).toHaveLength(0);
       });
 
       it('should be settable', () => {
         const model = new CellModel({});
-        expect(model.value.text).toHaveLength(0);
-        model.value.text = 'foo';
-        expect(model.value.text).toBe('foo');
+        expect(model.sharedModel.getSource()).toHaveLength(0);
+        model.sharedModel.setSource('foo');
+        expect(model.sharedModel.getSource()).toBe('foo');
       });
     });
 
@@ -346,7 +348,7 @@ describe('cells/model', () => {
         };
         const model = new CodeCellModel({ cell });
         expect(model).toBeInstanceOf(CodeCellModel);
-        expect(model.value.text).toBe(cell.source);
+        expect(model.sharedModel.getSource()).toBe(cell.source);
       });
 
       it('should connect the outputs changes to content change signal', () => {
@@ -479,7 +481,7 @@ describe('cells/model', () => {
         expect(model.isDirty).toBe(false);
         expect(called).toBe(0);
 
-        model.value.text = 'foo';
+        model.sharedModel.setSource('foo');
         expect(model.isDirty).toBe(true);
         expect(called).toBe(1);
 

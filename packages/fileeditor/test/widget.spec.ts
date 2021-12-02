@@ -88,7 +88,7 @@ describe('fileeditorcodewrapper', () => {
         await context.initialize(true);
         await context.ready;
         widget.context.model.fromString('foo');
-        expect(widget.editor.model.value.text).toBe('foo');
+        expect(widget.editor.model.sharedModel.getSource()).toBe('foo');
       });
     });
 
@@ -125,7 +125,7 @@ describe('fileeditorcodewrapper', () => {
         await context.initialize(true);
         await context.ready;
         widget.context.model.fromString('foo');
-        expect(widget.editor.model.value.text).toBe('foo');
+        expect(widget.editor.model.sharedModel.getSource()).toBe('foo');
       });
 
       it('should set the mime type for the path', () => {

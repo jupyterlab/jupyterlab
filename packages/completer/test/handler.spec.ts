@@ -177,7 +177,7 @@ describe('@jupyterlab/completer', () => {
         expect(handler.methods).toEqual(
           expect.not.arrayContaining(['onTextChanged'])
         );
-        handler.editor.model.value.text = 'foo';
+        handler.editor.model.sharedModel.setSource('foo');
         expect(handler.methods).toEqual(
           expect.arrayContaining(['onTextChanged'])
         );
@@ -196,11 +196,14 @@ describe('@jupyterlab/completer', () => {
         expect(model.methods).toEqual(
           expect.not.arrayContaining(['handleTextChange'])
         );
-        editor.model.value.text = 'bar';
+        editor.model.sharedModel.setSource('bar');
         editor.setCursorPosition({ line: 0, column: 2 });
         // This signal is emitted (again) because the cursor position that
         // a natural user would create need to be recreated here.
-        (editor.model.value.changed as any).emit({ type: 'set', value: 'bar' });
+        (editor.model.sharedModel.changed as any).emit({
+          type: 'set',
+          value: 'bar'
+        });
         expect(model.methods).toEqual(
           expect.arrayContaining(['handleTextChange'])
         );
@@ -257,12 +260,12 @@ describe('@jupyterlab/completer', () => {
         };
 
         handler.editor = editor;
-        handler.editor.model.value.text = text;
+        handler.editor.model.sharedModel.setSource(text);
         handler.editor.setCursorPosition({ line, column: column + 3 });
         model.original = request;
         model.cursor = { start: column, end: column + 3 };
         (completer.selected as any).emit(patch);
-        expect(handler.editor.model.value.text).toBe(want);
+        expect(handler.editor.model.sharedModel.getSource()).toBe(want);
         expect(handler.editor.getCursorPosition()).toEqual({
           line,
           column: column + 6
@@ -289,14 +292,14 @@ describe('@jupyterlab/completer', () => {
         };
 
         handler.editor = editor;
-        handler.editor.model.value.text = text;
+        handler.editor.model.sharedModel.setSource(text);
         handler.editor.model.sharedModel.clearUndoHistory();
         handler.editor.setCursorPosition({ line, column: column + 3 });
         model.original = request;
         model.cursor = { start: column, end: column + 3 };
         // Make the completion, check its value and cursor position.
         (completer.selected as any).emit(patch);
-        expect(editor.model.value.text).toBe(want);
+        expect(editor.model.sharedModel.getSource()).toBe(want);
         expect(editor.getCursorPosition()).toEqual({
           line,
           column: column + 6
@@ -304,7 +307,7 @@ describe('@jupyterlab/completer', () => {
         console.warn(editor.getCursorPosition());
         // Undo the completion, check its value and cursor position.
         editor.undo();
-        expect(editor.model.value.text).toBe(text);
+        expect(editor.model.sharedModel.getSource()).toBe(text);
         expect(editor.getCursorPosition()).toEqual({
           line,
           column: column + 3
@@ -312,7 +315,7 @@ describe('@jupyterlab/completer', () => {
         console.warn(editor.getCursorPosition());
         // Redo the completion, check its value and cursor position.
         editor.redo();
-        expect(editor.model.value.text).toBe(want);
+        expect(editor.model.sharedModel.getSource()).toBe(want);
         expect(editor.getCursorPosition()).toEqual({
           line,
           column: column + 6
@@ -341,7 +344,7 @@ describe('@jupyterlab/completer', () => {
       };
 
       handler.editor = editor;
-      handler.editor.model.value.text = text;
+      handler.editor.model.sharedModel.setSource(text);
       handler.editor.model.sharedModel.clearUndoHistory();
       handler.editor.setCursorPosition({ line, column });
       model.original = request;
@@ -349,7 +352,7 @@ describe('@jupyterlab/completer', () => {
       model.cursor = { start: offset, end: offset };
       // Make the completion, check its value and cursor position.
       (completer.selected as any).emit(patch);
-      expect(editor.model.value.text).toBe(want);
+      expect(editor.model.sharedModel.getSource()).toBe(want);
       expect(editor.getCursorPosition()).toEqual({
         line,
         column: column + 6

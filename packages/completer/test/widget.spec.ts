@@ -243,7 +243,7 @@ describe('completer/widget', () => {
         const model = new CompleterModel();
         let called = false;
 
-        editor.model.value.text = 'a';
+        editor.model.sharedModel.setSource('a');
         panel.node.style.position = 'absolute';
         panel.node.style.top = '0px';
         panel.node.style.left = '0px';
@@ -293,7 +293,7 @@ describe('completer/widget', () => {
         let model = new CompleterModel();
         let called = false;
 
-        editor.model.value.text = 'a';
+        editor.model.sharedModel.setSource('a');
         panel.node.style.position = 'absolute';
         panel.node.style.top = '0px';
         panel.node.style.left = '0px';
@@ -1486,7 +1486,7 @@ describe('completer/widget', () => {
           code.node.style.height = '5000px';
           code.node.style.width = '400px';
           code.node.style.background = 'yellow';
-          editor.model.value.text = text;
+          editor.model.sharedModel.setSource(text);
 
           panel.node.style.background = 'red';
           panel.node.style.height = '2000px';

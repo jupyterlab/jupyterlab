@@ -113,7 +113,7 @@ describe('CodeMirrorEditor', () => {
   describe('#lineCount', () => {
     it('should get the number of lines in the editor', () => {
       expect(editor.lineCount).toBe(1);
-      editor.model.value.text = 'foo\nbar\nbaz';
+      editor.model.sharedModel.setSource('foo\nbar\nbaz');
       expect(editor.lineCount).toBe(3);
     });
   });
@@ -187,7 +187,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getLine()', () => {
     it('should get a line of text', () => {
-      model.value.text = 'foo\nbar';
+      model.sharedModel.setSource('foo\nbar');
       expect(editor.getLine(0)).toBe('foo');
       expect(editor.getLine(1)).toBe('bar');
       expect(editor.getLine(2)).toBeUndefined();
@@ -196,7 +196,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getOffsetAt()', () => {
     it('should get the offset for a given position', () => {
-      model.value.text = 'foo\nbar';
+      model.sharedModel.setSource('foo\nbar');
       let pos = {
         column: 2,
         line: 1
@@ -212,7 +212,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getPositionAt()', () => {
     it('should get the position for a given offset', () => {
-      model.value.text = 'foo\nbar';
+      model.sharedModel.setSource('foo\nbar');
       let pos = editor.getPositionAt(6);
       expect(pos.column).toBe(2);
       expect(pos.line).toBe(1);
@@ -224,27 +224,27 @@ describe('CodeMirrorEditor', () => {
 
   describe('#undo()', () => {
     it('should undo one edit', () => {
-      model.value.text = 'foo';
+      model.sharedModel.setSource('foo');
       editor.undo();
-      expect(model.value.text).toBe('');
+      expect(model.sharedModel.getSource()).toBe('');
     });
   });
 
   describe('#redo()', () => {
     it('should redo one undone edit', () => {
-      model.value.text = 'foo';
+      model.sharedModel.setSource('foo');
       editor.undo();
       editor.redo();
-      expect(model.value.text).toBe('foo');
+      expect(model.sharedModel.getSource()).toBe('foo');
     });
   });
 
   describe('#clearHistory()', () => {
     it('should clear the undo history', () => {
-      model.value.text = 'foo';
+      model.sharedModel.setSource('foo');
       editor.clearHistory();
       editor.undo();
-      expect(model.value.text).toBe('foo');
+      expect(model.sharedModel.getSource()).toBe('foo');
     });
   });
 
@@ -328,7 +328,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#revealPosition()', () => {
     it('should reveal the given position in the editor', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       editor.revealPosition({ line: 50, column: 0 });
       expect(editor).toBeTruthy();
     });
@@ -336,7 +336,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#revealSelection()', () => {
     it('should reveal the given selection in the editor', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const start = { line: 50, column: 0 };
       const end = { line: 52, column: 0 };
       editor.setSelection({ start, end });
@@ -347,7 +347,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getCoordinateForPosition()', () => {
     it('should get the window coordinates given a cursor position', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
       if (typeof process !== 'undefined') {
         // eslint-disable-next-line jest/no-conditional-expect
@@ -361,7 +361,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getPositionForCoordinate()', () => {
     it('should get the window coordinates given a cursor position', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
       const newPos = editor.getPositionForCoordinate(coord)!;
       expect(newPos.line).toBeTruthy();
@@ -371,7 +371,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getCursorPosition()', () => {
     it('should get the primary position of the cursor', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       let pos = editor.getCursorPosition();
       expect(pos.line).toBe(0);
       expect(pos.column).toBe(0);
@@ -385,7 +385,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#setCursorPosition()', () => {
     it('should set the primary position of the cursor', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       editor.setCursorPosition({ line: 12, column: 3 });
       const pos = editor.getCursorPosition();
       expect(pos.line).toBe(12);
@@ -403,7 +403,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#setSelection()', () => {
     it('should set the primary selection of the editor', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const start = { line: 50, column: 0 };
       const end = { line: 52, column: 0 };
       editor.setSelection({ start, end });
@@ -412,7 +412,7 @@ describe('CodeMirrorEditor', () => {
     });
 
     it('should remove any secondary cursors', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const range0 = {
         start: { line: 50, column: 0 },
         end: { line: 52, column: 0 }
@@ -429,7 +429,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getSelections()', () => {
     it('should get the selections for all the cursors', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const range0 = {
         start: { line: 50, column: 0 },
         end: { line: 52, column: 0 }
@@ -447,7 +447,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#setSelections()', () => {
     it('should set the selections for all the cursors', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const range0 = {
         start: { line: 50, column: 0 },
         end: { line: 52, column: 0 }
@@ -463,7 +463,7 @@ describe('CodeMirrorEditor', () => {
     });
 
     it('should set a default selection for an empty array', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       editor.setSelections([]);
       const selection = editor.getSelection();
       expect(selection.start.line).toBe(0);

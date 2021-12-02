@@ -164,7 +164,7 @@ describe('console/widget', () => {
         expect(widget.cells.length).toBeGreaterThan(0);
         widget.clear();
         expect(widget.cells.length).toBe(0);
-        expect(widget.promptCell!.model.value.text).toBe('');
+        expect(widget.promptCell!.model.sharedModel.getSource()).toBe('');
       });
     });
 
@@ -199,7 +199,7 @@ describe('console/widget', () => {
         const force = false;
         const timeout = 9000;
         Widget.attach(widget, document.body);
-        widget.promptCell!.model.value.text = 'for x in range(5):';
+        widget.promptCell!.model.sharedModel.setSource('for x in range(5):');
         expect(widget.cells.length).toBe(0);
         const session = widget.sessionContext as SessionContext;
         session.kernelPreference = { name: 'ipython' };
@@ -224,16 +224,16 @@ describe('console/widget', () => {
         Widget.attach(widget, document.body);
 
         const model = widget.promptCell!.model;
-        expect(model.value.text).toHaveLength(0);
+        expect(model.sharedModel.getSource()).toHaveLength(0);
         widget.insertLinebreak();
-        expect(model.value.text).toBe('\n');
+        expect(model.sharedModel.getSource()).toBe('\n');
       });
     });
 
     describe('#serialize()', () => {
       it('should serialize the contents of a console', () => {
         Widget.attach(widget, document.body);
-        widget.promptCell!.model.value.text = 'foo';
+        widget.promptCell!.model.sharedModel.setSource('foo');
 
         const serialized = widget.serialize();
         expect(serialized).toHaveLength(1);

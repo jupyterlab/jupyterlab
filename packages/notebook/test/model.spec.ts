@@ -76,14 +76,14 @@ describe('@jupyterlab/notebook', () => {
           disableDocumentWideUndoRedo: true
         });
         const cell = model.contentFactory.createCodeCell({});
-        cell.value.text = 'foo';
+        cell.sharedModel.setSource('foo');
         const cellJSON = cell.toJSON();
         model.cells.push(cell);
         model.cells.clearUndo();
         model.cells.remove(model.cells.length - 1);
         model.cells.undo();
         expect(model.cells.length).toBe(1);
-        expect(model.cells.get(0).value.text).toBe('foo');
+        expect(model.cells.get(0).sharedModel.getSource()).toBe('foo');
         // Previous model matches the restored model
         expect(model.cells.get(0).toJSON()).toEqual(cellJSON);
       });
@@ -140,7 +140,7 @@ describe('@jupyterlab/notebook', () => {
           const cell = model.contentFactory.createCodeCell({});
           model.cells.push(cell);
           expect(() => {
-            cell.value.text = 'foo';
+            cell.sharedModel.setSource('foo');
           }).not.toThrow();
         });
 
@@ -161,7 +161,7 @@ describe('@jupyterlab/notebook', () => {
           const cell = model.contentFactory.createCodeCell({});
           model.cells.push(cell);
           model.dirty = false;
-          cell.value.text = 'foo';
+          cell.sharedModel.setSource('foo');
           expect(model.dirty).toBe(true);
         });
       });
@@ -386,7 +386,7 @@ describe('@jupyterlab/notebook', () => {
           disableDocumentWideUndoRedo: true
         });
         const cell = model.contentFactory.createCodeCell({});
-        cell.value.text = 'foo';
+        cell.sharedModel.setSource('foo');
         model.cells.push(cell);
         expect(model.cells.canUndo).toBe(true);
         model.initialize();
@@ -438,18 +438,18 @@ describe('@jupyterlab/notebook', () => {
 
         it('should clone an existing code cell', () => {
           const orig = factory.createCodeCell({});
-          orig.value.text = 'foo';
+          orig.sharedModel.setSource('foo');
           const cell = orig.toJSON();
           const newCell = factory.createCodeCell({ cell });
-          expect(newCell.value.text).toBe('foo');
+          expect(newCell.sharedModel.getSource()).toBe('foo');
         });
 
         it('should clone an existing raw cell', () => {
           const orig = factory.createRawCell({});
-          orig.value.text = 'foo';
+          orig.sharedModel.setSource('foo');
           const cell = orig.toJSON();
           const newCell = factory.createCodeCell({ cell });
-          expect(newCell.value.text).toBe('foo');
+          expect(newCell.sharedModel.getSource()).toBe('foo');
         });
       });
 
@@ -461,18 +461,18 @@ describe('@jupyterlab/notebook', () => {
 
         it('should clone an existing raw cell', () => {
           const orig = factory.createRawCell({});
-          orig.value.text = 'foo';
+          orig.sharedModel.setSource('foo');
           const cell = orig.toJSON();
           const newCell = factory.createRawCell({ cell });
-          expect(newCell.value.text).toBe('foo');
+          expect(newCell.sharedModel.getSource()).toBe('foo');
         });
 
         it('should clone an existing code cell', () => {
           const orig = factory.createCodeCell({});
-          orig.value.text = 'foo';
+          orig.sharedModel.setSource('foo');
           const cell = orig.toJSON();
           const newCell = factory.createRawCell({ cell });
-          expect(newCell.value.text).toBe('foo');
+          expect(newCell.sharedModel.getSource()).toBe('foo');
         });
       });
 
@@ -484,18 +484,18 @@ describe('@jupyterlab/notebook', () => {
 
         it('should clone an existing markdown cell', () => {
           const orig = factory.createMarkdownCell({});
-          orig.value.text = 'foo';
+          orig.sharedModel.setSource('foo');
           const cell = orig.toJSON();
           const newCell = factory.createMarkdownCell({ cell });
-          expect(newCell.value.text).toBe('foo');
+          expect(newCell.sharedModel.getSource()).toBe('foo');
         });
 
         it('should clone an existing raw cell', () => {
           const orig = factory.createRawCell({});
-          orig.value.text = 'foo';
+          orig.sharedModel.setSource('foo');
           const cell = orig.toJSON();
           const newCell = factory.createMarkdownCell({ cell });
-          expect(newCell.value.text).toBe('foo');
+          expect(newCell.sharedModel.getSource()).toBe('foo');
         });
       });
 

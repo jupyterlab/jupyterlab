@@ -753,7 +753,7 @@ describe('cells/widget', () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         widget.initializeState();
         let originalCount: number;
-        widget.model.value.text = 'foo';
+        widget.model.sharedModel.setSource('foo');
         originalCount = widget.model.executionCount!;
         await CodeCell.execute(widget, sessionContext);
         const executionCount = widget.model.executionCount;
@@ -786,7 +786,7 @@ describe('cells/widget', () => {
       it('should set the cell prompt properly while executing', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         widget.initializeState();
-        widget.model.value.text = 'foo';
+        widget.model.sharedModel.setSource('foo');
         const future1 = CodeCell.execute(widget, sessionContext);
         expect(widget.promptNode.textContent).toEqual('[*]:');
         const future2 = CodeCell.execute(widget, sessionContext);
