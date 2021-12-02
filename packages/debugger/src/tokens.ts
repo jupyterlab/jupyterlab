@@ -344,7 +344,9 @@ export namespace IDebugger {
     /**
      * Get exception filters and default values.
      */
-    exceptionBreakpointFilters: { [key: string]: string };
+    exceptionBreakpointFilters:
+      | DebugProtocol.ExceptionBreakpointsFilter[]
+      | undefined;
 
     /**
      * Signal emitted for debug event messages.
