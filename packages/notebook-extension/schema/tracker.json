@@ -595,6 +595,11 @@
       "command": "notebook:toggle-render-side-by-side",
       "keys": ["Shift R"],
       "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:toggle-render-side-by-side-current",
+      "keys": ["Ctrl Shift R"],
+      "selector": ".jp-Notebook:focus"
     }
   ],
   "title": "Notebook",

@@ -1332,6 +1332,7 @@ export namespace NotebookActions {
    */
   export function renderSideBySide(notebook: Notebook): void {
     notebook.node.classList.add(SIDE_BY_SIDE_CLASS);
+    notebook.model?.metadata.set('render-side-by-side', true);
   }
 
   /**
@@ -1341,6 +1342,7 @@ export namespace NotebookActions {
    */
   export function renderNotSideBySide(notebook: Notebook): void {
     notebook.node.classList.remove(SIDE_BY_SIDE_CLASS);
+    notebook.model?.metadata.set('render-side-by-side', false);
   }
 
   /**

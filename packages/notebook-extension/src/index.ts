@@ -233,6 +233,9 @@ namespace CommandIDs {
 
   export const toggleRenderSideBySide = 'notebook:toggle-render-side-by-side';
 
+  export const toggleRenderSideBySideCurrentNotebook =
+    'notebook:toggle-render-side-by-side-current';
+
   export const setSideBySideRatio = 'notebook:set-side-by-side-ratio';
 
   export const enableOutputScrolling = 'notebook:enable-output-scrolling';
@@ -2370,6 +2373,22 @@ function addCommands(
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.toggleRenderSideBySideCurrentNotebook, {
+    label: trans.__('Toggle Side-by-side rendering for current Notebook'),
+    execute: args => {
+      Private.renderSideBySide = !Private.renderSideBySide;
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        console.log('---', current.model?.metadata.get('render-side-by-side'));
+        if (current.model?.metadata.get('render-side-by-side')) {
+          return NotebookActions.renderNotSideBySide(current.content);
+        }
+        return NotebookActions.renderSideBySide(current.content);
+      }
+    },
+    isEnabled
+  });
+
   commands.addCommand(CommandIDs.setSideBySideRatio, {
     label: trans.__('Set side-by-side ratio'),
     execute: args => {
@@ -2564,6 +2583,7 @@ function populatePalette(
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
     CommandIDs.toggleRenderSideBySide,
+    CommandIDs.toggleRenderSideBySideCurrentNotebook,
     CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
     CommandIDs.disableOutputScrolling
