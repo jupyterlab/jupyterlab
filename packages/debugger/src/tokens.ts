@@ -32,8 +32,8 @@ export interface IDebugger {
   readonly isStarted: boolean;
 
   /**
-    * Wheter the session is pausing for exceptions.
-    */
+   * Wheter the session is pausing for exceptions.
+   */
   readonly isPausingOnExceptions: boolean;
 
   /**

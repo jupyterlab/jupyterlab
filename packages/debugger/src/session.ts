@@ -96,10 +96,10 @@ export class DebuggerSession implements IDebugger.ISession {
   /**
    * Whether the debug session is started
    */
-  set pausingOnExceptions(value : boolean) {
-      this._pausingOnExceptions = value;
+  set pausingOnExceptions(value: boolean) {
+    this._pausingOnExceptions = value;
   }
-  
+
   /**
    * Signal emitted for debug event messages.
    */
@@ -145,7 +145,7 @@ export class DebuggerSession implements IDebugger.ISession {
 
     this._isStarted = true;
     this._pausingOnExceptions = false;
-    console.log(this._pausingOnExceptions)
+    console.log(this._pausingOnExceptions);
     await this.sendRequest('attach', {});
   }
 

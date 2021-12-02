@@ -701,8 +701,12 @@ const main: JupyterFrontEndPlugin<void> = {
       caption: trans.__('Enable / Disable pausing on exceptions'),
       className: 'jp-PauseOnExceptions',
       icon: Debugger.Icons.pauseOnExceptionsIcon,
-      isToggled: () => { return service.isPausingOnExceptions; },
-      isEnabled: () => { return !!service.isStarted; },
+      isToggled: () => {
+        return service.isPausingOnExceptions;
+      },
+      isEnabled: () => {
+        return !!service.isStarted;
+      },
       execute: async () => {
         await service.pauseOnExceptions(!service.isPausingOnExceptions);
         commands.notifyCommandChanged();
@@ -711,19 +715,19 @@ const main: JupyterFrontEndPlugin<void> = {
 
     service.eventMessage.connect((_, event): void => {
       commands.notifyCommandChanged();
-      console.log("eventMessage", event.event)
+      console.log('eventMessage', event.event);
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
       }
     });
 
     service.stateRestored.connect(_ => {
-      console.log("stateRestored")
+      console.log('stateRestored');
       commands.notifyCommandChanged(CommandIDs.pause);
     });
 
     service.sessionChanged.connect(_ => {
-      console.log("sessionChanged")
+      console.log('sessionChanged');
       commands.notifyCommandChanged();
     });
 
@@ -752,7 +756,7 @@ const main: JupyterFrontEndPlugin<void> = {
         CommandIDs.stepIn,
         CommandIDs.stepOut,
         CommandIDs.evaluate,
-        CommandIDs.pause,
+        CommandIDs.pause
       ].forEach(command => {
         palette.addItem({ command, category });
       });
