@@ -96,8 +96,8 @@ export class DebuggerSession implements IDebugger.ISession {
   /**
    * Whether the debug session is started
    */
-  set pausingOnExceptions(value : boolean) {
-      this._pausingOnExceptions = value;
+  set pausingOnExceptions(value: boolean) {
+    this._pausingOnExceptions = value;
   }
 
   /**
