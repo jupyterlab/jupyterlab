@@ -45,6 +45,7 @@
     "build:packages:scope": "lerna run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-|application-top)*\" --concurrency 1",
     "build:storybook": "lerna run build:storybook --concurrency 1",
+    "build:test": "lerna run build:test",
     "build:test:scope": "lerna run build --concurrency 1",
     "build:testutils": "cd testutils && jlpm run build",
     "build:utils": "cd buildutils && jlpm run build",
