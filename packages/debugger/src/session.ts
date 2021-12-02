@@ -9,6 +9,8 @@ import { PromiseDelegate } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { DebugProtocol } from 'vscode-debugprotocol';
+
 import { IDebugger } from './tokens';
 
 /**
@@ -101,6 +103,22 @@ export class DebuggerSession implements IDebugger.ISession {
   }
 
   /**
+   * Exception paths defined by the debugger
+   */
+  get exceptionPaths(): string[] {
+    return this._exceptionPaths;
+  }
+
+  /**
+   * Exception paths defined by the debugger
+   */
+  get exceptionBreakpointFilters():
+    | DebugProtocol.ExceptionBreakpointsFilter[]
+    | undefined {
+    return this._exceptionBreakpointFilters;
+  }
+
+  /**
    * Signal emitted for debug event messages.
    */
   get eventMessage(): ISignal<IDebugger.ISession, IDebugger.ISession.Event> {
@@ -141,10 +159,10 @@ export class DebuggerSession implements IDebugger.ISession {
       throw new Error(`Could not start the debugger: ${reply.message}`);
     }
 
-    // console.log(reply);
-
     this._isStarted = true;
     this._pausingOnExceptions = false;
+    this._exceptionBreakpointFilters = reply.body?.exceptionBreakpointFilters;
+
     console.log(this._pausingOnExceptions);
     await this.sendRequest('attach', {});
   }
@@ -167,6 +185,7 @@ export class DebuggerSession implements IDebugger.ISession {
     const message = await this.sendRequest('debugInfo', {});
     // console.log("DEBUG INFO", message)
     this._isStarted = message.body.isStarted;
+    this._exceptionPaths = message.body?.exceptionPaths;
     return message;
   }
 
@@ -238,6 +257,11 @@ export class DebuggerSession implements IDebugger.ISession {
   private _isDisposed = false;
   private _isStarted = false;
   private _pausingOnExceptions = false;
+  private _exceptionPaths: string[] = [];
+  // private _exceptionBreakpointFilters: any = [];
+  private _exceptionBreakpointFilters:
+    | DebugProtocol.ExceptionBreakpointsFilter[]
+    | undefined = [];
   private _disposed = new Signal<this, void>(this);
   private _eventMessage = new Signal<
     IDebugger.ISession,

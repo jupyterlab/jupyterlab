@@ -315,6 +315,18 @@ export namespace IDebugger {
     pausingOnExceptions: boolean;
 
     /**
+     * Whether the debug session is pausing on exceptions.
+     */
+    exceptionPaths: string[];
+
+    /**
+     * Get exception filters and default values.
+     */
+    exceptionBreakpointFilters:
+      | DebugProtocol.ExceptionBreakpointsFilter[]
+      | undefined;
+
+    /**
      * Signal emitted for debug event messages.
      */
     readonly eventMessage: ISignal<
@@ -562,6 +574,7 @@ export namespace IDebugger {
         stoppedThreads: number[];
         tmpFilePrefix: string;
         tmpFileSuffix: string;
+        exceptionPaths: string[];
       };
     }
 

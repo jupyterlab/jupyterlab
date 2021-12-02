@@ -515,45 +515,34 @@ export class DebuggerService implements IDebugger, IDisposable {
     // await this.session.sendRequest('configurationDone', {});
   }
 
+  /**
+   * Enable or disable pausing on exceptions.
+   *
+   * @param enable - Wether to enbale or disable pausing on exceptions.
+   */
   async pauseOnExceptions(enable: boolean): Promise<void> {
     if (!this.session?.isStarted) {
       return;
     }
-
-    console.log('Pause on exceptions', enable);
+    const exceptionBreakpointFilters = this.session.exceptionBreakpointFilters;
     this.session.pausingOnExceptions = enable;
-    let options: DebugProtocol.SetExceptionBreakpointsArguments;
-    if (enable) {
-      options = {
-        filters: ['raised', 'uncaught'],
-        exceptionOptions: [
-          {
-            path: [{ names: ['Python Exceptions'] }],
-            breakMode: 'always'
-          },
-          {
-            path: [{ names: ['Python Exceptions'] }],
-            breakMode: 'always'
-          }
-        ]
-      };
-    } else {
-      options = {
-        filters: ['raised', 'uncaught'],
-        exceptionOptions: [
-          {
-            path: [{ names: ['Python Exceptions'] }],
-            breakMode: 'never'
-          },
-          {
-            path: [{ names: ['Python Exceptions'] }],
-            breakMode: 'never'
-          }
-        ]
-      };
+    const filters: string[] = [];
+    const exceptionOptions: DebugProtocol.ExceptionOptions[] = [];
+    const breakMode = enable ? 'always' : 'never';
+    if (exceptionBreakpointFilters) {
+      for (let filter_dict of exceptionBreakpointFilters) {
+        filters.push(filter_dict.filter);
+        exceptionOptions.push({
+          path: [{ names: this.session.exceptionPaths }],
+          breakMode: breakMode
+        });
+      }
     }
+    const options: DebugProtocol.SetExceptionBreakpointsArguments = {
+      filters: filters,
+      exceptionOptions: exceptionOptions
+    };
     await this.session.sendRequest('setExceptionBreakpoints', options);
-    // console.log(reply);
   }
 
   /**
