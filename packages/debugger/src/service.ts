@@ -112,7 +112,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     this._session?.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
-        console.log("EVENT", event)
+        console.log('EVENT', event);
         this._model.stoppedThreads.add(event.body.threadId);
         void this._getAllFrames();
       } else if (event.event === 'continued') {
@@ -525,42 +525,42 @@ export class DebuggerService implements IDebugger, IDisposable {
     // await this.session.sendRequest('configurationDone', {});
   }
 
-  async pauseOnExceptions(enable : boolean): Promise<void> {
+  async pauseOnExceptions(enable: boolean): Promise<void> {
     if (!this.session?.isStarted) {
-      return
+      return;
     }
 
-    console.log("Pause on exceptions", enable);
+    console.log('Pause on exceptions', enable);
     this.session.pausingOnExceptions = enable;
     let options: DebugProtocol.SetExceptionBreakpointsArguments;
     if (enable) {
       options = {
-        filters: ["raised", "uncaught"],
+        filters: ['raised', 'uncaught'],
         exceptionOptions: [
-          { 
-            path: [{names: ["Python Exceptions"]}],
-            breakMode: "always"
+          {
+            path: [{ names: ['Python Exceptions'] }],
+            breakMode: 'always'
           },
-          { 
-            path: [{names: ["Python Exceptions"]}],
-            breakMode: "always"
+          {
+            path: [{ names: ['Python Exceptions'] }],
+            breakMode: 'always'
           }
         ]
-      }
+      };
     } else {
       options = {
-        filters: ["raised", "uncaught"],
+        filters: ['raised', 'uncaught'],
         exceptionOptions: [
-          { 
-            path: [{names: ["Python Exceptions"]}],
-            breakMode: "never"
+          {
+            path: [{ names: ['Python Exceptions'] }],
+            breakMode: 'never'
           },
-          { 
-            path: [{names: ["Python Exceptions"]}],
-            breakMode: "never"
+          {
+            path: [{ names: ['Python Exceptions'] }],
+            breakMode: 'never'
           }
         ]
-      }
+      };
     }
     await this.session.sendRequest('setExceptionBreakpoints', options);
     // console.log(reply);

@@ -73,7 +73,7 @@ export class Breakpoints extends PanelWithToolbar {
     //     console.log("Nothing!")
     //     return
     //   }
-  
+
     //   let enable = !pauseButton.hasClass(pauseButtonActiveClass);
     //   if (enable) {
     //     pauseButton.addClass(pauseButtonActiveClass)

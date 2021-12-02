@@ -20,8 +20,7 @@ import {
   stepOutIcon as stepOut,
   stepOverIcon as stepOver,
   variableIcon as variable,
-  viewBreakpointIcon as viewBreakpoint,
-  pauseOnExceptionsIcon as pauseOnExceptions
+  viewBreakpointIcon as viewBreakpoint
 } from './icons';
 
 import { DebuggerModel } from './model';
