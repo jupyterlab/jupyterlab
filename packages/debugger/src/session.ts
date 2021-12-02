@@ -9,6 +9,8 @@ import { PromiseDelegate } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { DebugProtocol } from 'vscode-debugprotocol';
+
 import { IDebugger } from './tokens';
 
 /**
@@ -104,13 +106,15 @@ export class DebuggerSession implements IDebugger.ISession {
    * Exception paths defined by the debugger
    */
   get exceptionPaths(): string[] {
-      return this._exceptionPaths;
+    return this._exceptionPaths;
   }
 
   /**
    * Exception paths defined by the debugger
    */
-  get exceptionBreakpointFilters(): any {
+  get exceptionBreakpointFilters():
+    | DebugProtocol.ExceptionBreakpointsFilter[]
+    | undefined {
     return this._exceptionBreakpointFilters;
   }
 
@@ -177,7 +181,7 @@ export class DebuggerSession implements IDebugger.ISession {
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
     const message = await this.sendRequest('debugInfo', {});
     this._isStarted = message.body.isStarted;
-    this._exceptionPaths = message.body.exceptionPaths;
+    this._exceptionPaths = message.body?.exceptionPaths;
     return message;
   }
 
@@ -248,10 +252,11 @@ export class DebuggerSession implements IDebugger.ISession {
   private _connection: Session.ISessionConnection | null;
   private _isDisposed = false;
   private _isStarted = false;
-  private _exceptionPaths: string[] = [];
   private _pausingOnExceptions = false;
-  // private _exceptionBreakpointFilters: DebugProtocol.ExceptionBreakpointsFilter = [];
-  private _exceptionBreakpointFilters: any = [];
+  private _exceptionPaths: string[] = [];
+  private _exceptionBreakpointFilters:
+    | DebugProtocol.ExceptionBreakpointsFilter[]
+    | undefined = [];
   private _disposed = new Signal<this, void>(this);
   private _eventMessage = new Signal<
     IDebugger.ISession,

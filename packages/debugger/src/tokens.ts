@@ -322,7 +322,9 @@ export namespace IDebugger {
     /**
      * Get exception filters and default values.
      */
-    exceptionBreakpointFilters: { [key: string]: string };
+    exceptionBreakpointFilters:
+      | DebugProtocol.ExceptionBreakpointsFilter[]
+      | undefined;
 
     /**
      * Signal emitted for debug event messages.
@@ -569,7 +571,6 @@ export namespace IDebugger {
          * Whether the kernel supports variable rich rendering or not.
          */
         richRendering?: boolean;
-        stoppedThreads: number[];
         tmpFilePrefix: string;
         tmpFileSuffix: string;
         stoppedThreads: number[];
