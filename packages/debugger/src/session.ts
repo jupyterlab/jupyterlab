@@ -138,7 +138,6 @@ export class DebuggerSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
-    // console.log("start");
     const reply = await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',

@@ -742,19 +742,16 @@ const main: JupyterFrontEndPlugin<void> = {
 
     service.eventMessage.connect((_, event): void => {
       commands.notifyCommandChanged();
-      console.log('eventMessage', event.event);
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
       }
     });
 
     service.stateRestored.connect(_ => {
-      console.log('stateRestored');
       commands.notifyCommandChanged(CommandIDs.pause);
     });
 
     service.sessionChanged.connect(_ => {
-      console.log('sessionChanged');
       commands.notifyCommandChanged();
     });
 

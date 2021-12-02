@@ -42,6 +42,6 @@ button.jp-Button.bp3-button.bp3-minimal.jp-PauseOnExceptions:hover {
   background-color: var(--jp-layout-color1);
 }
 
-button.jp-Button.bp3-button.bp3-minimal.jp-PauseOnExceptions.lm-mod-toggled {
-  background-color: var(--jp-layout-color1);
+button.jp-Button.jp-PauseOnExceptions.lm-mod-toggled {
+  background-color: var(--jp-layout-color2);
 }

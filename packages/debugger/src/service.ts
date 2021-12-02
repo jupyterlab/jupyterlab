@@ -112,7 +112,6 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     this._session?.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
-        console.log('EVENT', event);
         this._model.stoppedThreads.add(event.body.threadId);
         void this._getAllFrames();
       } else if (event.event === 'continued') {
@@ -491,7 +490,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: IDebugger.IBreakpoint[],
     path?: string
   ): Promise<void> {
-    // console.log("Updating!")
     if (!this.session?.isStarted) {
       return;
     }
@@ -522,86 +520,9 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
-    // await this.session.sendRequest('configurationDone', {});
+    await this.session.sendRequest('configurationDone', {});
   }
 
-  /**
-   * Enable or disable pausing on exceptions.
-   *
-   * @param enable - Wether to enbale or disable pausing on exceptions.
-   */
-  async pauseOnExceptions(enable: boolean): Promise<void> {
-    if (!this.session?.isStarted) {
-      return;
-    }
-    const exceptionBreakpointFilters = this.session.exceptionBreakpointFilters;
-    this.session.pausingOnExceptions = enable;
-    const filters: string[] = [];
-    const exceptionOptions: DebugProtocol.ExceptionOptions[] = [];
-    const breakMode = enable ? 'always' : 'never';
-    if (exceptionBreakpointFilters) {
-      for (let filter_dict of exceptionBreakpointFilters) {
-        filters.push(filter_dict.filter);
-        exceptionOptions.push({
-          path: [{ names: this.session.exceptionPaths }],
-          breakMode: breakMode
-        });
-      }
-    }
-    const options: DebugProtocol.SetExceptionBreakpointsArguments = {
-      filters: filters,
-      exceptionOptions: exceptionOptions
-    };
-    await this.session.sendRequest('setExceptionBreakpoints', options);
-  }
-
-  /**
-   * Enable or disable pausing on exceptions.
-   *
-   * @param enable - Wether to enbale or disable pausing on exceptions.
-   */
-  async pauseOnExceptions(enable : boolean): Promise<void> {
-    if (!this.session?.isStarted) {
-      return
-    }
-
-    const exceptionPaths = this.session.exceptionPaths;
-    const exceptionBreakpointFilters = this.session.exceptionBreakpointFilters;
-    console.log(exceptionPaths);
-    console.log(exceptionBreakpointFilters);
-    this.session.pausingOnExceptions = enable;
-    let options: DebugProtocol.SetExceptionBreakpointsArguments;
-    if (enable) {
-      options = {
-        filters: ["raised", "uncaught"],
-        exceptionOptions: [
-          { 
-            path: [{names: exceptionPaths}],
-            breakMode: "always"
-          },
-          { 
-            path: [{names: exceptionPaths}],
-            breakMode: "always"
-          }
-        ]
-      }
-    } else {
-      options = {
-        filters: ["raised", "uncaught"],
-        exceptionOptions: [
-          { 
-            path: [{names: exceptionPaths}],
-            breakMode: "always"
-          },
-          { 
-            path: [{names: exceptionPaths}],
-            breakMode: "never"
-          }
-        ]
-      }
-    }
-    await this.session.sendRequest('setExceptionBreakpoints', options);
-  }
 
   pauseOnExceptionsIsValid(): boolean {
     if (this.isStarted) {

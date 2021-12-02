@@ -65,33 +65,6 @@ export class Breakpoints extends PanelWithToolbar {
       })
     );
 
-    // let pauseButton: ToolbarButton;
-    // const pauseButtonActiveClass = 'jp-PauseOnExceptionsToggled';
-
-    // const onPauseChange = async () => {
-    //   if (!service.session?.isStarted) {
-    //     console.log("Nothing!")
-    //     return
-    //   }
-
-    //   let enable = !pauseButton.hasClass(pauseButtonActiveClass);
-    //   if (enable) {
-    //     pauseButton.addClass(pauseButtonActiveClass)
-    //   } else {
-    //     pauseButton.removeClass(pauseButtonActiveClass)
-    //   }
-    //   service.pauseOnExceptions(enable);
-    // };
-
-    // pauseButton =  new ToolbarButton({
-    //   icon: pauseOnExceptionsIcon,
-    //   onClick: onPauseChange,
-    //   className: 'jp-PauseOnExceptions',
-    //   tooltip: trans.__('Pause on uncaught exceptions')
-    // })
-
-    // header.toolbar.addItem('pauseOnExceptions', pauseButton);
-
     this.addWidget(body);
     this.addClass('jp-DebuggerBreakpoints');
   }
