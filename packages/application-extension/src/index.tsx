@@ -916,9 +916,21 @@ const busy: JupyterFrontEndPlugin<void> = {
  */
 const shell: JupyterFrontEndPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
-  activate: (app: JupyterFrontEnd) => {
+  optional: [ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry | null
+  ) => {
     if (!(app.shell instanceof LabShell)) {
       throw new Error(`${shell.id} did not find a LabShell instance.`);
+    }
+    if (settingRegistry) {
+      settingRegistry.load(shell.id).then(settings => {
+        (app.shell as LabShell).updateConfig(settings.composite);
+        settings.changed.connect(() => {
+          (app.shell as LabShell).updateConfig(settings.composite);
+        });
+      });
     }
     return app.shell;
   },

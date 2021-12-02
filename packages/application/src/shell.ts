@@ -22,7 +22,6 @@ import {
   FocusTracker,
   Panel,
   SplitPanel,
-  StackedLayout,
   StackedPanel,
   TabBar,
   TabPanel,
@@ -106,6 +105,18 @@ export namespace ILabShell {
    * An arguments object for the changed signals.
    */
   export type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
+
+  export interface IConfig {
+    /**
+     * The method for hiding widgets in the dock panel.
+     *
+     * The default is `scale`.
+     *
+     * Using `scale` will often increase performance as most browsers will not trigger style computation
+     * for the transform action.
+     */
+    hiddenMode: 'display' | 'scale';
+  }
 
   /**
    * The args for the current path change signal.
@@ -275,7 +286,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const hboxPanel = new BoxPanel();
     const vsplitPanel = (this._vsplitPanel = new Private.RestorableSplitPanel());
     const dockPanel = (this._dockPanel = new DockPanelSvg({
-      hiddenMode: Widget.HiddenMode.Composition
+      hiddenMode: Widget.HiddenMode.Scale
     }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
@@ -1067,6 +1078,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Update the shell configuration.
+   *
+   * @param config Shell configuration
+   */
+  updateConfig(config: Partial<ILabShell.IConfig>): void {
+    if (config.hiddenMode) {
+      this._dockPanel.hiddenMode =
+        config.hiddenMode === 'display'
+          ? Widget.HiddenMode.Display
+          : Widget.HiddenMode.Scale;
+    }
+  }
+
+  /**
    * Returns the widgets for an application area.
    */
   widgets(area?: ILabShell.Area): IIterator<Widget> {
@@ -1625,9 +1650,7 @@ namespace Private {
         allowDeselect: true,
         orientation: 'vertical'
       });
-      this._stackedPanel = new StackedPanel({
-        layout: new StackedLayout({ hiddenMode: Widget.HiddenMode.Composition })
-      });
+      this._stackedPanel = new StackedPanel();
       this._sideBar.hide();
       this._stackedPanel.hide();
       this._lastCurrent = null;
