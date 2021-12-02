@@ -9,18 +9,19 @@
 
 /* All input areas */
 .jp-InputArea {
-  display: flex;
-  flex-direction: row;
+  display: table;
   overflow: hidden;
-}
-
-body[data-format='mobile'] .jp-InputArea {
-  flex-direction: column;
 }
 
 .jp-InputArea-editor {
-  flex: 1 1 auto;
+  display: table-cell;
+  width: 100%;
   overflow: hidden;
+  vertical-align: top;
+}
+
+body[data-format='mobile'] .jp-InputArea-editor {
+  display: table-row;
 }
 
 .jp-InputArea-editor {
@@ -35,7 +36,9 @@ body[data-format='mobile'] .jp-InputArea-editor {
 }
 
 .jp-InputPrompt {
-  flex: 0 0 var(--jp-cell-prompt-width);
+  display: table-cell;
+  vertical-align: top;
+  min-width: var(--jp-cell-prompt-width);
   color: var(--jp-cell-inprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
@@ -58,6 +61,6 @@ body[data-format='mobile'] .jp-InputArea-editor {
 }
 
 body[data-format='mobile'] .jp-InputPrompt {
-  flex: 0 0 auto;
+  display: table-row;
   text-align: left;
 }
