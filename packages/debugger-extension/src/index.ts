@@ -460,6 +460,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           handler.activeWidget instanceof NotebookPanel &&
           handler.activeWidget.model
         ) {
+          // Trust variable view if the notebook is trusted
           isTrusted = !toArray(handler.activeWidget.model.cells).some(
             cell => cell.trusted === false
           );
@@ -474,7 +475,8 @@ const variables: JupyterFrontEndPlugin<void> = {
         widget.addClass('jp-DebuggerRichVariable');
         widget.id = id;
         widget.title.icon = Debugger.Icons.variableIcon;
-        widget.title.label = `${service.session?.connection?.name} - ${name}`;
+        widget.title.label = name;
+        widget.title.caption = `${name} - ${service.session?.connection?.name}`;
         void trackerMime.add(widget);
         const disposeWidget = () => {
           widget.dispose();
@@ -482,21 +484,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           activeWidget?.disposed.disconnect(disposeWidget);
         };
         const refreshWidget = () => {
-          if (
-            name &&
-            variablesModel.scopes
-              .map(s => s.variables.map(v => v.name))
-              .findIndex(variables => variables.includes(name!)) >= 0
-          ) {
-            widget.refresh();
-          } else if (
-            !frameId &&
-            !service.model.callstack.frames.map(f => f.id).includes(frameId!)
-          ) {
-            // Dispose the widget if the frame in which the variable is defined
-            // does not exists any longer.
-            disposeWidget();
-          }
+          widget.refresh();
         };
         widget.disposed.connect(disposeWidget);
         variablesModel.changed.connect(refreshWidget);

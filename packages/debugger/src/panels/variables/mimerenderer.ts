@@ -1,6 +1,10 @@
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry, MimeModel } from '@jupyterlab/rendermime';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import {
   notTrustedIcon,
   ToolbarButton,
@@ -26,7 +30,9 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
       content,
       reveal: Promise.all([dataLoader, loaded.promise])
     });
-    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    const trans = (this.trans = (translator ?? nullTranslator).load(
+      'jupyterlab'
+    ));
     this.dataLoader = dataLoader;
     this.renderMime = rendermime;
     this.trustedButton = new ToolbarButton({
@@ -53,7 +59,18 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
    * Refresh the variable view
    */
   async refresh(force = false): Promise<void> {
-    const data = await this.dataLoader();
+    let data = await this.dataLoader();
+
+    if (Object.keys(data.data).length === 0) {
+      data = {
+        data: {
+          'text/plain': this.trans.__(
+            'The variable is undefined in the active context.'
+          )
+        },
+        metadata: {}
+      };
+    }
 
     if (data.data) {
       const hash = murmur2(JSON.stringify(data), 17);
@@ -95,6 +112,7 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
 
   protected dataLoader: () => Promise<IDebugger.IRichVariable>;
   protected renderMime: IRenderMimeRegistry;
+  protected trans: TranslationBundle;
   protected trustedButton: ToolbarButton;
   private _dataHash: number | null;
 }
