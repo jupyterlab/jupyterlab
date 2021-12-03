@@ -33,15 +33,7 @@ import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extensio
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
-import {
-  IEditMenu,
-  IFileMenu,
-  IHelpMenu,
-  IKernelMenu,
-  IMainMenu,
-  IRunMenu,
-  IViewMenu
-} from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
   CommandEditStatus,
@@ -113,11 +105,15 @@ namespace CommandIDs {
 
   export const changeKernel = 'notebook:change-kernel';
 
+  export const getKernel = 'notebook:get-kernel';
+
   export const createConsole = 'notebook:create-console';
 
   export const createOutputView = 'notebook:create-output-view';
 
   export const clearAllOutputs = 'notebook:clear-all-cell-outputs';
+
+  export const shutdown = 'notebook:shutdown-kernel';
 
   export const closeAndShutdown = 'notebook:close-and-shutdown';
 
@@ -208,6 +204,10 @@ namespace CommandIDs {
   export const undoCellAction = 'notebook:undo-cell-action';
 
   export const redoCellAction = 'notebook:redo-cell-action';
+
+  export const redo = 'notebook:redo';
+
+  export const undo = 'notebook:undo';
 
   export const markdown1 = 'notebook:change-cell-to-heading-1';
 
@@ -1216,8 +1216,12 @@ function activateNotebookHandler(
   const trans = translator.load('jupyterlab');
   const services = app.serviceManager;
 
-  const { commands } = app;
+  const { commands, shell } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
+
+  const isEnabled = (): boolean => {
+    return Private.isEnabled(shell, tracker);
+  };
 
   // Fetch settings if possible.
   const fetchSettings = settingRegistry
@@ -1286,7 +1290,7 @@ function activateNotebookHandler(
   });
   registry.addModelFactory(modelFactory);
 
-  addCommands(app, tracker, translator, sessionDialogs);
+  addCommands(app, tracker, translator, sessionDialogs, isEnabled);
 
   if (palette) {
     populatePalette(palette, translator);
@@ -1343,6 +1347,8 @@ function activateNotebookHandler(
 
     factory.editorConfig = { code, markdown, raw };
     factory.notebookConfig = {
+      showHiddenCellsButton: settings.get('showHiddenCellsButton')
+        .composite as boolean,
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
@@ -1377,7 +1383,7 @@ function activateNotebookHandler(
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(app, mainMenu, tracker, translator, sessionDialogs);
+    populateMenus(mainMenu, tracker, sessionDialogs, isEnabled);
   }
 
   // Utility function to create a new notebook.
@@ -1487,16 +1493,13 @@ function addCommands(
   app: JupyterFrontEnd,
   tracker: NotebookTracker,
   translator: ITranslator,
-  sessionDialogs: ISessionContextDialogs | null
+  sessionDialogs: ISessionContextDialogs | null,
+  isEnabled: () => boolean
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
 
   sessionDialogs = sessionDialogs ?? sessionContextDialogs;
-
-  const isEnabled = (): boolean => {
-    return Private.isEnabled(shell, tracker);
-  };
 
   const isEnabledAndSingleSelected = (): boolean => {
     return Private.isEnabledAndSingleSelected(shell, tracker);
@@ -1659,8 +1662,21 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.shutdown, {
+    label: trans.__('Shut Down Kernel'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (!current) {
+        return;
+      }
+
+      return current.context.sessionContext.shutdown();
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.closeAndShutdown, {
-    label: trans.__('Close and Shut Down'),
+    label: trans.__('Close and Shut Down Notebook'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1676,9 +1692,11 @@ function addCommands(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.context.sessionContext.shutdown().then(() => {
-            current.dispose();
-          });
+          return commands
+            .execute(CommandIDs.shutdown, { activate: false })
+            .then(() => {
+              current.dispose();
+            });
         }
       });
     },
@@ -1697,59 +1715,42 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.restartClear, {
     label: trans.__('Restart Kernel and Clear All Outputs…'),
-    execute: args => {
-      const current = getCurrent(tracker, shell, args);
-
-      if (current) {
-        const { content, sessionContext } = current;
-
-        return sessionDialogs!.restart(sessionContext, translator).then(() => {
-          NotebookActions.clearAllOutputs(content);
-        });
+    execute: async () => {
+      const restarted: boolean = await commands.execute(CommandIDs.restart, {
+        activate: false
+      });
+      if (restarted) {
+        await commands.execute(CommandIDs.clearAllOutputs);
       }
     },
     isEnabled
   });
   commands.addCommand(CommandIDs.restartAndRunToSelected, {
     label: trans.__('Restart Kernel and Run up to Selected Cell…'),
-    execute: args => {
-      const current = getCurrent(tracker, shell, args);
-      if (current) {
-        const { context, content } = current;
-        return sessionDialogs!
-          .restart(current.sessionContext, translator)
-          .then(restarted => {
-            if (restarted) {
-              void NotebookActions.runAllAbove(
-                content,
-                context.sessionContext
-              ).then(executed => {
-                if (executed || content.activeCellIndex === 0) {
-                  void NotebookActions.run(content, context.sessionContext);
-                }
-              });
-            }
-          });
+    execute: async () => {
+      const restarted: boolean = await commands.execute(CommandIDs.restart, {
+        activate: false
+      });
+      if (restarted) {
+        const executed: boolean = await commands.execute(
+          CommandIDs.runAllAbove,
+          { activate: false }
+        );
+        if (executed) {
+          return commands.execute(CommandIDs.run);
+        }
       }
     },
     isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: trans.__('Restart Kernel and Run All Cells…'),
-    execute: args => {
-      const current = getCurrent(tracker, shell, args);
-
-      if (current) {
-        const { context, content, sessionContext } = current;
-
-        return sessionDialogs!
-          .restart(sessionContext, translator)
-          .then(restarted => {
-            if (restarted) {
-              void NotebookActions.runAll(content, context.sessionContext);
-            }
-            return restarted;
-          });
+    execute: async () => {
+      const restarted: boolean = await commands.execute(CommandIDs.restart, {
+        activate: false
+      });
+      if (restarted) {
+        await commands.execute(CommandIDs.runAll);
       }
     },
     isEnabled
@@ -1767,6 +1768,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.clearOutputs, {
     label: trans.__('Clear Outputs'),
+    caption: trans.__('Clear outputs for the selected cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2103,7 +2105,7 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
-    label: trans.__('Toggle All Line Numbers'),
+    label: trans.__('Show Line Numbers'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2111,7 +2113,20 @@ function addCommands(
         return NotebookActions.toggleAllLineNumbers(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (current) {
+        const config = current.content.editorConfig;
+        return !!(
+          config.code.lineNumbers &&
+          config.markdown.lineNumbers &&
+          config.raw.lineNumbers
+        );
+      } else {
+        return false;
+      }
+    }
   });
   commands.addCommand(CommandIDs.commandMode, {
     label: trans.__('Enter Command Mode'),
@@ -2157,6 +2172,26 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.redo, {
+    label: trans.__('Redo'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return current.content.activeCell?.editor.redo();
+      }
+    }
+  });
+  commands.addCommand(CommandIDs.undo, {
+    label: trans.__('Undo'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return current.content.activeCell?.editor.undo();
+      }
+    }
+  });
   commands.addCommand(CommandIDs.changeKernel, {
     label: trans.__('Change Kernel…'),
     execute: args => {
@@ -2171,8 +2206,19 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.getKernel, {
+    label: trans.__('Get Kernel'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, { activate: false, ...args });
+
+      if (current) {
+        return current.sessionContext.session?.kernel;
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.reconnectToKernel, {
-    label: trans.__('Reconnect To Kernel'),
+    label: trans.__('Reconnect to Kernel'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2564,164 +2610,93 @@ function populatePalette(
  * Populates the application menus for the notebook.
  */
 function populateMenus(
-  app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
-  translator: ITranslator,
-  sessionDialogs: ISessionContextDialogs | null
+  sessionDialogs: ISessionContextDialogs | null,
+  isEnabled: () => boolean
 ): void {
-  const trans = translator.load('jupyterlab');
-  const { commands } = app;
   sessionDialogs = sessionDialogs || sessionContextDialogs;
 
   // Add undo/redo hooks to the edit menu.
-  mainMenu.editMenu.undoers.add({
-    tracker,
-    undo: widget => {
-      widget.content.activeCell?.editor.undo();
-    },
-    redo: widget => {
-      widget.content.activeCell?.editor.redo();
-    }
-  } as IEditMenu.IUndoer<NotebookPanel>);
+  mainMenu.editMenu.undoers.redo.add({
+    id: CommandIDs.redo,
+    isEnabled
+  });
+  mainMenu.editMenu.undoers.undo.add({
+    id: CommandIDs.undo,
+    isEnabled
+  });
 
   // Add a clearer to the edit menu
-  mainMenu.editMenu.clearers.add({
-    tracker,
-    clearCurrentLabel: (n: number) => trans.__('Clear Output'),
-    clearAllLabel: (n: number) => {
-      return trans.__('Clear All Outputs');
-    },
-    clearCurrent: (current: NotebookPanel) => {
-      return NotebookActions.clearOutputs(current.content);
-    },
-    clearAll: (current: NotebookPanel) => {
-      return NotebookActions.clearAllOutputs(current.content);
-    }
-  } as IEditMenu.IClearer<NotebookPanel>);
-
-  // Add a close and shutdown command to the file menu.
-  mainMenu.fileMenu.closeAndCleaners.add({
-    tracker,
-    closeAndCleanupLabel: (n: number) =>
-      trans.__('Close and Shutdown Notebook'),
-    closeAndCleanup: (current: NotebookPanel) => {
-      const fileName = current.title.label;
-      return showDialog({
-        title: trans.__('Shut down the Notebook?'),
-        body: trans.__('Are you sure you want to close "%1"?', fileName),
-        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
-      }).then(result => {
-        if (result.button.accept) {
-          return current.context.sessionContext.shutdown().then(() => {
-            current.dispose();
-          });
-        }
-      });
-    }
-  } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
-
-  // Add a kernel user to the Kernel menu
-  mainMenu.kernelMenu.kernelUsers.add({
-    tracker,
-    interruptKernel: current => {
-      const kernel = current.sessionContext.session?.kernel;
-      if (kernel) {
-        return kernel.interrupt();
-      }
-      return Promise.resolve(void 0);
-    },
-    reconnectToKernel: current => {
-      const kernel = current.sessionContext.session?.kernel;
-      if (kernel) {
-        return kernel.reconnect();
-      }
-      return Promise.resolve(void 0);
-    },
-    restartKernelAndClearLabel: (n: number) =>
-      trans.__('Restart Kernel and Clear All Outputs…'),
-    restartKernel: current =>
-      sessionDialogs!.restart(current.sessionContext, translator),
-    restartKernelAndClear: current => {
-      return sessionDialogs!
-        .restart(current.sessionContext, translator)
-        .then(restarted => {
-          if (restarted) {
-            NotebookActions.clearAllOutputs(current.content);
-          }
-          return restarted;
-        });
-    },
-    changeKernel: current =>
-      sessionDialogs!.selectKernel(current.sessionContext, translator),
-    shutdownKernel: current => current.sessionContext.shutdown()
-  } as IKernelMenu.IKernelUser<NotebookPanel>);
+  mainMenu.editMenu.clearers.clearAll.add({
+    id: CommandIDs.clearAllOutputs,
+    isEnabled
+  });
+  mainMenu.editMenu.clearers.clearCurrent.add({
+    id: CommandIDs.clearOutputs,
+    isEnabled
+  });
 
   // Add a console creator the the Kernel menu
   mainMenu.fileMenu.consoleCreators.add({
-    tracker,
-    createConsoleLabel: (n: number) => trans.__('New Console for Notebook'),
-    createConsole: current => Private.createConsole(commands, current, true)
-  } as IFileMenu.IConsoleCreator<NotebookPanel>);
+    id: CommandIDs.createConsole,
+    isEnabled
+  });
+
+  // Add a close and shutdown command to the file menu.
+  mainMenu.fileMenu.closeAndCleaners.add({
+    id: CommandIDs.closeAndShutdown,
+    isEnabled
+  });
+
+  // Add a kernel user to the Kernel menu
+  mainMenu.kernelMenu.kernelUsers.changeKernel.add({
+    id: CommandIDs.changeKernel,
+    isEnabled
+  });
+  mainMenu.kernelMenu.kernelUsers.clearWidget.add({
+    id: CommandIDs.clearAllOutputs,
+    isEnabled
+  });
+  mainMenu.kernelMenu.kernelUsers.interruptKernel.add({
+    id: CommandIDs.interrupt,
+    isEnabled
+  });
+  mainMenu.kernelMenu.kernelUsers.reconnectToKernel.add({
+    id: CommandIDs.reconnectToKernel,
+    isEnabled
+  });
+  mainMenu.kernelMenu.kernelUsers.restartKernel.add({
+    id: CommandIDs.restart,
+    isEnabled
+  });
+  mainMenu.kernelMenu.kernelUsers.shutdownKernel.add({
+    id: CommandIDs.shutdown,
+    isEnabled
+  });
 
   // Add an IEditorViewer to the application view menu
-  mainMenu.viewMenu.editorViewers.add({
-    tracker,
-    toggleLineNumbers: widget => {
-      NotebookActions.toggleAllLineNumbers(widget.content);
-    },
-    lineNumbersToggled: widget => {
-      const config = widget.content.editorConfig;
-      return !!(
-        config.code.lineNumbers &&
-        config.markdown.lineNumbers &&
-        config.raw.lineNumbers
-      );
-    }
-  } as IViewMenu.IEditorViewer<NotebookPanel>);
+  mainMenu.viewMenu.editorViewers.toggleLineNumbers.add({
+    id: CommandIDs.toggleAllLines,
+    isEnabled
+  });
 
   // Add an ICodeRunner to the application run menu
-  mainMenu.runMenu.codeRunners.add({
-    tracker,
-    runLabel: (n: number) => trans.__('Run Selected Cells'),
-    runCaption: (n: number) => trans.__('Run the selected cells and advance'),
-    runAllLabel: (n: number) => trans.__('Run All Cells'),
-    runAllCaption: (n: number) => trans.__('Run the all notebook cells'),
-    restartAndRunAllLabel: (n: number) =>
-      trans.__('Restart Kernel and Run All Cells…'),
-    restartAndRunAllCaption: (n: number) =>
-      trans.__('Restart the kernel, then re-run the whole notebook'),
-    run: current => {
-      const { context, content } = current;
-      return NotebookActions.runAndAdvance(
-        content,
-        context.sessionContext
-      ).then(() => void 0);
-    },
-    runAll: current => {
-      const { context, content } = current;
-      return NotebookActions.runAll(content, context.sessionContext).then(
-        () => void 0
-      );
-    },
-    restartAndRunAll: current => {
-      const { context, content } = current;
-      return sessionDialogs!
-        .restart(context.sessionContext, translator)
-        .then(restarted => {
-          if (restarted) {
-            void NotebookActions.runAll(content, context.sessionContext);
-          }
-          return restarted;
-        });
-    }
-  } as IRunMenu.ICodeRunner<NotebookPanel>);
+  mainMenu.runMenu.codeRunners.restart.add({
+    id: CommandIDs.restart,
+    isEnabled
+  });
+  mainMenu.runMenu.codeRunners.run.add({
+    id: CommandIDs.runAndAdvance,
+    isEnabled
+  });
+  mainMenu.runMenu.codeRunners.runAll.add({ id: CommandIDs.runAll, isEnabled });
 
   // Add kernel information to the application help menu.
-  mainMenu.helpMenu.kernelUsers.add({
-    tracker,
-    getKernel: current => current.sessionContext.session?.kernel
-  } as IHelpMenu.IKernelUser<NotebookPanel>);
+  mainMenu.helpMenu.getKernel.add({
+    id: CommandIDs.getKernel,
+    isEnabled
+  });
 }
 
 /**

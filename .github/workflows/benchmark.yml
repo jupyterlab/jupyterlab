@@ -57,6 +57,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14.x'
+
       - name: Install Python
         uses: actions/setup-python@v2
         with:
@@ -93,6 +94,8 @@ jobs:
       - name: Install dependencies
         run: |
           bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm run build
 
       - name: Launch JupyterLab
         shell: bash
@@ -138,7 +141,7 @@ jobs:
           # Reset installation
           jlpm run clean:slate
           jlpm run build
-          
+
           # Reset the reference after clean:slate as it removes non-versioned files
           cp /tmp/lab-benchmark-expected.json galata/
 
@@ -177,7 +180,7 @@ jobs:
         run: |
           # Publish image to cml.dev
           echo "" >> ${REPORT}
-          cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
+          cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT} || true
           echo "" >> ${REPORT}
 
           # Test if metadata have changed

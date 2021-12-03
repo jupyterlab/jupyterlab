@@ -24,14 +24,7 @@ import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
-import {
-  IEditMenu,
-  IFileMenu,
-  IHelpMenu,
-  IKernelMenu,
-  IMainMenu,
-  IRunMenu
-} from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
@@ -76,6 +69,8 @@ namespace CommandIDs {
 
   export const changeKernel = 'console:change-kernel';
 
+  export const getKernel = 'console:get-kernel';
+
   export const enterToExecute = 'console:enter-to-execute';
 
   export const shiftEnterToExecute = 'console:shift-enter-to-execute';
@@ -83,6 +78,8 @@ namespace CommandIDs {
   export const interactionMode = 'console:interaction-mode';
 
   export const replaceSelection = 'console:replace-selection';
+
+  export const shutdown = 'console:shutdown';
 }
 
 /**
@@ -590,6 +587,18 @@ async function activateConsole(
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.shutdown, {
+    label: trans.__('Shut Down'),
+    execute: args => {
+      const current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+
+      return current.console.sessionContext.shutdown();
+    }
+  });
+
   commands.addCommand(CommandIDs.closeAndShutdown, {
     label: trans.__('Close and Shut Down…'),
     execute: args => {
@@ -606,10 +615,12 @@ async function activateConsole(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.console.sessionContext.shutdown().then(() => {
-            current.dispose();
-            return true;
-          });
+          return commands
+            .execute(CommandIDs.shutdown, { activate: false })
+            .then(() => {
+              current.dispose();
+              return true;
+            });
         } else {
           return false;
         }
@@ -653,6 +664,18 @@ async function activateConsole(
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.getKernel, {
+    label: trans.__('Get Kernel'),
+    execute: args => {
+      const current = getCurrent({ activate: false, ...args });
+      if (!current) {
+        return;
+      }
+      return current.sessionContext.session?.kernel;
+    },
+    isEnabled
+  });
+
   if (palette) {
     // Add command palette items
     [
@@ -673,75 +696,49 @@ async function activateConsole(
   if (mainMenu) {
     // Add a close and shutdown command to the file menu.
     mainMenu.fileMenu.closeAndCleaners.add({
-      tracker,
-      closeAndCleanupLabel: (n: number) => trans.__('Shutdown Console'),
-      closeAndCleanup: (current: ConsolePanel) => {
-        return showDialog({
-          title: trans.__('Shut down the Console?'),
-          body: trans.__(
-            'Are you sure you want to close "%1"?',
-            current.title.label
-          ),
-          buttons: [Dialog.cancelButton(), Dialog.warnButton()]
-        }).then(result => {
-          if (result.button.accept) {
-            return current.console.sessionContext.shutdown().then(() => {
-              current.dispose();
-            });
-          } else {
-            return void 0;
-          }
-        });
-      }
-    } as IFileMenu.ICloseAndCleaner<ConsolePanel>);
+      id: CommandIDs.closeAndShutdown,
+      isEnabled
+    });
 
     // Add a kernel user to the Kernel menu
-    mainMenu.kernelMenu.kernelUsers.add({
-      tracker,
-      restartKernelAndClearLabel: n =>
-        trans.__('Restart Kernel and Clear Console'),
-      interruptKernel: current => {
-        const kernel = current.console.sessionContext.session?.kernel;
-        if (kernel) {
-          return kernel.interrupt();
-        }
-        return Promise.resolve(void 0);
-      },
-      restartKernel: current =>
-        sessionDialogs!.restart(current.console.sessionContext, translator),
-      restartKernelAndClear: current => {
-        return sessionDialogs!
-          .restart(current.console.sessionContext)
-          .then(restarted => {
-            if (restarted) {
-              current.console.clear();
-            }
-            return restarted;
-          });
-      },
-      changeKernel: current =>
-        sessionDialogs!.selectKernel(
-          current.console.sessionContext,
-          translator
-        ),
-      shutdownKernel: current => current.console.sessionContext.shutdown()
-    } as IKernelMenu.IKernelUser<ConsolePanel>);
+    mainMenu.kernelMenu.kernelUsers.changeKernel.add({
+      id: CommandIDs.changeKernel,
+      isEnabled
+    });
+    mainMenu.kernelMenu.kernelUsers.clearWidget.add({
+      id: CommandIDs.clear,
+      isEnabled
+    });
+    mainMenu.kernelMenu.kernelUsers.interruptKernel.add({
+      id: CommandIDs.interrupt,
+      isEnabled
+    });
+    mainMenu.kernelMenu.kernelUsers.restartKernel.add({
+      id: CommandIDs.restart,
+      isEnabled
+    });
+    mainMenu.kernelMenu.kernelUsers.shutdownKernel.add({
+      id: CommandIDs.shutdown,
+      isEnabled
+    });
 
     // Add a code runner to the Run menu.
-    mainMenu.runMenu.codeRunners.add({
-      tracker,
-      runLabel: (n: number) => trans.__('Run Cell'),
-      run: current => current.console.execute(true)
-    } as IRunMenu.ICodeRunner<ConsolePanel>);
+    mainMenu.runMenu.codeRunners.run.add({
+      id: CommandIDs.runForced,
+      isEnabled
+    });
 
     // Add a clearer to the edit menu
-    mainMenu.editMenu.clearers.add({
-      tracker,
-      clearCurrentLabel: (n: number) => trans.__('Clear Console Cell'),
-      clearCurrent: (current: ConsolePanel) => {
-        return current.console.clear();
-      }
-    } as IEditMenu.IClearer<ConsolePanel>);
+    mainMenu.editMenu.clearers.clearCurrent.add({
+      id: CommandIDs.clear,
+      isEnabled
+    });
+
+    // Add kernel information to the application help menu.
+    mainMenu.helpMenu.getKernel.add({
+      id: CommandIDs.getKernel,
+      isEnabled
+    });
   }
 
   // For backwards compatibility and clarity, we explicitly label the run
@@ -771,14 +768,6 @@ async function activateConsole(
     },
     isToggled: args => args['interactionMode'] === interactionMode
   });
-
-  if (mainMenu) {
-    // Add kernel information to the application help menu.
-    mainMenu.helpMenu.kernelUsers.add({
-      tracker,
-      getKernel: current => current.sessionContext.session?.kernel
-    } as IHelpMenu.IKernelUser<ConsolePanel>);
-  }
 
   return tracker;
 }

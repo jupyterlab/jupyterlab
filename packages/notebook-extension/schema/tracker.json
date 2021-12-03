@@ -868,6 +868,12 @@
       "type": "boolean",
       "default": false
     },
+    "showHiddenCellsButton": {
+      "type": "boolean",
+      "title": "Show hidden cells button if collapsed",
+      "description": "If set to true, a button is shown below collapsed headings, indicating how many cells are hidden beneath the collapsed heading.",
+      "default": true
+    },
     "sideBySideRendering": {
       "title": "Side-by-side rendering",
       "description": "Global setting to enable side-by-side rendering in notebooks",

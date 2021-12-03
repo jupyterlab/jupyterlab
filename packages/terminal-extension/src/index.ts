@@ -17,7 +17,7 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { ILauncher } from '@jupyterlab/launcher';
-import { IFileMenu, IMainMenu } from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { Terminal } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -27,7 +27,7 @@ import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
 import { ITranslator } from '@jupyterlab/translation';
 import { terminalIcon } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
-import { Menu } from '@lumino/widgets';
+import { Menu, Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -44,6 +44,8 @@ namespace CommandIDs {
   export const decreaseFont = 'terminal:decrease-font';
 
   export const setTheme = 'terminal:set-theme';
+
+  export const shutdown = 'terminal:shut-down';
 }
 
 /**
@@ -214,13 +216,9 @@ function activate(
 
     // Add terminal close-and-shutdown to the file menu.
     mainMenu.fileMenu.closeAndCleaners.add({
-      tracker,
-      closeAndCleanupLabel: (n: number) => trans.__('Shutdown Terminal'),
-      closeAndCleanup: (current: MainAreaWidget<ITerminal.ITerminal>) => {
-        // The widget is automatically disposed upon session shutdown.
-        return current.content.session.shutdown();
-      }
-    } as IFileMenu.ICloseAndCleaner<MainAreaWidget<ITerminal.ITerminal>>);
+      id: CommandIDs.shutdown,
+      isEnabled: (w: Widget) => tracker.currentWidget !== null && tracker.has(w)
+    });
   }
 
   if (palette) {
@@ -399,6 +397,20 @@ export function addCommands(
       } catch (err) {
         Private.showErrorMessage(err);
       }
+    },
+    isEnabled: () => tracker.currentWidget !== null
+  });
+
+  commands.addCommand(CommandIDs.shutdown, {
+    label: trans.__('Shutdown Terminal'),
+    execute: () => {
+      const current = tracker.currentWidget;
+      if (!current) {
+        return;
+      }
+
+      // The widget is automatically disposed upon session shutdown.
+      return current.content.session.shutdown();
     },
     isEnabled: () => tracker.currentWidget !== null
   });
