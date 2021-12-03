@@ -16,6 +16,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { YNotebook } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, each, findIndex } from '@lumino/algorithm';
 import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
@@ -1205,6 +1206,10 @@ export class Notebook extends StaticNotebook {
       return;
     }
     this._trimSelections();
+
+    // Notify the collaborators
+    (this.model?.sharedModel as YNotebook).notifyActiveCellIndex(oldValue, newValue);
+
     this._stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
   }
 

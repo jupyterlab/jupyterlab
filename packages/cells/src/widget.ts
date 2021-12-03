@@ -80,6 +80,7 @@ import { ResizeHandle } from './resizeHandle';
 
 import { Signal } from '@lumino/signaling';
 import { addIcon } from '@jupyterlab/ui-components';
+import { CollaboratorsList } from './collaborators_list';
 
 /**
  * The CSS class added to cell widgets.
@@ -227,6 +228,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
+    // Collaborators list
+    this._collaboratorsList = new CollaboratorsList();
+    (this.layout as PanelLayout).addWidget(this._collaboratorsList);
+
     this._inputPlaceholder = new InputPlaceholder(() => {
       this.inputHidden = !this.inputHidden;
     });
@@ -247,6 +252,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       this.editor.setOptions(editorOptions);
     }
 
+    model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);
   }
 
@@ -494,6 +500,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this._model = null!;
     this._inputWrapper = null!;
     this._inputPlaceholder = null!;
+    this._collaboratorsList = null!;
     super.dispose();
   }
 
@@ -534,6 +541,19 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
+   * Handle changes in the model.
+   */
+   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+      case 'collaborators':
+        this._collaboratorsList.collaborators = args.newValue;
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
@@ -564,6 +584,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _input: InputArea;
   private _inputWrapper: Widget;
   private _inputPlaceholder: InputPlaceholder;
+  private _collaboratorsList: CollaboratorsList;
   private _syncCollapse = false;
   private _syncEditable = false;
 }
@@ -779,7 +800,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
         this.outputHidden = !this.outputHidden;
       });
     }
-    model.stateChanged.connect(this.onStateChanged, this);
     this.node.setAttribute('aria-label', ariaLabel);
   }
 
@@ -1009,6 +1029,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * Handle changes in the model.
    */
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    super.onStateChanged(model, args);
+
     switch (args.name) {
       case 'executionCount':
         this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);

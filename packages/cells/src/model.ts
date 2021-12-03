@@ -406,6 +406,14 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
           this._updateModelDBMetadata(newValue);
         }
       }
+
+      if (change.collaboratorsChange) {
+        this.stateChanged.emit({
+          name: 'collaborators',
+          oldValue: change.collaboratorsChange.oldValue,
+          newValue: change.collaboratorsChange.newValue
+        });
+      }
     });
   }
 

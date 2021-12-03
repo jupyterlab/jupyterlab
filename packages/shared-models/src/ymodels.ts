@@ -5,6 +5,7 @@
 
 import * as nbformat from '@jupyterlab/nbformat';
 import { UUID } from '@lumino/coreutils';
+import { IUser } from '@jupyterlab/user';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
@@ -224,6 +225,8 @@ export class YNotebook
 
     this.ymeta.observe(this._onMetadataChanged);
     this.ystate.observe(this._onStateChanged);
+
+    this.awareness.on('change', this._onAwarenessChanged);
   }
 
   get nbformat(): number {
@@ -244,6 +247,13 @@ export class YNotebook
     this.transact(() => {
       this.ystate.set('nbformatMinor', value);
     }, false);
+  }
+
+  /**
+   * Send an update of the active cell index to other collaborators.
+   */
+  notifyActiveCellIndex(oldValue: number, newValue: number) {
+    this.awareness.setLocalStateField('activeCellIndex', { oldValue, newValue });
   }
 
   /**
@@ -382,6 +392,25 @@ export class YNotebook
    */
   get disableDocumentWideUndoRedo(): boolean {
     return this._disableDocumentWideUndoRedo;
+  }
+
+  /**
+   * Handle collaborator change.
+   */
+  private _onAwarenessChanged = () => {
+    const state = this.awareness.getStates();
+
+    state.forEach((value: any, key: any) => {
+      const user = value.user as IUser.User;
+      const activeCellIndex = value.activeCellIndex;
+
+      // TODO Do nothing if it's the current user
+
+      if (activeCellIndex) {
+        this.cells[activeCellIndex.newValue]?.addCollaborator(user);
+        this.cells[activeCellIndex.oldValue]?.removeCollaborator(user);
+      }
+    });
   }
 
   /**
@@ -599,6 +628,48 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    */
   get notebook(): YNotebook | null {
     return this._notebook;
+  }
+
+  /**
+   * Add a user to the collaborator list for this cell.
+   */
+  addCollaborator(user: IUser.User): void {
+    const userHere = this._collaborators.find((collaborator: IUser.User) => user.username === collaborator.username);
+    if (userHere) {
+      return;
+    }
+
+    const oldValue = this._collaborators.slice();
+    this._collaborators.push(user);
+
+    const changes: models.CellChange<Metadata> = {};
+    changes.collaboratorsChange = {
+      oldValue, newValue: this._collaborators
+    };
+
+    this._changed.emit(changes);
+  }
+
+  /**
+   * Remove a user from the collaborator list for this cell.
+   */
+  removeCollaborator(user: IUser.User): void {
+    const userHere = this._collaborators.find((collaborator: IUser.User) => user.username === collaborator.username);
+    if (!userHere) {
+      return;
+    }
+
+    const oldValue = this._collaborators.slice();
+    this._collaborators = this._collaborators.filter((collaborator: IUser.User) => {
+      return user.username !== collaborator.username;
+    });
+
+    const changes: models.CellChange<Metadata> = {};
+    changes.collaboratorsChange = {
+      oldValue, newValue: this._collaborators
+    };
+
+    this._changed.emit(changes);
   }
 
   /**
@@ -848,6 +919,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   private _undoManager: Y.UndoManager | null = null;
   private _changed = new Signal<this, models.CellChange<Metadata>>(this);
   private _prevSourceLength: number;
+  private _collaborators: IUser.User[] = [];
 }
 
 export class YCodeCell

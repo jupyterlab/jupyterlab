@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import './collaboratorslist.css';
 @import './collapser.css';
 @import './headerfooter.css';
 @import './inputarea.css';

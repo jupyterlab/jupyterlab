@@ -15,6 +15,7 @@
  */
 
 import * as nbformat from '@jupyterlab/nbformat';
+import { IUser } from '@jupyterlab/user';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
@@ -509,6 +510,10 @@ export type CellChange<MetadataType> = {
     oldValue: Partial<MetadataType> | undefined;
     newValue: Partial<MetadataType> | undefined;
   };
+  collaboratorsChange?: {
+    oldValue: IUser.User[];
+    newValue: IUser.User[];
+  }
 };
 
 export type DocumentChange = {
