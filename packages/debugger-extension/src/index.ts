@@ -46,7 +46,6 @@ import {
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import { toArray } from '@lumino/algorithm';
 
 /**
  * A plugin that provides visual debugging support for consoles.
@@ -453,23 +452,9 @@ const variables: JupyterFrontEndPlugin<void> = {
 
         const variablesModel = service.model.variables;
 
-        // Trust the console panel by default
-        let isTrusted =
-          handler.activeWidget instanceof ConsolePanel ? true : false;
-        if (
-          handler.activeWidget instanceof NotebookPanel &&
-          handler.activeWidget.model
-        ) {
-          // Trust variable view if the notebook is trusted
-          isTrusted = !toArray(handler.activeWidget.model.cells).some(
-            cell => cell.trusted === false
-          );
-        }
-
         const widget = new Debugger.VariableRenderer({
           dataLoader: () => service.inspectRichVariable(name!, frameId),
           rendermime: activeRendermime,
-          isTrusted,
           translator
         });
         widget.addClass('jp-DebuggerRichVariable');

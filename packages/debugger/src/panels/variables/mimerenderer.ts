@@ -5,11 +5,6 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import {
-  notTrustedIcon,
-  ToolbarButton,
-  trustedIcon
-} from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel } from '@lumino/widgets';
 import { murmur2 } from '../../hash';
@@ -23,30 +18,17 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
    * Instantiate a new VariableMimeRenderer.
    */
   constructor(options: VariableMimeRenderer.IOptions) {
-    const { dataLoader, isTrusted, rendermime, translator } = options;
+    const { dataLoader, rendermime, translator } = options;
     const content = new Panel();
     const loaded = new PromiseDelegate<void>();
     super({
       content,
       reveal: Promise.all([dataLoader, loaded.promise])
     });
-    const trans = (this.trans = (translator ?? nullTranslator).load(
-      'jupyterlab'
-    ));
+    this.trans = (translator ?? nullTranslator).load('jupyterlab');
     this.dataLoader = dataLoader;
     this.renderMime = rendermime;
-    this.trustedButton = new ToolbarButton({
-      className: 'jp-VariableRenderer-TrustButton',
-      icon: notTrustedIcon,
-      tooltip: trans.__('Variable value is not trusted'),
-      pressedIcon: trustedIcon,
-      pressedTooltip: trans.__('Variable value is trusted'),
-      pressed: isTrusted,
-      onClick: this.onTrustClick.bind(this)
-    });
     this._dataHash = null;
-
-    this.toolbar.addItem('trust-variable', this.trustedButton);
 
     this.refresh()
       .then(() => {
@@ -81,15 +63,13 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
           });
         }
 
-        const trusted = this.trustedButton.pressed;
-        const mimeType = this.renderMime.preferredMimeType(
-          data.data,
-          trusted ? 'any' : 'ensure'
-        );
+        // We trust unconditionally the data has the user is required to
+        // execute the code to load a particular variable in memory
+        const mimeType = this.renderMime.preferredMimeType(data.data, 'any');
 
         if (mimeType) {
           const widget = this.renderMime.createRenderer(mimeType);
-          const model = new MimeModel({ ...data, trusted });
+          const model = new MimeModel({ ...data, trusted: true });
           this._dataHash = hash;
           await widget.renderModel(model);
 
@@ -105,15 +85,9 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
     }
   }
 
-  protected onTrustClick(): Promise<void> {
-    this.trustedButton.pressed = !this.trustedButton.pressed;
-    return this.refresh(true);
-  }
-
   protected dataLoader: () => Promise<IDebugger.IRichVariable>;
   protected renderMime: IRenderMimeRegistry;
   protected trans: TranslationBundle;
-  protected trustedButton: ToolbarButton;
   private _dataHash: number | null;
 }
 
@@ -133,12 +107,6 @@ export namespace VariableMimeRenderer {
      * Render mime type registry
      */
     rendermime: IRenderMimeRegistry;
-    /**
-     * Whether the data is trusted or not
-     *
-     * By default it will be false.
-     */
-    isTrusted?: boolean;
     /**
      * Translation manager
      */
