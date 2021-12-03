@@ -52,26 +52,27 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
   /**
    * Refresh the variable view
    */
-  async refresh(): Promise<void> {
+  async refresh(force = false): Promise<void> {
     const data = await this.dataLoader();
 
     if (data.data) {
       const hash = murmur2(JSON.stringify(data), 17);
-      if (this._dataHash !== hash) {
+      if (force || this._dataHash !== hash) {
         if (this.content.layout) {
           this.content.widgets.forEach(w => {
             this.content.layout!.removeWidget(w);
           });
         }
 
+        const trusted = this.trustedButton.pressed;
         const mimeType = this.renderMime.preferredMimeType(
           data.data,
-          this.trustedButton.pressed ? 'any' : 'ensure'
+          trusted ? 'any' : 'ensure'
         );
 
         if (mimeType) {
           const widget = this.renderMime.createRenderer(mimeType);
-          const model = new MimeModel(data);
+          const model = new MimeModel({ ...data, trusted });
           this._dataHash = hash;
           await widget.renderModel(model);
 
@@ -88,7 +89,8 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
   }
 
   protected onTrustClick(): Promise<void> {
-    return this.refresh();
+    this.trustedButton.pressed = !this.trustedButton.pressed;
+    return this.refresh(true);
   }
 
   protected dataLoader: () => Promise<IDebugger.IRichVariable>;

@@ -31,7 +31,7 @@ export class VariablesBodyTree extends ReactWidget {
     this._service = options.service;
     this._translator = options.translator;
 
-    const model = options.model;
+    const model = (this.model = options.model);
     model.changed.connect(this._updateScopes, this);
 
     this.addClass('jp-DebuggerVariables-body');
@@ -53,19 +53,12 @@ export class VariablesBodyTree extends ReactWidget {
         filter={this._filter}
         translator={this._translator}
         handleSelectVariable={variable => {
-          this._latestSelection = variable;
+          this.model.selectedVariable = variable;
         }}
       />
     ) : (
       <div></div>
     );
-  }
-
-  /**
-   * Get the latest hit variable
-   */
-  get latestSelection(): IDebugger.IVariableSelection | null {
-    return this._latestSelection;
   }
 
   /**
@@ -97,11 +90,11 @@ export class VariablesBodyTree extends ReactWidget {
     this.update();
   }
 
+  protected model: IDebugger.Model.IVariables;
   private _commands: CommandRegistry;
   private _scope = '';
   private _scopes: IDebugger.IScope[] = [];
   private _filter = new Set<string>();
-  private _latestSelection: IDebugger.IVariableSelection | null = null;
   private _service: IDebugger;
   private _translator: ITranslator | undefined;
 }

@@ -24,7 +24,7 @@ import { IDebugger } from './tokens';
 /**
  * A debugger sidebar.
  */
-export class DebuggerSidebar extends SidePanel implements IDebugger.ISidebar {
+export class DebuggerSidebar extends SidePanel {
   /**
    * Instantiate a new Debugger.Sidebar
    *

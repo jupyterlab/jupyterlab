@@ -354,7 +354,7 @@ const variables: JupyterFrontEndPlugin<void> = {
       isEnabled: args =>
         !!service.session?.isStarted &&
         (args.variableReference ??
-          sidebar.variables.latestSelection?.variablesReference ??
+          service.model.variables.selectedVariable?.variablesReference ??
           0) > 0,
       execute: async args => {
         let { variableReference, name } = args as {
@@ -364,10 +364,10 @@ const variables: JupyterFrontEndPlugin<void> = {
 
         if (!variableReference) {
           variableReference =
-            sidebar.variables.latestSelection?.variablesReference;
+            service.model.variables.selectedVariable?.variablesReference;
         }
         if (!name) {
-          name = sidebar.variables.latestSelection?.name;
+          name = service.model.variables.selectedVariable?.name;
         }
 
         const id = `jp-debugger-variable-${name}`;
@@ -426,7 +426,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         };
 
         if (!name) {
-          name = sidebar.variables.latestSelection?.name;
+          name = service.model.variables.selectedVariable?.name;
         }
         if (!frameId) {
           frameId = service.model.callstack.frame?.id;
