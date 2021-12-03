@@ -118,6 +118,13 @@ export namespace ILabShell {
     hiddenMode: 'display' | 'scale';
   }
 
+  export type IWidgetPosition = {
+    area?: Area;
+    options?: DocumentRegistry.IOpenOptions;
+  };
+
+  export type IDelayedWidget = { widget: Widget } & IWidgetPosition;
+
   /**
    * The args for the current path change signal.
    */
@@ -629,6 +636,26 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return this._restored.promise;
   }
 
+  get userLayout(): {
+    default: { [type: string]: ILabShell.IWidgetPosition };
+    simpleMode: { [type: string]: ILabShell.IWidgetPosition };
+  } {
+    return this._userLayout;
+  }
+  set userLayout(v: {
+    default: { [type: string]: ILabShell.IWidgetPosition };
+    simpleMode: { [type: string]: ILabShell.IWidgetPosition };
+  }) {
+    if (this._userLayout) {
+      throw new Error('userLayout can only be set once.');
+    }
+    this._userLayout = v;
+    this._delayedWidget.forEach(({ widget, area, options }) => {
+      this.add(widget, area, options);
+    });
+    this._delayedWidget.length = 0;
+  }
+
   /**
    * Activate a widget in its area.
    */
@@ -773,6 +800,23 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     area: ILabShell.Area = 'main',
     options?: DocumentRegistry.IOpenOptions
   ): void {
+    if (!this._userLayout) {
+      this._delayedWidget.push({ widget, area, options });
+      return;
+    }
+    const mode = this.mode === 'multiple-document' ? 'default' : 'simpleMode';
+    let userPosition: ILabShell.IWidgetPosition | undefined;
+    if (options?.type && this._userLayout[mode][options.type]) {
+      userPosition = this._userLayout[mode][options.type];
+    } else {
+      userPosition = this._userLayout[mode][widget.id];
+    }
+    area = userPosition?.area ?? area;
+    options = {
+      ...options,
+      ...userPosition?.options
+    };
+
     switch (area || 'main') {
       case 'bottom':
         return this._addToBottomArea(widget, options);
@@ -1540,6 +1584,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
+  private _userLayout: {
+    default: { [type: string]: ILabShell.IWidgetPosition };
+    simpleMode: { [type: string]: ILabShell.IWidgetPosition };
+  };
+  private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
+  // private _userLayoutLoaded = new PromiseDelegate<null>();
 }
 
 namespace Private {

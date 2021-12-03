@@ -737,24 +737,44 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   ) => {
     const first = app.started;
     const registry = app.commands;
+
     const restorer = new LayoutRestorer({ connector: state, first, registry });
 
-    void restorer.fetch().then(saved => {
-      labShell.restoreLayout(
-        PageConfig.getOption('mode') as DockPanel.Mode,
-        saved
-      );
-      labShell.layoutModified.connect(() => {
-        void restorer.save(labShell.saveLayout());
+    settingRegistry
+      .load(layout.id)
+      .then(settings => {
+        // TODO listen for settings changes to prompt the user to reload
+
+        // Add a layer of customization to support app shell mode
+        const customizedLayout = settings.composite['layout'] as any;
+        labShell.userLayout = {
+          default: customizedLayout.default ?? {},
+          simpleMode: customizedLayout['simpleMode'] ?? {}
+        };
+        void restorer.fetch().then(saved => {
+          // restoreLayout needs to be protected to be triggered only
+          // after loading the userLayout... Or maybe not but then
+          // userLayout must be set to empty
+          labShell.restoreLayout(
+            PageConfig.getOption('mode') as DockPanel.Mode,
+            saved
+          );
+          labShell.layoutModified.connect(() => {
+            void restorer.save(labShell.saveLayout());
+          });
+          // Private.activateSidebarSwitcher(
+          //   app,
+          //   labShell,
+          //   settingRegistry,
+          //   translator,
+          //   saved
+          // );
+        });
+      })
+      .catch(reason => {
+        console.error('Fail to load settings for the layout restorer.');
+        console.error(reason);
       });
-      Private.activateSidebarSwitcher(
-        app,
-        labShell,
-        settingRegistry,
-        translator,
-        saved
-      );
-    });
 
     return restorer;
   },

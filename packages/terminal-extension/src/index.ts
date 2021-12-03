@@ -371,7 +371,7 @@ export function addCommands(
       term.title.label = '...';
 
       const main = new MainAreaWidget({ content: term });
-      app.shell.add(main);
+      app.shell.add(main, 'main', { type: 'terminals' });
       void tracker.add(main);
       app.shell.activateById(main.id);
       return main;

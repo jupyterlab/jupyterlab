@@ -1,0 +1,54 @@
+{
+  "jupyter.lab.setting-icon-label": "Sidebar",
+  "title": "Shell layout",
+  "description": "Shell layout settings.",
+  "properties": {
+    "layout": {
+      "type": "object",
+      "title": "Customize shell widget positioning",
+      "description": "Overrides for where to show widget in the application layout\ne.g., {}.",
+      "default": {},
+      "properties": {
+        "default": {
+          "type": "object",
+          "properties": {
+            "[\\w-]+": {
+              "type": "object",
+              "properties": {
+                "area": {
+                  "enum": ["main", "left", "right", "down"]
+                },
+                "options": {
+                  "type": "object"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "default": {}
+        },
+        "simpleMode": {
+          "type": "object",
+          "properties": {
+            "[\\w-]+": {
+              "type": "object",
+              "properties": {
+                "area": {
+                  "enum": ["main", "left", "right", "down"]
+                },
+                "options": {
+                  "type": "object"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "default": {}
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
