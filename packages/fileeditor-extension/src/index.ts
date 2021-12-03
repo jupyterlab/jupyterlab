@@ -11,13 +11,15 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   ICommandPalette,
   ISessionContextDialogs,
+  IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import { IConsoleTracker } from '@jupyterlab/console';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
@@ -54,7 +56,8 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     ILauncher,
     IMainMenu,
     ILayoutRestorer,
-    ISessionContextDialogs
+    ISessionContextDialogs,
+    IToolbarWidgetRegistry
   ],
   provides: IEditorTracker,
   autoStart: true
@@ -155,17 +158,35 @@ function activate(
   launcher: ILauncher | null,
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
-  sessionDialogs: ISessionContextDialogs | null
+  sessionDialogs: ISessionContextDialogs | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
+  let toolbarFactory:
+    | ((widget: IDocumentWidget<FileEditor>) => DocumentRegistry.IToolbarItem[])
+    | undefined;
+
+  if (toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      FACTORY,
+      id,
+      translator
+    );
+  }
+
   const factory = new FileEditorFactory({
     editorServices,
     factoryOptions: {
       name: FACTORY,
+      label: trans.__('Editor'),
       fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
-      defaultFor: ['markdown', '*'] // it outranks the defaultRendered viewer.
+      defaultFor: ['markdown', '*'], // it outranks the defaultRendered viewer.
+      toolbarFactory,
+      translator
     }
   });
   const { commands, restored, shell } = app;
@@ -278,7 +299,9 @@ function activate(
     id,
     isEnabled,
     tracker,
-    browserFactory
+    browserFactory,
+    consoleTracker,
+    sessionDialogs
   );
 
   // Add a launcher item if the launcher is available.
@@ -291,14 +314,7 @@ function activate(
   }
 
   if (menu) {
-    Commands.addMenuItems(
-      menu,
-      commands,
-      tracker,
-      trans,
-      consoleTracker,
-      sessionDialogs
-    );
+    Commands.addMenuItems(menu, tracker, consoleTracker, isEnabled);
   }
 
   getAvailableKernelFileTypes()

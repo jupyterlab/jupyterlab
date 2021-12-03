@@ -1,12 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ReactWidget,
-  showErrorMessage,
-  Toolbar,
-  ToolbarButton
-} from '@jupyterlab/apputils';
+import { showErrorMessage } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import {
@@ -14,7 +9,13 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
+import {
+  newFolderIcon,
+  ReactWidget,
+  refreshIcon,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
 import { IIterator } from '@lumino/algorithm';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
@@ -188,7 +189,6 @@ export class FileBrowser extends Widget {
       forceRefresh: true
     });
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
-    this._filenameSearcher.id = 'filename-searcher';
 
     this.layout.removeWidget(this._filenameSearcher);
     this.layout.removeWidget(this.crumbs);
@@ -197,6 +197,18 @@ export class FileBrowser extends Widget {
     this.layout.addWidget(this._filenameSearcher);
     this.layout.addWidget(this.crumbs);
     this.layout.addWidget(this.listing);
+  }
+
+  /**
+   * Whether to show hidden files
+   */
+  get showHiddenFiles(): boolean {
+    return this._showHiddenFiles;
+  }
+
+  set showHiddenFiles(value: boolean) {
+    this.model.showHiddenFiles(value);
+    this._showHiddenFiles = value;
   }
 
   /**
@@ -277,6 +289,7 @@ export class FileBrowser extends Widget {
         this._directoryPending = false;
       })
       .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
         this._directoryPending = false;
       });
   }
@@ -306,6 +319,7 @@ export class FileBrowser extends Widget {
         this._filePending = false;
       })
       .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
         this._filePending = false;
       });
   }
@@ -412,6 +426,7 @@ export class FileBrowser extends Widget {
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
+  private _showHiddenFiles: boolean = false;
 }
 
 /**

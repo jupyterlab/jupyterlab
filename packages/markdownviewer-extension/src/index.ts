@@ -110,6 +110,7 @@ function activate(
   const factory = new MarkdownViewerFactory({
     rendermime,
     name: FACTORY,
+    label: trans.__('Markdown Preview'),
     primaryFileType: docRegistry.getFileType('markdown'),
     fileTypes: ['markdown'],
     defaultRendered: ['markdown']

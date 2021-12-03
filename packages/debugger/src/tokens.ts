@@ -5,15 +5,17 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { Token } from '@lumino/coreutils';
+import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 
 import { IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@lumino/widgets';
+import { Panel } from '@lumino/widgets';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
+
+import { DebuggerHandler } from './handler';
 
 /**
  * An interface describing an application's visual debugger.
@@ -30,8 +32,8 @@ export interface IDebugger {
   readonly isStarted: boolean;
 
   /**
-    * Wheter the session is pausing for exceptions.
-    */
+   * Whether the session is pausing for exceptions.
+   */
   readonly isPausingOnExceptions: boolean;
 
   /**
@@ -101,6 +103,18 @@ export interface IDebugger {
   ): Promise<DebugProtocol.Variable[]>;
 
   /**
+   * Request rich representation of a variable.
+   *
+   * @param variableName The variable name to request
+   * @param variablesReference The variable reference to request
+   * @returns The mime renderer data model
+   */
+  inspectRichVariable(
+    variableName: string,
+    variablesReference?: number
+  ): Promise<IDebugger.IRichVariable>;
+
+  /**
    * Requests all the defined variables and display them in the
    * table view.
    */
@@ -166,6 +180,21 @@ export interface IDebugger {
     breakpoints: IDebugger.IBreakpoint[],
     path?: string
   ): Promise<void>;
+
+  /**
+   * Get the debugger state
+   *
+   * @returns Debugger state
+   */
+  getDebuggerState(): IDebugger.State;
+
+  /**
+   * Restore the debugger state
+   *
+   * @param state Debugger state
+   * @returns Whether the state has been restored successfully or not
+   */
+  restoreDebuggerState(state: IDebugger.State): Promise<boolean>;
 }
 
 /**
@@ -197,6 +226,21 @@ export namespace IDebugger {
    */
   export interface IBreakpoint extends DebugProtocol.Breakpoint {}
 
+  /*
+   * The state of the debugger, used for restoring a debugging session
+   * after restarting the kernel.
+   */
+  export type State = {
+    /**
+     * List of cells to dump after the kernel has restarted
+     */
+    cells: string[];
+    /**
+     * Map of breakpoints to send back to the kernel after it has restarted
+     */
+    breakpoints: Map<string, IDebugger.IBreakpoint[]>;
+  };
+
   /**
    * Debugger file and hashing configuration.
    */
@@ -222,7 +266,19 @@ export namespace IDebugger {
      * @param params - Temporary file prefix and suffix for a kernel.
      */
     setTmpFileParams(params: IConfig.FileParams): void;
+
+    /**
+     * Gets the parameters used for the temp files (e.e. cells) for a kernel.
+     *
+     * @param kernel - The kernel name from current session.
+     */
+    getTmpFileParams(kernel: string): IConfig.FileParams;
   }
+
+  /**
+   * An interface for debugger handler.
+   */
+  export interface IHandler extends DebuggerHandler.IHandler {}
 
   /**
    * An interface for a scope.
@@ -266,7 +322,9 @@ export namespace IDebugger {
     /**
      * Get exception filters and default values.
      */
-    exceptionBreakpointFilters: { [key: string]: string };
+    exceptionBreakpointFilters:
+      | DebugProtocol.ExceptionBreakpointsFilter[]
+      | undefined;
 
     /**
      * Signal emitted for debug event messages.
@@ -325,6 +383,21 @@ export namespace IDebugger {
    * The type for a stack frame
    */
   export interface IStackFrame extends DebugProtocol.StackFrame {}
+
+  /**
+   * A reply to an rich inspection request.
+   */
+  export interface IRichVariable {
+    /**
+     * The MIME bundle data returned from an rich inspection request.
+     */
+    data: ReadonlyJSONObject;
+
+    /**
+     * Any metadata that accompanies the MIME bundle returning from a rich inspection request.
+     */
+    metadata: ReadonlyJSONObject;
+  }
 
   /**
    * An interface for a variable.
@@ -395,7 +468,7 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsArguments;
       configurationDone: DebugProtocol.ConfigurationDoneArguments;
       continue: DebugProtocol.ContinueArguments;
-      debugInfo: {};
+      debugInfo: Record<string, never>;
       disconnect: DebugProtocol.DisconnectArguments;
       dumpCell: IDumpCellArguments;
       evaluate: DebugProtocol.EvaluateArguments;
@@ -403,7 +476,7 @@ export namespace IDebugger {
       goto: DebugProtocol.GotoArguments;
       gotoTargets: DebugProtocol.GotoTargetsArguments;
       initialize: DebugProtocol.InitializeRequestArguments;
-      inspectVariables: {};
+      inspectVariables: Record<string, never>;
       launch: DebugProtocol.LaunchRequestArguments;
       loadedSources: DebugProtocol.LoadedSourcesArguments;
       modules: DebugProtocol.ModulesArguments;
@@ -412,6 +485,7 @@ export namespace IDebugger {
       restart: DebugProtocol.RestartArguments;
       restartFrame: DebugProtocol.RestartFrameArguments;
       reverseContinue: DebugProtocol.ReverseContinueArguments;
+      richInspectVariables: IRichVariablesArguments;
       scopes: DebugProtocol.ScopesArguments;
       setBreakpoints: DebugProtocol.SetBreakpointsArguments;
       setExceptionBreakpoints: DebugProtocol.SetExceptionBreakpointsArguments;
@@ -426,7 +500,7 @@ export namespace IDebugger {
       stepOut: DebugProtocol.StepOutArguments;
       terminate: DebugProtocol.TerminateArguments;
       terminateThreads: DebugProtocol.TerminateThreadsArguments;
-      threads: {};
+      threads: Record<string, never>;
       variables: DebugProtocol.VariablesArguments;
     };
 
@@ -455,6 +529,7 @@ export namespace IDebugger {
       restart: DebugProtocol.RestartResponse;
       restartFrame: DebugProtocol.RestartFrameResponse;
       reverseContinue: DebugProtocol.ReverseContinueResponse;
+      richInspectVariables: IRichVariablesResponse;
       scopes: DebugProtocol.ScopesResponse;
       setBreakpoints: DebugProtocol.SetBreakpointsResponse;
       setExceptionBreakpoints: DebugProtocol.SetExceptionBreakpointsResponse;
@@ -488,13 +563,17 @@ export namespace IDebugger {
      */
     export interface IDebugInfoResponse extends DebugProtocol.Response {
       body: {
-        isStarted: boolean;
+        breakpoints: IDebugInfoBreakpoints[];
         hashMethod: string;
         hashSeed: number;
-        breakpoints: IDebugInfoBreakpoints[];
+        isStarted: boolean;
+        /**
+         * Whether the kernel supports variable rich rendering or not.
+         */
+        richRendering?: boolean;
+        stoppedThreads: number[];
         tmpFilePrefix: string;
         tmpFileSuffix: string;
-        stoppedThreads: number[];
         exceptionPaths: string[];
       };
     }
@@ -526,6 +605,36 @@ export namespace IDebugger {
     }
 
     /**
+     * Arguments for 'richVariables' request
+     *
+     * This is an addition to the Debug Adapter Protocol to support
+     * render rich variable representation.
+     */
+    export interface IRichVariablesArguments {
+      /**
+       * Variable name
+       */
+      variableName: string;
+      /**
+       * Frame Id
+       */
+      frameId?: number;
+    }
+
+    /**
+     * Arguments for 'richVariables' request
+     *
+     * This is an addition to the Debug Adapter Protocol to support
+     * rich rendering of variables.
+     */
+    export interface IRichVariablesResponse extends DebugProtocol.Response {
+      /**
+       * Variable mime type data
+       */
+      body: IRichVariable;
+    }
+
+    /**
      * Response to the 'kernel_info_request' request.
      * This interface extends the IInfoReply by adding the `debugger` key
      * that isn't part of the protocol yet.
@@ -537,23 +646,36 @@ export namespace IDebugger {
   }
 
   /**
+   * Select variable in the variables explorer.
+   */
+  export interface IVariableSelection
+    extends Pick<
+      DebugProtocol.Variable,
+      'name' | 'type' | 'variablesReference' | 'value'
+    > {}
+
+  /**
+   * Debugger variables explorer interface.
+   */
+  export interface IVariablesPanel {
+    /**
+     * Select variable in the variables explorer.
+     */
+    latestSelection: IVariableSelection | null;
+    /**
+     * Variable view mode.
+     */
+    viewMode: 'tree' | 'table';
+  }
+
+  /**
    * Debugger sidebar interface.
    */
-  export interface ISidebar extends Widget {
+  export interface ISidebar extends Panel {
     /**
-     * Add item at the end of the sidebar.
+     * Debugger variables explorer.
      */
-    addItem(widget: Widget): void;
-
-    /**
-     * Insert item at a specified index.
-     */
-    insertItem(index: number, widget: Widget): void;
-
-    /**
-     * Return all items that were added to sidebar.
-     */
-    readonly items: readonly Widget[];
+    variables: IVariablesPanel;
   }
 
   /**
@@ -664,12 +786,12 @@ export namespace IDebugger {
       /**
        * Signal emitted when the current frame has changed.
        */
-      readonly currentFrameChanged: ISignal<this, IDebugger.IStackFrame>;
+      readonly currentFrameChanged: ISignal<this, IDebugger.IStackFrame | null>;
 
       /**
        * The current frame.
        */
-      frame: IDebugger.IStackFrame;
+      frame: IDebugger.IStackFrame | null;
 
       /**
        * The frames for the callstack.
@@ -695,6 +817,11 @@ export namespace IDebugger {
        * The callstack UI model.
        */
       readonly callstack: ICallstack;
+
+      /**
+       * Whether the kernel support rich variable rendering based on mime type.
+       */
+      hasRichVariableRendering: boolean;
 
       /**
        * The variables UI model.
@@ -736,7 +863,7 @@ export namespace IDebugger {
        */
       readonly currentFrameChanged: ISignal<
         IDebugger.Model.ICallstack,
-        IDebugger.IStackFrame
+        IDebugger.IStackFrame | null
       >;
 
       /**
@@ -819,4 +946,11 @@ export const IDebuggerSources = new Token<IDebugger.ISources>(
  */
 export const IDebuggerSidebar = new Token<IDebugger.ISidebar>(
   '@jupyterlab/debugger:IDebuggerSidebar'
+);
+
+/**
+ * The debugger handler token.
+ */
+export const IDebuggerHandler = new Token<IDebugger.IHandler>(
+  '@jupyterlab/debugger:IDebuggerHandler'
 );

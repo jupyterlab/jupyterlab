@@ -42,6 +42,7 @@ export class DocumentManager implements IDocumentManager {
     this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._docProviderFactory = options.docProviderFactory;
+    this._isConnectedCallback = options.isConnectedCallback || (() => true);
 
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
@@ -117,24 +118,19 @@ export class DocumentManager implements IDocumentManager {
   }
 
   /**
-   * Whether to prompt to name file on first save.
+   * Defines max acceptable difference, in milliseconds, between last modified timestamps on disk and client
    */
-  get nameFileOnSave(): boolean {
-    return this._nameFileOnSave;
+  get lastModifiedCheckMargin(): number {
+    return this._lastModifiedCheckMargin;
   }
 
-  set nameFileOnSave(value: boolean) {
-    if (this._nameFileOnSave != value) {
-      this._optionChanged.emit({ nameFileOnSave: value });
-    }
-    this._nameFileOnSave = value;
-  }
+  set lastModifiedCheckMargin(value: number) {
+    this._lastModifiedCheckMargin = value;
 
-  /**
-   * A signal emitted when option is changed.
-   */
-  get optionChanged(): ISignal<this, any> {
-    return this._optionChanged;
+    // For each existing context, update the margin value.
+    this._contexts.forEach(context => {
+      context.lastModifiedCheckMargin = value;
+    });
   }
 
   /**
@@ -428,11 +424,7 @@ export class DocumentManager implements IDocumentManager {
    * a file.
    */
   rename(oldPath: string, newPath: string): Promise<Contents.IModel> {
-    return this.services.contents.rename(oldPath, newPath).then(model => {
-      if (model.type == 'notebook' || model.type == 'file') {
-        model.renamed = true;
-      }
-    }) as Promise<Contents.IModel>;
+    return this.services.contents.rename(oldPath, newPath);
   }
 
   /**
@@ -498,10 +490,12 @@ export class DocumentManager implements IDocumentManager {
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
       collaborative: this._collaborative,
-      docProviderFactory: this._docProviderFactory
+      docProviderFactory: this._docProviderFactory,
+      lastModifiedCheckMargin: this._lastModifiedCheckMargin
     });
     const handler = new SaveHandler({
       context,
+      isConnectedCallback: this._isConnectedCallback,
       saveInterval: this.autosaveInterval
     });
     Private.saveHandlerProperty.set(context, handler);
@@ -621,14 +615,14 @@ export class DocumentManager implements IDocumentManager {
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;
   private _autosave = true;
-  private _nameFileOnSave = true;
-  private _optionChanged = new Signal<this, Object>(this);
   private _autosaveInterval = 120;
+  private _lastModifiedCheckMargin = 500;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
   private _docProviderFactory: IDocumentProviderFactory | undefined;
   private _collaborative: boolean;
+  private _isConnectedCallback: () => boolean;
 }
 
 /**
@@ -684,6 +678,12 @@ export namespace DocumentManager {
      * If true, the context will connect through yjs_ws_server to share information if possible.
      */
     collaborative?: boolean;
+
+    /**
+     * Autosaving should be paused while this callback function returns `false`.
+     * By default, it always returns `true`.
+     */
+    isConnectedCallback?: () => boolean;
   }
 
   /**

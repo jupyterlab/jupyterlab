@@ -1,14 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import { Text } from '@jupyterlab/coreutils';
+import { ISessionContext, translateKernelStatuses } from '@jupyterlab/apputils';
 import { Session } from '@jupyterlab/services';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { JSONArray, JSONExt } from '@lumino/coreutils';
 import React from 'react';
 import { interactiveItem, TextItem } from '..';
@@ -23,7 +23,7 @@ function KernelStatusComponent(
   const trans = translator.load('jupyterlab');
   let statusText = '';
   if (props.status) {
-    statusText = ` | ${Text.titleCase(trans.__(props.status))}`;
+    statusText = ` | ${props.status}`;
   }
   return (
     <TextItem
@@ -87,7 +87,7 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
   /**
    * Render the kernel status item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (this.model === null) {
       return null;
     } else {
@@ -120,20 +120,23 @@ export namespace KernelStatus {
       translator = translator || nullTranslator;
       this._trans = translator.load('jupyterlab');
       this._kernelName = this._trans.__('No Kernel!');
+      this._statusNames = translateKernelStatuses(translator);
     }
 
     /**
      * The name of the kernel.
      */
-    get kernelName() {
+    get kernelName(): string {
       return this._kernelName;
     }
 
     /**
      * The current status of the kernel.
      */
-    get status() {
-      return this._kernelStatus;
+    get status(): string | undefined {
+      return this._kernelStatus
+        ? this._statusNames[this._kernelStatus]
+        : undefined;
     }
 
     /**
@@ -166,7 +169,8 @@ export namespace KernelStatus {
       const oldState = this._getAllState();
       this._sessionContext = sessionContext;
       this._kernelStatus = sessionContext?.kernelDisplayStatus;
-      this._kernelName = sessionContext?.kernelDisplayName ?? 'No Kernel'; // FIXME-TRANS: ?
+      this._kernelName =
+        sessionContext?.kernelDisplayName ?? this._trans.__('No Kernel');
       sessionContext?.statusChanged.connect(this._onKernelStatusChanged, this);
       sessionContext?.connectionStatusChanged.connect(
         this._onKernelStatusChanged,
@@ -213,8 +217,12 @@ export namespace KernelStatus {
     private _trans: TranslationBundle;
     private _activityName: string = 'activity'; // FIXME-TRANS:?
     private _kernelName: string; // Initialized in constructor due to localization
-    private _kernelStatus: string | undefined = '';
+    private _kernelStatus: ISessionContext.KernelDisplayStatus | undefined = '';
     private _sessionContext: ISessionContext | null = null;
+    private readonly _statusNames: Record<
+      ISessionContext.KernelDisplayStatus,
+      string
+    >;
   }
 
   /**

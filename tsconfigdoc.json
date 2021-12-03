@@ -3,15 +3,20 @@
   "extends": "./tsconfigbase",
   "exclude": [
     "**/test/**",
-    "**/testutils/**",
-    "**/ui-tests/**"
+    "**/testutils/**"
   ],
   "compilerOptions": {
+    "strictNullChecks": false,
     "paths": {
       "@jupyterlab/*": [
         "./packages/*/src"
       ]
-    }
+    },
+    "moduleResolution": "node",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "references": [
     {

@@ -1,16 +1,22 @@
 name: Linux Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
 
 jobs:
   linuxtests:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
+        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
         python: [3.6, 3.8]
         include:
-          - group: release_check
+          - group: release_test
             upload-output: true
         exclude:
           - group: integrity
@@ -19,7 +25,7 @@ jobs:
             python: 3.6
           - group: integrity3
             python: 3.6
-          - group: release_check
+          - group: release_test
             python: 3.6
           - group: docs
             python: 3.6
@@ -38,7 +44,7 @@ jobs:
           - group: splice_source
             python: 3.6
       fail-fast: false
-    timeout-minutes: 30
+    timeout-minutes: 45
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -75,15 +81,6 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-
-      - name: Cache checked links build
-        uses: actions/cache@v2
-        if: ${{ matrix.group == 'linkcheck' }}
-        with:
-          path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst') }}-changelog
-          restore-keys: |
-            ${{ runner.os }}-linkcheck-
 
       - name: Install dependencies
         env:

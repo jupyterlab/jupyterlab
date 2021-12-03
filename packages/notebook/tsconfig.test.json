@@ -30,6 +30,9 @@
       "path": "../services"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../shared-models"
     },
     {
@@ -46,45 +49,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../cells"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../nbformat"
-    },
-    {
-      "path": "../observables"
-    },
-    {
-      "path": "../rendermime"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../shared-models"
-    },
-    {
-      "path": "../statusbar"
-    },
-    {
-      "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }

@@ -104,7 +104,7 @@ const exclude =
   packages.flatMap(p => [`packages/${p}/test`]) +
   [
     'packages/application-extension/src/index.tsx',
-    'ui-tests/**/*'
+    'examples/example.spec.ts'
     //'packages/*/test/*.spec.ts',
   ];
 

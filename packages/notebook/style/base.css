@@ -19,6 +19,7 @@
 |----------------------------------------------------------------------------*/
 
 @import './toolbar.css';
+@import './executionindicator.css';
 
 /*-----------------------------------------------------------------------------
 | Notebook
@@ -292,6 +293,86 @@
 .jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-InputPrompt,
 .jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-OutputPrompt {
   flex: 0 0 110px;
+}
+
+/*-----------------------------------------------------------------------------
+| Side-by-side Mode (.jp-mod-sideBySide)
+|----------------------------------------------------------------------------*/
+:root {
+  --jp-side-by-side-output-size: 1fr;
+  --jp-side-by-side-resized-cell: var(--jp-side-by-side-output-size);
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
+  margin-top: 3em;
+  margin-bottom: 3em;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min-content minmax(
+      0,
+      var(--jp-side-by-side-output-size)
+    );
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'header header header'
+    'input handle output'
+    'footer footer footer';
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell.jp-mod-resizedCell {
+  grid-template-columns: minmax(0, 1fr) min-content minmax(
+      0,
+      var(--jp-side-by-side-resized-cell)
+    );
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-CellHeader {
+  grid-area: header;
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-Cell-inputWrapper {
+  grid-area: input;
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-Cell-outputWrapper {
+  /* overwrite the default margin (no vertical separation needed in side by side move */
+  margin-top: 0;
+  grid-area: output;
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-CellFooter {
+  grid-area: footer;
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-CellResizeHandle {
+  grid-area: handle;
+  user-select: none;
+  display: block;
+  height: 100%;
+  cursor: ew-resize;
+  padding: 0 var(--jp-cell-padding);
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-CellResizeHandle::after {
+  content: '';
+  display: block;
+  background: var(--jp-border-color2);
+  height: 100%;
+  width: 5px;
+}
+
+.jp-mod-sideBySide.jp-Notebook
+  .jp-CodeCell.jp-mod-resizedCell
+  .jp-CellResizeHandle::after {
+  background: var(--jp-border-color0);
+}
+
+.jp-CellResizeHandle {
+  display: none;
 }
 
 /*-----------------------------------------------------------------------------

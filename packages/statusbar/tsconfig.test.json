@@ -9,9 +9,6 @@
       "path": "../codeeditor"
     },
     {
-      "path": "../coreutils"
-    },
-    {
       "path": "../services"
     },
     {
@@ -25,24 +22,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }

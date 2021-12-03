@@ -16,7 +16,8 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ArrayExt, each } from '@lumino/algorithm';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ArrayExt, each, findIndex } from '@lumino/algorithm';
 import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag, IDragEvent } from '@lumino/dragdrop';
@@ -25,6 +26,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';
+import { NotebookActions } from './actions';
 import { INotebookModel } from './model';
 
 /**
@@ -138,6 +140,12 @@ type InsertType = 'push' | 'insert' | 'set';
 const HEADING_COLLAPSER_CLASS = 'jp-collapseHeadingButton';
 
 /**
+ * The class that controls the visibility of "heading collapser" and "show hidden cells" buttons.
+ */
+const HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS =
+  'jp-mod-showHiddenCellsButton';
+
+/**
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
@@ -145,6 +153,7 @@ export type NotebookMode = 'command' | 'edit';
 if ((window as any).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
+  // eslint-disable-next-line @typescript-eslint/ban-types
   (window as any).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {
@@ -182,6 +191,7 @@ export class StaticNotebook extends Widget {
     this.node.dataset[UNDOER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
     this.rendermime = options.rendermime;
+    this.translator = options.translator || nullTranslator;
     this.layout = new Private.NotebookPanelLayout();
     this.contentFactory =
       options.contentFactory || StaticNotebook.defaultContentFactory;
@@ -189,6 +199,7 @@ export class StaticNotebook extends Widget {
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
+    this._updateNotebookConfig();
     this._mimetypeService = options.mimeTypeService;
 
     // Section for the virtual-notebook behavior.
@@ -257,6 +268,11 @@ export class StaticNotebook extends Widget {
    * The Rendermime instance used by the widget.
    */
   readonly rendermime: IRenderMimeRegistry;
+
+  /**
+   * Translator to be used by cell renderers
+   */
+  readonly translator: ITranslator;
 
   /**
    * The model for the widget.
@@ -334,7 +350,7 @@ export class StaticNotebook extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
@@ -541,7 +557,9 @@ export class StaticNotebook extends Widget {
     if (
       this._observer &&
       insertType === 'push' &&
-      this._renderedCellsCount > this.notebookConfig.numberCellsToRenderDirectly
+      this._renderedCellsCount >=
+        this.notebookConfig.numberCellsToRenderDirectly &&
+      cell.type !== 'markdown'
     ) {
       // We have an observer and we are have been asked to push (not to insert).
       // and we are above the number of cells to render directly, then
@@ -579,9 +597,8 @@ export class StaticNotebook extends Widget {
       this._renderedCellsCount >=
         this.notebookConfig.numberCellsToRenderDirectly
     ) {
-      const index = this._renderedCellsCount;
-      const cell = this._cellsArray[index];
-      this._renderPlaceholderCell(cell, index);
+      const ci = this._toRenderMap.entries().next();
+      this._renderPlaceholderCell(ci.value[1].cell, ci.value[1].index);
     }
   }
 
@@ -591,6 +608,7 @@ export class StaticNotebook extends Widget {
     pl.insertWidget(index, cell);
     this._toRenderMap.delete(cell.model.id);
     this._incrementRenderedCount();
+    this.onCellInserted(index, cell);
     this._placeholderCellRendered.emit(cell);
   }
 
@@ -608,6 +626,7 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false,
       placeholder: false,
+      translator: this.translator,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs
     };
     const cell = this.contentFactory.createCodeCell(options, this);
@@ -635,6 +654,12 @@ export class StaticNotebook extends Widget {
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
     cell.syncEditable = true;
+    // Connect collapsed signal for each markdown cell widget
+    cell.toggleCollapsedSignal.connect(
+      (newCell: MarkdownCell, collapsed: boolean) => {
+        NotebookActions.setHeadingCollapse(newCell, collapsed, this);
+      }
+    );
     return cell;
   }
 
@@ -772,6 +797,11 @@ export class StaticNotebook extends Widget {
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
+    // Control visibility of heading collapser UI
+    this.toggleClass(
+      HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS,
+      this._notebookConfig.showHiddenCellsButton
+    );
   }
 
   private _incrementRenderedCount() {
@@ -833,6 +863,11 @@ export namespace StaticNotebook {
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**
@@ -892,7 +927,7 @@ export namespace StaticNotebook {
       ...CodeEditor.defaultConfig,
       lineWrap: 'off',
       matchBrackets: true,
-      autoClosingBrackets: true
+      autoClosingBrackets: false
     },
     markdown: {
       ...CodeEditor.defaultConfig,
@@ -912,6 +947,11 @@ export namespace StaticNotebook {
    * A config object for the notebook widget
    */
   export interface INotebookConfig {
+    /**
+     * Show hidden cells button if collapsed
+     */
+    showHiddenCellsButton: boolean;
+
     /**
      * Enable scrolling past the last cell
      */
@@ -957,11 +997,18 @@ export namespace StaticNotebook {
      * Defines the maximum number of outputs per cell.
      */
     maxNumberOutputs: number;
+
+    /**
+     * Defines if the document can be undo/redo.
+     */
+    disableDocumentWideUndoRedo: boolean;
   }
+
   /**
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
+    showHiddenCellsButton: true,
     scrollPastEnd: true,
     defaultCell: 'code',
     recordTiming: false,
@@ -969,7 +1016,8 @@ export namespace StaticNotebook {
     renderCellOnIdle: true,
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px',
-    maxNumberOutputs: 50
+    maxNumberOutputs: 50,
+    disableDocumentWideUndoRedo: false
   };
 
   /**
@@ -1168,6 +1216,13 @@ export class Notebook extends StaticNotebook {
    */
   get activeCell(): Cell | null {
     return this._activeCell;
+  }
+
+  get lastClipboardInteraction(): 'copy' | 'cut' | 'paste' | null {
+    return this._lastClipboardInteraction;
+  }
+  set lastClipboardInteraction(newValue: 'copy' | 'cut' | 'paste' | null) {
+    this._lastClipboardInteraction = newValue;
   }
 
   /**
@@ -1640,7 +1695,11 @@ export class Notebook extends StaticNotebook {
     if (this._fragment) {
       let el;
       try {
-        el = this.node.querySelector(this._fragment);
+        el = this.node.querySelector(
+          this._fragment.startsWith('#')
+            ? `#${CSS.escape(this._fragment.slice(1))}`
+            : this._fragment
+        );
       } catch (error) {
         console.warn('Unable to set URI fragment identifier', error);
       }
@@ -2105,6 +2164,19 @@ export class Notebook extends StaticNotebook {
       event.dropAction = 'move';
       const toMove: Cell[] = event.mimeData.getData('internal:cells');
 
+      // For collapsed markdown headings with hidden "child" cells, move all
+      // child cells as well as the markdown heading.
+      const cell = toMove[toMove.length - 1];
+      if (cell instanceof MarkdownCell && cell.headingCollapsed) {
+        const nextParent = NotebookActions.findNextParentHeading(cell, source);
+        if (nextParent > 0) {
+          const index = findIndex(source.widgets, (possibleCell: Cell) => {
+            return cell.model.id === possibleCell.model.id;
+          });
+          toMove.push(...source.widgets.slice(index + 1, nextParent));
+        }
+      }
+
       // Compute the to/from indices for the move.
       let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
       let toIndex = this._findCell(target);
@@ -2253,8 +2325,11 @@ export class Notebook extends StaticNotebook {
       // If the editor itself does not have focus, ensure command mode.
       if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
-      } else {
-        // If the editor has focus, ensure edit mode.
+      }
+      this.activeCellIndex = index;
+      // If the editor has focus, ensure edit mode.
+      const node = widget.editorWidget.node;
+      if (node.contains(target)) {
         this.mode = 'edit';
       }
       this.activeCellIndex = index;
@@ -2358,6 +2433,8 @@ export class Notebook extends StaticNotebook {
   // Attributes for optimized cell refresh:
   private _cellLayoutStateCache?: { width: number };
   private _checkCacheOnNextResize = false;
+
+  private _lastClipboardInteraction: 'copy' | 'cut' | 'paste' | null = null;
 }
 
 /**
@@ -2493,7 +2570,9 @@ namespace Private {
    * #### Notes
    * This defaults the content factory to that in the `Notebook` namespace.
    */
-  export function processNotebookOptions(options: Notebook.IOptions) {
+  export function processNotebookOptions(
+    options: Notebook.IOptions
+  ): Notebook.IOptions {
     if (options.contentFactory) {
       return options;
     } else {

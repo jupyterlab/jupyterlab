@@ -1,5 +1,6 @@
 # project files
 coverage/
+.eslintcache
 
 dev_mode/listings
 dev_mode/schemas
@@ -28,6 +29,8 @@ jupyterlab/style.js
 jupyterlab/tests/**/static
 jupyterlab/tests/**/labextension
 
+ui-tests/test-output
+
 # Remove after next release
 jupyterlab/imports.css
 
@@ -38,6 +41,14 @@ packages/theme-*/static
 
 tests/**/coverage
 tests/**/.cache-loader
+
+# galata
+galata/benchmark-results
+galata/playwright-report
+galata/test-results
+galata/*benchmark-expected.json
+
+package_json.tar.gz
 
 # javascript/typescript
 lib
@@ -110,8 +121,6 @@ junit.xml
 # ms IDE stuff
 *.code-workspace
 .history
-.vscode
+.vscode/settings.json
 
-ui-tests/test-output
-ui-tests/jlab_root
-package_json.tar.gz
+.jupyter_releaser_checkout

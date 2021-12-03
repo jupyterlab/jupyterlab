@@ -46,7 +46,7 @@ export interface ILanguageInfoMetadata extends PartialJSONObject {
 export interface INotebookMetadata extends PartialJSONObject {
   kernelspec?: IKernelspecMetadata;
   language_info?: ILanguageInfoMetadata;
-  orig_nbformat: number;
+  orig_nbformat?: number;
 }
 
 /**

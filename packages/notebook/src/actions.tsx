@@ -26,12 +26,14 @@ import { ElementExt } from '@lumino/domutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
 import { INotebookModel } from './model';
-import { Notebook } from './widget';
+import { Notebook, StaticNotebook } from './widget';
 
 /**
  * The mimetype used for Jupyter cell data.
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+
+const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
 
 export class KernelError extends Error {
   /**
@@ -99,7 +101,7 @@ export class NotebookActions {
   }
 
   /**
-   * A signal that emits whenever a cell completes execution.
+   * A signal that emits when one notebook's cells are all executed.
    */
   static get selectionExecuted(): ISignal<
     any,
@@ -129,16 +131,16 @@ export namespace NotebookActions {
   /**
    * Split the active cell into two or more cells.
    *
-   * @param widget - The target notebook widget.
+   * @param notebook The target notebook widget.
    *
    * #### Notes
    * It will preserve the existing mode.
    * The last cell will be activated if no selection is found.
    * If text was selected, the cell containing the selection will
-     be activated.
+   * be activated.
    * The existing selection will be cleared.
-   * The activated cell will have focus and the cursor will move
-     to the end of the cell.
+   * The activated cell will have focus and the cursor will
+   * remain in the initial position.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells will be created.
    * Both cells will have the same type as the original cell.
@@ -215,9 +217,6 @@ export namespace NotebookActions {
     notebook.activeCellIndex = index + clones.length - activeCellDelta;
     const focusedEditor = notebook.activeCell.editor;
     focusedEditor.focus();
-
-    // Move to the end of the cell that now contains the cursor
-    focusedEditor.setCursorPosition({ line: editor.lineCount, column: 0 });
 
     Private.handleState(notebook, state);
   }
@@ -562,7 +561,9 @@ export namespace NotebookActions {
         {}
       );
 
-      model.cells.push(cell);
+      // Do not use push here, as we want an widget insertion
+      // to make sure no placeholder widget is rendered.
+      model.cells.insert(notebook.widgets.length, cell);
       notebook.activeCellIndex++;
       notebook.mode = 'edit';
     } else {
@@ -990,7 +991,18 @@ export namespace NotebookActions {
     const newCells = values.map(cell => {
       switch (cell.cell_type) {
         case 'code':
-          return model.contentFactory.createCodeCell({ cell });
+          if (
+            notebook.lastClipboardInteraction === 'cut' &&
+            typeof cell.id === 'string'
+          ) {
+            let cell_id = cell.id as string;
+            return model.contentFactory.createCodeCell({
+              id: cell_id,
+              cell: cell
+            });
+          } else {
+            return model.contentFactory.createCodeCell({ cell });
+          }
         case 'markdown':
           return model.contentFactory.createMarkdownCell({ cell });
         default:
@@ -1044,6 +1056,7 @@ export namespace NotebookActions {
 
     notebook.activeCellIndex += newCells.length;
     notebook.deselectAll();
+    notebook.lastClipboardInteraction = 'paste';
     Private.handleState(notebook, state);
   }
 
@@ -1313,6 +1326,24 @@ export namespace NotebookActions {
   }
 
   /**
+   * Render side-by-side.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function renderSideBySide(notebook: Notebook): void {
+    notebook.node.classList.add(SIDE_BY_SIDE_CLASS);
+  }
+
+  /**
+   * Render not side-by-side.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function renderNotSideBySide(notebook: Notebook): void {
+    notebook.node.classList.remove(SIDE_BY_SIDE_CLASS);
+  }
+
+  /**
    * Show the output on all code cells.
    *
    * @param notebook - The target notebook widget.
@@ -1423,7 +1454,7 @@ export namespace NotebookActions {
    * There will always be one blank space after the header.
    * The cells will be unrendered.
    */
-  export function setMarkdownHeader(notebook: Notebook, level: number) {
+  export function setMarkdownHeader(notebook: Notebook, level: number): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -1530,6 +1561,38 @@ export namespace NotebookActions {
   }
 
   /**
+   * Finds the next heading that isn't a child of the given markdown heading.
+   * @param cell - "Child" cell that has become the active cell
+   * @param notebook - The target notebook widget.
+   */
+  export function findNextParentHeading(
+    cell: Cell,
+    notebook: Notebook
+  ): number {
+    let index = findIndex(
+      notebook.widgets,
+      (possibleCell: Cell, index: number) => {
+        return cell.model.id === possibleCell.model.id;
+      }
+    );
+    if (index === -1) {
+      return -1;
+    }
+    let childHeaderInfo = getHeadingInfo(cell);
+    for (index = index + 1; index < notebook.widgets.length; index++) {
+      let hInfo = getHeadingInfo(notebook.widgets[index]);
+      if (
+        hInfo.isHeading &&
+        hInfo.headingLevel <= childHeaderInfo.headingLevel
+      ) {
+        return index;
+      }
+    }
+    // else no parent header found. return the index of the last cell
+    return notebook.widgets.length;
+  }
+
+  /**
    * Set the given cell and ** all "child" cells **
    * to the given collapse / expand if cell is
    * a markdown header.
@@ -1541,7 +1604,7 @@ export namespace NotebookActions {
   export function setHeadingCollapse(
     cell: Cell,
     collapsing: boolean,
-    notebook: Notebook
+    notebook: StaticNotebook
   ): number {
     const which = findIndex(
       notebook.widgets,
@@ -1703,10 +1766,14 @@ export namespace NotebookActions {
           'Selecting trust will re-render this notebook in a trusted state.'
         )}
         <br />
-        {trans.__(
-          'For more information, see the <a href="https://jupyter-server.readthedocs.io/en/stable/operators/security.html">%1</a>',
-          trans.__('Jupyter security documentation')
-        )}
+        {trans.__('For more information, see')}{' '}
+        <a
+          href="https://jupyter-server.readthedocs.io/en/stable/operators/security.html"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {trans.__('the Jupyter security documentation')}
+        </a>
       </p>
     );
 
@@ -1908,6 +1975,7 @@ namespace Private {
           notebook,
           lastCell: notebook.widgets[lastIndex]
         });
+
         notebook.update();
 
         return false;
@@ -1946,9 +2014,9 @@ namespace Private {
           }
           if (sessionContext.pendingInput) {
             void showDialog({
-              title: trans.__('Waiting on User Input'),
+              title: trans.__('Cell not executed due to pending input'),
               body: trans.__(
-                'Did not run selected cell because there is a cell waiting on input! Submit your input and try again.'
+                'The cell has not been executed to avoid kernel deadlock as there is another pending input! Submit your pending input and try again.'
               ),
               buttons: [Dialog.okButton({ label: trans.__('Ok') })]
             });
@@ -2081,6 +2149,11 @@ namespace Private {
     } else {
       notebook.deselectAll();
     }
+    if (cut) {
+      notebook.lastClipboardInteraction = 'cut';
+    } else {
+      notebook.lastClipboardInteraction = 'copy';
+    }
     handleState(notebook, state);
   }
 
@@ -2207,7 +2280,7 @@ namespace Private {
   /**
    * Set the markdown header level of a cell.
    */
-  export function setMarkdownHeader(cell: ICellModel, level: number) {
+  export function setMarkdownHeader(cell: ICellModel, level: number): void {
     // Remove existing header or leading white space.
     let source = cell.value.text;
     const regex = /^(#+\s*)|^(\s*)/;

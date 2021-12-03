@@ -59,6 +59,11 @@ export interface ISharedBase extends IDisposable {
  */
 export interface ISharedDocument extends ISharedBase {
   /**
+   * Whether the document is saved to disk or not.
+   */
+  readonly dirty: boolean;
+
+  /**
    * The changed signal.
    */
   readonly changed: ISignal<this, DocumentChange>;
@@ -203,6 +208,30 @@ export interface ISharedNotebook extends ISharedDocument {
    * @param to: The end index of the range to remove (exclusive).
    */
   deleteCellRange(from: number, to: number): void;
+}
+
+/**
+ * Definition of the map changes for yjs.
+ */
+export type MapChange = Map<
+  string,
+  { action: 'add' | 'update' | 'delete'; oldValue: any; newValue: any }
+>;
+
+/**
+ * The namespace for `ISharedNotebook` class statics.
+ */
+export namespace ISharedNotebook {
+  /**
+   * The options used to initialize a a ISharedNotebook
+   */
+  export interface IOptions {
+    /**
+     * Wether the the undo/redo logic should be
+     * considered on the full document across all cells.
+     */
+    disableDocumentWideUndoRedo: boolean;
+  }
 }
 
 /**
@@ -449,11 +478,21 @@ export type NotebookChange = {
     newValue: nbformat.INotebookMetadata | undefined;
   };
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 export type FileChange = {
   sourceChange?: Delta<string>;
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 /**
@@ -474,12 +513,9 @@ export type CellChange<MetadataType> = {
 
 export type DocumentChange = {
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
-
-/**
- * Definition of the map changes for yjs.
- */
-export type MapChange = Map<
-  string,
-  { action: 'add' | 'update' | 'delete'; oldValue: any; newValue: any }
->;

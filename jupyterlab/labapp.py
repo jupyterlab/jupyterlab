@@ -31,7 +31,7 @@ from .debuglog import DebugLogFileMixin
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
-from .handlers.yjs_echo_ws import YJSEchoWS
+from .handlers.yjs_echo_ws import YjsEchoWebSocket
 
 # TODO: remove when oldest compatible jupyterlab_server contains license tooling
 try:
@@ -538,7 +538,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     )
     flags['expose-app-in-browser'] = (
         {'LabApp': {'expose_app_in_browser': True}},
-        "Expose the global app instance to browser via window.jupyterlab."
+        """Expose the global app instance to browser via window.jupyterapp. 
+        It is also available via the deprecated window.jupyterlab name."""
     )
     flags['extensions-in-dev-mode'] = (
         {'LabApp': {'extensions_in_dev_mode': True}},
@@ -722,6 +723,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         page_config['exposeAppInBrowser'] = self.expose_app_in_browser
         page_config['quitButton'] = self.serverapp.quit_button
         page_config['collaborative'] = self.collaborative
+        page_config['allow_hidden_files'] = self.serverapp.contents_manager.allow_hidden
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
         page_config['notebookVersion'] = json.dumps(jpserver_version_info)
@@ -734,8 +736,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         build_handler = (build_path, BuildHandler, {'builder': builder})
         handlers.append(build_handler)
 
-        #YJS_Echo WS Handler
-        yjs_echo_handler = (r"/api/yjs/(.*)", YJSEchoWS)
+        # Yjs Echo WebSocket handler
+        yjs_echo_handler = (r"/api/yjs/(.*)", YjsEchoWebSocket)
         handlers.append(yjs_echo_handler)
 
         errored = False

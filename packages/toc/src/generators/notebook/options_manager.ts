@@ -24,6 +24,14 @@ interface IOptions {
   numberingH1: boolean;
 
   /**
+   * Boolean indicating whether cell output should be included in headings.
+   */
+  includeOutput: boolean;
+  /**
+   * Boolean indicating whether notebook headers should collapse with ToC headers and vice versa
+   */
+  syncCollapseState: boolean;
+  /**
    * HTML sanitizer.
    */
   sanitizer: ISanitizer;
@@ -44,7 +52,7 @@ interface IOptions {
  *
  * @private
  */
-class OptionsManager extends Registry.IOptionsManager {
+class OptionsManager implements Registry.IOptionsManager {
   /**
    * Returns an options manager.
    *
@@ -58,9 +66,10 @@ class OptionsManager extends Registry.IOptionsManager {
     notebook: INotebookTracker,
     options: IOptions
   ) {
-    super();
     this._numbering = options.numbering;
     this._numberingH1 = options.numberingH1;
+    this._includeOutput = options.includeOutput;
+    this._syncCollapseState = options.syncCollapseState;
     this._widget = widget;
     this._notebook = notebook;
     this.sanitizer = options.sanitizer;
@@ -83,7 +92,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._tagTool = tagTool;
   }
 
-  get tagTool() {
+  get tagTool(): TagsToolComponent | null {
     return this._tagTool;
   }
 
@@ -105,7 +114,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this.notebookMetadata = ['toc-autonumbering', this._numbering];
   }
 
-  get numbering() {
+  get numbering(): boolean {
     return this._numbering;
   }
 
@@ -119,8 +128,35 @@ class OptionsManager extends Registry.IOptionsManager {
     }
   }
 
-  get numberingH1() {
+  get numberingH1(): boolean {
     return this._numberingH1;
+  }
+
+  /**
+   * Toggles whether cell outputs should be included in headings.
+   */
+  set includeOutput(value: boolean) {
+    if (this._includeOutput != value) {
+      this._includeOutput = value;
+      this._widget.update();
+    }
+  }
+
+  get includeOutput(): boolean {
+    return this._includeOutput;
+  }
+  /**
+   * Gets/sets option for ToC heading collapsing to be reflected in Notebook and vice versa
+   */
+  set syncCollapseState(value: boolean) {
+    if (this._syncCollapseState != value) {
+      this._syncCollapseState = value;
+      this._widget.update();
+    }
+  }
+
+  get syncCollapseState(): boolean {
+    return this._syncCollapseState;
   }
 
   /**
@@ -132,7 +168,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._widget.update();
   }
 
-  get showCode() {
+  get showCode(): boolean {
     return this._showCode;
   }
 
@@ -145,7 +181,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._widget.update();
   }
 
-  get showMarkdown() {
+  get showMarkdown(): boolean {
     return this._showMarkdown;
   }
 
@@ -165,14 +201,14 @@ class OptionsManager extends Registry.IOptionsManager {
     this._widget.update();
   }
 
-  get showTags() {
+  get showTags(): boolean {
     return this._showTags;
   }
 
   /**
    * Returns a list of selected tags.
    */
-  get filtered() {
+  get filtered(): string[] {
     if (this.tagTool) {
       this._filtered = this.tagTool.filtered;
     } else if (this.storeTags.length > 0) {
@@ -185,6 +221,9 @@ class OptionsManager extends Registry.IOptionsManager {
 
   /**
    * Gets/sets a pre-rendered a toolbar.
+   *
+   * @deprecated since v4
+   * This is not used any more
    */
   set preRenderedToolbar(value: any) {
     this._preRenderedToolbar = value;
@@ -197,7 +236,7 @@ class OptionsManager extends Registry.IOptionsManager {
   /**
    * Updates a table of contents widget.
    */
-  updateWidget() {
+  updateWidget(): void {
     this._widget.update();
   }
 
@@ -207,7 +246,7 @@ class OptionsManager extends Registry.IOptionsManager {
    * to perform an action when the collapse button
    * is pressed.
    */
-  updateAndCollapse(args: Registry.ICollapseChangedArgs) {
+  updateAndCollapse(args: Registry.ICollapseChangedArgs): void {
     this._collapseChanged.emit(args);
     this._widget.update();
   }
@@ -221,6 +260,8 @@ class OptionsManager extends Registry.IOptionsManager {
    *
    * @param numbering - boolean indicating whether to number items
    * @param numberingH1 - boolean indicating whether to number first level items
+   * @param includeOutput - boolean indicating whether cell outputs should be included in headings
+   * @param syncCollapseState - boolean indicating whether collapsing in ToC should be reflected in Notebook and vice versa
    * @param showCode - boolean indicating whether to show code previews
    * @param showMarkdown - boolean indicating whether to show Markdown previews
    * @param showTags - boolean indicating whether to show tags
@@ -228,12 +269,16 @@ class OptionsManager extends Registry.IOptionsManager {
   initializeOptions(
     numbering: boolean,
     numberingH1: boolean,
+    includeOutput: boolean,
+    syncCollapseState: boolean,
     showCode: boolean,
     showMarkdown: boolean,
     showTags: boolean
-  ) {
+  ): void {
     this._numbering = numbering;
     this._numberingH1 = numberingH1;
+    this._includeOutput = includeOutput;
+    this._syncCollapseState = syncCollapseState;
     this._showCode = showCode;
     this._showMarkdown = showMarkdown;
     this._showTags = showTags;
@@ -244,6 +289,8 @@ class OptionsManager extends Registry.IOptionsManager {
   private _filtered: string[] = [];
   private _numbering: boolean;
   private _numberingH1: boolean;
+  private _includeOutput: boolean;
+  private _syncCollapseState: boolean;
   private _showCode = false;
   private _showMarkdown = false;
   private _showTags = false;
@@ -252,7 +299,7 @@ class OptionsManager extends Registry.IOptionsManager {
   private _collapseChanged: Signal<this, Registry.ICollapseChangedArgs>;
   private _tagTool: TagsToolComponent | null = null;
   translator: ITranslator; // FIXME-TRANS:
-  public storeTags: string[];
+  storeTags: string[];
 }
 
 /**

@@ -1,3 +1,4 @@
+/* global NodeRequire */
 import path from 'path';
 import glob from 'glob';
 import fs from 'fs-extra';
@@ -9,6 +10,16 @@ import { JSONExt, JSONObject } from '@lumino/coreutils';
 type Dict<T> = { [key: string]: T };
 
 const backSlash = /\\/g;
+
+/**
+ *  Exit with an error code on uncaught error.
+ */
+export function exitOnUuncaughtException(): void {
+  process.on('uncaughtException', function (err) {
+    console.error('Uncaught exception', err);
+    process.exit(1);
+  });
+}
 
 /**
  * Get all of the lerna package paths.
@@ -215,18 +226,13 @@ ${status}`
 /**
  * Post-bump.
  */
-export function postbump(): void {
-  // Get the current version.
-  const curr = getPythonVersion();
-
-  // Update the dev mode version.
-  const filePath = path.resolve(path.join('.', 'dev_mode', 'package.json'));
-  const data = readJSONFile(filePath);
-  data.jupyterlab.version = curr;
-  writeJSONFile(filePath, data);
+export function postbump(commit = true): void {
+  run('jlpm run integrity');
 
   // Commit changes.
-  run('git commit -am "bump version"');
+  if (commit) {
+    run('git commit -am "[ci skip] bump version"');
+  }
 }
 
 /**

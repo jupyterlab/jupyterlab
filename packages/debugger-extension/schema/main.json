@@ -3,7 +3,42 @@
   "description": "Debugger settings",
   "jupyter.lab.setting-icon": "ui-components:bug",
   "jupyter.lab.setting-icon-label": "Debugger",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-kernel",
+        "items": [
+          { "type": "separator", "rank": 1.2 },
+          { "command": "debugger:restart-debug", "rank": 1.2 }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "command": "debugger:show-panel",
+            "rank": 5
+          }
+        ]
+      }
+    ],
+    "context": [
+      {
+        "command": "debugger:inspect-variable",
+        "selector": ".jp-DebuggerVariables-body .jp-DebuggerVariables-grid"
+      },
+      {
+        "command": "debugger:render-mime-variable",
+        "selector": ".jp-DebuggerVariables-body"
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
+    {
+      "command": "debugger:show-panel",
+      "keys": ["Accel Shift E"],
+      "selector": "body"
+    },
     {
       "command": "debugger:debug-console",
       "keys": ["Accel Shift I"],

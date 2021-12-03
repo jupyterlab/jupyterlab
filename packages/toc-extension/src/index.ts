@@ -29,13 +29,16 @@ import {
 } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
-import { runNestedCodeCells } from '@jupyterlab/toc';
+import { INotebookHeading } from '@jupyterlab/toc';
+import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
 
 /**
- * The command IDs used by TOC item.
+ * A namespace for command IDs of table of contents plugin.
  */
 namespace CommandIDs {
   export const runCells = 'toc:run-cells';
+
+  export const showPanel = 'toc:show-panel';
 }
 
 /**
@@ -44,26 +47,26 @@ namespace CommandIDs {
  * @private
  * @param app - Jupyter application
  * @param docmanager - document manager
- * @param editorTracker - editor tracker
- * @param labShell - Jupyter lab shell
- * @param restorer - application layout restorer
- * @param markdownViewerTracker - Markdown viewer tracker
- * @param notebookTracker - notebook tracker
  * @param rendermime - rendered MIME registry
  * @param translator - translator
+ * @param editorTracker - editor tracker
+ * @param restorer - application layout restorer
+ * @param labShell - Jupyter lab shell
+ * @param markdownViewerTracker - Markdown viewer tracker
+ * @param notebookTracker - notebook tracker
  * @param settingRegistry - setting registry
  * @returns table of contents registry
  */
 async function activateTOC(
   app: JupyterFrontEnd,
   docmanager: IDocumentManager,
-  editorTracker: IEditorTracker,
-  labShell: ILabShell,
-  restorer: ILayoutRestorer,
-  markdownViewerTracker: IMarkdownViewerTracker,
-  notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
+  editorTracker?: IEditorTracker,
+  restorer?: ILayoutRestorer,
+  labShell?: ILabShell,
+  markdownViewerTracker?: IMarkdownViewerTracker,
+  notebookTracker?: INotebookTracker,
   settingRegistry?: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
@@ -84,22 +87,58 @@ async function activateTOC(
   toc.node.setAttribute('role', 'region');
   toc.node.setAttribute('aria-label', trans.__('Table of Contents section'));
 
-  labShell.add(toc, 'left', { rank: 400 });
+  app.shell.add(toc, 'left', { rank: 400 });
 
   app.commands.addCommand(CommandIDs.runCells, {
     execute: args => {
-      return runNestedCodeCells(toc.headings, toc.activeEntry);
+      if (!notebookTracker) {
+        return null;
+      }
+
+      const panel = notebookTracker.currentWidget;
+      if (panel == null) {
+        return;
+      }
+
+      const cells = panel.content.widgets;
+      if (cells === undefined) {
+        return;
+      }
+
+      const activeCell = (toc.activeEntry as INotebookHeading).cellRef;
+
+      if (activeCell instanceof MarkdownCell) {
+        let level = activeCell.headingInfo.level;
+        for (let i = cells.indexOf(activeCell) + 1; i < cells.length; i++) {
+          const cell = cells[i];
+          if (cell instanceof MarkdownCell && cell.headingInfo.level <= level) {
+            break;
+          }
+
+          if (cell instanceof CodeCell) {
+            void CodeCell.execute(cell, panel.sessionContext);
+          }
+        }
+      } else {
+        if (activeCell instanceof CodeCell) {
+          void CodeCell.execute(activeCell, panel.sessionContext);
+        }
+      }
     },
     label: trans.__('Run Cell(s)')
   });
 
-  app.contextMenu.addItem({
-    selector: '.jp-tocItem',
-    command: CommandIDs.runCells
+  app.commands.addCommand(CommandIDs.showPanel, {
+    label: trans.__('Table of Contents'),
+    execute: () => {
+      app.shell.activateById(toc.id);
+    }
   });
 
-  // Add the ToC widget to the application restorer:
-  restorer.add(toc, '@jupyterlab/toc:plugin');
+  if (restorer) {
+    // Add the ToC widget to the application restorer:
+    restorer.add(toc, '@jupyterlab/toc:plugin');
+  }
 
   // Attempt to load plugin settings:
   let settings: ISettingRegistry.ISettings | undefined;
@@ -114,45 +153,53 @@ async function activateTOC(
   }
 
   // Create a notebook generator:
-  const notebookGenerator = createNotebookGenerator(
-    notebookTracker,
-    toc,
-    rendermime.sanitizer,
-    translator,
-    settings
-  );
-  registry.add(notebookGenerator);
+  if (notebookTracker) {
+    const notebookGenerator = createNotebookGenerator(
+      notebookTracker,
+      toc,
+      rendermime.sanitizer,
+      translator,
+      settings
+    );
+    registry.add(notebookGenerator);
+  }
 
   // Create a Markdown generator:
-  const markdownGenerator = createMarkdownGenerator(
-    editorTracker,
-    toc,
-    rendermime.sanitizer,
-    translator,
-    settings
-  );
-  registry.add(markdownGenerator);
+  if (editorTracker) {
+    const markdownGenerator = createMarkdownGenerator(
+      editorTracker,
+      toc,
+      rendermime.sanitizer,
+      translator,
+      settings
+    );
+    registry.add(markdownGenerator);
+
+    // Create a LaTeX generator:
+    const latexGenerator = createLatexGenerator(editorTracker);
+    registry.add(latexGenerator);
+
+    // Create a Python generator:
+    const pythonGenerator = createPythonGenerator(editorTracker);
+    registry.add(pythonGenerator);
+  }
 
   // Create a rendered Markdown generator:
-  const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
-    markdownViewerTracker,
-    toc,
-    rendermime.sanitizer,
-    translator,
-    settings
-  );
-  registry.add(renderedMarkdownGenerator);
-
-  // Create a LaTeX generator:
-  const latexGenerator = createLatexGenerator(editorTracker);
-  registry.add(latexGenerator);
-
-  // Create a Python generator:
-  const pythonGenerator = createPythonGenerator(editorTracker);
-  registry.add(pythonGenerator);
+  if (markdownViewerTracker) {
+    const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
+      markdownViewerTracker,
+      toc,
+      rendermime.sanitizer,
+      translator,
+      settings
+    );
+    registry.add(renderedMarkdownGenerator);
+  }
 
   // Update the ToC when the active widget changes:
-  labShell.currentChanged.connect(onConnect);
+  if (labShell) {
+    labShell.currentChanged.connect(onConnect);
+  }
 
   return registry;
 
@@ -188,17 +235,15 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   id: '@jupyterlab/toc:plugin',
   autoStart: true,
   provides: ITableOfContentsRegistry,
-  requires: [
-    IDocumentManager,
+  requires: [IDocumentManager, IRenderMimeRegistry, ITranslator],
+  optional: [
     IEditorTracker,
-    ILabShell,
     ILayoutRestorer,
+    ILabShell,
     IMarkdownViewerTracker,
     INotebookTracker,
-    IRenderMimeRegistry,
-    ITranslator
+    ISettingRegistry
   ],
-  optional: [ISettingRegistry],
   activate: activateTOC
 };
 

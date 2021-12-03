@@ -158,27 +158,36 @@ describe('docregistry/registry', () => {
     describe('#addModelFactory()', () => {
       it('should add the model factory to the registry', () => {
         const factory = new Base64ModelFactory();
-        registry.addModelFactory(factory);
+        expect(() => {
+          registry.addModelFactory(factory);
+        }).not.toThrow();
       });
 
       it('should be a no-op a factory with the given `name` is already registered', () => {
         const factory = new Base64ModelFactory();
         registry.addModelFactory(factory);
-        const disposable = registry.addModelFactory(new Base64ModelFactory());
-        disposable.dispose();
+
+        expect(() => {
+          const disposable = registry.addModelFactory(new Base64ModelFactory());
+          disposable.dispose();
+        }).not.toThrow();
       });
 
       it('should be a no-op if the same factory is already registered', () => {
         const factory = new Base64ModelFactory();
         registry.addModelFactory(factory);
-        const disposable = registry.addModelFactory(factory);
-        disposable.dispose();
+        expect(() => {
+          const disposable = registry.addModelFactory(factory);
+          disposable.dispose();
+        }).not.toThrow();
       });
 
       it('should be removed from the registry when disposed', () => {
         const factory = new Base64ModelFactory();
-        const disposable = registry.addModelFactory(factory);
-        disposable.dispose();
+        expect(() => {
+          const disposable = registry.addModelFactory(factory);
+          disposable.dispose();
+        }).not.toThrow();
       });
     });
 
@@ -376,6 +385,19 @@ describe('docregistry/registry', () => {
         registry.addWidgetFactory(mdFactory);
         registry.setDefaultWidgetFactory('foobar', 'markdown');
         expect(registry.defaultWidgetFactory('a.foo.bar')).toBe(mdFactory);
+      });
+
+      it('should override the default rendered widget factory for a file type', () => {
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown', 'foobar'],
+          defaultFor: []
+        });
+        registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('foobar', 'markdown');
+        expect(registry.defaultRenderedWidgetFactory('a.foo.bar')).toBe(
+          mdFactory
+        );
       });
 
       it('should revert to the default widget factory when unset', () => {
@@ -647,9 +669,15 @@ describe('docregistry/registry', () => {
         expect(ft[1].name).toBe('json');
       });
 
-      it('should be case insensitive', () => {
-        const ft = registry.getFileTypesForPath('foo/bar/baz.PY');
-        expect(ft[0].name).toBe('python');
+      it.each([
+        ['python', null, 'foo/bar/baz.PY'],
+        ['r-markdown', ['.Rmd'], 'foo/bar/baz.Rmd']
+      ])('should be case insensitive', (name, extensions, filename) => {
+        if (extensions) {
+          registry.addFileType({ name, extensions });
+        }
+        const ft = registry.getFileTypesForPath(filename);
+        expect(ft[0].name).toBe(name);
       });
 
       it('should support pattern matching', () => {

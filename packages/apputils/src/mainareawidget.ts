@@ -2,12 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ReactiveToolbar, Spinner, Toolbar } from '@jupyterlab/ui-components';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
 import { DOMUtils } from './domutils';
 import { Printing } from './printing';
-import { Spinner } from './spinner';
-import { Toolbar } from './toolbar';
 
 /**
  * A widget meant to be contained in the JupyterLab main area.
@@ -40,7 +39,7 @@ export class MainAreaWidget<T extends Widget = Widget>
     const content = (this._content = options.content);
     content.node.setAttribute('role', 'region');
     content.node.setAttribute('aria-label', trans.__('notebook content'));
-    const toolbar = (this._toolbar = options.toolbar || new Toolbar());
+    const toolbar = (this._toolbar = options.toolbar || new ReactiveToolbar());
     toolbar.node.setAttribute('role', 'navigation');
     toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
     const contentHeader = (this._contentHeader =
@@ -88,6 +87,7 @@ export class MainAreaWidget<T extends Widget = Widget>
         .catch(e => {
           // Show a revealed promise error.
           const error = new Widget();
+          error.addClass('jp-MainAreaWidget-error');
           // Show the error to the user.
           const pre = document.createElement('pre');
           pre.textContent = String(e);
@@ -321,7 +321,7 @@ export namespace MainAreaWidget {
     content?: T;
 
     /**
-     * The toolbar to use for the widget.  Defaults to an empty toolbar.
+     * The toolbar to use for the widget. Defaults to an empty toolbar.
      */
     toolbar?: Toolbar;
 

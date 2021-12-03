@@ -55,7 +55,7 @@ class CodeComponent extends React.Component<IProperties, IState> {
    *
    * @param props - component properties
    */
-  UNSAFE_componentWillReceiveProps(nextProps: IProperties) {
+  UNSAFE_componentWillReceiveProps(nextProps: IProperties): void {
     this.setState({ heading: nextProps.heading });
   }
 
@@ -64,7 +64,7 @@ class CodeComponent extends React.Component<IProperties, IState> {
    *
    * @returns rendered component
    */
-  render() {
+  render(): JSX.Element {
     // Get the current rendered CodeMirror:
     let html = this.state.heading.cellRef!.editor.host.innerHTML;
 

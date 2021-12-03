@@ -10,7 +10,7 @@ import {
 
 import { log } from './log';
 
-export async function main() {
+export async function main(): Promise<void> {
   log('Starting session manager');
   const kernelManager = new KernelManager();
   const sessionManager = new SessionManager({ kernelManager });

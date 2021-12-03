@@ -1,14 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Button, closeIcon, LabIcon } from '@jupyterlab/ui-components';
+import {
+  Button,
+  closeIcon,
+  LabIcon,
+  ReactWidget,
+  Styling
+} from '@jupyterlab/ui-components';
 import { ArrayExt, each, map, toArray } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { Styling } from './styling';
-import { ReactWidget } from './vdom';
 import { WidgetTracker } from './widgettracker';
 
 /**
@@ -35,7 +39,7 @@ export function showDialog<T>(
  */
 export function showErrorMessage(
   title: string,
-  error: any,
+  error: string | Dialog.IError,
   buttons: ReadonlyArray<Dialog.IButton> = [
     Dialog.okButton({ label: 'Dismiss' })
   ]
@@ -97,6 +101,9 @@ export class Dialog<T> extends Widget {
     const layout = (this.layout = new PanelLayout());
     const content = new Panel();
     content.addClass('jp-Dialog-content');
+    if (typeof options.body === 'string') {
+      content.addClass('jp-Dialog-content-small');
+    }
     layout.addWidget(content);
 
     this._body = normalized.body;
@@ -488,6 +495,16 @@ export namespace Dialog {
      * The button display type.
      */
     displayType: 'default' | 'warn';
+  }
+
+  /**
+   * Error object interface
+   */
+  export interface IError {
+    /**
+     * Error message
+     */
+    message: string | React.ReactElement<any>;
   }
 
   /**
@@ -897,23 +914,19 @@ namespace Private {
   export function handleOptions<T>(
     options: Partial<Dialog.IOptions<T>> = {}
   ): Dialog.IOptions<T> {
-    const buttons = options.buttons || [
+    const buttons = options.buttons ?? [
       Dialog.cancelButton(),
       Dialog.okButton()
     ];
-    let defaultButton = buttons.length - 1;
-    if (options.defaultButton !== undefined) {
-      defaultButton = options.defaultButton;
-    }
     return {
-      title: options.title || '',
-      body: options.body || '',
-      host: options.host || document.body,
+      title: options.title ?? '',
+      body: options.body ?? '',
+      host: options.host ?? document.body,
       buttons,
-      defaultButton,
-      renderer: options.renderer || Dialog.defaultRenderer,
-      focusNodeSelector: options.focusNodeSelector || '',
-      hasClose: options.hasClose || true
+      defaultButton: options.defaultButton ?? buttons.length - 1,
+      renderer: options.renderer ?? Dialog.defaultRenderer,
+      focusNodeSelector: options.focusNodeSelector ?? '',
+      hasClose: options.hasClose ?? true
     };
   }
 

@@ -40,7 +40,7 @@ def post_dist():
         version = json.load(fid)['jupyterlab']['version']
 
     if Version(version) != Version(get_version(f'{NAME}/_version.py')):
-        raise ValueError('Version mismatch, please run `build:update`')
+        raise ValueError('Version mismatch, please run `npm run prepare:python-release`')
 
 
 try:

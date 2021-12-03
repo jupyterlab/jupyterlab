@@ -28,10 +28,6 @@
         "id": "jp-mainmenu-settings",
         "items": [
           {
-            "type": "separator",
-            "rank": 10
-          },
-          {
             "type": "submenu",
             "submenu": {
               "id": "jp-mainmenu-view-codemirror-keymap",
@@ -63,7 +59,7 @@
                 }
               ]
             },
-            "rank": 10
+            "rank": 31
           },
           {
             "type": "submenu",
@@ -163,11 +159,11 @@
                 }
               ]
             },
-            "rank": 10
+            "rank": 31
           },
           {
             "type": "separator",
-            "rank": 10
+            "rank": 39
           }
         ]
       }

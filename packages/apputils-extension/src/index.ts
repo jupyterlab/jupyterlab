@@ -26,7 +26,7 @@ import {
   sessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
@@ -37,6 +37,7 @@ import { Debouncer, Throttler } from '@lumino/polling';
 import { Palette } from './palette';
 import { settingsPlugin } from './settingsplugin';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
+import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 
 /**
@@ -335,23 +336,30 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
   if (current === undefined) {
-    document.title = `JupyterLab${
+    document.title = `${PageConfig.getOption('appName') || 'JupyterLab'}${
       workspace.startsWith('auto-') ? ` (${workspace})` : ``
     }`;
   } else {
-    // First 15 characters of current document name
-    current = current.split(':')[1].slice(0, 15);
+    // File name from current path
+    let currentFile: string = PathExt.basename(current.split(':')[1]);
+    // Truncate to first 12 characters of current document name + ... if length > 15
+    currentFile =
+      currentFile.length > 15
+        ? currentFile.slice(0, 12).concat(`…`)
+        : currentFile;
     // Number of restorable items that are either notebooks or editors
     const count: number = Object.keys(data).filter(
       item => item.startsWith('notebook') || item.startsWith('editor')
     ).length;
 
     if (workspace.startsWith('auto-')) {
-      document.title = `${current} (${workspace}${
+      document.title = `${currentFile} (${workspace}${
         count > 1 ? ` : ${count}` : ``
       }) - ${name}`;
     } else {
-      document.title = `${current}${count > 1 ? ` (${count})` : ``} - ${name}`;
+      document.title = `${currentFile}${
+        count > 1 ? ` (${count})` : ``
+      } - ${name}`;
     }
   }
 }
@@ -571,9 +579,11 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    // Add a command for taking lists of commands and command arguments
+    // and running all the enabled commands.
     commands.addCommand(CommandIDs.runAllEnabled, {
       label: trans.__('Run All Enabled Commands Passed as Args'),
-      execute: args => {
+      execute: async args => {
         const commands: string[] = args.commands as string[];
         const commandArgs: any = args.args;
         const argList = Array.isArray(args);
@@ -582,7 +592,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
           const cmd = commands[i];
           const arg = argList ? commandArgs[i] : commandArgs;
           if (app.commands.isEnabled(cmd, arg)) {
-            app.commands.execute(cmd, arg);
+            await app.commands.execute(cmd, arg);
           } else {
             if (errorIfNotEnabled) {
               console.error(`${cmd} is not enabled.`);
@@ -622,6 +632,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   themesPlugin,
   themesPaletteMenuPlugin,
   toggleHeader,
+  toolbarRegistry,
   utilityCommands,
   workspacesPlugin
 ];

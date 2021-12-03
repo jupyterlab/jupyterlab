@@ -20,10 +20,11 @@ import {
 } from '@jupyterlab/codemirror';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
+import { Widget } from '@lumino/widgets';
 import CodeMirror from 'codemirror';
 
 /**
@@ -147,7 +148,7 @@ class CodeMirrorSingleton implements ICodeMirror {
 
   async ensureVimKeymap() {
     if (!('Vim' in (CodeMirror as any))) {
-      // @ts-expect-error
+      // @ts-expect-error Import non typed package
       await import('codemirror/keymap/vim.js');
     }
   }
@@ -403,11 +404,8 @@ function activateEditorCommands(
     }
     // Add go to line capabilities to the edit menu.
     mainMenu.editMenu.goToLiners.add({
-      tracker,
-      goToLine: (widget: IDocumentWidget<FileEditor>) => {
-        const editor = widget.content.editor as CodeMirrorEditor;
-        editor.execCommand('jumpToLine');
-      }
-    } as IEditMenu.IGoToLiner<IDocumentWidget<FileEditor>>);
+      id: CommandIDs.goToLine,
+      isEnabled: (w: Widget) => tracker.currentWidget !== null && tracker.has(w)
+    });
   }
 }

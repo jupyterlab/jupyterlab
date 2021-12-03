@@ -3,6 +3,68 @@
 Extension Migration Guide
 ================================================
 
+JupyterLab 3.x to 4.x
+---------------------
+
+.. note::
+
+   With JupyterLab 4.x, the npm package version policy changed to not bump major version with 
+   the Python package unless required to ease extension compatibility.
+
+API breaking changes
+^^^^^^^^^^^^^^^^^^^^
+
+Here is a list of JupyterLab npm packages that encountered API changes and therefore have
+bumped their major version (following semver convention):
+
+- ``@jupyterlab/ui-components`` from 3.x to 4.x
+   Major version bumped following removal of Blueprint JS dependency. Extensions using proxied
+   components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly 
+   from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
+   need to switch to the Blueprint components as the interfaces of those components in JupyterLab
+   do not match those of Blueprint JS.
+
+JupyterLab 3.0 to 3.1
+---------------------
+
+New main and context menus customization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab 3.1 introduces a new way to hook commands into :ref:`mainmenu` and :ref:`context_menu`.
+It allows the final user to customize those menus through settings as it is already possible for
+the shortcuts.  
+Using the API is not recommended any longer except to create dynamic menus.
+
+
+Jest configuration update
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
+They need to be ignore when transforming the code with Jest. You will need to update the 
+``transformIgnorePatterns`` to match:
+
+.. code::
+
+   const esModules = [
+     '@jupyterlab/',
+     'lib0',
+     'y\\-protocols',
+     'y\\-websocket',
+     'yjs'
+   ].join('|');
+
+   // ...
+
+   transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
+
+For more information, have a look at :ref:`testing_with_jest`.
+
+.. note::
+
+   Here is an example of pull request to update to JupyterLab 3.1 in ``@jupyterlab/git`` extension:  
+   https://github.com/jupyterlab/jupyterlab-git/pull/979/files
+
+
 .. _extension_migration_2_3:
 
 JupyterLab 2.x to 3.x
@@ -105,7 +167,7 @@ The upgrade script also updates the dependencies in ``package.json`` to the ``^3
 On the diff above, we see that additional development scripts are also added, as they are used by the new extension system workflow.
 
 The diff also shows the new ``@jupyterlab/builder`` as a ``devDependency``.
-``@jupyterlab/builder`` is a package required to build the extension as a federated extension.
+``@jupyterlab/builder`` is a package required to build the extension as a federated (prebuilt) extension.
 It hides away internal dependencies such as ``webpack``, and produces the assets that can then be distributed as part of a Python package.
 
 Extension developers do not need to interact with ``@jupyterlab/builder`` directly, but instead can use the

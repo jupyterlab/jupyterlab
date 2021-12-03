@@ -11,6 +11,8 @@
  * Ensure a consistent version of all packages.
  * Manage the metapackage meta package.
  */
+import { execSync } from 'child_process';
+import * as glob from 'glob';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as utils from './utils';
@@ -22,11 +24,26 @@ import {
 
 type Dict<T> = { [key: string]: T };
 
+// URL config for this branch
+// Source and target branches
+// Target RTD version name
+// For master these will be the same, for other branches the source
+// branch is whichever branch it was created from
+// The current release branch should target RTD stable
+// Master should target latest
+// All other release branches should target a specific named version
+const URL_CONFIG = {
+  source: 'master',
+  target: 'master',
+  rtdVersion: 'latest'
+};
+
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['path', 'webpack'],
-  '@jupyterlab/builder': ['path'],
+  '@jupyterlab/builder': ['path', 'crypto'],
+  '@jupyterlab/galata': ['fs', 'path'],
   '@jupyterlab/testutils': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
@@ -67,8 +84,9 @@ const UNUSED: Dict<string[]> = {
     'webpack-cli',
     'worker-loader'
   ],
-  '@jupyterlab/buildutils': ['npm-cli-login', 'verdaccio'],
+  '@jupyterlab/buildutils': ['verdaccio'],
   '@jupyterlab/coreutils': ['path-browserify'],
+  '@jupyterlab/galata': ['node-fetch', 'http-server'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testutils': [
@@ -235,6 +253,97 @@ const depCache: Dict<string> = {};
 const locals: Dict<string> = {};
 
 /**
+ * Ensure branch integrity - GitHub and RTD urls, and workflow target branches
+ *
+ * @returns An array of messages for changes.
+ */
+function ensureBranch(): string[] {
+  const messages: string[] = [];
+
+  const { source, target, rtdVersion } = URL_CONFIG;
+
+  // Handle the github_version in conf.py
+  const confPath = 'docs/source/conf.py';
+  const oldConfData = fs.readFileSync(confPath, 'utf-8');
+  const confTest = new RegExp('"github_version": "(.*)"');
+  const newConfData = oldConfData.replace(
+    confTest,
+    `"github_version": "${target}"`
+  );
+  if (newConfData !== oldConfData) {
+    messages.push(`Overwriting ${confPath}`);
+    fs.writeFileSync(confPath, newConfData, 'utf-8');
+  }
+
+  // Handle urls in files
+  // Get all files matching the desired file types
+  const fileTypes = ['.json', '.md', '.rst', '.yml', '.ts', '.tsx', '.py'];
+  let files = execSync('git ls-tree -r HEAD --name-only')
+    .toString()
+    .trim()
+    .split(/\r?\n/);
+  files = files.filter(filePath => {
+    return fileTypes.indexOf(path.extname(filePath)) !== -1;
+  });
+
+  // Set up string replacements
+  const base = '/jupyterlab/jupyterlab';
+  const rtdString = `jupyterlab.readthedocs.io/en/${rtdVersion}/`;
+  const urlMap = [
+    [`\/jupyterlab\/jupyterlab\/${source}\/`, `${base}/${target}/`],
+    [`\/jupyterlab\/jupyterlab\/blob\/${source}\/`, `${base}/blob/${target}/`],
+    [`\/jupyterlab\/jupyterlab\/tree\/${source}\/`, `${base}/tree/${target}/`],
+    [`jupyterlab.readthedocs.io\/en\/.*?\/`, rtdString]
+  ];
+
+  // Make the string replacements
+  files.forEach(filePath => {
+    if (path.basename(filePath) === 'ensure-repo.ts') {
+      return;
+    }
+    const oldData = fs.readFileSync(filePath, 'utf-8');
+    let newData = oldData;
+    urlMap.forEach(section => {
+      const test = new RegExp(section[0], 'g');
+      const replacer = section[1];
+      if (newData.match(test)) {
+        newData = newData.replace(test, replacer);
+      }
+    });
+
+    // Make sure the root RTD links point to stable
+    const badgeLink = '(http://jupyterlab.readthedocs.io/en/stable/)';
+    const toReplace = badgeLink.replace('stable', rtdVersion);
+    if (badgeLink !== toReplace) {
+      while (newData.indexOf(toReplace) !== -1) {
+        newData = newData.replace(toReplace, badgeLink);
+      }
+    }
+
+    if (newData !== oldData) {
+      messages.push(`Overwriting ${filePath}`);
+      fs.writeFileSync(filePath, newData, 'utf-8');
+    }
+  });
+
+  // Handle workflow file target branches
+  const workflows = glob.sync(path.join('.github', 'workflows', '*.yml'));
+  workflows.forEach(filePath => {
+    let workflowData = fs.readFileSync(filePath, 'utf-8');
+    const test = new RegExp(`\\[${source}\\]`, 'g');
+    if (workflowData.match(test)) {
+      if (workflowData.match(test)![1] !== `[${target}]`) {
+        messages.push(`Overwriting ${filePath}`);
+        workflowData = workflowData.replace(test, `[${target}]`);
+        fs.writeFileSync(filePath, workflowData, 'utf-8');
+      }
+    }
+  });
+
+  return messages;
+}
+
+/**
  * Ensure the metapackage package.
  *
  * @returns An array of messages for changes.
@@ -277,6 +386,9 @@ function ensureMetaPackage(): string[] {
       delete mpData.dependencies[name];
     }
   });
+
+  // Add to build:all target
+  mpData.scripts['build:all'] = 'npm run build';
 
   // Write the files.
   if (messages.length > 0) {
@@ -415,6 +527,10 @@ function ensureJupyterlab(): string[] {
     corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
   });
 
+  // Update the dev mode version.
+  const curr = utils.getPythonVersion();
+  corePackage.jupyterlab.version = curr;
+
   // Write the package.json back to disk.
   if (utils.writePackageData(corePath, corePackage)) {
     return ['Updated dev mode'];
@@ -450,6 +566,17 @@ function ensureBuildUtils() {
  */
 export async function ensureIntegrity(): Promise<boolean> {
   const messages: Dict<string[]> = {};
+
+  if (process.env.SKIP_INTEGRITY_CHECK === 'true') {
+    console.log('Skipping integrity check');
+    return true;
+  }
+
+  // Handle branch integrity
+  const branchMessages = ensureBranch();
+  if (branchMessages.length > 0) {
+    messages['branch'] = branchMessages;
+  }
 
   // Pick up all the package versions.
   const paths = utils.getLernaPaths();
@@ -602,12 +729,33 @@ export async function ensureIntegrity(): Promise<boolean> {
     .getCorePaths()
     .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
     .map(pth => {
-      return { path: './' + path.relative('.', pth) };
+      return { path: './' + path.relative('.', pth).replace('\\/g', '/') };
     });
   utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
 
   // Handle buildutils
   ensureBuildUtils();
+
+  // Handle the pyproject.toml file
+  const pyprojectPath = path.resolve('.', 'pyproject.toml');
+  const curr = utils.getPythonVersion();
+  let tag = 'latest';
+  if (!/\d+\.\d+\.\d+$/.test(curr)) {
+    tag = 'next';
+  }
+  const publishCommand = `npm publish --tag ${tag}`;
+  let pyprojectText = fs.readFileSync(pyprojectPath, { encoding: 'utf8' });
+  if (pyprojectText.indexOf(publishCommand) === -1) {
+    pyprojectText = pyprojectText.replace(
+      /npm publish --tag [a-z]+/,
+      publishCommand
+    );
+    fs.writeFileSync(pyprojectPath, pyprojectText, { encoding: 'utf8' });
+    if (!messages['top']) {
+      messages['top'] = [];
+    }
+    messages['top'].push('Update npm publish command in pyproject.toml');
+  }
 
   // Handle the JupyterLab application top package.
   pkgMessages = ensureJupyterlab();

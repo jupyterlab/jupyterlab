@@ -151,7 +151,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   /**
    * Get the length of the cell list.
    *
-   * @return The number of cells in the cell list.
+   * @returns The number of cells in the cell list.
    *
    * #### Notes
    * This is a read-only property.

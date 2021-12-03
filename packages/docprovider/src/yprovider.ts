@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { JSONObject, PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
 import { WebsocketProvider } from 'y-websocket';
@@ -10,7 +11,10 @@ import * as Y from 'yjs';
 import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
 import { getAnonymousUserName, getRandomColor } from './awareness';
 import * as env from 'lib0/environment';
+import { IStateDB } from '@jupyterlab/statedb';
 
+const PREFIX = '@jupyterlab/docprovider:yprovider';
+const USER = `${PREFIX}:user`;
 /**
  * A class to provide Yjs synchronization over WebSocket.
  *
@@ -41,17 +45,11 @@ export class WebSocketProviderWithLocks
     this._path = options.path;
     this._contentType = options.contentType;
     this._serverUrl = options.url;
-    const color = '#' + env.getParam('--usercolor', getRandomColor().slice(1));
-    const name = env.getParam('--username', getAnonymousUserName());
+
     const awareness = options.ymodel.awareness;
     const currState = awareness.getLocalState();
-    // only set if this was not already set by another plugin
-    if (currState && currState.name == null) {
-      options.ymodel.awareness.setLocalStateField('user', {
-        name,
-        color
-      });
-    }
+    let color = '#' + env.getParam('--usercolor', '');
+    let name = env.getParam('--username', '');
 
     // Message handler that confirms when a lock has been acquired
     this.messageHandlers[127] = (
@@ -94,15 +92,49 @@ export class WebSocketProviderWithLocks
     this._isInitialized = false;
     this._onConnectionStatus = this._onConnectionStatus.bind(this);
     this.on('status', this._onConnectionStatus);
+
+    const state = options.state;
+    if (name != '' || color != '#' || state == null) {
+      if (name == '') {
+        name = getAnonymousUserName();
+      }
+      if (color == '#') {
+        color = '#' + getRandomColor().slice(1);
+      }
+      // only set if this was not already set by another plugin
+      if (currState && currState.user?.name == null) {
+        options.ymodel.awareness.setLocalStateField('user', {
+          name,
+          color
+        });
+      }
+      return;
+    }
+
+    const user = state.fetch(USER);
+    void user.then(param => {
+      if (param === undefined) {
+        name = getAnonymousUserName();
+        color = '#' + getRandomColor().slice(1);
+        void state.save(USER, { userName: name, userColor: color });
+      } else {
+        const { userName, userColor } = param as JSONObject;
+        name = userName as string;
+        color = userColor as string;
+      }
+      // only set if this was not already set by another plugin
+      if (currState && currState.user?.name == null) {
+        options.ymodel.awareness.setLocalStateField('user', {
+          name,
+          color
+        });
+      }
+    });
   }
 
   setPath(newPath: string): void {
     if (newPath !== this._path) {
       this._path = newPath;
-      // The next time the provider connects, we should connect through a different server url
-      this.bcChannel =
-        this._serverUrl + '/' + this._contentType + ':' + this._path;
-      this.url = this.bcChannel;
       const encoder = encoding.createEncoder();
       encoding.write(encoder, 123);
       // writing a utf8 string to the encoder
@@ -116,6 +148,13 @@ export class WebSocketProviderWithLocks
         );
       }
       this._sendMessage(encoding.toUint8Array(encoder));
+      // prevent publishing messages to the old channel id.
+      this.disconnectBc();
+      // The next time the provider connects, we should connect through a different server url
+      this.bcChannel =
+        this._serverUrl + '/' + this._contentType + ':' + this._path;
+      this.url = this.bcChannel;
+      this.connectBc();
     }
   }
 
@@ -127,20 +166,15 @@ export class WebSocketProviderWithLocks
       return this._initialContentRequest.promise;
     }
 
-    let resolve: any, reject: any;
-    const promise: Promise<boolean> = new Promise((_resolve, _reject) => {
-      resolve = _resolve;
-      reject = _reject;
-    });
-    this._initialContentRequest = { promise, resolve, reject };
+    this._initialContentRequest = new PromiseDelegate<boolean>();
     this._sendMessage(new Uint8Array([125]));
 
     // Resolve with true if the server doesn't respond for some reason.
     // In case of a connection problem, we don't want the user to re-initialize the window.
     // Instead wait for y-websocket to connect to the server.
     // @todo maybe we should reload instead..
-    setTimeout(() => resolve(false), 1000);
-    return promise;
+    setTimeout(() => this._initialContentRequest?.resolve(false), 1000);
+    return this._initialContentRequest.promise;
   }
 
   /**
@@ -164,7 +198,10 @@ export class WebSocketProviderWithLocks
     }
     this._sendMessage(new Uint8Array([127]));
     // try to acquire lock in regular interval
-    const intervalID = setInterval(() => {
+    if (this._requestLockInterval) {
+      clearInterval(this._requestLockInterval);
+    }
+    this._requestLockInterval = setInterval(() => {
       if (this.wsconnected) {
         // try to acquire lock
         this._sendMessage(new Uint8Array([127]));
@@ -176,10 +213,6 @@ export class WebSocketProviderWithLocks
       reject = _reject;
     });
     this._currentLockRequest = { promise, resolve, reject };
-    const _finally = () => {
-      clearInterval(intervalID);
-    };
-    promise.then(_finally, _finally);
     return promise;
   }
 
@@ -195,6 +228,9 @@ export class WebSocketProviderWithLocks
     encoding.writeUint32(encoder, lock);
     // releasing lock
     this._sendMessage(encoding.toUint8Array(encoder));
+    if (this._requestLockInterval) {
+      clearInterval(this._requestLockInterval);
+    }
   }
 
   /**
@@ -238,16 +274,13 @@ export class WebSocketProviderWithLocks
   private _contentType: string;
   private _serverUrl: string;
   private _isInitialized: boolean;
+  private _requestLockInterval: number;
   private _currentLockRequest: {
     promise: Promise<number>;
     resolve: (lock: number) => void;
     reject: () => void;
   } | null = null;
-  private _initialContentRequest: {
-    promise: Promise<boolean>;
-    resolve: (initialized: boolean) => void;
-    reject: () => void;
-  } | null = null;
+  private _initialContentRequest: PromiseDelegate<boolean> | null = null;
 }
 
 /**
@@ -262,5 +295,10 @@ export namespace WebSocketProviderWithLocks {
      * The server URL
      */
     url: string;
+
+    /**
+     * The state database
+     */
+    state: IStateDB | null;
   }
 }

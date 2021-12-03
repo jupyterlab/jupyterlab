@@ -4,7 +4,7 @@
 declare let define: any;
 
 if (typeof define !== 'function') {
-  // @ts-expect-error
+  // @ts-expect-error Import of a untyped module
   const define = require('amdefine')(module); // eslint-disable-line @typescript-eslint/no-unused-vars
 }
 

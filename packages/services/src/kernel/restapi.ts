@@ -21,6 +21,32 @@ export interface IModel {
    * The name of the kernel.
    */
   readonly name: string;
+
+  /**
+   * The kernel execution state.
+   */
+  readonly execution_state?: string;
+
+  /**
+   * The timestamp of the last activity on the kernel.
+   */
+  // eslint-disable-next-line camelcase
+  readonly last_activity?: string;
+
+  /**
+   * The number of active connections to the kernel.
+   */
+  readonly connections?: number;
+
+  /**
+   * The reason the kernel died, if applicable.
+   */
+  readonly reason?: string;
+
+  /**
+   * The traceback for a dead kernel, if applicable.
+   */
+  readonly traceback?: string;
 }
 
 /**

@@ -95,7 +95,7 @@ export class CodeMirrorSearchProvider
     return this._startQuery(query, false);
   }
 
-  refreshOverlay() {
+  refreshOverlay(): void {
     this._refreshOverlay();
   }
 

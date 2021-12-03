@@ -465,14 +465,22 @@ export class ObservableList<T> implements IObservableList<T> {
    *
    * #### Notes
    * The `index` will be clamped to the bounds of the list.
+   *
    * By convention, the oldIndex is set to -2 to indicate
    * an insert operation.
+   *
+   * The value -2 as oldIndex can be used to distinguish from the push
+   * method which will use a value -1.
    *
    * #### Undefined Behavior
    * An `index` which is non-integral.
    */
   insert(index: number, value: T): void {
-    ArrayExt.insert(this._array, index, value);
+    if (index === this._array.length) {
+      this._array.push(value);
+    } else {
+      ArrayExt.insert(this._array, index, value);
+    }
     this._changed.emit({
       type: 'add',
       oldIndex: -2,
@@ -725,7 +733,7 @@ namespace Private {
   /**
    * The default strict equality item cmp.
    */
-  export function itemCmp(first: any, second: any): boolean {
+  export function itemCmp<T>(first: T, second: T): boolean {
     return first === second;
   }
 }

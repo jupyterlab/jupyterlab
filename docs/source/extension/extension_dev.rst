@@ -172,7 +172,7 @@ document can then be saved by the user in the usual manner.
 Theme plugins
 ^^^^^^^^^^^^^
 
-A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated. Since CSS files referenced by the ``style`` or ``styleModule`` keys are automatically bundled and loaded on the page, the theme files should not be referenced by these keys. 
+A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated. Since CSS files referenced by the ``style`` or ``styleModule`` keys are automatically bundled and loaded on the page, the theme files should not be referenced by these keys.
 
 The extension package containing the theme plugin must include all static assets that are referenced by ``@import`` in its theme CSS files. Local URLs can be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or ``url('../foo/bar.css')`` can be used to refer local files in the theme. Absolute URLs (starting with a ``/``) or external URLs (e.g. ``https:``) can be used to refer to external assets.
 
@@ -570,7 +570,56 @@ This ``install.json`` file is used by JupyterLab to help a user know how to mana
 * ``packageName``: This is the package name of the prebuilt extension in the package manager above, which may be different than the package name in ``package.json``.
 * ``uninstallInstructions``: This is a short block of text giving the user instructions for uninstalling the prebuilt extension. For example, it might instruct them to use a system package manager or talk to a system administrator.
 
+.. _dev_trove_classifiers:
 
+PyPI Trove Classifiers
+""""""""""""""""""""""
+
+Extensions distributed as Python packages may declare additional metadata in the form of
+`trove classifiers <https://pypi.org/classifiers>`__. These improve the browsing
+experience for users on `PyPI <https://pypi.org/search>`__. While including the license,
+development status, Python versions supported, and other topic classifiers are useful
+for many audiences, the following classifiers are specific to Jupyter and JupyterLab.
+
+.. code-block::
+
+    Framework :: Jupyter
+    Framework :: Jupyter :: JupyterLab
+    Framework :: Jupyter :: JupyterLab :: 1
+    Framework :: Jupyter :: JupyterLab :: 2
+    Framework :: Jupyter :: JupyterLab :: 3
+    Framework :: Jupyter :: JupyterLab :: 4
+    Framework :: Jupyter :: JupyterLab :: Extensions
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Mime Renderers
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
+
+Include each relevant classifier (and its parents) to help describe what your package
+provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyproject.toml``.
+
+.. hint::
+
+    For example, a theme, only compatible with JupyterLab 3, and distributed as
+    a ready-to-run, prebuilt extension might look like:
+
+    .. code-block:: python
+
+        # setup.py
+        setup(
+            # the rest of the package's metadata
+            # ...
+            classifiers=[
+                "Framework :: Jupyter",
+                "Framework :: Jupyter :: JupyterLab",
+                "Framework :: Jupyter :: JupyterLab :: 3",
+                "Framework :: Jupyter :: JupyterLab :: Extensions",
+                "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
+                "Framework :: Jupyter :: JupyterLab :: Extensions :: Themes",
+            ]
+        )
+
+    This would be discoverable from, for example, a
+    `PyPI search for theme extensions <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Themes>`__.
 
 .. _source_dev_workflow:
 
@@ -681,6 +730,8 @@ path on the user's machine or a provided tarball. Any valid
 We encourage extension authors to add the `jupyterlab-extension GitHub topic
 <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__ to any GitHub extension repository.
 
+.. _testing_with_jest:
+
 Testing your extension
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -703,14 +754,22 @@ To transpile jupyterlab packages, you need to install the following package:
    jlpm add --dev jest @types/jest ts-jest @babel/core@^7 @babel/preset-env@^7
 
 Then in `jest.config.js`, you will specify to use babel for js files and ignore
-all node modules except the jupyterlab ones:
+all node modules except the ES6 modules:
 
 ::
+
+   const esModules = [
+     '@jupyterlab/',
+     'lib0',
+     'y\\-protocols',
+     'y\\-websocket',
+     'yjs'
+   ].join('|');
 
    module.exports = {
      preset: 'ts-jest/presets/js-with-babel',
      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-     transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
+     transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
      globals: {
        'ts-jest': {
          tsConfig: 'tsconfig.json'

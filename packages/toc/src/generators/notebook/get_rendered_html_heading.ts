@@ -4,7 +4,7 @@
 import { ISanitizer } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
 import { generateNumbering } from '../../utils/generate_numbering';
-import { INotebookHeading } from '../../utils/headings';
+import { INotebookHeading, RunningStatus } from '../../utils/headings';
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 
@@ -40,7 +40,8 @@ function getRenderedHTMLHeadings(
   numbering = false,
   numberingH1 = true,
   cellRef: Cell,
-  index: number = -1
+  index: number = -1,
+  isRunning = RunningStatus.Idle
 ): INotebookHeading[] {
   let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
 
@@ -51,6 +52,10 @@ function getRenderedHTMLHeadings(
   }
   let headings: INotebookHeading[] = [];
   for (const el of nodes) {
+    if (el.classList.contains('jp-toc-ignore')) {
+      // skip this element if a special class name is included
+      continue;
+    }
     if (el.nodeName.toLowerCase() === 'p') {
       if (el.innerHTML) {
         let html = sanitizer.sanitize(el.innerHTML, sanitizerOptions);
@@ -62,7 +67,8 @@ function getRenderedHTMLHeadings(
           type: 'markdown',
           cellRef: cellRef,
           hasChild: false,
-          index: index
+          index: index,
+          isRunning
         });
       }
       continue;
@@ -93,7 +99,8 @@ function getRenderedHTMLHeadings(
       type: 'header',
       cellRef: cellRef,
       hasChild: false,
-      index: index
+      index: index,
+      isRunning
     });
   }
   return headings;

@@ -2071,10 +2071,10 @@ def _validate_extension(data):
     if mime_extension and mime_extension not in files:
         messages.append('Missing mimeExtension module "%s"' % mime_extension)
 
-    if themePath and not any(f.startswith(themePath) for f in files):
+    if themePath and not any(f.startswith(str(Path(themePath))) for f in files):
         messages.append('themePath is empty: "%s"' % themePath)
 
-    if schemaDir and not any(f.startswith(schemaDir) for f in files):
+    if schemaDir and not any(f.startswith(str(Path(schemaDir))) for f in files):
         messages.append('schemaDir is empty: "%s"' % schemaDir)
 
     return messages
@@ -2307,7 +2307,7 @@ def _log_single_compat_errors(logger, name, version, errors):
 
 
 def _compat_error_age(errors):
-    """Compare all incompatabilites for an extension.
+    """Compare all incompatibilities for an extension.
 
     Returns a number > 0 if all extensions are older than that supported by lab.
     Returns a number < 0 if all extensions are newer than that supported by lab.

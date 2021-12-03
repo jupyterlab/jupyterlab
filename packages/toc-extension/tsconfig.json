@@ -10,6 +10,9 @@
       "path": "../application"
     },
     {
+      "path": "../cells"
+    },
+    {
       "path": "../docmanager"
     },
     {

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PartialJSONObject } from '@lumino/coreutils';
-import * as posix from 'path';
+import { posix } from 'path';
 import urlparse from 'url-parse';
 
 /**
@@ -30,7 +30,7 @@ export namespace URLExt {
    *
    * @param url - The URL string to parse
    *
-   * @return a hostname string value
+   * @returns a hostname string value
    */
   export function getHostName(url: string): string {
     return urlparse(url).hostname;

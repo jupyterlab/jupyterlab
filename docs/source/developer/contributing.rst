@@ -29,7 +29,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
     :depth: 1
 
 General Guidelines for Contributing
-------------------------------------
+-----------------------------------
 
 For general documentation about contributing to Jupyter projects, see
 the `Project Jupyter Contributor
@@ -38,7 +38,7 @@ and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
 All source code is written in
-`TypeScript <http://www.typescriptlang.org/Handbook>`__. See the `Style
+`TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
 All source code is formatted using `prettier <https://prettier.io>`__.
@@ -119,7 +119,7 @@ If you use ``conda``, you can get it with:
 
    conda install -c conda-forge 'nodejs'
 
-If you use `Homebrew <http://brew.sh>`__ on Mac OS X:
+If you use `Homebrew <https://brew.sh>`__ on Mac OS X:
 
 .. code:: bash
 
@@ -171,6 +171,12 @@ Notes:
    installation, make sure Python 3.0+ is installed. Also, try using the
    Python 3.0+ version of ``pip`` or ``pip3 install -e .`` command to
    install JupyterLab from the forked repository.
+-  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
+   returned exit status 127 while in binding.gyp`` while running the 
+   ``pip install`` command above, you may be missing packages required
+   by ``canvas``. On macOS with Homebrew, you can add these packages by
+   running 
+   ``brew install pkg-config cairo pango libpng jpeg giflib librsvg``.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://yarnpkg.com/en>`__ package manager. If you have
    ``yarn`` installed already, you can use the ``yarn`` command when
@@ -224,7 +230,8 @@ Start JupyterLab in development mode:
 
 Development mode ensures that you are running the JavaScript assets that
 are built in the dev-installed Python package. Note that when running in
-dev mode, extensions will not be activated by default.
+dev mode, extensions will not be activated by default - refer
+:ref:`documentation on extension development <prebuilt_dev_workflow>` to know more.
 
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
@@ -295,6 +302,15 @@ function to get a ``Promise`` for a ``requestAnimationFrame``. We
 sometimes have to set a sentinel value inside a ``Promise`` and then
 check that the sentinel was set if we need a promise to run without
 blocking.
+
+Internationalization
+--------------------
+
+Translatable strings update
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The translatable strings update cannot occur on patch release. They 
+must be delayed on minor or major versions.
 
 Performance Testing
 -------------------
@@ -528,28 +544,55 @@ the two reports:
 Visual Regression and UI Tests
 ------------------------------
 
-As part of JupyterLab CI workflows, UI tests are run with visual regression checks. `Galata <https://github.com/jupyterlab/galata>`__ is used for UI testing. Galata provides a high level API to control and inspect JupyterLab UI programmatically, testing tools and CLI to manage tests and other tasks.
+As part of JupyterLab CI workflows, UI tests are run with visual regression checks.
+`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__ is used for UI 
+testing. Galata provides `Playwright <https://playwright.dev>`__ helpers to control and 
+inspect JupyterLab UI programmatically.
 
-UI tests are run for each commit into JupyterLab project in PRs or direct commits. Code changes can sometimes cause UI tests to fail for various reasons. After each test run, Galata generates a user friendly test result report which can be used to inspect failing UI tests. Result report shows the failure reason, call-stack up to the failure and detailed information on visual regression issues. For visual regression errors, reference image and test capture image, along with diff image generated during comparison are provided in the report. You can use these information to debug failing tests. Galata test report can be downloaded from GitHub Actions page for a UI test run. Test artifact is named ``ui-test-output`` and once you extract it, you can access the report by opening ``test/report/index.html`` in a browser window.
+UI tests are run for each commit into JupyterLab project in PRs or direct commits. Code 
+changes can sometimes cause UI tests to fail for various reasons. After each test run, 
+Galata generates a user friendly test result report which can be used to inspect failing 
+UI tests. Result report shows the failure reason, call-stack up to the failure and 
+detailed information on visual regression issues. For visual regression errors, reference 
+image and test capture image, along with diff image generated during comparison are 
+provided in the report. You can use these information to debug failing tests. Galata test 
+report can be downloaded from GitHub Actions page for a UI test run. Test artifact is 
+named ``galata-report`` and once you extract it, you can access the report by launching 
+a server to serve the files ``python -m http.server -d <path-to-extracted-report>``. 
+Then open *http://localhost:8000* with your web browser.
 
 Main reasons for UI test failures are:
 
 1. **A visual regression caused by code changes**:
 
-   Sometimes unintentional UI changes are introduced by modifications to project source code. Goal of visual regression testing is to detect this kind of UI changes. If your PR / commit is causing visual regression, then debug and fix the regression caused. You can locally run and debug the UI tests to fix the visual regression. Follow the instructions in steps 5-7 of ``Adding a new UI test suite guide`` in `UI Testing documentation <https://github.com/jupyterlab/jupyterlab/blob/master/ui-tests/README.md#adding-a-new-ui-test-suite>`__ to locally debug and fix UI tests. Once you have a fix, you can push the change to your GitHub branch and test with GitHub actions.
+   Sometimes unintentional UI changes are introduced by modifications to project source 
+   code. Goal of visual regression testing is to detect this kind of UI changes. If your 
+   PR / commit is causing visual regression, then debug and fix the regression caused. 
+   You can locally run and debug the UI tests to fix the visual regression. To debug your
+   test, you may run ``PWDEBUG=1 jlpm playwright test <path-to-test-file>``. Once you 
+   have a fix, you can push the change to your GitHub branch and test with GitHub actions.
 
 2. **An intended update to user interface**:
 
-   If your code change is introducing an update to UI which causes existing UI Tests to fail, then you will need to update reference image(s) for the failing tests. In order to do that, simply go to GitHub Actions page for the failed test and download test artifacts. It will contain test captures in directory ``test/screenshots``. You can copy the capture for the failed test and paste into reference screenshots directory in JupyterLab source code, replacing the failing test's reference capture. Reference captures are located in ``ui-tests/reference-output/screenshots`` in JupyterLab source code.
+   If your code change is introducing an update to UI which causes existing UI Tests to
+   fail, then you will need to update reference image(s) for the failing tests. In order
+   to do that, go to GitHub Actions page for the failed test and download test 
+   artifacts ``galata-test-assets``. It will contain test captures. You can 
+   copy the capture for the failed test suffixed with *actual* and paste it into reference 
+   screenshots directory in JupyterLab source code, replacing the failing test's reference
+   capture. Reference captures are located in directories named as the test files with the
+   suffix ``-snapshots`` in JupyterLab source code.
 
-For more information on UI Testing, please read the `UI Testing developer documentation <.https://github.com/jupyterlab/jupyterlab/blob/master/ui-tests/README.md>`__ and `Galata documentation <https://github.com/jupyterlab/galata/blob/main/README.md>`__.
+For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/master/galata/README.md>`__
+and `Playwright documentation <https://playwright.dev/docs/intro>`__.
 
 Good Practices for Integration tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Here are some good practices to follow when writing integration tests:
 
-- Don't compare multiple screenshots in the same test; if the first comparison breaks, it will require running multiple times the CI workflow to fix all tests.
+- Don't compare multiple screenshots in the same test; if the first comparison breaks,
+  it will require running multiple times the CI workflow to fix all tests.
 
 Contributing to the debugger front-end
 --------------------------------------
@@ -821,6 +864,7 @@ The majority of names are written in lower case. These names include:
 The following sections of the user interface should be in title case,
 directly quoting a word in the UI:
 
+-  Activity Bar
 -  File menu
 -  Files tab
 -  Running panel
@@ -897,7 +941,7 @@ Linking/Unlinking Packages to JupyterLab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you want to make changes to one of JupyterLab's external packages
-(for example, `Lumino <https://github.com/jupyterlab/lumino>`__ and test
+(for example, `Lumino <https://github.com/jupyterlab/lumino>`__) and test
 them out against your copy of JupyterLab, you can easily do so using the
 ``link`` command:
 

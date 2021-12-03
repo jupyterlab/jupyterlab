@@ -25,8 +25,8 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Cmd-Left': 'goLineLeft',
         Tab: 'indentMoreOrinsertTab',
         'Shift-Tab': 'indentLess',
-        'Cmd-/': 'toggleComment',
-        'Ctrl-/': 'toggleComment',
+        'Cmd-/': cm => cm.toggleComment({ indent: true }),
+        'Ctrl-/': cm => cm.toggleComment({ indent: true }),
         'Ctrl-G': 'find',
         'Cmd-G': 'find'
       },
@@ -37,8 +37,8 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
       extraKeys: {
         Tab: 'indentMoreOrinsertTab',
         'Shift-Tab': 'indentLess',
-        'Cmd-/': 'toggleComment',
-        'Ctrl-/': 'toggleComment',
+        'Cmd-/': cm => cm.toggleComment({ indent: true }),
+        'Ctrl-/': cm => cm.toggleComment({ indent: true }),
         'Shift-Enter': () => {
           /* no-op */
         }
@@ -52,7 +52,7 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
   /**
    * Create a new editor for inline code.
    */
-  newInlineEditor = (options: CodeEditor.IOptions) => {
+  newInlineEditor = (options: CodeEditor.IOptions): CodeMirrorEditor => {
     options.host.dataset.type = 'inline';
     return new CodeMirrorEditor({
       ...options,
@@ -64,7 +64,7 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
   /**
    * Create a new editor for a full document.
    */
-  newDocumentEditor = (options: CodeEditor.IOptions) => {
+  newDocumentEditor = (options: CodeEditor.IOptions): CodeMirrorEditor => {
     options.host.dataset.type = 'document';
     return new CodeMirrorEditor({
       ...options,

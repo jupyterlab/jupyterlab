@@ -163,6 +163,14 @@
           {
             "type": "separator",
             "rank": 11
+          },
+          {
+            "command": "notebook:toggle-render-side-by-side",
+            "rank": 12
+          },
+          {
+            "type": "separator",
+            "rank": 12
           }
         ]
       },
@@ -300,52 +308,60 @@
       {
         "command": "notebook:clear-all-cell-outputs",
         "selector": ".jp-Notebook",
-        "rank": 0
+        "rank": 13
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook",
-        "rank": 1
+        "rank": 20
       },
       {
         "command": "notebook:enable-output-scrolling",
         "selector": ".jp-Notebook",
-        "rank": 2
+        "rank": 21
       },
       {
         "command": "notebook:disable-output-scrolling",
         "selector": ".jp-Notebook",
-        "rank": 3
+        "rank": 22
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook",
-        "rank": 4
+        "rank": 30
       },
       {
         "command": "notebook:undo-cell-action",
         "selector": ".jp-Notebook",
-        "rank": 5
+        "rank": 31
       },
       {
         "command": "notebook:redo-cell-action",
         "selector": ".jp-Notebook",
-        "rank": 6
+        "rank": 32
       },
       {
         "command": "notebook:restart-kernel",
         "selector": ".jp-Notebook",
-        "rank": 7
+        "rank": 33
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook",
-        "rank": 8
+        "rank": 40
       },
       {
         "command": "notebook:create-console",
         "selector": ".jp-Notebook",
-        "rank": 9
+        "rank": 41
+      },
+      {
+        "command": "notebook:create-new",
+        "selector": ".jp-DirListing-content",
+        "rank": 52,
+        "args": {
+          "isContextMenu": true
+        }
       }
     ]
   },
@@ -574,6 +590,11 @@
       "command": "notebook:undo-cell-action",
       "keys": ["Z"],
       "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:toggle-render-side-by-side",
+      "keys": ["Shift R"],
+      "selector": ".jp-Notebook:focus"
     }
   ],
   "title": "Notebook",
@@ -582,26 +603,32 @@
     "editorConfig": {
       "properties": {
         "autoClosingBrackets": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "cursorBlinkRate": {
           "type": "number",
           "title": "Cursor blinking rate",
-          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely."
+          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely.",
+          "default": 530
         },
         "fontFamily": {
-          "type": ["string", "null"]
+          "type": ["string", "null"],
+          "default": null
         },
         "fontSize": {
           "type": ["integer", "null"],
           "minimum": 1,
-          "maximum": 100
+          "maximum": 100,
+          "default": null
         },
         "lineHeight": {
-          "type": ["number", "null"]
+          "type": ["number", "null"],
+          "default": null
         },
         "lineNumbers": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "lineWrap": {
           "type": "string",
@@ -611,32 +638,60 @@
           "type": "boolean"
         },
         "readOnly": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "insertSpaces": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "tabSize": {
-          "type": "number"
+          "type": "number",
+          "default": 4
         },
         "wordWrapColumn": {
-          "type": "integer"
+          "type": "integer",
+          "default": 80
         },
         "rulers": {
           "type": "array",
           "items": {
             "type": "number"
-          }
+          },
+          "default": []
         },
         "codeFolding": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "lineWiseCopyCut": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
+        },
+        "showTrailingSpace": {
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false,
       "type": "object"
+    },
+    "kernelStatusConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "showOnStatusBar": {
+          "type": "boolean",
+          "title": "Show kernel status on toolbar or status bar.",
+          "description": "If `true`, the kernel status progression will be displayed in the status bar otherwise it will be in the toolbar.",
+          "default": false
+        },
+        "showProgress": {
+          "type": "boolean",
+          "title": "Show execution progress.",
+          "default": true
+        }
+      }
     }
   },
   "properties": {
@@ -644,8 +699,16 @@
       "title": "Code Cell Configuration",
       "description": "The configuration for all code cells.",
       "$ref": "#/definitions/editorConfig",
+      "properties": {
+        "lineWarp": {
+          "default": "off"
+        },
+        "matchBrackets": {
+          "default": true
+        }
+      },
       "default": {
-        "autoClosingBrackets": true,
+        "autoClosingBrackets": false,
         "cursorBlinkRate": 530,
         "fontFamily": null,
         "fontSize": null,
@@ -659,7 +722,8 @@
         "wordWrapColumn": 80,
         "rulers": [],
         "codeFolding": false,
-        "lineWiseCopyCut": true
+        "lineWiseCopyCut": true,
+        "showTrailingSpace": false
       }
     },
     "defaultCell": {
@@ -679,6 +743,14 @@
       "title": "Markdown Cell Configuration",
       "description": "The configuration for all markdown cells.",
       "$ref": "#/definitions/editorConfig",
+      "properties": {
+        "lineWarp": {
+          "default": "on"
+        },
+        "matchBrackets": {
+          "default": false
+        }
+      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,
@@ -694,13 +766,22 @@
         "wordWrapColumn": 80,
         "rulers": [],
         "codeFolding": false,
-        "lineWiseCopyCut": true
+        "lineWiseCopyCut": true,
+        "showTrailingSpace": false
       }
     },
     "rawCellConfig": {
       "title": "Raw Cell Configuration",
       "description": "The configuration for all raw cells.",
       "$ref": "#/definitions/editorConfig",
+      "properties": {
+        "lineWarp": {
+          "default": "on"
+        },
+        "matchBrackets": {
+          "default": false
+        }
+      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,
@@ -716,7 +797,8 @@
         "wordWrapColumn": 80,
         "rulers": [],
         "codeFolding": false,
-        "lineWiseCopyCut": true
+        "lineWiseCopyCut": true,
+        "showTrailingSpace": false
       }
     },
     "scrollPastEnd": {
@@ -756,10 +838,37 @@
       "default": "1000px"
     },
     "maxNumberOutputs": {
-      "title": "The maximum number of output cells to to be rendered in the output area. Set to 0 to have the complete display.",
-      "description": "Defines the maximum number of output cells to to to be rendered in the output area for cells with many outputs. The output area will have a head and a tail, and the outputs between will be trimmed and not displayed unless the user clicks on the information message.",
+      "title": "The maximum number of output cells to be rendered in the output area. Set to 0 to have the complete display.",
+      "description": "Defines the maximum number of output cells to be rendered in the output area for cells with many outputs. The output area will have a head and the remaining outputs will be trimmed and not displayed unless the user clicks on the information message.",
       "type": "number",
       "default": 50
+    },
+    "kernelStatus": {
+      "title": "Kernel status icon configuration",
+      "description": "Defines the position and components of execution progress indicator.",
+      "$ref": "#/definitions/kernelStatusConfig",
+      "default": {
+        "showOnStatusBar": false,
+        "showProgress": true
+      }
+    },
+    "experimentalDisableDocumentWideUndoRedo": {
+      "title": "Experimental settings to enable the undo/redo on the notebook document level.",
+      "description": "Disable the undo/redo on the notebook document level, so actions independent cells can have their own history. The undo/redo never applies on the outputs, in other words, outputs don't have history. A moved cell completely looses history capability for now.",
+      "type": "boolean",
+      "default": false
+    },
+    "showHiddenCellsButton": {
+      "type": "boolean",
+      "title": "Show hidden cells button if collapsed",
+      "description": "If set to true, a button is shown below collapsed headings, indicating how many cells are hidden beneath the collapsed heading.",
+      "default": true
+    },
+    "sideBySideRendering": {
+      "title": "Side-by-side rendering",
+      "description": "Global setting to enable side-by-side rendering in notebooks",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

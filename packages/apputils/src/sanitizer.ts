@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
@@ -624,7 +625,6 @@ export class Sanitizer implements ISanitizer {
       font: ['color', 'face', 'size'],
       form: [
         'accept',
-        'action',
         'autocomplete',
         'enctype',
         'method',

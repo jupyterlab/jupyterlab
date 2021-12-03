@@ -11,7 +11,7 @@ import * as models from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import { Title, Widget } from '@lumino/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
 
 /**
@@ -29,6 +29,9 @@ export class DocumentModel
     const filemodel = new models.YFile() as models.ISharedFile;
     this.switchSharedModel(filemodel, true);
     this.value.changed.connect(this.triggerContentChange, this);
+
+    (this.sharedModel as models.YFile).dirty = false;
+    this.sharedModel.changed.connect(this._onStateChanged, this);
   }
 
   /**
@@ -49,15 +52,13 @@ export class DocumentModel
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this._dirty;
+    return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
+    if (newValue === this.dirty) {
       return;
     }
-    const oldValue = this._dirty;
-    this._dirty = newValue;
-    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
+    (this.sharedModel as models.YFile).dirty = newValue;
   }
 
   /**
@@ -151,12 +152,24 @@ export class DocumentModel
     this.dirty = true;
   }
 
+  private _onStateChanged(
+    sender: models.ISharedFile,
+    changes: models.NotebookChange
+  ): void {
+    if (changes.stateChange) {
+      changes.stateChange.forEach(value => {
+        if (value.name !== 'dirty' || value.oldValue !== value.newValue) {
+          this.triggerStateChange(value);
+        }
+      });
+    }
+  }
+
   /**
    * The shared notebook model.
    */
   readonly sharedModel: models.ISharedFile;
   private _defaultLang = '';
-  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -284,6 +297,7 @@ export abstract class ABCWidgetFactory<
   constructor(options: DocumentRegistry.IWidgetFactoryOptions<T>) {
     this._translator = options.translator || nullTranslator;
     this._name = options.name;
+    this._label = options.label || options.name;
     this._readOnly = options.readOnly === undefined ? false : options.readOnly;
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
     this._defaultRendered = (options.defaultRendered || []).slice();
@@ -329,10 +343,18 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The name of the widget to display in dialogs.
+   * A unique name identifying of the widget.
    */
   get name(): string {
     return this._name;
+  }
+
+  /**
+   * The label of the widget to display in dialogs.
+   * If not given, name is used instead.
+   */
+  get label(): string {
+    return this._label;
   }
 
   /**
@@ -443,6 +465,7 @@ export abstract class ABCWidgetFactory<
   private _isDisposed = false;
   private _translator: ITranslator;
   private _name: string;
+  private _label: string;
   private _readOnly: boolean;
   private _canStartKernel: boolean;
   private _shutdownOnClose: boolean;
@@ -486,6 +509,9 @@ export class DocumentWidget<
     void this.context.ready.then(() => {
       this._handleDirtyState();
     });
+
+    // listen for changes to the title object
+    this.title.changed.connect(this._onTitleChanged, this);
   }
 
   /**
@@ -493,6 +519,29 @@ export class DocumentWidget<
    */
   setFragment(fragment: string): void {
     /* no-op */
+  }
+
+  /**
+   * Handle a title change.
+   */
+  private async _onTitleChanged(_sender: Title<this>) {
+    const validNameExp = /[\/\\:]/;
+    const name = this.title.label;
+    const filename = this.context.path.split('/').pop()!;
+
+    if (name === filename) {
+      return;
+    }
+    if (name.length > 0 && !validNameExp.test(name)) {
+      const oldPath = this.context.path;
+      await this.context.rename(name);
+      if (this.context.path !== oldPath) {
+        // Rename succeeded
+        return;
+      }
+    }
+    // Reset title if name is invalid or rename fails
+    this.title.label = filename;
   }
 
   /**
@@ -521,7 +570,10 @@ export class DocumentWidget<
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (this.context.model.dirty) {
+    if (
+      this.context.model.dirty &&
+      !this.title.className.includes(DIRTY_CLASS)
+    ) {
       this.title.className += ` ${DIRTY_CLASS}`;
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
@@ -544,6 +596,10 @@ export namespace DocumentWidget {
     U extends DocumentRegistry.IModel = DocumentRegistry.IModel
   > extends MainAreaWidget.IOptionsOptionalContent<T> {
     context: DocumentRegistry.IContext<U>;
+
+    /**
+     * The application language translator.
+     */
     translator?: ITranslator;
   }
 }

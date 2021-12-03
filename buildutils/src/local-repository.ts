@@ -1,8 +1,11 @@
+/* eslint-disable camelcase */
 import * as fs from 'fs-extra';
 import * as child_process from 'child_process';
+import * as crypto from 'crypto';
 import * as path from 'path';
 import * as os from 'os';
 import * as ps from 'process';
+import glob from 'glob';
 
 import { Command } from 'commander';
 
@@ -24,14 +27,18 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
   }
 
   // Get current registry values
-  const prev_npm =
-    utils.run('npm config get registry', { stdio: 'pipe' }, true) ||
-    'https://registry.npmjs.org/';
+  let prev_npm = utils.run('npm config get registry', { stdio: 'pipe' }, true);
   let prev_yarn = '';
   try {
     prev_yarn = utils.run('yarn config get registry', { stdio: 'pipe' }, true);
   } catch (e) {
     // Do nothing
+  }
+  if (!prev_npm || prev_npm.indexOf('localhost') !== -1) {
+    prev_npm = 'https://registry.npmjs.org/';
+  }
+  if (prev_yarn.indexOf('localhost') !== -1) {
+    prev_yarn = '';
   }
 
   // write the config file
@@ -122,16 +129,50 @@ packages:
   }
 
   // Log in using cli and temp credentials
-  const env = {
-    ...process.env,
-    NPM_USER: 'foo',
-    NPM_PASS: 'bar',
-    NPM_EMAIL: 'foo@bar.com',
-    NPM_REGISTRY: local_registry
-  };
-  const npm_cli_login_bin = path.join(bin_dir, 'npm-cli-login');
+  const user = 'foo';
+  const pass = 'bar';
+  const email = 'foo@bar.com';
   console.log('Logging in');
-  child_process.execSync(npm_cli_login_bin, { env, stdio: 'pipe' });
+  const loginPs = child_process.spawn(
+    'npm',
+    `login -r ${local_registry}`.split(' ')
+  );
+
+  const loggedIn = new Promise<void>((accept, reject) => {
+    loginPs.stdout.on('data', (chunk: string) => {
+      const data = Buffer.from(chunk, 'utf-8').toString().trim();
+      console.log('stdout:', data);
+      switch (data) {
+        case 'Username:':
+          console.log('Passing username...');
+          loginPs.stdin.write(user + '\n');
+          break;
+        case 'Password:':
+          console.log('Passing password...');
+          loginPs.stdin.write(pass + '\n');
+          break;
+        case 'Email: (this IS public)':
+          console.log('Passing email...');
+          loginPs.stdin.write(email + '\n');
+          break;
+        default:
+          reject(`Unexpected prompt: "${data}"`);
+      }
+      if (data.indexOf('Logged in as') !== -1) {
+        loginPs.stdin.end();
+        // do not accept here yet, the token may not have been written
+      }
+      loginPs.stderr.on('data', (chunk: string) => {
+        const data = Buffer.from(chunk, 'utf-8').toString().trim();
+        console.log('stderr:', data);
+      });
+    });
+    loginPs.on('error', error => reject(error));
+    loginPs.on('close', () => accept());
+  });
+
+  await loggedIn;
+  loginPs.kill();
 
   console.log('Running in', out_dir);
   ps.exit(0);
@@ -176,23 +217,89 @@ async function stopLocalRegistry(out_dir: string) {
   }
 }
 
+/**
+ * Fix the yarn lock links in the given directory.
+ */
+function fixLinks(package_dir: string) {
+  let yarn_reg = '';
+  try {
+    yarn_reg = utils.run('yarn config get registry', { stdio: 'pipe' }, true);
+  } catch (e) {
+    // Do nothing
+  }
+  yarn_reg = yarn_reg || 'https://registry.yarnpkg.com';
+  const lock_file = path.join(package_dir, 'yarn.lock');
+  console.log(`Fixing links in ${lock_file}`);
+  const content = fs.readFileSync(lock_file, { encoding: 'utf-8' });
+
+  let shasum = crypto.createHash('sha256');
+  let hash = shasum.update(content);
+  console.log('Prior hash', hash.digest('hex'));
+
+  const regex = /http\:\/\/localhost\:\d+/g;
+  const new_content = content.replace(regex, yarn_reg);
+
+  shasum = crypto.createHash('sha256');
+  hash = shasum.update(new_content);
+  console.log('After hash', hash.digest('hex'));
+
+  fs.writeFileSync(lock_file, new_content, 'utf8');
+}
+
+/**
+ * Publish the npm tar files in a given directory
+ */
+function publishPackages(dist_dir: string) {
+  const paths = glob.sync(path.join(dist_dir, '*.tgz'));
+  const curr = utils.getPythonVersion();
+  let tag = 'latest';
+  if (!/\d+\.\d+\.\d+$/.test(curr)) {
+    tag = 'next';
+  }
+  paths.forEach(package_path => {
+    const filename = path.basename(package_path);
+    utils.run(`npm publish ${filename} --tag ${tag}`, {
+      cwd: dist_dir,
+      stdio: 'pipe'
+    });
+  });
+}
+
 const program = new Command();
 
 program
   .command('start')
-  .option('--port', 'Port to use for the registry')
-  .option('--path', 'Path to use for the registry')
+  .option('--port <port>', 'Port to use for the registry')
+  .option('--path <path>', 'Path to use for the registry')
   .action(async (options: any) => {
+    utils.exitOnUuncaughtException();
     const out_dir = options.path || DEFAULT_OUT_DIR;
     await startLocalRegistry(out_dir, options.port || DEFAULT_PORT);
   });
 
 program
   .command('stop')
-  .option('--path', 'Path to use for the registry')
+  .option('--path <path>', 'Path to use for the registry')
   .action(async (options: any) => {
+    utils.exitOnUuncaughtException();
     const out_dir = options.path || DEFAULT_OUT_DIR;
     await stopLocalRegistry(out_dir);
+  });
+
+program
+  .command('fix-links')
+  .option('--path <path>', 'Path to the directory with a yarn lock')
+  .action((options: any) => {
+    utils.exitOnUuncaughtException();
+    fixLinks(options.path || process.cwd());
+  });
+
+program
+  .command('publish-dists')
+  .option('--path <path>', 'Path to the directory with npm tar balls')
+  .action((options: any) => {
+    utils.exitOnUuncaughtException();
+    publishPackages(options.path || process.cwd());
   });
 
 if (require.main === module) {

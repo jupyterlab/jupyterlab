@@ -6,13 +6,13 @@
       "path": "../shared-models"
     },
     {
+      "path": "../statedb"
+    },
+    {
       "path": "."
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../shared-models"
     }
   ]
 }

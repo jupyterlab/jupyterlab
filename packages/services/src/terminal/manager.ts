@@ -212,11 +212,13 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
     try {
       models = await listRunning(this.serverSettings);
     } catch (err) {
-      // Check for a network error, or a 503 error, which is returned
-      // by a JupyterHub when a server is shut down.
+      // Handle network errors, as well as cases where we are on a
+      // JupyterHub and the server is not running. JupyterHub returns a
+      // 503 (<2.0) or 424 (>2.0) in that case.
       if (
         err instanceof ServerConnection.NetworkError ||
-        err.response?.status === 503
+        err.response?.status === 503 ||
+        err.response?.status === 424
       ) {
         this._connectionFailure.emit(err);
       }
@@ -289,6 +291,6 @@ export namespace TerminalManager {
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
-    standby?: Poll.Standby;
+    standby?: Poll.Standby | (() => boolean | Poll.Standby);
   }
 }

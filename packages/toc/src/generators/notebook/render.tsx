@@ -1,126 +1,83 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { ellipsesIcon } from '@jupyterlab/ui-components';
+import { MARKDOWN_HEADING_COLLAPSED } from '@jupyterlab/cells';
+import { INotebookTracker, NotebookActions } from '@jupyterlab/notebook';
+import { classes, ellipsesIcon } from '@jupyterlab/ui-components';
+import { ElementExt } from '@lumino/domutils';
 import * as React from 'react';
-import { INotebookHeading } from '../../utils/headings';
+import { TableOfContents } from '../..';
+import { INotebookHeading, RunningStatus } from '../../utils/headings';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { CodeComponent } from './codemirror';
 import { OptionsManager } from './options_manager';
 
 /**
- * Renders a notebook table of contents item.
+ * Class name of the toc item list.
  *
  * @private
+ */
+const TOC_TREE_CLASS = 'jp-TableOfContents-content';
+
+/**
+ * Renders a notebook table of contents item.
+ *
  * @param options - generator options
  * @param tracker - notebook tracker
  * @param item - notebook heading
  * @param toc - current list of notebook headings
  * @returns rendered item
  */
-function render(
+export function render(
   options: OptionsManager,
   tracker: INotebookTracker,
+  widget: TableOfContents,
   item: INotebookHeading,
   toc: INotebookHeading[] = []
-) {
-  let jsx;
+): JSX.Element | null {
   if (item.type === 'markdown' || item.type === 'header') {
-    let fontSizeClass = 'toc-level-size-default';
-    let numbering = item.numbering && options.numbering ? item.numbering : '';
-    if (item.type === 'header') {
-      fontSizeClass = 'toc-level-size-' + item.level;
-    }
-    if (item.html && (item.type === 'header' || options.showMarkdown)) {
-      jsx = (
+    const fontSizeClass =
+      item.type === 'header'
+        ? `toc-level-size-${item.level}`
+        : 'toc-level-size-default';
+    const numbering = item.numbering && options.numbering ? item.numbering : '';
+    const cellCollapseMetadata = options.syncCollapseState
+      ? MARKDOWN_HEADING_COLLAPSED
+      : 'toc-hr-collapsed';
+
+    if (item.type === 'header' || options.showMarkdown) {
+      const header = item.html ? (
         <span
           dangerouslySetInnerHTML={{
             __html:
               numbering +
               options.sanitizer.sanitize(item.html, sanitizerOptions)
           }}
-          className={item.type + '-cell toc-cell-item'}
+          className={`${item.type}-cell toc-cell-item`}
         />
-      );
-      // Render the headers:
-      if (item.type === 'header') {
-        let button = (
-          <div
-            className="jp-Collapser p-Widget lm-Widget"
-            onClick={(event: any) => {
-              event.stopPropagation();
-              onClick(item);
-            }}
-          >
-            <div className="toc-Collapser-child" />
-          </div>
-        );
-
-        let collapsed;
-        if (item.cellRef!.model.metadata.has('toc-hr-collapsed')) {
-          collapsed = item.cellRef!.model.metadata.get(
-            'toc-hr-collapsed'
-          ) as boolean;
-        }
-        let ellipseButton = collapsed ? (
-          <div
-            className="toc-Ellipses"
-            onClick={(event: any) => {
-              event.stopPropagation();
-              onClick(item);
-            }}
-          >
-            <ellipsesIcon.react />
-          </div>
-        ) : (
-          <div />
-        );
-
-        // Render the heading item:
-        jsx = (
-          <div
-            className={
-              'toc-entry-holder ' +
-              fontSizeClass +
-              (tracker.activeCell === item.cellRef
-                ? ' toc-active-cell'
-                : previousHeader(tracker, item, toc)
-                ? ' toc-active-cell'
-                : '')
-            }
-          >
-            {button}
-            {jsx}
-            {ellipseButton}
-          </div>
-        );
-      }
-      return jsx;
-    }
-    if (item.type === 'header' || options.showMarkdown) {
-      // Render headers/markdown for plain text:
-      jsx = (
-        <span className={item.type + '-cell toc-cell-item'}>
+      ) : (
+        <span className={`${item.type}-cell toc-cell-item`}>
           {numbering + item.text}
         </span>
       );
+
       if (item.type === 'header') {
         let button = (
           <div
             className="jp-Collapser p-Widget lm-Widget"
             onClick={(event: any) => {
               event.stopPropagation();
-              onClick(item);
+              onClick(tracker, cellCollapseMetadata, item);
             }}
           >
             <div className="toc-Collapser-child" />
           </div>
         );
+
         let collapsed;
-        if (item.cellRef!.model.metadata.has('toc-hr-collapsed')) {
+        if (item.cellRef!.model.metadata.has(cellCollapseMetadata)) {
           collapsed = item.cellRef!.model.metadata.get(
-            'toc-hr-collapsed'
+            cellCollapseMetadata
           ) as boolean;
         }
         let ellipseButton = collapsed ? (
@@ -128,37 +85,35 @@ function render(
             className="toc-Ellipses"
             onClick={(event: any) => {
               event.stopPropagation();
-              onClick(item);
+              onClick(tracker, cellCollapseMetadata, item);
             }}
           >
             <ellipsesIcon.react />
           </div>
-        ) : (
-          <div />
-        );
-        jsx = (
-          <div
-            className={
-              'toc-entry-holder ' +
-              fontSizeClass +
-              (tracker.activeCell === item.cellRef
-                ? ' toc-active-cell'
-                : previousHeader(tracker, item, toc)
-                ? ' toc-active-cell'
-                : '')
+        ) : null;
+
+        return (
+          <NotebookHeading
+            isActive={
+              tracker.activeCell === item.cellRef ||
+              previousHeader(tracker, item, toc)
             }
+            className={'toc-entry-holder ' + fontSizeClass}
+            isRunning={item.isRunning}
+            area={widget.node.querySelector(`.${TOC_TREE_CLASS}`)}
           >
             {button}
-            {jsx}
+            {header}
             {ellipseButton}
-          </div>
+          </NotebookHeading>
         );
+      } else {
+        return header;
       }
-      return jsx;
     }
-    return null;
   }
-  if (item.type === 'code' && options.showCode) {
+
+  if (options.showCode && item.type === 'code') {
     // Render code cells:
     return (
       <div className="toc-code-cell-div">
@@ -169,6 +124,7 @@ function render(
       </div>
     );
   }
+
   return null;
 
   /**
@@ -177,24 +133,41 @@ function render(
    * @private
    * @param heading - notebook heading that was clicked
    */
-  function onClick(heading?: INotebookHeading) {
-    let collapsed;
-    if (heading!.cellRef!.model.metadata.has('toc-hr-collapsed')) {
+
+  function onClick(
+    tracker: INotebookTracker,
+    cellCollapseMetadata: string,
+    heading?: INotebookHeading
+  ) {
+    let collapsed = false;
+    let syncCollapseState = options.syncCollapseState;
+    if (heading!.cellRef!.model.metadata.get(cellCollapseMetadata)) {
       collapsed = heading!.cellRef!.model.metadata.get(
-        'toc-hr-collapsed'
+        cellCollapseMetadata
       ) as boolean;
-      heading!.cellRef!.model.metadata.delete('toc-hr-collapsed');
-    } else {
-      collapsed = false;
-      heading!.cellRef!.model.metadata.set('toc-hr-collapsed', true);
     }
     if (heading) {
+      if (syncCollapseState) {
+        // if collapse state is synced, update state here
+        if (tracker.currentWidget) {
+          NotebookActions.setHeadingCollapse(
+            heading!.cellRef!,
+            !collapsed,
+            tracker.currentWidget.content
+          );
+        }
+      } else {
+        if (collapsed) {
+          heading!.cellRef!.model.metadata.delete(cellCollapseMetadata);
+        } else {
+          heading!.cellRef!.model.metadata.set(cellCollapseMetadata, true);
+        }
+      }
       options.updateAndCollapse({
         heading: heading,
         collapsedState: collapsed,
         tocType: 'notebook'
       });
-      // NOTE: we can imagine a future in which this extension combines with a collapsible-header/ings extension such that we can programmatically close notebook "sections" according to a public API specifically intended for collapsing notebook sections. In the meantime, we need to resort to manually "collapsing" sections...
     } else {
       options.updateWidget();
     }
@@ -235,7 +208,36 @@ function previousHeader(
   return false;
 }
 
+type NotebookHeadingProps = React.PropsWithChildren<{
+  isActive: boolean;
+  className: string;
+  area: Element | null;
+  isRunning?: RunningStatus;
+}>;
+
 /**
- * Exports.
+ * React component for a single toc heading
+ *
+ * @private
  */
-export { render };
+function NotebookHeading(props: NotebookHeadingProps): JSX.Element {
+  const itemRef = React.useRef<HTMLDivElement>(null);
+  const isActive = props.isActive;
+  React.useEffect(() => {
+    if (isActive && itemRef.current && props.area) {
+      ElementExt.scrollIntoViewIfNeeded(
+        props.area,
+        itemRef.current.parentElement as Element
+      );
+    }
+  }, [isActive]);
+  return (
+    <div
+      ref={itemRef}
+      className={classes(props.className, isActive ? 'toc-active-cell' : '')}
+      data-running={props.isRunning}
+    >
+      {props.children}
+    </div>
+  );
+}

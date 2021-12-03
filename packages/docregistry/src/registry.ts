@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, Toolbar } from '@jupyterlab/apputils';
+import { ISessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IChangedArgs as IChangedArgsGeneric,
@@ -25,6 +25,7 @@ import {
   pythonIcon,
   rKernelIcon,
   spreadsheetIcon,
+  Toolbar,
   yamlIcon
 } from '@jupyterlab/ui-components';
 import {
@@ -400,22 +401,33 @@ export class DocumentRegistry implements IDisposable {
    * file types and there is a match in that set, this returns that.
    * Otherwise, this returns the same widget factory as
    * [[defaultWidgetFactory]].
+   *
+   * The user setting `defaultViewers` took precedence on this one too.
    */
   defaultRenderedWidgetFactory(path: string): DocumentRegistry.WidgetFactory {
     // Get the matching file types.
-    const fts = this.getFileTypesForPath(PathExt.basename(path));
+    const ftNames = this.getFileTypesForPath(PathExt.basename(path)).map(
+      ft => ft.name
+    );
 
-    let factory: DocumentRegistry.WidgetFactory | undefined = undefined;
-    // Find if a there is a default rendered factory for this type.
-    for (const ft of fts) {
-      if (ft.name in this._defaultRenderedWidgetFactories) {
-        factory = this._widgetFactories[
-          this._defaultRenderedWidgetFactories[ft.name]
-        ];
-        break;
+    // Start with any user overrides for the defaults.
+    for (const name in ftNames) {
+      if (name in this._defaultWidgetFactoryOverrides) {
+        return this._widgetFactories[this._defaultWidgetFactoryOverrides[name]];
       }
     }
-    return factory || this.defaultWidgetFactory(path);
+
+    // Find if a there is a default rendered factory for this type.
+    for (const name in ftNames) {
+      if (name in this._defaultRenderedWidgetFactories) {
+        return this._widgetFactories[
+          this._defaultRenderedWidgetFactories[name]
+        ];
+      }
+    }
+
+    // Fallback to the default widget factory
+    return this.defaultWidgetFactory(path);
   }
 
   /**
@@ -661,7 +673,14 @@ export class DocumentRegistry implements IDisposable {
     // Then look by extension name, starting with the longest
     let ext = Private.extname(name);
     while (ext.length > 1) {
-      ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
+      ft = find(
+        this._fileTypes,
+        ft =>
+          ft.extensions
+            // In Private.extname, the extension is transformed to lower case
+            .map(extension => extension.toLowerCase())
+            .indexOf(ext) !== -1
+      );
       if (ft) {
         fts.push(ft);
       }
@@ -705,10 +724,8 @@ export namespace DocumentRegistry {
   /**
    * The item to be added to document toolbar.
    */
-  export interface IToolbarItem {
-    name: string;
-    widget: Widget;
-  }
+  export interface IToolbarItem extends ToolbarRegistry.IToolbarItem {}
+
   /**
    * The options used to create a document registry.
    */
@@ -852,6 +869,11 @@ export namespace DocumentRegistry {
     disposed: ISignal<this, void>;
 
     /**
+     * Configurable margin used to detect document modification conflicts, in milliseconds
+     */
+    lastModifiedCheckMargin: number;
+
+    /**
      * The data model for the document.
      */
     readonly model: T;
@@ -905,7 +927,7 @@ export namespace DocumentRegistry {
     /**
      * Save the document contents to disk.
      */
-    save(manual?: boolean): Promise<void>;
+    save(): Promise<void>;
 
     /**
      * Save the document to a different path chosen by the user.
@@ -973,11 +995,7 @@ export namespace DocumentRegistry {
     addSibling(widget: Widget, options?: IOpenOptions): IDisposable;
   }
 
-  export type SaveState =
-    | 'started'
-    | 'failed'
-    | 'completed'
-    | 'completed manually';
+  export type SaveState = 'started' | 'failed' | 'completed';
 
   /**
    * A type alias for a context.
@@ -994,9 +1012,15 @@ export namespace DocumentRegistry {
    */
   export interface IWidgetFactoryOptions<T extends Widget = Widget> {
     /**
-     * The name of the widget to display in dialogs.
+     * A unique name identifying of the widget.
      */
     readonly name: string;
+
+    /**
+     * The label of the widget to display in dialogs.
+     * If not given, name is used instead.
+     */
+    readonly label?: string;
 
     /**
      * The file types the widget can view.
@@ -1418,7 +1442,7 @@ export namespace DocumentRegistry {
         name: 'r',
         displayName: trans.__('R File'),
         mimeTypes: ['text/x-rsrc'],
-        extensions: ['.r'],
+        extensions: ['.R'],
         icon: rKernelIcon
       },
       {
@@ -1520,7 +1544,7 @@ namespace Private {
   /**
    * Get the extension name of a path.
    *
-   * @param file - string.
+   * @param path - string.
    *
    * #### Notes
    * Dotted filenames (e.g. `".table.json"` are allowed).

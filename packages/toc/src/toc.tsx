@@ -109,7 +109,7 @@ export class TableOfContents extends Widget {
    *
    * @returns table of contents generator
    */
-  get generator() {
+  get generator(): Registry.IGenerator<Widget> | null {
     if (this._current) {
       return this._current.generator;
     }
@@ -122,6 +122,11 @@ export class TableOfContents extends Widget {
    * @param msg - message
    */
   protected onUpdateRequest(msg: Message): void {
+    if (this.isHidden) {
+      // Bail early
+      return;
+    }
+
     let title = this._trans.__('Table of Contents');
     if (this._current) {
       this._headings = this._current.generator.generate(
