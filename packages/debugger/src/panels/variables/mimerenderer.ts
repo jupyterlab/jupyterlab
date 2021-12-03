@@ -1,5 +1,11 @@
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry, MimeModel } from '@jupyterlab/rendermime';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  notTrustedIcon,
+  ToolbarButton,
+  trustedIcon
+} from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel } from '@lumino/widgets';
 import { murmur2 } from '../../hash';
@@ -13,16 +19,28 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
    * Instantiate a new VariableMimeRenderer.
    */
   constructor(options: VariableMimeRenderer.IOptions) {
-    const { dataLoader, rendermime } = options;
+    const { dataLoader, isTrusted, rendermime, translator } = options;
     const content = new Panel();
     const loaded = new PromiseDelegate<void>();
     super({
       content,
       reveal: Promise.all([dataLoader, loaded.promise])
     });
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     this.dataLoader = dataLoader;
     this.renderMime = rendermime;
+    this.trustedButton = new ToolbarButton({
+      className: 'jp-VariableRenderer-TrustButton',
+      icon: notTrustedIcon,
+      tooltip: trans.__('Variable value is not trusted'),
+      pressedIcon: trustedIcon,
+      pressedTooltip: trans.__('Variable value is trusted'),
+      pressed: isTrusted,
+      onClick: this.onTrustClick.bind(this)
+    });
     this._dataHash = null;
+
+    this.toolbar.addItem('trust-variable', this.trustedButton);
 
     this.refresh()
       .then(() => {
@@ -46,7 +64,10 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
           });
         }
 
-        const mimeType = this.renderMime.preferredMimeType(data.data, 'any');
+        const mimeType = this.renderMime.preferredMimeType(
+          data.data,
+          this.trustedButton.pressed ? 'any' : 'ensure'
+        );
 
         if (mimeType) {
           const widget = this.renderMime.createRenderer(mimeType);
@@ -66,8 +87,13 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
     }
   }
 
+  protected onTrustClick(): Promise<void> {
+    return this.refresh();
+  }
+
   protected dataLoader: () => Promise<IDebugger.IRichVariable>;
   protected renderMime: IRenderMimeRegistry;
+  protected trustedButton: ToolbarButton;
   private _dataHash: number | null;
 }
 
@@ -87,5 +113,15 @@ export namespace VariableMimeRenderer {
      * Render mime type registry
      */
     rendermime: IRenderMimeRegistry;
+    /**
+     * Whether the data is trusted or not
+     *
+     * By default it will be false.
+     */
+    isTrusted?: boolean;
+    /**
+     * Translation manager
+     */
+    translator?: ITranslator;
   }
 }
