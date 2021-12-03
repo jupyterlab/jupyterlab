@@ -38,13 +38,8 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo && rimraf tsconfig.test.tsbuildinfo && rimraf tests/build",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
-    "test": "jest",
-    "test:cov": "jest --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -67,14 +62,8 @@
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^3.5.0-beta.0",
     "@types/codemirror": "^0.0.109",
-    "@types/jest": "^26.0.10",
     "@types/react-dom": "^17.0.0",
-    "jest": "^26.4.2",
-    "jest-junit": "^11.1.0",
-    "jest-raw-loader": "^1.0.1",
-    "jest-summary-reporter": "^0.0.2",
     "rimraf": "~3.0.0",
     "shell-quote": "^1.7.2",
     "ts-jest": "^26.3.0",
