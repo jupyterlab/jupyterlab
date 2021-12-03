@@ -173,6 +173,12 @@ namespace CommandIDs {
 
   export const selectBelow = 'notebook:move-cursor-down';
 
+  export const selectHeadingAboveOrCollapse =
+    'notebook:move-cursor-heading-above-or-collapse';
+
+  export const selectHeadingBelowOrExpand =
+    'notebook:move-cursor-heading-below-or-expand';
+
   export const extendAbove = 'notebook:extend-marked-cells-above';
 
   export const extendTop = 'notebook:extend-marked-cells-top';
@@ -1982,6 +1988,32 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.selectHeadingAboveOrCollapse, {
+    label: trans.__('Select Heading Above or Collapse Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.selectHeadingAboveOrCollapseHeading(
+          current.content
+        );
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.selectHeadingBelowOrExpand, {
+    label: trans.__('Select Heading Below or Expand Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.selectHeadingBelowOrExpandHeading(
+          current.content
+        );
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.extendAbove, {
     label: trans.__('Extend Selection Above'),
     execute: args => {
@@ -2495,6 +2527,8 @@ function populatePalette(
     CommandIDs.insertBelow,
     CommandIDs.selectAbove,
     CommandIDs.selectBelow,
+    CommandIDs.selectHeadingAboveOrCollapse,
+    CommandIDs.selectHeadingBelowOrExpand,
     CommandIDs.extendAbove,
     CommandIDs.extendTop,
     CommandIDs.extendBelow,

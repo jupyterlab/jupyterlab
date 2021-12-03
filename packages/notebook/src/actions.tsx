@@ -838,6 +838,126 @@ export namespace NotebookActions {
   }
 
   /**
+   * Select the heading above the active cell or, if already at heading, collapse it.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * #### Notes
+   * The widget mode will be preserved.
+   * This is a no-op if the active cell is the topmost heading in collapsed state
+   * The existing selection will be cleared.
+   */
+  export function selectHeadingAboveOrCollapseHeading(
+    notebook: Notebook
+  ): void {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+    const state = Private.getState(notebook);
+    let hInfoActiveCell = getHeadingInfo(notebook.activeCell);
+    // either collapse or find the right heading to jump to
+    if (hInfoActiveCell.isHeading && !hInfoActiveCell.collapsed) {
+      setHeadingCollapse(notebook.activeCell, true, notebook);
+    } else {
+      let targetHeadingCellIdx = findLowerEqualLevelParentHeadingAbove(
+        notebook.activeCell,
+        notebook
+      );
+      if (targetHeadingCellIdx) {
+        notebook.activeCellIndex = targetHeadingCellIdx;
+      }
+    }
+    // clear selection and handle state
+    notebook.deselectAll();
+    Private.handleState(notebook, state, true);
+  }
+
+  function determineHeadingLevel(baseCell: Cell, notebook: Notebook) {
+    let headingInfoBaseCell = getHeadingInfo(baseCell);
+    // fill baseHeadingLevel or return null if there is no heading at or above baseCell
+    if (headingInfoBaseCell.isHeading) {
+      return headingInfoBaseCell.headingLevel;
+    } else {
+      let parentHeading = findNearestParentHeader(baseCell, notebook);
+      if (!parentHeading) {
+        return null;
+      }
+      return getHeadingInfo(parentHeading).headingLevel;
+    }
+  }
+
+  function findLowerEqualLevelParentHeadingAbove(
+    baseCell: Cell,
+    notebook: Notebook
+  ) {
+    let baseHeadingLevel = determineHeadingLevel(baseCell, notebook);
+    if (!baseHeadingLevel) {
+      return null;
+    }
+    // find the heading above with heading level <= baseHeadingLevel and return its index
+    let cellIdx = notebook.widgets.indexOf(baseCell);
+    while (cellIdx > 0) {
+      cellIdx -= 1;
+      if (cellIdx < 0) {
+        return null; // nothing found
+      }
+      let headingInfo = getHeadingInfo(notebook.widgets[cellIdx]);
+      if (
+        headingInfo.isHeading &&
+        headingInfo.headingLevel <= baseHeadingLevel
+      ) {
+        return cellIdx;
+      }
+    }
+  }
+
+  /**
+   * Select the heading below the active cell or, if already at heading, expand it.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * #### Notes
+   * The widget mode will be preserved.
+   * This is a no-op if the active cell is the last heading in expanded state
+   * The existing selection will be cleared.
+   */
+  export function selectHeadingBelowOrExpandHeading(notebook: Notebook): void {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+    const state = Private.getState(notebook);
+    let hInfo = getHeadingInfo(notebook.activeCell);
+    if (hInfo.isHeading && hInfo.collapsed) {
+      console.log('expand');
+      setHeadingCollapse(notebook.activeCell, false, notebook);
+    } else {
+      let targetHeadingCellIdx = findHeadingBelow(
+        notebook.activeCell,
+        notebook
+      );
+      if (targetHeadingCellIdx) {
+        notebook.activeCellIndex = targetHeadingCellIdx;
+      }
+    }
+    notebook.deselectAll();
+    Private.handleState(notebook, state, true);
+  }
+
+  function findHeadingBelow(baseCell: Cell, notebook: Notebook) {
+    let cellIdx = notebook.widgets.indexOf(baseCell);
+    while (cellIdx < notebook.widgets.length - 1) {
+      cellIdx += 1;
+      if (cellIdx >= notebook.widgets.length) {
+        return null; // nothing found
+      }
+      let headingInfo = getHeadingInfo(notebook.widgets[cellIdx]);
+      if (headingInfo.isHeading) {
+        return cellIdx;
+      }
+    }
+  }
+
+  /**
    * Extend the selection to the cell above.
    *
    * @param notebook - The target notebook widget.
@@ -995,9 +1115,9 @@ export namespace NotebookActions {
             notebook.lastClipboardInteraction === 'cut' &&
             typeof cell.id === 'string'
           ) {
-            let cell_id = cell.id as string;
+            let cellId = cell.id as string;
             return model.contentFactory.createCodeCell({
-              id: cell_id,
+              id: cellId,
               cell: cell
             });
           } else {
