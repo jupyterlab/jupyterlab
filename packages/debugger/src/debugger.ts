@@ -15,12 +15,12 @@ import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
 
 import {
   closeAllIcon as closeAll,
-  pauseOnExceptionsIcon as pauseOnExceptions,
   stepIntoIcon as stepInto,
   stepOutIcon as stepOut,
   stepOverIcon as stepOver,
   variableIcon as variable,
-  viewBreakpointIcon as viewBreakpoint
+  viewBreakpointIcon as viewBreakpoint,
+  pauseOnExceptionsIcon as pauseOnExceptions
 } from './icons';
 
 import { DebuggerModel } from './model';
