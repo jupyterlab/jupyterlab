@@ -2522,7 +2522,6 @@ namespace Private {
       let headingInfoBaseCell = NotebookActions.getHeadingInfo(baseCell);
       // fill baseHeadingLevel or return null if there is no heading at or above baseCell
       if (headingInfoBaseCell.isHeading) {
-        console.log('is heading');
         return headingInfoBaseCell.headingLevel;
       } else {
         let parentHeading = findParentHeading(
