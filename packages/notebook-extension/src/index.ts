@@ -175,6 +175,10 @@ namespace CommandIDs {
   export const selectHeadingBelowOrExpand =
     'notebook:move-cursor-heading-below-or-expand';
 
+  export const insertHeadingAbove = 'notebook:insert-heading-above';
+
+  export const insertHeadingBelow = 'notebook:insert-heading-below';
+
   export const extendAbove = 'notebook:extend-marked-cells-above';
 
   export const extendTop = 'notebook:extend-marked-cells-top';
@@ -1986,6 +1990,28 @@ function addCommands(
 
       if (current) {
         return NotebookActions.selectBelow(current.content);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.insertHeadingAbove, {
+    label: trans.__('Insert Heading Above Current Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.insertSameLevelHeadingAbove(current.content);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.insertHeadingBelow, {
+    label: trans.__('Insert Heading Below Current Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.insertSameLevelHeadingBelow(current.content);
       }
     },
     isEnabled

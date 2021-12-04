@@ -527,6 +527,16 @@
       "selector": ".jp-Notebook:focus"
     },
     {
+      "command": "notebook:insert-heading-above",
+      "keys": ["Shift A"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:insert-heading-below",
+      "keys": ["Shift B"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
       "command": "notebook:paste-cell-below",
       "keys": ["V"],
       "selector": ".jp-Notebook:focus"

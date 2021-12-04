@@ -837,6 +837,56 @@ export namespace NotebookActions {
     Private.handleState(notebook, state, true);
   }
 
+  /** Insert new heading of same level above active cell.
+   *
+   * @param notebook - The target notebook widget
+   */
+  export function insertSameLevelHeadingAbove(notebook: Notebook) {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+    let headingLevel = Private.Headings.determineHeadingLevel(
+      notebook.activeCell,
+      notebook
+    );
+    if (headingLevel == null) {
+      Private.Headings.insertHeadingAboveCellIdx(0, 1, notebook);
+    } else {
+      Private.Headings.insertHeadingAboveCellIdx(
+        notebook.activeCellIndex!,
+        headingLevel,
+        notebook
+      );
+    }
+  }
+
+  /** Insert new heading of same level at end of current section.
+   *
+   * @param notebook - The target notebook widget
+   */
+  export function insertSameLevelHeadingBelow(notebook: Notebook) {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+    let headingLevel = Private.Headings.determineHeadingLevel(
+      notebook.activeCell,
+      notebook
+    );
+    headingLevel = headingLevel ? headingLevel : 1;
+    let cellIdxOfHeadingBelow = Private.Headings.findHeadingBelow(
+      notebook.activeCell,
+      notebook,
+      true
+    ) as number;
+    Private.Headings.insertHeadingAboveCellIdx(
+      cellIdxOfHeadingBelow == -1
+        ? notebook.model.cells.length
+        : cellIdxOfHeadingBelow,
+      headingLevel,
+      notebook
+    );
+  }
+
   /**
    * Select the heading above the active cell or, if already at heading, collapse it.
    *
@@ -2485,6 +2535,30 @@ namespace Private {
         }
         return NotebookActions.getHeadingInfo(parentHeading).headingLevel;
       }
+    }
+
+    /** Insert a new heading cell at given position.
+     *
+     * @param cellIdx - where to insert
+     * @param headingLevel - level of the new heading
+     * @param notebook - target notebook
+     *
+     * #### Notes
+     * Enters edit mode after insert.
+     */
+    export function insertHeadingAboveCellIdx(
+      cellIdx: number,
+      headingLevel: number,
+      notebook: Notebook
+    ) {
+      const state = Private.getState(notebook);
+      const newCell = notebook.model!.contentFactory.createMarkdownCell({});
+      notebook.model!.cells.insert(cellIdx, newCell);
+      Private.setMarkdownHeader(newCell, headingLevel);
+      notebook.activeCellIndex = cellIdx;
+      notebook.deselectAll();
+      Private.handleState(notebook, state, true);
+      notebook.mode = 'edit';
     }
   }
 }
