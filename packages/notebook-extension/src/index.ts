@@ -2601,6 +2601,8 @@ function populatePalette(
     CommandIDs.selectBelow,
     CommandIDs.selectHeadingAboveOrCollapse,
     CommandIDs.selectHeadingBelowOrExpand,
+    CommandIDs.insertHeadingAbove,
+    CommandIDs.insertHeadingBelow,
     CommandIDs.extendAbove,
     CommandIDs.extendTop,
     CommandIDs.extendBelow,

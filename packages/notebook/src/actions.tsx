@@ -2559,6 +2559,7 @@ namespace Private {
       notebook.deselectAll();
       Private.handleState(notebook, state, true);
       notebook.mode = 'edit';
+      notebook.widgets[cellIdx].setHidden(false);
     }
   }
 }
