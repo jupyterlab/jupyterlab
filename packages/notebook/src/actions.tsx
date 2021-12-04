@@ -859,56 +859,18 @@ export namespace NotebookActions {
     if (hInfoActiveCell.isHeading && !hInfoActiveCell.collapsed) {
       setHeadingCollapse(notebook.activeCell, true, notebook);
     } else {
-      let targetHeadingCellIdx = findLowerEqualLevelParentHeadingAbove(
+      let targetHeadingCellIdx = Private.Headings.findLowerEqualLevelParentHeadingAbove(
         notebook.activeCell,
-        notebook
-      );
-      if (targetHeadingCellIdx != null) {
+        notebook,
+        true
+      ) as number;
+      if (targetHeadingCellIdx > -1) {
         notebook.activeCellIndex = targetHeadingCellIdx;
       }
     }
     // clear selection and handle state
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
-  }
-
-  function determineHeadingLevel(baseCell: Cell, notebook: Notebook) {
-    let headingInfoBaseCell = getHeadingInfo(baseCell);
-    // fill baseHeadingLevel or return null if there is no heading at or above baseCell
-    if (headingInfoBaseCell.isHeading) {
-      return headingInfoBaseCell.headingLevel;
-    } else {
-      let parentHeading = findNearestParentHeader(baseCell, notebook);
-      if (!parentHeading) {
-        return null;
-      }
-      return getHeadingInfo(parentHeading).headingLevel;
-    }
-  }
-
-  function findLowerEqualLevelParentHeadingAbove(
-    baseCell: Cell,
-    notebook: Notebook
-  ) {
-    let baseHeadingLevel = determineHeadingLevel(baseCell, notebook);
-    if (!baseHeadingLevel) {
-      return null;
-    }
-    // find the heading above with heading level <= baseHeadingLevel and return its index
-    let cellIdx = notebook.widgets.indexOf(baseCell);
-    while (cellIdx > 0) {
-      cellIdx -= 1;
-      if (cellIdx < 0) {
-        return null; // nothing found
-      }
-      let headingInfo = getHeadingInfo(notebook.widgets[cellIdx]);
-      if (
-        headingInfo.isHeading &&
-        headingInfo.headingLevel <= baseHeadingLevel
-      ) {
-        return cellIdx;
-      }
-    }
   }
 
   /**
@@ -928,33 +890,19 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     let hInfo = getHeadingInfo(notebook.activeCell);
     if (hInfo.isHeading && hInfo.collapsed) {
-      console.log('expand');
       setHeadingCollapse(notebook.activeCell, false, notebook);
     } else {
-      let targetHeadingCellIdx = findHeadingBelow(
+      let targetHeadingCellIdx = Private.Headings.findHeadingBelow(
         notebook.activeCell,
-        notebook
-      );
-      if (targetHeadingCellIdx) {
+        notebook,
+        true // return index of heading cell
+      ) as number;
+      if (targetHeadingCellIdx > -1) {
         notebook.activeCellIndex = targetHeadingCellIdx;
       }
     }
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
-  }
-
-  function findHeadingBelow(baseCell: Cell, notebook: Notebook) {
-    let cellIdx = notebook.widgets.indexOf(baseCell);
-    while (cellIdx < notebook.widgets.length - 1) {
-      cellIdx += 1;
-      if (cellIdx >= notebook.widgets.length) {
-        return null; // nothing found
-      }
-      let headingInfo = getHeadingInfo(notebook.widgets[cellIdx]);
-      if (headingInfo.isHeading) {
-        return cellIdx;
-      }
-    }
   }
 
   /**
@@ -2411,5 +2359,132 @@ namespace Private {
       source = source.slice(matches[0].length);
     }
     cell.value.text = newHeader + source;
+  }
+
+  /** Functionality related to collapsible headings */
+  export namespace Headings {
+    /** Find the heading that is parent to cell.
+     *
+     * @param childCell - The cell that is child to the sought heading
+     * @param notebook - The target notebook widget
+     * @param includeChildCell [default=false] - if set to true and childCell is a heading itself, the childCell will be returned
+     * @param returnIdx [default=false] - if set to true, the cell idx is returned rather than the cell object.
+     *
+     * @returns the (index | Cell object) of the parent heading or (-1 | null) if there is no parent heading.
+     */
+    export function findParentHeading(
+      childCell: Cell,
+      notebook: Notebook,
+      includeChildCell = false,
+      returnIdx = false
+    ): number | Cell | null {
+      let cellIdx =
+        notebook.widgets.indexOf(childCell) - (includeChildCell ? 1 : 0);
+      while (cellIdx >= 0) {
+        let headingInfo = NotebookActions.getHeadingInfo(
+          notebook.widgets[cellIdx]
+        );
+        if (headingInfo.isHeading) {
+          return returnIdx ? cellIdx : notebook.widgets[cellIdx];
+        }
+        cellIdx--;
+      }
+      return returnIdx ? -1 : null;
+    }
+
+    /** Find heading above with leq level than baseCell heading level.
+     *
+     * @param baseCell - cell relative to which so search
+     * @param notebook - target notebook widget
+     * @param returnIdx [default=false] - if set to true, the cell idx is returned rather than the cell object.
+     *
+     * @returns the (index | Cell object) of the found heading or (-1 | null) if no heading found.
+     */
+    export function findLowerEqualLevelParentHeadingAbove(
+      baseCell: Cell,
+      notebook: Notebook,
+      returnIdx = false
+    ): number | Cell | null {
+      let baseHeadingLevel = Private.Headings.determineHeadingLevel(
+        baseCell,
+        notebook
+      );
+      if (!baseHeadingLevel) {
+        return returnIdx ? -1 : null; // no heading found
+      }
+      // find the heading above with heading level <= baseHeadingLevel and return its index
+      let cellIdx = notebook.widgets.indexOf(baseCell) - 1;
+      while (cellIdx >= 0) {
+        let cell = notebook.widgets[cellIdx];
+        let headingInfo = NotebookActions.getHeadingInfo(cell);
+        if (
+          headingInfo.isHeading &&
+          headingInfo.headingLevel <= baseHeadingLevel
+        ) {
+          return returnIdx ? cellIdx : cell;
+        }
+        cellIdx--;
+      }
+      return returnIdx ? -1 : null; // no heading found
+    }
+
+    /** Find next heading.
+     *
+     * @param baseCell - cell relative to which so search
+     * @param notebook - target notebook widget
+     * @param returnIdx [default=false] - if set to true, the cell idx is returned rather than the cell object.
+     *
+     * @returns the (index | Cell object) of the found heading or (-1 | null) if no heading found.
+     */
+    export function findHeadingBelow(
+      baseCell: Cell,
+      notebook: Notebook,
+      returnIdx = false
+    ): number | Cell | null {
+      let cellIdx = notebook.widgets.indexOf(baseCell) + 1;
+      while (cellIdx < notebook.widgets.length) {
+        let cell = notebook.widgets[cellIdx];
+        let headingInfo = NotebookActions.getHeadingInfo(cell);
+        if (headingInfo.isHeading) {
+          return returnIdx ? cellIdx : cell;
+        }
+        cellIdx++;
+      }
+      return returnIdx ? -1 : null;
+    }
+
+    /** Determine the heading level of a cell.
+     *
+     * @param baseCell - The cell of which the heading level shall be determined
+     * @param notebook - The target notebook widget
+     *
+     * @returns the heading level or -1 if there is no parent heading
+     *
+     * #### Notes
+     * If the baseCell is a heading itself, the heading level of baseCell is returned.
+     * If the baseCell is not a heading itself, the level of the parent heading is returned.
+     * If there is no parent heading, -1 is returned.
+     */
+    export function determineHeadingLevel(
+      baseCell: Cell,
+      notebook: Notebook
+    ): number {
+      let headingInfoBaseCell = NotebookActions.getHeadingInfo(baseCell);
+      // fill baseHeadingLevel or return null if there is no heading at or above baseCell
+      if (headingInfoBaseCell.isHeading) {
+        console.log('is heading');
+        return headingInfoBaseCell.headingLevel;
+      } else {
+        let parentHeading = findParentHeading(
+          baseCell,
+          notebook,
+          true
+        ) as Cell | null;
+        if (parentHeading == null) {
+          return -1;
+        }
+        return NotebookActions.getHeadingInfo(parentHeading).headingLevel;
+      }
+    }
   }
 }
