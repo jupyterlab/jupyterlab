@@ -863,7 +863,7 @@ export namespace NotebookActions {
         notebook.activeCell,
         notebook
       );
-      if (targetHeadingCellIdx) {
+      if (targetHeadingCellIdx != null) {
         notebook.activeCellIndex = targetHeadingCellIdx;
       }
     }
