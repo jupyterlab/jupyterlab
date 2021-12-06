@@ -13,7 +13,7 @@ import { NbConvert, NbConvertManager } from './nbconvert';
 
 import { Contents, ContentsManager } from './contents';
 
-import { KernelManager, Kernel } from './kernel';
+import { Kernel, KernelManager } from './kernel';
 
 import { KernelSpec, KernelSpecManager } from './kernelspec';
 
@@ -44,10 +44,12 @@ export class ServiceManager implements ServiceManager.IManager {
     const kernelManager = options.kernels || new KernelManager(normalized);
     this.serverSettings = serverSettings;
     this.contents = options.contents || new ContentsManager(normalized);
-    this.sessions = options.sessions || new SessionManager({
-      ...normalized,
-      kernelManager: kernelManager
-    });
+    this.sessions =
+      options.sessions ||
+      new SessionManager({
+        ...normalized,
+        kernelManager: kernelManager
+      });
     this.settings = options.settings || new SettingManager(normalized);
     this.terminals = options.terminals || new TerminalManager(normalized);
     this.builder = options.builder || new BuildManager(normalized);
@@ -176,7 +178,7 @@ export namespace ServiceManager {
   /**
    * A service manager interface.
    */
-  export interface IManager extends IDisposable, Managers{
+  export interface IManager extends IDisposable, IManagers {
     /**
      * Test whether the manager is ready.
      */
@@ -196,7 +198,7 @@ export namespace ServiceManager {
   /**
    * The options used to create a service manager.
    */
-  export interface IOptions extends Managers {
+  export interface IOptions extends IManagers {
     /**
      * Kernel manager of the manager.
      */
@@ -216,7 +218,7 @@ export namespace ServiceManager {
   /**
    * The managers provided by the service manager.
    */
-  interface Managers {
+  interface IManagers {
     /**
      * The builder for the manager.
      */
