@@ -37,6 +37,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -51,6 +52,7 @@ import {
   NotebookActions,
   NotebookModelFactory,
   NotebookPanel,
+  NotebookSearchProvider,
   NotebookTools,
   NotebookTracker,
   NotebookTrustStatus,
@@ -768,6 +770,19 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
   activate: activateNotebookCompleterService,
   autoStart: true
 };
+
+/**
+ * A plugin to search notebook documents
+ */
+const searchProvider: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:search',
+  requires: [ISearchProviderRegistry],
+  autoStart: true,
+  activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
+    registry.register('jp-notebookSearchProvider', NotebookSearchProvider);
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -786,7 +801,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   copyOutputPlugin,
   kernelStatus,
   lineColStatus,
-  completerPlugin
+  completerPlugin,
+  searchProvider
 ];
 export default plugins;
 

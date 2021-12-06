@@ -9,6 +9,8 @@
 @import url('~@jupyterlab/statusbar/style/index.css');
 @import url('~@jupyterlab/apputils/style/index.css');
 @import url('~@jupyterlab/codeeditor/style/index.css');
+@import url('~@jupyterlab/documentsearch/style/index.css');
+@import url('~@jupyterlab/statusbar/style/index.css');
 @import url('~@jupyterlab/rendermime/style/index.css');
 @import url('~@jupyterlab/docregistry/style/index.css');
 @import url('~@jupyterlab/application/style/index.css');

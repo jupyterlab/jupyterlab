@@ -14,9 +14,7 @@ import {
 import { ICommandPalette } from '@jupyterlab/apputils';
 
 import {
-  CodeMirrorSearchProvider,
   ISearchProviderRegistry,
-  NotebookSearchProvider,
   SearchInstance,
   SearchProviderRegistry
 } from '@jupyterlab/documentsearch';
@@ -45,8 +43,7 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
       const providerForWidget = registry.getProviderForWidget(widget);
       if (providerForWidget) {
         widget.addClass(SEARCHABLE_CLASS);
-      }
-      if (!providerForWidget) {
+      } else {
         widget.removeClass(SEARCHABLE_CLASS);
       }
     };
@@ -92,10 +89,6 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
 
     // Create registry, retrieve all default providers
     const registry: SearchProviderRegistry = new SearchProviderRegistry();
-
-    // Register default implementations of the Notebook and CodeMirror search providers
-    registry.register('jp-notebookSearchProvider', NotebookSearchProvider);
-    registry.register('jp-codeMirrorSearchProvider', CodeMirrorSearchProvider);
 
     const activeSearches = new Map<string, SearchInstance>();
 

@@ -4,25 +4,12 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "references": [
     {
       "path": "../apputils"
-    },
-    {
-      "path": "../cells"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../codemirror"
-    },
-    {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../notebook"
     },
     {
       "path": "../translation"

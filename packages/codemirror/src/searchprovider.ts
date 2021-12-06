@@ -30,60 +30,15 @@
   THE SOFTWARE.
 */
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { FileEditor } from '@jupyterlab/fileeditor';
+import { ISearchMatch } from '@jupyterlab/documentsearch';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
 import * as CodeMirror from 'codemirror';
-import { ISearchMatch, ISearchProvider } from '../interfaces';
+import { CodeMirrorEditor } from './editor';
 
-// The type for which canSearchFor returns true
-export type CMMainAreaWidget = MainAreaWidget<FileEditor> & {
-  content: { editor: CodeMirrorEditor };
-};
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
-export class CodeMirrorSearchProvider
-  implements ISearchProvider<CMMainAreaWidget> {
-  /**
-   * Get an initial query value if applicable so that it can be entered
-   * into the search box as an initial query
-   *
-   * @returns Initial value used to populate the search box.
-   */
-  getInitialQuery(searchTarget: CMMainAreaWidget): any {
-    const cm = searchTarget.content.editor;
-    const selection = cm.doc.getSelection();
-    // if there are newlines, just return empty string
-    return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
-  }
-
-  /**
-   * Initialize the search using the provided options.  Should update the UI
-   * to highlight all matches and "select" whatever the first match should be.
-   *
-   * @param query A RegExp to be use to perform the search
-   * @param searchTarget The widget to be searched
-   * @param [filters={}] Filter parameters to pass to provider
-   *
-   * @returns A promise that resolves with a list of all matches
-   */
-  async startQuery(
-    query: RegExp,
-    searchTarget: Widget,
-    filters = {}
-  ): Promise<ISearchMatch[]> {
-    if (!CodeMirrorSearchProvider.canSearchOn(searchTarget)) {
-      throw new Error('Cannot find Codemirror instance to search');
-    }
-
-    // canSearchOn is a type guard that guarantees the type of .editor
-    this._cm = searchTarget.content.editor;
-    return this._startQuery(query);
-  }
-
+export class CodeMirrorSearchProvider {
   /**
    * Initialize the search using a CodeMirrorEditor object.
    */
@@ -245,17 +200,6 @@ export class CodeMirrorSearchProvider
         resolve(replaceOccurred);
       });
     });
-  }
-
-  /**
-   * Report whether or not this provider has the ability to search on the given object
-   */
-  static canSearchOn(domain: Widget): domain is CMMainAreaWidget {
-    return (
-      domain instanceof MainAreaWidget &&
-      domain.content instanceof FileEditor &&
-      domain.content.editor instanceof CodeMirrorEditor
-    );
   }
 
   /**

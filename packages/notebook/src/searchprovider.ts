@@ -1,15 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { Cell, CodeCell, MarkdownCell } from '@jupyterlab/cells';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { NotebookPanel } from '@jupyterlab/notebook';
+import {
+  CodeMirrorEditor,
+  CodeMirrorSearchProvider
+} from '@jupyterlab/codemirror';
+import {
+  GenericSearchProvider,
+  ISearchMatch,
+  ISearchProvider
+} from '@jupyterlab/documentsearch';
 import { ArrayExt } from '@lumino/algorithm';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import CodeMirror from 'codemirror';
-import { ISearchMatch, ISearchProvider } from '../index';
-import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
-import { GenericSearchProvider } from './genericsearchprovider';
+import { NotebookPanel } from './panel';
 
 interface ICellSearchPair {
   cell: Cell;
@@ -35,7 +40,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: NotebookPanel): unknown {
+  getInitialQuery(searchTarget: NotebookPanel): string {
     const activeCell = searchTarget.content.activeCell;
     const selection = (activeCell?.editor as
       | CodeMirrorEditor
@@ -76,6 +81,12 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
     // hide the current notebook widget to prevent expensive layout re-calculation operations
     this._searchTarget.hide();
+
+    // Trigger update if the active cell changes
+    this._searchTarget.content.activeCellChanged.connect(
+      this._onSearchProviderChanged,
+      this
+    );
 
     let indexTotal = 0;
     const allMatches: ISearchMatch[] = [];
@@ -215,6 +226,10 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       queriesEnded.push(provider.endQuery());
       provider.changed.disconnect(this._onSearchProviderChanged, this);
     });
+    this._searchTarget!.content.activeCellChanged.disconnect(
+      this._onSearchProviderChanged,
+      this
+    );
     Signal.disconnectBetween(this._searchTarget!.model!.cells, this);
 
     this._searchProviders = [];
@@ -246,6 +261,10 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    */
   async endSearch(): Promise<void> {
     this._searchTarget!.hide();
+    this._searchTarget!.content.activeCellChanged.disconnect(
+      this._onSearchProviderChanged,
+      this
+    );
     Signal.disconnectBetween(this._searchTarget!.model!.cells, this);
 
     const index = this._searchTarget!.content.activeCellIndex;

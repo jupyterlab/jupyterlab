@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import { NotebookPanel } from '@jupyterlab/notebook';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -57,20 +56,6 @@ export class SearchInstance implements IDisposable {
     if (this._widget instanceof MainAreaWidget) {
       // Offset the position of the search widget to not cover the toolbar.
       this._searchWidget.node.style.top = `${this._widget.toolbar.node.clientHeight}px`;
-    }
-
-    if (this._widget instanceof NotebookPanel) {
-      this._widget.content.activeCellChanged.connect(() => {
-        if (
-          this._displayState.query &&
-          this._displayState.filters.selectedCells
-        ) {
-          void this._startQuery(
-            this._displayState.query,
-            this._displayState.filters
-          );
-        }
-      });
     }
 
     this._displaySearchWidget();

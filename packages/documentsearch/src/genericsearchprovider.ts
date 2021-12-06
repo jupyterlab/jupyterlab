@@ -3,7 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { ISearchMatch, ISearchProvider } from '../interfaces';
+import { ISearchMatch, ISearchProvider } from './interfaces';
 
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext'];

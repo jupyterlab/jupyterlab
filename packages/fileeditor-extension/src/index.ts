@@ -24,10 +24,12 @@ import {
 } from '@jupyterlab/codeeditor';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
   FileEditorFactory,
+  FileEditorSearchProvider,
   IEditorTracker,
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
@@ -175,13 +177,26 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to search notebook documents
+ */
+const searchProvider: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extension:search',
+  requires: [ISearchProviderRegistry],
+  autoStart: true,
+  activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
+    registry.register('jp-fileeditorSearchProvider', FileEditorSearchProvider);
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   plugin,
   lineColStatus,
-  tabSpaceStatus,
-  completerPlugin
+  completerPlugin,
+  searchProvider,
+  tabSpaceStatus
 ];
 export default plugins;
 
