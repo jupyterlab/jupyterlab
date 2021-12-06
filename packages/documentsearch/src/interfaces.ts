@@ -122,16 +122,7 @@ export interface ISearchProviderConstructor<T extends Widget = Widget> {
   canSearchOn(domain: Widget): domain is T;
 }
 
-export interface ISearchProvider<T extends Widget = Widget> {
-  /**
-   * Get an initial query value if applicable so that it can be entered
-   * into the search box as an initial query
-   *
-   * @param searchTarget The widget to be searched
-   *
-   * @returns Initial value used to populate the search box.
-   */
-  getInitialQuery(searchTarget: T): any;
+export interface IBaseSearchProvider<T> {
   /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
@@ -156,6 +147,19 @@ export interface ISearchProvider<T extends Widget = Widget> {
    * begin a new search.
    */
   endQuery(): Promise<void>;
+}
+
+export interface ISearchProvider<T extends Widget = Widget>
+  extends IBaseSearchProvider<T> {
+  /**
+   * Get an initial query value if applicable so that it can be entered
+   * into the search box as an initial query
+   *
+   * @param searchTarget The widget to be searched
+   *
+   * @returns Initial value used to populate the search box.
+   */
+  getInitialQuery(searchTarget: T): string;
 
   /**
    * Resets UI state as it was before the search process began.  Cleans up and

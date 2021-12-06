@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+import { IBaseSearchProvider } from '.';
 import { ISearchProvider, ISearchProviderConstructor } from './interfaces';
 import { ISearchProviderRegistry } from './tokens';
 
@@ -27,6 +29,24 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
   }
 
   /**
+   * Add a search mime type provider to the registry.
+   *
+   * @param key - The mime type key.
+   * @returns A disposable delegate that, when disposed, deregisters the given search provider
+   */
+  registerMimeTypeSearchEngine(
+    key: string,
+    provider: IBaseSearchProvider<ReadonlyPartialJSONObject>
+  ): IDisposable {
+    this._mimeProviderMap.set(key, provider);
+    this._changed.emit();
+    return new DisposableDelegate(() => {
+      this._mimeProviderMap.delete(key);
+      this._changed.emit();
+    });
+  }
+
+  /**
    * Returns a matching provider for the widget.
    *
    * @param widget - The widget to search over.
@@ -36,6 +56,18 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     widget: T
   ): ISearchProvider<T> | undefined {
     return this._findMatchingProvider(this._providerMap, widget);
+  }
+
+  /**
+   * Returns a matching provider for the mimetype.
+   *
+   * @param key The mimetype to search over.
+   * @returns the search provider, or undefined if none exists.
+   */
+  getMimeTypeProvider(
+    key: string
+  ): IBaseSearchProvider<ReadonlyPartialJSONObject> | undefined {
+    return this._mimeProviderMap.get(key);
   }
 
   /**
@@ -63,10 +95,14 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
   private _changed = new Signal<this, void>(this);
   private _providerMap: Private.ProviderMap = new Map<
     string,
-    ISearchProviderConstructor<any>
+    ISearchProviderConstructor<Widget>
+  >();
+  private _mimeProviderMap = new Map<
+    string,
+    IBaseSearchProvider<ReadonlyPartialJSONObject>
   >();
 }
 
 namespace Private {
-  export type ProviderMap = Map<string, ISearchProviderConstructor<any>>;
+  export type ProviderMap = Map<string, ISearchProviderConstructor<Widget>>;
 }
