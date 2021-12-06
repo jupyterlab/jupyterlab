@@ -24,13 +24,12 @@ bumped their major version (following semver convention):
    need to switch to the Blueprint components as the interfaces of those components in JupyterLab
    do not match those of Blueprint JS.
 - ``@jupyterlab/application`` from 3.x to 4.x
-   Major version bump to:
-   - This allows alternate ``ServiceManager`` implementations in ``JupyterFrontEnd``.
-     Specifically this allows the use of a mock manager.
-   - Make the ``JupyterLab.IOptions`` more permissive: do not require a shell when options are
-     given and allow a shell that meets the ``ILabShell`` interface.
-   - As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
-   - See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
+   Major version bump to allow alternate ``ServiceManager`` implementations in ``JupyterFrontEnd``.
+   Specifically this allows the use of a mock manager.
+   This also makes the ``JupyterLab.IOptions`` more permissive to not require a shell when options are
+   given and allow a shell that meets the ``ILabShell`` interface.
+   As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
+   See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
 
 JupyterLab 3.0 to 3.1
 ---------------------
