@@ -1595,7 +1595,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function collapseAll(notebook: Notebook): any {
+  export function collapseAllHeadings(notebook: Notebook): any {
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
         NotebookActions.setHeadingCollapse(cell, true, notebook);

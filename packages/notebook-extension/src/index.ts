@@ -2512,11 +2512,11 @@ function addCommands(
     isEnabled: isEnabledAndHeadingSelected
   });
   commands.addCommand(CommandIDs.collapseAllCmd, {
-    label: 'Collapse All Cells',
+    label: 'Collapse All Headings',
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.collapseAll(current.content);
+        return NotebookActions.collapseAllHeadings(current.content);
       }
     }
   });
