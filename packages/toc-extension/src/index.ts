@@ -144,7 +144,7 @@ async function activateTOC(
   let settings: ISettingRegistry.ISettings | undefined;
   if (settingRegistry) {
     try {
-      settings = await settingRegistry.load('@jupyterlab/toc-extension:plugin');
+      settings = await settingRegistry.load(extension.id);
     } catch (error) {
       console.error(
         `Failed to load settings for the Table of Contents extension.\n\n${error}`
@@ -232,7 +232,7 @@ async function activateTOC(
  * @private
  */
 const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
-  id: '@jupyterlab/toc:plugin',
+  id: '@jupyterlab/toc-extension:plugin',
   autoStart: true,
   provides: ITableOfContentsRegistry,
   requires: [IDocumentManager, IRenderMimeRegistry, ITranslator],
