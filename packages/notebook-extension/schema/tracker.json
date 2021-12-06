@@ -699,16 +699,6 @@
       "title": "Code Cell Configuration",
       "description": "The configuration for all code cells.",
       "$ref": "#/definitions/editorConfig",
-      "properties": {
-        "lineWrap": {
-          "type": "string",
-          "default": "off"
-        },
-        "matchBrackets": {
-          "type": "boolean",
-          "default": true
-        }
-      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,
