@@ -1,12 +1,39 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ITranslator } from '@jupyterlab/translation';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
+/**
+ * Filter interface
+ */
+export interface IFilter {
+  /**
+   * Filter title
+   */
+  title: string;
+  /**
+   * Filter description
+   */
+  description: string;
+  /**
+   * Default value
+   */
+  default: boolean;
+  /**
+   * Does the filter support replace?
+   */
+  supportReplace: boolean;
+}
+
+/**
+ * Type of filters
+ *
+ * TODO support additional filter type
+ */
 export interface IFiltersType {
-  output: boolean;
-  selectedCells: boolean;
+  [key: string]: boolean;
 }
 
 export interface IDisplayState {
@@ -113,7 +140,7 @@ export interface ISearchMatch {
  * the static canSearchOn function.
  */
 export interface ISearchProviderConstructor<T extends Widget = Widget> {
-  new (): ISearchProvider<T>;
+  new (translator: ITranslator): ISearchProvider<T>;
   /**
    * Report whether or not this provider has the ability to search on the
    * given object. The function is a type guard, meaning that it returns
@@ -220,8 +247,12 @@ export interface ISearchProvider<T extends Widget = Widget>
   readonly isReadOnly: boolean;
 
   /**
-   * Set to true if the widget under search has outputs to search.
-   * Defaults to false.
+   * Get the filters for the given provider.
+   *
+   * @returns The filters.
+   *
+   * ### Notes
+   * TODO For now it only supports boolean filters (represented with checkboxes)
    */
-  readonly hasOutputs?: boolean;
+  getFilters?(): { [key: string]: IFilter };
 }

@@ -23,6 +23,7 @@ import { Debouncer } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { IFilter } from '.';
 import { IDisplayState, IFiltersType } from './interfaces';
 import { SearchInstance } from './searchinstance';
 
@@ -295,60 +296,30 @@ class FilterToggle extends React.Component<
 }
 
 interface IFilterSelectionProps {
-  searchOutput: boolean;
-  searchSelectedCells: boolean;
-  canToggleOutput: boolean;
-  canToggleSelectedCells: boolean;
-  toggleOutput: () => void;
-  toggleSelectedCells: () => void;
-  trans: TranslationBundle;
+  title: string;
+  description: string;
+  value: boolean;
+  isEnabled: boolean;
+  onToggle: () => void;
 }
 
-interface IFilterSelectionState {}
-
-class FilterSelection extends React.Component<
-  IFilterSelectionProps,
-  IFilterSelectionState
-> {
-  render() {
-    return (
-      <label className={SEARCH_OPTIONS_CLASS}>
-        <div>
-          <span
-            className={
-              this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
-            }
-          >
-            {this.props.trans.__('Search Cell Outputs')}
-          </span>
-          <input
-            type="checkbox"
-            disabled={!this.props.canToggleOutput}
-            checked={this.props.searchOutput}
-            onChange={this.props.toggleOutput}
-          />
-        </div>
-        <div>
-          <span
-            className={
-              this.props.canToggleSelectedCells
-                ? ''
-                : SEARCH_OPTIONS_DISABLED_CLASS
-            }
-          >
-            {this.props.trans.__('Search Selected Cell(s)')}
-          </span>
-          <input
-            type="checkbox"
-            disabled={!this.props.canToggleSelectedCells}
-            checked={this.props.searchSelectedCells}
-            onChange={this.props.toggleSelectedCells}
-          />
-        </div>
-      </label>
-    );
-  }
+function FilterSelection(props: IFilterSelectionProps): JSX.Element {
+  return (
+    <label
+      className={props.isEnabled ? '' : SEARCH_OPTIONS_DISABLED_CLASS}
+      title={props.description}
+    >
+      {props.title}
+      <input
+        type="checkbox"
+        disabled={!props.isEnabled}
+        checked={props.value}
+        onChange={props.onToggle}
+      />
+    </label>
+  );
 }
+
 interface ISearchOverlayProps {
   overlayState: IDisplayState;
   onCaseSensitiveToggled: () => void;
@@ -360,8 +331,8 @@ interface ISearchOverlayProps {
   onReplaceCurrent: (t: string) => void;
   onReplaceAll: (t: string) => void;
   isReadOnly: boolean;
-  hasOutputs: boolean;
   searchDebounceTime: number;
+  filters: { [key: string]: IFilter };
   translator?: ITranslator;
 }
 
@@ -377,10 +348,6 @@ class SearchOverlay extends React.Component<
     this._debouncedStartSearch = new Debouncer(() => {
       this._executeSearch(true, this.state.searchText);
     }, props.searchDebounceTime);
-    this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
-    this._toggleSearchSelectedCells = this._toggleSearchSelectedCells.bind(
-      this
-    );
   }
 
   componentDidMount() {
@@ -479,30 +446,6 @@ class SearchOverlay extends React.Component<
       this.setState({ searchInputFocused: false });
     }
   }
-  private _toggleSearchOutput() {
-    this.setState(
-      prevState => ({
-        ...prevState,
-        filters: {
-          ...prevState.filters,
-          output: !prevState.filters.output
-        }
-      }),
-      () => this._executeSearch(true, undefined, true)
-    );
-  }
-  private _toggleSearchSelectedCells() {
-    this.setState(
-      prevState => ({
-        ...prevState,
-        filters: {
-          ...prevState.filters,
-          selectedCells: !prevState.filters.selectedCells
-        }
-      }),
-      () => this._executeSearch(true, undefined, true)
-    );
-  }
 
   private _toggleFiltersOpen() {
     this.setState(prevState => ({
@@ -512,24 +455,47 @@ class SearchOverlay extends React.Component<
 
   render() {
     const showReplace = !this.props.isReadOnly && this.state.replaceEntryShown;
-    const showFilter = this.props.hasOutputs;
-    const filterToggle = showFilter ? (
+    const filters = this.props.filters;
+
+    const hasFilters = Object.keys(filters).length > 0;
+    const filterToggle = hasFilters ? (
       <FilterToggle
         enabled={this.state.filtersOpen}
         toggleEnabled={() => this._toggleFiltersOpen()}
       />
     ) : null;
-    const filter = showFilter ? (
-      <FilterSelection
-        key={'filter'}
-        canToggleOutput={!showReplace}
-        canToggleSelectedCells={true}
-        searchOutput={this.state.filters.output}
-        searchSelectedCells={this.state.filters.selectedCells}
-        toggleOutput={this._toggleSearchOutput}
-        toggleSelectedCells={this._toggleSearchSelectedCells}
-        trans={this.translator.load('jupyterlab')}
-      />
+    const filter = hasFilters ? (
+      <div className={SEARCH_OPTIONS_CLASS}>
+        {Object.keys(filters).map(name => {
+          const filter = filters[name];
+          return (
+            <FilterSelection
+              key={name}
+              title={filter.title}
+              description={filter.description}
+              isEnabled={!showReplace || filter.supportReplace}
+              onToggle={() => {
+                this.setState(
+                  prevState => {
+                    const newState = {
+                      ...prevState,
+                      filters: {
+                        ...prevState.filters
+                      }
+                    };
+                    newState.filters[name] = !(
+                      prevState.filters[name] ?? filter.default
+                    );
+                    return newState;
+                  },
+                  () => this._executeSearch(true, undefined, true)
+                );
+              }}
+              value={this.state.filters[name] ?? filter.default}
+            />
+          );
+        })}
+      </div>
     ) : null;
     const icon = this.state.replaceEntryShown ? caretDownIcon : caretRightIcon;
 
@@ -658,8 +624,8 @@ export function createSearchOverlay(
     onReplaceAll,
     onEndSearch,
     isReadOnly,
-    hasOutputs,
     searchDebounceTime,
+    filters,
     translator
   } = options;
   const widget = ReactWidget.create(
@@ -677,8 +643,8 @@ export function createSearchOverlay(
             onReplaceAll={onReplaceAll}
             overlayState={args!}
             isReadOnly={isReadOnly}
-            hasOutputs={hasOutputs}
             searchDebounceTime={searchDebounceTime}
+            filters={filters}
             translator={translator}
           />
         );
@@ -702,8 +668,8 @@ namespace createSearchOverlay {
     onReplaceCurrent: (t: string) => void;
     onReplaceAll: (t: string) => void;
     isReadOnly: boolean;
-    hasOutputs: boolean;
     searchDebounceTime: number;
+    filters: { [key: string]: IFilter };
     translator?: ITranslator;
   }
 }

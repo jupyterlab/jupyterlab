@@ -7,9 +7,12 @@ import {
 } from '@jupyterlab/codemirror';
 import {
   GenericSearchProvider,
+  IFilter,
+  IFiltersType,
   ISearchMatch,
   ISearchProvider
 } from '@jupyterlab/documentsearch';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -21,19 +24,36 @@ interface ICellSearchPair {
   provider: CodeMirrorSearchProvider | GenericSearchProvider;
 }
 
-export interface INotebookFilters {
-  /**
-   * Should cell output be searched?
-   */
-  output: boolean;
-
-  /**
-   * Should search be within the selected cell(s)?
-   */
-  selectedCells: boolean;
-}
-
 export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
+  constructor(protected translator: ITranslator = nullTranslator) {}
+
+  /**
+   * Get the filters for the given provider.
+   *
+   * @returns The filters.
+   *
+   * ### Notes
+   * TODO For now it only supports boolean filters (represented with checkboxes)
+   */
+  getFilters(): { [key: string]: IFilter } {
+    const trans = this.translator.load('jupyterlab');
+
+    return {
+      output: {
+        title: trans.__('Search Cell Outputs'),
+        description: trans.__('Search in the cell outputs.'),
+        default: true,
+        supportReplace: false
+      },
+      selectedCells: {
+        title: trans.__('Search Selected Cell(s)'),
+        description: trans.__('Search only in the selected cell(s).'),
+        default: false,
+        supportReplace: true
+      }
+    };
+  }
+
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
@@ -62,15 +82,16 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   async startQuery(
     query: RegExp,
     searchTarget: NotebookPanel,
-    filters: INotebookFilters | undefined
+    filters: IFiltersType | undefined
   ): Promise<ISearchMatch[]> {
     this._searchTarget = searchTarget;
     let cells = this._searchTarget.content.widgets;
 
-    this._filters =
-      !filters || Object.entries(filters).length === 0
-        ? { output: true, selectedCells: false }
-        : filters;
+    this._filters = {
+      output: true,
+      selectedCells: false,
+      ...(filters ?? {})
+    };
 
     const selectedCells = cells.filter(cell =>
       this._searchTarget!.content.isSelectedOrActive(cell)
@@ -404,8 +425,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    */
   readonly isReadOnly = false;
 
-  readonly hasOutputs = true;
-
   private _updatedCurrentProvider(reverse: boolean) {
     if (
       this._currentProvider &&
@@ -520,7 +539,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   private _searchTarget: NotebookPanel | undefined | null;
-  private _filters: INotebookFilters;
+  private _filters: IFiltersType;
   private _searchProviders: ICellSearchPair[] = [];
   private _currentProvider: ICellSearchPair | null | undefined;
   private _currentMatch: ISearchMatch | undefined | null;

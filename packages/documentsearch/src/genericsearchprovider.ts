@@ -3,7 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { ISearchMatch, ISearchProvider } from './interfaces';
+import { IFilter, ISearchMatch, ISearchProvider } from './interfaces';
 
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
@@ -67,6 +67,18 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
    */
   getInitialQuery(searchTarget: Widget): any {
     return '';
+  }
+
+  /**
+   * Get the filters for the given provider.
+   *
+   * @returns The filters.
+   *
+   * ### Notes
+   * TODO For now it only supports boolean filters (represented with checkboxes)
+   */
+  getFilters(): { [key: string]: IFilter } {
+    return {};
   }
 
   /**

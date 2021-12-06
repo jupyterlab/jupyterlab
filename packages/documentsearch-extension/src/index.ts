@@ -88,7 +88,9 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     let searchDebounceTime = 500;
 
     // Create registry, retrieve all default providers
-    const registry: SearchProviderRegistry = new SearchProviderRegistry();
+    const registry: SearchProviderRegistry = new SearchProviderRegistry(
+      translator
+    );
 
     const activeSearches = new Map<string, SearchInstance>();
 

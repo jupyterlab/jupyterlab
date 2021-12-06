@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -10,6 +11,8 @@ import { ISearchProvider, ISearchProviderConstructor } from './interfaces';
 import { ISearchProviderRegistry } from './tokens';
 
 export class SearchProviderRegistry implements ISearchProviderRegistry {
+  constructor(protected translator: ITranslator = nullTranslator) {}
+
   /**
    * Add a provider to the registry.
    *
@@ -86,7 +89,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     // widget.
     for (const P of providerMap.values()) {
       if (P.canSearchOn(widget)) {
-        return new P();
+        return new P(this.translator);
       }
     }
     return undefined;

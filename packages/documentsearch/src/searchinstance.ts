@@ -38,8 +38,9 @@ export class SearchInstance implements IDisposable {
       onReplaceAll: this._replaceAll.bind(this),
       onEndSearch: this.dispose.bind(this),
       isReadOnly: this._activeProvider.isReadOnly,
-      hasOutputs: this._activeProvider.hasOutputs || false,
       searchDebounceTime: searchDebounceTime,
+      filters:
+        this._activeProvider.getFilters?.call(this._activeProvider) ?? {},
       translator: this.translator
     });
 
@@ -239,7 +240,7 @@ export class SearchInstance implements IDisposable {
     forceFocus: true,
     replaceText: '',
     replaceEntryShown: false,
-    filters: { output: true, selectedCells: false },
+    filters: {},
     filtersOpen: false
   };
 
