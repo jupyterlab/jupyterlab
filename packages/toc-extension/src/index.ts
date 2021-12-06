@@ -125,6 +125,11 @@ async function activateTOC(
     label: trans.__('Run Cell(s)')
   });
 
+  app.contextMenu.addItem({
+    selector: '.jp-tocItem',
+    command: CommandIDs.runCells
+  });
+
   if (restorer) {
     // Add the ToC widget to the application restorer:
     restorer.add(toc, '@jupyterlab/toc:plugin');
