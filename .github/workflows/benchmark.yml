@@ -64,6 +64,8 @@ jobs:
           python-version: 3.8
 
       - uses: iterative/setup-cml@v1
+        with:
+          sudo: false
 
       - name: Cache pip on Linux
         uses: actions/cache@v1
@@ -180,7 +182,7 @@ jobs:
         run: |
           # Publish image to cml.dev
           echo "" >> ${REPORT}
-          cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT} || true
+          cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
           echo "" >> ${REPORT}
 
           # Test if metadata have changed
