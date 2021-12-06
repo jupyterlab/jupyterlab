@@ -165,7 +165,7 @@
             "rank": 11
           },
           {
-            "command": "notebook:toggle-render-side-by-side",
+            "command": "notebook:toggle-render-side-by-side-current",
             "rank": 12
           },
           {
@@ -593,12 +593,12 @@
     },
     {
       "command": "notebook:toggle-render-side-by-side",
-      "keys": ["Shift R"],
+      "keys": ["Ctrl Shift R"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:toggle-render-side-by-side-current",
-      "keys": ["Ctrl Shift R"],
+      "keys": ["Shift R"],
       "selector": ".jp-Notebook:focus"
     }
   ],
