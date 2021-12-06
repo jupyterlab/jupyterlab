@@ -30,7 +30,7 @@ bumped their major version (following semver convention):
    given and allow a shell that meets the ``ILabShell`` interface.
    As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
-- ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:plugin``
+- ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).
 
 JupyterLab 3.0 to 3.1

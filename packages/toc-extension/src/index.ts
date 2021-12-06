@@ -232,7 +232,7 @@ async function activateTOC(
  * @private
  */
 const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
-  id: '@jupyterlab/toc-extension:plugin',
+  id: '@jupyterlab/toc-extension:registry',
   autoStart: true,
   provides: ITableOfContentsRegistry,
   requires: [IDocumentManager, IRenderMimeRegistry, ITranslator],
