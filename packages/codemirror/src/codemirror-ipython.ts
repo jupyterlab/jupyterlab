@@ -1,16 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import CodeMirror from 'codemirror';
+// TODO: CM6 migration
+/*import CodeMirror from 'codemirror';
 import 'codemirror/mode/meta';
 import 'codemirror/mode/python/python';
-
+*/
 /**
  * Define an IPython codemirror mode.
  *
  * It is a slightly altered Python Mode with a `?` operator.
  */
-CodeMirror.defineMode(
+/*CodeMirror.defineMode(
   'ipython',
   (config: CodeMirror.EditorConfiguration, modeOptions?: any) => {
     const pythonConf: any = {};
@@ -19,9 +20,9 @@ CodeMirror.defineMode(
         pythonConf[prop] = modeOptions[prop];
       }
     }
-    pythonConf.name = 'python';
-    pythonConf.singleOperators = new RegExp('^[\\+\\-\\*/%&|@\\^~<>!\\?]');
-    pythonConf.identifiers = new RegExp(
+    pythonConf.name = 'python';*/
+    //pythonConf.singleOperators = new RegExp('^[\\+\\-\\*/%&|@\\^~<>!\\?]');
+    /*pythonConf.identifiers = new RegExp(
       '^[_A-Za-z\u00A1-\uFFFF][_A-Za-z0-9\u00A1-\uFFFF]*'
     );
     return CodeMirror.getMode(config, pythonConf);
@@ -35,4 +36,4 @@ CodeMirror.modeInfo.push({
   mime: 'text/x-ipython',
   mode: 'ipython',
   name: 'ipython'
-});
+});*/

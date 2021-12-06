@@ -687,12 +687,12 @@ export namespace CodeEditor {
     /**
      * Gets the token at a given position.
      */
-    getTokenForPosition(position: IPosition): IToken;
+    //getTokenForPosition(position: IPosition): IToken;
 
     /**
      * Gets the list of tokens for the editor model.
      */
-    getTokens(): IToken[];
+    //getTokens(): IToken[];
 
     /**
      * Replaces selection with the given text.

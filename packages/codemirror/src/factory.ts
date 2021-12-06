@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { indentLess } from '@codemirror/commands';
+import { commentKeymap } from '@codemirror/comment';
+import { searchKeymap } from '@codemirror/search';
+import { EditorView } from '@codemirror/view';
 import { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CodeMirrorEditor } from './editor';
@@ -19,7 +23,12 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
     this.translator = translator || nullTranslator;
     this.inlineCodeMirrorConfig = {
       ...CodeMirrorEditor.defaultConfig,
-      extraKeys: {
+      extraKeys: [
+        {key: 'Tab', run: CodeMirrorEditor.indentMoreOrInsertTab, shift: indentLess},
+        ...commentKeymap,
+        ...searchKeymap
+      ],
+      /*extraKeys: {
         'Cmd-Right': 'goLineRight',
         End: 'goLineRight',
         'Cmd-Left': 'goLineLeft',
@@ -29,20 +38,25 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Ctrl-/': cm => cm.toggleComment({ indent: true }),
         'Ctrl-G': 'find',
         'Cmd-G': 'find'
-      },
+      },*/
       ...defaults
     };
     this.documentCodeMirrorConfig = {
       ...CodeMirrorEditor.defaultConfig,
-      extraKeys: {
+      extraKeys: [
+        {key: 'Tab', run: CodeMirrorEditor.indentMoreOrInsertTab, shift: indentLess},
+        ...commentKeymap,
+        {key: 'Shift-Enter', run: (target: EditorView) => { return true; }}
+      ],
+      /*extraKeys: {
         Tab: 'indentMoreOrinsertTab',
         'Shift-Tab': 'indentLess',
         'Cmd-/': cm => cm.toggleComment({ indent: true }),
         'Ctrl-/': cm => cm.toggleComment({ indent: true }),
         'Shift-Enter': () => {
           /* no-op */
-        }
-      },
+        /*}
+      },*/
       lineNumbers: true,
       scrollPastEnd: true,
       ...defaults

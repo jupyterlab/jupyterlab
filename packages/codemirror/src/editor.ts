@@ -7,22 +7,49 @@
 import { showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
-  ICollaborator,
+  /*ICollaborator,*/
   IObservableMap,
   IObservableString
 } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+//import * as models from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
-import { JSONExt, UUID } from '@lumino/coreutils';
+import { /*JSONExt,*/ UUID } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
-import CodeMirror from 'codemirror';
+
+import {
+  defaultKeymap,
+  indentMore,
+  insertNewlineAndIndent,
+  insertTab
+} from '@codemirror/commands';
+import { closeBrackets} from '@codemirror/closebrackets';
+import * as gutter from '@codemirror/gutter';
+import { defaultHighlightStyle }  from '@codemirror/highlight';
+import {
+  getIndentUnit,
+  indentUnit
+} from '@codemirror/language';
+import {
+  EditorSelection,
+  EditorState,
+  StateCommand,
+  Transaction
+} from '@codemirror/state';
+import { Text } from '@codemirror/text';
+import {
+  Command,
+  EditorView,
+  KeyBinding,
+  keymap } from '@codemirror/view';
+
+/*import CodeMirror from 'codemirror';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/display/rulers.js';
 import 'codemirror/addon/edit/closebrackets.js';
@@ -46,7 +73,7 @@ import 'codemirror/addon/edit/trailingspace.js';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
 import { CodemirrorBinding } from 'y-codemirror';
-import { Mode } from './mode';
+import { Mode } from './mode';*/
 
 // import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
 
@@ -58,17 +85,17 @@ const EDITOR_CLASS = 'jp-CodeMirrorEditor';
 /**
  * The class name added to read only cell editor widgets.
  */
-const READ_ONLY_CLASS = 'jp-mod-readOnly';
+//const READ_ONLY_CLASS = 'jp-mod-readOnly';
 
 /**
  * The class name for the hover box for collaborator cursors.
  */
-const COLLABORATOR_CURSOR_CLASS = 'jp-CollaboratorCursor';
+//const COLLABORATOR_CURSOR_CLASS = 'jp-CollaboratorCursor';
 
 /**
  * The class name for the hover box for collaborator cursors.
  */
-const COLLABORATOR_HOVER_CLASS = 'jp-CollaboratorCursor-hover';
+//const COLLABORATOR_HOVER_CLASS = 'jp-CollaboratorCursor-hover';
 
 /**
  * The key code for the up arrow key.
@@ -83,7 +110,7 @@ const DOWN_ARROW = 40;
 /**
  * The time that a collaborator name hover persists.
  */
-const HOVER_TIMEOUT = 1000;
+//const HOVER_TIMEOUT = 1000;
 
 // @todo Remove the duality of having a modeldb and a y-codemirror
 // binding as it just introduces a lot of additional complexity without gaining anything.
@@ -127,11 +154,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // every time the model is switched, we need to re-initialize the editor binding
     this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
 
-    const doc = editor.getDoc();
 
     // Handle initial values for text, mimetype, and selections.
     if (!USE_YCODEMIRROR_BINDING) {
-      doc.setValue(model.value.text);
+      this.editor.dispatch({ changes: { from: 0, to: this.editor.state.doc.length, insert: model.value.text}});
     }
     this._onMimeTypeChanged();
     this._onCursorActivity();
@@ -153,7 +179,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
-    CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
+    // TODO: CM6 migration
+    /*CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
       const index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
           event.preventDefault();
@@ -191,10 +218,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       if (!handlePaste) {
         event.codemirrorIgnore = true;
       }
-    });
+    });*/
 
     // Manually refresh on paste to make sure editor is properly sized.
-    editor.getWrapperElement().addEventListener('paste', () => {
+    editor.dom.addEventListener('paste', () => {
       if (this.hasFocus()) {
         this.refresh();
       }
@@ -208,7 +235,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (!USE_YCODEMIRROR_BINDING) {
       return;
     }
-    this._yeditorBinding?.destroy();
+    // TODO: CM6 migration
+    /*this._yeditorBinding?.destroy();
     const sharedModel = this.model.sharedModel as models.IYText;
     const opts = sharedModel.undoManager
       ? { yUndoManager: sharedModel.undoManager }
@@ -219,7 +247,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this.editor,
       awareness,
       opts
-    );
+    );*/
   }
 
   /**
@@ -255,22 +283,22 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Get the codemirror editor wrapped by the editor.
    */
-  get editor(): CodeMirror.Editor {
+  get editor(): EditorView {
     return this._editor;
   }
 
   /**
    * Get the codemirror doc wrapped by the widget.
    */
-  get doc(): CodeMirror.Doc {
-    return this._editor.getDoc();
+  get doc(): Text {
+    return this._editor.state.doc;
   }
 
   /**
    * Get the number of lines in the editor.
    */
   get lineCount(): number {
-    return this.doc.lineCount();
+    return this.doc.lines;
   }
 
   /**
@@ -284,14 +312,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * The height of a line in the editor in pixels.
    */
   get lineHeight(): number {
-    return this._editor.defaultTextHeight();
+    return this._editor.defaultLineHeight;
   }
 
   /**
    * The widget of a character in the editor in pixels.
    */
   get charWidth(): number {
-    return this._editor.defaultCharWidth();
+    return this._editor.defaultCharacterWidth;
   }
 
   /**
@@ -312,12 +340,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('focus', this, true);
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
-    if (this._yeditorBinding) {
+    /*if (this._yeditorBinding) {
       this._yeditorBinding.destroy();
-    }
+    }*/
     this._keydownHandlers.length = 0;
     this._poll.dispose();
     Signal.clearData(this);
+    this.editor.destroy();
   }
 
   /**
@@ -352,7 +381,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * is set.
    */
   setOptions(options: Partial<CodeMirrorEditor.IConfig>): void {
-    const editor = this._editor;
+    // TODO: CM6 migration
+    /*const editor = this._editor;
     editor.startOperation();
     for (const key in options) {
       const k = key as keyof CodeMirrorEditor.IConfig;
@@ -360,32 +390,32 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         this.setOption(k, options[k]);
       });
     }
-    editor.endOperation();
+    editor.endOperation();*/
   }
 
   /**
    * Returns the content for the given line number.
    */
   getLine(line: number): string | undefined {
-    return this.doc.getLine(line);
+    // TODO: CM6 remove +1 when CM6 first line number has propagated
+    return this.doc.line(line+1).text;
   }
 
   /**
    * Find an offset for the given position.
    */
   getOffsetAt(position: CodeEditor.IPosition): number {
-    return this.doc.indexFromPos({
-      ch: position.column,
-      line: position.line
-    });
+    // TODO: CM6 remove +1 when CM6 first line number has propagated
+    return this.doc.line(position.line+1).from + position.column;
   }
 
   /**
    * Find a position for the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
-    const { ch, line } = this.doc.posFromIndex(offset);
-    return { line, column: ch };
+    // TODO: CM6 remove -1 when CM6 first line number has propagated
+    const line = this.doc.lineAt(offset);
+    return { line: line.number - 1, column: offset - line.from };
   }
 
   /**
@@ -406,7 +436,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Clear the undo history.
    */
   clearHistory(): void {
-    this._yeditorBinding?.yUndoManager?.clear();
+    //TODO
+    //this._yeditorBinding?.yUndoManager?.clear();
   }
 
   /**
@@ -420,21 +451,23 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Test whether the editor has keyboard focus.
    */
   hasFocus(): boolean {
-    return this._editor.getWrapperElement().contains(document.activeElement);
+    return this._editor.dom.contains(document.activeElement);
+    //return this._editor.getWrapperElement().contains(document.activeElement);
   }
 
   /**
    * Explicitly blur the editor.
    */
   blur(): void {
-    this._editor.getInputField().blur();
+    this._editor.contentDOM.blur();
+    //this._editor.getInputField().blur();
   }
 
   /**
    * Repaint editor.
    */
   refresh(): void {
-    this._editor.refresh();
+    //this._editor.refresh();
     this._needsRefresh = false;
   }
 
@@ -453,14 +486,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
 
   // todo: docs, maybe define overlay options as a type?
   addOverlay(mode: string | object, options?: object): void {
-    this._editor.addOverlay(mode, options);
+    // TODO: CM6 migration
+    //this._editor.addOverlay(mode, options);
   }
 
   removeOverlay(mode: string | object): void {
-    this._editor.removeOverlay(mode);
+    // TODO: CM6 migration
+    //this._editor.removeOverlay(mode);
   }
 
-  getSearchCursor(
+  // TODO: CM6 migration
+  /*getSearchCursor(
     query: string | RegExp,
     start?: CodeMirror.Position,
     caseFold?: boolean
@@ -470,25 +506,28 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
 
   getCursor(start?: string): CodeMirror.Position {
     return this._editor.getDoc().getCursor(start);
-  }
+  }*/
 
-  get state(): any {
+  get state(): EditorState {
     return this._editor.state;
   }
 
-  operation<T>(fn: () => T): T {
+  // TODO: CM6 migration
+  /*operation<T>(fn: () => T): T {
     return this._editor.operation(fn);
-  }
+  }*/
 
   firstLine(): number {
-    return this._editor.getDoc().firstLine();
+    // TODO: return 1 when CM6 first line number has propagated
+    return 0;
   }
 
   lastLine(): number {
-    return this._editor.getDoc().lastLine();
+    return this.doc.lines - 1;
   }
 
-  scrollIntoView(
+  // TODO: CM6 migration (see scrollTo)
+  /*scrollIntoView(
     pos: { from: CodeMirror.Position; to: CodeMirror.Position },
     margin: number
   ): void {
@@ -504,21 +543,28 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       inline: 'center'
     });
     this._editor.scrollTo(null, top - height / 2);
-  }
+  }*/
 
   cursorCoords(
     where: boolean,
     mode?: 'window' | 'page' | 'local'
   ): { left: number; top: number; bottom: number } {
-    return this._editor.cursorCoords(where, mode);
+    const selection = this.state.selection.main;
+    const pos = where ? selection.from : selection.to;
+    const rect = this.editor.coordsAtPos(pos);
+    return rect as { left: number, top: number, bottom: number };
+    //return this._editor.cursorCoords(where, mode);
   }
 
   getRange(
-    from: CodeMirror.Position,
-    to: CodeMirror.Position,
+    from: { line: number, ch: number },
+    to: { line: number, ch: number },
     separator?: string
   ): string {
-    return this._editor.getDoc().getRange(from, to, separator);
+    const from_offset = this.getOffsetAt(this._toPosition(from));
+    const to_offset = this.getOffsetAt(this._toPosition(to));
+    return this.state.sliceDoc(from_offset, to_offset);
+    //return this._editor.getDoc().getRange(from, to, separator);
   }
 
   /**
@@ -539,11 +585,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Set the size of the editor in pixels.
    */
   setSize(dimension: CodeEditor.IDimension | null): void {
-    if (dimension) {
+    // TODO: CM6
+    /*if (dimension) {
       this._editor.setSize(dimension.width, dimension.height);
     } else {
       this._editor.setSize(null, null);
-    }
+    }*/
     this._needsRefresh = false;
   }
 
@@ -551,19 +598,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Reveal the given position in the editor.
    */
   revealPosition(position: CodeEditor.IPosition): void {
-    const cmPosition = this._toCodeMirrorPosition(position);
-    this._editor.scrollIntoView(cmPosition);
+    // TODO: CM6
+    //const cmPosition = this._toCodeMirrorPosition(position);
+    //this._editor.scrollIntoView(cmPosition);
   }
 
   /**
    * Reveal the given selection in the editor.
    */
   revealSelection(selection: CodeEditor.IRange): void {
-    const range = {
+    // TODO: CM6
+    /*const range = {
       from: this._toCodeMirrorPosition(selection.start),
       to: this._toCodeMirrorPosition(selection.end)
     };
-    this._editor.scrollIntoView(range);
+    this._editor.scrollIntoView(range);*/
   }
 
   /**
@@ -572,8 +621,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   getCoordinateForPosition(
     position: CodeEditor.IPosition
   ): CodeEditor.ICoordinate {
-    const pos = this._toCodeMirrorPosition(position);
-    const rect = this.editor.charCoords(pos, 'page');
+    const offset = this.getOffsetAt(position);
+    const rect = this.editor.coordsAtPos(offset);
     return rect as CodeEditor.ICoordinate;
   }
 
@@ -588,15 +637,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   getPositionForCoordinate(
     coordinate: CodeEditor.ICoordinate
   ): CodeEditor.IPosition | null {
-    return this._toPosition(this.editor.coordsChar(coordinate)) || null;
+    const offset = this.editor.posAtCoords({x: coordinate.left, y: coordinate.top});
+    return this.getPositionAt(offset!) || null;
   }
 
   /**
    * Returns the primary position of the cursor, never `null`.
    */
   getCursorPosition(): CodeEditor.IPosition {
-    const cursor = this.doc.getCursor();
-    return this._toPosition(cursor);
+    const offset = this.state.selection.main.head;
+    return this.getPositionAt(offset);
   }
 
   /**
@@ -609,12 +659,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     position: CodeEditor.IPosition,
     options?: { bias?: number; origin?: string; scroll?: boolean }
   ): void {
-    const cursor = this._toCodeMirrorPosition(position);
-    this.doc.setCursor(cursor, undefined, options);
+    const offset = this.getOffsetAt(position);
+    this.editor.dispatch({selection: {anchor: offset}});
     // If the editor does not have focus, this cursor change
     // will get screened out in _onCursorsChanged(). Make an
     // exception for this method.
-    if (!this.editor.hasFocus()) {
+    if (!this.editor.hasFocus) {
       this.model.selections.set(this.uuid, this.getSelections());
     }
   }
@@ -637,11 +687,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Gets the selections for all the cursors, never `null` or empty.
    */
   getSelections(): CodeEditor.ITextSelection[] {
-    const selections = this.doc.listSelections();
+    //const selections = this.doc.listSelections();
+    const selections = this.state.selection.ranges; //= [{anchor: number, head: number}]
     if (selections.length > 0) {
-      return selections.map(selection => this._toSelection(selection));
+      const sel = selections.map(r => ({ anchor: this._toCodeMirrorPosition(this.getPositionAt(r.from)),
+                                        head: this._toCodeMirrorPosition(this.getPositionAt(r.to)) }));
+      return sel.map(selection => this._toSelection(selection));
+      //return selections.map(selection => this._toSelection(selection));
     }
-    const cursor = this.doc.getCursor();
+    const cursor = this._toCodeMirrorPosition(this.getPositionAt(this.state.selection.main.head));
+    //const cursor = this.doc.getCursor();
     const selection = this._toSelection({ anchor: cursor, head: cursor });
     return [selection];
   }
@@ -652,8 +707,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Passing an empty array resets a cursor position to the start of a document.
    */
   setSelections(selections: CodeEditor.IRange[]): void {
-    const cmSelections = this._toCodeMirrorSelections(selections);
-    this.doc.setSelections(cmSelections, 0);
+    const sel = selections.map(r => EditorSelection.range(this.getOffsetAt(r.start), this.getOffsetAt(r.end)));
+    this.editor.dispatch({ selection: EditorSelection.create(sel)}); 
   }
 
   /**
@@ -662,13 +717,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * @param text The text to be inserted.
    */
   replaceSelection(text: string): void {
-    this.doc.replaceSelection(text);
+    this.editor.dispatch(this.state.replaceSelection(text));
   }
 
   /**
    * Get a list of tokens for the current editor text content.
    */
-  getTokens(): CodeEditor.IToken[] {
+  // TODO: CM6
+  /*getTokens(): CodeEditor.IToken[] {
     let tokens: CodeEditor.IToken[] = [];
     for (let i = 0; i < this.lineCount; ++i) {
       const lineTokens = this.editor.getLineTokens(i).map(t => ({
@@ -679,12 +735,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       tokens = tokens.concat(lineTokens);
     }
     return tokens;
-  }
+  }*/
 
   /**
    * Get the token at a given editor position.
    */
-  getTokenForPosition(position: CodeEditor.IPosition): CodeEditor.IToken {
+  // TODO: CM6
+  /*getTokenForPosition(position: CodeEditor.IPosition): CodeEditor.IToken {
     const cursor = this._toCodeMirrorPosition(position);
     const token = this.editor.getTokenAt(cursor);
     return {
@@ -692,13 +749,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       value: token.string,
       type: token.type ?? undefined
     };
-  }
+  }*/
 
   /**
    * Insert a new indented line at the current cursor position.
    */
   newIndentedLine(): void {
-    this.execCommand('newlineAndIndent');
+    insertNewlineAndIndent({state: this.state, dispatch: this.editor.dispatch});
+    //this.execCommand('newlineAndIndent');
   }
 
   /**
@@ -706,9 +764,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    *
    * @param command - The name of the command to execute.
    */
-  execCommand(command: string): void {
-    this._editor.execCommand(command);
+  execCommand(command: Command | StateCommand): void {
+    command(this.editor);
   }
+  /*execCommand(command: string): void {
+    this._editor.execCommand(command);
+  }*/
 
   /**
    * Handle keydown events from the editor.
@@ -747,25 +808,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Converts selections to code mirror selections.
-   */
-  private _toCodeMirrorSelections(
-    selections: CodeEditor.IRange[]
-  ): CodeMirror.Selection[] {
-    if (selections.length > 0) {
-      return selections.map(selection =>
-        this._toCodeMirrorSelection(selection)
-      );
-    }
-    const position = { line: 0, ch: 0 };
-    return [{ anchor: position, head: position }];
-  }
-
-  /**
    * Handles a mime type change.
    */
   private _onMimeTypeChanged(): void {
-    const mime = this._model.mimeType;
+    // TODO: CM6 migration
+    /*const mime = this._model.mimeType;
     const editor = this._editor;
     const extraKeys = (editor.getOption('extraKeys' as any) ||
       {}) as CodeMirror.KeyMap;
@@ -780,7 +827,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // TODO: should we provide a hook for when the mode is done being set?
     void Mode.ensure(mime).then(spec => {
       this.setOption('mode', spec?.mime ?? 'null');
-    });
+    });*/
   }
 
   /**
@@ -802,14 +849,15 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Clean selections for the given uuid.
    */
+  // TODO: CM6 migration see Mark Text section of the migration guide
   private _cleanSelections(uuid: string) {
-    const markers = this.selectionMarkers[uuid];
+    /*const markers = this.selectionMarkers[uuid];
     if (markers) {
       markers.forEach(marker => {
         marker.clear();
       });
     }
-    delete this.selectionMarkers[uuid];
+    delete this.selectionMarkers[uuid];*/
   }
 
   /**
@@ -819,7 +867,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     uuid: string,
     selections: CodeEditor.ITextSelection[]
   ) {
-    const markers: CodeMirror.TextMarker[] = [];
+    // TODO: CM6 migration, see Mark Text section of the igration guide
+    /*const markers: CodeMirror.TextMarker[] = [];
 
     // If we are marking selections corresponding to an active hover,
     // remove it.
@@ -870,7 +919,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         );
       }
     });
-    this.selectionMarkers[uuid] = markers;
+    this.selectionMarkers[uuid] = markers;*/
   }
 
   /**
@@ -879,7 +928,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _onCursorActivity(): void {
     // Only add selections if the editor has focus. This avoids unwanted
     // triggering of cursor activity due to collaborator actions.
-    if (this._editor.hasFocus()) {
+    if (this._editor.hasFocus) {
       const selections = this.getSelections();
       this.model.selections.set(this.uuid, selections);
     }
@@ -889,7 +938,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Converts a code mirror selection to an editor selection.
    */
   private _toSelection(
-    selection: CodeMirror.Selection
+    selection: { anchor: { line: number, ch: number}, head: { line: number, ch: number }}
   ): CodeEditor.ITextSelection {
     return {
       uuid: this.uuid,
@@ -902,7 +951,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Converts the selection style to a text marker options.
    */
-  private _toTextMarkerOptions(
+  // TODO: CM6 migration see Mark text section of the migration guide
+  /*private _toTextMarkerOptions(
     style: CodeEditor.ISelectionStyle
   ): CodeMirror.TextMarkerOptions {
     const r = parseInt(style.color.slice(1, 3), 16);
@@ -914,24 +964,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       title: style.displayName,
       css
     };
-  }
-
-  /**
-   * Converts an editor selection to a code mirror selection.
-   */
-  private _toCodeMirrorSelection(
-    selection: CodeEditor.IRange
-  ): CodeMirror.Selection {
-    return {
-      anchor: this._toCodeMirrorPosition(selection.start),
-      head: this._toCodeMirrorPosition(selection.end)
-    };
-  }
+  }*/
 
   /**
    * Convert a code mirror position to an editor position.
    */
-  private _toPosition(position: CodeMirror.Position) {
+  private _toPosition(position: { line: number, ch: number}) {
     return {
       line: position.line,
       column: position.ch
@@ -959,27 +997,25 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._changeGuard = true;
-    const doc = this.doc;
     switch (args.type) {
       case 'insert': {
-        const pos = doc.posFromIndex(args.start);
         // Replace the range, including a '+input' origin,
         // which indicates that CodeMirror may merge changes
         // for undo/redo purposes.
-        doc.replaceRange(args.value, pos, pos, '+input');
+        this.editor.dispatch({changes: {from: args.start, to: args.start, insert: args.value}});
         break;
       }
       case 'remove': {
-        const from = doc.posFromIndex(args.start);
-        const to = doc.posFromIndex(args.end);
+        const from = args.start;
+        const to = args.end;
         // Replace the range, including a '+input' origin,
         // which indicates that CodeMirror may merge changes
         // for undo/redo purposes.
-        doc.replaceRange('', from, to, '+input');
+        this.editor.dispatch({changes: {from, to, insert: ''}});
         break;
       }
       case 'set':
-        doc.setValue(args.value);
+        this.editor.dispatch({changes: {from: 0, to: this.doc.length, insert: args.value}});
         break;
       default:
         break;
@@ -990,7 +1026,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handles document changes.
    */
-  private _beforeDocChanged(
+  // TODO: CM6 migration
+  /*private _beforeDocChanged(
     doc: CodeMirror.Doc,
     change: CodeMirror.EditorChange
   ) {
@@ -1010,7 +1047,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       value.insert(start, inserted);
     }
     this._changeGuard = false;
-  }
+  }*/
 
   /**
    * Handle the DOM events for the editor.
@@ -1085,7 +1122,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a caret element representing the position
    * of a collaborator's cursor.
    */
-  private _getCaret(collaborator: ICollaborator): HTMLElement {
+  // TODO: CM6 migration, see Marked Text section of migration guide
+  /*private _getCaret(collaborator: ICollaborator): HTMLElement {
     // FIXME-TRANS: Is this localizable?
     const name = collaborator ? collaborator.displayName : 'Anonymous';
     const color = collaborator
@@ -1124,7 +1162,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }, HOVER_TIMEOUT);
     };
     return caret;
-  }
+  }*/
 
   /**
    * Check for an out of sync editor.
@@ -1135,9 +1173,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._lastChange = null;
-    const editor = this._editor;
-    const doc = editor.getDoc();
-    if (doc.getValue() === this._model.value.text) {
+    const doc = this.doc;
+    if (doc.toString() === this._model.value.text) {
       return;
     }
 
@@ -1153,11 +1190,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     console.warn(
       JSON.stringify({
         model: this._model.value.text,
-        view: doc.getValue(),
+        view: doc.toString(),
         selections: this.getSelections(),
         cursor: this.getCursorPosition(),
-        lineSep: editor.getOption('lineSeparator'),
-        mode: editor.getOption('mode'),
+        lineSep: this.state.facet(EditorState.lineSeparator),
+        //mode: editor.getOption('mode'),
         change
       })
     );
@@ -1166,23 +1203,23 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _model: CodeEditor.IModel;
-  private _editor: CodeMirror.Editor;
-  protected selectionMarkers: {
+  private _editor: EditorView;
+  /*protected selectionMarkers: {
     [key: string]: CodeMirror.TextMarker[] | undefined;
-  } = {};
+  } = {};*/
   private _caretHover: HTMLElement | null;
   private readonly _config: CodeMirrorEditor.IConfig;
   private _hoverTimeout: number;
-  private _hoverId: string;
+  //private _hoverId: string;
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
   private _needsRefresh = false;
   private _isDisposed = false;
-  private _lastChange: CodeMirror.EditorChange | null = null;
+  private _lastChange: Transaction | null = null;
   private _poll: Poll;
-  private _yeditorBinding: CodemirrorBinding | null;
+  //private _yeditorBinding: CodemirrorBinding | null;
 }
 
 /**
@@ -1206,7 +1243,7 @@ export namespace CodeMirrorEditor {
     /**
      * The mode to use.
      */
-    mode?: string | Mode.IMode;
+    mode?: string;// | Mode.IMode;
 
     /**
      * The theme to style the editor with.
@@ -1242,7 +1279,7 @@ export namespace CodeMirrorEditor {
      * Can be used to specify extra keybindings for the editor, alongside the
      * ones defined by keyMap. Should be either null, or a valid keymap value.
      */
-    extraKeys?: CodeMirror.KeyMap | null;
+    extraKeys?: KeyBinding[] | null;
 
     /**
      * Can be used to add extra gutters (beyond or instead of the line number
@@ -1323,7 +1360,7 @@ export namespace CodeMirrorEditor {
      * CodeMirror-activeline-background, and adds the class
      * CodeMirror-activeline-gutter to the line's gutter space is enabled.
      */
-    styleActiveLine: boolean | CodeMirror.StyleActiveLine;
+    styleActiveLine: boolean; //| CodeMirror.StyleActiveLine;
 
     /**
      * Whether to causes the selected text to be marked with the CSS class
@@ -1369,19 +1406,81 @@ export namespace CodeMirrorEditor {
   };
 
   /**
+   * The options used to set several options at once with setOptions.
+   */
+  export interface IConfigOptions<K extends keyof IConfig> {
+    K: IConfig[K];
+  }
+
+  /**
    * Add a command to CodeMirror.
    *
    * @param name - The name of the command to add.
    *
    * @param command - The command function.
    */
-  export function addCommand(
+  // TODO: There is no longer a central registry of named commands in CM6,
+  // the question is should we expose Commands and StateCommands, or recreate
+  // the central registry internally
+  /*export function addCommand(
     name: string,
     command: (cm: CodeMirror.Editor) => void
   ): void {
     (CodeMirror.commands as any)[name] = command;
+  }*/
+
+  /**
+   * Indent or insert a tab as appropriate.
+   */
+  export function indentMoreOrInsertTab(target: { state: EditorState, dispatch: (transaction: Transaction) => void }): boolean {
+    const arg = { state: target.state, dispatch: target.dispatch };
+    const from = target.state.selection.main.from;
+    const to = target.state.selection.main.to;
+    if (from != to) {
+      return indentMore(arg);
+    }
+    const line = target.state.doc.lineAt(from);
+    const before = target.state.doc.slice(line.from, from).toString();
+    if (/^\s*$/.test(before)) {
+      return indentMore(arg);
+    }
+    else {
+      return insertTab(arg);
+    }
+  }
+
+  /**
+   * Delete spaces to the previous tab stop in a codemirror editor.
+   */
+  export function delSpaceToPrevTabStop(target: EditorView): void {
+    const indentUnit = getIndentUnit(target.state);
+    const ranges = target.state.selection.ranges; // handle multicursor
+    for (let i = ranges.length - 1; i >=0; i--) {
+      // iterate reverse so any deletions don't overlap
+      const head = ranges[i].head;
+      const anchor = ranges[i].anchor;
+      if (head != anchor) {
+        target.dispatch({changes: {from: anchor, to: head, insert: ''}});
+      }
+      else {
+        const line = target.state.doc.lineAt(head);
+        const text = line.text.substring(0, head - line.from);
+        if (text.match(/^\ +$/) !== null) {
+          // delete tabs
+          const prevTabStop = (Math.ceil((head - line.from) / indentUnit) - 1) * indentUnit;
+          const from = line.from + prevTabStop;
+          target.dispatch({changes: {from: from, to: head, insert: ''}});
+        } else {
+          // delete non-tabs
+          // TODO
+          // const from = cm.findPosH(head, -1, 'char', false);
+          // doc.replaceRange('', from, head);
+        }
+      }
+    }
   }
 }
+
 /**
  * The namespace for module private data.
  */
@@ -1389,20 +1488,46 @@ namespace Private {
   export function createEditor(
     host: HTMLElement,
     config: CodeMirrorEditor.IConfig
-  ): CodeMirror.Editor {
+  ): EditorView {
     const {
+      lineNumbers,
       autoClosingBrackets,
-      fontFamily,
-      fontSize,
+      //fontFamily,
+      //fontSize,
       insertSpaces,
-      lineHeight,
-      lineWrap,
-      wordWrapColumn,
+      //lineHeight,
+      //lineWrap,
+      //wordWrapColumn,
       tabSize,
       readOnly,
-      ...otherOptions
+      extraKeys
+      //...otherOptions
     } = config;
-    const bareConfig = {
+
+    let extensions = [
+      EditorState.tabSize.of(tabSize),
+      EditorState.readOnly.of(readOnly),
+      insertSpaces ? indentUnit.of(' '.repeat(tabSize)) : indentUnit.of('\t'),
+      defaultHighlightStyle.fallback,
+      keymap.of([...defaultKeymap, ...extraKeys!])
+    ];
+
+    if (lineNumbers) {
+      extensions.push(gutter.lineNumbers());
+    }
+    if (autoClosingBrackets) {
+      extensions.push(closeBrackets());
+    }
+
+    const view = new EditorView({
+      state: EditorState.create({
+        extensions: extensions
+      }),
+      parent: host
+    });
+
+    return view;
+    /*const bareConfig = {
       autoCloseBrackets: autoClosingBrackets ? {} : false,
       indentUnit: tabSize,
       indentWithTabs: !insertSpaces,
@@ -1432,13 +1557,13 @@ namespace Private {
         lines.style.maxWidth = `${wordWrapColumn}ch`;
       }
       host.appendChild(el);
-    }, bareConfig);
+    }, bareConfig);*/
   }
 
   /**
    * Indent or insert a tab as appropriate.
    */
-  export function indentMoreOrinsertTab(cm: CodeMirror.Editor): void {
+  /*export function indentMoreOrinsertTab(cm: CodeMirror.Editor): void {
     const doc = cm.getDoc();
     const from = doc.getCursor('from');
     const to = doc.getCursor('to');
@@ -1459,12 +1584,12 @@ namespace Private {
         CodeMirror.commands['insertSoftTab'](cm);
       }
     }
-  }
+  }*/
 
   /**
    * Delete spaces to the previous tab stop in a codemirror editor.
    */
-  export function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
+  /*export function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
     const doc = cm.getDoc();
     // default tabsize is 2, according to codemirror docs: https://codemirror.net/doc/manual.html#config
     const tabSize = cm.getOption('indentUnit') ?? 2;
@@ -1490,24 +1615,25 @@ namespace Private {
         }
       }
     }
-  }
+  }*/
 
   /**
    * Test whether two CodeMirror positions are equal.
    */
-  export function posEq(
+  /*export function posEq(
     a: CodeMirror.Position,
     b: CodeMirror.Position
   ): boolean {
     return a.line === b.line && a.ch === b.ch;
-  }
+  }*/
 
   /**
    * Get the list of active gutters
    *
    * @param config Editor configuration
    */
-  function getActiveGutters(config: CodeMirrorEditor.IConfig): string[] {
+  // TODO: CM6 migration
+  /*function getActiveGutters(config: CodeMirrorEditor.IConfig): string[] {
     // The order of the classes will be the gutters order
     const classToSwitch: { [val: string]: keyof CodeMirrorEditor.IConfig } = {
       'CodeMirror-linenumbers': 'lineNumbers',
@@ -1516,17 +1642,19 @@ namespace Private {
     return Object.keys(classToSwitch).filter(
       gutter => config[classToSwitch[gutter]]
     );
-  }
+  }*/
 
   /**
    * Set a config option for the editor.
    */
+  // TODO: CM6 migration, set the new option/config system based on Facets
   export function setOption<K extends keyof CodeMirrorEditor.IConfig>(
-    editor: CodeMirror.Editor,
+    editor: EditorView,
     option: K,
     value: CodeMirrorEditor.IConfig[K],
     config: CodeMirrorEditor.IConfig
   ): void {
+  /*
     const el = editor.getWrapperElement();
     switch (option) {
       case 'cursorBlinkRate':
@@ -1608,23 +1736,25 @@ namespace Private {
       default:
         (editor.setOption as any)(option, value);
         break;
-    }
+    }*/
   }
 }
 
+// TODO: no more central registry of named commands in CM6,
+// let's remove that for now
 /**
  * Add a CodeMirror command to delete until previous non blanking space
  * character or first multiple of tabsize tabstop.
  */
-CodeMirrorEditor.addCommand(
+/*CodeMirrorEditor.addCommand(
   'delSpaceToPrevTabStop',
   Private.delSpaceToPrevTabStop
-);
+);*/
 
 /**
  * Add a CodeMirror command to indent or insert a tab as appropriate.
  */
-CodeMirrorEditor.addCommand(
+/*CodeMirrorEditor.addCommand(
   'indentMoreOrinsertTab',
   Private.indentMoreOrinsertTab
-);
+);*/

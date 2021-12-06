@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import CodeMirror from 'codemirror';
+/*import CodeMirror from 'codemirror';
 import 'codemirror/addon/mode/multiplex';
 import 'codemirror/mode/gfm/gfm';
 import 'codemirror/mode/stex/stex';
-
+*/
 /**
  * Define an IPython GFM (GitHub Flavored Markdown) mode.
  *
@@ -15,7 +15,7 @@ import 'codemirror/mode/stex/stex';
  *  But was later removed in
  *   https://github.com/codemirror/CodeMirror/commit/d9c9f1b1ffe984aee41307f3e927f80d1f23590c
  */
-CodeMirror.defineMode(
+/*CodeMirror.defineMode(
   'ipythongfm',
   (config: CodeMirror.EditorConfiguration, modeOptions?: any) => {
     const gfmMode = CodeMirror.getMode(config, {
@@ -97,4 +97,4 @@ CodeMirror.modeInfo.push({
   mime: 'text/x-ipythongfm',
   mode: 'ipythongfm',
   name: 'ipythongfm'
-});
+});*/
