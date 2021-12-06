@@ -537,6 +537,16 @@
       "selector": ".jp-Notebook:focus"
     },
     {
+      "command": "Collapsible_Headings:Collapse_All",
+      "keys": ["Ctrl Shift ArrowLeft"],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "Collapsible_Headings:Expand_All",
+      "keys": ["Ctrl Shift ArrowRight"],
+      "selector": ".jp-Notebook"
+    },
+    {
       "command": "notebook:paste-cell-below",
       "keys": ["V"],
       "selector": ".jp-Notebook:focus"
