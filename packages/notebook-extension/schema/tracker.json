@@ -537,12 +537,12 @@
       "selector": ".jp-Notebook:focus"
     },
     {
-      "command": "Collapsible_Headings:Collapse_All",
+      "command": "notebook:collapse-all-headings",
       "keys": ["Ctrl Shift ArrowLeft"],
       "selector": ".jp-Notebook"
     },
     {
-      "command": "Collapsible_Headings:Expand_All",
+      "command": "notebook:expand-all-headings",
       "keys": ["Ctrl Shift ArrowRight"],
       "selector": ".jp-Notebook"
     },

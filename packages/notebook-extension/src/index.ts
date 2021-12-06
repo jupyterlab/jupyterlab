@@ -255,11 +255,11 @@ namespace CommandIDs {
 
   export const autoClosingBrackets = 'notebook:toggle-autoclosing-brackets';
 
-  export const toggleCollapseCmd = 'Collapsible_Headings:Toggle_Collapse';
+  export const toggleCollapseCmd = 'notebook:toggle-heading-collapse';
 
-  export const collapseAllCmd = 'Collapsible_Headings:Collapse_All';
+  export const collapseAllCmd = 'notebook:collapse-all-headings';
 
-  export const expandAllCmd = 'Collapsible_Headings:Expand_All';
+  export const expandAllCmd = 'notebook:expand-all-headings';
 
   export const copyToClipboard = 'notebook:copy-to-clipboard';
 }
