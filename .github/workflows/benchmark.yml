@@ -64,8 +64,6 @@ jobs:
           python-version: 3.8
 
       - uses: iterative/setup-cml@v1
-        with:
-          sudo: false
 
       - name: Cache pip on Linux
         uses: actions/cache@v1
