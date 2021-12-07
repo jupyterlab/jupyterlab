@@ -31,12 +31,12 @@
 */
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ISearchMatch } from '@jupyterlab/documentsearch';
+import { ITextSearchMatch } from '@jupyterlab/documentsearch';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorEditor } from './editor';
 
-type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
+type MatchMap = { [key: number]: { [key: number]: ITextSearchMatch } };
 
 export class CodeMirrorSearchProvider {
   /**
@@ -45,7 +45,7 @@ export class CodeMirrorSearchProvider {
   async startQueryCodeMirror(
     query: RegExp,
     searchTarget: CodeMirrorEditor
-  ): Promise<ISearchMatch[]> {
+  ): Promise<ITextSearchMatch[]> {
     this._cm = searchTarget;
     return this._startQuery(query, false);
   }
@@ -57,7 +57,7 @@ export class CodeMirrorSearchProvider {
   private async _startQuery(
     query: RegExp,
     refreshOverlay: boolean = true
-  ): Promise<ISearchMatch[]> {
+  ): Promise<ITextSearchMatch[]> {
     // no point in removing overlay in the middle of the search
     await this.endQuery(false);
 
@@ -127,7 +127,7 @@ export class CodeMirrorSearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightNext(): Promise<ISearchMatch | undefined> {
+  async highlightNext(): Promise<ITextSearchMatch | undefined> {
     const cursorMatch = this._findNext(false);
     if (!cursorMatch) {
       return;
@@ -142,7 +142,7 @@ export class CodeMirrorSearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightPrevious(): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(): Promise<ITextSearchMatch | undefined> {
     const cursorMatch = this._findNext(true);
     if (!cursorMatch) {
       return;
@@ -205,11 +205,11 @@ export class CodeMirrorSearchProvider {
   /**
    * The same list of matches provided by the startQuery promise resolution
    */
-  get matches(): ISearchMatch[] {
+  get matches(): ITextSearchMatch[] {
     return this._parseMatchesFromState();
   }
 
-  get currentMatch(): ISearchMatch | null {
+  get currentMatch(): ITextSearchMatch | null {
     return this._currentMatch;
   }
 
@@ -295,10 +295,10 @@ export class CodeMirrorSearchProvider {
       let match = query.exec(line);
       while (match) {
         const col = match.index;
-        const matchObj: ISearchMatch = {
+        const matchObj: ITextSearchMatch = {
           text: match[0],
           line: lineNumber,
-          column: col,
+          position: col,
           fragment: line,
           index: totalMatchIndex
         };
@@ -342,10 +342,10 @@ export class CodeMirrorSearchProvider {
         if (match && match.index === currentPos) {
           // found match, add it to state
           const matchLength = match[0].length;
-          const matchObj: ISearchMatch = {
+          const matchObj: ITextSearchMatch = {
             text: lineText.substr(currentPos, matchLength),
             line: line,
-            column: currentPos,
+            position: currentPos,
             fragment: lineText,
             index: 0 // fill in index when flattening, later
           };
@@ -447,26 +447,20 @@ export class CodeMirrorSearchProvider {
     });
   }
 
-  private _parseMatchesFromState(): ISearchMatch[] {
+  private _parseMatchesFromState(): ITextSearchMatch[] {
     let index = 0;
-    // Flatten state map and update the index of each match
-    const matches: ISearchMatch[] = Object.keys(this._matchState).reduce(
-      (result: ISearchMatch[], lineNumber: string) => {
-        const lineKey = parseInt(lineNumber, 10);
-        const lineMatches: { [key: number]: ISearchMatch } = this._matchState[
-          lineKey
-        ];
-        Object.keys(lineMatches).forEach((pos: string) => {
-          const posKey = parseInt(pos, 10);
-          const match: ISearchMatch = lineMatches[posKey];
-          match.index = index;
-          index += 1;
-          result.push(match);
-        });
-        return result;
-      },
-      []
-    );
+    // Flatten state map
+    const matches = new Array<ITextSearchMatch>();
+
+    for (const lineKey in this._matchState) {
+      const lineMatches = this._matchState[lineKey];
+      for (const posKey in lineMatches) {
+        const match = lineMatches[posKey];
+        match.index = index++;
+        matches.push(match);
+      }
+    }
+
     return matches;
   }
 
@@ -488,7 +482,7 @@ export class CodeMirrorSearchProvider {
       currentSelection.start.line === currentSelection.end.line;
     return (
       this._currentMatch.line === currentSelection.start.line &&
-      this._currentMatch.column === currentSelection.start.column &&
+      this._currentMatch.position === currentSelection.start.column &&
       this._currentMatch.text.length === currentSelectionLength &&
       selectionIsOneLine
     );
@@ -496,17 +490,17 @@ export class CodeMirrorSearchProvider {
 
   private _query: RegExp;
   private _cm: CodeMirrorEditor;
-  private _currentMatch: ISearchMatch | null;
+  private _currentMatch: ITextSearchMatch | null;
   private _matchState: MatchMap = {};
   private _changed = new Signal<this, void>(this);
   private _overlay: any;
 }
 
 export class SearchState {
-  public posFrom: CodeMirror.Position;
-  public posTo: CodeMirror.Position;
-  public lastQuery: string;
-  public query: RegExp;
+  posFrom: CodeMirror.Position;
+  posTo: CodeMirror.Position;
+  lastQuery: string;
+  query: RegExp;
 }
 
 namespace Private {

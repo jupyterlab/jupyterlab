@@ -115,6 +115,25 @@ export interface ISearchMatch {
   readonly text: string;
 
   /**
+   * Start location of the match (in a text, this is the column)
+   */
+  position: number;
+
+  /**
+   * Index among the other matches
+   */
+  index: number;
+}
+
+export interface IHTMLSearchMatch extends ISearchMatch {
+  /**
+   * Node containing the match
+   */
+  readonly node: Text;
+}
+
+export interface ITextSearchMatch extends ISearchMatch {
+  /**
    * Fragment containing match
    */
   readonly fragment: string;
@@ -123,16 +142,6 @@ export interface ISearchMatch {
    * Line number of match
    */
   line: number;
-
-  /**
-   * Column location of match
-   */
-  column: number;
-
-  /**
-   * Index among the other matches
-   */
-  index: number;
 }
 
 /**
@@ -149,7 +158,21 @@ export interface ISearchProviderConstructor<T extends Widget = Widget> {
   canSearchOn(domain: Widget): domain is T;
 }
 
-export interface IBaseSearchProvider<T> {
+export interface IMimeTypeSearchEngine {
+  search(query: RegExp, data: any): Promise<ISearchMatch[]>;
+}
+
+export interface ISearchProvider<T extends Widget = Widget> {
+  /**
+   * Get an initial query value if applicable so that it can be entered
+   * into the search box as an initial query
+   *
+   * @param searchTarget The widget to be searched
+   *
+   * @returns Initial value used to populate the search box.
+   */
+  getInitialQuery(searchTarget: T): string;
+
   /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
@@ -174,22 +197,9 @@ export interface IBaseSearchProvider<T> {
    * begin a new search.
    */
   endQuery(): Promise<void>;
-}
-
-export interface ISearchProvider<T extends Widget = Widget>
-  extends IBaseSearchProvider<T> {
-  /**
-   * Get an initial query value if applicable so that it can be entered
-   * into the search box as an initial query
-   *
-   * @param searchTarget The widget to be searched
-   *
-   * @returns Initial value used to populate the search box.
-   */
-  getInitialQuery(searchTarget: T): string;
 
   /**
-   * Resets UI state as it was before the search process began.  Cleans up and
+   * Resets UI state as it was before the search process began. Cleans up and
    * disposes of all internal state.
    *
    * @returns A promise that resolves when all state has been cleaned up.

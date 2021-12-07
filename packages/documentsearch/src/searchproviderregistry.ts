@@ -2,12 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IBaseSearchProvider } from '.';
-import { ISearchProvider, ISearchProviderConstructor } from './interfaces';
+import {
+  IMimeTypeSearchEngine,
+  ISearchProvider,
+  ISearchProviderConstructor
+} from './interfaces';
 import { ISearchProviderRegistry } from './tokens';
 
 export class SearchProviderRegistry implements ISearchProviderRegistry {
@@ -39,12 +41,12 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    */
   registerMimeTypeSearchEngine(
     key: string,
-    provider: IBaseSearchProvider<ReadonlyPartialJSONObject>
+    provider: IMimeTypeSearchEngine
   ): IDisposable {
-    this._mimeProviderMap.set(key, provider);
+    this._mimeEngineMap.set(key, provider);
     this._changed.emit();
     return new DisposableDelegate(() => {
-      this._mimeProviderMap.delete(key);
+      this._mimeEngineMap.delete(key);
       this._changed.emit();
     });
   }
@@ -67,10 +69,8 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    * @param key The mimetype to search over.
    * @returns the search provider, or undefined if none exists.
    */
-  getMimeTypeProvider(
-    key: string
-  ): IBaseSearchProvider<ReadonlyPartialJSONObject> | undefined {
-    return this._mimeProviderMap.get(key);
+  getMimeTypeSearchEngine(key: string): IMimeTypeSearchEngine | undefined {
+    return this._mimeEngineMap.get(key);
   }
 
   /**
@@ -100,10 +100,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     string,
     ISearchProviderConstructor<Widget>
   >();
-  private _mimeProviderMap = new Map<
-    string,
-    IBaseSearchProvider<ReadonlyPartialJSONObject>
-  >();
+  private _mimeEngineMap = new Map<string, IMimeTypeSearchEngine>();
 }
 
 namespace Private {

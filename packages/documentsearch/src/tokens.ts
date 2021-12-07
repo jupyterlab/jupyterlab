@@ -1,12 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IBaseSearchProvider } from '.';
-import { ISearchProvider, ISearchProviderConstructor } from './interfaces';
+import {
+  IMimeTypeSearchEngine,
+  ISearchProvider,
+  ISearchProviderConstructor
+} from './interfaces';
 
 /**
  * The search provider registry token.
@@ -35,7 +38,7 @@ export interface ISearchProviderRegistry {
    */
   registerMimeTypeSearchEngine(
     key: string,
-    provider: IBaseSearchProvider<ReadonlyPartialJSONObject>
+    provider: IMimeTypeSearchEngine
   ): IDisposable;
 
   /**
@@ -44,9 +47,7 @@ export interface ISearchProviderRegistry {
    * @param key The mimetype to search over.
    * @returns the search provider, or undefined if none exists.
    */
-  getMimeTypeProvider(
-    key: string
-  ): IBaseSearchProvider<ReadonlyPartialJSONObject> | undefined;
+  getMimeTypeSearchEngine(key: string): IMimeTypeSearchEngine | undefined;
 
   /**
    * Returns a matching provider for the widget.

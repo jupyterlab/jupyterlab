@@ -3,12 +3,15 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IFilter, ISearchMatch, ISearchProvider } from './interfaces';
+import { IMimeTypeSearchEngine } from '..';
+import { IHTMLSearchMatch, ISearchProvider } from '../interfaces';
 
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
 
-export class GenericSearchProvider implements ISearchProvider<Widget> {
+// Highlight next and previous seem broken
+
+export class HTMLSearchEngine implements IMimeTypeSearchEngine {
   /**
    * We choose opt out as most node types should be searched (e.g. script).
    * Even nodes like <data>, could have textContent we care about.
@@ -60,25 +63,75 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
   };
 
   /**
+   *
+   * @param query
+   * @param data
+   * @returns
+   */
+  search(query: RegExp, rootNode: Node): Promise<IHTMLSearchMatch[]> {
+    if (!(rootNode instanceof Node)) {
+      console.warn(
+        'Unable to search with HTMLSearchEngine the provided object.',
+        rootNode
+      );
+      return Promise.resolve([]);
+    }
+
+    if (!query.global) {
+      query = new RegExp(query.source, query.flags + 'g');
+    }
+
+    const matches: IHTMLSearchMatch[] = [];
+    const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT, {
+      acceptNode: node => {
+        // Filter subtrees of UNSUPPORTED_ELEMENTS and nodes that
+        // do not contain our search text
+        let parentElement = node.parentElement!;
+        while (parentElement !== rootNode) {
+          if (parentElement.nodeName in HTMLSearchEngine.UNSUPPORTED_ELEMENTS) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          parentElement = parentElement.parentElement!;
+        }
+        return query.test(node.textContent!)
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_REJECT;
+      }
+    });
+
+    let node: Node | null = null;
+    while ((node = walker.nextNode()) !== null) {
+      // Reset query index
+      query.lastIndex = 0;
+      let match: RegExpExecArray | null = null;
+      while ((match = query.exec(node.textContent!)) !== null) {
+        matches.push({
+          text: match[0],
+          position: match.index,
+          node: node as Text,
+          // TODO remove those
+          index: -1 // We set this later to ensure we get order correct
+        });
+      }
+    }
+
+    matches.forEach((match, idx) => {
+      // This may be changed when this is a subprovider :/
+      match.index = idx;
+    });
+    return Promise.resolve(matches);
+  }
+}
+
+export class GenericSearchProvider implements ISearchProvider<Widget> {
+  /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: Widget): any {
+  getInitialQuery(searchTarget: Widget): string {
     return '';
-  }
-
-  /**
-   * Get the filters for the given provider.
-   *
-   * @returns The filters.
-   *
-   * ### Notes
-   * TODO For now it only supports boolean filters (represented with checkboxes)
-   */
-  getFilters(): { [key: string]: IFilter } {
-    return {};
   }
 
   /**
@@ -95,123 +148,57 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     query: RegExp,
     searchTarget: Widget,
     filters = {}
-  ): Promise<ISearchMatch[]> {
-    const that = this; // eslint-disable-line
+  ): Promise<IHTMLSearchMatch[]> {
     // No point in removing overlay in the middle of the search
     await this.endQuery(false);
 
     this._widget = searchTarget;
     this._query = query;
-    this._mutationObserver.disconnect();
 
-    const matches: IGenericSearchMatch[] = [];
-    const walker = document.createTreeWalker(
-      this._widget.node,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: node => {
-          // Filter subtrees of UNSUPPORTED_ELEMENTS and nodes that
-          // do not contain our search text
-          let parentElement = node.parentElement!;
-          while (parentElement !== this._widget.node) {
-            if (
-              parentElement.nodeName in
-              GenericSearchProvider.UNSUPPORTED_ELEMENTS
-            ) {
-              return NodeFilter.FILTER_REJECT;
-            }
-            parentElement = parentElement.parentElement!;
-          }
-          return that._query.test(node.textContent!)
-            ? NodeFilter.FILTER_ACCEPT
-            : NodeFilter.FILTER_REJECT;
-        }
-      }
+    const matches = await new HTMLSearchEngine().search(
+      query,
+      this._widget.node
     );
-    const nodes: (Node | null)[] = [];
-    const originalNodes: Node[] = [];
-    // We MUST gather nodes first, otherwise the updates below will find each result twice
-    let node = walker.nextNode();
-    while (node) {
-      nodes.push(node);
-      /* We store them here as we want to avoid saving a modified one
-       * This happens with something like this: <pre><span>Hello</span> world</pre> and looking for o
-       * The o in world is found after the o in hello which means the pre could have been modified already
-       * While there may be a better data structure to do this for performance, this was easy to reason about.
-       */
-      originalNodes.push(node.parentElement!.cloneNode(true));
-      node = walker.nextNode();
-    }
-    // We'll need to copy the regexp to ensure its 'g' and that we start the index count from 0
-    const flags =
-      this._query.flags.indexOf('g') === -1 ? query.flags + 'g' : query.flags;
 
-    nodes.forEach((node, nodeIndex) => {
-      const q = new RegExp(query.source, flags);
-      const subsections = [];
-      let match = q.exec(node!.textContent!);
-      while (match) {
-        subsections.push({
-          start: match.index,
-          end: match.index + match[0].length,
-          text: match[0]
-        });
-        match = q.exec(node!.textContent!);
+    // Transform the DOM
+    /*
+     * We store them here as we want to avoid saving a modified one
+     * This happens with something like this: <pre><span>Hello</span> world</pre> and looking for o
+     * The o in world is found after the o in hello which means the pre could have been modified already
+     * While there may be a better data structure to do this for performance, this was easy to reason about.
+     */
+    // const originalNodes = matches.forEach(match =>
+    //   match.originalNode.parentElement!.cloneNode(true)
+    // );
+
+    let nodeIdx = 0;
+    while (nodeIdx < matches.length) {
+      let activeNode = matches[nodeIdx].node;
+      let parent = activeNode.parentNode!;
+
+      let subMatches = [matches[nodeIdx]];
+      while (
+        ++nodeIdx < matches.length &&
+        matches[nodeIdx].node === activeNode
+      ) {
+        subMatches.unshift(matches[nodeIdx]);
       }
-      const originalNode = originalNodes[nodeIndex];
-      const originalLength = node!.textContent!.length; // Node length will change below
-      let lastNodeAdded = null;
-      // Go backwards as index may change if we go forwards
-      const newMatches = [];
-      for (let idx = subsections.length - 1; idx >= 0; --idx) {
-        const { start, end, text } = subsections[idx];
+
+      subMatches.forEach(match => {
         // TODO: support tspan for svg when svg support is added
         const spannedNode = document.createElement('span');
         spannedNode.classList.add(...FOUND_CLASSES);
-        spannedNode.textContent = text;
-        // Splice the text out before we add it back in with a span
-        node!.textContent = `${node!.textContent!.slice(
-          0,
-          start
-        )}${node!.textContent!.slice(end)}`;
-        // Are we replacing somewhere in the middle?
-        if (node?.nodeType == Node.TEXT_NODE) {
-          const endText = (node as Text).splitText(start);
-          node!.parentNode!.insertBefore(spannedNode, endText);
-          // Are we replacing from the start?
-        } else if (start === 0) {
-          node!.parentNode!.prepend(spannedNode);
-          // Are we replacing at the end?
-        } else if (end === originalLength) {
-          node!.parentNode!.append(spannedNode);
-          // Are the two results are adjacent to each other?
-        } else if (lastNodeAdded && end === subsections[idx + 1].start) {
-          node!.parentNode!.insertBefore(spannedNode, lastNodeAdded);
-        }
-        lastNodeAdded = spannedNode;
-        newMatches.unshift({
-          text,
-          fragment: '',
-          line: 0,
-          column: 0,
-          index: -1, // We set this later to ensure we get order correct
-          // GenericSearchFields
-          matchesIndex: -1,
-          indexInOriginal: idx,
-          spanElement: spannedNode,
-          originalNode
-        });
-      }
-      matches.push(...newMatches);
-    });
-    matches.forEach((match, idx) => {
-      // This may be changed when this is a subprovider :/
-      match.index = idx;
-      // TODO: matchesIndex is declared as readonly. Why are we setting it here?
-      (match as any).matchesIndex = idx;
-    });
+        spannedNode.textContent = match.text;
+
+        const newNode = activeNode.splitText(match.position);
+        newNode.textContent = newNode.textContent!.slice(match.text.length);
+        parent.insertBefore(spannedNode, newNode);
+        this._spanNodes.push(spannedNode);
+      });
+    }
+
     if (!this.isSubProvider && matches.length > 0) {
-      this._currentMatch = matches[0];
+      this._currentMatchIndex = 0;
     }
     // Watch for future changes:
     this._mutationObserver.observe(
@@ -241,16 +228,15 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
    * begin a new search.
    */
   async endQuery(removeOverlay = true): Promise<void> {
-    this._matches.forEach(match => {
-      // We already took care of this parent with another match
-      if (match.indexInOriginal !== 0) {
-        return;
-      }
-      match.spanElement.parentElement!.replaceWith(match.originalNode);
-    });
-    this._matches = [];
-    this._currentMatch = null;
     this._mutationObserver.disconnect();
+    this._spanNodes.forEach(el => {
+      const parent = el.parentNode!;
+      parent.replaceChild(document.createTextNode(el.textContent!), el);
+      parent.normalize();
+    });
+    this._spanNodes = [];
+    this._matches = [];
+    this._currentMatchIndex = null;
   }
 
   /**
@@ -267,7 +253,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightNext(): Promise<ISearchMatch | undefined> {
+  async highlightNext(): Promise<IHTMLSearchMatch | undefined> {
     return this._highlightNext(false);
   }
 
@@ -276,44 +262,48 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightPrevious(): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(): Promise<IHTMLSearchMatch | undefined> {
     return this._highlightNext(true);
   }
 
-  private _highlightNext(reverse: boolean): ISearchMatch | undefined {
+  private _highlightNext(reverse: boolean): IHTMLSearchMatch | undefined {
     if (this._matches.length === 0) {
       return undefined;
     }
-    if (!this._currentMatch) {
-      this._currentMatch = reverse
-        ? this._matches[this.matches.length - 1]
-        : this._matches[0];
+    if (!this._currentMatchIndex) {
+      this._currentMatchIndex = reverse ? this.matches.length - 1 : 0;
     } else {
-      this._currentMatch.spanElement.classList.remove(...SELECTED_CLASSES);
+      const hit = this._spanNodes[this._currentMatchIndex];
+      hit.classList.remove(...SELECTED_CLASSES);
 
-      let nextIndex = reverse
-        ? this._currentMatch.matchesIndex - 1
-        : this._currentMatch.matchesIndex + 1;
-      // When we are a subprovider, don't loop
-      if (this.isSubProvider) {
-        if (nextIndex < 0 || nextIndex >= this._matches.length) {
-          this._currentMatch = null;
-          return undefined;
-        }
+      this._currentMatchIndex = reverse
+        ? this._currentMatchIndex - 1
+        : this._currentMatchIndex + 1;
+      if (
+        this._currentMatchIndex < 0 ||
+        this._currentMatchIndex >= this._matches.length
+      ) {
+        this._currentMatchIndex = this.isSubProvider
+          ? null
+          : // Cheap way to make this a circular buffer
+            (this._currentMatchIndex + this._matches.length) %
+            this._matches.length;
       }
-      // Cheap way to make this a circular buffer
-      nextIndex = (nextIndex + this._matches.length) % this._matches.length;
-      this._currentMatch = this._matches[nextIndex];
     }
-    if (this._currentMatch) {
-      this._currentMatch.spanElement.classList.add(...SELECTED_CLASSES);
+
+    if (this._currentMatchIndex) {
+      const hit = this._spanNodes[this._currentMatchIndex];
+      hit.classList.add(...SELECTED_CLASSES);
       // If not in view, scroll just enough to see it
-      if (!elementInViewport(this._currentMatch.spanElement)) {
-        this._currentMatch.spanElement.scrollIntoView(reverse);
+      if (!elementInViewport(hit)) {
+        hit.scrollIntoView(reverse);
       }
-      this._currentMatch.spanElement.focus();
+      hit.focus();
+
+      return this._matches[this._currentMatchIndex];
+    } else {
+      return undefined;
     }
-    return this._currentMatch;
   }
 
   /**
@@ -345,7 +335,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
   /**
    * The same list of matches provided by the startQuery promise resolution
    */
-  get matches(): ISearchMatch[] {
+  get matches(): IHTMLSearchMatch[] {
     // Ensure that no other fn can overwrite matches index property
     // We shallow clone each node
     return this._matches
@@ -364,14 +354,13 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
    * The current index of the selected match.
    */
   get currentMatchIndex(): number | null {
-    if (!this._currentMatch) {
-      return null;
-    }
-    return this._currentMatch.index;
+    return this._currentMatchIndex;
   }
 
-  get currentMatch(): ISearchMatch | null {
-    return this._currentMatch;
+  get currentMatch(): IHTMLSearchMatch | null {
+    return this._currentMatchIndex === null
+      ? null
+      : this._matches[this._currentMatchIndex];
   }
 
   /**
@@ -402,25 +391,13 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
 
   private _query: RegExp;
   private _widget: Widget;
-  private _currentMatch: IGenericSearchMatch | null;
-  private _matches: IGenericSearchMatch[] = [];
+  private _currentMatchIndex: number | null;
+  private _matches: IHTMLSearchMatch[] = [];
   private _mutationObserver: MutationObserver = new MutationObserver(
     this._onWidgetChanged.bind(this)
   );
   private _changed = new Signal<this, void>(this);
-}
-
-export interface IGenericSearchMatch extends ISearchMatch {
-  readonly originalNode: Node;
-  readonly spanElement: HTMLElement;
-  /*
-   * Index among spans within the same originalElement
-   */
-  readonly indexInOriginal: number;
-  /**
-   * Index in the matches array
-   */
-  readonly matchesIndex: number;
+  private _spanNodes = new Array<HTMLSpanElement>();
 }
 
 function elementInViewport(el: HTMLElement): boolean {

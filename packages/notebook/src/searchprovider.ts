@@ -10,7 +10,8 @@ import {
   IFilter,
   IFiltersType,
   ISearchMatch,
-  ISearchProvider
+  ISearchProvider,
+  ITextSearchMatch
 } from '@jupyterlab/documentsearch';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
@@ -31,9 +32,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * Get the filters for the given provider.
    *
    * @returns The filters.
-   *
-   * ### Notes
-   * TODO For now it only supports boolean filters (represented with checkboxes)
    */
   getFilters(): { [key: string]: IFilter } {
     const trans = this.translator.load('jupyterlab');
@@ -100,19 +98,18 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       cells = selectedCells;
     }
 
-    // hide the current notebook widget to prevent expensive layout re-calculation operations
-    this._searchTarget.hide();
-
     // Trigger update if the active cell changes
-    this._searchTarget.content.activeCellChanged.connect(
-      this._onSearchProviderChanged,
-      this
-    );
+    if (this._filters.selectedCells) {
+      this._searchTarget.content.activeCellChanged.connect(
+        this._onSearchProviderChanged,
+        this
+      );
+    }
 
     let indexTotal = 0;
     const allMatches: ISearchMatch[] = [];
-    // For each cell, create a search provider and collect the matches
 
+    // For each cell, create a search provider and collect the matches
     for (const cell of cells) {
       const cmEditor = cell.editor as CodeMirrorEditor;
       const cmSearchProvider = new CodeMirrorSearchProvider();
@@ -507,7 +504,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     let indexTotal = 0;
     const result: ISearchMatch[][] = [];
     this._searchProviders.forEach(({ provider }) => {
-      const cellMatches = provider.matches;
+      const cellMatches = provider.matches as ISearchMatch[];
       cellMatches.forEach(match => {
         match.index = match.index + indexTotal;
       });
@@ -531,8 +528,9 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     const selectionIsOneLine =
       currentSelection.start.line === currentSelection.end.line;
     return (
-      this._currentMatch.line === currentSelection.start.line &&
-      this._currentMatch.column === currentSelection.start.column &&
+      (this._currentMatch as ITextSearchMatch).line ===
+        currentSelection.start.line &&
+      this._currentMatch.position === currentSelection.start.column &&
       this._currentMatch.text.length === currentSelectionLength &&
       selectionIsOneLine
     );

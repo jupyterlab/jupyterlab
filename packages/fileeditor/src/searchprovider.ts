@@ -6,7 +6,7 @@ import {
   CodeMirrorEditor,
   CodeMirrorSearchProvider
 } from '@jupyterlab/codemirror';
-import { ISearchMatch, ISearchProvider } from '@jupyterlab/documentsearch';
+import { ISearchProvider, ITextSearchMatch } from '@jupyterlab/documentsearch';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from './widget';
 
@@ -53,7 +53,7 @@ export class FileEditorSearchProvider
     query: RegExp,
     searchTarget: FileEditorPanel,
     filters = {}
-  ): Promise<ISearchMatch[]> {
+  ): Promise<ITextSearchMatch[]> {
     const cm = searchTarget.content.editor as CodeMirrorEditor;
     return this.startQueryCodeMirror(query, cm);
   }
