@@ -187,7 +187,7 @@ export interface ISearchProvider<T extends Widget = Widget> {
     query: RegExp,
     searchTarget: T,
     filters: IFiltersType
-  ): Promise<ISearchMatch[]>;
+  ): Promise<void>;
 
   /**
    * Clears state of a search provider to prepare for startQuery to be called

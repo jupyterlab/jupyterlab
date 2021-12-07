@@ -41,14 +41,12 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  async startQuery(
-    query: RegExp,
-    searchTarget: CSVDocumentWidget
-  ): Promise<ISearchMatch[]> {
+  startQuery(query: RegExp, searchTarget: CSVDocumentWidget): Promise<void> {
     this._target = searchTarget;
     this._query = query;
     searchTarget.content.searchService.find(query);
-    return this.matches;
+
+    return Promise.resolve();
   }
 
   /**
@@ -58,8 +56,10 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    * @returns A promise that resolves when the search provider is ready to
    * begin a new search.
    */
-  async endQuery(): Promise<void> {
+  endQuery(): Promise<void> {
     this._target.content.searchService.clear();
+
+    return Promise.resolve();
   }
 
   /**
@@ -69,7 +69,7 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    * @returns A promise that resolves when all state has been cleaned up.
    */
   async endSearch(): Promise<void> {
-    this._target.content.searchService.clear();
+    await this.endQuery();
   }
 
   /**
@@ -77,9 +77,9 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightNext(): Promise<ISearchMatch | undefined> {
+  highlightNext(): Promise<ISearchMatch | undefined> {
     this._target.content.searchService.find(this._query);
-    return undefined;
+    return Promise.resolve(undefined);
   }
 
   /**
@@ -87,9 +87,9 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightPrevious(): Promise<ISearchMatch | undefined> {
+  highlightPrevious(): Promise<ISearchMatch | undefined> {
     this._target.content.searchService.find(this._query, true);
-    return undefined;
+    return Promise.resolve(undefined);
   }
 
   /**
@@ -98,8 +98,8 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async replaceCurrentMatch(newText: string): Promise<boolean> {
-    return false;
+  replaceCurrentMatch(newText: string): Promise<boolean> {
+    return Promise.resolve(false);
   }
 
   /**
@@ -108,8 +108,8 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async replaceAllMatches(newText: string): Promise<boolean> {
-    return false;
+  replaceAllMatches(newText: string): Promise<boolean> {
+    return Promise.resolve(false);
   }
 
   /**

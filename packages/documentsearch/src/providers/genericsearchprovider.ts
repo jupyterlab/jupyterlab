@@ -148,7 +148,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     query: RegExp,
     searchTarget: Widget,
     filters = {}
-  ): Promise<IHTMLSearchMatch[]> {
+  ): Promise<void> {
     // No point in removing overlay in the middle of the search
     await this.endQuery(false);
 
@@ -213,7 +213,6 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     );
 
     this._matches = matches;
-    return this._matches;
   }
 
   refreshOverlay(): void {

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+
 import { Cell, CodeCell, MarkdownCell } from '@jupyterlab/cells';
 import {
   CodeMirrorEditor,
@@ -81,7 +82,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     query: RegExp,
     searchTarget: NotebookPanel,
     filters: IFiltersType | undefined
-  ): Promise<ISearchMatch[]> {
+  ): Promise<void> {
     this._searchTarget = searchTarget;
     let cells = this._searchTarget.content.widgets;
 
@@ -169,16 +170,17 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       if (cell instanceof CodeCell && this._filters.output) {
         const outputProvider = new GenericSearchProvider();
         outputProvider.isSubProvider = true;
-        const matchesFromOutput = await outputProvider.startQuery(
-          query,
-          cell.outputArea
-        );
-        matchesFromOutput.map(match => {
-          match.index = match.index + indexTotal;
-        });
-        indexTotal += matchesFromOutput.length;
+        // TODO
+        // const matchesFromOutput = await outputProvider.startQuery(
+        //   query,
+        //   cell.outputArea
+        // );
+        // matchesFromOutput.map(match => {
+        //   match.index = match.index + indexTotal;
+        // });
+        // indexTotal += matchesFromOutput.length;
 
-        allMatches.concat(matchesFromOutput);
+        // allMatches.concat(matchesFromOutput);
 
         outputProvider.changed.connect(this._onSearchProviderChanged, this);
 
@@ -200,7 +202,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
     this._refreshCellsEditorsInBackground(this._cellsWithMatches);
 
-    return allMatches;
+    return Promise.resolve();
   }
 
   /**
