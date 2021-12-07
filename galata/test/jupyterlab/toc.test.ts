@@ -213,4 +213,22 @@ test.describe.serial('Table of Contents', () => {
     expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
     await tags[1].click();
   });
+
+  test('Open context menu', async ({ page }) => {
+    await page.notebook.selectCells(0);
+    await page.sidebar.openTab('table-of-contents');
+
+    const tocPanel = await page.sidebar.getContentPanel(
+      await page.sidebar.getTabPosition('table-of-contents')
+    );
+
+    await (await tocPanel.$('li > .toc-level-size-1')).click({
+      button: 'right'
+    });
+
+    const menu = await page.menu.getOpenMenu();
+    expect(await menu.screenshot()).toMatchSnapshot(
+      'notebook-context-menu.png'
+    );
+  });
 });
