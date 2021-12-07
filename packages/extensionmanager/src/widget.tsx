@@ -685,7 +685,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   private _forceOpen: boolean;
   constructor(
     app: JupyterFrontEnd,
-    serviceManager: ServiceManager,
+    serviceManager: ServiceManager.IManager,
     settings: ISettingRegistry.ISettings,
     translator?: ITranslator
   ) {
