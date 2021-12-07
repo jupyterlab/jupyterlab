@@ -2374,7 +2374,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.toggleRenderSideBySideCurrentNotebook, {
-    label: trans.__('Toggle Side-by-side rendering'),
+    label: trans.__('Toggle Side-by-side Rendering'),
     execute: args => {
       Private.renderSideBySide = !Private.renderSideBySide;
       const current = getCurrent(tracker, shell, args);
