@@ -55,7 +55,9 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       options.contentFactory || ConsolePanel.defaultContentFactory);
     const count = Private.count++;
     if (!path) {
-      path = `${basePath || ''}/console-${count}-${UUID.uuid4()}`;
+      path = `${
+        basePath ? basePath + '/' : ''
+      }console-${count}-${UUID.uuid4()}`;
     }
 
     sessionContext = this._sessionContext =
