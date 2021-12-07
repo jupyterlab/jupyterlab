@@ -2379,8 +2379,7 @@ function addCommands(
       Private.renderSideBySide = !Private.renderSideBySide;
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        console.log('---', current.model?.metadata.get('render-side-by-side'));
-        if (current.model?.metadata.get('render-side-by-side')) {
+        if (current.model?.metadata.get('render_side_by_side')) {
           return NotebookActions.renderNotSideBySide(current.content);
         }
         return NotebookActions.renderSideBySide(current.content);
