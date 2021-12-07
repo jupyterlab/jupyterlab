@@ -6,15 +6,16 @@ import { UUID } from '@lumino/coreutils';
 import * as env from 'lib0/environment';
 
 import { ICurrentUser, IUser, USER } from './tokens';
-import { getAnonymousUserName, getRandomColor } from './utils';
+import { getAnonymousUserName, getInitials, getRandomColor } from './utils';
 
 /**
  * Default user implementation.
  */
 export class User implements ICurrentUser {
-  private _id: string;
-  private _name: string;
   private _username: string;
+  private _givenName: string;
+  private _familyName: string;
+  private _initials: string;
   private _color: string;
   private _anonymous: boolean;
   private _role: IUser.ROLE;
@@ -34,24 +35,31 @@ export class User implements ICurrentUser {
   }
 
   /**
-   * User's ID.
+   * User's Username.
    */
-  get id(): string {
-    return this._id;
+  get username(): string {
+    return this._username;
   }
 
   /**
    * User's name.
    */
-  get name(): string {
-    return this._name;
+  get givenName(): string {
+    return this._givenName;
   }
 
   /**
-   * User's Username.
+   * User's last name.
    */
-  get username(): string {
-    return this._username;
+  get familyName(): string {
+    return this._familyName;
+  }
+
+  /**
+   * User's name initials.
+   */
+  get initials(): string {
+    return this._initials;
   }
 
   /**
@@ -118,9 +126,10 @@ export class User implements ICurrentUser {
    * Convenience method to modify the user as a JSON object.
    */
   fromJSON(user: IUser.User): void {
-    this._id = user.id;
-    this._name = user.name;
     this._username = user.username;
+    this._givenName = user.givenName;
+    this._familyName = user.familyName;
+    this._initials = user.initials;
     this._color = user.color;
     this._anonymous = user.anonymous;
     this._role = user.role;
@@ -133,9 +142,10 @@ export class User implements ICurrentUser {
    */
   toJSON(): IUser.User {
     return {
-      id: this._id,
-      name: this._name,
       username: this._username,
+      givenName: this._givenName,
+      familyName: this._familyName,
+      initials: this._initials,
       color: this._color,
       anonymous: this._anonymous,
       role: this._role,
@@ -165,10 +175,11 @@ export class User implements ICurrentUser {
     const data = localStorage.getItem(USER);
     if (data !== null) {
       const user = JSON.parse(data);
-      this._id = user.id as string;
 
-      this._name = name !== '' ? name : (user.name as string);
-      this._username = name !== '' ? name : (user.username as string);
+      this._username = user.username as string;
+      this._givenName = name !== '' ? name : (user.givenName as string);
+      this._familyName = name !== '' ? '' : (user.familyName as string);
+      this._initials = user.initials as string;
       this._color = color !== '' ? '#' + color : (user.color as string);
       this._anonymous = user.anonymous as boolean;
       this._role = user.role as IUser.ROLE;
@@ -179,9 +190,10 @@ export class User implements ICurrentUser {
       }
     } else {
       // Get random values
-      this._id = UUID.uuid4();
-      this._name = name !== '' ? name : getAnonymousUserName();
-      this._username = this._name;
+      this._username = UUID.uuid4();
+      this._givenName = name !== '' ? name : 'Anonymous';
+      this._familyName = name !== '' ? '' : getAnonymousUserName();
+      this._initials = getInitials(this.givenName, this.familyName);
       this._color = '#' + (color !== '' ? color : getRandomColor().slice(1));
       this._anonymous = true;
       this._role = IUser.ROLE.ADMIN;

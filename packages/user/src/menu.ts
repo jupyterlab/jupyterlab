@@ -6,7 +6,6 @@ import { Menu, MenuBar } from '@lumino/widgets';
 import { h, VirtualElement } from '@lumino/virtualdom';
 
 import { ICurrentUser } from './tokens';
-import { getInitials } from './utils';
 
 /**
  * Custom renderer for the user menu.
@@ -86,7 +85,7 @@ export class RendererUserMenu extends MenuBar.Renderer {
             'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-anonymousIcon',
           style: { backgroundColor: this._user.color }
         },
-        h.span({}, getInitials(this._user.name))
+        h.span({}, this._user.initials)
       );
     } else {
       return h.div(
@@ -109,7 +108,9 @@ export class UserMenu extends Menu {
   constructor(options: UserMenu.IOptions) {
     super(options);
     this._user = options.user;
-    this.title.label = 'Anonymous';
+    this.title.label = this._user.isReady
+      ? `${this._user.givenName} ${this._user.familyName}`
+      : '';
     this.title.icon = caretDownIcon;
     this.title.iconClass = 'jp-UserMenu-caretDownIcon';
     this._user.ready.connect(this._updateLabel);
@@ -122,7 +123,7 @@ export class UserMenu extends Menu {
   }
 
   private _updateLabel = (user: ICurrentUser) => {
-    this.title.label = user.name;
+    this.title.label = `${user.givenName} ${user.familyName}`;
     this.update();
   };
 }

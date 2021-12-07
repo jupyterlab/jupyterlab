@@ -130,7 +130,6 @@ export const moonsOfJupyter = [
  * This function returns names like "Anonymous Io" or "Anonymous Metis".
  */
 export const getAnonymousUserName = (): string =>
-  'Anonymous ' +
   moonsOfJupyter[Math.floor(Math.random() * moonsOfJupyter.length)];
 
 /**

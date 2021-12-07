@@ -73,19 +73,24 @@ export namespace IUser {
    */
   export type User = {
     /**
-     * User's unique identifier.
+     * User's Username.
      */
-    readonly id: string;
+    readonly username: string;
 
     /**
      * User's name.
      */
-    readonly name: string;
+    readonly givenName: string;
 
     /**
-     * User's Username.
+     * User's last name.
      */
-    readonly username: string;
+    readonly familyName: string;
+
+    /**
+     * User's name initials.
+     */
+    readonly initials: string;
 
     /**
      * User's cursor color and icon color if avatar_url is undefined
@@ -103,9 +108,15 @@ export namespace IUser {
     readonly anonymous: boolean;
 
     /**
+     * @experimental
+     * @alpha
+     * @hidden
+     *
      * User's role.
      *
-     * NOTE: Jupyter Server and JupyterLab doesn't implement a role-base access control (RBAC) yet.
+     * @todo: define roles
+     * NOTE: this is experimental and will probably change.
+     * Jupyter Server and JupyterLab doesn't implement a role-base access control (RBAC) yet.
      * This attribute is here to start introducing RBAC to JupyterLab's interface. At the moment every
      * user has the role ADMIN.
      */
@@ -126,9 +137,14 @@ export namespace IUser {
   };
 
   /**
+   * @experimental
+   * @alpha
+   * @hidden
+   *
    * User's roles.
    *
-   * TODO: define roles
+   * @note: this is experimental and will probably change.
+   * @todo: define roles
    */
   export enum ROLE {
     /**
