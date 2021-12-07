@@ -32,6 +32,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ITextSearchMatch } from '@jupyterlab/documentsearch';
+import { ObservableList } from '@jupyterlab/observables';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorEditor } from './editor';
@@ -496,6 +497,266 @@ export class CodeMirrorSearchProvider {
   private _overlay: any;
 }
 
+export class CodeMirrorSearchHighlighter {
+  /**
+   *
+   * @param editor
+   * @param matches
+   *
+   * ### Notes
+   * `matches` must be stored by (line, position)
+   */
+  constructor(
+    editor: CodeMirrorEditor,
+    matches: ObservableList<ITextSearchMatch>
+  ) {
+    this._cm = editor;
+    this._matches = matches;
+  }
+
+  refreshOverlay(): void {
+    this._refreshOverlay();
+  }
+
+  /**
+   * Clears state of a search provider to prepare for startQuery to be called
+   * in order to start a new query or refresh an existing one.
+   *
+   * @returns A promise that resolves when the search provider is ready to
+   * begin a new search.
+   */
+  endQuery(removeOverlay = true): Promise<void> {
+    this._currentMatchIndex = null;
+
+    if (removeOverlay) {
+      this._cm.removeOverlay(this._overlay);
+    }
+    const from = this._cm.getCursor('from');
+    const to = this._cm.getCursor('to');
+    // Setting a reverse selection to allow search-as-you-type to maintain the
+    // current selected match.  See comment in _findNext for more details.
+    if (from !== to) {
+      this._cm.setSelection({
+        start: this._toEditorPos(to),
+        end: this._toEditorPos(from)
+      });
+    }
+
+    return Promise.resolve();
+  }
+
+  /**
+   * Resets UI state, removes all matches.
+   *
+   * @returns A promise that resolves when all state has been cleaned up.
+   */
+  async endSearch(): Promise<void> {
+    return this.endQuery();
+  }
+
+  /**
+   * Move the current match indicator to the next match.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  highlightNext(): Promise<ITextSearchMatch | undefined> {
+    this._findNext(false);
+    return Promise.resolve(this.currentMatch ?? undefined);
+  }
+
+  /**
+   * Move the current match indicator to the previous match.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  highlightPrevious(): Promise<ITextSearchMatch | undefined> {
+    this._findNext(true);
+    return Promise.resolve(this.currentMatch ?? undefined);
+  }
+
+  get currentMatch(): ITextSearchMatch | null {
+    return this._currentMatchIndex !== null
+      ? this._matches.get(this._currentMatchIndex)
+      : null;
+  }
+
+  /**
+   * The current index of the selected match.
+   */
+  get currentMatchIndex(): number | null {
+    return this._currentMatchIndex;
+  }
+
+  get editor(): CodeMirrorEditor {
+    return this._cm;
+  }
+
+  private _refreshOverlay() {
+    this._cm.operation(() => {
+      // clear search first
+      this._cm.removeOverlay(this._overlay);
+      this._overlay = this._getSearchOverlay();
+      this._cm.addOverlay(this._overlay);
+    });
+  }
+
+  private _getSearchOverlay() {
+    let lastMatchIndex = 0;
+
+    return {
+      /**
+       * Token function is called when a line needs to be processed -
+       * when the overlay is initially created, it's called on all lines;
+       * when a line is modified and needs to be re-evaluated, it's called
+       * on just that line.
+       *
+       * This implementation of the token function both constructs/maintains
+       * the overlay and keeps track of the match state as the document is
+       * updated while a search is active.
+       */
+      token: (stream: CodeMirror.StringStream) => {
+        const line = (stream as any).lineOracle.line;
+
+        let found = Utils.find(
+          this._matches,
+          line,
+          lastMatchIndex,
+          this._matches.length - 1
+        );
+
+        if (found !== null) {
+          lastMatchIndex = found;
+          let match: ITextSearchMatch;
+          while ((match = this._matches.get(found)).position < stream.pos) {
+            found += 1;
+            if (
+              found >= this._matches.length ||
+              this._matches.get(found).line !== line
+            ) {
+              // no matches, consume the rest of the stream
+              stream.skipToEnd();
+              return null;
+            }
+          }
+
+          if (stream.pos === match.position) {
+            // move the stream along and return searching style for the token
+            stream.pos += match.text.length || 1;
+            return 'searching';
+          } else {
+            stream.pos = match.position;
+          }
+        } else {
+          // no matches, consume the rest of the stream
+          stream.skipToEnd();
+        }
+        return null;
+      }
+    };
+  }
+
+  private _findNext(reverse: boolean): void {
+    if (this._matches.length === 0) {
+      // No-op
+      return;
+    }
+    // In order to support search-as-you-type, we needed a way to allow the first
+    // match to be selected when a search is started, but prevent the selected
+    // search to move for each new keypress.  To do this, when a search is ended,
+    // the cursor is reversed, putting the head at the 'from' position.  When a new
+    // search is started, the cursor we want is at the 'from' position, so that the same
+    // match is selected when the next key is entered (if it is still a match).
+    //
+    // When toggling through a search normally, the cursor is always set in the forward
+    // direction, so head is always at the 'to' position.  That way, if reverse = false,
+    // the search proceeds from the 'to' position during normal toggling.  If reverse = true,
+    // the search always proceeds from the 'anchor' position, which is at the 'from'.
+
+    const cursorToGet = reverse ? 'anchor' : 'head';
+    const lastPosition = this._cm.getCursor(cursorToGet);
+    const position = this._toEditorPos(lastPosition);
+
+    let found = Utils.findNext(
+      this._matches,
+      position.line,
+      0,
+      this._matches.length - 1
+    );
+
+    let match: ITextSearchMatch;
+    if (found !== null) {
+      while (
+        (match = this._matches.get(found)).line === position.line &&
+        match.position < position.column
+      ) {
+        found += 1;
+        if (found >= this._matches.length) {
+          found = null;
+          break;
+        }
+      }
+    }
+
+    if (found === null) {
+      // Don't loop
+      return;
+    }
+
+    if (reverse) {
+      found -= 1;
+      if (found < 0) {
+        // Don't loop
+        return;
+      }
+    }
+
+    match = this._matches.get(found);
+
+    this._cm.operation(() => {
+      const fromPos: CodeMirror.Position = {
+        line: match.line,
+        ch: match.position
+      };
+      const toPos: CodeMirror.Position = {
+        line: match.line,
+        ch: match.position + match.text.length
+      };
+
+      const selRange: CodeEditor.IRange = {
+        start: {
+          line: fromPos.line,
+          column: fromPos.ch
+        },
+        end: {
+          line: toPos.line,
+          column: toPos.ch
+        }
+      };
+
+      this._cm.setSelection(selRange);
+      this._cm.scrollIntoView(
+        {
+          from: fromPos,
+          to: toPos
+        },
+        100
+      );
+    });
+  }
+
+  private _toEditorPos(posIn: CodeMirror.Position): CodeEditor.IPosition {
+    return {
+      line: posIn.line,
+      column: posIn.ch
+    };
+  }
+
+  private _cm: CodeMirrorEditor;
+  private _currentMatchIndex: number | null;
+  private _matches: ObservableList<ITextSearchMatch>;
+  private _overlay: any;
+}
+
 export class SearchState {
   posFrom: CodeMirror.Position;
   posTo: CodeMirror.Position;
@@ -507,5 +768,83 @@ namespace Private {
   export interface ICodeMirrorMatch {
     from: CodeMirror.Position;
     to: CodeMirror.Position;
+  }
+}
+
+export namespace Utils {
+  export function find(
+    matches: ObservableList<ITextSearchMatch>,
+    line: number,
+    lowerBound = 0,
+    higherBound = Infinity
+  ): number | null {
+    higherBound = Math.min(matches.length, higherBound);
+
+    while (lowerBound <= higherBound) {
+      let middle = lowerBound + Math.floor(0.5 * (lowerBound + higherBound));
+      const currentLine = matches.get(middle).line;
+
+      if (currentLine === line) {
+        // find the first match for line (multiple matches are available on the same line)
+        do {
+          middle -= 1;
+        } while (matches.get(middle).line === line && middle > 0);
+        return middle + 1;
+      } else if (currentLine < line) {
+        lowerBound = middle + 1;
+        if (line < matches.get(lowerBound).line) {
+          // No match for line
+          return null;
+        }
+      } else if (currentLine > line) {
+        higherBound = middle - 1;
+        if (line > matches.get(higherBound).line) {
+          // No match for line
+          return null;
+        }
+      }
+    }
+
+    const position = lowerBound > 0 ? lowerBound - 1 : 0;
+    const match = matches.get(position);
+    return match.line === line ? position : null;
+  }
+
+  export function findNext(
+    matches: ObservableList<ITextSearchMatch>,
+    line: number,
+    lowerBound = 0,
+    higherBound = Infinity
+  ): number | null {
+    higherBound = Math.min(matches.length, higherBound);
+
+    while (lowerBound <= higherBound) {
+      let middle = lowerBound + Math.floor(0.5 * (lowerBound + higherBound));
+      const currentLine = matches.get(middle).line;
+
+      if (currentLine === line) {
+        // find the first match for line (multiple matches are available on the same line)
+        do {
+          middle -= 1;
+        } while (matches.get(middle).line === line && middle > 0);
+        return middle + 1;
+      } else if (currentLine < line) {
+        lowerBound = middle + 1;
+        if (line < matches.get(lowerBound).line) {
+          // No match for line
+          return lowerBound;
+        }
+      } else if (currentLine > line) {
+        higherBound = middle - 1;
+        if (line > matches.get(higherBound).line) {
+          // No match for line
+          return middle;
+        }
+      }
+    }
+
+    const position = lowerBound > 0 ? lowerBound - 1 : 0;
+    const match = matches.get(position);
+    return match.line >= line ? position : null;
   }
 }
