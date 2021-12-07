@@ -165,7 +165,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _handleClick: () => void;
-  private _serviceManager: ServiceManager;
+  private _serviceManager: ServiceManager.IManager;
 }
 
 /**
@@ -217,7 +217,7 @@ export namespace RunningSessions {
     /**
      * The application service manager.
      */
-    serviceManager: ServiceManager;
+    serviceManager: ServiceManager.IManager;
 
     /**
      * A click handler for the item. By default this is used

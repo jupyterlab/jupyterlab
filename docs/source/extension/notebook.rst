@@ -126,6 +126,37 @@ list. An OutputArea uses a notebook-specific
 `RenderMimeRegistry <../api/classes/rendermime.rendermimeregistry-1.html>`__
 object to render ``display_data`` output messages.
 
+The Notebook widget is represented in the DOM with a ``<div>`` element
+with CSS classes ``jp-Notebook`` and ``jp-NotebookPanel-notebook``.
+It contains a sequence of cells widgets.
+
+ - Code cells have the following DOM structure:
+
+   .. image:: images/code-cell-dom.svg
+
+ - Rendered markdown cells have the following DOM structure:
+
+   .. image:: images/rendered-markdown-cell-dom.svg
+
+ - Active markdown cells have the following DOM structure:
+
+   .. image:: images/active-markdown-cell-dom.svg
+
+.. note::
+   The default nbconvert template for the HTML exporter produces the same DOM
+   as the JupyterLab notebook, allowing for the JupyterLab CSS to be used directly.
+   In JupyterLab, input areas are rendered with the CodeMirror, with a custom theme
+   making use of the CSS variables of JupyterLab.
+   In the case of nbconvert, code cells are rendered using the Pygments Python
+   library, which produces static HTML with syntax highlighting. The
+   `jupyterlab_pygments <https://github.com/jupyterlab/jupyterlab_pygments.git>`_
+   Pygments theme mimicks the default CodeMirror theme of JupyterLab.
+
+.. note::
+   The SVG figures presenting the DOM structures of the different cell types
+   were produced with Draw.io, and contain the metadata allowing them to be
+   directly opened and edited with Draw.io.
+
 Rendering output messages
 """""""""""""""""""""""""
 
@@ -283,14 +314,13 @@ Run the following commands:
 
 Open a notebook and observe the new "Header" widget.
 
-
-The *ipywidgets* third party extension
+The *ipywidgets* third party-extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This discussion will be a bit confusing since we've been using the term
 *widget* to refer to *lumino widgets*. In the discussion below,
-*ipython widgets* will be referred to as *ipywidgets*. There is no
-intrinsic relation between *lumino widgets* and *ipython widgets*.
+*Jupyter interactive widgets* will be referred to as *ipywidgets*. There is no
+intrinsic relation between *lumino widgets* and *Jupyter interactive widgets*.
 
 The *ipywidgets* extension registers a factory for a notebook *widget*
 extension using the `Document
