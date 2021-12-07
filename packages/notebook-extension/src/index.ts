@@ -2350,7 +2350,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.toggleRenderSideBySide, {
-    label: trans.__('Render Side-by-side'),
+    label: trans.__('Toggle Side-by-side rendering setting'),
     execute: args => {
       Private.renderSideBySide = !Private.renderSideBySide;
       tracker.forEach(widget => {
@@ -2374,7 +2374,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.toggleRenderSideBySideCurrentNotebook, {
-    label: trans.__('Toggle Side-by-side rendering for current Notebook'),
+    label: trans.__('Toggle Side-by-side rendering'),
     execute: args => {
       Private.renderSideBySide = !Private.renderSideBySide;
       const current = getCurrent(tracker, shell, args);
