@@ -10,7 +10,6 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { IStateDB } from '@jupyterlab/statedb';
 import {
   ICurrentUser,
   IUserMenu,
@@ -26,10 +25,9 @@ import { Menu, MenuBar, Widget } from '@lumino/widgets';
 const userPlugin: JupyterFrontEndPlugin<ICurrentUser> = {
   id: '@jupyterlab/user-extension:user',
   autoStart: true,
-  requires: [IStateDB],
   provides: ICurrentUser,
-  activate: (app: JupyterFrontEnd, state: IStateDB): ICurrentUser => {
-    return new User(state);
+  activate: (app: JupyterFrontEnd): ICurrentUser => {
+    return new User();
   }
 };
 

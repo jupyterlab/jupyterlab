@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IStateDB } from '@jupyterlab/statedb';
 import { ISignal, Signal } from '@lumino/signaling';
-import { JSONObject, ReadonlyPartialJSONObject, UUID } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 import * as env from 'lib0/environment';
 
 import { ICurrentUser, IUser, USER } from './tokens';
@@ -22,23 +21,16 @@ export class User implements ICurrentUser {
   private _cursor?: IUser.Cursor;
 
   private _isReady = false;
-  private _state: IStateDB;
   private _ready = new Signal<User, boolean>(this);
   private _changed = new Signal<User, void>(this);
 
   /**
    * Constructor of the User class.
-   *
-   * @argument state: IStateDB to store users information.
    */
-  constructor(state: IStateDB) {
-    this._state = state;
-    this._fetchUser()
-      .then(() => {
-        this._isReady = true;
-        this._ready.emit(true);
-      })
-      .catch(e => console.error(e));
+  constructor() {
+    this._fetchUser();
+    this._isReady = true;
+    this._ready.emit(true);
   }
 
   /**
@@ -133,7 +125,7 @@ export class User implements ICurrentUser {
     this._anonymous = user.anonymous;
     this._role = user.role;
     this._cursor = user.cursor;
-    this._save().catch(e => console.error(e));
+    this._save();
   }
 
   /**
@@ -154,37 +146,37 @@ export class User implements ICurrentUser {
   /**
    * Saves the user information to StateDB.
    */
-  private async _save(): Promise<void> {
-    await this._state.save(USER, this.toJSON() as ReadonlyPartialJSONObject);
+  private _save(): void {
+    const { localStorage } = window;
+    localStorage.setItem(USER, JSON.stringify(this.toJSON()));
     this._changed.emit();
-    return Promise.resolve();
   }
 
   /**
    * Retrieves the user information from StateDB, or initializes
    * the user as anonymous if doesn't exists.
    */
-  private async _fetchUser(): Promise<void> {
+  private _fetchUser(): void {
     // Read username and color from URL
     let name = env.getParam('--username', '');
     let color = env.getParam('--usercolor', '');
 
-    const data = (await this._state.fetch(USER)) as JSONObject;
-    if (data !== undefined) {
-      this._id = data.id as string;
+    const { localStorage } = window;
+    const data = localStorage.getItem(USER);
+    if (data !== null) {
+      const user = JSON.parse(data);
+      this._id = user.id as string;
 
-      this._name = name !== '' ? name : (data.name as string);
-      this._username = name !== '' ? name : (data.username as string);
-      this._color = color !== '' ? '#' + color : (data.color as string);
-      this._anonymous = data.anonymous as boolean;
-      this._role = data.role as IUser.ROLE;
-      this._cursor = (data.cursor as IUser.Cursor) || undefined;
+      this._name = name !== '' ? name : (user.name as string);
+      this._username = name !== '' ? name : (user.username as string);
+      this._color = color !== '' ? '#' + color : (user.color as string);
+      this._anonymous = user.anonymous as boolean;
+      this._role = user.role as IUser.ROLE;
+      this._cursor = (user.cursor as IUser.Cursor) || undefined;
 
       if (name !== '' || color !== '') {
-        return this._save();
+        this._save();
       }
-
-      return Promise.resolve();
     } else {
       // Get random values
       this._id = UUID.uuid4();
@@ -194,7 +186,7 @@ export class User implements ICurrentUser {
       this._anonymous = true;
       this._role = IUser.ROLE.ADMIN;
       this._cursor = undefined;
-      return this._save();
+      this._save();
     }
   }
 }
