@@ -869,11 +869,11 @@
       "description": "If set to true, a button is shown below collapsed headings, indicating how many cells are hidden beneath the collapsed heading.",
       "default": true
     },
-    "sideBySideRendering": {
-      "title": "Side-by-side rendering",
-      "description": "Global setting to enable side-by-side rendering in notebooks",
-      "type": "boolean",
-      "default": false
+    "renderingLayout": {
+      "title": "Rendering Layout",
+      "description": "Global setting to define the rendering layout in notebooks. 'default' or 'side-by-side' are supported.",
+      "type": "string",
+      "default": "default"
     }
   },
   "additionalProperties": false,

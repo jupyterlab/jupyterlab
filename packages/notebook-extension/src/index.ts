@@ -1358,7 +1358,10 @@ function activateNotebookHandler(
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
       disableDocumentWideUndoRedo: settings.get(
         'experimentalDisableDocumentWideUndoRedo'
-      ).composite as boolean
+      ).composite as boolean,
+      renderingLayout: settings.get('renderingLayout').composite as
+        | 'default'
+        | 'side-by-side'
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
@@ -2358,7 +2361,7 @@ function addCommands(
           if (Private.renderSideBySide) {
             return NotebookActions.renderSideBySide(widget.content);
           }
-          return NotebookActions.renderNotSideBySide(widget.content);
+          return NotebookActions.renderDefault(widget.content);
         }
       });
       tracker.currentChanged.connect(() => {
@@ -2379,8 +2382,8 @@ function addCommands(
       Private.renderSideBySide = !Private.renderSideBySide;
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        if (current.model?.metadata.get('render_side_by_side')) {
-          return NotebookActions.renderNotSideBySide(current.content);
+        if (current.content.renderingLayout === 'side-by-side') {
+          return NotebookActions.renderDefault(current.content);
         }
         return NotebookActions.renderSideBySide(current.content);
       }
