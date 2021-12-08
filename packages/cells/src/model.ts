@@ -233,8 +233,6 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     for (const key in metadata) {
       observableMetadata.set(key, metadata[key]);
     }
-
-    this.sharedModel.changed.connect(this.onSharedModelChanged, this);
   }
 
   /**
@@ -341,12 +339,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
         this._updateModelDBMetadata(newValue);
       }
     }
-    // Disconnect from old model
-    this.sharedModel.changed.disconnect(this.onSharedModelChanged, this);
-    // parent class changes the model
     super.switchSharedModel(sharedModel, reinitialize);
-    // connect to new model
-    this.sharedModel.changed.connect(this.onSharedModelChanged, this);
   }
 
   /**

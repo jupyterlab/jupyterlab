@@ -10,7 +10,11 @@ import {
   ModelDB,
   ObservableValue
 } from '@jupyterlab/observables';
-import { createStandaloneCell, ISharedText } from '@jupyterlab/shared-models';
+import {
+  createStandaloneCell,
+  ISharedText,
+  TextChange
+} from '@jupyterlab/shared-models';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -236,6 +240,7 @@ export namespace CodeEditor {
       this.modelDB.createMap('selections');
 
       this.sharedModel.setSource(options.value || '');
+      this.sharedModel.changed.connect(this.onSharedModelChanged, this);
     }
 
     get type(): nbformat.CellType {
@@ -314,7 +319,9 @@ export namespace CodeEditor {
      * @param reinitialize Whether to reinitialize the shared model adding the content from modelDB.
      */
     switchSharedModel(sharedModel: ISharedText, reinitialize?: boolean): void {
+      this.sharedModel.changed.disconnect(this.onSharedModelChanged, this);
       this.sharedModel = sharedModel;
+      this.sharedModel.changed.connect(this.onSharedModelChanged, this);
       this._sharedModelSwitched.emit(true);
     }
 
@@ -327,6 +334,19 @@ export namespace CodeEditor {
         oldValue: args.oldValue as string,
         newValue: args.newValue as string
       });
+    }
+
+    /**
+     * Handle a change to the shared model.
+     *
+     * NOTE: This method is here to trigger the changes on
+     * classes that extend Model.
+     */
+    protected onSharedModelChanged(
+      sender: ISharedText,
+      change: TextChange
+    ): void {
+      /* NO OP */
     }
 
     private _isDisposed = false;

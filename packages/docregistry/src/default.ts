@@ -32,7 +32,7 @@ export class DocumentModel
     //this.value.changed.connect(this.triggerContentChange, this);
 
     (this.sharedModel as YFile).dirty = false;
-    this.sharedModel.changed.connect(this.onSharedModelChanged, this);
+    //this.sharedModel.changed.connect(this.onSharedModelChanged, this);
   }
 
   /**
@@ -152,11 +152,11 @@ export class DocumentModel
    */
   switchSharedModel(sharedModel: ISharedFile, reinitialize?: boolean): void {
     // Disconnect from old model
-    this.sharedModel.changed.disconnect(this.onSharedModelChanged, this);
+    //this.sharedModel.changed.disconnect(this.onSharedModelChanged, this);
     // parent class changes the model
     super.switchSharedModel(sharedModel, reinitialize);
     // connect to new model
-    this.sharedModel.changed.connect(this.onSharedModelChanged, this);
+    //this.sharedModel.changed.connect(this.onSharedModelChanged, this);
   }
 
   protected onSharedModelChanged(
