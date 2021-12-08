@@ -142,3 +142,19 @@ is a consequence of the showHiddenCellsButton option in Notebook Settings)*/
 .jp-showHiddenCellsButton {
   display: none;
 }
+
+/*-----------------------------------------------------------------------------
+| Printing
+|----------------------------------------------------------------------------*/
+
+/*
+Using block instead of flex to allow the use of the break-inside CSS property for
+cell outputs.
+*/
+
+@media print {
+  .jp-Cell-inputWrapper,
+  .jp-Cell-outputWrapper {
+    display: block;
+  }
+}
