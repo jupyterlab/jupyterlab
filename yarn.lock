@@ -11653,6 +11653,13 @@ lib0@^0.2.31, lib0@^0.2.42:
   dependencies:
     isomorphic.js "^0.2.4"
 
+lib0@^0.2.43:
+  version "0.2.43"
+  resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.43.tgz#1c2ed1fb2e9fe136e92abef7ca56875f2ee66b07"
+  integrity sha512-MJ1KLoz5p3gljIUBfdjjNuL/wlWHHK6+DrcIRhzSRLvtAu1XNdRtRGATYM51KSTI0P2nxJZFQM8rwCH6ga9KUw==
+  dependencies:
+    isomorphic.js "^0.2.4"
+
 libnpmaccess@^4.0.1:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/libnpmaccess/-/libnpmaccess-4.0.3.tgz#dfb0e5b0a53c315a2610d300e46b4ddeb66e7eec"
@@ -18533,12 +18540,12 @@ yazl@^2.5.1:
   dependencies:
     buffer-crc32 "~0.2.3"
 
-yjs@^13.5.17:
-  version "13.5.17"
-  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.17.tgz#888830e015cce709f3413f78cfdcf3c2176d4b0a"
-  integrity sha512-EeroWadB+/SlGuNwXaIjo75QlTlCjst3U/dLqhTkqwIXeCGl/nRTbQev+iYgWZVskD1eTCvaDc2FdrGdpKq32A==
+yjs@next:
+  version "13.6.0-2"
+  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.6.0-2.tgz#670e812d01877eb7232414adfe713f4519a93040"
+  integrity sha512-3+1DHp9vlC1We/gdWExMh7sx/5MmggTnmc+l/O513zy4RC5N4Qia7r0TVx4aJAPwT1XFph8/MfzJI0lfUe0pBA==
   dependencies:
-    lib0 "^0.2.42"
+    lib0 "^0.2.43"
 
 yocto-queue@^0.1.0:
   version "0.1.0"

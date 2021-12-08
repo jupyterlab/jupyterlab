@@ -64,29 +64,31 @@ export class CellList implements IObservableUndoableList<ICellModel> {
             change.oldIndex + change.oldValues.length
           );
         }
-        if (
-          change.type === 'set' ||
-          change.type === 'add' ||
-          change.type === 'move'
-        ) {
+        if (change.type === 'move') {
+          const moveLen = change.oldValues.length;
+          const adaptionIncrease =
+            change.oldIndex < change.newIndex ? moveLen : 0;
+          if (moveLen === 1) {
+            nbmodel.moveCell(
+              change.oldIndex,
+              change.newIndex + adaptionIncrease
+            );
+          } else {
+            nbmodel.moveCells(
+              change.oldIndex,
+              change.oldIndex + moveLen,
+              change.newIndex + adaptionIncrease
+            );
+          }
+        } else if (change.type === 'set' || change.type === 'add') {
           const cells = change.newValues.map(cell => {
             return cell.sharedModel.clone() as any;
           });
           let insertLocation = change.newIndex;
-          if (change.type === 'move' && insertLocation > change.oldIndex) {
-            insertLocation += change.oldValues.length;
-          }
           nbmodel.insertCells(insertLocation, cells);
           change.newValues.forEach((cell, index) => {
             cell.switchSharedModel(cells[index], false);
           });
-        }
-        if (change.type === 'move') {
-          let from = change.oldIndex;
-          if (from >= change.newIndex) {
-            from += change.oldValues.length;
-          }
-          nbmodel.deleteCellRange(from, from + change.oldValues.length);
         }
       });
     });

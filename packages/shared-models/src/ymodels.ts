@@ -213,7 +213,8 @@ export class YNotebook
   implements models.ISharedNotebook {
   constructor(options: ISharedNotebook.IOptions) {
     super();
-    this._disableDocumentWideUndoRedo = options.disableDocumentWideUndoRedo;
+    this._disableDocumentWideUndoRedo =
+      options.disableDocumentWideUndoRedo || true; // @todo!!!!!!!!!!!!!!!!!!!!!!!!!!!kk
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
       if (!this._ycellMapping.has(ycell)) {
@@ -287,9 +288,6 @@ export class YNotebook
   insertCells(index: number, cells: YCellType[]): void {
     cells.forEach(cell => {
       this._ycellMapping.set(cell.ymodel, cell);
-      if (!this.disableDocumentWideUndoRedo) {
-        cell.undoManager = this.undoManager;
-      }
     });
     this.transact(() => {
       this.ycells.insert(
@@ -308,9 +306,26 @@ export class YNotebook
    */
   moveCell(fromIndex: number, toIndex: number): void {
     this.transact(() => {
-      const fromCell: any = this.getCell(fromIndex).clone();
-      this.deleteCell(fromIndex);
-      this.insertCell(toIndex, fromCell);
+      this.transact(() => {
+        console.log('moved a Cell !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!k');
+        this.ycells.move(fromIndex, toIndex);
+      });
+    });
+  }
+
+  /**
+   * Move a cell.
+   *
+   * @param fromIndex: Index of the cell to move.
+   *
+   * @param toIndex: New position of the cell.
+   */
+  moveCells(start: number, end: number, toIndex: number): void {
+    this.transact(() => {
+      this.transact(() => {
+        console.log('moved Cells !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!k');
+        this.ycells.moveRange(start, end, toIndex);
+      });
     });
   }
 
@@ -320,6 +335,7 @@ export class YNotebook
    * @param index: Index of the cell to remove.
    */
   deleteCell(index: number): void {
+    console.log('deleted cell');
     this.deleteCellRange(index, index + 1);
   }
 
@@ -396,11 +412,6 @@ export class YNotebook
       }
       const cell = this._ycellMapping.get(type) as any;
       cell._notebook = this;
-      if (!this.disableDocumentWideUndoRedo) {
-        cell._undoManager = this.undoManager;
-      } else {
-        cell._undoManager = new Y.UndoManager([cell.ymodel], {});
-      }
     });
     event.changes.deleted.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
@@ -544,19 +555,16 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    * The notebook that this cell belongs to.
    */
   get undoManager(): Y.UndoManager | null {
-    if (!this.notebook) {
-      return this._undoManager;
+    if (!this._undoManager) {
+      if (this.notebook && !this.notebook.disableDocumentWideUndoRedo) {
+        this._undoManager = this.notebook.undoManager;
+      } else {
+        this._undoManager = new Y.UndoManager([this.ymodel], {
+          trackedOrigins: new Set([this])
+        });
+      }
     }
-    return this.notebook?.disableDocumentWideUndoRedo
-      ? this._undoManager
-      : this.notebook.undoManager;
-  }
-
-  /**
-   * Set the undoManager when adding new cells.
-   */
-  set undoManager(undoManager: Y.UndoManager | null) {
-    this._undoManager = undoManager;
+    return this._undoManager;
   }
 
   /**
@@ -637,9 +645,6 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     const cell = this.create(id);
     cell.isStandalone = true;
     new Y.Doc().getArray().insert(0, [cell.ymodel]);
-    cell._undoManager = new Y.UndoManager([cell.ymodel], {
-      trackedOrigins: new Set([cell])
-    });
     return cell;
   }
 
@@ -656,11 +661,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     ymodel.set('cell_type', this.cell_type);
     ymodel.set('id', this.getId());
     const Self: any = this.constructor;
-    const clone = new Self(ymodel);
-    // TODO The assignment of the undoManager does not work for a clone.
-    // See https://github.com/jupyterlab/jupyterlab/issues/11035
-    clone._undoManager = this.undoManager;
-    return clone;
+    return new Self(ymodel);
   }
 
   /**
