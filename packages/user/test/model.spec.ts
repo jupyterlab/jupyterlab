@@ -56,8 +56,7 @@ describe('user/model', () => {
         name: newName,
         username: newName,
         color: user.color,
-        anonymous: user.anonymous,
-        role: user.role
+        anonymous: user.anonymous
       });
       const [sender] = await promise;
       expect(sender).toBe(user);

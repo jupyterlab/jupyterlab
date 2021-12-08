@@ -18,7 +18,6 @@ export class User implements ICurrentUser {
   private _initials: string;
   private _color: string;
   private _anonymous: boolean;
-  private _role: IUser.ROLE;
   private _cursor?: IUser.Cursor;
 
   private _isReady = false;
@@ -82,17 +81,6 @@ export class User implements ICurrentUser {
   }
 
   /**
-   * User's role.
-   *
-   * NOTE: Jupyter Server and JupyterLab doesn't implement a role-base access control (RBAC) yet.
-   * This attribute is here to start introducing RBAC to JupyterLab's interface. At the moment every
-   * user has the role ADMIN.
-   */
-  get role(): IUser.ROLE {
-    return this._role;
-  }
-
-  /**
    * User's cursor position on the document.
    *
    * If undefined, the user is not on a document.
@@ -132,7 +120,6 @@ export class User implements ICurrentUser {
     this._initials = user.initials;
     this._color = user.color;
     this._anonymous = user.anonymous;
-    this._role = user.role;
     this._cursor = user.cursor;
     this._save();
   }
@@ -148,7 +135,6 @@ export class User implements ICurrentUser {
       initials: this._initials,
       color: this._color,
       anonymous: this._anonymous,
-      role: this._role,
       cursor: this._cursor
     };
   }
@@ -182,7 +168,6 @@ export class User implements ICurrentUser {
       this._initials = user.initials as string;
       this._color = color !== '' ? '#' + color : (user.color as string);
       this._anonymous = user.anonymous as boolean;
-      this._role = user.role as IUser.ROLE;
       this._cursor = (user.cursor as IUser.Cursor) || undefined;
 
       if (name !== '' || color !== '') {
@@ -196,7 +181,6 @@ export class User implements ICurrentUser {
       this._initials = getInitials(this.givenName, this.familyName);
       this._color = '#' + (color !== '' ? color : getRandomColor().slice(1));
       this._anonymous = true;
-      this._role = IUser.ROLE.ADMIN;
       this._cursor = undefined;
       this._save();
     }

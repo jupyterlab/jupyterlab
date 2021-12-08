@@ -108,21 +108,6 @@ export namespace IUser {
     readonly anonymous: boolean;
 
     /**
-     * @experimental
-     * @alpha
-     * @hidden
-     *
-     * User's role.
-     *
-     * @todo: define roles
-     * NOTE: this is experimental and will probably change.
-     * Jupyter Server and JupyterLab doesn't implement a role-base access control (RBAC) yet.
-     * This attribute is here to start introducing RBAC to JupyterLab's interface. At the moment every
-     * user has the role ADMIN.
-     */
-    readonly role: IUser.ROLE;
-
-    /**
      * User's cursor position on the document.
      *
      * If undefined, the user is not on a document.
@@ -135,35 +120,6 @@ export namespace IUser {
      */
     readonly avatar_url?: string;
   };
-
-  /**
-   * @experimental
-   * @alpha
-   * @hidden
-   *
-   * User's roles.
-   *
-   * @note: this is experimental and will probably change.
-   * @todo: define roles
-   */
-  export enum ROLE {
-    /**
-     * Can do everything RUN, modify settings, install extensions, etc.
-     */
-    ADMIN = 1,
-    /**
-     * Can only read documents.
-     */
-    READ = 2,
-    /**
-     * Can only read and write documents.
-     */
-    WRITE = 3,
-    /**
-     * Can READ, WRITE, execute documents, commands in the terminal and console.
-     */
-    RUN = 4
-  }
 
   export type Cursor = {
     /**
