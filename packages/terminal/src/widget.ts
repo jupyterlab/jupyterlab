@@ -148,6 +148,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
     switch (option) {
       case 'shutdownOnClose': // Do not transmit to XTerm
+      case 'disposeOnExit': // Do not transmit to XTerm
         break;
       case 'theme':
         this._term.setOption(
