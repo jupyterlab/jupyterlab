@@ -209,7 +209,7 @@ export type Action = 'install' | 'uninstall' | 'enable' | 'disable';
 export class ListModel extends VDomModel {
   constructor(
     app: JupyterFrontEnd,
-    serviceManager: ServiceManager,
+    serviceManager: ServiceManager.IManager,
     settings: ISettingRegistry.ISettings,
     translator?: ITranslator
   ) {
@@ -887,7 +887,7 @@ export class ListModel extends VDomModel {
   /**
    * The service manager to use for building.
    */
-  protected serviceManager: ServiceManager;
+  protected serviceManager: ServiceManager.IManager;
 
   protected translator: ITranslator;
   private _app: JupyterFrontEnd;

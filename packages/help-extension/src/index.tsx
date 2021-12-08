@@ -20,12 +20,7 @@ import {
 } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import {
-  Kernel,
-  KernelMessage,
-  Session,
-  SessionManager
-} from '@jupyterlab/services';
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   CommandToolbarButton,
@@ -349,7 +344,7 @@ const resources: JupyterFrontEndPlugin<void> = {
     >();
 
     const onSessionRunningChanged = (
-      m: SessionManager,
+      m: Session.IManager,
       sessions: Session.IModel[]
     ) => {
       // If a new session has been added, it is at the back

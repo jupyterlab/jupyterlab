@@ -50,6 +50,11 @@ import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
+ * Default context menu item rank
+ */
+export const DEFAULT_CONTEXT_ITEM_RANK = 100;
+
+/**
  * The command IDs used by the application plugin.
  */
 namespace CommandIDs {
@@ -1091,7 +1096,7 @@ namespace Private {
      */
     function populate(schema: ISettingRegistry.ISchema) {
       loaded = {};
-      schema.properties!.contextMenu.default = Object.keys(registry.plugins)
+      const pluginDefaults = Object.keys(registry.plugins)
         .map(plugin => {
           const items =
             registry.plugins[plugin]!.schema['jupyter.lab.menus']?.context ??
@@ -1099,17 +1104,24 @@ namespace Private {
           loaded[plugin] = items;
           return items;
         })
-        .concat([
-          schema['jupyter.lab.menus']?.context ?? [],
-          schema.properties!.contextMenu.default as any[]
-        ])
+        .concat([schema['jupyter.lab.menus']?.context ?? []])
         .reduceRight(
           (
             acc: ISettingRegistry.IContextMenuItem[],
             val: ISettingRegistry.IContextMenuItem[]
           ) => SettingRegistry.reconcileItems(acc, val, true),
           []
-        )! // flatten one level
+        )!;
+
+      // Apply default value as last step to take into account overrides.json
+      // The standard default being [] as the plugin must use `jupyter.lab.menus.context`
+      // to define their default value.
+      schema.properties!.contextMenu.default = SettingRegistry.reconcileItems(
+        pluginDefaults,
+        schema.properties!.contextMenu.default as any[],
+        true
+      )!
+        // flatten one level
         .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
     }
 
@@ -1164,11 +1176,19 @@ namespace Private {
     const settings = await registry.load(pluginId);
 
     const contextItems: ISettingRegistry.IContextMenuItem[] =
-      JSONExt.deepCopy(settings.composite.contextMenu as any) ?? [];
+      (settings.composite.contextMenu as any) ?? [];
 
     // Create menu item for non-disabled element
     SettingRegistry.filterDisabledItems(contextItems).forEach(item => {
-      MenuFactory.addContextItem(item, contextMenu, menuFactory);
+      MenuFactory.addContextItem(
+        {
+          // We have to set the default rank because Lumino is sorting the visible items
+          rank: DEFAULT_CONTEXT_ITEM_RANK,
+          ...item
+        },
+        contextMenu,
+        menuFactory
+      );
     });
 
     settings.changed.connect(() => {
@@ -1202,7 +1222,15 @@ namespace Private {
                 false
               ) ?? [];
             SettingRegistry.filterDisabledItems(toAdd).forEach(item => {
-              MenuFactory.addContextItem(item, contextMenu, menuFactory);
+              MenuFactory.addContextItem(
+                {
+                  // We have to set the default rank because Lumino is sorting the visible items
+                  rank: DEFAULT_CONTEXT_ITEM_RANK,
+                  ...item
+                },
+                contextMenu,
+                menuFactory
+              );
             });
           }
         }
