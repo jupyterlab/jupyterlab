@@ -3,15 +3,14 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IMimeTypeSearchEngine } from '..';
-import { IHTMLSearchMatch, ISearchProvider } from '../interfaces';
+import { IHTMLSearchMatch, ISearchProvider } from '../tokens';
 
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
 
 // Highlight next and previous seem broken
 
-export class HTMLSearchEngine implements IMimeTypeSearchEngine {
+export class HTMLSearchEngine {
   /**
    * We choose opt out as most node types should be searched (e.g. script).
    * Even nodes like <data>, could have textContent we care about.
@@ -68,7 +67,7 @@ export class HTMLSearchEngine implements IMimeTypeSearchEngine {
    * @param data
    * @returns
    */
-  search(query: RegExp, rootNode: Node): Promise<IHTMLSearchMatch[]> {
+  static search(query: RegExp, rootNode: Node): Promise<IHTMLSearchMatch[]> {
     if (!(rootNode instanceof Node)) {
       console.warn(
         'Unable to search with HTMLSearchEngine the provided object.',
@@ -155,10 +154,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     this._widget = searchTarget;
     this._query = query;
 
-    const matches = await new HTMLSearchEngine().search(
-      query,
-      this._widget.node
-    );
+    const matches = await HTMLSearchEngine.search(query, this._widget.node);
 
     // Transform the DOM
     /*

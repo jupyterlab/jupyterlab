@@ -6,7 +6,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IDisplayState, IFiltersType, ISearchProvider } from './interfaces';
+import { IDisplayState, IFiltersType, ISearchProvider } from './tokens';
 import { createSearchOverlay } from './searchoverlay';
 
 /**

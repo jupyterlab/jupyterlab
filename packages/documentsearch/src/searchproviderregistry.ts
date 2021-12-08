@@ -8,9 +8,9 @@ import { Widget } from '@lumino/widgets';
 import {
   IMimeTypeSearchEngine,
   ISearchProvider,
-  ISearchProviderConstructor
-} from './interfaces';
-import { ISearchProviderRegistry } from './tokens';
+  ISearchProviderConstructor,
+  ISearchProviderRegistry
+} from './tokens';
 
 export class SearchProviderRegistry implements ISearchProviderRegistry {
   constructor(protected translator: ITranslator = nullTranslator) {}
@@ -89,7 +89,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     // widget.
     for (const P of providerMap.values()) {
       if (P.canSearchOn(widget)) {
-        return new P(this.translator);
+        return new P(this.translator, this);
       }
     }
     return undefined;

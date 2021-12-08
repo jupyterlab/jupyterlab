@@ -5,7 +5,6 @@
  * @module documentsearch
  */
 
-export * from './interfaces';
 export * from './providers/genericsearchprovider';
 export * from './providers/textprovider';
 export * from './searchinstance';

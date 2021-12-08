@@ -1,12 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IMimeTypeSearchEngine, ITextSearchMatch } from '../interfaces';
+import { ITextSearchMatch } from '../tokens';
 
 /**
  * Search provider for plain/text
  */
-export class TextSearchEngine implements IMimeTypeSearchEngine {
+export const TextSearchEngine = {
   search(query: RegExp, data: string): Promise<ITextSearchMatch[]> {
     // If data is not a string, try to JSON serialize the data.
     if (typeof data !== 'string') {
@@ -47,4 +47,4 @@ export class TextSearchEngine implements IMimeTypeSearchEngine {
 
     return Promise.resolve(matches);
   }
-}
+};
