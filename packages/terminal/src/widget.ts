@@ -176,8 +176,10 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
         });
       }
     }
-    this._term.dispose();
-    super.dispose();
+    if (this.getOption('disposeOnExit')) {
+      this._term.dispose();
+      super.dispose();
+    }
   }
 
   /**
