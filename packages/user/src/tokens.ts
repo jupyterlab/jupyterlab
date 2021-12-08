@@ -192,19 +192,4 @@ export interface IUserMenu {
    * This is a no-op if the item is not in the menu.
    */
   removeItem(item: Menu.IItem): void;
-
-  /**
-   * Remove the item at a given index from the menu.
-   *
-   * @param index - The index of the item to remove.
-   *
-   * #### Notes
-   * This is a no-op if the index is out of range.
-   */
-  removeItemAt(index: number): void;
-
-  /**
-   * Remove all menu items from the menu.
-   */
-  clearItems(): void;
 }

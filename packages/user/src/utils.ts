@@ -133,26 +133,6 @@ export const getAnonymousUserName = (): string =>
   moonsOfJupyter[Math.floor(Math.random() * moonsOfJupyter.length)];
 
 /**
- * Predefined colors for users
- */
-export const userColors = [
-  '#12A0D3',
-  '#17AB30',
-  '#CC8500',
-  '#A79011',
-  '#ee6352',
-  '#609DA9',
-  '#4BA749',
-  '#00A1B3'
-];
-
-/**
- * Get a random color from the list of colors.
- */
-export const getRandomColor = (): string =>
-  userColors[Math.floor(Math.random() * userColors.length)];
-
-/**
  * Extract the initials from the name of the user.
  */
 export const getInitials = (name: string, familyName?: string): string => {

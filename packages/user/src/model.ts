@@ -6,7 +6,7 @@ import { UUID } from '@lumino/coreutils';
 import * as env from 'lib0/environment';
 
 import { ICurrentUser, IUser, USER } from './tokens';
-import { getAnonymousUserName, getInitials, getRandomColor } from './utils';
+import { getAnonymousUserName, getInitials } from './utils';
 
 /**
  * Default user implementation.
@@ -179,10 +179,39 @@ export class User implements ICurrentUser {
       this._givenName = name !== '' ? name : 'Anonymous';
       this._familyName = name !== '' ? '' : getAnonymousUserName();
       this._initials = getInitials(this.givenName, this.familyName);
-      this._color = '#' + (color !== '' ? color : getRandomColor().slice(1));
+      this._color =
+        '#' + (color !== '' ? color : Private.getRandomColor().slice(1));
       this._anonymous = true;
       this._cursor = undefined;
       this._save();
     }
   }
+}
+
+/**
+ * A namespace for module-private functionality.
+ *
+ * Note: We do not want to export this function
+ * to move it to css variables in the Theme.
+ */
+namespace Private {
+  /**
+   * Predefined colors for users
+   */
+  const userColors = [
+    '#12A0D3',
+    '#17AB30',
+    '#CC8500',
+    '#A79011',
+    '#ee6352',
+    '#609DA9',
+    '#4BA749',
+    '#00A1B3'
+  ];
+
+  /**
+   * Get a random color from the list of colors.
+   */
+  export const getRandomColor = (): string =>
+    userColors[Math.floor(Math.random() * userColors.length)];
 }
