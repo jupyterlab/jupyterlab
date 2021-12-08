@@ -120,9 +120,9 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
   }
 
   /**
-   * The same list of matches provided by the startQuery promise resolution
+   * The number of matches.
    */
-  readonly matches: ISearchMatch[] = [];
+  readonly matchesSize = null;
 
   /**
    * The current index of the selected match.

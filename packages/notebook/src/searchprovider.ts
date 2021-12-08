@@ -394,13 +394,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   /**
-   * The same list of matches provided by the startQuery promise resolution
-   */
-  get matches(): ISearchMatch[] {
-    return ([] as ISearchMatch[]).concat(...this._getMatchesFromCells());
-  }
-
-  /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
   get changed(): ISignal<this, void> {
@@ -415,6 +408,16 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       return null;
     }
     return this._currentMatch.index;
+  }
+
+  /**
+   * The number of matches.
+   */
+  get matchesSize(): number | null {
+    return this._getMatchesFromCells().reduce(
+      (sum, arr) => (sum += arr.length),
+      0
+    );
   }
 
   /**

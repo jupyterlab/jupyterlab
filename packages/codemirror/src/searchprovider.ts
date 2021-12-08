@@ -210,6 +210,17 @@ export class CodeMirrorSearchProvider {
     return this._parseMatchesFromState();
   }
 
+  /**
+   * The number of matches.
+   */
+  get matchesSize(): number | null {
+    let size = 0;
+    for (const line in this._matchState) {
+      size += Object.keys(this._matchState[line]).length;
+    }
+    return size;
+  }
+
   get currentMatch(): ITextSearchMatch | null {
     return this._currentMatch;
   }

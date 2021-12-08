@@ -116,7 +116,7 @@ export class SearchInstance implements IDisposable {
    * Updates the match index and total display in the search widget.
    */
   updateIndices(): void {
-    this._displayState.totalMatches = this._activeProvider.matches.length;
+    this._displayState.totalMatches = this._activeProvider.matchesSize ?? 0;
     this._displayState.currentIndex = this._activeProvider.currentMatchIndex;
     this._updateDisplay();
   }

@@ -235,11 +235,6 @@ export interface ISearchProvider<T extends Widget = Widget> {
   replaceAllMatches(newText: string): Promise<boolean>;
 
   /**
-   * The same list of matches provided by the startQuery promise resolution
-   */
-  readonly matches: ISearchMatch[];
-
-  /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
   readonly changed: ISignal<ISearchProvider<T>, void>;
@@ -248,6 +243,11 @@ export interface ISearchProvider<T extends Widget = Widget> {
    * The current index of the selected match.
    */
   readonly currentMatchIndex: number | null;
+
+  /**
+   * The number of matches.
+   */
+  readonly matchesSize: number | null;
 
   /**
    * Set to true if the widget under search is read-only, false

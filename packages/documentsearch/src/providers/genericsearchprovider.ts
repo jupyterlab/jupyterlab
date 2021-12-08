@@ -332,17 +332,6 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
   }
 
   /**
-   * The same list of matches provided by the startQuery promise resolution
-   */
-  get matches(): IHTMLSearchMatch[] {
-    // Ensure that no other fn can overwrite matches index property
-    // We shallow clone each node
-    return this._matches
-      ? this._matches.map(m => Object.assign({}, m))
-      : this._matches;
-  }
-
-  /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
   get changed(): ISignal<this, void> {
@@ -360,6 +349,24 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     return this._currentMatchIndex === null
       ? null
       : this._matches[this._currentMatchIndex];
+  }
+
+  /**
+   * The same list of matches provided by the startQuery promise resolution
+   */
+  get matches(): IHTMLSearchMatch[] {
+    // Ensure that no other fn can overwrite matches index property
+    // We shallow clone each node
+    return this._matches
+      ? this._matches.map(m => Object.assign({}, m))
+      : this._matches;
+  }
+
+  /**
+   * The number of matches.
+   */
+  get matchesSize(): number | null {
+    return this._matches.length;
   }
 
   /**
