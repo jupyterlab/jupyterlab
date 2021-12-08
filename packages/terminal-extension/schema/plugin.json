@@ -81,9 +81,9 @@
       "type": "boolean",
       "default": false
     },
-    "disposeOnExit": {
-      "title": "Dispose on exit",
-      "description": "Dispose the widget when exiting the terminal.",
+    "closeOnExit": {
+      "title": "Close on exit",
+      "description": "Close the widget when exiting the terminal.",
       "type": "boolean",
       "default": true
     },

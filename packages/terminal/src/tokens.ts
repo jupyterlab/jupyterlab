@@ -83,9 +83,9 @@ export namespace ITerminal {
     shutdownOnClose: boolean;
 
     /**
-     * Whether to dispose the widget when exiting a terminal or not.
+     * Whether to close the widget when exiting a terminal or not.
      */
-    disposeOnExit: boolean;
+    closeOnExit: boolean;
 
     /**
      * Whether to blink the cursor.  Can only be set at startup.
@@ -130,7 +130,7 @@ export namespace ITerminal {
     lineHeight: 1.0,
     scrollback: 1000,
     shutdownOnClose: false,
-    disposeOnExit: true,
+    closeOnExit: true,
     cursorBlink: true,
     initialCommand: '',
     screenReaderMode: false, // False by default, can cause scrollbar mouse interaction issues.
