@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { signalToPromise } from '@jupyterlab/testutils';
-import { StateDB } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
 
 import { UserMenu } from './../src/menu';
@@ -11,30 +10,26 @@ import { User } from './../src/model';
 describe('user/menu', () => {
   describe('Menu', () => {
     it('Should change the title', async () => {
-      const stateDB = new StateDB();
       const commands = new CommandRegistry();
-      const user = new User(stateDB);
+      const user = new User();
       const menu = new UserMenu({
         user,
         commands
       });
 
-      const promiseIsReady = signalToPromise(user.ready);
-      const [senderIsReady] = await promiseIsReady;
-      expect(senderIsReady).toBe(user);
-
       const promiseUserChanged = signalToPromise(user.changed);
       const promiseTitleChanged = signalToPromise(menu.title.changed);
 
-      const name = 'jovyan';
-      user.fromJSON({ ...user.toJSON(), name });
+      const givenName = 'jovyan';
+      const familyName = '';
+      user.fromJSON({ ...user.toJSON(), givenName, familyName });
 
       const [senderUserChanged] = await promiseUserChanged;
       const [senderTitleChanged] = await promiseTitleChanged;
 
       expect(senderUserChanged).toBe(user);
       expect(senderTitleChanged).toBe(menu.title);
-      expect(menu.title.label).toBe(name);
+      expect(menu.title.label).toBe(givenName);
     });
   });
 });
