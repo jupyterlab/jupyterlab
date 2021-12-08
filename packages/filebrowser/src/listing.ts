@@ -1129,7 +1129,7 @@ export class DirListing extends Widget {
     }
     for (let i = 0; i < length; i++) {
       let entry = event.dataTransfer?.items[i].webkitGetAsEntry();
-      if (entry.isDirectory) {
+      if (entry?.isDirectory) {
         console.log('currently not supporting drag + drop for folders');
         void showDialog({
           title: this._trans.__('Error Uploading Folder'),
