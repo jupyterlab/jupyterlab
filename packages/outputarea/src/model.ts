@@ -83,11 +83,6 @@ export interface IOutputAreaModel extends IDisposable {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput[];
-
-  /**
-   * The maximum number of output items to display on top and bottom of cell output.
-   */
-  maxNumberOutputs?: number;
 }
 
 /**
