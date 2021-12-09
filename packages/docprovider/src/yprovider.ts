@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { ICurrentUser } from '@jupyterlab/user';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
@@ -55,7 +56,7 @@ export class WebSocketProvider
       });
     }
 
-    // Message handler that receives the rename acknowledge
+    // Message handler that confirms when a lock has been acquired
     this.messageHandlers[127] = (
       encoder,
       decoder,
@@ -67,10 +68,24 @@ export class WebSocketProvider
         decoding.readTailAsUint8Array(decoder)[0] ? true : false
       );
     };
+
+    const user = options.user;
+    const userChanged = () => {
+      const name =
+        user.familyName !== ''
+          ? `${user.givenName} ${user.familyName}`
+          : user.givenName;
+      awareness.setLocalStateField('user', { ...user.toJSON(), name });
+    };
+    if (user.isReady) {
+      userChanged();
+    }
+    user.ready.connect(userChanged);
+    user.changed.connect(userChanged);
   }
 
   get renameAck(): Promise<boolean> {
-    return this._renameAck.promise;
+    return this._renameAck.promise; 969fa5d674 (Add a user package to represent the current connected user (#11443))
   }
 
   setPath(newPath: string): void {
@@ -146,5 +161,10 @@ export namespace WebSocketProvider {
      * The server URL
      */
     url: string;
+
+    /**
+     * The user data
+     */
+    user: ICurrentUser;
   }
 }

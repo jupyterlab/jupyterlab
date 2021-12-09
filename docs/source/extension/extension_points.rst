@@ -125,6 +125,10 @@ might want to use the services in your extensions.
   created by the application.
 - ``@jupyterlab/tooltip:ITooltipManager``: A service for the tooltip manager for the application.
   Use this to allow your extension to invoke a tooltip.
+- ``@jupyterlab/user:ICurrentUser``: A service for the current user information.
+  Use this if you want to access to the identity of the current connected user.
+- ``@jupyterlab/user:IUserMenu``: A service for the user menu on the application.
+  Use this if you want to add new items to the user menu.
 - ``@jupyterlab/vdom:IVDOMTracker``: A widget tracker for virtual DOM (VDOM) documents.
   Use this to iterate over and interact with VDOM document instances created by the application.
 

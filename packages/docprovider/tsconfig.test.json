@@ -6,6 +6,9 @@
       "path": "../shared-models"
     },
     {
+      "path": "../user"
+    },
+    {
       "path": "."
     },
     {

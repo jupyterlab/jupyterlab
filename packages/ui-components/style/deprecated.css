@@ -87,6 +87,7 @@
   --jp-icon-save: url('icons/toolbar/save.svg');
   --jp-icon-search: url('icons/toolbar/search.svg');
   --jp-icon-settings: url('icons/filetype/settings.svg');
+  --jp-icon-share: url('icons/sidebar/share.svg');
   --jp-icon-spreadsheet: url('icons/filetype/spreadsheet.svg');
   --jp-icon-stop: url('icons/toolbar/stop.svg');
   --jp-icon-tab: url('icons/sidebar/tab.svg');
@@ -98,6 +99,7 @@
   --jp-icon-tree-view: url('icons/toolbar/tree-view.svg');
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
   --jp-icon-undo: url('icons/toolbar/undo.svg');
+  --jp-icon-user: url('icons/sidebar/user.svg');
   --jp-icon-vega: url('icons/filetype/vega.svg');
   --jp-icon-yaml: url('icons/filetype/yaml.svg');
 }
@@ -329,6 +331,9 @@
 .jp-SettingsIcon {
   background-image: var(--jp-icon-settings);
 }
+.jp-ShareIcon {
+  background-image: var(--jp-icon-share);
+}
 .jp-SpreadsheetIcon {
   background-image: var(--jp-icon-spreadsheet);
 }
@@ -361,6 +366,9 @@
 }
 .jp-UndoIcon {
   background-image: var(--jp-icon-undo);
+}
+.jp-UserIcon {
+  background-image: var(--jp-icon-user);
 }
 .jp-VegaIcon {
   background-image: var(--jp-icon-vega);

@@ -271,6 +271,12 @@
       "path": "../ui-components-extension"
     },
     {
+      "path": "../user"
+    },
+    {
+      "path": "../user-extension"
+    },
+    {
       "path": "../vdom"
     },
     {

@@ -120,6 +120,8 @@
     "@jupyterlab/translation-extension": "^3.5.0-beta.0",
     "@jupyterlab/ui-components": "^3.5.0-beta.0",
     "@jupyterlab/ui-components-extension": "^3.5.0-beta.0",
+    "@jupyterlab/user": "^3.5.0-beta.0",
+    "@jupyterlab/user-extension": "^3.5.0-beta.0",
     "@jupyterlab/vdom": "^3.5.0-beta.0",
     "@jupyterlab/vdom-extension": "^3.5.0-beta.0",
     "@jupyterlab/vega5-extension": "^3.5.0-beta.0"
