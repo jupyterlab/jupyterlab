@@ -8,6 +8,45 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.0a17
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a16...969fa5d674931a89322d60c7e8c5bf80752f6cdd))
+
+### Enhancements made
+
+- Specifying print CSS rules for notebooks [#11635](https://github.com/jupyterlab/jupyterlab/pull/11635) ([@SylvainCorlay](https://github.com/SylvainCorlay))
+- Add a user package to represent the current connected user [#11443](https://github.com/jupyterlab/jupyterlab/pull/11443) ([@hbcarlos](https://github.com/hbcarlos))
+
+### Bugs fixed
+
+- Fix menu items for toc [#11622](https://github.com/jupyterlab/jupyterlab/pull/11622) ([@fcollonval](https://github.com/fcollonval))
+
+### Maintenance and upkeep improvements
+
+- Bump nth-check from 2.0.0 to 2.0.1 in /jupyterlab/staging [#11629](https://github.com/jupyterlab/jupyterlab/pull/11629) ([@dependabot](https://github.com/dependabot))
+- Update to TypeScript 4.5 [#11594](https://github.com/jupyterlab/jupyterlab/pull/11594) ([@jtpio](https://github.com/jtpio))
+- RTC shared model: Rename createCellFromType into createCellFromModel [#11538](https://github.com/jupyterlab/jupyterlab/pull/11538) ([@martinRenou](https://github.com/martinRenou))
+- Make `NotebookPanel._onSave` private [#10420](https://github.com/jupyterlab/jupyterlab/pull/10420) ([@jtpio](https://github.com/jtpio))
+
+- Fix menu items for toc [#11622](https://github.com/jupyterlab/jupyterlab/pull/11622) ([@fcollonval](https://github.com/fcollonval))
+- RTC shared model: Rename createCellFromType into createCellFromModel [#11538](https://github.com/jupyterlab/jupyterlab/pull/11538) ([@martinRenou](https://github.com/martinRenou))
+- Add a user package to represent the current connected user [#11443](https://github.com/jupyterlab/jupyterlab/pull/11443) ([@hbcarlos](https://github.com/hbcarlos))
+- Make `NotebookPanel._onSave` private [#10420](https://github.com/jupyterlab/jupyterlab/pull/10420) ([@jtpio](https://github.com/jtpio))
+
+### API and Breaking Changes
+
+- Fix menu items for toc [#11622](https://github.com/jupyterlab/jupyterlab/pull/11622) ([@fcollonval](https://github.com/fcollonval))
+- RTC shared model: Rename createCellFromType into createCellFromModel [#11538](https://github.com/jupyterlab/jupyterlab/pull/11538) ([@martinRenou](https://github.com/martinRenou))
+- Make `NotebookPanel._onSave` private [#10420](https://github.com/jupyterlab/jupyterlab/pull/10420) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-12-07&to=2021-12-09&type=c))
+
+[@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-12-07..2021-12-09&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2021-12-07..2021-12-09&type=Issues) | [@ellisonbg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aellisonbg+updated%3A2021-12-07..2021-12-09&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2021-12-07..2021-12-09&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2021-12-07..2021-12-09&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2021-12-07..2021-12-09&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2021-12-07..2021-12-09&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2021-12-07..2021-12-09&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2021-12-07..2021-12-09&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2021-12-07..2021-12-09&type=Issues) | [@SylvainCorlay](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2021-12-07..2021-12-09&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2021-12-07..2021-12-09&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.0a16
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a15...17cf5fcd5caf563a55b811e5df6377db612f6cd3))
@@ -100,8 +139,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2021-11-09&to=2021-12-07&type=c))
 
 [@0x2b3bfa0](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3A0x2b3bfa0+updated%3A2021-11-09..2021-12-07&type=Issues) | [@andrewfulton9](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrewfulton9+updated%3A2021-11-09..2021-12-07&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-11-09..2021-12-07&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2021-11-09..2021-12-07&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2021-11-09..2021-12-07&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2021-11-09..2021-12-07&type=Issues) | [@dmonad](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Admonad+updated%3A2021-11-09..2021-12-07&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2021-11-09..2021-12-07&type=Issues) | [@ellisonbg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aellisonbg+updated%3A2021-11-09..2021-12-07&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2021-11-09..2021-12-07&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2021-11-09..2021-12-07&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2021-11-09..2021-12-07&type=Issues) | [@isabela-pf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aisabela-pf+updated%3A2021-11-09..2021-12-07&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2021-11-09..2021-12-07&type=Issues) | [@jess-x](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajess-x+updated%3A2021-11-09..2021-12-07&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2021-11-09..2021-12-07&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-11-09..2021-12-07&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2021-11-09..2021-12-07&type=Issues) | [@jweill-aws](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajweill-aws+updated%3A2021-11-09..2021-12-07&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2021-11-09..2021-12-07&type=Issues) | [@loichuder](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aloichuder+updated%3A2021-11-09..2021-12-07&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2021-11-09..2021-12-07&type=Issues) | [@mbektas](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ambektas+updated%3A2021-11-09..2021-12-07&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2021-11-09..2021-12-07&type=Issues) | [@schmidi314](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aschmidi314+updated%3A2021-11-09..2021-12-07&type=Issues) | [@skyetim](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Askyetim+updated%3A2021-11-09..2021-12-07&type=Issues) | [@SylvainCorlay](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2021-11-09..2021-12-07&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2021-11-09..2021-12-07&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2021-11-09..2021-12-07&type=Issues) | [@williamstein](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awilliamstein+updated%3A2021-11-09..2021-12-07&type=Issues) | [@yuvipanda](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ayuvipanda+updated%3A2021-11-09..2021-12-07&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.0a15
 
