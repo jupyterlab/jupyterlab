@@ -35,6 +35,8 @@ bumped their major version (following semver convention):
 - As a result of the update to TypeScript 4.5, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions` is now a ``DOMRect` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+- ``@jupyterlab/notebook`` from 3.x to 4.x
+   The ``NotebookPanel._onSave`` method is now ``private``.
 
 JupyterLab 3.0 to 3.1
 ---------------------
