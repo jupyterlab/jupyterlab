@@ -190,11 +190,11 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
     const trusted = (this._trusted = value);
     for (let i = 0; i < this.list.length; i++) {
-      let item = this.list.get(i);
-      const value = item.toJSON();
-      item.dispose();
-      item = this._createItem({ value, trusted });
+      const oldItem = this.list.get(i);
+      const value = oldItem.toJSON();
+      const item = this._createItem({ value, trusted });
       this.list.set(i, item);
+      oldItem.dispose();
     }
   }
 
@@ -325,8 +325,8 @@ export class OutputAreaModel implements IOutputAreaModel {
       const item = this._createItem({ value, trusted });
       const index = this.length - 1;
       const prev = this.list.get(index);
-      prev.dispose();
       this.list.set(index, item);
+      prev.dispose();
       return index;
     }
 
@@ -380,7 +380,6 @@ export class OutputAreaModel implements IOutputAreaModel {
   private _createItem(options: IOutputModel.IOptions): IOutputModel {
     const factory = this.contentFactory;
     const item = factory.createOutputModel(options);
-    item.changed.connect(this._onGenericChange, this);
     return item;
   }
 
@@ -391,6 +390,26 @@ export class OutputAreaModel implements IOutputAreaModel {
     sender: IObservableList<IOutputModel>,
     args: IObservableList.IChangedArgs<IOutputModel>
   ) {
+    switch (args.type) {
+      case 'add':
+        args.newValues.forEach(item => {
+          item.changed.connect(this._onGenericChange, this);
+        });
+        break;
+      case 'remove':
+        args.oldValues.forEach(item => {
+          item.changed.disconnect(this._onGenericChange, this);
+        });
+        break;
+      case 'set':
+        args.newValues.forEach(item => {
+          item.changed.connect(this._onGenericChange, this);
+        });
+        args.oldValues.forEach(item => {
+          item.changed.disconnect(this._onGenericChange, this);
+        });
+        break;
+    }
     this._changed.emit(args);
   }
 

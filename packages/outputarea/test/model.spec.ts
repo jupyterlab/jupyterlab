@@ -201,6 +201,26 @@ describe('outputarea/model', () => {
       });
     });
 
+    describe('#set', () => {
+      it('should disconnect the replaced output', () => {
+        const model = new OutputAreaModel({
+          values: [NBTestUtils.DEFAULT_OUTPUTS[0]]
+        });
+
+        const output = model.get(0);
+        let called = false;
+        model.stateChanged.connect((sender, args) => {
+          called = true;
+        });
+
+        model.set(0, NBTestUtils.DEFAULT_OUTPUTS[1]);
+
+        output.setData({ ...output.data });
+
+        expect(called).toEqual(false);
+      });
+    });
+
     describe('#fromJSON()', () => {
       it('should deserialize the model from JSON', () => {
         model.clear();
