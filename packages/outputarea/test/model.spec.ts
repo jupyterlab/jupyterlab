@@ -51,16 +51,29 @@ describe('outputarea/model', () => {
     });
 
     describe('#stateChanged', () => {
-      it('should be emitted when an item changes', () => {
+      it('should be emitted when an item data changes', () => {
         let called = false;
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         model.stateChanged.connect((sender, args) => {
           expect(sender).toBe(model);
-          expect(args).toBeUndefined();
+          expect(args).toEqual([0, 'data']);
           called = true;
         });
         const output = model.get(0);
         output.setData({ ...output.data });
+        expect(called).toBe(true);
+      });
+
+      it('should be emitted when an item highlights changes', () => {
+        let called = false;
+        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        model.stateChanged.connect((sender, args) => {
+          expect(sender).toBe(model);
+          expect(args).toEqual([0, 'highlights']);
+          called = true;
+        });
+        const output = model.get(0);
+        output.highlights = [{ text: 'dummy', position: 22 }];
         expect(called).toBe(true);
       });
     });

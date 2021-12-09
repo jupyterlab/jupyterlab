@@ -33,6 +33,36 @@ describe('rendermime/outputmodel', () => {
       });
     });
 
+    describe('#changed', () => {
+      it('should be emitted when the data changes', () => {
+        const value = DEFAULT_EXECUTE;
+        let model = new OutputModel({ value });
+        let called = false;
+        model.changed.connect((sender, args) => {
+          expect(sender).toBe(model);
+          expect(args).toEqual('data');
+          called = true;
+        });
+        model.setData({ ...model.data });
+        expect(called).toBe(true);
+      });
+
+      it('should be emitted when the highlights changes', () => {
+        const value = DEFAULT_EXECUTE;
+        let model = new OutputModel({ value });
+        let called = false;
+
+        model.changed.connect((sender, args) => {
+          expect(sender).toBe(model);
+          expect(args).toEqual('highlights');
+          called = true;
+        });
+
+        model.highlights = [{ text: 'dummy', position: 22 }];
+        expect(called).toBe(true);
+      });
+    });
+
     describe('#type', () => {
       it('should be the output type', () => {
         let model = new OutputModel({ value: DEFAULT_EXECUTE });

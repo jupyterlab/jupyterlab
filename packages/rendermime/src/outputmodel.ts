@@ -22,8 +22,12 @@ import { MimeModel } from './mimemodel';
 export interface IOutputModel extends IRenderMime.IMimeModel {
   /**
    * A signal emitted when the output model changes.
+   *
+   * Possible values for the parameter are:
+   * - 'highlights': Emitted when the highlights are changed
+   * - 'data': Emitted when the data and/or metadata are changed
    */
-  readonly changed: ISignal<this, void>;
+  readonly changed: ISignal<this, string | void>;
 
   /**
    * The output type.
@@ -49,6 +53,11 @@ export interface IOutputModel extends IRenderMime.IMimeModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput;
+
+  /**
+   * Text fragments to highlight.
+   */
+  highlights?: IRenderMime.IHighlight[];
 }
 
 /**
@@ -108,7 +117,7 @@ export class OutputModel implements IOutputModel {
   /**
    * A signal emitted when the output model changes.
    */
-  get changed(): ISignal<this, void> {
+  get changed(): ISignal<this, 'data' | 'highlights'> {
     return this._changed;
   }
 
@@ -151,6 +160,17 @@ export class OutputModel implements IOutputModel {
   }
 
   /**
+   * Text fragments to highlight.
+   */
+  get highlights(): IRenderMime.IHighlight[] {
+    return this._highlights;
+  }
+  set highlights(fragments: IRenderMime.IHighlight[]) {
+    this._highlights = fragments;
+    this._changed.emit('highlights');
+  }
+
+  /**
    * Set the data associated with the model.
    *
    * #### Notes
@@ -161,12 +181,14 @@ export class OutputModel implements IOutputModel {
     if (options.data) {
       this._updateObservable(this._data, options.data);
       this._rawData = options.data;
+      // Clear highlights
+      this._highlights.length = 0;
     }
     if (options.metadata) {
       this._updateObservable(this._metadata, options.metadata!);
       this._rawMetadata = options.metadata;
     }
-    this._changed.emit(void 0);
+    this._changed.emit('data');
   }
 
   /**
@@ -219,12 +241,13 @@ export class OutputModel implements IOutputModel {
     }
   }
 
-  private _changed = new Signal<this, void>(this);
+  private _changed = new Signal<this, 'data' | 'highlights'>(this);
   private _raw: PartialJSONObject = {};
   private _rawMetadata: ReadonlyPartialJSONObject;
   private _rawData: ReadonlyPartialJSONObject;
   private _data: IObservableJSON;
   private _metadata: IObservableJSON;
+  private _highlights = new Array<IRenderMime.IHighlight>();
 }
 
 /**
