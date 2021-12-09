@@ -102,13 +102,26 @@ describe('rendermime/factories', () => {
       it('should escape inline html', async () => {
         const f = textRendererFactory;
         const source =
-          'There is no text <script>window.x=1</script> but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
+          'That should be <span>plain text</span> <script>window.x=1</script> but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
         const mimeType = 'application/vnd.jupyter.console-text';
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(
-          '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
+          '<pre>That should be &lt;span&gt;plain text&lt;/span&gt; &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
+        );
+      });
+
+      it('should not escape highlighted span', async () => {
+        const f = textRendererFactory;
+        const source =
+          'That should not be <span class="jp-mimeType-highlight">plain text</span> <script>window.x=1</script> but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
+        const mimeType = 'application/vnd.jupyter.console-text';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<pre>That should not be <span class="jp-mimeType-highlight">plain text</span> &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
         );
       });
 

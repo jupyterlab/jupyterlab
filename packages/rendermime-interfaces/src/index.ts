@@ -294,6 +294,21 @@ export namespace IRenderMime {
      * of the widget to update it if and when new data is available.
      */
     renderModel(model: IMimeModel): Promise<void>;
+
+    /**
+     * Highlights text fragment on the widget.
+     *
+     * @param highlights - The highlights to render.
+     *
+     * @returns A promise which resolves when rendering is complete.
+     *
+     * #### Notes
+     * The highlights are sorted from the lowest to the highest position.
+     *
+     * This method may be called multiple times during the lifetime
+     * of the widget to update it if and when new data is available.
+     */
+    renderHighlights?(highlights: IHighlight[]): Promise<void>;
   }
 
   /**
@@ -449,5 +464,20 @@ export namespace IRenderMime {
      * @returns - A promise of the string.
      */
     render(source: string): Promise<string>;
+  }
+
+  /**
+   * The interface for highlighting a text fragment
+   */
+  export interface IHighlight {
+    /**
+     * Text to highlight
+     */
+    readonly text: string;
+
+    /**
+     * Start location of the match (in a text, this is the column)
+     */
+    position: any;
   }
 }

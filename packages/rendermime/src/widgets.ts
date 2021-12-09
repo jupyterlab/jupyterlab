@@ -71,6 +71,22 @@ export abstract class RenderedCommon
   readonly translator: ITranslator;
 
   /**
+   * Highlights text fragment on the widget.
+   *
+   * @param highlights - The highlights to render.
+   *
+   * @returns A promise which resolves when rendering is complete.
+   *
+   * #### Notes
+   * This method may be called multiple times during the lifetime
+   * of the widget to update it if and when new data is available.
+   */
+  renderHighlights(highlights: IRenderMime.IHighlight[]): Promise<void> {
+    /* no-op */
+    return Promise.resolve();
+  }
+
+  /**
    * Render a mime model.
    *
    * @param model - The mime model to render.
@@ -123,10 +139,84 @@ export abstract class RenderedCommon
   }
 }
 
+export abstract class RenderedTextHighlightCommon extends RenderedCommon {
+  /**
+   * Construct a new rendered widget that can highlight text fragment.
+   *
+   * @param options - The options for initializing the widget.
+   */
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
+    this.trusted = false;
+    this.highlights = [];
+  }
+
+  /**
+   * Render a mime model.
+   *
+   * @param model - The mime model to render.
+   *
+   * @returns A promise which resolves when rendering is complete.
+   *
+   * ### Notes
+   * It will clear the highlights. So `renderHighlights` needs to be
+   * recalled.
+   */
+  render(model: IRenderMime.IMimeModel): Promise<void> {
+    this.originalSource = String(model.data[this.mimeType]);
+    this.trusted = model.trusted;
+    this.highlights.length = 0;
+    return this.rerender();
+  }
+
+  /**
+   * Highlights text fragment on the widget.
+   *
+   * @param highlights - The highlights to render.
+   *
+   * @returns A promise which resolves when rendering is complete.
+   */
+  renderHighlights(highlights: IRenderMime.IHighlight[]): Promise<void> {
+    // Empty any existing content in the node from previous renders
+    while (this.node.firstChild) {
+      this.node.removeChild(this.node.firstChild);
+    }
+
+    this.highlights = highlights;
+    return typeof this.originalSource === 'string'
+      ? this.rerender()
+      : Promise.resolve();
+  }
+
+  protected highlight(): string {
+    const src = this.originalSource;
+    let lastEnd = 0;
+    const finalSrc = this.highlights.reduce((agg, highlight) => {
+      const start = highlight.position as number;
+      const end = start + highlight.text.length;
+      const newStep = `${agg}${src.slice(lastEnd, start)}${renderers.highlight(
+        src.slice(start, end)
+      )}`;
+      lastEnd = end;
+      return newStep;
+    }, '');
+    return `${finalSrc}${this.originalSource.slice(lastEnd)}`;
+  }
+
+  /**
+   * Render the model with the highlights
+   */
+  protected abstract rerender(): Promise<void>;
+
+  protected highlights: IRenderMime.IHighlight[];
+  protected originalSource: string;
+  protected trusted: boolean;
+}
+
 /**
  * A common base class for HTML mime renderers.
  */
-export abstract class RenderedHTMLCommon extends RenderedCommon {
+export abstract class RenderedHTMLCommon extends RenderedTextHighlightCommon {
   /**
    * Construct a new rendered HTML common widget.
    *
@@ -169,17 +259,22 @@ export class RenderedHTML extends RenderedHTMLCommon {
   }
 
   /**
-   * Render a mime model.
-   *
-   * @param model - The mime model to render.
-   *
-   * @returns A promise which resolves when rendering is complete.
+   * A message handler invoked on an `'after-attach'` message.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  onAfterAttach(msg: Message): void {
+    if (this.latexTypesetter) {
+      this.latexTypesetter.typeset(this.node);
+    }
+  }
+
+  /**
+   * Render the model with the highlights
+   */
+  protected rerender(): Promise<void> {
     return renderers.renderHTML({
       host: this.node,
-      source: String(model.data[this.mimeType]),
-      trusted: model.trusted,
+      source: this.highlight(),
+      trusted: this.trusted,
       resolver: this.resolver,
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
@@ -187,15 +282,6 @@ export class RenderedHTML extends RenderedHTMLCommon {
       latexTypesetter: this.latexTypesetter,
       translator: this.translator
     });
-  }
-
-  /**
-   * A message handler invoked on an `'after-attach'` message.
-   */
-  onAfterAttach(msg: Message): void {
-    if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
-    }
   }
 }
 
@@ -291,17 +377,22 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
   }
 
   /**
-   * Render a mime model.
-   *
-   * @param model - The mime model to render.
-   *
-   * @returns A promise which resolves when rendering is complete.
+   * A message handler invoked on an `'after-attach'` message.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  onAfterAttach(msg: Message): void {
+    if (this.latexTypesetter) {
+      this.latexTypesetter.typeset(this.node);
+    }
+  }
+
+  /**
+   * Render the model with the highlights
+   */
+  protected rerender(): Promise<void> {
     return renderers.renderMarkdown({
       host: this.node,
-      source: String(model.data[this.mimeType]),
-      trusted: model.trusted,
+      source: this.highlight(),
+      trusted: this.trusted,
       resolver: this.resolver,
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
@@ -310,15 +401,6 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
       markdownParser: this.markdownParser,
       translator: this.translator
     });
-  }
-
-  /**
-   * A message handler invoked on an `'after-attach'` message.
-   */
-  onAfterAttach(msg: Message): void {
-    if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
-    }
   }
 }
 
@@ -369,7 +451,7 @@ export class RenderedSVG extends RenderedCommon {
 /**
  * A widget for displaying plain text and console text.
  */
-export class RenderedText extends RenderedCommon {
+export class RenderedText extends RenderedTextHighlightCommon {
   /**
    * Construct a new rendered text widget.
    *
@@ -381,17 +463,13 @@ export class RenderedText extends RenderedCommon {
   }
 
   /**
-   * Render a mime model.
-   *
-   * @param model - The mime model to render.
-   *
-   * @returns A promise which resolves when rendering is complete.
+   * Render the model with the highlights
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  protected rerender(): Promise<void> {
     return renderers.renderText({
       host: this.node,
       sanitizer: this.sanitizer,
-      source: String(model.data[this.mimeType]),
+      source: this.highlight(),
       translator: this.translator
     });
   }

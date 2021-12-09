@@ -12,6 +12,25 @@ import escape from 'lodash.escape';
 import { removeMath, replaceMath } from './latex';
 
 /**
+ * Class name defining a highlighted text fragment
+ */
+const HIGHLIGHT_CLASS_NAME = 'jp-mimeType-highlight';
+/**
+ * Regex to capture escaped highlighted fragment in plain text
+ */
+const ESCAPED_HIGHLIGHT_SPAN = new RegExp(escape(highlight('(.*?)')), 'g');
+
+/**
+ * Wrap a text fragment in a HTML node for highlighting
+ *
+ * @param toHighlight String to highlight
+ * @returns HTML to be injected to highlight a text fragment
+ */
+export function highlight(toHighlight: string): string {
+  return `<span class="${HIGHLIGHT_CLASS_NAME}">${toHighlight}</span>`;
+}
+
+/**
  * Render HTML into a host node.
  *
  * @param options - The options for rendering.
@@ -1076,6 +1095,10 @@ namespace Private {
     let start = 0;
 
     str = escape(str);
+    // unescape highlighted span
+    str = str.replace(ESCAPED_HIGHLIGHT_SPAN, (substr, match) =>
+      highlight(match)
+    );
 
     str += '\x1b[m'; // Ensure markup for trailing text
     // tslint:disable-next-line
