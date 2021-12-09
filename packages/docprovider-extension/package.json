@@ -38,7 +38,7 @@
     "@jupyterlab/coreutils": "^6.0.0-alpha.1",
     "@jupyterlab/docprovider": "^4.0.0-alpha.1",
     "@jupyterlab/services": "^7.0.0-alpha.1",
-    "@jupyterlab/statedb": "^4.0.0-alpha.1"
+    "@jupyterlab/user": "^4.0.0-alpha.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

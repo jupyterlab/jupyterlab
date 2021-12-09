@@ -19,7 +19,7 @@
       "path": "../services"
     },
     {
-      "path": "../statedb"
+      "path": "../user"
     }
   ]
 }
