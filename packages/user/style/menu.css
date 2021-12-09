@@ -3,8 +3,23 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.lm-MenuBar-item[data-empty='true'],
+.p-MenuBar-item[data-empty='true'] {
+  border: none !important;
+}
+
+.lm-MenuBar-item[data-empty='true']:hover,
+.p-MenuBar-item[data-empty='true']:hover {
+  background: none !important;
+}
+
+.lm-MenuBar-menu[data-empty='true'],
+.p-MenuBar-menu[data-empty='true'] {
+  border: none !important;
+}
+
 .jp-MenuBar-label {
-  margin-left: 25px;
+  margin-left: 30px;
 }
 
 .jp-MenuBar-anonymousIcon span {

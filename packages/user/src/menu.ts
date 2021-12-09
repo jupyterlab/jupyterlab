@@ -34,12 +34,21 @@ export class RendererUserMenu extends MenuBar.Renderer {
     let className = this.createItemClass(data);
     let dataset = this.createItemDataset(data);
     let aria = this.createItemARIA(data);
-    return h.li(
-      { className, dataset, tabindex: '0', onfocus: data.onfocus, ...aria },
-      this._createUserIcon(),
-      this.renderLabel(data),
-      this.renderIcon(data)
-    );
+
+    if ('empty' in dataset && dataset.empty === 'true') {
+      return h.li(
+        { className, dataset, tabindex: '0', onfocus: data.onfocus, ...aria },
+        this._createUserIcon(),
+        this.renderLabel(data)
+      );
+    } else {
+      return h.li(
+        { className, dataset, tabindex: '0', onfocus: data.onfocus, ...aria },
+        this._createUserIcon(),
+        this.renderLabel(data),
+        this.renderIcon(data)
+      );
+    }
   }
 
   /**
@@ -115,6 +124,8 @@ export class UserMenu extends Menu {
     this.title.label = this._user.isReady ? name : '';
     this.title.icon = caretDownIcon;
     this.title.iconClass = 'jp-UserMenu-caretDownIcon';
+    this.title.dataset = { empty: 'true' };
+    this.dataset.empty = 'true';
     this._user.ready.connect(this._updateLabel);
     this._user.changed.connect(this._updateLabel);
   }
@@ -132,6 +143,49 @@ export class UserMenu extends Menu {
     this.title.label = name;
     this.update();
   };
+
+  /**
+   * Insert a menu item into the menu at the specified index.
+   *
+   * @param index - The index at which to insert the item.
+   *
+   * @param options - The options for creating the menu item.
+   *
+   * @returns The menu item added to the menu.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   */
+  insertItem(index: number, options: Menu.IItemOptions): Menu.IItem {
+    this.dataset.empty = 'false';
+    this.title.dataset = { ...this.title.dataset, empty: 'false' };
+    return super.insertItem(index, options);
+  }
+
+  /**
+   * Remove the item at a given index from the menu.
+   *
+   * @param index - The index of the item to remove.
+   *
+   * #### Notes
+   * This is a no-op if the index is out of range.
+   */
+  removeItemAt(index: number): void {
+    super.removeItemAt(index);
+    if (this.items.length === 0) {
+      this.dataset.empty = 'true';
+      this.title.dataset = { ...this.title.dataset, empty: 'true' };
+    }
+  }
+
+  /**
+   * Remove all menu items from the menu.
+   */
+  clearItems(): void {
+    super.clearItems();
+    this.dataset.empty = 'true';
+    this.title.dataset = { ...this.title.dataset, empty: 'true' };
+  }
 }
 
 /**
