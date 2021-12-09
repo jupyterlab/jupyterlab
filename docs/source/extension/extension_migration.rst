@@ -37,6 +37,8 @@ bumped their major version (following semver convention):
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    The ``NotebookPanel._onSave`` method is now ``private``.
+- ``@jupyterlab/shared-models`` from 3.x to 4.x
+  The ``createCellFromType`` functoin is now named ``createCellModelFromSharedType``
 
 JupyterLab 3.0 to 3.1
 ---------------------
