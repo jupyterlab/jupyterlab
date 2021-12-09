@@ -11,6 +11,9 @@ import { Token } from '@lumino/coreutils';
 export const USER = '@jupyterlab/user:userDB';
 
 /**
+ * @experimental
+ * @alpha
+ *
  * The user token.
  *
  * NOTE: Requirer this token in your extension to access the
@@ -29,6 +32,9 @@ export const ICurrentUser = new Token<ICurrentUser>(
 export const IUserMenu = new Token<IUserMenu>('@jupyterlab/user:IUserMenu');
 
 /**
+ * @experimental
+ * @alpha
+ *
  * An interface describing the current user.
  */
 export interface ICurrentUser extends IUser.User {
