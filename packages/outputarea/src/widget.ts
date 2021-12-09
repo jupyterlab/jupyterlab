@@ -94,10 +94,13 @@ export class OutputArea extends Widget {
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
-    this.trimmedOutputModels = new Array<IOutputModel>();
-    this.maxNumberOutputs = options.maxNumberOutputs || 0;
-    this.headEndIndex = this.maxNumberOutputs;
-    for (let i = 0; i < model.length; i++) {
+    this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
+
+    for (
+      let i = 0;
+      i < Math.min(model.length, this._maxNumberOutputs + 1);
+      i++
+    ) {
       const output = model.get(i);
       this._insertOutput(i, output);
     }
@@ -119,22 +122,6 @@ export class OutputArea extends Widget {
    * The rendermime instance used by the widget.
    */
   readonly rendermime: IRenderMimeRegistry;
-
-  /**
-   * The hidden output models.
-   */
-  private trimmedOutputModels: IOutputModel[];
-
-  /*
-   * The maximum outputs to show in the trimmed
-   * output area.
-   */
-  private maxNumberOutputs: number;
-
-  /*
-   * The index for the end of the head in case of trim mode.
-   */
-  private headEndIndex: number;
 
   /**
    * A read-only sequence of the children widgets in the output area.
@@ -203,6 +190,27 @@ export class OutputArea extends Widget {
   }
 
   /**
+   * The maximum number of output items to display on top and bottom of cell output.
+   *
+   * ### Notes
+   * It is set to Infinity if no trim is to be applied.
+   */
+  get maxNumberOutputs(): number {
+    return this._maxNumberOutputs;
+  }
+  set maxNumberOutputs(limit: number) {
+    if (limit <= 0) {
+      console.warn(`OutputArea.maxNumberOutputs must be strictly positive.`);
+      return;
+    }
+    const lastShown = this._maxNumberOutputs;
+    this._maxNumberOutputs = limit;
+    if (lastShown < limit) {
+      this._showTrimmedOutputs(lastShown);
+    }
+  }
+
+  /**
    * Dispose of the resources used by the output area.
    */
   dispose(): void {
@@ -266,7 +274,7 @@ export class OutputArea extends Widget {
 
   /**
    * Update indices in _displayIdMap in response to element remove from model items
-   * *
+   *
    * @param startIndex - The index of first element removed
    *
    * @param count - The number of elements removed from model items
@@ -293,16 +301,45 @@ export class OutputArea extends Widget {
   /**
    * Follow changes on the output model state.
    */
-  protected onStateChanged(sender: IOutputAreaModel): void {
-    this.trimmedOutputModels = new Array<IOutputModel>();
-    for (let i = 0; i < this.model.length; i++) {
-      this._setOutput(i, this.model.get(i));
+  protected onStateChanged(
+    sender: IOutputAreaModel,
+    change: [number, string] | void
+  ): void {
+    if (change) {
+      if (change[0] >= this._maxNumberOutputs) {
+        // Bail early
+        return;
+      }
+      if (change[1] == 'highlights') {
+        const layout = this.layout as PanelLayout;
+        const renderer = layout.widgets[change[0]];
+        const model = this.model.get(change[0]);
+        if (
+          (renderer as IRenderMime.IRenderer).renderHighlights &&
+          model.highlights
+        ) {
+          (renderer as IRenderMime.IRenderer).renderHighlights!(
+            model.highlights
+          );
+        }
+      } else {
+        this._setOutput(change[0], this.model.get(change[0]));
+        this.outputLengthChanged.emit(this.model.length);
+      }
+    } else {
+      for (
+        let i = 0;
+        i < Math.min(this.model.length, this._maxNumberOutputs);
+        i++
+      ) {
+        this._setOutput(i, this.model.get(i));
+      }
     }
     this.outputLengthChanged.emit(this.model.length);
   }
 
   /**
-   * Clear the widget inputs and outputs.
+   * Clear the widget outputs.
    */
   private _clear(): void {
     // Bail if there is no work to do.
@@ -395,10 +432,10 @@ export class OutputArea extends Widget {
    * Update an output in the layout in place.
    */
   private _setOutput(index: number, model: IOutputModel): void {
-    if (index >= this.headEndIndex && this.maxNumberOutputs !== 0) {
-      this.trimmedOutputModels[index - this.headEndIndex] = model;
+    if (index >= this._maxNumberOutputs) {
       return;
     }
+
     const layout = this.layout as PanelLayout;
     const panel = layout.widgets[index] as Panel;
     const renderer = (panel.widgets
@@ -430,52 +467,49 @@ export class OutputArea extends Widget {
    * @param model - The model of the output to be inserted.
    */
   private _insertOutput(index: number, model: IOutputModel): void {
-    if (index === 0) {
-      this.trimmedOutputModels = new Array<IOutputModel>();
+    if (index > this._maxNumberOutputs) {
+      return;
     }
-    if (index === this.maxNumberOutputs && this.maxNumberOutputs !== 0) {
+
+    if (index === this._maxNumberOutputs) {
       // TODO Improve style of the display message.
-      const separatorModel = this.model.contentFactory.createOutputModel({
+      model = this.model.contentFactory.createOutputModel({
         value: {
           output_type: 'display_data',
           data: {
             'text/html': `
               <a style="margin: 10px; text-decoration: none; cursor: pointer;">
                 <pre>Output of this cell has been trimmed on the initial display.</pre>
-                <pre>Displaying the first ${this.maxNumberOutputs} top outputs.</pre>
+                <pre>Displaying the first ${this._maxNumberOutputs} top outputs.</pre>
                 <pre>Click on this message to get the complete output.</pre>
               </a>
               `
           }
         }
       });
-      const onClick = () => this._showTrimmedOutputs();
-      const separator = this.createOutputItem(separatorModel);
-      separator!.node.addEventListener('click', onClick);
-      const layout = this.layout as PanelLayout;
-      layout.insertWidget(this.headEndIndex, separator!);
     }
-    const output = this._createOutput(model);
-    const layout = this.layout as PanelLayout;
-    if (index < this.maxNumberOutputs || this.maxNumberOutputs === 0) {
-      layout.insertWidget(index, output);
-    }
-    if (index >= this.maxNumberOutputs && this.maxNumberOutputs !== 0) {
-      this.trimmedOutputModels.push(model);
-    }
-    if (!this._outputTracker.has(output)) {
-      void this._outputTracker.add(output);
-    }
-  }
 
-  private _createOutput(model: IOutputModel): Widget {
     let output = this.createOutputItem(model);
     if (output) {
       output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
     } else {
       output = new Widget();
     }
-    return output;
+
+    if (!this._outputTracker.has(output)) {
+      void this._outputTracker.add(output);
+    }
+
+    const layout = this.layout as PanelLayout;
+    layout.insertWidget(index, output);
+
+    if (index === this._maxNumberOutputs) {
+      output.node.addEventListener('click', () => {
+        const lastShown = this._maxNumberOutputs;
+        this._maxNumberOutputs = Infinity;
+        this._showTrimmedOutputs(lastShown);
+      });
+    }
   }
 
   /**
@@ -486,15 +520,17 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * Remove the information message related to the trimmed output
-   * and show all previously trimmed outputs.
+   * Dispose information message and show output models from the given
+   * index to maxNumberOutputs
+   *
+   * @param lastShown Starting model index to insert.
    */
-  private _showTrimmedOutputs() {
-    const layout = this.layout as PanelLayout;
-    layout.removeWidgetAt(this.headEndIndex);
-    for (let i = 0; i < this.trimmedOutputModels.length; i++) {
-      const output = this._createOutput(this.trimmedOutputModels[i]);
-      layout.insertWidget(this.headEndIndex + i, output);
+  private _showTrimmedOutputs(lastShown: number) {
+    // Dispose information widget
+    this.widgets[lastShown].dispose();
+
+    for (let idx = lastShown; idx < this.model.length; idx++) {
+      this._insertOutput(idx, this.model.get(idx));
     }
   }
 
@@ -543,19 +579,26 @@ export class OutputArea extends Widget {
       output = new Private.IsolatedRenderer(output);
     }
     Private.currentPreferredMimetype.set(output, mimeType);
-    output.renderModel(model).catch(error => {
-      // Manually append error message to output
-      const pre = document.createElement('pre');
-      pre.textContent = `Javascript Error: ${error.message}`;
-      output.node.appendChild(pre);
+    output
+      .renderModel(model)
+      .then(() => {
+        if (model.highlights?.length) {
+          output.renderHighlights?.call(output, model.highlights);
+        }
+      })
+      .catch(error => {
+        // Manually append error message to output
+        const pre = document.createElement('pre');
+        pre.textContent = `Javascript Error: ${error.message}`;
+        output.node.appendChild(pre);
 
-      // Remove mime-type-specific CSS classes
-      output.node.className = 'lm-Widget jp-RenderedText';
-      output.node.setAttribute(
-        'data-mime-type',
-        'application/vnd.jupyter.stderr'
-      );
-    });
+        // Remove mime-type-specific CSS classes
+        output.node.className = 'lm-Widget jp-RenderedText';
+        output.node.setAttribute(
+          'data-mime-type',
+          'application/vnd.jupyter.stderr'
+        );
+      });
     return output;
   }
 
@@ -640,6 +683,12 @@ export class OutputArea extends Widget {
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
+
+  /**
+   * The maximum outputs to show in the trimmed
+   * output area.
+   */
+  private _maxNumberOutputs: number;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
