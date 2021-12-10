@@ -44,7 +44,7 @@ const notebookConfig = {
   observedBottomMargin: '1000px',
   maxNumberOutputs: 50,
   disableDocumentWideUndoRedo: true,
-  renderingLayout: 'default'
+  renderingLayout: 'default' as 'default' | 'side-by-side'
 };
 
 const options: Notebook.IOptions = {
