@@ -383,7 +383,6 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-search-selected-match-color: black;
   --jp-search-unselected-match-background-color: var(
     --jp-inverse-layout-color0
-    /*can we add search icon here?*/
   );
   --jp-search-unselected-match-color: var(--jp-ui-inverse-font-color0);
 
