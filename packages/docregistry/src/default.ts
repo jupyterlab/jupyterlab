@@ -3,7 +3,7 @@
 
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { Mode } from '@jupyterlab/codemirror';
+//import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IModelDB, IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
@@ -251,8 +251,10 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * Get the preferred kernel language given a file path.
    */
   preferredLanguage(path: string): string {
-    const mode = Mode.findByFileName(path);
-    return mode && mode.mode;
+    // TODO: CM6 migration
+    //const mode = Mode.findByFileName(path);
+    //return mode && mode.mode;
+    return '';
   }
 
   private _isDisposed = false;

@@ -5,7 +5,7 @@ import { Token } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { CodeEditor } from './editor';
 import { IEditorFactoryService } from './factory';
-//import { IEditorMimeTypeService } from './mimetype';
+import { IEditorMimeTypeService } from './mimetype';
 
 /**
  * Code editor services token.
@@ -26,7 +26,7 @@ export interface IEditorServices {
   /**
    * The editor mime type service.
    */
-  //readonly mimeTypeService: IEditorMimeTypeService;
+  readonly mimeTypeService: IEditorMimeTypeService;
 }
 
 /**

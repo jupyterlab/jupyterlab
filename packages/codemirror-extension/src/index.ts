@@ -10,27 +10,22 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  CodeEditor,
-  IEditorServices,
-  IPositionModel,
-  LineCol
-} from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditor,
   editorServices,
-  EditorSyntaxStatus,
-  ICodeMirror,
-  Mode
+  //EditorSyntaxStatus,
+  //ICodeMirror,
+  //Mode
 } from '@jupyterlab/codemirror';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+//import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { /*FileEditor,*/ IEditorTracker } from '@jupyterlab/fileeditor';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
-import CodeMirror from 'codemirror';
+import { findNext, gotoLine } from '@codemirror/search';
 
 /**
  * The command IDs used by the codemirror plugin.
@@ -48,11 +43,11 @@ namespace CommandIDs {
 }
 
 /** The CodeMirror singleton. */
-const codemirrorSingleton: JupyterFrontEndPlugin<ICodeMirror> = {
+/*const codemirrorSingleton: JupyterFrontEndPlugin<ICodeMirror> = {
   id: '@jupyterlab/codemirror-extension:codemirror',
   provides: ICodeMirror,
   activate: activateCodeMirror
-};
+};*/
 
 /**
  * The editor services.
@@ -68,7 +63,7 @@ const services: JupyterFrontEndPlugin<IEditorServices> = {
  */
 const commands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [IEditorTracker, ISettingRegistry, ITranslator, ICodeMirror],
+  requires: [IEditorTracker, ISettingRegistry, ITranslator/*, ICodeMirror*/],
   optional: [IMainMenu],
   activate: activateEditorCommands,
   autoStart: true
@@ -93,13 +88,14 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
       // Automatically disable if statusbar missing
       return;
     }
-    const item = new EditorSyntaxStatus({ commands: app.commands, translator });
+    // TODO: CM6 migration
+    /*const item = new EditorSyntaxStatus({ commands: app.commands, translator });
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
       if (current && tracker.has(current) && item.model) {
-        item.model.editor = (
-          current as IDocumentWidget<FileEditor>
-        ).content.editor;
+        item.model.editor = (current as IDocumentWidget<
+          FileEditor
+        >).content.editor;
       }
     });
     statusBar.registerStatusItem(
@@ -113,9 +109,7 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
           !!tracker.currentWidget &&
           labShell.currentWidget === tracker.currentWidget
       }
-    );
-  }
-};
+    );*/
 
 /**
  * A plugin providing a line/column status item to the application.
@@ -193,8 +187,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
   editorSyntaxStatus,
-  lineColItem,
-  codemirrorSingleton
+  lineColItem/*,
+  codemirrorSingleton*/
 ];
 export default plugins;
 
@@ -207,16 +201,16 @@ const id = commands.id;
  * Set up the editor services.
  */
 function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
-  CodeMirror.prototype.save = () => {
+  /*CodeMirror.prototype.save = () => {
     void app.commands.execute('docmanager:save');
-  };
+  };*/
   return editorServices;
 }
 
 /**
  * Simplest implementation of the CodeMirror singleton provider.
  */
-class CodeMirrorSingleton implements ICodeMirror {
+/*class CodeMirrorSingleton implements ICodeMirror {
   get CodeMirror() {
     return CodeMirror;
   }
@@ -227,14 +221,14 @@ class CodeMirrorSingleton implements ICodeMirror {
       await import('codemirror/keymap/vim.js');
     }
   }
-}
+}*/
 
 /**
  * Set up the CodeMirror singleton.
  */
-function activateCodeMirror(app: JupyterFrontEnd): ICodeMirror {
+/*function activateCodeMirror(app: JupyterFrontEnd): ICodeMirror {
   return new CodeMirrorSingleton();
-}
+}*/
 
 /**
  * Set up the editor widget menu and commands.
@@ -244,7 +238,7 @@ function activateEditorCommands(
   tracker: IEditorTracker,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
-  codeMirror: ICodeMirror,
+  //codeMirror: ICodeMirror,
   mainMenu: IMainMenu | null
 ): void {
   const trans = translator.load('jupyterlab');
@@ -268,29 +262,30 @@ function activateEditorCommands(
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
 
     // Lazy loading of vim mode
-    if (keyMap === 'vim') {
+    // TODO: CM6 migration
+    /*if (keyMap === 'vim') {
       await codeMirror.ensureVimKeymap();
-    }
+    }*/
 
     theme = (settings.get('theme').composite as string | null) || theme;
 
     // Lazy loading of theme stylesheets
     if (theme !== 'jupyter' && theme !== 'default') {
-      const filename =
+      // TODO: CM6
+      /*const filename =
         theme === 'solarized light' || theme === 'solarized dark'
           ? 'solarized'
           : theme;
 
-      await import(`codemirror/theme/${filename}.css`);
+      await import(`codemirror/theme/${filename}.css`);*/
     }
 
     scrollPastEnd =
       (settings.get('scrollPastEnd').composite as boolean | null) ??
       scrollPastEnd;
     styleActiveLine =
-      (settings.get('styleActiveLine').composite as
-        | boolean
-        | CodeMirror.StyleActiveLine) ?? styleActiveLine;
+      (settings.get('styleActiveLine').composite as boolean
+        /*| CodeMirror.StyleActiveLine*/) ?? styleActiveLine;
     styleSelectedText =
       (settings.get('styleSelectedText').composite as boolean) ??
       styleSelectedText;
@@ -409,31 +404,20 @@ function activateEditorCommands(
         return;
       }
       const editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('find');
+      editor.execCommand(findNext);
     },
     isEnabled
   });
 
   commands.addCommand(CommandIDs.goToLine, {
     label: trans.__('Go to Line…'),
-    execute: args => {
+    execute: () => {
       const widget = tracker.currentWidget;
       if (!widget) {
         return;
       }
-      const line = args['line'] as number | undefined;
-      const column = args['column'] as number | undefined;
-
       const editor = widget.content.editor as CodeMirrorEditor;
-      if (line !== undefined || column !== undefined) {
-        editor.setCursorPosition({
-          line: (line ?? 1) - 1,
-          column: (column ?? 1) - 1
-        });
-      } else {
-        editor.execCommand('jumpToLine');
-      }
-      editor.focus();
+      editor.execCommand(gotoLine);
     },
     isEnabled
   });
@@ -446,10 +430,10 @@ function activateEditorCommands(
       const name = args['name'] as string;
       const widget = tracker.currentWidget;
       if (name && widget) {
-        const spec = Mode.findByName(name);
+        /*const spec = Mode.findByName(name);
         if (spec) {
           widget.content.model.mimeType = spec.mime;
-        }
+        }*/
       }
     },
     isEnabled,
@@ -458,15 +442,17 @@ function activateEditorCommands(
       if (!widget) {
         return false;
       }
-      const mime = widget.content.model.mimeType;
+      /*const mime = widget.content.model.mimeType;
       const spec = Mode.findByMIME(mime);
       const name = spec && spec.name;
-      return args['name'] === name;
+      return args['name'] === name;*/
+      return false;
     }
   });
 
   if (mainMenu) {
-    const modeMenu = mainMenu.viewMenu.items.find(
+    // TODO: CM6 migration
+    /*const modeMenu = mainMenu.viewMenu.items.find(
       item =>
         item.type === 'submenu' &&
         item.submenu?.id === 'jp-mainmenu-view-codemirror-theme'
@@ -489,7 +475,7 @@ function activateEditorCommands(
             args: { ...spec } as any // TODO: Casting to `any` until lumino typings are fixed
           });
         });
-    }
+    }*/
     // Add go to line capabilities to the edit menu.
     mainMenu.editMenu.goToLiners.add({
       id: CommandIDs.goToLine,

@@ -7,7 +7,7 @@
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditorFactory } from './factory';
-//import { CodeMirrorMimeTypeService } from './mimetype';
+import { CodeMirrorMimeTypeService } from './mimetype';
 
 export * from './editor';
 export * from './factory';
@@ -22,7 +22,7 @@ export * from './searchprovider';
  */
 export const editorServices: IEditorServices = {
   factoryService: new CodeMirrorEditorFactory(),
-//  mimeTypeService: new CodeMirrorMimeTypeService()
+  mimeTypeService: new CodeMirrorMimeTypeService()
 };
 
 /**

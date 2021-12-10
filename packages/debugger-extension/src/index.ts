@@ -808,10 +808,11 @@ const main: JupyterFrontEndPlugin<void> = {
           if (breakpoint && typeof breakpoint.line !== 'undefined') {
             results.forEach(editor => {
               if (editor instanceof CodeMirrorEditor) {
-                (editor as CodeMirrorEditor).scrollIntoViewCentered({
+                // TODO: CM6
+                /*(editor as CodeMirrorEditor).scrollIntoViewCentered({
                   line: (breakpoint.line as number) - 1,
                   ch: breakpoint.column || 0
-                });
+                });*/
               } else {
                 editor.revealPosition({
                   line: (breakpoint.line as number) - 1,

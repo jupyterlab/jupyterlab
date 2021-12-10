@@ -4,7 +4,9 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../application"
@@ -14,9 +16,6 @@
     },
     {
       "path": "../codemirror"
-    },
-    {
-      "path": "../docregistry"
     },
     {
       "path": "../fileeditor"

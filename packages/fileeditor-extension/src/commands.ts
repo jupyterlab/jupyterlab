@@ -48,6 +48,7 @@ import {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { selectAll } from '@codemirror/commands';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
@@ -870,7 +871,7 @@ export namespace Commands {
         }
 
         const editor = widget.editor as CodeMirrorEditor;
-        editor.execCommand('selectAll');
+        editor.execCommand(selectAll);
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       label: trans.__('Select All')
