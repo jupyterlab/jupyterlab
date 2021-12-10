@@ -17,7 +17,7 @@ import {
   User,
   UserMenu
 } from '@jupyterlab/user';
-import { Menu, MenuBar, Widget } from '@lumino/widgets';
+import { Menu, MenuBar } from '@lumino/widgets';
 
 /**
  * Jupyter plugin providing the ICurrentUser.
@@ -62,10 +62,6 @@ const menuBarPlugin: JupyterFrontEndPlugin<void> = {
     if (PageConfig.getOption('collaborative') !== 'true') {
       return;
     }
-
-    const spacer = new Widget();
-    spacer.id = 'jp-topbar-spacer';
-    shell.add(spacer, 'top', { rank: 900 });
 
     const menuBar = new MenuBar({
       forceItemsPosition: {

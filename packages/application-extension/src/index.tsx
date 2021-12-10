@@ -1047,6 +1047,20 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that adds a spacer widget to the top area.
+ */
+const topSpacer: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:top-spacer',
+  autoStart: true,
+  requires: [ILabShell],
+  activate: (app: JupyterFrontEnd, shell: ILabShell) => {
+    const spacer = new Widget();
+    spacer.id = 'jp-topbar-spacer';
+    shell.add(spacer, 'top', { rank: 900 });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1064,7 +1078,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   info,
   paths,
   propertyInspector,
-  JupyterLogo
+  JupyterLogo,
+  topSpacer
 ];
 
 export default plugins;
