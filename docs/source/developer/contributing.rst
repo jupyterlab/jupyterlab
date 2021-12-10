@@ -86,11 +86,11 @@ locked issue, please open a new issue referencing the locked issue.
 New issues are subject to triage. A developer will triage your new issue 
 by doing the following:
 
-1. Read the item
+1. Read the issue
 2. Search the existing issues and mark it as a duplicate if necessary
 3. If additional information is required, add a comment requesting it
-4. If the item is ready to be worked on, assign it to a milestone
-5. Apply appropriate labels to the item (see examples below)
+4. If the issue is ready to be worked on, assign it to a milestone
+5. Apply appropriate labels to the issue (see examples below)
 
 You may start to work on your issue as soon as you file it. Please 
 work with a triager if they have any questions about your issue so that 
@@ -115,8 +115,8 @@ For a **feature request**:
 * Description of the proposed solution
 * Additional context
 
-**The item should represent real, relevant, feasible work**. In short, if a 
-knowledgeable person were to be assigned this item, they would be able to
+**The issue should represent real, relevant, feasible work**. In short, if a 
+knowledgeable person were to be assigned this issue, they would be able to
 complete it with a reasonable amount of effort and assistance, and it
 furthers the goals of the Jupyter project.
 
@@ -124,10 +124,10 @@ furthers the goals of the Jupyter project.
 * Bugs represent valid expectations for use of Jupyter products and services.
 * Expectations for security, performance, accessibility, and localization match
   generally-accepted norms in the community that uses Jupyter products.
-* The item represents work that one developer can commit to owning, even if 
-  they collaborate with other developers for feedback. Excessively large items 
-  should be split into multiple items, each triaged individually, or into 
-  `team-compass <https://github.com/jupyterlab/team-compass>` items to discuss
+* The issue represents work that one developer can commit to owning, even if 
+  they collaborate with other developers for feedback. Excessively large issues 
+  should be split into multiple issues, each triaged individually, or into 
+  `team-compass <https://github.com/jupyterlab/team-compass>` issues to discuss
   more substantive changes.
 
 Labels Used by Triagers
@@ -137,20 +137,20 @@ A bot applies the ``status: Needs Triage`` label to all new bugs and
 enhancement requests as they are filed.
 
 On a regular basis, Jupyter contributors (triage reviewers or triagers)
-review JupyterLab items tagged
+review JupyterLab issues tagged
 with ``status: Needs Triage``, starting with the oldest, and determine 
 whether they meet the definition of ready.
 
-Once triaged, if the item is ready, the reviewer removes the 
+Once triaged, if the issue is ready, the reviewer removes the 
 ``status: Needs Triage`` label; no additional label is required. If there 
-is not enough information in the item as filed, the triage reviewer applies
+is not enough information in the issue as filed, the triage reviewer applies
 the ``status: Needs Info`` label and leaves ``status: Needs Triage`` in place.
-If an item has remained in ``status: Needs Info`` for more than 14 days 
+If an issue has remained in ``status: Needs Info`` for more than 14 days 
 without any follow-up communication, the reviewer should apply 
-``status: Blocked``. A blocked item should be closed after another 14 days
+``status: Blocked``. A blocked issue should be closed after another 14 days
 pass without a reply that unblocks it.
 
-Our expectation is that every new item should be examined within a week of
+Our expectation is that every new issue should be examined within a week of
 its creation.
 
 Tagging Issues with Labels
