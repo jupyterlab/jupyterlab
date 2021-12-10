@@ -36,10 +36,10 @@
   },
   "dependencies": {
     "@jupyterlab/statedb": "^3.3.4",
-    "@lumino/commands": "^1.12.0",
-    "@lumino/coreutils": "^1.5.3",
-    "@lumino/disposable": "^1.4.3",
-    "@lumino/signaling": "^1.4.3",
+    "@lumino/commands": "^1.19.0",
+    "@lumino/coreutils": "^1.11.0",
+    "@lumino/disposable": "^1.10.0",
+    "@lumino/signaling": "^1.10.0",
     "ajv": "^6.12.3",
     "json5": "^2.1.1"
   },

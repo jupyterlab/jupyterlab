@@ -41,9 +41,9 @@
     "@jupyterlab/docregistry": "^3.3.4",
     "@jupyterlab/rendermime": "^3.3.4",
     "@jupyterlab/translation": "^3.3.4",
-    "@lumino/coreutils": "^1.5.3",
-    "@lumino/messaging": "^1.4.3",
-    "@lumino/widgets": "^1.19.0"
+    "@lumino/coreutils": "^1.11.0",
+    "@lumino/messaging": "^1.10.0",
+    "@lumino/widgets": "^1.30.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
