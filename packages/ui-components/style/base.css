@@ -169,11 +169,15 @@ input::placeholder {
 }
 
 .jp-InputGroupAction {
+  background-color: var(--jp-brand-color1);
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 0px;
+  right: 0px;
+  padding: 7px;
+}
 
-  padding: 6px;
+.jp-InputGroupAction .jp-icon3[fill] {
+  fill: var(--jp-layout-color0);
 }
 
 .jp-HTMLSelect.jp-DefaultStyle select {
