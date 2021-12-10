@@ -50,6 +50,11 @@ import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
+ * Default context menu item rank
+ */
+export const DEFAULT_CONTEXT_ITEM_RANK = 100;
+
+/**
  * The command IDs used by the application plugin.
  */
 namespace CommandIDs {
@@ -398,7 +403,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
 
     function updateTreePath(treePath: string) {
       // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-      treeResolver.paths.then(() => {
+      void treeResolver.paths.then(() => {
         _defaultBrowserTreePath = treePath;
         if (!_docTreePath) {
           const url = PageConfig.getUrl({ treePath });
@@ -445,7 +450,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     });
 
     // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-    treeResolver.paths.then(() => {
+    void treeResolver.paths.then(() => {
       // Watch the path of the current widget in the main area and update the page
       // URL to reflect the change.
       app.shell.currentPathChanged.connect((_, args) => {
@@ -1064,11 +1069,19 @@ namespace Private {
     const settings = await registry.load(pluginId);
 
     const contextItems: ISettingRegistry.IContextMenuItem[] =
-      JSONExt.deepCopy(settings.composite.contextMenu as any) ?? [];
+      (settings.composite.contextMenu as any) ?? [];
 
     // Create menu item for non-disabled element
     SettingRegistry.filterDisabledItems(contextItems).forEach(item => {
-      MenuFactory.addContextItem(item, contextMenu, menuFactory);
+      MenuFactory.addContextItem(
+        {
+          // We have to set the default rank because Lumino is sorting the visible items
+          rank: DEFAULT_CONTEXT_ITEM_RANK,
+          ...item
+        },
+        contextMenu,
+        menuFactory
+      );
     });
 
     settings.changed.connect(() => {
@@ -1102,7 +1115,15 @@ namespace Private {
                 false
               ) ?? [];
             SettingRegistry.filterDisabledItems(toAdd).forEach(item => {
-              MenuFactory.addContextItem(item, contextMenu, menuFactory);
+              MenuFactory.addContextItem(
+                {
+                  // We have to set the default rank because Lumino is sorting the visible items
+                  rank: DEFAULT_CONTEXT_ITEM_RANK,
+                  ...item
+                },
+                contextMenu,
+                menuFactory
+              );
             });
           }
         }
