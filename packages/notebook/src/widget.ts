@@ -355,7 +355,7 @@ export class StaticNotebook extends Widget {
   }
   set renderingLayout(value: 'default' | 'side-by-side' | undefined) {
     this._renderingLayout = value;
-    if (this._renderingLayout == 'side-by-side') {
+    if (this._renderingLayout === 'side-by-side') {
       this.node.classList.add(SIDE_BY_SIDE_CLASS);
     } else {
       this.node.classList.remove(SIDE_BY_SIDE_CLASS);
