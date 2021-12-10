@@ -35,20 +35,15 @@ export class RendererUserMenu extends MenuBar.Renderer {
     let dataset = this.createItemDataset(data);
     let aria = this.createItemARIA(data);
 
-    if ('empty' in dataset && dataset.empty === 'true') {
-      return h.li(
-        { className, dataset, tabindex: '0', onfocus: data.onfocus, ...aria },
-        this._createUserIcon(),
-        this.renderLabel(data)
-      );
-    } else {
-      return h.li(
-        { className, dataset, tabindex: '0', onfocus: data.onfocus, ...aria },
-        this._createUserIcon(),
-        this.renderLabel(data),
-        this.renderIcon(data)
-      );
+    const children = [this._createUserIcon(), this.renderLabel(data)];
+    if (dataset.empty !== 'true') {
+      children.push(this.renderIcon(data));
     }
+
+    return h.li(
+      { className, dataset, tabindex: '0', onfocus: data.onfocus, ...aria },
+      ...children
+    );
   }
 
   /**
