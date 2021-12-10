@@ -31,7 +31,10 @@
 */
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ITextSearchMatch } from '@jupyterlab/documentsearch';
+import {
+  IBaseSearchProvider,
+  ITextSearchMatch
+} from '@jupyterlab/documentsearch';
 import { ObservableList } from '@jupyterlab/observables';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as CodeMirror from 'codemirror';
@@ -39,15 +42,17 @@ import { CodeMirrorEditor } from './editor';
 
 type MatchMap = { [key: number]: { [key: number]: ITextSearchMatch } };
 
-export class CodeMirrorSearchProvider {
+export class CodeMirrorSearchProvider implements IBaseSearchProvider {
+  constructor(editor: CodeMirrorEditor) {
+    this.editor = editor;
+  }
   /**
    * Initialize the search using a CodeMirrorEditor object.
    */
-  async startQueryCodeMirror(
-    query: RegExp,
-    searchTarget: CodeMirrorEditor
-  ): Promise<ITextSearchMatch[]> {
-    this._cm = searchTarget;
+  async startQuery(query: RegExp): Promise<void> {
+    if (!this.editor) {
+      return Promise.resolve();
+    }
     return this._startQuery(query, false);
   }
 
@@ -58,13 +63,13 @@ export class CodeMirrorSearchProvider {
   private async _startQuery(
     query: RegExp,
     refreshOverlay: boolean = true
-  ): Promise<ITextSearchMatch[]> {
+  ): Promise<void> {
     // no point in removing overlay in the middle of the search
     await this.endQuery(false);
 
     this._query = query;
 
-    CodeMirror.on(this._cm.doc, 'change', this._onDocChanged.bind(this));
+    CodeMirror.on(this.editor.doc, 'change', this._onDocChanged.bind(this));
     if (refreshOverlay) {
       this._refreshOverlay();
     }
@@ -72,16 +77,10 @@ export class CodeMirrorSearchProvider {
 
     const matches = this._parseMatchesFromState();
     if (matches.length === 0) {
-      return [];
+      return Promise.resolve();
     }
-    if (!this.isSubProvider) {
-      const cursorMatch = this._findNext(false);
-      const match =
-        cursorMatch &&
-        this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-      this._currentMatch = match;
-    }
-    return matches;
+
+    return Promise.resolve();
   }
 
   /**
@@ -96,19 +95,19 @@ export class CodeMirrorSearchProvider {
     this._currentMatch = null;
 
     if (removeOverlay) {
-      this._cm.removeOverlay(this._overlay);
+      this.editor.removeOverlay(this._overlay);
     }
-    const from = this._cm.getCursor('from');
-    const to = this._cm.getCursor('to');
+    const from = this.editor.getCursor('from');
+    const to = this.editor.getCursor('to');
     // Setting a reverse selection to allow search-as-you-type to maintain the
     // current selected match.  See comment in _findNext for more details.
     if (from !== to) {
-      this._cm.setSelection({
+      this.editor.setSelection({
         start: this._toEditorPos(to),
         end: this._toEditorPos(from)
       });
     }
-    CodeMirror.off(this._cm.doc, 'change', this._onDocChanged.bind(this));
+    CodeMirror.off(this.editor.doc, 'change', this._onDocChanged.bind(this));
   }
 
   /**
@@ -118,7 +117,7 @@ export class CodeMirrorSearchProvider {
    */
   async endSearch(): Promise<void> {
     if (!this.isSubProvider) {
-      this._cm.focus();
+      this.editor.focus();
     }
     return this.endQuery();
   }
@@ -163,9 +162,9 @@ export class CodeMirrorSearchProvider {
     // replace it.  Otherwise, just select the next match after the cursor.
     let replaceOccurred = false;
     if (this._currentMatchIsSelected()) {
-      const cursor = this._cm.getSearchCursor(
+      const cursor = this.editor.getSearchCursor(
         this._query,
-        this._cm.getCursor('from'),
+        this.editor.getCursor('from'),
         !this._query.ignoreCase
       );
       if (!cursor.findNext()) {
@@ -186,8 +185,8 @@ export class CodeMirrorSearchProvider {
   async replaceAllMatches(newText: string): Promise<boolean> {
     let replaceOccurred = false;
     return new Promise((resolve, _) => {
-      this._cm.operation(() => {
-        const cursor = this._cm.getSearchCursor(
+      this.editor.operation(() => {
+        const cursor = this.editor.getSearchCursor(
           this._query,
           undefined,
           !this._query.ignoreCase
@@ -249,13 +248,6 @@ export class CodeMirrorSearchProvider {
    */
   readonly isReadOnly = false;
 
-  clearSelection(): void {
-    return undefined;
-  }
-
-  get editor(): CodeMirrorEditor {
-    return this._cm;
-  }
   /**
    * Set whether or not the CodemirrorSearchProvider will wrap to the beginning
    * or end of the document on invocations of highlightNext or highlightPrevious, respectively
@@ -272,11 +264,11 @@ export class CodeMirrorSearchProvider {
   }
 
   private _refreshOverlay() {
-    this._cm.operation(() => {
+    this.editor.operation(() => {
       // clear search first
-      this._cm.removeOverlay(this._overlay);
+      this.editor.removeOverlay(this._overlay);
       this._overlay = this._getSearchOverlay();
-      this._cm.addOverlay(this._overlay);
+      this.editor.addOverlay(this._overlay);
       this._changed.emit(undefined);
     });
   }
@@ -297,9 +289,9 @@ export class CodeMirrorSearchProvider {
   private _setInitialMatches(query: RegExp) {
     this._matchState = {};
 
-    const start = CodeMirror.Pos(this._cm.doc.firstLine(), 0);
-    const end = CodeMirror.Pos(this._cm.doc.lastLine());
-    const content = this._cm.doc.getRange(start, end);
+    const start = CodeMirror.Pos(this.editor.doc.firstLine(), 0);
+    const end = CodeMirror.Pos(this.editor.doc.lastLine());
+    const content = this.editor.doc.getRange(start, end);
     const lines = content.split('\n');
     const totalMatchIndex = 0;
     lines.forEach((line, lineNumber) => {
@@ -387,7 +379,7 @@ export class CodeMirrorSearchProvider {
   }
 
   private _findNext(reverse: boolean): Private.ICodeMirrorMatch | null {
-    return this._cm.operation(() => {
+    return this.editor.operation(() => {
       const caseSensitive = this._query.ignoreCase;
 
       // In order to support search-as-you-type, we needed a way to allow the first
@@ -403,9 +395,9 @@ export class CodeMirrorSearchProvider {
       // the search always proceeds from the 'anchor' position, which is at the 'from'.
 
       const cursorToGet = reverse ? 'anchor' : 'head';
-      const lastPosition = this._cm.getCursor(cursorToGet);
+      const lastPosition = this.editor.getCursor(cursorToGet);
       const position = this._toEditorPos(lastPosition);
-      let cursor: CodeMirror.SearchCursor = this._cm.getSearchCursor(
+      let cursor: CodeMirror.SearchCursor = this.editor.getSearchCursor(
         this._query,
         lastPosition,
         !caseSensitive
@@ -413,16 +405,16 @@ export class CodeMirrorSearchProvider {
       if (!cursor.find(reverse)) {
         // if we don't want to loop, no more matches found, reset the cursor and exit
         if (this.isSubProvider) {
-          this._cm.setCursorPosition(position, { scroll: false });
+          this.editor.setCursorPosition(position, { scroll: false });
           this._currentMatch = null;
           return null;
         }
 
         // if we do want to loop, try searching from the bottom/top
         const startOrEnd = reverse
-          ? CodeMirror.Pos(this._cm.lastLine())
-          : CodeMirror.Pos(this._cm.firstLine(), 0);
-        cursor = this._cm.getSearchCursor(
+          ? CodeMirror.Pos(this.editor.lastLine())
+          : CodeMirror.Pos(this.editor.firstLine(), 0);
+        cursor = this.editor.getSearchCursor(
           this._query,
           startOrEnd,
           !caseSensitive
@@ -444,8 +436,8 @@ export class CodeMirrorSearchProvider {
         }
       };
 
-      this._cm.setSelection(selRange);
-      this._cm.scrollIntoView(
+      this.editor.setSelection(selRange);
+      this.editor.scrollIntoView(
         {
           from: fromPos,
           to: toPos
@@ -487,7 +479,7 @@ export class CodeMirrorSearchProvider {
     if (!this._currentMatch) {
       return false;
     }
-    const currentSelection = this._cm.getSelection();
+    const currentSelection = this.editor.getSelection();
     const currentSelectionLength =
       currentSelection.end.column - currentSelection.start.column;
     const selectionIsOneLine =
@@ -500,8 +492,8 @@ export class CodeMirrorSearchProvider {
     );
   }
 
+  protected editor: CodeMirrorEditor;
   private _query: RegExp;
-  private _cm: CodeMirrorEditor;
   private _currentMatch: ITextSearchMatch | null;
   private _matchState: MatchMap = {};
   private _changed = new Signal<this, void>(this);

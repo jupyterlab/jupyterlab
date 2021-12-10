@@ -220,20 +220,9 @@ export interface IMimeTypeSearchEngine {
   search(query: RegExp, data: any): Promise<ISearchMatch[]>;
 }
 
-export interface ISearchProvider<T extends Widget = Widget> {
+export interface IBaseSearchProvider {
   /**
-   * Get an initial query value if applicable so that it can be entered
-   * into the search box as an initial query
-   *
-   * @param searchTarget The widget to be searched
-   *
-   * @returns Initial value used to populate the search box.
-   */
-  getInitialQuery(searchTarget: T): string;
-
-  /**
-   * Initialize the search using the provided options.  Should update the UI
-   * to highlight all matches and "select" whatever the first match should be.
+   * Initialize the search using the provided options.
    *
    * @param query A RegExp to be use to perform the search
    * @param searchTarget The widget to be searched
@@ -241,11 +230,7 @@ export interface ISearchProvider<T extends Widget = Widget> {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  startQuery(
-    query: RegExp,
-    searchTarget: T,
-    filters: IFiltersType
-  ): Promise<void>;
+  startQuery(query: RegExp, filters: IFiltersType): Promise<void>;
 
   /**
    * Clears state of a search provider to prepare for startQuery to be called
@@ -257,26 +242,22 @@ export interface ISearchProvider<T extends Widget = Widget> {
   endQuery(): Promise<void>;
 
   /**
-   * Resets UI state as it was before the search process began. Cleans up and
-   * disposes of all internal state.
-   *
-   * @returns A promise that resolves when all state has been cleaned up.
-   */
-  endSearch(): Promise<void>;
-
-  /**
    * Move the current match indicator to the next match.
+   *
+   * @param loop Whether to loop within the matches list.
    *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightNext(): Promise<ISearchMatch | undefined>;
+  highlightNext(loop?: boolean): Promise<ISearchMatch | undefined>;
 
   /**
    * Move the current match indicator to the previous match.
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightPrevious(): Promise<ISearchMatch | undefined>;
+  highlightPrevious(loop?: boolean): Promise<ISearchMatch | undefined>;
 
   /**
    * Replace the currently selected match with the provided text
@@ -295,7 +276,7 @@ export interface ISearchProvider<T extends Widget = Widget> {
   /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
-  readonly changed: ISignal<ISearchProvider<T>, void>;
+  readonly changed: ISignal<IBaseSearchProvider, void>;
 
   /**
    * The current index of the selected match.
@@ -306,6 +287,34 @@ export interface ISearchProvider<T extends Widget = Widget> {
    * The number of matches.
    */
   readonly matchesSize: number | null;
+}
+
+export interface ISearchProvider<T extends Widget = Widget>
+  extends IBaseSearchProvider {
+  /**
+   * Get an initial query value if applicable so that it can be entered
+   * into the search box as an initial query
+   *
+   * @param searchTarget The widget to be searched
+   *
+   * @returns Initial value used to populate the search box.
+   */
+  getInitialQuery(searchTarget: T): string;
+
+  /**
+   * Initialize the search state with the given target.
+   *
+   * @param searchTarget The widget to be searched
+   */
+  startSearch(searchTarget: T): void;
+
+  /**
+   * Reset the target search state as it was before the search process began.
+   * Cleans up and disposes of all internal state.
+   *
+   * @returns A promise that resolves when all state have been cleaned up.
+   */
+  endSearch(): Promise<void>;
 
   /**
    * Set to true if the widget under search is read-only, false

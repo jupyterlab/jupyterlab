@@ -27,9 +27,18 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: CSVDocumentWidget): any {
+  getInitialQuery(searchTarget: CSVDocumentWidget): string {
     // CSV Viewer does not support selection
-    return null;
+    return '';
+  }
+
+  /**
+   * Initialize the search state with the given target.
+   *
+   * @param searchTarget The widget to be searched
+   */
+  startSearch(searchTarget: CSVDocumentWidget): void {
+    this._target = searchTarget;
   }
 
   /**
@@ -41,10 +50,12 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  startQuery(query: RegExp, searchTarget: CSVDocumentWidget): Promise<void> {
-    this._target = searchTarget;
+  startQuery(query: RegExp): Promise<void> {
+    if (!this._target) {
+      return Promise.resolve();
+    }
     this._query = query;
-    searchTarget.content.searchService.find(query);
+    this._target.content.searchService.find(query);
 
     return Promise.resolve();
   }

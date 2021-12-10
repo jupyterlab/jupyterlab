@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IHTMLSearchMatch, ISearchProvider } from '../tokens';
+import { IHTMLSearchMatch } from '../tokens';
+import { SearchProvider } from '../searchprovider';
 
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
@@ -122,17 +122,7 @@ export class HTMLSearchEngine {
   }
 }
 
-export class GenericSearchProvider implements ISearchProvider<Widget> {
-  /**
-   * Get an initial query value if applicable so that it can be entered
-   * into the search box as an initial query
-   *
-   * @returns Initial value used to populate the search box.
-   */
-  getInitialQuery(searchTarget: Widget): string {
-    return '';
-  }
-
+export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
@@ -143,18 +133,16 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  async startQuery(
-    query: RegExp,
-    searchTarget: Widget,
-    filters = {}
-  ): Promise<void> {
+  async startQuery(query: RegExp, filters = {}): Promise<void> {
+    if (!this.widget) {
+      return Promise.resolve();
+    }
+
     // No point in removing overlay in the middle of the search
     await this.endQuery(false);
-
-    this._widget = searchTarget;
     this._query = query;
 
-    const matches = await HTMLSearchEngine.search(query, this._widget.node);
+    const matches = await HTMLSearchEngine.search(query, this.widget.node);
 
     // Transform the DOM
     /*
@@ -198,7 +186,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     }
     // Watch for future changes:
     this._mutationObserver.observe(
-      this._widget.node,
+      this.widget.node,
       // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserverInit
       {
         attributes: false,
@@ -328,13 +316,6 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
   }
 
   /**
-   * Signal indicating that something in the search has changed, so the UI should update
-   */
-  get changed(): ISignal<this, void> {
-    return this._changed;
-  }
-
-  /**
    * The current index of the selected match.
    */
   get currentMatchIndex(): number | null {
@@ -372,10 +353,6 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
    */
   readonly isReadOnly = true;
 
-  clearSelection(): void {
-    return;
-  }
-
   /**
    * Set whether or not this will wrap to the beginning
    * or end of the document on invocations of highlightNext or highlightPrevious, respectively
@@ -387,18 +364,16 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     observer: MutationObserver
   ) {
     // This is typically cheap, but we do not control the rate of change or size of the output
-    await this.startQuery(this._query, this._widget);
-    this._changed.emit(undefined);
+    await this.startQuery(this._query);
+    this.changed.emit(undefined);
   }
 
   private _query: RegExp;
-  private _widget: Widget;
   private _currentMatchIndex: number | null;
   private _matches: IHTMLSearchMatch[] = [];
   private _mutationObserver: MutationObserver = new MutationObserver(
     this._onWidgetChanged.bind(this)
   );
-  private _changed = new Signal<this, void>(this);
   private _spanNodes = new Array<HTMLSpanElement>();
 }
 

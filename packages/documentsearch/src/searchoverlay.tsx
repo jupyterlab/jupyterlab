@@ -343,7 +343,7 @@ class SearchOverlay extends React.Component<
   constructor(props: ISearchOverlayProps) {
     super(props);
     this.translator = props.translator || nullTranslator;
-    this.state = props.overlayState;
+    this.state = { ...props.overlayState };
     this.replaceEntryRef = React.createRef();
     this._debouncedStartSearch = new Debouncer(() => {
       this._executeSearch(true, this.state.searchText);

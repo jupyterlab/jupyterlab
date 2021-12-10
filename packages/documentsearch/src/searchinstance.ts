@@ -26,6 +26,8 @@ export class SearchInstance implements IDisposable {
     const initialQuery = this._activeProvider.getInitialQuery(this._widget);
     this._displayState.searchText = initialQuery || '';
 
+    this._activeProvider.startSearch(this._widget);
+
     this._searchWidget = createSearchOverlay({
       widgetChanged: this._displayUpdateSignal,
       overlayState: this._displayState,
@@ -52,12 +54,6 @@ export class SearchInstance implements IDisposable {
       this._widget.activate();
       this.dispose();
     });
-
-    // TODO: this does not update if the toolbar changes height.
-    if (this._widget instanceof MainAreaWidget) {
-      // Offset the position of the search widget to not cover the toolbar.
-      this._searchWidget.node.style.top = `${this._widget.toolbar.node.clientHeight}px`;
-    }
 
     this._displaySearchWidget();
   }
@@ -136,7 +132,7 @@ export class SearchInstance implements IDisposable {
     }
     this._displayState.query = query;
     this._displayState.filters = filters;
-    await this._activeProvider.startQuery(query, this._widget, filters);
+    await this._activeProvider.startQuery(query, filters);
     this.updateIndices();
 
     // this signal should get injected when the widget is
@@ -196,7 +192,13 @@ export class SearchInstance implements IDisposable {
    */
   _displaySearchWidget(): void {
     if (!this._searchWidget.isAttached) {
-      Widget.attach(this._searchWidget, this._widget.node);
+      Widget.attach(
+        this._searchWidget,
+        this._widget instanceof MainAreaWidget
+          ? // Offset the position of the search widget to not cover the toolbar nor the content header.
+            this._widget.content.node
+          : this._widget.node
+      );
     }
   }
 

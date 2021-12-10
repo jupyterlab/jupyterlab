@@ -40,21 +40,13 @@ export class FileEditorSearchProvider
   }
 
   /**
-   * Initialize the search using the provided options.  Should update the UI
-   * to highlight all matches and "select" whatever the first match should be.
+   * Initialize the search state with the given target.
    *
-   * @param query A RegExp to be use to perform the search
    * @param searchTarget The widget to be searched
-   * @param filters Filter parameters to pass to provider
    *
-   * @returns A promise that resolves with a list of all matches
+   * @returns A promise that resolves when search state is initialized.
    */
-  async startQuery(
-    query: RegExp,
-    searchTarget: FileEditorPanel,
-    filters = {}
-  ): Promise<void> {
-    const cm = searchTarget.content.editor as CodeMirrorEditor;
-    await this.startQueryCodeMirror(query, cm);
+  startSearch(searchTarget: FileEditorPanel): void {
+    this.editor = searchTarget.content.editor as CodeMirrorEditor;
   }
 }
