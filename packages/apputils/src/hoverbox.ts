@@ -27,7 +27,7 @@ export namespace HoverBox {
      * coordinate position, which can be retrieved via calling the
      * `getCoordinateForPosition` method.
      */
-    anchor: ClientRect;
+    anchor: DOMRect;
 
     /**
      * The node that hosts the anchor.

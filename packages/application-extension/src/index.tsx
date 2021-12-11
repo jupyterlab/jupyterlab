@@ -50,6 +50,11 @@ import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
+ * Default context menu item rank
+ */
+export const DEFAULT_CONTEXT_ITEM_RANK = 100;
+
+/**
  * The command IDs used by the application plugin.
  */
 namespace CommandIDs {
@@ -911,9 +916,21 @@ const busy: JupyterFrontEndPlugin<void> = {
  */
 const shell: JupyterFrontEndPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
-  activate: (app: JupyterFrontEnd) => {
+  optional: [ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry | null
+  ) => {
     if (!(app.shell instanceof LabShell)) {
       throw new Error(`${shell.id} did not find a LabShell instance.`);
+    }
+    if (settingRegistry) {
+      settingRegistry.load(shell.id).then(settings => {
+        (app.shell as LabShell).updateConfig(settings.composite);
+        settings.changed.connect(() => {
+          (app.shell as LabShell).updateConfig(settings.composite);
+        });
+      });
     }
     return app.shell;
   },
@@ -1171,11 +1188,19 @@ namespace Private {
     const settings = await registry.load(pluginId);
 
     const contextItems: ISettingRegistry.IContextMenuItem[] =
-      JSONExt.deepCopy(settings.composite.contextMenu as any) ?? [];
+      (settings.composite.contextMenu as any) ?? [];
 
     // Create menu item for non-disabled element
     SettingRegistry.filterDisabledItems(contextItems).forEach(item => {
-      MenuFactory.addContextItem(item, contextMenu, menuFactory);
+      MenuFactory.addContextItem(
+        {
+          // We have to set the default rank because Lumino is sorting the visible items
+          rank: DEFAULT_CONTEXT_ITEM_RANK,
+          ...item
+        },
+        contextMenu,
+        menuFactory
+      );
     });
 
     settings.changed.connect(() => {
@@ -1209,7 +1234,15 @@ namespace Private {
                 false
               ) ?? [];
             SettingRegistry.filterDisabledItems(toAdd).forEach(item => {
-              MenuFactory.addContextItem(item, contextMenu, menuFactory);
+              MenuFactory.addContextItem(
+                {
+                  // We have to set the default rank because Lumino is sorting the visible items
+                  rank: DEFAULT_CONTEXT_ITEM_RANK,
+                  ...item
+                },
+                contextMenu,
+                menuFactory
+              );
             });
           }
         }

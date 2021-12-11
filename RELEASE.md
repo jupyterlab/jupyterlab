@@ -133,6 +133,8 @@ that JS package:
 
 `jlpm bump:js:major [...packages]`
 
+**NOTE** You should rebase before running `jlpm bump:js:major` to avoid a cascade of merge conflicts.
+
 Results:
 
 - Python package is not affected.

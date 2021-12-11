@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   Completer,
   CompleterModel,
@@ -16,7 +15,7 @@ function makeState(text: string): Completer.ITextState {
     lineHeight: 0,
     charWidth: 0,
     line: 0,
-    coords: { left: 0, right: 0, top: 0, bottom: 0 } as CodeEditor.ICoordinate,
+    coords: { left: 0, right: 0, top: 0, bottom: 0 },
     text
   };
 }
