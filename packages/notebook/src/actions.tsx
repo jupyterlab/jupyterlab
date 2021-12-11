@@ -873,7 +873,7 @@ export namespace NotebookActions {
       notebook
     );
     headingLevel = headingLevel ? headingLevel : 1;
-    let cellIdxOfHeadingBelow = Private.Headings.findHeadingBelow(
+    let cellIdxOfHeadingBelow = Private.Headings.findLowerEqualLevelParentHeadingBelow(
       notebook.activeCell,
       notebook,
       true
@@ -942,7 +942,7 @@ export namespace NotebookActions {
     if (hInfo.isHeading && hInfo.collapsed) {
       setHeadingCollapse(notebook.activeCell, false, notebook);
     } else {
-      let targetHeadingCellIdx = Private.Headings.findHeadingBelow(
+      let targetHeadingCellIdx = Private.Headings.findLowerEqualLevelParentHeadingBelow(
         notebook.activeCell,
         notebook,
         true // return index of heading cell
@@ -2486,16 +2486,23 @@ namespace Private {
      *
      * @returns the (index | Cell object) of the found heading or (-1 | null) if no heading found.
      */
-    export function findHeadingBelow(
+    export function findLowerEqualLevelParentHeadingBelow(
       baseCell: Cell,
       notebook: Notebook,
       returnIdx = false
     ): number | Cell | null {
+      let baseHeadingLevel = Private.Headings.determineHeadingLevel(
+        baseCell,
+        notebook
+      );
       let cellIdx = notebook.widgets.indexOf(baseCell) + 1;
       while (cellIdx < notebook.widgets.length) {
         let cell = notebook.widgets[cellIdx];
         let headingInfo = NotebookActions.getHeadingInfo(cell);
-        if (headingInfo.isHeading) {
+        if (
+          headingInfo.isHeading &&
+          headingInfo.headingLevel <= baseHeadingLevel
+        ) {
           return returnIdx ? cellIdx : cell;
         }
         cellIdx++;
