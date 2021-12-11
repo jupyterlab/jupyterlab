@@ -226,13 +226,9 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         label: this.trans.__('Cell'),
         render_cell: row => <td key={5}>{row.cell_number}</td>,
         sort: (a, b) =>
-          a.cell_number > b.cell_number
-            ? 1
-            : a.data.range.start.line > b.data.range.start.line
-            ? 1
-            : a.data.range.start.ch > b.data.range.start.ch
-            ? 1
-            : -1,
+          a.cell_number - b.cell_number
+            || a.data.range.start.line - b.data.range.start.line
+            || a.data.range.start.ch - b.data.range.start.ch,
         is_available: context => context.adapter.has_multiple_editors
       }),
       new Column({
@@ -244,11 +240,8 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
           </td>
         ),
         sort: (a, b) =>
-          a.data.range.start.line > b.data.range.start.line
-            ? 1
-            : a.data.range.start.ch > b.data.range.start.ch
-            ? 1
-            : -1
+          a.data.range.start.line - b.data.range.start.line
+            || a.data.range.start.ch - b.data.range.start.ch
       })
     ];
   }
