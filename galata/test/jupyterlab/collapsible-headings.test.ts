@@ -111,3 +111,171 @@ test.describe('Collapsible Headings; no_showHCB', () => {
     ).toMatchSnapshot('no_showHCB_expand_heading_via_collapser.png');
   });
 });
+
+async function populateNotebook2(page: IJupyterLabPageFixture) {
+  await page.notebook.setCell(0, 'markdown', '# Heading 1');
+  await page.notebook.addCell('code', '1+1');
+  await page.notebook.addCell('markdown', '## Heading 1.1');
+  await page.notebook.addCell('code', '2+2');
+  await page.notebook.addCell('markdown', '# Heading 2');
+  await page.notebook.addCell('code', '3+3');
+  await page.notebook.addCell('code', '4+4');
+}
+
+test.describe('Collapsible Headings; keyboard navigation', () => {
+  // create an empty notebook for each test
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew(fileName);
+  });
+
+  test('Jump to Previous Header', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(6);
+    await page.keyboard.press('ArrowLeft');
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('jump_previous_header.png');
+  });
+
+  test('Collapse Previous Header', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(6);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('collapse_previous_header.png');
+  });
+
+  test('Collapse Previous Headers', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(6);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('collapse_previous_headers.png');
+  });
+
+  test('ReExpand Headers 01', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(6);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('a');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowLeft');
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('reexpand_headers_01.png');
+  });
+
+  test('ReExpand Headers 02', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(6);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowRight');
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('reexpand_headers_02.png');
+  });
+
+  test('Add Header Below 01', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(6);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('Shift+B');
+    await page.keyboard.type('Heading 3');
+    await page.keyboard.press('Shift+Enter');
+    await page.notebook.selectCells(2);
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('add_header_below_01.png');
+  });
+
+  /** Check that header below adds header at end of present-level section. */
+  test('Add Header Below 02', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(6);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('Shift+B');
+    await page.keyboard.type('Heading 3');
+    await page.keyboard.press('Shift+Enter');
+    await page.notebook.selectCells(2);
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('add_header_below_02.png');
+  });
+
+  test('Add Header Below 03', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(6);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('Shift+B');
+    await page.keyboard.type('Heading 1.2');
+    await page.keyboard.press('a');
+    await page.keyboard.press('Shift+Enter');
+    await page.notebook.selectCells(2);
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('add_header_below_03.png');
+  });
+
+  /** Checks also if the cursor is at the right position when adding heading */
+  test('Add Header Above 01', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(6);
+    await page.keyboard.press('Shift+A');
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('add_header_above_01.png');
+  });
+
+  /** Checks also if the cursor is at the right position when adding heading */
+  test('Add Header Above 02', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(4);
+    await page.keyboard.press('Shift+A');
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('add_header_above_02.png');
+  });
+
+  /** Checks also if the cursor is at the right position when adding heading */
+  test('Add Header Above 03', async ({ page }) => {
+    await populateNotebook2(page);
+    await page.notebook.run();
+    await page.notebook.selectCells(3);
+    await page.keyboard.press('Shift+A');
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('add_header_above_03.png');
+  });
+});
