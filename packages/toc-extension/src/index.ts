@@ -62,11 +62,11 @@ async function activateTOC(
   docmanager: IDocumentManager,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
+  notebookTracker: INotebookTracker,
   editorTracker?: IEditorTracker,
   restorer?: ILayoutRestorer,
   labShell?: ILabShell,
   markdownViewerTracker?: IMarkdownViewerTracker,
-  notebookTracker?: INotebookTracker,
   settingRegistry?: ISettingRegistry
 ): Promise<ITableOfContentsRegistry> {
   const trans = translator.load('jupyterlab');
@@ -91,10 +91,6 @@ async function activateTOC(
 
   app.commands.addCommand(CommandIDs.runCells, {
     execute: args => {
-      if (!notebookTracker) {
-        return null;
-      }
-
       const panel = notebookTracker.currentWidget;
       if (panel == null) {
         return;
@@ -153,16 +149,14 @@ async function activateTOC(
   }
 
   // Create a notebook generator:
-  if (notebookTracker) {
-    const notebookGenerator = createNotebookGenerator(
-      notebookTracker,
-      toc,
-      rendermime.sanitizer,
-      translator,
-      settings
-    );
-    registry.add(notebookGenerator);
-  }
+  const notebookGenerator = createNotebookGenerator(
+    notebookTracker,
+    toc,
+    rendermime.sanitizer,
+    translator,
+    settings
+  );
+  registry.add(notebookGenerator);
 
   // Create a Markdown generator:
   if (editorTracker) {
@@ -235,13 +229,17 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   id: '@jupyterlab/toc-extension:registry',
   autoStart: true,
   provides: ITableOfContentsRegistry,
-  requires: [IDocumentManager, IRenderMimeRegistry, ITranslator],
+  requires: [
+    IDocumentManager,
+    IRenderMimeRegistry,
+    ITranslator,
+    INotebookTracker
+  ],
   optional: [
     IEditorTracker,
     ILayoutRestorer,
     ILabShell,
     IMarkdownViewerTracker,
-    INotebookTracker,
     ISettingRegistry
   ],
   activate: activateTOC
