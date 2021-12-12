@@ -123,6 +123,18 @@ async function populateNotebook2(page: IJupyterLabPageFixture) {
 }
 
 test.describe('Collapsible Headings; keyboard navigation', () => {
+
+  test.use({
+    mockSettings: {
+      '@jupyterlab/apputils-extension:themes': {
+        overrides: {
+          "content-font-family": "Arial",
+          "content-font-size1": "12pt"
+        }
+      }
+    }
+  });
+
   // create an empty notebook for each test
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
