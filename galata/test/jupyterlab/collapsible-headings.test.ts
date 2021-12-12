@@ -222,7 +222,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('Shift+B');
     await page.keyboard.type('Heading 3');
     await page.keyboard.press('Shift+Enter');
-    await page.notebook.selectCells(2);
+    await page.notebook.selectCells(0);
     expect(
       await (await page.notebook.getNotebookInPanel()).screenshot()
     ).toMatchSnapshot('add_header_below_02.png');
