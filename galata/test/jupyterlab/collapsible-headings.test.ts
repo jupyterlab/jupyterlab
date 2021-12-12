@@ -123,13 +123,12 @@ async function populateNotebook2(page: IJupyterLabPageFixture) {
 }
 
 test.describe('Collapsible Headings; keyboard navigation', () => {
-
   test.use({
     mockSettings: {
       '@jupyterlab/apputils-extension:themes': {
         overrides: {
-          "content-font-family": "Arial",
-          "content-font-size1": "12pt"
+          'content-font-family': 'Arial',
+          'content-font-size1': '12pt'
         }
       }
     }
@@ -214,6 +213,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('Shift+B');
+    await page.waitForTimeout(200);
     await page.keyboard.type('Heading 3');
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(2);
@@ -232,6 +232,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('Shift+B');
+    await page.waitForTimeout(200);
     await page.keyboard.type('Heading 3');
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(0);
@@ -249,6 +250,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('Shift+B');
+    await page.waitForTimeout(200);
     await page.keyboard.type('Heading 1.2');
     await page.keyboard.press('a');
     await page.keyboard.press('Shift+Enter');
@@ -264,6 +266,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.notebook.run();
     await page.notebook.selectCells(6);
     await page.keyboard.press('Shift+A');
+    await page.waitForTimeout(200);
     expect(
       await (await page.notebook.getNotebookInPanel()).screenshot()
     ).toMatchSnapshot('add_header_above_01.png');
@@ -275,6 +278,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.notebook.run();
     await page.notebook.selectCells(4);
     await page.keyboard.press('Shift+A');
+    await page.waitForTimeout(200);
     expect(
       await (await page.notebook.getNotebookInPanel()).screenshot()
     ).toMatchSnapshot('add_header_above_02.png');
@@ -286,6 +290,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.notebook.run();
     await page.notebook.selectCells(3);
     await page.keyboard.press('Shift+A');
+    await page.waitForTimeout(200);
     expect(
       await (await page.notebook.getNotebookInPanel()).screenshot()
     ).toMatchSnapshot('add_header_above_03.png');
