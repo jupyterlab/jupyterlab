@@ -15,22 +15,29 @@ async function populateNotebook(page: IJupyterLabPageFixture) {
 }
 
 test.describe('Collapsible Headings; showHCB', () => {
+
+  test.use({
+    mockSettings: {
+      '@jupyterlab/apputils-extension:themes': {
+        overrides: { 'content-font-family': 'DejaVu Sans' }
+      }
+    }
+  });
+
   // create an empty notebook for each test
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
+    await populateNotebook(page);
+    await page.notebook.run();
   });
 
   test('Show Collapser Unselected; showHCB', async ({ page }) => {
-    await populateNotebook(page);
-    await page.notebook.run();
     expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
       'showHCB_heading_unselected.png'
     );
   });
 
   test('Show Collapser Selected; showHCB', async ({ page }) => {
-    await populateNotebook(page);
-    await page.notebook.run();
     await page.notebook.selectCells(0);
     expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
       'showHCB_heading_selected.png'
@@ -38,8 +45,6 @@ test.describe('Collapsible Headings; showHCB', () => {
   });
 
   test('Collapse Heading; showHCB', async ({ page }) => {
-    await populateNotebook(page);
-    await page.notebook.run();
     await page.notebook.selectCells(0);
     await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
     expect(
@@ -48,8 +53,6 @@ test.describe('Collapsible Headings; showHCB', () => {
   });
 
   test('Expand Heading via Collapser Button; showHCB', async ({ page }) => {
-    await populateNotebook(page);
-    await page.notebook.run();
     await page.notebook.selectCells(0);
     await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
     await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
@@ -63,27 +66,30 @@ test.describe('Collapsible Headings; no_showHCB', () => {
   // create an empty notebook for each test
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
+    await populateNotebook(page);
+    await page.notebook.run();
   });
   // use non-standard showHiddenCellsButton=false
   test.use({
     mockSettings: {
       '@jupyterlab/notebook-extension:tracker': {
         showHiddenCellsButton: false
+      },
+      '@jupyterlab/apputils-extension:themes': {
+        overrides: { 'content-font-family': 'DejaVu Sans' }
       }
     }
   });
 
+  
+
   test('Show Collapser Unselected; no_showHCB', async ({ page }) => {
-    await populateNotebook(page);
-    await page.notebook.run();
     expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
       'no_showHCB_heading_unselected.png'
     );
   });
 
   test('Show Collapser Selected; no_showHCB', async ({ page }) => {
-    await populateNotebook(page);
-    await page.notebook.run();
     await page.notebook.selectCells(0);
     expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
       'no_showHCB_heading_selected.png'
@@ -91,8 +97,6 @@ test.describe('Collapsible Headings; no_showHCB', () => {
   });
 
   test('Collapse Heading; no_showHCB', async ({ page }) => {
-    await populateNotebook(page);
-    await page.notebook.run();
     await page.notebook.selectCells(0);
     await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
     expect(
@@ -101,8 +105,6 @@ test.describe('Collapsible Headings; no_showHCB', () => {
   });
 
   test('Expand Heading via Collapser Button; no_showHCB', async ({ page }) => {
-    await populateNotebook(page);
-    await page.notebook.run();
     await page.notebook.selectCells(0);
     await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
     await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
@@ -126,10 +128,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   test.use({
     mockSettings: {
       '@jupyterlab/apputils-extension:themes': {
-        overrides: {
-          'content-font-family': 'Arial',
-          'content-font-size1': '12pt'
-        }
+        overrides: { 'content-font-family': 'DejaVu Sans' }
       }
     }
   });
@@ -137,11 +136,11 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   // create an empty notebook for each test
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
+    await populateNotebook2(page);
+    await page.notebook.run();
   });
 
   test('Jump to Previous Header', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
     expect(
@@ -150,8 +149,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   });
 
   test('Collapse Previous Header', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
@@ -161,8 +158,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   });
 
   test('Collapse Previous Headers', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
@@ -174,8 +169,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   });
 
   test('ReExpand Headers 01', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
@@ -192,8 +185,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   });
 
   test('ReExpand Headers 02', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
@@ -207,8 +198,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   });
 
   test('Add Header Below 01', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
@@ -224,8 +213,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
 
   /** Check that header below adds header at end of present-level section. */
   test('Add Header Below 02', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
@@ -242,8 +229,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   });
 
   test('Add Header Below 03', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
@@ -252,7 +237,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('Shift+B');
     await page.waitForTimeout(200);
     await page.keyboard.type('Heading 1.2');
-    await page.keyboard.press('a');
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(2);
     expect(
@@ -262,8 +246,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
 
   /** Checks also if the cursor is at the right position when adding heading */
   test('Add Header Above 01', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(6);
     await page.keyboard.press('Shift+A');
     await page.waitForTimeout(200);
@@ -274,8 +256,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
 
   /** Checks also if the cursor is at the right position when adding heading */
   test('Add Header Above 02', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(4);
     await page.keyboard.press('Shift+A');
     await page.waitForTimeout(200);
@@ -286,8 +266,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
 
   /** Checks also if the cursor is at the right position when adding heading */
   test('Add Header Above 03', async ({ page }) => {
-    await populateNotebook2(page);
-    await page.notebook.run();
     await page.notebook.selectCells(3);
     await page.keyboard.press('Shift+A');
     await page.waitForTimeout(200);
