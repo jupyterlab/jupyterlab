@@ -29,9 +29,14 @@ export namespace galata {
       editorConfig: { cursorBlinkRate: 0 }
     },
     '@jupyterlab/notebook-extension:tracker': {
-      codeCellConfig: { cursorBlinkRate: 0 },
-      markdownCellConfig: { cursorBlinkRate: 0 },
-      rawCellConfig: { cursorBlinkRate: 0 }
+      //codeCellConfig: { cursorBlinkRate: 0 },
+      //markdownCellConfig: { cursorBlinkRate: 0 },
+      //rawCellConfig: { cursorBlinkRate: 0 },  // this should make some tests fail (checking if this makes a difference)
+      showHiddenCellsButton: false // this should make some tests fail (checking if this makes a difference)
+    },
+    '@jupyterlab/apputils-extension:themes': {
+      //overrides: { 'content-font-family': "DejaVu Sans" }  // that's what we actually want
+      overrides: { 'content-font-family': 'Arial' } // this should make many tests fail
     }
   };
 
