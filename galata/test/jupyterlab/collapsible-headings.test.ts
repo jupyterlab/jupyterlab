@@ -15,15 +15,6 @@ async function populateNotebook(page: IJupyterLabPageFixture) {
 }
 
 test.describe('Collapsible Headings; showHCB', () => {
-
-  test.use({
-    mockSettings: {
-      '@jupyterlab/apputils-extension:themes': {
-        overrides: { 'content-font-family': 'DejaVu Sans' }
-      }
-    }
-  });
-
   // create an empty notebook for each test
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
@@ -74,14 +65,9 @@ test.describe('Collapsible Headings; no_showHCB', () => {
     mockSettings: {
       '@jupyterlab/notebook-extension:tracker': {
         showHiddenCellsButton: false
-      },
-      '@jupyterlab/apputils-extension:themes': {
-        overrides: { 'content-font-family': 'DejaVu Sans' }
       }
     }
   });
-
-  
 
   test('Show Collapser Unselected; no_showHCB', async ({ page }) => {
     expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
@@ -125,14 +111,6 @@ async function populateNotebook2(page: IJupyterLabPageFixture) {
 }
 
 test.describe('Collapsible Headings; keyboard navigation', () => {
-  test.use({
-    mockSettings: {
-      '@jupyterlab/apputils-extension:themes': {
-        overrides: { 'content-font-family': 'DejaVu Sans' }
-      }
-    }
-  });
-
   // create an empty notebook for each test
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
