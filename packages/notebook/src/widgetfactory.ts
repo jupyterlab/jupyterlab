@@ -8,6 +8,7 @@ import { ITranslator } from '@jupyterlab/translation';
 import { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { StaticNotebook } from './widget';
+import { NotebookHistory } from './history';
 
 /**
  * A widget factory for notebook panels.
@@ -78,6 +79,9 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     source?: NotebookPanel
   ): NotebookPanel {
     const translator = (context as any).translator;
+    const history = new NotebookHistory({
+      sessionContext: context.sessionContext
+    });
     const nbOptions = {
       rendermime: source
         ? source.content.rendermime
@@ -88,7 +92,8 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       notebookConfig: source
         ? source.content.notebookConfig
         : this._notebookConfig,
-      translator
+      translator,
+      history
     };
     const content = this.contentFactory.createNotebook(nbOptions);
 

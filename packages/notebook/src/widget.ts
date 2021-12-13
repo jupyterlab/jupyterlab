@@ -32,6 +32,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { NotebookActions } from './actions';
 import { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
+import { INotebookHistory } from './history';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
@@ -234,6 +235,32 @@ export class StaticNotebook extends WindowedList {
     this._updateNotebookConfig();
     this._mimetypeService = options.mimeTypeService;
     this.renderingLayout = options.notebookConfig?.renderingLayout;
+    this._history = options.history;
+
+    // Section for the virtual-notebook behavior.
+    this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
+    this._cellsArray = new Array<Cell>();
+    if ('IntersectionObserver' in window) {
+      this._observer = new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach(o => {
+            if (o.isIntersecting) {
+              observer.unobserve(o.target);
+              const ci = this._toRenderMap.get(o.target.id);
+              if (ci) {
+                const { cell, index } = ci;
+                this._renderPlaceholderCell(cell, index);
+              }
+            }
+          });
+        },
+        {
+          root: this.node,
+          threshold: 1,
+          rootMargin: `${this.notebookConfig.observedTopMargin} 0px ${this.notebookConfig.observedBottomMargin} 0px`
+        }
+      );
+    }
   }
 
   get cellCollapsed(): ISignal<this, Cell> {
@@ -352,6 +379,12 @@ export class StaticNotebook extends WindowedList {
       this.node.classList.remove(SIDE_BY_SIDE_CLASS);
     }
     this._renderingLayoutChanged.emit(this._renderingLayout ?? 'default');
+  accessLastHistory(): void {
+    // this._history.back(this.content.activeCell);
+  }
+
+  accessNextHistory(): void {
+    // this._history.forward(this.content.activeCell);
   }
 
   /**
@@ -989,12 +1022,24 @@ export class StaticNotebook extends WindowedList {
   private _idleCallBack: number | null;
   private _mimetype: string;
   private _mimetypeService: IEditorMimeTypeService;
+<<<<<<< HEAD
   private _modelChanged: Signal<this, void>;
   private _modelContentChanged: Signal<this, void>;
   private _notebookConfig: StaticNotebook.INotebookConfig;
   private _notebookModel: INotebookModel | null;
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
+=======
+  private _history: INotebookHistory | undefined;
+  private _modelChanged = new Signal<this, void>(this);
+  private _modelContentChanged = new Signal<this, void>(this);
+  private _fullyRendered = new Signal<this, boolean>(this);
+  private _placeholderCellRendered = new Signal<this, Cell>(this);
+  private _observer: IntersectionObserver;
+  private _renderedCellsCount = 0;
+  private _toRenderMap: Map<string, { index: number; cell: Cell }>;
+  private _cellsArray: Array<Cell>;
+>>>>>>> 2f1b2d555d (initial work to add kernel history on noteobok)
 }
 
 /**
@@ -1039,6 +1084,11 @@ export namespace StaticNotebook {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * TODO
+     */
+    history?: INotebookHistory;
   }
 
   /**
