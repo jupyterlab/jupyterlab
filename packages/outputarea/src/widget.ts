@@ -17,7 +17,6 @@ import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import ResizeObserver from 'resize-observer-polyfill';
 import { IOutputAreaModel } from './model';
 
 /**
@@ -412,7 +411,6 @@ export class OutputArea extends Widget {
       model.trusted ? 'any' : 'ensure'
     );
     if (
-      renderer.renderModel &&
       Private.currentPreferredMimetype.get(renderer) === mimeType &&
       OutputArea.isIsolated(mimeType, model.metadata) ===
         renderer instanceof Private.IsolatedRenderer

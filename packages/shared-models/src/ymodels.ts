@@ -217,7 +217,7 @@ export class YNotebook
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
       if (!this._ycellMapping.has(ycell)) {
-        this._ycellMapping.set(ycell, createCellFromType(ycell));
+        this._ycellMapping.set(ycell, createCellModelFromSharedType(ycell));
       }
       return this._ycellMapping.get(ycell) as YCellType;
     });
@@ -392,7 +392,7 @@ export class YNotebook
     event.changes.added.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
       if (!this._ycellMapping.has(type)) {
-        this._ycellMapping.set(type, createCellFromType(type));
+        this._ycellMapping.set(type, createCellModelFromSharedType(type));
       }
       const cell = this._ycellMapping.get(type) as any;
       cell._notebook = this;
@@ -480,9 +480,9 @@ export class YNotebook
 }
 
 /**
- * Create a new shared cell given the type.
+ * Create a new shared cell model given the YJS shared type.
  */
-export const createCellFromType = (type: Y.Map<any>): YCellType => {
+export const createCellModelFromSharedType = (type: Y.Map<any>): YCellType => {
   switch (type.get('cell_type')) {
     case 'code':
       return new YCodeCell(type);
