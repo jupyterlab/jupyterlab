@@ -71,14 +71,11 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this.title.label = this._trans.__('Terminal');
 
     session.messageReceived.connect(this._onMessage, this);
-    session.disposed.connect(
-      () => {
-        if (this.getOption('closeOnExit')) {
-          this.dispose();
-        }
-      },
-      this
-    );
+    session.disposed.connect(() => {
+      if (this.getOption('closeOnExit')) {
+        this.dispose();
+      }
+    }, this);
 
     if (session.connectionStatus === 'connected') {
       this._initialConnection();

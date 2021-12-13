@@ -145,14 +145,16 @@ export interface IManager extends IBaseManager {
   /**
    * Create a new terminal session.
    *
-   * @param name - The name of the target terminal.
+   * @param options - The options used to create the terminal.
    *
    * @returns A promise that resolves with the terminal connection instance.
    *
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  startNew(name?: string): Promise<ITerminalConnection>;
+  startNew(
+    options?: Omit<ITerminalConnection.IOptions, 'serverSettings'>
+  ): Promise<ITerminalConnection>;
 
   /*
    * Connect to a running session.
