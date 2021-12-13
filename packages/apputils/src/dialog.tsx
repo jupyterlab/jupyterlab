@@ -207,7 +207,6 @@ export class Dialog<T> extends Widget {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
-    console.log('---', event);
     switch (event.type) {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
