@@ -806,19 +806,21 @@ third parameter of the ``activate`` function.
       activate: activate
     };
 
-Here ``ILayoutRestorer`` is specified as an ``optional`` token, as the corresponding might
+Here ``ILayoutRestorer`` is specified as an ``optional`` token, as the corresponding service might
 not be available in a customized JupyterLab distribution that does not provide layout restoration
-functionalities. Having it ``optional`` make a nice to have, and enable your extension to be loaded
+functionalities. Having it ``optional`` make it a nice to have, and enable your extension to be loaded
 in more JupyterLab based applications.
 
-You can learn more about ``requires`` and ``optional`` in the :ref:`tokens` section
-of the Extension Developer Guide.
+.. note::
+
+    You can learn more about ``requires`` and ``optional`` in the :ref:`tokens` section
+    of the Extension Developer Guide.
 
 Finally, rewrite the ``activate`` function so that it:
 
 1. Declares a widget variable, but does not create an instance
    immediately.
-2. Add the global ``LayoutRestorer`` as the thid parameter of the ``activate`` function.
+2. Adds the global ``LayoutRestorer`` as the thid parameter of the ``activate`` function.
    This parameter is declared as ``ILayoutRestorer | null`` since the token is specified as ``optional``.
 3. Constructs a ``WidgetTracker`` and tells the ``ILayoutRestorer``
    to use it to save/restore panel state.
