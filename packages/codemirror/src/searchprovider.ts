@@ -125,9 +125,11 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   /**
    * Move the current match indicator to the next match.
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightNext(): Promise<ITextSearchMatch | undefined> {
+  async highlightNext(loop?: boolean): Promise<ITextSearchMatch | undefined> {
     const cursorMatch = this._findNext(false);
     if (!cursorMatch) {
       return;
@@ -140,9 +142,13 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   /**
    * Move the current match indicator to the previous match.
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightPrevious(): Promise<ITextSearchMatch | undefined> {
+  async highlightPrevious(
+    loop?: boolean
+  ): Promise<ITextSearchMatch | undefined> {
     const cursorMatch = this._findNext(true);
     if (!cursorMatch) {
       return;
@@ -155,9 +161,11 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   /**
    * Replace the currently selected match with the provided text
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  async replaceCurrentMatch(newText: string): Promise<boolean> {
+  async replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean> {
     // If the current selection exactly matches the current match,
     // replace it.  Otherwise, just select the next match after the cursor.
     let replaceOccurred = false;

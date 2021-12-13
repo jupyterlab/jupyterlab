@@ -261,13 +261,19 @@ export interface IBaseSearchProvider {
 
   /**
    * Replace the currently selected match with the provided text
+   * and highlight the next match.
+   *
+   * @param newText New text to include.
+   * @param loop Whether to loop within the matches list.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  replaceCurrentMatch(newText: string): Promise<boolean>;
+  replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean>;
 
   /**
    * Replace all matches in the notebook with the provided text
+   *
+   * @param newText New text to include.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */

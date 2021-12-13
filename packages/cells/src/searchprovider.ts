@@ -7,12 +7,11 @@ import {
   IFiltersType,
   ISearchMatch,
   ISearchProviderRegistry,
-  ITextSearchMatch,
-  TextSearchEngine
+  ITextSearchMatch
 } from '@jupyterlab/documentsearch';
 import { IObservableString } from '@jupyterlab/observables';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry, TextSearchEngine } from '@jupyterlab/rendermime';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { CodeCellModel } from '.';
@@ -32,9 +31,9 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     return this._changed;
   }
 
-  get currentMatchIndex(): number {
+  get currentMatchIndex(): number | null {
     // TODO
-    return 0;
+    return null;
   }
 
   get matchesSize(): number {

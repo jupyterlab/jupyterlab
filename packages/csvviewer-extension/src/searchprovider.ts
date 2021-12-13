@@ -86,9 +86,11 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
   /**
    * Move the current match indicator to the next match.
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightNext(): Promise<ISearchMatch | undefined> {
+  highlightNext(loop?: boolean): Promise<ISearchMatch | undefined> {
     this._target.content.searchService.find(this._query);
     return Promise.resolve(undefined);
   }
@@ -96,9 +98,11 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
   /**
    * Move the current match indicator to the previous match.
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightPrevious(): Promise<ISearchMatch | undefined> {
+  highlightPrevious(loop?: boolean): Promise<ISearchMatch | undefined> {
     this._target.content.searchService.find(this._query, true);
     return Promise.resolve(undefined);
   }
@@ -107,9 +111,11 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    * Replace the currently selected match with the provided text
    * Not implemented in the CSV viewer as it is read-only.
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves once the action has completed.
    */
-  replaceCurrentMatch(newText: string): Promise<boolean> {
+  replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean> {
     return Promise.resolve(false);
   }
 

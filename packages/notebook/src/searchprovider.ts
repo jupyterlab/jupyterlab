@@ -1,14 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, CellSearchProvider, ICellModel } from '@jupyterlab/cells';
+import { CellSearchProvider, ICellModel } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
   IFilter,
   IFiltersType,
   ISearchMatch,
   ISearchProviderRegistry,
-  ITextSearchMatch,
   SearchProvider
 } from '@jupyterlab/documentsearch';
 import {
@@ -17,15 +16,8 @@ import {
 } from '@jupyterlab/observables';
 import { ITranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
-import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import CodeMirror from 'codemirror';
 import { NotebookPanel } from './panel';
-
-interface ICellSearchPair {
-  cell: Cell;
-  searchEngine: CellSearchProvider;
-}
 
 export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   constructor(
@@ -128,13 +120,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
         await cellSearchProvider.startQuery(query, filters);
 
-        return { cell, searchEngine: cellSearchProvider };
+        return cellSearchProvider;
       })
     );
 
     this._currentProviderIndex = this.widget.content.activeCellIndex;
 
-    await this.highlightNext();
+    await this.highlightNext(false);
 
     return Promise.resolve();
   }
@@ -154,7 +146,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
 
     await Promise.all(
-      this._searchProviders.map(({ searchEngine: provider }) => {
+      this._searchProviders.map(provider => {
         provider.changed.disconnect(this._onSearchProviderChanged, this);
 
         return provider.endQuery();
@@ -182,58 +174,66 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * Move the current match indicator to the next match.
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves once the action has completed.
    */
   async highlightNext(loop: boolean = true): Promise<ISearchMatch | undefined> {
-    this._currentMatch = await this._stepNext();
-    return this._currentMatch;
+    const match = await this._stepNext(false, loop);
+    return match ?? undefined;
   }
 
   /**
    * Move the current match indicator to the previous match.
+   *
+   * @param loop Whether to loop within the matches list.
    *
    * @returns A promise that resolves once the action has completed.
    */
   async highlightPrevious(
     loop: boolean = true
   ): Promise<ISearchMatch | undefined> {
-    this._currentMatch = await this._stepNext(true);
-    return this._currentMatch;
+    const match = await this._stepNext(true, loop);
+    return match ?? undefined;
   }
 
   /**
    * Replace the currently selected match with the provided text
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  async replaceCurrentMatch(newText: string): Promise<boolean> {
-    const notebook = this.widget!.content;
-    const editor = notebook.activeCell!.editor as CodeMirrorEditor;
+  async replaceCurrentMatch(newText: string, loop = true): Promise<boolean> {
     let replaceOccurred = false;
-    if (this._currentMatchIsSelected(editor)) {
-      const { searchEngine } = this._searchProviders[
-        this._currentProviderIndex!
-      ];
+
+    if (this._currentProviderIndex === null) {
+      // Highlight next match if none is selected.
+      this.highlightNext(loop);
+    }
+
+    if (this._currentProviderIndex !== null) {
+      const searchEngine = this._searchProviders[this._currentProviderIndex];
       replaceOccurred = await searchEngine.replaceCurrentMatch(newText);
     }
-    await this.highlightNext();
+    await this.highlightNext(loop);
     return replaceOccurred;
   }
 
   /**
    * Replace all matches in the notebook with the provided text
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
   async replaceAllMatches(newText: string): Promise<boolean> {
-    let replaceOccurred = false;
-    for (const index in this._searchProviders) {
-      const { searchEngine: provider } = this._searchProviders[index];
-      const singleReplaceOccurred = await provider.replaceAllMatches(newText);
-      replaceOccurred = singleReplaceOccurred ? true : replaceOccurred;
-    }
-    this._currentMatch = null;
-    return replaceOccurred;
+    const replacementOccurred = await Promise.all(
+      this._searchProviders.map(provider => {
+        return provider.replaceAllMatches(newText);
+      })
+    );
+    return replacementOccurred.includes(true);
   }
 
   /**
@@ -253,13 +253,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     let found = false;
     for (let idx = 0; idx < this._searchProviders.length; idx++) {
       const provider = this._searchProviders[idx];
-      const localMatch = provider.searchEngine.currentMatchIndex;
+      const localMatch = provider.currentMatchIndex;
       if (localMatch !== null) {
         agg += localMatch;
         found = true;
         break;
       } else {
-        agg += provider.searchEngine.matchesSize;
+        agg += provider.matchesSize;
       }
     }
     return found ? agg : null;
@@ -270,7 +270,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    */
   get matchesSize(): number | null {
     return this._searchProviders.reduce(
-      (sum, provider) => (sum += provider.searchEngine.matchesSize),
+      (sum, provider) => (sum += provider.matchesSize),
       0
     );
   }
@@ -293,10 +293,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     switch (changes.type) {
       case 'add':
         changes.newValues.forEach((model, index) => {
-          ArrayExt.insert(this._searchProviders, changes.newIndex + index, {
-            cell: null,
-            searchEngine: null
-          });
+          ArrayExt.insert(
+            this._searchProviders,
+            changes.newIndex + index,
+            new CellSearchProvider(
+              model,
+              this.widget!.content.rendermime,
+              this.registry
+            )
+          );
         });
         break;
       case 'move':
@@ -312,8 +317,27 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
             this._searchProviders,
             changes.oldIndex
           );
-          provider?.searchEngine.dispose();
+          provider?.dispose();
         }
+        break;
+      case 'set':
+        changes.newValues.forEach((model, index) => {
+          ArrayExt.insert(
+            this._searchProviders,
+            changes.newIndex + index,
+            new CellSearchProvider(
+              model,
+              this.widget!.content.rendermime,
+              this.registry
+            )
+          );
+          const provider = ArrayExt.removeAt(
+            this._searchProviders,
+            changes.newIndex + index + 1
+          );
+          provider?.dispose();
+        });
+
         break;
     }
   }
@@ -328,9 +352,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     const startIndex = this._currentProviderIndex;
     do {
-      const { searchEngine } = this._searchProviders[
-        this._currentProviderIndex
-      ];
+      const searchEngine = this._searchProviders[this._currentProviderIndex];
 
       const match = reverse
         ? await searchEngine.highlightPrevious(false)
@@ -362,9 +384,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (loop) {
       // Search a last time in the first provider as it may contain more
       // than one matches
-      const { searchEngine } = this._searchProviders[
-        this._currentProviderIndex
-      ];
+      const searchEngine = this._searchProviders[this._currentProviderIndex];
       const match = reverse
         ? await searchEngine.highlightPrevious(false)
         : await searchEngine.highlightNext(false);
@@ -383,6 +403,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this.changed.emit();
   }
 
-  private _searchProviders: ICellSearchPair[] = [];
+  private _searchProviders: CellSearchProvider[] = [];
   private _currentProviderIndex: number | null = null;
 }

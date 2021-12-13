@@ -234,22 +234,31 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
    * Move the current match indicator to the next match.
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightNext(): Promise<IHTMLSearchMatch | undefined> {
-    return this._highlightNext(false);
+  async highlightNext(loop?: boolean): Promise<IHTMLSearchMatch | undefined> {
+    return this._highlightNext(false, loop);
   }
 
   /**
    * Move the current match indicator to the previous match.
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightPrevious(): Promise<IHTMLSearchMatch | undefined> {
-    return this._highlightNext(true);
+  async highlightPrevious(
+    loop?: boolean
+  ): Promise<IHTMLSearchMatch | undefined> {
+    return this._highlightNext(true, loop);
   }
 
-  private _highlightNext(reverse: boolean): IHTMLSearchMatch | undefined {
+  private _highlightNext(
+    reverse: boolean,
+    loop?: boolean
+  ): IHTMLSearchMatch | undefined {
     if (this._matches.length === 0) {
       return undefined;
     }
@@ -292,9 +301,11 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
    * Replace the currently selected match with the provided text
    *
+   * @param loop Whether to loop within the matches list.
+   *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  async replaceCurrentMatch(newText: string): Promise<boolean> {
+  async replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean> {
     return Promise.resolve(false);
   }
 
