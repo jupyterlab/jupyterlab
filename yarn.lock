@@ -2243,7 +2243,7 @@
     npmlog "^4.1.2"
     write-file-atomic "^3.0.3"
 
-"@lumino/algorithm@^1.8.0", "@lumino/algorithm@^1.9.1":
+"@lumino/algorithm@^1.9.1":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-1.9.1.tgz#a870598e031f5ee85e20e77ce7bfffbb0dffd7f5"
   integrity sha512-d0rj7IYRzYj6WbWSrbJbKvrfO4H0NUnXT2yjSWS/sCklpTpSp0IGmndK/X4r6gG+ev5lb5+wBg9ofUDBvoAlAw==
@@ -2305,7 +2305,7 @@
     "@lumino/algorithm" "^1.9.1"
     "@lumino/signaling" "^1.10.1"
 
-"@lumino/domutils@^1.7.0", "@lumino/domutils@^1.8.1":
+"@lumino/domutils@^1.8.1":
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/@lumino/domutils/-/domutils-1.8.1.tgz#cf118e4eba90c3bf1e3edf7f19cce8846ec7875c"
   integrity sha512-QUVXwmDMIfcHC3yslhmyGK4HYBKaJ3xX5MTwDrjsSX7J7AZ4jwL4zfsxyF9ntdqEKraoJhLQ6BaUBY+Ur1cnYw==
@@ -2364,7 +2364,7 @@
   dependencies:
     "@lumino/algorithm" "^1.9.1"
 
-"@lumino/widgets@^1.28.0", "@lumino/widgets@^1.30.0":
+"@lumino/widgets@^1.30.0":
   version "1.30.0"
   resolved "https://registry.yarnpkg.com/@lumino/widgets/-/widgets-1.30.0.tgz#fdf96ffab9a018523b932afd5727317c3a360b4f"
   integrity sha512-0nYFoaZrUzJHa1uWvPGHtRjz9TItwQIK0m2hT1IS6fyPv9QKdDELjEMBGUgXHX5Do5h3TWrou0tgdviKZ0KNrg==
