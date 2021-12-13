@@ -97,6 +97,7 @@ export class Dialog<T> extends Widget {
         return renderer.createButtonNode(button);
       })
     );
+    this._lastMouseDownInDialog = false;
 
     const layout = (this.layout = new PanelLayout());
     const content = new Panel();
@@ -206,9 +207,13 @@ export class Dialog<T> extends Widget {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
+    console.log('---', event);
     switch (event.type) {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
+        break;
+      case 'mousedown':
+        this._evtMouseDown(event as MouseEvent);
         break;
       case 'click':
         this._evtClick(event as MouseEvent);
@@ -233,6 +238,7 @@ export class Dialog<T> extends Widget {
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
     node.addEventListener('click', this, true);
+    document.addEventListener('mousedown', this, true);
     document.addEventListener('focus', this, true);
     this._first = Private.findFirstFocusable(this.node);
     this._original = document.activeElement as HTMLElement;
@@ -256,6 +262,7 @@ export class Dialog<T> extends Widget {
     node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('click', this, true);
     document.removeEventListener('focus', this, true);
+    document.removeEventListener('mousedown', this, true);
     this._original.focus();
   }
 
@@ -281,7 +288,7 @@ export class Dialog<T> extends Widget {
     if (!content.contains(event.target as HTMLElement)) {
       event.stopPropagation();
       event.preventDefault();
-      if (this._hasClose) {
+      if (this._hasClose && !this._lastMouseDownInDialog) {
         this.reject();
       }
       return;
@@ -391,6 +398,19 @@ export class Dialog<T> extends Widget {
   }
 
   /**
+   * Handle the `'mousedown'` event for the widget.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  protected _evtMouseDown(event: MouseEvent): void {
+    const content = this.node.getElementsByClassName(
+      'jp-Dialog-content'
+    )[0] as HTMLElement;
+    const target = event.target as HTMLElement;
+    this._lastMouseDownInDialog = content.contains(target as HTMLElement);
+  }
+
+  /**
    * Resolve a button item.
    */
   private _resolve(button: Dialog.IButton): void {
@@ -425,6 +445,7 @@ export class Dialog<T> extends Widget {
   private _host: HTMLElement;
   private _hasClose: boolean;
   private _body: Dialog.Body<T>;
+  private _lastMouseDownInDialog: boolean;
   private _focusNodeSelector: string | undefined = '';
 }
 
