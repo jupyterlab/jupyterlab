@@ -792,30 +792,41 @@ entire list of import statements looks like the following:
     import { Widget } from '@lumino/widgets';
 
 Then add the ``ILayoutRestorer`` interface to the ``JupyterFrontEndPlugin``
-definition. This addition passes the global ``LayoutRestorer`` as the
+definition as ``optional``. This addition passes the global ``LayoutRestorer`` as the
 third parameter of the ``activate`` function.
 
 .. code-block:: typescript
-    :emphasize-lines: 4
+    :emphasize-lines: 5
 
     const extension: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab_apod',
       autoStart: true,
-      requires: [ICommandPalette, ILayoutRestorer],
+      requires: [ICommandPalette],
+      optional: [ILayoutRestorer],
       activate: activate
     };
+
+Here ``ILayoutRestorer`` is specified as an ``optional`` token, as the corresponding might
+not be available in a customized JupyterLab distribution that does not provide layout restoration
+functionalities. Having it ``optional`` make a nice to have, and enable your extension to be loaded
+in more JupyterLab based applications.
+
+You can learn more about ``requires`` and ``optional`` in the :ref:`tokens` section
+of the Extension Developer Guide.
 
 Finally, rewrite the ``activate`` function so that it:
 
 1. Declares a widget variable, but does not create an instance
    immediately.
-2. Constructs a ``WidgetTracker`` and tells the ``ILayoutRestorer``
+2. Add the global ``LayoutRestorer`` as the thid parameter of the ``activate`` function.
+   This parameter is declared as ``ILayoutRestorer | null`` since the token is specified as ``optional``.
+3. Constructs a ``WidgetTracker`` and tells the ``ILayoutRestorer``
    to use it to save/restore panel state.
-3. Creates, tracks, shows, and refreshes the widget panel appropriately.
+4. Creates, tracks, shows, and refreshes the widget panel appropriately.
 
 .. code-block:: typescript
 
-    function activate(app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer) {
+    function activate(app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer | null) {
       console.log('JupyterLab extension jupyterlab_apod is activated!');
 
       // Declare a widget variable
@@ -857,10 +868,12 @@ Finally, rewrite the ``activate`` function so that it:
       let tracker = new WidgetTracker<MainAreaWidget<APODWidget>>({
         namespace: 'apod'
       });
-      restorer.restore(tracker, {
-        command,
-        name: () => 'apod'
-      });
+      if (restorer) {
+        restorer.restore(tracker, {
+          command,
+          name: () => 'apod'
+        });
+      }
     }
 
 Rebuild your extension one last time and refresh your browser tab.
