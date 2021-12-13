@@ -10,7 +10,7 @@
 /* Hidden by zero height by default */
 .jp-CellHeader,
 .jp-CellFooter {
-  height: 0px;
+  height: max-content;
   width: 100%;
   padding: 0px;
   margin: 0px;

@@ -230,7 +230,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
     // Collaborators list
     this._collaboratorsList = new CollaboratorsList();
-    (this.layout as PanelLayout).addWidget(this._collaboratorsList);
+    (header.layout as PanelLayout).addWidget(this._collaboratorsList);
 
     this._inputPlaceholder = new InputPlaceholder(() => {
       this.inputHidden = !this.inputHidden;

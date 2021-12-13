@@ -4,15 +4,13 @@
 |----------------------------------------------------------------------------*/
 
 .jp-CollaboratorsList {
-    position: absolute;
-    right: 8px;
-    top: 8px;
-    display: flex;
-    z-index: 1000;
+  flex-direction: row-reverse;
+  display: flex;
+  z-index: 1000;
 }
 
 .jp-Collaborator {
-    border-radius: 100%;
-    margin: 1px;
-    padding: 2px;
+  border-radius: 100%;
+  margin: 2px 2px 6px 2px;
+  padding: 2px;
 }

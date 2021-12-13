@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Widget } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
  * The CSS class added to the cell header.
@@ -30,6 +30,8 @@ export class CellHeader extends Widget implements ICellHeader {
   constructor() {
     super();
     this.addClass(CELL_HEADER_CLASS);
+
+    this.layout = new PanelLayout();
   }
 }
 
