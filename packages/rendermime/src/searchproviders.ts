@@ -40,4 +40,19 @@ export const MarkdownSearchEngine = {
   }
 };
 
-// TODO HTMLStringSearchEngine => search HTML after whiting tags to search only text node
+const HTML_TAGS = /<.*?>/g;
+
+/**
+ * Search provider for markdown string
+ *
+ * It uses TextSearchEngine after filtering all tags and their attributes.
+ * This avoid to search in non rendered characters; it focuses on text content only.
+ */
+export const HTMLStringSearchEngine = {
+  search(query: RegExp, data: string): Promise<ISearchMatch[]> {
+    // Replace tags with white spaces to not search within them.
+    data = data.replace(HTML_TAGS, hit => ' '.repeat(hit.length));
+
+    return TextSearchEngine.search(query, data);
+  }
+};

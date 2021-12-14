@@ -18,6 +18,8 @@ import {
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
 import {
+  htmlRendererFactory,
+  HTMLStringSearchEngine,
   ILatexTypesetter,
   IMarkdownParser,
   IRenderMimeRegistry,
@@ -70,6 +72,13 @@ const search: JupyterFrontEndPlugin<void> = {
       searchRegistry.registerMimeTypeSearchEngine(
         mimeType,
         MarkdownSearchEngine
+      );
+    });
+
+    htmlRendererFactory.mimeTypes.forEach(mimeType => {
+      searchRegistry.registerMimeTypeSearchEngine(
+        mimeType,
+        HTMLStringSearchEngine
       );
     });
   },
