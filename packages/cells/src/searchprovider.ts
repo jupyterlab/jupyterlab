@@ -14,11 +14,14 @@ import {
 } from '@jupyterlab/documentsearch';
 import { IObservableString } from '@jupyterlab/observables';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  IRenderMimeRegistry,
+  MarkdownSearchEngine
+} from '@jupyterlab/rendermime';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { CodeCellModel, ICellModel } from './model';
-import { Cell } from './widget';
+import { Cell, MarkdownCell } from './widget';
 
 export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   constructor(protected cell: Cell<ICellModel>) {
@@ -345,7 +348,26 @@ class CodeCellSearchProvider extends CellSearchProvider {
   }
 }
 
-class MarkdownCellSearchProvider extends CellSearchProvider {}
+class MarkdownCellSearchProvider extends CellSearchProvider {
+  async endQuery(): Promise<void> {
+    await super.endQuery();
+    (this.cell as MarkdownCell).highlights = [];
+  }
+
+  protected async onInputChanged(
+    content: IObservableString,
+    changes?: IObservableString.IChangedArgs
+  ): Promise<void> {
+    await super.onInputChanged(content, changes);
+    if (this.query !== null) {
+      (this
+        .cell as MarkdownCell).highlights = await MarkdownSearchEngine.search(
+        this.query,
+        content.text
+      );
+    }
+  }
+}
 
 export function createCellSearchProvider(
   cell: Cell<ICellModel>,

@@ -286,6 +286,7 @@ export namespace IRenderMime {
      * Render a mime model.
      *
      * @param model - The mime model to render.
+     * @param highlights - The highlights to render.
      *
      * @returns A promise which resolves when rendering is complete.
      *
@@ -293,7 +294,7 @@ export namespace IRenderMime {
      * This method may be called multiple times during the lifetime
      * of the widget to update it if and when new data is available.
      */
-    renderModel(model: IMimeModel): Promise<void>;
+    renderModel(model: IMimeModel, highlights?: IHighlight[]): Promise<void>;
 
     /**
      * Highlights text fragment on the widget.

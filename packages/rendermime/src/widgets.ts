@@ -90,6 +90,7 @@ export abstract class RenderedCommon
    * Render a mime model.
    *
    * @param model - The mime model to render.
+   * @param highlights - The highlights to render.
    *
    * @returns A promise which resolves when rendering is complete.
    *
@@ -99,7 +100,10 @@ export abstract class RenderedCommon
    * (if, for instance, they are using DOM diffing), should override
    * this method and not call `super.renderModel()`.
    */
-  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+  async renderModel(
+    model: IRenderMime.IMimeModel,
+    highlights?: IRenderMime.IHighlight[]
+  ): Promise<void> {
     // TODO compare model against old model for early bail?
 
     // Empty any existing content in the node from previous renders
@@ -111,7 +115,7 @@ export abstract class RenderedCommon
     this.toggleClass('jp-mod-trusted', model.trusted);
 
     // Render the actual content.
-    await this.render(model);
+    await this.render(model, highlights);
 
     // Handle the fragment identifier if given.
     const { fragment } = model.metadata;
@@ -124,10 +128,14 @@ export abstract class RenderedCommon
    * Render the mime model.
    *
    * @param model - The mime model to render.
+   * @param highlights - The highlights to render.
    *
    * @returns A promise which resolves when rendering is complete.
    */
-  abstract render(model: IRenderMime.IMimeModel): Promise<void>;
+  abstract render(
+    model: IRenderMime.IMimeModel,
+    highlights?: IRenderMime.IHighlight[]
+  ): Promise<void>;
 
   /**
    * Set the URI fragment identifier.
@@ -155,6 +163,7 @@ export abstract class RenderedTextHighlightCommon extends RenderedCommon {
    * Render a mime model.
    *
    * @param model - The mime model to render.
+   * @param highlights - The highlights to render.
    *
    * @returns A promise which resolves when rendering is complete.
    *
@@ -162,10 +171,13 @@ export abstract class RenderedTextHighlightCommon extends RenderedCommon {
    * It will clear the highlights. So `renderHighlights` needs to be
    * recalled.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  render(
+    model: IRenderMime.IMimeModel,
+    highlights?: IRenderMime.IHighlight[]
+  ): Promise<void> {
     this.originalSource = String(model.data[this.mimeType]);
     this.trusted = model.trusted;
-    this.highlights.length = 0;
+    this.highlights = highlights ?? [];
     return this.rerender();
   }
 
@@ -303,10 +315,14 @@ export class RenderedLatex extends RenderedCommon {
    * Render a mime model.
    *
    * @param model - The mime model to render.
+   * @param highlights - The highlights to render.
    *
    * @returns A promise which resolves when rendering is complete.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  render(
+    model: IRenderMime.IMimeModel,
+    highlights?: IRenderMime.IHighlight[]
+  ): Promise<void> {
     return renderers.renderLatex({
       host: this.node,
       source: String(model.data[this.mimeType]),
@@ -343,10 +359,14 @@ export class RenderedImage extends RenderedCommon {
    * Render a mime model.
    *
    * @param model - The mime model to render.
+   * @param highlights - The highlights to render.
    *
    * @returns A promise which resolves when rendering is complete.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  render(
+    model: IRenderMime.IMimeModel,
+    highlights?: IRenderMime.IHighlight[]
+  ): Promise<void> {
     const metadata = model.metadata[this.mimeType] as
       | ReadonlyPartialJSONObject
       | undefined;
@@ -422,10 +442,14 @@ export class RenderedSVG extends RenderedCommon {
    * Render a mime model.
    *
    * @param model - The mime model to render.
+   * @param highlights - The highlights to render.
    *
    * @returns A promise which resolves when rendering is complete.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  render(
+    model: IRenderMime.IMimeModel,
+    highlights?: IRenderMime.IHighlight[]
+  ): Promise<void> {
     const metadata = model.metadata[this.mimeType] as
       | ReadonlyJSONObject
       | undefined;
@@ -493,10 +517,14 @@ export class RenderedJavaScript extends RenderedCommon {
    * Render a mime model.
    *
    * @param model - The mime model to render.
+   * @param highlights - The highlights to render.
    *
    * @returns A promise which resolves when rendering is complete.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  render(
+    model: IRenderMime.IMimeModel,
+    highlights?: IRenderMime.IHighlight[]
+  ): Promise<void> {
     const trans = this.translator.load('jupyterlab');
 
     return renderers.renderText({

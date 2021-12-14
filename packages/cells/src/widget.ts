@@ -42,6 +42,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { addIcon } from '@jupyterlab/ui-components';
 
 import {
+  JSONExt,
   JSONObject,
   JSONValue,
   PartialJSONValue,
@@ -1513,6 +1514,20 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return this._ready.promise;
   }
 
+  get highlights(): IRenderMime.IHighlight[] {
+    return this._highlights;
+  }
+  set highlights(v: IRenderMime.IHighlight[]) {
+    if (!JSONExt.deepEqual(this._highlights as any, v as any)) {
+      this._highlights = v;
+      if (this.rendered) {
+        this._updateRenderedInput(true).catch(reason => {
+          console.error('Failed to update rendered markdown cell', reason);
+        });
+      }
+    }
+  }
+
   /**
    * Text that represents the heading if cell is a heading.
    * Returns empty string if not a heading.
@@ -1763,18 +1778,18 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   /**
    * Update the rendered input.
    */
-  private _updateRenderedInput(): Promise<void> {
+  private _updateRenderedInput(force = false): Promise<void> {
     const model = this.model;
     const text = (model && model.value.text) || DEFAULT_MARKDOWN_TEXT;
     // Do not re-render if the text has not changed.
-    if (text !== this._prevText) {
+    if (text !== this._prevText || force) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
       if (!this._renderer) {
         this._renderer = this._rendermime.createRenderer('text/markdown');
         this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
       }
       this._prevText = text;
-      return this._renderer.renderModel(mimeModel);
+      return this._renderer.renderModel(mimeModel, this._highlights);
     }
     return Promise.resolve(void 0);
   }
@@ -1793,6 +1808,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
   }
 
+  private _highlights: IRenderMime.IHighlight[] = new Array<
+    IRenderMime.IHighlight
+  >();
   private _monitor: ActivityMonitor<ICellModel, void>;
   private _numberChildNodes: number;
   private _headingCollapsed: boolean;

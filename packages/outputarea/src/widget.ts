@@ -582,26 +582,19 @@ export class OutputArea extends Widget {
       output = new Private.IsolatedRenderer(output);
     }
     Private.currentPreferredMimetype.set(output, mimeType);
-    output
-      .renderModel(model)
-      .then(() => {
-        if (model.highlights?.length) {
-          output.renderHighlights?.call(output, model.highlights);
-        }
-      })
-      .catch(error => {
-        // Manually append error message to output
-        const pre = document.createElement('pre');
-        pre.textContent = `Javascript Error: ${error.message}`;
-        output.node.appendChild(pre);
+    output.renderModel(model, model.highlights).catch(error => {
+      // Manually append error message to output
+      const pre = document.createElement('pre');
+      pre.textContent = `Javascript Error: ${error.message}`;
+      output.node.appendChild(pre);
 
-        // Remove mime-type-specific CSS classes
-        output.node.className = 'lm-Widget jp-RenderedText';
-        output.node.setAttribute(
-          'data-mime-type',
-          'application/vnd.jupyter.stderr'
-        );
-      });
+      // Remove mime-type-specific CSS classes
+      output.node.className = 'lm-Widget jp-RenderedText';
+      output.node.setAttribute(
+        'data-mime-type',
+        'application/vnd.jupyter.stderr'
+      );
+    });
     return output;
   }
 
