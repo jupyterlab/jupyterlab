@@ -43,9 +43,6 @@ import { CodeMirrorEditor } from './editor';
 type MatchMap = { [key: number]: { [key: number]: ITextSearchMatch } };
 
 export class CodeMirrorSearchProvider implements IBaseSearchProvider {
-  constructor(editor: CodeMirrorEditor) {
-    this.editor = editor;
-  }
   /**
    * Initialize the search using a CodeMirrorEditor object.
    */
@@ -53,7 +50,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     if (!this.editor) {
       return Promise.resolve();
     }
-    return this._startQuery(query, false);
+    return this._startQuery(query);
   }
 
   refreshOverlay(): void {
@@ -79,6 +76,11 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     if (matches.length === 0) {
       return Promise.resolve();
     }
+    const cursorMatch = this._findNext(false);
+    const match =
+      cursorMatch &&
+      this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
+    this._currentMatch = match;
 
     return Promise.resolve();
   }
