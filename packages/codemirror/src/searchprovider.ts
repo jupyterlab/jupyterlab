@@ -533,18 +533,26 @@ export class CodeMirrorSearchHighlighter {
       // Highlight the current index
       if (this._currentIndex !== null) {
         const match = this.matches[this._currentIndex];
-        const start = this.editor.doc.posFromIndex(match.position);
-        this.editor.setSelection({
-          start: {
+        this._cm.operation(() => {
+          const start = this.editor.doc.posFromIndex(match.position);
+          const from = {
             line: start.line,
             column: start.ch
-          },
-          end: {
+          };
+          const to = {
             // Matches is on the same line
             line: start.line,
             column: start.ch + match.text.length
-          }
+          };
+          // No need to scroll into view this is the default behavior
+          this.editor.setSelection({
+            start: from,
+            end: to
+          });
         });
+      } else {
+        // Set cursor to remove any selection
+        this.editor.setCursorPosition({ line: 0, column: 0 });
       }
     }
   }
@@ -600,7 +608,7 @@ export class CodeMirrorSearchHighlighter {
    * @returns A promise that resolves once the action has completed.
    */
   highlightNext(): Promise<ISearchMatch | undefined> {
-    this._findNext(false);
+    this.currentIndex = this._findNext(false);
     return Promise.resolve(
       this._currentIndex !== null
         ? this._matches[this._currentIndex]
@@ -614,7 +622,7 @@ export class CodeMirrorSearchHighlighter {
    * @returns A promise that resolves once the action has completed.
    */
   highlightPrevious(): Promise<ISearchMatch | undefined> {
-    this._findNext(true);
+    this.currentIndex = this._findNext(true);
     return Promise.resolve(
       this._currentIndex !== null
         ? this._matches[this._currentIndex]
@@ -674,7 +682,6 @@ export class CodeMirrorSearchHighlighter {
           ch: stream.pos
         });
 
-        console.log('overlay', position, lastMatchIndex, this._matches);
         let found =
           this._matches.length > 0
             ? Utils.findNext(
@@ -684,7 +691,6 @@ export class CodeMirrorSearchHighlighter {
                 this._matches.length - 1
               )
             : null;
-        console.log('found', found);
 
         if (found !== null) {
           lastMatchIndex = found;
@@ -712,10 +718,10 @@ export class CodeMirrorSearchHighlighter {
     };
   }
 
-  private _findNext(reverse: boolean): void {
+  private _findNext(reverse: boolean): number | null {
     if (this._matches.length === 0) {
       // No-op
-      return;
+      return null;
     }
     // In order to support search-as-you-type, we needed a way to allow the first
     // match to be selected when a search is started, but prevent the selected
@@ -740,64 +746,20 @@ export class CodeMirrorSearchHighlighter {
       this._matches.length - 1
     );
 
-    let match: ISearchMatch;
-    if (found !== null) {
-      while (
-        (match = this._matches[found]).position === lastPosition.line &&
-        match.position < lastPosition.ch
-      ) {
-        found += 1;
-        if (found >= this._matches.length) {
-          found = null;
-          break;
-        }
-      }
-    }
-
     if (found === null) {
       // Don't loop
-      return;
+      return null;
     }
 
     if (reverse) {
       found -= 1;
       if (found < 0) {
         // Don't loop
-        return;
+        return null;
       }
     }
 
-    match = this._matches[found];
-
-    this._cm.operation(() => {
-      const fromPos: CodeMirror.Position = this.editor.doc.posFromIndex(
-        match.position
-      );
-      const toPos: CodeMirror.Position = {
-        line: fromPos.line,
-        ch: fromPos.ch + match.text.length
-      };
-
-      const selRange: CodeEditor.IRange = {
-        start: {
-          line: fromPos.line,
-          column: fromPos.ch
-        },
-        end: {
-          line: toPos.line,
-          column: toPos.ch
-        }
-      };
-
-      this._cm.setSelection(selRange);
-      this._cm.scrollIntoView(
-        {
-          from: fromPos,
-          to: toPos
-        },
-        100
-      );
-    });
+    return found;
   }
 
   private _toEditorPos(posIn: CodeMirror.Position): CodeEditor.IPosition {
