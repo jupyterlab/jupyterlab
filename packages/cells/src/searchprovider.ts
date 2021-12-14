@@ -21,11 +21,7 @@ import { CodeCellModel, ICellModel } from './model';
 import { Cell } from './widget';
 
 export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
-  constructor(
-    protected cell: Cell<ICellModel>,
-    protected rendermime?: IRenderMimeRegistry,
-    protected searchRegistry?: ISearchProviderRegistry
-  ) {
+  constructor(protected cell: Cell<ICellModel>) {
     this._currentIndex = null;
     this._changed = new Signal<IBaseSearchProvider, void>(this);
     this.cmHandler = new CodeMirrorSearchHighlighter(
@@ -42,10 +38,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   }
 
   get matchesSize(): number {
-    return (
-      this.cmHandler.matches.length +
-      this.outputMatches.reduce((sum, matches) => (sum += matches.length), 0)
-    );
+    return this.cmHandler.matches.length;
   }
 
   get isDisposed(): boolean {
@@ -76,50 +69,11 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     const content = this.cell.model.modelDB.get('value') as IObservableString;
     await this.onInputChanged(content);
     content.changed.connect(this.onInputChanged, this);
-
-    // Search outputs
-    this.outputMatches.length = 0;
-    if (
-      filters?.output !== false &&
-      this.cell.model.type === 'code' &&
-      this.rendermime &&
-      this.searchRegistry
-    ) {
-      const outputs = (this.cell.model as CodeCellModel).outputs;
-      const searchOutputs = new Array<Promise<void>>();
-      for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-        const output = outputs.get(outputIdx);
-        // Search for the display mimetype as in packages/outputarea/src/widget.ts
-        const mimeType = this.rendermime.preferredMimeType(
-          output.data,
-          output.trusted ? 'any' : 'ensure'
-        );
-        if (mimeType) {
-          const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
-            mimeType
-          );
-          if (searchEngine && output.highlights) {
-            searchOutputs.push(
-              searchEngine.search(query, output.data).then(hits => {
-                output.highlights = hits;
-              })
-            );
-          }
-        }
-      }
-
-      await Promise.all(searchOutputs);
-      outputs.changed.connect(this.onOutputsChanged, this);
-      outputs.stateChanged.connect(this.onOutputChanged, this);
-    }
-
-    return Promise.resolve();
   }
 
-  endQuery(): Promise<void> {
+  async endQuery(): Promise<void> {
     this.query = null;
-    this.cmHandler.endQuery();
-    return Promise.resolve();
+    await this.cmHandler.endQuery();
   }
 
   /**
@@ -238,16 +192,6 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
       let match: ISearchMatch | undefined = undefined;
       if (this._currentIndex < this.cmHandler.matches.length) {
         match = this.cmHandler.matches[this._currentIndex];
-      } else {
-        let index = this._currentIndex - this.cmHandler.matches.length;
-        for (const output of this.outputMatches) {
-          if (index < output.length) {
-            match = output[index];
-            break;
-          } else {
-            index -= output.length;
-          }
-        }
       }
       return match;
     }
@@ -279,6 +223,113 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     }
   }
 
+  protected cmHandler: CodeMirrorSearchHighlighter;
+  protected isActive = false;
+  protected query: RegExp | null = null;
+  private _changed: Signal<IBaseSearchProvider, void>;
+  private _isDisposed = false;
+  private _currentIndex: number | null = null;
+}
+
+class CodeCellSearchProvider extends CellSearchProvider {
+  constructor(
+    cell: Cell<ICellModel>,
+    protected rendermime?: IRenderMimeRegistry,
+    protected searchRegistry?: ISearchProviderRegistry
+  ) {
+    super(cell);
+  }
+
+  get matchesSize(): number {
+    let outputsSize = 0;
+    const outputs = (this.cell.model as CodeCellModel).outputs;
+    for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
+      const output = outputs.get(outputIdx);
+      outputsSize += output.highlights?.length ?? 0;
+    }
+
+    return super.matchesSize + outputsSize;
+  }
+  /**
+   * Initialize the search using the provided options. Should update the UI
+   * to highlight all matches and "select" whatever the first match should be.
+   *
+   * @param query A RegExp to be use to perform the search
+   * @param filters Filter parameters to pass to provider
+   *
+   * @returns A promise that resolves with a list of all matches
+   */
+  async startQuery(query: RegExp, filters?: IFiltersType): Promise<void> {
+    await super.startQuery(query, filters);
+
+    // Search outputs
+    if (
+      filters?.output !== false &&
+      this.cell.model.type === 'code' &&
+      this.rendermime &&
+      this.searchRegistry
+    ) {
+      const outputs = (this.cell.model as CodeCellModel).outputs;
+      const searchOutputs = new Array<Promise<void>>();
+      for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
+        const output = outputs.get(outputIdx);
+        // Search for the display mimetype as in packages/outputarea/src/widget.ts
+        const mimeType = this.rendermime.preferredMimeType(
+          output.data,
+          output.trusted ? 'any' : 'ensure'
+        );
+        if (mimeType) {
+          const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
+            mimeType
+          );
+          if (searchEngine && output.highlights) {
+            searchOutputs.push(
+              searchEngine.search(query, output.data[mimeType]).then(hits => {
+                output.highlights = hits;
+              })
+            );
+          }
+        }
+      }
+
+      await Promise.all(searchOutputs);
+      outputs.changed.connect(this.onOutputsChanged, this);
+      outputs.stateChanged.connect(this.onOutputChanged, this);
+    }
+  }
+
+  async endQuery(): Promise<void> {
+    await super.endQuery();
+    const outputs = (this.cell.model as CodeCellModel).outputs;
+    for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
+      const output = outputs.get(outputIdx);
+      if ((output.highlights?.length ?? 0) > 0) {
+        output.highlights = [];
+      }
+    }
+  }
+
+  protected getCurrentMatch(): ISearchMatch | undefined {
+    let match = super.getCurrentMatch();
+    if (!match && this.currentMatchIndex !== null) {
+      let index = this.currentMatchIndex - this.cmHandler.matches.length;
+      const outputs = (this.cell.model as CodeCellModel).outputs;
+      for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
+        const output = outputs.get(outputIdx);
+        if (index < (output.highlights?.length ?? 0)) {
+          match = {
+            ...output.highlights![index],
+            index: this.currentMatchIndex
+          };
+          break;
+        } else {
+          index -= output.highlights?.length ?? 0;
+        }
+      }
+    }
+    return match;
+  }
+
   protected onOutputsChanged(
     output: IOutputAreaModel,
     changes: IOutputAreaModel.ChangedArgs
@@ -292,12 +343,21 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   ): void {
     // No-op
   }
+}
 
-  protected cmHandler: CodeMirrorSearchHighlighter;
-  protected isActive = false;
-  protected outputMatches = new Array<ISearchMatch[]>();
-  protected query: RegExp | null = null;
-  private _changed: Signal<IBaseSearchProvider, void>;
-  private _isDisposed = false;
-  private _currentIndex: number | null = null;
+class MarkdownCellSearchProvider extends CellSearchProvider {}
+
+export function createCellSearchProvider(
+  cell: Cell<ICellModel>,
+  rendermime?: IRenderMimeRegistry,
+  searchRegistry?: ISearchProviderRegistry
+): CellSearchProvider {
+  switch (cell.model.type) {
+    case 'code':
+      return new CodeCellSearchProvider(cell, rendermime, searchRegistry);
+    case 'markdown':
+      return new MarkdownCellSearchProvider(cell);
+    default:
+      return new CellSearchProvider(cell);
+  }
 }

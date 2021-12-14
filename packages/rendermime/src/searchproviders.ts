@@ -11,7 +11,7 @@ const MARKDOWN_URL_LINKS = /\[(.*?)\]\(.+?\)/g;
  * Search provider for markdown string
  *
  * It uses TextSearchEngine after filtering some unrendered fragments
- * like links
+ * like links and math insets.
  */
 export const MarkdownSearchEngine = {
   search(query: RegExp, data: string): Promise<ISearchMatch[]> {
@@ -39,3 +39,5 @@ export const MarkdownSearchEngine = {
     return TextSearchEngine.search(query, data);
   }
 };
+
+// TODO HTMLStringSearchEngine => search HTML after whiting tags to search only text node

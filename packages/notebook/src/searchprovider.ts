@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CellSearchProvider, ICellModel } from '@jupyterlab/cells';
+import {
+  CellSearchProvider,
+  ICellModel,
+  createCellSearchProvider
+} from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
   IFilter,
@@ -112,13 +116,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     // For each cell, create a search provider
     this._searchProviders = await Promise.all(
       cells.map(async cell => {
-        const cellSearchProvider = new CellSearchProvider(
+        const cellSearchProvider = createCellSearchProvider(
           cell,
           this.widget!.content.rendermime,
           this.registry
         );
 
-        await cellSearchProvider.startQuery(query, filters);
+        await cellSearchProvider.startQuery(query, finalFilters);
 
         return cellSearchProvider;
       })
@@ -296,7 +300,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           ArrayExt.insert(
             this._searchProviders,
             changes.newIndex + index,
-            new CellSearchProvider(
+            createCellSearchProvider(
               // Ok to access the widget as NotebookPanel is instantiated before this object
               this.widget!.content.widgets[changes.newIndex + index],
               this.widget!.content.rendermime,
@@ -326,7 +330,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           ArrayExt.insert(
             this._searchProviders,
             changes.newIndex + index,
-            new CellSearchProvider(
+            createCellSearchProvider(
               this.widget!.content.widgets[changes.newIndex + index],
               this.widget!.content.rendermime,
               this.registry

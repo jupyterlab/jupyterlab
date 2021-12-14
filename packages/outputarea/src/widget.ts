@@ -312,7 +312,10 @@ export class OutputArea extends Widget {
       }
       if (change[1] == 'highlights') {
         const layout = this.layout as PanelLayout;
-        const renderer = layout.widgets[change[0]];
+        const outputPanel = layout.widgets[change[0]] as Panel;
+        const renderer = outputPanel.widgets
+          ? outputPanel.widgets[1]
+          : new Widget();
         const model = this.model.get(change[0]);
         if (
           (renderer as IRenderMime.IRenderer).renderHighlights &&

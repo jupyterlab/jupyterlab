@@ -140,8 +140,10 @@ export class OutputAreaModel implements IOutputAreaModel {
       options.contentFactory || OutputAreaModel.defaultContentFactory;
     this.list = new ObservableList<IOutputModel>();
     if (options.values) {
-      each(options.values, value => {
+      each(options.values, (value, index) => {
         this._add(value);
+        const item = this.list.get(index);
+        item.changed.connect(this._onGenericChange, this);
       });
     }
     this.list.changed.connect(this._onListChanged, this);
