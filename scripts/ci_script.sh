@@ -262,19 +262,6 @@ if [[ $GROUP == usage ]]; then
     # Use the extension upgrade script
     pip install cookiecutter
     python -m jupyterlab.upgrade_extension --no-input jupyterlab/tests/mock_packages/extension
-
-    # Test theme creation - make sure we can add it as a package, build,
-    # and run browser
-    pip install -q pexpect
-    python scripts/create_theme.py
-    mv foo packages
-    jlpm run integrity
-    jlpm run build:packages
-    jlpm run build:dev
-    python -m jupyterlab.browser_check --dev-mode
-    jlpm run remove:package foo
-    jlpm run integrity
-
 fi
 
 
