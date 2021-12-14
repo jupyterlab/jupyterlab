@@ -775,13 +775,6 @@ export class CodeMirrorSearchHighlighter {
   private _overlay: any;
 }
 
-export class SearchState {
-  posFrom: CodeMirror.Position;
-  posTo: CodeMirror.Position;
-  lastQuery: string;
-  query: RegExp;
-}
-
 namespace Private {
   export interface ICodeMirrorMatch {
     from: CodeMirror.Position;
