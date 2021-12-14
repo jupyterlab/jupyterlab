@@ -60,9 +60,9 @@ Submitting a Pull Request Contribution
 --------------------------------------
 
 Generally, an issue should be opened describing a piece of proposed work
-and the issues it solves before a pull request is opened. Your issue should 
-go through a brief triage process to ensure that it meets our definition 
-of ready before we merge any pull requests that relate to it.
+and the issues it solves before a pull request is opened. A triager will 
+ensure that your issue it meets our definition of ready before we can merge
+any pull requests that relate to it.
 
 Issue Management
 ^^^^^^^^^^^^^^^^
@@ -83,8 +83,8 @@ bot <https://github.com/apps/lock>`__ will lock the issue. If additional
 discussion is desired, or if the pull request doesn't fully address the
 locked issue, please open a new issue referencing the locked issue.
 
-New issues are subject to triage. A developer will triage your new issue 
-by doing the following:
+New issues are subject to triage. A developer with triage permissions 
+(a *triager*) will do the following:
 
 1. Read the issue
 2. Search the existing issues and mark it as a duplicate if necessary
@@ -92,12 +92,18 @@ by doing the following:
 4. If the issue is ready to be worked on, assign it to a milestone
 5. Apply appropriate labels to the issue (see examples below)
 
-You may start to work on your issue as soon as you file it. Please 
+A developer may start to work on an issue as soon as it is filed. Please 
 work with a triager if they have any questions about your issue so that 
 your changes can be merged in without delay.
 
 Definition of Ready
 ^^^^^^^^^^^^^^^^^^^
+
+One of the main goals of triage is to get issues into a state where they
+are **ready** for someone to work on. Once a triager is satisfies that an 
+issue meets the definition below, they will remove the ``status:Needs Triage``
+label from it. We will not merge a pull request for an issue that still 
+needs triage.
 
 **All requested information, where applicable, is provided.** From the 
 templates in JupyterLab’s issues:
@@ -133,8 +139,7 @@ furthers the goals of the Jupyter project.
 Labels Used by Triagers
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-A bot applies the ``status: Needs Triage`` label to all new bugs and 
-enhancement requests as they are filed.
+All new bugs and enhancement requests have the ``status: Needs Triage`` label.
 
 On a regular basis, Jupyter contributors (triage reviewers or triagers)
 review JupyterLab issues tagged
