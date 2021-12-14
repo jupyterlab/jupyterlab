@@ -139,20 +139,20 @@ furthers the goals of the Jupyter project.
 Labels Used by Triagers
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-All new bugs and enhancement requests have the ``status: Needs Triage`` label.
+All new bugs and enhancement requests have the ``status:Needs Triage`` label.
 
 On a regular basis, Jupyter contributors (triage reviewers or triagers)
 review JupyterLab issues tagged
-with ``status: Needs Triage``, starting with the oldest, and determine 
+with ``status:Needs Triage``, starting with the oldest, and determine 
 whether they meet the definition of ready.
 
 Once triaged, if the issue is ready, the reviewer removes the 
-``status: Needs Triage`` label; no additional label is required. If there 
+``status:Needs Triage`` label; no additional label is required. If there 
 is not enough information in the issue as filed, the triage reviewer applies
-the ``status: Needs Info`` label and leaves ``status: Needs Triage`` in place.
-If an issue has remained in ``status: Needs Info`` for more than 14 days 
+the ``status:Needs Info`` label and leaves ``status:Needs Triage`` in place.
+If an issue has remained in ``status:Needs Info`` for more than 14 days 
 without any follow-up communication, the reviewer should apply 
-``status: Blocked``. A blocked issue should be closed after another 14 days
+``status:Blocked``. A blocked issue should be closed after another 14 days
 pass without a reply that unblocks it.
 
 Our expectation is that every new issue should be examined within a week of
