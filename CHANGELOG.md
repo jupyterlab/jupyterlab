@@ -2,6 +2,10 @@
 github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.2.x/CHANGELOG.md'
 ---
 
+<!-- The line below is MyST syntax for creating a reference to changelog -->
+
+(changelog)=
+
 # JupyterLab Changelog
 
 ## v3.2
