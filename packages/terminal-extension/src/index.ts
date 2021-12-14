@@ -356,9 +356,7 @@ export function addCommands(
         } else {
           // we are restoring a terminal widget but the corresponding terminal was closed
           // let's start a new terminal with the original name
-          session = await serviceManager.terminals.startNew({
-            model: { name }
-          });
+          session = await serviceManager.terminals.startNew({ name });
         }
       } else {
         // we are creating a new terminal widget with a new terminal

@@ -173,9 +173,9 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    * options.
    */
   async startNew(
-    options?: Omit<Terminal.ITerminalConnection.IOptions, 'serverSettings'>
+    options?: Terminal.ITerminal.IOptions
   ): Promise<Terminal.ITerminalConnection> {
-    const model = await startNew(this.serverSettings, options?.model.name);
+    const model = await startNew(this.serverSettings, options?.name);
     await this.refreshRunning();
     return this.connectTo({ model });
   }
@@ -326,7 +326,7 @@ export namespace TerminalManager {
      *
      */
     async startNew(
-      options?: Omit<Terminal.ITerminalConnection.IOptions, 'serverSettings'>
+      options?: Terminal.ITerminal.IOptions
     ): Promise<Terminal.ITerminalConnection> {
       return Promise.reject(
         new Error('Not implemented in no-op Terminal Manager')

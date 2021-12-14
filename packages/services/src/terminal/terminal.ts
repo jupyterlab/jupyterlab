@@ -16,6 +16,15 @@ import { IManager as IBaseManager } from '../basemanager';
 import { IModel, isAvailable } from './restapi';
 export { IModel, isAvailable };
 
+export namespace ITerminal {
+  export interface IOptions {
+    /**
+     * Terminal name.
+     */
+    name: string;
+  }
+}
+
 /**
  * An interface for a terminal session.
  */
@@ -152,9 +161,7 @@ export interface IManager extends IBaseManager {
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  startNew(
-    options?: Omit<ITerminalConnection.IOptions, 'serverSettings'>
-  ): Promise<ITerminalConnection>;
+  startNew(options?: ITerminal.IOptions): Promise<ITerminalConnection>;
 
   /*
    * Connect to a running session.
