@@ -105,6 +105,10 @@ issue meets the definition below, they will remove the ``status:Needs Triage``
 label from it. We will not merge a pull request for an issue that still 
 needs triage.
 
+Triagers should also ensure that the issue has appropriate labels that 
+describe it, such as labels with the ``pkg:`` prefix for issues that 
+affect one or more packages.
+
 **All requested information, where applicable, is provided.** From the 
 templates in JupyterLab’s issues:
 
