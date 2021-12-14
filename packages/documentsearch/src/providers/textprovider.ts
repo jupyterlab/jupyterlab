@@ -4,7 +4,7 @@
 import { ISearchMatch } from '../tokens';
 
 /**
- * Search provider for plain/text
+ * Search provider for text/plain
  */
 export const TextSearchEngine = {
   search(query: RegExp, data: string): Promise<ISearchMatch[]> {

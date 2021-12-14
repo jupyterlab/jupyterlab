@@ -28,7 +28,9 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   ) {
     this._currentIndex = null;
     this._changed = new Signal<IBaseSearchProvider, void>(this);
-    this.cmHandler = new CodeMirrorSearchHighlighter(this.editor);
+    this.cmHandler = new CodeMirrorSearchHighlighter(
+      this.cell.editor as CodeMirrorEditor
+    );
   }
 
   get changed(): Signal<IBaseSearchProvider, void> {
@@ -37,10 +39,6 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
 
   get currentMatchIndex(): number | null {
     return this._currentIndex;
-  }
-
-  get editor(): CodeMirrorEditor {
-    return this.cell.editor as CodeMirrorEditor;
   }
 
   get matchesSize(): number {

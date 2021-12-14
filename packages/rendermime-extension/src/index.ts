@@ -14,11 +14,18 @@ import {
 import { ISanitizer } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import {
+  ISearchProviderRegistry,
+  TextSearchEngine
+} from '@jupyterlab/documentsearch';
+import {
   ILatexTypesetter,
   IMarkdownParser,
   IRenderMimeRegistry,
+  markdownRendererFactory,
+  MarkdownSearchEngine,
   RenderMimeRegistry,
-  standardRendererFactories
+  standardRendererFactories,
+  textRendererFactory
 } from '@jupyterlab/rendermime';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
@@ -44,9 +51,35 @@ const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
 };
 
 /**
- * Export the plugin as default.
+ * A plugin providing search engine for cell outputs.
  */
-export default plugin;
+const search: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/rendermime-extension:search',
+  requires: [ISearchProviderRegistry],
+  activate: (app: JupyterFrontEnd, searchRegistry: ISearchProviderRegistry) => {
+    textRendererFactory.mimeTypes.forEach(mimeType => {
+      searchRegistry.registerMimeTypeSearchEngine(mimeType, TextSearchEngine);
+    });
+
+    [
+      ...markdownRendererFactory.mimeTypes,
+      'text/x-ipythongfm',
+      'text/x-markdown',
+      'text/x-gfm'
+    ].forEach(mimeType => {
+      searchRegistry.registerMimeTypeSearchEngine(
+        mimeType,
+        MarkdownSearchEngine
+      );
+    });
+  },
+  autoStart: true
+};
+
+/**
+ * Export the plugins as default.
+ */
+export default [plugin, search];
 
 /**
  * Activate the rendermine plugin.

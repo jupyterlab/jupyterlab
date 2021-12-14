@@ -534,7 +534,7 @@ export class CodeMirrorSearchHighlighter {
       if (this._currentIndex !== null) {
         const match = this.matches[this._currentIndex];
         this._cm.operation(() => {
-          const start = this.editor.doc.posFromIndex(match.position);
+          const start = this._cm.doc.posFromIndex(match.position);
           const from = {
             line: start.line,
             column: start.ch
@@ -545,20 +545,16 @@ export class CodeMirrorSearchHighlighter {
             column: start.ch + match.text.length
           };
           // No need to scroll into view this is the default behavior
-          this.editor.setSelection({
+          this._cm.setSelection({
             start: from,
             end: to
           });
         });
       } else {
         // Set cursor to remove any selection
-        this.editor.setCursorPosition({ line: 0, column: 0 });
+        this._cm.setCursorPosition({ line: 0, column: 0 });
       }
     }
-  }
-
-  get editor(): CodeMirrorEditor {
-    return this._cm;
   }
 
   get matches(): ISearchMatch[] {
@@ -636,7 +632,7 @@ export class CodeMirrorSearchHighlighter {
       return false;
     }
 
-    const currentSelection = this.editor!.getSelection();
+    const currentSelection = this._cm.getSelection();
     const currentSelectionLength =
       currentSelection.end.column - currentSelection.start.column;
     const selectionIsOneLine =
@@ -646,7 +642,7 @@ export class CodeMirrorSearchHighlighter {
       selectionIsOneLine &&
       match.text.length === currentSelectionLength &&
       match.position ===
-        this.editor.doc.indexFromPos({
+        this._cm.doc.indexFromPos({
           line: currentSelection.start.line,
           ch: currentSelection.start.column
         })
@@ -677,7 +673,7 @@ export class CodeMirrorSearchHighlighter {
        * updated while a search is active.
        */
       token: (stream: CodeMirror.StringStream) => {
-        const position = this.editor.doc.indexFromPos({
+        const position = this._cm.doc.indexFromPos({
           line: stream.lineOracle.line,
           ch: stream.pos
         });
