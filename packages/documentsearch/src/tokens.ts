@@ -141,18 +141,6 @@ export interface IHTMLSearchMatch extends ISearchMatch {
   readonly node: Text;
 }
 
-export interface ITextSearchMatch extends ISearchMatch {
-  /**
-   * Fragment containing match
-   */
-  readonly fragment: string;
-
-  /**
-   * Line number of match
-   */
-  line: number;
-}
-
 /**
  * This interface is meant to enforce that SearchProviders implement
  * the static canSearchOn function.

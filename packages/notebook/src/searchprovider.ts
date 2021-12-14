@@ -113,7 +113,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._searchProviders = await Promise.all(
       cells.map(async cell => {
         const cellSearchProvider = new CellSearchProvider(
-          cell.model,
+          cell,
           this.widget!.content.rendermime,
           this.registry
         );
@@ -297,7 +297,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
             this._searchProviders,
             changes.newIndex + index,
             new CellSearchProvider(
-              model,
+              // Ok to access the widget as NotebookPanel is instantiated before this object
+              this.widget!.content.widgets[changes.newIndex + index],
               this.widget!.content.rendermime,
               this.registry
             )
@@ -326,7 +327,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
             this._searchProviders,
             changes.newIndex + index,
             new CellSearchProvider(
-              model,
+              this.widget!.content.widgets[changes.newIndex + index],
               this.widget!.content.rendermime,
               this.registry
             )
@@ -352,11 +353,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     const startIndex = this._currentProviderIndex;
     do {
+      const isEdited =
+        this.widget!.content.mode === 'edit' &&
+        this.widget!.content.activeCellIndex === this._currentProviderIndex;
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
       const match = reverse
-        ? await searchEngine.highlightPrevious(false)
-        : await searchEngine.highlightNext(false);
+        ? await searchEngine.highlightPrevious(false, isEdited)
+        : await searchEngine.highlightNext(false, isEdited);
 
       if (match) {
         this.widget!.content.activeCellIndex = this._currentProviderIndex;

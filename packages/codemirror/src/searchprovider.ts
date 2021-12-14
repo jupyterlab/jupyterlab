@@ -33,14 +33,15 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IBaseSearchProvider,
-  ITextSearchMatch
+  ISearchMatch,
+  TextSearchEngine
 } from '@jupyterlab/documentsearch';
-import { ObservableList } from '@jupyterlab/observables';
+import { JSONExt } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorEditor } from './editor';
 
-type MatchMap = { [key: number]: { [key: number]: ITextSearchMatch } };
+type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
 export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   /**
@@ -131,7 +132,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightNext(loop?: boolean): Promise<ITextSearchMatch | undefined> {
+  async highlightNext(loop?: boolean): Promise<ISearchMatch | undefined> {
     const cursorMatch = this._findNext(false);
     if (!cursorMatch) {
       return;
@@ -148,9 +149,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightPrevious(
-    loop?: boolean
-  ): Promise<ITextSearchMatch | undefined> {
+  async highlightPrevious(loop?: boolean): Promise<ISearchMatch | undefined> {
     const cursorMatch = this._findNext(true);
     if (!cursorMatch) {
       return;
@@ -215,7 +214,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   /**
    * The same list of matches provided by the startQuery promise resolution
    */
-  get matches(): ITextSearchMatch[] {
+  get matches(): ISearchMatch[] {
     return this._parseMatchesFromState();
   }
 
@@ -230,7 +229,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     return size;
   }
 
-  get currentMatch(): ITextSearchMatch | null {
+  get currentMatch(): ISearchMatch | null {
     return this._currentMatch;
   }
 
@@ -296,32 +295,18 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    *
    * @param query The search term
    */
-  private _setInitialMatches(query: RegExp) {
+  private async _setInitialMatches(query: RegExp) {
     this._matchState = {};
 
-    const start = CodeMirror.Pos(this.editor.doc.firstLine(), 0);
-    const end = CodeMirror.Pos(this.editor.doc.lastLine());
-    const content = this.editor.doc.getRange(start, end);
-    const lines = content.split('\n');
-    const totalMatchIndex = 0;
-    lines.forEach((line, lineNumber) => {
-      query.lastIndex = 0;
-      let match = query.exec(line);
-      while (match) {
-        const col = match.index;
-        const matchObj: ITextSearchMatch = {
-          text: match[0],
-          line: lineNumber,
-          position: col,
-          fragment: line,
-          index: totalMatchIndex
-        };
-        if (!this._matchState[lineNumber]) {
-          this._matchState[lineNumber] = {};
-        }
-        this._matchState[lineNumber][col] = matchObj;
-        match = query.exec(line);
+    const content = this.editor.doc.getValue();
+    const matches = await TextSearchEngine.search(query, content);
+
+    matches.forEach(match => {
+      const { line, ch } = this.editor.doc.posFromIndex(match.position);
+      if (!this._matchState[line]) {
+        this._matchState[line] = {};
       }
+      this._matchState[line][ch] = match;
     });
   }
 
@@ -356,11 +341,12 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
         if (match && match.index === currentPos) {
           // found match, add it to state
           const matchLength = match[0].length;
-          const matchObj: ITextSearchMatch = {
+          const matchObj: ISearchMatch = {
             text: lineText.substr(currentPos, matchLength),
-            line: line,
-            position: currentPos,
-            fragment: lineText,
+            position: this.editor.doc.indexFromPos({
+              line,
+              ch: currentPos
+            }),
             index: 0 // fill in index when flattening, later
           };
           if (!this._matchState[line]) {
@@ -461,10 +447,10 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     });
   }
 
-  private _parseMatchesFromState(): ITextSearchMatch[] {
+  private _parseMatchesFromState(): ISearchMatch[] {
     let index = 0;
     // Flatten state map
-    const matches = new Array<ITextSearchMatch>();
+    const matches = new Array<ISearchMatch>();
 
     for (const lineKey in this._matchState) {
       const lineMatches = this._matchState[lineKey];
@@ -495,16 +481,19 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     const selectionIsOneLine =
       currentSelection.start.line === currentSelection.end.line;
     return (
-      this._currentMatch.line === currentSelection.start.line &&
-      this._currentMatch.position === currentSelection.start.column &&
+      selectionIsOneLine &&
       this._currentMatch.text.length === currentSelectionLength &&
-      selectionIsOneLine
+      this._currentMatch.position ===
+        this.editor.doc.indexFromPos({
+          line: currentSelection.start.line,
+          ch: currentSelection.start.column
+        })
     );
   }
 
   protected editor: CodeMirrorEditor;
   private _query: RegExp;
-  private _currentMatch: ITextSearchMatch | null;
+  private _currentMatch: ISearchMatch | null;
   private _matchState: MatchMap = {};
   private _changed = new Signal<this, void>(this);
   private _overlay: any;
@@ -519,15 +508,62 @@ export class CodeMirrorSearchHighlighter {
    * ### Notes
    * `matches` must be stored by (line, position)
    */
-  constructor(
-    editor: CodeMirrorEditor,
-    matches: ObservableList<ITextSearchMatch>
-  ) {
+  constructor(editor: CodeMirrorEditor) {
     this._cm = editor;
-    this._matches = matches;
+    this._matches = new Array<ISearchMatch>();
+    this._currentIndex = null;
+
+    // Start overlay
+    this.refresh();
   }
 
-  refreshOverlay(): void {
+  /**
+   * The current index of the selected match.
+   */
+  get currentIndex(): number | null {
+    return this._currentIndex;
+  }
+  set currentIndex(v: number | null) {
+    if (v !== this._currentIndex) {
+      if (v !== null && v >= this.matches.length) {
+        v = null;
+      }
+      this._currentIndex = v;
+
+      // Highlight the current index
+      if (this._currentIndex !== null) {
+        const match = this.matches[this._currentIndex];
+        const start = this.editor.doc.posFromIndex(match.position);
+        this.editor.setSelection({
+          start: {
+            line: start.line,
+            column: start.ch
+          },
+          end: {
+            // Matches is on the same line
+            line: start.line,
+            column: start.ch + match.text.length
+          }
+        });
+      }
+    }
+  }
+
+  get editor(): CodeMirrorEditor {
+    return this._cm;
+  }
+
+  get matches(): ISearchMatch[] {
+    return this._matches;
+  }
+  set matches(v: ISearchMatch[]) {
+    if (!JSONExt.deepEqual(this._matches as any, v as any)) {
+      this._matches = v;
+      this.refresh();
+    }
+  }
+
+  refresh(): void {
     this._refreshOverlay();
   }
 
@@ -539,7 +575,7 @@ export class CodeMirrorSearchHighlighter {
    * begin a new search.
    */
   endQuery(removeOverlay = true): Promise<void> {
-    this._currentMatchIndex = null;
+    this._currentIndex = null;
 
     if (removeOverlay) {
       this._cm.removeOverlay(this._overlay);
@@ -559,22 +595,17 @@ export class CodeMirrorSearchHighlighter {
   }
 
   /**
-   * Resets UI state, removes all matches.
-   *
-   * @returns A promise that resolves when all state has been cleaned up.
-   */
-  async endSearch(): Promise<void> {
-    return this.endQuery();
-  }
-
-  /**
    * Move the current match indicator to the next match.
    *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightNext(): Promise<ITextSearchMatch | undefined> {
+  highlightNext(): Promise<ISearchMatch | undefined> {
     this._findNext(false);
-    return Promise.resolve(this.currentMatch ?? undefined);
+    return Promise.resolve(
+      this._currentIndex !== null
+        ? this._matches[this._currentIndex]
+        : undefined
+    );
   }
 
   /**
@@ -582,26 +613,36 @@ export class CodeMirrorSearchHighlighter {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightPrevious(): Promise<ITextSearchMatch | undefined> {
+  highlightPrevious(): Promise<ISearchMatch | undefined> {
     this._findNext(true);
-    return Promise.resolve(this.currentMatch ?? undefined);
+    return Promise.resolve(
+      this._currentIndex !== null
+        ? this._matches[this._currentIndex]
+        : undefined
+    );
   }
 
-  get currentMatch(): ITextSearchMatch | null {
-    return this._currentMatchIndex !== null
-      ? this._matches.get(this._currentMatchIndex)
-      : null;
-  }
+  isCurrentIndexHighlighted(): boolean {
+    // No current match
+    if (this._currentIndex === null) {
+      return false;
+    }
 
-  /**
-   * The current index of the selected match.
-   */
-  get currentMatchIndex(): number | null {
-    return this._currentMatchIndex;
-  }
-
-  get editor(): CodeMirrorEditor {
-    return this._cm;
+    const currentSelection = this.editor!.getSelection();
+    const currentSelectionLength =
+      currentSelection.end.column - currentSelection.start.column;
+    const selectionIsOneLine =
+      currentSelection.start.line === currentSelection.end.line;
+    const match = this._matches[this._currentIndex];
+    return (
+      selectionIsOneLine &&
+      match.text.length === currentSelectionLength &&
+      match.position ===
+        this.editor.doc.indexFromPos({
+          line: currentSelection.start.line,
+          ch: currentSelection.start.column
+        })
+    );
   }
 
   private _refreshOverlay() {
@@ -628,36 +669,39 @@ export class CodeMirrorSearchHighlighter {
        * updated while a search is active.
        */
       token: (stream: CodeMirror.StringStream) => {
-        const line = (stream as any).lineOracle.line;
+        const position = this.editor.doc.indexFromPos({
+          line: stream.lineOracle.line,
+          ch: stream.pos
+        });
 
-        let found = Utils.find(
-          this._matches,
-          line,
-          lastMatchIndex,
-          this._matches.length - 1
-        );
+        console.log('overlay', position, lastMatchIndex, this._matches);
+        let found =
+          this._matches.length > 0
+            ? Utils.findNext(
+                this._matches,
+                position,
+                lastMatchIndex,
+                this._matches.length - 1
+              )
+            : null;
+        console.log('found', found);
 
         if (found !== null) {
           lastMatchIndex = found;
-          let match: ITextSearchMatch;
-          while ((match = this._matches.get(found)).position < stream.pos) {
-            found += 1;
-            if (
-              found >= this._matches.length ||
-              this._matches.get(found).line !== line
-            ) {
-              // no matches, consume the rest of the stream
-              stream.skipToEnd();
-              return null;
-            }
+          const match = this._matches[found];
+          if (match.position > position + stream.string.length) {
+            // next match not in this stream, consume the rest of the stream
+            stream.skipToEnd();
+            return null;
           }
 
-          if (stream.pos === match.position) {
+          if (position === match.position) {
             // move the stream along and return searching style for the token
             stream.pos += match.text.length || 1;
             return 'searching';
           } else {
-            stream.pos = match.position;
+            // Move to the next match
+            stream.pos += match.position - position;
           }
         } else {
           // no matches, consume the rest of the stream
@@ -687,20 +731,20 @@ export class CodeMirrorSearchHighlighter {
 
     const cursorToGet = reverse ? 'anchor' : 'head';
     const lastPosition = this._cm.getCursor(cursorToGet);
-    const position = this._toEditorPos(lastPosition);
+    const position = this._cm.doc.indexFromPos(lastPosition);
 
     let found = Utils.findNext(
       this._matches,
-      position.line,
+      position + lastPosition.line,
       0,
       this._matches.length - 1
     );
 
-    let match: ITextSearchMatch;
+    let match: ISearchMatch;
     if (found !== null) {
       while (
-        (match = this._matches.get(found)).line === position.line &&
-        match.position < position.column
+        (match = this._matches[found]).position === lastPosition.line &&
+        match.position < lastPosition.ch
       ) {
         found += 1;
         if (found >= this._matches.length) {
@@ -723,16 +767,15 @@ export class CodeMirrorSearchHighlighter {
       }
     }
 
-    match = this._matches.get(found);
+    match = this._matches[found];
 
     this._cm.operation(() => {
-      const fromPos: CodeMirror.Position = {
-        line: match.line,
-        ch: match.position
-      };
+      const fromPos: CodeMirror.Position = this.editor.doc.posFromIndex(
+        match.position
+      );
       const toPos: CodeMirror.Position = {
-        line: match.line,
-        ch: match.position + match.text.length
+        line: fromPos.line,
+        ch: fromPos.ch + match.text.length
       };
 
       const selRange: CodeEditor.IRange = {
@@ -765,8 +808,8 @@ export class CodeMirrorSearchHighlighter {
   }
 
   private _cm: CodeMirrorEditor;
-  private _currentMatchIndex: number | null;
-  private _matches: ObservableList<ITextSearchMatch>;
+  private _currentIndex: number | null;
+  private _matches: ISearchMatch[];
   private _overlay: any;
 }
 
@@ -785,79 +828,39 @@ namespace Private {
 }
 
 export namespace Utils {
-  export function find(
-    matches: ObservableList<ITextSearchMatch>,
-    line: number,
-    lowerBound = 0,
-    higherBound = Infinity
-  ): number | null {
-    higherBound = Math.min(matches.length, higherBound);
-
-    while (lowerBound <= higherBound) {
-      let middle = lowerBound + Math.floor(0.5 * (lowerBound + higherBound));
-      const currentLine = matches.get(middle).line;
-
-      if (currentLine === line) {
-        // find the first match for line (multiple matches are available on the same line)
-        do {
-          middle -= 1;
-        } while (matches.get(middle).line === line && middle > 0);
-        return middle + 1;
-      } else if (currentLine < line) {
-        lowerBound = middle + 1;
-        if (line < matches.get(lowerBound).line) {
-          // No match for line
-          return null;
-        }
-      } else if (currentLine > line) {
-        higherBound = middle - 1;
-        if (line > matches.get(higherBound).line) {
-          // No match for line
-          return null;
-        }
-      }
-    }
-
-    const position = lowerBound > 0 ? lowerBound - 1 : 0;
-    const match = matches.get(position);
-    return match.line === line ? position : null;
-  }
-
   export function findNext(
-    matches: ObservableList<ITextSearchMatch>,
-    line: number,
+    matches: ISearchMatch[],
+    position: number,
     lowerBound = 0,
     higherBound = Infinity
   ): number | null {
-    higherBound = Math.min(matches.length, higherBound);
+    higherBound = Math.min(matches.length - 1, higherBound);
 
     while (lowerBound <= higherBound) {
-      let middle = lowerBound + Math.floor(0.5 * (lowerBound + higherBound));
-      const currentLine = matches.get(middle).line;
+      let middle = Math.floor(0.5 * (lowerBound + higherBound));
+      const currentPosition = matches[middle].position;
 
-      if (currentLine === line) {
-        // find the first match for line (multiple matches are available on the same line)
-        do {
-          middle -= 1;
-        } while (matches.get(middle).line === line && middle > 0);
-        return middle + 1;
-      } else if (currentLine < line) {
+      if (currentPosition < position) {
         lowerBound = middle + 1;
-        if (line < matches.get(lowerBound).line) {
-          // No match for line
+        if (
+          lowerBound < matches.length &&
+          matches[lowerBound].position > position
+        ) {
           return lowerBound;
         }
-      } else if (currentLine > line) {
+      } else if (currentPosition > position) {
         higherBound = middle - 1;
-        if (line > matches.get(higherBound).line) {
-          // No match for line
+        if (higherBound > 0 && matches[higherBound].position < position) {
           return middle;
         }
+      } else {
+        return middle;
       }
     }
 
-    const position = lowerBound > 0 ? lowerBound - 1 : 0;
-    const match = matches.get(position);
-    return match.line >= line ? position : null;
+    // Next could be the first item
+    const first = lowerBound > 0 ? lowerBound - 1 : 0;
+    const match = matches[first];
+    return match.position >= position ? first : null;
   }
 }
