@@ -61,7 +61,7 @@ Submitting a Pull Request Contribution
 
 Generally, an issue should be opened describing a piece of proposed work
 and the issues it solves before a pull request is opened. A triager will 
-ensure that your issue it meets our definition of ready before we can merge
+ensure that your issue meets our definition of ready before we can merge
 any pull requests that relate to it.
 
 Issue Management
