@@ -849,7 +849,7 @@ export namespace NotebookActions {
       notebook.activeCell,
       notebook
     );
-    if (headingLevel == null) {
+    if (headingLevel == -1) {
       Private.Headings.insertHeadingAboveCellIdx(0, 1, notebook);
     } else {
       Private.Headings.insertHeadingAboveCellIdx(
@@ -872,7 +872,7 @@ export namespace NotebookActions {
       notebook.activeCell,
       notebook
     );
-    headingLevel = headingLevel ? headingLevel : 1;
+    headingLevel = headingLevel > -1 ? headingLevel : 1;
     let cellIdxOfHeadingBelow = Private.Headings.findLowerEqualLevelParentHeadingBelow(
       notebook.activeCell,
       notebook,
@@ -2459,8 +2459,8 @@ namespace Private {
         baseCell,
         notebook
       );
-      if (!baseHeadingLevel) {
-        return returnIdx ? -1 : null; // no heading found
+      if (baseHeadingLevel == -1) {
+        baseHeadingLevel = 1; // if no heading level can be determined, assume we're on level 1
       }
       // find the heading above with heading level <= baseHeadingLevel and return its index
       let cellIdx = notebook.widgets.indexOf(baseCell) - 1;
@@ -2495,6 +2495,9 @@ namespace Private {
         baseCell,
         notebook
       );
+      if (baseHeadingLevel == -1) {
+        baseHeadingLevel = 1; // if no heading level can be determined, assume we're on level 1
+      }
       let cellIdx = notebook.widgets.indexOf(baseCell) + 1;
       while (cellIdx < notebook.widgets.length) {
         let cell = notebook.widgets[cellIdx];
