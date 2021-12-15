@@ -14,14 +14,14 @@ button.jp-Button.jp-mod-minimal.jp-TreeView.jp-TableView {
 
 button.jp-Button.jp-mod-minimal.jp-TreeView:hover {
   cursor: pointer;
-  background-color: var(--jp-layout-color1);
+  background-color: var(--jp-layout-color2);
 }
 
 button.jp-Button.jp-mod-minimal.jp-TableView:hover {
   cursor: pointer;
-  background-color: var(--jp-layout-color1);
+  background-color: var(--jp-layout-color2);
 }
 
 .jp-ViewModeSelected {
-  background-color: var(--jp-layout-color1);
+  background-color: var(--jp-layout-color2);
 }
