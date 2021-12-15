@@ -34,7 +34,10 @@ export namespace galata {
       rawCellConfig: { cursorBlinkRate: 0 }
     },
     '@jupyterlab/apputils-extension:themes': {
-      overrides: { 'content-font-family': 'DejaVu Sans' }
+      overrides: {
+        'content-font-family': 'DejaVu Sans',
+        'ui-font-family': 'DejaVu Sans'
+      }
     }
   };
 
