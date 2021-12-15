@@ -18,5 +18,6 @@ module.exports = {
 
     // Artifacts
     video: 'retain-on-failure'
-  }
+  },
+  expect: { toMatchSnapshot: { threshold: 0.3 } }
 } as PlaywrightTestConfig;
