@@ -54,7 +54,6 @@
     "style-loader": "~2.0.0",
     "svg-url-loader": "~6.0.0",
     "url-loader": "~4.1.0",
-    "watch": "~1.0.2",
     "webpack": "^4.41.1",
     "webpack-cli": "^4.1.0",
     "whatwg-fetch": "^3.0.0"
