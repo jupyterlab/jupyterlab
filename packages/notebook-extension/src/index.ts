@@ -231,8 +231,6 @@ namespace CommandIDs {
 
   export const showAllOutputs = 'notebook:show-all-cell-outputs';
 
-  export const toggleRenderSideBySide = 'notebook:toggle-render-side-by-side';
-
   export const toggleRenderSideBySideCurrentNotebook =
     'notebook:toggle-render-side-by-side-current';
 
@@ -1370,10 +1368,6 @@ function activateNotebookHandler(
       'experimentalDisableDocumentWideUndoRedo'
     ).composite as boolean;
 
-    Private.renderSideBySide = !settings.get('sideBySideRendering')
-      .composite as boolean;
-    commands.execute(CommandIDs.toggleRenderSideBySide);
-
     updateTracker({
       editorConfig: factory.editorConfig,
       notebookConfig: factory.notebookConfig,
@@ -2352,23 +2346,6 @@ function addCommands(
     isEnabled
   });
 
-  commands.addCommand(CommandIDs.toggleRenderSideBySide, {
-    label: trans.__('Toggle Side-by-side rendering setting'),
-    execute: args => {
-      Private.renderSideBySide = !Private.renderSideBySide;
-      tracker.forEach(widget => {
-        if (widget) {
-          if (Private.renderSideBySide) {
-            return NotebookActions.renderSideBySide(widget.content);
-          }
-          return NotebookActions.renderDefault(widget.content);
-        }
-      });
-    },
-    isToggled: () => Private.renderSideBySide,
-    isEnabled
-  });
-
   commands.addCommand(CommandIDs.toggleRenderSideBySideCurrentNotebook, {
     label: trans.__('Toggle Side-by-side Rendering'),
     execute: args => {
@@ -2576,7 +2553,6 @@ function populatePalette(
     CommandIDs.showOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
-    CommandIDs.toggleRenderSideBySide,
     CommandIDs.toggleRenderSideBySideCurrentNotebook,
     CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
@@ -2870,6 +2846,4 @@ namespace Private {
       translator?: ITranslator;
     }
   }
-
-  export let renderSideBySide = false;
 }
