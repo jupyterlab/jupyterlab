@@ -137,7 +137,7 @@ furthers the goals of the Jupyter project.
 * The issue represents work that one developer can commit to owning, even if 
   they collaborate with other developers for feedback. Excessively large issues 
   should be split into multiple issues, each triaged individually, or into 
-  `team-compass <https://github.com/jupyterlab/team-compass>` issues to discuss
+  `team-compass <https://github.com/jupyterlab/team-compass>`__ issues to discuss
   more substantive changes.
 
 Labels Used by Triagers
