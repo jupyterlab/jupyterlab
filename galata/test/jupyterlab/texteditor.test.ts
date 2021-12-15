@@ -26,7 +26,7 @@ test.describe('Text Editor Tests', () => {
     await page.menu.clickMenuItem('Settings>Setting Editor');
 
     await page.click('text=Text Editor');
-  
+
     // Add two rulers
     await page.click('button[aria-label="Add"]');
     await page.click('[id="root_editorConfig_rulers_0"]');
