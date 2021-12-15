@@ -737,7 +737,7 @@ export class CodeMirrorSearchHighlighter {
 
     let found = Utils.findNext(
       this._matches,
-      position + lastPosition.line,
+      position,
       0,
       this._matches.length - 1
     );
