@@ -117,7 +117,7 @@ For a **bug**:
 * Description, preferably including screen shots
 * Steps to reproduce
 * Expected behavior
-* Context: OS, browser, JupyterLab version, relevant output
+* Context, such as OS, browser, JupyterLab version, and output or log excerpts
 
 For a **feature request**:
 
