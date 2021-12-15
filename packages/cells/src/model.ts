@@ -632,10 +632,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     const trusted = this.trusted;
     const cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
+    let execution_count: number | null = null;
     const executionCount = this.modelDB.createValue('executionCount');
     if (!executionCount.get()) {
       if (cell && cell.cell_type === 'code') {
-        executionCount.set(cell.execution_count || null);
+        execution_count = cell.execution_count || null;
+        executionCount.set(execution_count);
         outputs = cell.outputs ?? [];
         // If execution count is not null presume the input code was the latest executed
         // TODO load from the notebook file when the dirty state is stored in it
@@ -654,6 +656,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     globalModelDBMutex(() => {
       const sharedCell = this.sharedModel as models.ISharedCodeCell;
       sharedCell.setOutputs(outputs);
+      sharedCell.execution_count = execution_count;
     });
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
     this._outputs.changed.connect(this.onGenericChange, this);
