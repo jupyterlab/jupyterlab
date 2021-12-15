@@ -11,7 +11,7 @@ import {
   IObservableMap,
   IObservableString
 } from '@jupyterlab/observables';
-//import * as models from '@jupyterlab/shared-models';
+import * as models from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -47,8 +47,11 @@ import {
   Command,
   EditorView,
   KeyBinding,
-  keymap } from '@codemirror/view';
-
+  keymap
+} from '@codemirror/view';
+import * as Y from 'yjs'
+import { yCollab } from 'y-codemirror.next' 
+import { Awareness } from 'y-protocols/awareness';
 /*import CodeMirror from 'codemirror';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/display/rulers.js';
@@ -116,6 +119,12 @@ const DOWN_ARROW = 40;
 // binding as it just introduces a lot of additional complexity without gaining anything.
 const USE_YCODEMIRROR_BINDING = true;
 
+interface YCodeMirrorBinding {
+  text: Y.Text;
+  // TODO: remove | null when we remove shareModel
+  awareness: Awareness | null;
+};
+
 /**
  * CodeMirror editor.
  */
@@ -149,8 +158,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...CodeMirrorEditor.defaultConfig,
       ...config
     });
-    const editor = (this._editor = Private.createEditor(host, fullConfig));
+
+    // TODO: refactor this when we decide to ALWAYS use YJS. Different parts of the
+    // editor should be created alltogether.
     this._initializeEditorBinding();
+    const editor = (this._editor = Private.createEditor(host, fullConfig, this._yeditorBinding));
+
     // every time the model is switched, we need to re-initialize the editor binding
     this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
 
@@ -235,9 +248,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (!USE_YCODEMIRROR_BINDING) {
       return;
     }
+    const sharedModel = this.model.sharedModel as models.IYText;
+    this._yeditorBinding = { text: sharedModel.ysource, awareness: sharedModel.awareness };
     // TODO: CM6 migration
     /*this._yeditorBinding?.destroy();
-    const sharedModel = this.model.sharedModel as models.IYText;
     const opts = sharedModel.undoManager
       ? { yUndoManager: sharedModel.undoManager }
       : {};
@@ -1219,7 +1233,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _isDisposed = false;
   private _lastChange: Transaction | null = null;
   private _poll: Poll;
-  //private _yeditorBinding: CodemirrorBinding | null;
+  private _yeditorBinding: YCodeMirrorBinding | null;
 }
 
 /**
@@ -1487,7 +1501,8 @@ export namespace CodeMirrorEditor {
 namespace Private {
   export function createEditor(
     host: HTMLElement,
-    config: CodeMirrorEditor.IConfig
+    config: CodeMirrorEditor.IConfig,
+    ybinding: YCodeMirrorBinding | null
   ): EditorView {
     const {
       lineNumbers,
@@ -1518,9 +1533,13 @@ namespace Private {
     if (autoClosingBrackets) {
       extensions.push(closeBrackets());
     }
-
+    if (ybinding) {
+      extensions.push(yCollab(ybinding.text, ybinding.awareness));
+    }
+    const doc = ybinding?.text.toString();
     const view = new EditorView({
       state: EditorState.create({
+        doc: doc,
         extensions: extensions
       }),
       parent: host

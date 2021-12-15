@@ -67,7 +67,9 @@
     "@lumino/signaling": "^1.10.1",
     "@lumino/widgets": "^1.33.0",
     "react": "^17.0.1",
-    "y-codemirror": "^3.0.1"
+    "y-codemirror.next": "~0.1.1",
+    "y-protocols": "^1.0.5",
+    "yjs": "^13.5.17"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.11",
