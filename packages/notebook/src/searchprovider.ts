@@ -73,6 +73,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   startSearch(searchTarget: NotebookPanel): void {
     super.startSearch(searchTarget);
     this.widget!.model!.cells.changed.connect(this._onCellsChanged, this);
+    this.widget!.content.activeCellChanged.connect(
+      this._onActiveCellChanged,
+      this
+    );
   }
 
   /**
@@ -143,7 +147,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * begin a new search.
    */
   async endQuery(): Promise<void> {
-    this.widget!.model!.cells.changed.connect(this._onCellsChanged, this);
     this.widget!.content.activeCellChanged.disconnect(
       this._onSearchProviderChanged,
       this
@@ -167,6 +170,12 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * @returns A promise that resolves when all state has been cleaned up.
    */
   async endSearch(): Promise<void> {
+    this.widget!.model!.cells.changed.disconnect(this._onCellsChanged, this);
+    this.widget!.content.activeCellChanged.disconnect(
+      this._onActiveCellChanged,
+      this
+    );
+
     const index = this.widget!.content.activeCellIndex;
     await this.endQuery();
     this.widget!.content.activeCellIndex = index;
@@ -357,14 +366,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     const startIndex = this._currentProviderIndex;
     do {
-      const isEdited =
-        this.widget!.content.mode === 'edit' &&
+      const isActive =
+        // this.widget!.content.mode === 'edit' &&
         this.widget!.content.activeCellIndex === this._currentProviderIndex;
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
       const match = reverse
-        ? await searchEngine.highlightPrevious(false, isEdited)
-        : await searchEngine.highlightNext(false, isEdited);
+        ? await searchEngine.highlightPrevious(false, isActive)
+        : await searchEngine.highlightNext(false, isActive);
 
       if (match) {
         this.widget!.content.activeCellIndex = this._currentProviderIndex;
@@ -405,6 +414,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     this._currentProviderIndex = null;
     return null;
+  }
+
+  private _onActiveCellChanged() {
+    if (
+      this.widget!.content.activeCellIndex !== this._currentProviderIndex &&
+      this._currentProviderIndex !== null
+    ) {
+      this._searchProviders[this._currentProviderIndex].clearSelection();
+      this._currentProviderIndex = null;
+    }
   }
 
   private _onSearchProviderChanged() {

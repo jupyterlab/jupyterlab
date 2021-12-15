@@ -52,6 +52,11 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     return this._isDisposed;
   }
 
+  clearSelection(): void {
+    this._currentIndex = null;
+    this.cmHandler.currentIndex = this._currentIndex;
+  }
+
   dispose(): void {
     if (this._isDisposed) {
       return;
@@ -90,13 +95,13 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
    */
   async highlightNext(
     loop = false,
-    isEdited = false
+    isActive = false
   ): Promise<ISearchMatch | undefined> {
     if (this.matchesSize === 0) {
       this._currentIndex = null;
     } else {
       // If no match is selected or the cell is being edited => search from cursor
-      if (this._currentIndex === null || isEdited) {
+      if (this._currentIndex === null || isActive) {
         // This starts from the cursor position
         const match = await this.cmHandler.highlightNext();
         if (match) {
@@ -133,7 +138,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
    */
   async highlightPrevious(
     loop = false,
-    isEdited = false
+    isActive = false
   ): Promise<ISearchMatch | undefined> {
     if (this.matchesSize === 0) {
       this._currentIndex = null;
@@ -141,7 +146,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
       if (
         (this._currentIndex !== null &&
           this._currentIndex <= this.cmHandler.matches.length) ||
-        isEdited
+        isActive
       ) {
         const match = await this.cmHandler.highlightPrevious();
         if (match) {
@@ -258,6 +263,11 @@ class CodeCellSearchProvider extends CellSearchProvider {
     return super.matchesSize + outputsSize;
   }
 
+  clearSelection(): void {
+    super.clearSelection();
+    this.updateHighlightedOutput();
+  }
+
   /**
    * Move the current match indicator to the next match.
    *
@@ -265,9 +275,9 @@ class CodeCellSearchProvider extends CellSearchProvider {
    */
   async highlightNext(
     loop = false,
-    isEdited = false
+    isActive = false
   ): Promise<ISearchMatch | undefined> {
-    const match = await super.highlightNext(loop, isEdited);
+    const match = await super.highlightNext(loop, isActive);
 
     this.updateHighlightedOutput();
 
@@ -281,9 +291,9 @@ class CodeCellSearchProvider extends CellSearchProvider {
    */
   async highlightPrevious(
     loop = false,
-    isEdited = false
+    isActive = false
   ): Promise<ISearchMatch | undefined> {
-    const match = await super.highlightPrevious(loop, isEdited);
+    const match = await super.highlightPrevious(loop, isActive);
 
     this.updateHighlightedOutput();
 
@@ -410,6 +420,11 @@ class CodeCellSearchProvider extends CellSearchProvider {
 class MarkdownCellSearchProvider extends CellSearchProvider {
   // TODO should we switch to rendered hits / codemirror hits depending on the cell status?
 
+  clearSelection(): void {
+    super.clearSelection();
+    this.updateRenderedSelection();
+  }
+
   /**
    * Move the current match indicator to the next match.
    *
@@ -417,9 +432,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    */
   async highlightNext(
     loop = false,
-    isEdited = false
+    isActive = false
   ): Promise<ISearchMatch | undefined> {
-    const match = await super.highlightNext(loop, isEdited);
+    const match = await super.highlightNext(loop, isActive);
 
     this.updateRenderedSelection();
 
@@ -433,9 +448,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    */
   async highlightPrevious(
     loop = false,
-    isEdited = false
+    isActive = false
   ): Promise<ISearchMatch | undefined> {
-    const match = await super.highlightPrevious(loop, isEdited);
+    const match = await super.highlightPrevious(loop, isActive);
 
     this.updateRenderedSelection();
 
