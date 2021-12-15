@@ -14,7 +14,7 @@ import { removeMath, replaceMath } from './latex';
 /**
  * Class name defining a highlighted text fragment
  */
-const HIGHLIGHT_CLASS_NAME = 'jp-mimeType-highlight';
+export const HIGHLIGHT_CLASS_NAME = 'jp-mimeType-highlight';
 /**
  * Regex to capture escaped highlighted fragment in plain text
  */

@@ -525,7 +525,7 @@ export class CodeMirrorSearchHighlighter {
   }
   set currentIndex(v: number | null) {
     if (v !== this._currentIndex) {
-      if (v !== null && v >= this.matches.length) {
+      if (v !== null && (v < 0 || v >= this.matches.length)) {
         v = null;
       }
       this._currentIndex = v;

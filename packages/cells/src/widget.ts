@@ -1625,6 +1625,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
   }
 
+  get renderer(): IRenderMime.IRenderer | null {
+    return this._renderer;
+  }
+
   protected maybeCreateCollapseButton(): void {
     if (
       this.headingInfo.level > 0 &&

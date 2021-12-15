@@ -15,13 +15,17 @@ import {
 import { IObservableString } from '@jupyterlab/observables';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
 import {
+  HIGHLIGHT_CLASS_NAME,
   IRenderMimeRegistry,
   MarkdownSearchEngine
 } from '@jupyterlab/rendermime';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
+import { CodeCell } from '.';
 import { CodeCellModel, ICellModel } from './model';
 import { Cell, MarkdownCell } from './widget';
+
+const SELECTED_HIGHLIGHT_CLASS = 'jp-mod-selected';
 
 export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   constructor(protected cell: Cell<ICellModel>) {
@@ -110,7 +114,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
         this._currentIndex =
           (this._currentIndex + this.matchesSize) % this.matchesSize;
       } else {
-        if (this._currentIndex > this.matchesSize) {
+        if (this._currentIndex >= this.matchesSize) {
           this._currentIndex = null;
         }
       }
@@ -253,6 +257,39 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
     return super.matchesSize + outputsSize;
   }
+
+  /**
+   * Move the current match indicator to the next match.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  async highlightNext(
+    loop = false,
+    isEdited = false
+  ): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightNext(loop, isEdited);
+
+    this.updateHighlightedOutput();
+
+    return match;
+  }
+
+  /**
+   * Move the current match indicator to the previous match.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  async highlightPrevious(
+    loop = false,
+    isEdited = false
+  ): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightPrevious(loop, isEdited);
+
+    this.updateHighlightedOutput();
+
+    return match;
+  }
+
   /**
    * Initialize the search using the provided options. Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
@@ -333,22 +370,78 @@ class CodeCellSearchProvider extends CellSearchProvider {
     return match;
   }
 
-  protected onOutputsChanged(
+  private onOutputsChanged(
     output: IOutputAreaModel,
     changes: IOutputAreaModel.ChangedArgs
   ): void {
     // No-op
   }
 
-  protected onOutputChanged(
+  private onOutputChanged(
     output: IOutputAreaModel,
     changes?: [number, string]
   ): void {
     // No-op
   }
+
+  private updateHighlightedOutput() {
+    // Clear any output selection
+    const outputArea = (this.cell as CodeCell).outputArea;
+    const oldHit = outputArea.node.querySelector(
+      `span.${HIGHLIGHT_CLASS_NAME}.${SELECTED_HIGHLIGHT_CLASS}`
+    );
+    if (oldHit) {
+      oldHit.classList.remove(SELECTED_HIGHLIGHT_CLASS);
+    }
+
+    const outputIndex =
+      this.currentMatchIndex !== null
+        ? this.currentMatchIndex - this.cmHandler.matches.length
+        : -1;
+    if (outputIndex >= 0) {
+      const newHit = outputArea.node.querySelectorAll(
+        `span.${HIGHLIGHT_CLASS_NAME}`
+      )[outputIndex];
+      newHit.classList.add(SELECTED_HIGHLIGHT_CLASS);
+    }
+  }
 }
 
 class MarkdownCellSearchProvider extends CellSearchProvider {
+  // TODO should we switch to rendered hits / codemirror hits depending on the cell status?
+
+  /**
+   * Move the current match indicator to the next match.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  async highlightNext(
+    loop = false,
+    isEdited = false
+  ): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightNext(loop, isEdited);
+
+    this.updateRenderedSelection();
+
+    return match;
+  }
+
+  /**
+   * Move the current match indicator to the previous match.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  async highlightPrevious(
+    loop = false,
+    isEdited = false
+  ): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightPrevious(loop, isEdited);
+
+    this.updateRenderedSelection();
+
+    return match;
+  }
+
   async endQuery(): Promise<void> {
     await super.endQuery();
     (this.cell as MarkdownCell).highlights = [];
@@ -365,6 +458,27 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         this.query,
         content.text
       );
+    }
+  }
+
+  private updateRenderedSelection() {
+    const cell = this.cell as MarkdownCell;
+    const cellRenderer = cell.renderer;
+
+    if (cellRenderer) {
+      const oldHit = cellRenderer.node.querySelector(
+        `span.${HIGHLIGHT_CLASS_NAME}.${SELECTED_HIGHLIGHT_CLASS}`
+      );
+      if (oldHit) {
+        oldHit.classList.remove(SELECTED_HIGHLIGHT_CLASS);
+      }
+
+      if (cell.rendered && this.currentMatchIndex !== null) {
+        const newHit = cellRenderer.node.querySelectorAll(
+          `span.${HIGHLIGHT_CLASS_NAME}`
+        )[this.currentMatchIndex];
+        newHit?.classList.add(SELECTED_HIGHLIGHT_CLASS);
+      }
     }
   }
 }
