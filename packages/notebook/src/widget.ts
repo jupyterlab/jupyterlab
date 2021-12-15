@@ -134,6 +134,11 @@ const DRAG_THRESHOLD = 5;
  */
 type InsertType = 'push' | 'insert' | 'set';
 
+/*
+ * The rendering mode for the notebook.
+ */
+type RenderingMode = 'default' | 'side-by-side';
+
 /**
  * The class attached to the heading collapser button
  */
@@ -350,10 +355,10 @@ export class StaticNotebook extends Widget {
     this._updateNotebookConfig();
   }
 
-  get renderingLayout(): 'default' | 'side-by-side' | undefined {
+  get renderingLayout(): RenderingMode | undefined {
     return this._renderingLayout;
   }
-  set renderingLayout(value: 'default' | 'side-by-side' | undefined) {
+  set renderingLayout(value: RenderingMode | undefined) {
     this._renderingLayout = value;
     if (this._renderingLayout === 'side-by-side') {
       this.node.classList.add(SIDE_BY_SIDE_CLASS);
@@ -839,7 +844,7 @@ export class StaticNotebook extends Widget {
   private _renderedCellsCount = 0;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
   private _cellsArray: Array<Cell>;
-  private _renderingLayout: 'default' | 'side-by-side' | undefined;
+  private _renderingLayout: RenderingMode | undefined;
 }
 
 /**
@@ -1022,7 +1027,7 @@ export namespace StaticNotebook {
     /**
      * Defines the rendering layout to use.
      */
-    renderingLayout: 'default' | 'side-by-side';
+    renderingLayout: RenderingMode;
   }
 
   /**
