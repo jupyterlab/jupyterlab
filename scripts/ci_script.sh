@@ -83,9 +83,6 @@ if [[ $GROUP == integrity2 ]]; then
     # Make sure we can build for release
     jlpm run build:dev:prod:release
 
-    # Make sure the storybooks build.
-    jlpm run build:storybook
-
     jlpm config set prefix ~/.yarn
 
     # Make sure we have CSS that can be converted with postcss
