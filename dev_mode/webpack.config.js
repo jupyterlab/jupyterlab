@@ -22,7 +22,7 @@ const packageData = require('./package.json');
 
 // Handle the extensions.
 const jlab = packageData.jupyterlab;
-const { extensions, mimeExtensions } = jlab;
+const { extensions, mimeExtensions, singletonPackages } = jlab;
 
 // Deduplicated list of extension package names.
 const extensionPackages = [
@@ -156,7 +156,11 @@ function ignored(checkedPath) {
 }
 
 // Set up module federation sharing config
-const shared = createShared(packageData);
+const shared = createShared({
+  extensions: extensionPackages,
+  resolutions: packageData.resolutions,
+  singletonPackages
+});
 
 const plugins = [
   new WPPlugin.NowatchDuplicatePackageCheckerPlugin({

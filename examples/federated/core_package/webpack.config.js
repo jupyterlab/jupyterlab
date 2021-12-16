@@ -48,9 +48,12 @@ const themeDir = path.resolve(jlab.themeDir || outputDir);
 // ensureAssets puts themes in the themes subdirectory
 fs.emptyDirSync(path.join(themeDir, 'themes'));
 
+// Deduplicated list of extension package names.
+const extensionPackages = [...new Set([...extensions, ...mimeExtensions])];
+
 // Configuration to handle extension assets
 const extensionAssetConfig = Build.ensureAssets({
-  packageNames: jlab.extensions,
+  packageNames: extensionPackages,
   output: buildDir,
   schemaOutput: schemaDir,
   themeOutput: themeDir
@@ -70,6 +73,12 @@ fs.writeFileSync(
 const entryPoint = path.join(buildDir, 'bootstrap.js');
 fs.copySync('./bootstrap.js', entryPoint);
 
+const shared = createShared({
+  extensions: extensionPackages,
+  resolutions: packageData.resolutions,
+  singletonPackages: jlab.singletonPackages
+});
+
 const plugins = [
   new ModuleFederationPlugin({
     library: {
@@ -77,7 +86,7 @@ const plugins = [
       name: ['_JUPYTERLAB', 'CORE_LIBRARY_FEDERATION']
     },
     name: 'CORE_FEDERATION',
-    shared: createShared(packageData)
+    shared
   })
 ];
 

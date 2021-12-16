@@ -5,21 +5,15 @@
 /**
  * Create the webpack ``shared`` configuration
  */
-export function createShared(packageData) {
+export function createShared({ extensions, resolutions, singletonPackages }) {
   // Set up module federation sharing config
   const shared = {};
-  const { extensions, mimeExtensions } = packageData.jupyterlab;
 
   // Deduplicated list of extension package names.
-  const extensionPackages = [
-    ...new Set([
-      ...Object.keys(extensions),
-      ...Object.keys(mimeExtensions || [])
-    ])
-  ];
+  const extensionPackages = [...new Set(extensions)];
 
   // Make sure any resolutions are shared
-  for (let [pkg, requiredVersion] of Object.entries(packageData.resolutions)) {
+  for (let [pkg, requiredVersion] of Object.entries(resolutions)) {
     shared[pkg] = { requiredVersion };
   }
 
@@ -101,7 +95,7 @@ export function createShared(packageData) {
   }
 
   // Add singleton package information
-  for (let pkg of packageData.jupyterlab.singletonPackages) {
+  for (let pkg of singletonPackages) {
     shared[pkg].singleton = true;
   }
 
