@@ -22,7 +22,6 @@
     "packages/services/examples/**/*",
     "packages/**/*.config.js",
     "packages/metapackage/build-doc-index.js",
-    "packages/**/stories/*",
     "scripts/*",
     "jupyterlab/*",
     "jupyterlab/staging/*",

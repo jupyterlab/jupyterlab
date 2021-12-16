@@ -98,8 +98,7 @@ const UNUSED: Dict<string[]> = {
     'jest-summary-reporter'
   ],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
-  '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
-  '@jupyterlab/ui-components': ['@blueprintjs/icons']
+  '@jupyterlab/vega5-extension': ['vega', 'vega-lite']
 };
 
 // Packages that are allowed to have differing versions
@@ -173,6 +172,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/console-extension',
     '@jupyterlab/csvviewer',
     '@jupyterlab/documentsearch',
+    '@jupyterlab/docprovider',
     '@jupyterlab/csvviewer-extension',
     '@jupyterlab/debugger',
     '@jupyterlab/debugger-extension',
@@ -220,6 +220,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/tooltip-extension',
     '@jupyterlab/translation-extension',
     '@jupyterlab/ui-components-extension',
+    '@jupyterlab/user',
+    '@jupyterlab/user-extension',
     '@jupyterlab/vdom',
     '@jupyterlab/vdom-extension',
     '@jupyterlab/vega5-extension'
@@ -242,8 +244,7 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/theme-dark-extension': [
     '@jupyterlab/application',
     '@jupyterlab/apputils'
-  ],
-  '@jupyterlab/ui-extension': ['@blueprintjs/icons']
+  ]
 };
 
 const pkgData: Dict<any> = {};

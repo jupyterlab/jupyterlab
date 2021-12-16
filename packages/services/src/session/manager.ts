@@ -44,7 +44,9 @@ export class SessionManager extends BaseManager implements Session.IManager {
     this._ready = (async () => {
       await this._pollModels.start();
       await this._pollModels.tick;
-      await this._kernelManager.ready;
+      if (this._kernelManager.isActive) {
+        await this._kernelManager.ready;
+      }
       this._isReady = true;
     })();
   }
@@ -363,5 +365,78 @@ export namespace SessionManager {
      * Kernel Manager
      */
     kernelManager: Kernel.IManager;
+  }
+
+  /**
+   * A no-op session manager to be used when starting sessions is not supported.
+   */
+  export class NoopManager extends SessionManager {
+    /**
+     * Whether the manager is active.
+     */
+    get isActive(): boolean {
+      return false;
+    }
+
+    /**
+     * Used for testing.
+     */
+    get parentReady(): Promise<void> {
+      return super.ready;
+    }
+
+    /**
+     * Start a new session - throw an error since it is not supported.
+     */
+    async startNew(
+      createOptions: Session.ISessionOptions,
+      connectOptions: Omit<
+        Session.ISessionConnection.IOptions,
+        'model' | 'connectToKernel' | 'serverSettings'
+      > = {}
+    ): Promise<Session.ISessionConnection> {
+      return Promise.reject(
+        new Error('Not implemented in no-op Session Manager')
+      );
+    }
+
+    /*
+     * Connect to a running session - throw an error since it is not supported.
+     */
+    connectTo(
+      options: Omit<
+        Session.ISessionConnection.IOptions,
+        'connectToKernel' | 'serverSettings'
+      >
+    ): Session.ISessionConnection {
+      throw Error('Not implemented in no-op Session Manager');
+    }
+
+    /**
+     * A promise that fulfills when the manager is ready (never).
+     */
+    get ready(): Promise<void> {
+      return this.parentReady.then(() => this._readyPromise);
+    }
+
+    /**
+     * Shut down a session by id - throw an error since it is not supported.
+     */
+    async shutdown(id: string): Promise<void> {
+      return Promise.reject(
+        new Error('Not implemented in no-op Session Manager')
+      );
+    }
+
+    /**
+     * Execute a request to the server to poll running sessions and update state.
+     */
+    protected async requestRunning(): Promise<void> {
+      return Promise.resolve();
+    }
+
+    private _readyPromise = new Promise<void>(() => {
+      /* no-op */
+    });
   }
 }

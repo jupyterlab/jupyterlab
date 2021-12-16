@@ -526,7 +526,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     this.session.pausingOnExceptions = enable;
     const filters: string[] = [];
     const exceptionOptions: DebugProtocol.ExceptionOptions[] = [];
-    const breakMode = enable ? 'always' : 'never';
+    const breakMode = enable ? 'userUnhandled' : 'never';
     for (let filter_dict of exceptionBreakpointFilters ?? []) {
       filters.push(filter_dict.filter);
       exceptionOptions.push({

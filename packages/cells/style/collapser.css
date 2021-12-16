@@ -23,3 +23,19 @@
   top: 0px;
   bottom: 0px;
 }
+
+/*-----------------------------------------------------------------------------
+| Printing
+|----------------------------------------------------------------------------*/
+
+/*
+Hiding collapsers in print mode.
+
+Note: input and output wrappers have "display: block" propery in print mode.
+*/
+
+@media print {
+  .jp-Collapser {
+    display: none;
+  }
+}

@@ -125,6 +125,10 @@ might want to use the services in your extensions.
   created by the application.
 - ``@jupyterlab/tooltip:ITooltipManager``: A service for the tooltip manager for the application.
   Use this to allow your extension to invoke a tooltip.
+- ``@jupyterlab/user:ICurrentUser``: A service for the current user information.
+  Use this if you want to access to the identity of the current connected user.
+- ``@jupyterlab/user:IUserMenu``: A service for the user menu on the application.
+  Use this if you want to add new items to the user menu.
 - ``@jupyterlab/vdom:IVDOMTracker``: A widget tracker for virtual DOM (VDOM) documents.
   Use this to iterate over and interact with VDOM document instances created by the application.
 
@@ -420,7 +424,7 @@ declaring default keyboard shortcuts for a command:
 
 Shortcuts added to the settings system will be editable by users.
 
-From Jupyterlab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut. 
+From Jupyterlab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut.
 This requires you to define a keyboard shortcut for ``apputils:run-all-enabled`` command:
 
 .. code:: json
@@ -441,9 +445,9 @@ This requires you to define a keyboard shortcut for ``apputils:run-all-enabled``
       "selector": "body"
     }
 
-In this example ``my-command-1`` and ``my-command-2`` are passed in ``args`` 
+In this example ``my-command-1`` and ``my-command-2`` are passed in ``args``
 of ``apputils:run-all-enabled`` command as ``commands`` list.
-You can optionally pass the command arguemnts of ``my-command-1`` and ``my-command-2`` in ``args`` 
+You can optionally pass the command arguemnts of ``my-command-1`` and ``my-command-2`` in ``args``
 of ``apputils:run-all-enabled`` command as ``args`` list.
 
 Launcher
@@ -483,6 +487,23 @@ In JupyterLab, the application shell consists of:
 -  A ``bottom`` area for things like status bars.
 -  A ``header`` area for custom elements.
 
+Top Area
+^^^^^^^^
+
+The top area is intended to host most persistent user interface elements that span the whole session of a user.
+JupyterLab adds a user dropdown to that area when started in ``collaborative`` mode.
+
+You can use a numeric rank to control the ordering of top area widgets:
+
+.. code:: typescript
+
+  app.shell.add(widget, 'top', { rank: 100 });
+
+JupyterLab adds a spacer widget to the top area at rank ``900`` by default.
+You can then use the following guidelines to place your items:
+
+* ``rank <= 900`` to place items to the left side of the top area
+* ``rank > 900`` to place items to the right side of the top area
 
 Left/Right Areas
 ^^^^^^^^^^^^^^^^
@@ -772,20 +793,20 @@ bar. A typical example is the notebook toolbar as in the snippet below:
      let toolbarFactory:
        | ((widget: NotebookPanel) => DocumentRegistry.IToolbarItem[])
        | undefined;
-   
+
      // Register notebook toolbar specific widgets
      if (toolbarRegistry) {
        toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
          ToolbarItems.createCellTypeItem(panel, translator)
        );
-       
+
        toolbarRegistry.registerFactory<NotebookPanel>(
          FACTORY,
          'kernelStatus',
          panel => Toolbar.createKernelStatusItem(panel.sessionContext, translator)
        );
-       // etc... 
-     
+       // etc...
+
        if (settingRegistry) {
          // Create the factory
          toolbarFactory = createToolbarFactory(
@@ -799,7 +820,7 @@ bar. A typical example is the notebook toolbar as in the snippet below:
          );
        }
      }
-   
+
      const factory = new NotebookWidgetFactory({
        name: FACTORY,
        fileTypes: ['notebook'],
@@ -811,7 +832,7 @@ bar. A typical example is the notebook toolbar as in the snippet below:
      });
      app.docRegistry.addWidgetFactory(factory);
 
-The registry ``registerFactory`` method allows an extension to provide special widget for a unique pair 
+The registry ``registerFactory`` method allows an extension to provide special widget for a unique pair
 (factory name, toolbar item name). Then the helper ``createToolbarFactory`` can be used to extract the
 toolbar definition from the settings and build the factory to pass to the widget factory.
 
@@ -819,11 +840,11 @@ The default toolbar items can be defined across multiple extensions by providing
 mapping. For example for the notebook panel:
 
 .. code:: js
- 
+
    "jupyter.lab.toolbars": {
      "Notebook": [ // Factory name
        // Item with non-default widget - it must be registered within an extension
-       { 
+       {
          "name": "save", // Unique toolbar item name
          "rank": 10 // Item rank
        },

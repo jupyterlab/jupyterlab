@@ -114,8 +114,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
             ? NodeFilter.FILTER_ACCEPT
             : NodeFilter.FILTER_REJECT;
         }
-      },
-      false
+      }
     );
     const nodes: (Node | null)[] = [];
     const originalNodes: Node[] = [];
