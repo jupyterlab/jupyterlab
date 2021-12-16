@@ -2347,7 +2347,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.toggleRenderSideBySideCurrentNotebook, {
-    label: trans.__('Toggle Side-by-side Rendering'),
+    label: trans.__('Render Side-by-Side'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
@@ -2357,7 +2357,15 @@ function addCommands(
         return NotebookActions.renderSideBySide(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (current) {
+        return current.content.renderingLayout === 'side-by-side';
+      } else {
+        return false;
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.setSideBySideRatio, {
