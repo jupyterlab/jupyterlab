@@ -369,6 +369,21 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-mirror-editor-error-color: #f00;
   --jp-mirror-editor-hr-color: #999;
 
+  /*
+    RTC user specific colors.
+    These colors are used for the cursor, username in the editor,
+    and the icon of the user.
+  */
+
+  --jp-collaborator-1: #12a0d3;
+  --jp-collaborator-2: #17ab30;
+  --jp-collaborator-3: #cc8500;
+  --jp-collaborator-4: #a79011;
+  --jp-collaborator-5: #ee6352;
+  --jp-collaborator-6: #609da9;
+  --jp-collaborator-7: #4ba749;
+  --jp-collaborator-8: #00a1b3;
+
   /* Vega extension styles */
 
   --jp-vega-background: var(--md-grey-400);
