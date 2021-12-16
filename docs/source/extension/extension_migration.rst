@@ -41,7 +41,7 @@ bumped their major version (following semver convention):
    should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
 - TypeScript 4.5 update
    As a result of the update to TypeScript 4.5, a couple of interfaces have had their definitions changed.
-   The ``anchor`` parameter of ``HoverBox.IOptions` is now a ``DOMRect` instead of ``ClientRect``.
+   The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 
 JupyterLab 3.0 to 3.1
