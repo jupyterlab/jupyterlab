@@ -32,16 +32,17 @@ bumped their major version (following semver convention):
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
 - ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).
-- As a result of the update to TypeScript 4.5, a couple of interfaces have had their definitions changed.
-   The ``anchor`` parameter of ``HoverBox.IOptions` is now a ``DOMRect` instead of ``ClientRect``.
-   The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    The ``NotebookPanel._onSave`` method is now ``private``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
-  The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
+   The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
-  The ``create-theme`` script has been removed. If you want to create a new theme extension, you
-  should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
+   The ``create-theme`` script has been removed. If you want to create a new theme extension, you
+   should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
+- TypeScript 4.5 update
+   As a result of the update to TypeScript 4.5, a couple of interfaces have had their definitions changed.
+   The ``anchor`` parameter of ``HoverBox.IOptions` is now a ``DOMRect` instead of ``ClientRect``.
+   The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 
 JupyterLab 3.0 to 3.1
 ---------------------
