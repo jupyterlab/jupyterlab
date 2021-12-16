@@ -370,6 +370,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     reverse = false,
     loop = false
   ): Promise<ISearchMatch | null> {
+    const activateNewMatch = () => {
+      this.widget!.content.activeCellIndex = this._currentProviderIndex!;
+      // Unhide cell
+      if (this.widget!.content.activeCell!.inputHidden) {
+        this.widget!.content.activeCell!.inputHidden = false;
+      }
+    };
+
     if (this._currentProviderIndex === null) {
       this._currentProviderIndex = this.widget!.content.activeCellIndex;
     }
@@ -383,7 +391,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         : await searchEngine.highlightNext();
 
       if (match) {
-        this.widget!.content.activeCellIndex = this._currentProviderIndex;
+        activateNewMatch();
         return match;
       } else {
         this._currentProviderIndex =
@@ -414,7 +422,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         : await searchEngine.highlightNext();
 
       if (match) {
-        this.widget!.content.activeCellIndex = this._currentProviderIndex;
+        activateNewMatch();
         return match;
       }
     }
