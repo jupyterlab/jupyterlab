@@ -119,6 +119,8 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
       let match = await this.cmHandler.highlightNext();
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
+      } else {
+        this.currentIndex = null;
       }
       return match;
     }
