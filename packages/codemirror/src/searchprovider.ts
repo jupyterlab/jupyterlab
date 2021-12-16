@@ -512,9 +512,6 @@ export class CodeMirrorSearchHighlighter {
     this._cm = editor;
     this._matches = new Array<ISearchMatch>();
     this._currentIndex = null;
-
-    // Start overlay
-    this.refresh();
   }
 
   /**
@@ -550,12 +547,12 @@ export class CodeMirrorSearchHighlighter {
    * @returns A promise that resolves when the search provider is ready to
    * begin a new search.
    */
-  endQuery(removeOverlay = true): Promise<void> {
+  endQuery(): Promise<void> {
     this._currentIndex = null;
+    this._matches = [];
 
-    if (removeOverlay) {
-      this._cm.removeOverlay(this._overlay);
-    }
+    this._cm.removeOverlay(this._overlay);
+
     const from = this._cm.getCursor('from');
     const to = this._cm.getCursor('to');
     // Setting a reverse selection to allow search-as-you-type to maintain the

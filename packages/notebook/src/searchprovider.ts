@@ -3,8 +3,9 @@
 
 import {
   CellSearchProvider,
+  createCellSearchProvider,
   ICellModel,
-  createCellSearchProvider
+  MarkdownCell
 } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
@@ -105,14 +106,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     };
 
     if (finalFilters.selectedCells) {
-      const selection = cells.filter(cell =>
-        this.widget!.content.isSelectedOrActive(cell)
-      );
-      cells = selection.length > 0 ? selection : cells;
-
-      // Trigger update if the active cell changes
-      this.widget.content.activeCellChanged.connect(
-        this._onSearchProviderChanged,
+      this._onSelectedCells = finalFilters.selectedCells;
+      this.widget!.content.selectionChanged.connect(
+        this._onSelectionChanged,
         this
       );
     }
@@ -126,6 +122,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this.registry
         );
 
+        await cellSearchProvider.setIsActive(
+          !finalFilters.selectedCells ||
+            this.widget!.content.isSelectedOrActive(cell)
+        );
         await cellSearchProvider.startQuery(query, finalFilters);
 
         return cellSearchProvider;
@@ -147,11 +147,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * begin a new search.
    */
   async endQuery(): Promise<void> {
-    this.widget!.content.activeCellChanged.disconnect(
-      this._onSearchProviderChanged,
-      this
-    );
-
     await Promise.all(
       this._searchProviders.map(provider => {
         provider.changed.disconnect(this._onSearchProviderChanged, this);
@@ -220,16 +215,31 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   async replaceCurrentMatch(newText: string, loop = true): Promise<boolean> {
     let replaceOccurred = false;
 
-    if (this._currentProviderIndex === null) {
-      // Highlight next match if none is selected.
-      this.highlightNext(loop);
-    }
-
     if (this._currentProviderIndex !== null) {
+      // Unrendered markdown cell
+      const activeCell = this.widget?.content.activeCell;
+      if (
+        activeCell?.model.type === 'markdown' &&
+        (activeCell as MarkdownCell).rendered
+      ) {
+        (activeCell as MarkdownCell).rendered = false;
+      }
+
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       replaceOccurred = await searchEngine.replaceCurrentMatch(newText);
     }
-    await this.highlightNext(loop);
+    if (!replaceOccurred) {
+      await this.highlightNext(loop);
+    }
+
+    // Unrendered markdown cell
+    const activeCell = this.widget?.content.activeCell;
+    if (
+      activeCell?.model.type === 'markdown' &&
+      (activeCell as MarkdownCell).rendered
+    ) {
+      (activeCell as MarkdownCell).rendered = false;
+    }
     return replaceOccurred;
   }
 
@@ -413,7 +423,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     return null;
   }
 
-  private _onActiveCellChanged() {
+  private async _onActiveCellChanged() {
+    await this._onSelectionChanged();
+
     if (
       this.widget!.content.activeCellIndex !== this._currentProviderIndex &&
       this._currentProviderIndex !== null
@@ -427,6 +439,22 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this.changed.emit();
   }
 
+  private async _onSelectionChanged() {
+    if (this._onSelectedCells) {
+      const cells = this.widget!.content.widgets;
+      await Promise.all(
+        this._searchProviders.map((provider, index) =>
+          provider.setIsActive(
+            this.widget!.content.isSelectedOrActive(cells[index])
+          )
+        )
+      );
+
+      this.changed.emit();
+    }
+  }
+
   private _searchProviders: CellSearchProvider[] = [];
   private _currentProviderIndex: number | null = null;
+  private _onSelectedCells = false;
 }

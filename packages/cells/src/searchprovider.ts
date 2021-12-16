@@ -21,9 +21,9 @@ import {
 } from '@jupyterlab/rendermime';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-import { CodeCell } from '.';
+
 import { CodeCellModel, ICellModel } from './model';
-import { Cell, MarkdownCell } from './widget';
+import { Cell, CodeCell, MarkdownCell } from './widget';
 
 const SELECTED_HIGHLIGHT_CLASS = 'jp-mod-selected';
 
@@ -41,15 +41,19 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   }
 
   get currentMatchIndex(): number | null {
-    return this.currentIndex;
+    return this.isActive ? this.currentIndex : null;
   }
 
-  get matchesSize(): number {
-    return this.cmHandler.matches.length;
+  get isActive(): boolean {
+    return this._isActive;
   }
 
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  get matchesSize(): number {
+    return this.isActive ? this.cmHandler.matches.length : 0;
   }
 
   clearSelection(): void {
@@ -65,6 +69,19 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     Signal.clearData(this);
   }
 
+  async setIsActive(v: boolean): Promise<void> {
+    if (this._isActive !== v) {
+      this._isActive = v;
+    }
+    if (this._isActive) {
+      if (this.query !== null) {
+        await this.startQuery(this.query, this.filters);
+      }
+    } else {
+      await this.endQuery();
+    }
+  }
+
   /**
    * Initialize the search using the provided options. Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
@@ -76,6 +93,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
    */
   async startQuery(query: RegExp, filters?: IFiltersType): Promise<void> {
     this.query = query;
+    this.filters = filters;
 
     // Search input
     const content = this.cell.model.modelDB.get('value') as IObservableString;
@@ -84,8 +102,8 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   }
 
   async endQuery(): Promise<void> {
-    this.query = null;
     await this.cmHandler.endQuery();
+    this.currentIndex = null;
   }
 
   /**
@@ -94,7 +112,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
-    if (this.matchesSize === 0) {
+    if (this.matchesSize === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       // This starts from the cursor position
@@ -114,7 +132,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
-    if (this.matchesSize === 0) {
+    if (this.matchesSize === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       // This starts from the cursor position
@@ -136,7 +154,32 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
   replaceCurrentMatch(newText: string): Promise<boolean> {
-    return Promise.resolve(false);
+    if (!this.isActive) {
+      return Promise.resolve(false);
+    }
+
+    let occurred = false;
+
+    if (
+      this.currentIndex !== null &&
+      this.currentIndex < this.cmHandler.matches.length
+    ) {
+      const match = this.getCurrentMatch();
+      this.cmHandler.matches.splice(this.currentIndex, 1);
+      this.currentIndex = null;
+      this._highlightNextOnReplace = true;
+
+      this.cell.model.value.text =
+        this.cell.model.value.text.slice(0, match!.position) +
+        newText +
+        this.cell.model.value.text.slice(match!.position + match!.text.length);
+      occurred = true;
+    }
+
+    if (!occurred) {
+      this.highlightNext();
+    }
+    return Promise.resolve(occurred);
   }
 
   /**
@@ -145,7 +188,28 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
   replaceAllMatches(newText: string): Promise<boolean> {
-    return Promise.resolve(false);
+    if (!this.isActive) {
+      return Promise.resolve(false);
+    }
+
+    let occurred = this.cmHandler.matches.length > 0;
+    let src = this.cell.model.value.text;
+    let lastEnd = 0;
+    const finalSrc = this.cmHandler.matches.reduce((agg, match) => {
+      const start = match.position as number;
+      const end = start + match.text.length;
+      const newStep = `${agg}${src.slice(lastEnd, start)}${newText}`;
+      lastEnd = end;
+      return newStep;
+    }, '');
+
+    if (occurred) {
+      this.cmHandler.matches = [];
+      this.currentIndex = null;
+      this.cell.model.value.text = `${finalSrc}${src.slice(lastEnd)}`;
+      // this.cmHandler.refresh();
+    }
+    return Promise.resolve(occurred);
   }
 
   protected getCurrentMatch(): ISearchMatch | undefined {
@@ -179,18 +243,28 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     changes?: IObservableString.IChangedArgs
   ): Promise<void> {
     if (this.query !== null) {
-      this.cmHandler.matches = await TextSearchEngine.search(
-        this.query,
-        content.text
-      );
+      if (this.isActive) {
+        this.cmHandler.matches = await TextSearchEngine.search(
+          this.query,
+          content.text
+        );
+        if (this._highlightNextOnReplace) {
+          this.highlightNext();
+        }
+      } else {
+        this.cmHandler.matches = [];
+      }
     }
   }
 
   protected cmHandler: CodeMirrorSearchHighlighter;
   protected currentIndex: number | null = null;
+  protected filters: IFiltersType | undefined;
   protected query: RegExp | null = null;
   private _changed: Signal<IBaseSearchProvider, void>;
+  private _isActive = true;
   private _isDisposed = false;
+  private _highlightNextOnReplace = false;
 }
 
 class CodeCellSearchProvider extends CellSearchProvider {
@@ -203,6 +277,10 @@ class CodeCellSearchProvider extends CellSearchProvider {
   }
 
   get matchesSize(): number {
+    if (!this.isActive) {
+      return 0;
+    }
+
     let outputsSize = 0;
     const outputs = (this.cell.model as CodeCellModel).outputs;
     for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
@@ -224,7 +302,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
-    if (this.matchesSize === 0) {
+    if (this.matchesSize === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       if (
@@ -255,7 +333,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
-    if (this.matchesSize === 0) {
+    if (this.matchesSize === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       if (this.currentIndex === null) {
@@ -301,29 +379,31 @@ class CodeCellSearchProvider extends CellSearchProvider {
       this.searchRegistry
     ) {
       const outputs = (this.cell.model as CodeCellModel).outputs;
-      const searchOutputs = new Array<Promise<void>>();
-      for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-        const output = outputs.get(outputIdx);
-        // Search for the display mimetype as in packages/outputarea/src/widget.ts
-        const mimeType = this.rendermime.preferredMimeType(
-          output.data,
-          output.trusted ? 'any' : 'ensure'
-        );
-        if (mimeType) {
-          const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
-            mimeType
+      if (this.isActive) {
+        const searchOutputs = new Array<Promise<void>>();
+        for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
+          const output = outputs.get(outputIdx);
+          // Search for the display mimetype as in packages/outputarea/src/widget.ts
+          const mimeType = this.rendermime.preferredMimeType(
+            output.data,
+            output.trusted ? 'any' : 'ensure'
           );
-          if (searchEngine && output.highlights) {
-            searchOutputs.push(
-              searchEngine.search(query, output.data[mimeType]).then(hits => {
-                output.highlights = hits;
-              })
+          if (mimeType) {
+            const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
+              mimeType
             );
+            if (searchEngine && output.highlights) {
+              searchOutputs.push(
+                searchEngine.search(query, output.data[mimeType]).then(hits => {
+                  output.highlights = hits;
+                })
+              );
+            }
           }
         }
-      }
 
-      await Promise.all(searchOutputs);
+        await Promise.all(searchOutputs);
+      }
       outputs.changed.connect(this.onOutputsChanged, this);
       outputs.stateChanged.connect(this.onOutputChanged, this);
     }
@@ -401,7 +481,11 @@ class CodeCellSearchProvider extends CellSearchProvider {
 class MarkdownCellSearchProvider extends CellSearchProvider {
   get matchesSize(): number {
     const cell = this.cell as MarkdownCell;
-    return cell.rendered ? cell.highlights.length : super.matchesSize;
+    return this.isActive
+      ? cell.rendered
+        ? cell.highlights.length
+        : super.matchesSize
+      : 0;
   }
 
   clearSelection(): void {
@@ -416,6 +500,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
     let match: ISearchMatch | undefined = undefined;
+    if (!this.isActive) {
+      return match;
+    }
+
     const cell = this.cell as MarkdownCell;
     if (cell.rendered) {
       this.currentIndex =
@@ -471,7 +559,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     changes?: IObservableString.IChangedArgs
   ): Promise<void> {
     await super.onInputChanged(content, changes);
-    if (this.query !== null) {
+    if (this.query !== null && this.isActive) {
       (this
         .cell as MarkdownCell).highlights = await MarkdownSearchEngine.search(
         this.query,

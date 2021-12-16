@@ -480,7 +480,7 @@ class SearchOverlay extends React.Component<
       />
     ) : null;
     const filter = hasFilters ? (
-      <div className={SEARCH_OPTIONS_CLASS}>
+      <div className={SEARCH_OPTIONS_CLASS} key={2}>
         {Object.keys(filters).map(name => {
           const filter = filters[name];
           return (
@@ -644,27 +644,34 @@ export function createSearchOverlay(
     translator
   } = options;
   const widget = ReactWidget.create(
-    <UseSignal signal={widgetChanged} initialArgs={overlayState}>
-      {(_, args) => {
-        return (
-          <SearchOverlay
-            onCaseSensitiveToggled={onCaseSensitiveToggled}
-            onRegexToggled={onRegexToggled}
-            onHighlightNext={onHighlightNext}
-            onHighlightPrevious={onHighlightPrevious}
-            onStartQuery={onStartQuery}
-            onEndSearch={onEndSearch}
-            onReplaceCurrent={onReplaceCurrent}
-            onReplaceAll={onReplaceAll}
-            overlayState={args!}
-            isReadOnly={isReadOnly}
-            searchDebounceTime={searchDebounceTime}
-            filters={filters}
-            translator={translator}
-          />
-        );
+    <div
+      onMouseDown={(event: React.MouseEvent) => {
+        // Stop event propagation to avoid triggering handler on content widget
+        event.stopPropagation();
       }}
-    </UseSignal>
+    >
+      <UseSignal signal={widgetChanged} initialArgs={overlayState}>
+        {(_, args) => {
+          return (
+            <SearchOverlay
+              onCaseSensitiveToggled={onCaseSensitiveToggled}
+              onRegexToggled={onRegexToggled}
+              onHighlightNext={onHighlightNext}
+              onHighlightPrevious={onHighlightPrevious}
+              onStartQuery={onStartQuery}
+              onEndSearch={onEndSearch}
+              onReplaceCurrent={onReplaceCurrent}
+              onReplaceAll={onReplaceAll}
+              overlayState={args!}
+              isReadOnly={isReadOnly}
+              searchDebounceTime={searchDebounceTime}
+              filters={filters}
+              translator={translator}
+            />
+          );
+        }}
+      </UseSignal>
+    </div>
   );
   widget.addClass(OVERLAY_CLASS);
   return widget;
