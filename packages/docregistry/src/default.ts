@@ -28,11 +28,8 @@ export class DocumentModel
     this._defaultLang = languagePreference || '';
     const filemodel = new YFile() as ISharedFile;
     this.switchSharedModel(filemodel, true);
-    // Deprecate: triggered when the shared model's source changes
-    //this.value.changed.connect(this.triggerContentChange, this);
 
     (this.sharedModel as YFile).dirty = false;
-    //this.sharedModel.changed.connect(this.onSharedModelChanged, this);
   }
 
   /**

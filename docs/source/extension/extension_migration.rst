@@ -44,6 +44,27 @@ bumped their major version (following semver convention):
    As a result of the update to TypeScript 4.5, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+- ``@jupyterlab/codeeditor`` from 3.x to 4.x
+  The property ``value`` from ``IModel`` interface has been removed. Instead you can access the document's source
+  through the property ``sharedModel``:
+  - ``value.changed`` -> ``sharedModel.changed``
+  - ``value.text`` -> ``sharedModel.getSource``
+  - ``value.remove`` -> ``sharedModel.updateSource``
+  - ``value.insert`` -> ``sharedModel.updateSource``
+- ``@jupyterlab/cells`` from 3.x to 4.x
+  The property ``value`` from ``CodeEditor.IModel`` interface has been removed. This change affect the
+  following interfaces:
+  - ``ICellModel``
+  - ``ICodeCellModel``
+  - ``IAttachmentsCellModel``
+  - ``IMarkdownCellModel``
+  - ``IRawCellModel``
+  Check the migration tips on ``@jupyterlab/codeeditor``.
+- ``@jupyterlab/docregistry`` from 3.x to 4.x
+  The property ``value`` from ``CodeEditor.IModel`` interface has been removed. This change affect the
+  interface ``ICodeModel`` and the class ``DocumentModel``
+  Check the migration tips on ``@jupyterlab/codeeditor``.
+
 
 JupyterLab 3.0 to 3.1
 ---------------------

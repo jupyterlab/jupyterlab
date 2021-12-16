@@ -188,9 +188,6 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
       id: options.id || (options.cell?.id as string) || UUID.uuid4()
     });
 
-    // Deprecate: triggered when the shared model's source changes
-    //this.value.changed.connect(this.onGenericChange, this);
-
     const cellType = this.modelDB.createValue('type');
     cellType.set(this.type);
 
@@ -670,8 +667,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         executionCount.set(null);
       }
     }
-    // Deprecated: Tracked on this._onSharedModelChanged
-    //this.value.changed.connect(this._onValueChanged, this);
 
     executionCount.changed.connect(this._onExecutionCountChanged, this);
 
