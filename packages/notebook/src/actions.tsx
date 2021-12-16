@@ -873,7 +873,7 @@ export namespace NotebookActions {
       notebook
     );
     headingLevel = headingLevel > -1 ? headingLevel : 1;
-    let cellIdxOfHeadingBelow = Private.Headings.findLowerEqualLevelParentHeadingBelow(
+    let cellIdxOfHeadingBelow = Private.Headings.findLowerEqualLevelHeadingBelow(
       notebook.activeCell,
       notebook,
       true
@@ -942,7 +942,7 @@ export namespace NotebookActions {
     if (hInfo.isHeading && hInfo.collapsed) {
       setHeadingCollapse(notebook.activeCell, false, notebook);
     } else {
-      let targetHeadingCellIdx = Private.Headings.findLowerEqualLevelParentHeadingBelow(
+      let targetHeadingCellIdx = Private.Headings.findHeadingBelow(
         notebook.activeCell,
         notebook,
         true // return index of heading cell
@@ -2462,6 +2462,9 @@ namespace Private {
       if (baseHeadingLevel == -1) {
         baseHeadingLevel = 1; // if no heading level can be determined, assume we're on level 1
       }
+
+      console.log('A', baseHeadingLevel);
+
       // find the heading above with heading level <= baseHeadingLevel and return its index
       let cellIdx = notebook.widgets.indexOf(baseCell) - 1;
       while (cellIdx >= 0) {
@@ -2478,7 +2481,7 @@ namespace Private {
       return returnIdx ? -1 : null; // no heading found
     }
 
-    /** Find next heading.
+    /** Find next heading with equal or lower level.
      *
      * @param baseCell - cell relative to which so search
      * @param notebook - target notebook widget
@@ -2486,7 +2489,7 @@ namespace Private {
      *
      * @returns the (index | Cell object) of the found heading or (-1 | null) if no heading found.
      */
-    export function findLowerEqualLevelParentHeadingBelow(
+    export function findLowerEqualLevelHeadingBelow(
       baseCell: Cell,
       notebook: Notebook,
       returnIdx = false
@@ -2506,6 +2509,31 @@ namespace Private {
           headingInfo.isHeading &&
           headingInfo.headingLevel <= baseHeadingLevel
         ) {
+          return returnIdx ? cellIdx : cell;
+        }
+        cellIdx++;
+      }
+      return returnIdx ? -1 : null;
+    }
+
+    /** Find next heading.
+     *
+     * @param baseCell - cell relative to which so search
+     * @param notebook - target notebook widget
+     * @param returnIdx [default=false] - if set to true, the cell idx is returned rather than the cell object.
+     *
+     * @returns the (index | Cell object) of the found heading or (-1 | null) if no heading found.
+     */
+    export function findHeadingBelow(
+      baseCell: Cell,
+      notebook: Notebook,
+      returnIdx = false
+    ): number | Cell | null {
+      let cellIdx = notebook.widgets.indexOf(baseCell) + 1;
+      while (cellIdx < notebook.widgets.length) {
+        let cell = notebook.widgets[cellIdx];
+        let headingInfo = NotebookActions.getHeadingInfo(cell);
+        if (headingInfo.isHeading) {
           return returnIdx ? cellIdx : cell;
         }
         cellIdx++;

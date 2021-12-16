@@ -175,6 +175,26 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     ).toMatchSnapshot('reexpand_headers_02.png');
   });
 
+  test('ReExpand Headers 03', async ({ page }) => {
+    await page.notebook.selectCells(6);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('reexpand_headers_03a.png');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    expect(
+      await (await page.notebook.getNotebookInPanel()).screenshot()
+    ).toMatchSnapshot('reexpand_headers_03b.png');
+  });
+
   test('Add Header Below 01', async ({ page }) => {
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
