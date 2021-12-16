@@ -644,34 +644,27 @@ export function createSearchOverlay(
     translator
   } = options;
   const widget = ReactWidget.create(
-    <div
-      onMouseDown={(event: React.MouseEvent) => {
-        // Stop event propagation to avoid triggering handler on content widget
-        event.stopPropagation();
+    <UseSignal signal={widgetChanged} initialArgs={overlayState}>
+      {(_, args) => {
+        return (
+          <SearchOverlay
+            onCaseSensitiveToggled={onCaseSensitiveToggled}
+            onRegexToggled={onRegexToggled}
+            onHighlightNext={onHighlightNext}
+            onHighlightPrevious={onHighlightPrevious}
+            onStartQuery={onStartQuery}
+            onEndSearch={onEndSearch}
+            onReplaceCurrent={onReplaceCurrent}
+            onReplaceAll={onReplaceAll}
+            overlayState={args!}
+            isReadOnly={isReadOnly}
+            searchDebounceTime={searchDebounceTime}
+            filters={filters}
+            translator={translator}
+          />
+        );
       }}
-    >
-      <UseSignal signal={widgetChanged} initialArgs={overlayState}>
-        {(_, args) => {
-          return (
-            <SearchOverlay
-              onCaseSensitiveToggled={onCaseSensitiveToggled}
-              onRegexToggled={onRegexToggled}
-              onHighlightNext={onHighlightNext}
-              onHighlightPrevious={onHighlightPrevious}
-              onStartQuery={onStartQuery}
-              onEndSearch={onEndSearch}
-              onReplaceCurrent={onReplaceCurrent}
-              onReplaceAll={onReplaceAll}
-              overlayState={args!}
-              isReadOnly={isReadOnly}
-              searchDebounceTime={searchDebounceTime}
-              filters={filters}
-              translator={translator}
-            />
-          );
-        }}
-      </UseSignal>
-    </div>
+    </UseSignal>
   );
   widget.addClass(OVERLAY_CLASS);
   return widget;

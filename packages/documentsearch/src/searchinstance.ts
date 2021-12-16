@@ -192,13 +192,15 @@ export class SearchInstance implements IDisposable {
    */
   _displaySearchWidget(): void {
     if (!this._searchWidget.isAttached) {
-      Widget.attach(
-        this._searchWidget,
-        this._widget instanceof MainAreaWidget
-          ? // Offset the position of the search widget to not cover the toolbar nor the content header.
-            this._widget.content.node
-          : this._widget.node
-      );
+      Widget.attach(this._searchWidget, this._widget.node);
+      if (this._widget instanceof MainAreaWidget) {
+        // Offset the position of the search widget to not cover the toolbar nor the content header.
+        // TODO this does not update once the search widget is displayed.
+        this._searchWidget.node.style.top = `${
+          this._widget.toolbar.node.getBoundingClientRect().height +
+          this._widget.contentHeader.node.getBoundingClientRect().height
+        }px`;
+      }
     }
   }
 
