@@ -11,6 +11,7 @@ import 'codemirror/mode/clike/clike';
 import 'codemirror/mode/css/css';
 // Bundle other common modes
 import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/jsx/jsx';
 import 'codemirror/mode/julia/julia';
 import 'codemirror/mode/markdown/markdown';
 import 'codemirror/mode/meta';

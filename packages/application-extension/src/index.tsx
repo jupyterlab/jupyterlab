@@ -916,9 +916,21 @@ const busy: JupyterFrontEndPlugin<void> = {
  */
 const shell: JupyterFrontEndPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
-  activate: (app: JupyterFrontEnd) => {
+  optional: [ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry | null
+  ) => {
     if (!(app.shell instanceof LabShell)) {
       throw new Error(`${shell.id} did not find a LabShell instance.`);
+    }
+    if (settingRegistry) {
+      settingRegistry.load(shell.id).then(settings => {
+        (app.shell as LabShell).updateConfig(settings.composite);
+        settings.changed.connect(() => {
+          (app.shell as LabShell).updateConfig(settings.composite);
+        });
+      });
     }
     return app.shell;
   },
@@ -1035,6 +1047,20 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that adds a spacer widget to the top area.
+ */
+const topSpacer: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:top-spacer',
+  autoStart: true,
+  requires: [ILabShell],
+  activate: (app: JupyterFrontEnd, shell: ILabShell) => {
+    const spacer = new Widget();
+    spacer.id = 'jp-topbar-spacer';
+    shell.add(spacer, 'top', { rank: 900 });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1052,7 +1078,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   info,
   paths,
   propertyInspector,
-  JupyterLogo
+  JupyterLogo,
+  topSpacer
 ];
 
 export default plugins;

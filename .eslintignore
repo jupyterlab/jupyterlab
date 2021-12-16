@@ -24,7 +24,6 @@ jupyterlab/geckodriver
 packages/extensionmanager-extension/examples/listings
 packages/nbconvert-css/raw.js
 packages/ui-components/src/icon/iconimports.ts
-packages/ui-components/storybook-static
 jupyterlab/staging/yarn.js
 jupyterlab/staging/index.js
 tsconfigdoc.json

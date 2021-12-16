@@ -6,7 +6,7 @@
       "path": "../shared-models"
     },
     {
-      "path": "../statedb"
+      "path": "../user"
     },
     {
       "path": "."
