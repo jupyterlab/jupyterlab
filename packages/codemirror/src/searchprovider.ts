@@ -646,7 +646,7 @@ export class CodeMirrorSearchHighlighter {
       });
     } else {
       // Set cursor to remove any selection
-      this._cm.setCursorPosition(this._cm.getCursorPosition());
+      this._cm.setCursorPosition({ line: 0, column: 0 });
     }
   }
 
@@ -733,14 +733,20 @@ export class CodeMirrorSearchHighlighter {
     // the search always proceeds from the 'anchor' position, which is at the 'from'.
 
     const cursorToGet = reverse ? 'anchor' : 'head';
-    const lastPosition =
-      reverse && this.currentIndex === null
-        ? {
-            // Go to virtual next line so position got clamp to end
-            line: this._cm.lineCount,
-            ch: 0
-          }
-        : this._cm.getCursor(cursorToGet);
+    let lastPosition = this._cm.getCursor(cursorToGet);
+    if (
+      lastPosition.line === 0 &&
+      lastPosition.ch === 0 &&
+      reverse &&
+      this.currentIndex === null
+    ) {
+      // The default position is (0, 0) but we want to start from the end in that case
+      lastPosition = {
+        // Go to virtual next line so position got clamp to end
+        line: this._cm.lineCount,
+        ch: 0
+      };
+    }
     const position = this._cm.doc.indexFromPos(lastPosition);
 
     let found = Utils.findNext(
