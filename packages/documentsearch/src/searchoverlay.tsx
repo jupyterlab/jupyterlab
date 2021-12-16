@@ -430,9 +430,24 @@ class SearchOverlay extends React.Component<
   }
 
   private _onReplaceToggled() {
-    this.setState({
-      replaceEntryShown: !this.state.replaceEntryShown
-    });
+    // Deactivate invalid replace filters
+    const filters = { ...this.state.filters };
+    if (!this.state.replaceEntryShown) {
+      for (const key in this.props.filters) {
+        const filter = this.props.filters[key];
+        if (!filter.supportReplace) {
+          filters[key] = false;
+        }
+      }
+    }
+
+    this.setState(
+      {
+        filters,
+        replaceEntryShown: !this.state.replaceEntryShown
+      },
+      () => this._executeSearch(true, undefined, true)
+    );
   }
 
   private _onSearchInputFocus() {
