@@ -49,7 +49,9 @@ const themeDir = path.resolve(jlab.themeDir || outputDir);
 fs.emptyDirSync(path.join(themeDir, 'themes'));
 
 // Deduplicated list of extension package names.
-const extensionPackages = [...new Set([...extensions, ...mimeExtensions])];
+const extensionPackages = [
+  ...new Set([...jlab.extensions, ...jlab.mimeExtensions])
+];
 
 // Configuration to handle extension assets
 const extensionAssetConfig = Build.ensureAssets({
