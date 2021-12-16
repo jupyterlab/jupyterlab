@@ -8,7 +8,15 @@
 export function createShared(packageData) {
   // Set up module federation sharing config
   const shared = {};
-  const extensionPackages = packageData.jupyterlab.extensions;
+  const { extensions, mimeExtensions } = packageData.jupyterlab;
+
+  // Deduplicated list of extension package names.
+  const extensionPackages = [
+    ...new Set([
+      ...Object.keys(extensions),
+      ...Object.keys(mimeExtensions || [])
+    ])
+  ];
 
   // Make sure any resolutions are shared
   for (let [pkg, requiredVersion] of Object.entries(packageData.resolutions)) {
