@@ -399,7 +399,10 @@ class CodeCellSearchProvider extends CellSearchProvider {
 }
 
 class MarkdownCellSearchProvider extends CellSearchProvider {
-  // TODO should we switch to rendered hits / codemirror hits depending on the cell status?
+  get matchesSize(): number {
+    const cell = this.cell as MarkdownCell;
+    return cell.rendered ? cell.highlights.length : super.matchesSize;
+  }
 
   clearSelection(): void {
     super.clearSelection();
@@ -412,7 +415,19 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
-    const match = await super.highlightNext();
+    let match: ISearchMatch | undefined = undefined;
+    const cell = this.cell as MarkdownCell;
+    if (cell.rendered) {
+      this.currentIndex =
+        this.currentIndex === null ? 0 : this.currentIndex + 1;
+      if (this.currentIndex >= cell.highlights.length) {
+        this.currentIndex = null;
+      } else {
+        match = cell.highlights[this.currentIndex] as ISearchMatch;
+      }
+    } else {
+      match = await super.highlightNext();
+    }
 
     this.updateRenderedSelection();
 
@@ -425,7 +440,21 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
-    const match = await super.highlightPrevious();
+    let match: ISearchMatch | undefined = undefined;
+    const cell = this.cell as MarkdownCell;
+    if (cell.rendered) {
+      this.currentIndex =
+        this.currentIndex === null
+          ? cell.highlights.length - 1
+          : this.currentIndex - 1;
+      if (this.currentIndex < 0) {
+        this.currentIndex = null;
+      } else {
+        match = cell.highlights[this.currentIndex] as ISearchMatch;
+      }
+    } else {
+      match = await super.highlightPrevious();
+    }
 
     this.updateRenderedSelection();
 
