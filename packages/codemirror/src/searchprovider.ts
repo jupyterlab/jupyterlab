@@ -523,39 +523,6 @@ export class CodeMirrorSearchHighlighter {
   get currentIndex(): number | null {
     return this._currentIndex;
   }
-  set currentIndex(v: number | null) {
-    if (v !== this._currentIndex) {
-      if (v !== null && (v < 0 || v >= this.matches.length)) {
-        v = null;
-      }
-      this._currentIndex = v;
-
-      // Highlight the current index
-      if (this._currentIndex !== null) {
-        const match = this.matches[this._currentIndex];
-        this._cm.operation(() => {
-          const start = this._cm.doc.posFromIndex(match.position);
-          const from = {
-            line: start.line,
-            column: start.ch
-          };
-          const to = {
-            // Matches is on the same line
-            line: start.line,
-            column: start.ch + match.text.length
-          };
-          // No need to scroll into view this is the default behavior
-          this._cm.setSelection({
-            start: from,
-            end: to
-          });
-        });
-      } else {
-        // Set cursor to remove any selection
-        this._cm.setCursorPosition({ line: 0, column: 0 });
-      }
-    }
-  }
 
   get matches(): ISearchMatch[] {
     return this._matches;
@@ -565,6 +532,11 @@ export class CodeMirrorSearchHighlighter {
       this._matches = v;
       this.refresh();
     }
+  }
+
+  clearSelection(): void {
+    this._currentIndex = null;
+    this._highlightCurrentMatch();
   }
 
   refresh(): void {
@@ -604,7 +576,8 @@ export class CodeMirrorSearchHighlighter {
    * @returns A promise that resolves once the action has completed.
    */
   highlightNext(): Promise<ISearchMatch | undefined> {
-    this.currentIndex = this._findNext(false);
+    this._currentIndex = this._findNext(false);
+    this._highlightCurrentMatch();
     return Promise.resolve(
       this._currentIndex !== null
         ? this._matches[this._currentIndex]
@@ -618,7 +591,8 @@ export class CodeMirrorSearchHighlighter {
    * @returns A promise that resolves once the action has completed.
    */
   highlightPrevious(): Promise<ISearchMatch | undefined> {
-    this.currentIndex = this._findNext(true);
+    this._currentIndex = this._findNext(true);
+    this._highlightCurrentMatch();
     return Promise.resolve(
       this._currentIndex !== null
         ? this._matches[this._currentIndex]
@@ -647,6 +621,33 @@ export class CodeMirrorSearchHighlighter {
           ch: currentSelection.start.column
         })
     );
+  }
+
+  private _highlightCurrentMatch(): void {
+    // Highlight the current index
+    if (this._currentIndex !== null) {
+      const match = this.matches[this._currentIndex];
+      this._cm.operation(() => {
+        const start = this._cm.doc.posFromIndex(match.position);
+        const from = {
+          line: start.line,
+          column: start.ch
+        };
+        const to = {
+          // Matches is on the same line
+          line: start.line,
+          column: start.ch + match.text.length
+        };
+        // No need to scroll into view this is the default behavior
+        this._cm.setSelection({
+          start: from,
+          end: to
+        });
+      });
+    } else {
+      // Set cursor to remove any selection
+      this._cm.setCursorPosition(this._cm.getCursorPosition());
+    }
   }
 
   private _refreshOverlay() {
@@ -732,7 +733,14 @@ export class CodeMirrorSearchHighlighter {
     // the search always proceeds from the 'anchor' position, which is at the 'from'.
 
     const cursorToGet = reverse ? 'anchor' : 'head';
-    const lastPosition = this._cm.getCursor(cursorToGet);
+    const lastPosition =
+      reverse && this.currentIndex === null
+        ? {
+            // Go to virtual next line so position got clamp to end
+            line: this._cm.lineCount,
+            ch: 0
+          }
+        : this._cm.getCursor(cursorToGet);
     const position = this._cm.doc.indexFromPos(lastPosition);
 
     let found = Utils.findNext(
@@ -744,7 +752,7 @@ export class CodeMirrorSearchHighlighter {
 
     if (found === null) {
       // Don't loop
-      return null;
+      return reverse ? this._matches.length - 1 : null;
     }
 
     if (reverse) {

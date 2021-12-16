@@ -366,14 +366,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     const startIndex = this._currentProviderIndex;
     do {
-      const isActive =
-        // this.widget!.content.mode === 'edit' &&
-        this.widget!.content.activeCellIndex === this._currentProviderIndex;
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
       const match = reverse
-        ? await searchEngine.highlightPrevious(false, isActive)
-        : await searchEngine.highlightNext(false, isActive);
+        ? await searchEngine.highlightPrevious()
+        : await searchEngine.highlightNext();
 
       if (match) {
         this.widget!.content.activeCellIndex = this._currentProviderIndex;
@@ -403,8 +400,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // than one matches
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       const match = reverse
-        ? await searchEngine.highlightPrevious(false)
-        : await searchEngine.highlightNext(false);
+        ? await searchEngine.highlightPrevious()
+        : await searchEngine.highlightNext();
 
       if (match) {
         this.widget!.content.activeCellIndex = this._currentProviderIndex;

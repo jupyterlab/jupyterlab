@@ -29,7 +29,7 @@ const SELECTED_HIGHLIGHT_CLASS = 'jp-mod-selected';
 
 export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   constructor(protected cell: Cell<ICellModel>) {
-    this._currentIndex = null;
+    this.currentIndex = null;
     this._changed = new Signal<IBaseSearchProvider, void>(this);
     this.cmHandler = new CodeMirrorSearchHighlighter(
       this.cell.editor as CodeMirrorEditor
@@ -41,7 +41,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   }
 
   get currentMatchIndex(): number | null {
-    return this._currentIndex;
+    return this.currentIndex;
   }
 
   get matchesSize(): number {
@@ -53,8 +53,8 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   }
 
   clearSelection(): void {
-    this._currentIndex = null;
-    this.cmHandler.currentIndex = this._currentIndex;
+    this.currentIndex = null;
+    this.cmHandler.clearSelection();
   }
 
   dispose(): void {
@@ -93,40 +93,17 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightNext(
-    loop = false,
-    isActive = false
-  ): Promise<ISearchMatch | undefined> {
+  async highlightNext(): Promise<ISearchMatch | undefined> {
     if (this.matchesSize === 0) {
-      this._currentIndex = null;
+      this.currentIndex = null;
     } else {
-      // If no match is selected or the cell is being edited => search from cursor
-      if (this._currentIndex === null || isActive) {
-        // This starts from the cursor position
-        const match = await this.cmHandler.highlightNext();
-        if (match) {
-          this._currentIndex = this.cmHandler.currentIndex;
-          return match;
-        } else {
-          // The index will be incremented
-          this._currentIndex = this.cmHandler.matches.length - 1;
-        }
+      // This starts from the cursor position
+      let match = await this.cmHandler.highlightNext();
+      if (match) {
+        this.currentIndex = this.cmHandler.currentIndex;
       }
-
-      this._currentIndex += 1;
-
-      if (loop) {
-        this._currentIndex =
-          (this._currentIndex + this.matchesSize) % this.matchesSize;
-      } else {
-        if (this._currentIndex >= this.matchesSize) {
-          this._currentIndex = null;
-        }
-      }
+      return match;
     }
-
-    // It will be set to null if greater than the number of matches
-    this.cmHandler.currentIndex = this._currentIndex;
 
     return Promise.resolve(this.getCurrentMatch());
   }
@@ -136,45 +113,19 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightPrevious(
-    loop = false,
-    isActive = false
-  ): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(): Promise<ISearchMatch | undefined> {
     if (this.matchesSize === 0) {
-      this._currentIndex = null;
+      this.currentIndex = null;
     } else {
-      if (
-        (this._currentIndex !== null &&
-          this._currentIndex <= this.cmHandler.matches.length) ||
-        isActive
-      ) {
-        const match = await this.cmHandler.highlightPrevious();
-        if (match) {
-          this._currentIndex = this.cmHandler.currentIndex;
-          return match;
-        } else {
-          // No hit in the current editor => will be decremented just after
-          this._currentIndex = 0;
-        }
-      }
-
-      this._currentIndex =
-        this._currentIndex === null
-          ? this.matchesSize - 1
-          : this._currentIndex - 1;
-
-      if (loop) {
-        this._currentIndex =
-          (this._currentIndex + this.matchesSize) % this.matchesSize;
+      // This starts from the cursor position
+      let match = await this.cmHandler.highlightPrevious();
+      if (match) {
+        this.currentIndex = this.cmHandler.currentIndex;
       } else {
-        if (this._currentIndex < 0) {
-          this._currentIndex = null;
-        }
+        this.currentIndex = null;
       }
+      return match;
     }
-
-    // It will be set to null if greater than the number of matches
-    this.cmHandler.currentIndex = this._currentIndex;
 
     return Promise.resolve(this.getCurrentMatch());
   }
@@ -198,12 +149,12 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   }
 
   protected getCurrentMatch(): ISearchMatch | undefined {
-    if (this._currentIndex === null) {
+    if (this.currentIndex === null) {
       return undefined;
     } else {
       let match: ISearchMatch | undefined = undefined;
-      if (this._currentIndex < this.cmHandler.matches.length) {
-        match = this.cmHandler.matches[this._currentIndex];
+      if (this.currentIndex < this.cmHandler.matches.length) {
+        match = this.cmHandler.matches[this.currentIndex];
       }
       return match;
     }
@@ -211,12 +162,12 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
 
   protected isCurrentIndexHighlighted(): boolean {
     // No current match
-    if (this._currentIndex === null) {
+    if (this.currentIndex === null) {
       return false;
     }
 
     // Current match is not in the input
-    if (this._currentIndex >= this.cmHandler.matches.length) {
+    if (this.currentIndex >= this.cmHandler.matches.length) {
       return true;
     } else {
       return this.cmHandler.isCurrentIndexHighlighted();
@@ -236,11 +187,10 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   }
 
   protected cmHandler: CodeMirrorSearchHighlighter;
-  protected isActive = false;
+  protected currentIndex: number | null = null;
   protected query: RegExp | null = null;
   private _changed: Signal<IBaseSearchProvider, void>;
   private _isDisposed = false;
-  private _currentIndex: number | null = null;
 }
 
 class CodeCellSearchProvider extends CellSearchProvider {
@@ -273,15 +223,30 @@ class CodeCellSearchProvider extends CellSearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightNext(
-    loop = false,
-    isActive = false
-  ): Promise<ISearchMatch | undefined> {
-    const match = await super.highlightNext(loop, isActive);
+  async highlightNext(): Promise<ISearchMatch | undefined> {
+    if (this.matchesSize === 0) {
+      this.currentIndex = null;
+    } else {
+      if (
+        this.currentIndex !== null &&
+        this.currentIndex >= this.cmHandler.matches.length
+      ) {
+        this.currentIndex! += 1;
+      } else {
+        const match = await super.highlightNext();
+        if (!match) {
+          this.currentIndex = this.cmHandler.matches.length;
+        }
+      }
+
+      if (this.currentIndex !== null && this.currentIndex >= this.matchesSize) {
+        this.currentIndex = null;
+      }
+    }
 
     this.updateHighlightedOutput();
 
-    return match;
+    return Promise.resolve(this.getCurrentMatch());
   }
 
   /**
@@ -289,15 +254,31 @@ class CodeCellSearchProvider extends CellSearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightPrevious(
-    loop = false,
-    isActive = false
-  ): Promise<ISearchMatch | undefined> {
-    const match = await super.highlightPrevious(loop, isActive);
+  async highlightPrevious(): Promise<ISearchMatch | undefined> {
+    if (this.matchesSize === 0) {
+      this.currentIndex = null;
+    } else {
+      if (this.currentIndex === null) {
+        this.currentIndex = this.matchesSize - 1;
+      } else {
+        this.currentIndex -= 1;
+      }
+
+      if (this.currentIndex < this.cmHandler.matches.length) {
+        const match = await super.highlightPrevious();
+        if (!match) {
+          this.currentIndex = null;
+        }
+      }
+
+      if (this.currentIndex !== null && this.currentIndex < 0) {
+        this.currentIndex = null;
+      }
+    }
 
     this.updateHighlightedOutput();
 
-    return match;
+    return Promise.resolve(this.getCurrentMatch());
   }
 
   /**
@@ -430,11 +411,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightNext(
-    loop = false,
-    isActive = false
-  ): Promise<ISearchMatch | undefined> {
-    const match = await super.highlightNext(loop, isActive);
+  async highlightNext(): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightNext();
 
     this.updateRenderedSelection();
 
@@ -446,11 +424,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightPrevious(
-    loop = false,
-    isActive = false
-  ): Promise<ISearchMatch | undefined> {
-    const match = await super.highlightPrevious(loop, isActive);
+  async highlightPrevious(): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightPrevious();
 
     this.updateRenderedSelection();
 
