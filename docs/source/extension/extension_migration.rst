@@ -39,6 +39,9 @@ bumped their major version (following semver convention):
    The ``NotebookPanel._onSave`` method is now ``private``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
   The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
+- ``@jupyterlab/buildutils`` from 3.x to 4.x
+  The ``create-theme`` script has been removed. If you want to create a new theme extension, you
+  should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
 
 JupyterLab 3.0 to 3.1
 ---------------------
