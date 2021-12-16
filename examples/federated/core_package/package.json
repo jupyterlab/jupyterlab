@@ -167,7 +167,6 @@
     "svg-url-loader": "~6.0.0",
     "to-string-loader": "^1.1.6",
     "url-loader": "~4.1.0",
-    "watch": "~1.0.2",
     "webpack": "^5.55.1",
     "webpack-cli": "^4.8.0",
     "webpack-merge": "^5.8.0",
