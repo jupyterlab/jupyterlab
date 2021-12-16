@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterLab } from '@jupyterlab/application';
+import { ILabShell } from '@jupyterlab/application';
+import { ITranslator } from '@jupyterlab/translation';
+import { ICommandPalette } from '@jupyterlab/apputils';
+import { NotebookPanel } from '@jupyterlab/notebook';
 
 // The webpack public path needs to be set before loading the CSS assets.
 import { PageConfig } from '@jupyterlab/coreutils';
@@ -45,7 +49,35 @@ const extensions = [
   import('@jupyterlab/toc-extension'),
   import('@jupyterlab/tooltip-extension'),
   import('@jupyterlab/translation-extension'),
-  import('@jupyterlab/ui-components-extension')
+  import('@jupyterlab/ui-components-extension'),
+  {
+    id: 'remotecontrol:plugin',
+    autoStart: true,
+    requires: [ILabShell, ITranslator],
+    optional: [ICommandPalette],
+    activate: app => {
+      console.log('JupyterLab extension remotecontrol is activated!');
+      console.log(app.commands.listCommands());
+      console.log(app.shell);
+      window.addEventListener('message', event => {
+        const { action } = event.data;
+        console.log(action);
+        if (action === 'ping') {
+          console.log('got ping, sending pong...');
+          window.parent.postMessage({ action: 'pong' }, '*');
+        }
+        if (action === 'runCommand') {
+          const { command } = event.data;
+          console.log(app.shell.currentWidget);
+          if (app.shell.currentWidget instanceof NotebookPanel) {
+            app.commands.execute(command);
+          } else {
+            console.log('current widget is not notebook, so doing nothing');
+          }
+        }
+      });
+    }
+  }
 ];
 
 const mimeExtensions = [
