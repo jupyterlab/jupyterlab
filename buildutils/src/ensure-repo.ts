@@ -517,7 +517,7 @@ function ensureFederatedExample(): string[] {
   corePackage.jupyterlab.extensions = [];
   coreData.forEach((data, name) => {
     // Make sure it is included as a dependency.
-    corePackage.dependencies[data.name] = `~${data.version}`;
+    corePackage.dependencies[data.name] = `^${data.version}`;
 
     const meta = data.jupyterlab;
     const keep = meta?.extension || meta?.mimeExtension;
