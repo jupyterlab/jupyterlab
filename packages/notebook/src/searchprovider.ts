@@ -5,7 +5,8 @@ import {
   CellSearchProvider,
   createCellSearchProvider,
   ICellModel,
-  MarkdownCell
+  MarkdownCell,
+  SELECTED_HIGHLIGHT_CLASS
 } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
@@ -371,10 +372,29 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     loop = false
   ): Promise<ISearchMatch | null> {
     const activateNewMatch = () => {
-      this.widget!.content.activeCellIndex = this._currentProviderIndex!;
+      if (
+        this.widget!.content.activeCellIndex !== this._currentProviderIndex!
+      ) {
+        this.widget!.content.activeCellIndex = this._currentProviderIndex!;
+      }
+      const activeCell = this.widget!.content.activeCell!;
       // Unhide cell
-      if (this.widget!.content.activeCell!.inputHidden) {
-        this.widget!.content.activeCell!.inputHidden = false;
+      if (activeCell.inputHidden) {
+        activeCell.inputHidden = false;
+      }
+      // scroll to newly activate highlight
+      const containerRect = this.widget!.content.node.getBoundingClientRect();
+      const element =
+        activeCell.node.querySelector(`.${SELECTED_HIGHLIGHT_CLASS}`) ??
+        activeCell.node.querySelector('.CodeMirror-selected');
+      if (element) {
+        const elementRect = element.getBoundingClientRect();
+        if (
+          elementRect.top < containerRect.top ||
+          elementRect.top > containerRect.bottom
+        ) {
+          element.scrollIntoView({ block: 'center' });
+        }
       }
     };
 

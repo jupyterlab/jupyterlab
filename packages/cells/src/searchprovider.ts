@@ -25,7 +25,7 @@ import { Signal } from '@lumino/signaling';
 import { CodeCellModel, ICellModel } from './model';
 import { Cell, CodeCell, MarkdownCell } from './widget';
 
-const SELECTED_HIGHLIGHT_CLASS = 'jp-mod-selected';
+export const SELECTED_HIGHLIGHT_CLASS = 'jp-mod-selected';
 
 export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   constructor(protected cell: Cell<ICellModel>) {
