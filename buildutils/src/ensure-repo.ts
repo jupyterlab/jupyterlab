@@ -767,7 +767,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   }
 
   // Handle the federated example application
-  pkgMessages = ensureJupyterlabApplication({
+  ensureJupyterlabApplication({
     corePathPackage: path.join(
       'examples',
       'federated',
@@ -777,9 +777,10 @@ export async function ensureIntegrity(): Promise<boolean> {
     linkedPackages: false,
     version: false
   });
-  if (pkgMessages.length > 0) {
-    messages['@jupyterlab/example-federated-core'] = pkgMessages;
-  }
+  // TODO: re-add
+  // if (pkgMessages.length > 0) {
+  //   messages['@jupyterlab/example-federated-core'] = pkgMessages;
+  // }
 
   // Handle the JupyterLab application top package.
   pkgMessages = ensureJupyterlabApplication({
