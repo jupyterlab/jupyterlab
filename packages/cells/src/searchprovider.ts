@@ -92,7 +92,10 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  async startQuery(query: RegExp, filters?: IFiltersType): Promise<void> {
+  async startQuery(
+    query: RegExp | null,
+    filters?: IFiltersType
+  ): Promise<void> {
     this.query = query;
     this.filters = filters;
 
@@ -376,7 +379,10 @@ class CodeCellSearchProvider extends CellSearchProvider {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  async startQuery(query: RegExp, filters?: IFiltersType): Promise<void> {
+  async startQuery(
+    query: RegExp | null,
+    filters?: IFiltersType
+  ): Promise<void> {
     await super.startQuery(query, filters);
 
     // Search outputs

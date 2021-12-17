@@ -100,14 +100,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
     let cells = this.widget.content.widgets;
 
-    const finalFilters = {
+    this._query = query;
+    this._filters = {
       output: true,
       selectedCells: false,
       ...(filters ?? {})
     };
 
-    if (finalFilters.selectedCells) {
-      this._onSelectedCells = finalFilters.selectedCells;
+    if (this._filters.selectedCells) {
+      this._onSelectedCells = this._filters.selectedCells;
       this.widget!.content.selectionChanged.connect(
         this._onSelectionChanged,
         this
@@ -122,12 +123,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this.widget!.content.rendermime,
           this.registry
         );
+        cellSearchProvider.changed.connect(this._onSearchProviderChanged, this);
 
         await cellSearchProvider.setIsActive(
-          !finalFilters.selectedCells ||
+          !this._filters!.selectedCells ||
             this.widget!.content.isSelectedOrActive(cell)
         );
-        await cellSearchProvider.startQuery(query, finalFilters);
+        await cellSearchProvider.startQuery(query, this._filters);
 
         return cellSearchProvider;
       })
@@ -312,21 +314,40 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     cells: IObservableUndoableList<ICellModel>,
     changes: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    // TODO update search on cell list changes...?
     // It was removed in https://github.com/jupyterlab/jupyterlab/pull/7835
+    this._clearSelection();
+
+    const addCellProvider = (index: number) => {
+      const cell = this.widget!.content.widgets[index];
+      const cellSearchProvider = createCellSearchProvider(
+        cell,
+        this.widget!.content.rendermime,
+        this.registry
+      );
+      cellSearchProvider.changed.connect(this._onSearchProviderChanged, this);
+
+      ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
+
+      cellSearchProvider
+        .setIsActive(
+          !(this._filters?.selectedCells ?? false) ||
+            this.widget!.content.isSelectedOrActive(cell)
+        )
+        .then(() => {
+          cellSearchProvider.startQuery(this._query, this._filters);
+        });
+    };
+
+    const removeCellProvider = (index: number) => {
+      const provider = ArrayExt.removeAt(this._searchProviders, index);
+      provider?.changed.disconnect(this._onSearchProviderChanged, this);
+      provider?.dispose();
+    };
+
     switch (changes.type) {
       case 'add':
         changes.newValues.forEach((model, index) => {
-          ArrayExt.insert(
-            this._searchProviders,
-            changes.newIndex + index,
-            createCellSearchProvider(
-              // Ok to access the widget as NotebookPanel is instantiated before this object
-              this.widget!.content.widgets[changes.newIndex + index],
-              this.widget!.content.rendermime,
-              this.registry
-            )
-          );
+          addCellProvider(changes.newIndex + index);
         });
         break;
       case 'move':
@@ -338,33 +359,18 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         break;
       case 'remove':
         for (let index = 0; index < changes.oldValues.length; index++) {
-          const provider = ArrayExt.removeAt(
-            this._searchProviders,
-            changes.oldIndex
-          );
-          provider?.dispose();
+          removeCellProvider(changes.oldIndex);
         }
         break;
       case 'set':
         changes.newValues.forEach((model, index) => {
-          ArrayExt.insert(
-            this._searchProviders,
-            changes.newIndex + index,
-            createCellSearchProvider(
-              this.widget!.content.widgets[changes.newIndex + index],
-              this.widget!.content.rendermime,
-              this.registry
-            )
-          );
-          const provider = ArrayExt.removeAt(
-            this._searchProviders,
-            changes.newIndex + index + 1
-          );
-          provider?.dispose();
+          addCellProvider(changes.newIndex + index);
+          removeCellProvider(changes.newIndex + index + 1);
         });
 
         break;
     }
+    this.changed.emit();
   }
 
   private async _stepNext(
@@ -454,10 +460,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private async _onActiveCellChanged() {
     await this._onSelectionChanged();
 
-    if (
-      this.widget!.content.activeCellIndex !== this._currentProviderIndex &&
-      this._currentProviderIndex !== null
-    ) {
+    if (this.widget!.content.activeCellIndex !== this._currentProviderIndex) {
+      this._clearSelection();
+    }
+  }
+
+  private _clearSelection() {
+    if (this._currentProviderIndex !== null) {
       this._searchProviders[this._currentProviderIndex].clearSelection();
       this._currentProviderIndex = null;
     }
@@ -482,7 +491,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
   }
 
-  private _searchProviders: CellSearchProvider[] = [];
   private _currentProviderIndex: number | null = null;
+  private _filters: IFiltersType | undefined;
   private _onSelectedCells = false;
+  private _query: RegExp | null = null;
+  private _searchProviders: CellSearchProvider[] = [];
 }
