@@ -30,35 +30,36 @@ jobs:
             linkcheck,
             lint,
           ]
-        python: [3.6, 3.8]
+        # This will be used by the base setup action
+        python-version: ['3.7', '3.10']
         include:
           - group: release_test
             upload-output: true
         exclude:
           - group: integrity
-            python: 3.6
+            python-version: '3.7'
           - group: integrity2
-            python: 3.6
+            python-version: '3.7'
           - group: integrity3
-            python: 3.6
+            python-version: '3.7'
           - group: release_test
-            python: 3.6
+            python-version: '3.7'
           - group: docs
-            python: 3.6
+            python-version: '3.7'
           - group: usage
-            python: 3.6
+            python-version: '3.7'
           - group: usage2
-            python: 3.6
+            python-version: '3.7'
           - group: linkcheck
-            python: 3.6
+            python-version: '3.7'
           - group: nonode
-            python: 3.6
+            python-version: '3.7'
           - group: lint
-            python: 3.6
+            python-version: '3.7'
           - group: examples
-            python: 3.6
+            python-version: '3.7'
           - group: splice_source
-            python: 3.6
+            python-version: '3.7'
       fail-fast: false
     timeout-minutes: 30
     runs-on: ubuntu-20.04
