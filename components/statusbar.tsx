@@ -844,7 +844,8 @@ export namespace LSPStatus {
           uninitialized.delete(initialized);
         }
         // servers for n documents did not respond to the initialization request
-        msg = this.trans._n(
+        msg = this.trans._np(
+          'pluralized',
           'Fully connected, but %2/%3 virtual document stuck uninitialized: %4',
           'Fully connected, but %2/%3 virtual documents stuck uninitialized: %4',
           status.detected_documents.size,
@@ -858,7 +859,8 @@ export namespace LSPStatus {
           unconnected.delete(connected);
         }
 
-        msg = this.trans._n(
+        msg = this.trans._np(
+          'pluralized',
           '%2/%3 virtual document connected (%4 connections; waiting for: %5)',
           '%2/%3 virtual documents connected (%4 connections; waiting for: %5)',
           status.detected_documents.size,
