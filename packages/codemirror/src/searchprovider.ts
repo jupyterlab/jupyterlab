@@ -527,8 +527,8 @@ export class CodeMirrorSearchHighlighter {
   set matches(v: ISearchMatch[]) {
     if (!JSONExt.deepEqual(this._matches as any, v as any)) {
       this._matches = v;
-      this.refresh();
     }
+    this.refresh();
   }
 
   clearSelection(): void {
@@ -551,7 +551,8 @@ export class CodeMirrorSearchHighlighter {
     this._currentIndex = null;
     this._matches = [];
 
-    this._cm.removeOverlay(this._overlay);
+    this._cm.removeOverlay('jp-searching');
+    this._overlay = null;
 
     const from = this._cm.getCursor('from');
     const to = this._cm.getCursor('to');
@@ -648,18 +649,55 @@ export class CodeMirrorSearchHighlighter {
   }
 
   private _refreshOverlay() {
-    this._cm.operation(() => {
-      // clear search first
-      this._cm.removeOverlay(this._overlay);
-      this._overlay = this._getSearchOverlay();
-      this._cm.addOverlay(this._overlay);
-    });
+    // clear search first
+    this._cm.removeOverlay('jp-searching');
+    this._overlay = this._getSearchOverlay();
+    this._cm.addOverlay(this._overlay);
   }
 
   private _getSearchOverlay() {
-    let lastMatchIndex = 0;
+    const token = (stream: CodeMirror.StringStream) => {
+      const position = this._cm.doc.indexFromPos({
+        line: stream.lineOracle.line,
+        ch: stream.pos
+      });
+
+      let found =
+        this._matches.length > 0
+          ? Utils.findNext(
+              this._matches,
+              position,
+              0, // lastMatchIndex,
+              this._matches.length - 1
+            )
+          : null;
+
+      if (found !== null) {
+        // lastMatchIndex = found;
+        const match = this._matches[found];
+        if (match.position > position + stream.string.length) {
+          // next match not in this stream, consume the rest of the stream
+          stream.skipToEnd();
+          return null;
+        }
+
+        if (position === match.position) {
+          // move the stream along and return searching style for the token
+          stream.pos += match.text.length || 1;
+          return 'searching';
+        } else {
+          // Move to the next match
+          stream.pos += match.position - position;
+        }
+      } else {
+        // no matches, consume the rest of the stream
+        stream.skipToEnd();
+      }
+      return null;
+    };
 
     return {
+      name: 'jp-searching',
       /**
        * Token function is called when a line needs to be processed -
        * when the overlay is initially created, it's called on all lines;
@@ -670,45 +708,7 @@ export class CodeMirrorSearchHighlighter {
        * the overlay and keeps track of the match state as the document is
        * updated while a search is active.
        */
-      token: (stream: CodeMirror.StringStream) => {
-        const position = this._cm.doc.indexFromPos({
-          line: stream.lineOracle.line,
-          ch: stream.pos
-        });
-
-        let found =
-          this._matches.length > 0
-            ? Utils.findNext(
-                this._matches,
-                position,
-                lastMatchIndex,
-                this._matches.length - 1
-              )
-            : null;
-
-        if (found !== null) {
-          lastMatchIndex = found;
-          const match = this._matches[found];
-          if (match.position > position + stream.string.length) {
-            // next match not in this stream, consume the rest of the stream
-            stream.skipToEnd();
-            return null;
-          }
-
-          if (position === match.position) {
-            // move the stream along and return searching style for the token
-            stream.pos += match.text.length || 1;
-            return 'searching';
-          } else {
-            // Move to the next match
-            stream.pos += match.position - position;
-          }
-        } else {
-          // no matches, consume the rest of the stream
-          stream.skipToEnd();
-        }
-        return null;
-      }
+      token: token.bind(this)
     };
   }
 

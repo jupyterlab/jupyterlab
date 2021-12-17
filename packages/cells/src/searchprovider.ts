@@ -16,6 +16,7 @@ import { IObservableString } from '@jupyterlab/observables';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
 import {
   HIGHLIGHT_CLASS_NAME,
+  IOutputModel,
   IRenderMimeRegistry,
   MarkdownSearchEngine
 } from '@jupyterlab/rendermime';
@@ -97,7 +98,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
 
     // Search input
     const content = this.cell.model.modelDB.get('value') as IObservableString;
-    await this.onInputChanged(content);
+    await this._updateCodeMirror(content);
     content.changed.connect(this.onInputChanged, this);
   }
 
@@ -244,6 +245,11 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     content: IObservableString,
     changes?: IObservableString.IChangedArgs
   ): Promise<void> {
+    await this._updateCodeMirror(content);
+    this._changed.emit();
+  }
+
+  private async _updateCodeMirror(content: IObservableString) {
     if (this.query !== null) {
       if (this.isActive) {
         this.cmHandler.matches = await TextSearchEngine.search(
@@ -295,7 +301,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
   clearSelection(): void {
     super.clearSelection();
-    this.updateHighlightedOutput();
+    this._updateHighlightedOutput();
   }
 
   /**
@@ -324,7 +330,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
       }
     }
 
-    this.updateHighlightedOutput();
+    this._updateHighlightedOutput();
 
     return Promise.resolve(this.getCurrentMatch());
   }
@@ -356,7 +362,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
       }
     }
 
-    this.updateHighlightedOutput();
+    this._updateHighlightedOutput();
 
     return Promise.resolve(this.getCurrentMatch());
   }
@@ -374,41 +380,10 @@ class CodeCellSearchProvider extends CellSearchProvider {
     await super.startQuery(query, filters);
 
     // Search outputs
-    if (
-      filters?.output !== false &&
-      this.cell.model.type === 'code' &&
-      this.rendermime &&
-      this.searchRegistry
-    ) {
-      const outputs = (this.cell.model as CodeCellModel).outputs;
-      if (this.isActive) {
-        const searchOutputs = new Array<Promise<void>>();
-        for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-          const output = outputs.get(outputIdx);
-          // Search for the display mimetype as in packages/outputarea/src/widget.ts
-          const mimeType = this.rendermime.preferredMimeType(
-            output.data,
-            output.trusted ? 'any' : 'ensure'
-          );
-          if (mimeType) {
-            const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
-              mimeType
-            );
-            if (searchEngine && output.highlights) {
-              searchOutputs.push(
-                searchEngine.search(query, output.data[mimeType]).then(hits => {
-                  output.highlights = hits;
-                })
-              );
-            }
-          }
-        }
-
-        await Promise.all(searchOutputs);
-      }
-      outputs.changed.connect(this.onOutputsChanged, this);
-      outputs.stateChanged.connect(this.onOutputChanged, this);
-    }
+    const outputs = (this.cell.model as CodeCellModel).outputs;
+    this._onOutputChanged(outputs);
+    outputs.changed.connect(this._onOutputsChanged, this);
+    outputs.stateChanged.connect(this._onOutputChanged, this);
   }
 
   async endQuery(): Promise<void> {
@@ -443,21 +418,58 @@ class CodeCellSearchProvider extends CellSearchProvider {
     return match;
   }
 
-  private onOutputsChanged(
+  private async _onOutputsChanged(
     output: IOutputAreaModel,
     changes: IOutputAreaModel.ChangedArgs
-  ): void {
-    // No-op
+  ): Promise<void> {
+    switch (changes.type) {
+      case 'add':
+      case 'set':
+        await Promise.all(
+          changes.newValues.map(output => this._updateOutput(output))
+        );
+        break;
+      case 'move':
+      case 'remove':
+        // Nothing to do
+        break;
+    }
+
+    this.changed.emit();
   }
 
-  private onOutputChanged(
+  private async _onOutputChanged(
     output: IOutputAreaModel,
     changes?: [number, string]
-  ): void {
-    // No-op
+  ): Promise<void> {
+    if (!this.isActive) {
+      return Promise.resolve();
+    }
+
+    const model = this.cell.model as CodeCellModel;
+
+    if (changes) {
+      const [index, type] = changes;
+      if (type === 'data') {
+        await this._updateOutput(model.outputs.get(index));
+      }
+    } else {
+      if (this.query && this.filters?.output !== false) {
+        const outputs = model.outputs;
+        const searchOutputs = new Array<Promise<void>>();
+        for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
+          const output = outputs.get(outputIdx);
+          searchOutputs.push(this._updateOutput(output));
+        }
+
+        await Promise.all(searchOutputs);
+      }
+    }
+
+    this.changed.emit();
   }
 
-  private updateHighlightedOutput() {
+  private _updateHighlightedOutput() {
     // Clear any output selection
     const outputArea = (this.cell as CodeCell).outputArea;
     const oldHit = outputArea.node.querySelector(
@@ -477,6 +489,41 @@ class CodeCellSearchProvider extends CellSearchProvider {
       )[outputIndex];
       newHit.classList.add(SELECTED_HIGHLIGHT_CLASS);
     }
+  }
+
+  private async _updateOutput(output: IOutputModel): Promise<void> {
+    if (
+      !this.query ||
+      this.filters?.output === false ||
+      !this.rendermime ||
+      !this.searchRegistry
+    ) {
+      return Promise.resolve();
+    }
+
+    // Search for the display mimetype as in packages/outputarea/src/widget.ts
+    const mimeType = this.rendermime.preferredMimeType(
+      output.data,
+      output.trusted ? 'any' : 'ensure'
+    );
+    if (mimeType) {
+      const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
+        mimeType
+      );
+      if (searchEngine && output.highlights) {
+        const hits = await searchEngine.search(
+          this.query!,
+          output.data[mimeType]
+        );
+        output.highlights = hits;
+
+        if (this.currentIndex !== null) {
+          this.currentIndex = null;
+        }
+      }
+    }
+
+    return Promise.resolve();
   }
 }
 
