@@ -405,9 +405,17 @@ function ensureMetaPackage(): string[] {
 /**
  * Ensure the jupyterlab application package.
  */
-function ensureJupyterlab(): string[] {
+function ensureJupyterlabApplication({
+  corePathPackage,
+  linkedPackages = true,
+  version = true
+}: {
+  corePathPackage: string;
+  linkedPackages?: boolean;
+  version?: boolean;
+}): string[] {
   const basePath = path.resolve('.');
-  const corePath = path.join(basePath, 'dev_mode', 'package.json');
+  const corePath = path.join(basePath, corePathPackage);
   const corePackage = utils.readJSONFile(corePath);
 
   corePackage.jupyterlab.extensions = {};
@@ -504,29 +512,33 @@ function ensureJupyterlab(): string[] {
     });
   });
 
-  utils.getLernaPaths().forEach(pkgPath => {
-    const dataPath = path.join(pkgPath, 'package.json');
-    let data: any;
-    try {
-      data = utils.readJSONFile(dataPath);
-    } catch (e) {
-      return;
-    }
-    // Skip private packages.
-    if (data.private === true) {
-      return;
-    }
+  if (linkedPackages) {
+    utils.getLernaPaths().forEach(pkgPath => {
+      const dataPath = path.join(pkgPath, 'package.json');
+      let data: any;
+      try {
+        data = utils.readJSONFile(dataPath);
+      } catch (e) {
+        return;
+      }
+      // Skip private packages.
+      if (data.private === true) {
+        return;
+      }
 
-    // watch all src, build, and test files in the Jupyterlab project
-    const relativePath = utils.ensureUnixPathSep(
-      path.join('..', path.relative(basePath, pkgPath))
-    );
-    corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
-  });
+      // watch all src, build, and test files in the Jupyterlab project
+      const relativePath = utils.ensureUnixPathSep(
+        path.join('..', path.relative(basePath, pkgPath))
+      );
+      corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
+    });
+  }
 
-  // Update the dev mode version.
-  const curr = utils.getPythonVersion();
-  corePackage.jupyterlab.version = curr;
+  if (version) {
+    // Update the dev mode version.
+    const curr = utils.getPythonVersion();
+    corePackage.jupyterlab.version = curr;
+  }
 
   // Write the package.json back to disk.
   if (utils.writePackageData(corePath, corePackage)) {
@@ -754,8 +766,25 @@ export async function ensureIntegrity(): Promise<boolean> {
     messages['top'].push('Update npm publish command in pyproject.toml');
   }
 
+  // Handle the federated example application
+  pkgMessages = ensureJupyterlabApplication({
+    corePathPackage: path.join(
+      'examples',
+      'federated',
+      'core_package',
+      'package.json'
+    ),
+    linkedPackages: false,
+    version: false
+  });
+  if (pkgMessages.length > 0) {
+    messages['@jupyterlab/example-federated-core'] = pkgMessages;
+  }
+
   // Handle the JupyterLab application top package.
-  pkgMessages = ensureJupyterlab();
+  pkgMessages = ensureJupyterlabApplication({
+    corePathPackage: path.join('dev_mode', 'package.json')
+  });
   if (pkgMessages.length > 0) {
     messages['@application/top'] = pkgMessages;
   }
