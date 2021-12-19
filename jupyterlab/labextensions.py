@@ -17,8 +17,7 @@ from jupyterlab.debuglog import DebugLogFileMixin
 from .commands import (
     HERE, AppOptions, build, check_extension,
     disable_extension, enable_extension, get_app_version,
-    install_extension, link_package, list_extensions,
-    uninstall_extension, unlink_package, update_extension
+    list_extensions
 )
 from .federated_labextensions import build_labextension, develop_labextension_py, watch_labextension
 from .labapp import LabApp
@@ -148,45 +147,6 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         return "%(message)s"
 
 
-class InstallLabExtensionApp(BaseExtensionApp):
-    description = """Install labextension(s)
-
-     Usage
-
-        jupyter labextension install [--pin-version-as <alias,...>] <package...>
-
-    This installs JupyterLab extensions similar to yarn add or npm install.
-
-    Pass a list of comma separate names to the --pin-version-as flag
-    to use as aliases for the packages providers. This is useful to
-    install multiple versions of the same extension.
-    These can be uninstalled with the alias you provided
-    to the flag, similar to the "alias" feature of yarn add.
-    """
-    aliases = install_aliases
-
-    pin = Unicode('', config=True,
-        help="Pin this version with a certain alias")
-
-    def run_task(self):
-        pinned_versions = self.pin.split(',')
-        self.extra_args = self.extra_args or [os.getcwd()]
-        return any([
-            install_extension(
-                arg,
-                # Pass in pinned alias if we have it
-                pin=pinned_versions[i] if i < len(pinned_versions) else None,
-                app_options=AppOptions(
-                    app_dir=self.app_dir,
-                    logger=self.log,
-                    core_config=self.core_config,
-                    labextensions_path=self.labextensions_path
-                )
-            )
-            for i, arg in enumerate(self.extra_args)
-        ])
-
-
 class DevelopLabExtensionApp(BaseExtensionApp):
     description = "Develop labextension"
     flags = develop_flags
@@ -259,91 +219,6 @@ class WatchLabExtensionApp(BaseExtensionApp):
         core_path = self.core_path or None)
 
 
-class UpdateLabExtensionApp(BaseExtensionApp):
-    description = "Update labextension(s)"
-    flags = update_flags
-
-    all = Bool(False, config=True,
-        help="Whether to update all extensions")
-
-    def run_task(self):
-        if not self.all and not self.extra_args:
-            self.log.warn('Specify an extension to update, or use --all to update all extensions')
-            return False
-        app_options = AppOptions(app_dir=self.app_dir, logger=self.log,
-            core_config=self.core_config, labextensions_path=self.labextensions_path)
-        if self.all:
-            return update_extension(all_=True, app_options=app_options)
-        return any([
-            update_extension(name=arg, app_options=app_options)
-            for arg in self.extra_args
-        ])
-
-
-class LinkLabExtensionApp(BaseExtensionApp):
-    description = """
-    Link local npm packages that are not lab extensions.
-
-    Links a package to the JupyterLab build process. A linked
-    package is manually re-installed from its source location when
-    `jupyter lab build` is run.
-    """
-    should_build = Bool(True, config=True,
-        help="Whether to build the app after the action")
-
-    def run_task(self):
-        self.extra_args = self.extra_args or [os.getcwd()]
-        options = AppOptions(
-            app_dir=self.app_dir, logger=self.log,
-            labextensions_path=self.labextensions_path,
-            core_config=self.core_config)
-        return any([
-            link_package(
-                arg,
-                app_options=options)
-            for arg in self.extra_args
-        ])
-
-
-class UnlinkLabExtensionApp(BaseExtensionApp):
-    description = "Unlink packages by name or path"
-
-    def run_task(self):
-        self.extra_args = self.extra_args or [os.getcwd()]
-        options = AppOptions(
-            app_dir=self.app_dir, logger=self.log,
-            labextensions_path=self.labextensions_path,
-            core_config=self.core_config)
-        return any([
-            unlink_package(
-                arg,
-                app_options=options)
-            for arg in self.extra_args
-        ])
-
-
-class UninstallLabExtensionApp(BaseExtensionApp):
-    description = "Uninstall labextension(s) by name"
-    flags = uninstall_flags
-
-    all = Bool(False, config=True,
-        help="Whether to uninstall all extensions")
-
-    def run_task(self):
-        self.extra_args = self.extra_args or [os.getcwd()]
-
-        options = AppOptions(
-            app_dir=self.app_dir, logger=self.log,
-            labextensions_path=self.labextensions_path,
-            core_config=self.core_config)
-        return any([
-            uninstall_extension(
-                arg, all_=self.all,
-                app_options=options)
-            for arg in self.extra_args
-        ])
-
-
 class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
 
@@ -405,8 +280,6 @@ jupyter labextension list                        # list all configured labextens
 jupyter labextension develop                     # develop a prebuilt labextension
 jupyter labextension build                       # build a prebuilt labextension
 jupyter labextension watch                       # watch a prebuilt labextension
-jupyter labextension install <extension name>    # install a labextension
-jupyter labextension uninstall <extension name>  # uninstall a labextension
 """
 
 
@@ -418,15 +291,10 @@ class LabExtensionApp(JupyterApp):
     examples = _examples
 
     subcommands = dict(
-        install=(InstallLabExtensionApp, "Install labextension(s)"),
         develop=(DevelopLabExtensionApp, "Develop labextension(s)"),
         build=(BuildLabExtensionApp, "Build labextension"),
         watch=(WatchLabExtensionApp, "Watch labextension"),
-        update=(UpdateLabExtensionApp, "Update labextension(s)"),
-        uninstall=(UninstallLabExtensionApp, "Uninstall labextension(s)"),
         list=(ListLabExtensionsApp, "List labextensions"),
-        link=(LinkLabExtensionApp, "Link labextension(s)"),
-        unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
         enable=(EnableLabExtensionsApp, "Enable labextension(s)"),
         disable=(DisableLabExtensionsApp, "Disable labextension(s)"),
         check=(CheckLabExtensionsApp, "Check labextension(s)"),

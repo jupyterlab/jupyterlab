@@ -169,56 +169,58 @@ if [[ $GROUP == usage ]]; then
     jupyter lab clean --debug
     jupyter lab build --debug
     jupyter lab path --debug
-    pushd jupyterlab/tests/mock_packages
-    jupyter labextension link mimeextension --no-build --debug
-    jupyter labextension unlink mimeextension --no-build --debug
-    jupyter labextension link mimeextension --no-build --debug
-    jupyter labextension unlink  @jupyterlab/mock-mime-extension --no-build --debug
 
-    # Test with a source package install
-    jupyter labextension install mimeextension --debug
-    jupyter labextension list --debug
-    jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep "@jupyterlab/mock-mime-extension.*enabled.*OK"
-    python -m jupyterlab.browser_check
-    jupyter labextension disable @jupyterlab/mock-mime-extension --debug
-    jupyter labextension enable @jupyterlab/mock-mime-extension --debug
-    jupyter labextension uninstall @jupyterlab/mock-mime-extension --no-build --debug
+    # TODO: test with federated extensions?
+    # pushd jupyterlab/tests/mock_packages
+    # jupyter labextension link mimeextension --no-build --debug
+    # jupyter labextension unlink mimeextension --no-build --debug
+    # jupyter labextension link mimeextension --no-build --debug
+    # jupyter labextension unlink  @jupyterlab/mock-mime-extension --no-build --debug
 
-    # Test enable/disable and uninstall/install a core package
-    jupyter labextension disable @jupyterlab/notebook-extension --debug
-    jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
-    jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep "Uninstalled core extensions:"
-    jupyter labextension install @jupyterlab/notebook-extension --no-build --debug
-    jupyter labextension enable @jupyterlab/notebook-extension --debug
+    # # Test with a source package install
+    # jupyter labextension install mimeextension --debug
+    # jupyter labextension list --debug
+    # jupyter labextension list 1>labextensions 2>&1
+    # cat labextensions | grep "@jupyterlab/mock-mime-extension.*enabled.*OK"
+    # python -m jupyterlab.browser_check
+    # jupyter labextension disable @jupyterlab/mock-mime-extension --debug
+    # jupyter labextension enable @jupyterlab/mock-mime-extension --debug
+    # jupyter labextension uninstall @jupyterlab/mock-mime-extension --no-build --debug
 
-    # Test with a prebuilt install
-    jupyter labextension develop extension --debug
-    jupyter labextension build extension
+    # # Test enable/disable and uninstall/install a core package
+    # jupyter labextension disable @jupyterlab/notebook-extension --debug
+    # jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
+    # jupyter labextension list 1>labextensions 2>&1
+    # cat labextensions | grep "Uninstalled core extensions:"
+    # jupyter labextension install @jupyterlab/notebook-extension --no-build --debug
+    # jupyter labextension enable @jupyterlab/notebook-extension --debug
 
-    # Test develop script with hyphens and underscores in the module name
-    pip install -e test-hyphens
-    jupyter labextension develop test-hyphens --overwrite --debug
-    pip install -e test_no_hyphens
-    jupyter labextension develop test_no_hyphens --overwrite --debug
-    pip install -e test-hyphens-underscore
-    jupyter labextension develop test-hyphens-underscore --overwrite --debug
+    # # Test with a prebuilt install
+    # jupyter labextension develop extension --debug
+    # jupyter labextension build extension
 
-    python -m jupyterlab.browser_check
-    jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
-    jupyter labextension build extension --static-url /foo/
-    jupyter labextension build extension --core-path ../../../examples/federated/core_package
-    jupyter labextension disable @jupyterlab/mock-extension --debug
-    jupyter labextension enable @jupyterlab/mock-extension --debug
-    jupyter labextension uninstall @jupyterlab/mock-extension --debug
-    jupyter labextension list 1>labextensions 2>&1
-    # check the federated extension is still listed after jupyter labextension uninstall
-    cat labextensions | grep -q "mock-extension"
-    # build it again without a static-url to avoid causing errors
-    jupyter labextension build extension
-    popd
+    # # Test develop script with hyphens and underscores in the module name
+    # pip install -e test-hyphens
+    # jupyter labextension develop test-hyphens --overwrite --debug
+    # pip install -e test_no_hyphens
+    # jupyter labextension develop test_no_hyphens --overwrite --debug
+    # pip install -e test-hyphens-underscore
+    # jupyter labextension develop test-hyphens-underscore --overwrite --debug
+
+    # python -m jupyterlab.browser_check
+    # jupyter labextension list 1>labextensions 2>&1
+    # cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
+    # jupyter labextension build extension --static-url /foo/
+    # jupyter labextension build extension --core-path ../../../examples/federated/core_package
+    # jupyter labextension disable @jupyterlab/mock-extension --debug
+    # jupyter labextension enable @jupyterlab/mock-extension --debug
+    # jupyter labextension uninstall @jupyterlab/mock-extension --debug
+    # jupyter labextension list 1>labextensions 2>&1
+    # # check the federated extension is still listed after jupyter labextension uninstall
+    # cat labextensions | grep -q "mock-extension"
+    # # build it again without a static-url to avoid causing errors
+    # jupyter labextension build extension
+    # popd
 
     jupyter lab workspaces export > workspace.json --debug
     jupyter lab workspaces import --name newspace workspace.json --debug
@@ -230,23 +232,12 @@ if [[ $GROUP == usage ]]; then
     jupyter lab build -h
     jupyter lab clean -h
     jupyter lab path -h
-    jupyter labextension link -h
-    jupyter labextension unlink -h
-    jupyter labextension install -h
-    jupyter labextension uninstall -h
     jupyter labextension list -h
     jupyter labextension enable -h
     jupyter labextension disable -h
 
     # Make sure we can run JupyterLab under classic notebook
     python -m jupyterlab.browser_check --notebook
-
-    # Make sure we can add and remove a sibling package.
-    # jlpm run add:sibling jupyterlab/tests/mock_packages/extension
-    # jlpm run build
-    # jlpm run remove:package extension
-    # jlpm run build
-    # jlpm run integrity --force  # Should have a clean tree now
 
     # Test cli tools
     jlpm run get:dependency mocha
@@ -282,7 +273,8 @@ if [[ $GROUP == usage2 ]]; then
     python -m jupyterlab.browser_check --core-mode
 
     # Make sure we can run the built app.
-    jupyter labextension install ./jupyterlab/tests/mock_packages/extension --debug
+    # TODO: install a prebuilt extension
+    # jupyter labextension install ./jupyterlab/tests/mock_packages/extension --debug
     python -m jupyterlab.browser_check
     jupyter labextension list --debug
 
@@ -371,66 +363,69 @@ fi
 if [[ $GROUP == interop ]]; then
     cd jupyterlab/tests/mock_packages/interop
 
-    # Install a source extension that depends on a prebuilt extension
-    pushd token
-    jupyter labextension link . --no-build
-    popd
-    pushd provider
-    jupyter labextension build .
-    pip install .
-    popd
-    pushd consumer
-    jupyter labextension install .
-    popd
-    jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
-    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
+    # TODO: we probably don't need to support interop between source and prebuilt
+    # Instead we can test prebuilt extensions depending on another prebuilt extension
 
-    python -m jupyterlab.browser_check
+    # # Install a source extension that depends on a prebuilt extension
+    # pushd token
+    # jupyter labextension link . --no-build
+    # popd
+    # pushd provider
+    # jupyter labextension build .
+    # pip install .
+    # popd
+    # pushd consumer
+    # jupyter labextension install .
+    # popd
+    # jupyter labextension list 1>labextensions 2>&1
+    # cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
+    # cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
 
-    # Clear install
-    pip uninstall -y jlab_mock_provider
-    jupyter lab clean --all
+    # python -m jupyterlab.browser_check
 
-    # Install a prebuilt extension that depends on a source extension
-    pushd token
-    jupyter labextension link . --no-build
-    popd
-    pushd provider
-    jupyter labextension install .
-    popd
-    pushd consumer
-    jupyter labextension build .
-    pip install .
-    popd
-    jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
-    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
-    python -m jupyterlab.browser_check
+    # # Clear install
+    # pip uninstall -y jlab_mock_provider
+    # jupyter lab clean --all
 
-    # Clear install
-    pip uninstall -y jlab_mock_consumer
-    jupyter lab clean --all
+    # # Install a prebuilt extension that depends on a source extension
+    # pushd token
+    # jupyter labextension link . --no-build
+    # popd
+    # pushd provider
+    # jupyter labextension install .
+    # popd
+    # pushd consumer
+    # jupyter labextension build .
+    # pip install .
+    # popd
+    # jupyter labextension list 1>labextensions 2>&1
+    # cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
+    # cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
+    # python -m jupyterlab.browser_check
 
-    # Install the mock consumer as a source extension and as a
-    # prebuilt extension to test shadowing
-    pushd token
-    jupyter labextension link . --no-build
-    popd
-    pushd provider
-    jupyter labextension install . --no-build
-    popd
-    pushd consumer
-    # Need to install source first because it would get ignored
-    # if installed after
-    jupyter labextension install .
-    jupyter labextension build .
-    pip install .
-    popd
-    jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
-    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
-    python -m jupyterlab.browser_check
+    # # Clear install
+    # pip uninstall -y jlab_mock_consumer
+    # jupyter lab clean --all
+
+    # # Install the mock consumer as a source extension and as a
+    # # prebuilt extension to test shadowing
+    # pushd token
+    # jupyter labextension link . --no-build
+    # popd
+    # pushd provider
+    # jupyter labextension install . --no-build
+    # popd
+    # pushd consumer
+    # # Need to install source first because it would get ignored
+    # # if installed after
+    # jupyter labextension install .
+    # jupyter labextension build .
+    # pip install .
+    # popd
+    # jupyter labextension list 1>labextensions 2>&1
+    # cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
+    # cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
+    # python -m jupyterlab.browser_check
 fi
 
 if [[ $GROUP == nonode ]]; then

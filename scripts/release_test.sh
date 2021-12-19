@@ -29,8 +29,10 @@ JLAB_BROWSER_CHECK_OUTPUT=${OUTPUT_DIR} python -m jupyterlab.browser_check
 # Remove node_modules to get a clean directory and build the extensions
 rm -rf ./mock_packages/mimeextension/node_modules
 rm -rf ./mock_packages/extension/node_modules
-jupyter labextension install ./mock_packages/mimeextension --no-build --debug
-jupyter labextension develop ./mock_packages/extension --debug
+
+# TODO: install a prebuilt extension
+# jupyter labextension install ./mock_packages/mimeextension --no-build --debug
+# jupyter labextension develop ./mock_packages/extension --debug
 jupyter labextension build ./mock_packages/extension --debug
 
 conda install --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y ipywidgets altair matplotlib-base vega_datasets jupyterlab_widgets

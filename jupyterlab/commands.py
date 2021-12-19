@@ -18,7 +18,6 @@ import site
 import subprocess
 import sys
 import tarfile
-import warnings
 from copy import deepcopy
 from glob import glob
 from pathlib import Path
@@ -35,7 +34,7 @@ from jupyterlab_server.config import (LabConfig, get_federated_extensions,
                                       write_page_config)
 from jupyterlab_server.process import Process, WatchHelper, list2cmdline, which
 from packaging.version import Version
-from traitlets import Bool, Dict, HasTraits, Instance, List, Unicode, default
+from traitlets import Bool, HasTraits, Instance, List, Unicode, default
 
 from jupyterlab.coreconfig import CoreConfig
 from jupyterlab.jlpmapp import HERE, YARN_PATH
@@ -397,47 +396,6 @@ def watch(app_options=None):
     return package_procs + handler.watch()
 
 
-
-def install_extension(extension, app_options=None, pin=None):
-    """Install an extension package into JupyterLab.
-
-    The extension is first validated.
-
-    Returns `True` if a rebuild is recommended, `False` otherwise.
-    """
-    app_options = _ensure_options(app_options)
-    _node_check(app_options.logger)
-    handler = _AppHandler(app_options)
-    return handler.install_extension(extension, pin=pin)
-
-
-def uninstall_extension(name=None, app_options=None, all_=False):
-    """Uninstall an extension by name or path.
-
-    Returns `True` if a rebuild is recommended, `False` otherwise.
-    """
-    app_options = _ensure_options(app_options)
-    _node_check(app_options.logger)
-    handler = _AppHandler(app_options)
-    if all_ is True:
-        return handler.uninstall_all_extensions()
-    return handler.uninstall_extension(name)
-
-
-def update_extension(name=None, all_=False, app_dir=None, app_options=None):
-    """Update an extension by name, or all extensions.
-    Either `name` must be given as a string, or `all_` must be `True`.
-    If `all_` is `True`, the value of `name` is ignored.
-    Returns `True` if a rebuild is recommended, `False` otherwise.
-    """
-    app_options = _ensure_options(app_options)
-    _node_check(app_options.logger)
-    handler = _AppHandler(app_options)
-    if all_ is True:
-        return handler.update_all_extensions()
-    return handler.update_extension(name)
-
-
 def clean(app_options=None):
     """Clean the JupyterLab application directory."""
     app_options = _ensure_options(app_options)
@@ -534,24 +492,6 @@ def list_extensions(app_options=None):
     return handler.list_extensions()
 
 
-def link_package(path, app_options=None):
-    """Link a package against the JupyterLab build.
-
-    Returns `True` if a rebuild is recommended, `False` otherwise.
-    """
-    handler = _AppHandler(app_options)
-    return handler.link_package(path)
-
-
-def unlink_package(package, app_options=None):
-    """Unlink a package from JupyterLab by path or name.
-
-    Returns `True` if a rebuild is recommended, `False` otherwise.
-    """
-    handler = _AppHandler(app_options)
-    return handler.unlink_package(package)
-
-
 def get_app_version(app_options=None):
     """Get the application version."""
     handler = _AppHandler(app_options)
@@ -602,53 +542,6 @@ class _AppHandler(object):
         # Do this last since it relies on other attributes
         self.info = self._get_app_info()
 
-
-
-    def install_extension(self, extension, existing=None, pin=None):
-        """Install an extension package into JupyterLab.
-
-        The extension is first validated.
-
-        Returns `True` if a rebuild is recommended, `False` otherwise.
-        """
-        extension = _normalize_path(extension)
-        extensions = self.info['extensions']
-
-        # Check for a core extensions.
-        if extension in self.info['core_extensions']:
-            config = self._read_build_config()
-            uninstalled = config.get('uninstalled_core_extensions', [])
-            if extension in uninstalled:
-                self.logger.info('Installing core extension %s' % extension)
-                uninstalled.remove(extension)
-                config['uninstalled_core_extensions'] = uninstalled
-                self._write_build_config(config)
-                return True
-            return False
-
-        # Create the app dirs if needed.
-        self._ensure_app_dirs()
-
-        # Install the package using a temporary directory.
-        with TemporaryDirectory() as tempdir:
-            info = self._install_extension(extension, tempdir, pin=pin)
-
-        name = info['name']
-
-        # Local directories get name mangled and stored in metadata.
-        if info['is_dir']:
-            config = self._read_build_config()
-            local = config.setdefault('local_extensions', dict())
-            local[name] = info['source']
-            self._write_build_config(config)
-
-        # Remove an existing extension with the same name and different path
-        if name in extensions:
-            other = extensions[name]
-            if other['path'] != info['path'] and other['location'] == 'app':
-                os.remove(other['path'])
-
-        return True
 
     def build(self, name=None, version=None, static_url=None,
               clean_staging=False, production=True, minimize=True):
@@ -860,172 +753,6 @@ class _AppHandler(object):
                 messages.append('%s content changed' % name)
 
         return messages
-
-    def uninstall_extension(self, name):
-        """Uninstall an extension by name.
-
-        Returns `True` if a rebuild is recommended, `False` otherwise.
-        """
-        info = self.info
-        logger = self.logger
-
-        if name in info['federated_extensions']:
-            if info['federated_extensions'][name].get('install', dict()).get('uninstallInstructions', None):
-                logger.error('JupyterLab cannot uninstall this extension. %s' % info['federated_extensions'][name]['install']['uninstallInstructions'])
-            else:
-                logger.error('JupyterLab cannot uninstall %s since it was installed outside of JupyterLab. Use the same method used to install this extension to uninstall this extension.' % name)
-            return False
-
-        # Allow for uninstalled core extensions.
-        if name in info['core_extensions']:
-            config = self._read_build_config()
-            uninstalled = config.get('uninstalled_core_extensions', [])
-            if name not in uninstalled:
-                logger.info('Uninstalling core extension %s' % name)
-                uninstalled.append(name)
-                config['uninstalled_core_extensions'] = uninstalled
-                self._write_build_config(config)
-                return True
-            return False
-
-        local = info['local_extensions']
-
-        for (extname, data) in info['extensions'].items():
-            path = data['path']
-            if extname == name:
-                msg = 'Uninstalling %s from %s' % (name, osp.dirname(path))
-                logger.info(msg)
-                os.remove(path)
-                # Handle local extensions.
-                if extname in local:
-                    config = self._read_build_config()
-                    data = config.setdefault('local_extensions', dict())
-                    del data[extname]
-                    self._write_build_config(config)
-                return True
-
-        logger.warn('No labextension named "%s" installed' % name)
-        return False
-
-    def uninstall_all_extensions(self):
-        """Uninstalls all extensions
-
-        Returns `True` if a rebuild is recommended, `False` otherwise
-        """
-        should_rebuild = False
-        for (extname, _) in self.info['extensions'].items():
-            uninstalled = self.uninstall_extension(extname)
-            should_rebuild = should_rebuild or uninstalled
-        return should_rebuild
-
-    def update_all_extensions(self):
-        """Update all non-local extensions.
-
-        Returns `True` if a rebuild is recommended, `False` otherwise.
-        """
-        should_rebuild = False
-        for (extname, _) in self.info['extensions'].items():
-            if extname in self.info['local_extensions']:
-                continue
-            updated = self._update_extension(extname)
-            # Rebuild if at least one update happens:
-            should_rebuild = should_rebuild or updated
-        return should_rebuild
-
-    def update_extension(self, name):
-        """Update an extension by name.
-
-        Returns `True` if a rebuild is recommended, `False` otherwise.
-        """
-        if name not in self.info['extensions']:
-            self.logger.warning('No labextension named "%s" installed' % name)
-            return False
-        return self._update_extension(name)
-
-    def _update_extension(self, name):
-        """Update an extension by name.
-
-        Returns `True` if a rebuild is recommended, `False` otherwise.
-        """
-        data = self.info['extensions'][name]
-        if data["alias_package_source"]:
-            self.logger.warn("Skipping updating pinned extension '%s'." % name)
-            return False
-        try:
-            latest = self._latest_compatible_package_version(name)
-        except URLError:
-            return False
-        if latest is None:
-            self.logger.warn('No compatible version found for %s!' % (name,))
-            return False
-        if latest == data['version']:
-            self.logger.info('Extension %r already up to date' % name)
-            return False
-        self.logger.info('Updating %s to version %s' % (name, latest))
-        return self.install_extension('%s@%s' % (name, latest))
-
-    def link_package(self, path):
-        """Link a package at the given path.
-
-        Returns `True` if a rebuild is recommended, `False` otherwise.
-        """
-        path = _normalize_path(path)
-        if not osp.exists(path) or not osp.isdir(path):
-            msg = 'Cannot install "%s" only link local directories'
-            raise ValueError(msg % path)
-
-        with TemporaryDirectory() as tempdir:
-            info = self._extract_package(path, tempdir)
-
-        messages = _validate_extension(info['data'])
-        if not messages:
-            return self.install_extension(path)
-
-        # Warn that it is a linked package.
-        self.logger.warning('Installing %s as a linked package because it does not have extension metadata:', path)
-        [self.logger.warning('   %s' % m) for m in messages]
-
-        # Add to metadata.
-        config = self._read_build_config()
-        linked = config.setdefault('linked_packages', dict())
-        linked[info['name']] = info['source']
-        self._write_build_config(config)
-
-        return True
-
-    def unlink_package(self, path):
-        """Unlink a package by name or at the given path.
-
-        A ValueError is raised if the path is not an unlinkable package.
-
-        Returns `True` if a rebuild is recommended, `False` otherwise.
-        """
-        path = _normalize_path(path)
-        config = self._read_build_config()
-        linked = config.setdefault('linked_packages', dict())
-
-        found = None
-        for (name, source) in linked.items():
-            if name == path or source == path:
-                found = name
-
-        if found:
-            del linked[found]
-        else:
-            local = config.setdefault('local_extensions', dict())
-            for (name, source) in local.items():
-                if name == path or source == path:
-                    found = name
-            if found:
-                del local[found]
-                path = self.info['extensions'][found]['path']
-                os.remove(path)
-
-        if not found:
-            raise ValueError('No linked package for %s' % path)
-
-        self._write_build_config(config)
-        return True
 
     def toggle_extension(self, extension, value, level='sys_prefix'):
         """Enable or disable a lab extension.
@@ -1677,72 +1404,6 @@ class _AppHandler(object):
             self._write_build_config(config)
 
         return data
-
-    def _install_extension(self, extension, tempdir, pin=None):
-        """Install an extension with validation and return the name and path.
-        """
-        info = self._extract_package(extension, tempdir, pin=pin)
-        data = info['data']
-
-        # Check for compatible version unless:
-        # - A specific version was requested (@ in name,
-        #   but after first char to allow for scope marker).
-        # - Package is locally installed.
-        allow_fallback = '@' not in extension[1:] and not info['is_dir']
-        name = info['name']
-
-        # Verify that the package is an extension.
-        messages = _validate_extension(data)
-        if messages:
-            msg = '"%s" is not a valid extension:\n%s'
-            msg = msg % (extension, '\n'.join(messages))
-            if allow_fallback:
-                try:
-                    version = self._latest_compatible_package_version(name)
-                except URLError:
-                    raise ValueError(msg)
-            else:
-                raise ValueError(msg)
-
-        # Verify package compatibility.
-        deps = data.get('dependencies', dict())
-        errors = _validate_compatibility(extension, deps, self.core_data)
-        if errors:
-            msg = _format_compatibility_errors(
-                data['name'], data['version'], errors
-            )
-            if allow_fallback:
-                try:
-                    version = self._latest_compatible_package_version(name)
-                except URLError:
-                    # We cannot add any additional information to error message
-                    raise ValueError(msg)
-
-                if version and name:
-                    self.logger.debug('Incompatible extension:\n%s', name)
-                    self.logger.debug('Found compatible version: %s', version)
-                    with TemporaryDirectory() as tempdir2:
-                        return self._install_extension(
-                            '%s@%s' % (name, version), tempdir2)
-
-                # Extend message to better guide the user what to do:
-                conflicts = '\n'.join(msg.splitlines()[2:])
-                msg = ''.join((
-                    self._format_no_compatible_package_version(name),
-                    "\n\n",
-                    conflicts))
-
-            raise ValueError(msg)
-
-        # Move the file to the app directory.
-        target = pjoin(self.app_dir, 'extensions', info['filename'])
-        if osp.exists(target):
-            os.remove(target)
-
-        shutil.move(info['path'], target)
-
-        info['path'] = target
-        return info
 
     def _extract_package(self, source, tempdir, pin=None):
         """Call `npm pack` for an extension.
