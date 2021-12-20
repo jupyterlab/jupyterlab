@@ -734,6 +734,8 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
           editor = (widget as NotebookPanel).content.activeCell?.editor ?? null;
           previousWidget = widget as NotebookPanel;
         }
+      } else if (widget) {
+        editor = (widget as NotebookPanel).content.activeCell?.editor ?? null;
       }
       return editor;
     };
