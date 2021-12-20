@@ -107,6 +107,7 @@ function activate(
         key,
         registry,
         state,
+        commands,
         translator
       });
 

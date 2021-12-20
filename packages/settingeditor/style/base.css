@@ -25,7 +25,7 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-#setting-editor > .lm-Widget,
+#setting-editor > .jp-SettingsPanelWidget,
 #json-setting-editor > .lm-Widget {
   position: absolute;
   top: 0;
@@ -309,6 +309,21 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   box-shadow: none;
   border: none;
   padding: 5px;
+}
+
+.jp-openJSONSettingsEditor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.jp-openJSONSettingsEditor button {
+  border: 1px solid var(--jp-border-color1);
+  color: var(--jp-ui-font-color0);
+  padding: 5px;
+  margin: 5px;
+  cursor: pointer;
+  background-color: var(--jp-border-color3);
 }
 
 #setting-editor .array-item {

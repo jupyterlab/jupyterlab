@@ -8,6 +8,7 @@ import { PluginList } from './pluginlist';
 import { SettingsPanel } from './settingspanel';
 import { Message } from '@lumino/messaging';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { CommandRegistry } from '@lumino/commands';
 
 /**
  * Form based interface for editing settings.
@@ -52,7 +53,19 @@ export class SettingsEditor extends Widget {
           hasError={this._list.setError}
         />
       );
+      this._panel.addClass('jp-SettingsPanelWidget');
       this._panel.addWidget(settingsPanel);
+      const openJSONEditorButton = ReactWidget.create(
+        <button
+          onClick={() => {
+            options.commands.execute('settingeditor:open-json');
+          }}
+        >
+          JSON Settings Editor
+        </button>
+      );
+      openJSONEditorButton.addClass('jp-openJSONSettingsEditor');
+      layout.addWidget(openJSONEditorButton);
     });
   }
 
@@ -95,6 +108,11 @@ export namespace SettingsEditor {
      * The state database used to store layout.
      */
     state: IStateDB;
+
+    /**
+     * Command registry used to open the JSON settings editor.
+     */
+    commands: CommandRegistry;
 
     /**
      * The application language translator.
