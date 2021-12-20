@@ -182,6 +182,8 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
           editor = (widget as ConsolePanel).console.promptCell?.editor ?? null;
           previousWidget = widget as ConsolePanel;
         }
+      } else if (widget) {
+        editor = (widget as ConsolePanel).console.promptCell?.editor ?? null;
       }
       return editor;
     };
