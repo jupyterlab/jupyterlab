@@ -250,35 +250,42 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       <span>: </span>
       <span style={styleType}>{convertType(variable)}</span>
       <span className="jp-DebuggerVariables-hspacer"></span>
-      {service.model.hasRichVariableRendering && (
-        <button
-          className="jp-DebuggerVariables-renderVariable"
-          disabled={
-            !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, {
-              name: variable.name,
-              variablesReference: variable.variablesReference
-            } as any)
-          }
-          onClick={e => {
-            e.stopPropagation();
-            onSelection(variable);
-            commands
-              .execute(Debugger.CommandIDs.renderMimeVariable, {
+      {service.model.hasRichVariableRendering &&
+        // Don't add rich display for special entries
+        ![
+          'special variables',
+          'protected variables',
+          'function variables',
+          'class variables'
+        ].includes(variable.name) && (
+          <button
+            className="jp-DebuggerVariables-renderVariable"
+            disabled={
+              !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, {
                 name: variable.name,
                 variablesReference: variable.variablesReference
               } as any)
-              .catch(reason => {
-                console.error(
-                  `Failed to render variable ${variable.name}`,
-                  reason
-                );
-              });
-          }}
-          title={trans.__('Render variable')}
-        >
-          <searchIcon.react stylesheet="menuItem" tag="span" />
-        </button>
-      )}
+            }
+            onClick={e => {
+              e.stopPropagation();
+              onSelection(variable);
+              commands
+                .execute(Debugger.CommandIDs.renderMimeVariable, {
+                  name: variable.name,
+                  variablesReference: variable.variablesReference
+                } as any)
+                .catch(reason => {
+                  console.error(
+                    `Failed to render variable ${variable.name}`,
+                    reason
+                  );
+                });
+            }}
+            title={trans.__('Render variable')}
+          >
+            <searchIcon.react stylesheet="menuItem" tag="span" />
+          </button>
+        )}
 
       {expanded && variables && (
         <VariablesComponent
