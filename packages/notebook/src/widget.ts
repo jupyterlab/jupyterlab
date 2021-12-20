@@ -447,6 +447,7 @@ export class StaticNotebook extends Widget {
       return;
     }
     this._updateMimetype();
+
     const cells = newValue.cells;
     if (!cells.length && newValue.isInitialized) {
       cells.push(
@@ -2203,7 +2204,10 @@ export class Notebook extends StaticNotebook {
         let value: ICellModel;
         switch (cell.cell_type) {
           case 'code':
-            value = factory.createCodeCell({ cell });
+            value = factory.createCodeCell({
+              cell,
+              mimeType: this.codeMimetype
+            });
             break;
           case 'markdown':
             value = factory.createMarkdownCell({ cell });

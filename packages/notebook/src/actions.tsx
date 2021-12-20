@@ -186,7 +186,11 @@ export namespace NotebookActions {
 
     const clones: ICellModel[] = [];
     for (let i = 0; i + 1 < offsets.length; i++) {
-      const clone = Private.cloneCell(nbModel, child.model);
+      const clone = Private.cloneCell(
+        nbModel,
+        child.model,
+        notebook.codeMimetype
+      );
       clones.push(clone);
     }
 
@@ -301,7 +305,11 @@ export namespace NotebookActions {
     notebook.deselectAll();
 
     // Create a new cell for the source to preserve history.
-    const newModel = Private.cloneCell(model, primary.model);
+    const newModel = Private.cloneCell(
+      model,
+      primary.model,
+      notebook.codeMimetype
+    );
 
     newModel.value.text = toMerge.join('\n\n');
     if (isCodeCellModel(newModel)) {
@@ -368,7 +376,12 @@ export namespace NotebookActions {
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
       notebook.notebookConfig.defaultCell,
-      {}
+      {
+        mimeType:
+          notebook.notebookConfig.defaultCell === 'code'
+            ? notebook.codeMimetype
+            : undefined
+      }
     );
     const active = notebook.activeCellIndex;
 
@@ -400,7 +413,12 @@ export namespace NotebookActions {
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
       notebook.notebookConfig.defaultCell,
-      {}
+      {
+        mimeType:
+          notebook.notebookConfig.defaultCell === 'code'
+            ? notebook.codeMimetype
+            : undefined
+      }
     );
 
     model.cells.insert(notebook.activeCellIndex + 1, cell);
@@ -558,7 +576,12 @@ export namespace NotebookActions {
     if (notebook.activeCellIndex === notebook.widgets.length - 1) {
       const cell = model.contentFactory.createCell(
         notebook.notebookConfig.defaultCell,
-        {}
+        {
+          mimeType:
+            notebook.notebookConfig.defaultCell === 'code'
+              ? notebook.codeMimetype
+              : undefined
+        }
       );
 
       // Do not use push here, as we want an widget insertion
@@ -601,7 +624,12 @@ export namespace NotebookActions {
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
       notebook.notebookConfig.defaultCell,
-      {}
+      {
+        mimeType:
+          notebook.notebookConfig.defaultCell === 'code'
+            ? notebook.codeMimetype
+            : undefined
+      }
     );
 
     model.cells.insert(notebook.activeCellIndex + 1, cell);
@@ -998,10 +1026,14 @@ export namespace NotebookActions {
             let cell_id = cell.id as string;
             return model.contentFactory.createCodeCell({
               id: cell_id,
-              cell: cell
+              cell: cell,
+              mimeType: notebook.codeMimetype
             });
           } else {
-            return model.contentFactory.createCodeCell({ cell });
+            return model.contentFactory.createCodeCell({
+              cell,
+              mimeType: notebook.codeMimetype
+            });
           }
         case 'markdown':
           return model.contentFactory.createMarkdownCell({ cell });
@@ -1902,12 +1934,16 @@ namespace Private {
    */
   export function cloneCell(
     model: INotebookModel,
-    cell: ICellModel
+    cell: ICellModel,
+    mimeType?: string
   ): ICellModel {
     switch (cell.type) {
       case 'code':
         // TODO why isn't modeldb or id passed here?
-        return model.contentFactory.createCodeCell({ cell: cell.toJSON() });
+        return model.contentFactory.createCodeCell({
+          cell: cell.toJSON(),
+          mimeType
+        });
       case 'markdown':
         // TODO why isn't modeldb or id passed here?
         return model.contentFactory.createMarkdownCell({ cell: cell.toJSON() });

@@ -290,35 +290,6 @@ export class NotebookModel implements INotebookModel {
     const cells: ICellModel[] = [];
     const factory = this.contentFactory;
     const useId = value.nbformat === 4 && value.nbformat_minor >= 5;
-    for (const cell of value.cells) {
-      const options: CellModel.IOptions = { cell };
-      if (useId) {
-        options.id = (cell as any).id;
-      }
-      switch (cell.cell_type) {
-        case 'code':
-          cells.push(
-            factory.createCodeCell({
-              ...options,
-              // Set early the code cell mimetype
-              mimeType: value.metadata.language_info?.mimetype
-            })
-          );
-          break;
-        case 'markdown':
-          cells.push(factory.createMarkdownCell(options));
-          break;
-        case 'raw':
-          cells.push(factory.createRawCell(options));
-          break;
-        default:
-          continue;
-      }
-    }
-    this.cells.beginCompoundOperation();
-    this.cells.clear();
-    this.cells.pushAll(cells);
-    this.cells.endCompoundOperation();
 
     (this.sharedModel as models.YNotebook).nbformat_minor =
       nbformat.MINOR_VERSION;
@@ -377,6 +348,40 @@ close the notebook without saving it.`,
       this.metadata.set(key, metadata[key]);
     }
     this._ensureMetadata();
+
+    for (const cell of value.cells) {
+      const options: CellModel.IOptions = { cell };
+      if (useId) {
+        options.id = (cell as any).id;
+      }
+      switch (cell.cell_type) {
+        case 'code':
+          cells.push(
+            factory.createCodeCell({
+              ...options,
+              // Set early the code cell mimetype
+              mimeType:
+                ((this.metadata.get('language_info') ??
+                  {}) as nbformat.ILanguageInfoMetadata).mimetype ??
+                'text/plain'
+            })
+          );
+          break;
+        case 'markdown':
+          cells.push(factory.createMarkdownCell(options));
+          break;
+        case 'raw':
+          cells.push(factory.createRawCell(options));
+          break;
+        default:
+          continue;
+      }
+    }
+    this.cells.beginCompoundOperation();
+    this.cells.clear();
+    this.cells.pushAll(cells);
+    this.cells.endCompoundOperation();
+
     this.dirty = true;
   }
 
@@ -390,7 +395,13 @@ close the notebook without saving it.`,
   initialize(): void {
     if (!this.cells.length) {
       const factory = this.contentFactory;
-      this.cells.push(factory.createCodeCell({}));
+      this.cells.push(
+        factory.createCodeCell({
+          mimeType:
+            ((this.metadata.get('language_info') ??
+              {}) as nbformat.ILanguageInfoMetadata).mimetype ?? 'text/plain'
+        })
+      );
     }
     this._isInitialized = true;
     this.cells.clearUndo();
