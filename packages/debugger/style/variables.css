@@ -124,3 +124,7 @@
       0.6
     );
 }
+
+.jp-DebuggerRichVariable div[data-mime-type='text/plain'] > pre {
+  white-space: normal;
+}
