@@ -325,14 +325,13 @@ const sources: JupyterFrontEndPlugin<IDebugger.ISources> = {
 const variables: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:variables',
   autoStart: true,
-  requires: [IDebugger, IDebuggerHandler, ITranslator, IDebuggerSidebar],
+  requires: [IDebugger, IDebuggerHandler, ITranslator],
   optional: [IThemeManager, IRenderMimeRegistry],
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     handler: Debugger.Handler,
     translator: ITranslator,
-    sidebar: IDebugger.ISidebar,
     themeManager: IThemeManager | null,
     rendermime: IRenderMimeRegistry | null
   ) => {
@@ -441,7 +440,10 @@ const variables: JupyterFrontEndPlugin<void> = {
           return;
         }
 
-        const id = `jp-debugger-variable-mime-${name}`;
+        const id = `jp-debugger-variable-mime-${name}-${service.session?.connection?.path.replace(
+          '/',
+          '-'
+        )}`;
         if (
           !name || // Name is mandatory
           trackerMime.find(widget => widget.id === id) || // Widget already exists
@@ -460,8 +462,8 @@ const variables: JupyterFrontEndPlugin<void> = {
         widget.addClass('jp-DebuggerRichVariable');
         widget.id = id;
         widget.title.icon = Debugger.Icons.variableIcon;
-        widget.title.label = name;
-        widget.title.caption = `${name} - ${service.session?.connection?.name}`;
+        widget.title.label = `${name} - ${service.session?.connection?.name}`;
+        widget.title.caption = `${name} - ${service.session?.connection?.path}`;
         void trackerMime.add(widget);
         const disposeWidget = () => {
           widget.dispose();
@@ -469,7 +471,10 @@ const variables: JupyterFrontEndPlugin<void> = {
           activeWidget?.disposed.disconnect(disposeWidget);
         };
         const refreshWidget = () => {
-          widget.refresh();
+          // Refresh the widget only if the active element is the same.
+          if (handler.activeWidget === activeWidget) {
+            widget.refresh();
+          }
         };
         widget.disposed.connect(disposeWidget);
         variablesModel.changed.connect(refreshWidget);
