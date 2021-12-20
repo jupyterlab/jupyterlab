@@ -252,6 +252,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       <span className="jp-DebuggerVariables-hspacer"></span>
       {service.model.hasRichVariableRendering &&
         // Don't add rich display for special entries
+        // debugpy: https://github.com/microsoft/debugpy/blob/cf0d684566edc339545b161da7c3dfc48af7c7d5/src/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_utils.py#L359
         ![
           'special variables',
           'protected variables',
