@@ -56,14 +56,14 @@ export const IKernelStatusModel = new Token<IKernelStatusModel>(
  */
 export interface IKernelStatusModel {
   /**
-   * A display name for the activity.
+   * Add a session context provider.
+   *
+   * A provider will receive the currently active widget and must return the
+   * associated session context if it can or null otherwise.
    */
-  sessionContext: ISessionContext | null;
-
-  /**
-   * The current client session associated with the kernel status indicator.
-   */
-  activityName: string;
+  addSessionProvider: (
+    provider: (widget: Widget | null) => ISessionContext | null
+  ) => void;
 }
 
 /**

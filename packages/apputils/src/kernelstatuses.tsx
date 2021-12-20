@@ -9,7 +9,6 @@ import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { JSONArray, JSONExt } from '@lumino/coreutils';
 import React from 'react';
 import { ISessionContext } from './sessioncontext';
-import { IKernelStatusModel } from './tokens';
 
 /**
  * Helper function to translate kernel statuses mapping by using
@@ -142,7 +141,7 @@ export namespace KernelStatus {
   /**
    * A VDomModel for the kernel status indicator.
    */
-  export class Model extends VDomModel implements IKernelStatusModel {
+  export class Model extends VDomModel {
     constructor(translator?: ITranslator) {
       super();
       translator = translator || nullTranslator;

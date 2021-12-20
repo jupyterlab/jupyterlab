@@ -137,19 +137,17 @@ const kernelStatus: JupyterFrontEndPlugin<void> = {
     tracker: IConsoleTracker,
     kernelStatus: IKernelStatusModel
   ) => {
-    function updateCurrent() {
-      if (
-        tracker.currentWidget &&
-        tracker.currentWidget === app.shell.currentWidget
-      ) {
-        kernelStatus.sessionContext = tracker.currentWidget.sessionContext;
-      }
-    }
+    const provider = (widget: Widget | null) => {
+      let session: ISessionContext | null = null;
 
-    if (tracker.currentWidget) {
-      updateCurrent();
-    }
-    tracker.currentChanged.connect(updateCurrent);
+      if (widget && tracker.has(widget)) {
+        return (widget as ConsolePanel).sessionContext;
+      }
+
+      return session;
+    };
+
+    kernelStatus.addSessionProvider(provider);
   },
   requires: [IConsoleTracker, IKernelStatusModel],
   autoStart: true

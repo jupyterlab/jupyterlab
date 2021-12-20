@@ -38,13 +38,12 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
   ): IKernelStatusModel => {
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
-    let currentSession: ISessionContext | null = null;
     const changeKernel = async () => {
-      if (!currentSession) {
+      if (!item.model.sessionContext) {
         return;
       }
-      await (sessionDialogs || sessionContextDialogs).selectKernel(
-        currentSession,
+      await (sessionDialogs ?? sessionContextDialogs).selectKernel(
+        item.model.sessionContext,
         translator
       );
     };
@@ -52,32 +51,52 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
     // Create the status item.
     const item = new KernelStatus({ onClick: changeKernel }, translator);
 
-    // When the title of the active widget changes, update the label
-    // of the hover text.
-    const onTitleChanged = (title: Title<Widget>) => {
-      item.model!.activityName = title.label;
+    const providers = new Set<(w: Widget | null) => ISessionContext | null>();
+
+    const addSessionProvider = (
+      provider: (w: Widget | null) => ISessionContext | null
+    ): void => {
+      providers.add(provider);
+
+      if (app.shell.currentWidget) {
+        updateSession(app.shell, {
+          newValue: app.shell.currentWidget,
+          oldValue: null
+        });
+      }
     };
 
-    // Keep the session object on the status item up-to-date.
-    function setCurrentWidget(_: any, change: ILabShell.IChangedArgs): void {
-      const { oldValue, newValue } = change;
+    function updateSession(
+      shell: JupyterFrontEnd.IShell,
+      changes: ILabShell.IChangedArgs
+    ) {
+      const { oldValue, newValue } = changes;
 
       // Clean up after the old value if it exists,
       // listen for changes to the title of the activity
       if (oldValue) {
         oldValue.title.changed.disconnect(onTitleChanged);
       }
-      if (newValue) {
+
+      item.model.sessionContext =
+        [...providers]
+          .map(provider => provider(changes.newValue))
+          .filter(session => session !== null)[0] ?? null;
+
+      if (newValue && item.model.sessionContext) {
+        onTitleChanged(newValue.title);
         newValue.title.changed.connect(onTitleChanged);
       }
     }
+
+    // When the title of the active widget changes, update the label
+    // of the hover text.
+    const onTitleChanged = (title: Title<Widget>) => {
+      item.model!.activityName = title.label;
+    };
+
     if (labShell) {
-      labShell.currentChanged.connect(setCurrentWidget);
-    } else {
-      setCurrentWidget(null, {
-        oldValue: null,
-        newValue: app.shell.currentWidget
-      });
+      labShell.currentChanged.connect(updateSession);
     }
 
     statusBar.registerStatusItem(kernelStatus.id, {
@@ -87,7 +106,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
       // isActive: () => !!item.model!.sessionContext
     });
 
-    return item.model;
+    return { addSessionProvider };
   }
 };
 

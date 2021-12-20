@@ -17,6 +17,7 @@ import {
   ICommandPalette,
   IKernelStatusModel,
   InputDialog,
+  ISessionContext,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
@@ -689,19 +690,17 @@ const kernelStatus: JupyterFrontEndPlugin<void> = {
     tracker: INotebookTracker,
     kernelStatus: IKernelStatusModel
   ) => {
-    function updateCurrent() {
-      if (
-        tracker.currentWidget &&
-        tracker.currentWidget === app.shell.currentWidget
-      ) {
-        kernelStatus.sessionContext = tracker.currentWidget.sessionContext;
-      }
-    }
+    const provider = (widget: Widget | null) => {
+      let session: ISessionContext | null = null;
 
-    if (tracker.currentWidget) {
-      updateCurrent();
-    }
-    tracker.currentChanged.connect(updateCurrent);
+      if (widget && tracker.has(widget)) {
+        return (widget as NotebookPanel).sessionContext;
+      }
+
+      return session;
+    };
+
+    kernelStatus.addSessionProvider(provider);
   },
   requires: [INotebookTracker, IKernelStatusModel],
   autoStart: true

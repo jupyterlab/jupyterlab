@@ -123,13 +123,14 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
 export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
   id: '@jupyterlab/codemirror-extension:line-col-status',
   autoStart: true,
-  requires: [ILabShell, IStatusBar, ITranslator],
+  requires: [IStatusBar, ITranslator],
+  optional: [ILabShell],
   provides: IPositionModel,
   activate: (
     app: JupyterFrontEnd,
-    labShell: ILabShell,
     statusBar: IStatusBar,
-    translator: ITranslator
+    translator: ITranslator,
+    labShell: ILabShell | null
   ): IPositionModel => {
     const item = new LineCol(translator);
 
@@ -150,29 +151,34 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
     ): void => {
       providers.add(provider);
 
-      if (labShell.currentWidget) {
-        updateEditor(labShell, {
-          newValue: labShell.currentWidget,
+      if (app.shell.currentWidget) {
+        updateEditor(app.shell, {
+          newValue: app.shell.currentWidget,
           oldValue: null
         });
       }
     };
 
     const update = (): void => {
-      updateEditor(labShell, {
-        oldValue: labShell.currentWidget,
-        newValue: labShell.currentWidget
+      updateEditor(app.shell, {
+        oldValue: app.shell.currentWidget,
+        newValue: app.shell.currentWidget
       });
     };
 
-    function updateEditor(shell: ILabShell, changes: ILabShell.IChangedArgs) {
+    function updateEditor(
+      shell: JupyterFrontEnd.IShell,
+      changes: ILabShell.IChangedArgs
+    ) {
       item.model.editor =
         [...providers]
           .map(provider => provider(changes.newValue))
           .filter(editor => editor !== null)[0] ?? null;
     }
 
-    labShell.currentChanged.connect(updateEditor);
+    if (labShell) {
+      labShell.currentChanged.connect(updateEditor);
+    }
 
     return { addEditorProvider, update };
   }
