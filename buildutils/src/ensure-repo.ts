@@ -83,6 +83,21 @@ const UNUSED: Dict<string[]> = {
     'worker-loader'
   ],
   '@jupyterlab/buildutils': ['verdaccio'],
+  '@jupyterlab/codemirror': [
+    '@codemirror/lang-cpp',
+    '@codemirror/lang-css',
+    '@codemirror/lang-html',
+    '@codemirror/lang-java',
+    '@codemirror/lang-javascript',
+    '@codemirror/lang-json',
+    '@codemirror/lang-markdown',
+    '@codemirror/lang-php',
+    '@codemirror/lang-python',
+    '@codemirror/lang-rust',
+    '@codemirror/lang-sql',
+    '@codemirror/lang-wast',
+    '@codemirror/lang-xml'
+  ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/galata': ['node-fetch', 'http-server'],

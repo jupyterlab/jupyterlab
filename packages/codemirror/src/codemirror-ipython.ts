@@ -4,7 +4,7 @@
 import { Mode } from './mode';
 import '@codemirror/legacy-modes/mode/python.js';
 
-// Stub for the require function.
+// Stub for the mkPython function.
 declare let mkPython: any;
 
 Mode.registerModeInfo({
@@ -15,39 +15,3 @@ Mode.registerModeInfo({
   }
 });
 
-// TODO: CM6 migration
-/*import CodeMirror from 'codemirror';
-import 'codemirror/mode/meta';
-import 'codemirror/mode/python/python';
-*/
-/**
- * Define an IPython codemirror mode.
- *
- * It is a slightly altered Python Mode with a `?` operator.
- */
-/*CodeMirror.defineMode(
-  'ipython',
-  (config: CodeMirror.EditorConfiguration, modeOptions?: any) => {
-    const pythonConf: any = {};
-    for (const prop in modeOptions) {
-      if (modeOptions.hasOwnProperty(prop)) {
-        pythonConf[prop] = modeOptions[prop];
-      }
-    }
-    pythonConf.name = 'python';*/
-    //pythonConf.singleOperators = new RegExp('^[\\+\\-\\*/%&|@\\^~<>!\\?]');
-    /*pythonConf.identifiers = new RegExp(
-      '^[_A-Za-z\u00A1-\uFFFF][_A-Za-z0-9\u00A1-\uFFFF]*'
-    );
-    return CodeMirror.getMode(config, pythonConf);
-  },
-  'python'
-);
-
-CodeMirror.defineMIME('text/x-ipython', 'ipython');
-CodeMirror.modeInfo.push({
-  ext: [],
-  mime: 'text/x-ipython',
-  mode: 'ipython',
-  name: 'ipython'
-});*/
