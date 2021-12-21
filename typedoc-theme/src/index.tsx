@@ -5,13 +5,42 @@ import {
     JSX,
     Options,
     PageEvent,
-    Reflection
+    Reflection,
+    DeclarationReflection,
+    SignatureReflection,
+    TypeParameterReflection,
 } from "typedoc";
 
-import {
-    hasTypeParameters,
-    join
-} from "typedoc/dist/lib/output/themes/lib";
+
+/**
+ * Copied from TypeDoc source code because is not exported
+ * https://github.com/TypeStrong/typedoc/blob/3f0dbeab09ec61b5351f6766a0b13f37ea26c8c7/src/lib/output/themes/lib.tsx#L41-L52
+ */
+export function join<T>(joiner: JSX.Children, list: readonly T[], cb: (x: T) => JSX.Children) {
+    const result: JSX.Children = [];
+
+    for (const item of list) {
+        if (result.length > 0) {
+            result.push(joiner);
+        }
+        result.push(cb(item));
+    }
+
+    return <>{result}</>;
+}
+
+/**
+ * Copied from TypeDoc source code because is not exported
+ * https://github.com/TypeStrong/typedoc/blob/3f0dbeab09ec61b5351f6766a0b13f37ea26c8c7/src/lib/output/themes/lib.tsx#L73-L80
+ */
+export function hasTypeParameters(
+    reflection: Reflection
+): reflection is Reflection & { typeParameters: TypeParameterReflection[] } {
+    if (reflection instanceof DeclarationReflection || reflection instanceof SignatureReflection) {
+        return reflection.typeParameters != null;
+    }
+    return false;
+}
 
 /**
  * The theme context is where all of the partials live for rendering a theme,
@@ -28,59 +57,59 @@ export class HeaderOverrideThemeContext extends DefaultThemeRenderContext {
         this.header = (props: PageEvent<Reflection>) => {
             return (
                 <header>
-                    <div className="tsd-page-toolbar">
-                        <div className="container">
-                            <div className="table-wrap">
-                                <div className="table-cell" id="tsd-search" data-base={this.relativeURL("./")}>
-                                    <div className="field">
-                                        <label htmlFor="tsd-search-field" className="tsd-widget search no-caption">
+                    <div class="tsd-page-toolbar">
+                        <div class="container">
+                            <div class="table-wrap">
+                                <div class="table-cell" id="tsd-search" data-base={this.relativeURL("./")}>
+                                    <div class="field">
+                                        <label for="tsd-search-field" class="tsd-widget search no-caption">
                                             Search
                                         </label>
                                         <input type="text" id="tsd-search-field" />
                                     </div>
             
-                                    <ul className="results">
-                                        <li className="state loading">Preparing search index...</li>
-                                        <li className="state failure">The search index is not available</li>
+                                    <ul class="results">
+                                        <li class="state loading">Preparing search index...</li>
+                                        <li class="state failure">The search index is not available</li>
                                     </ul>
             
-                                    <a href={this.relativeURL("index.html")} className="title">
+                                    <a href={this.relativeURL("index.html")} class="title">
                                         {props.project.name}
                                     </a>
                                 </div>
             
-                                <div className="table-cell" id="tsd-widgets">
+                                <div class="table-cell" id="tsd-widgets">
                                     <div id="tsd-filter">
-                                        <a href="#" className="tsd-widget options no-caption" data-toggle="options">
+                                        <a href="#" class="tsd-widget options no-caption" data-toggle="options">
                                             Options
                                         </a>
-                                        <div className="tsd-filter-group">
-                                            <div className="tsd-select" id="tsd-filter-visibility">
-                                                <span className="tsd-select-label">All</span>
-                                                <ul className="tsd-select-list">
+                                        <div class="tsd-filter-group">
+                                            <div class="tsd-select" id="tsd-filter-visibility">
+                                                <span class="tsd-select-label">All</span>
+                                                <ul class="tsd-select-list">
                                                     <li data-value="public">Public</li>
                                                     <li data-value="protected">Public/Protected</li>
-                                                    <li data-value="private" className="selected">
+                                                    <li data-value="private" class="selected">
                                                         All
                                                     </li>
                                                 </ul>
                                             </div>{" "}
                                             <input type="checkbox" id="tsd-filter-inherited" checked={true} />
-                                            <label className="tsd-widget" htmlFor="tsd-filter-inherited">
+                                            <label class="tsd-widget" for="tsd-filter-inherited">
                                                 Inherited
                                             </label>
                                             {!this.options.getValue("excludeExternals") && (
                                                 <>
                                                     <input type="checkbox" id="tsd-filter-externals" checked={true} />
-                                                    <label className="tsd-widget" htmlFor="tsd-filter-externals">
+                                                    <label class="tsd-widget" for="tsd-filter-externals">
                                                         Externals
                                                     </label>
                                                 </>
                                             )}
                                             {!this.options.getValue("excludeNotExported") && (
                                                 <>
-                                                    <input type="checkbox" id="tsd-filter-externals" checked={true} />
-                                                    <label className="tsd-widget" htmlFor="tsd-filter-externals">
+                                                    <input type="checkbox" id="tsd-filter-exported" checked={true} />
+                                                    <label class='tsd-widget' for='tsd-filter-exported'>
                                                         Only exported
                                                     </label>
                                                 </>
@@ -88,16 +117,16 @@ export class HeaderOverrideThemeContext extends DefaultThemeRenderContext {
                                         </div>
                                     </div>
             
-                                    <a href="#" className="tsd-widget menu no-caption" data-toggle="menu">
+                                    <a href="#" class="tsd-widget menu no-caption" data-toggle="menu">
                                         Menu
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className="tsd-page-title">
-                        <div className="container">
-                            <ul className="tsd-breadcrumb">{this.breadcrumb(props.model)}</ul>
+                    <div class="tsd-page-title">
+                        <div class="container">
+                            <ul class="tsd-breadcrumb">{this.breadcrumb(props.model)}</ul>
                             <h1>
                                 {`${props.model.kindString ?? ""} `}
                                 {props.model.name}
@@ -122,6 +151,8 @@ export class HeaderOverrideThemeContext extends DefaultThemeRenderContext {
  * 
  * Example:
  * https://github.com/Gerrit0/typedoc-custom-theme-demo/blob/main/src/index.tsx
+ * 
+ * https://github.com/TypeStrong/typedoc-default-themes/blob/master/src/default/partials/header.hbs
  * 
  */
 export class HeaderOverrideTheme extends DefaultTheme {
