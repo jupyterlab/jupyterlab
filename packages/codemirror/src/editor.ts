@@ -23,13 +23,13 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 
+import { closeBrackets} from '@codemirror/closebrackets';
 import {
   defaultKeymap,
   indentMore,
   insertNewlineAndIndent,
   insertTab
 } from '@codemirror/commands';
-import { closeBrackets} from '@codemirror/closebrackets';
 import * as gutter from '@codemirror/gutter';
 import { defaultHighlightStyle }  from '@codemirror/highlight';
 import {
@@ -37,6 +37,7 @@ import {
   indentUnit
 } from '@codemirror/language';
 import {
+  Compartment,
   EditorSelection,
   EditorState,
   StateCommand,
@@ -52,6 +53,9 @@ import {
 import * as Y from 'yjs'
 import { yCollab } from 'y-codemirror.next' 
 import { Awareness } from 'y-protocols/awareness';
+import { Mode } from './mode';
+import './codemirror-ipython';
+import './codemirror-ipythongfm';
 /*import CodeMirror from 'codemirror';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/display/rulers.js';
@@ -76,7 +80,6 @@ import 'codemirror/addon/edit/trailingspace.js';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
 import { CodemirrorBinding } from 'y-codemirror';
-import { Mode } from './mode';*/
 
 // import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
 
@@ -162,7 +165,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // TODO: refactor this when we decide to ALWAYS use YJS. Different parts of the
     // editor should be created alltogether.
     this._initializeEditorBinding();
-    const editor = (this._editor = Private.createEditor(host, fullConfig, this._yeditorBinding));
+
+    this._language = new Compartment;
+    const editor = (this._editor = Private.createEditor(host, fullConfig, this._yeditorBinding, this._language));
 
     // every time the model is switched, we need to re-initialize the editor binding
     this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
@@ -826,8 +831,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _onMimeTypeChanged(): void {
     // TODO: CM6 migration
-    /*const mime = this._model.mimeType;
-    const editor = this._editor;
+    const mime = this._model.mimeType;
+    /*const editor = this._editor;
     const extraKeys = (editor.getOption('extraKeys' as any) ||
       {}) as CodeMirror.KeyMap;
     const isCode = mime !== 'text/plain' && mime !== 'text/x-ipythongfm';
@@ -836,12 +841,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     } else {
       delete extraKeys['Backspace'];
     }
-    this.setOption('extraKeys', extraKeys);
+    this.setOption('extraKeys', extraKeys);*/
 
     // TODO: should we provide a hook for when the mode is done being set?
     void Mode.ensure(mime).then(spec => {
-      this.setOption('mode', spec?.mime ?? 'null');
-    });*/
+      if (spec) {
+        this._editor.dispatch({
+          effects: this._language.reconfigure(spec.support!)
+        });
+      }
+    });
   }
 
   /**
@@ -1218,6 +1227,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _trans: TranslationBundle;
   private _model: CodeEditor.IModel;
   private _editor: EditorView;
+  private _language: Compartment;
   /*protected selectionMarkers: {
     [key: string]: CodeMirror.TextMarker[] | undefined;
   } = {};*/
@@ -1257,7 +1267,7 @@ export namespace CodeMirrorEditor {
     /**
      * The mode to use.
      */
-    mode?: string;// | Mode.IMode;
+    mode?: string;
 
     /**
      * The theme to style the editor with.
@@ -1502,7 +1512,8 @@ namespace Private {
   export function createEditor(
     host: HTMLElement,
     config: CodeMirrorEditor.IConfig,
-    ybinding: YCodeMirrorBinding | null
+    ybinding: YCodeMirrorBinding | null,
+    language: Compartment
   ): EditorView {
     const {
       lineNumbers,
@@ -1523,7 +1534,7 @@ namespace Private {
       EditorState.tabSize.of(tabSize),
       EditorState.readOnly.of(readOnly),
       insertSpaces ? indentUnit.of(' '.repeat(tabSize)) : indentUnit.of('\t'),
-      defaultHighlightStyle.fallback,
+      defaultHighlightStyle/*.fallback*/,
       keymap.of([...defaultKeymap, ...extraKeys!])
     ];
 
@@ -1536,6 +1547,7 @@ namespace Private {
     if (ybinding) {
       extensions.push(yCollab(ybinding.text, ybinding.awareness));
     }
+    Mode.ensure('text/x-python').then(spec => { extensions.push(spec?.support!); });
     const doc = ybinding?.text.toString();
     const view = new EditorView({
       state: EditorState.create({

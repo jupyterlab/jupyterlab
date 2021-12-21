@@ -12,9 +12,9 @@ import { CodeMirrorMimeTypeService } from './mimetype';
 export * from './editor';
 export * from './factory';
 export * from './searchprovider';
-//export * from './mimetype';
-//export * from './mode';
-//export * from './syntaxstatus';
+export * from './mimetype';
+export * from './mode';
+export * from './syntaxstatus';
 //export * from './tokens';
 
 /**

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Mode } from './mode';
-import '@codemirror/legacy-modes/mode/python.js';
+import '@codemirror/legacy-modes/mode/python';
 
 // Stub for the mkPython function.
 declare let mkPython: any;

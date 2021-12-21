@@ -430,10 +430,10 @@ function activateEditorCommands(
       const name = args['name'] as string;
       const widget = tracker.currentWidget;
       if (name && widget) {
-        /*const spec = Mode.findByName(name);
+        const spec = Mode.findByName(name);
         if (spec) {
-          widget.content.model.mimeType = spec.mime;
-        }*/
+          widget.content.model.mimeType = spec.mime as string;
+        }
       }
     },
     isEnabled,
@@ -442,17 +442,16 @@ function activateEditorCommands(
       if (!widget) {
         return false;
       }
-      /*const mime = widget.content.model.mimeType;
+      const mime = widget.content.model.mimeType;
       const spec = Mode.findByMIME(mime);
       const name = spec && spec.name;
-      return args['name'] === name;*/
-      return false;
+      return args['name'] === name;
     }
   });
 
   if (mainMenu) {
     // TODO: CM6 migration
-    /*const modeMenu = mainMenu.viewMenu.items.find(
+    const modeMenu = mainMenu.viewMenu.items.find(
       item =>
         item.type === 'submenu' &&
         item.submenu?.id === 'jp-mainmenu-view-codemirror-theme'
@@ -467,7 +466,7 @@ function activateEditorCommands(
         })
         .forEach(spec => {
           // Avoid mode name with a curse word.
-          if (spec.mode.indexOf('brainf') === 0) {
+          if (spec.name.indexOf('brainf') === 0) {
             return;
           }
           modeMenu.addItem({
@@ -475,7 +474,7 @@ function activateEditorCommands(
             args: { ...spec } as any // TODO: Casting to `any` until lumino typings are fixed
           });
         });
-    }*/
+    }
     // Add go to line capabilities to the edit menu.
     mainMenu.editMenu.goToLiners.add({
       id: CommandIDs.goToLine,

@@ -1288,8 +1288,8 @@ export namespace Mode {
    */
   export async function ensure(mode: string | ISpec): Promise<ISpec | null> {
     const spec = findBest(mode);
-
-    if(await spec?.load!()) {
+    if (spec) {
+      spec.support = await spec.load!();
       return spec;
     }
     return null;

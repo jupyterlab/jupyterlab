@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-//import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-//import { Mode } from './mode';
+import { Mode } from './mode';
 
 /**
  * The mime type service for CodeMirror.
@@ -17,15 +17,15 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    * If a mime type cannot be found returns the default mime type `text/plain`, never `null`.
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
-    /*const ext = info.file_extension || '';
-    return Mode.findBest(
+    const ext = info.file_extension || '';
+    const mode = Mode.findBest(
       (info.codemirror_mode as any) || {
         mimetype: info.mimetype,
         name: info.name,
         ext: [ext.split('.').slice(-1)[0]]
       }
-    ).mime as string;*/
-    return 'text/plain';
+    );
+    return mode ? mode.mime as string : IEditorMimeTypeService.defaultMimeType;
   }
 
   /**
@@ -35,14 +35,13 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    * If a mime type cannot be found returns the default mime type `text/plain`, never `null`.
    */
   getMimeTypeByFilePath(path: string): string {
-    /*const ext = PathExt.extname(path);
+    const ext = PathExt.extname(path);
     if (ext === '.ipy') {
       return 'text/x-python';
     } else if (ext === '.md') {
       return 'text/x-ipythongfm';
     }
     const mode = Mode.findByFileName(path) || Mode.findBest('');
-    return mode.mime as string;*/
-    return 'text/plain';
+    return mode ? mode.mime as string : IEditorMimeTypeService.defaultMimeType;
   }
 }
