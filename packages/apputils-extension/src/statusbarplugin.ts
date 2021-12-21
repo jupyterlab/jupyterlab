@@ -103,8 +103,8 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
     statusBar.registerStatusItem(kernelStatus.id, {
       item,
       align: 'left',
-      rank: 1
-      // isActive: () => !!item.model!.sessionContext
+      rank: 1,
+      isActive: () => item.model!.sessionContext !== null
     });
 
     return { addSessionProvider };

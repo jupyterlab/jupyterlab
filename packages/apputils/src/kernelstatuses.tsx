@@ -144,9 +144,8 @@ export namespace KernelStatus {
   export class Model extends VDomModel {
     constructor(translator?: ITranslator) {
       super();
-      translator = translator || nullTranslator;
+      translator = translator ?? nullTranslator;
       this._trans = translator.load('jupyterlab');
-      this._kernelName = this._trans.__('No Kernel!');
       this._statusNames = translateKernelStatuses(translator);
     }
 
@@ -178,7 +177,7 @@ export namespace KernelStatus {
         return;
       }
       this._activityName = val;
-      this.stateChanged.emit(void 0);
+      this.stateChanged.emit();
     }
 
     /**
@@ -242,8 +241,8 @@ export namespace KernelStatus {
 
     protected translation: ITranslator;
     private _trans: TranslationBundle;
-    private _activityName: string = 'activity'; // FIXME-TRANS:?
-    private _kernelName: string; // Initialized in constructor due to localization
+    private _activityName: string = '';
+    private _kernelName: string = '';
     private _kernelStatus: ISessionContext.KernelDisplayStatus | undefined = '';
     private _sessionContext: ISessionContext | null = null;
     private readonly _statusNames: Record<
