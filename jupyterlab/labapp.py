@@ -6,18 +6,14 @@
 
 import json
 import os
-import os.path as osp
-import sys
 from os.path import join as pjoin
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
-from jupyter_server import _tz as tz
-from jupyter_server.transutils import _i18n
 
-from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, slugify
+from jupyterlab_server import LabServerApp, LicensesApp, WorkspaceExportApp, WorkspaceImportApp, WorkspaceListApp
 from nbclassic.shim import NBClassicConfigShimMixin
 from traitlets import Bool, Instance, Unicode, default
 
@@ -259,225 +255,26 @@ class LabPathApp(JupyterApp):
         print('User Settings directory: %s' % get_user_settings_dir())
         print('Workspaces directory: %s' % get_workspaces_dir())
 
-
-class LabWorkspaceListApp(JupyterApp):
+class LabWorkspaceExportApp(WorkspaceExportApp):
     version = version
-    description = """
-    Print all the workspaces available
 
-    If '--json' flag is passed in, 'json' output of each workspace is printed.
-    If '--jsonlist' flag is passed in, 'json' output of list of workspaces is printed.
-    If nothing is passed in, 'human-readable' output is printed.
-    """
-    flags = dict(
-        jsonlist=(
-            {"LabWorkspaceListApp": {"jsonlist": True}},
-            _i18n("Produce machine-readable JSON list output."),
-        ),
-        json=(
-            {"LabWorkspaceListApp": {"json": True}},
-            _i18n("Produce machine-readable JSON object on each line of output."),
-        ),
-    )
+    @default('workspaces_dir')
+    def _default_workspaces_dir(self):
+        return get_workspaces_dir()
 
-    jsonlist = Bool(
-        False,
-        config=True,
-        help=_i18n(
-            "If True, the output will be a JSON list of objects, one per "
-            "JupyterLab workspace, each with the details of the "
-            "relevant workspace"
-        ),
-    )
-    json = Bool(
-        False,
-        config=True,
-        help=_i18n(
-            "If True, each line of output will be a JSON object with the "
-            "details of the workspace."
-        ),
-    )
-
-    def start(self):
-        app = LabApp(config=self.config)
-        directory = app.workspaces_dir
-
-        items = [item
-                for item in os.listdir(directory)
-                if item.endswith(WORKSPACE_EXTENSION)]
-        items.sort()
-
-        workspaces = _list_available_workspaces(directory, items)
-        if self.jsonlist:
-            print(json.dumps(workspaces))
-        elif self.json:
-            for workspace in workspaces:
-                print(json.dumps(workspace))
-        else:
-            for workspace in workspaces:
-                print(workspace['metadata']['id'])
-                
-
-def _list_available_workspaces(directory, items):
-    """
-    Return a list containing all the workspaces
-    """
-    workspaces = []
-    for slug in items:
-        workspace_path = os.path.join(directory, slug)
-        if os.path.exists(workspace_path):
-            workspaces.append(_load_with_file_times(workspace_path))
-    return workspaces
-
-
-def _load_with_file_times(workspace_path):
-    """
-    Load workspace JSON from disk, overwriting the `created` and `last_modified`
-    metadata with current file stat information
-    """
-    stat = os.stat(workspace_path)
-    with open(workspace_path, encoding='utf-8') as fid:
-        workspace = json.load(fid)
-        workspace["metadata"].update(
-            last_modified=tz.utcfromtimestamp(stat.st_mtime).isoformat(),
-            created=tz.utcfromtimestamp(stat.st_ctime).isoformat()
-        )
-    return workspace
-
-
-class LabWorkspaceExportApp(JupyterApp):
+class LabWorkspaceImportApp(WorkspaceImportApp):
     version = version
-    description = """
-    Export a JupyterLab workspace
 
-    If no arguments are passed in, this command will export the default
-        workspace.
-    If a workspace name is passed in, this command will export that workspace.
-    If no workspace is found, this command will export an empty workspace.
-    """
-    def start(self):
-        app = LabApp(config=self.config)
-        base_url = app.settings.get('base_url', '/')
-        directory = app.workspaces_dir
-        app_url = app.app_url
+    @default('workspaces_dir')
+    def _default_workspaces_dir(self):
+        return get_workspaces_dir()
 
-        if len(self.extra_args) > 1:
-            print('Too many arguments were provided for workspace export.')
-            self.exit(1)
-
-        workspaces_url = ujoin(app_url, 'workspaces')
-        raw = (app_url if not self.extra_args
-               else ujoin(workspaces_url, self.extra_args[0]))
-        slug = slugify(raw, base_url)
-        workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
-
-        if osp.exists(workspace_path):
-            with open(workspace_path) as fid:
-                try:  # to load the workspace file.
-                    print(fid.read())
-                except Exception as e:
-                    print(json.dumps(dict(data=dict(), metadata=dict(id=raw))))
-        else:
-            print(json.dumps(dict(data=dict(), metadata=dict(id=raw))))
-
-
-class LabWorkspaceImportApp(JupyterApp):
+class LabWorkspaceListApp(WorkspaceListApp):
     version = version
-    description = """
-    Import a JupyterLab workspace
 
-    This command will import a workspace from a JSON file. The format of the
-        file must be the same as what the export functionality emits.
-    """
-    workspace_name = Unicode(
-        None,
-        config=True,
-        allow_none=True,
-        help="""
-        Workspace name. If given, the workspace ID in the imported
-        file will be replaced with a new ID pointing to this
-        workspace name.
-        """
-    )
-
-    aliases = {
-        'name': 'LabWorkspaceImportApp.workspace_name'
-    }
-
-    def start(self):
-        app = LabApp(config=self.config)
-        base_url = app.settings.get('base_url', '/')
-        directory = app.workspaces_dir
-        app_url = app.app_url
-        workspaces_url = ujoin(app.app_url, 'workspaces')
-
-        if len(self.extra_args) != 1:
-            print('One argument is required for workspace import.')
-            self.exit(1)
-
-        workspace = dict()
-        with self._smart_open() as fid:
-            try:  # to load, parse, and validate the workspace file.
-                workspace = self._validate(fid, base_url, app_url, workspaces_url)
-            except Exception as e:
-                print('%s is not a valid workspace:\n%s' % (fid.name, e))
-                self.exit(1)
-
-        if not osp.exists(directory):
-            try:
-                os.makedirs(directory)
-            except Exception as e:
-                print('Workspaces directory could not be created:\n%s' % e)
-                self.exit(1)
-
-        slug = slugify(workspace['metadata']['id'], base_url)
-        workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
-
-        # Write the workspace data to a file.
-        with open(workspace_path, 'w') as fid:
-            fid.write(json.dumps(workspace))
-
-        print('Saved workspace: %s' % workspace_path)
-
-    def _smart_open(self):
-        file_name = self.extra_args[0]
-
-        if file_name == '-':
-            return sys.stdin
-        else:
-            file_path = osp.abspath(file_name)
-
-            if not osp.exists(file_path):
-                print('%s does not exist.' % file_name)
-                self.exit(1)
-
-            return open(file_path)
-
-    def _validate(self, data, base_url, app_url, workspaces_url):
-        workspace = json.load(data)
-
-        if 'data' not in workspace:
-            raise Exception('The `data` field is missing.')
-
-        # If workspace_name is set in config, inject the
-        # name into the workspace metadata.
-        if self.workspace_name is not None:
-            if self.workspace_name == "":
-                workspace_id = ujoin(base_url, app_url)
-            else:
-                workspace_id = ujoin(base_url, workspaces_url, self.workspace_name)
-            workspace['metadata'] = {'id': workspace_id}
-        # else check that the workspace_id is valid.
-        else:
-            if 'id' not in workspace['metadata']:
-                raise Exception('The `id` field is missing in `metadata`.')
-            else:
-                id = workspace['metadata']['id']
-                if id != ujoin(base_url, app_url) and not id.startswith(ujoin(base_url, workspaces_url)):
-                    error = '%s does not match app_url or start with workspaces_url.'
-                    raise Exception(error % id)
-
-        return workspace
+    @default('workspaces_dir')
+    def _default_workspaces_dir(self):
+        return get_workspaces_dir()
 
 
 class LabWorkspaceApp(JupyterApp):
@@ -489,66 +286,66 @@ class LabWorkspaceApp(JupyterApp):
         should not otherwise do any work.
     """
     subcommands = dict()
-    subcommands['export'] = (
+    subcommands["export"] = (
         LabWorkspaceExportApp,
-        LabWorkspaceExportApp.description.splitlines()[0]
+        LabWorkspaceExportApp.description.splitlines()[0],
     )
-    subcommands['import'] = (
+    subcommands["import"] = (
         LabWorkspaceImportApp,
-        LabWorkspaceImportApp.description.splitlines()[0]
+        LabWorkspaceImportApp.description.splitlines()[0],
     )
-    subcommands['list'] = (
+    subcommands["list"] = (
         LabWorkspaceListApp,
-        LabWorkspaceListApp.description.splitlines()[0]
+        LabWorkspaceListApp.description.splitlines()[0],
     )
+
     def start(self):
         try:
             super().start()
-            print('One of `export`, `import` or `list` must be specified.')
+            print("One of `export`, `import` or `list` must be specified.")
             self.exit(1)
         except NoStart:
             pass
         self.exit(0)
 
 
-if LicensesApp is not None:
-    class LabLicensesApp(LicensesApp):
-        version = version
+class LabLicensesApp(LicensesApp):
+    version = version
 
-        dev_mode = Bool(
-            False,
-            config=True,
-            help="""Whether to start the app in dev mode. Uses the unpublished local
-            JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
-            show a red stripe at the top of the page.  It can only be used if JupyterLab
-            is installed as `pip install -e .`.
-            """,
-        )
+    dev_mode = Bool(
+        False,
+        config=True,
+        help="""Whether to start the app in dev mode. Uses the unpublished local
+        JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
+        show a red stripe at the top of the page.  It can only be used if JupyterLab
+        is installed as `pip install -e .`.
+        """,
+    )
 
-        app_dir = Unicode(
-            "", config=True, help="The app directory for which to show licenses"
-        )
+    app_dir = Unicode(
+        "", config=True, help="The app directory for which to show licenses"
+    )
 
-        aliases = {
-            **LicensesApp.aliases,
-            "app-dir": "LabLicensesApp.app_dir",
-        }
+    aliases = {
+        **LicensesApp.aliases,
+        "app-dir": "LabLicensesApp.app_dir",
+    }
 
-        flags = {
-            **LicensesApp.flags,
-            "dev-mode": (
-                {"LabLicensesApp": {"dev_mode": True}},
-                "Start the app in dev mode for running from source.",
-            ),
-        }
+    flags = {
+        **LicensesApp.flags,
+        "dev-mode": (
+            {"LabLicensesApp": {"dev_mode": True}},
+            "Start the app in dev mode for running from source.",
+        ),
+    }
 
-        @default('app_dir')
-        def _default_app_dir(self):
-            return get_app_dir()
+    @default('app_dir')
+    def _default_app_dir(self):
+        return get_app_dir()
 
-        @default('static_dir')
-        def _default_static_dir(self):
-            return pjoin(self.app_dir, 'static')
+    @default('static_dir')
+    def _default_static_dir(self):
+        return pjoin(self.app_dir, 'static')
 
 
 aliases = dict(base_aliases)
@@ -645,14 +442,9 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         path=(LabPathApp, LabPathApp.description.splitlines()[0]),
         paths=(LabPathApp, LabPathApp.description.splitlines()[0]),
         workspace=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
-        workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0])
+        workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0])
     )
-
-    # TODO: remove when oldest compatible jupyterlab_server contains license tooling
-    if LicensesApp is not None:
-        subcommands.update(
-            licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0])
-        )
 
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
