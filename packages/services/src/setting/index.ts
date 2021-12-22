@@ -7,6 +7,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { DataConnector } from '@jupyterlab/statedb';
 
+import * as json5 from 'json5';
+
 import { ServerConnection } from '../serverconnection';
 
 /**
@@ -60,7 +62,8 @@ export class SettingManager extends DataConnector<
     }
 
     // Assert what type the server response is returning.
-    return response.json() as Promise<ISettingRegistry.IPlugin>;
+    const content = await response.text();
+    return json5.parse(content) as ISettingRegistry.IPlugin;
   }
 
   /**
@@ -80,7 +83,8 @@ export class SettingManager extends DataConnector<
       throw new ResponseError(response);
     }
 
-    const json = await response.json();
+    const content = await response.text();
+    const json = json5.parse(content);
     const values: ISettingRegistry.IPlugin[] =
       json?.['settings']?.map((plugin: ISettingRegistry.IPlugin) => {
         plugin.data = { composite: {}, user: {} };

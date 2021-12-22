@@ -55,6 +55,7 @@
     "@lumino/disposable": "^1.10.1",
     "@lumino/polling": "^1.9.1",
     "@lumino/signaling": "^1.10.1",
+    "json5": "^2.1.1",
     "node-fetch": "^2.6.0",
     "ws": "^7.4.6"
   },
