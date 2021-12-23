@@ -10,16 +10,21 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  IEditorServices,
+  IPositionModel,
+  LineCol
+} from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditor,
   editorServices,
-  //EditorSyntaxStatus,
+  EditorSyntaxStatus,
   //ICodeMirror,
-  //Mode
+  Mode
 } from '@jupyterlab/codemirror';
-//import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { /*FileEditor,*/ IEditorTracker } from '@jupyterlab/fileeditor';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -63,7 +68,7 @@ const services: JupyterFrontEndPlugin<IEditorServices> = {
  */
 const commands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [IEditorTracker, ISettingRegistry, ITranslator/*, ICodeMirror*/],
+  requires: [IEditorTracker, ISettingRegistry, ITranslator /*, ICodeMirror*/],
   optional: [IMainMenu],
   activate: activateEditorCommands,
   autoStart: true
@@ -89,7 +94,7 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
       return;
     }
     // TODO: CM6 migration
-    /*const item = new EditorSyntaxStatus({ commands: app.commands, translator });
+    const item = new EditorSyntaxStatus({ commands: app.commands, translator });
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
       if (current && tracker.has(current) && item.model) {
@@ -109,7 +114,9 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
           !!tracker.currentWidget &&
           labShell.currentWidget === tracker.currentWidget
       }
-    );*/
+    );
+  }
+};
 
 /**
  * A plugin providing a line/column status item to the application.
@@ -187,7 +194,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
   editorSyntaxStatus,
-  lineColItem/*,
+  lineColItem /*,
   codemirrorSingleton*/
 ];
 export default plugins;
@@ -284,8 +291,8 @@ function activateEditorCommands(
       (settings.get('scrollPastEnd').composite as boolean | null) ??
       scrollPastEnd;
     styleActiveLine =
-      (settings.get('styleActiveLine').composite as boolean
-        /*| CodeMirror.StyleActiveLine*/) ?? styleActiveLine;
+      (settings.get('styleActiveLine').composite as boolean) ??
+      /*| CodeMirror.StyleActiveLine*/ styleActiveLine;
     styleSelectedText =
       (settings.get('styleSelectedText').composite as boolean) ??
       styleSelectedText;

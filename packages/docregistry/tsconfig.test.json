@@ -1,15 +1,15 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": [
-    "src/*",
-    "test/*"
-  ],
+  "include": ["src/*", "test/*"],
   "references": [
     {
       "path": "../apputils"
     },
     {
       "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
     },
     {
       "path": "../coreutils"

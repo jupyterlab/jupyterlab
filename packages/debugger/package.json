@@ -73,7 +73,6 @@
     "@lumino/signaling": "^1.10.1",
     "@lumino/widgets": "^1.33.0",
     "@vscode/debugprotocol": "^1.51.0",
-    "@codemirror/basic-setup": "^0.19.0",
     "react": "^17.0.1"
   },
   "devDependencies": {

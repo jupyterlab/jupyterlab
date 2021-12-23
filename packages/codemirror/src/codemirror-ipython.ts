@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Mode } from './mode';
-import '@codemirror/legacy-modes/mode/python';
-
-// Stub for the mkPython function.
-declare let mkPython: any;
+import { mkPython } from '@codemirror/legacy-modes/mode/python';
 
 Mode.registerModeInfo({
   name: 'ipython',
   mime: 'text/x-ipython',
   load: () => {
-    return Mode.legacy(mkPython({singleOperators: /\?/}))
+    return Mode.legacy(mkPython({ singleOperators: /\?/ }));
   }
 });
-

@@ -28,12 +28,12 @@ export class ReadOnlyEditorFactory {
    * @param source The source to create a new editor for.
    */
   createNewEditor(source: IDebugger.Source): CodeEditorWrapper {
-    const { content/*, mimeType, path*/ } = source;
+    const { content /*, mimeType, path*/ } = source;
     const factory = this._services.factoryService.newInlineEditor;
     //const mimeTypeService = this._services.mimeTypeService;
     const editor = new CodeEditorWrapper({
       model: new CodeEditor.Model({
-        value: content,
+        value: content
         //mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path)
       }),
       factory,

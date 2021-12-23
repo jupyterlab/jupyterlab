@@ -322,14 +322,16 @@ function findPackageJson(base: string, moduleDirs: string[]): NodeRequire {
   const { root } = path.parse(base);
   let current = base;
 
-  while(current !== root && !isModuleDir(current, moduleDirs)) {
+  while (current !== root && !isModuleDir(current, moduleDirs)) {
     const pkgJsonPath = path.join(current, 'package.json');
     if (fs.existsSync(pkgJsonPath)) {
       return require(pkgJsonPath);
     }
-    current  = path.resolve(current, '..');
+    current = path.resolve(current, '..');
   }
-  throw new Error(`Unable to find package.json for '${base}', moduleDirs = '${moduleDirs[0]}'`);
+  throw new Error(
+    `Unable to find package.json for '${base}', moduleDirs = '${moduleDirs[0]}'`
+  );
 }
 /**
  * Resolve a `package.json` in the `module` starting at resolution from the `parentModule`.
@@ -345,7 +347,7 @@ function requirePackage(parentModule: string, module: string): NodeRequire {
     parentModulePath = require.resolve(parentModule);
   } catch {
     try {
-    return require(packagePath);
+      return require(packagePath);
     } catch {
       return findPackageJson(module, [path.resolve(packagePath, '..')]);
     }

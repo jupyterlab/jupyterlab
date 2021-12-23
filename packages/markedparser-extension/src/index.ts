@@ -74,7 +74,7 @@ namespace Private {
               return cb(null, code);
             }
             try {
-              Mode.run(code, spec.mime, el);
+              Mode.run(code, spec, el);
               return cb(null, el.innerHTML);
             } catch (err) {
               console.error(`Failed to highlight ${lang} code`, err);

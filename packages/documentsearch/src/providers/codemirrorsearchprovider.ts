@@ -58,8 +58,10 @@ export class CodeMirrorSearchProvider
    */
   getInitialQuery(searchTarget: CMMainAreaWidget): any {
     const cm = searchTarget.content.editor;
-    const selection = cm.state.sliceDoc(cm.state.selection.main.from,
-                                        cm.state.selection.main.to);
+    const selection = cm.state.sliceDoc(
+      cm.state.selection.main.from,
+      cm.state.selection.main.to
+    );
     //const selection = cm.doc.getSelection();
     // if there are newlines, just return empty string
     return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
@@ -225,7 +227,9 @@ export class CodeMirrorSearchProvider
       }
       const value = cursor.value;
       replaceOccurred = true;
-      this._cm.editor.dispatch({changes: { from: value.from, to: value.to, insert: newText}});
+      this._cm.editor.dispatch({
+        changes: { from: value.from, to: value.to, insert: newText }
+      });
     }
     await this.highlightNext();
     return replaceOccurred;
@@ -239,16 +243,17 @@ export class CodeMirrorSearchProvider
   async replaceAllMatches(newText: string): Promise<boolean> {
     let replaceOccurred = false;
     return new Promise((resolve, _) => {
-      let cursor = new RegExpCursor(
-        this._cm.doc,
-        this._query.toString(),
-        { ignoreCase: !this._query.ignoreCase }
-      ).next();
+      let cursor = new RegExpCursor(this._cm.doc, this._query.toString(), {
+        ignoreCase: !this._query.ignoreCase
+      }).next();
       let changeSpec: ChangeSpec[] = [];
-      while (!cursor.done)
-      {
+      while (!cursor.done) {
         replaceOccurred = true;
-        changeSpec.push({from: cursor.value.from, to: cursor.value.to, insert: newText});
+        changeSpec.push({
+          from: cursor.value.from,
+          to: cursor.value.to,
+          insert: newText
+        });
         cursor = cursor.next();
       }
       this._cm.editor.dispatch({ changes: changeSpec });
@@ -354,8 +359,11 @@ export class CodeMirrorSearchProvider
   private _setInitialMatches(query: RegExp) {
     this._matchState = {};
 
-    const start = this._cm.getOffsetAt({line: 0, column: 0});
-    const end = this._cm.getOffsetAt({line: this._cm.doc.lines - 1, column: 0});
+    const start = this._cm.getOffsetAt({ line: 0, column: 0 });
+    const end = this._cm.getOffsetAt({
+      line: this._cm.doc.lines - 1,
+      column: 0
+    });
     const content = this._cm.state.sliceDoc(start, end);
     const lines = content.split('\n');
     const totalMatchIndex = 0;
@@ -393,7 +401,7 @@ export class CodeMirrorSearchProvider
        * the overlay and keeps track of the match state as the document is
        * updated while a search is active.
        */
-      /*token: (stream: StringStream) => {
+  /*token: (stream: StringStream) => {
         const currentPos = stream.pos;
         this._query.lastIndex = currentPos;
         const lineText = stream.string;
@@ -567,15 +575,15 @@ export class CodeMirrorSearchProvider
 }
 
 export class SearchState {
-  public posFrom: {line: number, ch: number};
-  public posTo: {line: number, ch: number};
+  public posFrom: { line: number; ch: number };
+  public posTo: { line: number; ch: number };
   public lastQuery: string;
   public query: RegExp;
 }
 
 namespace Private {
   export interface ICodeMirrorMatch {
-    from: {line: number, ch: number};
-    to: {line: number, ch: number};
+    from: { line: number; ch: number };
+    to: { line: number; ch: number };
   }
 }

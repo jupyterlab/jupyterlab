@@ -24,7 +24,11 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
     this.inlineCodeMirrorConfig = {
       ...CodeMirrorEditor.defaultConfig,
       extraKeys: [
-        {key: 'Tab', run: CodeMirrorEditor.indentMoreOrInsertTab, shift: indentLess},
+        {
+          key: 'Tab',
+          run: CodeMirrorEditor.indentMoreOrInsertTab,
+          shift: indentLess
+        },
         ...commentKeymap,
         ...searchKeymap
       ],
@@ -44,9 +48,18 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
     this.documentCodeMirrorConfig = {
       ...CodeMirrorEditor.defaultConfig,
       extraKeys: [
-        {key: 'Tab', run: CodeMirrorEditor.indentMoreOrInsertTab, shift: indentLess},
+        {
+          key: 'Tab',
+          run: CodeMirrorEditor.indentMoreOrInsertTab,
+          shift: indentLess
+        },
         ...commentKeymap,
-        {key: 'Shift-Enter', run: (target: EditorView) => { return true; }}
+        {
+          key: 'Shift-Enter',
+          run: (target: EditorView) => {
+            return true;
+          }
+        }
       ],
       /*extraKeys: {
         Tab: 'indentMoreOrinsertTab',
@@ -55,7 +68,7 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Ctrl-/': cm => cm.toggleComment({ indent: true }),
         'Shift-Enter': () => {
           /* no-op */
-        /*}
+      /*}
       },*/
       lineNumbers: true,
       scrollPastEnd: true,

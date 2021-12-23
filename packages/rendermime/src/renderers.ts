@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import { ISanitizer } from '@jupyterlab/apputils';
-import { CodeMirrorEditor/*, Mode*/ } from '@jupyterlab/codemirror';
 import { URLExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -744,26 +743,6 @@ namespace Private {
       // Replace the old script in the parent.
       script.parentNode.replaceChild(clone, script);
     }
-  }
-
-  /**
-   * Render markdown for the specified content.
-   *
-   * @param content - The string of markdown to render.
-   *
-   * @returns A promise which resolves with the rendered content.
-   */
-  export function renderMarked(content: string): Promise<string> {
-    initializeMarked();
-    return new Promise<string>((resolve, reject) => {
-      marked(content, (err: any, content: string) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(content);
-        }
-      });
-    });
   }
 
   /**

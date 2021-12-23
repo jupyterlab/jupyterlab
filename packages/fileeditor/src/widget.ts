@@ -221,7 +221,7 @@ export class FileEditorFactory extends ABCWidgetFactory<
     };
     const content = new FileEditor({
       factory,
-      context/*,
+      context /*,
     // TODO: CM6 migration
       mimeTypeService: this._services.mimeTypeService*/
     });
