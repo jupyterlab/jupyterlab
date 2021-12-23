@@ -2518,7 +2518,7 @@ namespace Private {
      *
      * @param baseCell - cell relative to which so search
      * @param notebook - target notebook widget
-     * @param returnIdx [default=false] - if set to true, the cell idx is returned rather than the cell object.
+     * @param returnIdx [default=false] - if set to true, the cell index is returned rather than the cell object.
      *
      * @returns the (index | Cell object) of the found heading or (-1 | null) if no heading found.
      */
