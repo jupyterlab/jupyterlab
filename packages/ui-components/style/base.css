@@ -169,7 +169,6 @@ input::placeholder {
 }
 
 .jp-InputGroupAction {
-  background-color: var(--jp-brand-color1);
   position: absolute;
   top: 0;
   right: 0;
