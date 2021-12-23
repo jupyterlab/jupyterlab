@@ -2418,7 +2418,7 @@ namespace Private {
      * @param childCell - The cell that is child to the sought heading
      * @param notebook - The target notebook widget
      * @param includeChildCell [default=false] - if set to true and childCell is a heading itself, the childCell will be returned
-     * @param returnIdx [default=false] - if set to true, the cell idx is returned rather than the cell object.
+     * @param returnIdx [default=false] - if set to true, the cell index is returned rather than the cell object.
      *
      * @returns the (index | Cell object) of the parent heading or (-1 | null) if there is no parent heading.
      */
