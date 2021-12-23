@@ -13,6 +13,7 @@ const merge = require('webpack-merge').default;
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
 const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
+const bootstrap = require.resolve('@jupyterlab/builder/src/bootstrap');
 const { createShared } = require('@jupyterlab/builder');
 const { ModuleFederationPlugin } = webpack.container;
 
@@ -56,7 +57,7 @@ fs.writeFileSync(path.join(buildDir, 'index.out.js'), template(extData));
 // Create the bootstrap file that loads federated extensions and calls the
 // initialization logic in index.out.js
 const entryPoint = path.join(buildDir, 'bootstrap.js');
-fs.copySync('./bootstrap.js', entryPoint);
+fs.copySync(bootstrap, entryPoint);
 
 fs.copySync('./package.json', path.join(buildDir, 'package.json'));
 if (outputDir !== buildDir) {
