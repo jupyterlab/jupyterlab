@@ -5,4 +5,4 @@
 
 export * from './build';
 export * from './webpack-plugins';
-export * from './utils';
+export * from './sharing';
