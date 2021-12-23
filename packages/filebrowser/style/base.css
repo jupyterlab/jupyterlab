@@ -99,7 +99,7 @@
   .jp-Toolbar-item:first-child
   .jp-ToolbarButtonComponent
   .jp-icon3 {
-  fill: white;
+  fill: var(--jp-layout-color1);
 }
 
 /*-----------------------------------------------------------------------------
