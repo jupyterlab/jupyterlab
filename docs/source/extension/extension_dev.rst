@@ -738,10 +738,7 @@ Testing your extension
 There are a number of helper functions in ``testutils`` in this repo (which
 is a public ``npm`` package called ``@jupyterlab/testutils``) that can be used when
 writing tests for an extension.  See ``tests/test-application`` for an example
-of the infrastructure needed to run tests.  There is a ``karma`` config file
-that points to the parent directory's ``karma`` config, and a test runner,
-``run-test.py`` that starts a Jupyter server.
-
+of the infrastructure needed to run tests.
 
 If you are using `jest <https://jestjs.io/>`__ to test your extension, you will
 need to transpile the jupyterlab packages to ``commonjs`` as they are using ES6 modules
