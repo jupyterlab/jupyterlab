@@ -160,10 +160,10 @@ export class CodeEditorWrapper extends Widget {
    * A message handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (this.isVisible) {
-      this._hasRefreshedSinceAttach = true;
-      this.editor.refresh();
-    }
+    // if (this.isVisible) {
+    //   this._hasRefreshedSinceAttach = true;
+    //   this.editor.refresh();
+    // }
   }
 
   /**
