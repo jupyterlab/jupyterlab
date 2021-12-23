@@ -2463,8 +2463,6 @@ namespace Private {
         baseHeadingLevel = 1; // if no heading level can be determined, assume we're on level 1
       }
 
-      console.log('A', baseHeadingLevel);
-
       // find the heading above with heading level <= baseHeadingLevel and return its index
       let cellIdx = notebook.widgets.indexOf(baseCell) - 1;
       while (cellIdx >= 0) {
