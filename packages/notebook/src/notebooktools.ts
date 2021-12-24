@@ -152,7 +152,11 @@ export class NotebookTools extends Widget implements INotebookTools {
       this._prevActiveNotebookModel &&
       !this._prevActiveNotebookModel.isDisposed
     ) {
-      this._prevActiveNotebookModel.metadata.changed.disconnect(
+      /* this._prevActiveNotebookModel.metadata.changed.disconnect(
+        this._onActiveNotebookPanelMetadataChanged,
+        this
+      ); */
+      this._prevActiveNotebookModel.metadataChanged.disconnect(
         this._onActiveNotebookPanelMetadataChanged,
         this
       );
@@ -163,7 +167,11 @@ export class NotebookTools extends Widget implements INotebookTools {
         : null;
     this._prevActiveNotebookModel = activeNBModel;
     if (activeNBModel) {
-      activeNBModel.metadata.changed.connect(
+      /* activeNBModel.metadata.changed.connect(
+        this._onActiveNotebookPanelMetadataChanged,
+        this
+      ); */
+      activeNBModel.metadataChanged.connect(
         this._onActiveNotebookPanelMetadataChanged,
         this
       );
@@ -209,7 +217,7 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change in the active cell metadata.
    */
   private _onActiveNotebookPanelMetadataChanged(
-    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
+    sender: INotebookModel, //IObservableMap<ReadonlyPartialJSONValue | undefined>,
     args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
   ): void {
     const message = new ObservableJSON.ChangeMessage(
@@ -593,7 +601,10 @@ export namespace NotebookTools {
       const nb =
         this.notebookTools.activeNotebookPanel &&
         this.notebookTools.activeNotebookPanel.content;
-      this.editor.source = nb?.model?.metadata ?? null;
+      //this.editor.source = nb?.model?.metadata ?? null;
+      //TODO: Update metadata editor, use shared models?
+      /* @ts-ignore */
+      this.editor.source = nb?.model?.sharedModel.getMetadata() ?? null;
     }
   }
 

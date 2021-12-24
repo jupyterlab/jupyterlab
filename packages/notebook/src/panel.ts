@@ -239,7 +239,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Update the kernel language.
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
-    this.model!.metadata.set('language_info', language);
+    //this.model!.metadata.set('language_info', language);
+    this.model!.sharedModel.updateMetadata({ language_info: language });
   }
 
   /**
@@ -250,10 +251,17 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (this.isDisposed) {
       return;
     }
-    this.model!.metadata.set('kernelspec', {
+    /* this.model!.metadata.set('kernelspec', {
       name: kernel.name,
       display_name: spec?.display_name,
       language: spec?.language
+    }); */
+    this.model!.sharedModel.updateMetadata({
+      kernelspec: {
+        name: kernel.name,
+        display_name: spec === undefined ? '' : spec.display_name,
+        language: spec?.language
+      }
     });
   }
 

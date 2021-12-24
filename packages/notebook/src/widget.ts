@@ -412,7 +412,7 @@ export class StaticNotebook extends Widget {
    * when the `language_info` metadata changes.
    */
   protected onMetadataChanged(
-    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
+    sender: INotebookModel, //IObservableMap<ReadonlyPartialJSONValue | undefined>,
     args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
   ): void {
     switch (args.key) {
@@ -461,7 +461,8 @@ export class StaticNotebook extends Widget {
     const layout = this.layout as PanelLayout;
     if (oldValue) {
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
-      oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
+      //oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
+      oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       // TODO: reuse existing cell widgets if possible. Remember to initially
       // clear the history of each cell if we do this.
@@ -486,7 +487,8 @@ export class StaticNotebook extends Widget {
     });
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
-    newValue.metadata.changed.connect(this.onMetadataChanged, this);
+    //newValue.metadata.changed.connect(this.onMetadataChanged, this);
+    newValue.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
   /**
@@ -751,9 +753,10 @@ export class StaticNotebook extends Widget {
    * Update the mimetype of the notebook.
    */
   private _updateMimetype(): void {
-    const info = this._model?.metadata.get(
+    /* const info = this._model?.metadata.get(
       'language_info'
-    ) as nbformat.ILanguageInfoMetadata;
+    ) as nbformat.ILanguageInfoMetadata; */
+    const info = this.model?.sharedModel.getMetadata().language_info;
     if (!info) {
       return;
     }

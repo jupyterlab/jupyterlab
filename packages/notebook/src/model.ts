@@ -17,14 +17,13 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
   IModelDB,
-  IObservableJSON,
+  //IObservableJSON,
   IObservableList,
   IObservableMap,
   IObservableUndoableList,
   ModelDB
 } from '@jupyterlab/observables';
 import {
-  createMutex,
   ISharedNotebook,
   IYDocument,
   NotebookChange,
@@ -39,12 +38,20 @@ import { JSONObject, ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 
-const UNSHARED_KEYS = ['kernelspec', 'language_info'];
+//const UNSHARED_KEYS = ['kernelspec', 'language_info'];
 
 /**
  * The definition of a model object for a notebook widget.
  */
 export interface INotebookModel extends DocumentRegistry.IModel {
+  /**
+   * A signal emitted when a model state changes.
+   */
+  readonly metadataChanged: ISignal<
+    INotebookModel,
+    IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
+  >;
+
   /**
    * The list of cells in the notebook.
    */
@@ -68,7 +75,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The metadata associated with the notebook.
    */
-  readonly metadata: IObservableJSON;
+  //readonly metadata: IObservableJSON;
 
   /**
    * The array of deleted cells since the notebook was last run.
@@ -110,13 +117,18 @@ export class NotebookModel implements INotebookModel {
     this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
-    const metadata = this._modelDB.createMap('metadata');
-    if (!metadata.has('language_info')) {
+    const metadata = this._sharedModel.getMetadata();
+    if (!('language_info' in metadata)) {
+      const name = options.languagePreference || '';
+      this._sharedModel.updateMetadata({ language_info: { name } });
+    }
+    //const metadata = this.modelDB.createMap('metadata');
+    /* if (!metadata.has('language_info')) {
       const name = options.languagePreference || '';
       metadata.set('language_info', { name });
-    }
+    } */
     this._ensureMetadata();
-    metadata.changed.connect(this._onMetadataChanged, this);
+    //metadata.changed.connect(this._onMetadataChanged, this);
     this._deletedCells = [];
 
     (this._sharedModel as YNotebook).dirty = false;
@@ -134,6 +146,16 @@ export class NotebookModel implements INotebookModel {
    */
   get stateChanged(): ISignal<this, IChangedArgs<any>> {
     return this._stateChanged;
+  }
+
+  /**
+   * A signal emitted when the document metadata changes.
+   */
+  get metadataChanged(): ISignal<
+    this,
+    IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
+  > {
+    return this._metadataChanged;
   }
 
   /**
@@ -167,9 +189,9 @@ export class NotebookModel implements INotebookModel {
   /**
    * The metadata associated with the notebook.
    */
-  get metadata(): IObservableJSON {
-    return this._modelDB.get('metadata') as IObservableJSON;
-  }
+  /* get metadata(): IObservableJSON {
+    return this.modelDB.get('metadata') as IObservableJSON;
+  } */
 
   /**
    * Get the observable list of notebook cells.
@@ -196,9 +218,10 @@ export class NotebookModel implements INotebookModel {
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    const spec = this.metadata.get(
+    /* const spec = this.metadata.get(
       'kernelspec'
-    ) as nbformat.IKernelspecMetadata;
+    ) as nbformat.IKernelspecMetadata; */
+    const spec = this.sharedModel.getMetadata().kernelspec;
     return spec ? spec.name : '';
   }
 
@@ -220,9 +243,10 @@ export class NotebookModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    const info = this.metadata.get(
+    /* const info = this.metadata.get(
       'language_info'
-    ) as nbformat.ILanguageInfoMetadata;
+    ) as nbformat.ILanguageInfoMetadata; */
+    const info = this.sharedModel.getMetadata().language_info;
     return info ? info.name : '';
   }
 
@@ -290,10 +314,10 @@ export class NotebookModel implements INotebookModel {
       cells.push(cell);
     }
     this._ensureMetadata();
-    const metadata = this._sharedModel.getMetadata();
-    for (const key of this.metadata.keys()) {
+    const metadata = this.sharedModel.getMetadata();
+    /* for (const key of this.metadata.keys()) {
       metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
-    }
+    } */
     return {
       metadata,
       nbformat_minor: this._nbformatMinor,
@@ -381,7 +405,7 @@ close the notebook without saving it.`,
     }
 
     // Update the metadata.
-    this.metadata.clear();
+    /* this.metadata.clear();
     const metadata = value.metadata;
     for (const key in metadata) {
       // orig_nbformat is not intended to be stored per spec.
@@ -389,7 +413,12 @@ close the notebook without saving it.`,
         continue;
       }
       this.metadata.set(key, metadata[key]);
+    } */
+    const metadata = value.metadata;
+    if ('orig_nbformat' in metadata) {
+      delete metadata['orig_nbformat'];
     }
+    this.sharedModel.setMetadata(metadata);
     this._ensureMetadata();
     this.dirty = true;
   }
@@ -455,16 +484,48 @@ close the notebook without saving it.`,
     }
 
     if (change.metadataChange) {
-      const metadata = change.metadataChange.newValue as JSONObject;
-      this._modelDBMutex(() => {
-        Object.entries(metadata).forEach(([key, value]) => {
-          this.metadata.set(key, value);
-        });
+      // Create and trigger a signal with `IObservableMap.IChangedArgs`
+      // to keep compatibility with the old API. Otherwise there is too
+      // many changes
+      const oldMetadata = change.metadataChange.oldValue as JSONObject;
+      const newMetadata = change.metadataChange.newValue as JSONObject;
+      const checkedAttributes: string[] = [];
+      // Check and trigger event for removed and changed attributes
+      Object.entries(oldMetadata).forEach(([key, value]) => {
+        checkedAttributes.push(key);
+        if (!(key in newMetadata)) {
+          this.triggerMetadataChange({
+            key,
+            type: 'remove',
+            oldValue: value,
+            newValue: undefined
+          });
+        }
+        if (key in newMetadata && value !== newMetadata[key]) {
+          this.triggerMetadataChange({
+            key,
+            type: 'change',
+            oldValue: value,
+            newValue: newMetadata[key]
+          });
+        }
+      });
+      // Check and trigger event for new attributes
+      Object.entries(newMetadata).forEach(([key, value]) => {
+        if (!(key in checkedAttributes)) {
+          this.triggerMetadataChange({
+            key,
+            type: 'add',
+            oldValue: undefined,
+            newValue: newMetadata[key]
+          });
+        }
+        checkedAttributes.push(key);
       });
     }
   }
 
-  private _onMetadataChanged(
+  /* private _onMetadataChanged(
     metadata: IObservableJSON,
     change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
   ): void {
@@ -474,18 +535,28 @@ close the notebook without saving it.`,
       });
     }
     this.triggerContentChange();
-  }
+  } */
 
   /**
    * Make sure we have the required metadata fields.
    */
   private _ensureMetadata(): void {
-    const metadata = this.metadata;
+    /* const metadata = this.metadata;
     if (!metadata.has('language_info')) {
       metadata.set('language_info', { name: '' });
     }
     if (!metadata.has('kernelspec')) {
       metadata.set('kernelspec', { name: '', display_name: '' });
+    } */
+
+    const metadata = this.sharedModel.getMetadata();
+    if (!('language_info' in metadata)) {
+      this.sharedModel.updateMetadata({ language_info: { name: '' } });
+    }
+    if (!('kernelspec' in metadata)) {
+      this.sharedModel.updateMetadata({
+        kernelspec: { name: '', display_name: '' }
+      });
     }
   }
 
@@ -498,9 +569,20 @@ close the notebook without saving it.`,
 
   /**
    * Trigger a content changed signal.
+   * TODO: remove generic signals?
    */
   protected triggerContentChange(): void {
     this._contentChanged.emit(void 0);
+    this.dirty = true;
+  }
+
+  /**
+   * Trigger a metadata changed signal.
+   */
+  protected triggerMetadataChange(
+    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
+  ): void {
+    this._metadataChanged.emit(args);
     this.dirty = true;
   }
 
@@ -519,7 +601,7 @@ close the notebook without saving it.`,
   /**
    * A mutex to update the shared model.
    */
-  protected readonly _modelDBMutex = createMutex();
+  //protected readonly _modelDBMutex = createMutex();
 
   protected _modelDB: IModelDB;
   protected _sharedModel: ISharedNotebook;
@@ -527,6 +609,10 @@ close the notebook without saving it.`,
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _metadataChanged = new Signal<
+    this,
+    IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
+  >(this);
 
   private _trans: TranslationBundle;
   private _cells: CellList;
