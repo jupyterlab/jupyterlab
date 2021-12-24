@@ -1,11 +1,8 @@
 # coding: utf-8
 """A lab app that runs a sub process for a demo or a test."""
 
-import argparse
 import atexit
-import glob
 import json
-import logging
 import os
 import shutil
 import sys
@@ -20,11 +17,9 @@ import jupyter_core
 import jupyterlab_server
 import pkg_resources
 from ipykernel.kernelspec import write_kernel_spec
-from jupyter_core.application import base_aliases, base_flags
 from jupyter_server.serverapp import ServerApp
-from jupyterlab.utils import deprecated
 from jupyterlab_server.process_app import ProcessApp
-from traitlets import Bool, Dict, Unicode, default
+from traitlets import default
 
 HERE = osp.realpath(osp.dirname(__file__))
 
