@@ -722,7 +722,11 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   abstract context_from_active_document(): ICommandContext | null;
 
-  get_context(root_position: IRootPosition): ICommandContext {
+  get_context(root_position: IRootPosition): ICommandContext | null {
+    // ignore premature calls and calls after disposal
+    if (!this.virtual_editor) {
+      return null;
+    }
     let document = this.virtual_editor.document_at_root_position(root_position);
     let virtual_position =
       this.virtual_editor.root_position_to_virtual_position(root_position);
@@ -738,7 +742,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     };
   }
 
-  get_context_from_context_menu(): ICommandContext {
+  get_context_from_context_menu(): ICommandContext | null {
     let root_position = this.get_position_from_context_menu();
     return this.get_context(root_position);
   }

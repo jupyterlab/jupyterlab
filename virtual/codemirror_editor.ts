@@ -537,7 +537,9 @@ export class CodeMirrorVirtualEditor
   forEveryBlockEditor(
     callback: (cm_editor: CodeMirror.Editor) => any,
     monitor_for_new_blocks = true,
-    on_editor_removed_callback: (cm_editor: CodeMirror.Editor) => any = null
+    on_editor_removed_callback: (
+      cm_editor: CodeMirror.Editor
+    ) => any | null = null
   ) {
     const editors_with_handlers = new Set<CodeMirror.Editor>();
 
@@ -568,6 +570,9 @@ export class CodeMirrorVirtualEditor
         adapter: WidgetAdapter<IDocumentWidget>,
         data: IEditorChangedData
       ) => {
+        if (on_editor_removed_callback == null) {
+          return;
+        }
         let { editor } = data;
         if (editor == null) {
           return;

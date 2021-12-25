@@ -620,7 +620,8 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     connection: LSPConnection,
     response: lsProtocol.PublishDiagnosticsParams
   ) => {
-    if (!uris_equal(response.uri, this.virtual_document.document_info.uri)) {
+    // use optional chaining operator because the diagnostics message may come late (after the document was disposed)
+    if (!uris_equal(response.uri, this.virtual_document?.document_info?.uri)) {
       return;
     }
 
