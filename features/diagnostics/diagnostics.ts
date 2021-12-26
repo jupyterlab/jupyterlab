@@ -50,8 +50,8 @@ function escapeRegExp(string: string) {
 }
 
 class DiagnosticsPanel {
-  private _content: DiagnosticsListing = null;
-  private _widget: MainAreaWidget<DiagnosticsListing> = null;
+  private _content: DiagnosticsListing | null = null;
+  private _widget: MainAreaWidget<DiagnosticsListing> | null = null;
   feature: DiagnosticsCM;
   is_registered = false;
   trans: TranslationBundle;
@@ -114,14 +114,14 @@ class DiagnosticsPanel {
 
     app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
       execute: args => {
-        let column = get_column(args['id'] as string);
+        let column = get_column(args['id'] as string)!;
         column.is_visible = !column.is_visible;
         widget.update();
       },
       label: args => this.trans.__(args['id'] as string),
       isToggled: args => {
         let column = get_column(args['id'] as string);
-        return column.is_visible;
+        return column ? column.is_visible : false;
       }
     });
 
@@ -143,14 +143,14 @@ class DiagnosticsPanel {
       'Ignore diagnostics like this'
     );
 
-    let get_row = (): IDiagnosticsRow => {
+    let get_row = (): IDiagnosticsRow | undefined => {
       let tr = app.contextMenuHitTest(
         node => node.tagName.toLowerCase() == 'tr'
       );
       if (!tr) {
         return;
       }
-      return this.widget.content.get_diagnostic(tr.dataset.key);
+      return this.widget.content.get_diagnostic(tr.dataset.key!);
     };
 
     ignore_diagnostics_menu.addItem({
@@ -161,7 +161,14 @@ class DiagnosticsPanel {
     });
     app.commands.addCommand(CMD_IGNORE_DIAGNOSTIC_CODE, {
       execute: () => {
-        const diagnostic = get_row().data.diagnostic;
+        const row = get_row();
+        if (!row) {
+          console.warn(
+            'LPS: diagnostics row not found for ignore code execute()'
+          );
+          return;
+        }
+        const diagnostic = row.data.diagnostic;
         let current = this.content.model.settings.composite.ignoreCodes;
         this.content.model.settings.set('ignoreCodes', [
           ...current,
@@ -192,6 +199,12 @@ class DiagnosticsPanel {
     app.commands.addCommand(CMD_IGNORE_DIAGNOSTIC_MSG, {
       execute: () => {
         const row = get_row();
+        if (!row) {
+          console.warn(
+            'LPS: diagnostics row not found for ignore message execute()'
+          );
+          return;
+        }
         const diagnostic = row.data.diagnostic;
         let current =
           this.content.model.settings.composite.ignoreMessagesPatterns;
@@ -225,6 +238,10 @@ class DiagnosticsPanel {
     app.commands.addCommand(CMD_JUMP_TO_DIAGNOSTIC, {
       execute: () => {
         const row = get_row();
+        if (!row) {
+          console.warn('LPS: diagnostics row not found for jump execute()');
+          return;
+        }
         this.widget.content.jump_to(row);
       },
       label: this.trans.__('Jump to location'),
@@ -235,6 +252,7 @@ class DiagnosticsPanel {
       execute: () => {
         const row = get_row();
         if (!row) {
+          console.warn('LPS: diagnostics row not found for copy execute()');
           return;
         }
         const message = row.data.diagnostic.message;
@@ -335,7 +353,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     if (!diagnostics_databases.has(this.virtual_editor)) {
       diagnostics_databases.set(this.virtual_editor, new DiagnosticsDatabase());
     }
-    return diagnostics_databases.get(this.virtual_editor);
+    return diagnostics_databases.get(this.virtual_editor)!;
   }
 
   switchDiagnosticsPanelSource = () => {
@@ -385,7 +403,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
       let range_id = get_range_id(range);
       range_id_to_range.set(range_id, range);
       if (range_id_to_diagnostics.has(range_id)) {
-        let ranges_list = range_id_to_diagnostics.get(range_id);
+        let ranges_list = range_id_to_diagnostics.get(range_id)!;
         ranges_list.push(diagnostic);
       } else {
         range_id_to_diagnostics.set(range_id, [diagnostic]);
@@ -396,7 +414,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
 
     range_id_to_diagnostics.forEach(
       (range_diagnostics: lsProtocol.Diagnostic[], range_id: RangeID) => {
-        let range = range_id_to_range.get(range_id);
+        let range = range_id_to_range.get(range_id)!;
         map.set(range, range_diagnostics);
       }
     );
@@ -517,7 +535,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
 
         if (
           document.virtual_lines
-            .get(start.line)
+            .get(start.line)!
             .skip_inspect.indexOf(document.id_path) !== -1
         ) {
           this.console.log(
@@ -535,10 +553,18 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
 
         let ce_editor = document.get_editor_at_virtual_line(start);
         let cm_editor =
-          this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
+          this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor)!;
 
         let start_in_editor = document.transform_virtual_to_editor(start);
-        let end_in_editor: IEditorPosition;
+        let end_in_editor: IEditorPosition | null;
+
+        if (start_in_editor === null) {
+          this.console.warn(
+            'Start in editor could not be be determined for',
+            diagnostics
+          );
+          return;
+        }
 
         // some servers return strange positions for ends
         try {
@@ -546,6 +572,14 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
         } catch (err) {
           this.console.warn('Malformed range for diagnostic', end);
           end_in_editor = { ...start_in_editor, ch: start_in_editor.ch + 1 };
+        }
+
+        if (end_in_editor === null) {
+          this.console.warn(
+            'End in editor could not be be determined for',
+            diagnostics
+          );
+          return;
         }
 
         let range_in_editor = {

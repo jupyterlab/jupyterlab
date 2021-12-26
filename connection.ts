@@ -213,10 +213,12 @@ class ServerRequestHandler<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > implements IServerRequestHandler
 {
-  private _handler: (
-    params: IServerRequestParams[T],
-    connection?: LSPConnection
-  ) => Promise<IServerResult[T]>;
+  private _handler:
+    | ((
+        params: IServerRequestParams[T],
+        connection?: LSPConnection
+      ) => Promise<IServerResult[T]>)
+    | null;
 
   constructor(
     protected connection: MessageConnection,
@@ -228,13 +230,15 @@ class ServerRequestHandler<
     this._handler = null;
   }
 
-  private handle(request: IServerRequestParams[T]): Promise<IServerResult[T]> {
+  private handle(
+    request: IServerRequestParams[T]
+  ): Promise<IServerResult[T] | undefined> {
     this.emitter.log(MessageKind.server_requested, {
       method: this.method,
       message: request
     });
     if (!this._handler) {
-      return;
+      return new Promise(() => undefined);
     }
     return this._handler(request, this.emitter).then(result => {
       this.emitter.log(MessageKind.response_for_server, {
@@ -324,7 +328,7 @@ interface IMessageLog<T extends AnyMethod = AnyMethod> {
 
 export class LSPConnection extends LspWsConnection {
   protected documentsToOpen: IDocumentInfo[];
-  public serverIdentifier: string;
+  public serverIdentifier?: string;
 
   public clientNotifications: ClientNotifications;
   public serverNotifications: ServerNotifications;
@@ -375,7 +379,7 @@ export class LSPConnection extends LspWsConnection {
   constructor(options: ILSPOptions) {
     super(options);
     this.logAllCommunication = false;
-    this.serverIdentifier = options?.serverIdentifier;
+    this.serverIdentifier = options.serverIdentifier;
     this.console = options.console.scope(this.serverIdentifier + ' connection');
     this.documentsToOpen = [];
     this.clientNotifications =
@@ -400,7 +404,7 @@ export class LSPConnection extends LspWsConnection {
     this.afterInitialized();
     super.onServerInitialized(params);
     while (this.documentsToOpen.length) {
-      this.sendOpen(this.documentsToOpen.pop());
+      this.sendOpen(this.documentsToOpen.pop()!);
     }
   }
 
@@ -443,12 +447,19 @@ export class LSPConnection extends LspWsConnection {
         params.registrations.forEach(
           (capabilityRegistration: lsp.Registration) => {
             try {
-              this.serverCapabilities = registerServerCapability(
+              const updatedCapabilities = registerServerCapability(
                 this.serverCapabilities,
                 capabilityRegistration
               );
+              if (updatedCapabilities === null) {
+                this.console.error(
+                  `Failed to register server capability: ${capabilityRegistration}`
+                );
+                return;
+              }
+              this.serverCapabilities = updatedCapabilities;
             } catch (err) {
-              console.error(err);
+              this.console.error(err);
             }
           }
         );
@@ -512,9 +523,9 @@ export class LSPConnection extends LspWsConnection {
     documentInfo: IDocumentInfo,
     newName: string,
     emit = true
-  ): Promise<lsp.WorkspaceEdit> {
+  ): Promise<lsp.WorkspaceEdit | null> {
     if (!this.isReady || !this.isRenameSupported()) {
-      return;
+      return null;
     }
 
     const params: lsp.RenameParams = {
@@ -608,6 +619,8 @@ export class LSPConnection extends LspWsConnection {
    * @deprecated The method should not be used in new code
    */
   public isCompletionResolveProvider(): boolean {
-    return this.serverCapabilities?.completionProvider?.resolveProvider;
+    return (
+      this.serverCapabilities?.completionProvider?.resolveProvider || false
+    );
   }
 }

@@ -49,8 +49,8 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
           virtual_position
         );
       let old_value = editor.get_token_at(root_position).value;
-      let handle_failure = (error: any) => {
-        let status = '';
+      let handle_failure = (error: Error) => {
+        let status: string | null = '';
 
         if (features.has(DIAGNOSTICS_PLUGIN_ID)) {
           let diagnostics_feature = features.get(
@@ -80,27 +80,32 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
       });
 
       try {
-        if (dialog_value.button.accept != true) {
-          // the user has cancelled the rename action
+        const new_value = dialog_value.value;
+        if (dialog_value.button.accept != true || new_value == null) {
+          // the user has cancelled the rename action or did not provide new value
           return;
         }
-        let new_value = dialog_value.value;
         rename_feature.setStatus(
           trans.__('Renaming %1 to %2...', old_value, new_value),
           2 * 1000
         );
-        const edit = await connection.rename(
+        const edit = await connection?.rename(
           virtual_position,
           document.document_info,
           new_value,
           false
         );
-        await rename_feature.handleRename(edit, old_value, new_value);
+        if (edit) {
+          await rename_feature.handleRename(edit, old_value, new_value);
+        } else {
+          handle_failure(new Error('no edit from server'));
+        }
       } catch (error) {
         handle_failure(error);
       }
     },
-    is_enabled: ({ connection }) => connection.isRenameSupported(),
+    is_enabled: ({ connection }) =>
+      connection ? connection.provides('renameProvider') : false,
     label: trans.__('Rename symbol'),
     icon: renameIcon
   }
@@ -126,7 +131,7 @@ export class RenameCM extends CodeMirrorIntegration {
       outcome = await this.apply_edit(workspaceEdit);
     } catch (error) {
       this.status_message.set(this.trans.__('Rename failed: %1', error));
-      return outcome;
+      return;
     }
 
     try {
@@ -142,7 +147,7 @@ export class RenameCM extends CodeMirrorIntegration {
         status = this.trans._n(
           'Renamed %2 in %3 place',
           'Renamed %2 in %3 places',
-          outcome.appliedChanges,
+          outcome.appliedChanges!,
           change_text,
           outcome.appliedChanges
         );
@@ -179,11 +184,11 @@ export class RenameCM extends CodeMirrorIntegration {
    * and provides a nice error message to the user.
    */
   static ux_workaround_for_rope_limitation(
-    error: any,
+    error: Error,
     diagnostics_feature: DiagnosticsCM,
     editor: CodeMirrorVirtualEditor,
     rename_feature: RenameCM
-  ): string {
+  ): string | null {
     let has_index_error = false;
     try {
       has_index_error = error.message.includes('IndexError');

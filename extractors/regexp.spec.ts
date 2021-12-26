@@ -112,10 +112,10 @@ describe('RegExpForeignCodeExtractor', () => {
       expect(result.host_code).to.equal(PYTHON_CELL_MAGIC_WITH_H);
       expect(result.foreign_code).to.equal('h');
 
-      expect(result.range.start.line).to.equal(1);
-      expect(result.range.start.column).to.equal(0);
-      expect(result.range.end.line).to.equal(1);
-      expect(result.range.end.column).to.equal(1);
+      expect(result.range!.start.line).to.equal(1);
+      expect(result.range!.start.column).to.equal(0);
+      expect(result.range!.end.line).to.equal(1);
+      expect(result.range!.end.column).to.equal(1);
     });
 
     it('should work with non-line magic and non-cell magic code snippets as well', () => {
@@ -138,10 +138,10 @@ describe('RegExpForeignCodeExtractor', () => {
       expect(result.foreign_code).to.equal(
         '<a href="#">\n<b>important</b> link\n</a>'
       );
-      expect(result.range.start.line).to.equal(1);
-      expect(result.range.start.column).to.equal(7);
-      expect(result.range.end.line).to.equal(3);
-      expect(result.range.end.column).to.equal(4);
+      expect(result.range!.start.line).to.equal(1);
+      expect(result.range!.start.column).to.equal(7);
+      expect(result.range!.end.line).to.equal(3);
+      expect(result.range!.end.column).to.equal(4);
       let last_bit = results[1];
       expect(last_bit.host_code).to.equal('""";\nprint(x)');
     });
@@ -153,8 +153,8 @@ describe('RegExpForeignCodeExtractor', () => {
 
       expect(result.host_code).to.equal(R_CELL_MAGIC_EXISTS);
       expect(result.foreign_code).to.equal('some text\n');
-      expect(result.range.start.line).to.equal(1);
-      expect(result.range.start.column).to.equal(0);
+      expect(result.range!.start.line).to.equal(1);
+      expect(result.range!.start.column).to.equal(0);
     });
 
     it('should extract and remove from host', () => {
@@ -215,8 +215,8 @@ describe('RegExpForeignCodeExtractor', () => {
 
       expect(first_magic.foreign_code).to.equal('df = data.frame()');
       expect(first_magic.host_code).to.equal('%R df = data.frame()\n');
-      expect(first_magic.range.end.line).to.equal(0);
-      expect(first_magic.range.end.column).to.equal(20);
+      expect(first_magic.range!.end.line).to.equal(0);
+      expect(first_magic.range!.end.column).to.equal(20);
 
       let second_magic = results[1];
 

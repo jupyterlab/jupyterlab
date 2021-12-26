@@ -90,8 +90,8 @@ export class MockSettings<T> implements IFeatureSettings<T> {
     this.changed = new Signal(this);
   }
 
-  get composite(): T {
-    return this.settings;
+  get composite(): Required<T> {
+    return this.settings as Required<T>;
   }
 
   set(setting: keyof T, value: any): void {
@@ -112,7 +112,7 @@ export class MockExtension implements ILSPExtension {
   translator: ITranslator;
 
   constructor() {
-    this.app = null;
+    this.app = null as any;
     this.feature_manager = new FeatureManager();
     this.editor_type_manager = new VirtualEditorManager();
     this.language_server_manager = new MockLanguageServerManager({
@@ -130,7 +130,7 @@ export class MockExtension implements ILSPExtension {
     this.foreign_code_extractors = {};
     this.code_overrides = {};
     this.console = new BrowserConsole();
-    this.user_console = null;
+    this.user_console = null as any;
   }
 }
 
@@ -247,7 +247,7 @@ function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
     }
 
     public dispose_feature(feature: CodeMirrorIntegration) {
-      let connection = this._connections.get(feature);
+      let connection = this._connections.get(feature)!;
       connection.close();
       feature.is_registered = false;
     }
@@ -410,16 +410,16 @@ export const python_notebook_metadata = {
 export function showAllCells(notebook: Notebook) {
   notebook.show();
   // iterate over every cell to activate the editors
-  for (let i = 0; i < notebook.model.cells.length; i++) {
+  for (let i = 0; i < notebook.model!.cells.length; i++) {
     notebook.activeCellIndex = i;
-    notebook.activeCell.show();
+    notebook.activeCell!.show();
   }
 }
 
 export function getCellsJSON(notebook: Notebook): Array<nbformat.ICell> {
   let cells: Array<ICellModel> = [];
-  for (let i = 0; i < notebook.model.cells.length; i++) {
-    cells.push(notebook.model.cells.get(i));
+  for (let i = 0; i < notebook.model!.cells.length; i++) {
+    cells.push(notebook.model!.cells.get(i));
   }
   return cells.map(cell => cell.toJSON());
 }

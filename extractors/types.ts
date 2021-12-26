@@ -9,8 +9,9 @@ export interface IExtractedCode {
   foreign_code: string | null;
   /**
    * Range of the foreign code relative to the original source.
+   * `null` is used internally to represent a leftover host code after extraction.
    */
-  range: CodeEditor.IRange;
+  range: CodeEditor.IRange | null;
   /**
    * Shift due to any additional code inserted at the beginning of the virtual document
    * (usually in order to mock the arguments passed to a magic, or to provide other context clues for the linters)

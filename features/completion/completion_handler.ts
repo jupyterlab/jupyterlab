@@ -49,7 +49,7 @@ export interface ICompletionsReply
   extends CompletionHandler.ICompletionItemsReply {
   // TODO: it is not clear when the source is set here and when on IExtendedCompletionItem.
   //  it might be good to separate the two stages for both interfaces
-  source: ICompletionsSource;
+  source: ICompletionsSource | null;
   items: IExtendedCompletionItem[];
 }
 
@@ -131,13 +131,13 @@ export class LSPConnector
     if (this.isDisposed) {
       return;
     }
-    this._connections = null;
-    this.virtual_editor = null;
-    this._context_connector = null;
-    this._kernel_connector = null;
-    this._kernel_and_context_connector = null;
-    this.options = null;
-    this._editor = null;
+    this._connections = null as any;
+    this.virtual_editor = null as any;
+    this._context_connector = null as any;
+    this._kernel_connector = null as any;
+    this._kernel_and_context_connector = null as any;
+    this.options = null as any;
+    this._editor = null as any;
     this.isDisposed = true;
   }
 
@@ -154,7 +154,7 @@ export class LSPConnector
   }
 
   protected async _kernel_language(): Promise<string> {
-    return (await this.options.session.kernel.info).language_info.name;
+    return (await this.options.session!.kernel!.info).language_info.name;
   }
 
   protected get _kernel_timeout(): number {
@@ -176,7 +176,7 @@ export class LSPConnector
     return this.virtual_editor.transform_from_editor_to_root(
       this._editor,
       editor_position
-    );
+    )!;
   }
 
   /**
@@ -186,28 +186,34 @@ export class LSPConnector
    */
   async fetch(
     request: CompletionHandler.IRequest
-  ): Promise<CompletionHandler.ICompletionItemsReply> {
+  ): Promise<CompletionHandler.ICompletionItemsReply | undefined> {
     let editor = this._editor;
 
     const cursor = editor.getCursorPosition();
     const token = editor.getTokenForPosition(cursor);
 
     if (this.trigger_kind == AdditionalCompletionTriggerKinds.AutoInvoked) {
-      if (this.suppress_continuous_hinting_in.indexOf(token.type) !== -1) {
+      if (
+        token.type &&
+        this.suppress_continuous_hinting_in.indexOf(token.type) !== -1
+      ) {
         this.console.debug('Suppressing completer auto-invoke in', token.type);
         this.trigger_kind = CompletionTriggerKind.Invoked;
         return;
       }
     } else if (this.trigger_kind == CompletionTriggerKind.TriggerCharacter) {
-      if (this.suppress_trigger_character_in.indexOf(token.type) !== -1) {
+      if (
+        token.type &&
+        this.suppress_trigger_character_in.indexOf(token.type) !== -1
+      ) {
         this.console.debug('Suppressing completer auto-invoke in', token.type);
         this.trigger_kind = CompletionTriggerKind.Invoked;
         return;
       }
     }
 
-    const start = editor.getPositionAt(token.offset);
-    const end = editor.getPositionAt(token.offset + token.value.length);
+    const start = editor.getPositionAt(token.offset)!;
+    const end = editor.getPositionAt(token.offset + token.value.length)!;
 
     let position_in_token = cursor.column - start.column - 1;
     const typed_character = token.value[cursor.column - start.column - 1];
@@ -227,8 +233,9 @@ export class LSPConnector
       virtual_editor.root_position_to_virtual_position(end_in_root);
     let virtual_cursor =
       virtual_editor.root_position_to_virtual_position(cursor_in_root);
-    const lsp_promise: Promise<CompletionHandler.ICompletionItemsReply> = this
-      .use_lsp_completions
+    const lsp_promise: Promise<
+      CompletionHandler.ICompletionItemsReply | undefined
+    > = this.use_lsp_completions
       ? this.fetch_lsp(
           token,
           typed_character,
@@ -238,9 +245,11 @@ export class LSPConnector
           document,
           position_in_token
         )
-      : Promise.resolve(null);
+      : Promise.resolve(undefined);
 
-    let promise: Promise<CompletionHandler.ICompletionItemsReply> = null;
+    let promise: Promise<
+      CompletionHandler.ICompletionItemsReply | undefined
+    > | null = null;
 
     try {
       const kernelTimeout = this._kernel_timeout;
@@ -278,10 +287,10 @@ export class LSPConnector
                 return setTimeout(
                   () =>
                     resolve({
-                      start: null,
-                      end: null,
+                      start: 0,
+                      end: 0,
                       matches: [],
-                      metadata: null
+                      metadata: {}
                     }),
                   kernelTimeout
                 );
@@ -322,7 +331,9 @@ export class LSPConnector
     this.console.debug('All promises set up and ready.');
     return promise.then(reply => {
       reply = this.suppress_if_needed(reply, token, cursor);
-      this.items = reply.items;
+      if (reply) {
+        this.items = reply.items;
+      }
       this.trigger_kind = CompletionTriggerKind.Invoked;
       return reply;
     });
@@ -341,7 +352,7 @@ export class LSPConnector
     document: VirtualDocument,
     position_in_token: number
   ): Promise<ICompletionsReply> {
-    let connection = this.get_connection(document.uri);
+    let connection = this.get_connection(document.uri)!;
 
     this.console.debug('Fetching');
     this.console.debug('Token:', token, start, end);
@@ -459,9 +470,6 @@ export class LSPConnector
   }
 
   protected icon_for(type: string): LabIcon {
-    if (!this.options.settings.composite.theme) {
-      return undefined;
-    }
     if (typeof type === 'undefined') {
       type = KernelKind;
     }
@@ -514,7 +522,7 @@ export class LSPConnector
     replies = replies.filter(reply => {
       if (reply instanceof Error) {
         this.console.warn(
-          `Caught ${reply.source.name} completions error`,
+          `Caught ${reply.source!.name} completions error`,
           reply
         );
         return false;
@@ -527,7 +535,7 @@ export class LSPConnector
       return true;
     });
 
-    replies.sort((a, b) => b.source.priority - a.source.priority);
+    replies.sort((a, b) => b.source!.priority - a.source!.priority);
 
     this.console.debug('Sorted replies:', replies);
 
@@ -541,24 +549,30 @@ export class LSPConnector
     if (minStart != maxStart) {
       const cursor = editor.getCursorPosition();
       const line = editor.getLine(cursor.line);
-
-      replies = replies.map(reply => {
-        // no prefix to strip, return as-is
-        if (reply.start == maxStart) {
-          return reply;
-        }
-        let prefix = line.substring(reply.start, maxStart);
-        this.console.debug(`Removing ${reply.source.name} prefix: `, prefix);
-        return {
-          ...reply,
-          items: reply.items.map(item => {
-            item.insertText = item.insertText.startsWith(prefix)
-              ? item.insertText.substr(prefix.length)
-              : item.insertText;
-            return item;
-          })
-        };
-      });
+      if (line == null) {
+        this.console.warn(
+          `Could not remove prefixes: line is undefined`,
+          cursor.line
+        );
+      } else {
+        replies = replies.map(reply => {
+          // no prefix to strip, return as-is
+          if (reply.start == maxStart) {
+            return reply;
+          }
+          let prefix = line.substring(reply.start, maxStart);
+          this.console.debug(`Removing ${reply.source!.name} prefix: `, prefix);
+          return {
+            ...reply,
+            items: reply.items.map(item => {
+              item.insertText = item.insertText.startsWith(prefix)
+                ? item.insertText.substr(prefix.length)
+                : item.insertText;
+              return item;
+            })
+          };
+        });
+      }
     }
 
     const insertTextSet = new Set<string>();
@@ -580,9 +594,11 @@ export class LSPConnector
         // lead to processing hundreds of suggestions - e.g. from numpy
         // multiple times if multiple sources provide them).
         let processedItem = item as IExtendedCompletionItem;
-        processedItem.source = reply.source;
-        if (!processedItem.icon) {
-          processedItem.icon = reply.source.fallbackIcon;
+        if (reply.source) {
+          processedItem.source = reply.source;
+          if (!processedItem.icon) {
+            processedItem.icon = reply.source.fallbackIcon;
+          }
         }
         processedItems.push(processedItem);
       });
@@ -598,10 +614,7 @@ export class LSPConnector
     };
   }
 
-  list(query: string | undefined): Promise<{
-    ids: CompletionHandler.IRequest[];
-    values: CompletionHandler.ICompletionItemsReply[];
-  }> {
+  list(query: string | undefined): Promise<any> {
     return Promise.resolve(undefined);
   }
 
@@ -614,10 +627,13 @@ export class LSPConnector
   }
 
   private suppress_if_needed(
-    reply: CompletionHandler.ICompletionItemsReply,
+    reply: CompletionHandler.ICompletionItemsReply | undefined,
     token: CodeEditor.IToken,
     cursor_at_request: CodeEditor.IPosition
   ) {
+    if (reply == null) {
+      return reply;
+    }
     if (!this._editor.hasFocus()) {
       this.console.debug(
         'Ignoring completion response: the corresponding editor lost focus'
@@ -689,7 +705,7 @@ export namespace LSPConnector {
 
     themeManager: ILSPCompletionThemeManager;
 
-    session?: Session.ISessionConnection;
+    session?: Session.ISessionConnection | null;
 
     console: ILSPLogConsole;
   }

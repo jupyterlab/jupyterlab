@@ -13,7 +13,7 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
   features: Map<string, IFeatureEditorIntegration<T>>;
   isDisposed = false;
 
-  private last_change: IEditorChange;
+  private last_change: IEditorChange | null;
   private console: ILSPLogConsole;
 
   constructor(
@@ -50,7 +50,7 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
       return;
     }
 
-    let change: IEditorChange = this.last_change;
+    let change: IEditorChange | null = this.last_change;
 
     let root_position: IRootPosition;
 
@@ -75,7 +75,9 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
 
       for (let feature of this.features.values()) {
         try {
-          feature.afterChange(change, root_position);
+          if (feature.afterChange) {
+            feature.afterChange(change, root_position);
+          }
         } catch (err) {
           console.warn('afterChange of feature', feature, 'failed with', err);
         }
@@ -107,7 +109,7 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
     this.editor.change.disconnect(this.saveChange);
 
     // just to be sure
-    this.editor = null;
+    this.editor = null as any;
 
     // actually disposed
     this.isDisposed = true;

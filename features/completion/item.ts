@@ -35,8 +35,8 @@ export interface IExtendedCompletionItem
 }
 
 export class LazyCompletionItem implements IExtendedCompletionItem {
-  private _detail: string;
-  private _documentation: string;
+  private _detail: string | undefined;
+  private _documentation: string | undefined;
   private _is_documentation_markdown: boolean;
   private _requested_resolution: boolean;
   private _resolved: boolean;
@@ -82,7 +82,9 @@ export class LazyCompletionItem implements IExtendedCompletionItem {
     this.self = this;
   }
 
-  private _setDocumentation(documentation: string | lsProtocol.MarkupContent) {
+  private _setDocumentation(
+    documentation: string | lsProtocol.MarkupContent | undefined
+  ) {
     if (lsProtocol.MarkupContent.is(documentation)) {
       this._documentation = documentation.value;
       this._is_documentation_markdown = documentation.kind === 'markdown';
@@ -107,17 +109,17 @@ export class LazyCompletionItem implements IExtendedCompletionItem {
     return this.match.sortText || this.match.label;
   }
 
-  get filterText(): string {
+  get filterText(): string | undefined {
     return this.match.filterText;
   }
 
   public supportsResolution() {
     const connection = this.connector.get_connection(this.uri);
 
-    return connection.isCompletionResolveProvider();
+    return connection != null && connection.isCompletionResolveProvider();
   }
 
-  get detail(): string {
+  get detail(): string | undefined {
     return this._detail;
   }
 
@@ -155,7 +157,7 @@ export class LazyCompletionItem implements IExtendedCompletionItem {
       return until_ready(() => this._resolved, 100, 50).then(() => this);
     }
 
-    const connection = this.connector.get_connection(this.uri);
+    const connection = this.connector.get_connection(this.uri)!;
 
     this._requested_resolution = true;
 
@@ -165,11 +167,12 @@ export class LazyCompletionItem implements IExtendedCompletionItem {
         if (resolvedCompletionItem === null) {
           return resolvedCompletionItem;
         }
-        this._setDocumentation(resolvedCompletionItem.documentation);
-        this._detail = resolvedCompletionItem.detail;
+        this._setDocumentation(resolvedCompletionItem?.documentation);
+        this._detail = resolvedCompletionItem?.detail;
         // TODO: implement in pyls and enable with proper LSP communication
         // this.label = resolvedCompletionItem.label;
         this._resolved = true;
+        return this;
       });
   }
 
@@ -177,14 +180,14 @@ export class LazyCompletionItem implements IExtendedCompletionItem {
    * A human-readable string with additional information
    * about this item, like type or symbol information.
    */
-  get documentation(): string {
+  get documentation(): string | undefined {
     if (!this.connector.should_show_documentation) {
-      return null;
+      return undefined;
     }
     if (this._documentation) {
       return this._documentation;
     }
-    return null;
+    return undefined;
   }
 
   /**
@@ -195,7 +198,7 @@ export class LazyCompletionItem implements IExtendedCompletionItem {
       return this.match.deprecated;
     }
     return (
-      this.match.tags &&
+      this.match.tags != null &&
       this.match.tags.some(
         tag => tag == lsProtocol.CompletionItemTag.Deprecated
       )

@@ -116,19 +116,20 @@ function to_markup(
 }
 
 export class HoverCM extends CodeMirrorIntegration {
-  protected last_hover_character: IRootPosition;
-  private last_hover_response: lsProtocol.Hover;
-  protected hover_marker: CodeMirror.TextMarker;
+  protected last_hover_character: IRootPosition | null = null;
+  private last_hover_response: lsProtocol.Hover | null;
+  protected hover_marker: CodeMirror.TextMarker | null = null;
   private virtual_position: IVirtualPosition;
   protected cache: ResponseCache;
 
-  private debounced_get_hover: Throttler<Promise<lsProtocol.Hover>>;
+  private debounced_get_hover: Throttler<Promise<lsProtocol.Hover | undefined>>;
   private tooltip: FreeTooltip;
-  private _previousHoverRequest: Promise<Promise<lsProtocol.Hover>> | null;
+  private _previousHoverRequest: Promise<
+    Promise<lsProtocol.Hover | undefined>
+  > | null = null;
 
   constructor(options: IEditorIntegrationOptions) {
     super(options);
-    this._previousHoverRequest = null;
   }
 
   protected get modifierKey(): ModifierKey {
@@ -152,7 +153,7 @@ export class HoverCM extends CodeMirrorIntegration {
       if (cache_item.document !== document) {
         return false;
       }
-      let range = cache_item.response.range;
+      let range = cache_item.response.range!;
       return (
         line >= range.start.line &&
         line <= range.end.line &&
@@ -179,7 +180,7 @@ export class HoverCM extends CodeMirrorIntegration {
       // we simulate the mouseleave for the editor in wrapper's mousemove;
       // this is used to hide the tooltip on leaving cells in notebook
       this.updateUnderlineAndTooltip(event)
-        .then(keep_tooltip => {
+        ?.then(keep_tooltip => {
           if (!keep_tooltip) {
             this.maybeHideTooltip(event);
           }
@@ -213,7 +214,7 @@ export class HoverCM extends CodeMirrorIntegration {
   protected onKeyDown = (event: KeyboardEvent) => {
     if (
       getModifierState(event, this.modifierKey) &&
-      typeof this.last_hover_character !== 'undefined'
+      this.last_hover_character !== null
     ) {
       // does not need to be shown if it is already visible (otherwise we would be creating an identical tooltip again!)
       if (this.tooltip && this.tooltip.isVisible && !this.tooltip.isDisposed) {
@@ -249,7 +250,7 @@ export class HoverCM extends CodeMirrorIntegration {
   }
 
   protected create_throttler() {
-    return new Throttler<Promise<lsProtocol.Hover>>(this.on_hover, {
+    return new Throttler<Promise<lsProtocol.Hover | undefined>>(this.on_hover, {
       limit: this.settings.composite.throttlerDelay,
       edge: 'trailing'
     });
@@ -259,7 +260,7 @@ export class HoverCM extends CodeMirrorIntegration {
     super.afterChange(change, root_position);
     // reset cache on any change in the document
     this.cache.clean();
-    this.last_hover_character = undefined;
+    this.last_hover_character = null;
     this.remove_range_highlight();
   }
 
@@ -383,7 +384,7 @@ export class HoverCM extends CodeMirrorIntegration {
     // if over an empty space in a line (and not over a token) then not worth checking
     if (target.classList.contains('CodeMirror-line')) {
       this.remove_range_highlight();
-      return;
+      return false;
     }
 
     const show_tooltip = getModifierState(event, this.modifierKey);
@@ -398,7 +399,7 @@ export class HoverCM extends CodeMirrorIntegration {
     // and because some regions of the editor (between lines) have no characters
     if (root_position == null) {
       this.remove_range_highlight();
-      return;
+      return false;
     }
 
     let token = this.virtual_editor.getTokenAt(root_position);
@@ -411,10 +412,13 @@ export class HoverCM extends CodeMirrorIntegration {
       !this.is_event_inside_visible(event)
     ) {
       this.remove_range_highlight();
-      return;
+      return false;
     }
 
-    if (!is_equal(root_position, this.last_hover_character)) {
+    if (
+      this.last_hover_character &&
+      !is_equal(root_position, this.last_hover_character)
+    ) {
       let virtual_position =
         this.virtual_editor.root_position_to_virtual_position(root_position);
       this.virtual_position = virtual_position;
@@ -441,11 +445,11 @@ export class HoverCM extends CodeMirrorIntegration {
         if (this._previousHoverRequest === promise) {
           this._previousHoverRequest = null;
         }
-        if (this.is_useful_response(response)) {
+        if (response && this.is_useful_response(response)) {
           let ce_editor =
             this.virtual_editor.get_editor_at_root_position(root_position);
           let cm_editor =
-            this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
+            this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor)!;
 
           let editor_range = this.get_editor_range(
             response,
@@ -468,7 +472,7 @@ export class HoverCM extends CodeMirrorIntegration {
           this.cache.store(response_data);
         } else {
           this.remove_range_highlight();
-          return;
+          return false;
         }
       }
 
@@ -497,8 +501,8 @@ export class HoverCM extends CodeMirrorIntegration {
     if (this.hover_marker) {
       this.hover_marker.clear();
       this.hover_marker = null;
-      this.last_hover_response = undefined;
-      this.last_hover_character = undefined;
+      this.last_hover_response = null;
+      this.last_hover_character = null;
     }
   };
 
@@ -507,12 +511,6 @@ export class HoverCM extends CodeMirrorIntegration {
     this.remove_range_highlight();
     this.debounced_get_hover.dispose();
     super.remove();
-
-    // just to be sure
-    this.debounced_get_hover = null;
-    this.remove_range_highlight = null;
-    this.handleResponse = null;
-    this.on_hover = null;
   }
 
   private get_editor_range(
@@ -558,7 +556,7 @@ export class HoverCM extends CodeMirrorIntegration {
             this.virtual_editor.transform_from_editor_to_root(
               ce_editor,
               editor_range.start
-            )
+            )!
           )
         ),
         end: PositionConverter.cm_to_lsp(
@@ -566,7 +564,7 @@ export class HoverCM extends CodeMirrorIntegration {
             this.virtual_editor.transform_from_editor_to_root(
               ce_editor,
               editor_range.end
-            )
+            )!
           )
         )
       }

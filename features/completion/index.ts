@@ -9,6 +9,7 @@ import { LabIcon } from '@jupyterlab/ui-components';
 import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
 
 import completionSvg from '../../../style/icons/completion.svg';
+import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { FeatureSettings } from '../../feature';
 import {
   ILSPAdapterManager,
@@ -52,7 +53,7 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
     const labIntegration = new CompletionLabIntegration(
       app,
       completionManager,
-      settings,
+      settings as FeatureSettings<LSPCompletionSettings>,
       adapterManager,
       iconsThemeManager,
       logConsole.scope('CompletionLab'),

@@ -77,7 +77,7 @@ describe('Diagnostics', () => {
       markers = env.ce_editor.editor.getDoc().getAllMarks();
       expect(markers.length).to.equal(0);
 
-      feature.handleDiagnostic(null, {
+      feature.handleDiagnostic(null as any, {
         uri: env.document_options.path,
         diagnostics: diagnostics
       });
@@ -99,7 +99,7 @@ describe('Diagnostics', () => {
       env.ce_editor.model.value.text = text;
       await env.adapter.update_documents();
 
-      feature.handleDiagnostic(null, {
+      feature.handleDiagnostic(null as any, {
         uri: env.document_options.path,
         diagnostics: diagnostics
       });
@@ -124,7 +124,7 @@ describe('Diagnostics', () => {
       env.ce_editor.model.value.text = text;
       await env.adapter.update_documents();
 
-      feature.handleDiagnostic(null, {
+      feature.handleDiagnostic(null as any, {
         uri: env.document_options.path,
         diagnostics: diagnostics
       });
@@ -167,7 +167,7 @@ describe('Diagnostics', () => {
       let document = env.virtual_editor.virtual_document;
       let uri = env.virtual_editor.virtual_document.uri;
 
-      feature.handleDiagnostic(null, {
+      feature.handleDiagnostic(null as any, {
         uri: uri,
         diagnostics: [
           {
@@ -240,14 +240,14 @@ describe('Diagnostics', () => {
       expect(merged_mark_title).to.contain('\n');
 
       expect(feature.diagnostics_db.size).to.equal(1);
-      expect(feature.diagnostics_db.get(document).length).to.equal(5);
+      expect(feature.diagnostics_db.get(document)!.length).to.equal(5);
 
       feature.switchDiagnosticsPanelSource();
       diagnostics_panel.widget.content.update();
       // the panel should contain all 5 diagnostics
-      let db = diagnostics_panel.content.model.diagnostics;
+      let db = diagnostics_panel.content.model.diagnostics!;
       expect(db.size).to.equal(1);
-      expect(db.get(document).length).to.equal(5);
+      expect(db.get(document)!.length).to.equal(5);
     });
 
     it('Works in foreign documents', async () => {
@@ -285,7 +285,7 @@ describe('Diagnostics', () => {
       } as lsProtocol.PublishDiagnosticsParams;
 
       // test guards against wrongly propagated responses:
-      feature.handleDiagnostic(null, response);
+      feature.handleDiagnostic(null as any, response);
       let cm_editors = env.adapter.editors.map(
         ce_editor => (ce_editor as CodeMirrorEditor).editor
       );
@@ -297,7 +297,7 @@ describe('Diagnostics', () => {
       expect(marks_cell_2.length).to.equal(0);
 
       // correct propagation
-      foreign_feature.handleDiagnostic(null, response);
+      foreign_feature.handleDiagnostic(null as any, response);
 
       marks_cell_1 = cm_editors[0].getDoc().getAllMarks();
       marks_cell_2 = cm_editors[1].getDoc().getAllMarks();
@@ -307,14 +307,14 @@ describe('Diagnostics', () => {
 
       let mark = marks_cell_2[0] as TextMarker<MarkerRange>;
 
-      let mark_position = mark.find();
+      let mark_position = mark.find()!;
 
       // second line (0th and 1st virtual lines) + 1 line for '%%python\n' => line: 2
       expect(is_equal(mark_position.from, { line: 2, ch: 0 })).to.be.true;
       expect(is_equal(mark_position.to, { line: 2, ch: 1 })).to.be.true;
 
       // the silenced diagnostic for the %%python magic should be ignored
-      feature.handleDiagnostic(null, {
+      feature.handleDiagnostic(null as any, {
         uri: document.uri,
         diagnostics: [
           {

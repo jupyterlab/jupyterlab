@@ -10,7 +10,7 @@ describe('Signature', () => {
       const split = extractLead(
         ['This function does foo', '', 'But there are more details'],
         1
-      );
+      )!;
       expect(split.lead).to.equal('This function does foo');
       expect(split.remainder).to.equal('But there are more details');
     });
@@ -36,7 +36,7 @@ describe('Signature', () => {
           'But there are more details'
         ],
         2
-      );
+      )!;
       expect(split.lead).to.equal('This function does foo,\nand it does bar');
       expect(split.remainder).to.equal('But there are more details');
     });
@@ -66,7 +66,7 @@ describe('Signature', () => {
           parameters: [
             {
               label: 'text',
-              documentation: null
+              documentation: undefined
             }
           ],
           activeParameter: 0
@@ -91,7 +91,7 @@ describe('Signature', () => {
           parameters: [
             {
               label: 'text',
-              documentation: null
+              documentation: undefined
             }
           ],
           activeParameter: 0
@@ -116,7 +116,7 @@ describe('Signature', () => {
           parameters: [
             {
               label: 'text',
-              documentation: null
+              documentation: undefined
             }
           ],
           activeParameter: 0

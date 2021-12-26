@@ -39,7 +39,7 @@ export class GenericCompleterModel<
   completionItems(): T[] {
     let query = this.query;
     this.query = '';
-    let unfilteredItems = super.completionItems() as T[];
+    let unfilteredItems = super.completionItems!() as T[];
     this.query = query;
 
     // always want to sort
@@ -48,7 +48,7 @@ export class GenericCompleterModel<
   }
 
   setCompletionItems(newValue: T[]) {
-    super.setCompletionItems(newValue);
+    super.setCompletionItems!(newValue);
   }
 
   private _markFragment(value: string): string {
@@ -80,8 +80,8 @@ export class GenericCompleterModel<
 
       let matched: boolean;
 
-      let filterText: string = null;
-      let filterMatch: StringExt.IMatchResult;
+      let filterText: string | null = null;
+      let filterMatch: StringExt.IMatchResult | null = null;
 
       let lowerCaseQuery = query.toLowerCase();
 
@@ -108,7 +108,7 @@ export class GenericCompleterModel<
         // If the matches are substrings of label, highlight them
         // in this part of the label that can be highlighted (must be a prefix),
         // which is intended to avoid highlighting matches in function arguments etc.
-        let labelMatch: StringExt.IMatchResult;
+        let labelMatch: StringExt.IMatchResult | null = null;
         if (query) {
           let labelPrefix = escapeHTML(this.getHighlightableLabelRegion(item));
           if (labelPrefix == filterText) {

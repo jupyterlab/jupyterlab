@@ -54,7 +54,7 @@ interface IServerStatusProps {
 }
 
 function ServerStatus(props: IServerStatusProps) {
-  let list = props.server.spec.languages.map((language, i) => (
+  let list = props.server.spec.languages!.map((language, i) => (
     <li key={i}>{language}</li>
   ));
   return (
@@ -290,7 +290,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
             <li key={i}>
               <DocumentLocator
                 document={document}
-                adapter={this.model.adapter}
+                adapter={this.model.adapter!}
               />
               <span className={'lsp-document-status'}>
                 {this.model.trans.__(status)}
@@ -399,7 +399,7 @@ const SELECTED_CLASS = 'jp-mod-selected';
  * StatusBar item.
  */
 export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
-  protected _popup: Popup = null;
+  protected _popup: Popup | null = null;
   private interactiveStateObserver: MutationObserver;
   private trans: TranslationBundle;
   /**
@@ -471,7 +471,9 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
             className={'lsp-status-message'}
             source={model.short_message}
           />
-        ) : null}
+        ) : (
+          <></>
+        )}
         <TextItem source={model.feature_message} />
       </GroupItem>
     );
@@ -597,7 +599,7 @@ export namespace LSPStatus {
    * A VDomModel for the LSP of current file editor/notebook.
    */
   export class Model extends VDomModel {
-    server_extension_status: SCHEMA.ServersResponse = null;
+    server_extension_status: SCHEMA.ServersResponse | null = null;
     language_server_manager: ILanguageServerManager;
     trans: TranslationBundle;
     private _connection_manager: DocumentConnectionManager;
@@ -625,7 +627,7 @@ export namespace LSPStatus {
     get supported_languages(): Set<string> {
       const languages = new Set<string>();
       for (let server of this.available_servers.values()) {
-        for (let language of server.spec.languages) {
+        for (let language of server.spec.languages!) {
           languages.add(language.toLocaleLowerCase());
         }
       }
@@ -646,6 +648,7 @@ export namespace LSPStatus {
           return true;
         }
       }
+      return false;
     }
 
     get documents_by_server(): Map<
@@ -673,19 +676,19 @@ export namespace LSPStatus {
           continue;
         }
         // For now only use the server with the highest priority
-        let server = this.language_server_manager.sessions.get(server_ids[0]);
+        let server = this.language_server_manager.sessions.get(server_ids[0])!;
 
         if (!data.has(server)) {
           data.set(server, new Map<string, VirtualDocument[]>());
         }
 
-        let documents_map = data.get(server);
+        let documents_map = data.get(server)!;
 
         if (!documents_map.has(language)) {
           documents_map.set(language, new Array<VirtualDocument>());
         }
 
-        let documents = documents_map.get(language);
+        let documents = documents_map.get(language)!;
         documents.push(document);
       }
       return data;

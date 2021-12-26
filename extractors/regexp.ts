@@ -15,9 +15,17 @@ export function getIndexOfCaptureGroup(
 
   // get index of the part that is being extracted to foreign document
   let captured_groups = expression.exec(matched_string);
+
+  if (captured_groups == null) {
+    console.warn(
+      `No capture group found for ${expression} in ${matched_string}`
+    );
+    return -1;
+  }
+
   let offset_in_match = 0;
 
-  // first element is full match
+  // first element is a full match
   let full_matched = captured_groups[0];
 
   for (let group of captured_groups.slice(1)) {
@@ -70,7 +78,7 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
     let extracts = new Array<IExtractedCode>();
 
     let started_from = this.global_expression.lastIndex;
-    let match: RegExpExecArray = this.global_expression.exec(code);
+    let match: RegExpExecArray | null = this.global_expression.exec(code);
     let host_code_fragment: string;
 
     let chosen_replacer: string | replacer;
@@ -82,13 +90,18 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
     } else if (typeof this.options.foreign_capture_groups !== 'undefined') {
       chosen_replacer = '$' + this.options.foreign_capture_groups.join('$');
       is_new_api_replacer = true;
-    } else {
+    } else if (this.options.extract_to_foreign) {
       chosen_replacer = this.options.extract_to_foreign;
+    } else {
+      console.warn(
+        `Foreign replacer not defined for extractor: {this.expression} - this is deprecated; use 'foreign_replacer' to define it`
+      );
+      return [];
     }
 
     while (match != null) {
       let matched_string = match[0];
-      let position_shift: CodeEditor.IPosition = null;
+      let position_shift: CodeEditor.IPosition | null = null;
 
       let foreign_code_fragment = matched_string.replace(
         this.expression,
@@ -127,7 +140,7 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
       if (is_new_api_replacer) {
         foreign_code_group_value = matched_string.replace(
           this.expression,
-          '$' + Math.min(...this.options.foreign_capture_groups)
+          '$' + Math.min(...this.options.foreign_capture_groups!)
         );
       }
 

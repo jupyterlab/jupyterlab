@@ -14,12 +14,12 @@ describe('ContextMenuCommandManager', () => {
   class ManagerImplementation extends ContextCommandManager {
     constructor(options: IContextMenuOptions) {
       super({
-        app: null,
-        adapter_manager: null,
-        palette: null,
-        tracker: null,
-        suffix: null,
-        entry_point: null,
+        app: null as any,
+        adapter_manager: null as any,
+        palette: null as any,
+        tracker: null as any,
+        suffix: null as any,
+        entry_point: null as any,
         console: new BrowserConsole(),
         ...options
       });
@@ -33,7 +33,7 @@ describe('ContextMenuCommandManager', () => {
     selector: string;
 
     get current_adapter(): WidgetAdapter<IDocumentWidget> {
-      return undefined;
+      return undefined as any;
     }
   }
   let manager: ManagerImplementation;
@@ -52,7 +52,7 @@ describe('ContextMenuCommandManager', () => {
   describe('#get_rank()', () => {
     it('uses in-group (relative) positioning by default', () => {
       manager = new ManagerImplementation({
-        selector: null,
+        selector: 'body',
         rank_group: 0,
         rank_group_size: 5
       });
@@ -63,7 +63,7 @@ describe('ContextMenuCommandManager', () => {
       expect(rank).to.equal(1 / 5);
 
       manager = new ManagerImplementation({
-        selector: null,
+        selector: 'body',
         rank_group: 1,
         rank_group_size: 5
       });
@@ -72,7 +72,7 @@ describe('ContextMenuCommandManager', () => {
       expect(rank).to.equal(1 + 1 / 5);
 
       manager = new ManagerImplementation({
-        selector: null
+        selector: 'body'
       });
       rank = manager.get_rank(base_command);
       expect(rank).to.equal(Infinity);
@@ -81,7 +81,7 @@ describe('ContextMenuCommandManager', () => {
 
   it('respects is_rank_relative value', () => {
     manager = new ManagerImplementation({
-      selector: null,
+      selector: 'body',
       rank_group: 0,
       rank_group_size: 5
     });

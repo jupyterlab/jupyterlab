@@ -150,7 +150,7 @@ export class DocumentConnectionManager {
     // of connecting.
     const connection = await Private.connection(
       language,
-      language_server_id,
+      language_server_id!,
       uris,
       this.on_new_connection,
       this.console
@@ -191,9 +191,11 @@ export class DocumentConnectionManager {
       if (!allServerSettings.hasOwnProperty(language_server_id)) {
         continue;
       }
-      const rawSettings = allServerSettings[language_server_id];
+      const rawSettings = allServerSettings[language_server_id]!;
 
-      const parsedSettings = expandDottedPaths(rawSettings.serverSettings);
+      const parsedSettings = expandDottedPaths(
+        rawSettings.serverSettings || {}
+      );
 
       const serverSettings: protocol.DidChangeConfigurationParams = {
         settings: parsedSettings
@@ -267,7 +269,7 @@ export class DocumentConnectionManager {
       if (connection !== a_connection) {
         continue;
       }
-      callback(this.documents.get(virtual_document_uri));
+      callback(this.documents.get(virtual_document_uri)!);
     }
   }
 
@@ -496,7 +498,7 @@ namespace Private {
       onCreate(connection);
     }
 
-    connection = _connections.get(language_server_id);
+    connection = _connections.get(language_server_id)!;
 
     return connection;
   }

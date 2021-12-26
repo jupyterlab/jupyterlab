@@ -59,7 +59,7 @@ class DocDispatcher implements CodeMirror.Doc {
     // TODO: edgecase: from and to in different cells
     let ce_editor =
       this.virtual_editor.virtual_document.get_editor_at_source_line(from);
-    let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
+    let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor)!;
     let notebook_map = this.virtual_editor;
     return cm_editor
       .getDoc()
@@ -73,7 +73,8 @@ class DocDispatcher implements CodeMirror.Doc {
   getCursor(start?: string): CodeMirror.Position {
     let active_editor = this.adapter.activeEditor as CodeMirrorEditor;
     if (active_editor == null) {
-      return;
+      // TODO
+      return undefined as any;
     }
     let cursor = active_editor.editor
       .getDoc()
@@ -81,7 +82,7 @@ class DocDispatcher implements CodeMirror.Doc {
     return this.virtual_editor.transform_from_editor_to_root(
       active_editor,
       cursor
-    );
+    )!;
   }
 }
 /**
@@ -183,14 +184,14 @@ export class CodeMirrorVirtualEditor
     this.virtual_document.dispose();
 
     // just to be sure
-    this.virtual_document = null;
-    this.code_extractors = null;
+    this.virtual_document = null as any;
+    this.code_extractors = null as any;
 
     this.isDisposed = true;
 
     // just to be sure
-    this.forEveryBlockEditor = null;
-    this._proxy = null;
+    this.forEveryBlockEditor = null as any;
+    this._proxy = null as any;
   }
 
   get_cursor_position(): IRootPosition {
@@ -233,8 +234,14 @@ export class CodeMirrorVirtualEditor
     this.change.emit(change as IEditorChange);
   }
 
-  window_coords_to_root_position(coordinates: IWindowCoordinates) {
-    return this.coordsChar(coordinates, 'window') as IRootPosition;
+  window_coords_to_root_position(
+    coordinates: IWindowCoordinates
+  ): IRootPosition | null {
+    const position = this.coordsChar(coordinates, 'window');
+    if (position.line === -1 && position.ch === -1) {
+      return null;
+    }
+    return position;
   }
 
   get_token_at(position: IRootPosition): CodeEditor.IToken {
@@ -242,7 +249,7 @@ export class CodeMirrorVirtualEditor
     return {
       value: token.string,
       offset: token.start,
-      type: token.type
+      type: token.type || ''
     };
   }
 
@@ -250,7 +257,9 @@ export class CodeMirrorVirtualEditor
     return this.get_editor_at_root_line(position);
   }
 
-  transform_virtual_to_editor(position: IVirtualPosition): IEditorPosition {
+  transform_virtual_to_editor(
+    position: IVirtualPosition
+  ): IEditorPosition | null {
     return this.virtual_document.transform_virtual_to_editor(position);
   }
 
@@ -316,12 +325,12 @@ export class CodeMirrorVirtualEditor
     let wrapped_handler = this._event_wrappers.get([eventName, handler]);
 
     this.forEveryBlockEditor(cm_editor => {
-      cm_editor.off(eventName as EventName2, wrapped_handler);
+      cm_editor.off(eventName as EventName2, wrapped_handler!);
     });
   }
 
   find_ce_editor(cm_editor: CodeMirror.Editor): CodeEditor.IEditor {
-    return this.cm_editor_to_ce_editor.get(cm_editor);
+    return this.cm_editor_to_ce_editor.get(cm_editor)!;
   }
 
   transform_from_editor_to_root(
@@ -332,7 +341,7 @@ export class CodeMirrorVirtualEditor
       this.console.warn('Editor not found in editor_to_source_line map');
       return null;
     }
-    let shift = this.editor_to_source_line.get(editor);
+    let shift = this.editor_to_source_line.get(editor)!;
     return {
       ...(position as CodeMirror.Position),
       line: position.line + shift
@@ -355,7 +364,7 @@ export class CodeMirrorVirtualEditor
     where: string,
     _class: string
   ): CodeMirror.LineHandle {
-    return undefined;
+    return undefined as any;
   }
 
   addLineWidget(
@@ -363,7 +372,7 @@ export class CodeMirrorVirtualEditor
     node: HTMLElement,
     options?: CodeMirror.LineWidgetOptions
   ): CodeMirror.LineWidget {
-    return undefined;
+    return undefined as any;
   }
 
   addOverlay(mode: any, options?: any): void {
@@ -402,6 +411,7 @@ export class CodeMirrorVirtualEditor
     object: { left: number; top: number },
     mode?: 'window' | 'page' | 'local'
   ): IRootPosition {
+    let bestGuess: IRootPosition | null = null;
     for (let editor of this.adapter.editors) {
       // TODO: use some more intelligent strategy to determine editors to test
       let cm_editor = editor as CodeMirrorEditor;
@@ -411,8 +421,19 @@ export class CodeMirrorVirtualEditor
         continue;
       }
 
-      return this.transform_from_editor_to_root(editor, pos as IEditorPosition);
+      bestGuess = this.transform_from_editor_to_root(
+        editor,
+        pos as IEditorPosition
+      );
+      break;
     }
+    if (bestGuess == null) {
+      return {
+        line: -1,
+        ch: -1
+      } as IRootPosition;
+    }
+    return bestGuess;
   }
 
   cursorCoords(
@@ -427,7 +448,7 @@ export class CodeMirrorVirtualEditor
     where?: boolean | IRootPosition | null,
     mode?: 'window' | 'page' | 'local'
   ): { left: number; top: number; bottom: number } {
-    if (typeof where !== 'boolean') {
+    if (typeof where !== 'boolean' && where != null) {
       let editor = this.get_editor_at_root_line(where);
       return editor.cursorCoords(this.transform_from_root_to_editor(where));
     }
@@ -469,20 +490,17 @@ export class CodeMirrorVirtualEditor
 
   private get_editor_at_root_line(pos: IRootPosition): CodeMirror.Editor {
     let ce_editor = this.virtual_document.root.get_editor_at_source_line(pos);
-    return this.ce_editor_to_cm_editor.get(ce_editor);
+    return this.ce_editor_to_cm_editor.get(ce_editor)!;
   }
 
   getTokenAt(pos: IRootPosition, precise?: boolean): CodeMirror.Token {
-    if (pos === undefined) {
-      return;
-    }
     let editor = this.get_editor_at_root_line(pos);
     return editor.getTokenAt(this.transform_from_root_to_editor(pos));
   }
 
   getTokenTypeAt(pos: IRootPosition): string {
     let ce_editor = this.virtual_document.get_editor_at_source_line(pos);
-    let cm_editor = this.ce_editor_to_cm_editor.get(ce_editor);
+    let cm_editor = this.ce_editor_to_cm_editor.get(ce_editor)!;
     return cm_editor.getTokenTypeAt(this.transform_from_root_to_editor(pos));
   }
 
@@ -537,9 +555,9 @@ export class CodeMirrorVirtualEditor
   forEveryBlockEditor(
     callback: (cm_editor: CodeMirror.Editor) => any,
     monitor_for_new_blocks = true,
-    on_editor_removed_callback: (
-      cm_editor: CodeMirror.Editor
-    ) => any | null = null
+    on_editor_removed_callback:
+      | ((cm_editor: CodeMirror.Editor) => any)
+      | null = null
   ) {
     const editors_with_handlers = new Set<CodeMirror.Editor>();
 
@@ -594,7 +612,7 @@ export class CodeMirrorVirtualEditor
    * @param cm_editor
    */
   find_editor(cm_editor: CodeMirror.Editor) {
-    let ce_editor = this.cm_editor_to_ce_editor.get(cm_editor);
+    let ce_editor = this.cm_editor_to_ce_editor.get(cm_editor)!;
     return {
       index: this.adapter.get_editor_index(ce_editor),
       node: this.adapter.get_editor_wrapper(ce_editor)

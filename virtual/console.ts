@@ -35,7 +35,7 @@ class FloatingConsole implements ILogConsoleImplementation {
   // likely to be replaced by JupyterLab console: https://github.com/jupyterlab/jupyterlab/pull/6833#issuecomment-543016425
   private readonly element: HTMLElement;
 
-  constructor(scope: string[] = ['LSP'], element: HTMLElement = null) {
+  constructor(scope: string[] = ['LSP'], element: HTMLElement | null = null) {
     if (element) {
       this.element = element;
     } else {
@@ -215,7 +215,7 @@ class ConsoleSingleton {
       this.implementation = new BrowserConsole();
     }
 
-    this.verbosity = composite.loggingLevel;
+    this.verbosity = composite.loggingLevel!;
     this.changed.emit();
   }
 }

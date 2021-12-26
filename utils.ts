@@ -103,7 +103,7 @@ export class DefaultMap<K, V> extends Map<K, V> {
 
   get_or_create(k: K, ...args: any[]): V {
     if (this.has(k)) {
-      return super.get(k);
+      return super.get(k)!;
     } else {
       let v = this.default_factory(k, ...args);
       this.set(k, v);

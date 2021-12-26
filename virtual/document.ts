@@ -32,7 +32,7 @@ interface IVirtualLine {
   /**
    * Where does the virtual line belongs to in the source document?
    */
-  source_line: number;
+  source_line: number | null;
   editor: CodeEditor.IEditor;
 }
 
@@ -132,7 +132,7 @@ export namespace VirtualDocument {
     foreign_code_extractors: IForeignCodeExtractorsRegistry;
     overrides_registry: ICodeOverridesRegistry;
     path: string;
-    file_extension: string;
+    file_extension: string | undefined;
     console: ILSPLogConsole;
     /**
      * Notebooks or any other aggregates of documents are not supported
@@ -218,9 +218,9 @@ export class VirtualDocument {
   public changed: Signal<VirtualDocument, VirtualDocument>;
 
   public path: string;
-  public file_extension: string;
+  public file_extension: string | undefined;
   public has_lsp_supported_file: boolean;
-  public parent?: VirtualDocument;
+  public parent?: VirtualDocument | null;
   private readonly options: VirtualDocument.IOptions;
   public update_manager: UpdateManager;
 
@@ -251,7 +251,7 @@ export class VirtualDocument {
     this.source_lines = new Map();
     this.foreign_documents = new Map();
     this.overrides_registry = options.overrides_registry;
-    this.standalone = options.standalone;
+    this.standalone = options.standalone || false;
     this.instance_id = VirtualDocument.instances_count;
     VirtualDocument.instances_count += 1;
     this.unused_standalone_documents = new DefaultMap(
@@ -289,14 +289,15 @@ export class VirtualDocument {
     this.unused_standalone_documents.clear();
     this.virtual_lines.clear();
 
-    // just to be sure
-    this.cell_magics_overrides = null;
-    this.document_info = null;
-    this.foreign_extractors = null;
-    this.foreign_extractors_registry = null;
-    this.line_magics_overrides = null;
-    this.line_blocks = null;
-    this.overrides_registry = null;
+    // just to be sure - if anything is accessed after disposal (it should not) we
+    // will get alterted by errors in the console AND this will limit memory leaks
+    this.cell_magics_overrides = null as any;
+    this.document_info = null as any;
+    this.foreign_extractors = null as any;
+    this.foreign_extractors_registry = null as any;
+    this.line_magics_overrides = null as any;
+    this.line_blocks = null as any;
+    this.overrides_registry = null as any;
   }
 
   /**
@@ -415,7 +416,7 @@ export class VirtualDocument {
   }
 
   is_within_foreign(source_position: ISourcePosition): boolean {
-    let source_line = this.source_lines.get(source_position.line);
+    let source_line = this.source_lines.get(source_position.line)!;
 
     let source_position_ce: CodeEditor.IPosition = {
       line: source_line.editor_line,
@@ -432,7 +433,7 @@ export class VirtualDocument {
   virtual_position_at_document(
     source_position: ISourcePosition
   ): IVirtualPosition {
-    let source_line = this.source_lines.get(source_position.line);
+    let source_line = this.source_lines.get(source_position.line)!;
     let virtual_line = source_line.virtual_line;
 
     // position inside the cell (block)
@@ -474,7 +475,7 @@ export class VirtualDocument {
     // if not standalone, try to append to existing document
     let foreign_exists = this.foreign_documents.has(extractor.language);
     if (!extractor.standalone && foreign_exists) {
-      foreign_document = this.foreign_documents.get(extractor.language);
+      foreign_document = this.foreign_documents.get(extractor.language)!;
       this.unused_documents.delete(foreign_document);
     } else {
       // if standalone, try to re-use existing connection to the server
@@ -482,7 +483,7 @@ export class VirtualDocument {
         extractor.language
       );
       if (extractor.standalone && unused_standalone.length > 0) {
-        foreign_document = unused_standalone.pop();
+        foreign_document = unused_standalone.pop()!;
         this.unused_documents.delete(foreign_document);
       } else {
         // if (previous document does not exists) or (extractor produces standalone documents
@@ -521,8 +522,14 @@ export class VirtualDocument {
 
       for (let result of results) {
         if (result.foreign_code !== null) {
+          // result.range should only be null if result.foregin_code is null
+          if (result.range === null) {
+            this.console.warn(
+              'Failure in foreign code extraction: `range` is null but `foreign_code` is not!'
+            );
+            continue;
+          }
           let foreign_document = this.choose_foreign_document(extractor);
-
           foreign_document_map.set(result.range, {
             virtual_line: foreign_document.last_virtual_line,
             virtual_document: foreign_document,
@@ -538,7 +545,7 @@ export class VirtualDocument {
               ce_editor: block.ce_editor
             },
             foreign_shift,
-            result.virtual_shift
+            result.virtual_shift!
           );
         }
         if (result.host_code != null) {
@@ -748,11 +755,7 @@ export class VirtualDocument {
   }
 
   transform_source_to_editor(pos: ISourcePosition): IEditorPosition {
-    if (pos == null) {
-      this.console.warn('no position available');
-      return;
-    }
-    let source_line = this.source_lines.get(pos.line);
+    let source_line = this.source_lines.get(pos.line)!;
     let editor_line = source_line.editor_line;
     let editor_shift = source_line.editor_shift;
     return {
@@ -764,17 +767,35 @@ export class VirtualDocument {
     } as IEditorPosition;
   }
 
+  /**
+  Can be null because some lines are added as padding/anchors
+  to the virtual document and those do not exist in the source document
+  and thus they are absent in the editor.
+  */
   transform_virtual_to_editor(
     virtual_position: IVirtualPosition
-  ): IEditorPosition {
+  ): IEditorPosition | null {
     let source_position = this.transform_virtual_to_source(virtual_position);
+    if (source_position == null) {
+      return null;
+    }
     return this.transform_source_to_editor(source_position);
   }
 
-  transform_virtual_to_source(position: IVirtualPosition): ISourcePosition {
+  /**
+  Can be null because some lines are added as padding/anchors
+  to the virtual document and those do not exist in the source document.
+  */
+  transform_virtual_to_source(
+    position: IVirtualPosition
+  ): ISourcePosition | null {
+    const line = this.virtual_lines.get(position.line)!.source_line;
+    if (line == null) {
+      return null;
+    }
     return {
       ch: position.ch,
-      line: this.virtual_lines.get(position.line).source_line
+      line: line
     } as ISourcePosition;
   }
 
@@ -786,24 +807,16 @@ export class VirtualDocument {
   }
 
   get_editor_at_virtual_line(pos: IVirtualPosition): CodeEditor.IEditor {
-    if (pos == null) {
-      this.console.warn('no position available');
-      return;
-    }
     let line = pos.line;
     // tolerate overshot by one (the hanging blank line at the end)
     if (!this.virtual_lines.has(line)) {
       line -= 1;
     }
-    return this.virtual_lines.get(line).editor;
+    return this.virtual_lines.get(line)!.editor;
   }
 
   get_editor_at_source_line(pos: ISourcePosition): CodeEditor.IEditor {
-    if (pos == null) {
-      this.console.warn('no position available');
-      return;
-    }
-    return this.source_lines.get(pos.line).editor;
+    return this.source_lines.get(pos.line)!.editor;
   }
 
   /**

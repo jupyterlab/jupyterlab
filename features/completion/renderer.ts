@@ -46,7 +46,7 @@ export class LSPCompletionRenderer
             return;
           }
           let li = entry.target as HTMLLIElement;
-          let item = this.elementToItem.get(li);
+          let item = this.elementToItem.get(li)!;
           this.itemShown.emit({
             item: item,
             element: li
@@ -71,7 +71,7 @@ export class LSPCompletionRenderer
         if (li.classList.contains('jp-mod-active')) {
           if (inactive) {
             this.wasActivated.set(li, true);
-            let item = this.elementToItem.get(li);
+            let item = this.elementToItem.get(li)!;
             this.activeChanged.emit({
               item: item,
               element: li
@@ -88,14 +88,14 @@ export class LSPCompletionRenderer
     const labelExtra = this.options.integrator.settings.composite.labelExtra;
     switch (labelExtra) {
       case 'detail':
-        return item?.detail;
+        return item?.detail || '';
       case 'type':
         return item?.type?.toLowerCase?.();
       case 'source':
         return item?.source?.name;
       case 'auto':
         return [
-          item?.detail,
+          item?.detail || '',
           item?.type?.toLowerCase?.(),
           item?.source?.name
         ].filter(x => !!x)[0];
@@ -104,6 +104,7 @@ export class LSPCompletionRenderer
           'labelExtra does not match any of the expected values',
           labelExtra
         );
+        return '';
     }
   }
 
@@ -145,7 +146,7 @@ export class LSPCompletionRenderer
   createDocumentationNode(item: LazyCompletionItem): HTMLElement {
     // note: not worth trying to `fetchDocumentation()` as this is not
     // invoked if documentation is empty (as of jlab 3.2)
-    if (item.isDocumentationMarkdown) {
+    if (item.isDocumentationMarkdown && this.options.markdownRenderer) {
       let documentation = item.documentation;
       this.options.markdownRenderer
         .renderModel({
@@ -159,7 +160,12 @@ export class LSPCompletionRenderer
           }
         })
         .then(() => {
-          if (this.options.latexTypesetter && documentation.includes('$')) {
+          if (
+            this.options.markdownRenderer &&
+            this.options.latexTypesetter &&
+            documentation &&
+            documentation.includes('$')
+          ) {
             this.options.latexTypesetter.typeset(
               this.options.markdownRenderer.node
             );
@@ -169,7 +175,9 @@ export class LSPCompletionRenderer
       return this.options.markdownRenderer.node;
     } else {
       let node = document.createElement('pre');
-      node.textContent = item.documentation;
+      if (item.documentation) {
+        node.textContent = item.documentation;
+      }
       return node;
     }
   }
@@ -178,8 +186,8 @@ export class LSPCompletionRenderer
 export namespace LSPCompletionRenderer {
   export interface IOptions {
     integrator: CompletionLabIntegration;
-    markdownRenderer: IRenderMime.IRenderer;
-    latexTypesetter?: IRenderMime.ILatexTypesetter;
+    markdownRenderer: IRenderMime.IRenderer | null;
+    latexTypesetter?: IRenderMime.ILatexTypesetter | null;
     console: ILSPLogConsole;
   }
 }

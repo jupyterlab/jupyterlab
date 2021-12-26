@@ -34,16 +34,18 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
   {
     id: 'highlight-references',
     execute: ({ connection, virtual_position, document }) =>
-      connection.getReferences(virtual_position, document.document_info),
-    is_enabled: ({ connection }) => connection.isReferencesSupported(),
+      connection?.getReferences(virtual_position, document.document_info),
+    is_enabled: ({ connection }) =>
+      connection ? connection.isReferencesSupported() : false,
     label: trans.__('Highlight references'),
     icon: highlightIcon
   },
   {
     id: 'highlight-type-definition',
     execute: ({ connection, virtual_position, document }) =>
-      connection.getTypeDefinition(virtual_position, document.document_info),
-    is_enabled: ({ connection }) => connection.isTypeDefinitionSupported(),
+      connection?.getTypeDefinition(virtual_position, document.document_info),
+    is_enabled: ({ connection }) =>
+      connection ? connection.isTypeDefinitionSupported() : false,
     label: trans.__('Highlight type definition'),
     icon: highlightTypeIcon
   }
@@ -51,10 +53,12 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
 
 export class HighlightsCM extends CodeMirrorIntegration {
   protected highlight_markers: CodeMirror.TextMarker[] = [];
-  private debounced_get_highlight: Debouncer<lsProtocol.DocumentHighlight[]>;
+  private debounced_get_highlight: Debouncer<
+    lsProtocol.DocumentHighlight[] | undefined
+  >;
   private virtual_position: IVirtualPosition;
   private sent_version: number;
-  private last_token: CodeEditor.IToken;
+  private last_token: CodeEditor.IToken | null = null;
 
   get settings() {
     return super.settings as FeatureSettings<LSPHighlightsSettings>;
@@ -82,8 +86,6 @@ export class HighlightsCM extends CodeMirrorIntegration {
   };
 
   remove(): void {
-    this.handleHighlight = null;
-    this.onCursorActivity = null;
     this.clear_markers();
     super.remove();
   }
@@ -95,7 +97,9 @@ export class HighlightsCM extends CodeMirrorIntegration {
     this.highlight_markers = [];
   }
 
-  protected handleHighlight = (items: lsProtocol.DocumentHighlight[]) => {
+  protected handleHighlight = (
+    items: lsProtocol.DocumentHighlight[] | undefined
+  ) => {
     this.clear_markers();
 
     if (!items) {
@@ -116,7 +120,7 @@ export class HighlightsCM extends CodeMirrorIntegration {
   };
 
   protected create_debouncer() {
-    return new Debouncer<lsProtocol.DocumentHighlight[]>(
+    return new Debouncer<lsProtocol.DocumentHighlight[] | undefined>(
       this.on_cursor_activity,
       this.settings.composite.debouncerDelay
     );

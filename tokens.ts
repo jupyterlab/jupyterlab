@@ -186,7 +186,7 @@ export interface ILSPVirtualEditorManager {
    */
   findBestImplementation(
     editors: CodeEditor.IEditor[]
-  ): IVirtualEditorType<any>;
+  ): IVirtualEditorType<any> | null;
 }
 
 /**

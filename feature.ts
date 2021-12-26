@@ -54,7 +54,7 @@ export interface IFeatureCommand {
 }
 
 export interface IFeatureSettings<T> {
-  readonly composite: T;
+  readonly composite: Required<T>;
   readonly changed: Signal<IFeatureSettings<T>, void>;
   readonly ready?: Promise<void>;
 
@@ -90,8 +90,8 @@ export class FeatureSettings<T> implements IFeatureSettings<T> {
     }
   }
 
-  get composite(): T {
-    return this.settings.composite as unknown as T;
+  get composite(): Required<T> {
+    return this.settings.composite as unknown as Required<T>;
   }
 
   set(setting: keyof T, value: any) {

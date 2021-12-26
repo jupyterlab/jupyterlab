@@ -39,9 +39,16 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   }
 
   private async update_language_info() {
-    this._language_info = (
-      await this.widget.context.sessionContext.session.kernel.info
-    ).language_info;
+    const language_info = (
+      await this.widget.context.sessionContext?.session?.kernel?.info
+    )?.language_info;
+    if (language_info) {
+      this._language_info = language_info;
+    } else {
+      throw new Error(
+        'Language info update failed (no session, kernel, or info available)'
+      );
+    }
   }
 
   async on_kernel_changed(
@@ -49,16 +56,30 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     change: Session.ISessionConnection.IKernelChangedArgs
   ) {
     if (!change.newValue) {
-      this.console.log('kernel was shut down');
+      this.console.log('Kernel was shut down');
       return;
     }
     try {
-      await this.update_language_info();
-      this.console.log(
-        `Changed to ${this._language_info.name} kernel, reconnecting`
-      );
+      // note: we need to wait until ready before updating language info
+      this.console.log('Changed kernel, will try to reconnect');
+      const old_language_info = this._language_info;
       await until_ready(this.is_ready, -1);
-      this.reload_connection();
+      await this.update_language_info();
+      const new_language_info = this._language_info;
+      if (
+        old_language_info?.name != new_language_info.name ||
+        old_language_info?.mimetype != new_language_info?.mimetype ||
+        old_language_info?.file_extension != new_language_info?.file_extension
+      ) {
+        this.console.log(
+          `Changed to ${this._language_info.name} kernel, reconnecting`
+        );
+        this.reload_connection();
+      } else {
+        this.console.log(
+          'Keeping old LSP connection as the new kernel uses the same langauge'
+        );
+      }
     } catch (err) {
       this.console.warn(err);
       // try to reconnect anyway
@@ -106,17 +127,17 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
 
   get mime_type(): string {
     let language_metadata = this.language_info();
-    if (!language_metadata) {
+    if (!language_metadata || !language_metadata.mimetype) {
       // fallback to the code cell mime type if no kernel in use
       return this.widget.content.codeMimetype;
     }
     return language_metadata.mimetype;
   }
 
-  get language_file_extension(): string {
+  get language_file_extension(): string | undefined {
     let language_metadata = this.language_info();
-    if (!language_metadata) {
-      return null;
+    if (!language_metadata || !language_metadata.file_extension) {
+      return;
     }
     return language_metadata.file_extension.replace('.', '');
   }
@@ -146,7 +167,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     );
 
     this.widget.content.activeCellChanged.connect(this.activeCellChanged, this);
-    this.widget.model.cells.changed.connect(this.handle_cell_change, this);
+    this._connectModelSignals(this.widget);
     this.editor.modelChanged.connect(notebook => {
       // note: this should not usually happen;
       // there is no default action that would trigger this,
@@ -155,8 +176,18 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       this.console.warn(
         'Model changed, connecting cell change handler; this is not something we were expecting'
       );
-      notebook.model.cells.changed.connect(this.handle_cell_change, this);
+      this._connectModelSignals(notebook);
     });
+  }
+
+  private _connectModelSignals(notebook: NotebookPanel | Notebook) {
+    if (notebook.model === null) {
+      this.console.warn(
+        `Model is missing for notebook ${notebook}, cannot connet cell changed signal!`
+      );
+    } else {
+      notebook.model.cells.changed.connect(this.handle_cell_change, this);
+    }
   }
 
   async handle_cell_change(
@@ -217,6 +248,12 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       let cellWidget = this.widget.content.widgets.find(
         cell => cell.model.id === cellModel.id
       );
+      if (!cellWidget) {
+        this.console.warn(
+          `Widget for removed cell with ID: ${cellModel.id} not found!`
+        );
+        continue;
+      }
       this.known_editors_ids.delete(cellWidget.editor.uuid);
 
       // for practical purposes this editor got removed from our consideration;
@@ -232,6 +269,12 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       let cellWidget = this.widget.content.widgets.find(
         cell => cell.model.id === cellModel.id
       );
+      if (!cellWidget) {
+        this.console.warn(
+          `Widget for added cell with ID: ${cellModel.id} not found!`
+        );
+        continue;
+      }
       this.known_editors_ids.add(cellWidget.editor.uuid);
 
       this.editorAdded.emit({
@@ -242,7 +285,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
 
   get editors(): CodeEditor.IEditor[] {
     if (this.isDisposed) {
-      return;
+      return [];
     }
 
     let notebook = this.widget.content;
@@ -277,7 +320,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   }
 
   get activeEditor() {
-    return this.widget.content.activeCell.editor;
+    return this.widget.content.activeCell?.editor;
   }
 
   private activeCellChanged(notebook: Notebook, cell: Cell) {
@@ -297,6 +340,13 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
 
   context_from_active_document(): ICommandContext | null {
     let cell = this.widget.content.activeCell;
+    if (cell === null) {
+      return null;
+    }
+    // short circuit if disposed
+    if (!this.virtual_editor || !this.get_context) {
+      return null;
+    }
     if (cell.model.type !== this.type) {
       // context will be sought on all cells to verify if the context menu should be visible,
       // thus it is ok to just return null; it seems to stem from the implementation detail
@@ -308,7 +358,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     let ce_cursor = editor.getCursorPosition();
     let cm_cursor = PositionConverter.ce_to_cm(ce_cursor) as IEditorPosition;
 
-    let virtual_editor = this?.virtual_editor;
+    let virtual_editor = this.virtual_editor;
 
     if (virtual_editor == null) {
       return null;
@@ -324,7 +374,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       return null;
     }
 
-    return this?.get_context(root_position);
+    return this.get_context(root_position);
   }
 
   get_editor_index_at(position: IVirtualPosition): number {
@@ -336,7 +386,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   }
 
   get_editor_index(ce_editor: CodeEditor.IEditor): number {
-    let cell = this.ce_editor_to_cell.get(ce_editor);
+    let cell = this.ce_editor_to_cell.get(ce_editor)!;
     let notebook = this.widget.content;
     return notebook.widgets.findIndex(other_cell => {
       return cell === other_cell;
@@ -344,13 +394,13 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   }
 
   get_editor_wrapper(ce_editor: CodeEditor.IEditor): HTMLElement {
-    let cell = this.ce_editor_to_cell.get(ce_editor);
+    let cell = this.ce_editor_to_cell.get(ce_editor)!;
     return cell.node;
   }
 
   private get_cell_at(pos: IVirtualPosition): Cell {
     let ce_editor =
       this.virtual_editor.virtual_document.get_editor_at_virtual_line(pos);
-    return this.ce_editor_to_cell.get(ce_editor);
+    return this.ce_editor_to_cell.get(ce_editor)!;
   }
 }

@@ -140,6 +140,13 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       // if in current file, transform from the position within virtual document to the editor position:
       let editor_position =
         this.virtual_editor.transform_virtual_to_editor(virtual_position);
+      if (editor_position === null) {
+        this.console.warn(
+          'Could not jump: conversion from virtual position to editor position failed',
+          virtual_position
+        );
+        return;
+      }
       let editor_position_ce = PositionConverter.cm_to_ce(editor_position);
       this.console.log(`Jumping to ${editor_index}th editor of ${uri}`);
       this.console.log('Jump target within editor:', editor_position_ce);
@@ -174,6 +181,11 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
 
       if (contents_path == null && uri.startsWith('file://')) {
         contents_path = decodeURI(uri.slice(7));
+      }
+
+      if (contents_path === null) {
+        this.console.warn('contents_path could not be resolved');
+        return;
       }
 
       try {
@@ -238,7 +250,7 @@ class JumperLabIntegration implements IFeatureLabIntegration {
 
   get jumper(): CodeJumper {
     let current = this.adapterManager.currentAdapter.widget.id;
-    return this.jumpers.get(current);
+    return this.jumpers.get(current)!;
   }
 }
 
@@ -247,14 +259,15 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
     id: 'jump-to-definition',
     execute: async ({ connection, virtual_position, document, features }) => {
       const jump_feature = features.get(FEATURE_ID) as CMJumpToDefinition;
-      const targets = await connection.getDefinition(
+      const targets = await connection?.getDefinition(
         virtual_position,
         document.document_info,
         false
       );
       await jump_feature.handle_jump(targets, document.document_info.uri);
     },
-    is_enabled: ({ connection }) => connection.isDefinitionSupported(),
+    is_enabled: ({ connection }) =>
+      connection ? connection.isDefinitionSupported() : false,
     label: trans.__('Jump to definition'),
     icon: jumpToIcon
   },
@@ -264,7 +277,8 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
       const jump_feature = features.get(FEATURE_ID) as CMJumpToDefinition;
       jump_feature.jumper.global_jump_back();
     },
-    is_enabled: ({ connection }) => connection.isDefinitionSupported(),
+    is_enabled: ({ connection }) =>
+      connection ? connection.isDefinitionSupported() : false,
     label: trans.__('Jump back'),
     icon: jumpBackIcon,
     // do not attach to any of the context menus

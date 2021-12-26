@@ -17,7 +17,7 @@ describe('CodeMirrorAdapter', () => {
     it('updates on change', async () => {
       class UpdateReceivingFeature extends CodeMirrorIntegration {
         public received_update = false;
-        public last_change: CodeMirror.EditorChange = null;
+        public last_change: CodeMirror.EditorChange = null as any;
         public last_change_position: IRootPosition;
 
         afterChange(change: IEditorChange, root_position: IRootPosition): void {

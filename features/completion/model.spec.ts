@@ -11,7 +11,13 @@ describe('LSPCompleterModel', () => {
     match: lsProtocol.CompletionItem,
     type: string = 'dummy'
   ) {
-    return new LazyCompletionItem(type, null, match, null, null);
+    return new LazyCompletionItem(
+      type,
+      null as any,
+      match,
+      null as any,
+      'file://test.ipynb'
+    );
   }
 
   const jupyter_icon_completion = create_dummy_item({

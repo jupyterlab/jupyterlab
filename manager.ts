@@ -34,7 +34,7 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     this._retries = options.retries || 2;
     this._retriesInterval = options.retriesInterval || 10000;
-    this._statusCode = null;
+    this._statusCode = -1;
     this._configuration = {};
     this.console = options.console;
     this.fetchSessions().catch(console.warn);
@@ -87,9 +87,9 @@ export class LanguageServerManager implements ILanguageServerManager {
   ) {
     // most things speak language
     // if language is not known, it is guessed based on MIME type earlier
-    // so some language should be available by now (which can be not obvious, e.g. "plain" for txt documents)
-    const lowerCaseLanguage = options.language.toLocaleLowerCase();
-    return spec.languages.some(
+    // so some language should be available by now (which can be not so obvious, e.g. "plain" for txt documents)
+    const lowerCaseLanguage = options.language!.toLocaleLowerCase();
+    return spec.languages!.some(
       language => language.toLocaleLowerCase() == lowerCaseLanguage
     );
   }

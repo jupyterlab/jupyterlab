@@ -132,9 +132,9 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     this.refreshAdapterFromCurrentWidget();
   }
 
-  isAnyActive() {
+  isAnyActive(): boolean {
     return (
-      this.shell.currentWidget &&
+      this.shell.currentWidget !== null &&
       this.adapterTypes.some(type => type.tracker.currentWidget) &&
       this.adapterTypes.some(
         type => type.tracker.currentWidget == this.shell.currentWidget

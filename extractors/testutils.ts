@@ -5,7 +5,7 @@ import { IVirtualDocumentBlock, VirtualDocument } from '../virtual/document';
 
 export function extract_code(document: VirtualDocument, code: string) {
   return document.extract_foreign_code(
-    { value: code, ce_editor: null },
+    { value: code, ce_editor: null as any },
     {
       line: 0,
       column: 0
@@ -24,7 +24,7 @@ export function get_the_only_pair(
   expect(foreign_document_map.size).to.equal(1);
 
   let range = foreign_document_map.keys().next().value;
-  let { virtual_document } = foreign_document_map.get(range);
+  let { virtual_document } = foreign_document_map.get(range)!;
 
   return { range, virtual_document };
 }

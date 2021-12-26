@@ -28,7 +28,11 @@ export class ReversibleOverridesMap extends OverridesMap {
   }
 
   get reverse(): OverridesMap {
-    return this.type(this.overrides.map(override => override.reverse));
+    return this.type(
+      this.overrides
+        .filter(override => override.reverse != null)
+        .map(override => override.reverse!)
+    );
   }
 
   type(overrides: ICodeOverride[]) {

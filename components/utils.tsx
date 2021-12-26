@@ -19,6 +19,7 @@ export function getBreadcrumbs(
       let path = document.path;
       if (
         !document.has_lsp_supported_file &&
+        document.file_extension &&
         path.endsWith(document.file_extension)
       ) {
         path = path.slice(0, -document.file_extension.length - 1);
@@ -41,18 +42,18 @@ export function getBreadcrumbs(
     }
     try {
       if (adapter.has_multiple_editors) {
-        let first_line = document.virtual_lines.get(0);
+        let first_line = document.virtual_lines.get(0)!;
         let last_line = document.virtual_lines.get(
           document.last_virtual_line - 1
-        );
+        )!;
 
         let first_cell = adapter.get_editor_index(first_line.editor);
         let last_cell = adapter.get_editor_index(last_line.editor);
 
         let cell_locator =
           first_cell === last_cell
-            ? trans.__('cell %1', first_cell + 1)
-            : trans.__('cells: %1-%2', first_cell + 1, last_cell + 1);
+            ? trans!.__('cell %1', first_cell + 1)
+            : trans!.__('cells: %1-%2', first_cell + 1, last_cell + 1);
 
         return (
           <span key={document.uri}>
@@ -75,7 +76,7 @@ export function get_breadcrumbs(
   adapter: WidgetAdapter<IDocumentWidget>,
   collapse = true
 ) {
-  return getBreadcrumbs(document, adapter, null, collapse);
+  return getBreadcrumbs(document, adapter, undefined, collapse);
 }
 
 export function focus_on(node: HTMLElement) {
@@ -92,7 +93,7 @@ export function DocumentLocator(props: {
   trans?: TranslationBundle;
 }) {
   let { document, adapter } = props;
-  let target: HTMLElement = null;
+  let target: HTMLElement | null = null;
   if (adapter.has_multiple_editors) {
     let first_line = document.virtual_lines.get(0);
     if (first_line) {
@@ -105,7 +106,7 @@ export function DocumentLocator(props: {
   return (
     <div
       className={'lsp-document-locator'}
-      onClick={() => focus_on(target ? target : null)}
+      onClick={() => (target ? focus_on(target) : null)}
     >
       {breadcrumbs}
     </div>

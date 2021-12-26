@@ -37,9 +37,8 @@ export class FileEditorAdapter extends WidgetAdapter<
       // registry (and this is arguably easier to extend), so let's check it
       // just in case; this is also how the "Klingon" language for testing
       // gets registered, so we need it for tests too.
-      let fileType = this.extension.app.docRegistry.getFileTypeForModel(
-        this.editor.context.contentsModel
-      );
+      let fileType =
+        this.extension.app.docRegistry.getFileTypeForModel(contentsModel);
       return fileType.mimeTypes[0];
     } else {
       // "text/plain" this is
@@ -105,11 +104,15 @@ export class FileEditorAdapter extends WidgetAdapter<
     return this.widget.context.path;
   }
 
-  context_from_active_document(): ICommandContext {
+  context_from_active_document(): ICommandContext | null {
+    // short circuit if disposed
+    if (!this.virtual_editor || !this.get_context) {
+      return null;
+    }
     let editor = this.widget.content.editor;
     let ce_cursor = editor.getCursorPosition();
     let root_position = PositionConverter.ce_to_cm(ce_cursor) as IRootPosition;
-    return this?.get_context(root_position);
+    return this.get_context(root_position);
   }
 
   get_editor_index_at(position: IVirtualPosition): number {

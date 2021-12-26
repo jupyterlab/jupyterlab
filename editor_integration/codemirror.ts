@@ -104,7 +104,7 @@ export abstract class CodeMirrorIntegration
 
   protected trans: TranslationBundle;
 
-  get settings(): IFeatureSettings<any> {
+  get settings(): IFeatureSettings<any> | undefined {
     return this.feature.settings;
   }
 
@@ -176,12 +176,12 @@ export abstract class CodeMirrorIntegration
         this.transform_virtual_position_to_root_position(start);
       let ce_editor =
         this.virtual_editor.get_editor_at_root_position(start_in_root);
-      cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
+      cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor)!;
     }
 
     return {
-      start: this.virtual_document.transform_virtual_to_editor(start),
-      end: this.virtual_document.transform_virtual_to_editor(end),
+      start: this.virtual_document.transform_virtual_to_editor(start)!,
+      end: this.virtual_document.transform_virtual_to_editor(end)!,
       editor: cm_editor
     };
   }
@@ -199,13 +199,13 @@ export abstract class CodeMirrorIntegration
   public transform_virtual_position_to_root_position(
     start: IVirtualPosition
   ): IRootPosition {
-    let ce_editor = this.virtual_document.virtual_lines.get(start.line).editor;
+    let ce_editor = this.virtual_document.virtual_lines.get(start.line)!.editor;
     let editor_position =
       this.virtual_document.transform_virtual_to_editor(start);
     return this.virtual_editor.transform_from_editor_to_root(
       ce_editor,
-      editor_position
-    );
+      editor_position!
+    )!;
   }
 
   protected get_cm_editor(position: IRootPosition) {
@@ -261,10 +261,10 @@ export abstract class CodeMirrorIntegration
       ? workspaceEdit.documentChanges.map(
           change => change as lsProtocol.TextDocumentEdit
         )
-      : toDocumentChanges(workspaceEdit.changes);
+      : toDocumentChanges(workspaceEdit.changes!);
     let applied_changes = 0;
-    let edited_cells: number;
-    let is_whole_document_edit: boolean;
+    let edited_cells: number = 0;
+    let is_whole_document_edit: boolean = false;
     let errors: string[] = [];
 
     for (let change of changes) {
@@ -310,7 +310,7 @@ export abstract class CodeMirrorIntegration
           // going over the edits in descending order of start points:
           let start_offsets = [...edits_by_offset.keys()].sort((a, b) => a - b);
           for (let start of start_offsets) {
-            let edit = edits_by_offset.get(start);
+            let edit = edits_by_offset.get(start)!;
             let prefix = value.slice(last_end, start);
             for (let i = 0; i < prefix.split('\n').length; i++) {
               let new_lines = old_to_new_line.get_or_create(current_old_line);
@@ -379,7 +379,7 @@ export abstract class CodeMirrorIntegration
       newFragmentText = newFragmentText.slice(0, -1);
     }
 
-    let doc = this.virtual_editor.ce_editor_to_cm_editor.get(editor).getDoc();
+    let doc = this.virtual_editor.ce_editor_to_cm_editor.get(editor)!.getDoc();
 
     let raw_value = doc.getValue('\n');
     // extract foreign documents and substitute magics,

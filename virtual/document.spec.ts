@@ -91,7 +91,7 @@ describe('VirtualDocument', () => {
     it('joins non-standalone fragments together', () => {
       let { cell_code_kept, foreign_document_map } =
         document.extract_foreign_code(
-          { value: R_LINE_MAGICS, ce_editor: null },
+          { value: R_LINE_MAGICS, ce_editor: null as any },
           {
             line: 0,
             column: 0
@@ -104,7 +104,7 @@ describe('VirtualDocument', () => {
 
       let { virtual_document: r_document } = foreign_document_map.get(
         foreign_document_map.keys().next().value
-      );
+      )!;
       expect(r_document.language).to.equal('r');
       expect(r_document.value).to.equal('df = data.frame()\n\n\nggplot(df)\n');
     });
@@ -154,7 +154,7 @@ describe('VirtualDocument', () => {
       let editor_position = document.transform_virtual_to_editor({
         line: 0,
         ch: 0
-      } as IVirtualPosition);
+      } as IVirtualPosition)!;
       expect(editor_position.line).to.equal(0);
       expect(editor_position.ch).to.equal(0);
 
@@ -162,7 +162,7 @@ describe('VirtualDocument', () => {
       editor_position = document.transform_virtual_to_editor({
         line: 4,
         ch: 0
-      } as IVirtualPosition);
+      } as IVirtualPosition)!;
       expect(editor_position.line).to.equal(0);
       expect(editor_position.ch).to.equal(0);
     });
@@ -198,7 +198,7 @@ describe('VirtualDocument', () => {
       // because it checks R source position, rather than checking root source positions.
 
       let editor_position =
-        foreign_document.transform_virtual_to_editor(virtual_r_1_1);
+        foreign_document.transform_virtual_to_editor(virtual_r_1_1)!;
       expect(editor_position.line).to.equal(1);
       expect(editor_position.ch).to.equal(4);
 
@@ -207,7 +207,7 @@ describe('VirtualDocument', () => {
       editor_position = foreign_document.transform_virtual_to_editor({
         line: 3,
         ch: 0
-      } as IVirtualPosition);
+      } as IVirtualPosition)!;
       // 0th editor line is 'test line in Python 2\n'
       expect(editor_position.line).to.equal(1);
       // 1st editor lines is '%R 1st test line in R line magic 2'
@@ -219,7 +219,7 @@ describe('VirtualDocument', () => {
       editor_position = foreign_document.transform_virtual_to_editor({
         line: 6,
         ch: 36
-      } as IVirtualPosition);
+      } as IVirtualPosition)!;
       // 0th editor line is 'test line in Python 3\n'
       expect(editor_position.line).to.equal(1);
       // 1st editor line is '%R -i imported_variable 1st test line in R line magic 3'
@@ -231,7 +231,7 @@ describe('VirtualDocument', () => {
       editor_position = foreign_document.transform_virtual_to_editor({
         line: 12,
         ch: 36
-      } as IVirtualPosition);
+      } as IVirtualPosition)!;
       // 0th editor line is '%%R -i imported_variable\n'
       expect(editor_position.line).to.equal(1);
       // 1st editor line is '1st test line in R cell magic 2'

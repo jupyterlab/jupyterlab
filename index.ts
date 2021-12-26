@@ -104,7 +104,9 @@ export class FeatureManager implements ILSPFeatureManager {
       }
       this.command_manager_registered.connect(
         (feature_manager, command_manager) => {
-          command_manager.add(options.feature.commands);
+          if (options.feature.commands) {
+            command_manager.add(options.feature.commands);
+          }
         }
       );
     }
@@ -114,7 +116,7 @@ export class FeatureManager implements ILSPFeatureManager {
     if (options.feature.settings && options.feature.settings.ready) {
       options.feature.settings.ready
         .then(() => {
-          if (!options.feature.settings.composite.disable) {
+          if (!options.feature?.settings?.composite.disable) {
             this._register(options);
           } else {
             console.log('Skipping ', options.feature.id, 'as disabled');
@@ -163,7 +165,7 @@ export class LSPExtension implements ILSPExtension {
     private code_overrides_manager: ILSPCodeOverridesManager,
     public console: ILSPLogConsole,
     public translator: ITranslator,
-    public user_console: ILoggerRegistry,
+    public user_console: ILoggerRegistry | null,
     status_bar: IStatusBar | null
   ) {
     const trans = (translator || nullTranslator).load('jupyterlab_lsp');
@@ -198,7 +200,7 @@ export class LSPExtension implements ILSPExtension {
     this.setting_registry
       .load(plugin.id)
       .then(settings => {
-        const options = settings.composite as LanguageServer;
+        const options = settings.composite as Required<LanguageServer>;
         // Store the initial server settings, to be sent asynchronously
         // when the servers are initialized.
         const initial_configuration = (options.language_servers ||
@@ -248,7 +250,7 @@ export class LSPExtension implements ILSPExtension {
   }
 
   private updateOptions(settings: ISettingRegistry.ISettings) {
-    const options = settings.composite as LanguageServer;
+    const options = settings.composite as Required<LanguageServer>;
 
     const languageServerSettings = (options.language_servers ||
       {}) as TLanguageServerConfigurations;
