@@ -63,6 +63,12 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       'mousedown',
       (virtual_editor, event: MouseEvent) => {
         let root_position = this.position_from_mouse(event);
+        if (root_position == null) {
+          this.console.warn(
+            'Could not retrieve root position from mouse event to jump to definition'
+          );
+          return;
+        }
         let document = virtual_editor.document_at_root_position(root_position);
         let virtual_position =
           virtual_editor.root_position_to_virtual_position(root_position);

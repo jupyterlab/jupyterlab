@@ -416,7 +416,7 @@ export class HoverCM extends CodeMirrorIntegration {
     }
 
     if (
-      this.last_hover_character &&
+      !this.last_hover_character ||
       !is_equal(root_position, this.last_hover_character)
     ) {
       let virtual_position =

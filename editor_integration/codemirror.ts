@@ -186,14 +186,19 @@ export abstract class CodeMirrorIntegration
     };
   }
 
-  protected position_from_mouse(event: MouseEvent): IRootPosition {
-    return this.virtual_editor.coordsChar(
+  protected position_from_mouse(event: MouseEvent): IRootPosition | null {
+    const position = this.virtual_editor.coordsChar(
       {
         left: event.clientX,
         top: event.clientY
       },
       'window'
-    ) as IRootPosition;
+    );
+    if (position.line === -1 && position.ch === -1) {
+      return null;
+    } else {
+      return position as IRootPosition;
+    }
   }
 
   public transform_virtual_position_to_root_position(

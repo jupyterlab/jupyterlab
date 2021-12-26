@@ -407,6 +407,9 @@ export class CodeMirrorVirtualEditor
     }
   }
 
+  /**
+   * @note returns {line: -1, ch: -1} if position is outside of all editors
+   */
   coordsChar(
     object: { left: number; top: number },
     mode?: 'window' | 'page' | 'local'
