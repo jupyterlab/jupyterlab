@@ -123,10 +123,7 @@ export function signatureToMarkdown(
       }
     } else {
       if (item.documentation.kind !== 'markdown') {
-        this.console.warn(
-          'Unknown MarkupContent kind:',
-          item.documentation.kind
-        );
+        console.warn('Unknown MarkupContent kind:', item.documentation.kind);
       }
       details += item.documentation.value;
     }
