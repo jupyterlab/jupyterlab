@@ -104,7 +104,6 @@ export function signatureToMarkdown(
   }
   let details = '';
   if (item.documentation) {
-    details += '\n';
     if (
       typeof item.documentation === 'string' ||
       item.documentation.kind === 'plaintext'
@@ -123,7 +122,7 @@ export function signatureToMarkdown(
       }
     } else {
       if (item.documentation.kind !== 'markdown') {
-        console.warn('Unknown MarkupContent kind:', item.documentation.kind);
+        logger.warn('Unknown MarkupContent kind:', item.documentation.kind);
       }
       details += item.documentation.value;
     }
@@ -146,7 +145,9 @@ export function signatureToMarkdown(
         details = '<details>\n' + details + '\n</details>';
       }
     }
-    markdown += details;
+    markdown += '\n\n' + details;
+  } else {
+    markdown += '\n';
   }
   return markdown;
 }
@@ -181,7 +182,7 @@ export class SignatureCM extends CodeMirrorIntegration {
     // (allowing user to select/copy from signature)
     if (
       this.isSignatureShown() &&
-      (event.target as Element).closest('.' + CLASS_NAME) === null
+      (event.relatedTarget as Element).closest('.' + CLASS_NAME) === null
     ) {
       this._hideTooltip();
     }
@@ -275,7 +276,7 @@ export class SignatureCM extends CodeMirrorIntegration {
         code.appendChild(element);
       }
     );
-    return pre.outerHTML + '\n\n';
+    return pre.outerHTML;
   }
 
   /**

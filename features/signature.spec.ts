@@ -76,7 +76,7 @@ describe('Signature', () => {
         new BrowserConsole()
       );
       expect(text).to.be.equal(
-        'str(<u>text</u>)\nCreate a new \\*string\\* object from the given object.\n'
+        'str(<u>text</u>)\n\nCreate a new \\*string\\* object from the given object.\n'
       );
     });
 
@@ -101,7 +101,7 @@ describe('Signature', () => {
         new BrowserConsole()
       );
       expect(text).to.be.equal(
-        'str(<u>text</u>)\nCreate a new \\*string\\* object from the given object.\n'
+        'str(<u>text</u>)\n\nCreate a new \\*string\\* object from the given object.\n'
       );
     });
 
@@ -126,7 +126,54 @@ describe('Signature', () => {
         new BrowserConsole()
       );
       expect(text).to.be.equal(
-        'str(<u>text</u>)\nCreate a new *string* object from the given object.'
+        'str(<u>text</u>)\n\nCreate a new *string* object from the given object.'
+      );
+    });
+
+    it('renders plaintext with details and paramaters', async () => {
+      let text = signatureToMarkdown(
+        {
+          label: 'str(text)',
+          documentation: {
+            value: 'line 1\n\nline 2\nline 3\nline 4\nline 5',
+            kind: 'plaintext'
+          },
+          parameters: [
+            {
+              label: 'text',
+              documentation: undefined
+            }
+          ],
+          activeParameter: 0
+        },
+        'python',
+        MockHighlighter,
+        new BrowserConsole(),
+        undefined,
+        4
+      );
+      expect(text).to.be.equal(
+        'str(<u>text</u>)\n\nline 1\n<details>\nline 2\nline 3\nline 4\nline 5\n</details>'
+      );
+    });
+
+    it('renders plaintext with details and no parameters', async () => {
+      let text = signatureToMarkdown(
+        {
+          label: 'str()',
+          documentation: {
+            value: 'line 1\n\nline 2\nline 3\nline 4\nline 5',
+            kind: 'plaintext'
+          }
+        },
+        'python',
+        MockHighlighter,
+        new BrowserConsole(),
+        undefined,
+        4
+      );
+      expect(text).to.be.equal(
+        '```python\nstr()\n```\n\nline 1\n<details>\nline 2\nline 3\nline 4\nline 5\n</details>'
       );
     });
   });
