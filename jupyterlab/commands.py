@@ -602,8 +602,6 @@ class _AppHandler(object):
         # Do this last since it relies on other attributes
         self.info = self._get_app_info()
 
-
-
     def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.
 
@@ -1153,7 +1151,11 @@ class _AppHandler(object):
 
         page_config = get_page_config(labextensions_path, app_settings_dir=app_settings_dir, logger=self.logger)
 
-        info['disabled'] = page_config.get('disabledExtensions', [])
+        disabled = page_config.get('disabledExtensions', {})
+        if isinstance(disabled, list):
+            disabled = { extension: True for extension in disabled }
+
+        info['disabled'] = disabled
 
         disabled_core = []
         for key in info['core_extensions']:
