@@ -49,6 +49,13 @@ export class GenericCompleterModel<
 
   setCompletionItems(newValue: T[]) {
     super.setCompletionItems!(newValue);
+
+    if (this.settings.preFilterMatches && this.current && this.cursor) {
+      // set initial query to pre-filter items; in future we should use:
+      // https://github.com/jupyterlab/jupyterlab/issues/9763#issuecomment-1001603348
+      const { start, end } = this.cursor;
+      this.query = this.current.text.substring(start, end);
+    }
   }
 
   private _markFragment(value: string): string {
@@ -180,10 +187,15 @@ export namespace GenericCompleterModel {
      * Whether perfect matches should be included (default = true)
      */
     includePerfectMatches?: boolean;
+    /**
+     * Wheteher matches should be pre-filtered (default = true)
+     */
+    preFilterMatches?: boolean;
   }
   export const defaultOptions: IOptions = {
     caseSensitive: true,
-    includePerfectMatches: true
+    includePerfectMatches: true,
+    preFilterMatches: true
   };
 }
 
