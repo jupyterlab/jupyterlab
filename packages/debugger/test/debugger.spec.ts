@@ -96,7 +96,8 @@ describe('Debugger', () => {
         next: '',
         stepIn: '',
         stepOut: '',
-        evaluate: ''
+        evaluate: '',
+        pause: ''
       },
       breakpointsCommands: {
         registry,
