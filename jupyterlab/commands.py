@@ -2230,10 +2230,13 @@ def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False
     return return_value
 
 
-def _is_disabled(name, disabled=[]):
+def _is_disabled(name, disabled={}):
     """Test whether the package is disabled.
     """
-    for pattern in disabled:
+    for pattern, value in disabled.items():
+        # skip packages explicitely marked as disabled
+        if value == False:
+            continue
         if name == pattern:
             return True
         if re.compile(pattern).match(name) is not None:
