@@ -40,7 +40,7 @@ export class DiagnosticsDatabase extends Map<
   IEditorDiagnostic[]
 > {
   get all(): Array<IEditorDiagnostic> {
-    return [].concat.apply([], this.values());
+    return [].concat.apply([], this.values() as any);
   }
 }
 
@@ -316,7 +316,10 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         });
       }
     );
-    let flattened: IDiagnosticsRow[] = [].concat.apply([], by_document);
+    let flattened: IDiagnosticsRow[] = ([] as IDiagnosticsRow[]).concat.apply(
+      [],
+      by_document
+    );
     this._diagnostics = new Map(flattened.map(row => [row.key, row]));
 
     let sorted_column = this.columns.filter(
