@@ -1152,6 +1152,8 @@ class _AppHandler(object):
         page_config = get_page_config(labextensions_path, app_settings_dir=app_settings_dir, logger=self.logger)
 
         disabled = page_config.get('disabledExtensions', {})
+        # handle disabledExtensions specified as a list (jupyterlab_server < 2.10)
+        # see https://github.com/jupyterlab/jupyterlab_server/pull/192 for more info
         if isinstance(disabled, list):
             disabled = { extension: True for extension in disabled }
 
