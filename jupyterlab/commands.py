@@ -2238,7 +2238,7 @@ def _is_disabled(name, disabled={}):
     """Test whether the package is disabled.
     """
     for pattern, value in disabled.items():
-        # skip packages explicitely marked as disabled
+        # skip packages explicitly marked as not disabled
         if value == False:
             continue
         if name == pattern:
