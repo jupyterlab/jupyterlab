@@ -106,6 +106,7 @@ class DiagnosticsPanel {
           return column;
         }
       }
+      return undefined;
     };
 
     /** Columns Menu **/

@@ -647,6 +647,8 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
         connection,
         virtual_document
       };
+    } else {
+      return undefined;
     }
   }
 

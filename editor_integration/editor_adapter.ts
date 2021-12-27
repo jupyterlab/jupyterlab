@@ -88,6 +88,7 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
       this.console.error(e);
     }
     this.invalidateLastChange();
+    return undefined;
   }
 
   public invalidateLastChange() {

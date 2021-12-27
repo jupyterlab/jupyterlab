@@ -94,7 +94,7 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
 
   get_uri_and_range(location_or_locations: AnyLocation) {
     if (location_or_locations == null) {
-      return;
+      return undefined;
     }
     // some language servers appear to return a single object
     const locations = Array.isArray(location_or_locations)
@@ -105,7 +105,7 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
     //  (like when there are multiple definitions or usages)
     //  could use the showHints() or completion frontend as a reference
     if (locations.length === 0) {
-      return;
+      return undefined;
     }
 
     this.console.log(
@@ -125,6 +125,12 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
         uri: location_or_link.uri,
         range: location_or_link.range
       };
+    } else {
+      this.console.warn(
+        'Returned jump location is incorrect (no uri or targetUri):',
+        location_or_link
+      );
+      return undefined;
     }
   }
 

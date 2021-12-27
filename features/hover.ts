@@ -494,6 +494,7 @@ export class HoverCM extends CodeMirrorIntegration {
       ) {
         this.console.warn(e);
       }
+      return undefined;
     }
   };
 
