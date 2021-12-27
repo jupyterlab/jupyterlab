@@ -282,7 +282,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             {entry.description}
           </div>
           <div className="jp-extensionmanager-entry-buttons">
-            {entry.enabled && entry.pkg_type == 'source' && (
+            {entry.enabled && (
               <Button
                 onClick={() => props.performAction('disable', entry)}
                 minimal
@@ -291,7 +291,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Disable')}
               </Button>
             )}
-            {entry.installed && entry.pkg_type == 'source' && !entry.enabled && (
+            {entry.installed && !entry.enabled && (
               <Button
                 onClick={() => props.performAction('enable', entry)}
                 minimal
