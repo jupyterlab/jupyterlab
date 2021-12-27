@@ -6,7 +6,7 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { WidgetAdapter } from './adapters/adapter';
 import { LSPConnection } from './connection';
 import { IFeatureCommand, IFeatureEditorIntegration } from './feature';
-import { IRootPosition, IVirtualPosition } from './positioning';
+import { IRootPosition, IVirtualPosition, PositionError } from './positioning';
 import { ILSPAdapterManager, ILSPLogConsole } from './tokens';
 import { VirtualDocument } from './virtual/document';
 import { IVirtualEditor } from './virtual/editor';
@@ -184,7 +184,17 @@ export class ContextCommandManager extends LSPCommandManager {
       }
     }
     if (context == null) {
-      context = this.current_adapter?.context_from_active_document();
+      try {
+        context = this.current_adapter?.context_from_active_document();
+      } catch (e) {
+        if (e instanceof PositionError) {
+          this.console.log(
+            'Could not get context from active document: it is expected when restoring workspace with open files'
+          );
+        } else {
+          throw e;
+        }
+      }
     }
     return context;
   }

@@ -13,7 +13,8 @@ import { ICodeOverridesRegistry } from '../overrides/tokens';
 import {
   IEditorPosition,
   ISourcePosition,
-  IVirtualPosition
+  IVirtualPosition,
+  PositionError
 } from '../positioning';
 import { ILSPLogConsole } from '../tokens';
 import { DefaultMap, until_ready } from '../utils';
@@ -433,7 +434,10 @@ export class VirtualDocument {
   virtual_position_at_document(
     source_position: ISourcePosition
   ): IVirtualPosition {
-    let source_line = this.source_lines.get(source_position.line)!;
+    let source_line = this.source_lines.get(source_position.line);
+    if (source_line == null) {
+      throw new PositionError('Source line not mapped to virtual position');
+    }
     let virtual_line = source_line.virtual_line;
 
     // position inside the cell (block)

@@ -64,3 +64,7 @@ export function offset_at_position(
   }
   return offset;
 }
+
+export class PositionError extends Error {
+  // no-op
+}
