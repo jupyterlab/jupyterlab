@@ -833,12 +833,12 @@ export namespace DocumentRegistry {
      * Making direct edits to the values stored in the`IModelDB`
      * is not recommended, and may produce unpredictable results.
      */
-    readonly modelDB: IModelDB;
+    //readonly modelDB: IModelDB;
 
     /**
      * The shared notebook model.
      */
-    readonly sharedModel: models.ISharedDocument;
+    //readonly sharedModel: models.ISharedDocument;
 
     /**
      * Serialize the model to a string.
@@ -880,7 +880,7 @@ export namespace DocumentRegistry {
    * The interface for a document model that represents code.
    */
   export interface ICodeModel extends IModel, CodeEditor.IModel {
-    sharedModel: models.ISharedFile;
+    //sharedModel: models.ISharedFile;
   }
 
   /**

@@ -23,7 +23,12 @@ import {
   IObservableUndoableList,
   ModelDB
 } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import {
+  createMutex,
+  ISharedNotebook,
+  NotebookChange,
+  YNotebook
+} from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -73,7 +78,6 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * If the model is initialized or not.
    */
   isInitialized: boolean;
-  readonly sharedModel: models.ISharedNotebook;
 }
 
 /**
@@ -85,27 +89,27 @@ export class NotebookModel implements INotebookModel {
    */
   constructor(options: NotebookModel.IOptions = {}) {
     if (options.modelDB) {
-      this.modelDB = options.modelDB;
+      this._modelDB = options.modelDB;
     } else {
-      this.modelDB = new ModelDB();
+      this._modelDB = new ModelDB();
     }
-    this.sharedModel = models.YNotebook.create(
+    this._sharedModel = YNotebook.create(
       options.disableDocumentWideUndoRedo || false
-    ) as models.ISharedNotebook;
+    ) as ISharedNotebook;
     this._isInitialized = options.isInitialized === false ? false : true;
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
-    this.contentFactory = factory.clone(this.modelDB.view('cells'));
+    this.contentFactory = factory.clone(this._modelDB.view('cells'));
     this._cells = new CellList(
-      this.modelDB,
+      this._modelDB,
       this.contentFactory,
-      this.sharedModel
+      this._sharedModel
     );
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
-    const metadata = this.modelDB.createMap('metadata');
+    const metadata = this._modelDB.createMap('metadata');
     if (!metadata.has('language_info')) {
       const name = options.languagePreference || '';
       metadata.set('language_info', { name });
@@ -114,8 +118,8 @@ export class NotebookModel implements INotebookModel {
     metadata.changed.connect(this._onMetadataChanged, this);
     this._deletedCells = [];
 
-    (this.sharedModel as models.YNotebook).dirty = false;
-    this.sharedModel.changed.connect(this._onStateChanged, this);
+    (this._sharedModel as YNotebook).dirty = false;
+    this._sharedModel.changed.connect(this.onSharedModelChanged, this);
   }
   /**
    * A signal emitted when the document content changes.
@@ -135,13 +139,13 @@ export class NotebookModel implements INotebookModel {
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this.sharedModel.dirty;
+    return this._sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
     if (newValue === this.dirty) {
       return;
     }
-    (this.sharedModel as models.YNotebook).dirty = newValue;
+    (this._sharedModel as YNotebook).dirty = newValue;
   }
 
   /**
@@ -163,7 +167,7 @@ export class NotebookModel implements INotebookModel {
    * The metadata associated with the notebook.
    */
   get metadata(): IObservableJSON {
-    return this.modelDB.get('metadata') as IObservableJSON;
+    return this._modelDB.get('metadata') as IObservableJSON;
   }
 
   /**
@@ -267,7 +271,7 @@ export class NotebookModel implements INotebookModel {
       cells.push(cell);
     }
     this._ensureMetadata();
-    const metadata = this.sharedModel.getMetadata();
+    const metadata = this._sharedModel.getMetadata();
     for (const key of this.metadata.keys()) {
       metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
     }
@@ -313,17 +317,15 @@ export class NotebookModel implements INotebookModel {
     this.cells.pushAll(cells);
     this.cells.endCompoundOperation();
 
-    (this.sharedModel as models.YNotebook).nbformat_minor =
-      nbformat.MINOR_VERSION;
-    (this.sharedModel as models.YNotebook).nbformat = nbformat.MAJOR_VERSION;
+    (this._sharedModel as YNotebook).nbformat_minor = nbformat.MINOR_VERSION;
+    (this._sharedModel as YNotebook).nbformat = nbformat.MAJOR_VERSION;
     const origNbformat = value.metadata.orig_nbformat;
 
     if (value.nbformat !== this._nbformat) {
-      (this.sharedModel as models.YNotebook).nbformat = value.nbformat;
+      (this._sharedModel as YNotebook).nbformat = value.nbformat;
     }
     if (value.nbformat_minor > this._nbformatMinor) {
-      (this.sharedModel as models.YNotebook).nbformat_minor =
-        value.nbformat_minor;
+      (this._sharedModel as YNotebook).nbformat_minor = value.nbformat_minor;
     }
 
     // Alert the user if the format changes.
@@ -415,12 +417,12 @@ close the notebook without saving it.`,
     this.triggerContentChange();
   }
 
-  private _onStateChanged(
-    sender: models.ISharedNotebook,
-    changes: models.NotebookChange
+  protected onSharedModelChanged(
+    sender: ISharedNotebook,
+    change: NotebookChange
   ): void {
-    if (changes.stateChange) {
-      changes.stateChange.forEach(value => {
+    if (change.stateChange) {
+      change.stateChange.forEach(value => {
         if (value.name === 'nbformat') {
           this._nbformat = value.newValue;
         }
@@ -433,8 +435,8 @@ close the notebook without saving it.`,
       });
     }
 
-    if (changes.metadataChange) {
-      const metadata = changes.metadataChange.newValue as JSONObject;
+    if (change.metadataChange) {
+      const metadata = change.metadataChange.newValue as JSONObject;
       this._modelDBMutex(() => {
         Object.entries(metadata).forEach(([key, value]) => {
           this.metadata.set(key, value);
@@ -449,7 +451,7 @@ close the notebook without saving it.`,
   ): void {
     if (!UNSHARED_KEYS.includes(change.key)) {
       this._modelDBMutex(() => {
-        this.sharedModel.updateMetadata(metadata.toJSON());
+        this._sharedModel.updateMetadata(metadata.toJSON());
       });
     }
     this.triggerContentChange();
@@ -496,20 +498,12 @@ close the notebook without saving it.`,
   readonly contentFactory: NotebookModel.IContentFactory;
 
   /**
-   * The shared notebook model.
-   */
-  readonly sharedModel: models.ISharedNotebook;
-
-  /**
    * A mutex to update the shared model.
    */
-  protected readonly _modelDBMutex = models.createMutex();
+  protected readonly _modelDBMutex = createMutex();
 
-  /**
-   * The underlying `IModelDB` instance in which model
-   * data is stored.
-   */
-  readonly modelDB: IModelDB;
+  protected _modelDB: IModelDB;
+  protected _sharedModel: ISharedNotebook;
 
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);

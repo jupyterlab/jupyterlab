@@ -29,13 +29,8 @@ export class DocumentModel
     const filemodel = new YFile() as ISharedFile;
     this.switchSharedModel(filemodel, true);
 
-    (this.sharedModel as YFile).dirty = false;
+    (this._sharedModel as YFile).dirty = false;
   }
-
-  /**
-   * The shared file model.
-   */
-  readonly sharedModel: ISharedFile;
 
   /**
    * A signal emitted when the document content changes.
@@ -55,13 +50,13 @@ export class DocumentModel
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this.sharedModel.dirty;
+    return this._sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
     if (newValue === this.dirty) {
       return;
     }
-    (this.sharedModel as YFile).dirty = newValue;
+    (this._sharedModel as YFile).dirty = newValue;
   }
 
   /**
@@ -103,7 +98,7 @@ export class DocumentModel
    * Serialize the model to a string.
    */
   toString(): string {
-    return this.sharedModel.getSource();
+    return this._sharedModel.getSource();
   }
 
   /**
@@ -113,14 +108,14 @@ export class DocumentModel
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    this.sharedModel.setSource(value);
+    this._sharedModel.setSource(value);
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): PartialJSONValue {
-    return JSON.parse(this.sharedModel.getSource() || 'null');
+    return JSON.parse(this._sharedModel.getSource() || 'null');
   }
 
   /**
@@ -160,6 +155,11 @@ export class DocumentModel
     sender: ISharedFile,
     change: FileChange
   ): void {
+    // Trigger sourceChanged
+    super.onSharedModelChanged(sender, change);
+
+    // TODO: Remove contentChanged in favor of sourceChanged?
+    // Will break a lot of extensions but
     if (change.sourceChange) {
       this.triggerContentChange();
     }
@@ -187,6 +187,8 @@ export class DocumentModel
     this._contentChanged.emit(void 0);
     this.dirty = true;
   }
+
+  protected _sharedModel: ISharedFile;
 
   private _defaultLang = '';
   private _readOnly = false;

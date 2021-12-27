@@ -21,7 +21,6 @@ import {
   ISharedBaseCellMetadata,
   ISharedCell,
   ISharedCodeCell,
-  ISharedText,
   YCodeCell
 } from '@jupyterlab/shared-models';
 
@@ -36,6 +35,7 @@ import {
 } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
+
 const globalModelDBMutex = createMutex();
 
 /**
@@ -75,7 +75,7 @@ export interface ICellModel extends CodeEditor.IModel {
   /**
    * The shared model associated with the cell.
    */
-  readonly sharedModel: ISharedCell & ISharedText;
+  //readonly sharedModel: ISharedCell & ISharedText;
 
   /**
    * Serialize the model to JSON.
@@ -188,15 +188,15 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
       id: options.id || (options.cell?.id as string) || UUID.uuid4()
     });
 
-    const cellType = this.modelDB.createValue('type');
+    const cellType = this._modelDB.createValue('type');
     cellType.set(this.type);
 
-    const observableMetadata = this.modelDB.createMap('metadata');
+    const observableMetadata = this._modelDB.createMap('metadata');
     observableMetadata.changed.connect(this.onModelDBMetadataChange, this);
     observableMetadata.changed.connect(this.onGenericChange, this);
 
     const cell = options.cell;
-    const trusted = this.modelDB.createValue('trusted');
+    const trusted = this._modelDB.createValue('trusted');
     trusted.changed.connect(this.onTrustedChanged, this);
 
     if (!cell) {
@@ -208,13 +208,13 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     // Set the text value, normalizing line endings to \n
     if (Array.isArray(cell.source)) {
-      this.sharedModel.setSource(
+      this._sharedModel.setSource(
         cell.source
           .map(s => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n'))
           .join('')
       );
     } else {
-      this.sharedModel.setSource(
+      this._sharedModel.setSource(
         cell.source.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
       );
     }
@@ -242,11 +242,6 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   /**
-   * The shared cell model.
-   */
-  sharedModel: ISharedCell;
-
-  /**
    * A signal emitted when the state of the model changes.
    */
   readonly contentChanged = new Signal<this, void>(this);
@@ -260,21 +255,21 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * The id for the cell.
    */
   get id(): string {
-    return this.sharedModel.getId();
+    return this._sharedModel.getId();
   }
 
   /**
    * The metadata associated with the cell.
    */
   get metadata(): IObservableJSON {
-    return this.modelDB.get('metadata') as IObservableJSON;
+    return this._modelDB.get('metadata') as IObservableJSON;
   }
 
   /**
    * Get the trusted state of the model.
    */
   get trusted(): boolean {
-    return this.modelDB.getValue('trusted') as boolean;
+    return this._modelDB.getValue('trusted') as boolean;
   }
 
   /**
@@ -285,7 +280,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     if (oldValue === newValue) {
       return;
     }
-    this.modelDB.setValue('trusted', newValue);
+    this._modelDB.setValue('trusted', newValue);
   }
 
   /**
@@ -302,7 +297,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     }
     return {
       cell_type: this.type,
-      source: this.sharedModel.getSource(),
+      source: this._sharedModel.getSource(),
       metadata
     } as nbformat.ICell;
   }
@@ -353,7 +348,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     sender: IObservableJSON,
     event: IObservableJSON.IChangedArgs
   ): void {
-    const metadata = this.sharedModel.getMetadata();
+    const metadata = this._sharedModel.getMetadata();
     globalModelDBMutex(() => {
       switch (event.type) {
         case 'add':
@@ -368,7 +363,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
         default:
           throw new Error(`Invalid event type: ${event.type}`);
       }
-      this.sharedModel.setMetadata(metadata);
+      this._sharedModel.setMetadata(metadata);
     });
   }
 
@@ -385,6 +380,9 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     sender: ISharedCell,
     change: CellChange<ISharedBaseCellMetadata>
   ): void {
+    // Trigger sourceChanged
+    super.onSharedModelChanged(sender, change);
+
     if (change.sourceChange) {
       this.onGenericChange();
     }
@@ -468,6 +466,8 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
       }
     });
   }
+
+  protected _sharedModel: ISharedCell;
 }
 
 /**
@@ -515,7 +515,7 @@ export class AttachmentsCellModel extends CellModel {
 
     this._attachments = factory.createAttachmentsModel({
       values: attachments,
-      modelDB: this.modelDB
+      modelDB: this._modelDB
     });
     this._attachments.stateChanged.connect(this.onGenericChange, this);
   }
@@ -652,7 +652,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     const trusted = this.trusted;
     const cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
-    const executionCount = this.modelDB.createValue('executionCount');
+    const executionCount = this._modelDB.createValue('executionCount');
     if (!executionCount.get()) {
       if (cell && cell.cell_type === 'code') {
         executionCount.set(cell.execution_count || null);
@@ -661,7 +661,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         // TODO load from the notebook file when the dirty state is stored in it
         if (cell.execution_count != null) {
           // True if execution_count is null or undefined
-          this._executedCode = this.sharedModel.getSource().trim();
+          this._executedCode = this._sharedModel.getSource().trim();
         }
       } else {
         executionCount.set(null);
@@ -671,7 +671,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     executionCount.changed.connect(this._onExecutionCountChanged, this);
 
     globalModelDBMutex(() => {
-      const sharedCell = this.sharedModel as ISharedCodeCell;
+      const sharedCell = this._sharedModel as ISharedCodeCell;
       sharedCell.setOutputs(outputs);
     });
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
@@ -717,8 +717,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this.modelDB.has('executionCount')
-      ? (this.modelDB.getValue('executionCount') as nbformat.ExecutionCount)
+    return this._modelDB.has('executionCount')
+      ? (this._modelDB.getValue('executionCount') as nbformat.ExecutionCount)
       : null;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
@@ -726,7 +726,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     if (newValue === oldValue) {
       return;
     }
-    this.modelDB.setValue('executionCount', newValue || null);
+    this._modelDB.setValue('executionCount', newValue || null);
   }
 
   /**
@@ -747,7 +747,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   private _setDirty(v: boolean) {
     if (v !== this._isDirty) {
       if (!v) {
-        this._executedCode = this.sharedModel.getSource().trim();
+        this._executedCode = this._sharedModel.getSource().trim();
       }
       this._isDirty = v;
       this.stateChanged.emit({
@@ -837,7 +837,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     sender: IOutputAreaModel,
     event: IOutputAreaModel.ChangedArgs
   ): void {
-    const codeCell = this.sharedModel as YCodeCell;
+    const codeCell = this._sharedModel as YCodeCell;
     globalModelDBMutex(() => {
       switch (event.type) {
         case 'add': {
@@ -880,7 +880,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     sender: ISharedCodeCell,
     change: CellChange<ISharedBaseCellMetadata>
   ): void {
+    // Trigger sourceChanged
     super.onSharedModelChanged(sender, change);
+
+    if (change.sourceChange) {
+      this._onValueChanged();
+    }
+
     globalModelDBMutex(() => {
       if (change.outputsChange) {
         this.clearExecution();
@@ -893,10 +899,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           : null;
       }
     });
-
-    if (change.sourceChange) {
-      this._onValueChanged();
-    }
   }
 
   /**
@@ -905,7 +907,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   private _onValueChanged(): void {
     if (this.executionCount !== null) {
       this._setDirty(
-        this._executedCode !== this.sharedModel.getSource().trim()
+        this._executedCode !== this._sharedModel.getSource().trim()
       );
     }
   }
@@ -917,7 +919,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     count: IObservableValue,
     args: ObservableValue.IChangedArgs
   ): void {
-    const codeCell = this.sharedModel as YCodeCell;
+    const codeCell = this._sharedModel as YCodeCell;
     globalModelDBMutex(() => {
       codeCell.execution_count = args.newValue
         ? (args.newValue as number)
