@@ -63,7 +63,7 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
           });
         }
 
-        // We trust unconditionally the data has the user is required to
+        // We trust unconditionally the data as the user is required to
         // execute the code to load a particular variable in memory
         const mimeType = this.renderMime.preferredMimeType(data.data, 'any');
 
