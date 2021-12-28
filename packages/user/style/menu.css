@@ -5,15 +5,17 @@
 
 .lm-MenuBar-item[data-empty='true'] {
   border: none !important;
+  /* Ensure the menu won't be displayed if there are no items */
+  pointer-events: none;
 }
 
 .lm-MenuBar-item[data-empty='true']:hover {
   background: none !important;
 }
 
-.lm-MenuBar-menu[data-empty='true'] {
+/* .lm-MenuBar-menu[data-empty='true'] {
   border: none !important;
-}
+} */
 
 .jp-MenuBar-label {
   margin-left: 30px;
