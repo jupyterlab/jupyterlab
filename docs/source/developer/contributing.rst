@@ -308,6 +308,21 @@ sometimes have to set a sentinel value inside a ``Promise`` and then
 check that the sentinel was set if we need a promise to run without
 blocking.
 
+Alternatives To Local Development Environment
+"""""""""""""""""""""""""""""""""""""""""""""
+
+Contributing to JupyterLab codebase without setting up a local development
+environment is also possible using a number of options, often allowing
+to contribute directly from the Web browser:
+
+-  Gitpod integration is enabled, however it is not actively maintained,
+-  GitHub's built-in editor is suitable for contributing very small fixes,
+-  more advanced ``github.dev`` editor can be accessed by pressing the dot
+   (``.``) key while in the JupyterLab GitHub repository,
+-  `jupyterlab-playground <https://github.com/jupyterlab/jupyterlab-plugin-playground>`__,
+   allows to prototype JupyterLab extensions from within JupyterLab and
+   can be run without installation in the browser using Binder.
+
 Internationalization
 --------------------
 
