@@ -210,8 +210,7 @@ namespace Private {
     'var(--jp-collaborator-4)',
     'var(--jp-collaborator-5)',
     'var(--jp-collaborator-6)',
-    'var(--jp-collaborator-7)',
-    'var(--jp-collaborator-8)'
+    'var(--jp-collaborator-7)'
   ];
 
   /**
