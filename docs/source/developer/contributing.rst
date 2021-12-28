@@ -91,9 +91,17 @@ the label ``foo`` and ``bar baz`` to an issue, comment
 
 Contributing from within the browser
 ------------------------------------
-Using the https://github.com web interface - documented
-`here <https://docs.github.com/en/free-pro-team@latest/github>`__ - you
-can create and propose a change purely within your browser.
+
+Contributing to JupyterLab codebase is also possible without setting up
+a local environment, directly from the Web browser:
+
+-  Gitpod integration is enabled, however it is not actively maintained,
+-  GitHub's built-in editor is suitable for contributing very small fixes,
+-  more advanced ``github.dev`` editor can be accessed by pressing the dot
+   (``.``) key while in the JupyterLab GitHub repository,
+-  `jupyterlab-playground <https://github.com/jupyterlab/jupyterlab-plugin-playground>`__,
+   allows to prototype JupyterLab extensions from within JupyterLab and
+   can be run without installation in the browser using Binder.
 
 Using `Binder <https://mybinder.org>`__, you can test the current master branch and your
 changes within the browser as well. We recommend you have at least 8 GB of RAM for this.
@@ -307,21 +315,6 @@ function to get a ``Promise`` for a ``requestAnimationFrame``. We
 sometimes have to set a sentinel value inside a ``Promise`` and then
 check that the sentinel was set if we need a promise to run without
 blocking.
-
-Alternatives To Local Development Environment
-"""""""""""""""""""""""""""""""""""""""""""""
-
-Contributing to JupyterLab codebase without setting up a local development
-environment is also possible using a number of options, often allowing
-to contribute directly from the Web browser:
-
--  Gitpod integration is enabled, however it is not actively maintained,
--  GitHub's built-in editor is suitable for contributing very small fixes,
--  more advanced ``github.dev`` editor can be accessed by pressing the dot
-   (``.``) key while in the JupyterLab GitHub repository,
--  `jupyterlab-playground <https://github.com/jupyterlab/jupyterlab-plugin-playground>`__,
-   allows to prototype JupyterLab extensions from within JupyterLab and
-   can be run without installation in the browser using Binder.
 
 Internationalization
 --------------------
