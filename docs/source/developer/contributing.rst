@@ -17,7 +17,12 @@ or `help
 wanted <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22>`__
 that we believe are good examples of small, self-contained changes. We
 encourage those that are new to the code base to implement and/or ask
-questions about these issues.
+questions about these issues. You are not required to ask for a permission
+to work on such issue, but if you do and do not get a reply within 48 hours
+please assume that no one else is working on it (even if someone previously
+volunteered) and open a pull request with proposed implementation.
+If you are not certain about the implementation, using draft pull requests is encouraged.
+
 
 If you believe you’ve found a security vulnerability in JupyterLab or
 any Jupyter project, please report it to security@ipython.org. If you
