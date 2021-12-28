@@ -543,15 +543,15 @@ class TestExtension(AppHandlerTest):
         assert disable_extension(self.pkg_names['extension'], app_options=options) is True
         info = get_app_info(app_options=options)
         name = self.pkg_names['extension']
-        assert name in info['disabled']
+        assert info['disabled'].get(name) is True
         assert not check_extension(name, app_options=options)
         assert check_extension(name, installed=True, app_options=options)
         assert disable_extension('@jupyterlab/notebook-extension', app_options=options) is True
         info = get_app_info(app_options=options)
-        assert '@jupyterlab/notebook-extension' in info['disabled']
+        assert info['disabled'].get('@jupyterlab/notebook-extension') is True
         assert not check_extension('@jupyterlab/notebook-extension', app_options=options)
         assert check_extension('@jupyterlab/notebook-extension', installed=True, app_options=options)
-        assert name in info['disabled']
+        assert info['disabled'].get(name) is True
         assert not check_extension(name, app_options=options)
         assert check_extension(name, installed=True, app_options=options)
 
@@ -563,7 +563,7 @@ class TestExtension(AppHandlerTest):
         info = get_app_info(app_options=options)
         assert '@jupyterlab/notebook-extension' not in info['disabled']
         name = self.pkg_names['extension']
-        assert name not in info['disabled']
+        assert info['disabled'].get(name, False) is False
         assert check_extension(name, app_options=options)
         assert disable_extension('@jupyterlab/notebook-extension', app_options=options) is True
         assert check_extension(name, app_options=options)
