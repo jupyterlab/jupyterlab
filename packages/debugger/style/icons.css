@@ -27,7 +27,7 @@ button.jp-Button.jp-mod-minimal.jp-TableView:hover {
 }
 
 /* Pause on exceptions */
-button.jp-Button.bp3-button.bp3-minimal.jp-PauseOnExceptions:hover {
+button.jp-Button.jp-mod-minimal.jp-PauseOnExceptions:hover {
   cursor: pointer;
   background-color: var(--jp-layout-color2);
 }
