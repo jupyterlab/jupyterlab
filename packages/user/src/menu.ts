@@ -120,7 +120,6 @@ export class UserMenu extends Menu {
     this.title.icon = caretDownIcon;
     this.title.iconClass = 'jp-UserMenu-caretDownIcon';
     this.title.dataset = { empty: 'true' };
-    //this.dataset.empty = 'true';
     this._user.ready.connect(this._updateLabel);
     this._user.changed.connect(this._updateLabel);
   }
@@ -152,7 +151,6 @@ export class UserMenu extends Menu {
    * The index will be clamped to the bounds of the items.
    */
   insertItem(index: number, options: Menu.IItemOptions): Menu.IItem {
-    //this.dataset.empty = 'false';
     this.title.dataset = { ...this.title.dataset, empty: 'false' };
     return super.insertItem(index, options);
   }
@@ -168,7 +166,6 @@ export class UserMenu extends Menu {
   removeItemAt(index: number): void {
     super.removeItemAt(index);
     if (this.items.length === 0) {
-      //this.dataset.empty = 'true';
       this.title.dataset = { ...this.title.dataset, empty: 'true' };
     }
   }
@@ -178,7 +175,6 @@ export class UserMenu extends Menu {
    */
   clearItems(): void {
     super.clearItems();
-    //this.dataset.empty = 'true';
     this.title.dataset = { ...this.title.dataset, empty: 'true' };
   }
 }
