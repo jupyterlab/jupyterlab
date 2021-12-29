@@ -713,7 +713,7 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.pause, {
-      label: trans.__('Enable / Disable pausing on exceptions'),
+      label: service.isPausingOnExceptions ? trans.__('Disable pausing on exceptions') : trans.__('Enable pausing on exceptions'),
       caption: trans.__('Enable / Disable pausing on exceptions'),
       className: 'jp-PauseOnExceptions',
       icon: Debugger.Icons.pauseOnExceptionsIcon,
