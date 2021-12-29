@@ -139,7 +139,7 @@ export namespace Callstack {
     evaluate: string;
 
     /**
-     * The puse command ID.
+     * The pause command ID.
      */
     pause: string;
   }
