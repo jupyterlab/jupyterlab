@@ -249,6 +249,7 @@ class LabPathApp(JupyterApp):
         print('User Settings directory: %s' % get_user_settings_dir())
         print('Workspaces directory: %s' % get_workspaces_dir())
 
+
 class LabWorkspaceExportApp(WorkspaceExportApp):
     version = version
 
@@ -256,12 +257,14 @@ class LabWorkspaceExportApp(WorkspaceExportApp):
     def _default_workspaces_dir(self):
         return get_workspaces_dir()
 
+
 class LabWorkspaceImportApp(WorkspaceImportApp):
     version = version
 
     @default('workspaces_dir')
     def _default_workspaces_dir(self):
         return get_workspaces_dir()
+
 
 class LabWorkspaceListApp(WorkspaceListApp):
     version = version
