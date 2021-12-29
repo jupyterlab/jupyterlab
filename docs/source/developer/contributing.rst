@@ -97,7 +97,9 @@ a local environment, directly from the Web browser:
 
 -  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
    however it is not actively maintained,
--  GitHub's built-in editor is suitable for contributing very small fixes,
+-  GitHub's
+   `built-in editor <https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files>`__
+   is suitable for contributing very small fixes,
 -  more advanced `github.dev <https://docs.github.com/en/codespaces/the-githubdev-web-based-editor>`__
    editor can be accessed by pressing the dot (``.``) key while in the JupyterLab GitHub repository,
 -  `jupyterlab-playground <https://github.com/jupyterlab/jupyterlab-plugin-playground>`__,
@@ -186,10 +188,10 @@ Notes:
    Python 3.0+ version of ``pip`` or ``pip3 install -e .`` command to
    install JupyterLab from the forked repository.
 -  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
-   returned exit status 127 while in binding.gyp`` while running the 
+   returned exit status 127 while in binding.gyp`` while running the
    ``pip install`` command above, you may be missing packages required
    by ``canvas``. On macOS with Homebrew, you can add these packages by
-   running 
+   running
    ``brew install pkg-config cairo pango libpng jpeg giflib librsvg``.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://yarnpkg.com/en>`__ package manager. If you have
@@ -323,7 +325,7 @@ Internationalization
 Translatable strings update
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The translatable strings update cannot occur on patch release. They 
+The translatable strings update cannot occur on patch release. They
 must be delayed on minor or major versions.
 
 Performance Testing
@@ -559,40 +561,40 @@ Visual Regression and UI Tests
 ------------------------------
 
 As part of JupyterLab CI workflows, UI tests are run with visual regression checks.
-`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__ is used for UI 
-testing. Galata provides `Playwright <https://playwright.dev>`__ helpers to control and 
+`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__ is used for UI
+testing. Galata provides `Playwright <https://playwright.dev>`__ helpers to control and
 inspect JupyterLab UI programmatically.
 
-UI tests are run for each commit into JupyterLab project in PRs or direct commits. Code 
-changes can sometimes cause UI tests to fail for various reasons. After each test run, 
-Galata generates a user friendly test result report which can be used to inspect failing 
-UI tests. Result report shows the failure reason, call-stack up to the failure and 
-detailed information on visual regression issues. For visual regression errors, reference 
-image and test capture image, along with diff image generated during comparison are 
-provided in the report. You can use these information to debug failing tests. Galata test 
-report can be downloaded from GitHub Actions page for a UI test run. Test artifact is 
-named ``galata-report`` and once you extract it, you can access the report by launching 
-a server to serve the files ``python -m http.server -d <path-to-extracted-report>``. 
+UI tests are run for each commit into JupyterLab project in PRs or direct commits. Code
+changes can sometimes cause UI tests to fail for various reasons. After each test run,
+Galata generates a user friendly test result report which can be used to inspect failing
+UI tests. Result report shows the failure reason, call-stack up to the failure and
+detailed information on visual regression issues. For visual regression errors, reference
+image and test capture image, along with diff image generated during comparison are
+provided in the report. You can use these information to debug failing tests. Galata test
+report can be downloaded from GitHub Actions page for a UI test run. Test artifact is
+named ``galata-report`` and once you extract it, you can access the report by launching
+a server to serve the files ``python -m http.server -d <path-to-extracted-report>``.
 Then open *http://localhost:8000* with your web browser.
 
 Main reasons for UI test failures are:
 
 1. **A visual regression caused by code changes**:
 
-   Sometimes unintentional UI changes are introduced by modifications to project source 
-   code. Goal of visual regression testing is to detect this kind of UI changes. If your 
-   PR / commit is causing visual regression, then debug and fix the regression caused. 
+   Sometimes unintentional UI changes are introduced by modifications to project source
+   code. Goal of visual regression testing is to detect this kind of UI changes. If your
+   PR / commit is causing visual regression, then debug and fix the regression caused.
    You can locally run and debug the UI tests to fix the visual regression. To debug your
-   test, you may run ``PWDEBUG=1 jlpm playwright test <path-to-test-file>``. Once you 
+   test, you may run ``PWDEBUG=1 jlpm playwright test <path-to-test-file>``. Once you
    have a fix, you can push the change to your GitHub branch and test with GitHub actions.
 
 2. **An intended update to user interface**:
 
    If your code change is introducing an update to UI which causes existing UI Tests to
    fail, then you will need to update reference image(s) for the failing tests. In order
-   to do that, go to GitHub Actions page for the failed test and download test 
-   artifacts ``galata-test-assets``. It will contain test captures. You can 
-   copy the capture for the failed test suffixed with *actual* and paste it into reference 
+   to do that, go to GitHub Actions page for the failed test and download test
+   artifacts ``galata-test-assets``. It will contain test captures. You can
+   copy the capture for the failed test suffixed with *actual* and paste it into reference
    screenshots directory in JupyterLab source code, replacing the failing test's reference
    capture. Reference captures are located in directories named as the test files with the
    suffix ``-snapshots`` in JupyterLab source code.
