@@ -31,12 +31,6 @@ from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
 from .handlers.yjs_echo_ws import YjsEchoWebSocket
 
-# TODO: remove when oldest compatible jupyterlab_server contains license tooling
-try:
-    from jupyterlab_server import LicensesApp
-except ImportError:
-    LicensesApp = None
-
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
 
