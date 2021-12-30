@@ -130,6 +130,8 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
           this.settings.composite.caseSensitive;
         this.model.settings.includePerfectMatches =
           this.settings.composite.includePerfectMatches;
+        this.model.settings.preFilterMatches =
+          this.settings.composite.preFilterMatches;
       }
     });
   }
@@ -285,7 +287,8 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     completer.addClass('lsp-completer');
     completer.model = new LSPCompleterModel({
       caseSensitive: this.settings.composite.caseSensitive,
-      includePerfectMatches: this.settings.composite.includePerfectMatches
+      includePerfectMatches: this.settings.composite.includePerfectMatches,
+      preFilterMatches: this.settings.composite.preFilterMatches
     });
   }
 
