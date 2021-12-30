@@ -516,13 +516,18 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       next: CommandIDs.next,
       stepIn: CommandIDs.stepIn,
       stepOut: CommandIDs.stepOut,
-      evaluate: CommandIDs.evaluate,
+      evaluate: CommandIDs.evaluate
+    };
+
+    const breakpointsCommands = {
+      registry: commands,
       pause: CommandIDs.pause
     };
 
     const sidebar = new Debugger.Sidebar({
       service,
       callstackCommands,
+      breakpointsCommands,
       editorServices,
       themeManager,
       translator
@@ -713,7 +718,9 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.pause, {
-      label: service.isPausingOnExceptions ? trans.__('Disable pausing on exceptions') : trans.__('Enable pausing on exceptions'),
+      label: service.isPausingOnExceptions
+        ? trans.__('Disable pausing on exceptions')
+        : trans.__('Enable pausing on exceptions'),
       caption: trans.__('Enable / Disable pausing on exceptions'),
       className: 'jp-PauseOnExceptions',
       icon: Debugger.Icons.pauseOnExceptionsIcon,
