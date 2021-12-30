@@ -75,10 +75,6 @@ export function writePackageData(
 ): boolean {
   const text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
   const orig = fs.readFileSync(pkgJsonPath, 'utf8').split('\r\n').join('\n');
-  console.log('NEW');
-  console.log(text);
-  console.log('ORIG');
-  console.log(orig);
   if (text !== orig) {
     fs.writeFileSync(pkgJsonPath, text, 'utf8');
     return true;
