@@ -742,7 +742,7 @@ const main: JupyterFrontEndPlugin<void> = {
     shell.add(sidebar, 'right');
 
     commands.addCommand(CommandIDs.showPanel, {
-      label: translator.load('jupyterlab').__('Debugger Panel'),
+      label: trans.__('Debugger Panel'),
       execute: () => {
         shell.activateById(sidebar.id);
       }
@@ -808,12 +808,12 @@ const main: JupyterFrontEndPlugin<void> = {
               if (editor instanceof CodeMirrorEditor) {
                 (editor as CodeMirrorEditor).scrollIntoViewCentered({
                   line: (breakpoint.line as number) - 1,
-                  ch: breakpoint.column || 0
+                  ch: breakpoint.column ?? 0
                 });
               } else {
                 editor.revealPosition({
                   line: (breakpoint.line as number) - 1,
-                  column: breakpoint.column || 0
+                  column: breakpoint.column ?? 0
                 });
               }
             });
