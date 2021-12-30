@@ -7,7 +7,8 @@ set -o pipefail
 
 # Building should work without yarn installed globally, so uninstall the
 # global yarn installed by default.
-if [ $OSTYPE == "linux-gnu" ]; then
+echo $OSTYPE
+if [ $OSTYPE == "Linux" ]; then
     sudo rm -rf $(which yarn)
     ! yarn
 fi
