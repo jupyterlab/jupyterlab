@@ -10,6 +10,10 @@ export enum DiagnosticTag {
   Deprecated = 2
 }
 
+export enum CompletionItemTag {
+  Deprecated = 1
+}
+
 export enum CompletionItemKind {
   Text = 1,
   Method = 2,

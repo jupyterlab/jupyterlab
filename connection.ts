@@ -19,6 +19,7 @@ import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
 
+import { CompletionItemTag } from './lsp';
 import { ILSPLogConsole } from './tokens';
 import { until_ready } from './utils';
 
@@ -390,6 +391,74 @@ export class LSPConnection extends LspWsConnection {
       this.constructNotificationHandlers<ServerNotifications>(
         Method.ServerNotification
       );
+  }
+
+  /**
+   * Initialization parameters to be sent to the language server.
+   * Subclasses can overload this when adding more features.
+   */
+  protected initializeParams(): lsp.InitializeParams {
+    return {
+      ...super.initializeParams(),
+      capabilities: {
+        textDocument: {
+          hover: {
+            dynamicRegistration: true,
+            contentFormat: ['markdown', 'plaintext']
+          },
+          synchronization: {
+            dynamicRegistration: true,
+            willSave: false,
+            didSave: true,
+            willSaveWaitUntil: false
+          },
+          completion: {
+            dynamicRegistration: true,
+            completionItem: {
+              snippetSupport: false,
+              commitCharactersSupport: true,
+              documentationFormat: ['markdown', 'plaintext'],
+              deprecatedSupport: true,
+              preselectSupport: false,
+              tagSupport: {
+                valueSet: [CompletionItemTag.Deprecated]
+              }
+            },
+            contextSupport: false
+          },
+          signatureHelp: {
+            dynamicRegistration: true,
+            signatureInformation: {
+              documentationFormat: ['markdown', 'plaintext']
+            }
+          },
+          declaration: {
+            dynamicRegistration: true,
+            linkSupport: true
+          },
+          definition: {
+            dynamicRegistration: true,
+            linkSupport: true
+          },
+          typeDefinition: {
+            dynamicRegistration: true,
+            linkSupport: true
+          },
+          implementation: {
+            dynamicRegistration: true,
+            linkSupport: true
+          }
+        } as lsp.ClientCapabilities,
+        workspace: {
+          didChangeConfiguration: {
+            dynamicRegistration: true
+          }
+        } as lsp.WorkspaceClientCapabilities
+      } as lsp.ClientCapabilities,
+      initializationOptions: null,
+      processId: null,
+      workspaceFolders: null
+    };
   }
 
   sendOpenWhenReady(documentInfo: IDocumentInfo) {
