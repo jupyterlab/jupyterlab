@@ -12,7 +12,7 @@ import { LSPConnection } from '../../connection';
 import { PositionConverter } from '../../converter';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 import { FeatureSettings } from '../../feature';
-import { DiagnosticSeverity } from '../../lsp';
+import { DiagnosticSeverity, DiagnosticTag } from '../../lsp';
 import { IEditorPosition, IVirtualPosition } from '../../positioning';
 import { DefaultMap, uris_equal } from '../../utils';
 import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
@@ -546,12 +546,6 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
           return;
         }
 
-        let highest_severity_code = diagnostics
-          .map(diagnostic => diagnostic.severity || this.defaultSeverity)
-          .sort()[0];
-
-        const severity = DiagnosticSeverity[highest_severity_code];
-
         let ce_editor = document.get_editor_at_virtual_line(start);
         let cm_editor =
           this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor)!;
@@ -621,11 +615,31 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
         markers_to_retain.add(diagnostic_hash);
 
         if (!this.marked_diagnostics.has(diagnostic_hash)) {
+          const highestSeverityCode = diagnostics
+            .map(diagnostic => diagnostic.severity || this.defaultSeverity)
+            .sort()[0];
+
+          const severity = DiagnosticSeverity[highestSeverityCode];
+
+          const classNames = [
+            'cm-lsp-diagnostic',
+            'cm-lsp-diagnostic-' + severity
+          ];
+
+          const tags: lsProtocol.DiagnosticTag[] = [];
+          for (let diagnostic of diagnostics) {
+            if (diagnostic.tags) {
+              tags.push(...diagnostic.tags);
+            }
+          }
+          for (const tag of new Set(tags)) {
+            classNames.push('cm-lsp-diagnostic-tag-' + DiagnosticTag[tag]);
+          }
           let options: CodeMirror.TextMarkerOptions = {
             title: diagnostics
               .map(d => d.message + (d.source ? ' (' + d.source + ')' : ''))
               .join('\n'),
-            className: 'cm-lsp-diagnostic cm-lsp-diagnostic-' + severity
+            className: classNames.join(' ')
           };
           let marker;
           try {
