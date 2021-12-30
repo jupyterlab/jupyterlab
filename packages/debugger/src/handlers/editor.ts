@@ -95,11 +95,11 @@ export class EditorHandler implements IDisposable {
     this._clearEditor();
     Signal.clearData(this);
     // Clear breakpoints
-    this._debuggerService.updateBreakpoints(
-      this._editor.model.value.text,
-      [],
-      this._path
-    );
+    this._debuggerService
+      .updateBreakpoints(this._editor.model.value.text, [], this._path)
+      .catch(reason => {
+        console.error(`Fail to clear breakpoints:\n${reason}`);
+      });
   }
 
   /**
