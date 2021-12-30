@@ -799,22 +799,22 @@ export namespace CodeEditor {
    * The default configuration options for an editor.
    */
   export const defaultConfig: IConfig = {
+    autoClosingBrackets: false,
+    codeFolding: false,
     cursorBlinkRate: 530,
     fontFamily: null,
     fontSize: null,
+    handlePaste: true,
+    insertSpaces: true,
     lineHeight: null,
     lineNumbers: false,
     lineWrap: 'on',
-    wordWrapColumn: 80,
+    matchBrackets: true,
     readOnly: false,
     tabSize: 4,
-    insertSpaces: true,
-    matchBrackets: true,
-    autoClosingBrackets: false,
-    handlePaste: true,
     rulers: [],
-    codeFolding: false,
-    showTrailingSpace: false
+    showTrailingSpace: false,
+    wordWrapColumn: 80
   };
 
   /**

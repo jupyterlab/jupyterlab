@@ -111,19 +111,20 @@ export const FACTORY = 'Editor';
 
 const userSettings = [
   'autoClosingBrackets',
+  'codeFolding',
   'cursorBlinkRate',
   'fontFamily',
   'fontSize',
+  'insertSpaces',
   'lineHeight',
   'lineNumbers',
   'lineWrap',
   'matchBrackets',
   'readOnly',
-  'insertSpaces',
-  'tabSize',
-  'wordWrapColumn',
   'rulers',
-  'codeFolding'
+  'showTrailingSpace',
+  'tabSize',
+  'wordWrapColumn'
 ];
 
 function filterUserSettings(config: CodeEditor.IConfig): CodeEditor.IConfig {
