@@ -13,12 +13,14 @@ JupyterLab will open automatically in your browser.
 
 If your notebook files are not in the current directory, you can pass your working directory path as argument when starting JupyterLab. Avoid running it from your root volume (e.g. `C:\` on Windows or `/` on Linux) to limit the risk of modifying system files.
 
+Example:
+
 .. code:: bash
 
     #Windows Example
-    jupyter lab --notebook-dir E:/
+    jupyter lab --app_dir=E:/ --preferred_dir E:/Documents/Somewhere/Else
     #Linux Example
-    jupyter lab --notebook-dir /var/www/html/
+    jupyter lab --app_dir=/var/ --preferred_dir /var/www/html/example-app/
 
 You may access JupyterLab by entering the notebook server's :ref:`URL <urls>`
 into the browser. JupyterLab sessions always reside in a
