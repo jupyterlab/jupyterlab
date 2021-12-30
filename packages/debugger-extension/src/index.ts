@@ -516,7 +516,11 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       next: CommandIDs.next,
       stepIn: CommandIDs.stepIn,
       stepOut: CommandIDs.stepOut,
-      evaluate: CommandIDs.evaluate,
+      evaluate: CommandIDs.evaluate
+    };
+
+    const breakpointsCommands = {
+      registry: commands,
       pause: CommandIDs.pause
     };
 
