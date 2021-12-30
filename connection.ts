@@ -19,7 +19,7 @@ import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
 
-import { CompletionItemTag } from './lsp';
+import { CompletionItemTag, DiagnosticTag } from './lsp';
 import { ILSPLogConsole } from './tokens';
 import { until_ready } from './utils';
 
@@ -426,6 +426,11 @@ export class LSPConnection extends LspWsConnection {
             },
             contextSupport: false
           },
+          publishDiagnostics: {
+            tagSupport: {
+              valueSet: [DiagnosticTag.Deprecated, DiagnosticTag.Unnecessary]
+            }
+          },
           signatureHelp: {
             dynamicRegistration: true,
             signatureInformation: {
@@ -448,7 +453,7 @@ export class LSPConnection extends LspWsConnection {
             dynamicRegistration: true,
             linkSupport: true
           }
-        } as lsp.ClientCapabilities,
+        } as lsp.TextDocumentClientCapabilities,
         workspace: {
           didChangeConfiguration: {
             dynamicRegistration: true
