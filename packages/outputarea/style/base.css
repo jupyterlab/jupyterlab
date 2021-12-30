@@ -223,6 +223,9 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   }
 }
 
+/*-----------------------------------------------------------------------------
+| Mobile
+|----------------------------------------------------------------------------*/
 @media only screen and (max-width: 760px) {
   .jp-OutputPrompt {
     display: table-row;
