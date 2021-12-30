@@ -548,7 +548,7 @@ export namespace CodeEditor {
     /**
      * Set config options for the editor.
      */
-    setOptions<K extends keyof IConfig>(options: IConfigOptions<K>[]): void;
+    setOptions(options: Partial<IConfig>): void;
 
     /**
      * Returns the content for the given line number.
@@ -818,13 +818,6 @@ export namespace CodeEditor {
   };
 
   /**
-   * The options used to set several options at once with setOptions.
-   */
-  export interface IConfigOptions<K extends keyof IConfig> {
-    K: IConfig[K];
-  }
-
-  /**
    * The options used to initialize an editor.
    */
   export interface IOptions {
@@ -861,7 +854,11 @@ export namespace CodeEditor {
 
   export namespace Model {
     export interface IOptions {
+      /**
+       * A unique identifier for the model.
+       */
       id?: string;
+
       /**
        * The initial value of the model.
        */

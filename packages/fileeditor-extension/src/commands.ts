@@ -207,11 +207,7 @@ export namespace Commands {
    */
   export function updateWidget(widget: FileEditor): void {
     const editor = widget.editor;
-    let editorOptions: any = {};
-    Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-      editorOptions[key] = config[key];
-    });
-    editor.setOptions(editorOptions);
+    editor.setOptions({...config});
   }
 
   /**

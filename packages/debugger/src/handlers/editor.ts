@@ -72,6 +72,13 @@ export class EditorHandler implements IDisposable {
   }
 
   /**
+   * The editor
+   */
+  get editor(): CodeEditor.IEditor {
+    return this._editor;
+  }
+
+  /**
    * Whether the handler is disposed.
    */
   isDisposed: boolean;
