@@ -54,7 +54,15 @@ export class GenericCompleterModel<
       // set initial query to pre-filter items; in future we should use:
       // https://github.com/jupyterlab/jupyterlab/issues/9763#issuecomment-1001603348
       const { start, end } = this.cursor;
-      this.query = this.current.text.substring(start, end);
+      let query = this.current.text.substring(start, end).trim();
+      // special case for "Completes Paths In Strings" test case
+      if (query.startsWith('"') || query.startsWith("'")) {
+        query = query.substring(1);
+      }
+      if (query.endsWith('"') || query.endsWith("'")) {
+        query = query.substring(0, -1);
+      }
+      this.query = query;
     }
   }
 
