@@ -11,7 +11,7 @@ Start JupyterLab using:
 
 JupyterLab will open automatically in your browser.
 
-If the location of your notebook files are not in your home directory (more often the case in Windows, or if you have an external drive) you can use the `--notebook-dir` added parameter to start JupyterLab in that directory.  Be very careful though, never run it in your root volume (ex: `c/` in Windows, `/` in Linux) unless you know what you are doing and are prepared for the consequences! 
+If your notebook files are not in the current directory, you can pass your working directory path as argument when starting JupyterLab. Avoid running it from your root volume (e.g. `C:\` on Windows or `/` on Linux) to limit the risk of modifying system files.
 
 .. code:: bash
 
