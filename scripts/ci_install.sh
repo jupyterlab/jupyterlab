@@ -55,6 +55,3 @@ if [[ $GROUP == js-debugger ]]; then
     pip install xeus-python">=0.9.0,<0.10.0"
 fi
 
-# Pin the jedi dependency to prevent a temporary breakage
-# See https://github.com/ipython/ipython/issues/12740, https://github.com/ipython/ipython/pull/12751
-pip install 'jedi<0.18'
