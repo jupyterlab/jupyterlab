@@ -96,7 +96,10 @@ describe('Debugger', () => {
         next: '',
         stepIn: '',
         stepOut: '',
-        evaluate: '',
+        evaluate: ''
+      },
+      breakpointsCommands: {
+        registry,
         pause: ''
       },
       breakpointsCommands: {
@@ -210,9 +213,9 @@ describe('Debugger', () => {
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Callstack');
       });
-      it('should have seven buttons', () => {
+      it('should have six buttons', () => {
         const buttons = toolbar.querySelectorAll('button');
-        expect(buttons.length).toBe(7);
+        expect(buttons.length).toBe(6);
       });
     });
     describe('Breakpoints toolbar', () => {
