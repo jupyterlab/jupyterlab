@@ -98,6 +98,7 @@ export abstract class CodeMirrorIntegration
   protected virtual_document: VirtualDocument;
   protected connection: LSPConnection;
 
+  /** @deprecated: use `setStatusMessage()` instead */
   protected status_message: StatusMessage;
   protected adapter: WidgetAdapter<IDocumentWidget>;
   protected console: ILSPLogConsole;
@@ -126,6 +127,17 @@ export abstract class CodeMirrorIntegration
     this.connection_handlers = new Map();
     this.wrapper_handlers = new Map();
     this.is_registered = false;
+  }
+
+  /**
+   * Set the text message and (optionally) the timeout to remove it.
+   * @param message
+   * @param timeout - number of ms to until the message is cleaned;
+   *        -1 if the message should stay up indefinitely;
+   *        defaults to 3000ms (3 seconds)
+   */
+  setStatusMessage(message: string, timeout?: number): void {
+    this.status_message.set(message, timeout);
   }
 
   register(): void {

@@ -129,10 +129,10 @@ export interface IClientResult {
   [Method.ClientRequest.DEFINITION]: AnyLocation;
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.DocumentHighlight[];
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbol[];
-  [Method.ClientRequest.HOVER]: lsp.Hover;
+  [Method.ClientRequest.HOVER]: lsp.Hover | null;
   [Method.ClientRequest.IMPLEMENTATION]: AnyLocation;
   [Method.ClientRequest.INITIALIZE]: lsp.InitializeResult;
-  [Method.ClientRequest.REFERENCES]: Location[];
+  [Method.ClientRequest.REFERENCES]: lsp.Location[] | null;
   [Method.ClientRequest.RENAME]: lsp.WorkspaceEdit;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.SignatureHelp;
   [Method.ClientRequest.TYPE_DEFINITION]: AnyLocation;

@@ -2,6 +2,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { InputDialog } from '@jupyterlab/apputils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { URLExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -16,6 +17,7 @@ import {
   NotebookJumper
 } from '@krassowski/code-jumpers';
 import { AnyLocation } from 'lsp-ws-connection/lib/types';
+import type * as lsp from 'vscode-languageserver-protocol';
 
 import jumpToSvg from '../../style/icons/jump-to.svg';
 import { CodeJump as LSPJumpSettings, ModifierKey } from '../_jump_to';
@@ -27,9 +29,10 @@ import {
   IFeatureCommand,
   IFeatureLabIntegration
 } from '../feature';
-import { IVirtualPosition } from '../positioning';
+import { IVirtualPosition, ProtocolCoordinates } from '../positioning';
 import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { getModifierState, uri_to_contents_path, uris_equal } from '../utils';
+import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 
 export const jumpToIcon = new LabIcon({
   name: 'lsp:jump-to',
@@ -44,6 +47,15 @@ const jumpBackIcon = new LabIcon({
 const FEATURE_ID = PLUGIN_ID + ':jump_to';
 
 let trans: TranslationBundle;
+
+const enum JumpResult {
+  NoTargetsFound = 1,
+  PositioningFailure = 2,
+  PathResolutionFailure = 3,
+  AssumeSuccess = 4,
+  UnspecifiedFailure = 5,
+  AlreadyAtTarget = 6
+}
 
 export class CMJumpToDefinition extends CodeMirrorIntegration {
   get jumper() {
@@ -61,94 +73,173 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
   register() {
     this.editor_handlers.set(
       'mousedown',
-      (virtual_editor, event: MouseEvent) => {
-        const { button } = event;
-        if (button === 0 && getModifierState(event, this.modifierKey)) {
-          let root_position = this.position_from_mouse(event);
-          if (root_position == null) {
-            this.console.warn(
-              'Could not retrieve root position from mouse event to jump to definition'
-            );
-            return;
-          }
-          let document =
-            virtual_editor.document_at_root_position(root_position);
-          let virtual_position =
-            virtual_editor.root_position_to_virtual_position(root_position);
-
-          this.connection
-            .getDefinition(virtual_position, document.document_info, false)
-            .then(targets => {
-              this.handle_jump(targets, document.document_info.uri).catch(
-                this.console.warn
-              );
-            })
-            .catch(this.console.warn);
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      }
+      this._jumpToDefinitionOrRefernce.bind(this)
     );
     super.register();
   }
 
-  get_uri_and_range(location_or_locations: AnyLocation) {
-    if (location_or_locations == null) {
-      return undefined;
+  private _jumpToDefinitionOrRefernce(
+    virtual_editor: CodeMirrorVirtualEditor,
+    event: MouseEvent
+  ) {
+    const { button } = event;
+    const shouldJump =
+      button === 0 && getModifierState(event, this.modifierKey);
+    if (!shouldJump) {
+      return;
     }
-    // some language servers appear to return a single object
-    const locations = Array.isArray(location_or_locations)
-      ? location_or_locations
-      : [location_or_locations];
-
-    // TODO: implement selector for multiple locations
-    //  (like when there are multiple definitions or usages)
-    //  could use the showHints() or completion frontend as a reference
-    if (locations.length === 0) {
-      return undefined;
-    }
-
-    this.console.log(
-      'Will jump to the first of suggested locations:',
-      locations
-    );
-
-    const location_or_link = locations[0];
-
-    if ('targetUri' in location_or_link) {
-      return {
-        uri: location_or_link.targetUri,
-        range: location_or_link.targetRange
-      };
-    } else if ('uri' in location_or_link) {
-      return {
-        uri: location_or_link.uri,
-        range: location_or_link.range
-      };
-    } else {
+    let root_position = this.position_from_mouse(event);
+    if (root_position == null) {
       this.console.warn(
-        'Returned jump location is incorrect (no uri or targetUri):',
-        location_or_link
+        'Could not retrieve root position from mouse event to jump to definition/reference'
       );
-      return undefined;
+      return;
+    }
+    let document = virtual_editor.document_at_root_position(root_position);
+    let virtual_position =
+      virtual_editor.root_position_to_virtual_position(root_position);
+
+    const positionParams: lsp.TextDocumentPositionParams = {
+      textDocument: {
+        uri: document.document_info.uri
+      },
+      position: {
+        line: virtual_position.line,
+        character: virtual_position.ch
+      }
+    };
+
+    this.connection.clientRequests['textDocument/definition']
+      .request(positionParams)
+      .then(targets => {
+        this.handleJump(targets, positionParams)
+          .then((result: JumpResult | undefined) => {
+            if (
+              result === JumpResult.NoTargetsFound ||
+              result === JumpResult.AlreadyAtTarget
+            ) {
+              // definition was not found, or we are in definition already, suggest references
+              this.connection.clientRequests['textDocument/references']
+                .request({
+                  ...positionParams,
+                  context: { includeDeclaration: false }
+                })
+                .then(targets =>
+                  // TODO: explain that we are now presenting references?
+                  this.handleJump(targets, positionParams)
+                )
+                .catch(this.console.warn);
+            }
+          })
+          .catch(this.console.warn);
+      })
+      .catch(this.console.warn);
+
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  private _harmonizeLocations(locationData: AnyLocation): lsp.Location[] {
+    if (locationData == null) {
+      return [];
+    }
+
+    const locationsList = Array.isArray(locationData)
+      ? locationData
+      : [locationData];
+
+    return (locationsList as (lsp.Location | lsp.LocationLink)[])
+      .map((locationOrLink): lsp.Location | undefined => {
+        if ('targetUri' in locationOrLink) {
+          return {
+            uri: locationOrLink.targetUri,
+            range: locationOrLink.targetRange
+          };
+        } else if ('uri' in locationOrLink) {
+          return {
+            uri: locationOrLink.uri,
+            range: locationOrLink.range
+          };
+        } else {
+          this.console.warn(
+            'Returned jump location is incorrect (no uri or targetUri):',
+            locationOrLink
+          );
+          return undefined;
+        }
+      })
+      .filter((location): location is lsp.Location => location != null);
+  }
+
+  private async _chooseTarget(locations: lsp.Location[]) {
+    if (locations.length > 1) {
+      const choices = locations.map(location => {
+        // TODO: extract the line, the line above and below, and show it
+        const path = this._resolvePath(location.uri) || location.uri;
+        return path + ', line: ' + location.range.start.line;
+      });
+
+      // TODO: use selector with preview, basically needes the ui-component
+      // from jupyterlab-citation-manager; let's try to move it to JupyterLab core
+      // (and re-implement command palette with it)
+      // the preview should use this.jumper.document_manager.services.contents
+
+      let getItemOptions = {
+        title: trans.__('Choose the jump target'),
+        okLabel: trans.__('Jump'),
+        items: choices
+      };
+      // TODO: use showHints() or completion-like widget instead?
+      const choice = await InputDialog.getItem(getItemOptions).catch(
+        this.console.warn
+      );
+      if (!choice || choice.value == null) {
+        this.console.warn('No choice selected for jump location selection');
+        return;
+      }
+      const choiceIndex = choices.indexOf(choice.value);
+      if (choiceIndex === -1) {
+        this.console.error(
+          'Choice selection error: please report this as a bug:',
+          choices,
+          choice
+        );
+        return;
+      }
+      return locations[choiceIndex];
+    } else {
+      return locations[0];
     }
   }
 
-  async handle_jump(location_or_locations: AnyLocation, document_uri: string) {
-    const target_info = this.get_uri_and_range(location_or_locations);
+  private _resolvePath(uri: string): string | null {
+    let contentsPath = uri_to_contents_path(uri);
 
-    if (!target_info) {
-      this.status_message.set(trans.__('No jump targets found'), 2 * 1000);
-      return;
+    if (contentsPath == null && uri.startsWith('file://')) {
+      contentsPath = decodeURI(uri.slice(7));
+    }
+    return contentsPath;
+  }
+
+  async handleJump(
+    locationData: AnyLocation,
+    positionParams: lsp.TextDocumentPositionParams
+  ) {
+    const locations = this._harmonizeLocations(locationData);
+    const targetInfo = await this._chooseTarget(locations);
+
+    if (!targetInfo) {
+      this.setStatusMessage(trans.__('No jump targets found'), 2 * 1000);
+      return JumpResult.NoTargetsFound;
     }
 
-    let { uri, range } = target_info;
+    let { uri, range } = targetInfo;
 
     let virtual_position = PositionConverter.lsp_to_cm(
       range.start
     ) as IVirtualPosition;
 
-    if (uris_equal(uri, document_uri)) {
+    if (uris_equal(uri, positionParams.textDocument.uri)) {
       let editor_index = this.adapter.get_editor_index_at(virtual_position);
       // if in current file, transform from the position within virtual document to the editor position:
       let editor_position =
@@ -158,21 +249,32 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
           'Could not jump: conversion from virtual position to editor position failed',
           virtual_position
         );
-        return;
+        return JumpResult.PositioningFailure;
       }
       let editor_position_ce = PositionConverter.cm_to_ce(editor_position);
       this.console.log(`Jumping to ${editor_index}th editor of ${uri}`);
       this.console.log('Jump target within editor:', editor_position_ce);
 
-      let contents_path = this.adapter.widget.context.path;
+      let contentsPath = this.adapter.widget.context.path;
+
+      const didUserChooseThis = locations.length > 1;
+
+      // note: we already know that URIs are equal, so just check the position range
+      if (
+        !didUserChooseThis &&
+        ProtocolCoordinates.isWithinRange(positionParams.position, range)
+      ) {
+        return JumpResult.AlreadyAtTarget;
+      }
 
       this.jumper.global_jump({
         line: editor_position_ce.line,
         column: editor_position.ch,
         editor_index: editor_index,
         is_symlink: false,
-        contents_path: contents_path
+        contents_path: contentsPath
       });
+      return JumpResult.AssumeSuccess;
     } else {
       // otherwise there is no virtual document and we expect the returned position to be source position:
       let source_position_ce = PositionConverter.cm_to_ce(virtual_position);
@@ -190,39 +292,33 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       //  with different OSes but also with JupyterHub and other platforms.
 
       // can it be resolved vs our guessed server root?
-      let contents_path = uri_to_contents_path(uri);
+      const contentsPath = this._resolvePath(uri);
 
-      if (contents_path == null && uri.startsWith('file://')) {
-        contents_path = decodeURI(uri.slice(7));
-      }
-
-      if (contents_path === null) {
+      if (contentsPath === null) {
         this.console.warn('contents_path could not be resolved');
-        return;
+        return JumpResult.PathResolutionFailure;
       }
 
       try {
-        await this.jumper.document_manager.services.contents.get(
-          contents_path,
-          {
-            content: false
-          }
-        );
+        await this.jumper.document_manager.services.contents.get(contentsPath, {
+          content: false
+        });
         this.jumper.global_jump({
-          contents_path,
+          contents_path: contentsPath,
           ...jump_data,
           is_symlink: false
         });
-        return;
+        return JumpResult.AssumeSuccess;
       } catch (err) {
         this.console.warn(err);
       }
 
       this.jumper.global_jump({
-        contents_path: URLExt.join('.lsp_symlink', contents_path),
+        contents_path: URLExt.join('.lsp_symlink', contentsPath),
         ...jump_data,
         is_symlink: true
       });
+      return JumpResult.AssumeSuccess;
     }
   }
 }
@@ -271,17 +367,63 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
   {
     id: 'jump-to-definition',
     execute: async ({ connection, virtual_position, document, features }) => {
-      const jump_feature = features.get(FEATURE_ID) as CMJumpToDefinition;
-      const targets = await connection?.getDefinition(
-        virtual_position,
-        document.document_info,
-        false
-      );
-      await jump_feature.handle_jump(targets, document.document_info.uri);
+      const jumpFeature = features.get(FEATURE_ID) as CMJumpToDefinition;
+      if (!connection) {
+        jumpFeature.setStatusMessage(
+          trans.__('Connection not found for jump'),
+          2 * 1000
+        );
+        return;
+      }
+
+      const positionParams: lsp.TextDocumentPositionParams = {
+        textDocument: {
+          uri: document.document_info.uri
+        },
+        position: {
+          line: virtual_position.line,
+          character: virtual_position.ch
+        }
+      };
+      const targets = await connection.clientRequests[
+        'textDocument/definition'
+      ].request(positionParams);
+      await jumpFeature.handleJump(targets, positionParams);
     },
     is_enabled: ({ connection }) =>
-      connection ? connection.isDefinitionSupported() : false,
+      connection ? connection.provides('definitionProvider') : false,
     label: trans.__('Jump to definition'),
+    icon: jumpToIcon
+  },
+  {
+    id: 'jump-to-reference',
+    execute: async ({ connection, virtual_position, document, features }) => {
+      const jumpFeature = features.get(FEATURE_ID) as CMJumpToDefinition;
+      if (!connection) {
+        jumpFeature.setStatusMessage(
+          trans.__('Connection not found for jump'),
+          2 * 1000
+        );
+        return;
+      }
+
+      const positionParams: lsp.TextDocumentPositionParams = {
+        textDocument: {
+          uri: document.document_info.uri
+        },
+        position: {
+          line: virtual_position.line,
+          character: virtual_position.ch
+        }
+      };
+      const targets = await connection.clientRequests[
+        'textDocument/references'
+      ].request({ ...positionParams, context: { includeDeclaration: false } });
+      await jumpFeature.handleJump(targets, positionParams);
+    },
+    is_enabled: ({ connection }) =>
+      connection ? connection.provides('referencesProvider') : false,
+    label: trans.__('Jump to references'),
     icon: jumpToIcon
   },
   {
@@ -291,7 +433,10 @@ const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
       jump_feature.jumper.global_jump_back();
     },
     is_enabled: ({ connection }) =>
-      connection ? connection.isDefinitionSupported() : false,
+      connection
+        ? connection.provides('definitionProvider') ||
+          connection.provides('referencesProvider')
+        : false,
     label: trans.__('Jump back'),
     icon: jumpBackIcon,
     // do not attach to any of the context menus

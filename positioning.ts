@@ -1,5 +1,6 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import type * as CodeMirror from 'codemirror';
+import type * as lsp from 'vscode-languageserver-protocol';
 
 /**
  * is_* attributes are there only to enforce strict interface type checking
@@ -67,4 +68,20 @@ export function offset_at_position(
 
 export class PositionError extends Error {
   // no-op
+}
+
+export namespace ProtocolCoordinates {
+  export function isWithinRange(
+    position: lsp.Position,
+    range: lsp.Range
+  ): boolean {
+    const { line, character } = position;
+    return (
+      line >= range.start.line &&
+      line <= range.end.line &&
+      // need to be non-overlapping see https://github.com/jupyter-lsp/jupyterlab-lsp/issues/628
+      (line != range.start.line || character > range.start.character) &&
+      (line != range.end.line || character <= range.end.character)
+    );
+  }
 }

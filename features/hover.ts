@@ -23,7 +23,12 @@ import {
   IEditorIntegrationOptions,
   IFeatureLabIntegration
 } from '../feature';
-import { IRootPosition, IVirtualPosition, is_equal } from '../positioning';
+import {
+  IRootPosition,
+  IVirtualPosition,
+  ProtocolCoordinates,
+  is_equal
+} from '../positioning';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { getModifierState } from '../utils';
 import { VirtualDocument } from '../virtual/document';
@@ -122,10 +127,12 @@ export class HoverCM extends CodeMirrorIntegration {
   private virtual_position: IVirtualPosition;
   protected cache: ResponseCache;
 
-  private debounced_get_hover: Throttler<Promise<lsProtocol.Hover | undefined>>;
+  private debounced_get_hover: Throttler<
+    Promise<lsProtocol.Hover | undefined | null>
+  >;
   private tooltip: FreeTooltip;
   private _previousHoverRequest: Promise<
-    Promise<lsProtocol.Hover | undefined>
+    Promise<lsProtocol.Hover | undefined | null>
   > | null = null;
 
   constructor(options: IEditorIntegrationOptions) {
@@ -154,13 +161,7 @@ export class HoverCM extends CodeMirrorIntegration {
         return false;
       }
       let range = cache_item.response.range!;
-      return (
-        line >= range.start.line &&
-        line <= range.end.line &&
-        // need to be non-overlapping see https://github.com/jupyter-lsp/jupyterlab-lsp/issues/628
-        (line != range.start.line || ch > range.start.character) &&
-        (line != range.end.line || ch <= range.end.character)
-      );
+      return ProtocolCoordinates.isWithinRange({ line, character: ch }, range);
     });
     if (matching_items.length > 1) {
       this.console.warn(
@@ -250,10 +251,13 @@ export class HoverCM extends CodeMirrorIntegration {
   }
 
   protected create_throttler() {
-    return new Throttler<Promise<lsProtocol.Hover | undefined>>(this.on_hover, {
-      limit: this.settings.composite.throttlerDelay,
-      edge: 'trailing'
-    });
+    return new Throttler<Promise<lsProtocol.Hover | undefined | null>>(
+      this.on_hover,
+      {
+        limit: this.settings.composite.throttlerDelay,
+        edge: 'trailing'
+      }
+    );
   }
 
   afterChange(change: IEditorChange, root_position: IRootPosition) {
