@@ -4,17 +4,15 @@ import {
 } from '@jupyterlab/application';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import type * as CodeMirror from 'codemirror';
 import type * as lsProtocol from 'vscode-languageserver-protocol';
 
-import highlightTypeSvg from '../../style/icons/highlight-type.svg';
 import highlightSvg from '../../style/icons/highlight.svg';
 import { CodeHighlights as LSPHighlightsSettings } from '../_highlights';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
-import { FeatureSettings, IFeatureCommand } from '../feature';
+import { FeatureSettings } from '../feature';
 import { DocumentHighlightKind } from '../lsp';
 import { IRootPosition, IVirtualPosition } from '../positioning';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
@@ -24,32 +22,6 @@ export const highlightIcon = new LabIcon({
   name: 'lsp:highlight',
   svgstr: highlightSvg
 });
-
-export const highlightTypeIcon = new LabIcon({
-  name: 'lsp:highlight-type',
-  svgstr: highlightTypeSvg
-});
-
-const COMMANDS = (trans: TranslationBundle): IFeatureCommand[] => [
-  {
-    id: 'highlight-references',
-    execute: ({ connection, virtual_position, document }) =>
-      connection?.getReferences(virtual_position, document.document_info),
-    is_enabled: ({ connection }) =>
-      connection ? connection.isReferencesSupported() : false,
-    label: trans.__('Highlight references'),
-    icon: highlightIcon
-  },
-  {
-    id: 'highlight-type-definition',
-    execute: ({ connection, virtual_position, document }) =>
-      connection?.getTypeDefinition(virtual_position, document.document_info),
-    is_enabled: ({ connection }) =>
-      connection ? connection.isTypeDefinitionSupported() : false,
-    label: trans.__('Highlight type definition'),
-    icon: highlightTypeIcon
-  }
-];
 
 export class HighlightsCM extends CodeMirrorIntegration {
   protected highlight_markers: CodeMirror.TextMarker[] = [];
@@ -240,24 +212,21 @@ const FEATURE_ID = PLUGIN_ID + ':highlights';
 
 export const HIGHLIGHTS_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
-  requires: [ILSPFeatureManager, ISettingRegistry, ITranslator],
+  requires: [ILSPFeatureManager, ISettingRegistry],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
-    settingRegistry: ISettingRegistry,
-    translator: ITranslator
+    settingRegistry: ISettingRegistry
   ) => {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
-    const trans = translator.load('jupyterlab_lsp');
 
     featureManager.register({
       feature: {
         editorIntegrationFactory: new Map([['CodeMirrorEditor', HighlightsCM]]),
         id: FEATURE_ID,
         name: 'LSP Highlights',
-        settings: settings,
-        commands: COMMANDS(trans)
+        settings: settings
       }
     });
   }
