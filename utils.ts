@@ -155,7 +155,8 @@ export function uri_to_contents_path(child: string, parent?: string) {
     return null;
   }
   if (child.startsWith(parent)) {
-    return decodeURI(child.replace(parent, ''));
+    // 'decodeURIComponent' is needed over 'decodeURI' for '@' in TS/JS paths
+    return decodeURIComponent(child.replace(parent, ''));
   }
   return null;
 }

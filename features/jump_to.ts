@@ -215,8 +215,12 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
   private _resolvePath(uri: string): string | null {
     let contentsPath = uri_to_contents_path(uri);
 
-    if (contentsPath == null && uri.startsWith('file://')) {
-      contentsPath = decodeURI(uri.slice(7));
+    if (contentsPath == null) {
+      if (uri.startsWith('file://')) {
+        contentsPath = decodeURIComponent(uri.slice(7));
+      } else {
+        contentsPath = decodeURIComponent(uri);
+      }
     }
     return contentsPath;
   }
