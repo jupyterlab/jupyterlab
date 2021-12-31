@@ -156,6 +156,7 @@ export class User implements ICurrentUser {
     // Read username and color from URL
     let name = env.getParam('--username', '');
     let color = env.getParam('--usercolor', '');
+    let initials = env.getParam('--initials', '');
 
     const { localStorage } = window;
     const data = localStorage.getItem(USER);
@@ -165,7 +166,7 @@ export class User implements ICurrentUser {
       this._username = user.username as string;
       this._name = name !== '' ? '' : (user.name as string);
       this._displayName = name !== '' ? '' : (user.displayName as string);
-      this._initials = user.initials as string;
+      this._initials = initials !== '' ? '' : (user.initials as string);
       this._color = color !== '' ? '#' + color : (user.color as string);
       this._anonymous = user.anonymous as boolean;
       this._cursor = (user.cursor as IUser.Cursor) || undefined;
@@ -179,7 +180,10 @@ export class User implements ICurrentUser {
       this._username = UUID.uuid4();
       this._name = name !== '' ? '' : 'Anonymous ' + anonymousName;
       this._displayName = this._name;
-      this._initials = `A${anonymousName.substring(0, 1).toLocaleUpperCase()}`;
+      this._initials =
+        initials !== ''
+          ? ''
+          : `A${anonymousName.substring(0, 1).toLocaleUpperCase()}`;
       this._color =
         '#' + (color !== '' ? color : Private.getRandomColor().slice(1));
       this._anonymous = true;
