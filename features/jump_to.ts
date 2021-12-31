@@ -340,7 +340,27 @@ export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
         id: FEATURE_ID,
         name: 'Jump to definition',
         labIntegration: labIntegration,
-        settings: settings
+        settings: settings,
+        capabilities: {
+          textDocument: {
+            declaration: {
+              dynamicRegistration: true,
+              linkSupport: true
+            },
+            definition: {
+              dynamicRegistration: true,
+              linkSupport: true
+            },
+            typeDefinition: {
+              dynamicRegistration: true,
+              linkSupport: true
+            },
+            implementation: {
+              dynamicRegistration: true,
+              linkSupport: true
+            }
+          }
+        }
       }
     });
   }

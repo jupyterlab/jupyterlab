@@ -1,3 +1,11 @@
+import type * as lsp from 'vscode-languageserver-protocol';
+
+/** Workaround to silence a bug in https://github.com/microsoft/vscode-languageserver-node/pull/720 */
+export type ClientCapabilities = Omit<
+  lsp.ClientCapabilities,
+  'textDocument'
+> & { textDocument?: Omit<lsp.TextDocumentClientCapabilities, 'moniker'> };
+
 export enum DiagnosticSeverity {
   Error = 1,
   Warning = 2,

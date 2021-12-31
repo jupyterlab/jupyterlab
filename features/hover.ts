@@ -611,7 +611,15 @@ export const HOVER_PLUGIN: JupyterFrontEndPlugin<void> = {
         id: FEATURE_ID,
         name: 'LSP Hover tooltip',
         labIntegration: labIntegration,
-        settings: settings
+        settings: settings,
+        capabilities: {
+          textDocument: {
+            hover: {
+              dynamicRegistration: true,
+              contentFormat: ['markdown', 'plaintext']
+            }
+          }
+        }
       }
     });
   }

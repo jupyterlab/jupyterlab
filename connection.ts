@@ -19,11 +19,12 @@ import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
 
-import { CompletionItemTag, DiagnosticTag } from './lsp';
+import { ClientCapabilities } from './lsp';
 import { ILSPLogConsole } from './tokens';
 import { until_ready } from './utils';
 
 interface ILSPOptions extends ILspOptions {
+  capabilities: ClientCapabilities;
   serverIdentifier?: string;
   console: ILSPLogConsole;
 }
@@ -336,6 +337,7 @@ export class LSPConnection extends LspWsConnection {
   public clientRequests: ClientRequests;
   public serverRequests: ServerRequests;
   protected console: ILSPLogConsole;
+  private _options: ILSPOptions;
   public logAllCommunication: boolean;
 
   public log(kind: MessageKind, message: IMessageLog) {
@@ -379,6 +381,7 @@ export class LSPConnection extends LspWsConnection {
 
   constructor(options: ILSPOptions) {
     super(options);
+    this._options = options;
     this.logAllCommunication = false;
     this.serverIdentifier = options.serverIdentifier;
     this.console = options.console.scope(this.serverIdentifier + ' connection');
@@ -400,66 +403,10 @@ export class LSPConnection extends LspWsConnection {
   protected initializeParams(): lsp.InitializeParams {
     return {
       ...super.initializeParams(),
-      capabilities: {
-        textDocument: {
-          hover: {
-            dynamicRegistration: true,
-            contentFormat: ['markdown', 'plaintext']
-          },
-          synchronization: {
-            dynamicRegistration: true,
-            willSave: false,
-            didSave: true,
-            willSaveWaitUntil: false
-          },
-          completion: {
-            dynamicRegistration: true,
-            completionItem: {
-              snippetSupport: false,
-              commitCharactersSupport: true,
-              documentationFormat: ['markdown', 'plaintext'],
-              deprecatedSupport: true,
-              preselectSupport: false,
-              tagSupport: {
-                valueSet: [CompletionItemTag.Deprecated]
-              }
-            },
-            contextSupport: false
-          },
-          publishDiagnostics: {
-            tagSupport: {
-              valueSet: [DiagnosticTag.Deprecated, DiagnosticTag.Unnecessary]
-            }
-          },
-          signatureHelp: {
-            dynamicRegistration: true,
-            signatureInformation: {
-              documentationFormat: ['markdown', 'plaintext']
-            }
-          },
-          declaration: {
-            dynamicRegistration: true,
-            linkSupport: true
-          },
-          definition: {
-            dynamicRegistration: true,
-            linkSupport: true
-          },
-          typeDefinition: {
-            dynamicRegistration: true,
-            linkSupport: true
-          },
-          implementation: {
-            dynamicRegistration: true,
-            linkSupport: true
-          }
-        } as lsp.TextDocumentClientCapabilities,
-        workspace: {
-          didChangeConfiguration: {
-            dynamicRegistration: true
-          }
-        } as lsp.WorkspaceClientCapabilities
-      } as lsp.ClientCapabilities,
+      // TODO: remove as `lsp.ClientCapabilities` after upgrading to 3.17
+      // which should finally include a fix for moniker issue:
+      // https://github.com/microsoft/vscode-languageserver-node/pull/720
+      capabilities: this._options.capabilities as lsp.ClientCapabilities,
       initializationOptions: null,
       processId: null,
       workspaceFolders: null

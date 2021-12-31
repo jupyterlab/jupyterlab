@@ -6,6 +6,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
 import { FeatureSettings, IFeatureCommand } from '../../feature';
+import { DiagnosticTag } from '../../lsp';
 import { ILSPFeatureManager, PLUGIN_ID } from '../../tokens';
 
 import {
@@ -65,6 +66,15 @@ export const DIAGNOSTICS_PLUGIN: JupyterFrontEndPlugin<void> = {
           ['CodeMirrorEditor', DiagnosticsCM]
         ]),
         id: FEATURE_ID,
+        capabilities: {
+          textDocument: {
+            publishDiagnostics: {
+              tagSupport: {
+                valueSet: [DiagnosticTag.Deprecated, DiagnosticTag.Unnecessary]
+              }
+            }
+          }
+        },
         name: 'LSP Diagnostics',
         settings: settings,
         commands: COMMANDS(trans)

@@ -488,7 +488,17 @@ export const SIGNATURE_PLUGIN: JupyterFrontEndPlugin<void> = {
         id: FEATURE_ID,
         name: 'LSP Function signature',
         labIntegration: labIntegration,
-        settings: settings
+        settings: settings,
+        capabilities: {
+          textDocument: {
+            signatureHelp: {
+              dynamicRegistration: true,
+              signatureInformation: {
+                documentationFormat: ['markdown', 'plaintext']
+              }
+            }
+          }
+        }
       }
     });
   }

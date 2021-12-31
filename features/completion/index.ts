@@ -11,6 +11,7 @@ import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/typ
 import completionSvg from '../../../style/icons/completion.svg';
 import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { FeatureSettings } from '../../feature';
+import { CompletionItemTag } from '../../lsp';
 import {
   ILSPAdapterManager,
   ILSPFeatureManager,
@@ -66,7 +67,25 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
         id: FEATURE_ID,
         name: 'LSP Completion',
         labIntegration: labIntegration,
-        settings: settings
+        settings: settings,
+        capabilities: {
+          textDocument: {
+            completion: {
+              dynamicRegistration: true,
+              completionItem: {
+                snippetSupport: false,
+                commitCharactersSupport: true,
+                documentationFormat: ['markdown', 'plaintext'],
+                deprecatedSupport: true,
+                preselectSupport: false,
+                tagSupport: {
+                  valueSet: [CompletionItemTag.Deprecated]
+                }
+              },
+              contextSupport: false
+            }
+          }
+        }
       }
     });
   }

@@ -8,6 +8,7 @@ import { Signal } from '@lumino/signaling';
 import { StatusMessage, WidgetAdapter } from './adapters/adapter';
 import { CommandEntryPoint, ICommandContext } from './command_manager';
 import { LSPConnection } from './connection';
+import { ClientCapabilities } from './lsp';
 import { IRootPosition } from './positioning';
 import { VirtualDocument } from './virtual/document';
 import { IEditorChange, IVirtualEditor } from './virtual/editor';
@@ -123,6 +124,10 @@ export interface IFeature {
     IEditorName,
     IFeatureEditorIntegrationConstructor<IVirtualEditor<IEditor>>
   >;
+  /**
+   * LSP capabilities implemented by the feature.
+   */
+  capabilities?: ClientCapabilities;
   /**
    * Command specification, including context menu placement options.
    */

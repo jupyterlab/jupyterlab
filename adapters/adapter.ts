@@ -6,6 +6,7 @@ import { ILogPayload } from '@jupyterlab/logconsole';
 import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
+import mergeWith from 'lodash.mergewith';
 
 import { ICommandContext } from '../command_manager';
 import { LSPConnection } from '../connection';
@@ -17,7 +18,7 @@ import {
 import { EditorAdapter } from '../editor_integration/editor_adapter';
 import { IFeature, IFeatureEditorIntegration } from '../feature';
 import { ILSPExtension, ILSPLogConsole } from '../index';
-import { LanguageIdentifier } from '../lsp';
+import { ClientCapabilities, LanguageIdentifier } from '../lsp';
 import { IRootPosition, IVirtualPosition } from '../positioning';
 import { IForeignContext, VirtualDocument } from '../virtual/document';
 import { IVirtualEditor } from '../virtual/editor';
@@ -632,7 +633,31 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
     this.console.log(`will connect using language: ${language}`);
 
+    let capabilities: ClientCapabilities = {
+      textDocument: {
+        synchronization: {
+          dynamicRegistration: true,
+          willSave: false,
+          didSave: true,
+          willSaveWaitUntil: false
+        }
+      },
+      workspace: {
+        didChangeConfiguration: {
+          dynamicRegistration: true
+        }
+      }
+    };
+
+    for (const feature of this.extension.feature_manager.features) {
+      if (!feature.capabilities) {
+        continue;
+      }
+      capabilities = mergeWith(capabilities, feature.capabilities);
+    }
+
     let options: ISocketConnectionOptions = {
+      capabilities,
       virtual_document,
       language,
       document_path: this.document_path

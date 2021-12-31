@@ -4,6 +4,7 @@ import type * as protocol from 'vscode-languageserver-protocol';
 
 import { AskServersToSendTraceNotifications } from './_plugin';
 import type * as ConnectionModuleType from './connection';
+import { ClientCapabilities } from './lsp';
 import {
   ILSPLogConsole,
   ILanguageServerManager,
@@ -29,6 +30,10 @@ export interface ISocketConnectionOptions {
    * Path to the document in the JupyterLab space
    */
   document_path: string;
+  /**
+   * LSP capabilities describing currently supported features
+   */
+  capabilities: ClientCapabilities;
 }
 
 /**
@@ -127,7 +132,7 @@ export class DocumentConnectionManager {
     options: ISocketConnectionOptions
   ): Promise<ConnectionModuleType.LSPConnection> {
     this.console.log('Connection Socket', options);
-    let { virtual_document, language } = options;
+    let { virtual_document, language, capabilities } = options;
 
     this.connect_document_signals(virtual_document);
 
@@ -153,7 +158,8 @@ export class DocumentConnectionManager {
       language_server_id!,
       uris,
       this.on_new_connection,
-      this.console
+      this.console,
+      capabilities
     );
 
     // if connecting for the first time, all documents subsequent documents will
@@ -469,7 +475,8 @@ namespace Private {
     language_server_id: TLanguageServerId,
     uris: DocumentConnectionManager.IURIs,
     onCreate: (connection: ConnectionModuleType.LSPConnection) => void,
-    console: ILSPLogConsole
+    console: ILSPLogConsole,
+    capabilities: ClientCapabilities
   ): Promise<ConnectionModuleType.LSPConnection> {
     if (_promise == null) {
       // TODO: consider lazy-loading _only_ the modules that _must_ be webpacked
@@ -489,7 +496,8 @@ namespace Private {
         serverUri: uris.server,
         rootUri: uris.base,
         serverIdentifier: language_server_id,
-        console: console
+        console: console,
+        capabilities: capabilities
       });
       // TODO: remove remaining unbounded users of connection.on
       connection.setMaxListeners(999);
