@@ -164,9 +164,9 @@ export class User implements ICurrentUser {
       const user = JSON.parse(data);
 
       this._username = user.username as string;
-      this._name = name !== '' ? '' : (user.name as string);
-      this._displayName = name !== '' ? '' : (user.displayName as string);
-      this._initials = initials !== '' ? '' : (user.initials as string);
+      this._name = name !== '' ? name : (user.name as string);
+      this._displayName = name !== '' ? name : (user.displayName as string);
+      this._initials = initials !== '' ? initials : (user.initials as string);
       this._color = color !== '' ? '#' + color : (user.color as string);
       this._anonymous = user.anonymous as boolean;
       this._cursor = (user.cursor as IUser.Cursor) || undefined;
@@ -178,11 +178,11 @@ export class User implements ICurrentUser {
       // Get random values
       const anonymousName = getAnonymousUserName();
       this._username = UUID.uuid4();
-      this._name = name !== '' ? '' : 'Anonymous ' + anonymousName;
+      this._name = name !== '' ? name : 'Anonymous ' + anonymousName;
       this._displayName = this._name;
       this._initials =
         initials !== ''
-          ? ''
+          ? initials
           : `A${anonymousName.substring(0, 1).toLocaleUpperCase()}`;
       this._color =
         '#' + (color !== '' ? color : Private.getRandomColor().slice(1));
