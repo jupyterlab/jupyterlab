@@ -26,7 +26,7 @@ interface IFreeTooltipOptions extends Tooltip.IOptions {
   /**
    * Position at which the tooltip should be placed, or null (default) to use the current cursor position.
    */
-  position: CodeEditor.IPosition | null;
+  position: CodeEditor.IPosition | undefined;
   /**
    * HoverBox privilege.
    */
@@ -34,7 +34,7 @@ interface IFreeTooltipOptions extends Tooltip.IOptions {
   /**
    * Alignment with respect to the current token.
    */
-  alignment?: 'start' | 'end' | null;
+  alignment?: 'start' | 'end' | undefined;
   /**
    * default: true; ESC will always hide
    */
