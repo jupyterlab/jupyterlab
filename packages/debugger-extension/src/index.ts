@@ -743,10 +743,6 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    service.stateRestored.connect(_ => {
-      commands.notifyCommandChanged(CommandIDs.pause);
-    });
-
     service.sessionChanged.connect(_ => {
       commands.notifyCommandChanged();
     });
