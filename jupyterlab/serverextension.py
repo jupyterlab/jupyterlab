@@ -1,9 +1,10 @@
-from .labapp import LabApp
 from tornado.web import RedirectHandler
 from jupyter_server.utils import url_path_join
 
 
 def load_jupyter_server_extension(serverapp):
+    from .labapp import LabApp
+
     """Temporary server extension shim when using
     old notebook server.
     """
