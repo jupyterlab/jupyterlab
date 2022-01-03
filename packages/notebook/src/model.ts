@@ -189,9 +189,12 @@ export class NotebookModel implements INotebookModel {
   /**
    * The metadata associated with the notebook.
    */
-  /* get metadata(): IObservableJSON {
-    return this.modelDB.get('metadata') as IObservableJSON;
-  } */
+  get metadata(): nbformat.INotebookMetadata {
+    return this._sharedModel.getMetadata();
+  }
+  set metadata(metadata: nbformat.INotebookMetadata) {
+    this._sharedModel.setMetadata(metadata);
+  }
 
   /**
    * Get the observable list of notebook cells.
@@ -221,7 +224,7 @@ export class NotebookModel implements INotebookModel {
     /* const spec = this.metadata.get(
       'kernelspec'
     ) as nbformat.IKernelspecMetadata; */
-    const spec = this.sharedModel.getMetadata().kernelspec;
+    const spec = this._sharedModel.getMetadata().kernelspec;
     return spec ? spec.name : '';
   }
 
@@ -246,7 +249,7 @@ export class NotebookModel implements INotebookModel {
     /* const info = this.metadata.get(
       'language_info'
     ) as nbformat.ILanguageInfoMetadata; */
-    const info = this.sharedModel.getMetadata().language_info;
+    const info = this._sharedModel.getMetadata().language_info;
     return info ? info.name : '';
   }
 
@@ -314,7 +317,7 @@ export class NotebookModel implements INotebookModel {
       cells.push(cell);
     }
     this._ensureMetadata();
-    const metadata = this.sharedModel.getMetadata();
+    const metadata = this._sharedModel.getMetadata();
     /* for (const key of this.metadata.keys()) {
       metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
     } */
@@ -418,7 +421,7 @@ close the notebook without saving it.`,
     if ('orig_nbformat' in metadata) {
       delete metadata['orig_nbformat'];
     }
-    this.sharedModel.setMetadata(metadata);
+    this._sharedModel.setMetadata(metadata);
     this._ensureMetadata();
     this.dirty = true;
   }
@@ -437,6 +440,15 @@ close the notebook without saving it.`,
     }
     this._isInitialized = true;
     this.cells.clearUndo();
+  }
+
+  /**
+   * Update metadata attributes
+   *
+   * @param value Partial metadata object
+   */
+  updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
+    this._sharedModel.updateMetadata(value);
   }
 
   /**
@@ -549,12 +561,12 @@ close the notebook without saving it.`,
       metadata.set('kernelspec', { name: '', display_name: '' });
     } */
 
-    const metadata = this.sharedModel.getMetadata();
+    const metadata = this._sharedModel.getMetadata();
     if (!('language_info' in metadata)) {
-      this.sharedModel.updateMetadata({ language_info: { name: '' } });
+      this._sharedModel.updateMetadata({ language_info: { name: '' } });
     }
     if (!('kernelspec' in metadata)) {
-      this.sharedModel.updateMetadata({
+      this._sharedModel.updateMetadata({
         kernelspec: { name: '', display_name: '' }
       });
     }
@@ -598,14 +610,6 @@ close the notebook without saving it.`,
    */
   readonly contentFactory: NotebookModel.IContentFactory;
 
-  /**
-   * A mutex to update the shared model.
-   */
-  //protected readonly _modelDBMutex = createMutex();
-
-  protected _modelDB: IModelDB;
-  protected _sharedModel: ISharedNotebook;
-
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -613,6 +617,9 @@ close the notebook without saving it.`,
     this,
     IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
   >(this);
+
+  private _sharedModel: ISharedNotebook;
+  private _modelDB: IModelDB;
 
   private _trans: TranslationBundle;
   private _cells: CellList;

@@ -15,7 +15,7 @@
  */
 
 import * as nbformat from '@jupyterlab/nbformat';
-import { JSONObject, JSONValue, PartialJSONObject } from '@lumino/coreutils';
+import { JSONObject, PartialJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 
