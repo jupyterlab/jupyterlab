@@ -24,10 +24,6 @@
   flex-direction: row;
 }
 
-body[data-format='mobile'] .jp-OutputArea-child {
-  flex-direction: column;
-}
-
 .jp-OutputPrompt {
   flex: 0 0 var(--jp-cell-prompt-width);
   color: var(--jp-cell-outprompt-font-color);
@@ -50,11 +46,6 @@ body[data-format='mobile'] .jp-OutputArea-child {
   user-select: none;
 }
 
-body[data-format='mobile'] .jp-OutputPrompt {
-  flex: 0 0 auto;
-  text-align: left;
-}
-
 .jp-OutputArea-output {
   height: auto;
   overflow: auto;
@@ -67,10 +58,6 @@ body[data-format='mobile'] .jp-OutputPrompt {
 .jp-OutputArea-child .jp-OutputArea-output {
   flex-grow: 1;
   flex-shrink: 1;
-}
-
-body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
-  margin-left: var(--jp-notebook-padding);
 }
 
 /**
@@ -224,4 +211,20 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 
 .jp-LinkedOutputView .jp-OutputArea-output:only-child {
   height: 100%;
+}
+
+/*-----------------------------------------------------------------------------
+| Mobile
+|----------------------------------------------------------------------------*/
+@media only screen and (max-width: 760px) {
+  .jp-OutputArea-child .jp-OutputArea-output {
+    margin-left: var(--jp-notebook-padding);
+  }
+  .jp-OutputArea-child {
+    flex-direction: column;
+  }
+  .jp-OutputPrompt {
+    flex: 0 0 auto;
+    text-align: left;
+  }
 }
