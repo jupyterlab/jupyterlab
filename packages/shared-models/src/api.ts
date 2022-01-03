@@ -464,8 +464,39 @@ export interface ISharedUnrecognizedCell
   toJSON(): nbformat.ICodeCell;
 }
 
+export type SourceChange = {
+  /**
+   * The type of change undergone by the list.
+   */
+  type: 'insert' | 'remove' | 'set';
+
+  /**
+   * The starting index of the change.
+   */
+  start: number;
+
+  /**
+   * The end index of the change.
+   */
+  end: number;
+
+  /**
+   * The value of the change.
+   *
+   * ### Notes
+   * If `ChangeType` is `set`, then
+   * this is the new value of the string.
+   *
+   * If `type` is `insert` this is
+   * the value of the inserted string.
+   *
+   * If `type` is remove this is null.
+   */
+  value: string | null;
+};
+
 export type TextChange = {
-  sourceChange?: Delta<string>;
+  sourceChange?: Array<SourceChange>;
 };
 
 /**
@@ -486,7 +517,7 @@ export type NotebookChange = {
 };
 
 export type FileChange = {
-  sourceChange?: Delta<string>;
+  sourceChange?: Array<SourceChange>;
   contextChange?: MapChange;
   stateChange?: Array<{
     name: string;
@@ -499,7 +530,7 @@ export type FileChange = {
  * Definition of the shared Cell changes.
  */
 export type CellChange<MetadataType> = {
-  sourceChange?: Delta<string>;
+  sourceChange?: Array<SourceChange>;
   outputsChange?: Delta<nbformat.IOutput[]>;
   executionCountChange?: {
     oldValue: number | undefined;

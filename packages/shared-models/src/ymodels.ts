@@ -125,9 +125,31 @@ export class YFile
    * Handle a change to the ymodel.
    */
   private _modelObserver = (event: Y.YTextEvent) => {
-    const changes: models.FileChange = {};
-    changes.sourceChange = event.changes.delta as any;
-    this._changed.emit(changes);
+    const changes: Array<models.SourceChange> = [];
+
+    let currpos = 0;
+    event.changes.delta.forEach(delta => {
+      if (delta.insert != null) {
+        changes.push({
+          type: 'insert',
+          start: currpos,
+          end: currpos + delta.insert.length,
+          value: delta.insert as string
+        });
+        currpos += delta.insert.length;
+      } else if (delta.delete != null) {
+        changes.push({
+          type: 'remove',
+          start: currpos,
+          end: currpos + delta.delete,
+          value: null
+        });
+      } else if (delta.retain != null) {
+        currpos += delta.retain;
+      }
+    });
+
+    this._changed.emit({ sourceChange: changes });
   };
 
   /**
@@ -517,8 +539,6 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   implements models.ISharedBaseCell<Metadata>, IYText {
   constructor(ymodel: Y.Map<any>) {
     this.ymodel = ymodel;
-    const ysource = ymodel.get('source');
-    this._prevSourceLength = ysource ? ysource.length : 0;
     this.ymodel.observeDeep(this._modelObserver);
   }
 
@@ -671,8 +691,33 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     const sourceEvent = events.find(
       event => event.target === this.ymodel.get('source')
     );
+
     if (sourceEvent) {
-      changes.sourceChange = sourceEvent.changes.delta as any;
+      const sourceChanges: Array<models.SourceChange> = [];
+
+      let currpos = 0;
+      sourceEvent.changes.delta.forEach(delta => {
+        if (delta.insert != null) {
+          sourceChanges.push({
+            type: 'insert',
+            start: currpos,
+            end: currpos + delta.insert.length,
+            value: delta.insert as string
+          });
+          currpos += delta.insert.length;
+        } else if (delta.delete != null) {
+          sourceChanges.push({
+            type: 'remove',
+            start: currpos,
+            end: currpos + delta.delete,
+            value: null
+          });
+        } else if (delta.retain != null) {
+          currpos += delta.retain;
+        }
+      });
+
+      changes.sourceChange = sourceChanges;
     }
 
     const outputEvent = events.find(
@@ -701,16 +746,18 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
       };
     }
 
-    // The model allows us to replace the complete source with a new string. We express this in the Delta format
-    // as a replace of the complete string.
+    // The model allows us to replace the complete source with a new string.
     const ysource = this.ymodel.get('source');
     if (modelEvent && modelEvent.keysChanged.has('source')) {
       changes.sourceChange = [
-        { delete: this._prevSourceLength },
-        { insert: ysource.toString() }
+        {
+          type: 'set',
+          start: 0,
+          end: ysource.length,
+          value: ysource.toString()
+        }
       ];
     }
-    this._prevSourceLength = ysource.length;
     this._changed.emit(changes);
   };
 
@@ -847,7 +894,6 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   public ymodel: Y.Map<any>;
   private _undoManager: Y.UndoManager | null = null;
   private _changed = new Signal<this, models.CellChange<Metadata>>(this);
-  private _prevSourceLength: number;
 }
 
 export class YCodeCell

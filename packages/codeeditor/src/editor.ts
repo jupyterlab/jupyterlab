@@ -6,7 +6,6 @@ import * as nbformat from '@jupyterlab/nbformat';
 import {
   IModelDB,
   IObservableMap,
-  IObservableString,
   IObservableValue,
   ModelDB,
   ObservableValue
@@ -14,6 +13,7 @@ import {
 import {
   createStandaloneCell,
   ISharedText,
+  SourceChange,
   TextChange
 } from '@jupyterlab/shared-models';
 import { ITranslator } from '@jupyterlab/translation';
@@ -184,7 +184,7 @@ export namespace CodeEditor {
      * @todo Better arguments?
      */
     //sourceChanged: ISignal<IModel, IObservableString.IChangedArgs>;
-    sourceChanged: ISignal<IModel, string>;
+    sourceChanged: ISignal<IModel, Array<SourceChange>>;
 
     /**
      * A signal emitted when the shared model was switched.
@@ -273,7 +273,7 @@ export namespace CodeEditor {
     /**
      * A signal emitted when a mimetype changes.
      */
-    get sourceChanged(): ISignal<IModel, string> {
+    get sourceChanged(): ISignal<IModel, Array<SourceChange>> {
       return this._sourceChanged;
     }
 
@@ -377,28 +377,9 @@ export namespace CodeEditor {
       // TODO: emit a better signal with the changes.
       // Problem: the signal from the shared model makes it
       // hard to implement the IObservableString.IChangedArgs
-      this._sourceChanged.emit(this._sharedModel.getSource());
-      /* if (change.sourceChange) {
-        let currpos = 0;
-        change.sourceChange.forEach(delta => {
-          if (delta.insert != null) {
-            this._sourceChanged.emit({
-              type: 'insert',
-              start: currpos,
-              end: currpos + delta.insert.length,
-              value: delta.insert
-            });
-            currpos += delta.insert.length;
-          } else if (delta.delete != null) {
-            this._sourceChanged.emit({
-              type: 'remove',
-              start: currpos,
-              end: currpos + delta.delete,
-              value: ""
-            });
-          }
-        });
-      } */
+      if (change.sourceChange) {
+        this._sourceChanged.emit(change.sourceChange);
+      }
     }
 
     protected _modelDB: IModelDB;
@@ -406,7 +387,7 @@ export namespace CodeEditor {
 
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
-    private _sourceChanged = new Signal<this, string>(this);
+    private _sourceChanged = new Signal<this, Array<SourceChange>>(this);
     private _sharedModelSwitched = new Signal<this, boolean>(this);
   }
 
