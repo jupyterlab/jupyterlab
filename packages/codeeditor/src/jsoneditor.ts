@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IObservableJSON } from '@jupyterlab/observables';
+import { ISharedMetadata, MetadataChange } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -116,10 +116,10 @@ export class JSONEditor extends Widget {
   /**
    * The observable source.
    */
-  get source(): IObservableJSON | null {
+  get source(): ISharedMetadata | null {
     return this._source;
   }
-  set source(value: IObservableJSON | null) {
+  set source(value: ISharedMetadata | null) {
     if (this._source === value) {
       return;
     }
@@ -206,10 +206,7 @@ export class JSONEditor extends Widget {
   /**
    * Handle a change to the metadata of the source.
    */
-  private _onSourceChanged(
-    sender: IObservableJSON,
-    args: IObservableJSON.IChangedArgs
-  ) {
+  private _onSourceChanged(sender: ISharedMetadata, args: MetadataChange) {
     if (this._changeGuard) {
       return;
     }
@@ -275,24 +272,26 @@ export class JSONEditor extends Widget {
     const model = this.editor.model;
     const old = this._originalValue;
     const user = JSON.parse(model.source) as JSONObject;
-    const source = this.source;
-    if (!source) {
+    const source = this.source?.getMetadata();
+    if (!this.source || !source) {
       return;
     }
 
     // If it is in user and has changed from old, set in new.
     for (const key in user) {
       if (!JSONExt.deepEqual(user[key], old[key] || null)) {
-        source.set(key, user[key]);
+        source[key] = user[key];
       }
     }
 
     // If it was in old and is not in user, remove from source.
     for (const key in old) {
       if (!(key in user)) {
-        source.delete(key);
+        delete source[key];
       }
     }
+
+    this.source.setMetadata(source);
   }
 
   /**
@@ -305,7 +304,7 @@ export class JSONEditor extends Widget {
     this.commitButtonNode.hidden = true;
     this.removeClass(ERROR_CLASS);
     const model = this.editor.model;
-    const content = this._source ? this._source.toJSON() : {};
+    const content = this._source ? this._source.getMetadata() : {};
     this._changeGuard = true;
     if (content === void 0) {
       model.source = this._trans.__('No data!');
@@ -329,7 +328,7 @@ export class JSONEditor extends Widget {
   private _trans: TranslationBundle;
   private _dataDirty = false;
   private _inputDirty = false;
-  private _source: IObservableJSON | null = null;
+  private _source: ISharedMetadata | null = null;
   private _originalValue: ReadonlyPartialJSONObject = JSONExt.emptyObject;
   private _changeGuard = false;
 }

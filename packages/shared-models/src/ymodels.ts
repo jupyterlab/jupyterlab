@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import * as nbformat from '@jupyterlab/nbformat';
-import { UUID } from '@lumino/coreutils';
+import { JSONObject, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
@@ -391,6 +391,10 @@ export class YNotebook
   updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
     // TODO: Maybe modify only attributes instead of replacing the whole metadata?
     this.ymeta.set('metadata', Object.assign({}, this.getMetadata(), value));
+  }
+
+  getMetadataAsISharedMetadata(): models.ISharedMetadata {
+    return new YMetadata(this.ymeta);
   }
 
   /**
@@ -884,6 +888,10 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     });
   }
 
+  getMetadataAsISharedMetadata(): models.ISharedMetadata {
+    return new YMetadata(this.ymodel);
+  }
+
   /**
    * Serialize the model to JSON.
    */
@@ -1097,6 +1105,72 @@ export class YMarkdownCell
       attachments: this.getAttachments()
     };
   }
+}
+
+/**
+ * Interface for ISharedMetadata
+ */
+export class YMetadata implements models.ISharedMetadata {
+  private _isDisposed: boolean;
+  private _source: Y.Map<any>;
+  private _changed = new Signal<this, models.MetadataChange>(this);
+
+  constructor(metadata: Y.Map<any>) {
+    this._source = metadata;
+    this._source.observe(this._modelObserver);
+  }
+
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * The changed signal.
+   */
+  get changed(): ISignal<this, models.MetadataChange> {
+    return this._changed;
+  }
+
+  /**
+   * Dispose of the resources.
+   */
+  dispose(): void {
+    this._source.unobserve(this._modelObserver);
+  }
+
+  /**
+   * Gets the metadata.
+   *
+   * @returns the metadata as a JSONObject
+   */
+  getMetadata(): JSONObject {
+    return deepCopy(this._source.get('metadata'));
+  }
+
+  /**
+   * Sets the metadata.
+   *
+   * @param value: new metadata.
+   */
+  setMetadata(value: JSONObject): void {
+    this._source.set('metadata', deepCopy(value));
+  }
+
+  /**
+   * Handle a change to the source.
+   */
+  private _modelObserver = (event: Y.YMapEvent<any>) => {
+    if (event && event.keysChanged.has('metadata')) {
+      const change = event.changes.keys.get('metadata');
+      console.debug('Metadata changed:', change);
+      if (change) {
+        this._changed.emit({
+          oldValue: change.oldValue,
+          newValue: this.getMetadata()
+        });
+      }
+    }
+  };
 }
 
 export default YNotebook;

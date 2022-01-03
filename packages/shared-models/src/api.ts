@@ -15,7 +15,7 @@
  */
 
 import * as nbformat from '@jupyterlab/nbformat';
-import { PartialJSONObject } from '@lumino/coreutils';
+import { JSONObject, JSONValue, PartialJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 
@@ -156,6 +156,8 @@ export interface ISharedNotebook extends ISharedDocument {
    * @param value: Metadata's attribute to update.
    */
   updateMetadata(value: Partial<nbformat.INotebookMetadata>): void;
+
+  getMetadataAsISharedMetadata(): ISharedMetadata;
 
   /**
    * Get a shared cell by index.
@@ -325,6 +327,8 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetadata>
    */
   setMetadata(metadata: Partial<Metadata>): void;
 
+  getMetadataAsISharedMetadata(): ISharedMetadata;
+
   /**
    * Serialize the model to JSON.
    */
@@ -464,6 +468,30 @@ export interface ISharedUnrecognizedCell
   toJSON(): nbformat.ICodeCell;
 }
 
+/**
+ * Interface for ISharedMetadata
+ */
+export interface ISharedMetadata extends IDisposable {
+  /**
+   * The changed signal.
+   */
+  readonly changed: ISignal<this, MetadataChange>;
+
+  /**
+   * Gets the metadata.
+   *
+   * @returns the metadata as a JSONObject
+   */
+  getMetadata(): JSONObject;
+
+  /**
+   * Sets the metadata.
+   *
+   * @param value: new metadata.
+   */
+  setMetadata(value: JSONObject): void;
+}
+
 export type SourceChange = {
   /**
    * The type of change undergone by the list.
@@ -549,4 +577,9 @@ export type DocumentChange = {
     oldValue: any;
     newValue: any;
   }>;
+};
+
+export type MetadataChange = {
+  oldValue: JSONObject;
+  newValue: JSONObject | undefined;
 };
