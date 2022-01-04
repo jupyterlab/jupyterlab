@@ -38,7 +38,7 @@
     "@jupyterlab/application": "^4.0.0-alpha.3",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.3",
     "@jupyterlab/translation": "^4.0.0-alpha.3",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.17",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.18",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.19.0",
     "@lumino/coreutils": "^1.11.1",
