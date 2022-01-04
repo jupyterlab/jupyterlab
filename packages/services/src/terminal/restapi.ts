@@ -30,16 +30,22 @@ export interface IModel {
 /**
  * Start a new terminal session.
  *
- * @param options - The session options to use.
+ * @param settings - The server settings to use.
  *
- * @returns A promise that resolves with the session instance.
+ * @param name - The name of the target terminal.
+ *
+ * @returns A promise that resolves with the session model.
  */
 export async function startNew(
-  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings(),
+  name?: string
 ): Promise<IModel> {
   Private.errorIfNotAvailable();
   const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
-  const init = { method: 'POST' };
+  const init = {
+    method: 'POST',
+    body: JSON.stringify({ name })
+  };
 
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 200) {
