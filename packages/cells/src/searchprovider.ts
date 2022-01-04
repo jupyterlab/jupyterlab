@@ -213,7 +213,6 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
       this.cmHandler.matches = [];
       this.currentIndex = null;
       this.cell.model.value.text = `${finalSrc}${src.slice(lastEnd)}`;
-      // this.cmHandler.refresh();
     }
     return Promise.resolve(occurred);
   }
@@ -607,6 +606,20 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   async endQuery(): Promise<void> {
     await super.endQuery();
     (this.cell as MarkdownCell).highlights = [];
+  }
+
+  /**
+   * Replace all matches in the notebook with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    const occurred = await super.replaceAllMatches(newText);
+
+    if (occurred) {
+      (this.cell as MarkdownCell).highlights = [];
+    }
+    return occurred;
   }
 
   /**
