@@ -185,8 +185,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     const index = this.widget!.content.activeCellIndex;
     await this.endQuery();
     this.widget!.content.activeCellIndex = index;
-    // TODO why...
-    this.widget!.content.mode = 'edit';
     this.widget = null;
   }
 
