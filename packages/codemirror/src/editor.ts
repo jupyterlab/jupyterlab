@@ -6,7 +6,7 @@
 
 import { showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
+import { IObservableMap } from '@jupyterlab/observables';
 import {
   ITranslator,
   nullTranslator,
@@ -58,12 +58,12 @@ const READ_ONLY_CLASS = 'jp-mod-readOnly';
 /**
  * The class name for the hover box for collaborator cursors.
  */
-const COLLABORATOR_CURSOR_CLASS = 'jp-CollaboratorCursor';
+//const COLLABORATOR_CURSOR_CLASS = 'jp-CollaboratorCursor';
 
 /**
  * The class name for the hover box for collaborator cursors.
  */
-const COLLABORATOR_HOVER_CLASS = 'jp-CollaboratorCursor-hover';
+//const COLLABORATOR_HOVER_CLASS = 'jp-CollaboratorCursor-hover';
 
 /**
  * The key code for the up arrow key.
@@ -78,7 +78,7 @@ const DOWN_ARROW = 40;
 /**
  * The time that a collaborator name hover persists.
  */
-const HOVER_TIMEOUT = 1000;
+//const HOVER_TIMEOUT = 1000;
 
 /**
  * CodeMirror editor.
@@ -181,7 +181,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _initializeEditorBinding(): void {
     this._yeditorBinding?.destroy();
-    const sharedModel = this.model.ymodel;
+    const sharedModel = this.model.ymodel!;
     const opts = sharedModel.undoManager
       ? { yUndoManager: sharedModel.undoManager }
       : {};
@@ -799,12 +799,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (uuid === this._hoverId) {
       this._clearHover();
     }
-    // If we can id the selection to a specific collaborator,
-    // use that information.
-    let collaborator: ICollaborator | undefined;
-    if (this._model.modelDB.collaborators) {
-      collaborator = this._model.modelDB.collaborators.get(uuid);
-    }
 
     // Style each selection for the uuid.
     selections.forEach(selection => {
@@ -825,22 +819,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           forward ? selection.end : selection.start
         );
         let markerOptions: CodeMirror.TextMarkerOptions;
-        if (collaborator) {
-          markerOptions = this._toTextMarkerOptions({
-            ...selection.style,
-            color: collaborator.color
-          });
-        } else {
-          markerOptions = this._toTextMarkerOptions(selection.style);
-        }
+
+        markerOptions = this._toTextMarkerOptions(selection.style);
         markers.push(this.doc.markText(anchor, head, markerOptions));
-      } else if (collaborator) {
-        const caret = this._getCaret(collaborator);
-        markers.push(
-          this.doc.setBookmark(this._toCodeMirrorPosition(selection.end), {
-            widget: caret
-          })
-        );
       }
     });
     this.selectionMarkers[uuid] = markers;
@@ -994,6 +975,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a caret element representing the position
    * of a collaborator's cursor.
    */
+  /* 
   private _getCaret(collaborator: ICollaborator): HTMLElement {
     // FIXME-TRANS: Is this localizable?
     const name = collaborator ? collaborator.displayName : 'Anonymous';
@@ -1033,7 +1015,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }, HOVER_TIMEOUT);
     };
     return caret;
-  }
+  } */
 
   /**
    * Check for an out of sync editor.

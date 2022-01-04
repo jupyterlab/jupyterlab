@@ -210,7 +210,7 @@ export namespace CodeEditor {
      */
     readonly selections: IObservableMap<ITextSelection[]>;
 
-    readonly ymodel: IYText;
+    readonly ymodel?: IYText;
 
     /**
      * Undo an operation.

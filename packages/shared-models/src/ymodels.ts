@@ -21,6 +21,7 @@ export interface IYText extends models.ISharedText {
   readonly ysource: Y.Text;
   readonly awareness: Awareness | null;
   readonly undoManager: Y.UndoManager | null;
+  readonly ydoc?: Y.Doc;
 }
 
 export type YCellType = YRawCell | YCodeCell | YMarkdownCell;

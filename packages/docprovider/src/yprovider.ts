@@ -33,9 +33,9 @@ export class WebSocketProviderWithLocks
     super(
       options.url,
       options.contentType + ':' + options.path,
-      options.ymodel.ydoc,
+      options.ymodel.ydoc!,
       {
-        awareness: options.ymodel.awareness
+        awareness: options.ymodel.awareness!
       }
     );
     this._path = options.path;
@@ -84,7 +84,7 @@ export class WebSocketProviderWithLocks
     this._onConnectionStatus = this._onConnectionStatus.bind(this);
     this.on('status', this._onConnectionStatus);
 
-    const awareness = options.ymodel.awareness;
+    const awareness = options.ymodel.awareness!;
     const user = options.user;
     const userChanged = () => {
       const name =

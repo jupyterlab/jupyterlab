@@ -44,7 +44,6 @@
     "@jupyterlab/coreutils": "^6.0.0-alpha.2",
     "@jupyterlab/nbformat": "^4.0.0-alpha.2",
     "@jupyterlab/observables": "^5.0.0-alpha.2",
-    "@jupyterlab/shared-models": "^4.0.0-alpha.2",
     "@jupyterlab/statusbar": "^4.0.0-alpha.2",
     "@jupyterlab/translation": "^4.0.0-alpha.2",
     "@jupyterlab/ui-components": "^4.0.0-alpha.17",

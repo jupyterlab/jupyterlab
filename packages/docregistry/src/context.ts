@@ -23,7 +23,6 @@ import {
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import * as ymodels from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -68,8 +67,8 @@ export class Context<
       this._model = this._factory.createNew(lang, undefined, false);
     }
 
-    const ymodel = this._model.sharedModel as ymodels.YDocument<any>; // translate to the concrete Yjs implementation
-    const ydoc = ymodel.ydoc;
+    const ymodel = this._model.ymodel!; // translate to the concrete Yjs implementation
+    const ydoc = ymodel.ydoc!;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('context');
     const docProviderFactory = options.docProviderFactory;
@@ -609,13 +608,8 @@ export class Context<
       content
     };
     try {
-      let value: Contents.IModel;
       await this._manager.ready;
-      if (!model.modelDB.isCollaborative) {
-        value = await this._maybeSave(options);
-      } else {
-        value = await this._manager.contents.save(this._path, options);
-      }
+      const value = await this._maybeSave(options);
       if (this.isDisposed) {
         return;
       }
