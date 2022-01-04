@@ -118,8 +118,8 @@ module.exports = {
   // json: 'docs/api.json',
   readme: 'README.md',
   theme: 'default',
-  tsconfig: 'tsconfigdoc.json',
-  plugin: "./typedoc-theme/lib/index.js"
+  tsconfig: 'tsconfigdoc.json'
+  //plugin: "./typedoc-theme/lib/index.js"
 
   // theme: minimal,
   // excludePrivate: true,
