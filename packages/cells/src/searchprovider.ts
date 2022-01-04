@@ -120,6 +120,11 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     if (this.matchesSize === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
+      if (this._lastReplacementPosition) {
+        this.cell.editor.setCursorPosition(this._lastReplacementPosition);
+        this._lastReplacementPosition = null;
+      }
+
       // This starts from the cursor position
       let match = await this.cmHandler.highlightNext();
       if (match) {
@@ -266,11 +271,6 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
           this.query,
           content.text
         );
-        if (this._lastReplacementPosition) {
-          this.cell.editor.setCursorPosition(this._lastReplacementPosition);
-          this._lastReplacementPosition = null;
-          this.highlightNext();
-        }
       } else {
         this.cmHandler.matches = [];
       }

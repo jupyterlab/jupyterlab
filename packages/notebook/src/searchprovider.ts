@@ -226,7 +226,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   async replaceCurrentMatch(newText: string, loop = true): Promise<boolean> {
     let replaceOccurred = false;
 
-    if (this._currentProviderIndex !== null) {
+    const unrenderMarkdownCell = async (
+      highlightNext = false
+    ): Promise<void> => {
       // Unrendered markdown cell
       const activeCell = this.widget?.content.activeCell;
       if (
@@ -234,23 +236,22 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         (activeCell as MarkdownCell).rendered
       ) {
         (activeCell as MarkdownCell).rendered = false;
+        if (highlightNext) {
+          await this.highlightNext(loop);
+        }
       }
+    };
+
+    if (this._currentProviderIndex !== null) {
+      await unrenderMarkdownCell();
 
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       replaceOccurred = await searchEngine.replaceCurrentMatch(newText);
     }
-    if (!replaceOccurred) {
-      await this.highlightNext(loop);
-    }
 
-    // Unrendered markdown cell
-    const activeCell = this.widget?.content.activeCell;
-    if (
-      activeCell?.model.type === 'markdown' &&
-      (activeCell as MarkdownCell).rendered
-    ) {
-      (activeCell as MarkdownCell).rendered = false;
-    }
+    await this.highlightNext(loop);
+    // Force highlighting the first hit in the unrendered cell
+    await unrenderMarkdownCell(true);
     return replaceOccurred;
   }
 
