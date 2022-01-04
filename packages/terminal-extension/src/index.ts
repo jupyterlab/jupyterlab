@@ -19,7 +19,7 @@ import {
 import { ILauncher } from '@jupyterlab/launcher';
 import { IFileMenu, IMainMenu } from '@jupyterlab/mainmenu';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Terminal } from '@jupyterlab/services';
+import { Terminal, TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal, ITerminalTracker } from '@jupyterlab/terminal';
 // Name-only import so as to not trigger inclusion in main bundle
@@ -348,9 +348,23 @@ export function addCommands(
 
       const name = args['name'] as string;
 
-      const session = await (name
-        ? serviceManager.terminals.connectTo({ model: { name } })
-        : serviceManager.terminals.startNew());
+      let session;
+      if (name) {
+        const models = await TerminalAPI.listRunning();
+        if (models.map(d => d.name).includes(name)) {
+          // we are restoring a terminal widget and the corresponding terminal exists
+          // let's connect to it
+          session = serviceManager.terminals.connectTo({ model: { name } });
+        } else {
+          // we are restoring a terminal widget but the corresponding terminal was closed
+          // let's start a new terminal with the original name
+          session = await serviceManager.terminals.startNew({ name });
+        }
+      } else {
+        // we are creating a new terminal widget with a new terminal
+        // let the server choose the terminal name
+        session = await serviceManager.terminals.startNew();
+      }
 
       const term = new Terminal(session, options, translator);
 
