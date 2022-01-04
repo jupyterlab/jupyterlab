@@ -591,7 +591,7 @@ export function createViewMenu(
     CommandIDs.wordWrap,
     createSemanticCommand(
       app,
-      menu.editorViewers.toggleMatchBrackets,
+      menu.editorViewers.toggleWordWrap,
       {
         label: trans.__('Wrap Words')
       },

@@ -6,7 +6,7 @@ from jupyterlab_server import LabConfig
 from tornado.escape import url_escape
 from traitlets import Unicode
 
-from jupyterlab import LabApp
+from jupyterlab.labapp import LabApp
 
 
 def mkdir(tmp_path, *parts):

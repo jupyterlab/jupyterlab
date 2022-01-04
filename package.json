@@ -25,7 +25,6 @@
     ]
   },
   "scripts": {
-    "add:sibling": "node buildutils/lib/add-sibling.js",
     "after:publish:assets": "jlpm && jlpm run build:utils && node buildutils/lib/publish --skip-publish",
     "analyze": "jlpm run analyze:dev",
     "analyze:dev": "cd dev_mode && jlpm run build --analyze",
@@ -63,7 +62,6 @@
     "coverage": "lerna run coverage --scope \"@jupyterlab/test-*\" --stream --concurrency 1",
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",
-    "create:theme": "node buildutils/lib/create-theme.js",
     "deduplicate": "jlpm yarn-deduplicate -s fewer --fail",
     "docs": "typedoc --options typedoc.js",
     "docs:init": "lerna run docs:init",
@@ -124,7 +122,7 @@
     "lint-staged": "^10.2.13",
     "prettier": "~2.1.1",
     "shell-quote": "^1.7.2",
-    "typedoc": "~0.21.2",
+    "typedoc": "~0.22.10",
     "yarn": "1.22.17"
   }
 }

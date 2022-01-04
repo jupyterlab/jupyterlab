@@ -17,7 +17,12 @@ or `help
 wanted <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22>`__
 that we believe are good examples of small, self-contained changes. We
 encourage those that are new to the code base to implement and/or ask
-questions about these issues.
+questions about these issues. You are not required to ask for a permission
+to work on such issue, but if you do and do not get a reply within 48 hours
+please assume that no one else is working on it (even if someone previously
+volunteered) and open a pull request with proposed implementation.
+If you are not certain about the implementation, using draft pull requests is encouraged.
+
 
 If you believe you’ve found a security vulnerability in JupyterLab or
 any Jupyter project, please report it to security@ipython.org. If you
@@ -60,14 +65,21 @@ Submitting a Pull Request Contribution
 --------------------------------------
 
 Generally, an issue should be opened describing a piece of proposed work
-and the issues it solves before a pull request is opened.
+and the issues it solves before a pull request is opened. A triager will 
+ensure that your issue meets our definition of ready before we can merge
+any pull requests that relate to it.
 
 Issue Management
 ^^^^^^^^^^^^^^^^
 
 Opening an issue lets community members participate in the design
 discussion, makes others aware of work being done, and sets the stage
-for a fruitful community interaction. A pull request should reference
+for a fruitful community interaction. When you open a new bug or 
+enhancement request, please provide all the requested information 
+in the issue template 
+so that a responder will be able to triage your bug without delay.
+
+A pull request should reference
 the issue it is addressing. Once the pull request is merged, the issue
 related to it will also be closed. If there is additional discussion
 around implementation the issue may be re-opened. Once 30 days have
@@ -76,8 +88,87 @@ bot <https://github.com/apps/lock>`__ will lock the issue. If additional
 discussion is desired, or if the pull request doesn't fully address the
 locked issue, please open a new issue referencing the locked issue.
 
-Tag Issues with Labels
-^^^^^^^^^^^^^^^^^^^^^^
+New issues are subject to triage. A developer with triage permissions 
+(a *triager*) will do the following:
+
+1. Read the issue
+2. Search the existing issues and mark it as a duplicate if necessary
+3. If additional information is required, add a comment requesting it
+4. If the issue is ready to be worked on, assign it to a milestone
+5. Apply appropriate labels to the issue (see examples below)
+
+A developer may start to work on an issue as soon as it is filed. Please 
+work with a triager if they have any questions about your issue so that 
+your changes can be merged in without delay.
+
+Definition of Ready
+^^^^^^^^^^^^^^^^^^^
+
+One of the main goals of triage is to get issues into a state where they
+are **ready** for someone to work on. Once a triager is satisfied that an 
+issue meets the definition below, they will remove the ``status:Needs Triage``
+label from it. We will not merge a pull request for an issue that still 
+needs triage.
+
+Triagers should also ensure that the issue has appropriate labels that 
+describe it, such as labels with the ``pkg:`` prefix for issues that 
+affect one or more packages.
+
+**All requested information, where applicable, is provided.** From the 
+templates in JupyterLab’s issues:
+
+For a **bug**:
+
+* Description, preferably including screen shots
+* Steps to reproduce
+* Expected behavior
+* Context, such as OS, browser, JupyterLab version, and output or log excerpts
+
+For a **feature request**:
+
+* Description of the problem
+* Description of the proposed solution
+* Additional context
+
+**The issue should represent real, relevant, feasible work**. In short, if a 
+knowledgeable person were to be assigned this issue, they would be able to
+complete it with a reasonable amount of effort and assistance, and it
+furthers the goals of the Jupyter project.
+
+* Issues should be unique; triage is the best time to identify duplicates.
+* Bugs represent valid expectations for use of Jupyter products and services.
+* Expectations for security, performance, accessibility, and localization match
+  generally-accepted norms in the community that uses Jupyter products.
+* The issue represents work that one developer can commit to owning, even if 
+  they collaborate with other developers for feedback. Excessively large issues 
+  should be split into multiple issues, each triaged individually, or into 
+  `team-compass <https://github.com/jupyterlab/team-compass>`__ issues to discuss
+  more substantive changes.
+
+Labels Used by Triagers
+^^^^^^^^^^^^^^^^^^^^^^^
+
+All new bugs and enhancement requests have the ``status:Needs Triage`` label.
+
+On a regular basis, Jupyter contributors (triage reviewers or triagers)
+review JupyterLab issues tagged
+with ``status:Needs Triage``, starting with the oldest, and determine 
+whether they meet the definition of ready.
+
+Once triaged, if the issue is ready, the reviewer removes the 
+``status:Needs Triage`` label; no additional label is required. If there 
+is not enough information in the issue as filed, the triage reviewer applies
+the ``status:Needs Info`` label and leaves ``status:Needs Triage`` in place.
+If an issue has remained in ``status:Needs Info`` for more than 14 days 
+without any follow-up communication, the reviewer should apply 
+``status:Blocked``. A blocked issue should be closed after another 14 days
+pass without a reply that unblocks it.
+
+Our expectation is that every new issue should be examined within a week of
+its creation.
+
+Tagging Issues with Labels
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Users without the commit rights to the JupyterLab repository can tag
 issues with labels using the ``@meeseeksdev`` bot. For example: To apply
@@ -86,9 +177,20 @@ the label ``foo`` and ``bar baz`` to an issue, comment
 
 Contributing from within the browser
 ------------------------------------
-Using the https://github.com web interface - documented
-`here <https://docs.github.com/en/free-pro-team@latest/github>`__ - you
-can create and propose a change purely within your browser.
+
+Contributing to JupyterLab codebase is also possible without setting up
+a local environment, directly from the Web browser:
+
+-  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
+   however it is not actively maintained,
+-  GitHub's
+   `built-in editor <https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files>`__
+   is suitable for contributing very small fixes,
+-  more advanced `github.dev <https://docs.github.com/en/codespaces/the-githubdev-web-based-editor>`__
+   editor can be accessed by pressing the dot (``.``) key while in the JupyterLab GitHub repository,
+-  `jupyterlab-playground <https://github.com/jupyterlab/jupyterlab-plugin-playground>`__,
+   allows to prototype JupyterLab extensions from within JupyterLab and
+   can be run without installation in the browser using Binder.
 
 Using `Binder <https://mybinder.org>`__, you can test the current master branch and your
 changes within the browser as well. We recommend you have at least 8 GB of RAM for this.
@@ -172,10 +274,10 @@ Notes:
    Python 3.0+ version of ``pip`` or ``pip3 install -e .`` command to
    install JupyterLab from the forked repository.
 -  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
-   returned exit status 127 while in binding.gyp`` while running the 
+   returned exit status 127 while in binding.gyp`` while running the
    ``pip install`` command above, you may be missing packages required
    by ``canvas``. On macOS with Homebrew, you can add these packages by
-   running 
+   running
    ``brew install pkg-config cairo pango libpng jpeg giflib librsvg``.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://yarnpkg.com/en>`__ package manager. If you have
@@ -309,7 +411,7 @@ Internationalization
 Translatable strings update
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The translatable strings update cannot occur on patch release. They 
+The translatable strings update cannot occur on patch release. They
 must be delayed on minor or major versions.
 
 Performance Testing
@@ -545,40 +647,40 @@ Visual Regression and UI Tests
 ------------------------------
 
 As part of JupyterLab CI workflows, UI tests are run with visual regression checks.
-`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__ is used for UI 
-testing. Galata provides `Playwright <https://playwright.dev>`__ helpers to control and 
+`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__ is used for UI
+testing. Galata provides `Playwright <https://playwright.dev>`__ helpers to control and
 inspect JupyterLab UI programmatically.
 
-UI tests are run for each commit into JupyterLab project in PRs or direct commits. Code 
-changes can sometimes cause UI tests to fail for various reasons. After each test run, 
-Galata generates a user friendly test result report which can be used to inspect failing 
-UI tests. Result report shows the failure reason, call-stack up to the failure and 
-detailed information on visual regression issues. For visual regression errors, reference 
-image and test capture image, along with diff image generated during comparison are 
-provided in the report. You can use these information to debug failing tests. Galata test 
-report can be downloaded from GitHub Actions page for a UI test run. Test artifact is 
-named ``galata-report`` and once you extract it, you can access the report by launching 
-a server to serve the files ``python -m http.server -d <path-to-extracted-report>``. 
+UI tests are run for each commit into JupyterLab project in PRs or direct commits. Code
+changes can sometimes cause UI tests to fail for various reasons. After each test run,
+Galata generates a user friendly test result report which can be used to inspect failing
+UI tests. Result report shows the failure reason, call-stack up to the failure and
+detailed information on visual regression issues. For visual regression errors, reference
+image and test capture image, along with diff image generated during comparison are
+provided in the report. You can use these information to debug failing tests. Galata test
+report can be downloaded from GitHub Actions page for a UI test run. Test artifact is
+named ``galata-report`` and once you extract it, you can access the report by launching
+a server to serve the files ``python -m http.server -d <path-to-extracted-report>``.
 Then open *http://localhost:8000* with your web browser.
 
 Main reasons for UI test failures are:
 
 1. **A visual regression caused by code changes**:
 
-   Sometimes unintentional UI changes are introduced by modifications to project source 
-   code. Goal of visual regression testing is to detect this kind of UI changes. If your 
-   PR / commit is causing visual regression, then debug and fix the regression caused. 
+   Sometimes unintentional UI changes are introduced by modifications to project source
+   code. Goal of visual regression testing is to detect this kind of UI changes. If your
+   PR / commit is causing visual regression, then debug and fix the regression caused.
    You can locally run and debug the UI tests to fix the visual regression. To debug your
-   test, you may run ``PWDEBUG=1 jlpm playwright test <path-to-test-file>``. Once you 
+   test, you may run ``PWDEBUG=1 jlpm playwright test <path-to-test-file>``. Once you
    have a fix, you can push the change to your GitHub branch and test with GitHub actions.
 
 2. **An intended update to user interface**:
 
    If your code change is introducing an update to UI which causes existing UI Tests to
    fail, then you will need to update reference image(s) for the failing tests. In order
-   to do that, go to GitHub Actions page for the failed test and download test 
-   artifacts ``galata-test-assets``. It will contain test captures. You can 
-   copy the capture for the failed test suffixed with *actual* and paste it into reference 
+   to do that, go to GitHub Actions page for the failed test and download test
+   artifacts ``galata-test-assets``. It will contain test captures. You can
+   copy the capture for the failed test suffixed with *actual* and paste it into reference
    screenshots directory in JupyterLab source code, replacing the failing test's reference
    capture. Reference captures are located in directories named as the test files with the
    suffix ``-snapshots`` in JupyterLab source code.

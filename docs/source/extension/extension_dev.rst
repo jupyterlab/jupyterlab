@@ -700,24 +700,6 @@ not enabled in our build configuration. To build a compatible package set
 ``output.libraryTarget`` to ``"commonjs2"`` in your Webpack configuration.
 (see `this <https://github.com/saulshanabrook/jupyterlab-webpack>`__ example repo).
 
-Another option to try out your extension with a local version of JupyterLab is to add it to the
-list of locally installed packages and to have JupyterLab register your extension when it starts up.
-
-You can do this by adding your extension to the ``jupyterlab.externalExtensions`` key
-in the ``dev_mode/package.json`` file. It should be a mapping
-of extension name to version, just like in ``dependencies``. Then run ``jlpm run integrity``
-and these extensions should be added automatically to the ``dependencies`` and pulled in.
-
-When you then run ``jlpm run build && jupyter lab --dev`` or ``jupyter lab --dev --watch`` this extension
-will be loaded by default. For example, this is how you can add the Jupyter Widgets
-extensions:
-
-::
-
-    "externalExtensions": {
-      "@jupyter-widgets/jupyterlab-manager": "2.0.0"
-    },
-
 If you publish your extension on ``npm.org``, users will be able to install
 it as simply ``jupyter labextension install <foo>``, where ``<foo>`` is
 the name of the published ``npm`` package. You can alternatively provide a
@@ -738,10 +720,7 @@ Testing your extension
 There are a number of helper functions in ``testutils`` in this repo (which
 is a public ``npm`` package called ``@jupyterlab/testutils``) that can be used when
 writing tests for an extension.  See ``tests/test-application`` for an example
-of the infrastructure needed to run tests.  There is a ``karma`` config file
-that points to the parent directory's ``karma`` config, and a test runner,
-``run-test.py`` that starts a Jupyter server.
-
+of the infrastructure needed to run tests.
 
 If you are using `jest <https://jestjs.io/>`__ to test your extension, you will
 need to transpile the jupyterlab packages to ``commonjs`` as they are using ES6 modules

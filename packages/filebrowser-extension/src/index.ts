@@ -154,8 +154,6 @@ const browser: JupyterFrontEndPlugin<void> = {
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const browser = factory.defaultBrowser;
-    browser.node.setAttribute('role', 'region');
-    browser.node.setAttribute('aria-label', trans.__('File Browser Section'));
 
     // Let the application restorer track the primary file browser (that is
     // automatically created) for restoration of application state (e.g. setting
@@ -175,7 +173,6 @@ const browser: JupyterFrontEndPlugin<void> = {
 
     addCommands(app, factory, translator, settingRegistry, commandPalette);
 
-    browser.title.icon = folderIcon;
     // Show the current file browser shortcut in its title.
     const updateBrowserTitle = () => {
       const binding = find(
@@ -388,6 +385,13 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
   ): void => {
     const { commands } = app;
     const { defaultBrowser: browser, tracker } = factory;
+    const trans = translator.load('jupyterlab');
+
+    // Set attributes when adding the browser to the UI
+    browser.node.setAttribute('role', 'region');
+    browser.node.setAttribute('aria-label', trans.__('File Browser Section'));
+    browser.title.icon = folderIcon;
+
     labShell.add(browser, 'left', { rank: 100 });
 
     commands.addCommand(CommandIDs.showBrowser, {
