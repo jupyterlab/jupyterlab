@@ -255,7 +255,6 @@
       "@jupyterlab/pdf-extension": "",
       "@jupyterlab/vega5-extension": ""
     },
-    "externalExtensions": {},
     "buildDir": "./static",
     "outputDir": ".",
     "singletonPackages": [
