@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditor,
   CodeMirrorSearchHighlighter
@@ -170,21 +171,28 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
       this.currentIndex !== null &&
       this.currentIndex < this.cmHandler.matches.length
     ) {
+      const editor = this.cell.editor as CodeMirrorEditor;
+      const selection = editor.doc.getSelection();
       const match = this.getCurrentMatch();
-      this.cmHandler.matches.splice(this.currentIndex, 1);
-      this.currentIndex = null;
-      this._highlightNextOnReplace = true;
-
-      this.cell.model.value.text =
-        this.cell.model.value.text.slice(0, match!.position) +
-        newText +
-        this.cell.model.value.text.slice(match!.position + match!.text.length);
-      occurred = true;
+      // If cursor is not on a selection, highlight the next match
+      if (selection !== match?.text) {
+        this.currentIndex = null;
+        // The next will be highlighted as a consequence of this returning false
+      } else {
+        this.cmHandler.matches.splice(this.currentIndex, 1);
+        this.currentIndex = null;
+        // Store the current position to highlight properly the next search hit
+        this._lastReplacementPosition = editor.getCursorPosition();
+        this.cell.model.value.text =
+          this.cell.model.value.text.slice(0, match!.position) +
+          newText +
+          this.cell.model.value.text.slice(
+            match!.position + match!.text.length
+          );
+        occurred = true;
+      }
     }
 
-    if (!occurred) {
-      this.highlightNext();
-    }
     return Promise.resolve(occurred);
   }
 
@@ -258,7 +266,9 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
           this.query,
           content.text
         );
-        if (this._highlightNextOnReplace) {
+        if (this._lastReplacementPosition) {
+          this.cell.editor.setCursorPosition(this._lastReplacementPosition);
+          this._lastReplacementPosition = null;
           this.highlightNext();
         }
       } else {
@@ -274,7 +284,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   private _changed: Signal<IBaseSearchProvider, void>;
   private _isActive = true;
   private _isDisposed = false;
-  private _highlightNextOnReplace = false;
+  private _lastReplacementPosition: CodeEditor.IPosition | null = null;
 }
 
 class CodeCellSearchProvider extends CellSearchProvider {
