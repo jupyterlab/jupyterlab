@@ -100,7 +100,7 @@ Definition of Ready
 ^^^^^^^^^^^^^^^^^^^
 
 One of the main goals of triage is to get issues into a state where they
-are **ready** for someone to work on. Once a triager is satisfies that an 
+are **ready** for someone to work on. Once a triager is satisfied that an 
 issue meets the definition below, they will remove the ``status:Needs Triage``
 label from it. We will not merge a pull request for an issue that still 
 needs triage.
