@@ -238,7 +238,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
     // Editor settings
     if (options.editorConfig) {
-      this.editor.setOptions({...options.editorConfig});
+      this.editor.setOptions({ ...options.editorConfig });
     }
 
     model.metadata.changed.connect(this.onMetadataChanged, this);

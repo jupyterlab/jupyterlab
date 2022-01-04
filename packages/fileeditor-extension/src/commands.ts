@@ -208,7 +208,7 @@ export namespace Commands {
    */
   export function updateWidget(widget: FileEditor): void {
     const editor = widget.editor;
-    editor.setOptions({...config});
+    editor.setOptions({ ...config });
   }
 
   /**

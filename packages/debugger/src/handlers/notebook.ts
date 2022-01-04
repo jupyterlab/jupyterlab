@@ -52,7 +52,9 @@ export class NotebookHandler implements IDisposable {
     this._cellMap.values().forEach(handler => {
       handler.dispose();
       // Ensure to restore notebook editor settings
-      handler.editor.setOptions({...this._notebookPanel.content.editorConfig.code})
+      handler.editor.setOptions({
+        ...this._notebookPanel.content.editorConfig.code
+      });
     });
     this._cellMap.dispose();
     Signal.clearData(this);
