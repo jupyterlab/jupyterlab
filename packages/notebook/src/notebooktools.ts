@@ -10,11 +10,6 @@ import {
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 import {
-  CellChange,
-  ISharedBaseCellMetadata,
-  ISharedCell
-} from '@jupyterlab/shared-models';
-import {
   ITranslator,
   nullTranslator,
   TranslationBundle
@@ -460,10 +455,7 @@ export namespace NotebookTools {
         layout.widgets[0].dispose();
       }
       if (this._cellModel && !this._cellModel.isDisposed) {
-        (this._cellModel.sharedModel as ISharedCell).changed.disconnect(
-          this._onValueChanged,
-          this
-        );
+        this._cellModel.sourceChanged.disconnect(this._onValueChanged, this);
         this._cellModel.mimeTypeChanged.disconnect(
           this._onMimeTypeChanged,
           this
@@ -483,10 +475,7 @@ export namespace NotebookTools {
       const factory = activeCell.contentFactory.editorFactory;
 
       const cellModel = (this._cellModel = activeCell.model);
-      (cellModel.sharedModel as ISharedCell).changed.connect(
-        this._onValueChanged,
-        this
-      );
+      cellModel.sourceChanged.connect(this._onValueChanged, this);
       cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
       this._model.source = cellModel.source.split('\n')[0];
       this._model.mimeType = cellModel.mimeType;
@@ -502,13 +491,8 @@ export namespace NotebookTools {
     /**
      * Handle a change to the current editor value.
      */
-    private _onValueChanged(
-      sender: ISharedCell,
-      changes: CellChange<ISharedBaseCellMetadata>
-    ): void {
-      if (changes.sourceChange) {
-        this._model.source = this._cellModel!.source.split('\n')[0];
-      }
+    private _onValueChanged(): void {
+      this._model.source = this._cellModel!.source.split('\n')[0];
     }
 
     /**

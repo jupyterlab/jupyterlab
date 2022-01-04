@@ -7,7 +7,12 @@ import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IModelDB } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
-import { FileChange, ISharedFile, YFile } from '@jupyterlab/shared-models';
+import {
+  FileChange,
+  ISharedFile,
+  IYDocument,
+  YFile
+} from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -92,6 +97,10 @@ export class DocumentModel
    */
   get defaultKernelLanguage(): string {
     return this._defaultLang;
+  }
+
+  get ydocument(): IYDocument {
+    return this._sharedModel as any;
   }
 
   /**

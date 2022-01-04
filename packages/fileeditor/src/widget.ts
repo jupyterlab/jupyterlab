@@ -53,7 +53,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
       this._onContextReady();
     });
 
-    if (context.model.modelDB.isCollaborative) {
+    /* if (context.model.modelDB.isCollaborative) {
       const modelDB = context.model.modelDB;
       void modelDB.connected.then(() => {
         const collaborators = modelDB.collaborators;
@@ -74,7 +74,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
         // Trigger an initial onCollaboratorsChanged event.
         this._onCollaboratorsChanged();
       });
-    }
+    } */
   }
 
   /**
@@ -132,7 +132,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
    * Handle a change to the collaborators on the model
    * by updating UI elements associated with them.
    */
-  private _onCollaboratorsChanged(): void {
+  /* private _onCollaboratorsChanged(): void {
     // If there are selections corresponding to non-collaborators,
     // they are stale and should be removed.
     const collaborators = this._context.model.modelDB.collaborators;
@@ -144,7 +144,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
         this.editor.model.selections.delete(key);
       }
     }
-  }
+  } */
 
   protected _context: DocumentRegistry.Context;
   private _ready = new PromiseDelegate<void>();

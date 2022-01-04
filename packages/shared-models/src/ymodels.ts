@@ -17,11 +17,16 @@ const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
  * Abstract interface to define Shared Models that can be bound to a text editor using any existing
  * Yjs-based editor binding.
  */
-export interface IYText extends models.ISharedText {
+export interface IYModel {
   readonly ysource: Y.Text;
   readonly awareness: Awareness | null;
   readonly undoManager: Y.UndoManager | null;
-  readonly ydoc?: Y.Doc;
+}
+
+export interface IYDocument {
+  readonly awareness: Awareness;
+  readonly undoManager: Y.UndoManager;
+  readonly ydoc: Y.Doc;
 }
 
 export type YCellType = YRawCell | YCodeCell | YMarkdownCell;
@@ -107,7 +112,7 @@ export class YDocument<T> implements models.ISharedDocument {
 
 export class YFile
   extends YDocument<models.FileChange>
-  implements models.ISharedFile, models.ISharedText, IYText {
+  implements models.ISharedFile, models.ISharedText, IYModel {
   constructor() {
     super();
     this.ysource.observe(this._modelObserver);
@@ -233,7 +238,7 @@ export class YFile
  */
 export class YNotebook
   extends YDocument<models.NotebookChange>
-  implements models.ISharedNotebook {
+  implements models.ISharedNotebook, IYDocument {
   constructor(options: ISharedNotebook.IOptions) {
     super();
     this._disableDocumentWideUndoRedo = options.disableDocumentWideUndoRedo;
@@ -537,7 +542,7 @@ export const createStandaloneCell = (
 };
 
 export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
-  implements models.ISharedBaseCell<Metadata>, IYText {
+  implements models.ISharedBaseCell<Metadata>, IYModel {
   constructor(ymodel: Y.Map<any>) {
     this.ymodel = ymodel;
     this.ymodel.observeDeep(this._modelObserver);

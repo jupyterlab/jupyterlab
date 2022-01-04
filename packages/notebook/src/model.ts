@@ -26,6 +26,7 @@ import {
 import {
   createMutex,
   ISharedNotebook,
+  IYDocument,
   NotebookChange,
   YNotebook
 } from '@jupyterlab/shared-models';
@@ -223,6 +224,10 @@ export class NotebookModel implements INotebookModel {
       'language_info'
     ) as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
+  }
+
+  get ydocument(): IYDocument {
+    return this._sharedModel as any;
   }
 
   /**

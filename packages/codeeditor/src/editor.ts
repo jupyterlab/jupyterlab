@@ -13,7 +13,7 @@ import {
 import {
   createStandaloneCell,
   ISharedText,
-  IYText,
+  IYModel,
   SourceChange,
   TextChange
 } from '@jupyterlab/shared-models';
@@ -210,7 +210,7 @@ export namespace CodeEditor {
      */
     readonly selections: IObservableMap<ITextSelection[]>;
 
-    readonly ymodel?: IYText;
+    readonly ymodel?: IYModel;
 
     /**
      * Undo an operation.
@@ -330,8 +330,8 @@ export namespace CodeEditor {
       this._sharedModel.setSource(newValue);
     }
 
-    get ymodel(): IYText {
-      return this._sharedModel as IYText;
+    get ymodel(): IYModel {
+      return this._sharedModel as any;
     }
 
     /**

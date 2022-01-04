@@ -1,4 +1,4 @@
-import { IYText } from '@jupyterlab/shared-models';
+import { IYDocument } from '@jupyterlab/shared-models';
 import { Token } from '@lumino/coreutils';
 
 /**
@@ -70,6 +70,6 @@ export namespace IDocumentProviderFactory {
     /**
      * The YNotebook.
      */
-    ymodel: IYText;
+    ydocument: IYDocument;
   }
 }

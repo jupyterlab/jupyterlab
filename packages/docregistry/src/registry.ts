@@ -10,7 +10,7 @@ import {
 import { IModelDB } from '@jupyterlab/observables';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents, Kernel } from '@jupyterlab/services';
-import { IYText } from '@jupyterlab/shared-models';
+import { IYDocument } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   fileIcon,
@@ -839,7 +839,7 @@ export namespace DocumentRegistry {
      * The shared notebook model.
      */
     //readonly sharedModel: models.ISharedDocument;
-    readonly ymodel?: IYText;
+    readonly ydocument: IYDocument;
 
     /**
      * Undo an operation.

@@ -67,8 +67,8 @@ export class Context<
       this._model = this._factory.createNew(lang, undefined, false);
     }
 
-    const ymodel = this._model.ymodel!; // translate to the concrete Yjs implementation
-    const ydoc = ymodel.ydoc!;
+    const ydocument = this._model.ydocument!; // translate to the concrete Yjs implementation
+    const ydoc = ydocument.ydoc;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('context');
     const docProviderFactory = options.docProviderFactory;
@@ -76,7 +76,7 @@ export class Context<
       ? docProviderFactory({
           path: this._path,
           contentType: this._factory.contentType,
-          ymodel
+          ydocument
         })
       : new ProviderMock();
 

@@ -296,7 +296,7 @@ export class StaticNotebook extends Widget {
     const oldValue = this._model;
     this._model = newValue;
 
-    if (oldValue && oldValue.modelDB.isCollaborative) {
+    /* if (oldValue && oldValue.modelDB.isCollaborative) {
       void oldValue.modelDB.connected.then(() => {
         oldValue!.modelDB.collaborators!.changed.disconnect(
           this._onCollaboratorsChanged,
@@ -311,7 +311,7 @@ export class StaticNotebook extends Widget {
           this
         );
       });
-    }
+    } */
 
     // Trigger private, protected, and public changes.
     this._onModelChanged(oldValue, newValue);
@@ -768,7 +768,7 @@ export class StaticNotebook extends Widget {
   /**
    * Handle an update to the collaborators.
    */
-  private _onCollaboratorsChanged(): void {
+  /* private _onCollaboratorsChanged(): void {
     // If there are selections corresponding to non-collaborators,
     // they are stale and should be removed.
     for (let i = 0; i < this.widgets.length; i++) {
@@ -779,7 +779,7 @@ export class StaticNotebook extends Widget {
         }
       }
     }
-  }
+  } */
 
   /**
    * Update editor settings for notebook cells.
@@ -1741,7 +1741,7 @@ export class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
-    if (this.model && this.model.modelDB.isCollaborative) {
+    /* if (this.model && this.model.modelDB.isCollaborative) {
       const modelDB = this.model.modelDB;
       void modelDB.connected.then(() => {
         if (!cell.isDisposed) {
@@ -1754,7 +1754,7 @@ export class Notebook extends StaticNotebook {
           };
         }
       });
-    }
+    } */
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
