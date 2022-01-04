@@ -92,7 +92,7 @@
     "shell-quote": "^1.7.2",
     "text-encoding": "^0.7.0",
     "ts-jest": "^26.3.0",
-    "typedoc": "~0.21.2",
+    "typedoc": "~0.22.10",
     "typescript": "~4.5.2"
   },
   "publishConfig": {

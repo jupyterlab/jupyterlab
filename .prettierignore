@@ -29,6 +29,7 @@ tsconfigdoc.json
 galata/playwright-report
 examples/federated/core_package/index.js
 examples/federated/labextensions
+typedoc-theme
 
 # jetbrains IDE stuff
 .idea/
