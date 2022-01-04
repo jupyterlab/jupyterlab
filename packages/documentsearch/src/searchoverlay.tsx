@@ -79,142 +79,118 @@ interface IReplaceEntryProps {
   translator?: ITranslator;
 }
 
-class SearchEntry extends React.Component<ISearchEntryProps> {
-  constructor(props: ISearchEntryProps) {
-    super(props);
-    this.translator = props.translator || nullTranslator;
-    this._trans = this.translator.load('jupyterlab');
-    this.searchInputRef = React.createRef();
-  }
+function SearchEntry(props: ISearchEntryProps): JSX.Element {
+  const trans = (props.translator ?? nullTranslator).load('jupyterlab');
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   /**
    * Focus the input.
    */
-  focusInput() {
-    // Select (and focus) any text already present.
-    // This makes typing in the box starts a new query (the common case),
-    // while arrow keys can be used to move cursor in preparation for
-    // modifying previous query.
-    this.searchInputRef.current?.select();
-  }
-
-  componentDidUpdate() {
-    if (this.props.forceFocus) {
-      this.focusInput();
+  React.useEffect(() => {
+    if (props.forceFocus) {
+      // Select (and focus) any text already present.
+      // This makes typing in the box starts a new query (the common case),
+      // while arrow keys can be used to move cursor in preparation for
+      // modifying previous query.
+      searchInputRef.current?.select();
     }
-  }
+  }, [props.forceFocus]);
 
-  render() {
-    const caseButtonToggleClass = classes(
-      this.props.caseSensitive ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
-      BUTTON_CONTENT_CLASS
-    );
-    const regexButtonToggleClass = classes(
-      this.props.useRegex ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
-      BUTTON_CONTENT_CLASS
-    );
+  const caseButtonToggleClass = classes(
+    props.caseSensitive ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
+    BUTTON_CONTENT_CLASS
+  );
+  const regexButtonToggleClass = classes(
+    props.useRegex ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
+    BUTTON_CONTENT_CLASS
+  );
 
-    const wrapperClass = `${INPUT_WRAPPER_CLASS} ${
-      this.props.inputFocused ? FOCUSED_INPUT : ''
-    }`;
+  const wrapperClass = `${INPUT_WRAPPER_CLASS} ${
+    props.inputFocused ? FOCUSED_INPUT : ''
+  }`;
 
-    return (
-      <div className={wrapperClass}>
-        <input
-          placeholder={
-            this.props.searchText ? undefined : this._trans.__('Find')
-          }
-          className={INPUT_CLASS}
-          value={this.props.searchText}
-          onChange={e => this.props.onChange(e)}
-          onKeyDown={e => this.props.onKeydown(e)}
-          tabIndex={0}
-          onFocus={e => this.props.onInputFocus()}
-          onBlur={e => this.props.onInputBlur()}
-          ref={this.searchInputRef}
-        />
-        <button
-          className={BUTTON_WRAPPER_CLASS}
-          onClick={() => this.props.onCaseSensitiveToggled()}
-          tabIndex={0}
-        >
-          <caseSensitiveIcon.react
-            className={caseButtonToggleClass}
-            tag="span"
-          />
-        </button>
-        <button
-          className={BUTTON_WRAPPER_CLASS}
-          onClick={() => this.props.onRegexToggled()}
-          tabIndex={0}
-        >
-          <regexIcon.react className={regexButtonToggleClass} tag="span" />
-        </button>
-      </div>
-    );
-  }
-
-  protected translator: ITranslator;
-  private _trans: TranslationBundle;
-  private searchInputRef: React.RefObject<HTMLInputElement>;
+  return (
+    <div className={wrapperClass}>
+      <input
+        placeholder={props.searchText ? undefined : trans.__('Find')}
+        className={INPUT_CLASS}
+        value={props.searchText}
+        onChange={e => props.onChange(e)}
+        onKeyDown={e => props.onKeydown(e)}
+        tabIndex={0}
+        onFocus={e => props.onInputFocus()}
+        onBlur={e => props.onInputBlur()}
+        ref={searchInputRef}
+        title={trans.__('Find')}
+      />
+      <button
+        className={BUTTON_WRAPPER_CLASS}
+        onClick={() => {
+          props.onCaseSensitiveToggled();
+        }}
+        tabIndex={0}
+        title={trans.__('Match Case')}
+      >
+        <caseSensitiveIcon.react className={caseButtonToggleClass} tag="span" />
+      </button>
+      <button
+        className={BUTTON_WRAPPER_CLASS}
+        onClick={() => props.onRegexToggled()}
+        tabIndex={0}
+        title={trans.__('Use Regular Expression')}
+      >
+        <regexIcon.react className={regexButtonToggleClass} tag="span" />
+      </button>
+    </div>
+  );
 }
 
-class ReplaceEntry extends React.Component<IReplaceEntryProps> {
-  constructor(props: any) {
-    super(props);
-    this._trans = (props.translator || nullTranslator).load('jupyterlab');
-    this.replaceInputRef = React.createRef();
-  }
+function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
+  const trans = (props.translator ?? nullTranslator).load('jupyterlab');
 
-  render() {
-    return (
-      <div className={REPLACE_WRAPPER_CLASS}>
-        <input
-          placeholder={
-            this.props.replaceText ? undefined : this._trans.__('Replace')
-          }
-          className={REPLACE_ENTRY_CLASS}
-          value={this.props.replaceText}
-          onKeyDown={e => this.props.onReplaceKeydown(e)}
-          onChange={e => this.props.onChange(e)}
-          tabIndex={0}
-          ref={this.replaceInputRef}
-        />
-        <button
-          className={REPLACE_BUTTON_WRAPPER_CLASS}
-          onClick={() => this.props.onReplaceCurrent()}
+  return (
+    <div className={REPLACE_WRAPPER_CLASS}>
+      <input
+        placeholder={props.replaceText ? undefined : trans.__('Replace')}
+        className={REPLACE_ENTRY_CLASS}
+        value={props.replaceText}
+        onKeyDown={e => props.onReplaceKeydown(e)}
+        onChange={e => props.onChange(e)}
+        tabIndex={0}
+        title={trans.__('Replace')}
+      />
+      <button
+        className={REPLACE_BUTTON_WRAPPER_CLASS}
+        onClick={() => props.onReplaceCurrent()}
+        tabIndex={0}
+      >
+        <span
+          className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
           tabIndex={0}
         >
-          <span
-            className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={0}
-          >
-            {this._trans.__('Replace')}
-          </span>
-        </button>
-        <button
-          className={REPLACE_BUTTON_WRAPPER_CLASS}
-          tabIndex={0}
-          onClick={() => this.props.onReplaceAll()}
+          {trans.__('Replace')}
+        </span>
+      </button>
+      <button
+        className={REPLACE_BUTTON_WRAPPER_CLASS}
+        tabIndex={0}
+        onClick={() => props.onReplaceAll()}
+      >
+        <span
+          className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
+          tabIndex={-1}
         >
-          <span
-            className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={-1}
-          >
-            {this._trans.__('Replace All')}
-          </span>
-        </button>
-      </div>
-    );
-  }
-
-  private replaceInputRef: React.RefObject<HTMLInputElement>;
-  private _trans: TranslationBundle;
+          {trans.__('Replace All')}
+        </span>
+      </button>
+    </div>
+  );
 }
 
 interface IUpDownProps {
   onHighlightPrevious: () => void;
   onHighlightNext: () => void;
+  trans: TranslationBundle;
 }
 
 function UpDownButtons(props: IUpDownProps) {
@@ -224,6 +200,7 @@ function UpDownButtons(props: IUpDownProps) {
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightPrevious()}
         tabIndex={0}
+        title={props.trans.__('Previous Match')}
       >
         <caretUpEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -234,6 +211,7 @@ function UpDownButtons(props: IUpDownProps) {
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightNext()}
         tabIndex={0}
+        title={props.trans.__('Next Match')}
       >
         <caretDownEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -264,34 +242,34 @@ function SearchIndices(props: ISearchIndexProps) {
 interface IFilterToggleProps {
   enabled: boolean;
   toggleEnabled: () => void;
+  trans: TranslationBundle;
 }
 
-interface IFilterToggleState {}
-
-class FilterToggle extends React.Component<
-  IFilterToggleProps,
-  IFilterToggleState
-> {
-  render() {
-    let className = `${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`;
-    if (this.props.enabled) {
-      className = `${className} ${ELLIPSES_BUTTON_ENABLED_CLASS}`;
-    }
-    return (
-      <button
-        className={BUTTON_WRAPPER_CLASS}
-        onClick={() => this.props.toggleEnabled()}
-        tabIndex={0}
-      >
-        <ellipsesIcon.react
-          className={className}
-          tag="span"
-          height="20px"
-          width="20px"
-        />
-      </button>
-    );
+function FilterToggle(props: IFilterToggleProps): JSX.Element {
+  let className = `${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`;
+  if (props.enabled) {
+    className = `${className} ${ELLIPSES_BUTTON_ENABLED_CLASS}`;
   }
+
+  return (
+    <button
+      className={BUTTON_WRAPPER_CLASS}
+      onClick={() => props.toggleEnabled()}
+      tabIndex={0}
+      title={
+        props.enabled
+          ? props.trans.__('Hide Search Filters')
+          : props.trans.__('Show Search Filters')
+      }
+    >
+      <ellipsesIcon.react
+        className={className}
+        tag="span"
+        height="20px"
+        width="20px"
+      />
+    </button>
+  );
 }
 
 interface IFilterSelectionProps {
@@ -343,7 +321,6 @@ class SearchOverlay extends React.Component<
     super(props);
     this.translator = props.translator || nullTranslator;
     this.state = { ...props.overlayState };
-    this.replaceEntryRef = React.createRef();
     this._debouncedStartSearch = new Debouncer(() => {
       this._executeSearch(true, this.state.searchText);
     }, props.searchDebounceTime);
@@ -468,6 +445,7 @@ class SearchOverlay extends React.Component<
   }
 
   render() {
+    const trans = this.translator.load('jupyterlab');
     const showReplace = !this.props.isReadOnly && this.state.replaceEntryShown;
     const filters = this.props.filters;
 
@@ -476,6 +454,7 @@ class SearchOverlay extends React.Component<
       <FilterToggle
         enabled={this.state.filtersOpen}
         toggleEnabled={() => this._toggleFiltersOpen()}
+        trans={trans}
       />
     ) : null;
     const filter = hasFilters ? (
@@ -523,6 +502,7 @@ class SearchOverlay extends React.Component<
             className={TOGGLE_WRAPPER}
             onClick={() => this._onReplaceToggled()}
             tabIndex={0}
+            title={trans.__('Toggle Replace')}
           >
             <icon.react
               className={`${REPLACE_TOGGLE_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -562,6 +542,7 @@ class SearchOverlay extends React.Component<
         <UpDownButtons
           onHighlightPrevious={() => this._executeSearch(false)}
           onHighlightNext={() => this._executeSearch(true)}
+          trans={trans}
         />
         {showReplace ? null : filterToggle}
         <button
@@ -592,7 +573,6 @@ class SearchOverlay extends React.Component<
                 this.props.onReplaceAll(this.state.replaceText)
               }
               replaceText={this.state.replaceText}
-              ref={this.replaceEntryRef}
               translator={this.translator}
             />
             <div className={SPACER_CLASS}></div>
@@ -618,7 +598,6 @@ class SearchOverlay extends React.Component<
   }
 
   protected translator: ITranslator;
-  private replaceEntryRef: React.RefObject<ReplaceEntry>;
 
   private _debouncedStartSearch: Debouncer;
 }
