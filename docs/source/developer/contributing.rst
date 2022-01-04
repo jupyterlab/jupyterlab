@@ -65,14 +65,21 @@ Submitting a Pull Request Contribution
 --------------------------------------
 
 Generally, an issue should be opened describing a piece of proposed work
-and the issues it solves before a pull request is opened.
+and the issues it solves before a pull request is opened. A triager will 
+ensure that your issue meets our definition of ready before we can merge
+any pull requests that relate to it.
 
 Issue Management
 ^^^^^^^^^^^^^^^^
 
 Opening an issue lets community members participate in the design
 discussion, makes others aware of work being done, and sets the stage
-for a fruitful community interaction. A pull request should reference
+for a fruitful community interaction. When you open a new bug or 
+enhancement request, please provide all the requested information 
+in the issue template 
+so that a responder will be able to triage your bug without delay.
+
+A pull request should reference
 the issue it is addressing. Once the pull request is merged, the issue
 related to it will also be closed. If there is additional discussion
 around implementation the issue may be re-opened. Once 30 days have
@@ -81,8 +88,87 @@ bot <https://github.com/apps/lock>`__ will lock the issue. If additional
 discussion is desired, or if the pull request doesn't fully address the
 locked issue, please open a new issue referencing the locked issue.
 
-Tag Issues with Labels
-^^^^^^^^^^^^^^^^^^^^^^
+New issues are subject to triage. A developer with triage permissions 
+(a *triager*) will do the following:
+
+1. Read the issue
+2. Search the existing issues and mark it as a duplicate if necessary
+3. If additional information is required, add a comment requesting it
+4. If the issue is ready to be worked on, assign it to a milestone
+5. Apply appropriate labels to the issue (see examples below)
+
+A developer may start to work on an issue as soon as it is filed. Please 
+work with a triager if they have any questions about your issue so that 
+your changes can be merged in without delay.
+
+Definition of Ready
+^^^^^^^^^^^^^^^^^^^
+
+One of the main goals of triage is to get issues into a state where they
+are **ready** for someone to work on. Once a triager is satisfied that an 
+issue meets the definition below, they will remove the ``status:Needs Triage``
+label from it. We will not merge a pull request for an issue that still 
+needs triage.
+
+Triagers should also ensure that the issue has appropriate labels that 
+describe it, such as labels with the ``pkg:`` prefix for issues that 
+affect one or more packages.
+
+**All requested information, where applicable, is provided.** From the 
+templates in JupyterLab’s issues:
+
+For a **bug**:
+
+* Description, preferably including screen shots
+* Steps to reproduce
+* Expected behavior
+* Context, such as OS, browser, JupyterLab version, and output or log excerpts
+
+For a **feature request**:
+
+* Description of the problem
+* Description of the proposed solution
+* Additional context
+
+**The issue should represent real, relevant, feasible work**. In short, if a 
+knowledgeable person were to be assigned this issue, they would be able to
+complete it with a reasonable amount of effort and assistance, and it
+furthers the goals of the Jupyter project.
+
+* Issues should be unique; triage is the best time to identify duplicates.
+* Bugs represent valid expectations for use of Jupyter products and services.
+* Expectations for security, performance, accessibility, and localization match
+  generally-accepted norms in the community that uses Jupyter products.
+* The issue represents work that one developer can commit to owning, even if 
+  they collaborate with other developers for feedback. Excessively large issues 
+  should be split into multiple issues, each triaged individually, or into 
+  `team-compass <https://github.com/jupyterlab/team-compass>`__ issues to discuss
+  more substantive changes.
+
+Labels Used by Triagers
+^^^^^^^^^^^^^^^^^^^^^^^
+
+All new bugs and enhancement requests have the ``status:Needs Triage`` label.
+
+On a regular basis, Jupyter contributors (triage reviewers or triagers)
+review JupyterLab issues tagged
+with ``status:Needs Triage``, starting with the oldest, and determine 
+whether they meet the definition of ready.
+
+Once triaged, if the issue is ready, the reviewer removes the 
+``status:Needs Triage`` label; no additional label is required. If there 
+is not enough information in the issue as filed, the triage reviewer applies
+the ``status:Needs Info`` label and leaves ``status:Needs Triage`` in place.
+If an issue has remained in ``status:Needs Info`` for more than 14 days 
+without any follow-up communication, the reviewer should apply 
+``status:Blocked``. A blocked issue should be closed after another 14 days
+pass without a reply that unblocks it.
+
+Our expectation is that every new issue should be examined within a week of
+its creation.
+
+Tagging Issues with Labels
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Users without the commit rights to the JupyterLab repository can tag
 issues with labels using the ``@meeseeksdev`` bot. For example: To apply
