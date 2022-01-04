@@ -609,6 +609,27 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     (this.cell as MarkdownCell).highlights = [];
   }
 
+  /**
+   * Initialize the search using the provided options. Should update the UI
+   * to highlight all matches and "select" whatever the first match should be.
+   *
+   * @param query A RegExp to be use to perform the search
+   * @param filters Filter parameters to pass to provider
+   *
+   * @returns A promise that resolves with a list of all matches
+   */
+  async startQuery(
+    query: RegExp | null,
+    filters?: IFiltersType
+  ): Promise<void> {
+    super.startQuery(query, filters);
+    this.onInputChanged(this.cell.model.value);
+    (this.cell as MarkdownCell).renderedChanged.connect(
+      this.onRenderedChanged,
+      this
+    );
+  }
+
   protected async onInputChanged(
     content: IObservableString,
     changes?: IObservableString.IChangedArgs
@@ -621,6 +642,21 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         content.text
       );
     }
+  }
+
+  /**
+   * Callback on rendered state change
+   *
+   * @param cell Cell that emitted the change
+   * @param rendered New rendered value
+   */
+  protected onRenderedChanged(cell: MarkdownCell, rendered: boolean): void {
+    this.currentIndex = null;
+    this.onInputChanged(this.cell.model.value).catch(reason => {
+      console.error(
+        `Fail to update markdown cell search highlight on rendered change:\n${reason}`
+      );
+    });
   }
 
   private updateRenderedSelection() {

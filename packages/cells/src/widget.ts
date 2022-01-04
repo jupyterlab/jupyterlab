@@ -1610,6 +1610,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 
     // If the rendered state changed, raise an event.
     this._displayChanged.emit();
+    this._renderedChanged.emit(this._rendered);
+  }
+
+  /**
+   * Signal emitted when the markdown cell rendered state changes
+   */
+  get renderedChanged(): ISignal<MarkdownCell, boolean> {
+    return this._renderedChanged;
   }
 
   /*
@@ -1822,6 +1830,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _renderer: IRenderMime.IRenderer | null = null;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
+  private _renderedChanged = new Signal<this, boolean>(this);
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
   private _showEditorForReadOnlyMarkdown = true;
