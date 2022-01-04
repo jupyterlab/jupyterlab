@@ -25,6 +25,9 @@ import { ArrayExt } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from './panel';
 
+/**
+ * Notebook document search provider
+ */
 export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   constructor(
     protected translator: ITranslator,
@@ -72,6 +75,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     return selection?.search(/\r?\n|\r/g) === -1 ? selection : '';
   }
 
+  /**
+   * Start a search on a given widget
+   *
+   * @param searchTarget Widget target
+   */
   startSearch(searchTarget: NotebookPanel): void {
     super.startSearch(searchTarget);
     this.widget!.model!.cells.changed.connect(this._onCellsChanged, this);
@@ -107,8 +115,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       ...(filters ?? {})
     };
 
+    this._onSelectedCells = this._filters.selectedCells;
     if (this._filters.selectedCells) {
-      this._onSelectedCells = this._filters.selectedCells;
       this.widget!.content.selectionChanged.connect(
         this._onSelectionChanged,
         this

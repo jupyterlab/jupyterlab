@@ -23,8 +23,7 @@ import { Debouncer } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { IFilter } from '.';
-import { IDisplayState, IFiltersType } from './tokens';
+import { IDisplayState, IFilter, IFiltersType } from './tokens';
 import { SearchInstance } from './searchinstance';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
