@@ -7,7 +7,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
-import { ISharedText, TextChange } from '@jupyterlab/shared-models';
+import { SourceChange } from '@jupyterlab/shared-models';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -43,7 +43,7 @@ export class EditorHandler implements IDisposable {
     this._editor = options.editor;
 
     this._editorMonitor = new ActivityMonitor({
-      signal: this._editor.model.sharedModel.changed,
+      signal: this._editor.model.sourceChanged,
       timeout: EDITOR_CHANGED_TIMEOUT
     });
     this._editorMonitor.activityStopped.connect(() => {
@@ -139,7 +139,7 @@ export class EditorHandler implements IDisposable {
     });
 
     void this._debuggerService.updateBreakpoints(
-      this._editor.model.sharedModel.getSource(),
+      this._editor.model.source,
       breakpoints,
       this._path
     );
@@ -171,7 +171,7 @@ export class EditorHandler implements IDisposable {
     }
 
     void this._debuggerService.updateBreakpoints(
-      this._editor.model.sharedModel.getSource(),
+      this._editor.model.source,
       breakpoints,
       this._path
     );
@@ -218,7 +218,7 @@ export class EditorHandler implements IDisposable {
    * or its path (if it exists).
    */
   private _getBreakpoints(): IDebugger.IBreakpoint[] {
-    const code = this._editor.model.sharedModel.getSource();
+    const code = this._editor.model.source;
     return this._debuggerService.model.breakpoints.getBreakpoints(
       this._path || this._debuggerService.getCodeId(code)
     );
@@ -228,7 +228,7 @@ export class EditorHandler implements IDisposable {
   private _path: string;
   private _editor: CodeEditor.IEditor;
   private _debuggerService: IDebugger;
-  private _editorMonitor: ActivityMonitor<ISharedText, TextChange>;
+  private _editorMonitor: ActivityMonitor<CodeEditor.IModel, SourceChange[]>;
 }
 
 /**

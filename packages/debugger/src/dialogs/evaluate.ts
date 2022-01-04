@@ -117,7 +117,7 @@ class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
    * Get the text specified by the user
    */
   getValue(): string {
-    return this._prompt.model.sharedModel.getSource();
+    return this._prompt.model.source;
   }
 
   /**

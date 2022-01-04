@@ -241,6 +241,20 @@ export class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Undo an operation.
+   */
+  undo(): void {
+    this._sharedModel.undo();
+  }
+
+  /**
+   * Redo an operation.
+   */
+  redo(): void {
+    this._sharedModel.redo();
+  }
+
+  /**
    * Serialize the model to a string.
    */
   toString(): string {

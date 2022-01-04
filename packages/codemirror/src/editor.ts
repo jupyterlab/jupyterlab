@@ -7,7 +7,6 @@
 import { showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -182,7 +181,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _initializeEditorBinding(): void {
     this._yeditorBinding?.destroy();
-    const sharedModel = this.model.sharedModel as models.IYText;
+    const sharedModel = this.model.ymodel;
     const opts = sharedModel.undoManager
       ? { yUndoManager: sharedModel.undoManager }
       : {};
@@ -366,14 +365,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
-    this.model.sharedModel.undo();
+    this.model.undo();
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
-    this.model.sharedModel.redo();
+    this.model.redo();
   }
 
   /**
@@ -1047,7 +1046,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._lastChange = null;
     const editor = this._editor;
     const doc = editor.getDoc();
-    if (doc.getValue() === this._model.sharedModel.getSource()) {
+    if (doc.getValue() === this._model.source) {
       return;
     }
 
@@ -1062,7 +1061,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     );
     console.warn(
       JSON.stringify({
-        model: this._model.sharedModel.getSource(),
+        model: this._model.source,
         view: doc.getValue(),
         selections: this.getSelections(),
         cursor: this.getCursorPosition(),

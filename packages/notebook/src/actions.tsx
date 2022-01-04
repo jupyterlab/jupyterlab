@@ -158,7 +158,7 @@ export namespace NotebookActions {
     const child = notebook.widgets[index];
     const editor = child.editor;
     const selections = editor.getSelections();
-    const orig = child.model.sharedModel.getSource();
+    const orig = child.model.source;
 
     const offsets = [0];
 
@@ -192,12 +192,10 @@ export namespace NotebookActions {
       if (i !== clones.length - 1 && clones[i].type === 'code') {
         (clones[i] as ICodeCellModel).outputs.clear();
       }
-      clones[i].sharedModel.setSource(
-        orig
-          .slice(offsets[i], offsets[i + 1])
-          .replace(/^\n+/, '')
-          .replace(/\n+$/, '')
-      );
+      clones[i].source = orig
+        .slice(offsets[i], offsets[i + 1])
+        .replace(/^\n+/, '')
+        .replace(/\n+$/, '');
     }
 
     const cells = nbModel.cells;
@@ -258,7 +256,7 @@ export namespace NotebookActions {
     // Get the cells to merge.
     notebook.widgets.forEach((child, index) => {
       if (notebook.isSelectedOrActive(child)) {
-        toMerge.push(child.model.sharedModel.getSource());
+        toMerge.push(child.model.source);
         if (index !== active) {
           toDelete.push(child.model);
         }
@@ -283,7 +281,7 @@ export namespace NotebookActions {
         // Otherwise merge with the previous cell.
         const cellModel = cells.get(active - 1);
 
-        toMerge.unshift(cellModel.sharedModel.getSource());
+        toMerge.unshift(cellModel.source);
         toDelete.push(cellModel);
       } else if (mergeAbove === false) {
         // Bail if it is the last cell.
@@ -293,7 +291,7 @@ export namespace NotebookActions {
         // Otherwise merge with the next cell.
         const cellModel = cells.get(active + 1);
 
-        toMerge.push(cellModel.sharedModel.getSource());
+        toMerge.push(cellModel.source);
         toDelete.push(cellModel);
       }
     }
@@ -303,7 +301,7 @@ export namespace NotebookActions {
     // Create a new cell for the source to preserve history.
     const newModel = Private.cloneCell(model, primary.model);
 
-    newModel.sharedModel.setSource(toMerge.join('\n\n'));
+    newModel.source = toMerge.join('\n\n');
     if (isCodeCellModel(newModel)) {
       newModel.outputs.clear();
     } else if (isMarkdownCellModel(newModel) || isRawCellModel(newModel)) {
@@ -995,9 +993,9 @@ export namespace NotebookActions {
             notebook.lastClipboardInteraction === 'cut' &&
             typeof cell.id === 'string'
           ) {
-            let cell_id = cell.id as string;
+            let cellId = cell.id as string;
             return model.contentFactory.createCodeCell({
-              id: cell_id,
+              id: cellId,
               cell: cell
             });
           } else {
@@ -1076,7 +1074,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    notebook.model.sharedModel.undo();
+    notebook.model.undo();
     notebook.deselectAll();
     Private.handleState(notebook, state);
   }
@@ -1097,7 +1095,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    notebook.model.sharedModel.redo();
+    notebook.model.redo();
     notebook.deselectAll();
     Private.handleState(notebook, state);
   }
@@ -2098,7 +2096,7 @@ namespace Private {
     const replace = setNextInput.replace;
 
     if (replace) {
-      cell.model.sharedModel.setSource(text);
+      cell.model.source = text;
       return;
     }
 
@@ -2107,7 +2105,7 @@ namespace Private {
     const cells = notebook.model!.cells;
     const index = ArrayExt.firstIndexOf(toArray(cells), cell.model);
 
-    newCell.sharedModel.setSource(text);
+    newCell.source = text;
     if (index === -1) {
       cells.push(newCell);
     } else {
@@ -2282,7 +2280,7 @@ namespace Private {
    */
   export function setMarkdownHeader(cell: ICellModel, level: number): void {
     // Remove existing header or leading white space.
-    let source = cell.sharedModel.getSource();
+    let source = cell.source;
     const regex = /^(#+\s*)|^(\s*)/;
     const newHeader = Array(level + 1).join('#') + ' ';
     const matches = regex.exec(source);
@@ -2290,6 +2288,6 @@ namespace Private {
     if (matches) {
       source = source.slice(matches[0].length);
     }
-    cell.sharedModel.setSource(newHeader + source);
+    cell.source = newHeader + source;
   }
 }

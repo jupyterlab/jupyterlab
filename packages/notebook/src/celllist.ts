@@ -70,7 +70,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
           change.type === 'move'
         ) {
           const cells = change.newValues.map(cell => {
-            return cell.sharedModel.clone() as any;
+            return cell.cloneSharedModel();
           });
           let insertLocation = change.newIndex;
           if (change.type === 'move' && insertLocation > change.oldIndex) {
@@ -551,7 +551,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
               break;
           }
           this._cellMap.set(id, cell);
-        } else if (!existingCell.sharedModel.isStandalone) {
+        } else if (!existingCell.isStandalone) {
           this._mutex(() => {
             // it does already exist, probably because it was deleted previously and we introduced it
             // copy it to a fresh codecell instance

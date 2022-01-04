@@ -52,6 +52,8 @@ export interface ICellModel extends CodeEditor.IModel {
    */
   readonly id: string;
 
+  readonly isStandalone: boolean;
+
   /**
    * A signal emitted when the content of the model changes.
    */
@@ -81,6 +83,8 @@ export interface ICellModel extends CodeEditor.IModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.ICell;
+
+  cloneSharedModel(): ISharedCell;
 }
 
 /**
@@ -241,6 +245,10 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     return 'raw';
   }
 
+  get isStandalone(): boolean {
+    return this._sharedModel.isStandalone;
+  }
+
   /**
    * A signal emitted when the state of the model changes.
    */
@@ -332,6 +340,10 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
       }
     }
     super.switchSharedModel(sharedModel, reinitialize);
+  }
+
+  cloneSharedModel(): ISharedCell {
+    return this._sharedModel.clone() as ISharedCell;
   }
 
   /**

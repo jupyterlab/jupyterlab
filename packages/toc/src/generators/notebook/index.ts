@@ -206,7 +206,7 @@ class NotebookGenerator implements Registry.IGenerator<NotebookPanel> {
               count ?? (isRunning !== RunningStatus.Idle ? '*' : ' ');
             let executionCount = `[${executionIndicator}]: `;
             let heading = getCodeCellHeading(
-              (model as CodeCellModel).sharedModel.getSource(),
+              (model as CodeCellModel).source,
               onClick,
               executionCount,
               getLastHeadingLevel(headings),
@@ -320,7 +320,7 @@ class NotebookGenerator implements Registry.IGenerator<NotebookPanel> {
               };
             };
             const markdownHeadings = getMarkdownHeadings(
-              model!.sharedModel.getSource(),
+              model!.source,
               onClick,
               dict,
               lastLevel,

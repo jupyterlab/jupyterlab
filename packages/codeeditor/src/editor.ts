@@ -13,6 +13,7 @@ import {
 import {
   createStandaloneCell,
   ISharedText,
+  IYText,
   SourceChange,
   TextChange
 } from '@jupyterlab/shared-models';
@@ -209,6 +210,18 @@ export namespace CodeEditor {
      */
     readonly selections: IObservableMap<ITextSelection[]>;
 
+    readonly ymodel: IYText;
+
+    /**
+     * Undo an operation.
+     */
+    undo(): void;
+
+    /**
+     * Redo an operation.
+     */
+    redo(): void;
+
     /**
      * Update the source by inserting/removing
      * characters from a certain position.
@@ -317,6 +330,10 @@ export namespace CodeEditor {
       this._sharedModel.setSource(newValue);
     }
 
+    get ymodel(): IYText {
+      return this._sharedModel as IYText;
+    }
+
     /**
      * Whether the model is disposed.
      */
@@ -332,7 +349,26 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
+      this._sharedModel.dispose();
       Signal.clearData(this);
+    }
+
+    /**
+     * Undo an operation.
+     */
+    undo(): void {
+      this._sharedModel.undo();
+    }
+
+    /**
+     * Redo an operation.
+     */
+    redo(): void {
+      this._sharedModel.redo();
+    }
+
+    updateSource(start: number, end: number, value?: string | undefined): void {
+      this._sharedModel.updateSource(start, end, value);
     }
 
     /**
@@ -347,10 +383,6 @@ export namespace CodeEditor {
       this._sharedModel = sharedModel;
       this._sharedModel.changed.connect(this.onSharedModelChanged, this);
       this._sharedModelSwitched.emit(true);
-    }
-
-    updateSource(start: number, end: number, value?: string | undefined): void {
-      this._sharedModel.updateSource(start, end, value);
     }
 
     private _onModelDBMimeTypeChanged(

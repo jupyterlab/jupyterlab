@@ -104,7 +104,7 @@ export class SourcesBody extends Widget {
     const editorMimeType =
       mimeType || this._mimeTypeService.getMimeTypeByFilePath(path ?? '');
 
-    this._editor.model.sharedModel.setSource(content);
+    this._editor.model.source = content;
     this._editor.model.mimeType = editorMimeType;
 
     this._editorHandler = new EditorHandler({

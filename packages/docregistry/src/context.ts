@@ -227,7 +227,6 @@ export class Context<
     }
     this._model.dispose();
     this._provider.destroy();
-    this._model.sharedModel.dispose();
     this._ydoc.destroy();
     this._disposed.emit(void 0);
     Signal.clearData(this);

@@ -95,7 +95,7 @@ export class CompletionHandler implements IDisposable {
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.disconnect(this.onTextChanged, this);
+      model.sourceChanged.disconnect(this.onTextChanged, this);
     }
 
     // Reset completer state.
@@ -109,7 +109,7 @@ export class CompletionHandler implements IDisposable {
 
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.connect(this.onTextChanged, this);
+      model.sourceChanged.connect(this.onTextChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
     }
@@ -161,7 +161,7 @@ export class CompletionHandler implements IDisposable {
     position: CodeEditor.IPosition
   ): Completer.ITextState {
     return {
-      text: editor.model.sharedModel.getSource(),
+      text: editor.model.source,
       lineHeight: editor.lineHeight,
       charWidth: editor.charWidth,
       line: position.line,
@@ -188,7 +188,7 @@ export class CompletionHandler implements IDisposable {
     const { start, end, value } = patch;
     const cursorBeforeChange = editor.getOffsetAt(editor.getCursorPosition());
     // we need to update the shared model in a single transaction so that the undo manager works as expected
-    editor.model.sharedModel.updateSource(start, end, value);
+    editor.model.updateSource(start, end, value);
     if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
       editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
     }
@@ -351,7 +351,7 @@ export class CompletionHandler implements IDisposable {
       return Promise.reject(new Error('No active editor'));
     }
 
-    const text = editor.model.sharedModel.getSource();
+    const text = editor.model.source;
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const pending = ++this._pending;
     const state = this.getState(editor, position);

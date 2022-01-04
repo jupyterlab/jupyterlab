@@ -276,7 +276,7 @@ export class CodeEditorWrapper extends Widget {
       return;
     }
     const offset = this.editor.getOffsetAt(position);
-    this.model.sharedModel.updateSource(offset, offset, data);
+    this.model.updateSource(offset, offset, data);
   }
 
   private _updateOnShow: boolean;

@@ -839,6 +839,15 @@ export namespace DocumentRegistry {
      * The shared notebook model.
      */
     //readonly sharedModel: models.ISharedDocument;
+    /**
+     * Undo an operation.
+     */
+    undo(): void;
+
+    /**
+     * Redo an operation.
+     */
+    redo(): void;
 
     /**
      * Serialize the model to a string.

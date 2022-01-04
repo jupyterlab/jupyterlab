@@ -143,12 +143,8 @@ export class DocumentModel
    * @param reinitialize Whether to reinitialize the shared model.
    */
   switchSharedModel(sharedModel: ISharedFile, reinitialize?: boolean): void {
-    // Disconnect from old model
-    //this.sharedModel.changed.disconnect(this.onSharedModelChanged, this);
     // parent class changes the model
     super.switchSharedModel(sharedModel, reinitialize);
-    // connect to new model
-    //this.sharedModel.changed.connect(this.onSharedModelChanged, this);
   }
 
   protected onSharedModelChanged(

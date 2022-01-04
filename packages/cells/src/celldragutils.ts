@@ -153,10 +153,7 @@ export namespace CellDragUtils {
       promptNumber = '';
     }
 
-    const cellContent = activeCell.model.sharedModel
-      .getSource()
-      .split('\n')[0]
-      .slice(0, 26);
+    const cellContent = activeCell.model.source.split('\n')[0].slice(0, 26);
     if (count > 1) {
       if (promptNumber !== '') {
         return VirtualDOM.realize(
