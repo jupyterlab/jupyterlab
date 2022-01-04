@@ -39,6 +39,9 @@ fi
 
 if [[ $GROUP == docs ]]; then
     # Build the docs (includes API docs)
+    pushd typedoc-theme
+    jlpm run build:docs:theme
+    popd
     pushd docs
     conda env create -f environment.yml
     conda init --all
