@@ -26,7 +26,7 @@ export async function requestTranslationsAPI<T>(
   // Make request to Jupyter API
   const settings = serverSettings ?? ServerConnection.makeSettings();
   translationsUrl =
-    translationsUrl || `${settings.appUrl}/${TRANSLATIONS_SETTINGS_URL}/`;
+    translationsUrl || `${settings.appUrl}/${TRANSLATIONS_SETTINGS_URL}`;
   const requestUrl = URLExt.join(settings.baseUrl, translationsUrl, locale);
   let response: Response;
   try {

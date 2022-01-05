@@ -45,6 +45,14 @@ bumped their major version (following semver convention):
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 
+Extension Development Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- The ``externalExtensions`` field in the ``dev_mode/package.json`` file corresponding to the ``@jupyterlab/application-top``
+  ``private`` package has now been removed in ``4.0``. If you were using this field to develop source extensions against
+  a development build of JupyterLab, you should instead switch to the federated extensions system (via the ``--extensions-in-dev-mode`` flag)
+  or to using the ``--splice-source`` option. See :ref:`prebuilt_dev_workflow` and :ref:`source_dev_workflow` for more information.
+
 JupyterLab 3.0 to 3.1
 ---------------------
 
