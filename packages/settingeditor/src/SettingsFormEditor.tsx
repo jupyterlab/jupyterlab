@@ -46,6 +46,12 @@ export namespace SettingsFormEditor {
      * Callback to update the plugin list when a validation error occurs.
      */
     hasError: (error: boolean) => void;
+
+    /**
+     * Handler for when selection change is triggered by scrolling
+     * in the SettingsPanel.
+     */
+    onSelect: (id: string) => void;
   }
 }
 /**
@@ -127,7 +133,8 @@ export const SettingsFormEditor = ({
   settings,
   renderers,
   handleSelectSignal,
-  hasError
+  hasError,
+  onSelect
 }: SettingsFormEditor.IProps) => {
   const [formData, setFormData] = React.useState(settings.composite);
   const [isModified, setIsModified] = React.useState(settings.isModified);
@@ -192,6 +199,7 @@ export const SettingsFormEditor = ({
         className="jp-SettingsHeader"
         onClick={() => {
           setHidden(!hidden);
+          onSelect(settings.id);
         }}
       >
         <div className="jp-SettingsTitle">
@@ -216,6 +224,7 @@ export const SettingsFormEditor = ({
           liveValidate
           onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
             setFormData(e.formData);
+            onSelect(settings.id);
             if (e.errors.length === 0) {
               handleChange(e.formData);
               hasError(false);

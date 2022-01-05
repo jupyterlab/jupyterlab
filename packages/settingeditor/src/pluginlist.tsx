@@ -296,7 +296,7 @@ export class PluginList extends ReactWidget {
       .map(this.mapPlugins);
 
     return (
-      <div>
+      <div className="jp-PluginList-wrapper">
         <FilterBox
           updateFilter={this.setFilter}
           useFuzzyFilter={true}

@@ -138,6 +138,7 @@ export const FilterBox = (props: IFilterBoxProps) => {
       rightIcon="ui-components:search"
       placeholder={props.placeholder}
       onChange={handleChange}
+      className="jp-FilterBox"
       value={filter}
     />
   );

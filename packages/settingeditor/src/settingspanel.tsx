@@ -66,39 +66,8 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     editorRefs[pluginId].current?.scrollIntoView(true)
   );
 
-  // TODO: is this efficient?
-  /**
-   * Calculates the currently "selected" plugin based on scroll location
-   */
-  const updateSelectedPlugin = () => {
-    for (const refId in editorRefs) {
-      const ref = editorRefs[refId];
-      const offsetTop =
-        ref.current?.offsetTop ?? 0 + (wrapperRef.current?.offsetTop ?? 0);
-      if (
-        wrapperRef.current?.scrollTop &&
-        ref.current?.scrollHeight &&
-        wrapperRef.current?.scrollTop + 1 >=
-          (wrapperRef.current?.offsetTop ?? 0) &&
-        // If top of editor is visible
-        (offsetTop >= wrapperRef.current?.scrollTop ||
-          // If the top is above the view and the bottom is below the view
-          (offsetTop < wrapperRef.current?.scrollTop &&
-            offsetTop + ref.current?.scrollHeight >
-              wrapperRef.current?.scrollTop + wrapperRef.current?.clientHeight))
-      ) {
-        onSelect(refId);
-        break;
-      }
-    }
-  };
-
   return (
-    <div
-      className="jp-SettingsPanel"
-      ref={wrapperRef}
-      onScroll={updateSelectedPlugin}
-    >
+    <div className="jp-SettingsPanel" ref={wrapperRef}>
       {settings.map(pluginSettings => {
         return (
           <div
@@ -113,6 +82,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
               hasError={(error: boolean) => {
                 hasError(pluginSettings.id, error);
               }}
+              onSelect={onSelect}
             />
           </div>
         );
