@@ -61,6 +61,11 @@ export interface IDebugger {
    */
   clearBreakpoints(): Promise<void>;
 
+  /**
+   * Used to determine if kernel has pause on exception capabilities
+   */
+  pauseOnExceptionsIsValid(): boolean;
+
   /** TODO */
   pauseOnExceptions(enable: boolean): Promise<void>;
 
