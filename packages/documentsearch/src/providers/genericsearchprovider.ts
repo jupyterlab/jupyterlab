@@ -107,17 +107,11 @@ export class HTMLSearchEngine {
         matches.push({
           text: match[0],
           position: match.index,
-          node: node as Text,
-          // TODO remove those
-          index: -1 // We set this later to ensure we get order correct
+          node: node as Text
         });
       }
     }
 
-    matches.forEach((match, idx) => {
-      // This may be changed when this is a subprovider :/
-      match.index = idx;
-    });
     return Promise.resolve(matches);
   }
 }

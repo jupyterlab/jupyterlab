@@ -127,11 +127,6 @@ export interface ISearchMatch {
    * Start location of the match (in a text, this is the column)
    */
   position: number;
-
-  /**
-   * Index among the other matches
-   */
-  index: number;
 }
 
 export interface IHTMLSearchMatch extends ISearchMatch {

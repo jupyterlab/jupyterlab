@@ -247,7 +247,9 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     if (!this._currentMatch) {
       return null;
     }
-    return this._currentMatch.index;
+
+    // TODO make it more efficient
+    return this.matches.indexOf(this._currentMatch);
   }
 
   /**
@@ -349,12 +351,11 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
           // found match, add it to state
           const matchLength = match[0].length;
           const matchObj: ISearchMatch = {
-            text: lineText.substr(currentPos, matchLength),
+            text: lineText.slice(currentPos, currentPos + matchLength),
             position: this.editor.doc.indexFromPos({
               line,
               ch: currentPos
-            }),
-            index: 0 // fill in index when flattening, later
+            })
           };
           if (!this._matchState[line]) {
             this._matchState[line] = {};
@@ -455,16 +456,13 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   }
 
   private _parseMatchesFromState(): ISearchMatch[] {
-    let index = 0;
     // Flatten state map
     const matches = new Array<ISearchMatch>();
 
     for (const lineKey in this._matchState) {
       const lineMatches = this._matchState[lineKey];
       for (const posKey in lineMatches) {
-        const match = lineMatches[posKey];
-        match.index = index++;
-        matches.push(match);
+        matches.push(lineMatches[posKey]);
       }
     }
 

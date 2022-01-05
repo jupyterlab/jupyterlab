@@ -32,8 +32,7 @@ export const TextSearchEngine = {
     while ((match = query.exec(data)) !== null) {
       matches.push({
         text: match[0],
-        position: match.index,
-        index: 0
+        position: match.index
       });
     }
 
