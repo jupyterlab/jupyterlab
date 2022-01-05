@@ -418,11 +418,11 @@
 }
 
 .jp-RenderedHTMLCommon tbody tr:nth-child(odd) {
-  background: var(--jp-rendermime-table-row-background-odd);
+  background: var(--jp-layout-color0);
 }
 
 .jp-RenderedHTMLCommon tbody tr:nth-child(even) {
-  background: var(--jp-rendermime-table-row-background-even);
+  background: var(--jp-rendermime-table-row-background);
 }
 
 .jp-RenderedHTMLCommon tbody tr:hover {

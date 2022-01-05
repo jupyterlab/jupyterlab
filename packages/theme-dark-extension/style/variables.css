@@ -302,8 +302,6 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   --jp-rendermime-error-background: rgba(244, 67, 54, 0.28);
   --jp-rendermime-table-row-background: var(--md-grey-900);
-  --jp-rendermime-table-row-background-odd: rgba(66, 66, 66, 0.1);
-  --jp-rendermime-table-row-background-even: rgba(255, 255, 255, 0.1);
   --jp-rendermime-table-row-hover-background: rgba(3, 169, 244, 0.2);
 
   /* Dialog specific styles */
