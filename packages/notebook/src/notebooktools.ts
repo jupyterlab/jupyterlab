@@ -603,8 +603,7 @@ export namespace NotebookTools {
         this.notebookTools.activeNotebookPanel.content;
       //this.editor.source = nb?.model?.metadata ?? null;
       //TODO: Update metadata editor, use shared models?
-      this.editor.source =
-        nb?.model?.sharedModel.getMetadataAsISharedMetadata() ?? null;
+      this.editor.source = nb?.model?.getMetadataAsISharedMetadata() ?? null;
     }
   }
 

@@ -81,18 +81,11 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
             tracker.currentWidget.content.activeCellChanged.connect(() => {
               options.updateWidget();
             });
-            const numbering = tracker.currentWidget.model!.metadata.get(
-              'toc-autonumbering'
-            ) as boolean;
-            const showCode = tracker.currentWidget.model!.metadata.get(
-              'toc-showcode'
-            ) as boolean;
-            const showMarkdown = tracker.currentWidget.model!.metadata.get(
-              'toc-showmarkdowntxt'
-            ) as boolean;
-            const showTags = tracker.currentWidget.model!.metadata.get(
-              'toc-showtags'
-            ) as boolean;
+            const metadata = tracker.currentWidget.model!.metadata;
+            const numbering = metadata['toc-autonumbering'] as boolean;
+            const showCode = metadata['toc-showcode'] as boolean;
+            const showMarkdown = metadata['toc-showmarkdowntxt'] as boolean;
+            const showTags = metadata['toc-showtags'] as boolean;
             options.initializeOptions(
               numbering || options.numbering,
               options.numberingH1,

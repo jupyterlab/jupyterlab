@@ -4,6 +4,7 @@
 import { ISanitizer } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { JSONObject } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
@@ -101,7 +102,9 @@ class OptionsManager implements Registry.IOptionsManager {
    */
   set notebookMetadata(value: [string, any]) {
     if (this._notebook.currentWidget != null) {
-      this._notebook.currentWidget.model!.metadata.set(value[0], value[1]);
+      const metadata: JSONObject = {};
+      metadata[value[0]] = value[1];
+      this._notebook.currentWidget.model!.updateMetadata(metadata);
     }
   }
 

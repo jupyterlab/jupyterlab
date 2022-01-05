@@ -240,7 +240,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
     //this.model!.metadata.set('language_info', language);
-    this.model!.sharedModel.updateMetadata({ language_info: language });
+    this.model!.updateMetadata({ language_info: language });
   }
 
   /**
@@ -256,7 +256,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       display_name: spec?.display_name,
       language: spec?.language
     }); */
-    this.model!.sharedModel.updateMetadata({
+    this.model!.updateMetadata({
       kernelspec: {
         name: kernel.name,
         display_name: spec === undefined ? '' : spec.display_name,

@@ -756,7 +756,7 @@ export class StaticNotebook extends Widget {
     /* const info = this._model?.metadata.get(
       'language_info'
     ) as nbformat.ILanguageInfoMetadata; */
-    const info = this.model?.sharedModel.getMetadata().language_info;
+    const info = this.model?.metadata.language_info;
     if (!info) {
       return;
     }

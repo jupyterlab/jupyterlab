@@ -24,6 +24,7 @@ import {
   ModelDB
 } from '@jupyterlab/observables';
 import {
+  ISharedMetadata,
   ISharedNotebook,
   IYDocument,
   NotebookChange,
@@ -75,7 +76,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The metadata associated with the notebook.
    */
-  //readonly metadata: IObservableJSON;
+  metadata: nbformat.INotebookMetadata;
 
   /**
    * The array of deleted cells since the notebook was last run.
@@ -86,6 +87,10 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * If the model is initialized or not.
    */
   isInitialized: boolean;
+
+  updateMetadata(value: Partial<nbformat.INotebookMetadata>): void;
+
+  getMetadataAsISharedMetadata(): ISharedMetadata;
 }
 
 /**
@@ -449,6 +454,10 @@ close the notebook without saving it.`,
    */
   updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
     this._sharedModel.updateMetadata(value);
+  }
+
+  getMetadataAsISharedMetadata(): ISharedMetadata {
+    return this._sharedModel.getMetadataAsISharedMetadata();
   }
 
   /**
