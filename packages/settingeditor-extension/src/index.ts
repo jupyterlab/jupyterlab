@@ -119,7 +119,7 @@ function activate(
       void tracker.add(main);
       shell.add(main);
     },
-    label: trans.__('Setting Editor')
+    label: trans.__('Settings Editor')
   });
 
   return tracker;
@@ -227,17 +227,17 @@ function activateJSON(
 
       editor.id = namespace;
       editor.title.icon = settingsIcon;
-      editor.title.label = trans.__('JSON Settings Editor');
+      editor.title.label = trans.__('Advanced Settings Editor');
 
       const main = new MainAreaWidget({ content: editor });
       void tracker.add(main);
       shell.add(main);
     },
-    label: trans.__('JSON Settings Editor')
+    label: trans.__('Advanced Settings Editor')
   });
   if (palette) {
     palette.addItem({
-      category: trans.__('JSON Settings Editor'),
+      category: trans.__('Advanced Settings Editor'),
       command: CommandIDs.openJSON
     });
   }
