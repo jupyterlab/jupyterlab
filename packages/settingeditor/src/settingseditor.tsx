@@ -58,7 +58,7 @@ export class SettingsEditor extends Widget {
       const openJSONEditorButton = ReactWidget.create(
         <button
           onClick={() => {
-            options.commands.execute('settingeditor:open-json');
+            void options.commands.execute('settingeditor:open-json');
           }}
         >
           JSON Settings Editor
