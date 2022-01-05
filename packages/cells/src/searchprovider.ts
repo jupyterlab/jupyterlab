@@ -396,7 +396,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
     // Search outputs
     const outputs = (this.cell.model as CodeCellModel).outputs;
-    this._onOutputChanged(outputs);
+    await this._onOutputChanged(outputs)
     outputs.changed.connect(this._onOutputsChanged, this);
     outputs.stateChanged.connect(this._onOutputChanged, this);
   }
@@ -645,8 +645,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     query: RegExp | null,
     filters?: IFiltersType
   ): Promise<void> {
-    super.startQuery(query, filters);
-    this.onInputChanged(this.cell.model.value);
+    await super.startQuery(query, filters);
+    await this.onInputChanged(this.cell.model.value);
     (this.cell as MarkdownCell).renderedChanged.connect(
       this.onRenderedChanged,
       this

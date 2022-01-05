@@ -71,7 +71,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     if (refreshOverlay) {
       this._refreshOverlay();
     }
-    this._setInitialMatches(query);
+    await this._setInitialMatches(query);
 
     const matches = this._parseMatchesFromState();
     if (matches.length === 0) {
@@ -263,12 +263,19 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    */
   isSubProvider = false;
 
-  private _onDocChanged(_: any, changeObj: CodeMirror.EditorChange) {
+  private _onDocChanged(_: any, changeObj: CodeMirror.EditorChange): void {
     // If we get newlines added/removed, the line numbers across the
     // match state are all shifted, so here we need to recalculate it
     if (changeObj.text.length > 1 || (changeObj.removed?.length ?? 0) > 1) {
-      this._setInitialMatches(this._query);
-      this._changed.emit(undefined);
+      this._setInitialMatches(this._query)
+        .then(() => {
+          this._changed.emit(undefined);
+        })
+        .catch(reason => {
+          console.error(
+            `Fail to reapply search on CodeMirror document change:\n${reason}`
+          );
+        });
     }
   }
 
