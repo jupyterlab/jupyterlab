@@ -222,6 +222,7 @@ export const SettingsFormEditor = ({
           fields={renderers}
           formContext={{ settings: settings }}
           liveValidate
+          idPrefix={`jp-SettingsEditor-${settings.id}`}
           onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
             setFormData(e.formData);
             onSelect(settings.id);
