@@ -140,8 +140,8 @@ export class OutputAreaModel implements IOutputAreaModel {
       options.contentFactory || OutputAreaModel.defaultContentFactory;
     this.list = new ObservableList<IOutputModel>();
     if (options.values) {
-      each(options.values, (value, index) => {
-        this._add(value);
+      each(options.values, value => {
+        const index = this._add(value) - 1;
         const item = this.list.get(index);
         item.changed.connect(this._onGenericChange, this);
       });
@@ -300,6 +300,8 @@ export class OutputAreaModel implements IOutputAreaModel {
 
   /**
    * Add a copy of the item to the list.
+   * 
+   * @returns The list length
    */
   private _add(value: nbformat.IOutput): number {
     const trusted = this._trusted;
@@ -329,7 +331,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       const prev = this.list.get(index);
       this.list.set(index, item);
       prev.dispose();
-      return index;
+      return this.length;
     }
 
     if (nbformat.isStream(value)) {
@@ -432,7 +434,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     this._stateChanged.emit([idx, itemChange]);
   }
 
-  private _lastStream: string;
+  private _lastStream = '';
   private _lastName: 'stdout' | 'stderr';
   private _trusted = false;
   private _isDisposed = false;

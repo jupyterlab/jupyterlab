@@ -138,23 +138,12 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
       return Promise.resolve();
     }
 
-    // No point in removing overlay in the middle of the search
-    await this.endQuery(false);
+    await this.endQuery();
     this._query = query;
 
     const matches = await HTMLSearchEngine.search(query, this.widget.node);
 
     // Transform the DOM
-    /*
-     * We store them here as we want to avoid saving a modified one
-     * This happens with something like this: <pre><span>Hello</span> world</pre> and looking for o
-     * The o in world is found after the o in hello which means the pre could have been modified already
-     * While there may be a better data structure to do this for performance, this was easy to reason about.
-     */
-    // const originalNodes = matches.forEach(match =>
-    //   match.originalNode.parentElement!.cloneNode(true)
-    // );
-
     let nodeIdx = 0;
     while (nodeIdx < matches.length) {
       let activeNode = matches[nodeIdx].node;
@@ -199,10 +188,6 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     this._matches = matches;
   }
 
-  refreshOverlay(): void {
-    // We don't have an overlay, we are directly changing the DOM
-  }
-
   /**
    * Clears state of a search provider to prepare for startQuery to be called
    * in order to start a new query or refresh an existing one.
@@ -210,7 +195,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    * @returns A promise that resolves when the search provider is ready to
    * begin a new search.
    */
-  async endQuery(removeOverlay = true): Promise<void> {
+  async endQuery(): Promise<void> {
     this._mutationObserver.disconnect();
     this._spanNodes.forEach(el => {
       const parent = el.parentNode!;

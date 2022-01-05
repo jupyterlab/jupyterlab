@@ -2,8 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 import {
   FOUND_CLASSES,
-  GenericSearchProvider,
-  IGenericSearchMatch
+  GenericSearchProvider
 } from '@jupyterlab/documentsearch';
 import { Widget } from '@lumino/widgets';
 
@@ -13,11 +12,11 @@ describe('documentsearch/genericsearchprovider', () => {
   describe('GenericSearchProvider', () => {
     let provider: GenericSearchProvider;
     let widget: Widget;
-    let match: IGenericSearchMatch;
 
     beforeEach(() => {
       provider = new GenericSearchProvider();
       widget = new Widget();
+      provider.startSearch(widget);
     });
 
     afterEach(async () => {
@@ -25,100 +24,89 @@ describe('documentsearch/genericsearchprovider', () => {
       widget.dispose();
     });
 
-    function getHTMLForMatch(match: IGenericSearchMatch): string | undefined {
-      return match.spanElement?.closest('pre')?.innerHTML;
-    }
-
-    async function queryOne(query: RegExp): Promise<IGenericSearchMatch> {
-      let matches = (await provider.startQuery(
-        query,
-        widget
-      )) as IGenericSearchMatch[];
-      expect(matches).toHaveLength(1);
-      return matches[0];
-    }
-
     describe('#startQuery()', () => {
-      it('should highlight text fragment nested in a node', async () => {
-        widget.node.innerHTML = '<pre>xyz</pre>';
-        match = await queryOne(/x/);
-        expect(getHTMLForMatch(match)).toBe(
-          `<span class="${MATCH_CLASSES}">x</span>yz`
-        );
-
-        match = await queryOne(/y/);
-        expect(getHTMLForMatch(match)).toBe(
-          `x<span class="${MATCH_CLASSES}">y</span>z`
-        );
-
-        match = await queryOne(/z/);
-        expect(getHTMLForMatch(match)).toBe(
-          `xy<span class="${MATCH_CLASSES}">z</span>`
-        );
-      });
-
-      it('should highlight in presence of nested spans adjacent to text nodes', async () => {
-        widget.node.innerHTML = '<pre><span>x</span>yz</pre>';
-        match = await queryOne(/x/);
-        expect(getHTMLForMatch(match)).toBe(
+      it.each([
+        [/x/, '<pre>xyz</pre>', `<span class="${MATCH_CLASSES}">x</span>yz`],
+        [/y/, '<pre>xyz</pre>', `x<span class="${MATCH_CLASSES}">y</span>z`],
+        [/z/, '<pre>xyz</pre>', `xy<span class="${MATCH_CLASSES}">z</span>`],
+        [
+          /x/,
+          '<pre><span>x</span>yz</pre>',
           `<span><span class="${MATCH_CLASSES}">x</span></span>yz`
-        );
-
-        match = await queryOne(/y/);
-        expect(getHTMLForMatch(match)).toBe(
+        ],
+        [
+          /y/,
+          '<pre><span>x</span>yz</pre>',
           `<span>x</span><span class="${MATCH_CLASSES}">y</span>z`
-        );
-
-        match = await queryOne(/z/);
-        expect(getHTMLForMatch(match)).toBe(
+        ],
+        [
+          /z/,
+          '<pre><span>x</span>yz</pre>',
           `<span>x</span>y<span class="${MATCH_CLASSES}">z</span>`
-        );
-
-        widget.node.innerHTML = '<pre>x<span>y</span>z</pre>';
-        match = await queryOne(/x/);
-        expect(getHTMLForMatch(match)).toBe(
+        ],
+        [
+          /x/,
+          '<pre>x<span>y</span>z</pre>',
           `<span class="${MATCH_CLASSES}">x</span><span>y</span>z`
-        );
-
-        match = await queryOne(/y/);
-        expect(getHTMLForMatch(match)).toBe(
+        ],
+        [
+          /y/,
+          '<pre>x<span>y</span>z</pre>',
           `x<span><span class="${MATCH_CLASSES}">y</span></span>z`
-        );
-
-        match = await queryOne(/z/);
-        expect(getHTMLForMatch(match)).toBe(
+        ],
+        [
+          /z/,
+          '<pre>x<span>y</span>z</pre>',
           `x<span>y</span><span class="${MATCH_CLASSES}">z</span>`
-        );
-
-        widget.node.innerHTML = '<pre>xy<span>z</span></pre>';
-        match = await queryOne(/x/);
-        expect(getHTMLForMatch(match)).toBe(
+        ],
+        [
+          /x/,
+          '<pre>xy<span>z</span></pre>',
           `<span class="${MATCH_CLASSES}">x</span>y<span>z</span>`
-        );
-
-        match = await queryOne(/y/);
-        expect(getHTMLForMatch(match)).toBe(
+        ],
+        [
+          /y/,
+          '<pre>xy<span>z</span></pre>',
           `x<span class="${MATCH_CLASSES}">y</span><span>z</span>`
-        );
-
-        match = await queryOne(/z/);
-        expect(getHTMLForMatch(match)).toBe(
+        ],
+        [
+          /z/,
+          '<pre>xy<span>z</span></pre>',
           `xy<span><span class="${MATCH_CLASSES}">z</span></span>`
-        );
-      });
+        ]
+      ])(
+        'should highlight %s fragment in %s',
+        async (query, content, expected) => {
+          widget.node.innerHTML = content;
+          await provider.startQuery(query);
+          expect(widget.node.firstElementChild!.innerHTML).toEqual(expected);
+        }
+      );
+    });
 
-      it('should slice out the match correctly in nested nodes', async () => {
-        widget.node.innerHTML = '<pre><span>xy</span>z</pre>';
-        match = await queryOne(/x/);
-        expect(getHTMLForMatch(match)).toBe(
-          `<span><span class="${MATCH_CLASSES}">x</span>y</span>z`
-        );
-
-        match = await queryOne(/y/);
-        expect(getHTMLForMatch(match)).toBe(
-          `<span>x<span class="${MATCH_CLASSES}">y</span></span>z`
-        );
-      });
+    describe('#endQuery()', () => {
+      it.each([
+        [/x/, '<pre>xyz</pre>'],
+        [/y/, '<pre>xyz</pre>'],
+        [/z/, '<pre>xyz</pre>'],
+        [/x/, '<pre><span>x</span>yz</pre>'],
+        [/y/, '<pre><span>x</span>yz</pre>'],
+        [/z/, '<pre><span>x</span>yz</pre>'],
+        [/x/, '<pre>x<span>y</span>z</pre>'],
+        [/y/, '<pre>x<span>y</span>z</pre>'],
+        [/z/, '<pre>x<span>y</span>z</pre>'],
+        [/x/, '<pre>xy<span>z</span></pre>'],
+        [/y/, '<pre>xy<span>z</span></pre>'],
+        [/z/, '<pre>xy<span>z</span></pre>']
+      ])(
+        'should restore highlighted %s fragment in %s',
+        async (query, content) => {
+          widget.node.innerHTML = content;
+          await provider.startQuery(query);
+          await provider.endQuery();
+          expect(widget.node.innerHTML).toEqual(content);
+        }
+      );
     });
   });
 });
