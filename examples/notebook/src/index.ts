@@ -47,6 +47,8 @@ import {
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 import { SetupCommands } from './commands';
+import { SearchProviderRegistry } from '@jupyterlab/documentsearch';
+import { nullTranslator } from '@jupyterlab/translation';
 
 function main(): void {
   const manager = new ServiceManager();
@@ -166,7 +168,8 @@ function createApp(manager: ServiceManager.IManager): void {
     panel.update();
   });
 
-  SetupCommands(commands, palette, nbWidget, handler);
+  const searchRegistry = new SearchProviderRegistry(nullTranslator);
+  SetupCommands(commands, palette, nbWidget, handler, searchRegistry);
 
   console.debug('Example started!');
 }

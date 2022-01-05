@@ -4,12 +4,17 @@
 import { CommandRegistry } from '@lumino/commands';
 import { sessionContextDialogs } from '@jupyterlab/apputils';
 import { CompletionHandler } from '@jupyterlab/completer';
-import { NotebookActions, NotebookPanel } from '@jupyterlab/notebook';
 import {
-  NotebookSearchProvider,
+  NotebookActions,
+  NotebookPanel,
+  NotebookSearchProvider
+} from '@jupyterlab/notebook';
+import {
+  ISearchProviderRegistry,
   SearchInstance
 } from '@jupyterlab/documentsearch';
 import { CommandPalette } from '@lumino/widgets';
+import { nullTranslator } from '@jupyterlab/translation';
 
 /**
  * The map of command ids used by the notebook.
@@ -47,7 +52,8 @@ export const SetupCommands = (
   commands: CommandRegistry,
   palette: CommandPalette,
   nbWidget: NotebookPanel,
-  handler: CompletionHandler
+  handler: CompletionHandler,
+  searchRegistry: ISearchProviderRegistry
 ): void => {
   // Add commands.
   commands.addCommand(cmdIds.invoke, {
@@ -87,7 +93,10 @@ export const SetupCommands = (
         searchInstance.focusInput();
         return;
       }
-      const provider = new NotebookSearchProvider();
+      const provider = new NotebookSearchProvider(
+        nullTranslator,
+        searchRegistry
+      );
       searchInstance = new SearchInstance(nbWidget, provider, 500);
       searchInstance.disposed.connect(() => {
         searchInstance = undefined;
