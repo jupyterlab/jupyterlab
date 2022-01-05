@@ -2,8 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Widget } from '@lumino/widgets';
-import { IHTMLSearchMatch } from '../tokens';
+import {
+  IHTMLSearchMatch,
+  ISearchProvider,
+  ISearchProviderRegistry
+} from '../tokens';
 import { SearchProvider } from '../searchprovider';
+import { ITranslator } from '@jupyterlab/translation';
 
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
@@ -118,6 +123,72 @@ export class HTMLSearchEngine {
 
 export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
+   * Report whether or not this provider has the ability to search on the given object
+   */
+  static canSearchOn(domain: Widget): boolean {
+    return domain instanceof Widget;
+  }
+
+  /**
+   * Instantiate a search provider for the widget.
+   *
+   * #### Notes
+   * The widget provided is always checked using `canSearchOn` before calling
+   * this factory.
+   *
+   * @param widget The widget to search on
+   * @param registry The search provider registry
+   * @param translator [optional] The translator object
+   *
+   * @returns The search provider on the widget
+   */
+  static createSearchProvider(
+    widget: Widget,
+    registry: ISearchProviderRegistry,
+    translator?: ITranslator
+  ): ISearchProvider<Widget> {
+    return new GenericSearchProvider(widget);
+  }
+
+  /**
+   * The current index of the selected match.
+   */
+  get currentMatchIndex(): number | null {
+    return this._currentMatchIndex;
+  }
+
+  get currentMatch(): IHTMLSearchMatch | null {
+    return this._currentMatchIndex === null
+      ? null
+      : this._matches[this._currentMatchIndex];
+  }
+
+  /**
+   * The same list of matches provided by the startQuery promise resolution
+   */
+  get matches(): IHTMLSearchMatch[] {
+    // Ensure that no other fn can overwrite matches index property
+    // We shallow clone each node
+    return this._matches
+      ? this._matches.map(m => Object.assign({}, m))
+      : this._matches;
+  }
+
+  /**
+   * The number of matches.
+   */
+  get matchesSize(): number | null {
+    return this._matches.length;
+  }
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  readonly isReadOnly = true;
+
+  /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
@@ -164,7 +235,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
       });
     }
 
-    if (!this.isSubProvider && matches.length > 0) {
+    if (matches.length > 0) {
       this._currentMatchIndex = 0;
     }
     // Watch for future changes:
@@ -254,11 +325,10 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
         this._currentMatchIndex < 0 ||
         this._currentMatchIndex >= this._matches.length
       ) {
-        this._currentMatchIndex = this.isSubProvider
-          ? null
-          : // Cheap way to make this a circular buffer
-            (this._currentMatchIndex + this._matches.length) %
-            this._matches.length;
+        // Cheap way to make this a circular buffer
+        this._currentMatchIndex =
+          (this._currentMatchIndex + this._matches.length) %
+          this._matches.length;
       }
     }
 
@@ -297,57 +367,6 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     // This is read only, but we could loosen this in theory for input boxes...
     return Promise.resolve(false);
   }
-
-  /**
-   * Report whether or not this provider has the ability to search on the given object
-   */
-  static canSearchOn(domain: Widget): boolean {
-    return domain instanceof Widget;
-  }
-
-  /**
-   * The current index of the selected match.
-   */
-  get currentMatchIndex(): number | null {
-    return this._currentMatchIndex;
-  }
-
-  get currentMatch(): IHTMLSearchMatch | null {
-    return this._currentMatchIndex === null
-      ? null
-      : this._matches[this._currentMatchIndex];
-  }
-
-  /**
-   * The same list of matches provided by the startQuery promise resolution
-   */
-  get matches(): IHTMLSearchMatch[] {
-    // Ensure that no other fn can overwrite matches index property
-    // We shallow clone each node
-    return this._matches
-      ? this._matches.map(m => Object.assign({}, m))
-      : this._matches;
-  }
-
-  /**
-   * The number of matches.
-   */
-  get matchesSize(): number | null {
-    return this._matches.length;
-  }
-
-  /**
-   * Set to true if the widget under search is read-only, false
-   * if it is editable.  Will be used to determine whether to show
-   * the replace option.
-   */
-  readonly isReadOnly = true;
-
-  /**
-   * Set whether or not this will wrap to the beginning
-   * or end of the document on invocations of highlightNext or highlightPrevious, respectively
-   */
-  isSubProvider = false;
 
   private async _onWidgetChanged(
     mutations: MutationRecord[],

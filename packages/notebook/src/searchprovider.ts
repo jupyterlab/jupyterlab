@@ -13,6 +13,7 @@ import {
   IFilter,
   IFiltersType,
   ISearchMatch,
+  ISearchProvider,
   ISearchProviderRegistry,
   SearchProvider
 } from '@jupyterlab/documentsearch';
@@ -20,7 +21,7 @@ import {
   IObservableList,
   IObservableUndoableList
 } from '@jupyterlab/observables';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from './panel';
@@ -30,10 +31,86 @@ import { NotebookPanel } from './panel';
  */
 export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   constructor(
-    protected translator: ITranslator,
-    protected registry: ISearchProviderRegistry
+    widget: NotebookPanel,
+    protected registry: ISearchProviderRegistry,
+    protected translator: ITranslator = nullTranslator
   ) {
-    super();
+    super(widget);
+
+    this.widget.model!.cells.changed.connect(this._onCellsChanged, this);
+    this.widget.content.activeCellChanged.connect(
+      this._onActiveCellChanged,
+      this
+    );
+  }
+
+  /**
+   * Report whether or not this provider has the ability to search on the given object
+   */
+  static canSearchOn(domain: Widget): domain is NotebookPanel {
+    // check to see if the CMSearchProvider can search on the
+    // first cell, false indicates another editor is present
+    return domain instanceof NotebookPanel;
+  }
+
+  /**
+   * Instantiate a search provider for the widget.
+   *
+   * #### Notes
+   * The widget provided is always checked using `canSearchOn` before calling
+   * this factory.
+   *
+   * @param widget The widget to search on
+   * @param registry The search provider registry
+   * @param translator [optional] The translator object
+   *
+   * @returns The search provider on the widget
+   */
+  static createSearchProvider(
+    widget: NotebookPanel,
+    registry: ISearchProviderRegistry,
+    translator?: ITranslator
+  ): ISearchProvider<NotebookPanel> {
+    return new NotebookSearchProvider(widget, registry, translator);
+  }
+
+  /**
+   * The current index of the selected match.
+   */
+  get currentMatchIndex(): number | null {
+    let agg = 0;
+    let found = false;
+    for (let idx = 0; idx < this._searchProviders.length; idx++) {
+      const provider = this._searchProviders[idx];
+      const localMatch = provider.currentMatchIndex;
+      if (localMatch !== null) {
+        agg += localMatch;
+        found = true;
+        break;
+      } else {
+        agg += provider.matchesSize;
+      }
+    }
+    return found ? agg : null;
+  }
+
+  /**
+   * The number of matches.
+   */
+  get matchesSize(): number | null {
+    return this._searchProviders.reduce(
+      (sum, provider) => (sum += provider.matchesSize),
+      0
+    );
+  }
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  get isReadOnly(): boolean {
+    return this.widget?.content.model?.readOnly ?? false;
   }
 
   /**
@@ -76,20 +153,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
-   * Start a search on a given widget
-   *
-   * @param searchTarget Widget target
-   */
-  startSearch(searchTarget: NotebookPanel): void {
-    super.startSearch(searchTarget);
-    this.widget!.model!.cells.changed.connect(this._onCellsChanged, this);
-    this.widget!.content.activeCellChanged.connect(
-      this._onActiveCellChanged,
-      this
-    );
-  }
-
-  /**
    * Initialize the search using the provided options. Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
@@ -117,7 +180,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     this._onSelectedCells = this._filters.selectedCells;
     if (this._filters.selectedCells) {
-      this.widget!.content.selectionChanged.connect(
+      this.widget.content.selectionChanged.connect(
         this._onSelectionChanged,
         this
       );
@@ -128,14 +191,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       cells.map(async cell => {
         const cellSearchProvider = createCellSearchProvider(
           cell,
-          this.widget!.content.rendermime,
+          this.widget.content.rendermime,
           this.registry
         );
         cellSearchProvider.changed.connect(this._onSearchProviderChanged, this);
 
         await cellSearchProvider.setIsActive(
           !this._filters!.selectedCells ||
-            this.widget!.content.isSelectedOrActive(cell)
+            this.widget.content.isSelectedOrActive(cell)
         );
         await cellSearchProvider.startQuery(query, this._filters);
 
@@ -171,21 +234,36 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
-   * Resets UI state, removes all matches.
+   * Dispose of the resources held by the search provider.
    *
-   * @returns A promise that resolves when all state has been cleaned up.
+   * #### Notes
+   * If the object's `dispose` method is called more than once, all
+   * calls made after the first will be a no-op.
+   *
+   * #### Undefined Behavior
+   * It is undefined behavior to use any functionality of the object
+   * after it has been disposed unless otherwise explicitly noted.
    */
-  async endSearch(): Promise<void> {
-    this.widget!.model!.cells.changed.disconnect(this._onCellsChanged, this);
-    this.widget!.content.activeCellChanged.disconnect(
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+
+    this.widget.model!.cells.changed.disconnect(this._onCellsChanged, this);
+    this.widget.content.activeCellChanged.disconnect(
       this._onActiveCellChanged,
       this
     );
 
-    const index = this.widget!.content.activeCellIndex;
-    await this.endQuery();
-    this.widget!.content.activeCellIndex = index;
-    this.widget = null;
+    const index = this.widget.content.activeCellIndex;
+    this.endQuery()
+      .then(() => {
+        this.widget.content.activeCellIndex = index;
+      })
+      .catch(reason => {
+        console.error(`Fail to end search query in notebook:\n${reason}`);
+      });
   }
 
   /**
@@ -269,54 +347,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     return replacementOccurred.includes(true);
   }
 
-  /**
-   * Report whether or not this provider has the ability to search on the given object
-   */
-  static canSearchOn(domain: Widget): domain is NotebookPanel {
-    // check to see if the CMSearchProvider can search on the
-    // first cell, false indicates another editor is present
-    return domain instanceof NotebookPanel;
-  }
-
-  /**
-   * The current index of the selected match.
-   */
-  get currentMatchIndex(): number | null {
-    let agg = 0;
-    let found = false;
-    for (let idx = 0; idx < this._searchProviders.length; idx++) {
-      const provider = this._searchProviders[idx];
-      const localMatch = provider.currentMatchIndex;
-      if (localMatch !== null) {
-        agg += localMatch;
-        found = true;
-        break;
-      } else {
-        agg += provider.matchesSize;
-      }
-    }
-    return found ? agg : null;
-  }
-
-  /**
-   * The number of matches.
-   */
-  get matchesSize(): number | null {
-    return this._searchProviders.reduce(
-      (sum, provider) => (sum += provider.matchesSize),
-      0
-    );
-  }
-
-  /**
-   * Set to true if the widget under search is read-only, false
-   * if it is editable.  Will be used to determine whether to show
-   * the replace option.
-   */
-  get isReadOnly(): boolean {
-    return this.widget?.content.model?.readOnly ?? false;
-  }
-
   private _onCellsChanged(
     cells: IObservableUndoableList<ICellModel>,
     changes: IObservableList.IChangedArgs<ICellModel>
@@ -325,10 +355,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._clearSelection();
 
     const addCellProvider = (index: number) => {
-      const cell = this.widget!.content.widgets[index];
+      const cell = this.widget.content.widgets[index];
       const cellSearchProvider = createCellSearchProvider(
         cell,
-        this.widget!.content.rendermime,
+        this.widget.content.rendermime,
         this.registry
       );
       cellSearchProvider.changed.connect(this._onSearchProviderChanged, this);
@@ -338,7 +368,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       cellSearchProvider
         .setIsActive(
           !(this._filters?.selectedCells ?? false) ||
-            this.widget!.content.isSelectedOrActive(cell)
+            this.widget.content.isSelectedOrActive(cell)
         )
         .then(() => {
           cellSearchProvider.startQuery(this._query, this._filters);
@@ -385,18 +415,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     loop = false
   ): Promise<ISearchMatch | null> {
     const activateNewMatch = () => {
-      if (
-        this.widget!.content.activeCellIndex !== this._currentProviderIndex!
-      ) {
-        this.widget!.content.activeCellIndex = this._currentProviderIndex!;
+      if (this.widget.content.activeCellIndex !== this._currentProviderIndex!) {
+        this.widget.content.activeCellIndex = this._currentProviderIndex!;
       }
-      const activeCell = this.widget!.content.activeCell!;
+      const activeCell = this.widget.content.activeCell!;
       // Unhide cell
       if (activeCell.inputHidden) {
         activeCell.inputHidden = false;
       }
       // scroll to newly activate highlight
-      const containerRect = this.widget!.content.node.getBoundingClientRect();
+      const containerRect = this.widget.content.node.getBoundingClientRect();
       const element =
         activeCell.node.querySelector(`.${SELECTED_HIGHLIGHT_CLASS}`) ??
         activeCell.node.querySelector('.CodeMirror-selected');
@@ -412,7 +440,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     };
 
     if (this._currentProviderIndex === null) {
-      this._currentProviderIndex = this.widget!.content.activeCellIndex;
+      this._currentProviderIndex = this.widget.content.activeCellIndex;
     }
 
     const startIndex = this._currentProviderIndex;
@@ -467,7 +495,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private async _onActiveCellChanged() {
     await this._onSelectionChanged();
 
-    if (this.widget!.content.activeCellIndex !== this._currentProviderIndex) {
+    if (this.widget.content.activeCellIndex !== this._currentProviderIndex) {
       this._clearSelection();
     }
   }
@@ -485,11 +513,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
   private async _onSelectionChanged() {
     if (this._onSelectedCells) {
-      const cells = this.widget!.content.widgets;
+      const cells = this.widget.content.widgets;
       await Promise.all(
         this._searchProviders.map((provider, index) =>
           provider.setIsActive(
-            this.widget!.content.isSelectedOrActive(cells[index])
+            this.widget.content.isSelectedOrActive(cells[index])
           )
         )
       );

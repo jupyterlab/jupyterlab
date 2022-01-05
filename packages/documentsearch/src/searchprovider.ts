@@ -7,9 +7,9 @@ import { IFilter, IFiltersType, ISearchMatch, ISearchProvider } from './tokens';
 
 export abstract class SearchProvider<T extends Widget = Widget>
   implements ISearchProvider<T> {
-  constructor() {
-    this.widget = null;
+  constructor(protected widget: T) {
     this._changed = new Signal<SearchProvider<T>, void>(this);
+    this._disposed = false;
   }
   /**
    * Signal indicating that something in the search has changed, so the UI should update
@@ -23,6 +23,10 @@ export abstract class SearchProvider<T extends Widget = Widget>
    */
   get currentMatchIndex(): number | null {
     return null;
+  }
+
+  get isDisposed(): boolean {
+    return this._disposed;
   }
 
   /**
@@ -40,6 +44,25 @@ export abstract class SearchProvider<T extends Widget = Widget>
   abstract get isReadOnly(): boolean;
 
   /**
+   * Dispose of the resources held by the search provider.
+   *
+   * #### Notes
+   * If the object's `dispose` method is called more than once, all
+   * calls made after the first will be a no-op.
+   *
+   * #### Undefined Behavior
+   * It is undefined behavior to use any functionality of the object
+   * after it has been disposed unless otherwise explicitly noted.
+   */
+  dispose(): void {
+    if (this._disposed) {
+      return;
+    }
+
+    this._disposed = true;
+  }
+
+  /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
@@ -49,25 +72,6 @@ export abstract class SearchProvider<T extends Widget = Widget>
    */
   getInitialQuery(searchTarget: T): string {
     return '';
-  }
-
-  /**
-   * Initialize the search state with the given target.
-   *
-   * @param searchTarget The widget to be searched
-   */
-  startSearch(searchTarget: T): void {
-    this.widget = searchTarget;
-  }
-
-  /**
-   * Reset the target search state as it was before the search process began.
-   * Cleans up and disposes of all internal state.
-   *
-   * @returns A promise that resolves when all state have been cleaned up.
-   */
-  endSearch(): Promise<void> {
-    return Promise.resolve();
   }
 
   /**
@@ -86,7 +90,6 @@ export abstract class SearchProvider<T extends Widget = Widget>
    * Initialize the search using the provided options.
    *
    * @param query A RegExp to be use to perform the search
-   * @param searchTarget The widget to be searched
    * @param filters Filter parameters to pass to provider
    *
    * @returns A promise that resolves with a list of all matches
@@ -130,6 +133,6 @@ export abstract class SearchProvider<T extends Widget = Widget>
    */
   abstract replaceAllMatches(newText: string): Promise<boolean>;
 
-  protected widget: T | null;
   private _changed: Signal<SearchProvider<T>, void>;
+  private _disposed: boolean;
 }

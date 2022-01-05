@@ -26,8 +26,6 @@ export class SearchInstance implements IDisposable {
     const initialQuery = this._activeProvider.getInitialQuery(this._widget);
     this._displayState.searchText = initialQuery || '';
 
-    this._activeProvider.startSearch(this._widget);
-
     this._searchWidget = createSearchOverlay({
       widgetChanged: this._displayUpdateSignal,
       overlayState: this._displayState,
@@ -165,7 +163,7 @@ export class SearchInstance implements IDisposable {
 
     // If a query hasn't been executed yet, no need to call endSearch
     if (this._displayState.query) {
-      void this._activeProvider.endSearch();
+      void this._activeProvider.endQuery();
     }
 
     this._searchWidget.dispose();

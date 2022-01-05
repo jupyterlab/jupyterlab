@@ -114,18 +114,6 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   }
 
   /**
-   * Resets UI state, removes all matches.
-   *
-   * @returns A promise that resolves when all state has been cleaned up.
-   */
-  async endSearch(): Promise<void> {
-    if (!this.isSubProvider) {
-      this.editor.focus();
-    }
-    return this.endQuery();
-  }
-
-  /**
    * Move the current match indicator to the next match.
    *
    * @param loop Whether to loop within the matches list.
@@ -258,12 +246,6 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    * the replace option.
    */
   readonly isReadOnly = false;
-
-  /**
-   * Set whether or not the CodemirrorSearchProvider will wrap to the beginning
-   * or end of the document on invocations of highlightNext or highlightPrevious, respectively
-   */
-  isSubProvider = false;
 
   private _onDocChanged(_: any, changeObj: CodeMirror.EditorChange): void {
     // If we get newlines added/removed, the line numbers across the
@@ -400,20 +382,12 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
 
       const cursorToGet = reverse ? 'anchor' : 'head';
       const lastPosition = this.editor.getCursor(cursorToGet);
-      const position = this._toEditorPos(lastPosition);
       let cursor: CodeMirror.SearchCursor = this.editor.getSearchCursor(
         this._query,
         lastPosition,
         !caseSensitive
       );
       if (!cursor.find(reverse)) {
-        // if we don't want to loop, no more matches found, reset the cursor and exit
-        if (this.isSubProvider) {
-          this.editor.setCursorPosition(position, { scroll: false });
-          this._currentMatch = null;
-          return null;
-        }
-
         // if we do want to loop, try searching from the bottom/top
         const startOrEnd = reverse
           ? CodeMirror.Pos(this.editor.lastLine())
@@ -508,7 +482,6 @@ export class CodeMirrorSearchHighlighter {
   /**
    *
    * @param editor
-   * @param matches
    *
    * ### Notes
    * `matches` must be stored by (line, position)

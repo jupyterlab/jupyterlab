@@ -396,7 +396,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
     // Search outputs
     const outputs = (this.cell.model as CodeCellModel).outputs;
-    await this._onOutputChanged(outputs)
+    await this._onOutputChanged(outputs);
     outputs.changed.connect(this._onOutputsChanged, this);
     outputs.stateChanged.connect(this._onOutputChanged, this);
   }
@@ -421,8 +421,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
         const output = outputs.get(outputIdx);
         if (index < (output.highlights?.length ?? 0)) {
           match = {
-            ...output.highlights![index],
-            index: this.currentMatchIndex
+            ...output.highlights![index]
           };
           break;
         } else {

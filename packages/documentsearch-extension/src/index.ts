@@ -87,7 +87,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
 
     let searchDebounceTime = 500;
 
-    // Create registry, retrieve all default providers
+    // Create registry
     const registry: SearchProviderRegistry = new SearchProviderRegistry(
       translator
     );
@@ -150,6 +150,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
 
         searchInstance.disposed.connect(() => {
           activeSearches.delete(widgetId);
+          searchProvider.dispose();
           // find next and previous are now not enabled
           app.commands.notifyCommandChanged();
         });

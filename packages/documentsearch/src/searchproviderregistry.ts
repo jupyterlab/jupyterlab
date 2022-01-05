@@ -89,7 +89,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     // widget.
     for (const P of providerMap.values()) {
       if (P.canSearchOn(widget)) {
-        return new P(this.translator, this);
+        return P.createSearchProvider(widget, this, this.translator);
       }
     }
     return undefined;

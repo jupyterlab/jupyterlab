@@ -141,14 +141,31 @@ export interface IHTMLSearchMatch extends ISearchMatch {
  * the static canSearchOn function.
  */
 export interface ISearchProviderConstructor<T extends Widget = Widget> {
-  new (
-    translator: ITranslator,
-    registry: ISearchProviderRegistry
+  /**
+   * Instantiate a search provider for the widget.
+   *
+   * #### Notes
+   * The widget provided is always checked using `canSearchOn` before calling
+   * this factory.
+   *
+   * @param widget The widget to search on
+   * @param registry The search provider registry
+   * @param translator [optional] The translator object
+   *
+   * @returns The search provider on the widget
+   */
+  createSearchProvider(
+    widget: T,
+    registry: ISearchProviderRegistry,
+    translator?: ITranslator
   ): ISearchProvider<T>;
+
   /**
    * Report whether or not this provider has the ability to search on the
-   * given object. The function is a type guard, meaning that it returns
+   * given widget. The function is a type guard, meaning that it returns
    * a boolean, but has a type predicate (`x is T`) for its return signature.
+   *
+   * @param domain Widget to test
    */
   canSearchOn(domain: Widget): domain is T;
 }
@@ -279,7 +296,8 @@ export interface IBaseSearchProvider {
 }
 
 export interface ISearchProvider<T extends Widget = Widget>
-  extends IBaseSearchProvider {
+  extends IBaseSearchProvider,
+    IDisposable {
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
@@ -289,21 +307,6 @@ export interface ISearchProvider<T extends Widget = Widget>
    * @returns Initial value used to populate the search box.
    */
   getInitialQuery(searchTarget: T): string;
-
-  /**
-   * Initialize the search state with the given target.
-   *
-   * @param searchTarget The widget to be searched
-   */
-  startSearch(searchTarget: T): void;
-
-  /**
-   * Reset the target search state as it was before the search process began.
-   * Cleans up and disposes of all internal state.
-   *
-   * @returns A promise that resolves when all state have been cleaned up.
-   */
-  endSearch(): Promise<void>;
 
   /**
    * Set to true if the widget under search is read-only, false

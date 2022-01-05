@@ -6,7 +6,11 @@ import {
   CodeMirrorEditor,
   CodeMirrorSearchProvider
 } from '@jupyterlab/codemirror';
-import { ISearchProvider } from '@jupyterlab/documentsearch';
+import {
+  ISearchProvider,
+  ISearchProviderRegistry
+} from '@jupyterlab/documentsearch';
+import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from './widget';
 
@@ -15,6 +19,32 @@ export type FileEditorPanel = MainAreaWidget<FileEditor>;
 export class FileEditorSearchProvider
   extends CodeMirrorSearchProvider
   implements ISearchProvider<FileEditorPanel> {
+  constructor(widget: FileEditorPanel) {
+    super();
+    this.editor = widget.content.editor as CodeMirrorEditor;
+  }
+
+  /**
+   * Instantiate a search provider for the widget.
+   *
+   * #### Notes
+   * The widget provided is always checked using `canSearchOn` before calling
+   * this factory.
+   *
+   * @param widget The widget to search on
+   * @param registry The search provider registry
+   * @param translator [optional] The translator object
+   *
+   * @returns The search provider on the widget
+   */
+  static createSearchProvider(
+    widget: FileEditorPanel,
+    registry: ISearchProviderRegistry,
+    translator?: ITranslator
+  ): ISearchProvider<FileEditorPanel> {
+    return new FileEditorSearchProvider(widget);
+  }
+
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
@@ -26,27 +56,29 @@ export class FileEditorSearchProvider
     );
   }
 
+  get isDisposed(): boolean {
+    return this._disposed;
+  }
+
+  dispose(): void {
+    if (this._disposed) {
+      return;
+    }
+    this._disposed = true;
+  }
+
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: FileEditorPanel): any {
+  getInitialQuery(searchTarget: FileEditorPanel): string {
     const cm = searchTarget.content.editor as CodeMirrorEditor;
     const selection = cm.doc.getSelection();
     // if there are newlines, just return empty string
     return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
   }
 
-  /**
-   * Initialize the search state with the given target.
-   *
-   * @param searchTarget The widget to be searched
-   *
-   * @returns A promise that resolves when search state is initialized.
-   */
-  startSearch(searchTarget: FileEditorPanel): void {
-    this.editor = searchTarget.content.editor as CodeMirrorEditor;
-  }
+  private _disposed: boolean;
 }

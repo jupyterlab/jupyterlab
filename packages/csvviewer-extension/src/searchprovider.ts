@@ -2,14 +2,40 @@
 // Distributed under the terms of the Modified BSD License.
 import { CSVViewer } from '@jupyterlab/csvviewer';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import { ISearchMatch, ISearchProvider } from '@jupyterlab/documentsearch';
-import { ISignal, Signal } from '@lumino/signaling';
+import {
+  ISearchMatch,
+  ISearchProvider,
+  ISearchProviderRegistry,
+  SearchProvider
+} from '@jupyterlab/documentsearch';
+import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
 // The type for which canSearchFor returns true
 export type CSVDocumentWidget = DocumentWidget<CSVViewer>;
 
-export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
+export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
+  /**
+   * Instantiate a search provider for the widget.
+   *
+   * #### Notes
+   * The widget provided is always checked using `canSearchOn` before calling
+   * this factory.
+   *
+   * @param widget The widget to search on
+   * @param registry The search provider registry
+   * @param translator [optional] The translator object
+   *
+   * @returns The search provider on the widget
+   */
+  static createSearchProvider(
+    widget: CSVDocumentWidget,
+    registry: ISearchProviderRegistry,
+    translator?: ITranslator
+  ): ISearchProvider<CSVDocumentWidget> {
+    return new CSVSearchProvider(widget);
+  }
+
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
@@ -22,24 +48,11 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
   }
 
   /**
-   * Get an initial query value if applicable so that it can be entered
-   * into the search box as an initial query
-   *
-   * @returns Initial value used to populate the search box.
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
    */
-  getInitialQuery(searchTarget: CSVDocumentWidget): string {
-    // CSV Viewer does not support selection
-    return '';
-  }
-
-  /**
-   * Initialize the search state with the given target.
-   *
-   * @param searchTarget The widget to be searched
-   */
-  startSearch(searchTarget: CSVDocumentWidget): void {
-    this._target = searchTarget;
-  }
+  readonly isReadOnly = true;
 
   /**
    * Initialize the search using the provided options.  Should update the UI
@@ -51,11 +64,8 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    * @returns A promise that resolves with a list of all matches
    */
   startQuery(query: RegExp): Promise<void> {
-    if (!this._target) {
-      return Promise.resolve();
-    }
     this._query = query;
-    this._target.content.searchService.find(query);
+    this.widget.content.searchService.find(query);
 
     return Promise.resolve();
   }
@@ -68,19 +78,9 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    * begin a new search.
    */
   endQuery(): Promise<void> {
-    this._target.content.searchService.clear();
+    this.widget.content.searchService.clear();
 
     return Promise.resolve();
-  }
-
-  /**
-   * Resets UI state as it was before the search process began.  Cleans up and
-   * disposes of all internal state.
-   *
-   * @returns A promise that resolves when all state has been cleaned up.
-   */
-  async endSearch(): Promise<void> {
-    await this.endQuery();
   }
 
   /**
@@ -91,7 +91,7 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    * @returns A promise that resolves once the action has completed.
    */
   highlightNext(loop?: boolean): Promise<ISearchMatch | undefined> {
-    this._target.content.searchService.find(this._query);
+    this.widget.content.searchService.find(this._query);
     return Promise.resolve(undefined);
   }
 
@@ -103,7 +103,7 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    * @returns A promise that resolves once the action has completed.
    */
   highlightPrevious(loop?: boolean): Promise<ISearchMatch | undefined> {
-    this._target.content.searchService.find(this._query, true);
+    this.widget.content.searchService.find(this._query, true);
     return Promise.resolve(undefined);
   }
 
@@ -129,31 +129,5 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
     return Promise.resolve(false);
   }
 
-  /**
-   * Signal indicating that something in the search has changed, so the UI should update
-   */
-  get changed(): ISignal<this, void> {
-    return this._changed;
-  }
-
-  /**
-   * The number of matches.
-   */
-  readonly matchesSize = null;
-
-  /**
-   * The current index of the selected match.
-   */
-  readonly currentMatchIndex: number | null = null;
-
-  /**
-   * Set to true if the widget under search is read-only, false
-   * if it is editable.  Will be used to determine whether to show
-   * the replace option.
-   */
-  readonly isReadOnly = true;
-
-  private _target: CSVDocumentWidget;
   private _query: RegExp;
-  private _changed = new Signal<this, void>(this);
 }
