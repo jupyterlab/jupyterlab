@@ -730,6 +730,9 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => {
         return !!service.isStarted;
       },
+      isVisible: () => {
+        return service.pauseOnExceptionsIsValid();
+      },
       execute: async () => {
         await service.pauseOnExceptions(!service.isPausingOnExceptions);
         commands.notifyCommandChanged();

@@ -513,6 +513,15 @@ export class DebuggerService implements IDebugger, IDisposable {
     await this.session.sendRequest('configurationDone', {});
   }
 
+  pauseOnExceptionsIsValid(): boolean {
+    if (this.isStarted) {
+      if (this.session?.exceptionBreakpointFilters) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Enable or disable pausing on exceptions.
    *
