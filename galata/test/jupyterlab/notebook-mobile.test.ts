@@ -15,10 +15,10 @@ test.describe('Notebook Layout on Mobile', () => {
   });
 
   test('Execute code cell', async ({ page }) => {
-    await page.sidebar.close('left');
     await page.notebook.setCell(0, 'code', 'print("hello")');
     await page.notebook.addCell('code', '2 * 3');
     await page.notebook.runCellByCell();
+    await page.sidebar.close('left');
     const nbPanel = await page.notebook.getNotebookInPanel();
     const imageName = 'mobile-layout.png';
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
