@@ -71,10 +71,50 @@
 .jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea {
   overflow-y: auto;
   max-height: 24em;
-  box-shadow: inset 0 0 6px 2px rgba(0, 0, 0, 0.3);
+  /*box-shadow: inset 0 0 6px 2px rgba(0, 0, 0, 0.3);*/
   margin-left: var(--jp-private-cell-scrolling-output-offset);
   padding-top: 6px;
 }
+
+/*
+.jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea::after{
+  content: '';
+  box-shadow: inset 0 0 6px 2px rgba(0, 0, 0, 0.3);
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  pointer-events: none;
+}
+*/
+/*
+.jp-Cell:not(.jp-mod-noOutputs) .jp-Cell-outputWrapper::after {
+  content: '';
+  box-shadow: inset 0 0 6px 2px rgba(0, 0, 0, 0.3);
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  pointer-events: none;
+}*/
+
+.lm-Widget.p-Widget.jp-OutputArea.jp-Cell-outputArea::after {
+  content: ' ';
+  box-shadow: inset 0 0 6px 2px rgb(0 0 0 / 30%);
+  width: 100%;
+  height: 100%;
+  position: sticky;
+  bottom: 0;
+  top: 0;
+  margin-top: -50%;
+  float: left; 
+  display: block;
+  pointer-events: none; /* ignore user interactions */
+}
+
+
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-prompt {
   min-width: calc(
