@@ -7,6 +7,7 @@ import { Settings } from '@jupyterlab/settingregistry';
 import { showDialog } from '@jupyterlab/apputils';
 import React from 'react';
 import Form, {
+  ArrayFieldTemplateProps,
   Field,
   FieldTemplateProps,
   IChangeEvent,
@@ -54,6 +55,57 @@ export namespace SettingsFormEditor {
     onSelect: (id: string) => void;
   }
 }
+
+/**
+ * Template to allow for custom buttons to re-order / removal of entries in an array.
+ * Necessary to create accessible buttons.
+ */
+const CustomArrayTemplate = (props: ArrayFieldTemplateProps) => {
+  return (
+    <div className={props.className}>
+      {props.items.map(item => {
+        return (
+          <div key={item.key} className={item.className}>
+            {props.TitleField}
+            {props.DescriptionField}
+            {item.children}
+            <div className="jp-ArrayOperations">
+              <button
+                onClick={item.onReorderClick(item.index, item.index + 1)}
+                disabled={!item.hasMoveUp}
+              >
+                Move Up
+              </button>
+              <button
+                onClick={item.onReorderClick(item.index, item.index - 1)}
+                disabled={!item.hasMoveDown}
+              >
+                Move Down
+              </button>
+              <button
+                onClick={item.onDropIndexClick(item.index)}
+                disabled={!item.hasRemove}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        );
+      })}
+      {props.canAdd && (
+        <button
+          className="array-item-add"
+          onClick={() => {
+            props.onAddClick();
+          }}
+        >
+          Add
+        </button>
+      )}
+    </div>
+  );
+};
+
 /**
  * Renders the modified indicator and errors
  */
@@ -220,6 +272,7 @@ export const SettingsFormEditor = ({
           schema={settings.schema as JSONSchema7}
           formData={formData}
           FieldTemplate={CustomTemplate}
+          ArrayFieldTemplate={CustomArrayTemplate}
           uiSchema={uiSchema}
           fields={renderers}
           formContext={{ settings: settings }}
