@@ -165,7 +165,7 @@
             "rank": 11
           },
           {
-            "command": "notebook:toggle-render-side-by-side-current",
+            "command": "notebook:toggle-render-side-by-side",
             "rank": 12
           },
           {
@@ -585,11 +585,6 @@
     },
     {
       "command": "notebook:toggle-render-side-by-side",
-      "keys": ["Ctrl Shift R"],
-      "selector": ".jp-Notebook:focus"
-    },
-    {
-      "command": "notebook:toggle-render-side-by-side-current",
       "keys": ["Shift R"],
       "selector": ".jp-Notebook:focus"
     }
@@ -829,17 +824,11 @@
       "type": "boolean",
       "default": false
     },
-    "showHiddenCellsButton": {
+    "sideBySideRendering": {
+      "title": "Side-by-side rendering",
+      "description": "Global setting to enable side-by-side rendering in notebooks",
       "type": "boolean",
-      "title": "Show hidden cells button if collapsed",
-      "description": "If set to true, a button is shown below collapsed headings, indicating how many cells are hidden beneath the collapsed heading.",
-      "default": true
-    },
-    "renderingLayout": {
-      "title": "Rendering Layout",
-      "description": "Global setting to define the rendering layout in notebooks. 'default' or 'side-by-side' are supported.",
-      "type": "string",
-      "default": "default"
+      "default": false
     }
   },
   "additionalProperties": false,

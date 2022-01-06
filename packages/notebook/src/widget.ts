@@ -133,17 +133,10 @@ const DRAG_THRESHOLD = 5;
  */
 type InsertType = 'push' | 'insert' | 'set';
 
-/*
- * The rendering mode for the notebook.
- */
-type RenderingLayout = 'default' | 'side-by-side';
-
 /**
  * The class attached to the heading collapser button
  */
 const HEADING_COLLAPSER_CLASS = 'jp-collapseHeadingButton';
-
-const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
 
 /**
  * The interactivity modes for the notebook.
@@ -198,7 +191,6 @@ export class StaticNotebook extends Widget {
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._mimetypeService = options.mimeTypeService;
-    this.renderingLayout = options.notebookConfig?.renderingLayout;
 
     // Section for the virtual-notebook behavior.
     this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
@@ -338,18 +330,6 @@ export class StaticNotebook extends Widget {
   set notebookConfig(value: StaticNotebook.INotebookConfig) {
     this._notebookConfig = value;
     this._updateNotebookConfig();
-  }
-
-  get renderingLayout(): RenderingLayout | undefined {
-    return this._renderingLayout;
-  }
-  set renderingLayout(value: RenderingLayout | undefined) {
-    this._renderingLayout = value;
-    if (this._renderingLayout === 'side-by-side') {
-      this.node.classList.add(SIDE_BY_SIDE_CLASS);
-    } else {
-      this.node.classList.remove(SIDE_BY_SIDE_CLASS);
-    }
   }
 
   /**
@@ -823,7 +803,6 @@ export class StaticNotebook extends Widget {
   private _renderedCellsCount = 0;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
   private _cellsArray: Array<Cell>;
-  private _renderingLayout: RenderingLayout | undefined;
 }
 
 /**
@@ -992,11 +971,6 @@ export namespace StaticNotebook {
      * Defines if the document can be undo/redo.
      */
     disableDocumentWideUndoRedo: boolean;
-
-    /**
-     * Defines the rendering layout to use.
-     */
-    renderingLayout: RenderingLayout;
   }
 
   /**
@@ -1011,8 +985,7 @@ export namespace StaticNotebook {
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px',
     maxNumberOutputs: 50,
-    disableDocumentWideUndoRedo: false,
-    renderingLayout: 'default'
+    disableDocumentWideUndoRedo: false
   };
 
   /**
