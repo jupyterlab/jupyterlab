@@ -740,16 +740,6 @@
       "title": "Markdown Cell Configuration",
       "description": "The configuration for all markdown cells.",
       "$ref": "#/definitions/editorConfig",
-      "properties": {
-        "lineWrap": {
-          "type": "string",
-          "default": "on"
-        },
-        "matchBrackets": {
-          "type": "boolean",
-          "default": false
-        }
-      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,
@@ -773,16 +763,6 @@
       "title": "Raw Cell Configuration",
       "description": "The configuration for all raw cells.",
       "$ref": "#/definitions/editorConfig",
-      "properties": {
-        "lineWrap": {
-          "type": "string",
-          "default": "on"
-        },
-        "matchBrackets": {
-          "type": "boolean",
-          "default": false
-        }
-      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,

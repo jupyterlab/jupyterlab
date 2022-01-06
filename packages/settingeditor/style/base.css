@@ -293,9 +293,14 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 }
 .jp-SettingsPanel .array-item button {
   color: var(--jp-brand-color2);
+  background-color: var(--jp-layout-color2);
+  cursor: pointer;
+  margin: 2px;
 }
 .jp-SettingsPanel .array-item button:disabled {
   color: var(--jp-brand-color3);
+  background-color: var(--jp-layout-color1);
+  cursor: not-allowed;
 }
 
 .jp-SettingsPanel .array-item button.btn,
