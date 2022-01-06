@@ -71,13 +71,13 @@ const CustomArrayTemplate = (props: ArrayFieldTemplateProps) => {
             {item.children}
             <div className="jp-ArrayOperations">
               <button
-                onClick={item.onReorderClick(item.index, item.index + 1)}
+                onClick={item.onReorderClick(item.index, item.index - 1)}
                 disabled={!item.hasMoveUp}
               >
                 Move Up
               </button>
               <button
-                onClick={item.onReorderClick(item.index, item.index - 1)}
+                onClick={item.onReorderClick(item.index, item.index + 1)}
                 disabled={!item.hasMoveDown}
               >
                 Move Down
