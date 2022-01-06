@@ -829,12 +829,6 @@
       "type": "boolean",
       "default": false
     },
-    "showHiddenCellsButton": {
-      "type": "boolean",
-      "title": "Show hidden cells button if collapsed",
-      "description": "If set to true, a button is shown below collapsed headings, indicating how many cells are hidden beneath the collapsed heading.",
-      "default": true
-    },
     "renderingLayout": {
       "title": "Rendering Layout",
       "description": "Global setting to define the rendering layout in notebooks. 'default' or 'side-by-side' are supported.",
