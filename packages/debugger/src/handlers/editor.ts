@@ -93,7 +93,7 @@ export class EditorHandler implements IDisposable {
    * Refresh the breakpoints display
    */
   refreshBreakpoints(): void {
-    this._addBreakpointsToEditor()
+    this._addBreakpointsToEditor();
   }
 
   /**
