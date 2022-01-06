@@ -105,7 +105,7 @@ const CustomTemplate = (props: FieldTemplateProps) => {
   return (
     <div
       className={`form-group ${
-        displayLabel || schema.type === 'boolean' ? 'small-field' : ''
+        displayLabel || (schema.type === 'boolean' && 'small-field')
       }`}
     >
       {
@@ -117,8 +117,10 @@ const CustomTemplate = (props: FieldTemplateProps) => {
         rawErrors && <div className="jp-modifiedIndicator jp-errorIndicator" />
       }
       <div>
-        {displayLabel && id !== 'root' ? <h3> {label} </h3> : undefined}
-        <div className="inputFieldWrapper">{children}</div>
+        {displayLabel && schemaId !== '' && <h3> {label} </h3>}
+        <div className={`${schemaId === '' ? 'root' : 'inputFieldWrapper'}`}>
+          {children}
+        </div>
         <div className="validationErrors">{errors}</div>
       </div>
     </div>
