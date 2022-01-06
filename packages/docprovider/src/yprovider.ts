@@ -71,10 +71,7 @@ export class WebSocketProvider
 
     const user = options.user;
     const userChanged = () => {
-      const name =
-        user.familyName !== ''
-          ? `${user.givenName} ${user.familyName}`
-          : user.givenName;
+      const name = user.displayName !== '' ? user.displayName : user.name;
       awareness.setLocalStateField('user', { ...user.toJSON(), name });
     };
     if (user.isReady) {

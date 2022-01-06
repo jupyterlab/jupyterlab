@@ -6,15 +6,15 @@ import { UUID } from '@lumino/coreutils';
 import * as env from 'lib0/environment';
 
 import { ICurrentUser, IUser, USER } from './tokens';
-import { getAnonymousUserName, getInitials } from './utils';
+import { getAnonymousUserName } from './utils';
 
 /**
  * Default user implementation.
  */
 export class User implements ICurrentUser {
   private _username: string;
-  private _givenName: string;
-  private _familyName: string;
+  private _name: string;
+  private _displayName: string;
   private _initials: string;
   private _color: string;
   private _anonymous: boolean;
@@ -43,15 +43,15 @@ export class User implements ICurrentUser {
   /**
    * User's name.
    */
-  get givenName(): string {
-    return this._givenName;
+  get name(): string {
+    return this._name;
   }
 
   /**
    * User's last name.
    */
-  get familyName(): string {
-    return this._familyName;
+  get displayName(): string {
+    return this._displayName;
   }
 
   /**
@@ -115,8 +115,8 @@ export class User implements ICurrentUser {
    */
   fromJSON(user: IUser.User): void {
     this._username = user.username;
-    this._givenName = user.givenName;
-    this._familyName = user.familyName;
+    this._name = user.name;
+    this._displayName = user.displayName;
     this._initials = user.initials;
     this._color = user.color;
     this._anonymous = user.anonymous;
@@ -130,8 +130,8 @@ export class User implements ICurrentUser {
   toJSON(): IUser.User {
     return {
       username: this._username,
-      givenName: this._givenName,
-      familyName: this._familyName,
+      name: this.name,
+      displayName: this._displayName,
       initials: this._initials,
       color: this._color,
       anonymous: this._anonymous,
@@ -156,6 +156,7 @@ export class User implements ICurrentUser {
     // Read username and color from URL
     let name = env.getParam('--username', '');
     let color = env.getParam('--usercolor', '');
+    let initials = env.getParam('--initials', '');
 
     const { localStorage } = window;
     const data = localStorage.getItem(USER);
@@ -163,9 +164,9 @@ export class User implements ICurrentUser {
       const user = JSON.parse(data);
 
       this._username = user.username as string;
-      this._givenName = name !== '' ? name : (user.givenName as string);
-      this._familyName = name !== '' ? '' : (user.familyName as string);
-      this._initials = user.initials as string;
+      this._name = name !== '' ? name : (user.name as string);
+      this._displayName = name !== '' ? name : (user.displayName as string);
+      this._initials = initials !== '' ? initials : (user.initials as string);
       this._color = color !== '' ? '#' + color : (user.color as string);
       this._anonymous = user.anonymous as boolean;
       this._cursor = (user.cursor as IUser.Cursor) || undefined;
@@ -175,6 +176,7 @@ export class User implements ICurrentUser {
       }
     } else {
       // Get random values
+      const anonymousName = getAnonymousUserName();
       this._username = UUID.uuid4();
       this._name = name !== '' ? name : 'Anonymous ' + anonymousName;
       this._displayName = this._name;
@@ -182,7 +184,8 @@ export class User implements ICurrentUser {
         initials !== ''
           ? initials
           : `A${anonymousName.substring(0, 1).toLocaleUpperCase()}`;
-      this._color = color !== '' ? '#' + color : Private.getRandomColor();
+      this._color =
+        '#' + (color !== '' ? color : Private.getRandomColor().slice(1));
       this._anonymous = true;
       this._cursor = undefined;
       this._save();

@@ -109,9 +109,7 @@ export class UserMenu extends Menu {
     super(options);
     this._user = options.user;
     const name =
-      this._user.familyName !== ''
-        ? `${this._user.givenName} ${this._user.familyName}`
-        : this._user.givenName;
+      this._user.displayName !== '' ? this._user.displayName : this._user.name;
     this.title.label = this._user.isReady ? name : '';
     this.title.icon = caretDownIcon;
     this.title.iconClass = 'jp-UserMenu-caretDownIcon';
@@ -125,10 +123,7 @@ export class UserMenu extends Menu {
   }
 
   private _updateLabel = (user: ICurrentUser) => {
-    const name =
-      user.familyName !== ''
-        ? `${user.givenName} ${user.familyName}`
-        : user.givenName;
+    const name = user.displayName !== '' ? user.displayName : user.name;
     this.title.label = name;
     this.update();
   };
