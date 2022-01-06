@@ -2,9 +2,9 @@ name: Linux JS Tests
 
 on:
   push:
-    branches: [3.2.x]
+    branches: [3.3.x]
   pull_request:
-    branches: [3.2.x]
+    branches: [3.3.x]
   release:
     types: [published]
 
