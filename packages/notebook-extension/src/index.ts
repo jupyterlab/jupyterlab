@@ -239,7 +239,8 @@ namespace CommandIDs {
 
   export const showAllOutputs = 'notebook:show-all-cell-outputs';
 
-  export const toggleRenderSideBySide = 'notebook:toggle-render-side-by-side';
+  export const toggleRenderSideBySideCurrentNotebook =
+    'notebook:toggle-render-side-by-side-current';
 
   export const setSideBySideRatio = 'notebook:set-side-by-side-ratio';
 
@@ -1191,7 +1192,10 @@ function activateNotebookHandler(
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
       disableDocumentWideUndoRedo: settings.get(
         'experimentalDisableDocumentWideUndoRedo'
-      ).composite as boolean
+      ).composite as boolean,
+      renderingLayout: settings.get('renderingLayout').composite as
+        | 'default'
+        | 'side-by-side'
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
@@ -1199,10 +1203,6 @@ function activateNotebookHandler(
     modelFactory.disableDocumentWideUndoRedo = settings.get(
       'experimentalDisableDocumentWideUndoRedo'
     ).composite as boolean;
-
-    Private.renderSideBySide = !settings.get('sideBySideRendering')
-      .composite as boolean;
-    commands.execute(CommandIDs.toggleRenderSideBySide);
 
     updateTracker({
       editorConfig: factory.editorConfig,
@@ -2134,28 +2134,26 @@ function addCommands(
     isEnabled
   });
 
-  commands.addCommand(CommandIDs.toggleRenderSideBySide, {
-    label: trans.__('Render Side-by-side'),
+  commands.addCommand(CommandIDs.toggleRenderSideBySideCurrentNotebook, {
+    label: trans.__('Render Side-by-Side'),
     execute: args => {
-      Private.renderSideBySide = !Private.renderSideBySide;
-      tracker.forEach(widget => {
-        if (widget) {
-          if (Private.renderSideBySide) {
-            return NotebookActions.renderSideBySide(widget.content);
-          }
-          return NotebookActions.renderNotSideBySide(widget.content);
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        if (current.content.renderingLayout === 'side-by-side') {
+          return NotebookActions.renderDefault(current.content);
         }
-      });
-      tracker.currentChanged.connect(() => {
-        if (Private.renderSideBySide && tracker.currentWidget) {
-          return NotebookActions.renderSideBySide(
-            tracker.currentWidget.content
-          );
-        }
-      });
+        return NotebookActions.renderSideBySide(current.content);
+      }
     },
-    isToggled: () => Private.renderSideBySide,
-    isEnabled
+    isEnabled,
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (current) {
+        return current.content.renderingLayout === 'side-by-side';
+      } else {
+        return false;
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.setSideBySideRatio, {
@@ -2351,7 +2349,7 @@ function populatePalette(
     CommandIDs.showOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
-    CommandIDs.toggleRenderSideBySide,
+    CommandIDs.toggleRenderSideBySideCurrentNotebook,
     CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
     CommandIDs.disableOutputScrolling
@@ -2711,6 +2709,4 @@ namespace Private {
       translator?: ITranslator;
     }
   }
-
-  export let renderSideBySide = false;
 }
