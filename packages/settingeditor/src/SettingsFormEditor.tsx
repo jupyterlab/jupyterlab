@@ -105,7 +105,7 @@ const CustomTemplate = (props: FieldTemplateProps) => {
   return (
     <div
       className={`form-group ${
-        displayLabel || (schema.type === 'boolean' && 'small-field')
+        (displayLabel || schema.type === 'boolean') && 'small-field'
       }`}
     >
       {
