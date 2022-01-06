@@ -29,11 +29,21 @@ test.describe('Text Editor Tests', () => {
 
     // Add two rulers
     await page.click('button[aria-label="Add"]');
-    await page.click('[id="root_editorConfig_rulers_0"]');
-    await page.type('[id="root_editorConfig_rulers_0"]', '50');
+    await page.click(
+      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_0"]'
+    );
+    await page.type(
+      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_0"]',
+      '50'
+    );
     await page.click('button[aria-label="Add"]');
-    await page.click('[id="root_editorConfig_rulers_1"]');
-    await page.type('[id="root_editorConfig_rulers_1"]', '75');
+    await page.click(
+      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_1"]'
+    );
+    await page.type(
+      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_1"]',
+      '75'
+    );
 
     await page.activity.activateTab(DEFAULT_NAME);
 
