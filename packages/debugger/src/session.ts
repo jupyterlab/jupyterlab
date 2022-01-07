@@ -91,12 +91,12 @@ export class DebuggerSession implements IDebugger.ISession {
   /**
    * Whether to pause on exceptions
    */
-  get pausingOnExceptions(): boolean {
+  get pausingOnExceptions(): string[] {
     return this._pausingOnExceptions;
   }
 
-  set pausingOnExceptions(value: boolean) {
-    this._pausingOnExceptions = value;
+  set pausingOnExceptions(updatedPausingOnExceptions: string[]) {
+    this._pausingOnExceptions = updatedPausingOnExceptions;
   }
 
   /**
@@ -155,7 +155,6 @@ export class DebuggerSession implements IDebugger.ISession {
       throw new Error(`Could not start the debugger: ${reply.message}`);
     }
     this._isStarted = true;
-    this._pausingOnExceptions = false;
     this._exceptionBreakpointFilters = reply.body?.exceptionBreakpointFilters;
     await this.sendRequest('attach', {});
   }
@@ -248,7 +247,7 @@ export class DebuggerSession implements IDebugger.ISession {
   private _connection: Session.ISessionConnection | null;
   private _isDisposed = false;
   private _isStarted = false;
-  private _pausingOnExceptions = false;
+  private _pausingOnExceptions: string[] = [];
   private _exceptionPaths: string[] = [];
   private _exceptionBreakpointFilters:
     | DebugProtocol.ExceptionBreakpointsFilter[]

@@ -69,7 +69,17 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Whether the current debugger is pausing on exceptions.
    */
   get isPausingOnExceptions(): boolean {
-    return this._session?.pausingOnExceptions ?? false;
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    if (kernel) {
+      const tmpFileParams = this._config.getTmpFileParams(kernel);
+      if (tmpFileParams) {
+        return (
+          this._session?.pausingOnExceptions.includes(tmpFileParams.prefix) ??
+          false
+        );
+      }
+    }
+    return false;
   }
 
   /**
@@ -531,8 +541,33 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (!this.session?.isStarted) {
       return;
     }
+
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    if (!kernel) {
+      return;
+    }
+    const tmpFileParams = this._config.getTmpFileParams(kernel);
+    if (!tmpFileParams) {
+      return;
+    }
+    let prefix = tmpFileParams.prefix;
     const exceptionBreakpointFilters = this.session.exceptionBreakpointFilters;
-    this.session.pausingOnExceptions = enable;
+    let pauseOnExceptionKernels = this.session.pausingOnExceptions;
+    if (enable) {
+      if (!this.session.pausingOnExceptions.includes(prefix)) {
+        pauseOnExceptionKernels.push(prefix);
+        this.session.pausingOnExceptions = pauseOnExceptionKernels;
+      }
+    } else {
+      let prefixIndex = this.session.pausingOnExceptions.indexOf(prefix);
+      if (prefixIndex > -1) {
+        this.session.pausingOnExceptions = pauseOnExceptionKernels.splice(
+          prefixIndex,
+          1
+        );
+        this.session.pausingOnExceptions = pauseOnExceptionKernels;
+      }
+    }
     const filters: string[] = [];
     const exceptionOptions: DebugProtocol.ExceptionOptions[] = [];
     const breakMode = enable ? 'userUnhandled' : 'never';

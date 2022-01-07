@@ -317,7 +317,7 @@ export namespace IDebugger {
     /**
      * Whether the debug session is pausing on exceptions.
      */
-    pausingOnExceptions: boolean;
+    pausingOnExceptions: string[];
 
     /**
      * Whether the debug session is pausing on exceptions.
