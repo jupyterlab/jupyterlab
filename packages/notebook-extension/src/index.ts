@@ -169,6 +169,16 @@ namespace CommandIDs {
 
   export const selectBelow = 'notebook:move-cursor-down';
 
+  export const selectHeadingAboveOrCollapse =
+    'notebook:move-cursor-heading-above-or-collapse';
+
+  export const selectHeadingBelowOrExpand =
+    'notebook:move-cursor-heading-below-or-expand';
+
+  export const insertHeadingAbove = 'notebook:insert-heading-above';
+
+  export const insertHeadingBelow = 'notebook:insert-heading-below';
+
   export const extendAbove = 'notebook:extend-marked-cells-above';
 
   export const extendTop = 'notebook:extend-marked-cells-top';
@@ -246,11 +256,11 @@ namespace CommandIDs {
 
   export const autoClosingBrackets = 'notebook:toggle-autoclosing-brackets';
 
-  export const toggleCollapseCmd = 'Collapsible_Headings:Toggle_Collapse';
+  export const toggleCollapseCmd = 'notebook:toggle-heading-collapse';
 
-  export const collapseAllCmd = 'Collapsible_Headings:Collapse_All';
+  export const collapseAllCmd = 'notebook:collapse-all-headings';
 
-  export const expandAllCmd = 'Collapsible_Headings:Expand_All';
+  export const expandAllCmd = 'notebook:expand-all-headings';
 
   export const copyToClipboard = 'notebook:copy-to-clipboard';
 }
@@ -1984,6 +1994,54 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.insertHeadingAbove, {
+    label: trans.__('Insert Heading Above Current Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.insertSameLevelHeadingAbove(current.content);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.insertHeadingBelow, {
+    label: trans.__('Insert Heading Below Current Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.insertSameLevelHeadingBelow(current.content);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.selectHeadingAboveOrCollapse, {
+    label: trans.__('Select Heading Above or Collapse Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.selectHeadingAboveOrCollapseHeading(
+          current.content
+        );
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.selectHeadingBelowOrExpand, {
+    label: trans.__('Select Heading Below or Expand Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.selectHeadingBelowOrExpandHeading(
+          current.content
+        );
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.extendAbove, {
     label: trans.__('Extend Selection Above'),
     execute: args => {
@@ -2452,11 +2510,11 @@ function addCommands(
     isEnabled: isEnabledAndHeadingSelected
   });
   commands.addCommand(CommandIDs.collapseAllCmd, {
-    label: 'Collapse All Cells',
+    label: 'Collapse All Headings',
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.collapseAll(current.content);
+        return NotebookActions.collapseAllHeadings(current.content);
       }
     }
   });
@@ -2539,6 +2597,10 @@ function populatePalette(
     CommandIDs.insertBelow,
     CommandIDs.selectAbove,
     CommandIDs.selectBelow,
+    CommandIDs.selectHeadingAboveOrCollapse,
+    CommandIDs.selectHeadingBelowOrExpand,
+    CommandIDs.insertHeadingAbove,
+    CommandIDs.insertHeadingBelow,
     CommandIDs.extendAbove,
     CommandIDs.extendTop,
     CommandIDs.extendBelow,
