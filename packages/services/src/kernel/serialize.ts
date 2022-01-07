@@ -5,106 +5,91 @@ import * as KernelMessage from './messages';
 
 /**
  * Deserialize and return the unpacked message.
- *
- * #### Notes
- * Handles JSON blob strings and binary messages.
  */
-export function deserialize(
-  data: ArrayBuffer | string
-): KernelMessage.IMessage {
-  let value: KernelMessage.IMessage;
-  if (typeof data === 'string') {
-    value = JSON.parse(data);
-  } else {
-    value = deserializeBinary(data);
+export function deserialize(binMsg: ArrayBuffer): KernelMessage.IMessage {
+  let msg: KernelMessage.IMessage;
+  const data = new DataView(binMsg);
+  const layoutLength = data.getUint16(0, true /* littleEndian */);
+  const layoutBytes = new Uint8Array(binMsg.slice(2, 2 + layoutLength));
+  const decoder = new TextDecoder('utf8');
+  const layout = JSON.parse(decoder.decode(layoutBytes));
+  const channel = layout.channel;
+  let iter = getParts(new Uint8Array(binMsg.slice(2 + layoutLength)), layout.offsets);
+  const header = JSON.parse(decoder.decode(iter.next().value as Uint8Array));
+  const parent_header = JSON.parse(decoder.decode(iter.next().value as Uint8Array));
+  const metadata = JSON.parse(decoder.decode(iter.next().value as Uint8Array));
+  const content = JSON.parse(decoder.decode(iter.next().value as Uint8Array));
+  let curr = iter.next();
+  let buffers = [];
+  while (!curr.done) {
+    buffers.push(curr.value);
+    curr = iter.next();
   }
-  return value;
-}
-
-/**
- * Serialize a kernel message for transport.
- *
- * #### Notes
- * If there is binary content, an `ArrayBuffer` is returned,
- * otherwise the message is converted to a JSON string.
- */
-export function serialize(msg: KernelMessage.IMessage): string | ArrayBuffer {
-  let value: string | ArrayBuffer;
-  if (msg.buffers?.length) {
-    value = serializeBinary(msg);
-  } else {
-    value = JSON.stringify(msg);
-  }
-  return value;
-}
-
-/**
- * Deserialize a binary message to a Kernel Message.
- */
-function deserializeBinary(buf: ArrayBuffer): KernelMessage.IMessage {
-  const data = new DataView(buf);
-  // read the header: 1 + nbufs 32b integers
-  const nbufs = data.getUint32(0);
-  const offsets: number[] = [];
-  if (nbufs < 2) {
-    throw new Error('Invalid incoming Kernel Message');
-  }
-  for (let i = 1; i <= nbufs; i++) {
-    offsets.push(data.getUint32(i * 4));
-  }
-  const jsonBytes = new Uint8Array(buf.slice(offsets[0], offsets[1]));
-  const msg = JSON.parse(new TextDecoder('utf8').decode(jsonBytes));
-  // the remaining chunks are stored as DataViews in msg.buffers
-  msg.buffers = [];
-  for (let i = 1; i < nbufs; i++) {
-    const start = offsets[i];
-    const stop = offsets[i + 1] || buf.byteLength;
-    msg.buffers.push(new DataView(buf.slice(start, stop)));
-  }
+  msg = {
+    channel,
+    header,
+    parent_header,
+    metadata,
+    content,
+    buffers,
+  };
   return msg;
 }
 
 /**
- * Implement the binary serialization protocol.
- *
- * Serialize Kernel message to ArrayBuffer.
+ * Serialize a kernel message for transport.
  */
-function serializeBinary(msg: KernelMessage.IMessage): ArrayBuffer {
-  const offsets: number[] = [];
-  const buffers: ArrayBuffer[] = [];
+export function serialize(msg: KernelMessage.IMessage): ArrayBuffer {
+  const header = JSON.stringify(msg.header);
+  const parent_header = JSON.stringify(msg.parent_header);
+  const metadata = JSON.stringify(msg.metadata);
+  const content = JSON.stringify(msg.content);
+  let offsets = [
+    0,
+    header.length,
+    parent_header.length,
+    metadata.length,
+    content.length,
+  ]
+  let buffersLength = 0;
+  const buffers: (ArrayBuffer | ArrayBufferView)[] = (msg.buffers !== undefined) ? msg.buffers : [];
+  for (var buffer of buffers) {
+    offsets.push(buffer.byteLength);
+    buffersLength += buffer.byteLength;
+  }
+  offsets.push(0);
+  const layoutJson = {
+    channel: msg.channel,
+    offsets,
+  };
+  const layout = JSON.stringify(layoutJson);
+  const layoutLength = new ArrayBuffer(2);
+  new DataView(layoutLength).setInt16(0, layout.length, true /* littleEndian */);
   const encoder = new TextEncoder();
-  let origBuffers: (ArrayBuffer | ArrayBufferView)[] = [];
-  if (msg.buffers !== undefined) {
-    origBuffers = msg.buffers;
-    delete msg['buffers'];
+  const binMsgNoBuff = encoder.encode(layout + header + parent_header + metadata + content);
+  const binMsg = new Uint8Array(2 + binMsgNoBuff.byteLength + buffersLength);
+  binMsg.set(new Uint8Array(layoutLength), 0);
+  binMsg.set(new Uint8Array(binMsgNoBuff), 2);
+  let pos = 2 + binMsgNoBuff.byteLength;
+  for (var buffer of buffers) {
+    const b = buffer;
+    binMsg.set(new Uint8Array(ArrayBuffer.isView(b) ? b.buffer : b), pos);
+    pos += b.byteLength;
   }
-  const jsonUtf8 = encoder.encode(JSON.stringify(msg));
-  buffers.push(jsonUtf8.buffer);
-  for (let i = 0; i < origBuffers.length; i++) {
-    // msg.buffers elements could be either views or ArrayBuffers
-    // buffers elements are ArrayBuffers
-    const b: any = origBuffers[i];
-    buffers.push(ArrayBuffer.isView(b) ? b.buffer : b);
+  return binMsg.buffer;
+}
+
+function* getParts(binMsg: Uint8Array, offsets: number[]) {
+  let i0 = 0;
+  let i1: number;
+  let i = 1;
+  while(true) {
+    i1 = i0 + offsets[i];
+    if (i0 == i1) {
+      return;
+    }
+    yield binMsg.slice(i0, i1);
+    i0 = i1;
+    i += 1;
   }
-  const nbufs = buffers.length;
-  offsets.push(4 * (nbufs + 1));
-  for (let i = 0; i + 1 < buffers.length; i++) {
-    offsets.push(offsets[offsets.length - 1] + buffers[i].byteLength);
-  }
-  const msgBuf = new Uint8Array(
-    offsets[offsets.length - 1] + buffers[buffers.length - 1].byteLength
-  );
-  // use DataView.setUint32 for network byte-order
-  const view = new DataView(msgBuf.buffer);
-  // write nbufs to first 4 bytes
-  view.setUint32(0, nbufs);
-  // write offsets to next 4 * nbufs bytes
-  for (let i = 0; i < offsets.length; i++) {
-    view.setUint32(4 * (i + 1), offsets[i]);
-  }
-  // write all the buffers at their respective offsets
-  for (let i = 0; i < buffers.length; i++) {
-    msgBuf.set(new Uint8Array(buffers[i]), offsets[i]);
-  }
-  return msgBuf.buffer;
 }
