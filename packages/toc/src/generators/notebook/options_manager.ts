@@ -52,7 +52,7 @@ interface IOptions {
  *
  * @private
  */
-class OptionsManager extends Registry.IOptionsManager {
+class OptionsManager implements Registry.IOptionsManager {
   /**
    * Returns an options manager.
    *
@@ -66,7 +66,6 @@ class OptionsManager extends Registry.IOptionsManager {
     notebook: INotebookTracker,
     options: IOptions
   ) {
-    super();
     this._numbering = options.numbering;
     this._numberingH1 = options.numberingH1;
     this._includeOutput = options.includeOutput;
@@ -297,7 +296,7 @@ class OptionsManager extends Registry.IOptionsManager {
   private _collapseChanged: Signal<this, Registry.ICollapseChangedArgs>;
   private _tagTool: TagsToolComponent | null = null;
   translator: ITranslator; // FIXME-TRANS:
-  public storeTags: string[];
+  storeTags: string[];
 }
 
 /**
