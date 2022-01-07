@@ -28,7 +28,7 @@ test.describe('Text Editor Tests', () => {
     await page.click('text=Text Editor');
 
     // Add two rulers
-    await page.click('button[aria-label="Add"]');
+    await page.click('text="Add"');
     await page.click(
       '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_0"]'
     );
@@ -36,7 +36,7 @@ test.describe('Text Editor Tests', () => {
       '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_0"]',
       '50'
     );
-    await page.click('button[aria-label="Add"]');
+    await page.click('text="Add"');
     await page.click(
       '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_1"]'
     );
