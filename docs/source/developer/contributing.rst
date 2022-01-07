@@ -1,5 +1,5 @@
-Contributing to JupyterLab
-==========================
+Contribute
+==========
 
 If you're reading this section, you're probably interested in
 contributing to JupyterLab. Welcome and thanks for your interest in
@@ -28,6 +28,16 @@ If you believe you’ve found a security vulnerability in JupyterLab or
 any Jupyter project, please report it to security@ipython.org. If you
 prefer to encrypt your security reports, you can use `this PGP public
 key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc>`__.
+
+.. toctree::
+   :hidden:
+
+   repo
+   components
+   patterns
+   internationalization
+   css
+   api
 
 .. contents:: Table of contents
     :local:

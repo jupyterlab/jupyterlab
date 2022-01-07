@@ -165,16 +165,36 @@ def copy_code_files(temp_folder):
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-import sphinx_rtd_theme
-
-html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
+html_theme = "pydata_sphinx_theme"
+html_logo = "_static/logo-rectangle.svg"
+html_favicon = "_static/logo-icon.png"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/jupyterlab/jupyterlab",
+            "icon": "fab fa-github-square",
+        },
+        {
+            "name": "Discourse",
+            "url": "https://discourse.jupyter.org/c/jupyterlab/17",
+            "icon": "fab fa-discourse",
+        },
+        {
+            "name": "Gitter",
+            "url": "https://gitter.im/jupyterlab/jupyterlab",
+            "icon": "fab fa-gitter",
+        },
+    ],
+    "use_edit_page_button": True,
+    "navbar_align": "left",
+    "navbar_end": ["jupyter-website-icon.html", "navbar-icon-links.html", "search-field.html"],
+    "footer_items": ["copyright.html"],
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -187,18 +207,12 @@ html_static_path = ["_static"]
 # This is required for the alabaster theme
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
 html_sidebars = {
-    "**": [
-        "about.html",
-        "navigation.html",
-        "relations.html",  # needs 'show_related': True theme option to display
-        "searchbox.html",
-        "donate.html",
-    ]
+    "index": [],  # Home page has no sidebar so there's more room for content
+    "**": ["sidebar-nav-bs.html"],
 }
 
 # Output for github to be used in links
 html_context = {
-    "display_github": True,  # Integrate GitHub
     "github_user": "jupyterlab",  # Username
     "github_repo": "jupyterlab",  # Repo name
     "github_version": "master",  # Version

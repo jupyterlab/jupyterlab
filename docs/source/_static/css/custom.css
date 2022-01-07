@@ -1,3 +1,22 @@
+/* Navbar at the top */
+.jupyter-nav-logo {
+  padding: 0;
+}
+
+.jupyter-nav-logo img {
+  width: 30px;
+}
+
+.navbar-brand {
+  padding: 0.6em;
+}
+
+/* Save some space by making this just long enough for the text */
+nav.navbar form.bd-search {
+  width: 14em;
+}
+
+/* Text on page */
 h4 {
   font-size: 100%;
 }
