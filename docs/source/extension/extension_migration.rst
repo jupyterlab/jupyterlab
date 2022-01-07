@@ -32,6 +32,10 @@ bumped their major version (following semver convention):
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
 - ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).
+- ``@jupyterlab/console`` from 3.x to 4.x
+   The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
+   This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
+   in particular those with the strict null checks enabled.
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    The ``NotebookPanel._onSave`` method is now ``private``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
