@@ -719,6 +719,32 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
+   * Checks if any fields are different from the default value.
+   */
+  get isModified(): boolean {
+    for (const key in this.schema.properties) {
+      const user = this.get(key).user;
+      const defaultValue = this.default(key);
+      if (user === undefined || user === null) {
+        continue;
+      }
+      if (defaultValue === undefined || defaultValue === null) {
+        return true;
+      }
+      if (
+        JSONExt.deepEqual(user, JSONExt.emptyObject) ||
+        JSONExt.deepEqual(user, JSONExt.emptyArray)
+      ) {
+        continue;
+      }
+      if (!JSONExt.deepEqual(user, defaultValue)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * The user settings.
    */
   get user(): ReadonlyPartialJSONObject {
