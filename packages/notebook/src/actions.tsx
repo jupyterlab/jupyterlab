@@ -848,9 +848,9 @@ export namespace NotebookActions {
       notebook
     );
     if (headingLevel == -1) {
-      Private.Headings.insertHeadingAboveCellIdx(0, 1, notebook);
+      Private.Headings.insertHeadingAboveCellIndex(0, 1, notebook);
     } else {
-      Private.Headings.insertHeadingAboveCellIdx(
+      Private.Headings.insertHeadingAboveCellIndex(
         notebook.activeCellIndex!,
         headingLevel,
         notebook
@@ -876,7 +876,7 @@ export namespace NotebookActions {
       notebook,
       true
     ) as number;
-    Private.Headings.insertHeadingAboveCellIdx(
+    Private.Headings.insertHeadingAboveCellIndex(
       cellIdxOfHeadingBelow == -1
         ? notebook.model.cells.length
         : cellIdxOfHeadingBelow,
@@ -2416,7 +2416,7 @@ namespace Private {
      * @param childCell - The cell that is child to the sought heading
      * @param notebook - The target notebook widget
      * @param includeChildCell [default=false] - if set to true and childCell is a heading itself, the childCell will be returned
-     * @param returnIdx [default=false] - if set to true, the cell index is returned rather than the cell object.
+     * @param returnIndex [default=false] - if set to true, the cell index is returned rather than the cell object.
      *
      * @returns the (index | Cell object) of the parent heading or (-1 | null) if there is no parent heading.
      */
@@ -2424,7 +2424,7 @@ namespace Private {
       childCell: Cell,
       notebook: Notebook,
       includeChildCell = false,
-      returnIdx = false
+      returnIndex = false
     ): number | Cell | null {
       let cellIdx =
         notebook.widgets.indexOf(childCell) - (includeChildCell ? 1 : 0);
@@ -2433,25 +2433,25 @@ namespace Private {
           notebook.widgets[cellIdx]
         );
         if (headingInfo.isHeading) {
-          return returnIdx ? cellIdx : notebook.widgets[cellIdx];
+          return returnIndex ? cellIdx : notebook.widgets[cellIdx];
         }
         cellIdx--;
       }
-      return returnIdx ? -1 : null;
+      return returnIndex ? -1 : null;
     }
 
     /** Find heading above with leq level than baseCell heading level.
      *
      * @param baseCell - cell relative to which so search
      * @param notebook - target notebook widget
-     * @param returnIdx [default=false] - if set to true, the cell index is returned rather than the cell object.
+     * @param returnIndex [default=false] - if set to true, the cell index is returned rather than the cell object.
      *
      * @returns the (index | Cell object) of the found heading or (-1 | null) if no heading found.
      */
     export function findLowerEqualLevelParentHeadingAbove(
       baseCell: Cell,
       notebook: Notebook,
-      returnIdx = false
+      returnIndex = false
     ): number | Cell | null {
       let baseHeadingLevel = Private.Headings.determineHeadingLevel(
         baseCell,
@@ -2470,25 +2470,25 @@ namespace Private {
           headingInfo.isHeading &&
           headingInfo.headingLevel <= baseHeadingLevel
         ) {
-          return returnIdx ? cellIdx : cell;
+          return returnIndex ? cellIdx : cell;
         }
         cellIdx--;
       }
-      return returnIdx ? -1 : null; // no heading found
+      return returnIndex ? -1 : null; // no heading found
     }
 
     /** Find next heading with equal or lower level.
      *
      * @param baseCell - cell relative to which so search
      * @param notebook - target notebook widget
-     * @param returnIdx [default=false] - if set to true, the cell idx is returned rather than the cell object.
+     * @param returnIndex [default=false] - if set to true, the cell index is returned rather than the cell object.
      *
      * @returns the (index | Cell object) of the found heading or (-1 | null) if no heading found.
      */
     export function findLowerEqualLevelHeadingBelow(
       baseCell: Cell,
       notebook: Notebook,
-      returnIdx = false
+      returnIndex = false
     ): number | Cell | null {
       let baseHeadingLevel = Private.Headings.determineHeadingLevel(
         baseCell,
@@ -2505,36 +2505,36 @@ namespace Private {
           headingInfo.isHeading &&
           headingInfo.headingLevel <= baseHeadingLevel
         ) {
-          return returnIdx ? cellIdx : cell;
+          return returnIndex ? cellIdx : cell;
         }
         cellIdx++;
       }
-      return returnIdx ? -1 : null;
+      return returnIndex ? -1 : null;
     }
 
     /** Find next heading.
      *
      * @param baseCell - cell relative to which so search
      * @param notebook - target notebook widget
-     * @param returnIdx [default=false] - if set to true, the cell index is returned rather than the cell object.
+     * @param returnIndex [default=false] - if set to true, the cell index is returned rather than the cell object.
      *
      * @returns the (index | Cell object) of the found heading or (-1 | null) if no heading found.
      */
     export function findHeadingBelow(
       baseCell: Cell,
       notebook: Notebook,
-      returnIdx = false
+      returnIndex = false
     ): number | Cell | null {
       let cellIdx = notebook.widgets.indexOf(baseCell) + 1;
       while (cellIdx < notebook.widgets.length) {
         let cell = notebook.widgets[cellIdx];
         let headingInfo = NotebookActions.getHeadingInfo(cell);
         if (headingInfo.isHeading) {
-          return returnIdx ? cellIdx : cell;
+          return returnIndex ? cellIdx : cell;
         }
         cellIdx++;
       }
-      return returnIdx ? -1 : null;
+      return returnIndex ? -1 : null;
     }
 
     /** Determine the heading level of a cell.
@@ -2572,27 +2572,27 @@ namespace Private {
 
     /** Insert a new heading cell at given position.
      *
-     * @param cellIdx - where to insert
+     * @param cellIndex - where to insert
      * @param headingLevel - level of the new heading
      * @param notebook - target notebook
      *
      * #### Notes
      * Enters edit mode after insert.
      */
-    export function insertHeadingAboveCellIdx(
-      cellIdx: number,
+    export function insertHeadingAboveCellIndex(
+      cellIndex: number,
       headingLevel: number,
       notebook: Notebook
     ) {
       const state = Private.getState(notebook);
       const newCell = notebook.model!.contentFactory.createMarkdownCell({});
-      notebook.model!.cells.insert(cellIdx, newCell);
+      notebook.model!.cells.insert(cellIndex, newCell);
       Private.setMarkdownHeader(newCell, headingLevel);
-      notebook.activeCellIndex = cellIdx;
+      notebook.activeCellIndex = cellIndex;
       notebook.deselectAll();
       Private.handleState(notebook, state, true);
       notebook.mode = 'edit';
-      notebook.widgets[cellIdx].setHidden(false);
+      notebook.widgets[cellIndex].setHidden(false);
     }
   }
 }
