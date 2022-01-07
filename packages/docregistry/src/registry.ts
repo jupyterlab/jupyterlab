@@ -275,14 +275,21 @@ export class DocumentRegistry implements IDisposable {
   /**
    * Add a file type to the document registry.
    *
-   * @params fileType - The file type object to register.
+   * @param fileType - The file type object to register.
+   * @param factories - Optional factories to use for the file type.
    *
    * @returns A disposable which will unregister the command.
    *
    * #### Notes
    * These are used to populate the "Create New" dialog.
+   *
+   * If no default factory exists for the file type, the first factory will
+   * be defined as default factory.
    */
-  addFileType(fileType: Partial<DocumentRegistry.IFileType>): IDisposable {
+  addFileType(
+    fileType: Partial<DocumentRegistry.IFileType>,
+    factories?: string[]
+  ): IDisposable {
     const value: DocumentRegistry.IFileType = {
       ...DocumentRegistry.getFileTypeDefaults(this.translator),
       ...fileType,
@@ -291,6 +298,29 @@ export class DocumentRegistry implements IDisposable {
     };
     this._fileTypes.push(value);
 
+    // Add the filetype to the factory - filetype mapping
+    //  We do not change the factory itself
+    if (factories) {
+      const fileTypeName = value.name.toLowerCase();
+      factories
+        .map(factory => factory.toLowerCase())
+        .forEach(factory => {
+          if (!this._widgetFactoriesForFileType[fileTypeName]) {
+            this._widgetFactoriesForFileType[fileTypeName] = [];
+          }
+          if (
+            !this._widgetFactoriesForFileType[fileTypeName].includes(factory)
+          ) {
+            this._widgetFactoriesForFileType[fileTypeName].push(factory);
+          }
+        });
+      if (!this._defaultWidgetFactories[fileTypeName]) {
+        this._defaultWidgetFactories[
+          fileTypeName
+        ] = this._widgetFactoriesForFileType[fileTypeName][0];
+      }
+    }
+
     this._changed.emit({
       type: 'fileType',
       name: value.name,
@@ -298,6 +328,21 @@ export class DocumentRegistry implements IDisposable {
     });
     return new DisposableDelegate(() => {
       ArrayExt.removeFirstOf(this._fileTypes, value);
+      if (factories) {
+        const fileTypeName = value.name.toLowerCase();
+        for (const name of factories.map(factory => factory.toLowerCase())) {
+          ArrayExt.removeFirstOf(
+            this._widgetFactoriesForFileType[fileTypeName],
+            name
+          );
+        }
+        if (
+          this._defaultWidgetFactories[fileTypeName] ===
+          factories[0].toLowerCase()
+        ) {
+          delete this._defaultWidgetFactories[fileTypeName];
+        }
+      }
       this._changed.emit({
         type: 'fileType',
         name: fileType.name,
@@ -673,17 +718,11 @@ export class DocumentRegistry implements IDisposable {
     // Then look by extension name, starting with the longest
     let ext = Private.extname(name);
     while (ext.length > 1) {
-      ft = find(
-        this._fileTypes,
-        ft =>
-          ft.extensions
-            // In Private.extname, the extension is transformed to lower case
-            .map(extension => extension.toLowerCase())
-            .indexOf(ext) !== -1
+      const ftSubset = this._fileTypes.filter(ft =>
+        // In Private.extname, the extension is transformed to lower case
+        ft.extensions.map(extension => extension.toLowerCase()).includes(ext)
       );
-      if (ft) {
-        fts.push(ft);
-      }
+      fts.push(...ftSubset);
       ext = '.' + ext.split('.').slice(2).join('.');
     }
     return fts;

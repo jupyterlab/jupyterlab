@@ -187,7 +187,8 @@ export function checkStatus(cmd: string): number | null {
  */
 export function getPythonVersion(): string {
   const cmd = 'python setup.py --version';
-  return run(cmd, { stdio: 'pipe' }, true);
+  const lines = run(cmd, { stdio: 'pipe' }, true).split('\n');
+  return lines[lines.length - 1];
 }
 
 /**

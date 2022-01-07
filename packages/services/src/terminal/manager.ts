@@ -113,11 +113,9 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   /*
    * Connect to a running terminal.
    *
-   * @param name - The name of the target terminal.
-   *
    * @param options - The options used to connect to the terminal.
    *
-   * @returns A promise that resolves to the new terminal connection instance.
+   * @returns The new terminal connection instance.
    *
    * #### Notes
    * The manager `serverSettings` will be used.
@@ -166,14 +164,18 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   /**
    * Create a new terminal session.
    *
-   * @returns A promise that resolves with the terminal instance.
+   * @param options - The options used to create the terminal.
+   *
+   * @returns A promise that resolves with the terminal connection instance.
    *
    * #### Notes
    * The manager `serverSettings` will be used unless overridden in the
    * options.
    */
-  async startNew(): Promise<Terminal.ITerminalConnection> {
-    const model = await startNew(this.serverSettings);
+  async startNew(
+    options?: Terminal.ITerminal.IOptions
+  ): Promise<Terminal.ITerminalConnection> {
+    const model = await startNew(this.serverSettings, options?.name);
     await this.refreshRunning();
     return this.connectTo({ model });
   }
@@ -323,7 +325,9 @@ export namespace TerminalManager {
      * Create a new terminal session - throw an error since it is not supported.
      *
      */
-    async startNew(): Promise<Terminal.ITerminalConnection> {
+    async startNew(
+      options?: Terminal.ITerminal.IOptions
+    ): Promise<Terminal.ITerminalConnection> {
       return Promise.reject(
         new Error('Not implemented in no-op Terminal Manager')
       );

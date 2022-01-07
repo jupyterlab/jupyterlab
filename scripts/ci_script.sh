@@ -83,9 +83,6 @@ if [[ $GROUP == integrity2 ]]; then
     # Make sure we can build for release
     jlpm run build:dev:prod:release
 
-    # Make sure the storybooks build.
-    jlpm run build:storybook
-
     jlpm config set prefix ~/.yarn
 
     # Make sure we have CSS that can be converted with postcss
@@ -244,13 +241,6 @@ if [[ $GROUP == usage ]]; then
     # Make sure we can run JupyterLab under classic notebook
     python -m jupyterlab.browser_check --notebook
 
-    # Make sure we can add and remove a sibling package.
-    # jlpm run add:sibling jupyterlab/tests/mock_packages/extension
-    # jlpm run build
-    # jlpm run remove:package extension
-    # jlpm run build
-    # jlpm run integrity --force  # Should have a clean tree now
-
     # Test cli tools
     jlpm run get:dependency mocha
     jlpm run update:dependency mocha
@@ -262,19 +252,6 @@ if [[ $GROUP == usage ]]; then
     # Use the extension upgrade script
     pip install cookiecutter
     python -m jupyterlab.upgrade_extension --no-input jupyterlab/tests/mock_packages/extension
-
-    # Test theme creation - make sure we can add it as a package, build,
-    # and run browser
-    pip install -q pexpect
-    python scripts/create_theme.py
-    mv foo packages
-    jlpm run integrity
-    jlpm run build:packages
-    jlpm run build:dev
-    python -m jupyterlab.browser_check --dev-mode
-    jlpm run remove:package foo
-    jlpm run integrity
-
 fi
 
 

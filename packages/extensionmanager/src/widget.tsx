@@ -282,42 +282,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             {entry.description}
           </div>
           <div className="jp-extensionmanager-entry-buttons">
-            {!entry.installed &&
-              entry.pkg_type == 'source' &&
-              !entry.blockedExtensionsEntry &&
-              !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
-              ListModel.isDisclaimed() && (
-                <Button
-                  onClick={() => props.performAction('install', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Install')}
-                </Button>
-              )}
-            {ListModel.entryHasUpdate(entry) &&
-              entry.pkg_type == 'source' &&
-              !entry.blockedExtensionsEntry &&
-              !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
-              ListModel.isDisclaimed() && (
-                <Button
-                  onClick={() => props.performAction('install', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Update')}
-                </Button>
-              )}
-            {entry.installed && entry.pkg_type == 'source' && (
-              <Button
-                onClick={() => props.performAction('uninstall', entry)}
-                minimal
-                small
-              >
-                {trans.__('Uninstall')}
-              </Button>
-            )}
-            {entry.enabled && entry.pkg_type == 'source' && (
+            {entry.enabled && (
               <Button
                 onClick={() => props.performAction('disable', entry)}
                 minimal
@@ -326,7 +291,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Disable')}
               </Button>
             )}
-            {entry.installed && entry.pkg_type == 'source' && !entry.enabled && (
+            {entry.installed && !entry.enabled && (
               <Button
                 onClick={() => props.performAction('enable', entry)}
                 minimal

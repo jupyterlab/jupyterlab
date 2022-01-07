@@ -98,8 +98,7 @@ const UNUSED: Dict<string[]> = {
     'jest-summary-reporter'
   ],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
-  '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
-  '@jupyterlab/ui-components': ['@blueprintjs/icons']
+  '@jupyterlab/vega5-extension': ['vega', 'vega-lite']
 };
 
 // Packages that are allowed to have differing versions
@@ -245,8 +244,7 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/theme-dark-extension': [
     '@jupyterlab/application',
     '@jupyterlab/apputils'
-  ],
-  '@jupyterlab/ui-extension': ['@blueprintjs/icons']
+  ]
 };
 
 const pkgData: Dict<any> = {};
@@ -415,11 +413,7 @@ function ensureJupyterlab(): string[] {
   corePackage.jupyterlab.extensions = {};
   corePackage.jupyterlab.mimeExtensions = {};
   corePackage.jupyterlab.linkedPackages = {};
-  // start with known external dependencies
-  corePackage.dependencies = Object.assign(
-    {},
-    corePackage.jupyterlab.externalExtensions
-  );
+  corePackage.dependencies = {};
   corePackage.resolutions = {};
 
   const singletonPackages: string[] = corePackage.jupyterlab.singletonPackages;

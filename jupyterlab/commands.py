@@ -602,8 +602,6 @@ class _AppHandler(object):
         # Do this last since it relies on other attributes
         self.info = self._get_app_info()
 
-
-
     def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.
 
@@ -1153,7 +1151,13 @@ class _AppHandler(object):
 
         page_config = get_page_config(labextensions_path, app_settings_dir=app_settings_dir, logger=self.logger)
 
-        info['disabled'] = page_config.get('disabledExtensions', [])
+        disabled = page_config.get('disabledExtensions', {})
+        # handle disabledExtensions specified as a list (jupyterlab_server < 2.10)
+        # see https://github.com/jupyterlab/jupyterlab_server/pull/192 for more info
+        if isinstance(disabled, list):
+            disabled = { extension: True for extension in disabled }
+
+        info['disabled'] = disabled
 
         disabled_core = []
         for key in info['core_extensions']:
@@ -2230,10 +2234,14 @@ def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False
     return return_value
 
 
-def _is_disabled(name, disabled=[]):
+def _is_disabled(name, disabled=None):
     """Test whether the package is disabled.
     """
-    for pattern in disabled:
+    disabled = disabled or {}
+    for pattern, value in disabled.items():
+        # skip packages explicitly marked as not disabled
+        if value == False:
+            continue
         if name == pattern:
             return True
         if re.compile(pattern).match(name) is not None:
