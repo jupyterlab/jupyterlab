@@ -23,16 +23,16 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.2.x/CHANGELOG.md'
 
 ### Bugs fixed
 
-- [3.2.x] Manual backport: Restore compact notebook layout on mobile (#11762) [#11778](https://github.com/jupyterlab/jupyterlab/pull/11778) ([@jtpio](https://github.com/jtpio))
+- Restore compact notebook layout on mobile [#11778](https://github.com/jupyterlab/jupyterlab/pull/11778) ([@jtpio](https://github.com/jtpio))
 - Ensure browser attributes are set in plugin adding it [#11758](https://github.com/jupyterlab/jupyterlab/pull/11758) ([@fcollonval](https://github.com/fcollonval))
 - Fix handling of disabled extensions [#11744](https://github.com/jupyterlab/jupyterlab/pull/11744) ([@jtpio](https://github.com/jtpio))
-- updates debugger icon css to work with white panel background [#11688](https://github.com/jupyterlab/jupyterlab/pull/11688) ([@andrewfulton9](https://github.com/andrewfulton9))
+- Update debugger icon css to work with white panel background [#11688](https://github.com/jupyterlab/jupyterlab/pull/11688) ([@andrewfulton9](https://github.com/andrewfulton9))
 - Ensure the dialog does not close if you drag outside by mistake [#11673](https://github.com/jupyterlab/jupyterlab/pull/11673) ([@echarles](https://github.com/echarles))
 - Add JSX CodeMirror mode [#11666](https://github.com/jupyterlab/jupyterlab/pull/11666) ([@krassowski](https://github.com/krassowski))
 
 ### Maintenance and upkeep improvements
 
-- Revert "Backport/3.2.x/11608 Toggle side-by-side rendering for current notebook" [#11793](https://github.com/jupyterlab/jupyterlab/pull/11793) ([@fcollonval](https://github.com/fcollonval))
+- Revert "Toggle side-by-side rendering for current notebook" [#11793](https://github.com/jupyterlab/jupyterlab/pull/11793) ([@fcollonval](https://github.com/fcollonval))
 - Fix integrity failure on CI [#11770](https://github.com/jupyterlab/jupyterlab/pull/11770) ([@jtpio](https://github.com/jtpio))
 
 ### Documentation improvements
@@ -44,7 +44,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.2.x/CHANGELOG.md'
 
 ### Other merged PRs
 
-- Backport/3.2.x/11608 Toggle side-by-side rendering for current notebook [#11718](https://github.com/jupyterlab/jupyterlab/pull/11718) ([@echarles](https://github.com/echarles))
+- Toggle side-by-side rendering for current notebook [#11718](https://github.com/jupyterlab/jupyterlab/pull/11718) ([@echarles](https://github.com/echarles))
 
 ### Contributors to this release
 
