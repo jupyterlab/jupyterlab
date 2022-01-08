@@ -11,11 +11,13 @@
 .jp-InputArea {
   display: table;
   overflow: hidden;
+  table-layout: fixed;
+  width: 100%;
 }
 
 .jp-InputArea-editor {
   display: table-cell;
-  width: 100%;
+ 
   overflow: hidden;
   vertical-align: top;
 }
@@ -40,6 +42,7 @@
   font-size: var(--jp-code-font-size);
   border: var(--jp-border-width) solid transparent;
   opacity: var(--jp-cell-prompt-opacity);
+  width: var(--jp-cell-prompt-width);
   /* Right align prompt text, don't wrap to handle large prompt numbers */
   text-align: right;
   white-space: nowrap;
@@ -59,6 +62,7 @@
   .jp-InputArea-editor {
     display: table-row;
     margin-left: var(--jp-notebook-padding);
+    
   }
 
   .jp-InputPrompt {
