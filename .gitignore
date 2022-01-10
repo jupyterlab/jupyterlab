@@ -123,3 +123,6 @@ junit.xml
 .vscode/settings.json
 
 .jupyter_releaser_checkout
+docs/scripts/screenshots/yarn.lock
+docs/scripts/screenshots/playwright-report/
+docs/scripts/screenshots/test-results/
