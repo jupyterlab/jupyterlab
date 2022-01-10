@@ -20,6 +20,7 @@ See the sections below (and the top-level links above) for more information abou
 
 .. toctree::
    :maxdepth: 2
+   :caption: Table of Contents
 
    getting_started/overview
    user/index
