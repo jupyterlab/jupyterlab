@@ -44,7 +44,7 @@
     "@jupyterlab/launcher": "^3.3.0-alpha.15",
     "@jupyterlab/notebook": "^3.3.0-alpha.15",
     "@jupyterlab/translation": "^3.3.0-alpha.15",
-    "@jupyterlab/ui-components": "^3.3.0-alpha.15"
+    "@jupyterlab/ui-components": "^3.3.0-alpha.14"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

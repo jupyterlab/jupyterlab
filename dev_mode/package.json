@@ -165,7 +165,7 @@
     "@jupyterlab/toc-extension": "~5.3.0-alpha.15",
     "@jupyterlab/tooltip-extension": "~3.3.0-alpha.15",
     "@jupyterlab/translation-extension": "~3.3.0-alpha.15",
-    "@jupyterlab/ui-components-extension": "~3.3.0-alpha.15",
+    "@jupyterlab/ui-components-extension": "^3.3.0-alpha.14",
     "@jupyterlab/vdom-extension": "~3.3.0-alpha.15",
     "@jupyterlab/vega5-extension": "~3.3.0-alpha.15"
   },

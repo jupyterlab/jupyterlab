@@ -45,7 +45,7 @@
     "@jupyterlab/settingregistry": "^3.3.0-alpha.15",
     "@jupyterlab/statedb": "^3.3.0-alpha.15",
     "@jupyterlab/translation": "^3.3.0-alpha.15",
-    "@jupyterlab/ui-components": "^3.3.0-alpha.15",
+    "@jupyterlab/ui-components": "^3.3.0-alpha.14",
     "@lumino/disposable": "^1.4.3"
   },
   "devDependencies": {

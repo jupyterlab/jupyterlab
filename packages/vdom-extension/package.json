@@ -37,7 +37,7 @@
     "@jupyterlab/docregistry": "^3.3.0-alpha.15",
     "@jupyterlab/notebook": "^3.3.0-alpha.15",
     "@jupyterlab/rendermime": "^3.3.0-alpha.15",
-    "@jupyterlab/ui-components": "^3.3.0-alpha.15",
+    "@jupyterlab/ui-components": "^3.3.0-alpha.14",
     "@jupyterlab/vdom": "^3.3.0-alpha.15"
   },
   "devDependencies": {

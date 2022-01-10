@@ -43,7 +43,7 @@
     "@jupyterlab/mainmenu": "^3.3.0-alpha.15",
     "@jupyterlab/services": "^6.3.0-alpha.15",
     "@jupyterlab/translation": "^3.3.0-alpha.15",
-    "@jupyterlab/ui-components": "^3.3.0-alpha.15",
+    "@jupyterlab/ui-components": "^3.3.0-alpha.14",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/signaling": "^1.4.3",
     "@lumino/virtualdom": "^1.8.0",
