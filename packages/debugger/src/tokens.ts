@@ -52,7 +52,7 @@ export interface IDebugger {
   readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession | null>;
 
   /**
-   * TODO: Signal emitted upon session changed.
+   * Signal emitted upon session changed.
    */
   readonly stateRestored: ISignal<IDebugger, null>;
 
@@ -66,7 +66,9 @@ export interface IDebugger {
    */
   pauseOnExceptionsIsValid(): boolean;
 
-  /** TODO */
+  /**
+   * Handles enabling and disabling of Pause on Exception
+   */
   pauseOnExceptions(enable: boolean): Promise<void>;
 
   /**
