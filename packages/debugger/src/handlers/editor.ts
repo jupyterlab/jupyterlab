@@ -90,16 +90,10 @@ export class EditorHandler implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    this.isDisposed = true;
     this._editorMonitor.dispose();
     this._clearEditor();
+    this.isDisposed = true;
     Signal.clearData(this);
-    // Clear breakpoints
-    this._debuggerService
-      .updateBreakpoints(this._editor.model.value.text, [], this._path)
-      .catch(reason => {
-        console.error(`Fail to clear breakpoints:\n${reason}`);
-      });
   }
 
   /**
@@ -153,7 +147,7 @@ export class EditorHandler implements IDisposable {
 
     const breakpoints = this._getBreakpointsFromEditor().map(lineInfo => {
       return Private.createBreakpoint(
-        this._debuggerService.session?.connection?.name ?? '',
+        this._debuggerService.session?.connection?.name || '',
         lineInfo.line + 1
       );
     });

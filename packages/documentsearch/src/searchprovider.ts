@@ -5,12 +5,21 @@ import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { IFilter, IFiltersType, ISearchMatch, ISearchProvider } from './tokens';
 
+/**
+ * Abstract class implementing the search provider interface.
+ */
 export abstract class SearchProvider<T extends Widget = Widget>
   implements ISearchProvider<T> {
+  /**
+   * Constructor
+   *
+   * @param widget The widget to search in
+   */
   constructor(protected widget: T) {
     this._changed = new Signal<SearchProvider<T>, void>(this);
     this._disposed = false;
   }
+
   /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
@@ -25,6 +34,9 @@ export abstract class SearchProvider<T extends Widget = Widget>
     return null;
   }
 
+  /**
+   * Whether the search provider is disposed or not.
+   */
   get isDisposed(): boolean {
     return this._disposed;
   }
@@ -60,6 +72,7 @@ export abstract class SearchProvider<T extends Widget = Widget>
     }
 
     this._disposed = true;
+    Signal.clearData(this);
   }
 
   /**
@@ -87,47 +100,45 @@ export abstract class SearchProvider<T extends Widget = Widget>
   }
 
   /**
-   * Initialize the search using the provided options.
+   * Start a search using the provided options.
    *
    * @param query A RegExp to be use to perform the search
    * @param filters Filter parameters to pass to provider
-   *
-   * @returns A promise that resolves with a list of all matches
    */
   abstract startQuery(query: RegExp, filters: IFiltersType): Promise<void>;
 
   /**
-   * Clears state of a search provider to prepare for startQuery to be called
-   * in order to start a new query or refresh an existing one.
-   *
-   * @returns A promise that resolves when the search provider is ready to
-   * begin a new search.
+   * Stop a search and clear any internal state of the search provider.
    */
   abstract endQuery(): Promise<void>;
 
   /**
-   * Move the current match indicator to the next match.
+   * Highlight the next match.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The next match if available
    */
   abstract highlightNext(): Promise<ISearchMatch | undefined>;
 
   /**
-   * Move the current match indicator to the previous match.
+   * Highlight the previous match.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The previous match if available.
    */
   abstract highlightPrevious(): Promise<ISearchMatch | undefined>;
 
   /**
    * Replace the currently selected match with the provided text
    *
+   * @param newText The replacement text
+   *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
   abstract replaceCurrentMatch(newText: string): Promise<boolean>;
 
   /**
-   * Replace all matches in the notebook with the provided text
+   * Replace all matches in the widget with the provided text
+   *
+   * @param newText The replacement text
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */

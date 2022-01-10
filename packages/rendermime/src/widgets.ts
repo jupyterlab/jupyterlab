@@ -147,6 +147,9 @@ export abstract class RenderedCommon
   }
 }
 
+/**
+ * Abstract class to render text with highlights
+ */
 export abstract class RenderedTextHighlightCommon extends RenderedCommon {
   /**
    * Construct a new rendered widget that can highlight text fragment.
@@ -200,6 +203,11 @@ export abstract class RenderedTextHighlightCommon extends RenderedCommon {
       : Promise.resolve();
   }
 
+  /**
+   * Create the source augmented with highlighted parts.
+   *
+   * @returns Modified source
+   */
   protected highlight(): string {
     const src = this.originalSource;
     let lastEnd = 0;

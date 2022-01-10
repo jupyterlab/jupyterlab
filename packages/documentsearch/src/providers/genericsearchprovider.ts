@@ -13,8 +13,9 @@ import { ITranslator } from '@jupyterlab/translation';
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
 
-// Highlight next and previous seem broken
-
+/**
+ * HTML search engine
+ */
 export class HTMLSearchEngine {
   /**
    * We choose opt out as most node types should be searched (e.g. script).
@@ -67,10 +68,11 @@ export class HTMLSearchEngine {
   };
 
   /**
+   * Search for a `query` in a DOM tree.
    *
-   * @param query
-   * @param data
-   * @returns
+   * @param query Regular expression to search
+   * @param rootNode DOM root node to search in
+   * @returns The list of matches
    */
   static search(query: RegExp, rootNode: Node): Promise<IHTMLSearchMatch[]> {
     if (!(rootNode instanceof Node)) {
@@ -121,6 +123,9 @@ export class HTMLSearchEngine {
   }
 }
 
+/**
+ * Generic DOM tree search provider.
+ */
 export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
    * Report whether or not this provider has the ability to search on the given object
@@ -130,7 +135,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   }
 
   /**
-   * Instantiate a search provider for the widget.
+   * Instantiate a generic search provider for the widget.
    *
    * #### Notes
    * The widget provided is always checked using `canSearchOn` before calling
@@ -157,6 +162,9 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     return this._currentMatchIndex;
   }
 
+  /**
+   * The current match
+   */
   get currentMatch(): IHTMLSearchMatch | null {
     return this._currentMatchIndex === null
       ? null
@@ -164,7 +172,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   }
 
   /**
-   * The same list of matches provided by the startQuery promise resolution
+   * The current matches
    */
   get matches(): IHTMLSearchMatch[] {
     // Ensure that no other fn can overwrite matches index property
@@ -189,20 +197,61 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   readonly isReadOnly = true;
 
   /**
+   * Move the current match indicator to the next match.
+   *
+   * @param loop Whether to loop within the matches list.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  async highlightNext(loop?: boolean): Promise<IHTMLSearchMatch | undefined> {
+    return this._highlightNext(false, loop);
+  }
+
+  /**
+   * Move the current match indicator to the previous match.
+   *
+   * @param loop Whether to loop within the matches list.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  async highlightPrevious(
+    loop?: boolean
+  ): Promise<IHTMLSearchMatch | undefined> {
+    return this._highlightNext(true, loop);
+  }
+
+  /**
+   * Replace the currently selected match with the provided text
+   *
+   * @param newText The replacement text
+   * @param loop Whether to loop within the matches list.
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
+  async replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  /**
+   * Replace all matches in the notebook with the provided text
+   *
+   * @param newText The replacement text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    // This is read only, but we could loosen this in theory for input boxes...
+    return Promise.resolve(false);
+  }
+
+  /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
    * @param query A RegExp to be use to perform the search
-   * @param searchTarget The widget to be searched
-   * @param [filters={}] Filter parameters to pass to provider
-   *
-   * @returns A promise that resolves with a list of all matches
+   * @param filters Filter parameters to pass to provider
    */
   async startQuery(query: RegExp, filters = {}): Promise<void> {
-    if (!this.widget) {
-      return Promise.resolve();
-    }
-
     await this.endQuery();
     this._query = query;
 
@@ -254,11 +303,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   }
 
   /**
-   * Clears state of a search provider to prepare for startQuery to be called
-   * in order to start a new query or refresh an existing one.
-   *
-   * @returns A promise that resolves when the search provider is ready to
-   * begin a new search.
+   * Clear the highlighted matches and any internal state.
    */
   async endQuery(): Promise<void> {
     this._mutationObserver.disconnect();
@@ -270,39 +315,6 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     this._spanNodes = [];
     this._matches = [];
     this._currentMatchIndex = null;
-  }
-
-  /**
-   * Resets UI state, removes all matches.
-   *
-   * @returns A promise that resolves when all state has been cleaned up.
-   */
-  async endSearch(): Promise<void> {
-    return this.endQuery();
-  }
-
-  /**
-   * Move the current match indicator to the next match.
-   *
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves once the action has completed.
-   */
-  async highlightNext(loop?: boolean): Promise<IHTMLSearchMatch | undefined> {
-    return this._highlightNext(false, loop);
-  }
-
-  /**
-   * Move the current match indicator to the previous match.
-   *
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves once the action has completed.
-   */
-  async highlightPrevious(
-    loop?: boolean
-  ): Promise<IHTMLSearchMatch | undefined> {
-    return this._highlightNext(true, loop);
   }
 
   private _highlightNext(
@@ -345,27 +357,6 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     } else {
       return undefined;
     }
-  }
-
-  /**
-   * Replace the currently selected match with the provided text
-   *
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
-   */
-  async replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean> {
-    return Promise.resolve(false);
-  }
-
-  /**
-   * Replace all matches in the notebook with the provided text
-   *
-   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
-   */
-  async replaceAllMatches(newText: string): Promise<boolean> {
-    // This is read only, but we could loosen this in theory for input boxes...
-    return Promise.resolve(false);
   }
 
   private async _onWidgetChanged(

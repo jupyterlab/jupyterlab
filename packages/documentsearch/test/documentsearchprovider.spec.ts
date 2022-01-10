@@ -14,13 +14,11 @@ describe('documentsearch/genericsearchprovider', () => {
     let widget: Widget;
 
     beforeEach(() => {
-      provider = new GenericSearchProvider();
       widget = new Widget();
-      provider.startSearch(widget);
+      provider = new GenericSearchProvider(widget);
     });
 
     afterEach(async () => {
-      await provider.endSearch();
       widget.dispose();
     });
 

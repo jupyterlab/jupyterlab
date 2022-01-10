@@ -27,9 +27,20 @@ import { Signal } from '@lumino/signaling';
 import { CodeCellModel, ICellModel } from './model';
 import { Cell, CodeCell, MarkdownCell } from './widget';
 
+/**
+ * Class applied on highlighted search matches
+ */
 export const SELECTED_HIGHLIGHT_CLASS = 'jp-mod-selected';
 
+/**
+ * Search provider for cells.
+ */
 export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
+  /**
+   * Constructor
+   *
+   * @param cell Cell widget
+   */
   constructor(protected cell: Cell<ICellModel>) {
     this.currentIndex = null;
     this._changed = new Signal<IBaseSearchProvider, void>(this);
@@ -38,39 +49,73 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     );
   }
 
+  /**
+   * Changed signal to be emitted when search matches change.
+   */
   get changed(): Signal<IBaseSearchProvider, void> {
     return this._changed;
   }
 
+  /**
+   * Current match index
+   */
   get currentMatchIndex(): number | null {
     return this.isActive ? this.currentIndex : null;
   }
 
+  /**
+   * Whether the cell search is active.
+   *
+   * This is used when applying search only on selected cells.
+   */
   get isActive(): boolean {
     return this._isActive;
   }
 
+  /**
+   * Whether the search provider is disposed or not.
+   */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
 
+  /**
+   * Number of matches in the cell.
+   */
   get matchesSize(): number {
     return this.isActive ? this.cmHandler.matches.length : 0;
   }
 
+  /**
+   * Clear currently highlighted match
+   */
   clearSelection(): void {
     this.currentIndex = null;
     this.cmHandler.clearSelection();
   }
 
+  /**
+   * Dispose the search provider
+   */
   dispose(): void {
     if (this._isDisposed) {
       return;
     }
     this._isDisposed = true;
     Signal.clearData(this);
+    if (this.isActive) {
+      this.endQuery();
+    }
   }
 
+  /**
+   * Set `isActive` status.
+   *
+   * #### Notes
+   * It will start or end the search
+   *
+   * @param v New value
+   */
   async setIsActive(v: boolean): Promise<void> {
     if (this._isActive !== v) {
       this._isActive = v;
@@ -86,12 +131,10 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
 
   /**
    * Initialize the search using the provided options. Should update the UI
-   * to highlight all matches and "select" whatever the first match should be.
+   * to highlight all matches and "select" the first match.
    *
    * @param query A RegExp to be use to perform the search
    * @param filters Filter parameters to pass to provider
-   *
-   * @returns A promise that resolves with a list of all matches
    */
   async startQuery(
     query: RegExp | null,
@@ -106,15 +149,18 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     content.changed.connect(this.onInputChanged, this);
   }
 
+  /**
+   * Stop the search and clean any UI elements.
+   */
   async endQuery(): Promise<void> {
     await this.cmHandler.endQuery();
     this.currentIndex = null;
   }
 
   /**
-   * Move the current match indicator to the next match.
+   * Highlight the next match.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The next match if there is one.
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
     if (this.matchesSize === 0 || !this.isActive) {
@@ -139,9 +185,9 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   }
 
   /**
-   * Move the current match indicator to the previous match.
+   * Highlight the previous match.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The previous match if there is one.
    */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     if (this.matchesSize === 0 || !this.isActive) {
@@ -161,9 +207,12 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   }
 
   /**
-   * Replace the currently selected match with the provided text
+   * Replace the currently selected match with the provided text.
    *
-   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   * If no match is selected, it won't do anything.
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
    */
   replaceCurrentMatch(newText: string): Promise<boolean> {
     if (!this.isActive) {
@@ -202,9 +251,10 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   }
 
   /**
-   * Replace all matches in the notebook with the provided text
+   * Replace all matches in the cell source with the provided text
    *
-   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
    */
   replaceAllMatches(newText: string): Promise<boolean> {
     if (!this.isActive) {
@@ -230,6 +280,11 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     return Promise.resolve(occurred);
   }
 
+  /**
+   * Get the current match if it exists.
+   *
+   * @returns The current match
+   */
   protected getCurrentMatch(): ISearchMatch | undefined {
     if (this.currentIndex === null) {
       return undefined;
@@ -242,20 +297,12 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     }
   }
 
-  protected isCurrentIndexHighlighted(): boolean {
-    // No current match
-    if (this.currentIndex === null) {
-      return false;
-    }
-
-    // Current match is not in the input
-    if (this.currentIndex >= this.cmHandler.matches.length) {
-      return true;
-    } else {
-      return this.cmHandler.isCurrentIndexHighlighted();
-    }
-  }
-
+  /**
+   * Callback on source change
+   *
+   * @param content Cell source
+   * @param changes Source change
+   */
   protected async onInputChanged(
     content: IObservableString,
     changes?: IObservableString.IChangedArgs
@@ -277,9 +324,21 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     }
   }
 
+  /**
+   * CodeMirror search highlighter
+   */
   protected cmHandler: CodeMirrorSearchHighlighter;
+  /**
+   * Current match index
+   */
   protected currentIndex: number | null = null;
+  /**
+   * Current search filters
+   */
   protected filters: IFiltersType | undefined;
+  /**
+   * Current search query
+   */
   protected query: RegExp | null = null;
   private _changed: Signal<IBaseSearchProvider, void>;
   private _isActive = true;
@@ -287,7 +346,17 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   private _lastReplacementPosition: CodeEditor.IPosition | null = null;
 }
 
+/**
+ * Code cell search provider
+ */
 class CodeCellSearchProvider extends CellSearchProvider {
+  /**
+   * Constructor
+   *
+   * @param cell Cell widget
+   * @param rendermime Notebook rendermime registry
+   * @param searchRegistry Application search provider registry
+   */
   constructor(
     cell: Cell<ICellModel>,
     protected rendermime?: IRenderMimeRegistry,
@@ -296,6 +365,9 @@ class CodeCellSearchProvider extends CellSearchProvider {
     super(cell);
   }
 
+  /**
+   * Number of matches in the cell.
+   */
   get matchesSize(): number {
     if (!this.isActive) {
       return 0;
@@ -311,15 +383,18 @@ class CodeCellSearchProvider extends CellSearchProvider {
     return super.matchesSize + outputsSize;
   }
 
+  /**
+   * Clear currently highlighted match.
+   */
   clearSelection(): void {
     super.clearSelection();
     this._updateHighlightedOutput();
   }
 
   /**
-   * Move the current match indicator to the next match.
+   * Highlight the next match.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The next match if there is one.
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
     if (this.matchesSize === 0 || !this.isActive) {
@@ -348,9 +423,9 @@ class CodeCellSearchProvider extends CellSearchProvider {
   }
 
   /**
-   * Move the current match indicator to the previous match.
+   * Highlight the previous match.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The previous match if there is one.
    */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     if (this.matchesSize === 0 || !this.isActive) {
@@ -380,13 +455,11 @@ class CodeCellSearchProvider extends CellSearchProvider {
   }
 
   /**
-   * Initialize the search using the provided options. Should update the UI
-   * to highlight all matches and "select" whatever the first match should be.
+   * Initialize the search using the provided options. Should update the UI to highlight
+   * all matches and "select" the first match.
    *
    * @param query A RegExp to be use to perform the search
    * @param filters Filter parameters to pass to provider
-   *
-   * @returns A promise that resolves with a list of all matches
    */
   async startQuery(
     query: RegExp | null,
@@ -412,6 +485,11 @@ class CodeCellSearchProvider extends CellSearchProvider {
     }
   }
 
+  /**
+   * Get the current match if it exists.
+   *
+   * @returns The current match
+   */
   protected getCurrentMatch(): ISearchMatch | undefined {
     let match = super.getCurrentMatch();
     if (!match && this.currentMatchIndex !== null) {
@@ -541,7 +619,13 @@ class CodeCellSearchProvider extends CellSearchProvider {
   }
 }
 
+/**
+ * Markdown cell search provider
+ */
 class MarkdownCellSearchProvider extends CellSearchProvider {
+  /**
+   * Number of matches in the cell.
+   */
   get matchesSize(): number {
     const cell = this.cell as MarkdownCell;
     return this.isActive
@@ -551,15 +635,26 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       : 0;
   }
 
+  /**
+   * Clear currently highlighted match
+   */
   clearSelection(): void {
     super.clearSelection();
     this.updateRenderedSelection();
   }
 
   /**
-   * Move the current match indicator to the next match.
+   * Stop the search and clean any UI elements.
+   */
+  async endQuery(): Promise<void> {
+    await super.endQuery();
+    (this.cell as MarkdownCell).highlights = [];
+  }
+
+  /**
+   * Highlight the next match.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The next match if there is one.
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
     let match: ISearchMatch | undefined = undefined;
@@ -586,9 +681,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   }
 
   /**
-   * Move the current match indicator to the previous match.
+   * Highlight the previous match.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The previous match if there is one.
    */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     let match: ISearchMatch | undefined = undefined;
@@ -612,15 +707,11 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     return match;
   }
 
-  async endQuery(): Promise<void> {
-    await super.endQuery();
-    (this.cell as MarkdownCell).highlights = [];
-  }
-
   /**
-   * Replace all matches in the notebook with the provided text
+   * Replace all matches in the cell source with the provided text
    *
-   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
    */
   async replaceAllMatches(newText: string): Promise<boolean> {
     const occurred = await super.replaceAllMatches(newText);
@@ -633,12 +724,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
 
   /**
    * Initialize the search using the provided options. Should update the UI
-   * to highlight all matches and "select" whatever the first match should be.
+   * to highlight all matches and "select" the first match.
    *
    * @param query A RegExp to be use to perform the search
    * @param filters Filter parameters to pass to provider
-   *
-   * @returns A promise that resolves with a list of all matches
    */
   async startQuery(
     query: RegExp | null,
@@ -652,6 +741,12 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     );
   }
 
+  /**
+   * Callback on source change
+   *
+   * @param content Cell source
+   * @param changes Source change
+   */
   protected async onInputChanged(
     content: IObservableString,
     changes?: IObservableString.IChangedArgs
@@ -703,6 +798,14 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   }
 }
 
+/**
+ * Factory to create a cell search provider
+ *
+ * @param cell Cell widget
+ * @param rendermime Notebook rendermime registry
+ * @param searchRegistry Application search provider registry
+ * @returns Cell search provider
+ */
 export function createCellSearchProvider(
   cell: Cell<ICellModel>,
   rendermime?: IRenderMimeRegistry,

@@ -1,30 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, test } from '@jupyterlab/galata';
+import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'search.ipynb';
 
 test.describe('Notebook Search and Replace', () => {
-  test.beforeEach(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
-    await contents.uploadFile(
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
     );
-  });
 
-  test.afterEach(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
-    await contents.deleteDirectory(tmpPath);
-  });
-
-  test('Replace in cell', async ({ page, tmpPath }) => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     await page.notebook.activate(fileName);
+  });
 
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
+  test('Replace in cell', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -45,10 +43,7 @@ test.describe('Notebook Search and Replace', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('replace-in-cell.png');
   });
 
-  test('Replace on markdown rendered cell', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Replace on markdown rendered cell', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -80,10 +75,7 @@ test.describe('Notebook Search and Replace', () => {
     );
   });
 
-  test('Replace all', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Replace all', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 

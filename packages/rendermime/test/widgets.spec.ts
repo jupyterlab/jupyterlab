@@ -88,6 +88,27 @@ describe('@jupyterlab/rendermime', () => {
         w.renderHighlights && (await w.renderHighlights(highlights));
         expect(w.node.innerHTML).toBe(expected);
       });
+
+      const source2 =
+        '# Cell Markdown\n\n```python\ndef add(a, b):\n    return a + b\n```\n\n    This is a code formatted\n    text block';
+      it.each([
+        [
+          [],
+          '<h1 id="Cell-Markdown">Cell Markdown<a target="_self" href="#Cell-Markdown" class="jp-InternalAnchorLink">¶</a></h1>\n<pre><code class="cm-s-jupyter language-python"><span class="cm-keyword">def</span> <span class="cm-def">add</span>(<span class="cm-variable">a</span>, <span class="cm-variable">b</span>):\n    <span class="cm-keyword">return</span> <span class="cm-variable">a</span> <span class="cm-operator">+</span> <span class="cm-variable">b</span>\n</code></pre>\n<pre><code>This is a code formatted\ntext block\n</code></pre>\n'
+        ],
+        [
+          [{ text: 'add', position: /add/.exec(source2)!.index }],
+          '<h1 id="Cell-Markdown">Cell Markdown<a target="_self" href="#Cell-Markdown" class="jp-InternalAnchorLink">¶</a></h1>\n<pre><code class="cm-s-jupyter language-python"><span class="cm-keyword">def</span> <span class="cm-def">add</span>(<span class="cm-variable">a</span>, <span class="cm-variable">b</span>):\n    <span class="cm-keyword">return</span> <span class="cm-variable">a</span> <span class="cm-operator">+</span> <span class="cm-variable">b</span>\n</code></pre>\n<pre><code>This is a code formatted\ntext block\n</code></pre>\n'
+        ]
+      ])('should highlight in block code %j', async (highlights, expected) => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, source2);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        w.renderHighlights && (await w.renderHighlights(highlights));
+        expect(w.node.innerHTML).toBe(expected);
+      });
     });
   });
 

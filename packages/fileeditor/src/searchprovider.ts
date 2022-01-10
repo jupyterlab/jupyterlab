@@ -14,11 +14,21 @@ import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from './widget';
 
+/**
+ * Helper type
+ */
 export type FileEditorPanel = MainAreaWidget<FileEditor>;
 
+/**
+ * File editor search provider
+ */
 export class FileEditorSearchProvider
   extends CodeMirrorSearchProvider
   implements ISearchProvider<FileEditorPanel> {
+  /**
+   * Constructor
+   * @param widget File editor panel
+   */
   constructor(widget: FileEditorPanel) {
     super();
     this.editor = widget.content.editor as CodeMirrorEditor;
@@ -56,20 +66,11 @@ export class FileEditorSearchProvider
     );
   }
 
-  get isDisposed(): boolean {
-    return this._disposed;
-  }
-
-  dispose(): void {
-    if (this._disposed) {
-      return;
-    }
-    this._disposed = true;
-  }
-
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
+   *
+   * @param searchTarget The widget to search in.
    *
    * @returns Initial value used to populate the search box.
    */
@@ -79,6 +80,4 @@ export class FileEditorSearchProvider
     // if there are newlines, just return empty string
     return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
   }
-
-  private _disposed: boolean;
 }

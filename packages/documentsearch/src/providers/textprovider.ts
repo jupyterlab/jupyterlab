@@ -7,6 +7,13 @@ import { ISearchMatch } from '../tokens';
  * Search provider for text/plain
  */
 export const TextSearchEngine = {
+  /**
+   * Search for regular expression matches in a string.
+   *
+   * @param query Query regular expression
+   * @param data String to look into
+   * @returns List of matches
+   */
   search(query: RegExp, data: string): Promise<ISearchMatch[]> {
     // If data is not a string, try to JSON serialize the data.
     if (typeof data !== 'string') {

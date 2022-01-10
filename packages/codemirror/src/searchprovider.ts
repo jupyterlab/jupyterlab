@@ -37,15 +37,41 @@ import {
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
 import { JSONExt } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorEditor } from './editor';
 
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
-export class CodeMirrorSearchProvider implements IBaseSearchProvider {
+/**
+ * CodeMirror search provider for file editor
+ */
+export class CodeMirrorSearchProvider
+  implements IBaseSearchProvider, IDisposable {
+  /**
+   * Whether the search provider is disposed or not.
+   */
+  get isDisposed(): boolean {
+    return this._disposed;
+  }
+
+  /**
+   * Dispose the search provider
+   */
+  dispose(): void {
+    if (this._disposed) {
+      return;
+    }
+    this._disposed = true;
+
+    Signal.clearData(this);
+  }
+
   /**
    * Initialize the search using a CodeMirrorEditor object.
+   *
+   * @param query the search regular expression
    */
   async startQuery(query: RegExp): Promise<void> {
     if (!this.editor) {
@@ -54,6 +80,9 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     return this._startQuery(query);
   }
 
+  /**
+   * Refresh the search highlight overlay
+   */
   refreshOverlay(): void {
     this._refreshOverlay();
   }
@@ -90,8 +119,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    * Clears state of a search provider to prepare for startQuery to be called
    * in order to start a new query or refresh an existing one.
    *
-   * @returns A promise that resolves when the search provider is ready to
-   * begin a new search.
+   * @param removeOverlay Whether to remove the search highlight overlay or not.
    */
   async endQuery(removeOverlay = true): Promise<void> {
     this._matchState = {};
@@ -150,6 +178,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   /**
    * Replace the currently selected match with the provided text
    *
+   * @param newText The replacement text
    * @param loop Whether to loop within the matches list.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
@@ -177,6 +206,8 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   /**
    * Replace all matches in the notebook with the provided text
    *
+   * @param newText The replacement text
+   *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
   async replaceAllMatches(newText: string): Promise<boolean> {
@@ -200,7 +231,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   }
 
   /**
-   * The same list of matches provided by the startQuery promise resolution
+   * The list of matches
    */
   get matches(): ISearchMatch[] {
     return this._parseMatchesFromState();
@@ -217,6 +248,9 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     return size;
   }
 
+  /**
+   * The current match
+   */
   get currentMatch(): ISearchMatch | null {
     return this._currentMatch;
   }
@@ -475,16 +509,21 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   private _currentMatch: ISearchMatch | null;
   private _matchState: MatchMap = {};
   private _changed = new Signal<this, void>(this);
+  private _disposed = false;
   private _overlay: any;
 }
 
+/**
+ * Helper class to highlight texts in a code mirror editor.
+ *
+ * Highlighted texts (aka `matches`) must be provided through
+ * the `matches` attributes.
+ */
 export class CodeMirrorSearchHighlighter {
   /**
+   * Constructor
    *
-   * @param editor
-   *
-   * ### Notes
-   * `matches` must be stored by (line, position)
+   * @param editor The CodeMirror editor
    */
   constructor(editor: CodeMirrorEditor) {
     this._cm = editor;
@@ -499,6 +538,9 @@ export class CodeMirrorSearchHighlighter {
     return this._currentIndex;
   }
 
+  /**
+   * The list of matches
+   */
   get matches(): ISearchMatch[] {
     return this._matches;
   }
@@ -509,21 +551,23 @@ export class CodeMirrorSearchHighlighter {
     this.refresh();
   }
 
+  /**
+   * Clear all highlighted matches
+   */
   clearSelection(): void {
     this._currentIndex = null;
     this._highlightCurrentMatch();
   }
 
+  /**
+   * Refresh the highlight matches overlay
+   */
   refresh(): void {
     this._refreshOverlay();
   }
 
   /**
-   * Clears state of a search provider to prepare for startQuery to be called
-   * in order to start a new query or refresh an existing one.
-   *
-   * @returns A promise that resolves when the search provider is ready to
-   * begin a new search.
+   * Clear the highlighted matches.
    */
   endQuery(): Promise<void> {
     this._currentIndex = null;
@@ -547,9 +591,9 @@ export class CodeMirrorSearchHighlighter {
   }
 
   /**
-   * Move the current match indicator to the next match.
+   * Highlight the next match
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The next match if available
    */
   highlightNext(): Promise<ISearchMatch | undefined> {
     this._currentIndex = this._findNext(false);
@@ -562,9 +606,9 @@ export class CodeMirrorSearchHighlighter {
   }
 
   /**
-   * Move the current match indicator to the previous match.
+   * Highlight the previous match
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The previous match if available
    */
   highlightPrevious(): Promise<ISearchMatch | undefined> {
     this._currentIndex = this._findNext(true);
@@ -573,29 +617,6 @@ export class CodeMirrorSearchHighlighter {
       this._currentIndex !== null
         ? this._matches[this._currentIndex]
         : undefined
-    );
-  }
-
-  isCurrentIndexHighlighted(): boolean {
-    // No current match
-    if (this._currentIndex === null) {
-      return false;
-    }
-
-    const currentSelection = this._cm.getSelection();
-    const currentSelectionLength =
-      currentSelection.end.column - currentSelection.start.column;
-    const selectionIsOneLine =
-      currentSelection.start.line === currentSelection.end.line;
-    const match = this._matches[this._currentIndex];
-    return (
-      selectionIsOneLine &&
-      match.text.length === currentSelectionLength &&
-      match.position ===
-        this._cm.doc.indexFromPos({
-          line: currentSelection.start.line,
-          ch: currentSelection.start.column
-        })
     );
   }
 
@@ -767,7 +788,22 @@ namespace Private {
   }
 }
 
-export namespace Utils {
+/**
+ * Helpers namespace
+ */
+namespace Utils {
+  /**
+   * Find the closest match at `position` just after it.
+   *
+   * #### Notes
+   * Search is done using a binary search algorithm
+   *
+   * @param matches List of matches
+   * @param position Searched position
+   * @param lowerBound Lower range index
+   * @param higherBound High range index
+   * @returns The next match or null if none exists
+   */
   export function findNext(
     matches: ISearchMatch[],
     position: number,

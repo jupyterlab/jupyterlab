@@ -14,6 +14,9 @@ import { Widget } from '@lumino/widgets';
 // The type for which canSearchFor returns true
 export type CSVDocumentWidget = DocumentWidget<CSVViewer>;
 
+/**
+ * CSV viewer search provider
+ */
 export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
   /**
    * Instantiate a search provider for the widget.
@@ -55,42 +58,13 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
   readonly isReadOnly = true;
 
   /**
-   * Initialize the search using the provided options.  Should update the UI
-   * to highlight all matches and "select" whatever the first match should be.
-   *
-   * @param query A RegExp to be use to perform the search
-   * @param searchTarget The widget to be searched
-   *
-   * @returns A promise that resolves with a list of all matches
-   */
-  startQuery(query: RegExp): Promise<void> {
-    this._query = query;
-    this.widget.content.searchService.find(query);
-
-    return Promise.resolve();
-  }
-
-  /**
-   * Clears state of a search provider to prepare for startQuery to be called
-   * in order to start a new query or refresh an existing one.
-   *
-   * @returns A promise that resolves when the search provider is ready to
-   * begin a new search.
-   */
-  endQuery(): Promise<void> {
-    this.widget.content.searchService.clear();
-
-    return Promise.resolve();
-  }
-
-  /**
    * Move the current match indicator to the next match.
    *
    * @param loop Whether to loop within the matches list.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The match is never returned by this provider
    */
-  highlightNext(loop?: boolean): Promise<ISearchMatch | undefined> {
+  highlightNext(loop?: boolean): Promise<undefined> {
     this.widget.content.searchService.find(this._query);
     return Promise.resolve(undefined);
   }
@@ -100,9 +74,9 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    *
    * @param loop Whether to loop within the matches list.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The match is never returned by this provider
    */
-  highlightPrevious(loop?: boolean): Promise<ISearchMatch | undefined> {
+  highlightPrevious(loop?: boolean): Promise<undefined> {
     this.widget.content.searchService.find(this._query, true);
     return Promise.resolve(undefined);
   }
@@ -111,6 +85,7 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    * Replace the currently selected match with the provided text
    * Not implemented in the CSV viewer as it is read-only.
    *
+   * @param newText The replacement text
    * @param loop Whether to loop within the matches list.
    *
    * @returns A promise that resolves once the action has completed.
@@ -123,10 +98,35 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    * Replace all matches in the notebook with the provided text
    * Not implemented in the CSV viewer as it is read-only.
    *
+   * @param newText The replacement text
+   *
    * @returns A promise that resolves once the action has completed.
    */
   replaceAllMatches(newText: string): Promise<boolean> {
     return Promise.resolve(false);
+  }
+
+  /**
+   * Initialize the search using the provided options.  Should update the UI
+   * to highlight all matches and "select" whatever the first match should be.
+   *
+   * @param query A RegExp to be use to perform the search
+   */
+  startQuery(query: RegExp): Promise<void> {
+    this._query = query;
+    this.widget.content.searchService.find(query);
+
+    return Promise.resolve();
+  }
+
+  /**
+   * Clears state of a search provider to prepare for startQuery to be called
+   * in order to start a new query or refresh an existing one.
+   */
+  endQuery(): Promise<void> {
+    this.widget.content.searchService.clear();
+
+    return Promise.resolve();
   }
 
   private _query: RegExp;

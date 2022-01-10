@@ -12,7 +12,15 @@ import {
   ISearchProviderRegistry
 } from './tokens';
 
+/**
+ * Search provider registry
+ */
 export class SearchProviderRegistry implements ISearchProviderRegistry {
+  /**
+   * Constructor
+   *
+   * @param translator Application translator object
+   */
   constructor(protected translator: ITranslator = nullTranslator) {}
 
   /**

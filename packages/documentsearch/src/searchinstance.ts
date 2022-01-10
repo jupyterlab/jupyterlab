@@ -161,7 +161,7 @@ export class SearchInstance implements IDisposable {
     }
     this._isDisposed = true;
 
-    // If a query hasn't been executed yet, no need to call endSearch
+    // If a query hasn't been executed yet, no need to call endQuery
     if (this._displayState.query) {
       void this._activeProvider.endQuery();
     }

@@ -1514,6 +1514,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return this._ready.promise;
   }
 
+  /**
+   * Highlighted texts in rendered view
+   */
   get highlights(): IRenderMime.IHighlight[] {
     return this._highlights;
   }
@@ -1633,6 +1636,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
   }
 
+  /**
+   * Renderer
+   */
   get renderer(): IRenderMime.IRenderer | null {
     return this._renderer;
   }
@@ -1789,6 +1795,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 
   /**
    * Update the rendered input.
+   *
+   * @param force Force updating the rendered view
    */
   private _updateRenderedInput(force = false): Promise<void> {
     const model = this.model;

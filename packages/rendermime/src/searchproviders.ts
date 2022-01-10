@@ -14,6 +14,14 @@ const MARKDOWN_URL_LINKS = /\[(.*?)\]\(.+?\)/g;
  * like links and math insets.
  */
 export const MarkdownSearchEngine = {
+  /**
+   * Search for regular expression matches on data
+   *
+   * @param query Regular expression to test for
+   * @param data Data to test
+   *
+   * @returns The list of matches
+   */
   search(query: RegExp, data: string): Promise<ISearchMatch[]> {
     const { text, math } = removeMath(data);
     // Replace all the math group placeholders in the text
@@ -43,14 +51,22 @@ export const MarkdownSearchEngine = {
 const HTML_TAGS = /<.*?>/g;
 
 /**
- * Search provider for markdown string
+ * Search provider for html string
  *
  * It uses TextSearchEngine after filtering all tags and their attributes.
  * This avoid to search in non rendered characters; it focuses on text content only.
  */
 export const HTMLStringSearchEngine = {
+  /**
+   * Search for regular expression matches on data
+   *
+   * @param query Regular expression to test for
+   * @param data Data to test
+   *
+   * @returns The list of matches
+   */
   search(query: RegExp, data: string): Promise<ISearchMatch[]> {
-    // Replace tags with white spaces to not search within them.
+    // Replace tags with white spaces to not search within them but preserve positioning.
     data = data.replace(HTML_TAGS, hit => ' '.repeat(hit.length));
 
     return TextSearchEngine.search(query, data);

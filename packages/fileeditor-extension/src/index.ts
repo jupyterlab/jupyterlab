@@ -177,7 +177,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin to search notebook documents
+ * A plugin to search file editors
  */
 const searchProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:search',

@@ -42,13 +42,16 @@ import { DocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
+import { SearchProviderRegistry } from '@jupyterlab/documentsearch';
+
 import {
   standardRendererFactories as initialFactories,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-import { SetupCommands } from './commands';
-import { SearchProviderRegistry } from '@jupyterlab/documentsearch';
+
 import { nullTranslator } from '@jupyterlab/translation';
+
+import { SetupCommands } from './commands';
 
 function main(): void {
   const manager = new ServiceManager();

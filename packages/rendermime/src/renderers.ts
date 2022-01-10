@@ -361,6 +361,11 @@ export async function renderMarkdown(
     html = `<pre>${source}</pre>`;
   }
 
+  // Unescape highlighted span in code blocks
+  html = html.replace(ESCAPED_HIGHLIGHT_SPAN, (substr, match) =>
+    highlight(match)
+  );
+
   // Render HTML.
   await renderHTML({
     host,

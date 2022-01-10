@@ -30,6 +30,13 @@ import { NotebookPanel } from './panel';
  * Notebook document search provider
  */
 export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
+  /**
+   * Constructor
+   *
+   * @param widget The widget to search in
+   * @param registry Application search provider registry
+   * @param translator Application translator
+   */
   constructor(
     widget: NotebookPanel,
     protected registry: ISearchProviderRegistry,
@@ -46,6 +53,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
   /**
    * Report whether or not this provider has the ability to search on the given object
+   *
+   * @param domain Widget to test
+   * @returns Search ability
    */
   static canSearchOn(domain: Widget): domain is NotebookPanel {
     // check to see if the CMSearchProvider can search on the
@@ -54,7 +64,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
-   * Instantiate a search provider for the widget.
+   * Instantiate a search provider for the notebook panel.
    *
    * #### Notes
    * The widget provided is always checked using `canSearchOn` before calling
@@ -64,7 +74,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * @param registry The search provider registry
    * @param translator [optional] The translator object
    *
-   * @returns The search provider on the widget
+   * @returns The search provider on the notebook panel
    */
   static createSearchProvider(
     widget: NotebookPanel,
@@ -114,6 +124,39 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
+   * Dispose of the resources held by the search provider.
+   *
+   * #### Notes
+   * If the object's `dispose` method is called more than once, all
+   * calls made after the first will be a no-op.
+   *
+   * #### Undefined Behavior
+   * It is undefined behavior to use any functionality of the object
+   * after it has been disposed unless otherwise explicitly noted.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+
+    this.widget.model!.cells.changed.disconnect(this._onCellsChanged, this);
+    this.widget.content.activeCellChanged.disconnect(
+      this._onActiveCellChanged,
+      this
+    );
+
+    const index = this.widget.content.activeCellIndex;
+    this.endQuery()
+      .then(() => {
+        this.widget.content.activeCellIndex = index;
+      })
+      .catch(reason => {
+        console.error(`Fail to end search query in notebook:\n${reason}`);
+      });
+  }
+
+  /**
    * Get the filters for the given provider.
    *
    * @returns The filters.
@@ -153,14 +196,37 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
-   * Initialize the search using the provided options. Should update the UI
-   * to highlight all matches and "select" whatever the first match should be.
+   * Highlight the next match.
    *
-   * @param query A RegExp to be use to perform the search
-   * @param searchTarget The widget to be searched
+   * @param loop Whether to loop within the matches list.
+   *
+   * @returns The next match if available.
+   */
+  async highlightNext(loop: boolean = true): Promise<ISearchMatch | undefined> {
+    const match = await this._stepNext(false, loop);
+    return match ?? undefined;
+  }
+
+  /**
+   * Highlight the previous match.
+   *
+   * @param loop Whether to loop within the matches list.
+   *
+   * @returns The previous match if available.
+   */
+  async highlightPrevious(
+    loop: boolean = true
+  ): Promise<ISearchMatch | undefined> {
+    const match = await this._stepNext(true, loop);
+    return match ?? undefined;
+  }
+
+  /**
+   * Search for a regular expression with optional filters.
+   *
+   * @param query A regular expression to test for
    * @param filters Filter parameters to pass to provider
    *
-   * @returns A promise that resolves with a list of all matches
    */
   async startQuery(
     query: RegExp,
@@ -214,18 +280,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
-   * Clears state of a search provider to prepare for startQuery to be called
-   * in order to start a new query or refresh an existing one.
-   *
-   * @returns A promise that resolves when the search provider is ready to
-   * begin a new search.
+   * Stop the search and clear all internal state.
    */
   async endQuery(): Promise<void> {
     await Promise.all(
       this._searchProviders.map(provider => {
         provider.changed.disconnect(this._onSearchProviderChanged, this);
 
-        return provider.endQuery();
+        return provider.endQuery().then(() => {
+          provider.dispose();
+        });
       })
     );
 
@@ -234,67 +298,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
-   * Dispose of the resources held by the search provider.
-   *
-   * #### Notes
-   * If the object's `dispose` method is called more than once, all
-   * calls made after the first will be a no-op.
-   *
-   * #### Undefined Behavior
-   * It is undefined behavior to use any functionality of the object
-   * after it has been disposed unless otherwise explicitly noted.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
-
-    this.widget.model!.cells.changed.disconnect(this._onCellsChanged, this);
-    this.widget.content.activeCellChanged.disconnect(
-      this._onActiveCellChanged,
-      this
-    );
-
-    const index = this.widget.content.activeCellIndex;
-    this.endQuery()
-      .then(() => {
-        this.widget.content.activeCellIndex = index;
-      })
-      .catch(reason => {
-        console.error(`Fail to end search query in notebook:\n${reason}`);
-      });
-  }
-
-  /**
-   * Move the current match indicator to the next match.
-   *
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves once the action has completed.
-   */
-  async highlightNext(loop: boolean = true): Promise<ISearchMatch | undefined> {
-    const match = await this._stepNext(false, loop);
-    return match ?? undefined;
-  }
-
-  /**
-   * Move the current match indicator to the previous match.
-   *
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves once the action has completed.
-   */
-  async highlightPrevious(
-    loop: boolean = true
-  ): Promise<ISearchMatch | undefined> {
-    const match = await this._stepNext(true, loop);
-    return match ?? undefined;
-  }
-
-  /**
    * Replace the currently selected match with the provided text
    *
+   * @param newText The replacement text.
    * @param loop Whether to loop within the matches list.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
@@ -334,7 +340,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * Replace all matches in the notebook with the provided text
    *
-   * @param loop Whether to loop within the matches list.
+   * @param newText The replacement text.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */

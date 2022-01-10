@@ -1,20 +1,20 @@
 /**
  * Set up keyboard shortcuts & commands for notebook
  */
-import { CommandRegistry } from '@lumino/commands';
 import { sessionContextDialogs } from '@jupyterlab/apputils';
 import { CompletionHandler } from '@jupyterlab/completer';
+import {
+  ISearchProviderRegistry,
+  SearchInstance
+} from '@jupyterlab/documentsearch';
 import {
   NotebookActions,
   NotebookPanel,
   NotebookSearchProvider
 } from '@jupyterlab/notebook';
-import {
-  ISearchProviderRegistry,
-  SearchInstance
-} from '@jupyterlab/documentsearch';
-import { CommandPalette } from '@lumino/widgets';
 import { nullTranslator } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
+import { CommandPalette } from '@lumino/widgets';
 
 /**
  * The map of command ids used by the notebook.

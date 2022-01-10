@@ -1,30 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, test } from '@jupyterlab/galata';
+import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'search.ipynb';
 
 test.describe('Notebook Search', () => {
-  test.beforeEach(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
-    await contents.uploadFile(
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
     );
-  });
 
-  test.afterEach(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
-    await contents.deleteDirectory(tmpPath);
-  });
-
-  test('Search', async ({ page, tmpPath }) => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     await page.notebook.activate(fileName);
+  });
 
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
+  test('Search', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -37,10 +35,7 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
   });
 
-  test('Search not in outputs', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Search not in outputs', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -58,10 +53,7 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('search-no-outputs.png');
   });
 
-  test('Search in selected cells', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Search in selected cells', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -78,10 +70,7 @@ test.describe('Notebook Search', () => {
     );
   });
 
-  test('Highlight next hit same editor', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Highlight next hit same editor', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -99,10 +88,7 @@ test.describe('Notebook Search', () => {
     );
   });
 
-  test('Highlight next hit in the next cell', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Highlight next hit in the next cell', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -120,10 +106,7 @@ test.describe('Notebook Search', () => {
     expect(await cell.screenshot()).toMatchSnapshot('highlight-next-cell.png');
   });
 
-  test('Highlight previous hit', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Highlight previous hit', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -146,13 +129,7 @@ test.describe('Notebook Search', () => {
     );
   });
 
-  test('Highlight on markdown rendered state change', async ({
-    page,
-    tmpPath
-  }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Highlight on markdown rendered state change', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -174,10 +151,7 @@ test.describe('Notebook Search', () => {
     );
   });
 
-  test('Search on typing', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Search on typing', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -189,10 +163,7 @@ test.describe('Notebook Search', () => {
     expect(await cell.screenshot()).toMatchSnapshot('search-typing.png');
   });
 
-  test('Search new outputs', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Search new outputs', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -204,10 +175,7 @@ test.describe('Notebook Search', () => {
     expect(await cell.screenshot()).toMatchSnapshot('search-new-outputs.png');
   });
 
-  test('Search on new cell', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Search on new cell', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -227,10 +195,7 @@ test.describe('Notebook Search', () => {
     );
   });
 
-  test('Search on deleted cell', async ({ page, tmpPath }) => {
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-
+  test('Search on deleted cell', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 

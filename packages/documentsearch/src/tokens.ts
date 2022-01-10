@@ -42,9 +42,15 @@ export interface IFilter {
  * TODO support additional filter type
  */
 export interface IFiltersType {
+  /**
+   * Filter name: value
+   */
   [key: string]: boolean;
 }
 
+/**
+ * React search component state
+ */
 export interface IDisplayState {
   /**
    * The index of the currently selected match
@@ -117,6 +123,9 @@ export interface IDisplayState {
   filtersOpen: boolean;
 }
 
+/**
+ * Base search match interface
+ */
 export interface ISearchMatch {
   /**
    * Text of the exact match itself
@@ -129,6 +138,9 @@ export interface ISearchMatch {
   position: number;
 }
 
+/**
+ * HTML search match interface
+ */
 export interface IHTMLSearchMatch extends ISearchMatch {
   /**
    * Node containing the match
@@ -137,8 +149,7 @@ export interface IHTMLSearchMatch extends ISearchMatch {
 }
 
 /**
- * This interface is meant to enforce that SearchProviders implement
- * the static canSearchOn function.
+ * Interface for search provider factory
  */
 export interface ISearchProviderConstructor<T extends Widget = Widget> {
   /**
@@ -170,6 +181,9 @@ export interface ISearchProviderConstructor<T extends Widget = Widget> {
   canSearchOn(domain: Widget): domain is T;
 }
 
+/**
+ * Search provider registry interface
+ */
 export interface ISearchProviderRegistry {
   /**
    * Add a provider to the registry.
@@ -216,46 +230,56 @@ export interface ISearchProviderRegistry {
   changed: ISignal<ISearchProviderRegistry, void>;
 }
 
+/**
+ * Mime type search engine interface
+ */
 export interface IMimeTypeSearchEngine {
+  /**
+   * Search for regular expression matches on data
+   *
+   * @param query Regular expression to test for
+   * @param data Data to test
+   *
+   * @returns The list of matches
+   */
   search(query: RegExp, data: any): Promise<ISearchMatch[]>;
 }
 
+/**
+ * Base search provider interface
+ *
+ * #### Notes
+ * It is implemented by subprovider like searching on a single cell.
+ */
 export interface IBaseSearchProvider {
   /**
-   * Initialize the search using the provided options.
+   * Start a search
    *
-   * @param query A RegExp to be use to perform the search
-   * @param searchTarget The widget to be searched
-   * @param filters Filter parameters to pass to provider
-   *
-   * @returns A promise that resolves with a list of all matches
+   * @param query Regular expression to test for
+   * @param filters Filters to apply when searching
    */
   startQuery(query: RegExp, filters: IFiltersType): Promise<void>;
 
   /**
-   * Clears state of a search provider to prepare for startQuery to be called
-   * in order to start a new query or refresh an existing one.
-   *
-   * @returns A promise that resolves when the search provider is ready to
-   * begin a new search.
+   * Stop a search and clear any internal state of the provider
    */
   endQuery(): Promise<void>;
 
   /**
-   * Move the current match indicator to the next match.
+   * Highlight the next match
    *
    * @param loop Whether to loop within the matches list.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The next match if it exists
    */
   highlightNext(loop?: boolean): Promise<ISearchMatch | undefined>;
 
   /**
-   * Move the current match indicator to the previous match.
+   * Highlight the previous match
    *
    * @param loop Whether to loop within the matches list.
    *
-   * @returns A promise that resolves once the action has completed.
+   * @returns The previous match if it exists.
    */
   highlightPrevious(loop?: boolean): Promise<ISearchMatch | undefined>;
 
@@ -263,7 +287,7 @@ export interface IBaseSearchProvider {
    * Replace the currently selected match with the provided text
    * and highlight the next match.
    *
-   * @param newText New text to include.
+   * @param newText The replacement text
    * @param loop Whether to loop within the matches list.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
@@ -271,9 +295,9 @@ export interface IBaseSearchProvider {
   replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean>;
 
   /**
-   * Replace all matches in the notebook with the provided text
+   * Replace all matches in the widget with the provided text
    *
-   * @param newText New text to include.
+   * @param newText The replacement text.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
@@ -295,6 +319,9 @@ export interface IBaseSearchProvider {
   readonly matchesSize: number | null;
 }
 
+/**
+ * Search provider interface
+ */
 export interface ISearchProvider<T extends Widget = Widget>
   extends IBaseSearchProvider,
     IDisposable {
@@ -302,7 +329,7 @@ export interface ISearchProvider<T extends Widget = Widget>
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
-   * @param searchTarget The widget to be searched
+   * @param searchTarget The widget to be searched on
    *
    * @returns Initial value used to populate the search box.
    */
