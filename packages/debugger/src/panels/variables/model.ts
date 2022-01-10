@@ -38,6 +38,13 @@ export class VariablesModel implements IDebugger.Model.IVariables {
     return this._variableExpanded;
   }
 
+  get selectedVariable(): IDebugger.IVariableSelection | null {
+    return this._selectedVariable;
+  }
+  set selectedVariable(selection: IDebugger.IVariableSelection | null) {
+    this._selectedVariable = selection;
+  }
+
   /**
    * Expand a variable.
    *
@@ -47,6 +54,7 @@ export class VariablesModel implements IDebugger.Model.IVariables {
     this._variableExpanded.emit(variable);
   }
 
+  private _selectedVariable: IDebugger.IVariableSelection | null = null;
   private _state: IDebugger.IScope[] = [];
   private _variableExpanded = new Signal<this, IDebugger.IVariable>(this);
   private _changed = new Signal<this, void>(this);
