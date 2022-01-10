@@ -66,7 +66,9 @@ export interface IDebugger {
    */
   pauseOnExceptionsIsValid(): boolean;
 
-  /** TODO */
+  /**
+   * Handles enabling and disabling of Pause on Exception
+   */
   pauseOnExceptions(enable: boolean): Promise<void>;
 
   /**
