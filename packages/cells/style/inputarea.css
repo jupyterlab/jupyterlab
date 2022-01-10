@@ -11,7 +11,7 @@
 .jp-InputArea {
   display: table;
   table-layout: fixed;
-  width:100%;
+  width: 100%;
   overflow: hidden;
 }
 
@@ -60,7 +60,7 @@
   .jp-InputArea-editor {
     display: table-row;
     margin-left: var(--jp-notebook-padding);
-}
+  }
 
   .jp-InputPrompt {
     display: table-row;

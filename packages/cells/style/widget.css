@@ -94,7 +94,7 @@
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-prompt {
   width: calc(
-  var(--jp-cell-prompt-width) - var(--jp-private-cell-scrolling-output-offset)
+    var(--jp-cell-prompt-width) - var(--jp-private-cell-scrolling-output-offset)
   );
 }
 
