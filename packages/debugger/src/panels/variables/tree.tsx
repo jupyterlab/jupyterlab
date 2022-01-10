@@ -2,18 +2,27 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+
 import {
   caretDownEmptyIcon,
   ReactWidget,
   searchIcon
 } from '@jupyterlab/ui-components';
+
 import { ArrayExt } from '@lumino/algorithm';
+
 import { CommandRegistry } from '@lumino/commands';
+
+import { DebugProtocol } from '@vscode/debugprotocol';
+
 import React, { useEffect, useState } from 'react';
-import { DebugProtocol } from 'vscode-debugprotocol';
+
 import { convertType } from '.';
+
 import { Debugger } from '../../debugger';
+
 import { IDebugger } from '../../tokens';
+
 import { VariablesModel } from './model';
 
 /**
