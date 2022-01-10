@@ -1661,7 +1661,7 @@
     "@jupyterlab/application" "^3.3.0-alpha.15"
     "@jupyterlab/ui-components" "^4.0.0-alpha.15"
 
-"@jupyterlab/ui-components@^4.0.0-alpha.15", "@jupyterlab/ui-components@~3.3.0-alpha.15":
+"@jupyterlab/ui-components@^4.0.0-alpha.15", "@jupyterlab/ui-components@~3.3.0-alpha.14":
   version "3.3.0-alpha.14"
   resolved "https://registry.yarnpkg.com/@jupyterlab/ui-components/-/ui-components-3.3.0-alpha.14.tgz#399d326d29f991fb2851ebb40c3393072a574868"
   integrity sha512-fmlnKujy0JYXtEaLkkmrN0AR/mY7MPOuTOUVFuzHoCGcIeaZtFRfDQo8zvJ+FzJnCMmTw1gcd0FcvxO7hLciLg==
