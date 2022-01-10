@@ -41,7 +41,7 @@ export class VariablesBodyGrid extends Panel {
   constructor(options: VariablesBodyGrid.IOptions) {
     super();
     const { model, commands, themeManager, scopes, translator } = options;
-    this._grid = new Grid({ commands, themeManager, translator });
+    this._grid = new Grid({ commands, model, themeManager, translator });
     this._grid.addClass('jp-DebuggerVariables-grid');
     this._model = model;
     this._model.changed.connect((model: VariablesModel): void => {
@@ -50,13 +50,6 @@ export class VariablesBodyGrid extends Panel {
     this._grid.dataModel.setData(scopes ?? []);
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariables-body');
-  }
-
-  /**
-   * Get the latest hit variable
-   */
-  get latestSelection(): IDebugger.IVariableSelection | null {
-    return this._grid.latestSelection;
   }
 
   /**
@@ -136,7 +129,8 @@ class Grid extends Panel {
    */
   constructor(options: Grid.IOptions) {
     super();
-    const { commands, themeManager } = options;
+    const { commands, model, themeManager } = options;
+    this.model = model;
     const dataModel = new GridModel(options.translator);
     const grid = new DataGrid();
     const mouseHandler = new Private.MouseHandler();
@@ -148,7 +142,7 @@ class Grid extends Panel {
     );
     mouseHandler.selected.connect((_, hit) => {
       const { row } = hit;
-      this._latestSelection = {
+      this.model.selectedVariable = {
         name: dataModel.getVariableName(row),
         value: dataModel.data('body', row, 1),
         type: dataModel.data('body', row, 2),
@@ -200,13 +194,6 @@ class Grid extends Panel {
   }
 
   /**
-   * Get the latest hit variable
-   */
-  get latestSelection(): IDebugger.IVariableSelection | null {
-    return this._latestSelection;
-  }
-
-  /**
    * Handle `after-attach` messages.
    *
    * @param message - The `after-attach` message.
@@ -226,7 +213,7 @@ class Grid extends Panel {
   }
 
   private _grid: DataGrid;
-  private _latestSelection: IDebugger.IVariableSelection | null = null;
+  protected model: IDebugger.Model.IVariables;
 }
 
 /**
@@ -241,6 +228,11 @@ namespace Grid {
      * The commands registry.
      */
     commands: CommandRegistry;
+
+    /**
+     * The variables model.
+     */
+    model: IDebugger.Model.IVariables;
 
     /**
      * An optional application theme manager to detect theme changes.

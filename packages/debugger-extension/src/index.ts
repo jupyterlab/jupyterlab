@@ -325,14 +325,13 @@ const sources: JupyterFrontEndPlugin<IDebugger.ISources> = {
 const variables: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:variables',
   autoStart: true,
-  requires: [IDebugger, IDebuggerHandler, ITranslator, IDebuggerSidebar],
+  requires: [IDebugger, IDebuggerHandler, ITranslator],
   optional: [IThemeManager, IRenderMimeRegistry],
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     handler: Debugger.Handler,
     translator: ITranslator,
-    sidebar: IDebugger.ISidebar,
     themeManager: IThemeManager | null,
     rendermime: IRenderMimeRegistry | null
   ) => {
@@ -353,7 +352,7 @@ const variables: JupyterFrontEndPlugin<void> = {
       isEnabled: args =>
         !!service.session?.isStarted &&
         (args.variableReference ??
-          sidebar.variables.latestSelection?.variablesReference ??
+          service.model.variables.selectedVariable?.variablesReference ??
           0) > 0,
       execute: async args => {
         let { variableReference, name } = args as {
@@ -363,10 +362,10 @@ const variables: JupyterFrontEndPlugin<void> = {
 
         if (!variableReference) {
           variableReference =
-            sidebar.variables.latestSelection?.variablesReference;
+            service.model.variables.selectedVariable?.variablesReference;
         }
         if (!name) {
-          name = sidebar.variables.latestSelection?.name;
+          name = service.model.variables.selectedVariable?.name;
         }
 
         const id = `jp-debugger-variable-${name}`;
@@ -425,7 +424,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         };
 
         if (!name) {
-          name = sidebar.variables.latestSelection?.name;
+          name = service.model.variables.selectedVariable?.name;
         }
         if (!frameId) {
           frameId = service.model.callstack.frame?.id;
@@ -441,7 +440,10 @@ const variables: JupyterFrontEndPlugin<void> = {
           return;
         }
 
-        const id = `jp-debugger-variable-mime-${name}`;
+        const id = `jp-debugger-variable-mime-${name}-${service.session?.connection?.path.replace(
+          '/',
+          '-'
+        )}`;
         if (
           !name || // Name is mandatory
           trackerMime.find(widget => widget.id === id) || // Widget already exists
@@ -450,20 +452,34 @@ const variables: JupyterFrontEndPlugin<void> = {
           return;
         }
 
+        const variablesModel = service.model.variables;
+
         const widget = new Debugger.VariableRenderer({
-          dataLoader: service.inspectRichVariable(name, frameId),
-          rendermime: activeRendermime
+          dataLoader: () => service.inspectRichVariable(name!, frameId),
+          rendermime: activeRendermime,
+          translator
         });
-        widget.addClass('jp-DebuggerVariables');
+        widget.addClass('jp-DebuggerRichVariable');
         widget.id = id;
         widget.title.icon = Debugger.Icons.variableIcon;
-        widget.title.label = `${service.session?.connection?.name} - ${name}`;
+        widget.title.label = `${name} - ${service.session?.connection?.name}`;
+        widget.title.caption = `${name} - ${service.session?.connection?.path}`;
         void trackerMime.add(widget);
         const disposeWidget = () => {
           widget.dispose();
-          service.model.variables.changed.disconnect(disposeWidget);
+          variablesModel.changed.disconnect(refreshWidget);
+          activeWidget?.disposed.disconnect(disposeWidget);
         };
-        service.model.variables.changed.connect(disposeWidget);
+        const refreshWidget = () => {
+          // Refresh the widget only if the active element is the same.
+          if (handler.activeWidget === activeWidget) {
+            widget.refresh();
+          }
+        };
+        widget.disposed.connect(disposeWidget);
+        variablesModel.changed.connect(refreshWidget);
+        activeWidget?.disposed.connect(disposeWidget);
+
         shell.add(widget, 'main', {
           mode: trackerMime.currentWidget ? 'split-right' : 'split-bottom',
           activate: false
