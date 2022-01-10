@@ -44,20 +44,20 @@ export function serialize(msg: KernelMessage.IMessage): ArrayBuffer {
   const parent_header = JSON.stringify(msg.parent_header);
   const metadata = JSON.stringify(msg.metadata);
   const content = JSON.stringify(msg.content);
-  let offsets = [
-    0,
-    header.length,
-    parent_header.length,
-    metadata.length,
-    content.length,
-  ]
+  let offsets = [];
+  let curr_sum = 0;
+  for (var length of [header.length, parent_header.length, metadata.length, content.length]) {
+    offsets.push(length + curr_sum);
+    curr_sum += length;
+  }
   let buffersLength = 0;
   const buffers: (ArrayBuffer | ArrayBufferView)[] = (msg.buffers !== undefined) ? msg.buffers : [];
   for (var buffer of buffers) {
-    offsets.push(buffer.byteLength);
-    buffersLength += buffer.byteLength;
+    length = buffer.byteLength;
+    offsets.push(length + curr_sum);
+    curr_sum += length;
+    buffersLength += length;
   }
-  offsets.push(0);
   const layoutJson = {
     channel: msg.channel,
     offsets,
@@ -72,24 +72,17 @@ export function serialize(msg: KernelMessage.IMessage): ArrayBuffer {
   binMsg.set(new Uint8Array(binMsgNoBuff), 2);
   let pos = 2 + binMsgNoBuff.byteLength;
   for (var buffer of buffers) {
-    const b = buffer;
-    binMsg.set(new Uint8Array(ArrayBuffer.isView(b) ? b.buffer : b), pos);
-    pos += b.byteLength;
+    binMsg.set(new Uint8Array(ArrayBuffer.isView(buffer) ? buffer.buffer : buffer), pos);
+    pos += buffer.byteLength;
   }
   return binMsg.buffer;
 }
 
 function* getParts(binMsg: Uint8Array, offsets: number[]) {
   let i0 = 0;
-  let i1: number;
-  let i = 1;
-  while(true) {
-    i1 = i0 + offsets[i];
-    if (i0 == i1) {
-      return;
-    }
+  for (var i1 of offsets) {
     yield binMsg.slice(i0, i1);
     i0 = i1;
-    i += 1;
   }
+  yield binMsg.slice(i0);
 }
