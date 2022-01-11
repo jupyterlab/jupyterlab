@@ -132,7 +132,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * TODO Signal emitted upon session changed.
+   * Signal emitted upon session changed.
    */
   get stateRestored(): ISignal<IDebugger, null> {
     return this._stateRestored;
