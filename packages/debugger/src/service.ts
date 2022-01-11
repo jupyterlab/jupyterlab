@@ -523,6 +523,10 @@ export class DebuggerService implements IDebugger, IDisposable {
     await this.session.sendRequest('configurationDone', {});
   }
 
+  /**
+   * Determines if pausing on exceptions is supported by the kernel
+   *
+   */
   pauseOnExceptionsIsValid(): boolean {
     if (this.isStarted) {
       if (this.session?.exceptionBreakpointFilters) {
