@@ -37,10 +37,12 @@
     "start": "jupyter lab --config ./jupyter_server_test_config.py",
     "start:detached": "(jlpm run start&)",
     "test": "playwright test",
+    "test:doc": "jlpm run test -c playwright-documentation.config.js",
     "test:benchmark": "jlpm run test -c playwright-benchmark.config.js",
     "test:debug": "PWDEBUG=1 playwright test",
     "test:report": "http-server ./playwright-report -a localhost -o",
-    "test:update": "playwright test --update-snapshots"
+    "test:update": "playwright test --update-snapshots",
+    "test:doc:update": "jlpm run test:update -c playwright-documentation.config.js"
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.4",

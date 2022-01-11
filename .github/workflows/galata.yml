@@ -8,7 +8,7 @@ on:
     branches: '*'
 
 jobs:
-  build:
+  test:
     name: Visual Regression Tests
     timeout-minutes: 80
     runs-on: ubuntu-20.04
@@ -48,6 +48,7 @@ jobs:
         run: |
           cd galata
           jlpm run test
+          mv galata/test-results galata/test-jupyterlab-results || true
           # Run once benchmark tests to ensure they have no regression
           BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
 
@@ -57,6 +58,7 @@ jobs:
         with:
           name: jupyterlab-galata-test-assets
           path: |
+            galata/test-jupyterlab-results
             galata/test-results
 
       - name: Upload Galata Test report
@@ -79,6 +81,98 @@ jobs:
         with:
           name: jupyterlab-galata-updated-snapshots
           path: galata/test/**/*-snapshots/*.*
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log
+
+  test-documentation:
+    name: Visual Regression Documentation
+    timeout-minutes: 80
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: core
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: jupyterlab/jupyterlab-demo
+          ref: master
+          path: demo
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+          pip install matplotlib scipy ipywidgets
+          # Build dev-mode
+          jlpm run build
+        working-directory: core
+
+      - name: Launch JupyterLab
+        env:
+          JUPYTERLAB_GALATA_ROOT_DIR: '{{ env.GITHUB_WORKSPACE }}/demo'
+        run: |
+          cd galata
+          # Mount a volume to overwrite the server configuration
+          jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode 2>&1 > /tmp/jupyterlab_server.log &
+        working-directory: core
+
+      - name: Install browser
+        run: |
+          cd galata
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+        working-directory: core
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
+
+      - name: Test
+        run: |
+          cd galata
+          jlpm run test:doc
+        working-directory: core
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-galata-test-assets
+          path: |
+            core/galata/test-results
+
+      - name: Upload Galata Test report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-galata-report
+          path: |
+            core/galata/playwright-report
+
+      - name: Update snapshots
+        if: failure()
+        run: |
+          cd galata
+          jlpm run test:doc:update
+        working-directory: core
+
+      - name: Upload updated snapshots
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-galata-updated-snapshots
+          path: core/galata/test/**/*-snapshots/*.*
 
       - name: Print JupyterLab logs
         if: always()
