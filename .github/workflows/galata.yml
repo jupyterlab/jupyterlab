@@ -92,12 +92,12 @@ jobs:
     timeout-minutes: 80
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout
+      - name: Checkout JupyterLab
         uses: actions/checkout@v2
         with:
           path: core
 
-      - name: Checkout
+      - name: Checkout demo project
         uses: actions/checkout@v2
         with:
           repository: jupyterlab/jupyterlab-demo
@@ -117,7 +117,7 @@ jobs:
 
       - name: Launch JupyterLab
         env:
-          JUPYTERLAB_GALATA_ROOT_DIR: '${{ env.GITHUB_WORKSPACE }}/demo'
+          JUPYTERLAB_GALATA_ROOT_DIR: ${{ env.GITHUB_WORKSPACE }}/demo
         run: |
           cd galata
           # Mount a volume to overwrite the server configuration
