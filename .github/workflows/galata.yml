@@ -117,7 +117,7 @@ jobs:
 
       - name: Launch JupyterLab
         env:
-          JUPYTERLAB_GALATA_ROOT_DIR: '{{ env.GITHUB_WORKSPACE }}/demo'
+          JUPYTERLAB_GALATA_ROOT_DIR: '${{ env.GITHUB_WORKSPACE }}/demo'
         run: |
           cd galata
           # Mount a volume to overwrite the server configuration
