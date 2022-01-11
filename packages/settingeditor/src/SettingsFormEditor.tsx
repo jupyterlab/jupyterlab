@@ -18,6 +18,7 @@ import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { reduce } from '@lumino/algorithm';
 import { PluginList } from './pluginlist';
 import { ISignal } from '@lumino/signaling';
+import { Debouncer } from '@lumino/polling';
 
 /**
  * Namespace for a React component that prepares the settings for a
@@ -233,12 +234,12 @@ export const SettingsFormEditor = ({
    * Handler for edits made in the form editor.
    * @param data - Form data sent from the form editor
    */
-  const handleChange = (data: ReadonlyPartialJSONObject) => {
-    if (JSONExt.deepEqual(data, settings.user)) {
+  const handleChange = () => {
+    if (JSONExt.deepEqual(formData, settings.user)) {
       return;
     }
     settings
-      .save(JSON.stringify(data))
+      .save(JSON.stringify(formData))
       .then(() => {
         setIsModified(settings.isModified);
       })
@@ -246,6 +247,11 @@ export const SettingsFormEditor = ({
         showDialog({ title: 'Error saving settings.', body: reason })
       );
   };
+  const debouncer = new Debouncer(handleChange);
+
+  React.useEffect(() => {
+    debouncer.invoke();
+  }, [formData]);
 
   return (
     <div>
@@ -281,12 +287,7 @@ export const SettingsFormEditor = ({
           onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
             setFormData(e.formData);
             onSelect(settings.id);
-            if (e.errors.length === 0) {
-              handleChange(e.formData);
-              hasError(false);
-            } else {
-              hasError(true);
-            }
+            hasError(e.errors.length !== 0);
           }}
         />
       )}
