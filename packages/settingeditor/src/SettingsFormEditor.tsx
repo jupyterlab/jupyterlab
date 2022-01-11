@@ -250,7 +250,7 @@ export const SettingsFormEditor = ({
   const debouncer = new Debouncer(handleChange);
 
   React.useEffect(() => {
-    debouncer.invoke();
+    void debouncer.invoke();
   }, [formData]);
 
   return (
