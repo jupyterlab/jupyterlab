@@ -104,6 +104,11 @@ jobs:
           ref: master
           path: demo
 
+      - name: Get demo folder
+        run: |
+          echo "DEMO_DIR=$PWD" >> $GITHUB_ENV
+        working-directory: demo
+
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
@@ -117,7 +122,7 @@ jobs:
 
       - name: Launch JupyterLab
         env:
-          JUPYTERLAB_GALATA_ROOT_DIR: ${{ env.GITHUB_WORKSPACE }}/demo
+          JUPYTERLAB_GALATA_ROOT_DIR: ${{ env.DEMO_DIR }}
         run: |
           cd galata
           # Mount a volume to overwrite the server configuration
