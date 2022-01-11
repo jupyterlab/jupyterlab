@@ -115,7 +115,7 @@ jobs:
       - name: Install dependencies
         run: |
           bash ./scripts/ci_install.sh
-          pip install matplotlib scipy ipywidgets
+          pip install altair ipywidgets matplotlib pandas scipy vdom vega_datasets
           # Build dev-mode
           jlpm run build
         working-directory: core

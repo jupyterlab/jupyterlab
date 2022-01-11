@@ -279,7 +279,187 @@ test.describe('Documentation screenshots', () => {
     ).toMatchSnapshot('file_editor_settings.png');
   });
 
-  // TODO continue at user/notebooks
+  test('Notebook', async ({ page }) => {
+    await page.goto();
+
+    // Open Data.ipynb
+    await page.dblclick(
+      '[aria-label="File Browser Section"] >> text=notebooks'
+    );
+    await page.dblclick('text=Data.ipynb');
+
+    await page.notebook.setCell(
+      1,
+      'code',
+      "import pandas\ndf = pandas.read_csv('../data/iris.csv')\ndf.head(5)"
+    );
+    await page.notebook.setCell(
+      3,
+      'code',
+      "import json\nfrom IPython.display import GeoJSON\nwith open('../data/Museums_in_DC.geojson') as f:\ns = GeoJSON(json.load(f), layer_options={'minZoom': 11})"
+    );
+    await page.notebook.run();
+
+    expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png');
+  });
+
+  test('Terminals', async ({ page }) => {
+    await page.goto();
+
+    // Open Data.ipynb
+    await page.dblclick(
+      '[aria-label="File Browser Section"] >> text=notebooks'
+    );
+    await page.dblclick('text=Data.ipynb');
+
+    // Open a terminal
+    await page.click('text=File');
+    await page.click('ul[role="menu"] >> text=New');
+    await page.click('#jp-mainmenu-file-new >> text=Terminal');
+
+    await page.waitForTimeout(500);
+
+    await page.keyboard.type('cd $JUPYTERLAB_GALATA_ROOT_DIR');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('tree . -L 2');
+    await page.keyboard.press('Enter');
+
+    await page.waitForTimeout(200);
+
+    expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');
+  });
+
+  test('Kernels and Terminals', async ({ page }) => {
+    await page.goto();
+
+    // Open a terminal
+    await page.click('text=File');
+    await page.click('ul[role="menu"] >> text=New');
+    await page.click('#jp-mainmenu-file-new >> text=Terminal');
+
+    await page.dblclick(
+      '[aria-label="File Browser Section"] >> text=notebooks'
+    );
+    await page.dblclick('text=Data.ipynb');
+    await page.dblclick('text=Julia.ipynb');
+
+    await page.click('[title="Running Terminals and Kernels"]');
+
+    // Inject capture zone
+    await page.evaluate(() => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 400px;"></div>'
+      );
+    });
+
+    expect(
+      await (await page.$('#capture-screenshot')).screenshot()
+    ).toMatchSnapshot('running_layout.png');
+  });
+
+  test('Command Palette', async ({ page }) => {
+    await page.goto();
+
+    await page.keyboard.press('Control+Shift+C');
+
+    expect(
+      await (await page.$('#modal-command-palette')).screenshot()
+    ).toMatchSnapshot('command_palette.png');
+  });
+
+  test('Open With', async ({ page }) => {
+    await page.goto();
+
+    await page.click('text=README.md', {
+      button: 'right'
+    });
+    await page.click('text=Open With');
+    await page.hover('text=Markdown Preview');
+
+    // Inject capture zone
+    await page.evaluate(() => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 0px; width: 700px; height: 500px;"></div>'
+      );
+    });
+
+    expect(
+      await (await page.$('#capture-screenshot')).screenshot()
+    ).toMatchSnapshot('file_formats_open_with.png');
+  });
+
+  test('HTML Display', async ({ page, tmpPath }) => {
+    await page.goto(`tree/${tmpPath}`);
+
+    // Hide file browser
+    await page.click('[title^="File Browser"]');
+
+    await page.notebook.createNew();
+    await page.notebook.setCell(
+      0,
+      'code',
+      "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))"
+    );
+
+    await page.notebook.run();
+
+    await page.click('text=File');
+    await page.click('ul[role="menu"] >> text=New Console for Notebook');
+
+    await page.click('.jp-CodeConsole-input >> pre[role="presentation"]');
+    await page.keyboard.type(
+      "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))"
+    );
+    await page.keyboard.press('Shift+Enter');
+
+    expect(await page.screenshot()).toMatchSnapshot(
+      'file_formats_html_display.png'
+    );
+  });
+
+  test('Altair', async ({ page, tmpPath }) => {
+    await page.goto(`tree/${tmpPath}`);
+
+    // Hide file browser
+    await page.click('[title^="File Browser"]');
+
+    await page.notebook.createNew();
+    await page.notebook.setCell(
+      0,
+      'code',
+      "import altair as alt\n# load a simple dataset as a pandas DataFrame\nfrom vega_datasets import data\ncars = data.cars()\n\nalt.Chart(cars).mark_point().encode(x='Horsepower', y='Miles_per_Gallon', color='Origin').interactive()"
+    );
+
+    await page.notebook.run();
+
+    // Need to wait for altair to update the canvas
+    await page.waitForTimeout(500);
+    expect(await page.screenshot()).toMatchSnapshot('file_formats_altair.png');
+  });
+
+  test('VDOM', async ({ page, tmpPath }) => {
+    await page.goto(`tree/${tmpPath}`);
+
+    // Hide file browser
+    await page.click('[title^="File Browser"]');
+
+    await page.notebook.createNew();
+    await page.notebook.setCell(
+      0,
+      'code',
+      "from IPython.display import display\nfrom vdom.helpers import h1, p, img, div, b\n\ndisplay(\ndiv(\nh1('Our Incredibly Declarative Example'),\np('Can you believe we wrote this ', b('in Python'), '?'),\nimg(src='https://media.giphy.com/media/xUPGcguWZHRC2HyBRS/giphy.gif'),\np('What will ', b('you'), ' create next?')))"
+    );
+
+    await page.notebook.run();
+
+    expect(await page.screenshot()).toMatchSnapshot(
+      'file_formats_nteract_vdom.png'
+    );
+  });
+
+  // TODO extensions and exporting notebooks
 });
 
 async function openOverview(page) {
