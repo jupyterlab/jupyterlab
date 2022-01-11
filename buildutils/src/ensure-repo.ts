@@ -530,9 +530,9 @@ function ensureFederatedExample(): string[] {
   corePackage.jupyterlab.extensions.sort();
 
   // Write the package.json back to disk.
-  // if (utils.writePackageData(corePath, corePackage)) {
-  //   return ['Updated federated example'];
-  // }
+  if (utils.writePackageData(corePath, corePackage)) {
+    return ['Updated federated example'];
+  }
   return [];
 }
 
