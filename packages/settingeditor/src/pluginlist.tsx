@@ -62,8 +62,21 @@ export class PluginList extends ReactWidget {
       const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
       const editable = Object.keys(schema.properties || {}).length > 0;
       const extensible = schema.additionalProperties !== false;
+      // Filters out a couple of plugins that take too long to load in the new settings editor.
+      const correctEditor =
+        // If this is the json settings editor, anything is fine
+        this._confirm ||
+        // If this is the new settings editor, remove context menu / main menu settings.
+        (!this._confirm &&
+          plugin.id !== '@jupyterlab/application-extension:context-menu' &&
+          plugin.id !== '@jupyterlab/mainmenu-extension:plugin');
 
-      return !deprecated && (editable || extensible) && this._filter?.(plugin);
+      return (
+        !deprecated &&
+        correctEditor &&
+        (editable || extensible) &&
+        this._filter?.(plugin)
+      );
     });
 
     this._errors = {};

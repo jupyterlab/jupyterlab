@@ -167,7 +167,8 @@
         "readOnly": false,
         "rulers": [],
         "tabSize": 4,
-        "wordWrapColumn": 80
+        "wordWrapColumn": 80,
+        "showTrailingSpace": false
       }
     },
     "toolbar": {

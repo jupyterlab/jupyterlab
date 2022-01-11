@@ -46,7 +46,14 @@ export class SettingsEditor extends Widget {
     ).then(settings => {
       const settingsPanel = ReactWidget.create(
         <SettingsPanel
-          settings={settings as Settings[]}
+          settings={
+            settings.filter(
+              pluginSettings =>
+                pluginSettings.id !==
+                  '@jupyterlab/application-extension:context-menu' &&
+                pluginSettings.id !== '@jupyterlab/mainmenu-extension:plugin'
+            ) as Settings[]
+          }
           editorRegistry={options.editorRegistry}
           handleSelectSignal={this._list.handleSelectSignal}
           onSelect={(id: string) => (this._list.selection = id)}
