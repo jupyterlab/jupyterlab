@@ -1,7 +1,11 @@
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IFormComponentRegistry, ReactWidget } from '@jupyterlab/ui-components';
+import {
+  IFormComponentRegistry,
+  launchIcon,
+  ReactWidget
+} from '@jupyterlab/ui-components';
 import { PanelLayout, SplitPanel, Widget } from '@lumino/widgets';
 import React from 'react';
 import { PluginList } from './pluginlist';
@@ -69,6 +73,7 @@ export class SettingsEditor extends Widget {
           }}
         >
           JSON Settings Editor
+          <launchIcon.react />
         </button>
       );
       openJSONEditorButton.addClass('jp-openJSONSettingsEditor');

@@ -50,6 +50,7 @@ import jupyterlabWordmarkSvgstr from '../../style/icons/jupyter/jupyterlab-wordm
 import kernelSvgstr from '../../style/icons/statusbar/kernel.svg';
 import keyboardSvgstr from '../../style/icons/filetype/keyboard.svg';
 import launcherSvgstr from '../../style/icons/filetype/launcher.svg';
+import launchSvgstr from '../../style/icons/toolbar/launch.svg';
 import lineFormSvgstr from '../../style/icons/statusbar/line-form.svg';
 import linkSvgstr from '../../style/icons/toolbar/link.svg';
 import listSvgstr from '../../style/icons/statusbar/list.svg';
@@ -133,6 +134,7 @@ export const jupyterlabWordmarkIcon = new LabIcon({ name: 'ui-components:jupyter
 export const kernelIcon = new LabIcon({ name: 'ui-components:kernel', svgstr: kernelSvgstr });
 export const keyboardIcon = new LabIcon({ name: 'ui-components:keyboard', svgstr: keyboardSvgstr });
 export const launcherIcon = new LabIcon({ name: 'ui-components:launcher', svgstr: launcherSvgstr });
+export const launchIcon = new LabIcon({ name: 'ui-components:launch', svgstr: launchSvgstr });
 export const lineFormIcon = new LabIcon({ name: 'ui-components:line-form', svgstr: lineFormSvgstr });
 export const linkIcon = new LabIcon({ name: 'ui-components:link', svgstr: linkSvgstr });
 export const listIcon = new LabIcon({ name: 'ui-components:list', svgstr: listSvgstr });
