@@ -188,11 +188,13 @@
       "properties": {
         "autoClosingBrackets": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "title": "Auto Closing Brackets"
         },
         "codeFolding": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "title": "Code Folding"
         },
         "cursorBlinkRate": {
           "type": "number",
@@ -202,41 +204,50 @@
         },
         "fontFamily": {
           "type": ["string", "null"],
+          "title": "Font Family",
           "default": null
         },
         "fontSize": {
           "type": ["integer", "null"],
+          "title": "Font Size",
           "minimum": 1,
           "maximum": 100,
           "default": null
         },
         "insertSpaces": {
           "type": "boolean",
+          "title": "Insert Spaces",
           "default": true
         },
         "lineHeight": {
           "type": ["number", "null"],
+          "title": "Line Height",
           "default": null
         },
         "lineNumbers": {
           "type": "boolean",
+          "title": "Line Numbers",
           "default": true
         },
         "lineWrap": {
           "type": "string",
+          "title": "Line Wrap",
           "enum": ["off", "on", "wordWrapColumn", "bounded"],
           "default": "on"
         },
         "matchBrackets": {
           "type": "boolean",
+          "title": "Match Brackets",
           "default": true
         },
         "readOnly": {
           "type": "boolean",
+          "title": "Read Only",
           "default": false
         },
         "rulers": {
           "type": "array",
+          "title": "Rulers",
           "items": {
             "type": "number"
           },
@@ -244,14 +255,17 @@
         },
         "showTrailingSpace": {
           "type": "boolean",
+          "title": "Show Trailing Space",
           "default": false
         },
         "tabSize": {
           "type": "number",
+          "title": "Tab Size",
           "default": 4
         },
         "wordWrapColumn": {
           "type": "integer",
+          "title": "Word Wrap Column",
           "default": 80
         }
       },

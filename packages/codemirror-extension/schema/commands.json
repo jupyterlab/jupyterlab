@@ -191,7 +191,21 @@
       "default": true
     },
     "styleActiveLine": {
-      "oneOf": [{ "type": "boolean" }, { "type": "object" }],
+      "oneOf": [
+        {
+          "type": "boolean",
+          "title": "Boolean"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "nonEmpty": {
+              "type": "boolean"
+            }
+          },
+          "title": "Object"
+        }
+      ],
       "title": "Style Active Line",
       "description": "Value is boolean, or { nonEmpty: boolean }",
       "default": false
