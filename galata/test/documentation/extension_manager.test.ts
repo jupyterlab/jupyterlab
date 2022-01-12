@@ -71,6 +71,8 @@ test.describe('Extension Manager', () => {
       'drawio'
     );
 
+    await page.keyboard.type('Enter');
+
     // Inject capture zone
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(

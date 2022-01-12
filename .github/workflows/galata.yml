@@ -153,7 +153,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: jupyterlab-galata-test-assets
+          name: jupyterlab-documentation-test-assets
           path: |
             core/galata/test-results
 
@@ -161,7 +161,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: jupyterlab-galata-report
+          name: jupyterlab-documentation-report
           path: |
             core/galata/playwright-report
 
@@ -176,7 +176,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v2
         with:
-          name: jupyterlab-galata-updated-snapshots
+          name: jupyterlab-documentation-updated-snapshots
           path: core/galata/test/**/*-snapshots/*.*
 
       - name: Print JupyterLab logs
