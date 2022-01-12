@@ -14,6 +14,10 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.3.x/CHANGELOG.md'
 
 ## v3.2
 
+## 3.2.7
+
+No merged PRs
+
 ## 3.2.6
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.2.5...ebce458c5e55126a7cbd5082f669446269007a34))
