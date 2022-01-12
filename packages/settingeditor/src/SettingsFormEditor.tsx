@@ -18,7 +18,7 @@ import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { reduce } from '@lumino/algorithm';
 import { PluginList } from './pluginlist';
 import { ISignal } from '@lumino/signaling';
-import { Debouncer } from '@lumino/polling';
+import debounce from 'lodash/debounce';
 
 /**
  * Namespace for a React component that prepares the settings for a
@@ -201,7 +201,6 @@ export const SettingsFormEditor = ({
   const [formData, setFormData] = React.useState(settings.composite);
   const [isModified, setIsModified] = React.useState(settings.isModified);
   const [hidden, setHidden] = React.useState(true);
-  const [error, setError] = React.useState(false);
 
   /**
    * Construct uiSchema to pass any custom renderers to the form editor.
@@ -242,24 +241,22 @@ export const SettingsFormEditor = ({
    * Handler for edits made in the form editor.
    * @param data - Form data sent from the form editor
    */
-  const handleChange = () => {
-    if (JSONExt.deepEqual(formData, settings.user) || error) {
+  const handleChange = (data: any) => {
+    if (JSONExt.deepEqual(data, settings.user)) {
       return;
     }
     settings
-      .save(JSON.stringify(formData))
+      .save(JSON.stringify(data))
       .then(() => {
         setIsModified(settings.isModified);
       })
-      .catch(reason =>
+      .catch((reason: string) =>
         showDialog({ title: 'Error saving settings.', body: reason })
       );
   };
-  const debouncer = new Debouncer(handleChange);
-
-  React.useEffect(() => {
-    void debouncer.invoke();
-  }, [formData]);
+  const debouncer = React.useRef(
+    debounce(nextValue => handleChange(nextValue), 1000)
+  );
 
   return (
     <div>
@@ -294,8 +291,10 @@ export const SettingsFormEditor = ({
           idPrefix={`jp-SettingsEditor-${settings.id}`}
           onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
             hasError(e.errors.length !== 0);
-            setError(e.errors.length !== 0);
             setFormData(e.formData);
+            if (e.errors.length === 0) {
+              debouncer.current?.(e.formData);
+            }
             onSelect(settings.id);
           }}
         />
