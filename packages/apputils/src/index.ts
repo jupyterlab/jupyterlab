@@ -10,7 +10,7 @@ import { Toolbar as ApputilsToolbar } from './toolbar';
 
 /**
  * @deprecated since v4
- * Those widgets are now in @jupyterlab/ui-components
+ * These widgets are now in @jupyterlab/ui-components
  */
 export {
   addCommandToolbarButtonClass,

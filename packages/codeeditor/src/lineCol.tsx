@@ -120,7 +120,7 @@ class LineFormComponent extends React.Component<
                 this._textInput = input;
               }}
             />
-            <div className="jp-baseLineForm jp-lineFormButtonDiv">
+            <div className="jp-baseLineForm jp-lineFormButtonContainer">
               <lineFormIcon.react
                 className="jp-baseLineForm jp-lineFormButtonIcon"
                 elementPosition="center"

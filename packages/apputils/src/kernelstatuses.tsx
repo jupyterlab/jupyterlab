@@ -14,7 +14,7 @@ import { ISessionContext } from './sessioncontext';
  * Helper function to translate kernel statuses mapping by using
  * input translator.
  *
- * @param translator - - Language translator.
+ * @param translator - Language translator.
  * @return The translated kernel status mapping.
  */
 export function translateKernelStatuses(
