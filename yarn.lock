@@ -3258,6 +3258,11 @@
   resolved "https://registry.yarnpkg.com/@verdaccio/ui-theme/-/ui-theme-3.2.1.tgz#041a5b436847f73ebddeb693758b0f30819a98b0"
   integrity sha512-xaN1nVxGWSIO4Qmnm3xZwvUf2jOUIt43nAp2IbSiPdozQztCcfU1LHEHiMW2mP036LoUWcHbb3Z6Tj1GHyuQNg==
 
+"@vscode/debugprotocol@^1.51.0":
+  version "1.51.0"
+  resolved "https://registry.yarnpkg.com/@vscode/debugprotocol/-/debugprotocol-1.51.0.tgz#1d28a8581f8ea74b8e2fd465d4448717589a0ae3"
+  integrity sha512-39ShbKzI+0r53haLZQVEhY4XhdMJVSqfcliaDFigQjqiWattno5Ex0jXq2WRHrAtPf+W5Un9/HtED0K3pAiqZg==
+
 "@webassemblyjs/ast@1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.11.1.tgz#2bfd767eae1a6996f432ff7e8d7fc75679c0b6a7"
@@ -13672,11 +13677,6 @@ verror@1.10.0:
     assert-plus "^1.0.0"
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
-
-vscode-debugprotocol@^1.37.0:
-  version "1.47.0"
-  resolved "https://registry.yarnpkg.com/vscode-debugprotocol/-/vscode-debugprotocol-1.47.0.tgz#700055bea38633a9530a5a552fb3ea314d76b73f"
-  integrity sha512-ii7oCz3Wfr/SGtFr5AYop5dJm0dUmpg0hq2lTzTBdaht8nSheYMMjPntxULBR+2TUxXLcCKFZkF2UEJQduYsIQ==
 
 vscode-oniguruma@^1.6.1:
   version "1.6.1"
