@@ -42,7 +42,7 @@ export class KernelConnector extends DataConnector<
       cursor_pos: request.offset
     };
 
-    const msg = await kernel.requestComplete(contents);
+    const msg = await kernel.requestCompleteControl(contents);
     const response = msg.content;
 
     if (response.status !== 'ok') {
