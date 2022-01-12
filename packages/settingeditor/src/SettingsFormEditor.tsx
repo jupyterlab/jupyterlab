@@ -67,8 +67,15 @@ const CustomArrayTemplate = (props: ArrayFieldTemplateProps) => {
       {props.items.map(item => {
         return (
           <div key={item.key} className={item.className}>
-            {props.TitleField}
-            {props.DescriptionField}
+            <props.TitleField
+              title={props.title}
+              required={props.required}
+              id={`${props.idSchema.$id}-title`}
+            />
+            <props.DescriptionField
+              id={`${props.idSchema.$id}-title`}
+              description={props.schema.description ?? ''}
+            />
             {item.children}
             <div className="jp-ArrayOperations">
               <button
