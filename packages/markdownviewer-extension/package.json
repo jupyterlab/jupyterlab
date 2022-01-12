@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/markdownviewer-extension",
-  "version": "3.1.17",
+  "version": "3.1.18",
   "description": "JupyterLab - Markdown Renderer Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,13 +37,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.17",
-    "@jupyterlab/apputils": "^3.1.17",
-    "@jupyterlab/coreutils": "^5.1.17",
-    "@jupyterlab/markdownviewer": "^3.1.17",
-    "@jupyterlab/rendermime": "^3.1.17",
-    "@jupyterlab/settingregistry": "^3.1.17",
-    "@jupyterlab/translation": "^3.1.17"
+    "@jupyterlab/application": "^3.1.18",
+    "@jupyterlab/apputils": "^3.1.18",
+    "@jupyterlab/coreutils": "^5.1.18",
+    "@jupyterlab/markdownviewer": "^3.1.18",
+    "@jupyterlab/rendermime": "^3.1.18",
+    "@jupyterlab/settingregistry": "^3.1.18",
+    "@jupyterlab/translation": "^3.1.18"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

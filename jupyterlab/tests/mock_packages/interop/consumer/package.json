@@ -1,12 +1,12 @@
 {
   "name": "@jupyterlab/mock-consumer",
-  "version": "3.1.18",
+  "version": "3.1.19",
   "private": true,
   "dependencies": {
-    "@jupyterlab/mock-token": "^3.1.17"
+    "@jupyterlab/mock-token": "^3.1.18"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.1.18"
+    "@jupyterlab/builder": "^3.1.19"
   },
   "jupyterlab": {
     "extension": true,

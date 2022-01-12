@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/console",
-  "version": "3.1.17",
+  "version": "3.1.18",
   "description": "JupyterLab - Code Console",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -42,16 +42,16 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.1.17",
-    "@jupyterlab/cells": "^3.1.17",
-    "@jupyterlab/codeeditor": "^3.1.17",
-    "@jupyterlab/coreutils": "^5.1.17",
-    "@jupyterlab/nbformat": "^3.1.17",
-    "@jupyterlab/observables": "^4.1.17",
-    "@jupyterlab/rendermime": "^3.1.17",
-    "@jupyterlab/services": "^6.1.17",
-    "@jupyterlab/translation": "^3.1.17",
-    "@jupyterlab/ui-components": "^3.1.17",
+    "@jupyterlab/apputils": "^3.1.18",
+    "@jupyterlab/cells": "^3.1.18",
+    "@jupyterlab/codeeditor": "^3.1.18",
+    "@jupyterlab/coreutils": "^5.1.18",
+    "@jupyterlab/nbformat": "^3.1.18",
+    "@jupyterlab/observables": "^4.1.18",
+    "@jupyterlab/rendermime": "^3.1.18",
+    "@jupyterlab/services": "^6.1.18",
+    "@jupyterlab/translation": "^3.1.18",
+    "@jupyterlab/ui-components": "^3.1.18",
     "@lumino/algorithm": "^1.3.3",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/disposable": "^1.4.3",
@@ -61,7 +61,7 @@
     "@lumino/widgets": "^1.19.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.1.17",
+    "@jupyterlab/testutils": "^3.1.18",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
