@@ -201,6 +201,7 @@ export const SettingsFormEditor = ({
   const [formData, setFormData] = React.useState(settings.composite);
   const [isModified, setIsModified] = React.useState(settings.isModified);
   const [hidden, setHidden] = React.useState(true);
+  const [error, setError] = React.useState(false);
 
   /**
    * Construct uiSchema to pass any custom renderers to the form editor.
@@ -242,7 +243,7 @@ export const SettingsFormEditor = ({
    * @param data - Form data sent from the form editor
    */
   const handleChange = () => {
-    if (JSONExt.deepEqual(formData, settings.user)) {
+    if (JSONExt.deepEqual(formData, settings.user) || error) {
       return;
     }
     settings
@@ -292,9 +293,10 @@ export const SettingsFormEditor = ({
           liveValidate
           idPrefix={`jp-SettingsEditor-${settings.id}`}
           onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
+            hasError(e.errors.length !== 0);
+            setError(e.errors.length !== 0);
             setFormData(e.formData);
             onSelect(settings.id);
-            hasError(e.errors.length !== 0);
           }}
         />
       )}
