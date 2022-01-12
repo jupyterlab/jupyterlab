@@ -519,12 +519,12 @@
     {
       "command": "notebook:move-cursor-heading-above-or-collapse",
       "keys": ["ArrowLeft"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {
       "command": "notebook:move-cursor-heading-below-or-expand",
       "keys": ["ArrowRight"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {
       "command": "notebook:insert-heading-above",
@@ -539,12 +539,12 @@
     {
       "command": "notebook:collapse-all-headings",
       "keys": ["Ctrl Shift ArrowLeft"],
-      "selector": ".jp-Notebook"
+      "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {
       "command": "notebook:expand-all-headings",
       "keys": ["Ctrl Shift ArrowRight"],
-      "selector": ".jp-Notebook"
+      "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {
       "command": "notebook:paste-cell-below",
