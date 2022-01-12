@@ -1673,6 +1673,15 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   protected showEditor(): void {
     this.removeClass(RENDERED_CLASS);
     this.inputArea.showEditor();
+    // if this is going to be a heading, place the cursor accordingly
+    let numHashAtStart = (this.model.value.text.match(/^#+/g) || [''])[0]
+      .length;
+    if (numHashAtStart > 0) {
+      this.inputArea.editor.setCursorPosition({
+        column: numHashAtStart + 1,
+        line: 0
+      });
+    }
   }
 
   /*

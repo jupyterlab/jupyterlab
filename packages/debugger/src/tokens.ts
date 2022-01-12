@@ -13,7 +13,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Panel } from '@lumino/widgets';
 
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { DebuggerHandler } from './handler';
 
@@ -93,12 +93,12 @@ export interface IDebugger {
    * Request rich representation of a variable.
    *
    * @param variableName The variable name to request
-   * @param variablesReference The variable reference to request
+   * @param frameId The current frame id in which to request the variable
    * @returns The mime renderer data model
    */
   inspectRichVariable(
     variableName: string,
-    variablesReference?: number
+    frameId?: number
   ): Promise<IDebugger.IRichVariable>;
 
   /**
@@ -616,6 +616,11 @@ export namespace IDebugger {
 
   /**
    * Select variable in the variables explorer.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * This is experimental API
    */
   export interface IVariableSelection
     extends Pick<
@@ -624,28 +629,9 @@ export namespace IDebugger {
     > {}
 
   /**
-   * Debugger variables explorer interface.
-   */
-  export interface IVariablesPanel {
-    /**
-     * Select variable in the variables explorer.
-     */
-    latestSelection: IVariableSelection | null;
-    /**
-     * Variable view mode.
-     */
-    viewMode: 'tree' | 'table';
-  }
-
-  /**
    * Debugger sidebar interface.
    */
-  export interface ISidebar extends Panel {
-    /**
-     * Debugger variables explorer.
-     */
-    variables: IVariablesPanel;
-  }
+  export interface ISidebar extends Panel {}
 
   /**
    * A utility to find text editors used by the debugger.
@@ -880,6 +866,11 @@ export namespace IDebugger {
        * Signal emitted when the current variable has been expanded.
        */
       readonly variableExpanded: ISignal<this, IDebugger.IVariable>;
+
+      /**
+       * Selected variable in the variables explorer.
+       */
+      selectedVariable: IVariableSelection | null;
 
       /**
        * Expand a variable.

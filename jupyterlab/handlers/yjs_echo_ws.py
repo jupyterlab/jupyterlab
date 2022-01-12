@@ -7,6 +7,8 @@ import uuid
 import time
 
 from tornado.ioloop import IOLoop
+from jupyter_server.base.handlers import JupyterHandler
+from tornado import web
 from tornado.websocket import WebSocketHandler
 from enum import IntEnum
 
@@ -35,13 +37,20 @@ class YjsRoom:
         self.clients = {}
         self.content = bytes([])
 
-class YjsEchoWebSocket(WebSocketHandler):
+
+class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
     rooms = {}
 
     # Override max_message size to 1GB
     @property
     def max_message_size(self):
         return 1024 * 1024 * 1024
+
+    async def get(self, *args, **kwargs):
+        if self.get_current_user() is None:
+            self.log.warning("Couldn't authenticate WebSocket connection")
+            raise web.HTTPError(403)
+        return await super().get(*args, **kwargs)
 
     def open(self, guid):
         #print("[YJSEchoWS]: open", guid)
@@ -66,11 +75,11 @@ class YjsEchoWebSocket(WebSocketHandler):
             if room.lock is None or now - room.timeout > (10 * len(room.clients)) : # no lock or timeout
                 room.lock = now
                 room.timeout = now
-                room.lock_holder = self.id 
+                room.lock_holder = self.id
                 # print('Acquired new lock: ', room.lock)
                 # return acquired lock
                 self.write_message(bytes([ServerMessageType.ACQUIRE_LOCK]) + room.lock.to_bytes(4, byteorder = 'little'), binary=True)
-            
+
             elif room.lock_holder == self.id :
                 # print('Update lock: ', room.timeout)
                 room.timeout = now

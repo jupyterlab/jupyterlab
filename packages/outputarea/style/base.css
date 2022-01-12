@@ -21,6 +21,7 @@
 
 .jp-OutputArea-child {
   display: table;
+  table-layout: fixed;
   width: 100%;
   overflow: hidden;
 }
@@ -28,7 +29,7 @@
 .jp-OutputPrompt {
   display: table-cell;
   vertical-align: top;
-  min-width: var(--jp-cell-prompt-width);
+  width: var(--jp-cell-prompt-width);
   color: var(--jp-cell-outprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);

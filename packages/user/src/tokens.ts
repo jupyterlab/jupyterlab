@@ -86,12 +86,12 @@ export namespace IUser {
     /**
      * User's name.
      */
-    readonly givenName: string;
+    readonly name: string;
 
     /**
      * User's last name.
      */
-    readonly familyName: string;
+    readonly displayName: string;
 
     /**
      * User's name initials.

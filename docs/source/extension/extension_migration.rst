@@ -33,7 +33,11 @@ bumped their major version (following semver convention):
 - ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).
 - ``@jupyterlab/notebook`` from 3.x to 4.x
-   The ``NotebookPanel._onSave`` method is now ``private``.
+   * The ``NotebookPanel._onSave`` method is now ``private``.
+   * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
+   * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
+   * Command ``Collapsible_Headings:Collapse_All`` renamed to ``notebook:collapse-all-headings``.
+   * Command ``Collapsible_Headings:Expand_All`` renamed to ``notebook:expand-all-headings``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/buildutils`` from 3.x to 4.x

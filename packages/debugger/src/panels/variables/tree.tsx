@@ -2,18 +2,27 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+
 import {
   caretDownEmptyIcon,
   ReactWidget,
   searchIcon
 } from '@jupyterlab/ui-components';
+
 import { ArrayExt } from '@lumino/algorithm';
+
 import { CommandRegistry } from '@lumino/commands';
+
+import { DebugProtocol } from '@vscode/debugprotocol';
+
 import React, { useEffect, useState } from 'react';
-import { DebugProtocol } from 'vscode-debugprotocol';
+
 import { convertType } from '.';
+
 import { Debugger } from '../../debugger';
+
 import { IDebugger } from '../../tokens';
+
 import { VariablesModel } from './model';
 
 /**
@@ -31,7 +40,7 @@ export class VariablesBodyTree extends ReactWidget {
     this._service = options.service;
     this._translator = options.translator;
 
-    const model = options.model;
+    const model = (this.model = options.model);
     model.changed.connect(this._updateScopes, this);
 
     this.addClass('jp-DebuggerVariables-body');
@@ -53,19 +62,12 @@ export class VariablesBodyTree extends ReactWidget {
         filter={this._filter}
         translator={this._translator}
         handleSelectVariable={variable => {
-          this._latestSelection = variable;
+          this.model.selectedVariable = variable;
         }}
       />
     ) : (
       <div></div>
     );
-  }
-
-  /**
-   * Get the latest hit variable
-   */
-  get latestSelection(): IDebugger.IVariableSelection | null {
-    return this._latestSelection;
   }
 
   /**
@@ -97,11 +99,11 @@ export class VariablesBodyTree extends ReactWidget {
     this.update();
   }
 
+  protected model: IDebugger.Model.IVariables;
   private _commands: CommandRegistry;
   private _scope = '';
   private _scopes: IDebugger.IScope[] = [];
   private _filter = new Set<string>();
-  private _latestSelection: IDebugger.IVariableSelection | null = null;
   private _service: IDebugger;
   private _translator: ITranslator | undefined;
 }
@@ -257,35 +259,43 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       <span>: </span>
       <span style={styleType}>{convertType(variable)}</span>
       <span className="jp-DebuggerVariables-hspacer"></span>
-      {service.model.hasRichVariableRendering && (
-        <button
-          className="jp-DebuggerVariables-renderVariable"
-          disabled={
-            !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, {
-              name: variable.name,
-              variablesReference: variable.variablesReference
-            } as any)
-          }
-          onClick={e => {
-            e.stopPropagation();
-            onSelection(variable);
-            commands
-              .execute(Debugger.CommandIDs.renderMimeVariable, {
+      {service.model.hasRichVariableRendering &&
+        // Don't add rich display for special entries
+        // debugpy: https://github.com/microsoft/debugpy/blob/cf0d684566edc339545b161da7c3dfc48af7c7d5/src/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_utils.py#L359
+        ![
+          'special variables',
+          'protected variables',
+          'function variables',
+          'class variables'
+        ].includes(variable.name) && (
+          <button
+            className="jp-DebuggerVariables-renderVariable"
+            disabled={
+              !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, {
                 name: variable.name,
                 variablesReference: variable.variablesReference
               } as any)
-              .catch(reason => {
-                console.error(
-                  `Failed to render variable ${variable.name}`,
-                  reason
-                );
-              });
-          }}
-          title={trans.__('Render variable')}
-        >
-          <searchIcon.react stylesheet="menuItem" tag="span" />
-        </button>
-      )}
+            }
+            onClick={e => {
+              e.stopPropagation();
+              onSelection(variable);
+              commands
+                .execute(Debugger.CommandIDs.renderMimeVariable, {
+                  name: variable.name,
+                  variablesReference: variable.variablesReference
+                } as any)
+                .catch(reason => {
+                  console.error(
+                    `Failed to render variable ${variable.name}`,
+                    reason
+                  );
+                });
+            }}
+            title={trans.__('Render variable')}
+          >
+            <searchIcon.react stylesheet="menuItem" tag="span" />
+          </button>
+        )}
 
       {expanded && variables && (
         <VariablesComponent
