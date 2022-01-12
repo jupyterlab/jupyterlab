@@ -51,6 +51,17 @@ strong {
   font-weight: unset;
 }
 
+/* Override Blueprint's _typography.scss styles outside of dialog boxes */
+a:not(.jp-VisibleLink) {
+  text-decoration: unset;
+  color: unset;
+}
+
+a:hover:not(.jp-VisibleLink) {
+  text-decoration: unset;
+  color: unset;
+}
+
 /* Override Blueprint's _accessibility.scss styles */
 :focus {
   outline: unset;
