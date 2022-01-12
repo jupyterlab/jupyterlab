@@ -32,11 +32,13 @@ If you use ``pip``, you can install it with:
 
     pip install jupyterlab
 
+If you are using a macOS version that comes with Python 2, run ``pip3``
+instead of ``pip``.
 
 If installing using ``pip install --user``, you must add the user-level
 ``bin`` directory to your ``PATH`` environment variable in order to launch
-``jupyter lab``. If you are using a Unix derivative (FreeBSD, GNU / Linux, 
-macOS), you can achieve this by using ``export PATH="$HOME/.local/bin:$PATH"`` command.
+``jupyter lab``. If you are using a Unix derivative (FreeBSD, GNU/Linux, 
+macOS), you can do this by running ``export PATH="$HOME/.local/bin:$PATH"``.
 
 pipenv
 ------
