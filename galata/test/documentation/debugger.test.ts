@@ -194,6 +194,8 @@ test.describe('Debugger', () => {
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
 
+    await page.pause();
+
     // Inject capture zone
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
@@ -202,9 +204,15 @@ test.describe('Debugger', () => {
       );
     });
 
-    expect(
-      await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('debugger_callstack.png');
+    await expect(
+      page.locator('[aria-label="side panel content"] >> text=add').first()
+    ).toBeVisible();
+
+    // Don't compare screenshot as the kernel id varies
+    // Need to set precisely the path
+    await (await page.$('#capture-screenshot')).screenshot({
+      path: 'test/documentation/screenshots/debugger-callstack.png'
+    });
 
     // Remove capture area so clicking on the Continue button is possible
     await page.evaluate(() => {
@@ -238,9 +246,16 @@ test.describe('Debugger', () => {
       );
     });
 
-    expect(
-      await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('debugger_breakpoints.png');
+    const breakpointsPanel = await page.debugger.getBreakPointsPanel();
+    expect(await breakpointsPanel.innerText()).toMatch(
+      /ipykernel.*\/2114632017.py/
+    );
+
+    // Don't compare screenshot as the kernel id varies
+    // Need to set precisely the path
+    await (await page.$('#capture-screenshot')).screenshot({
+      path: 'test/documentation/screenshots/debugger-breakpoints.png'
+    });
 
     await page.click('button[title^=Continue]');
   });
@@ -269,9 +284,17 @@ test.describe('Debugger', () => {
       );
     });
 
-    expect(
-      await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('debugger_source.png');
+    await expect(
+      page.locator(
+        '[aria-label="side panel content"] >> text=Source/tmp/ipykernel_'
+      )
+    ).toBeVisible();
+
+    // Don't compare screenshot as the kernel id varies
+    // Need to set precisely the path
+    await (await page.$('#capture-screenshot')).screenshot({
+      path: 'test/documentation/screenshots/debugger-source.png'
+    });
 
     await page.click('button[title^=Continue]');
   });

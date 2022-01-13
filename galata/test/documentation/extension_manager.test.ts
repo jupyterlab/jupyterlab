@@ -16,7 +16,7 @@ test.describe('Extension Manager', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 400px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 600px;"></div>'
       );
     });
 
@@ -77,7 +77,7 @@ test.describe('Extension Manager', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 400px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 600px;"></div>'
       );
     });
 
@@ -149,7 +149,7 @@ test.describe('Extension Manager', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 110px; left: 33px; width: 250px; height: 160px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 110px; left: 33px; width: 250px; height: 280px;"></div>'
       );
     });
 

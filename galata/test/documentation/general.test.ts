@@ -95,7 +95,7 @@ test.describe('General', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 32px; left: 997px; width: 283px; height: 400px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 32px; left: 980px; width: 300px; height: 400px;"></div>'
       );
     });
 
@@ -113,7 +113,7 @@ test.describe('General', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 400px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 300px; height: 400px;"></div>'
       );
     });
 
