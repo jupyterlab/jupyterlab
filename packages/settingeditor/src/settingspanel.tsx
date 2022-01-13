@@ -39,6 +39,11 @@ export interface ISettingsPanelProps {
    * invalid / unsaved settings in red.
    */
   hasError: (id: string, error: boolean) => void;
+
+  /**
+   * Sends the updated dirty state to the parent class.
+   */
+  updateDirtyState: (dirty: boolean) => void;
 }
 
 /**
@@ -50,7 +55,8 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   editorRegistry,
   onSelect,
   handleSelectSignal,
-  hasError
+  hasError,
+  updateDirtyState
 }) => {
   // Refs used to keep track of "selected" plugin based on scroll location
   const editorRefs: {
@@ -60,12 +66,27 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     editorRefs[setting.id] = React.useRef(null);
   }
   const wrapperRef: React.RefObject<HTMLDivElement> = React.useRef(null);
+  const editorDirtyStates: React.RefObject<{
+    [id: string]: boolean;
+  }> = React.useRef({});
 
   // Scroll to the plugin when a selection is made in the left panel.
   handleSelectSignal?.connect?.((list, pluginId) =>
     editorRefs[pluginId].current?.scrollIntoView(true)
   );
 
+  const updateDirtyStates = (id: string, dirty: boolean) => {
+    if (editorDirtyStates.current) {
+      editorDirtyStates.current[id] = dirty;
+      for (const editor in editorDirtyStates.current) {
+        if (editorDirtyStates.current[editor]) {
+          updateDirtyState(true);
+          return;
+        }
+      }
+    }
+    updateDirtyState(false);
+  };
   return (
     <div className="jp-SettingsPanel" ref={wrapperRef}>
       {settings.map(pluginSettings => {
@@ -81,6 +102,9 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
               handleSelectSignal={handleSelectSignal}
               hasError={(error: boolean) => {
                 hasError(pluginSettings.id, error);
+              }}
+              updateDirtyState={(dirty: boolean) => {
+                updateDirtyStates(pluginSettings.id, dirty);
               }}
               onSelect={onSelect}
             />

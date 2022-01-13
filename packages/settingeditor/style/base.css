@@ -323,6 +323,19 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   height: 1.5em;
 }
 
+.jp-saveStatusIndicator p {
+  padding: 0.5em;
+  background: var(--jp-border-color3);
+  font-size: var(--jp-content-font-size2);
+  color: var(--jp-info-color0);
+}
+
+.jp-saveStatusIndicator {
+  position: absolute;
+  bottom: 0px;
+  left: 15em;
+}
+
 .jp-SettingsPanel .array-item {
   border: 1px solid var(--jp-border-color2);
   border-radius: 4px;

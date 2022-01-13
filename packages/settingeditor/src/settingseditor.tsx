@@ -1,3 +1,4 @@
+import { ILabStatus } from '@jupyterlab/application';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -27,12 +28,15 @@ export class SettingsEditor extends Widget {
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
     });
+    this._status = options.status;
     layout.addWidget(this._panel);
     const list = (this._list = new PluginList({
       registry: options.registry,
       translator: this.translator
     }));
     this._panel.addWidget(list);
+    this.updateDirtyState = this.updateDirtyState.bind(this);
+
     /**
      * Initializes the settings panel after loading the schema for all plugins.
      */
@@ -62,6 +66,7 @@ export class SettingsEditor extends Widget {
           handleSelectSignal={this._list.handleSelectSignal}
           onSelect={(id: string) => (this._list.selection = id)}
           hasError={this._list.setError}
+          updateDirtyState={this.updateDirtyState}
         />
       );
       this._panel.addClass('jp-SettingsPanelWidget');
@@ -77,8 +82,36 @@ export class SettingsEditor extends Widget {
         </button>
       );
       openJSONEditorButton.addClass('jp-openJSONSettingsEditor');
+      this._saveStatusIndicator = ReactWidget.create(
+        <p> {this._dirty ? 'Saving...' : 'Saved'}</p>
+      );
+      this._saveStatusIndicator.addClass('jp-saveStatusIndicator');
+      layout.addWidget(this._saveStatusIndicator);
       layout.addWidget(openJSONEditorButton);
     });
+  }
+
+  updateDirtyState(dirty: boolean) {
+    this._dirty = dirty;
+    if (this._dirty && !this._clearDirty) {
+      this._clearDirty = this._status.setDirty();
+    } else if (!this._dirty && this._clearDirty) {
+      this._clearDirty.dispose();
+      this._clearDirty = null;
+    }
+    if (dirty && !this.title.className.includes('jp-mod-dirty')) {
+      this.title.className += ' jp-mod-dirty';
+    }
+    if (!dirty) {
+      this.title.className = this.title.className.replace('jp-mod-dirty', '');
+    }
+    const layout = this.layout as PanelLayout;
+    layout.removeWidget(this._saveStatusIndicator);
+    this._saveStatusIndicator = ReactWidget.create(
+      <p> {dirty ? 'Saving...' : 'Saved'}</p>
+    );
+    this._saveStatusIndicator.addClass('jp-saveStatusIndicator');
+    layout.addWidget(this._saveStatusIndicator);
   }
 
   protected onCloseRequest(msg: Message): void {
@@ -89,14 +122,30 @@ export class SettingsEditor extends Widget {
         buttons: [Dialog.okButton(), Dialog.cancelButton()]
       }).then(value => {
         if (value.button.accept) {
+          this.dispose();
+          super.onCloseRequest(msg);
+        }
+      });
+    } else if (this._dirty) {
+      showDialog({
+        title: 'Some changes have not been saved. Continue without saving?',
+        buttons: [Dialog.cancelButton(), Dialog.okButton()]
+      }).then(value => {
+        if (value.button.accept) {
+          this.dispose();
           super.onCloseRequest(msg);
         }
       });
     } else {
+      this.dispose();
       super.onCloseRequest(msg);
     }
   }
 
+  private _clearDirty: any;
+  private _status: ILabStatus;
+  private _saveStatusIndicator: ReactWidget;
+  private _dirty: boolean = false;
   protected translator: ITranslator;
   private _list: PluginList;
   private _panel: SplitPanel;
@@ -125,6 +174,8 @@ export namespace SettingsEditor {
      * Command registry used to open the JSON settings editor.
      */
     commands: CommandRegistry;
+
+    status: ILabStatus;
 
     /**
      * The application language translator.

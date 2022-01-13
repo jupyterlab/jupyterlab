@@ -13,11 +13,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ICommandPalette,
-  MainAreaWidget,
-  WidgetTracker
-} from '@jupyterlab/apputils';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -51,7 +47,13 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:form-ui',
-  requires: [ISettingRegistry, IStateDB, ITranslator, IFormComponentRegistry],
+  requires: [
+    ISettingRegistry,
+    IStateDB,
+    ITranslator,
+    IFormComponentRegistry,
+    ILabStatus
+  ],
   optional: [ILayoutRestorer, ICommandPalette],
   autoStart: true,
   provides: ISettingEditorTracker,
@@ -67,13 +69,14 @@ function activate(
   state: IStateDB,
   translator: ITranslator,
   editorRegistry: IFormComponentRegistry,
+  status: ILabStatus,
   restorer?: ILayoutRestorer,
   palette?: ICommandPalette
 ): ISettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const namespace = 'setting-editor';
-  const tracker = new WidgetTracker<MainAreaWidget<SettingsEditor>>({
+  const tracker = new WidgetTracker<SettingsEditor>({
     namespace
   });
 
@@ -108,16 +111,17 @@ function activate(
         registry,
         state,
         commands,
-        translator
+        translator,
+        status
       });
 
       editor.id = namespace;
       editor.title.icon = settingsIcon;
       editor.title.label = trans.__('Settings');
+      editor.title.closable = true;
 
-      const main = new MainAreaWidget({ content: editor });
-      void tracker.add(main);
-      shell.add(main);
+      void tracker.add(editor);
+      shell.add(editor);
     },
     label: trans.__('Settings Editor')
   });
@@ -163,7 +167,7 @@ function activateJSON(
   const namespace = 'json-setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
-  const tracker = new WidgetTracker<MainAreaWidget<JsonSettingEditor>>({
+  const tracker = new WidgetTracker<JsonSettingEditor>({
     namespace
   });
   let editor: JsonSettingEditor;
@@ -228,10 +232,10 @@ function activateJSON(
       editor.id = namespace;
       editor.title.icon = settingsIcon;
       editor.title.label = trans.__('Advanced Settings Editor');
+      editor.title.closable = true;
 
-      const main = new MainAreaWidget({ content: editor });
-      void tracker.add(main);
-      shell.add(main);
+      void tracker.add(editor);
+      shell.add(editor);
     },
     label: trans.__('Advanced Settings Editor')
   });
@@ -244,18 +248,18 @@ function activateJSON(
 
   commands.addCommand(CommandIDs.revert, {
     execute: () => {
-      tracker.currentWidget?.content.revert();
+      tracker.currentWidget?.revert();
     },
     icon: undoIcon,
     label: trans.__('Revert User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
+    isEnabled: () => tracker.currentWidget?.canRevertRaw ?? false
   });
 
   commands.addCommand(CommandIDs.save, {
-    execute: () => tracker.currentWidget?.content.save(),
+    execute: () => tracker.currentWidget?.save(),
     icon: saveIcon,
     label: trans.__('Save User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
+    isEnabled: () => tracker.currentWidget?.canSaveRaw ?? false
   });
 
   return tracker;

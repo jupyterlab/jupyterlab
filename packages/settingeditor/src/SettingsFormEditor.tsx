@@ -54,6 +54,11 @@ export namespace SettingsFormEditor {
      * in the SettingsPanel.
      */
     onSelect: (id: string) => void;
+
+    /**
+     * Sends whether this editor has unsaved changes to the parent class.
+     */
+    updateDirtyState: (dirty: boolean) => void;
   }
 
   export interface IState {
@@ -213,6 +218,7 @@ export class SettingsFormEditor extends React.Component<
   SettingsFormEditor.IProps,
   SettingsFormEditor.IState
 > {
+  private _updateDirtyState: (dirty: boolean) => void;
   constructor(props: SettingsFormEditor.IProps) {
     super(props);
     const {
@@ -220,7 +226,8 @@ export class SettingsFormEditor extends React.Component<
       renderers,
       handleSelectSignal,
       hasError,
-      onSelect
+      onSelect,
+      updateDirtyState
     } = props;
     this.state = {
       formData: settings.composite,
@@ -230,9 +237,10 @@ export class SettingsFormEditor extends React.Component<
     this._hasError = hasError;
     this._onSelect = onSelect;
     this._renderers = renderers;
+    this._updateDirtyState = updateDirtyState;
     this.handleChange = this.handleChange.bind(this);
     this._settings = settings;
-    this._debouncer = new Debouncer(this.handleChange);
+    this._debouncer = new Debouncer(this.handleChange, 3000);
 
     /**
      * Construct uiSchema to pass any custom renderers to the form editor.
@@ -264,16 +272,19 @@ export class SettingsFormEditor extends React.Component<
    */
   handleChange() {
     if (JSONExt.deepEqual(this.state.formData, this._settings.user)) {
+      this._updateDirtyState(false);
       return;
     }
     this._settings
       .save(JSON.stringify(this.state.formData))
       .then(() => {
+        this._updateDirtyState(false);
         this.setState({ isModified: this._settings.isModified });
       })
-      .catch((reason: string) =>
-        showDialog({ title: 'Error saving settings.', body: reason })
-      );
+      .catch((reason: string) => {
+        this._updateDirtyState(false);
+        showDialog({ title: 'Error saving settings.', body: reason });
+      });
   }
 
   /**
@@ -327,7 +338,8 @@ export class SettingsFormEditor extends React.Component<
               this._hasError(e.errors.length !== 0);
               this.setState({ formData: e.formData });
               if (e.errors.length === 0) {
-                this._debouncer.invoke();
+                this._updateDirtyState(true);
+                void this._debouncer.invoke();
               }
               this._onSelect(this._settings.id);
             }}
