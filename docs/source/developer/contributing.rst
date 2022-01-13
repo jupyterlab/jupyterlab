@@ -1124,6 +1124,9 @@ preparing them:
 -  Make sure the screenshot does not contain copyrighted material
    (preferable), or the license is allowed in our documentation and
    clearly stated.
+-  For screenshots, you should prefer creating visual tests. This allows
+   to update them dynamically. Those tests are defined in ``galata/test/documentation``
+   folder.
 -  If taking a png screenshot, use the Firefox or Chrome developer tools
    to do the following:
 

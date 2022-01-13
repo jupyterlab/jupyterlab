@@ -115,7 +115,7 @@ jobs:
       - name: Install dependencies
         run: |
           bash ./scripts/ci_install.sh
-          pip install altair ipywidgets jupyterlab-language-pack-zh-CN matplotlib pandas scipy vdom vega_datasets
+          pip install altair==4.2.0 ipywidgets==7.6.5 jupyterlab-language-pack-zh-CN==3.2.post7 matplotlib==3.5.1 pandas==1.3.5 scipy==1.7.3 vdom==0.6 vega_datasets==0.9.0
           # Build dev-mode
           jlpm run build
         working-directory: core
