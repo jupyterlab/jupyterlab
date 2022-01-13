@@ -19,7 +19,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.2.x/CHANGELOG.md'
 ### Maintenance and upkeep improvements
 
 - Use the root yarn.lock in staging when making a release. [#11433](https://github.com/jupyterlab/jupyterlab/pull/11433) ([@jasongrout](https://github.com/jasongrout))
-- [3.2.x] Backport PR #11844: Update reference snapshot for the completer UI test [#11847](https://github.com/jupyterlab/jupyterlab/pull/11847) ([@jtpio](https://github.com/jtpio))
+- Update reference snapshot for the completer UI test [#11847](https://github.com/jupyterlab/jupyterlab/pull/11847) ([@jtpio](https://github.com/jtpio))
 
 ### Contributors to this release
 
