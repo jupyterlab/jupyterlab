@@ -13,14 +13,11 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
    :align: center
    :class: jp-screenshot shadow
 
-Get started
-===========
 
 See the sections below (and the top-level links above) for more information about using, extending, and contributing to JupyterLab.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Table of Contents
 
    getting_started/overview
    user/index
