@@ -18,7 +18,7 @@ import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { reduce } from '@lumino/algorithm';
 import { PluginList } from './pluginlist';
 import { ISignal } from '@lumino/signaling';
-import debounce from 'lodash/debounce';
+import { Debouncer } from '@lumino/polling';
 
 /**
  * Namespace for a React component that prepares the settings for a
@@ -54,6 +54,24 @@ export namespace SettingsFormEditor {
      * in the SettingsPanel.
      */
     onSelect: (id: string) => void;
+  }
+
+  export interface IState {
+    /**
+     * The current form values being displayed in the editor.
+     */
+    formData: any;
+
+    /**
+     * Indicates whether the settings have been modified. Used for hiding
+     * the "Restore to Default" button when there are no changes.
+     */
+    isModified: boolean;
+
+    /**
+     * Indicates whether the editor is collapsed / hidden or not.
+     */
+    hidden: boolean;
   }
 }
 
@@ -191,114 +209,138 @@ const CustomTemplate = (props: FieldTemplateProps) => {
  * A React component that prepares the settings for a
  * given plugin to be rendered in the FormEditor.
  */
-export const SettingsFormEditor = ({
-  settings,
-  renderers,
-  handleSelectSignal,
-  hasError,
-  onSelect
-}: SettingsFormEditor.IProps) => {
-  const [formData, setFormData] = React.useState(settings.composite);
-  const [isModified, setIsModified] = React.useState(settings.isModified);
-  const [hidden, setHidden] = React.useState(true);
+export class SettingsFormEditor extends React.Component<
+  SettingsFormEditor.IProps,
+  SettingsFormEditor.IState
+> {
+  constructor(props: SettingsFormEditor.IProps) {
+    super(props);
+    const {
+      settings,
+      renderers,
+      handleSelectSignal,
+      hasError,
+      onSelect
+    } = props;
+    this.state = {
+      formData: settings.composite,
+      isModified: settings.isModified,
+      hidden: true
+    };
+    this._hasError = hasError;
+    this._onSelect = onSelect;
+    this._renderers = renderers;
+    this.handleChange = this.handleChange.bind(this);
+    this._settings = settings;
+    this._debouncer = new Debouncer(this.handleChange);
 
-  /**
-   * Construct uiSchema to pass any custom renderers to the form editor.
-   */
-  const uiSchema: UiSchema = {};
-  for (const id in renderers) {
-    if (Object.keys(settings.schema.properties ?? {}).includes(id)) {
-      uiSchema[id] = {
-        'ui:field': id
-      };
+    /**
+     * Construct uiSchema to pass any custom renderers to the form editor.
+     */
+    const uiSchema: UiSchema = {};
+    for (const id in renderers) {
+      if (Object.keys(settings.schema.properties ?? {}).includes(id)) {
+        uiSchema[id] = {
+          'ui:field': id
+        };
+      }
     }
+    this._uiSchema = uiSchema;
+
+    /**
+     * Automatically expand the settings if this plugin was selected in the
+     * plugin list on the right
+     */
+    handleSelectSignal.connect((list: PluginList, id: string) => {
+      if (id === settings.id) {
+        this.setState({ hidden: false });
+      }
+    });
   }
 
   /**
-   * Automatically expand the settings if this plugin was selected in the
-   * plugin list on the right
+   * Handler for edits made in the form editor.
+   * @param data - Form data sent from the form editor
    */
-  handleSelectSignal.connect((list: PluginList, id: string) => {
-    if (id === settings.id) {
-      setHidden(false);
+  handleChange() {
+    if (JSONExt.deepEqual(this.state.formData, this._settings.user)) {
+      return;
     }
-  });
+    this._settings
+      .save(JSON.stringify(this.state.formData))
+      .then(() => {
+        this.setState({ isModified: this._settings.isModified });
+      })
+      .catch((reason: string) =>
+        showDialog({ title: 'Error saving settings.', body: reason })
+      );
+  }
 
   /**
    * Handler for the "Restore to defaults" button - clears all
    * modified settings then calls `setFormData` to restore the
    * values.
    */
-  const reset = async () => {
-    for (const field in settings.user) {
-      await settings.remove(field);
+  reset = async () => {
+    for (const field in this._settings.user) {
+      await this._settings.remove(field);
     }
-    setFormData(settings.composite);
-    setIsModified(false);
+    this.setState({
+      formData: this._settings.composite,
+      isModified: false
+    });
   };
 
-  /**
-   * Handler for edits made in the form editor.
-   * @param data - Form data sent from the form editor
-   */
-  const handleChange = (data: any) => {
-    if (JSONExt.deepEqual(data, settings.user)) {
-      return;
-    }
-    settings
-      .save(JSON.stringify(data))
-      .then(() => {
-        setIsModified(settings.isModified);
-      })
-      .catch((reason: string) =>
-        showDialog({ title: 'Error saving settings.', body: reason })
-      );
-  };
-  const debouncer = React.useRef(
-    debounce(nextValue => handleChange(nextValue), 1000)
-  );
-
-  return (
-    <div>
-      <div
-        className="jp-SettingsHeader"
-        onClick={() => {
-          setHidden(!hidden);
-          onSelect(settings.id);
-        }}
-      >
-        <div className="jp-SettingsTitle">
-          <h2> {settings.schema.title} </h2>
-          <h3> {settings.schema.description} </h3>
+  render() {
+    return (
+      <div>
+        <div
+          className="jp-SettingsHeader"
+          onClick={() => {
+            this.setState({ hidden: !this.state.hidden });
+            this._onSelect(this._settings.id);
+          }}
+        >
+          <div className="jp-SettingsTitle">
+            <h2> {this._settings.schema.title} </h2>
+            <h3> {this._settings.schema.description} </h3>
+          </div>
+          {this.state.isModified && (
+            <button className="jp-RestoreButton" onClick={this.reset}>
+              {' '}
+              Restore to Defaults{' '}
+            </button>
+          )}
         </div>
-        {isModified && (
-          <button className="jp-RestoreButton" onClick={reset}>
-            {' '}
-            Restore to Defaults{' '}
-          </button>
+        {!this.state.hidden && (
+          <Form
+            schema={this._settings.schema as JSONSchema7}
+            formData={this.state.formData}
+            FieldTemplate={CustomTemplate}
+            ArrayFieldTemplate={CustomArrayTemplate}
+            uiSchema={this._uiSchema}
+            fields={this._renderers}
+            formContext={{ settings: this._settings }}
+            liveValidate
+            idPrefix={`jp-SettingsEditor-${this._settings.id}`}
+            onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
+              this._hasError(e.errors.length !== 0);
+              this.setState({ formData: e.formData });
+              if (e.errors.length === 0) {
+                this._debouncer.invoke();
+              }
+              this._onSelect(this._settings.id);
+            }}
+          />
         )}
       </div>
-      {!hidden && (
-        <Form
-          schema={settings.schema as JSONSchema7}
-          formData={formData}
-          FieldTemplate={CustomTemplate}
-          ArrayFieldTemplate={CustomArrayTemplate}
-          uiSchema={uiSchema}
-          fields={renderers}
-          formContext={{ settings: settings }}
-          liveValidate
-          idPrefix={`jp-SettingsEditor-${settings.id}`}
-          onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-            hasError(e.errors.length !== 0);
-            setFormData(e.formData);
-            if (e.errors.length === 0) {
-              debouncer.current?.(e.formData);
-            }
-            onSelect(settings.id);
-          }}
-        />
-      )}
-    </div>
-  );
-};
+    );
+  }
+
+  private _debouncer: Debouncer<void, any>;
+  private _settings: Settings;
+  private _renderers: { [name: string]: Field } | undefined;
+  private _uiSchema: UiSchema | undefined;
+  private _onSelect: (id: string) => void;
+  private _hasError: (error: boolean) => void;
+}
