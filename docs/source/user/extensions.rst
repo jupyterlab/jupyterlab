@@ -68,8 +68,6 @@ to self-describe the features and compatibility provided:
    - easy for maintainers to review and merge, and
    - can have a positive impact on the discoverability of the package
 
-.. _install_command:
-
 Managing Extensions with ``jupyter labextension``
 -------------------------------------------------
 
@@ -161,9 +159,9 @@ You can use the Extension Manager in JupyterLab to manage extensions.
 
 The Extension Manager is in the :ref:`left sidebar <left-sidebar>`.
 
-.. figure:: images/extension_manager_default.png
+.. figure:: ../images/extensions-default.png
    :align: center
-   :class: jp-screenshotls
+   :class: jp-screenshot
 
    **Figure:** The default view has three components: a search bar, an "Installed"
    section, and a "Discover" section.
@@ -181,7 +179,7 @@ Disclaimer
 
 By default, the disclaimer is not acknowledged.
 
-.. figure:: images/listings/disclaimer_unchecked.png
+.. figure:: ../images/extensions-disabled.png
    :align: center
    :class: jp-screenshot
 
@@ -191,18 +189,12 @@ By default, the disclaimer is not acknowledged.
 As the disclaimer is not acknowledged, you can search for an extension,
 but can not install it (no install button is available).
 
-.. figure:: images/listings/disclaimer_unchecked_noinstall.png
-   :align: center
-   :class: jp-screenshot
-
-   **Figure:** With Disclaimer unchecked, you can not install an extension
-
 
 To install an extension, you first have to explicitly acknowledge the disclaimer.
 Once done, this will remain across sessions and the user does not have to
 check it again.
 
-.. figure:: images/listings/disclaimer_checked.png
+.. figure:: ../images/extensions-enabled.png
    :align: center
    :class: jp-screenshot
 
@@ -225,7 +217,7 @@ organization are always placed first. These extensions are distinguished by
 a small Jupyter icon next to their name.
 
 
-.. image:: images/extension_manager_discover.png
+.. figure:: ../images/extensions-default.png
    :align: center
    :class: jp-screenshot
    :alt: Screenshot showing the discovery extension listing.
@@ -234,7 +226,7 @@ a small Jupyter icon next to their name.
 Alternatively, you can limit your discovery by using the search bar. This
 performs a free-text search of JupyterLab extensions on the NPM registry.
 
-.. image:: images/extension_manager_search.png
+.. image:: ../images/extensions-search.png
    :align: center
    :class: jp-screenshot
    :alt: Screenshot showing an example search result
@@ -285,7 +277,7 @@ mode. JupyterLab will check the extensions against the defined listings.
     both block and allow listings, the JupyterLab server will not start.
 
 
-.. figure:: images/listings/simultaneous_block_allow_listings.png
+.. figure:: ..images/extensions-simultaneous-block-allow.png
    :align: center
    :class: jp-screenshot
 
@@ -323,7 +315,7 @@ the extension entry in the installed list will be highlighted
 in red. It is recommended that you uninstall it. You can move
 your mouse on the question mark icon to read the instructions.
 
-.. figure:: images/listings/installed_blocklisted.png
+.. figure:: ../images/extensions-blocked-list.png
    :align: center
    :class: jp-screenshot
 
@@ -350,7 +342,7 @@ in the installed list will be highlighted in red. It is recommended that
 you uninstall it. You can move your mouse on the question mark icon to
 read the instructions.
 
-.. figure:: images/listings/installed_allowlisted.png
+.. figure:: ../images/extensions-allowed-list.png
    :align: center
    :class: jp-screenshot
 

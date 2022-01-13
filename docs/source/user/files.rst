@@ -12,14 +12,14 @@ renaming, downloading, copying, and sharing files and directories.
 
 The file browser is in the left sidebar Files tab:
 
-.. image:: images/file_menu_left.png
+.. image:: ../images/files-menu-left.png
    :align: center
    :class: jp-screenshot
    :alt: Arrow pointing to the file browser in the upper left sidebar.
 
 Many actions on files can also be carried out in the File menu:
 
-.. image:: images/file_menu_top.png
+.. image:: ../images/files-menu-top.png
    :align: center
    :class: jp-screenshot
    :alt: A screenshot showing the File menu open including options like "New", "Save All."
@@ -86,7 +86,7 @@ Right-click on a file or directory and select "Copy Shareable Link" to
 copy a URL that can be used to open JupyterLab with that file or
 directory open.
 
-.. image:: images/shareable_link.png
+.. image:: ../images/files-shareable-link.png
    :align: center
    :class: jp-screenshot
    :alt: A screenshot showing the Copy Shareable Link option in the context menu opened over a file, which is the last entry on the list.
@@ -116,7 +116,7 @@ which enables you to pick an activity and kernel:
 
 You can also create new documents or activities using the File menu:
 
-.. image:: images/file_create_text_file.png
+.. image:: ../images/files-create-text-file.png
    :align: center
    :class: jp-screenshot
    :alt: A screenshot showing the context menu entry for creating a new file.

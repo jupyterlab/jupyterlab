@@ -16,7 +16,7 @@ displayed as HTML. You can open different editors and viewers for a file
 by right-clicking on the filename in the file browser and using the
 “Open With” submenu:
 
-.. image:: images/file_formats_open_with.png
+.. image:: ../images/file-formats-open-with.png
    :align: center
    :class: jp-screenshot
 
@@ -33,7 +33,7 @@ classes for displaying rich output:
 Running this code will display the HTML in the output of a notebook or
 code console cell:
 
-.. image:: images/file_formats_html_display.png
+.. image:: ../images/file-formats-html-display.png
    :align: center
    :class: jp-screenshot
 
@@ -279,7 +279,7 @@ Output support for Vega/Vega-Lite in a notebook or code console is
 provided through third-party libraries such as Altair (Python), the
 vegalite R package, or Vegas (Scala/Spark).
 
-.. image:: images/file_formats_altair.png
+.. image:: ../images/file-formats-altair.png
    :align: center
    :class: jp-screenshot
 
@@ -315,6 +315,6 @@ The `nteract/vdom <https://github.com/nteract/vdom>`__ library provides
 a Python API for creating VDOM output that is rendered in nteract and
 JupyterLab:
 
-.. image:: images/file_formats_nteract_vdom.png
+.. image:: ../images/file-formats-nteract-vdom.png
    :align: center
    :class: jp-screenshot

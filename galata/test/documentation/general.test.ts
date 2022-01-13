@@ -86,6 +86,24 @@ test.describe('General', () => {
     ).toMatchSnapshot('interface_left.png');
   });
 
+  test('Right Sidebar', async ({ page, tmpPath }) => {
+    await page.goto(`tree/${tmpPath}`);
+    await page.notebook.createNew();
+    await page.click('[title="Property Inspector"]');
+
+    // Inject capture zone
+    await page.evaluate(() => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<div id="capture-screenshot" style="position: absolute; top: 32px; left: 997px; width: 283px; height: 400px;"></div>'
+      );
+    });
+
+    expect(
+      await (await page.$('#capture-screenshot')).screenshot()
+    ).toMatchSnapshot('interface_right.png');
+  });
+
   test('Open tabs', async ({ page }) => {
     await openOverview(page);
 
@@ -142,7 +160,7 @@ test.describe('General', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('file_menu_left.png');
+    ).toMatchSnapshot('files_menu_left.png');
   });
 
   test('File New menu', async ({ page }) => {
@@ -169,7 +187,7 @@ test.describe('General', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('file_menu_top.png');
+    ).toMatchSnapshot('files_menu_top.png');
   });
 
   test('Shareable link', async ({ page }) => {
@@ -196,7 +214,7 @@ test.describe('General', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('shareable_link.png');
+    ).toMatchSnapshot('files_shareable_link.png');
   });
 
   test('File New Text file', async ({ page }) => {
@@ -224,7 +242,7 @@ test.describe('General', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('file_create_text_file.png');
+    ).toMatchSnapshot('files_create_text_file.png');
   });
 
   test('Text Editor Overview', async ({ page }) => {

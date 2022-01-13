@@ -8,7 +8,7 @@ system. These commands are shared and used throughout JupyterLab (menu bar,
 context menus, keyboard shortcuts, etc.). The command palette provides a
 keyboard-driven way to search for and run JupyterLab commands:
 
-.. image:: images/command_palette.png
+.. image:: ../images/command-palette.png
    :align: center
    :class: jp-screenshot
 

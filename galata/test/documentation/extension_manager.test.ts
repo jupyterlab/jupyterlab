@@ -22,7 +22,7 @@ test.describe('Extension Manager', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('extension_manager_default.png');
+    ).toMatchSnapshot('extensions_default.png');
   });
 
   test('Warning', async ({ page }) => {
@@ -40,7 +40,7 @@ test.describe('Extension Manager', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('extension_manager_disabled.png');
+    ).toMatchSnapshot('extensions_disabled.png');
   });
 
   test('Warning acknowledge', async ({ page }) => {
@@ -58,7 +58,7 @@ test.describe('Extension Manager', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('extension_manager_enabled.png');
+    ).toMatchSnapshot('extensions_enabled.png');
   });
 
   test('Search', async ({ page }) => {
@@ -83,7 +83,7 @@ test.describe('Extension Manager', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('extension_manager_enabled.png');
+    ).toMatchSnapshot('extensions_search.png');
   });
 
   test('With allowed and blocked list', async ({ page }) => {
@@ -119,7 +119,7 @@ test.describe('Extension Manager', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('extension_manager_simultaneous_block_allow.png');
+    ).toMatchSnapshot('extensions_simultaneous_block_allow.png');
   });
 
   test('Blocked installed extension', async ({ page }) => {
@@ -155,7 +155,7 @@ test.describe('Extension Manager', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('extension_manager_blocked_list.png');
+    ).toMatchSnapshot('extensions_blocked_list.png');
   });
 
   test('Allowed installed extension', async ({ page }) => {
@@ -191,7 +191,7 @@ test.describe('Extension Manager', () => {
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
-    ).toMatchSnapshot('extension_manager_allowed_list.png');
+    ).toMatchSnapshot('extensions_allowed_list.png');
   });
 });
 
