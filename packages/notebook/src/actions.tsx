@@ -1885,12 +1885,12 @@ export namespace NotebookActions {
         {trans.__('For more information, see')}{' '}
         <a
           href="https://jupyter-server.readthedocs.io/en/stable/operators/security.html"
-          className="jp-VisibleLink"
           target="_blank"
           rel="noopener noreferrer"
         >
           {trans.__('the Jupyter security documentation')}
-        </a>.
+        </a>
+        .
       </p>
     );
 

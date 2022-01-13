@@ -73,7 +73,6 @@ a:hover {
   color: revert;
 }
 
-
 /* Override Blueprint's _accessibility.scss styles */
 :focus {
   outline: unset;
