@@ -52,15 +52,27 @@ strong {
 }
 
 /* Override Blueprint's _typography.scss styles outside of dialog boxes */
-a:not(.jp-VisibleLink) {
+a {
   text-decoration: unset;
   color: unset;
 }
 
-a:hover:not(.jp-VisibleLink) {
+a:hover {
   text-decoration: unset;
   color: unset;
 }
+
+/* Accessibility for links inside dialog box text */
+.jp-Dialog-content a {
+  text-decoration: revert;
+  color: revert;
+}
+
+.jp-Dialog-content a:hover {
+  text-decoration: revert;
+  color: revert;
+}
+
 
 /* Override Blueprint's _accessibility.scss styles */
 :focus {
