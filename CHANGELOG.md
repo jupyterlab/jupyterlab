@@ -18,9 +18,8 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.3.x/CHANGELOG.md'
 
 ### Enhancements made
 
-- Backport PR #11816: Mentions pip3 for macOS users in docs [#11848](https://github.com/jupyterlab/jupyterlab/pull/11848) ([@jweill-aws](https://github.com/jweill-aws))
 - Fix overlapped shadow for scrolling output cell [#11785](https://github.com/jupyterlab/jupyterlab/pull/11785) ([@thesinepainter](https://github.com/thesinepainter))
-- Backport on 3.3.x: Toggle side-by-side rendering for current notebook (#11793) [#11794](https://github.com/jupyterlab/jupyterlab/pull/11794) ([@fcollonval](https://github.com/fcollonval))
+- Toggle side-by-side rendering for current notebook [#11794](https://github.com/jupyterlab/jupyterlab/pull/11794) ([@fcollonval](https://github.com/fcollonval))
 
 ### Bugs fixed
 
@@ -29,18 +28,18 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.3.x/CHANGELOG.md'
 
 ### Maintenance and upkeep improvements
 
-- [3.3.x] Backport PR #11844: Update reference snapshot for the completer UI test [#11846](https://github.com/jupyterlab/jupyterlab/pull/11846) ([@jtpio](https://github.com/jtpio))
-- [3.3.x] Bump version for the 3.3 prerelease [#11810](https://github.com/jupyterlab/jupyterlab/pull/11810) ([@jtpio](https://github.com/jtpio))
+- Update reference snapshot for the completer UI test [#11846](https://github.com/jupyterlab/jupyterlab/pull/11846) ([@jtpio](https://github.com/jtpio))
+- Bump version for the 3.3 prerelease [#11810](https://github.com/jupyterlab/jupyterlab/pull/11810) ([@jtpio](https://github.com/jtpio))
 
 ### Documentation improvements
 
-- Backport PR #11816: Mentions pip3 for macOS users in docs [#11848](https://github.com/jupyterlab/jupyterlab/pull/11848) ([@jweill-aws](https://github.com/jweill-aws))
-- Backport PR #11837: `3.1.19` Changelog Entry [#11842](https://github.com/jupyterlab/jupyterlab/pull/11842) ([@jtpio](https://github.com/jtpio))
+- Mention pip3 for macOS users in docs [#11848](https://github.com/jupyterlab/jupyterlab/pull/11848) ([@jweill-aws](https://github.com/jweill-aws))
+- Add `3.1.x` Changelog Entries [#11842](https://github.com/jupyterlab/jupyterlab/pull/11842) ([@jtpio](https://github.com/jtpio))
 - Give conda instructions for the pixman pkg-config error. [#11829](https://github.com/jupyterlab/jupyterlab/pull/11829) ([@jasongrout](https://github.com/jasongrout))
 
 ### API and Breaking Changes
 
-- Backport on 3.3.x: Toggle side-by-side rendering for current notebook (#11793) [#11794](https://github.com/jupyterlab/jupyterlab/pull/11794) ([@fcollonval](https://github.com/fcollonval))
+- Toggle side-by-side rendering for current notebook [#11794](https://github.com/jupyterlab/jupyterlab/pull/11794) ([@fcollonval](https://github.com/fcollonval))
 
 ### Other merged PRs
 
