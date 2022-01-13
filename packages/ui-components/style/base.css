@@ -51,7 +51,7 @@ strong {
   font-weight: unset;
 }
 
-/* Override Blueprint's _typography.scss styles outside of dialog boxes */
+/* Disable native link decoration styles everywhere outside of dialog boxes */
 a {
   text-decoration: unset;
   color: unset;
