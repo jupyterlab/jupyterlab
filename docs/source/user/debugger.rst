@@ -105,7 +105,8 @@ You can step into the code, and continue the execution using the debug actions:
 
 **Breakpoints**
 
-New breakpoints can be added and removed while the execution is stopped, and they will be shown in the list of breakpoints:
+New breakpoints can be added and removed while the execution is stopped, and
+they will be shown in the list of breakpoints:
 
 .. image:: ../images/debugger-breakpoints.png
 
@@ -115,4 +116,5 @@ The source panel shows the source of the current file being debugged:
 
 .. image:: ../images/debugger-source.png
 
-If the source corresponds to a cell that has been deleted, clicking on the _Open in Main Area_ button will open a read-only view of the source.
+If the source corresponds to a cell that has been deleted, clicking on the
+*Open in Main Area* button will open a read-only view of the source.

@@ -28,7 +28,6 @@ jobs:
       - name: Launch JupyterLab
         run: |
           cd galata
-          # Mount a volume to overwrite the server configuration
           jlpm start 2>&1 > /tmp/jupyterlab_server.log &
 
       - name: Install browser
@@ -114,8 +113,15 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # Install chinese font
+          sudo apt-get update
+          sudo apt-get install fonts-dejavu fonts-noto
+
           bash ./scripts/ci_install.sh
           pip install altair==4.2.0 ipywidgets==7.6.5 jupyterlab-language-pack-zh-CN==3.2.post7 matplotlib==3.5.1 pandas==1.3.5 scipy==1.7.3 vdom==0.6 vega_datasets==0.9.0
+          # TODO switch to official version
+          pip install "git+https://github.com/jupyterlab/jupyter-renderers.git@remove-jlab-py-dep#subdirectory=packages/geojson-extension&egg=jupyterlab-geojson"
+
           # Build dev-mode
           jlpm run build
         working-directory: core
@@ -125,7 +131,6 @@ jobs:
           JUPYTERLAB_GALATA_ROOT_DIR: ${{ env.DEMO_DIR }}
         run: |
           cd galata
-          # Mount a volume to overwrite the server configuration
           jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode 2>&1 > /tmp/jupyterlab_server.log &
         working-directory: core
 

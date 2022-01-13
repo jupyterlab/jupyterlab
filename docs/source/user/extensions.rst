@@ -119,13 +119,13 @@ The priority order for determining whether an extension is enabled or disabled
 is as follows:
 
 - Presence of ``<jupyter_config_path>/labconfig/page_config.json`` file(s) with
-a ``disabledExtensions`` key that is a object with package names as keys and boolean values.
+  a ``disabledExtensions`` key that is a object with package names as keys and boolean values.
 - (deprecated) Presence of ``disabledExtensions`` key in ``<lab_app_dir>/settings/page_config.json``.
-This value is a list of extensions to disable, but is deprecated in favor of the
-layered configuration approach in the `labconfig` location(s).
+  This value is a list of extensions to disable, but is deprecated in favor of the
+  layered configuration approach in the `labconfig` location(s).
 - Presence of ``disabledExtensions`` key in another JupyterLab extension's metadata
-that disables a given extension.  The key is ignored if that extension itself is
-disabled.
+  that disables a given extension.  The key is ignored if that extension itself is
+  disabled.
 
 When using the command line, you can target the ``--level`` of the config:
 ``user``, ``system``, or ``sys-prefix`` (default).
@@ -277,7 +277,7 @@ mode. JupyterLab will check the extensions against the defined listings.
     both block and allow listings, the JupyterLab server will not start.
 
 
-.. figure:: ..images/extensions-simultaneous-block-allow.png
+.. figure:: ../images/extensions-simultaneous-block-allow.png
    :align: center
    :class: jp-screenshot
 
