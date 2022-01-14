@@ -724,7 +724,7 @@ export class Settings implements ISettingRegistry.ISettings {
    */
   get isModified(): boolean {
     for (const key in this.schema.properties) {
-      const user = this.get(key).composite;
+      const user = this.get(key).user;
       const defaultValue = this.default(key);
       if (user === undefined || user === null) {
         continue;
