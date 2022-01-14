@@ -3,7 +3,6 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-import uuid
 import time
 
 from tornado.ioloop import IOLoop
@@ -52,11 +51,11 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
             raise web.HTTPError(403)
         return await super().get(*args, **kwargs)
 
-    def open(self, guid):
-        #print("[YJSEchoWS]: open", guid)
+    def open(self, room_id):
+        #print("[YJSEchoWS]: open", room_id)
         cls = self.__class__
-        self.id = str(uuid.uuid4())
-        self.room_id = guid
+        self.id = self.get_current_user()
+        self.room_id = room_id
         room = cls.rooms.get(self.room_id)
         if room is None:
             room = YjsRoom()
