@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
+import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 
 test.use({ autoGoto: false, viewport: { height: 720, width: 1280 } });
@@ -47,7 +47,13 @@ test.describe('Internationalization', () => {
   });
 
   test('UI in Chinese', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page);
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');

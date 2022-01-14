@@ -239,11 +239,20 @@ export namespace galata {
    */
   export namespace Routes {
     /**
+     * Contents API
+     *
+     * The content path can be found in the named group `path`.
+     *
+     * The path will be prefixed by '/'.
+     */
+    export const contents = /.*\/api\/contents(?<path>\/.+)?\?/;
+
+    /**
      * Sessions API
      *
      * The session id can be found in the named group `id`.
      *
-     * The id will be suffixed by '/'.
+     * The id will be prefixed by '/'.
      */
     export const sessions = /.*\/api\/sessions(?<id>\/[@:-\w]+)?/;
 
@@ -252,7 +261,7 @@ export namespace galata {
      *
      * The schema name can be found in the named group `id`.
      *
-     * The id will be suffixed by '/'.
+     * The id will be prefixed by '/'.
      */
     export const settings = /.*\/api\/settings(?<id>(\/[@:-\w]+)*)/;
 
@@ -261,7 +270,7 @@ export namespace galata {
      *
      * The terminal id can be found in the named group `id`.
      *
-     * The id will be suffixed by '/'.
+     * The id will be prefixed by '/'.
      */
     export const terminals = /.*\/api\/terminals(?<id>\/[@:-\w]+)?/;
 
@@ -270,7 +279,7 @@ export namespace galata {
      *
      * The locale can be found in the named group `id`.
      *
-     * The id will be suffixed by '/'.
+     * The id will be prefixed by '/'.
      */
     export const translations = /.*\/api\/translations(?<id>\/[@:-\w]+)?/;
 
@@ -279,7 +288,7 @@ export namespace galata {
      *
      * The space name can be found in the named group `id`.
      *
-     * The id will be suffixed by '/'.
+     * The id will be prefixed by '/'.
      */
     export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)/;
   }
@@ -395,6 +404,78 @@ export namespace galata {
    * Mock methods
    */
   export namespace Mock {
+    /**
+     * Set last modified attributes one day ago one listing
+     * directory content.
+     *
+     * @param page Page model object
+     *
+     * #### Notes
+     * The goal is to freeze the file browser display
+     */
+    export async function freezeContentLastModified(page: Page): Promise<void> {
+      // Listen for closing connection (may happen when request are still being processed)
+      let isClosed = false;
+      const ctxt = page.context();
+      ctxt.on('close', () => {
+        isClosed = true;
+      });
+      ctxt.browser()?.on('disconnected', () => {
+        isClosed = true;
+      });
+
+      return page.route(Routes.contents, async (route, request) => {
+        switch (request.method()) {
+          case 'GET': {
+            const path = Routes.contents.exec(request.url())?.groups?.path;
+
+            if (path) {
+              // Proxy the GET request
+              const response = await fetch(request.url(), {
+                headers: await request.allHeaders(),
+                method: request.method()
+              });
+              if (!response.ok) {
+                if (!page.isClosed() && !isClosed) {
+                  return route.fulfill({
+                    status: response.status,
+                    body: await response.text()
+                  });
+                }
+                break;
+              }
+              const data = await response.json();
+              // Modify the last_modified values to be set one day before now.
+              if (
+                data['type'] === 'directory' &&
+                Array.isArray(data['content'])
+              ) {
+                const now = Date.now();
+                const aDayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
+                for (const entry of data['content'] as any[]) {
+                  // Mutate the list in-place
+                  entry['last_modified'] = aDayAgo;
+                }
+              }
+
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: 200,
+                  body: JSON.stringify(data),
+                  contentType: 'application/json'
+                });
+              }
+              break;
+            } else {
+              return route.continue();
+            }
+          }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
     /**
      * Clear all wanted sessions or terminals.
      *

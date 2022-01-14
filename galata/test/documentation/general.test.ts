@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
+import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import { generateArrow, positionMouse } from './utils';
 
@@ -9,7 +9,13 @@ test.use({ autoGoto: false, viewport: { height: 720, width: 1280 } });
 
 test.describe('General', () => {
   test('Welcome', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page);
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // README.md in preview
     await page.click('text=README.md', {
@@ -64,6 +70,7 @@ test.describe('General', () => {
   });
 
   test('Overview', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page);
     await openOverview(page);
 
     expect(await page.screenshot()).toMatchSnapshot('interface_jupyterlab.png');
@@ -71,6 +78,12 @@ test.describe('General', () => {
 
   test('Left Sidebar', async ({ page }) => {
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
+
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
 
     // Inject capture zone
@@ -88,6 +101,12 @@ test.describe('General', () => {
 
   test('Right Sidebar', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
+
     await page.notebook.createNew();
     await page.click('[title="Property Inspector"]');
 
@@ -95,7 +114,7 @@ test.describe('General', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 32px; left: 980px; width: 300px; height: 400px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 32px; left: 997px; width: 283px; height: 400px;"></div>'
       );
     });
 
@@ -113,7 +132,7 @@ test.describe('General', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 300px; height: 400px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 26px; left: 0px; width: 283px; height: 400px;"></div>'
       );
     });
 
@@ -131,7 +150,7 @@ test.describe('General', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 210px; width: 700px; height: 350px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 210px; width: 700px; height: 350px;"></div>'
       );
     });
 
@@ -142,6 +161,11 @@ test.describe('General', () => {
 
   test('File menu', async ({ page }) => {
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -152,7 +176,7 @@ test.describe('General', () => {
         document.body.insertAdjacentHTML('beforeend', arrow);
         document.body.insertAdjacentHTML(
           'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 400px;"></div>'
+          '<div id="capture-screenshot" style="position: absolute; top: 26px; left: 0px; width: 283px; height: 400px;"></div>'
         );
       },
       [generateArrow({ x: 50, y: 55 }, -30)]
@@ -165,6 +189,11 @@ test.describe('General', () => {
 
   test('File New menu', async ({ page }) => {
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -179,7 +208,7 @@ test.describe('General', () => {
         document.body.insertAdjacentHTML('beforeend', mouse);
         document.body.insertAdjacentHTML(
           'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 0px; width: 620px; height: 400px;"></div>'
+          '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 0px; width: 620px; height: 400px;"></div>'
         );
       },
       [positionMouse({ x: 35, y: 35 })]
@@ -192,6 +221,11 @@ test.describe('General', () => {
 
   test('Shareable link', async ({ page }) => {
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -206,7 +240,7 @@ test.describe('General', () => {
         document.body.insertAdjacentHTML('beforeend', mouse);
         document.body.insertAdjacentHTML(
           'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 0px; width: 500px; height: 500px;"></div>'
+          '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 0px; width: 500px; height: 500px;"></div>'
         );
       },
       [positionMouse({ x: 260, y: 350 })]
@@ -219,6 +253,11 @@ test.describe('General', () => {
 
   test('File New Text file', async ({ page }) => {
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -234,7 +273,7 @@ test.describe('General', () => {
         document.body.insertAdjacentHTML('beforeend', mouse);
         document.body.insertAdjacentHTML(
           'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 0px; width: 620px; height: 400px;"></div>'
+          '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 0px; width: 620px; height: 400px;"></div>'
         );
       },
       [positionMouse({ x: 500, y: 110 })]
@@ -247,6 +286,11 @@ test.describe('General', () => {
 
   test('Text Editor Overview', async ({ page }) => {
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Open jupyterlab.md
     await page.dblclick(
@@ -262,6 +306,11 @@ test.describe('General', () => {
 
   test('Text Editor Settings', async ({ page }) => {
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Open jupyterlab.md
     await page.dblclick(
@@ -276,7 +325,7 @@ test.describe('General', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 260px; width: 600px; height: 450px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 260px; width: 600px; height: 450px;"></div>'
       );
     });
 
@@ -286,7 +335,13 @@ test.describe('General', () => {
   });
 
   test('Notebook', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page);
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Open Data.ipynb
     await page.dblclick(
@@ -311,6 +366,11 @@ test.describe('General', () => {
 
   test('Terminals', async ({ page }) => {
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Open Data.ipynb
     await page.dblclick(
@@ -337,6 +397,11 @@ test.describe('General', () => {
 
   test('Kernels and Terminals', async ({ page }) => {
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Open a terminal
     await page.click('text=File');
@@ -355,7 +420,7 @@ test.describe('General', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 400px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 26px; left: 0px; width: 283px; height: 400px;"></div>'
       );
     });
 
@@ -376,6 +441,11 @@ test.describe('General', () => {
 
   test('Open With', async ({ page }) => {
     await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     await page.click('text=README.md', {
       button: 'right'
@@ -387,7 +457,7 @@ test.describe('General', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 0px; width: 700px; height: 500px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 0px; width: 700px; height: 500px;"></div>'
       );
     });
 
@@ -398,6 +468,11 @@ test.describe('General', () => {
 
   test('HTML Display', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -427,6 +502,11 @@ test.describe('General', () => {
 
   test('Altair', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -447,6 +527,11 @@ test.describe('General', () => {
 
   test('VDOM', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -468,6 +553,11 @@ test.describe('General', () => {
 
 async function openOverview(page) {
   await page.goto();
+  await page.addStyleTag({
+    content: `.jp-LabShell.jp-mod-devMode {
+      border-top: none;
+    }`
+  });
 
   // Open Data.ipynb
   await page.dblclick('[aria-label="File Browser Section"] >> text=notebooks');

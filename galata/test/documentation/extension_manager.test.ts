@@ -72,6 +72,8 @@ test.describe('Extension Manager', () => {
     );
 
     await page.keyboard.press('Enter');
+    // We can not wait for extension kept by the keyword as they are already in the DOM
+    await page.waitForSelector('text=No entries');
 
     // Inject capture zone
     await page.evaluate(() => {
