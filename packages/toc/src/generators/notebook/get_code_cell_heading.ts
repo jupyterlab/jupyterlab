@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Cell } from '@jupyterlab/cells';
-import { INotebookHeading } from '../../utils/headings';
+import { INotebookHeading, RunningStatus } from '../../utils/headings';
 
 /**
  * Returns a "click" handler.
@@ -31,7 +31,8 @@ function getCodeCellHeading(
   executionCount: string,
   lastLevel: number,
   cellRef: Cell,
-  index: number = -1
+  index: number = -1,
+  isRunning = RunningStatus.Idle
 ): INotebookHeading {
   let headings: INotebookHeading[] = [];
   if (index === -1) {
@@ -56,7 +57,8 @@ function getCodeCellHeading(
       prompt: executionCount,
       cellRef: cellRef,
       hasChild: false,
-      index: index
+      index: index,
+      isRunning
     });
   }
   return headings[0];
