@@ -77,6 +77,7 @@ test.describe('General', () => {
   });
 
   test('Left Sidebar', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page);
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -132,7 +133,7 @@ test.describe('General', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 26px; left: 0px; width: 283px; height: 400px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 27px; left: 0px; width: 283px; height: 400px;"></div>'
       );
     });
 
@@ -176,7 +177,7 @@ test.describe('General', () => {
         document.body.insertAdjacentHTML('beforeend', arrow);
         document.body.insertAdjacentHTML(
           'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 26px; left: 0px; width: 283px; height: 400px;"></div>'
+          '<div id="capture-screenshot" style="position: absolute; top: 27px; left: 0px; width: 283px; height: 400px;"></div>'
         );
       },
       [generateArrow({ x: 50, y: 55 }, -30)]
@@ -365,6 +366,7 @@ test.describe('General', () => {
   });
 
   test('Terminals', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page);
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -420,7 +422,7 @@ test.describe('General', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 26px; left: 0px; width: 283px; height: 400px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 27px; left: 0px; width: 283px; height: 400px;"></div>'
       );
     });
 
@@ -609,6 +611,6 @@ async function openOverview(page) {
     mdBBox.y + 0.5 * mdBBox.height
   );
   await page.mouse.down();
-  await page.mouse.move(panelBBox.x + 0.75 * panelBBox.width, 200);
+  await page.mouse.move(panelBBox.x + 0.5 * panelBBox.width, 200);
   await page.mouse.up();
 }

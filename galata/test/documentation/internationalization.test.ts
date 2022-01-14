@@ -70,7 +70,7 @@ test.describe('Internationalization', () => {
     });
 
     // Wait for the launcher to be loaded
-    await page.waitForTimeout(500);
+    await page.waitForSelector('text=README.md');
 
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
