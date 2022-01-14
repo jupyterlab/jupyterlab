@@ -43,7 +43,9 @@ export class WebSocketProviderWithLocks
     this._contentType = options.contentType;
     this._serverUrl = options.url;
     const color = '#' + env.getParam('--usercolor', getRandomColor().slice(1));
-    const name = env.getParam('--username', getAnonymousUserName());
+    const name = decodeURIComponent(
+      env.getParam('--username', getAnonymousUserName())
+    );
     const awareness = options.ymodel.awareness;
     const currState = awareness.getLocalState();
     // only set if this was not already set by another plugin
