@@ -44,7 +44,7 @@
     "@jupyterlab/translation": "^4.0.0-alpha.4",
     "@jupyterlab/ui-components": "^4.0.0-alpha.19",
     "@lumino/messaging": "^1.10.1",
-    "@lumino/polling": "^1.9.1",
+    "@lumino/polling": "^1.10.0",
     "@lumino/signaling": "^1.10.1",
     "react": "^17.0.1",
     "react-paginate": "^6.3.2",

@@ -36,8 +36,8 @@
   },
   "dependencies": {
     "@jupyterlab/statedb": "^4.0.0-alpha.4",
-    "@lumino/commands": "^1.19.0",
-    "@lumino/coreutils": "^1.11.1",
+    "@lumino/commands": "^1.20.0",
+    "@lumino/coreutils": "^1.12.0",
     "@lumino/disposable": "^1.10.1",
     "@lumino/signaling": "^1.10.1",
     "ajv": "^6.12.3",

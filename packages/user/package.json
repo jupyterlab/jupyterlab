@@ -44,10 +44,10 @@
     "@jupyterlab/coreutils": "^6.0.0-alpha.4",
     "@jupyterlab/services": "^7.0.0-alpha.4",
     "@jupyterlab/ui-components": "^4.0.0-alpha.19",
-    "@lumino/coreutils": "^1.11.1",
+    "@lumino/coreutils": "^1.12.0",
     "@lumino/signaling": "^1.10.1",
     "@lumino/virtualdom": "^1.14.1",
-    "@lumino/widgets": "^1.30.0",
+    "@lumino/widgets": "^1.31.1",
     "lib0": "^0.2.42"
   },
   "devDependencies": {

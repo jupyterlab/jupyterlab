@@ -52,7 +52,7 @@
     "@jupyterlab/services": "^7.0.0-alpha.4",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.4",
     "@lumino/algorithm": "^1.9.1",
-    "@lumino/coreutils": "^1.11.1",
+    "@lumino/coreutils": "^1.12.0",
     "@playwright/test": "^1.16.2",
     "@stdlib/stats": "~0.0.13",
     "canvas": "^2.6.1",

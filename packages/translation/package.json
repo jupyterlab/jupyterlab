@@ -42,7 +42,7 @@
     "@jupyterlab/coreutils": "^6.0.0-alpha.4",
     "@jupyterlab/services": "^7.0.0-alpha.4",
     "@jupyterlab/statedb": "^4.0.0-alpha.4",
-    "@lumino/coreutils": "^1.11.1"
+    "@lumino/coreutils": "^1.12.0"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.4",
