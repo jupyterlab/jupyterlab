@@ -1255,7 +1255,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       url = url + `&token=${encodeURIComponent(token)}`;
     }
 
-    this._ws = new settings.WebSocket(url);
+    this._ws = new settings.WebSocket(url, '0.0.1');
 
     // Ensure incoming binary messages are not Blobs
     this._ws.binaryType = 'arraybuffer';
