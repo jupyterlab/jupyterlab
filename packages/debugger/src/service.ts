@@ -347,6 +347,12 @@ export class DebuggerService implements IDebugger, IDisposable {
       }
     ];
     this._model.variables.scopes = variableScopes;
+  }
+
+  async displayModules(): Promise<void> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
 
     const modules = await this.session.sendRequest('modules', {});
     this._model.kernelSources.kernelSources = modules.body.modules.map(
