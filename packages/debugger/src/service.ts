@@ -347,6 +347,16 @@ export class DebuggerService implements IDebugger, IDisposable {
       }
     ];
     this._model.variables.scopes = variableScopes;
+
+    const modules = await this.session.sendRequest('modules', {});
+    this._model.kernelSources.kernelSources = modules.body.modules.map(
+      module => {
+        return {
+          content: Object.keys(module)[0],
+          path: Object.values(module)[0]
+        };
+      }
+    );
   }
 
   /**

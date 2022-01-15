@@ -8,77 +8,42 @@ import { IDebugger } from '../../tokens';
 /**
  * The model to keep track of the current source being displayed.
  */
-export class KernelSourcesModel implements IDebugger.Model.ISources {
-  /**
-   * Instantiate a new Sources.Model
-   *
-   * @param options The Sources.Model instantiation options.
-   */
-  constructor(options: KernelSourcesModel.IOptions) {
-    this.currentFrameChanged = options.currentFrameChanged;
+export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
+  private _kernelSources: IDebugger.Source[] | null;
+
+  get kernelSources() {
+    return this._kernelSources;
   }
 
-  /**
-   * Signal emitted when the current frame changes.
-   */
-  readonly currentFrameChanged: ISignal<
-    IDebugger.Model.ICallstack,
-    IDebugger.IStackFrame | null
-  >;
-
-  /**
-   * Signal emitted when a source should be open in the main area.
-   */
-  get currentSourceOpened(): ISignal<
-    KernelSourcesModel,
-    IDebugger.Source | null
-  > {
-    return this._currentSourceOpened;
+  set kernelSources(kernelSources: IDebugger.Source[] | null) {
+    this._kernelSources = kernelSources;
+    this._changed.emit(kernelSources);
   }
 
   /**
    * Signal emitted when the current source changes.
    */
-  get currentSourceChanged(): ISignal<
-    KernelSourcesModel,
-    IDebugger.Source | null
-  > {
-    return this._currentSourceChanged;
+  get changed(): ISignal<this, IDebugger.Source[] | null> {
+    return this._changed;
   }
 
   /**
-   * Return the current source.
+   * Signal emitted when a kernel source should be open in the main area.
    */
-  get currentSource(): IDebugger.Source | null {
-    return this._currentSource;
-  }
-
-  /**
-   * Set the current source.
-   *
-   * @param source The source to set as the current source.
-   */
-  set currentSource(source: IDebugger.Source | null) {
-    this._currentSource = source;
-    this._currentSourceChanged.emit(source);
+  get kernelSourceOpened(): ISignal<this, IDebugger.Source | null> {
+    return this._kernelSourceOpened;
   }
 
   /**
    * Open a source in the main area.
    */
-  open(): void {
-    this._currentSourceOpened.emit(this._currentSource);
+  open(kernelSource: IDebugger.Source): void {
+    this._kernelSourceOpened.emit(kernelSource);
   }
 
-  private _currentSource: IDebugger.Source | null;
-  private _currentSourceOpened = new Signal<
-    KernelSourcesModel,
-    IDebugger.Source | null
-  >(this);
-  private _currentSourceChanged = new Signal<
-    KernelSourcesModel,
-    IDebugger.Source | null
-  >(this);
+  private _changed = new Signal<this, IDebugger.Source[] | null>(this);
+
+  private _kernelSourceOpened = new Signal<this, IDebugger.Source | null>(this);
 }
 
 /**

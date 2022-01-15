@@ -18,56 +18,38 @@ import { IDebugger } from '../../tokens';
  */
 export class KernelSourcesBody extends Widget {
   /**
-   * Instantiate a new Body for the SourcesBody widget.
+   * Instantiate a new Body for the KernelSourcesBody widget.
    *
-   * @param options The instantiation options for a SourcesBody.
+   * @param options The instantiation options for a KernelSourcesBody.
    */
   constructor(options: KernelSourcesBody.IOptions) {
     super();
     this._model = options.model;
     this._debuggerService = options.service;
-
-    const layout = new PanelLayout();
-    this.layout = layout;
+    this.layout = new PanelLayout();
     this.addClass('jp-DebuggerKernelSources-body');
-
-    this._model.currentFrameChanged.connect(async (_, frame) => {
-      if (!frame) {
-        this._clear();
-        return;
-      }
-    });
-
-    this._debuggerService.eventMessage.connect((_, event) => {
-      if (event.event === 'initialized') {
-        this._debuggerService.eventMessage.connect((_, event) => {
-          if (event.event === 'initialized') {
-            this._debuggerService.session
-              ?.sendRequest('modules', {})
-              .then(reply => {
-                reply.body.modules.forEach(module => {
-                  const name = Object.keys(module)[0];
-                  const path = Object.values(module)[0];
-                  const button = new ToolbarButton({
-                    icon: viewBreakpointIcon,
-                    onClick: (): void => {
-                      this._debuggerService
-                        .getSource({
-                          sourceReference: 0,
-                          path: path
-                        })
-                        .then(source => {
-                          this._model.currentSource = source;
-                          this._model.open();
-                        });
-                    },
-                    label: name,
-                    tooltip: path
-                  });
-                  layout.addWidget(button);
+    this._model.changed.connect((_, kernelSources) => {
+      this._clear();
+      if (kernelSources) {
+        kernelSources.forEach(module => {
+          const name = module.content;
+          const path = module.path;
+          const button = new ToolbarButton({
+            icon: viewBreakpointIcon,
+            onClick: (): void => {
+              this._debuggerService
+                .getSource({
+                  sourceReference: 0,
+                  path: path
+                })
+                .then(source => {
+                  this._model.open(source);
                 });
-              });
-          }
+            },
+            label: name,
+            tooltip: path
+          });
+          (this.layout as PanelLayout).addWidget(button);
         });
       }
     });
@@ -86,13 +68,15 @@ export class KernelSourcesBody extends Widget {
   }
 
   /**
-   * Clear the content of the source read-only editor.
+   * Clear the content of the kernel source read-only editor.
    */
   private _clear(): void {
-    this._model.currentSource = null;
+    while ((this.layout as PanelLayout).widgets.length > 0) {
+      (this.layout as PanelLayout).removeWidgetAt(0);
+    }
   }
 
-  private _model: IDebugger.Model.ISources;
+  private _model: IDebugger.Model.IKernelSources;
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
 }
@@ -113,6 +97,6 @@ export namespace KernelSourcesBody {
     /**
      * The sources model.
      */
-    model: IDebugger.Model.ISources;
+    model: IDebugger.Model.IKernelSources;
   }
 }
