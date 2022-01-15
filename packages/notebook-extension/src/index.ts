@@ -1445,8 +1445,20 @@ function activateNotebookHandler(
       ).composite as boolean,
       renderingLayout: settings.get('renderingLayout').composite as
         | 'default'
-        | 'side-by-side'
+        | 'side-by-side',
+      sideBySideLeftMarginOverride: settings.get('sideBySideLeftMarginOverride')
+        .composite as string,
+      sideBySideRightMarginOverride: settings.get(
+        'sideBySideRightMarginOverride'
+      ).composite as string
     };
+    document.head.insertAdjacentHTML(
+      'beforeend',
+      `<style>.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell { 
+      margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
+      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;
+    }</style>`
+    );
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
 
