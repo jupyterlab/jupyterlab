@@ -175,6 +175,12 @@ html_favicon = "_static/logo-icon.png"
 html_theme_options = {
     "icon_links": [
         {
+            "name": "jupyter.org",
+            "url": "https://jupyter.org",
+            "icon": "_static/jupyter_logo.svg",
+            "type": "local",
+        },
+        {
             "name": "GitHub",
             "url": "https://github.com/jupyterlab/jupyterlab",
             "icon": "fab fa-github-square",
@@ -192,7 +198,7 @@ html_theme_options = {
     ],
     "use_edit_page_button": True,
     "navbar_align": "left",
-    "navbar_end": ["jupyter-website-icon.html", "navbar-icon-links.html", "search-field.html"],
+    "navbar_end": ["navbar-icon-links.html", "search-field.html"],
     "footer_items": ["copyright.html"],
 }
 
