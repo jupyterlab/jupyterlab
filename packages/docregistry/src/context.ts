@@ -808,6 +808,11 @@ export class Context<
         `while the current file seems to have been saved ` +
         `${tDisk}`
     );
+    if (this._timeConflictModalIsOpen) {
+      return new Promise(() => {
+        return;
+      });
+    }
     const body = this._trans.__(
       `"%1" has changed on disk since the last time it was opened or saved.
 Do you want to overwrite the file on disk with the version open here,
@@ -818,11 +823,13 @@ or load the version on disk (revert)?`,
     const overwriteBtn = Dialog.warnButton({
       label: this._trans.__('Overwrite')
     });
+    this._timeConflictModalIsOpen = true;
     return showDialog({
       title: this._trans.__('File Changed'),
       body,
       buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
     }).then(result => {
+      this._timeConflictModalIsOpen = false;
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
@@ -906,6 +913,7 @@ or load the version on disk (revert)?`,
   private _ydoc: Y.Doc;
   private _ycontext: Y.Map<string>;
   private _lastModifiedCheckMargin = 500;
+  private _timeConflictModalIsOpen = false;
 }
 
 /**
