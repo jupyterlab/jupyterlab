@@ -29,9 +29,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged
     });
-    this.kernelSources = new KernelSourcesModel({
-      currentFrameChanged: this.callstack.currentFrameChanged
-    });
+    this.kernelSources = new KernelSourcesModel();
   }
 
   /**
@@ -143,6 +141,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.callstack.frames = [];
     this.variables.scopes = [];
     this.sources.currentSource = null;
+    this.kernelSources.kernelSources = null;
     this.title = '-';
   }
 

@@ -28,15 +28,6 @@ export class KernelSources extends PanelWithToolbar {
       service,
       model
     });
-    /*
-    const button = new ToolbarButton({
-      icon: viewBreakpointIcon,
-      onClick: (): void => model.open(),
-      label: '/Users/echarles/miniconda3/envs/datalayer/lib/python3.8/os.py',
-      tooltip: '/Users/echarles/miniconda3/envs/datalayer/lib/python3.8/os.py'
-    });
-    this.addWidget(button);
-    */
     this.addClass('jp-DebuggerKernelSources-header');
     this.addWidget(body);
     this.addClass('jp-DebuggerKenelSources');
@@ -59,7 +50,7 @@ export namespace KernelSources {
     /**
      * The model for the sources.
      */
-    model: IDebugger.Model.ISources;
+    model: IDebugger.Model.IKernelSources;
 
     /**
      * The application language translator

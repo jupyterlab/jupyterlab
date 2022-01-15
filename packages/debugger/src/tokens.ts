@@ -824,7 +824,7 @@ export namespace IDebugger {
       /**
        * The kernel sources UI model.
        */
-      readonly kernelSources: ISources;
+      readonly kernelSources: IKernelSources;
 
       /**
        * The set of threads in stopped state.
@@ -884,6 +884,37 @@ export namespace IDebugger {
        * Open a source in the main area.
        */
       open(): void;
+    }
+
+    /**
+     * The kernel sources UI model.
+     */
+    export interface IKernelSources {
+      /**
+       * The kernel source.
+       */
+      kernelSources: IDebugger.Source[] | null;
+
+      /**
+       * Signal emitted when the kernel sources have changed.
+       */
+      readonly changed: ISignal<
+        IDebugger.Model.IKernelSources,
+        IDebugger.Source[] | null
+      >;
+
+      /**
+       * Signal emitted when a kernel source has be opened in the main area.
+       */
+      readonly kernelSourceOpened: ISignal<
+        IDebugger.Model.IKernelSources,
+        IDebugger.Source | null
+      >;
+
+      /**
+       * Open a source in the main area.
+       */
+      open(source: IDebugger.Source): void;
     }
 
     /**

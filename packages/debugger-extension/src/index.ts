@@ -805,7 +805,7 @@ const main: JupyterFrontEndPlugin<void> = {
           });
       };
 
-      const onCurrentSourceOpened = (
+      const onSourceOpened = (
         _: IDebugger.Model.ISources | null,
         source: IDebugger.Source,
         breakpoint?: IDebugger.IBreakpoint
@@ -863,16 +863,28 @@ const main: JupyterFrontEndPlugin<void> = {
         }
       };
 
+      const onKernelSourceOpened = (
+        _: IDebugger.Model.IKernelSources | null,
+        source: IDebugger.Source,
+        breakpoint?: IDebugger.IBreakpoint
+      ): void => {
+        if (!source) {
+          return;
+        }
+        //        const { content, mimeType, path } = source;
+        onSourceOpened(null, source, breakpoint);
+      };
+
       model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
-      model.sources.currentSourceOpened.connect(onCurrentSourceOpened);
-      model.kernelSources.currentSourceOpened.connect(onCurrentSourceOpened);
+      model.sources.currentSourceOpened.connect(onSourceOpened);
+      model.kernelSources.kernelSourceOpened.connect(onKernelSourceOpened);
       model.breakpoints.clicked.connect(async (_, breakpoint) => {
         const path = breakpoint.source?.path;
         const source = await service.getSource({
           sourceReference: 0,
           path
         });
-        onCurrentSourceOpened(null, source, breakpoint);
+        onSourceOpened(null, source, breakpoint);
       });
     }
   }
