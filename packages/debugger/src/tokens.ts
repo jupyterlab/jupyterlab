@@ -123,6 +123,11 @@ export interface IDebugger {
   displayDefinedVariables(): Promise<void>;
 
   /**
+   * Requests all the loaded modules and display them.
+   */
+  displayModules(): Promise<void>;
+
+  /**
    * Request whether debugging is available for the given session connection.
    *
    * @param connection The session connection.
