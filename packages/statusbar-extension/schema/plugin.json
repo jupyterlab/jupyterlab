@@ -30,6 +30,12 @@
       "title": "Status Bar Visibility",
       "description": "Whether to show status bar or not",
       "default": true
+    },
+    "startWithSimpleMode": {
+      "type": "boolean",
+      "title": "Start with simple mode",
+      "description": "Whether to start with the simple mode or not",
+      "default": false
     }
   },
   "additionalProperties": false,
