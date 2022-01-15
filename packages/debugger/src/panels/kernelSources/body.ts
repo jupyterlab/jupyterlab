@@ -13,6 +13,16 @@ import { EditorHandler } from '../../handlers/editor';
 
 import { IDebugger } from '../../tokens';
 
+const compare = (a: IDebugger.Source, b: IDebugger.Source) => {
+  if (a.content < b.content) {
+    return -1;
+  }
+  if (a.content > b.content) {
+    return 1;
+  }
+  return 0;
+};
+
 /**
  * The body for a Sources Panel.
  */
@@ -31,23 +41,24 @@ export class KernelSourcesBody extends Widget {
     this._model.changed.connect((_, kernelSources) => {
       this._clear();
       if (kernelSources) {
+        kernelSources.sort(compare);
         kernelSources.forEach(module => {
           const name = module.content;
           const path = module.path;
           const button = new ToolbarButton({
             icon: viewBreakpointIcon,
-            onClick: (): void => {
-              this._debuggerService
-                .getSource({
-                  sourceReference: 0,
-                  path: path
-                })
-                .then(source => {
-                  this._model.open(source);
-                });
-            },
             label: name,
             tooltip: path
+          });
+          button.node.addEventListener('dblclick', () => {
+            this._debuggerService
+              .getSource({
+                sourceReference: 0,
+                path: path
+              })
+              .then(source => {
+                this._model.open(source);
+              });
           });
           (this.layout as PanelLayout).addWidget(button);
         });
