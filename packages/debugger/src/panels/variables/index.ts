@@ -24,7 +24,7 @@ import { VariablesBodyTree } from './tree';
 /**
  * A Panel to show a variable explorer.
  */
-export class Variables extends Panel implements IDebugger.IVariablesPanel {
+export class Variables extends Panel {
   /**
    * Instantiate a new Variables Panel.
    *
@@ -97,7 +97,7 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
       }
     };
 
-    markViewButtonSelection(this.viewMode);
+    markViewButtonSelection(this._table.isHidden ? 'tree' : 'table');
 
     this._header.toolbar.addItem('view-VariableTreeView', treeViewButton);
 
@@ -107,22 +107,6 @@ export class Variables extends Panel implements IDebugger.IVariablesPanel {
     this.addWidget(this._tree);
     this.addWidget(this._table);
     this.addClass('jp-DebuggerVariables');
-  }
-
-  /**
-   * Latest variable selected.
-   */
-  get latestSelection(): IDebugger.IVariableSelection | null {
-    return this._table.isHidden
-      ? this._tree.latestSelection
-      : this._table.latestSelection;
-  }
-
-  /**
-   * Get the variable explorer view mode
-   */
-  get viewMode(): 'tree' | 'table' {
-    return this._table.isHidden ? 'tree' : 'table';
   }
 
   /**
