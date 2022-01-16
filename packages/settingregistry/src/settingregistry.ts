@@ -50,7 +50,7 @@ export interface ISchemaValidator {
    * @param populate - Whether plugin data should be populated, defaults to
    * `true`.
    *
-   * @return A list of errors if either the schema or data fail to validate or
+   * @returns A list of errors if either the schema or data fail to validate or
    * `null` if there are no errors.
    */
   validateData(
@@ -115,7 +115,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    * @param populate - Whether plugin data should be populated, defaults to
    * `true`.
    *
-   * @return A list of errors if either the schema or data fail to validate or
+   * @returns A list of errors if either the schema or data fail to validate or
    * `null` if there are no errors.
    */
   validateData(
@@ -195,7 +195,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    *
    * @param schema - The schema being added.
    *
-   * @return A list of errors if the schema fails to validate or `null` if there
+   * @returns A list of errors if the schema fails to validate or `null` if there
    * are no errors.
    *
    * #### Notes

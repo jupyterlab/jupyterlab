@@ -55,6 +55,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     const { commands, shell } = app;
     const command = CommandIDs.open;
     const label = trans.__('Show Contextual Help');
+    const openedLabel = trans.__('Contextual Help');
     const namespace = 'inspector';
     const tracker = new WidgetTracker<MainAreaWidget<InspectorPanel>>({
       namespace
@@ -72,7 +73,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
           content: new InspectorPanel({ translator })
         });
         inspector.id = 'jp-inspector';
-        inspector.title.label = label;
+        inspector.title.label = openedLabel;
         inspector.title.icon = inspectorIcon;
         void tracker.add(inspector);
         source = source && !source.isDisposed ? source : null;
@@ -122,7 +123,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     }
 
     // Create a proxy to pass the `source` to the current inspector.
-    const proxy: IInspector = Object.defineProperty({}, 'source', {
+    const proxy = Object.defineProperty({} as IInspector, 'source', {
       get: (): IInspector.IInspectable | null =>
         !inspector || inspector.isDisposed ? null : inspector.content.source,
       set: (src: IInspector.IInspectable | null) => {

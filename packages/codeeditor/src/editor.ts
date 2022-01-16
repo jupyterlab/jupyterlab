@@ -17,6 +17,8 @@ import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
+const globalModelDBMutex = models.createMutex();
+
 /**
  * A namespace for code editors.
  *
@@ -59,7 +61,7 @@ export namespace CodeEditor {
   /**
    * An interface describing editor state coordinates.
    */
-  export interface ICoordinate extends JSONObject, ClientRect {}
+  export interface ICoordinate extends DOMRectReadOnly {}
 
   /**
    * A range.
@@ -283,7 +285,7 @@ export namespace CodeEditor {
       sender: models.ISharedBaseCell<any>,
       change: models.CellChange<nbformat.IBaseCellMetadata>
     ): void {
-      this._mutex(() => {
+      globalModelDBMutex(() => {
         if (change.sourceChange) {
           const value = this.modelDB.get('value') as IObservableString;
           let currpos = 0;
@@ -308,7 +310,7 @@ export namespace CodeEditor {
       value: IObservableString,
       event: IObservableString.IChangedArgs
     ): void {
-      this._mutex(() => {
+      globalModelDBMutex(() => {
         this.sharedModel.transact(() => {
           switch (event.type) {
             case 'insert':
@@ -337,11 +339,6 @@ export namespace CodeEditor {
      * The shared model for the cell editor.
      */
     sharedModel: models.ISharedText;
-
-    /**
-     * A mutex to update the shared model.
-     */
-    protected readonly _mutex = models.createMutex();
 
     /**
      * The underlying `IModelDB` instance in which model

@@ -1,11 +1,8 @@
 # coding: utf-8
 """A lab app that runs a sub process for a demo or a test."""
 
-import argparse
 import atexit
-import glob
 import json
-import logging
 import os
 import shutil
 import sys
@@ -20,11 +17,9 @@ import jupyter_core
 import jupyterlab_server
 import pkg_resources
 from ipykernel.kernelspec import write_kernel_spec
-from jupyter_core.application import base_aliases, base_flags
 from jupyter_server.serverapp import ServerApp
-from jupyterlab.utils import deprecated
 from jupyterlab_server.process_app import ProcessApp
-from traitlets import Bool, Dict, Unicode, default
+from traitlets import default
 
 HERE = osp.realpath(osp.dirname(__file__))
 
@@ -207,182 +202,6 @@ class ProcessTestApp(ProcessApp):
             os._exit(1)
 
 
-jest_aliases = dict(base_aliases)
-jest_aliases.update({
-    'testPathPattern': 'JestApp.testPathPattern'
-})
-jest_aliases.update({
-    'testNamePattern': 'JestApp.testNamePattern'
-})
-
-
-jest_flags = dict(base_flags)
-jest_flags['coverage'] = (
-    {'JestApp': {'coverage': True}},
-    'Run coverage'
-)
-jest_flags['watchAll'] = (
-    {'JestApp': {'watchAll': True}},
-    'Watch all test files'
-)
-
-
-class JestApp(ProcessTestApp):
-    """DEPRECATED: A notebook app that runs a jest test."""
-
-    default_url = Unicode('/lab')
-    extension_url = '/lab'
-    name = __name__
-    app_name = 'JupyterLab Jest Application'
-    app_url = '/lab'
-
-    coverage = Bool(False, help='Whether to run coverage').tag(config=True)
-
-    testPathPattern = Unicode('').tag(config=True)
-
-    testNamePattern = Unicode('').tag(config=True)
-
-    watchAll = Bool(False).tag(config=True)
-
-    aliases = jest_aliases
-
-    flags = jest_flags
-
-    jest_dir = Unicode('')
-
-    test_config = Dict(dict(foo='bar'))
-
-    @deprecated(removed_version=4)
-    def get_command(self):
-        """Get the command to run"""
-        terminalsAvailable = self.settings['terminals_available']
-        debug = self.log.level == logging.DEBUG
-
-        # find jest
-        target = osp.join('node_modules', 'jest', 'bin', 'jest.js')
-        jest = ''
-        cwd = osp.realpath(self.jest_dir)
-        while osp.dirname(cwd) != cwd:
-            if osp.exists(osp.join(cwd, target)):
-                jest = osp.join(cwd, target)
-                break
-            cwd = osp.dirname(cwd)
-        if not jest:
-            raise RuntimeError('jest not found!')
-
-        cmd = ['node']
-        if self.coverage:
-            cmd += [jest, '--coverage']
-        elif debug:
-            cmd += ['--inspect-brk', jest, '--no-cache']
-            if self.watchAll:
-                cmd += ['--watchAll']
-            else:
-                cmd += ['--watch']
-        else:
-            cmd += [jest]
-
-        if self.testPathPattern:
-            cmd += ['--testPathPattern', self.testPathPattern]
-
-        if self.testNamePattern:
-            cmd += ['--testNamePattern', self.testNamePattern]
-
-        cmd += ['--runInBand']
-
-        if self.log_level > logging.INFO:
-            cmd += ['--silent']
-
-        config = dict(baseUrl=self.serverapp.connection_url,
-                      terminalsAvailable=str(terminalsAvailable),
-                      token=self.settings['token'])
-        config.update(**self.test_config)
-
-        td = tempfile.mkdtemp()
-        atexit.register(lambda: shutil.rmtree(td, True))
-
-        config_path = os.path.join(td, 'config.json')
-        with open(config_path, 'w') as fid:
-            json.dump(config, fid)
-
-        env = os.environ.copy()
-        env['JUPYTER_CONFIG_DATA'] = config_path
-        return cmd, dict(cwd=self.jest_dir, env=env)
-
-
-class KarmaTestApp(ProcessTestApp):
-    """DEPRECATED: A notebook app that runs the jupyterlab karma tests.
-    """
-
-    default_url = Unicode('/lab')
-    extension_url = '/lab'
-    name = __name__
-    app_name = 'JupyterLab Karma Application'
-    app_url = '/lab'
-
-    karma_pattern = Unicode('src/*.spec.ts*')
-    karma_base_dir = Unicode('')
-    karma_coverage_dir = Unicode('')
-
-    @deprecated(removed_version=4)
-    def get_command(self):
-        """Get the command to run."""
-        terminalsAvailable = self.settings['terminals_available']
-        token = self.settings['token']
-        config = dict(baseUrl=self.serverapp.connection_url, token=token,
-                      terminalsAvailable=str(terminalsAvailable),
-                      foo='bar')
-
-        cwd = self.karma_base_dir
-
-        karma_inject_file = pjoin(cwd, 'build', 'injector.js')
-        if not os.path.exists(pjoin(cwd, 'build')):
-            os.makedirs(pjoin(cwd, 'build'))
-
-        with open(karma_inject_file, 'w') as fid:
-            fid.write("""
-            require('es6-promise/dist/es6-promise.js');
-            require('@lumino/widgets/style/index.css');
-
-            var node = document.createElement('script');
-            node.id = 'jupyter-config-data';
-            node.type = 'application/json';
-            node.textContent = '%s';
-            document.body.appendChild(node);
-            """ % json.dumps(config))
-
-        # validate the pattern
-        parser = argparse.ArgumentParser()
-        parser.add_argument('--pattern', action='store')
-        args, argv = parser.parse_known_args()
-        pattern = args.pattern or self.karma_pattern
-        files = glob.glob(pjoin(cwd, pattern))
-        if not files:
-            msg = 'No files matching "%s" found in "%s"'
-            raise ValueError(msg % (pattern, cwd))
-
-        # Find and validate the coverage folder if not specified
-        if not self.karma_coverage_dir:
-            with open(pjoin(cwd, 'package.json')) as fid:
-                data = json.load(fid)
-            name = data['name'].replace('@jupyterlab/test-', '')
-            folder = osp.realpath(pjoin(HERE, '..', '..', 'packages', name))
-            if not osp.exists(folder):
-                raise ValueError(
-                    'No source package directory found for "%s", use the pattern '
-                    '"@jupyterlab/test-<package_dir_name>"' % name
-                )
-            self.karma_coverage_dir = folder
-
-        env = os.environ.copy()
-        env['KARMA_INJECT_FILE'] = karma_inject_file
-        env.setdefault('KARMA_FILE_PATTERN', pattern)
-        env.setdefault('KARMA_COVER_FOLDER', self.karma_coverage_dir)
-        cwd = self.karma_base_dir
-        cmd = ['karma', 'start'] + sys.argv[1:]
-        return cmd, dict(env=env, cwd=cwd)
-
-
 class RootedServerApp(ServerApp):
 
     @default('root_dir')
@@ -400,40 +219,3 @@ class RootedServerApp(ServerApp):
         os.chmod(readonly_filepath, S_IRUSR | S_IRGRP | S_IROTH)
         atexit.register(lambda: shutil.rmtree(root_dir, True))
         return root_dir
-
-
-@deprecated(removed_version=4)
-def run_jest(jest_dir):
-    """Run a jest test in the given base directory.
-    """
-    def _jupyter_server_extension_points():
-        return [
-            {
-                'module': __name__,
-                'app': JestApp
-            }
-        ]
-    sys.modules[__name__]._jupyter_server_extension_points = _jupyter_server_extension_points
-    JestApp.jest_dir = jest_dir
-    RootedServerApp.jpserver_extensions = Dict({__name__: True})
-    RootedServerApp.flags = jest_flags
-    RootedServerApp.launch_instance()
-
-
-@deprecated(removed_version=4)
-def run_karma(base_dir, coverage_dir=''):
-    """Run a karma test in the given base directory.
-    """
-    logging.disable(logging.WARNING)
-    def _jupyter_server_extension_points():
-        return [
-            {
-                'module': __name__,
-                'app': KarmaTestApp
-            }
-        ]
-    sys.modules[__name__]._jupyter_server_extension_points = _jupyter_server_extension_points
-    KarmaTestApp.karma_base_dir = base_dir
-    KarmaTestApp.karma_coverage_dir = coverage_dir
-    RootedServerApp.jpserver_extensions = Dict({__name__: True})
-    RootedServerApp.launch_instance(argv=[])

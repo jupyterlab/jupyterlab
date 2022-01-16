@@ -425,7 +425,6 @@ export namespace LabIconStyle {
     toolbarButton: {
       container: {
         display: 'inline-block',
-        margin: 'auto',
         verticalAlign: 'middle'
       },
       element: {

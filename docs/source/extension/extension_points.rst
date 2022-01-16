@@ -11,7 +11,7 @@ Following the list of core tokens is a guide for using some of JupyterLab's most
 However, it is not an exhaustive account of how to extend the application components,
 and more detailed descriptions of their public APIs may be found in the
 `JupyterLab <../api/index.html>`__ and
-`Lumino <http://jupyterlab.github.io/lumino/index.html>`__ API documentation.
+`Lumino <https://jupyterlab.github.io/lumino/index.html>`__ API documentation.
 
 .. contents:: Table of contents
     :local:
@@ -125,6 +125,10 @@ might want to use the services in your extensions.
   created by the application.
 - ``@jupyterlab/tooltip:ITooltipManager``: A service for the tooltip manager for the application.
   Use this to allow your extension to invoke a tooltip.
+- ``@jupyterlab/user:ICurrentUser``: A service for the current user information.
+  Use this if you want to access to the identity of the current connected user.
+- ``@jupyterlab/user:IUserMenu``: A service for the user menu on the application.
+  Use this if you want to add new items to the user menu.
 - ``@jupyterlab/vdom:IVDOMTracker``: A widget tracker for virtual DOM (VDOM) documents.
   Use this to iterate over and interact with VDOM document instances created by the application.
 
@@ -178,7 +182,7 @@ a string value or a function that returns a string value.
 
 There are several more options which can be passed into the command registry when
 adding new commands. These are documented
-`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.icommandoptions.html>`__.
+`here <https://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.icommandoptions.html>`__.
 
 After a command has been added to the application command registry
 you can add them to various places in the application user interface,
@@ -256,15 +260,14 @@ A list of CSS selectors currently used by context menu commands is given in :ref
 
 Item must follow this definition:
 
-.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/jupyter.lab.menus.json
    :language: json
-   :lines: 21-39
+   :lines: 14-34
 
 where ``menuItem`` definition is:
 
-.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/menuItem.json
    :language: json
-   :lines: 142-180
 
 
 The same example using the API is shown below. See the Lumino `docs
@@ -401,7 +404,7 @@ the shortcut handler propagates up the DOM tree from the focused element
 and tests each element against the registered selectors. If a match is found,
 then that command is executed with the provided ``args``.
 Full documentation for the options for ``addKeyBinding`` can be found
-`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
+`here <https://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
 
 JupyterLab also provides integration with its settings system for keyboard shortcuts.
 Your extension can provide a settings schema with a ``jupyter.lab.shortcuts`` key,
@@ -421,7 +424,7 @@ declaring default keyboard shortcuts for a command:
 
 Shortcuts added to the settings system will be editable by users.
 
-From Jupyterlab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut. 
+From Jupyterlab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut.
 This requires you to define a keyboard shortcut for ``apputils:run-all-enabled`` command:
 
 .. code:: json
@@ -442,9 +445,9 @@ This requires you to define a keyboard shortcut for ``apputils:run-all-enabled``
       "selector": "body"
     }
 
-In this example ``my-command-1`` and ``my-command-2`` are passed in ``args`` 
+In this example ``my-command-1`` and ``my-command-2`` are passed in ``args``
 of ``apputils:run-all-enabled`` command as ``commands`` list.
-You can optionally pass the command arguemnts of ``my-command-1`` and ``my-command-2`` in ``args`` 
+You can optionally pass the command arguemnts of ``my-command-1`` and ``my-command-2`` in ``args``
 of ``apputils:run-all-enabled`` command as ``args`` list.
 
 Launcher
@@ -484,6 +487,23 @@ In JupyterLab, the application shell consists of:
 -  A ``bottom`` area for things like status bars.
 -  A ``header`` area for custom elements.
 
+Top Area
+^^^^^^^^
+
+The top area is intended to host most persistent user interface elements that span the whole session of a user.
+JupyterLab adds a user dropdown to that area when started in ``collaborative`` mode.
+
+You can use a numeric rank to control the ordering of top area widgets:
+
+.. code:: typescript
+
+  app.shell.add(widget, 'top', { rank: 100 });
+
+JupyterLab adds a spacer widget to the top area at rank ``900`` by default.
+You can then use the following guidelines to place your items:
+
+* ``rank <= 900`` to place items to the left side of the top area
+* ``rank > 900`` to place items to the right side of the top area
 
 Left/Right Areas
 ^^^^^^^^^^^^^^^^
@@ -603,15 +623,14 @@ The default main menu is defined in the ``mainmenu-extension`` package settings.
 
 A menu must respect the following schema:
 
-.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/jupyter.lab.menus.json
    :language: json
-   :lines: 85-141
+   :lines: 5-13
 
 And an item must follow:
 
-.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/menu.json
    :language: json
-   :lines: 142-180
 
 Menus added to the settings system will be editable by users using the ``mainmenu-extension``
 settings. In particular, they can be disabled at the item or the menu level by setting the
@@ -774,20 +793,20 @@ bar. A typical example is the notebook toolbar as in the snippet below:
      let toolbarFactory:
        | ((widget: NotebookPanel) => DocumentRegistry.IToolbarItem[])
        | undefined;
-   
+
      // Register notebook toolbar specific widgets
      if (toolbarRegistry) {
        toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
          ToolbarItems.createCellTypeItem(panel, translator)
        );
-       
+
        toolbarRegistry.registerFactory<NotebookPanel>(
          FACTORY,
          'kernelStatus',
          panel => Toolbar.createKernelStatusItem(panel.sessionContext, translator)
        );
-       // etc... 
-     
+       // etc...
+
        if (settingRegistry) {
          // Create the factory
          toolbarFactory = createToolbarFactory(
@@ -801,7 +820,7 @@ bar. A typical example is the notebook toolbar as in the snippet below:
          );
        }
      }
-   
+
      const factory = new NotebookWidgetFactory({
        name: FACTORY,
        fileTypes: ['notebook'],
@@ -813,7 +832,7 @@ bar. A typical example is the notebook toolbar as in the snippet below:
      });
      app.docRegistry.addWidgetFactory(factory);
 
-The registry ``registerFactory`` method allows an extension to provide special widget for a unique pair 
+The registry ``registerFactory`` method allows an extension to provide special widget for a unique pair
 (factory name, toolbar item name). Then the helper ``createToolbarFactory`` can be used to extract the
 toolbar definition from the settings and build the factory to pass to the widget factory.
 
@@ -821,11 +840,11 @@ The default toolbar items can be defined across multiple extensions by providing
 mapping. For example for the notebook panel:
 
 .. code:: js
- 
+
    "jupyter.lab.toolbars": {
      "Notebook": [ // Factory name
        // Item with non-default widget - it must be registered within an extension
-       { 
+       {
          "name": "save", // Unique toolbar item name
          "rank": 10 // Item rank
        },
@@ -883,11 +902,10 @@ The current widget factories supporting the toolbar customization are:
 - ``CSVTable``: CSV (Comma Separated Value) Viewer toolbar
 - ``TSVTable``: TSV (Tabulation Separated Value) Viewer toolbar
 
-Add the toolbar item must follow this definition:
+And the toolbar item must follow this definition:
 
-.. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
+.. literalinclude:: ../snippets/packages/settingregistry/src/toolbarItem.json
    :language: json
-   :lines: 207-252
 
 .. _widget-tracker:
 

@@ -18,7 +18,7 @@ import {
   NotebookActions,
   NotebookPanel,
   ToolbarItems
-} from '../src';
+} from '..';
 import * as utils from './utils';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
@@ -47,7 +47,7 @@ describe('@jupyterlab/notebook', () => {
           const promise = signalToPromise(context.fileChanged);
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          await promise;
+          await expect(promise).resolves.not.toThrow();
           button.dispose();
         });
 
@@ -214,8 +214,7 @@ describe('@jupyterlab/notebook', () => {
             'restart-and-run',
             'cellType',
             'spacer',
-            'kernelName',
-            'kernelStatus'
+            'kernelName'
           ]);
         });
       });
@@ -260,7 +259,7 @@ describe('@jupyterlab/notebook', () => {
             }
           });
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          await delegate.promise;
+          await expect(delegate.promise).resolves.not.toThrow();
           button.dispose();
         });
 
@@ -293,7 +292,7 @@ describe('@jupyterlab/notebook', () => {
           });
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await acceptDialog();
-          await delegate.promise;
+          await expect(delegate.promise).resolves.not.toThrow();
           button.dispose();
         });
 

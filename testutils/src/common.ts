@@ -183,6 +183,7 @@ export function sleep(milliseconds?: number): Promise<void>;
 export function sleep<T>(milliseconds: number, value: T): Promise<T>;
 export function sleep<T>(
   milliseconds: number = 0,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   value?: any
 ): Promise<T> | Promise<void> {
   return new Promise<T>((resolve, reject) => {
@@ -241,7 +242,7 @@ export function createFileContext(
 export async function createFileContextWithKernel(
   path: string = UUID.uuid4() + '.txt',
   manager: ServiceManager.IManager = Private.getManager()
-) {
+): Promise<Context> {
   const factory = Private.textFactory;
   const specsManager = manager.kernelspecs;
   await specsManager.ready;
@@ -384,7 +385,9 @@ namespace Private {
 
   export const textFactory = new TextModelFactory();
 
-  export const notebookFactory = new NotebookModelFactory({});
+  export const notebookFactory = new NotebookModelFactory({
+    disableDocumentWideUndoRedo: false
+  });
 
   /**
    * Get or create the service manager singleton.

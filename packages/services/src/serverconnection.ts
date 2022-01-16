@@ -113,7 +113,7 @@ export namespace ServerConnection {
    *
    * @returns The full settings object.
    */
-  export function makeSettings(options?: Partial<ISettings>) {
+  export function makeSettings(options?: Partial<ISettings>): ISettings {
     return Private.makeSettings(options);
   }
 
@@ -246,7 +246,7 @@ namespace Private {
       appUrl: PageConfig.getOption('appUrl'),
       appendToken:
         typeof window === 'undefined' ||
-        process.env.JEST_WORKER_ID !== undefined ||
+        process?.env?.JEST_WORKER_ID !== undefined ||
         URLExt.getHostName(pageBaseUrl) !== URLExt.getHostName(wsUrl),
       ...options,
       baseUrl,

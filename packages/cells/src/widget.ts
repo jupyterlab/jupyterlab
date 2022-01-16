@@ -75,6 +75,9 @@ import {
 } from './model';
 
 import { InputPlaceholder, OutputPlaceholder } from './placeholder';
+
+import { ResizeHandle } from './resizeHandle';
+
 import { Signal } from '@lumino/signaling';
 import { addIcon } from '@jupyterlab/ui-components';
 
@@ -325,7 +328,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Save view editable state to model
    */
-  saveEditableState() {
+  saveEditableState(): void {
     const { metadata } = this.model;
     const current = metadata.get('editable');
 
@@ -346,7 +349,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Load view editable state from model.
    */
-  loadEditableState() {
+  loadEditableState(): void {
     this.readOnly = this.model.metadata.get('editable') === false;
   }
 
@@ -392,7 +395,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Save view collapse state to model
    */
-  saveCollapseState() {
+  saveCollapseState(): void {
     const jupyter = { ...(this.model.metadata.get('jupyter') as any) };
 
     if (
@@ -417,7 +420,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Revert view collapse state from model.
    */
-  loadCollapseState() {
+  loadCollapseState(): void {
     const jupyter = (this.model.metadata.get('jupyter') as any) || {};
     this.inputHidden = !!jupyter.source_hidden;
   }
@@ -482,7 +485,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
@@ -661,7 +664,7 @@ export namespace Cell {
     }
 
     /**
-     * Create a new cell header for the parent widget.
+     * Create a new cell footer for the parent widget.
      */
     createCellFooter(): ICellFooter {
       return new CellFooter();
@@ -765,7 +768,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       output.outputLengthChanged.connect(this._outputLengthHandler, this);
       outputWrapper.addWidget(outputCollapser);
       outputWrapper.addWidget(output);
-      (this.layout as PanelLayout).insertWidget(2, outputWrapper);
+      (this.layout as PanelLayout).insertWidget(2, new ResizeHandle(this.node));
+      (this.layout as PanelLayout).insertWidget(3, outputWrapper);
 
       if (model.isDirty) {
         this.addClass(DIRTY_CLASS);
@@ -834,7 +838,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Save view collapse state to model
    */
-  saveCollapseState() {
+  saveCollapseState(): void {
     // Because collapse state for a code cell involves two different pieces of
     // metadata (the `collapsed` and `jupyter` metadata keys), we block reacting
     // to changes in metadata until we have fully committed our changes.
@@ -873,7 +877,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * We consider the `collapsed` metadata key as the source of truth for outputs
    * being hidden.
    */
-  loadCollapseState() {
+  loadCollapseState(): void {
     super.loadCollapseState();
     this.outputHidden = !!this.model.metadata.get('collapsed');
   }
@@ -895,7 +899,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Save view collapse state to model
    */
-  saveScrolledState() {
+  saveScrolledState(): void {
     const { metadata } = this.model;
     const current = metadata.get('scrolled');
 
@@ -915,7 +919,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Revert view collapse state from model.
    */
-  loadScrolledState() {
+  loadScrolledState(): void {
     const metadata = this.model.metadata;
 
     // We don't have the notion of 'auto' scrolled, so we make it false.
@@ -1587,7 +1591,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       let collapseButton = this.inputArea.promptNode.appendChild(
         document.createElement('button')
       );
-      collapseButton.className = `bp3-button bp3-minimal jp-Button minimal ${HEADING_COLLAPSER_CLASS}`;
+      collapseButton.className = `jp-Button jp-mod-minimal ${HEADING_COLLAPSER_CLASS}`;
       collapseButton.style.background = `${
         this._headingCollapsed
           ? 'var(--jp-icon-caret-right)'
@@ -1600,40 +1604,50 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
   }
 
+  /**
+   * Create, update or remove the hidden cells button.
+   * Note that the actual visibility is controlled in Static Notebook by toggling jp-mod-showHiddenCellsButton class.
+   */
   protected maybeCreateOrUpdateExpandButton(): void {
-    const expandButton = this.node.getElementsByClassName(
+    const showHiddenCellsButtonList = this.node.getElementsByClassName(
       SHOW_HIDDEN_CELLS_CLASS
     );
-    // Create the "show hidden" button if not already created
-    if (
+    let trans = this.translator.load('jupyterlab');
+    let buttonText = trans._n(
+      '%1 cell hidden',
+      '%1 cells hidden',
+      this._numberChildNodes
+    );
+    let needToCreateButton =
       this.headingCollapsed &&
-      expandButton.length === 0 &&
-      this._numberChildNodes > 0
-    ) {
-      const numberChildNodes = document.createElement('button');
-      numberChildNodes.className = `bp3-button bp3-minimal jp-Button ${SHOW_HIDDEN_CELLS_CLASS}`;
-      addIcon.render(numberChildNodes);
-      const numberChildNodesText = document.createElement('div');
-      numberChildNodesText.nodeValue = `${this._numberChildNodes} cell${
-        this._numberChildNodes > 1 ? 's' : ''
-      } hidden`;
-      numberChildNodes.appendChild(numberChildNodesText);
-      numberChildNodes.onclick = () => {
+      this._numberChildNodes > 0 &&
+      showHiddenCellsButtonList.length == 0;
+    if (needToCreateButton) {
+      const newShowHiddenCellsButton = document.createElement('button');
+      newShowHiddenCellsButton.className = `jp-mod-minimal jp-Button ${SHOW_HIDDEN_CELLS_CLASS}`;
+      addIcon.render(newShowHiddenCellsButton);
+      const buttonTextElement = document.createElement('div');
+      buttonTextElement.textContent = buttonText;
+      newShowHiddenCellsButton.appendChild(buttonTextElement);
+      newShowHiddenCellsButton.onclick = () => {
         this.headingCollapsed = false;
         this._toggleCollapsedSignal.emit(this._headingCollapsed);
       };
-      this.node.appendChild(numberChildNodes);
-    } else if (expandButton?.[0]?.childNodes?.length > 1) {
-      // If the heading is collapsed, update text
-      if (this._headingCollapsed) {
-        expandButton[0].childNodes[1].textContent = `${
-          this._numberChildNodes
-        } cell${this._numberChildNodes > 1 ? 's' : ''} hidden`;
-        // If the heading isn't collapsed, remove the button
-      } else {
-        for (const el of expandButton) {
-          this.node.removeChild(el);
-        }
+      this.node.appendChild(newShowHiddenCellsButton);
+    }
+    let needToUpdateButtonText =
+      this.headingCollapsed &&
+      this._numberChildNodes > 0 &&
+      showHiddenCellsButtonList.length == 1;
+    if (needToUpdateButtonText) {
+      showHiddenCellsButtonList[0].childNodes[1].textContent = buttonText;
+    }
+    let needToRemoveButton = !(
+      this.headingCollapsed && this._numberChildNodes > 0
+    );
+    if (needToRemoveButton) {
+      for (const button of showHiddenCellsButtonList) {
+        this.node.removeChild(button);
       }
     }
   }
@@ -1667,6 +1681,15 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   protected showEditor(): void {
     this.removeClass(RENDERED_CLASS);
     this.inputArea.showEditor();
+    // if this is going to be a heading, place the cursor accordingly
+    let numHashAtStart = (this.model.value.text.match(/^#+/g) || [''])[0]
+      .length;
+    if (numHashAtStart > 0) {
+      this.inputArea.editor.setCursorPosition({
+        column: numHashAtStart + 1,
+        line: 0
+      });
+    }
   }
 
   /*
@@ -1684,7 +1707,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   protected updateCellSourceWithAttachment(
     attachmentName: string,
     URI?: string
-  ) {
+  ): void {
     const textToBeAppended = `![${attachmentName}](attachment:${
       URI ?? attachmentName
     })`;

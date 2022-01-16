@@ -117,7 +117,7 @@ against the patterns in ``disabledExtensions`` and ``deferredExtensions``.
    ``"@jupyterlab/apputils-extension:set.*$"``),
    then that specific plugin is disabled (or deferred).
 
-An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as follows:
+An example ``<jupyter_config_path>/labconfig/page_config.json`` could look as follows:
 
 .. code:: json
 
@@ -186,7 +186,7 @@ schemas
 ^^^^^^^
 
 The ``schemas`` directory contains `JSON
-Schemas <http://json-schema.org/>`__ that describe the settings used by
+Schemas <https://json-schema.org/>`__ that describe the settings used by
 individual extensions. Users may edit these settings using the
 JupyterLab Advanced Settings Editor.
 

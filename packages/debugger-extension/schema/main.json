@@ -21,6 +21,16 @@
           }
         ]
       }
+    ],
+    "context": [
+      {
+        "command": "debugger:inspect-variable",
+        "selector": ".jp-DebuggerVariables-body .jp-DebuggerVariables-grid"
+      },
+      {
+        "command": "debugger:render-mime-variable",
+        "selector": ".jp-DebuggerVariables-body"
+      }
     ]
   },
   "jupyter.lab.shortcuts": [

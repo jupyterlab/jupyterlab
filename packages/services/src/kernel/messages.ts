@@ -202,6 +202,7 @@ export type IOPubMessageType =
   | 'error'
   | 'execute_input'
   | 'execute_result'
+  | 'shutdown_reply'
   | 'status'
   | 'stream'
   | 'update_display_data'
@@ -299,7 +300,7 @@ export interface IMessage<MSGTYPE extends MessageType = MessageType> {
   /**
    * The parent message
    */
-  parent_header: IHeader | {};
+  parent_header: IHeader | Record<string, never>;
 }
 
 /**
@@ -740,7 +741,7 @@ type ReplyContent<T> = T | IReplyErrorContent | IReplyAbortContent;
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-info).
  */
 export interface IInfoRequestMsg extends IShellMessage<'kernel_info_request'> {
-  content: {};
+  content: Record<string, never>;
 }
 
 /**

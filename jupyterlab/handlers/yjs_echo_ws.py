@@ -7,6 +7,8 @@ import uuid
 import time
 
 from tornado.ioloop import IOLoop
+from jupyter_server.base.handlers import JupyterHandler
+from tornado import web
 from tornado.websocket import WebSocketHandler
 from enum import IntEnum
 
@@ -30,11 +32,25 @@ class ServerMessageType(IntEnum):
 class YjsRoom:
     def __init__(self):
         self.lock = None
+        self.timeout = None
+        self.lock_holder = None
         self.clients = {}
         self.content = bytes([])
 
-class YjsEchoWebSocket(WebSocketHandler):
+
+class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
     rooms = {}
+
+    # Override max_message size to 1GB
+    @property
+    def max_message_size(self):
+        return 1024 * 1024 * 1024
+
+    async def get(self, *args, **kwargs):
+        if self.get_current_user() is None:
+            self.log.warning("Couldn't authenticate WebSocket connection")
+            raise web.HTTPError(403)
+        return await super().get(*args, **kwargs)
 
     def open(self, guid):
         #print("[YJSEchoWS]: open", guid)
@@ -56,17 +72,26 @@ class YjsEchoWebSocket(WebSocketHandler):
         room = cls.rooms.get(room_id)
         if message[0] == ServerMessageType.ACQUIRE_LOCK:
             now = int(time.time())
-            if room.lock is None or now - room.lock > 15: # no lock or timeout
+            if room.lock is None or now - room.timeout > (10 * len(room.clients)) : # no lock or timeout
                 room.lock = now
+                room.timeout = now
+                room.lock_holder = self.id
                 # print('Acquired new lock: ', room.lock)
                 # return acquired lock
                 self.write_message(bytes([ServerMessageType.ACQUIRE_LOCK]) + room.lock.to_bytes(4, byteorder = 'little'), binary=True)
+
+            elif room.lock_holder == self.id :
+                # print('Update lock: ', room.timeout)
+                room.timeout = now
+
         elif message[0] == ServerMessageType.RELEASE_LOCK:
             releasedLock = int.from_bytes(message[1:], byteorder = 'little')
             # print("trying release lock: ", releasedLock)
             if room.lock == releasedLock:
                 # print('released lock: ', room.lock)
                 room.lock = None
+                room.timeout = None
+                room.lock_holder = None
         elif message[0] == ServerMessageType.REQUEST_INITIALIZED_CONTENT:
             # print("client requested initial content")
             self.write_message(bytes([ServerMessageType.REQUEST_INITIALIZED_CONTENT]) + room.content, binary=True)

@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { ServerConnection } from '@jupyterlab/services';
 import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import { requestTranslationsAPI } from './server';
@@ -22,15 +23,25 @@ export const ITranslatorConnector = new Token<ITranslatorConnector>(
 export class TranslatorConnector
   extends DataConnector<Language, Language, { language: string }>
   implements ITranslatorConnector {
-  constructor(translationsUrl: string = '') {
+  constructor(
+    translationsUrl: string = '',
+    serverSettings?: ServerConnection.ISettings
+  ) {
     super();
     this._translationsUrl = translationsUrl;
+    this._serverSettings = serverSettings;
   }
 
   async fetch(opts: { language: string }): Promise<Language> {
-    return requestTranslationsAPI(this._translationsUrl, opts.language);
+    return requestTranslationsAPI(
+      this._translationsUrl,
+      opts.language,
+      {},
+      this._serverSettings
+    );
   }
 
+  private _serverSettings: ServerConnection.ISettings | undefined;
   private _translationsUrl: string;
 }
 

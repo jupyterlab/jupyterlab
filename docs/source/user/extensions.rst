@@ -186,13 +186,13 @@ Extensions or individual plugins within an extension can be disabled by another 
 
 The priority order for determining whether an extension is enabled or disabled is as follows:
 
-- Presence of ``<jupyter_config_path>/labconfig/pageconfig.json`` file(s) with a ``disabledExtensions`` key that is a object with package names as keys and boolean values.
-- (deprecated) Presence of ``disabledExtensions`` key in ``<lab_app_dir>/settings/pageconfig.json``.   This value is a list of extensions to disable, but is deprecated in favor of the layered configuration approach in the `labconfig` location(s).
+- Presence of ``<jupyter_config_path>/labconfig/page_config.json`` file(s) with a ``disabledExtensions`` key that is a object with package names as keys and boolean values.
+- (deprecated) Presence of ``disabledExtensions`` key in ``<lab_app_dir>/settings/page_config.json``.   This value is a list of extensions to disable, but is deprecated in favor of the layered configuration approach in the `labconfig` location(s).
 - Presence of ``disabledExtensions`` key in another JupyterLab extension's metadata that disables a given extension.  The key is ignored if that extension itself is disabled.
 
 When using the command line, you can target the ``--level`` of the config: ``user``, ``system``, or ``sys-prefix`` (default).
 
-An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as follows:
+An example ``<jupyter_config_path>/labconfig/page_config.json`` could look as follows:
 
 .. code:: json
 
@@ -206,6 +206,8 @@ See :ref:`documentation on LabConfig directories <labconfig_directories>` for mo
 
 Managing Extensions Using the Extension Manager
 -----------------------------------------------
+
+.. _extension_manager:
 
 You can use the Extension Manager in JupyterLab to manage extensions that are
 distributed as single JavaScript packages on npm.

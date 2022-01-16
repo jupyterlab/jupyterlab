@@ -112,6 +112,10 @@
                   }
                 },
                 {
+                  "command": "application:toggle-header",
+                  "rank": 15
+                },
+                {
                   "type": "separator",
                   "rank": 50
                 },

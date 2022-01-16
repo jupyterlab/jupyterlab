@@ -3,11 +3,17 @@
 
 import { KernelSpec, Session } from '@jupyterlab/services';
 
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { Debugger } from './debugger';
 
@@ -35,6 +41,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._specsManager = options.specsManager ?? null;
     this._model = new Debugger.Model();
     this._debuggerSources = options.debuggerSources ?? null;
+    this._trans = (options.translator || nullTranslator).load('jupyterlab');
   }
 
   /**
@@ -260,6 +267,31 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Request rich representation of a variable.
+   *
+   * @param variableName The variable name to request
+   * @param frameId The current frame id in which to request the variable
+   * @returns The mime renderer data model
+   */
+  async inspectRichVariable(
+    variableName: string,
+    frameId?: number
+  ): Promise<IDebugger.IRichVariable> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
+    const reply = await this.session.sendRequest('richInspectVariables', {
+      variableName,
+      frameId
+    });
+    if (reply.success) {
+      return reply.body;
+    } else {
+      throw new Error(reply.message);
+    }
+  }
+
+  /**
    * Request variables for a given variable reference.
    *
    * @param variablesReference The variable reference to request.
@@ -273,7 +305,11 @@ export class DebuggerService implements IDebugger, IDisposable {
     const reply = await this.session.sendRequest('variables', {
       variablesReference
     });
-    return reply.body.variables;
+    if (reply.success) {
+      return reply.body.variables;
+    } else {
+      throw new Error(reply.message);
+    }
   }
 
   /**
@@ -289,7 +325,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const variableScopes = [
       {
-        name: 'Globals',
+        name: this._trans.__('Globals'),
         variables: variables
       }
     ];
@@ -318,9 +354,10 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const reply = await this.session.restoreState();
     const { body } = reply;
-    const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
-    const stoppedThreads = new Set(reply.body.stoppedThreads);
+    const breakpoints = this._mapBreakpoints(body.breakpoints);
+    const stoppedThreads = new Set(body.stoppedThreads);
 
+    this._model.hasRichVariableRendering = body.richRendering === true;
     this._config.setHashParams({
       kernel: this.session?.connection?.kernel?.name ?? '',
       method: body.hashMethod,
@@ -469,15 +506,17 @@ export class DebuggerService implements IDebugger, IDisposable {
   getDebuggerState(): IDebugger.State {
     const breakpoints = this._model.breakpoints.breakpoints;
     let cells: string[] = [];
-    for (const id of breakpoints.keys()) {
-      const editorList = this._debuggerSources!.find({
-        focus: false,
-        kernel: this.session?.connection?.kernel?.name ?? '',
-        path: this._session?.connection?.path ?? '',
-        source: id
-      });
-      const tmp_cells = editorList.map(e => e.model.value.text);
-      cells = cells.concat(tmp_cells);
+    if (this._debuggerSources) {
+      for (const id of breakpoints.keys()) {
+        const editorList = this._debuggerSources.find({
+          focus: false,
+          kernel: this.session?.connection?.kernel?.name ?? '',
+          path: this._session?.connection?.path ?? '',
+          source: id
+        });
+        const tmpCells = editorList.map(e => e.model.value.text);
+        cells = cells.concat(tmpCells);
+      }
     }
     return { cells, breakpoints };
   }
@@ -821,6 +860,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     this
   );
   private _specsManager: KernelSpec.IManager | null;
+  private _trans: TranslationBundle;
 }
 
 /**
@@ -845,5 +885,10 @@ export namespace DebuggerService {
      * The optional kernel specs manager.
      */
     specsManager?: KernelSpec.IManager | null;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator | null;
   }
 }

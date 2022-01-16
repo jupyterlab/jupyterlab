@@ -182,6 +182,7 @@ function activate(
     editorServices,
     factoryOptions: {
       name: FACTORY,
+      label: trans.__('Editor'),
       fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
       defaultFor: ['markdown', '*'], // it outranks the defaultRendered viewer.
       toolbarFactory,
@@ -298,7 +299,9 @@ function activate(
     id,
     isEnabled,
     tracker,
-    browserFactory
+    browserFactory,
+    consoleTracker,
+    sessionDialogs
   );
 
   // Add a launcher item if the launcher is available.
@@ -311,14 +314,7 @@ function activate(
   }
 
   if (menu) {
-    Commands.addMenuItems(
-      menu,
-      commands,
-      tracker,
-      trans,
-      consoleTracker,
-      sessionDialogs
-    );
+    Commands.addMenuItems(menu, tracker, consoleTracker, isEnabled);
   }
 
   getAvailableKernelFileTypes()

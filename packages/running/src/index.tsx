@@ -320,7 +320,7 @@ export class RunningSessions extends ReactWidget {
     this.addClass(RUNNING_CLASS);
   }
 
-  protected render() {
+  protected render(): JSX.Element {
     return (
       <RunningSessionsComponent
         managers={this.managers}

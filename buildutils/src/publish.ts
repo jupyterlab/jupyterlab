@@ -23,13 +23,15 @@ commander
   .description('Publish the JS packages')
   .option(
     '--skip-build',
-    'Skip the clean and build step (if there was a network error during a JS publish'
+    'Skip the build step (if there was a network error during a JS publish'
   )
   .option('--skip-publish', 'Skip publish and only handle tags')
   .option('--skip-tags', 'publish assets but do not handle tags')
   .option('--yes', 'Publish without confirmation')
   .option('--dry-run', 'Do not actually push any assets')
   .action(async (options: any) => {
+    utils.exitOnUuncaughtException();
+
     // No-op if we're in release helper dry run
     if (process.env.RH_DRY_RUN === 'true') {
       return;
@@ -37,7 +39,7 @@ commander
 
     if (!options.skipPublish) {
       if (!options.skipBuild) {
-        utils.run('jlpm run build:packages');
+        utils.run('jlpm run build:all');
       }
 
       if (!options.dryRun) {
@@ -50,7 +52,7 @@ commander
 
       // Ensure a clean git environment
       try {
-        utils.run('git commit -am "bump version"');
+        utils.run('git commit -am "[ci skip] bump version"');
       } catch (e) {
         // do nothing
       }
@@ -64,11 +66,12 @@ commander
       if (options.yes) {
         cmd += '  --yes ';
       }
-      if (curr.indexOf('rc') === -1 && curr.indexOf('a') === -1) {
-        utils.run(`${cmd} -m "Publish"`);
-      } else {
-        utils.run(`${cmd} --dist-tag=next -m "Publish"`);
+
+      let tag = 'latest';
+      if (!/\d+\.\d+\.\d+$/.test(curr)) {
+        tag = 'next';
       }
+      utils.run(`${cmd} --dist-tag=${tag} -m "Publish"`);
     }
 
     // Fix up any tagging issues.
@@ -102,7 +105,7 @@ commander
     let attempt = 0;
     while (attempt < 10) {
       try {
-        utils.run(`npm install ${specifiers}`, { cwd: installDir });
+        utils.run(`npm install ${specifiers.join(' ')}`, { cwd: installDir });
         break;
       } catch (e) {
         console.error(e);
@@ -112,7 +115,8 @@ commander
       }
     }
     if (attempt == 10) {
-      throw new Error('Could not install packages');
+      console.error('Could not install packages');
+      process.exit(1);
     }
 
     // Emit a system beep.

@@ -3,8 +3,11 @@
 
 import {
   blankIcon,
+  bugDotIcon,
+  bugIcon,
   CommandToolbarButton,
   jupyterIcon,
+  ReactiveToolbar,
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
@@ -12,7 +15,7 @@ import { framePromise, JupyterServer } from '@jupyterlab/testutils';
 import { toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 const server = new JupyterServer();
@@ -147,12 +150,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('foo', new Widget());
         widget.addItem('bar', new Widget());
         widget.addItem('baz', new Widget());
-        expect(toArray(widget.names())).toEqual([
-          'foo',
-          'bar',
-          'baz',
-          'toolbar-popup-opener'
-        ]);
+        expect(toArray(widget.names())).toEqual(['foo', 'bar', 'baz']);
       });
     });
 
@@ -180,24 +178,14 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
-        expect(toArray(widget.names())).toEqual([
-          'a',
-          'c',
-          'b',
-          'toolbar-popup-opener'
-        ]);
+        expect(toArray(widget.names())).toEqual(['a', 'c', 'b']);
       });
 
       it('should clamp the bounds', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(10, 'c', new Widget());
-        expect(toArray(widget.names())).toEqual([
-          'a',
-          'b',
-          'c',
-          'toolbar-popup-opener'
-        ]);
+        expect(toArray(widget.names())).toEqual(['a', 'b', 'c']);
       });
     });
 
@@ -207,13 +195,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
         widget.insertAfter('c', 'd', new Widget());
-        expect(toArray(widget.names())).toEqual([
-          'a',
-          'c',
-          'd',
-          'b',
-          'toolbar-popup-opener'
-        ]);
+        expect(toArray(widget.names())).toEqual(['a', 'c', 'd', 'b']);
       });
 
       it('should return false if the target item does not exist', () => {
@@ -230,13 +212,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
         widget.insertBefore('c', 'd', new Widget());
-        expect(toArray(widget.names())).toEqual([
-          'a',
-          'd',
-          'c',
-          'b',
-          'toolbar-popup-opener'
-        ]);
+        expect(toArray(widget.names())).toEqual(['a', 'd', 'c', 'b']);
       });
 
       it('should return false if the target item does not exist', () => {
@@ -303,8 +279,7 @@ describe('@jupyterlab/ui-components', () => {
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.title).toBe('Test log command caption');
-        const wrapperNode = buttonNode.firstChild as HTMLElement;
-        const iconNode = wrapperNode.firstChild as HTMLElement;
+        const iconNode = buttonNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains('test-icon-class')).toBe(true);
         button.dispose();
       });
@@ -389,10 +364,63 @@ describe('@jupyterlab/ui-components', () => {
         iconClassValue = 'updated-icon-class';
         commands.notifyCommandChanged(id);
         await render(button);
-        const wrapperNode = buttonNode.firstChild as HTMLElement;
-        const iconNode = wrapperNode.firstChild as HTMLElement;
+        const iconNode = buttonNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains(iconClassValue)).toBe(true);
         cmd.dispose();
+      });
+    });
+  });
+
+  describe('ReactiveToolbar', () => {
+    let toolbar: ReactiveToolbar;
+
+    beforeEach(() => {
+      toolbar = new ReactiveToolbar();
+      Widget.attach(toolbar, document.body);
+    });
+
+    afterEach(() => {
+      toolbar.dispose();
+    });
+
+    describe('#constructor()', () => {
+      it('should append a node to body for the pop-up', () => {
+        const popup = document.body.querySelector(
+          '.jp-Toolbar-responsive-popup'
+        );
+        expect(popup).toBeDefined();
+        expect(popup!.parentNode!.nodeName).toEqual('BODY');
+      });
+    });
+
+    describe('#addItem()', () => {
+      it('should insert item before the toolbar pop-up button', () => {
+        const w = new Widget();
+        toolbar.addItem('test', w);
+        expect(
+          (toolbar.layout as PanelLayout).widgets.findIndex(v => v === w)
+        ).toEqual((toolbar.layout as PanelLayout).widgets.length - 2);
+      });
+    });
+
+    describe('#insertItem()', () => {
+      it('should insert item before the toolbar pop-up button', () => {
+        const w = new Widget();
+        toolbar.insertItem(2, 'test', w);
+        expect(
+          (toolbar.layout as PanelLayout).widgets.findIndex(v => v === w)
+        ).toEqual((toolbar.layout as PanelLayout).widgets.length - 2);
+      });
+    });
+
+    describe('#insertAfter()', () => {
+      it('should not insert item after the toolbar pop-up button', () => {
+        const w = new Widget();
+        const r = toolbar.insertAfter('toolbar-popup-opener', 'test', w);
+        expect(r).toEqual(false);
+        expect(
+          (toolbar.layout as PanelLayout).widgets.findIndex(v => v === w)
+        ).toEqual(-1);
       });
     });
   });
@@ -487,28 +515,141 @@ describe('@jupyterlab/ui-components', () => {
       });
     });
 
-    //   describe('#onAfterAttach()', () => {
-    //     it('should add event listeners to the node', () => {
-    //       const button = new LogToolbarButton();
-    //       Widget.attach(button, document.body);
-    //       expect(button.methods).to.contain('onAfterAttach');
-    //       simulate(button.node, 'click');
-    //       expect(button.events).to.contain('click');
-    //       button.dispose();
-    //     });
-    //   });
+    describe('#onAfterAttach()', () => {
+      it.skip('should add event listeners to the node', () => {
+        // const button = new LogToolbarButton();
+        // Widget.attach(button, document.body);
+        // expect(button.methods).to.contain('onAfterAttach');
+        // simulate(button.node, 'click');
+        // expect(button.events).to.contain('click');
+        // button.dispose();
+      });
+    });
 
-    //   describe('#onBeforeDetach()', () => {
-    //     it('should remove event listeners from the node', async () => {
-    //       const button = new LogToolbarButton();
-    //       Widget.attach(button, document.body);
-    //       await framePromise();
-    //       Widget.detach(button);
-    //       expect(button.methods).to.contain('onBeforeDetach');
-    //       simulate(button.node, 'click');
-    //       expect(button.events).to.not.contain('click');
-    //       button.dispose();
-    //     });
-    //   });
+    describe('#onBeforeDetach()', () => {
+      it.skip('should remove event listeners from the node', async () => {
+        // const button = new LogToolbarButton();
+        // Widget.attach(button, document.body);
+        // await framePromise();
+        // Widget.detach(button);
+        // expect(button.methods).to.contain('onBeforeDetach');
+        // simulate(button.node, 'click');
+        // expect(button.events).to.not.contain('click');
+        // button.dispose();
+      });
+    });
+
+    describe('#pressed()', () => {
+      it('should update the pressed state', async () => {
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'tooltip',
+          pressedTooltip: 'pressed tooltip',
+          pressedIcon: bugDotIcon
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        const button = widget.node.firstChild as HTMLElement;
+        expect(widget.pressed).toBe(false);
+        expect(button.title).toBe('tooltip');
+        expect(button.getAttribute('aria-pressed')).toEqual('false');
+        let icon = button.querySelectorAll('svg');
+        expect(icon[0].getAttribute('data-icon')).toEqual('ui-components:bug');
+        widget.pressed = true;
+        await framePromise();
+        expect(widget.pressed).toBe(true);
+        expect(button.title).toBe('pressed tooltip');
+        expect(button.getAttribute('aria-pressed')).toEqual('true');
+        icon = button.querySelectorAll('svg');
+        expect(icon[0].getAttribute('data-icon')).toEqual(
+          'ui-components:bug-dot'
+        );
+        widget.dispose();
+      });
+
+      it('should not have the pressed state when not enabled', async () => {
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'tooltip',
+          pressedTooltip: 'pressed tooltip',
+          disabledTooltip: 'disabled tooltip',
+          pressedIcon: bugDotIcon,
+          enabled: false
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        const button = widget.node.firstChild as HTMLElement;
+        expect(widget.pressed).toBe(false);
+        expect(button.title).toBe('disabled tooltip');
+        expect(button.getAttribute('aria-pressed')).toEqual('false');
+        widget.pressed = true;
+        await framePromise();
+        expect(widget.pressed).toBe(false);
+        expect(button.title).toBe('disabled tooltip');
+        expect(button.getAttribute('aria-pressed')).toEqual('false');
+        const icon = button.querySelectorAll('svg');
+        expect(icon[0].getAttribute('data-icon')).toEqual('ui-components:bug');
+        widget.dispose();
+      });
+    });
+
+    describe('#enabled()', () => {
+      it('should update the enabled state', async () => {
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'tooltip',
+          pressedTooltip: 'pressed tooltip',
+          disabledTooltip: 'disabled tooltip',
+          pressedIcon: bugDotIcon
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        const button = widget.node.firstChild as HTMLElement;
+        expect(widget.enabled).toBe(true);
+        expect(widget.pressed).toBe(false);
+        expect(button.getAttribute('aria-disabled')).toEqual('false');
+
+        widget.pressed = true;
+        await framePromise();
+        expect(widget.pressed).toBe(true);
+
+        widget.enabled = false;
+        await framePromise();
+        expect(widget.enabled).toBe(false);
+        expect(widget.pressed).toBe(false);
+        expect(button.getAttribute('aria-disabled')).toEqual('true');
+        widget.dispose();
+      });
+    });
+
+    describe('#onClick()', () => {
+      it('should update the onClick state', async () => {
+        let mockCalled = false;
+        const mockOnClick = () => {
+          mockCalled = true;
+        };
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'tooltip',
+          onClick: mockOnClick
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        simulate(widget.node.firstChild as HTMLElement, 'mousedown');
+        expect(mockCalled).toBe(true);
+
+        mockCalled = false;
+        let mockUpdatedCalled = false;
+        const mockOnClickUpdated = () => {
+          mockUpdatedCalled = true;
+        };
+        widget.onClick = mockOnClickUpdated;
+        await framePromise();
+        simulate(widget.node.firstChild as HTMLElement, 'mousedown');
+        expect(mockCalled).toBe(false);
+        expect(mockUpdatedCalled).toBe(true);
+        widget.dispose();
+      });
+    });
   });
 });

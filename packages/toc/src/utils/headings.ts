@@ -5,10 +5,8 @@ import { Cell } from '@jupyterlab/cells';
 
 /**
  * Interface describing a heading.
- *
- * @private
  */
-interface IHeading {
+export interface IHeading {
   /**
    * Heading text.
    */
@@ -41,10 +39,8 @@ interface IHeading {
 
 /**
  * Interface describing a numbered heading.
- *
- * @private
  */
-interface INumberedHeading extends IHeading {
+export interface INumberedHeading extends IHeading {
   /**
    * Heading numbering.
    */
@@ -52,11 +48,27 @@ interface INumberedHeading extends IHeading {
 }
 
 /**
- * Interface describing a notebook cell heading.
- *
- * @private
+ * Cell running status
  */
-interface INotebookHeading extends INumberedHeading {
+export enum RunningStatus {
+  /**
+   * Cell is idle
+   */
+  Idle = -1,
+  /**
+   * Cell execution is scheduled
+   */
+  Scheduled = 0,
+  /**
+   * Cell is running
+   */
+  Running = 1
+}
+
+/**
+ * Interface describing a notebook cell heading.
+ */
+export interface INotebookHeading extends INumberedHeading {
   /**
    * Heading type.
    */
@@ -81,6 +93,11 @@ interface INotebookHeading extends INumberedHeading {
    * index of reference cell in the notebook
    */
   index: number;
+
+  /**
+   * Running status of the cells in the heading
+   */
+  isRunning: RunningStatus;
 }
 
 /**
@@ -89,14 +106,6 @@ interface INotebookHeading extends INumberedHeading {
  * @param heading - heading to test
  * @returns boolean indicating whether a heading is a notebook heading
  */
-const isNotebookHeading = (heading: any): heading is INotebookHeading => {
+export function isNotebookHeading(heading: any): boolean {
   return heading.type !== undefined && heading.cellRef !== undefined;
-};
-
-/**
- * Exports.
- */
-export { IHeading };
-export { INumberedHeading };
-export { INotebookHeading };
-export { isNotebookHeading };
+}

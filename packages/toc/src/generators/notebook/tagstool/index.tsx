@@ -83,7 +83,7 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
    * @param newState - new state
    * @param add - boolean indicating whether to add to selection
    */
-  changeSelectionState = (newState: string, add: boolean) => {
+  changeSelectionState = (newState: string, add: boolean): void => {
     let tags = this.state.selected;
     if (add) {
       tags.push(newState);
@@ -106,14 +106,14 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
    *
    * @returns tag list
    */
-  get filtered() {
+  get filtered(): string[] {
     return this.state.selected;
   }
 
   /**
    * De-selects all tags in the dropdown and clear filters in the ToC.
    */
-  deselectAll = () => {
+  deselectAll = (): void => {
     this.setState({ selected: [] });
     this.props.options.updateWidget();
   };
@@ -125,7 +125,7 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
    * @param cell - cell reference
    * @returns boolean indicating whether a cell has a provided tag
    */
-  containsTag(tag: string, cell: Cell) {
+  containsTag(tag: string, cell: Cell): boolean {
     if (cell === null) {
       return false;
     }
@@ -136,8 +136,8 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
           return true;
         }
       }
-      return false;
     }
+    return false;
   }
 
   /**
@@ -173,7 +173,7 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
    *
    * @param selected - selected tags
    */
-  filterTags = (selected: string[]) => {
+  filterTags = (selected: string[]): void => {
     this.setState({ selected });
     this.props.options.updateWidget();
   };
@@ -181,7 +181,7 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
   /**
    * Updates filters.
    */
-  updateFilters = () => {
+  updateFilters = (): void => {
     let tmp: string[] = [];
     let idx = 0;
     let update = false;
@@ -202,7 +202,7 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
   /**
    * Updates filters.
    */
-  UNSAFE_componentWillUpdate() {
+  UNSAFE_componentWillUpdate(): void {
     this.updateFilters();
   }
 
@@ -211,7 +211,7 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
    *
    * @returns rendered component
    */
-  render() {
+  render(): JSX.Element {
     let jsx = (
       <div className="toc-no-tags-div">
         {this._trans.__('No Tags Available')}

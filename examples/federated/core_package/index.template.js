@@ -4,30 +4,12 @@
 import { JupyterLab } from '@jupyterlab/application';
 import { PageConfig } from '@jupyterlab/coreutils';
 
-// Promise.allSettled polyfill, until our supported browsers implement it
-// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
-if (Promise.allSettled === undefined) {
-  Promise.allSettled = promises =>
-    Promise.all(
-      promises.map(promise =>
-        promise
-          .then(value => ({
-            status: "fulfilled",
-            value,
-          }), reason => ({
-            status: "rejected",
-            reason,
-          }))
-      )
-    );
-}
-
 import('./style.js');
 
 async function createModule(scope, module) {
   try {
     const factory = await window._JUPYTERLAB[scope].get(module);
-    return factory();  
+    return factory();
   } catch(e) {
     console.warn(`Failed to create module: package: ${scope}; module: ${module}`);
     throw e;
@@ -72,7 +54,7 @@ export async function main() {
 
   /**
    * Iterate over active plugins in an extension.
-   * 
+   *
    * #### Notes
    * This also populates the disabled, deferred, and ignored arrays.
    */

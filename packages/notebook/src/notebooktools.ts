@@ -464,7 +464,6 @@ export namespace NotebookTools {
       if (!activeCell) {
         const cell = new Widget();
         cell.addClass('jp-InputArea-editor');
-        cell.addClass('jp-InputArea-editor');
         layout.addWidget(cell);
         this._cellModel = null;
         return;
@@ -483,7 +482,6 @@ export namespace NotebookTools {
 
       const model = this._model;
       const editorWidget = new CodeEditorWrapper({ model, factory });
-      editorWidget.addClass('jp-InputArea-editor');
       editorWidget.addClass('jp-InputArea-editor');
       editorWidget.editor.setOption('readOnly', true);
       layout.addWidget(prompt);
@@ -922,6 +920,23 @@ export namespace NotebookTools {
       validCellTypes: ['raw']
     });
   }
+
+  /**
+   * Create read-only toggle.
+   */
+  export function createEditableToggle(translator?: ITranslator): KeySelector {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    return new KeySelector({
+      key: 'editable',
+      title: trans.__('Editable'),
+      optionValueArray: [
+        [trans.__('Editable'), true],
+        [trans.__('Read-Only'), false]
+      ],
+      default: true
+    });
+  }
 }
 
 /**
@@ -964,7 +979,11 @@ namespace Private {
     each(options.optionValueArray, item => {
       option = item[0];
       value = JSON.stringify(item[1]);
-      optionNodes.push(h.option({ value }, option));
+      const attrs =
+        options.default == item[1]
+          ? { value, selected: 'selected' }
+          : { value };
+      optionNodes.push(h.option(attrs, option));
     });
     const node = VirtualDOM.realize(
       h.div({}, h.label(title, h.select({}, optionNodes)))

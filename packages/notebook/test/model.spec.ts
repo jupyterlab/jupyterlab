@@ -6,14 +6,14 @@ import * as nbformat from '@jupyterlab/nbformat';
 import { ModelDB } from '@jupyterlab/observables';
 import { acceptDialog } from '@jupyterlab/testutils';
 import { ArrayExt, toArray } from '@lumino/algorithm';
-import { NotebookModel } from '../src';
+import { NotebookModel } from '..';
 import * as utils from './utils';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModel', () => {
     describe('#constructor()', () => {
       it('should create a notebook model', () => {
-        const model = new NotebookModel();
+        const model = new NotebookModel({});
         expect(model).toBeInstanceOf(NotebookModel);
       });
 
@@ -72,7 +72,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should allow undoing a change', () => {
-        const model = new NotebookModel();
+        const model = new NotebookModel({
+          disableDocumentWideUndoRedo: true
+        });
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
         const cellJSON = cell.toJSON();
@@ -137,7 +139,9 @@ describe('@jupyterlab/notebook', () => {
           const model = new NotebookModel();
           const cell = model.contentFactory.createCodeCell({});
           model.cells.push(cell);
-          cell.value.text = 'foo';
+          expect(() => {
+            cell.value.text = 'foo';
+          }).not.toThrow();
         });
 
         it('should emit the `contentChanged` signal', () => {
@@ -378,7 +382,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should clear undo state', () => {
-        const model = new NotebookModel();
+        const model = new NotebookModel({
+          disableDocumentWideUndoRedo: true
+        });
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
         model.cells.push(cell);

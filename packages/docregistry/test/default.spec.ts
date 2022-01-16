@@ -581,6 +581,14 @@ describe('docregistry/default', () => {
         expect(widget.title.className).toContain('jp-mod-dirty');
       });
 
+      it('should remove the dirty class', () => {
+        context.model.dirty = true;
+        context.model.dirty = true;
+        expect(widget.title.className).toContain('jp-mod-dirty');
+        context.model.dirty = false;
+        expect(widget.title.className).not.toContain('jp-mod-dirty');
+      });
+
       it('should store the context', () => {
         expect(widget.context).toBe(context);
       });

@@ -111,6 +111,7 @@ describe('cells/model', () => {
         let called = false;
         const listener = (sender: any, args: IChangedArgs<any>) => {
           if (args.name == 'executionCount') {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(args.newValue).toBe(1);
             called = true;
           }

@@ -246,7 +246,7 @@ function activateLogConsole(
     statusBar.registerStatusItem('@jupyterlab/logconsole-extension:status', {
       item: status,
       align: 'left',
-      isActive: () => true,
+      isActive: () => status.model?.version > 0,
       activeStateChanged: status.model!.stateChanged
     });
   }
@@ -351,7 +351,7 @@ export class LogLevelSwitcher extends ReactWidget {
     }
   };
 
-  render() {
+  render(): JSX.Element {
     const logger = this._logConsole.logger;
     return (
       <>

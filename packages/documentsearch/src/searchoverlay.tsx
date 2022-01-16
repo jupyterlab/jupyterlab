@@ -23,7 +23,7 @@ import { Debouncer } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { IDisplayState } from './interfaces';
+import { IDisplayState, IFiltersType } from './interfaces';
 import { SearchInstance } from './searchinstance';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
@@ -56,12 +56,12 @@ const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
 const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
 interface ISearchEntryProps {
-  onCaseSensitiveToggled: Function;
-  onRegexToggled: Function;
-  onKeydown: Function;
-  onChange: Function;
-  onInputFocus: Function;
-  onInputBlur: Function;
+  onCaseSensitiveToggled: () => void;
+  onRegexToggled: () => void;
+  onKeydown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputFocus: () => void;
+  onInputBlur: () => void;
   inputFocused: boolean;
   caseSensitive: boolean;
   useRegex: boolean;
@@ -71,10 +71,10 @@ interface ISearchEntryProps {
 }
 
 interface IReplaceEntryProps {
-  onReplaceCurrent: Function;
-  onReplaceAll: Function;
-  onReplaceKeydown: Function;
-  onChange: Function;
+  onReplaceCurrent: () => void;
+  onReplaceAll: () => void;
+  onReplaceKeydown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   replaceText: string;
   translator?: ITranslator;
 }
@@ -213,8 +213,8 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
 }
 
 interface IUpDownProps {
-  onHighlightPrevious: Function;
-  onHighlightNext: Function;
+  onHighlightPrevious: () => void;
+  onHighlightNext: () => void;
 }
 
 function UpDownButtons(props: IUpDownProps) {
@@ -351,14 +351,14 @@ class FilterSelection extends React.Component<
 }
 interface ISearchOverlayProps {
   overlayState: IDisplayState;
-  onCaseSensitiveToggled: Function;
-  onRegexToggled: Function;
-  onHighlightNext: Function;
-  onHighlightPrevious: Function;
-  onStartQuery: Function;
-  onEndSearch: Function;
-  onReplaceCurrent: Function;
-  onReplaceAll: Function;
+  onCaseSensitiveToggled: () => void;
+  onRegexToggled: () => void;
+  onHighlightNext: () => void;
+  onHighlightPrevious: () => void;
+  onStartQuery: (r: RegExp, f: IFiltersType) => void;
+  onEndSearch: () => void;
+  onReplaceCurrent: (t: string) => void;
+  onReplaceAll: (t: string) => void;
   isReadOnly: boolean;
   hasOutputs: boolean;
   translator?: ITranslator;
@@ -395,7 +395,7 @@ class SearchOverlay extends React.Component<
     this.setState({ replaceText: (event.target as HTMLInputElement).value });
   }
 
-  private _onSearchKeydown(event: KeyboardEvent) {
+  private _onSearchKeydown(event: React.KeyboardEvent) {
     if (event.keyCode === 13) {
       event.preventDefault();
       event.stopPropagation();
@@ -407,7 +407,7 @@ class SearchOverlay extends React.Component<
     }
   }
 
-  private _onReplaceKeydown(event: KeyboardEvent) {
+  private _onReplaceKeydown(event: React.KeyboardEvent) {
     if (event.keyCode === 13) {
       event.preventDefault();
       event.stopPropagation();
@@ -447,7 +447,9 @@ class SearchOverlay extends React.Component<
       return;
     }
 
-    this.props.onStartQuery(query, this.state.filters);
+    if (query !== null) {
+      this.props.onStartQuery(query, this.state.filters);
+    }
   }
 
   private _onClose() {
@@ -558,7 +560,9 @@ class SearchOverlay extends React.Component<
             this.props.onRegexToggled();
             this._executeSearch(true);
           }}
-          onKeydown={(e: KeyboardEvent) => this._onSearchKeydown(e)}
+          onKeydown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+            this._onSearchKeydown(e)
+          }
           onChange={(e: React.ChangeEvent) => this._onSearchChange(e)}
           onInputFocus={this._onSearchInputFocus.bind(this)}
           onInputBlur={this._onSearchInputBlur.bind(this)}
@@ -593,7 +597,9 @@ class SearchOverlay extends React.Component<
         {showReplace ? (
           <>
             <ReplaceEntry
-              onReplaceKeydown={(e: KeyboardEvent) => this._onReplaceKeydown(e)}
+              onReplaceKeydown={(e: React.KeyboardEvent) =>
+                this._onReplaceKeydown(e)
+              }
               onChange={(e: React.ChangeEvent) => this._onReplaceChange(e)}
               onReplaceCurrent={() =>
                 this.props.onReplaceCurrent(this.state.replaceText)
@@ -683,14 +689,14 @@ namespace createSearchOverlay {
   export interface IOptions {
     widgetChanged: Signal<SearchInstance, IDisplayState>;
     overlayState: IDisplayState;
-    onCaseSensitiveToggled: Function;
-    onRegexToggled: Function;
-    onHighlightNext: Function;
-    onHighlightPrevious: Function;
-    onStartQuery: Function;
-    onEndSearch: Function;
-    onReplaceCurrent: Function;
-    onReplaceAll: Function;
+    onCaseSensitiveToggled: () => void;
+    onRegexToggled: () => void;
+    onHighlightNext: () => void;
+    onHighlightPrevious: () => void;
+    onStartQuery: (r: RegExp, f: IFiltersType) => void;
+    onEndSearch: () => void;
+    onReplaceCurrent: (t: string) => void;
+    onReplaceAll: (t: string) => void;
     isReadOnly: boolean;
     hasOutputs: boolean;
     translator?: ITranslator;
@@ -702,7 +708,7 @@ namespace Private {
     queryString: string,
     caseSensitive: boolean,
     regex: boolean
-  ) {
+  ): RegExp | null {
     const flag = caseSensitive ? 'g' : 'gi';
     // escape regex characters in query if its a string search
     const queryText = regex
@@ -710,13 +716,18 @@ namespace Private {
       : queryString.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
     let ret;
     ret = new RegExp(queryText, flag);
+
+    // If the empty string is hit, the search logic will freeze the browser tab
+    //  Trying /^/ or /$/ on the codemirror search demo, does not find anything.
+    //  So this is a limitation of the editor.
     if (ret.test('')) {
-      ret = /x^/;
+      return null;
     }
+
     return ret;
   }
 
-  export function regexEqual(a: RegExp | null, b: RegExp | null) {
+  export function regexEqual(a: RegExp | null, b: RegExp | null): boolean {
     if (!a || !b) {
       return false;
     }

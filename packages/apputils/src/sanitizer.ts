@@ -1,8 +1,7 @@
+/* eslint-disable camelcase */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// sanitize-html uses the url package, so we depend on a standalone version of
-// it which acts as a polyfill for browsers.
 import sanitize from 'sanitize-html';
 import { ISanitizer } from './tokens';
 

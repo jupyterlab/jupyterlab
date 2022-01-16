@@ -181,7 +181,7 @@ class Gettext {
   /**
    * Get current context delimiter.
    *
-   * @return The current delimiter.
+   * @returns The current delimiter.
    */
   getContextDelimiter(): string {
     return this._contextDelimiter;
@@ -199,7 +199,7 @@ class Gettext {
   /**
    * Get current locale.
    *
-   * @return The current locale.
+   * @returns The current locale.
    */
   getLocale(): string {
     return this._locale;
@@ -217,7 +217,7 @@ class Gettext {
   /**
    * Get current domain.
    *
-   * @return The current domain string.
+   * @returns The current domain string.
    */
   getDomain(): string {
     return this._domain;
@@ -235,7 +235,7 @@ class Gettext {
   /**
    * Get current strings prefix.
    *
-   * @return The strings prefix.
+   * @returns The strings prefix.
    */
   getStringsPrefix(): string {
     return this._stringsPrefix;
@@ -303,7 +303,7 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    *
    * ### Notes
    * This is not a private method (starts with an underscore) it is just
@@ -321,7 +321,7 @@ class Gettext {
    * @param n - The number for pluralization.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    *
    * ### Notes
    * This is not a private method (starts with an underscore) it is just
@@ -338,7 +338,7 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    *
    * ### Notes
    * This is not a private method (starts with an underscore) it is just
@@ -357,7 +357,7 @@ class Gettext {
    * @param n - The number for pluralization.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    *
    * ### Notes
    * This is not a private method (starts with an underscore) it is just
@@ -379,7 +379,7 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    */
   gettext(msgid: string, ...args: any[]): string {
     return this.dcnpgettext('', '', msgid, '', 0, ...args);
@@ -391,7 +391,7 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    */
   ngettext(
     msgid: string,
@@ -409,7 +409,7 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    *
    * ### Notes
    * This is not a private method (starts with an underscore) it is just
@@ -428,7 +428,7 @@ class Gettext {
    * @param n - The number for pluralization.
    * @param args - Any additional values to use with interpolation
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    */
   npgettext(
     msgctxt: string,
@@ -450,7 +450,7 @@ class Gettext {
    * @param n - The number for pluralization.
    * @param args - Any additional values to use with interpolation
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    */
   dcnpgettext(
     domain: string,
@@ -518,7 +518,7 @@ class Gettext {
    *
    * @param locale - The locale string.
    *
-   * @return An array of locales.
+   * @returns An array of locales.
    */
   private expandLocale(locale: string): Array<string> {
     let locales: Array<string> = [locale];
@@ -535,8 +535,9 @@ class Gettext {
    * Split a locale into parent locales. "es-CO" -> ["es-CO", "es"]
    *
    * @param pluralForm - Plural form string..
-   * @return An function to compute plural forms.
+   * @returns An function to compute plural forms.
    */
+  // eslint-disable-next-line @typescript-eslint/ban-types
   private getPluralFunc(pluralForm: string): Function {
     // Plural form string regexp
     // taken from https://github.com/Orange-OpenSource/gettext.js/blob/master/lib.gettext.js
@@ -566,7 +567,7 @@ class Gettext {
    * Remove the context delimiter from string.
    *
    * @param str - Translation string.
-   * @return A translation string without context.
+   * @returns A translation string without context.
    */
   private removeContext(str: string): string {
     // if there is context, remove it
@@ -585,7 +586,7 @@ class Gettext {
    * @param options - Translation options.
    * @param args - Any variables to interpolate.
    *
-   * @return A translation string without context.
+   * @returns A translation string without context.
    *
    * ### Notes
    * Contains juicy parts of https://github.com/Orange-OpenSource/gettext.js/blob/master/lib.gettext.js

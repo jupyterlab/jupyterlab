@@ -3,8 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-button.jp-Button.bp3-button.bp3-minimal.jp-TreeView.jp-TreeView,
-button.jp-Button.bp3-button.bp3-minimal.jp-TreeView.jp-TableView {
+button.jp-Button.jp-mod-minimal.jp-TreeView.jp-TreeView,
+button.jp-Button.jp-mod-minimal.jp-TreeView.jp-TableView {
   display: flex;
   align-items: center;
   -webkit-transition: 0.4s;
@@ -12,16 +12,16 @@ button.jp-Button.bp3-button.bp3-minimal.jp-TreeView.jp-TableView {
   width: 35px;
 }
 
-button.jp-Button.bp3-button.bp3-minimal.jp-TreeView:hover {
+button.jp-Button.jp-mod-minimal.jp-TreeView:hover {
   cursor: pointer;
-  background-color: var(--jp-layout-color1);
+  background-color: var(--jp-layout-color2);
 }
 
-button.jp-Button.bp3-button.bp3-minimal.jp-TableView:hover {
+button.jp-Button.jp-mod-minimal.jp-TableView:hover {
   cursor: pointer;
-  background-color: var(--jp-layout-color1);
+  background-color: var(--jp-layout-color2);
 }
 
 .jp-ViewModeSelected {
-  background-color: var(--jp-layout-color1);
+  background-color: var(--jp-layout-color2);
 }

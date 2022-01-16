@@ -16,10 +16,9 @@
 [![GitHub](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/jupyterlab/jupyterlab/issues)
 [![Discourse](https://img.shields.io/badge/help_forum-discourse-blue.svg)](https://discourse.jupyter.org/c/jupyterlab)
 [![Gitter](https://img.shields.io/badge/social_chat-gitter-blue.svg)](https://gitter.im/jupyterlab/jupyterlab)
+[![Gitpod](https://img.shields.io/badge/gitpod_editor-open-blue.svg)](https://gitpod.io/#https://github.com/jupyterlab/jupyterlab)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/0b99d22459b65b9de1593a8ba2e4f34df9f76c9f?urlpath=lab/tree/demo)
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/jupyterlab/jupyterlab)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/7390762294552deb550b486928646705bbb24333?urlpath=lab/tree/demo)
 
 An extensible environment for interactive and reproducible computing, based on the
 Jupyter Notebook and Architecture. [Currently ready for users.](https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906)
@@ -50,38 +49,27 @@ Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.rea
 
 ### Installation
 
-JupyterLab can be installed using [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.readthedocs.io/en/latest/) or [pip](https://docs.python.org/3.6/installing/index.html). For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html).
+If you use [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.readthedocs.io/en/latest/), or [pip](https://docs.python.org/3/installing/index.html), you can install JupyterLab with one of the following commands.
 
-Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
+- If you use conda:
+  ```shell
+  conda install -c conda-forge jupyterlab
+  ```
+- If you use mamba:
+  ```shell
+  mamba install -c conda-forge jupyterlab
+  ```
+- If you use pip:
+  ```shell
+  pip install jupyterlab
+  ```
+  If installing using `pip install --user`, you must add the user-level `bin` directory to your `PATH` environment variable in order to launch `jupyter lab`. If you are using a Unix derivative (e.g., FreeBSD, GNU/Linux, macOS), you can do this by running `export PATH="$HOME/.local/bin:$PATH"`. If you are using a macOS version that comes with Python 2, run `pip3` instead of `pip`.
 
-### mamba and conda
-
-If you use `mamba` or `conda`, you can install it with:
-
-```shell
-mamba install -c conda-forge jupyterlab
-```
-
-or
-
-```shell
-conda install -c conda-forge jupyterlab
-```
-
-### pip
-
-If you use `pip`, you can install it with:
-
-```shell
-pip install jupyterlab
-```
-
-If installing using `pip install --user`, you must add the user-level `bin` directory to your `PATH` environment variable in order to launch `jupyter lab`. If you are using a Unix derivative (FreeBSD, GNU / Linux, OS X), you can achieve this by using `export PATH="$HOME/.local/bin:$PATH"` command.
+For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html). Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
 #### Installing with Previous Versions of Jupyter Notebook
 
-When using a version of Jupyter Notebook earlier than 5.3, the following command must be run
-after installation to enable the JupyterLab server extension:
+When using a version of Jupyter Notebook earlier than 5.3, the following command must be run after installing JupyterLab to enable the JupyterLab server extension:
 
 ```bash
 jupyter serverextension enable --py jupyterlab --sys-prefix
@@ -158,13 +146,13 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 - Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
-- Jason Grout, Bloomberg (co-creator, vision, general development).
+- Jason Grout, Databricks (co-creator, vision, general development).
 - Michał Krassowski, University of Oxford (general development, extensions).
 - Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
 - Gonzalo Peña-Castellanos, QuanSight (general development, i18n, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
 - Isabela Presedo-Floyd, QuanSight Labs (design/UX).
-- Steven Silvester, Apple (co-creator, release management, packaging,
+- Steven Silvester, MongoDB (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 - Jeremy Tuloup, QuantStack (general development, extensions).
 
@@ -192,4 +180,6 @@ Anyone is welcome to attend, if they would like to discuss a topic or just to li
 
 - When: Wednesdays [9AM Pacific Time](https://www.thetimezoneconverter.com/?t=9%3A00%20am&tz=San%20Francisco&)
 - Where: [`jovyan` Zoom](https://zoom.us/my/jovyan?pwd=c0JZTHlNdS9Sek9vdzR3aTJ4SzFTQT09)
-- What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both)
+- What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both) - Notes are now taken on Binder using JupyterLab with RTC.
+
+> Notes are archived on [GitHub JupyterLab team compass](https://github.com/jupyterlab/team-compass/issues).

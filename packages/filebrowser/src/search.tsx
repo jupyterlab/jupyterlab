@@ -137,7 +137,7 @@ const FilterBox = (props: IFilterBoxProps) => {
 /**
  * A widget which hosts a input textbox to filter on file names.
  */
-export const FilenameSearcher = (props: IFilterBoxProps) => {
+export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
   return ReactWidget.create(
     <FilterBox
       listing={props.listing}

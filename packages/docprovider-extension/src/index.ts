@@ -16,19 +16,19 @@ import {
   ProviderMock,
   WebSocketProviderWithLocks
 } from '@jupyterlab/docprovider';
+import { ICurrentUser } from '@jupyterlab/user';
 import { ServerConnection } from '@jupyterlab/services';
-import { IStateDB } from '@jupyterlab/statedb';
 
 /**
  * The default document provider plugin
  */
 const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   id: '@jupyterlab/docprovider-extension:plugin',
-  optional: [IStateDB],
+  requires: [ICurrentUser],
   provides: IDocumentProviderFactory,
   activate: (
     app: JupyterFrontEnd,
-    state: IStateDB | null
+    user: ICurrentUser
   ): IDocumentProviderFactory => {
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
@@ -41,7 +41,7 @@ const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
         ? new WebSocketProviderWithLocks({
             ...options,
             url,
-            state
+            user
           })
         : new ProviderMock();
     };

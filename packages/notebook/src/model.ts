@@ -19,6 +19,7 @@ import {
   IModelDB,
   IObservableJSON,
   IObservableList,
+  IObservableMap,
   IObservableUndoableList,
   ModelDB
 } from '@jupyterlab/observables';
@@ -28,9 +29,11 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { UUID } from '@lumino/coreutils';
+import { JSONObject, ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
+
+const UNSHARED_KEYS = ['kernelspec', 'language_info'];
 
 /**
  * The definition of a model object for a notebook widget.
@@ -86,6 +89,9 @@ export class NotebookModel implements INotebookModel {
     } else {
       this.modelDB = new ModelDB();
     }
+    this.sharedModel = models.YNotebook.create(
+      options.disableDocumentWideUndoRedo || false
+    ) as models.ISharedNotebook;
     this._isInitialized = options.isInitialized === false ? false : true;
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
@@ -105,9 +111,10 @@ export class NotebookModel implements INotebookModel {
       metadata.set('language_info', { name });
     }
     this._ensureMetadata();
-    metadata.changed.connect(this.triggerContentChange, this);
+    metadata.changed.connect(this._onMetadataChanged, this);
     this._deletedCells = [];
 
+    (this.sharedModel as models.YNotebook).dirty = false;
     this.sharedModel.changed.connect(this._onStateChanged, this);
   }
   /**
@@ -128,15 +135,13 @@ export class NotebookModel implements INotebookModel {
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this._dirty;
+    return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
+    if (newValue === this.dirty) {
       return;
     }
-    const oldValue = this._dirty;
-    this._dirty = newValue;
-    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
+    (this.sharedModel as models.YNotebook).dirty = newValue;
   }
 
   /**
@@ -330,7 +335,7 @@ export class NotebookModel implements INotebookModel {
         msg = this._trans.__(
           `This notebook has been converted from an older notebook format (v%1)
 to the current notebook format (v%2).
-The next time you save this notebook, the current notebook format (vthis._nbformat) will be used.
+The next time you save this notebook, the current notebook format (v%2) will be used.
 'Older versions of Jupyter may not be able to read the new format.' To preserve the original format version,
 close the notebook without saving it.`,
           origNbformat,
@@ -422,12 +427,32 @@ close the notebook without saving it.`,
         if (value.name === 'nbformatMinor') {
           this._nbformatMinor = value.newValue;
         }
-        if (value.name === 'dirty') {
-          this._dirty = value.newValue;
+        if (value.name !== 'dirty' || value.oldValue !== value.newValue) {
+          this.triggerStateChange(value);
         }
-        this.triggerStateChange(value);
       });
     }
+
+    if (changes.metadataChange) {
+      const metadata = changes.metadataChange.newValue as JSONObject;
+      this._modelDBMutex(() => {
+        Object.entries(metadata).forEach(([key, value]) => {
+          this.metadata.set(key, value);
+        });
+      });
+    }
+  }
+
+  private _onMetadataChanged(
+    metadata: IObservableJSON,
+    change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
+  ): void {
+    if (!UNSHARED_KEYS.includes(change.key)) {
+      this._modelDBMutex(() => {
+        this.sharedModel.updateMetadata(metadata.toJSON());
+      });
+    }
+    this.triggerContentChange();
   }
 
   /**
@@ -473,7 +498,12 @@ close the notebook without saving it.`,
   /**
    * The shared notebook model.
    */
-  readonly sharedModel = models.YNotebook.create() as models.ISharedNotebook;
+  readonly sharedModel: models.ISharedNotebook;
+
+  /**
+   * A mutex to update the shared model.
+   */
+  protected readonly _modelDBMutex = models.createMutex();
 
   /**
    * The underlying `IModelDB` instance in which model
@@ -481,7 +511,6 @@ close the notebook without saving it.`,
    */
   readonly modelDB: IModelDB;
 
-  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -529,6 +558,11 @@ export namespace NotebookModel {
      * If the model is initialized or not.
      */
     isInitialized?: boolean;
+
+    /**
+     * Defines if the document can be undo/redo.
+     */
+    disableDocumentWideUndoRedo?: boolean;
   }
 
   /**

@@ -63,7 +63,7 @@ export function addOpenTabsSessionManager(
   managers: IRunningSessionManagers,
   translator: ITranslator,
   labShell: ILabShell
-) {
+): void {
   const signaler = new OpenTabsSignaler(labShell);
   const trans = translator.load('jupyterlab');
 

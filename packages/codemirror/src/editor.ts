@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 // / <reference types="codemirror"/>
@@ -164,8 +165,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         this.onKeydown(event);
       }
     });
-    CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-    if (!USE_YCODEMIRROR_BINDING) {
+
+    if (USE_YCODEMIRROR_BINDING) {
+      this._yeditorBinding?.on('cursorActivity', () =>
+        this._onCursorActivity()
+      );
+    } else {
+      CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
       CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
         this._beforeDocChanged(instance, change);
       });
@@ -1143,7 +1149,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       )
     });
     console.warn(
-      'Please paste the following to https://github.com/jupyterlab/jupyterlab/issues/2951'
+      'If you are able and willing to publicly share the text or code in your editor, you can help us debug the "Code Editor out of Sync" message by pasting the following to the public issue at https://github.com/jupyterlab/jupyterlab/issues/2951. Please note that the data below includes the text/code in your editor.'
     );
     console.warn(
       JSON.stringify({

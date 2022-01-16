@@ -279,7 +279,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * #### Notes
    * This will clear any existing data.
    */
-  fromJSON(values: nbformat.IOutput[]) {
+  fromJSON(values: nbformat.IOutput[]): void {
     this.clear();
     each(values, value => {
       this._add(value);
@@ -355,7 +355,7 @@ export class OutputAreaModel implements IOutputAreaModel {
   protected shouldCombine(options: {
     value: nbformat.IOutput;
     lastModel: IOutputModel;
-  }) {
+  }): boolean {
     return true;
   }
 

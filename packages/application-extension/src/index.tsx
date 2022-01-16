@@ -50,6 +50,11 @@ import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
+ * Default context menu item rank
+ */
+export const DEFAULT_CONTEXT_ITEM_RANK = 100;
+
+/**
  * The command IDs used by the application plugin.
  */
 namespace CommandIDs {
@@ -76,6 +81,8 @@ namespace CommandIDs {
   export const showPropertyPanel: string = 'property-inspector:show-panel';
 
   export const resetLayout: string = 'application:reset-layout';
+
+  export const toggleHeader: string = 'application:toggle-header';
 
   export const toggleMode: string = 'application:toggle-mode';
 
@@ -281,8 +288,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         }
       });
 
+      commands.addCommand(CommandIDs.toggleHeader, {
+        label: trans.__('Show Header'),
+        execute: () => {
+          if (labShell.mode === 'single-document') {
+            labShell.toggleTopInSimpleModeVisibility();
+          }
+        },
+        isToggled: () => labShell.isTopInSimpleModeVisible(),
+        isVisible: () => labShell.mode === 'single-document'
+      });
+
       commands.addCommand(CommandIDs.toggleLeftArea, {
-        label: () => trans.__('Show Left Sidebar'),
+        label: trans.__('Show Left Sidebar'),
         execute: () => {
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
@@ -298,7 +316,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
 
       commands.addCommand(CommandIDs.toggleRightArea, {
-        label: () => trans.__('Show Right Sidebar'),
+        label: trans.__('Show Right Sidebar'),
         execute: () => {
           if (labShell.rightCollapsed) {
             labShell.expandRight();
@@ -382,6 +400,15 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
                 console.error('Failed to undo presentation mode.', reason);
               });
           }
+          // Display top header
+          if (
+            labShell.mode === 'single-document' &&
+            !labShell.isTopInSimpleModeVisible()
+          ) {
+            commands.execute(CommandIDs.toggleHeader).catch(reason => {
+              console.error('Failed to display title header.', reason);
+            });
+          }
           // Display side tabbar
           (['left', 'right'] as ('left' | 'right')[]).forEach(side => {
             if (
@@ -412,6 +439,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.closeAll,
         CommandIDs.closeOtherTabs,
         CommandIDs.closeRightTabs,
+        CommandIDs.toggleHeader,
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
         CommandIDs.togglePresentationMode,
@@ -435,7 +463,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
  */
 const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [IRouter, IWindowResolver, ITranslator],
+  requires: [
+    IRouter,
+    IWindowResolver,
+    ITranslator,
+    JupyterFrontEnd.ITreeResolver
+  ],
   optional: [IConnectionLost],
   provides: ITreePathUpdater,
   activate: (
@@ -443,6 +476,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     router: IRouter,
     resolver: IWindowResolver,
     translator: ITranslator,
+    treeResolver: JupyterFrontEnd.ITreeResolver,
     connectionLost: IConnectionLost | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -458,13 +492,17 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     let _defaultBrowserTreePath = '';
 
     function updateTreePath(treePath: string) {
-      _defaultBrowserTreePath = treePath;
-      if (!_docTreePath) {
-        const path = PageConfig.getUrl({ treePath });
-        router.navigate(path, { skipRouting: true });
-        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-        PageConfig.setOption('treePath', treePath);
-      }
+      // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
+      treeResolver.paths.then(() => {
+        _defaultBrowserTreePath = treePath;
+        if (!_docTreePath) {
+          const url = PageConfig.getUrl({ treePath });
+          const path = URLExt.parse(url).pathname;
+          router.navigate(path, { skipRouting: true });
+          // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
+          PageConfig.setOption('treePath', treePath);
+        }
+      });
     }
 
     // Requiring the window resolver guarantees that the application extension
@@ -494,22 +532,27 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.
     app.shell.modeChanged.connect((_, args: DockPanel.Mode) => {
-      const path = PageConfig.getUrl({ mode: args as string });
+      const url = PageConfig.getUrl({ mode: args as string });
+      const path = URLExt.parse(url).pathname;
       router.navigate(path, { skipRouting: true });
       // Persist this mode change to PageConfig as it is used elsewhere at runtime.
       PageConfig.setOption('mode', args as string);
     });
 
-    // Watch the path of the current widget in the main area and update the page
-    // URL to reflect the change.
-    app.shell.currentPathChanged.connect((_, args) => {
-      const maybeTreePath = args.newValue as string;
-      const treePath = maybeTreePath || _defaultBrowserTreePath;
-      const path = PageConfig.getUrl({ treePath: treePath });
-      router.navigate(path, { skipRouting: true });
-      // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-      PageConfig.setOption('treePath', treePath);
-      _docTreePath = maybeTreePath;
+    // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
+    treeResolver.paths.then(() => {
+      // Watch the path of the current widget in the main area and update the page
+      // URL to reflect the change.
+      app.shell.currentPathChanged.connect((_, args) => {
+        const maybeTreePath = args.newValue as string;
+        const treePath = maybeTreePath || _defaultBrowserTreePath;
+        const url = PageConfig.getUrl({ treePath: treePath });
+        const path = URLExt.parse(url).pathname;
+        router.navigate(path, { skipRouting: true });
+        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
+        PageConfig.setOption('treePath', treePath);
+        _docTreePath = maybeTreePath;
+      });
     });
 
     // If the connection to the server is lost, handle it with the
@@ -873,9 +916,21 @@ const busy: JupyterFrontEndPlugin<void> = {
  */
 const shell: JupyterFrontEndPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
-  activate: (app: JupyterFrontEnd) => {
+  optional: [ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry | null
+  ) => {
     if (!(app.shell instanceof LabShell)) {
       throw new Error(`${shell.id} did not find a LabShell instance.`);
+    }
+    if (settingRegistry) {
+      settingRegistry.load(shell.id).then(settings => {
+        (app.shell as LabShell).updateConfig(settings.composite);
+        settings.changed.connect(() => {
+          (app.shell as LabShell).updateConfig(settings.composite);
+        });
+      });
     }
     return app.shell;
   },
@@ -992,6 +1047,20 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that adds a spacer widget to the top area.
+ */
+const topSpacer: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:top-spacer',
+  autoStart: true,
+  requires: [ILabShell],
+  activate: (app: JupyterFrontEnd, shell: ILabShell) => {
+    const spacer = new Widget();
+    spacer.id = 'jp-topbar-spacer';
+    shell.add(spacer, 'top', { rank: 900 });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1009,7 +1078,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   info,
   paths,
   propertyInspector,
-  JupyterLogo
+  JupyterLogo,
+  topSpacer
 ];
 
 export default plugins;
@@ -1053,7 +1123,7 @@ namespace Private {
      */
     function populate(schema: ISettingRegistry.ISchema) {
       loaded = {};
-      schema.properties!.contextMenu.default = Object.keys(registry.plugins)
+      const pluginDefaults = Object.keys(registry.plugins)
         .map(plugin => {
           const items =
             registry.plugins[plugin]!.schema['jupyter.lab.menus']?.context ??
@@ -1061,17 +1131,24 @@ namespace Private {
           loaded[plugin] = items;
           return items;
         })
-        .concat([
-          schema['jupyter.lab.menus']?.context ?? [],
-          schema.properties!.contextMenu.default as any[]
-        ])
+        .concat([schema['jupyter.lab.menus']?.context ?? []])
         .reduceRight(
           (
             acc: ISettingRegistry.IContextMenuItem[],
             val: ISettingRegistry.IContextMenuItem[]
           ) => SettingRegistry.reconcileItems(acc, val, true),
           []
-        )! // flatten one level
+        )!;
+
+      // Apply default value as last step to take into account overrides.json
+      // The standard default being [] as the plugin must use `jupyter.lab.menus.context`
+      // to define their default value.
+      schema.properties!.contextMenu.default = SettingRegistry.reconcileItems(
+        pluginDefaults,
+        schema.properties!.contextMenu.default as any[],
+        true
+      )!
+        // flatten one level
         .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
     }
 
@@ -1086,9 +1163,11 @@ namespace Private {
 
         const defaults = canonical.properties?.contextMenu?.default ?? [];
         const user = {
+          ...plugin.data.user,
           contextMenu: plugin.data.user.contextMenu ?? []
         };
         const composite = {
+          ...plugin.data.composite,
           contextMenu: SettingRegistry.reconcileItems(
             defaults as ISettingRegistry.IContextMenuItem[],
             user.contextMenu as ISettingRegistry.IContextMenuItem[],
@@ -1124,11 +1203,19 @@ namespace Private {
     const settings = await registry.load(pluginId);
 
     const contextItems: ISettingRegistry.IContextMenuItem[] =
-      JSONExt.deepCopy(settings.composite.contextMenu as any) ?? [];
+      (settings.composite.contextMenu as any) ?? [];
 
     // Create menu item for non-disabled element
     SettingRegistry.filterDisabledItems(contextItems).forEach(item => {
-      MenuFactory.addContextItem(item, contextMenu, menuFactory);
+      MenuFactory.addContextItem(
+        {
+          // We have to set the default rank because Lumino is sorting the visible items
+          rank: DEFAULT_CONTEXT_ITEM_RANK,
+          ...item
+        },
+        contextMenu,
+        menuFactory
+      );
     });
 
     settings.changed.connect(() => {
@@ -1162,7 +1249,15 @@ namespace Private {
                 false
               ) ?? [];
             SettingRegistry.filterDisabledItems(toAdd).forEach(item => {
-              MenuFactory.addContextItem(item, contextMenu, menuFactory);
+              MenuFactory.addContextItem(
+                {
+                  // We have to set the default rank because Lumino is sorting the visible items
+                  rank: DEFAULT_CONTEXT_ITEM_RANK,
+                  ...item
+                },
+                contextMenu,
+                menuFactory
+              );
             });
           }
         }

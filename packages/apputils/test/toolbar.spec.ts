@@ -87,13 +87,14 @@ describe('@jupyterlab/apputils', () => {
           let called = false;
           sessionContext.statusChanged.connect((_, status) => {
             if (status === 'busy') {
+              // eslint-disable-next-line jest/no-conditional-expect
               expect(
                 item.node.querySelector("[data-icon$='circle']")
               ).toBeDefined();
               called = true;
             }
           });
-          const future = sessionContext.session?.kernel?.requestExecute({
+          const future = sessionContext.session!.kernel!.requestExecute({
             code: 'a = 109\na'
           })!;
           await future.done;
@@ -105,11 +106,12 @@ describe('@jupyterlab/apputils', () => {
           const status = sessionContext.session?.kernel?.status;
           expect(item.node.title.toLowerCase()).toContain(status);
           let called = false;
-          const future = sessionContext.session?.kernel?.requestExecute({
+          const future = sessionContext.session!.kernel!.requestExecute({
             code: 'a = 1'
           })!;
           future.onIOPub = msg => {
             if (sessionContext.session?.kernel?.status === 'busy') {
+              // eslint-disable-next-line jest/no-conditional-expect
               expect(item.node.title.toLowerCase()).toContain('busy');
               called = true;
             }

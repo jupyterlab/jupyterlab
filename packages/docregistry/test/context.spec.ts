@@ -91,7 +91,9 @@ describe('docregistry/context', () => {
         let checked = false;
         context.saveState.connect((sender, args) => {
           if (!called) {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(sender).toBe(context);
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(args).toBe('started');
 
             checked = true;
@@ -110,7 +112,9 @@ describe('docregistry/context', () => {
         let checked = false;
         context.saveState.connect((sender, args) => {
           if (called > 0) {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(sender).toBe(context);
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(args).toBe('completed');
             checked = true;
           }
@@ -134,6 +138,7 @@ describe('docregistry/context', () => {
         let checked;
         context.saveState.connect((sender, args) => {
           if (called > 0) {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(sender).toBe(context);
             checked = args;
           }
@@ -167,7 +172,7 @@ describe('docregistry/context', () => {
     describe('#ready()', () => {
       it('should resolve when the file is saved for the first time', async () => {
         await context.initialize(true);
-        await context.ready;
+        await expect(context.ready).resolves.not.toThrow();
       });
 
       it('should resolve when the file is reverted for the first time', async () => {
@@ -177,7 +182,7 @@ describe('docregistry/context', () => {
           content: 'foo'
         });
         await context.initialize(false);
-        await context.ready;
+        await expect(context.ready).resolves.not.toThrow();
       });
 
       it('should initialize the model when the file is saved for the first time', async () => {
@@ -232,6 +237,17 @@ describe('docregistry/context', () => {
     describe('#path', () => {
       it('should be the current path for the context', () => {
         expect(typeof context.path).toBe('string');
+      });
+    });
+
+    describe('#lastModifiedCheckMargin', () => {
+      it('should be 500ms by default', () => {
+        expect(context.lastModifiedCheckMargin).toBe(500);
+      });
+
+      it('should be set-able', () => {
+        context.lastModifiedCheckMargin = 600;
+        expect(context.lastModifiedCheckMargin).toBe(600);
       });
     });
 
@@ -326,6 +342,24 @@ describe('docregistry/context', () => {
         };
         const model = await manager.contents.get(context.path, opts);
         expect(model.content).toBe('foo\nbar');
+      });
+
+      it('should should preserve CR line endings upon save', async () => {
+        await context.initialize(true);
+        await manager.contents.save(context.path, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo\rbar'
+        });
+        await context.revert();
+        await context.save();
+        const opts: Contents.IFetchOptions = {
+          format: factory.fileFormat,
+          type: factory.contentType,
+          content: true
+        };
+        const model = await manager.contents.get(context.path, opts);
+        expect(model.content).toBe('foo\rbar');
       });
 
       it('should should preserve CRLF line endings upon save', async () => {

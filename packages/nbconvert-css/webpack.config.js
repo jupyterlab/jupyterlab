@@ -5,7 +5,8 @@ module.exports = {
   entry: './raw.js',
   output: {
     filename: 'index.js',
-    path: path.resolve(__dirname, 'style')
+    path: path.resolve(__dirname, 'style'),
+    hashFunction: 'sha256'
   },
   plugins: [
     new MiniCssExtractPlugin({

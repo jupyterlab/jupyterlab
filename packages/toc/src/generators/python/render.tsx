@@ -11,7 +11,7 @@ import { IHeading } from '../../utils/headings';
  * @param item - numbered heading
  * @returns rendered item
  */
-function render(item: IHeading) {
+function render(item: IHeading): JSX.Element {
   let fontSizeClass = 'toc-level-size-' + item.level;
 
   return (

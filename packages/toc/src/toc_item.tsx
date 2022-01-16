@@ -54,7 +54,7 @@ class TOCItem extends React.Component<IProperties, IState> {
    *
    * @returns rendered entry
    */
-  render() {
+  render(): JSX.Element | null {
     const { heading, toc } = this.props;
 
     // Create an onClick handler for the TOC item

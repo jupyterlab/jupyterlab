@@ -52,7 +52,7 @@ interface IOptions {
  *
  * @private
  */
-class OptionsManager extends Registry.IOptionsManager {
+class OptionsManager implements Registry.IOptionsManager {
   /**
    * Returns an options manager.
    *
@@ -66,7 +66,6 @@ class OptionsManager extends Registry.IOptionsManager {
     notebook: INotebookTracker,
     options: IOptions
   ) {
-    super();
     this._numbering = options.numbering;
     this._numberingH1 = options.numberingH1;
     this._includeOutput = options.includeOutput;
@@ -93,7 +92,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._tagTool = tagTool;
   }
 
-  get tagTool() {
+  get tagTool(): TagsToolComponent | null {
     return this._tagTool;
   }
 
@@ -115,7 +114,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this.notebookMetadata = ['toc-autonumbering', this._numbering];
   }
 
-  get numbering() {
+  get numbering(): boolean {
     return this._numbering;
   }
 
@@ -129,7 +128,7 @@ class OptionsManager extends Registry.IOptionsManager {
     }
   }
 
-  get numberingH1() {
+  get numberingH1(): boolean {
     return this._numberingH1;
   }
 
@@ -143,7 +142,7 @@ class OptionsManager extends Registry.IOptionsManager {
     }
   }
 
-  get includeOutput() {
+  get includeOutput(): boolean {
     return this._includeOutput;
   }
   /**
@@ -156,7 +155,7 @@ class OptionsManager extends Registry.IOptionsManager {
     }
   }
 
-  get syncCollapseState() {
+  get syncCollapseState(): boolean {
     return this._syncCollapseState;
   }
 
@@ -169,7 +168,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._widget.update();
   }
 
-  get showCode() {
+  get showCode(): boolean {
     return this._showCode;
   }
 
@@ -182,7 +181,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._widget.update();
   }
 
-  get showMarkdown() {
+  get showMarkdown(): boolean {
     return this._showMarkdown;
   }
 
@@ -202,14 +201,14 @@ class OptionsManager extends Registry.IOptionsManager {
     this._widget.update();
   }
 
-  get showTags() {
+  get showTags(): boolean {
     return this._showTags;
   }
 
   /**
    * Returns a list of selected tags.
    */
-  get filtered() {
+  get filtered(): string[] {
     if (this.tagTool) {
       this._filtered = this.tagTool.filtered;
     } else if (this.storeTags.length > 0) {
@@ -222,6 +221,9 @@ class OptionsManager extends Registry.IOptionsManager {
 
   /**
    * Gets/sets a pre-rendered a toolbar.
+   *
+   * @deprecated since v4
+   * This is not used any more
    */
   set preRenderedToolbar(value: any) {
     this._preRenderedToolbar = value;
@@ -234,7 +236,7 @@ class OptionsManager extends Registry.IOptionsManager {
   /**
    * Updates a table of contents widget.
    */
-  updateWidget() {
+  updateWidget(): void {
     this._widget.update();
   }
 
@@ -244,7 +246,7 @@ class OptionsManager extends Registry.IOptionsManager {
    * to perform an action when the collapse button
    * is pressed.
    */
-  updateAndCollapse(args: Registry.ICollapseChangedArgs) {
+  updateAndCollapse(args: Registry.ICollapseChangedArgs): void {
     this._collapseChanged.emit(args);
     this._widget.update();
   }
@@ -272,7 +274,7 @@ class OptionsManager extends Registry.IOptionsManager {
     showCode: boolean,
     showMarkdown: boolean,
     showTags: boolean
-  ) {
+  ): void {
     this._numbering = numbering;
     this._numberingH1 = numberingH1;
     this._includeOutput = includeOutput;
@@ -297,7 +299,7 @@ class OptionsManager extends Registry.IOptionsManager {
   private _collapseChanged: Signal<this, Registry.ICollapseChangedArgs>;
   private _tagTool: TagsToolComponent | null = null;
   translator: ITranslator; // FIXME-TRANS:
-  public storeTags: string[];
+  storeTags: string[];
 }
 
 /**

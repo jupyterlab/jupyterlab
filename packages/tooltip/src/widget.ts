@@ -69,7 +69,10 @@ export class Tooltip extends Widget {
     }
 
     this._content = this._rendermime.createRenderer(mimeType);
-    void this._content.renderModel(model);
+    this._content
+      .renderModel(model)
+      .then(() => this._setGeometry())
+      .catch(error => console.error('tooltip rendering failed', error));
     this._content.addClass(CONTENT_CLASS);
     layout.addWidget(this._content);
   }
@@ -216,7 +219,7 @@ export class Tooltip extends Widget {
 
     const editor = this._editor;
 
-    const anchor = editor.getCoordinateForPosition(position) as ClientRect;
+    const anchor = editor.getCoordinateForPosition(position);
     const style = window.getComputedStyle(this.node);
     const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 

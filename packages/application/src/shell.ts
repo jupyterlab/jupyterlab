@@ -106,6 +106,18 @@ export namespace ILabShell {
    */
   export type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
 
+  export interface IConfig {
+    /**
+     * The method for hiding widgets in the dock panel.
+     *
+     * The default is `scale`.
+     *
+     * Using `scale` will often increase performance as most browsers will not trigger style computation
+     * for the transform action.
+     */
+    hiddenMode: 'display' | 'scale';
+  }
+
   /**
    * The args for the current path change signal.
    */
@@ -155,6 +167,11 @@ export namespace ILabShell {
      * The right area of the user interface.
      */
     readonly rightArea: ISideArea | null;
+
+    /**
+     * The top area of the user interface.
+     */
+    readonly topArea: ITopArea | null;
 
     /**
      * The relatives sizes of the areas of the user interface.
@@ -223,6 +240,16 @@ export namespace ILabShell {
 }
 
 /**
+ * The restorable description of the top area in the user interface.
+ */
+export interface ITopArea {
+  /**
+   * Top area visibility in simple mode.
+   */
+  readonly simpleVisibility: boolean;
+}
+
+/**
  * The application shell for JupyterLab.
  */
 export class LabShell extends Widget implements JupyterFrontEnd.IShell {
@@ -237,6 +264,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const trans = ((options && options.translator) || nullTranslator).load(
       'jupyterlab'
     );
+
+    // Skip Links
+    const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
+      this
+    ));
+    this._skipLinkWidget.show();
+    //  Wrap the skip widget to customize its position and size
+    const skipLinkWrapper = new Panel();
+    skipLinkWrapper.addClass('jp-skiplink-wrapper');
+    skipLinkWrapper.addWidget(skipLinkWidget);
+
     const headerPanel = (this._headerPanel = new BoxPanel());
     const menuHandler = (this._menuHandler = new Private.PanelHandler());
     menuHandler.panel.node.setAttribute('role', 'navigation');
@@ -247,7 +285,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     bottomPanel.node.setAttribute('role', 'contentinfo');
     const hboxPanel = new BoxPanel();
     const vsplitPanel = (this._vsplitPanel = new Private.RestorableSplitPanel());
-    const dockPanel = (this._dockPanel = new DockPanelSvg());
+    const dockPanel = (this._dockPanel = new DockPanelSvg({
+      hiddenMode: Widget.HiddenMode.Scale
+    }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     const hsplitPanel = (this._hsplitPanel = new Private.RestorableSplitPanel());
@@ -343,6 +383,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     BoxLayout.setStretch(hboxPanel, 1);
     BoxLayout.setStretch(bottomPanel, 0);
 
+    rootLayout.addWidget(skipLinkWrapper);
     rootLayout.addWidget(headerPanel);
     rootLayout.addWidget(topHandler.panel);
     rootLayout.addWidget(hboxPanel);
@@ -388,16 +429,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._topHandler.addWidget(this._menuHandler.panel, 100);
       titleHandler.hide();
     } else {
-      rootLayout.insertWidget(2, this._menuHandler.panel);
+      rootLayout.insertWidget(3, this._menuHandler.panel);
     }
-
-    // Skip Links
-    const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
-      this
-    ));
-
-    this.add(skipLinkWidget, 'top', { rank: 0 });
-    this._skipLinkWidget.show();
 
     // Wire up signals to update the title panel of the simple interface mode to
     // follow the title of this.currentWidget
@@ -518,11 +551,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     const applicationCurrentWidget = this.currentWidget;
 
-    // Toggle back to multiple document mode.
-    dock.mode = mode;
-
     if (mode === 'single-document') {
+      // Cache the current multi-document layout before changing the mode.
       this._cachedLayout = dock.saveLayout();
+      dock.mode = mode;
 
       // In case the active widget in the dock panel is *not* the active widget
       // of the application, defer to the application.
@@ -531,12 +563,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       }
 
       // Adjust menu and title
-      (this.layout as BoxLayout).insertWidget(2, this._menuHandler.panel);
+      (this.layout as BoxLayout).insertWidget(3, this._menuHandler.panel);
       this._titleHandler.show();
       this._updateTitlePanelTitle();
+      if (this._topHandlerHiddenByUser) {
+        this._topHandler.panel.hide();
+      }
     } else {
-      // Cache a reference to every widget currently in the dock panel.
+      // Cache a reference to every widget currently in the dock panel before
+      // changing its mode.
       const widgets = toArray(dock.widgets());
+      dock.mode = mode;
 
       // Restore the original layout.
       if (this._cachedLayout) {
@@ -816,6 +853,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Whether the top bar in simple mode is visible or not.
+   *
+   * @returns Top bar visibility
+   */
+  isTopInSimpleModeVisible(): boolean {
+    return !this._topHandlerHiddenByUser;
+  }
+
+  /**
    * True if the given area is empty.
    */
   isEmpty(area: ILabShell.Area): boolean {
@@ -845,7 +891,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Restore the layout state for the application shell.
    */
   restoreLayout(mode: DockPanel.Mode, layout: ILabShell.ILayout): void {
-    const { mainArea, downArea, leftArea, rightArea, relativeSizes } = layout;
+    const {
+      mainArea,
+      downArea,
+      leftArea,
+      rightArea,
+      topArea,
+      relativeSizes
+    } = layout;
     // Rehydrate the main area.
     if (mainArea) {
       const { currentWidget, dock } = mainArea;
@@ -863,6 +916,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       // This is needed when loading in an empty workspace in single doc mode
       if (mode) {
         this.mode = mode;
+      }
+    }
+
+    if (topArea?.simpleVisibility !== undefined) {
+      this._topHandlerHiddenByUser = !topArea.simpleVisibility;
+      if (this.mode === 'single-document') {
+        this._topHandler.panel.setHidden(this._topHandlerHiddenByUser);
       }
     }
 
@@ -969,10 +1029,31 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate(),
+      topArea: { simpleVisibility: !this._topHandlerHiddenByUser },
       relativeSizes: this._hsplitPanel.relativeSizes()
     };
 
     return layout;
+  }
+
+  /**
+   * Toggle top header visibility in simple mode
+   *
+   * Note: Does nothing in multi-document mode
+   */
+  toggleTopInSimpleModeVisibility(): void {
+    if (this.mode === 'single-document') {
+      if (this._topHandler.panel.isVisible) {
+        this._topHandlerHiddenByUser = true;
+        this._topHandler.panel.hide();
+      } else {
+        this._topHandlerHiddenByUser = false;
+        this._topHandler.panel.show();
+
+        this._updateTitlePanelTitle();
+      }
+      this._onLayoutModified();
+    }
   }
 
   /**
@@ -993,6 +1074,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       } else {
         this._leftHandler.show();
       }
+    }
+  }
+
+  /**
+   * Update the shell configuration.
+   *
+   * @param config Shell configuration
+   */
+  updateConfig(config: Partial<ILabShell.IConfig>): void {
+    if (config.hiddenMode) {
+      this._dockPanel.hiddenMode =
+        config.hiddenMode === 'display'
+          ? Widget.HiddenMode.Display
+          : Widget.HiddenMode.Scale;
     }
   }
 
@@ -1423,6 +1518,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _hsplitPanel: Private.RestorableSplitPanel;
   private _vsplitPanel: Private.RestorableSplitPanel;
   private _topHandler: Private.PanelHandler;
+  private _topHandlerHiddenByUser = false;
   private _menuHandler: Private.PanelHandler;
   private _skipLinkWidget: Private.SkipLinkWidget;
   private _titleHandler: Private.TitleHandler;

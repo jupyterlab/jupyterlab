@@ -134,10 +134,23 @@ const DRAG_THRESHOLD = 5;
  */
 type InsertType = 'push' | 'insert' | 'set';
 
+/*
+ * The rendering mode for the notebook.
+ */
+type RenderingLayout = 'default' | 'side-by-side';
+
 /**
  * The class attached to the heading collapser button
  */
 const HEADING_COLLAPSER_CLASS = 'jp-collapseHeadingButton';
+
+/**
+ * The class that controls the visibility of "heading collapser" and "show hidden cells" buttons.
+ */
+const HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS =
+  'jp-mod-showHiddenCellsButton';
+
+const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
 
 /**
  * The interactivity modes for the notebook.
@@ -147,6 +160,7 @@ export type NotebookMode = 'command' | 'edit';
 if ((window as any).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
+  // eslint-disable-next-line @typescript-eslint/ban-types
   (window as any).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {
@@ -192,8 +206,10 @@ export class StaticNotebook extends Widget {
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
+    this._updateNotebookConfig();
     this._mimetypeService = options.mimeTypeService;
     this._showEditorForReadOnlyMarkdown = options.showEditorForReadOnlyMarkdown;
+    this.renderingLayout = options.notebookConfig?.renderingLayout;
 
     // Section for the virtual-notebook behavior.
     this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
@@ -338,6 +354,18 @@ export class StaticNotebook extends Widget {
   set notebookConfig(value: StaticNotebook.INotebookConfig) {
     this._notebookConfig = value;
     this._updateNotebookConfig();
+  }
+
+  get renderingLayout(): RenderingLayout | undefined {
+    return this._renderingLayout;
+  }
+  set renderingLayout(value: RenderingLayout | undefined) {
+    this._renderingLayout = value;
+    if (this._renderingLayout === 'side-by-side') {
+      this.node.classList.add(SIDE_BY_SIDE_CLASS);
+    } else {
+      this.node.classList.remove(SIDE_BY_SIDE_CLASS);
+    }
   }
 
   /**
@@ -590,9 +618,8 @@ export class StaticNotebook extends Widget {
       this._renderedCellsCount >=
         this.notebookConfig.numberCellsToRenderDirectly
     ) {
-      const index = this._renderedCellsCount;
-      const cell = this._cellsArray[index];
-      this._renderPlaceholderCell(cell, index);
+      const ci = this._toRenderMap.entries().next();
+      this._renderPlaceholderCell(ci.value[1].cell, ci.value[1].index);
     }
   }
 
@@ -650,6 +677,12 @@ export class StaticNotebook extends Widget {
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
     cell.syncEditable = true;
+    // Connect collapsed signal for each markdown cell widget
+    cell.toggleCollapsedSignal.connect(
+      (newCell: MarkdownCell, collapsed: boolean) => {
+        NotebookActions.setHeadingCollapse(newCell, collapsed, this);
+      }
+    );
     return cell;
   }
 
@@ -787,6 +820,11 @@ export class StaticNotebook extends Widget {
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
+    // Control visibility of heading collapser UI
+    this.toggleClass(
+      HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS,
+      this._notebookConfig.showHiddenCellsButton
+    );
   }
 
   private _incrementRenderedCount() {
@@ -810,6 +848,7 @@ export class StaticNotebook extends Widget {
   private _showEditorForReadOnlyMarkdown?: boolean;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
   private _cellsArray: Array<Cell>;
+  private _renderingLayout: RenderingLayout | undefined;
 }
 
 /**
@@ -939,6 +978,11 @@ export namespace StaticNotebook {
    */
   export interface INotebookConfig {
     /**
+     * Show hidden cells button if collapsed
+     */
+    showHiddenCellsButton: boolean;
+
+    /**
      * Enable scrolling past the last cell
      */
     scrollPastEnd: boolean;
@@ -988,11 +1032,23 @@ export namespace StaticNotebook {
      * Should an editor be shown for read-only markdown
      */
     showEditorForReadOnlyMarkdown?: boolean;
+
+    /**
+     * Defines if the document can be undo/redo.
+     */
+    disableDocumentWideUndoRedo: boolean;
+
+    /**
+     * Defines the rendering layout to use.
+     */
+    renderingLayout: RenderingLayout;
   }
+
   /**
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
+    showHiddenCellsButton: true,
     scrollPastEnd: true,
     defaultCell: 'code',
     recordTiming: false,
@@ -1001,7 +1057,9 @@ export namespace StaticNotebook {
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px',
     maxNumberOutputs: 50,
-    showEditorForReadOnlyMarkdown: true
+    showEditorForReadOnlyMarkdown: true,
+    disableDocumentWideUndoRedo: false,
+    renderingLayout: 'default'
   };
 
   /**
@@ -1200,6 +1258,13 @@ export class Notebook extends StaticNotebook {
    */
   get activeCell(): Cell | null {
     return this._activeCell;
+  }
+
+  get lastClipboardInteraction(): 'copy' | 'cut' | 'paste' | null {
+    return this._lastClipboardInteraction;
+  }
+  set lastClipboardInteraction(newValue: 'copy' | 'cut' | 'paste' | null) {
+    this._lastClipboardInteraction = newValue;
   }
 
   /**
@@ -1672,7 +1737,11 @@ export class Notebook extends StaticNotebook {
     if (this._fragment) {
       let el;
       try {
-        el = this.node.querySelector(this._fragment);
+        el = this.node.querySelector(
+          this._fragment.startsWith('#')
+            ? `#${CSS.escape(this._fragment.slice(1))}`
+            : this._fragment
+        );
       } catch (error) {
         console.warn('Unable to set URI fragment identifier', error);
       }
@@ -2406,6 +2475,8 @@ export class Notebook extends StaticNotebook {
   // Attributes for optimized cell refresh:
   private _cellLayoutStateCache?: { width: number };
   private _checkCacheOnNextResize = false;
+
+  private _lastClipboardInteraction: 'copy' | 'cut' | 'paste' | null = null;
 }
 
 /**

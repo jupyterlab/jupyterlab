@@ -3,10 +3,62 @@
 Extension Migration Guide
 ================================================
 
-JupyterLab 3.0 to 3.1
+JupyterLab 3.x to 4.x
 ---------------------
 
-Following semver rules, API are compatible.
+.. note::
+
+   With JupyterLab 4.x, the npm package version policy changed to not bump major version with
+   the Python package unless required to ease extension compatibility.
+
+API breaking changes
+^^^^^^^^^^^^^^^^^^^^
+
+Here is a list of JupyterLab npm packages that encountered API changes and therefore have
+bumped their major version (following semver convention):
+
+- ``@jupyterlab/ui-components`` from 3.x to 4.x
+   Major version bumped following removal of Blueprint JS dependency. Extensions using proxied
+   components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly
+   from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
+   need to switch to the Blueprint components as the interfaces of those components in JupyterLab
+   do not match those of Blueprint JS.
+- ``@jupyterlab/application`` from 3.x to 4.x
+   Major version bump to allow alternate ``ServiceManager`` implementations in ``JupyterFrontEnd``.
+   Specifically this allows the use of a mock manager.
+   This also makes the ``JupyterLab.IOptions`` more permissive to not require a shell when options are
+   given and allow a shell that meets the ``ILabShell`` interface.
+   As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
+   See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
+- ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
+   This may impact application configuration (for instance if the plugin was disabled).
+- ``@jupyterlab/notebook`` from 3.x to 4.x
+   * The ``NotebookPanel._onSave`` method is now ``private``.
+   * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
+   * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
+   * Command ``Collapsible_Headings:Collapse_All`` renamed to ``notebook:collapse-all-headings``.
+   * Command ``Collapsible_Headings:Expand_All`` renamed to ``notebook:expand-all-headings``.
+- ``@jupyterlab/shared-models`` from 3.x to 4.x
+   The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
+- ``@jupyterlab/buildutils`` from 3.x to 4.x
+   The ``create-theme`` script has been removed. If you want to create a new theme extension, you
+   should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
+   The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
+- TypeScript 4.5 update
+   As a result of the update to TypeScript 4.5, a couple of interfaces have had their definitions changed.
+   The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
+   The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+
+Extension Development Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- The ``externalExtensions`` field in the ``dev_mode/package.json`` file corresponding to the ``@jupyterlab/application-top``
+  ``private`` package has now been removed in ``4.0``. If you were using this field to develop source extensions against
+  a development build of JupyterLab, you should instead switch to the federated extensions system (via the ``--extensions-in-dev-mode`` flag)
+  or to using the ``--splice-source`` option. See :ref:`prebuilt_dev_workflow` and :ref:`source_dev_workflow` for more information.
+
+JupyterLab 3.0 to 3.1
+---------------------
 
 New main and context menus customization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -14,13 +66,14 @@ New main and context menus customization
 JupyterLab 3.1 introduces a new way to hook commands into :ref:`mainmenu` and :ref:`context_menu`.
 It allows the final user to customize those menus through settings as it is already possible for
 the shortcuts.
+Using the API is not recommended any longer except to create dynamic menus.
 
 
 Jest configuration update
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
-They need to be ignore when transforming the code with Jest. You will need to update the 
+They need to be ignore when transforming the code with Jest. You will need to update the
 ``transformIgnorePatterns`` to match:
 
 .. code::
@@ -41,7 +94,7 @@ For more information, have a look at :ref:`testing_with_jest`.
 
 .. note::
 
-   Here is an example of pull request to update to JupyterLab 3.1 in ``@jupyterlab/git`` extension:  
+   Here is an example of pull request to update to JupyterLab 3.1 in ``@jupyterlab/git`` extension:
    https://github.com/jupyterlab/jupyterlab-git/pull/979/files
 
 

@@ -81,7 +81,7 @@ export class SearchBar extends React.Component<
   /**
    * Handler for search input changes.
    */
-  handleChange = (e: React.FormEvent<HTMLElement>) => {
+  handleChange = (e: React.FormEvent<HTMLElement>): void => {
     const target = e.target as HTMLInputElement;
     this.setState({
       value: target.value
@@ -282,42 +282,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             {entry.description}
           </div>
           <div className="jp-extensionmanager-entry-buttons">
-            {!entry.installed &&
-              entry.pkg_type == 'source' &&
-              !entry.blockedExtensionsEntry &&
-              !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
-              ListModel.isDisclaimed() && (
-                <Button
-                  onClick={() => props.performAction('install', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Install')}
-                </Button>
-              )}
-            {ListModel.entryHasUpdate(entry) &&
-              entry.pkg_type == 'source' &&
-              !entry.blockedExtensionsEntry &&
-              !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
-              ListModel.isDisclaimed() && (
-                <Button
-                  onClick={() => props.performAction('install', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Update')}
-                </Button>
-              )}
-            {entry.installed && entry.pkg_type == 'source' && (
-              <Button
-                onClick={() => props.performAction('uninstall', entry)}
-                minimal
-                small
-              >
-                {trans.__('Uninstall')}
-              </Button>
-            )}
-            {entry.enabled && entry.pkg_type == 'source' && (
+            {entry.enabled && (
               <Button
                 onClick={() => props.performAction('disable', entry)}
                 minimal
@@ -326,7 +291,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Disable')}
               </Button>
             )}
-            {entry.installed && entry.pkg_type == 'source' && !entry.enabled && (
+            {entry.installed && !entry.enabled && (
               <Button
                 onClick={() => props.performAction('enable', entry)}
                 minimal
@@ -595,7 +560,7 @@ export class CollapsibleSection extends React.Component<
   /**
    * Handler for search input changes.
    */
-  handleCollapse() {
+  handleCollapse(): void {
     this.setState(
       {
         isOpen: !this.state.isOpen
@@ -608,7 +573,9 @@ export class CollapsibleSection extends React.Component<
     );
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
+  UNSAFE_componentWillReceiveProps(
+    nextProps: CollapsibleSection.IProperties
+  ): void {
     if (nextProps.forceOpen) {
       this.setState({
         isOpen: true
@@ -683,7 +650,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   private _forceOpen: boolean;
   constructor(
     app: JupyterFrontEnd,
-    serviceManager: ServiceManager,
+    serviceManager: ServiceManager.IManager,
     settings: ISettingRegistry.ISettings,
     translator?: ITranslator
   ) {
@@ -971,7 +938,7 @@ risks or contain malicious code that runs on your machine.`)}
    *
    * @param value The new query.
    */
-  onSearch(value: string) {
+  onSearch(value: string): void {
     this.model!.query = value;
   }
 
@@ -980,7 +947,7 @@ risks or contain malicious code that runs on your machine.`)}
    *
    * @param value The pagination page number.
    */
-  onPage(value: number) {
+  onPage(value: number): void {
     this.model!.page = value;
   }
 
@@ -990,7 +957,7 @@ risks or contain malicious code that runs on your machine.`)}
    * @param action The action to perform.
    * @param entry The entry to perform the action on.
    */
-  onAction(action: Action, entry: IEntry) {
+  onAction(action: Action, entry: IEntry): Promise<void> {
     switch (action) {
       case 'install':
         return this.model!.install(entry);

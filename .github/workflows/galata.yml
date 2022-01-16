@@ -1,0 +1,86 @@
+name: UI Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches: '*'
+
+jobs:
+  build:
+    name: Visual Regression Tests
+    timeout-minutes: 80
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm run build
+
+      - name: Launch JupyterLab
+        run: |
+          cd galata
+          # Mount a volume to overwrite the server configuration
+          jlpm start 2>&1 > /tmp/jupyterlab_server.log &
+
+      - name: Install browser
+        run: |
+          cd galata
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
+
+      - name: Test
+        run: |
+          cd galata
+          jlpm run test
+          # Run once benchmark tests to ensure they have no regression
+          BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-galata-test-assets
+          path: |
+            galata/test-results
+
+      - name: Upload Galata Test report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-galata-report
+          path: |
+            galata/playwright-report
+
+      - name: Update snapshots
+        if: failure()
+        run: |
+          cd galata
+          jlpm run test:update
+
+      - name: Upload updated snapshots
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-galata-updated-snapshots
+          path: galata/test/**/*-snapshots/*.*
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log

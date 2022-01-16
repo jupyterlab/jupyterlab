@@ -10,7 +10,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import * as React from 'react';
-import { Button } from '../blueprint';
+import { Button } from './button';
 import { ellipsesIcon, LabIcon } from '../icon';
 import { classes } from '../utils';
 import { ReactWidget, UseSignal } from './vdom';
@@ -24,6 +24,11 @@ const TOOLBAR_CLASS = 'jp-Toolbar';
  * The class name added to toolbar items.
  */
 const TOOLBAR_ITEM_CLASS = 'jp-Toolbar-item';
+
+/**
+ * Toolbar pop-up opener button name
+ */
+const TOOLBAR_OPENER_NAME = 'toolbar-popup-opener';
 
 /**
  * The class name added to toolbar spacer.
@@ -163,13 +168,6 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     super();
     this.addClass(TOOLBAR_CLASS);
     this.layout = new ToolbarLayout();
-    this.insertItem(
-      0,
-      'toolbar-popup-opener',
-      (this.popupOpener as unknown) as T
-    );
-    this.popupOpener.hide();
-    this._resizer = new Throttler(this._onResize.bind(this), 500);
   }
 
   /**
@@ -201,22 +199,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   addItem(name: string, widget: T): boolean {
     const layout = this.layout as ToolbarLayout;
-    return this.insertItem(layout.widgets.length - 1, name, widget);
-  }
-
-  /**
-   * Dispose of the widget and its descendant widgets.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-
-    if (this._resizer) {
-      this._resizer.dispose();
-    }
-
-    super.dispose();
+    return this.insertItem(layout.widgets.length, name, widget);
   }
 
   /**
@@ -242,12 +225,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     }
     widget.addClass(TOOLBAR_ITEM_CLASS);
     const layout = this.layout as ToolbarLayout;
-    if (widget instanceof ToolbarPopupOpener) {
-      layout.insertWidget(index, widget);
-    } else {
-      const j = Math.max(0, Math.min(index, layout.widgets.length - 1));
-      layout.insertWidget(j, widget);
-    }
+
+    const j = Math.max(0, Math.min(index, layout.widgets.length));
+    layout.insertWidget(j, widget);
+
     Private.nameProperty.set(widget, name);
     return true;
   }
@@ -302,7 +283,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
       return { name: name, index: i };
     });
     const target = find(nameWithIndex, x => x.name === at);
-    if (target && !(target instanceof ToolbarPopupOpener)) {
+    if (target) {
       return this.insertItem(target.index + offset, name, widget);
     }
     return false;
@@ -332,6 +313,9 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * Handle a DOM click event.
    */
   protected handleClick(event: Event): void {
+    // Stop propagating the click outside the toolbar
+    event.stopPropagation();
+
     // Clicking a label focuses the corresponding control
     // that is linked with `for` attribute, so let it be.
     if (event.target instanceof HTMLLabelElement) {
@@ -365,6 +349,98 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
   }
+}
+
+/**
+ * A class which provides a toolbar widget.
+ */
+export class ReactiveToolbar extends Toolbar<Widget> {
+  /**
+   * Construct a new toolbar widget.
+   */
+  constructor() {
+    super();
+    this.insertItem(0, TOOLBAR_OPENER_NAME, this.popupOpener);
+    this.popupOpener.hide();
+    this._resizer = new Throttler(this._onResize.bind(this), 500);
+  }
+
+  /**
+   * Dispose of the widget and its descendant widgets.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    if (this._resizer) {
+      this._resizer.dispose();
+    }
+
+    super.dispose();
+  }
+
+  /**
+   * Insert an item into the toolbar at the after a target item.
+   *
+   * @param at - The target item to insert after.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar or if the target
+   *   is the toolbar pop-up opener.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertAfter(at: string, name: string, widget: Widget): boolean {
+    if (at === TOOLBAR_OPENER_NAME) {
+      return false;
+    }
+    return super.insertAfter(at, name, widget);
+  }
+
+  /**
+   * Insert an item into the toolbar at the specified index.
+   *
+   * @param index - The index at which to insert the item.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertItem(index: number, name: string, widget: Widget): boolean {
+    if (widget instanceof ToolbarPopupOpener) {
+      return super.insertItem(index, name, widget);
+    } else {
+      const j = Math.max(
+        0,
+        Math.min(index, (this.layout as ToolbarLayout).widgets.length - 1)
+      );
+      return super.insertItem(j, name, widget);
+    }
+  }
+
+  /**
+   * A message handler invoked on a `'before-hide'` message.
+   *
+   * It will hide the pop-up panel
+   */
+  onBeforeHide(msg: Message): void {
+    this.popupOpener.hidePopup();
+    super.onBeforeHide(msg);
+  }
 
   protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
@@ -390,8 +466,8 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
 
       while (index < toIndex) {
         const widget = layout.widgets[index];
-        this._saveWidgetWidth(widget as T);
-        width += this._getWidgetWidth(widget as T);
+        this._saveWidgetWidth(widget);
+        width += this._getWidgetWidth(widget);
         if (
           widgetsToRemove.length === 0 &&
           opener.isHidden &&
@@ -407,7 +483,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
 
       while (widgetsToRemove.length > 0) {
         const widget = widgetsToRemove.pop() as Widget;
-        width -= this._getWidgetWidth(widget as T);
+        width -= this._getWidgetWidth(widget);
         opener.addWidget(widget);
       }
 
@@ -417,7 +493,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
         let widget = opener.widgetAt(index);
         const widgetCount = opener.widgetCount();
 
-        width += this._getWidgetWidth(widget as T);
+        width += this._getWidgetWidth(widget);
 
         if (widgetCount === 1 && width - openerWidth <= toolbarWidth) {
           width -= openerWidth;
@@ -428,14 +504,14 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
           index++;
           widget = opener.widgetAt(index);
           if (widget) {
-            width += this._getWidgetWidth(widget as T);
+            width += this._getWidgetWidth(widget);
           } else {
             break;
           }
         }
 
         while (widgetsToAdd.length > 0) {
-          const widget = widgetsToAdd.shift() as T;
+          const widget = widgetsToAdd.shift()!;
           this.addItem(Private.nameProperty.get(widget), widget);
         }
       }
@@ -449,19 +525,19 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     }
   }
 
-  private _saveWidgetWidth(widget: T) {
+  private _saveWidgetWidth(widget: Widget) {
     const widgetName = Private.nameProperty.get(widget);
     this._widgetWidths![widgetName] = widget.hasClass(TOOLBAR_SPACER_CLASS)
       ? 2
       : widget.node.clientWidth;
   }
 
-  private _getWidgetWidth(widget: T): number {
+  private _getWidgetWidth(widget: Widget): number {
     const widgetName = Private.nameProperty.get(widget);
     return this._widgetWidths![widgetName];
   }
 
-  readonly popupOpener: ToolbarPopupOpener = new ToolbarPopupOpener();
+  protected readonly popupOpener: ToolbarPopupOpener = new ToolbarPopupOpener();
   private readonly _widgetWidths: { [key: string]: number } = {};
   private readonly _resizer: Throttler;
 }
@@ -470,6 +546,16 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
  * The namespace for Toolbar class statics.
  */
 export namespace Toolbar {
+  /**
+   * Widget with associated toolbar
+   */
+  export interface IWidgetToolbar extends Widget {
+    /**
+     * Toolbar of actions on the widget
+     */
+    toolbar?: Toolbar;
+  }
+
   /**
    * Create a toolbar spacer item.
    *
@@ -498,6 +584,10 @@ export namespace ToolbarButtonComponent {
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
+    pressed?: boolean;
+    pressedIcon?: LabIcon.IMaybeResolvable;
+    pressedTooltip?: string;
+    disabledTooltip?: string;
 
     /**
      * Trigger the button on the actual onClick event rather than onMouseDown.
@@ -547,6 +637,16 @@ export function ToolbarButtonComponent(
     }
   };
 
+  const getTooltip = () => {
+    if (props.enabled === false && props.disabledTooltip) {
+      return props.disabledTooltip;
+    } else if (props.pressed && props.pressedTooltip) {
+      return props.pressedTooltip;
+    } else {
+      return props.tooltip || props.iconLabel;
+    }
+  };
+
   return (
     <Button
       className={
@@ -554,18 +654,20 @@ export function ToolbarButtonComponent(
           ? props.className + ' jp-ToolbarButtonComponent'
           : 'jp-ToolbarButtonComponent'
       }
+      aria-pressed={props.pressed}
+      aria-disabled={props.enabled === false}
       disabled={props.enabled === false}
       onClick={props.actualOnClick ?? false ? handleClick : undefined}
       onMouseDown={
         !(props.actualOnClick ?? false) ? handleMouseDown : undefined
       }
       onKeyDown={handleKeyDown}
-      title={props.tooltip || props.iconLabel}
+      title={getTooltip()}
       minimal
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact
-          icon={props.icon}
+          icon={props.pressed ? props.pressedIcon : props.icon}
           iconClass={
             // add some extra classes for proper support of icons-as-css-background
             classes(props.iconClass, 'jp-Icon')
@@ -602,10 +704,82 @@ export class ToolbarButton extends ReactWidget {
   constructor(private props: ToolbarButtonComponent.IProps = {}) {
     super();
     addToolbarButtonClass(this);
+    this._enabled = props.enabled ?? true;
+    this._pressed = this._enabled! && (props.pressed ?? false);
+    this._onClick = props.onClick!;
   }
+
+  /**
+   * Sets the pressed state for the button
+   * @param value true if button is pressed, false otherwise
+   */
+  set pressed(value: boolean) {
+    if (this.enabled && value !== this._pressed) {
+      this._pressed = value;
+      this.update();
+    }
+  }
+
+  /**
+   * Returns true if button is pressed, false otherwise
+   */
+  get pressed(): boolean {
+    return this._pressed!;
+  }
+
+  /**
+   * Sets the enabled state for the button
+   * @param value true to enable the button, false otherwise
+   */
+  set enabled(value: boolean) {
+    if (value != this._enabled) {
+      this._enabled = value;
+      if (!this._enabled) {
+        this._pressed = false;
+      }
+      this.update();
+    }
+  }
+
+  /**
+   * Returns true if button is enabled, false otherwise
+   */
+  get enabled(): boolean {
+    return this._enabled;
+  }
+
+  /**
+   * Sets the click handler for the button
+   * @param value click handler
+   */
+  set onClick(value: () => void) {
+    if (value !== this._onClick) {
+      this._onClick = value;
+      this.update();
+    }
+  }
+
+  /**
+   * Returns the click handler for the button
+   */
+  get onClick(): () => void {
+    return this._onClick!;
+  }
+
   render(): JSX.Element {
-    return <ToolbarButtonComponent {...this.props} />;
+    return (
+      <ToolbarButtonComponent
+        {...this.props}
+        pressed={this.pressed}
+        enabled={this.enabled}
+        onClick={this.onClick}
+      />
+    );
   }
+
+  private _pressed: boolean;
+  private _enabled: boolean;
+  private _onClick: () => void;
 }
 
 /**
@@ -769,8 +943,6 @@ class ToolbarPopup extends Widget {
  *  the toolbar items overflow toolbar width
  */
 class ToolbarPopupOpener extends ToolbarButton {
-  readonly _popup: ToolbarPopup;
-
   /**
    *  Create a new popup opener
    */
@@ -782,23 +954,7 @@ class ToolbarPopupOpener extends ToolbarButton {
       }
     });
     this.addClass('jp-Toolbar-responsive-opener');
-    this._popup = new ToolbarPopup();
-  }
-
-  protected handleClick() {
-    const popup = this._popup;
-    popup.updateWidth(this.parent!.node.clientWidth);
-    popup.alignTo(this.parent!);
-    popup.setHidden(!popup.isHidden);
-  }
-
-  /**
-   *  Updates width and position of the popup
-   *  to align with the toolbar
-   */
-  updatePopup() {
-    this._popup.updateWidth(this.parent!.node.clientWidth);
-    this._popup.alignTo(this.parent!);
+    this.popup = new ToolbarPopup();
   }
 
   /**
@@ -806,14 +962,47 @@ class ToolbarPopupOpener extends ToolbarButton {
    * @param widget the widget to add
    */
   addWidget(widget: Widget) {
-    this._popup.insertWidget(0, widget);
+    this.popup.insertWidget(0, widget);
   }
 
   /**
-   *  Returns total no of widgets in the popup
+   * Dispose of the widget and its descendant widgets.
+   *
+   * #### Notes
+   * It is unsafe to use the widget after it has been disposed.
+   *
+   * All calls made to this method after the first are a no-op.
    */
-  widgetCount() {
-    return this._popup.widgetCount();
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.popup.dispose();
+    super.dispose();
+  }
+
+  /**
+   * Hides the opener and the popup
+   */
+  hide(): void {
+    super.hide();
+    this.hidePopup();
+  }
+
+  /**
+   * Hides the popup
+   */
+  hidePopup(): void {
+    this.popup.hide();
+  }
+
+  /**
+   *  Updates width and position of the popup
+   *  to align with the toolbar
+   */
+  updatePopup(): void {
+    this.popup.updateWidth(this.parent!.node.clientWidth);
+    this.popup.alignTo(this.parent!);
   }
 
   /**
@@ -821,16 +1010,24 @@ class ToolbarPopupOpener extends ToolbarButton {
    * @param index
    */
   widgetAt(index: number) {
-    return this._popup.widgetAt(index);
+    return this.popup.widgetAt(index);
   }
 
   /**
-   *  Hides the opener and the popup
+   * Returns total number of widgets in the popup
+   *
+   * @returns Number of widgets
    */
-  hide() {
-    super.hide();
-    this._popup.hide();
+  widgetCount(): number {
+    return this.popup.widgetCount();
   }
+
+  protected handleClick() {
+    this.updatePopup();
+    this.popup.setHidden(!this.popup.isHidden);
+  }
+
+  protected popup: ToolbarPopup;
 }
 
 /**

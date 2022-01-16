@@ -108,6 +108,7 @@ function activateHTMLViewer(
   // Create a new viewer factory.
   const factory = new HTMLViewerFactory({
     name: FACTORY,
+    label: trans.__('HTML Viewer'),
     fileTypes: ['html'],
     defaultFor: ['html'],
     readOnly: true,

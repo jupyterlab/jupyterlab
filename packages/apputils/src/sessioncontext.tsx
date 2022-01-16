@@ -107,6 +107,11 @@ export interface ISessionContext extends IObservableDisposable {
   readonly connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
 
   /**
+   * A flag indicating if session is has pending input, proxied from the session connection.
+   */
+  readonly pendingInput: boolean;
+
+  /**
    * A signal emitted for a kernel messages, proxied from the session connection.
    */
   readonly iopubMessage: ISignal<this, KernelMessage.IMessage>;
@@ -396,6 +401,13 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
+   * A flag indicating if the session has ending input, proxied from the kernel.
+   */
+  get pendingInput(): boolean {
+    return this._pendingInput;
+  }
+
+  /**
    * A signal emitted when the kernel status changes, proxied from the kernel.
    */
   get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
@@ -640,12 +652,19 @@ export class SessionContext implements ISessionContext {
    */
   async restartKernel(): Promise<void> {
     const kernel = this.session?.kernel || null;
+    if (this._isRestarting) {
+      return;
+    }
     this._isRestarting = true;
     this._isReady = false;
     this._statusChanged.emit('restarting');
-    await this.session?.kernel?.restart();
+    try {
+      await this.session?.kernel?.restart();
+      this._isReady = true;
+    } catch (e) {
+      console.error(e);
+    }
     this._isRestarting = false;
-    this._isReady = true;
     this._statusChanged.emit(this.session?.kernel?.status || 'unknown');
     this._kernelChanged.emit({
       name: 'kernel',
@@ -820,9 +839,7 @@ export class SessionContext implements ISessionContext {
       this._pendingKernelName = model.name;
     }
 
-    if (this._session && !this._isTerminating) {
-      await this._shutdownSession();
-    } else if (!this._session) {
+    if (!this._session) {
       this._kernelChanged.emit({
         name: 'kernel',
         oldValue: null,
@@ -834,6 +851,17 @@ export class SessionContext implements ISessionContext {
     // will be started first.
     if (!this._pendingSessionRequest) {
       this._initStarted.resolve(void 0);
+    }
+
+    // If we already have a session, just change the kernel.
+    if (this._session && !this._isTerminating) {
+      try {
+        await this._session.changeKernel(model);
+        return this._session.kernel;
+      } catch (err) {
+        void this._handleSessionError(err);
+        throw err;
+      }
     }
 
     // Use a UUID for the path to overcome a race condition on the server
@@ -906,6 +934,7 @@ export class SessionContext implements ISessionContext {
         this._onConnectionStatusChanged,
         this
       );
+      session.pendingInput.connect(this._onPendingInput, this);
       session.iopubMessage.connect(this._onIopubMessage, this);
       session.unhandledMessage.connect(this._onUnhandledMessage, this);
 
@@ -952,6 +981,13 @@ export class SessionContext implements ISessionContext {
     } catch (err) {
       // no-op
     }
+    await this._displayKernelError(message, traceback);
+  }
+
+  /**
+   * Display kernel error
+   */
+  private async _displayKernelError(message: string, traceback: string) {
     const body = (
       <div>
         {message && <pre>{message}</pre>}
@@ -1024,6 +1060,14 @@ export class SessionContext implements ISessionContext {
     sender: Session.ISessionConnection,
     status: Kernel.Status
   ): void {
+    if (status === 'dead') {
+      const model = sender.kernel?.model;
+      if (model?.reason) {
+        const traceback = (model as any).traceback || '';
+        void this._displayKernelError(model.reason, traceback);
+      }
+    }
+
     // Set that this kernel is busy, if we haven't already
     // If we have already, and now we aren't busy, dispose
     // of the busy disposable.
@@ -1056,12 +1100,26 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
+   * Handle a change to the pending input.
+   */
+  private _onPendingInput(
+    sender: Session.ISessionConnection,
+    value: boolean
+  ): void {
+    // Set the signal value
+    this._pendingInput = value;
+  }
+
+  /**
    * Handle an iopub message.
    */
   private _onIopubMessage(
     sender: Session.ISessionConnection,
     message: KernelMessage.IIOPubMessage
   ): void {
+    if (message.header.msg_type === 'shutdown_reply') {
+      this.session!.kernel!.removeInputGuard();
+    }
     this._iopubMessage.emit(message);
   }
 
@@ -1108,6 +1166,7 @@ export class SessionContext implements ISessionContext {
   );
   private translator: ITranslator;
   private _trans: TranslationBundle;
+  private _pendingInput = false;
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
@@ -1484,7 +1543,7 @@ namespace Private {
     }
 
     // Add an option for no kernel
-    node.appendChild(optionForNone());
+    node.appendChild(optionForNone(translator));
 
     const other = document.createElement('optgroup');
     other.label = trans.__('Start Other Kernel');
