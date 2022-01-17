@@ -24,7 +24,6 @@ import { HTMLHandler } from 'mathjax-full/js/handlers/html/HTMLHandler';
 
 import { browserAdaptor } from 'mathjax-full/js/adaptors/browserAdaptor';
 
-
 mathjax.handlers.register(SafeHandler(new HTMLHandler(browserAdaptor())));
 
 // Override dynamically generated fonts in favor
@@ -38,14 +37,20 @@ class emptyFont extends TeXFont {}
 export class MathJax3Typesetter implements ILatexTypesetter {
   constructor() {
     const chtml = new CHTML({
-      font: new emptyFont()
+      font: new emptyFont(),
     });
     const tex = new TeX({
       packages: AllPackages,
-      inlineMath: [['$', '$'], ['\\(', '\\)']],
-      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      inlineMath: [
+        ['$', '$'],
+        ['\\(', '\\)'],
+      ],
+      displayMath: [
+        ['$$', '$$'],
+        ['\\[', '\\]'],
+      ],
       processEscapes: true,
-      processEnvironments: true
+      processEnvironments: true,
     });
     this._mathDocument = mathjax.document(window.document, {
       InputJax: tex,
@@ -73,7 +78,7 @@ const mathJax3Plugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   requires: [],
   provides: ILatexTypesetter,
   activate: () => new MathJax3Typesetter(),
-  autoStart: true
+  autoStart: true,
 };
 
 export default mathJax3Plugin;
