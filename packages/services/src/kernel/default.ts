@@ -21,7 +21,7 @@ import {
   KernelShellFutureHandler
 } from './future';
 
-import * as serialize from './serialize';
+import { deserialize, serialize } from './serialize';
 
 import * as validate from './validate';
 import { KernelSpec, KernelSpecAPI } from '../kernelspec';
@@ -407,7 +407,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       KernelMessage.isInfoRequestMsg(msg)
     ) {
       if (this.connectionStatus === 'connected') {
-        this._ws!.send(serialize.serialize(msg));
+        this._ws!.send(serialize(msg, this._ws!.protocol));
         return;
       } else {
         throw new Error('Could not send message: status is not connected');
@@ -425,7 +425,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this.connectionStatus === 'connected' &&
       this._kernelSession !== RESTARTING_KERNEL_SESSION
     ) {
-      this._ws!.send(serialize.serialize(msg));
+      this._ws!.send(serialize(msg, this._ws!.protocol));
     } else if (queue) {
       this._pendingMessages.push(msg);
     } else {
@@ -1224,7 +1224,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Create the kernel websocket connection and add socket status handlers.
    */
-  private _createSocket = () => {
+  private _createSocket = (use_protocols = true) => {
     this._errorIfDisposed();
 
     // Make sure the socket is clear
@@ -1255,7 +1255,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
       url = url + `&token=${encodeURIComponent(token)}`;
     }
 
-    this._ws = new settings.WebSocket(url, '0.0.1');
+    // Try opening the websocket with our list of subprotocols.
+    // If the server doesn't handle subprotocols, the accepted protocol will be ''.
+    // But we cannot send '' as a subprotocol, so if connection fails,
+    // reconnect without subprotocols.
+    const supported_protocols = use_protocols ? this._supported_protocols : [];
+    this._ws = new settings.WebSocket(url, supported_protocols);
 
     // Ensure incoming binary messages are not Blobs
     this._ws.binaryType = 'arraybuffer';
@@ -1499,7 +1504,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
           timeout / 1000
         )} seconds.`
       );
-      this._reconnectTimeout = setTimeout(this._createSocket, timeout);
+      // Try reconnection without subprotocols.
+      this._reconnectTimeout = setTimeout(this._createSocket, timeout, false);
       this._reconnectAttempt += 1;
     } else {
       this._updateConnectionStatus('disconnected');
@@ -1524,6 +1530,18 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Handle a websocket open event.
    */
   private _onWSOpen = (evt: Event) => {
+    if (
+      this._ws!.protocol != '' &&
+      !this._supported_protocols.includes(this._ws!.protocol)
+    ) {
+      console.log(
+        'Server selected unkown kernel wire protocol:',
+        this._ws!.protocol
+      );
+      console.log('Supported protocols are:', this._supported_protocols);
+      this._updateStatus('dead');
+      throw new Error('Unkown kernel wire protocol: ' + this._ws!.protocol);
+    }
     this._ws!.onclose = this._onWSClose;
     this._ws!.onerror = this._onWSClose;
     this._updateConnectionStatus('connected');
@@ -1536,7 +1554,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // Notify immediately if there is an error with the message.
     let msg: KernelMessage.IMessage;
     try {
-      msg = serialize.deserialize(evt.data);
+      msg = deserialize(evt.data, this._ws!.protocol);
       validate.validateMessage(msg);
     } catch (error) {
       error.message = `Kernel message validation error: ${error.message}`;
@@ -1596,6 +1614,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Websocket to communicate with kernel.
    */
   private _ws: WebSocket | null = null;
+  private _supported_protocols: string[] = ['0.0.1'];
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
