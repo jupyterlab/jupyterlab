@@ -49,11 +49,6 @@ test.describe('Internationalization', () => {
   test('UI in Chinese', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
-    await page.addStyleTag({
-      content: `.jp-LabShell.jp-mod-devMode {
-        border-top: none;
-      }`
-    });
 
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');
@@ -67,6 +62,12 @@ test.describe('Internationalization', () => {
 
     await page.waitForSelector('#jupyterlab-splash', {
       state: 'detached'
+    });
+
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
     });
 
     // Wait for the launcher to be loaded

@@ -244,6 +244,7 @@ export namespace galata {
      * The content path can be found in the named group `path`.
      *
      * The path will be prefixed by '/'.
+     * The path will be undefined for the root folder.
      */
     export const contents = /.*\/api\/contents(?<path>\/.+)?\?/;
 
@@ -427,48 +428,42 @@ export namespace galata {
       return page.route(Routes.contents, async (route, request) => {
         switch (request.method()) {
           case 'GET': {
-            const path = Routes.contents.exec(request.url())?.groups?.path;
-
-            if (path) {
-              // Proxy the GET request
-              const response = await fetch(request.url(), {
-                headers: await request.allHeaders(),
-                method: request.method()
-              });
-              if (!response.ok) {
-                if (!page.isClosed() && !isClosed) {
-                  return route.fulfill({
-                    status: response.status,
-                    body: await response.text()
-                  });
-                }
-                break;
-              }
-              const data = await response.json();
-              // Modify the last_modified values to be set one day before now.
-              if (
-                data['type'] === 'directory' &&
-                Array.isArray(data['content'])
-              ) {
-                const now = Date.now();
-                const aDayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
-                for (const entry of data['content'] as any[]) {
-                  // Mutate the list in-place
-                  entry['last_modified'] = aDayAgo;
-                }
-              }
-
+            // Proxy the GET request
+            const response = await fetch(request.url(), {
+              headers: await request.allHeaders(),
+              method: request.method()
+            });
+            if (!response.ok) {
               if (!page.isClosed() && !isClosed) {
                 return route.fulfill({
-                  status: 200,
-                  body: JSON.stringify(data),
-                  contentType: 'application/json'
+                  status: response.status,
+                  body: await response.text()
                 });
               }
               break;
-            } else {
-              return route.continue();
             }
+            const data = await response.json();
+            // Modify the last_modified values to be set one day before now.
+            if (
+              data['type'] === 'directory' &&
+              Array.isArray(data['content'])
+            ) {
+              const now = Date.now();
+              const aDayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
+              for (const entry of data['content'] as any[]) {
+                // Mutate the list in-place
+                entry['last_modified'] = aDayAgo;
+              }
+            }
+
+            if (!page.isClosed() && !isClosed) {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify(data),
+                contentType: 'application/json'
+              });
+            }
+            break;
           }
           default:
             return route.continue();
