@@ -4,7 +4,8 @@
 |----------------------------------------------------------------------------*/
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { PanelWithToolbar } from '@jupyterlab/ui-components';
+import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
+import { refreshIcon } from '@jupyterlab/ui-components';
 import { IDebugger } from '../../tokens';
 import { KernelSourcesBody } from './body';
 
@@ -24,10 +25,24 @@ export class KernelSources extends PanelWithToolbar {
     this.title.label = trans.__('Kernel Sources');
 
     this.toolbar.addClass('jp-DebuggerKernelSources-header');
+
     const body = new KernelSourcesBody({
       service,
       model
     });
+
+    this.toolbar.addItem(
+      'closeAll',
+      new ToolbarButton({
+        icon: refreshIcon,
+        onClick: async (): Promise<void> => {
+          model.kernelSources = [];
+          service.displayModules();
+        },
+        tooltip: trans.__('Refresh kernel sources')
+      })
+    );
+
     this.addClass('jp-DebuggerKernelSources-header');
     this.addWidget(body);
     this.addClass('jp-DebuggerKenelSources');
