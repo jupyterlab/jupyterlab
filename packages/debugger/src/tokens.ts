@@ -229,6 +229,21 @@ export namespace IDebugger {
   };
 
   /**
+   * The type for a kernel source file.
+   */
+  export type KernelSource = {
+    /**
+     * The name of the source.
+     */
+    name: string;
+
+    /**
+     * The path of the source.
+     */
+    path: string;
+  };
+
+  /**
    * Single breakpoint in an editor.
    */
   export interface IBreakpoint extends DebugProtocol.Breakpoint {}
@@ -898,14 +913,14 @@ export namespace IDebugger {
       /**
        * The kernel source.
        */
-      kernelSources: IDebugger.Source[] | null;
+      kernelSources: IDebugger.KernelSource[] | null;
 
       /**
        * Signal emitted when the kernel sources have changed.
        */
       readonly changed: ISignal<
         IDebugger.Model.IKernelSources,
-        IDebugger.Source[] | null
+        IDebugger.KernelSource[] | null
       >;
 
       /**
