@@ -9,13 +9,13 @@ import { IDebugger } from '../../tokens';
  * The model to keep track of the current source being displayed.
  */
 export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
-  private _kernelSources: IDebugger.Source[] | null;
+  private _kernelSources: IDebugger.KernelSource[] | null;
 
   get kernelSources() {
     return this._kernelSources;
   }
 
-  set kernelSources(kernelSources: IDebugger.Source[] | null) {
+  set kernelSources(kernelSources: IDebugger.KernelSource[] | null) {
     this._kernelSources = kernelSources;
     this._changed.emit(kernelSources);
   }
@@ -23,7 +23,7 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   /**
    * Signal emitted when the current source changes.
    */
-  get changed(): ISignal<this, IDebugger.Source[] | null> {
+  get changed(): ISignal<this, IDebugger.KernelSource[] | null> {
     return this._changed;
   }
 
@@ -41,7 +41,7 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     this._kernelSourceOpened.emit(kernelSource);
   }
 
-  private _changed = new Signal<this, IDebugger.Source[] | null>(this);
+  private _changed = new Signal<this, IDebugger.KernelSource[] | null>(this);
 
   private _kernelSourceOpened = new Signal<this, IDebugger.Source | null>(this);
 }

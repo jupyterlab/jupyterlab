@@ -13,11 +13,11 @@ import { EditorHandler } from '../../handlers/editor';
 
 import { IDebugger } from '../../tokens';
 
-const compare = (a: IDebugger.Source, b: IDebugger.Source) => {
-  if (a.content < b.content) {
+const compare = (a: IDebugger.KernelSource, b: IDebugger.KernelSource) => {
+  if (a.name < b.name) {
     return -1;
   }
-  if (a.content > b.content) {
+  if (a.name > b.name) {
     return 1;
   }
   return 0;
@@ -43,7 +43,7 @@ export class KernelSourcesBody extends Widget {
       if (kernelSources) {
         kernelSources.sort(compare);
         kernelSources.forEach(module => {
-          const name = module.content;
+          const name = module.name;
           const path = module.path;
           const button = new ToolbarButton({
             icon: viewBreakpointIcon,
