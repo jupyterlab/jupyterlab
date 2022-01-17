@@ -524,11 +524,6 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       pause: CommandIDs.pause
     };
 
-    const breakpointsCommands = {
-      registry: commands,
-      pause: CommandIDs.pause
-    };
-
     const sidebar = new Debugger.Sidebar({
       service,
       callstackCommands,

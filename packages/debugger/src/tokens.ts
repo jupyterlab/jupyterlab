@@ -72,16 +72,6 @@ export interface IDebugger {
   pauseOnExceptions(enable: boolean): Promise<void>;
 
   /**
-   * Used to determine if kernel has pause on exception capabilities
-   */
-  pauseOnExceptionsIsValid(): boolean;
-
-  /**
-   * Handles enabling and disabling of Pause on Exception
-   */
-  pauseOnExceptions(enable: boolean): Promise<void>;
-
-  /**
    * Continues the execution of the current thread.
    */
   continue(): Promise<void>;

@@ -102,10 +102,6 @@ describe('Debugger', () => {
         registry,
         pause: ''
       },
-      breakpointsCommands: {
-        registry,
-        pause: ''
-      },
       editorServices: {
         factoryService,
         mimeTypeService
