@@ -361,19 +361,17 @@ const modeSwitch: JupyterFrontEndPlugin<void> = {
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(STATUSBAR_PLUGIN_ID);
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+        console.log('----', settings);
         const startWithSimpleMode = settings.get('startWithSimpleMode')
           .composite as boolean;
-        if (startWithSimpleMode) {
-          shell.mode = 'single-document';
-        }
+        shell.mode = startWithSimpleMode
+          ? 'single-document'
+          : 'multiple-document';
       };
 
       Promise.all([loadSettings, app.restored])
         .then(([settings]) => {
           updateSettings(settings);
-          settings.changed.connect(settings => {
-            updateSettings(settings);
-          });
         })
         .catch((reason: Error) => {
           console.error(reason.message);
