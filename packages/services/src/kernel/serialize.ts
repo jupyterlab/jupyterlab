@@ -8,7 +8,7 @@ import * as KernelMessage from './messages';
  */
 export function serialize(
   msg: KernelMessage.IMessage,
-  protocol: string
+  protocol: string = ''
 ): string | ArrayBuffer {
   switch (protocol) {
     case '0.0.1':
@@ -23,7 +23,7 @@ export function serialize(
  */
 export function deserialize(
   data: ArrayBuffer,
-  protocol: string
+  protocol: string = ''
 ): KernelMessage.IMessage {
   switch (protocol) {
     case '0.0.1':
