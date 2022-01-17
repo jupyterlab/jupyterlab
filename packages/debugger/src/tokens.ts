@@ -327,7 +327,12 @@ export namespace IDebugger {
     connection: Session.ISessionConnection | null;
 
     /**
-     * Whether the debug session is started.
+     * Returns the initialize response .
+     */
+    readonly initializeResponse: DebugProtocol.InitializeResponse | null;
+
+    /**
+     * Whether the debug session is started
      */
     readonly isStarted: boolean;
 
