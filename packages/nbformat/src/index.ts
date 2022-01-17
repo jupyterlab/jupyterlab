@@ -102,7 +102,7 @@ export function validateMimeValue(
   value: MultilineString | PartialJSONObject
 ): boolean {
   // Check if "application/json" or "application/foo+json"
-  const jsonTest = /^application\/(.*?)+\+json$/;
+  const jsonTest = /^application\/.+\+json$/;
   const isJSONType = type === 'application/json' || jsonTest.test(type);
 
   const isString = (x: any) => {
