@@ -71,7 +71,8 @@ test.describe('Extension Manager', () => {
       'drawio'
     );
 
-    await page.keyboard.press('Enter');
+    await page.keyboard.press('Tab');
+
     // We can not wait for extension kept by the keyword as they are already in the DOM
     await page.waitForSelector('text=No entries');
 

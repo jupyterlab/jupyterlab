@@ -546,7 +546,7 @@ test.describe('General', () => {
     await page.notebook.setCell(
       0,
       'code',
-      "from IPython.display import display\nfrom vdom.helpers import h1, p, img, div, b\n\ndisplay(\ndiv(\nh1('Our Incredibly Declarative Example'),\np('Can you believe we wrote this ', b('in Python'), '?'),\nimg(src='http://turnoff.us/image/en/death-and-the-programmer.png'),\np('What will ', b('you'), ' create next?')))"
+      "from IPython.display import display\nfrom vdom.helpers import h1, p, img, div, b\n\ndisplay(\ndiv(\nh1('Our Incredibly Declarative Example'),\np('Can you believe we wrote this ', b('in Python'), '?'),\nimg(src='https://turnoff.us/image/en/death-and-the-programmer.png', height='268px'),\np('What will ', b('you'), ' create next?')))"
     );
 
     await page.notebook.run();
