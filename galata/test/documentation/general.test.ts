@@ -362,7 +362,10 @@ test.describe('General', () => {
     );
     await page.notebook.run();
 
-    expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png');
+    // Relax threshold as displayed map may change a bit (in particular text positioning)
+    expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {
+      threshold: 0.3
+    });
   });
 
   test('Terminals', async ({ page }) => {
@@ -385,13 +388,14 @@ test.describe('General', () => {
     await page.click('ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
 
-    await page.waitForTimeout(500);
+    await page.waitForSelector('.jp-Terminal');
 
     await page.keyboard.type('cd $JUPYTERLAB_GALATA_ROOT_DIR');
     await page.keyboard.press('Enter');
     await page.keyboard.type('tree . -L 2');
     await page.keyboard.press('Enter');
 
+    // Wait for command answer
     await page.waitForTimeout(200);
 
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');
@@ -542,7 +546,7 @@ test.describe('General', () => {
     await page.notebook.setCell(
       0,
       'code',
-      "from IPython.display import display\nfrom vdom.helpers import h1, p, img, div, b\n\ndisplay(\ndiv(\nh1('Our Incredibly Declarative Example'),\np('Can you believe we wrote this ', b('in Python'), '?'),\nimg(src='https://media.giphy.com/media/xUPGcguWZHRC2HyBRS/giphy.gif'),\np('What will ', b('you'), ' create next?')))"
+      "from IPython.display import display\nfrom vdom.helpers import h1, p, img, div, b\n\ndisplay(\ndiv(\nh1('Our Incredibly Declarative Example'),\np('Can you believe we wrote this ', b('in Python'), '?'),\nimg(src='http://turnoff.us/image/en/death-and-the-programmer.png'),\np('What will ', b('you'), ' create next?')))"
     );
 
     await page.notebook.run();
