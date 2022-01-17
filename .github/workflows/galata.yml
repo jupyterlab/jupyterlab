@@ -182,7 +182,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: jupyterlab-documentation-updated-snapshots
-          path: core/galata/test/**/*-snapshots/*.*
+          path: |
+            core/galata/test/**/*-snapshots/*.*
+            core/galata/test/**/screenshots/*.*
 
       - name: Print JupyterLab logs
         if: always()
