@@ -10,6 +10,4 @@ export * from './model';
 export * from './widget';
 export * from './tokens';
 export * from './manager';
-export * from './connectorproxy';
-export * from './default/contextprovider';
-export * from './default/kernelprovider';
+export * from './default/provider';

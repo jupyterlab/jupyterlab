@@ -4,7 +4,10 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*", "src/default/*"],
+  "include": [
+    "src/*",
+    "src/default/*"
+  ],
   "references": [
     {
       "path": "../apputils"
