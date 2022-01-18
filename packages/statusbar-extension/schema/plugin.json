@@ -31,11 +31,11 @@
       "description": "Whether to show status bar or not",
       "default": true
     },
-    "startWithSimpleMode": {
-      "type": "boolean",
-      "title": "Start with simple mode",
-      "description": "Whether to start with the simple mode or not",
-      "default": false
+    "startMode": {
+      "type": "string",
+      "title": "Start mode: ``, `single`or `multiple`",
+      "description": "The mode under which JupyterLab should start. If empty, the mode will be imposed by the URL",
+      "default": ""
     }
   },
   "additionalProperties": false,
