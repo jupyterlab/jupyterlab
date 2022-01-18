@@ -118,10 +118,8 @@ jobs:
           sudo apt-get install fonts-dejavu fonts-noto
 
           bash ./scripts/ci_install.sh
-          pip install altair==4.2.0 ipywidgets==7.6.5 jupyterlab-language-pack-zh-CN==3.2.post7 matplotlib==3.5.1 pandas==1.3.5 scipy==1.7.3 vdom==0.6 vega_datasets==0.9.0
-          # TODO switch to official version - for now it is a master commit
-          pip install "git+https://github.com/jupyterlab/jupyter-renderers.git@aef37166d014911c97200f8a9fbbca8acef833f1#subdirectory=packages/geojson-extension&egg=jupyterlab-geojson"
-
+          pip install altair==4.2.0 ipywidgets==7.6.5 jupyterlab-geojson==3.2.0 jupyterlab-language-pack-zh-CN==3.2.post7 matplotlib==3.5.1 pandas==1.3.5 scipy==1.7.3 vdom==0.6 vega_datasets==0.9.0
+          
           # Build dev-mode
           jlpm run build
         working-directory: core
