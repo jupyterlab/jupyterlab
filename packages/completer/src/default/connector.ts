@@ -3,14 +3,14 @@
 
 import { DataConnector } from '@jupyterlab/statedb';
 import { ContextConnector } from './contextconnector';
-import { CompletionHandler } from './handler';
+import { CompletionHandler } from '../handler';
 import { KernelConnector } from './kernelconnector';
 
 /**
  * A context+kernel connector for completion handlers.
  */
 export class CompletionConnector extends DataConnector<
-  CompletionHandler.IReply,
+  CompletionHandler.ICompletionItemsReply,
   void,
   CompletionHandler.IRequest
 > {
@@ -32,7 +32,7 @@ export class CompletionConnector extends DataConnector<
    */
   fetch(
     request: CompletionHandler.IRequest
-  ): Promise<CompletionHandler.IReply> {
+  ): Promise<CompletionHandler.ICompletionItemsReply> {  
     return Promise.all([
       this._kernel.fetch(request),
       this._context.fetch(request)
@@ -64,7 +64,7 @@ namespace Private {
    *
    * @param context - The context reply being merged.
    *
-   * @returns A reply with a superset of kernel and context matches.
+   * @returns A reply with a superset of kernel and context items.
    *
    * #### Notes
    * The kernel and context matches are merged with a preference for kernel
@@ -73,31 +73,22 @@ namespace Private {
    * duplicates from the context list that appear in the kernel list.
    */
   export function mergeReplies(
-    kernel: CompletionHandler.IReply,
-    context: CompletionHandler.IReply
-  ): CompletionHandler.IReply {
-    // If one is empty, return the other.
-    if (kernel.matches.length === 0) {
+    kernel: CompletionHandler.ICompletionItemsReply,
+    context: CompletionHandler.ICompletionItemsReply
+  ): CompletionHandler.ICompletionItemsReply {
+    if (kernel.items.length === 0) {
       return context;
-    } else if (context.matches.length === 0) {
+    } else if (context.items.length === 0) {
       return kernel;
     }
 
-    // Populate the result with a copy of the kernel matches.
-    const matches = kernel.matches.slice();
-
-    // Cache all the kernel matches in a memo.
-    const memo = matches.reduce((acc, val) => {
-      acc[val] = null;
-      return acc;
-    }, {} as { [key: string]: string | null });
-
-    // Add each context match that is not in the memo to the result.
-    context.matches.forEach(match => {
-      if (!(match in memo)) {
-        matches.push(match);
+    const kernelLabels = new Set(kernel.items.map(item => item.label)) 
+    const items = [...kernel.items]
+    context.items.forEach(item => {
+      if(!kernelLabels.has(item.label)){
+        items.push(item)
       }
-    });
-    return { ...kernel, matches };
+    })
+    return { ...kernel, items };
   }
 }

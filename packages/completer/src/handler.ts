@@ -5,12 +5,12 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
-import { JSONArray, JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
+import {ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
-import { DummyConnector } from './dummyconnector';
 import { Completer } from './widget';
+import { IConnectorProxy } from './tokens';
 
 /**
  * A class added to editors that can host a completer.
@@ -41,37 +41,7 @@ export class CompletionHandler implements IDisposable {
    */
   readonly completer: Completer;
 
-  /**
-   * The data connector used to populate completion requests.
-   * @deprecated will be removed, or will return `CompletionHandler.ICompletionItemsConnector`
-   * instead of `IDataConnector` in future versions
-   *
-   * #### Notes
-   * The only method of this connector that will ever be called is `fetch`, so
-   * it is acceptable for the other methods to be simple functions that return
-   * rejected promises.
-   */
-  get connector(): IDataConnector<
-    CompletionHandler.IReply,
-    void,
-    CompletionHandler.IRequest
-  > {
-    if ('responseType' in this._connector) {
-      return new DummyConnector();
-    }
-    return this._connector as IDataConnector<
-      CompletionHandler.IReply,
-      void,
-      CompletionHandler.IRequest
-    >;
-  }
-  set connector(
-    connector: IDataConnector<
-      CompletionHandler.IReply,
-      void,
-      CompletionHandler.IRequest
-    >
-  ) {
+  set connector(connector: IConnectorProxy) {
     this._connector = connector;
   }
 
@@ -104,9 +74,9 @@ export class CompletionHandler implements IDisposable {
 
     // Update the editor and signal connections.
     editor = this._editor = newValue;
+    
     if (editor) {
       const model = editor.model;
-
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
       model.value.changed.connect(this.onTextChanged, this);
@@ -240,6 +210,7 @@ export class CompletionHandler implements IDisposable {
    *    even though the completer is not available.
    */
   protected onSelectionsChanged(): void {
+    
     const model = this.completer.model;
     const editor = this._editor;
 
@@ -353,64 +324,29 @@ export class CompletionHandler implements IDisposable {
 
     const text = editor.model.value.text;
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
-    const pending = ++this._pending;
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };
-
-    if (this._isICompletionItemsConnector(this._connector)) {
-      return this._connector
-        .fetch(request)
-        .then(reply => {
-          this._validate(pending, request);
-          if (!reply) {
-            throw new Error(`Invalid request: ${request}`);
-          }
-
-          this._onFetchItemsReply(state, reply);
-        })
-        .catch(_ => {
-          this._onFailure();
-        });
-    }
-
-    return this._connector
-      .fetch(request)
-      .then(reply => {
-        this._validate(pending, request);
-        if (!reply) {
-          throw new Error(`Invalid request: ${request}`);
-        }
-
-        this._onReply(state, reply);
-      })
-      .catch(_ => {
-        this._onFailure();
-      });
-  }
-
-  private _isICompletionItemsConnector(
-    connector:
-      | IDataConnector<
-          CompletionHandler.IReply,
-          void,
-          CompletionHandler.IRequest
-        >
-      | CompletionHandler.ICompletionItemsConnector
-  ): connector is CompletionHandler.ICompletionItemsConnector {
-    return (
-      (connector as CompletionHandler.ICompletionItemsConnector)
-        .responseType === CompletionHandler.ICompletionItemsResponseType
-    );
-  }
-
-  private _validate(pending: number, request: CompletionHandler.IRequest) {
-    if (this.isDisposed) {
-      throw new Error('Handler is disposed');
-    }
-    // If a newer completion request has created a pending request, bail.
-    if (pending !== this._pending) {
-      throw new Error('A newer completion request is pending');
-    }
+    return this._connector.fetch(request).then(replies => {
+      let start = 0;
+      let end = 0;
+      let items: Array<any> = []
+      for (const data of replies) {
+        //TODO: Send provider name to model to render a splitter between different providers
+        const dataValue = Object.values(data)[0]
+        items = items.concat(dataValue.items)
+        start = dataValue.start
+        end = dataValue.end
+      }     
+      let reply: CompletionHandler.ICompletionItemsReply = {start, end, items };
+      const model = this._updateModel(state, reply.start, reply.end);
+      if (!model) {
+        return;
+      }
+      
+      if(model.setCompletionItems){
+        model.setCompletionItems(reply.items);
+      }
+    })
   }
 
   /**
@@ -438,97 +374,11 @@ export class CompletionHandler implements IDisposable {
     return model;
   }
 
-  /**
-   * Receive a completion reply from the connector.
-   *
-   * @param state - The state of the editor when completion request was made.
-   *
-   * @param reply - The API response returned for a completion request.
-   */
-  private _onReply(
-    state: Completer.ITextState,
-    reply: CompletionHandler.IReply
-  ): void {
-    const model = this._updateModel(state, reply.start, reply.end);
-    if (!model) {
-      return;
-    }
 
-    // Dedupe the matches.
-    const matches: string[] = [];
-    const matchSet = new Set(reply.matches || []);
 
-    if (reply.matches) {
-      matchSet.forEach(match => {
-        matches.push(match);
-      });
-    }
-
-    // Extract the optional type map. The current implementation uses
-    // _jupyter_types_experimental which provide string type names. We make no
-    // assumptions about the names of the types, so other kernels can provide
-    // their own types.
-    // Even though the `metadata` field is required, it has historically not
-    // been used. Defensively check if it exists.
-    const metadata = reply.metadata || {};
-    const types = metadata._jupyter_types_experimental as JSONArray;
-    const typeMap: Completer.TypeMap = {};
-
-    if (types) {
-      types.forEach((item: JSONObject) => {
-        // For some reason the _jupyter_types_experimental list has two entries
-        // for each match, with one having a type of "<unknown>". Discard those
-        // and use undefined to indicate an unknown type.
-        const text = item.text as string;
-        const type = item.type as string;
-
-        if (matchSet.has(text) && type !== '<unknown>') {
-          typeMap[text] = type;
-        }
-      });
-    }
-
-    // Update the options, including the type map.
-    model.setOptions(matches, typeMap);
-  }
-
-  /**
-   * Receive completion items from provider.
-   *
-   * @param state - The state of the editor when completion request was made.
-   *
-   * @param reply - The API response returned for a completion request.
-   */
-  private _onFetchItemsReply(
-    state: Completer.ITextState,
-    reply: CompletionHandler.ICompletionItemsReply
-  ) {
-    const model = this._updateModel(state, reply.start, reply.end);
-    if (!model) {
-      return;
-    }
-    if (model.setCompletionItems) {
-      model.setCompletionItems(reply.items);
-    }
-  }
-
-  /**
-   * If completion request fails, reset model and fail silently.
-   */
-  private _onFailure() {
-    const model = this.completer.model;
-
-    if (model) {
-      model.reset(true);
-    }
-  }
-
-  private _connector:
-    | IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest>
-    | CompletionHandler.ICompletionItemsConnector;
+  private _connector: IConnectorProxy;
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
-  private _pending = 0;
   private _isDisposed = false;
 }
 
@@ -556,9 +406,7 @@ export namespace CompletionHandler {
      * @deprecated passing `IDataConnector` is deprecated;
      * pass `CompletionHandler.ICompletionItemsConnector`
      */
-    connector:
-      | IDataConnector<IReply, void, IRequest>
-      | CompletionHandler.ICompletionItemsConnector;
+    connector: IConnectorProxy;
   }
 
   /**
@@ -615,8 +463,7 @@ export namespace CompletionHandler {
     CompletionHandler.ICompletionItemsReply,
     void,
     CompletionHandler.IRequest
-  > &
-    CompletionHandler.ICompleterConnecterResponseType;
+  >
 
   /**
    * A reply to a completion items fetch request.
