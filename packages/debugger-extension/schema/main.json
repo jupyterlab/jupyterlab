@@ -112,6 +112,12 @@
           "__spec__"
         ]
       }
+    },
+    "kernelSourcesFilter": {
+      "title": "Kernel sources filter",
+      "description": "A filter to apply when showing the kernel sources",
+      "type": "string",
+      "default": ""
     }
   },
   "additionalProperties": false,

@@ -36,13 +36,17 @@ export class KernelSourcesBody extends Widget {
     super();
     this._model = options.model;
     this._debuggerService = options.service;
+    this._filter = options.filter;
     this.layout = new PanelLayout();
     this.addClass('jp-DebuggerKernelSources-body');
     this._model.changed.connect((_, kernelSources) => {
       this._clear();
       if (kernelSources) {
-        kernelSources.sort(compare);
-        kernelSources.forEach(module => {
+        const filtered = this._filter
+          ? kernelSources.filter(module => module.name.includes(this._filter))
+          : kernelSources;
+        filtered.sort(compare);
+        filtered.forEach(module => {
           const name = module.name;
           const path = module.path;
           const button = new ToolbarButton({
@@ -87,6 +91,14 @@ export class KernelSourcesBody extends Widget {
     }
   }
 
+  /**
+   * Set the filter to apply when showing the kernel sources.
+   */
+  set filter(filter: string) {
+    this._filter = filter;
+  }
+
+  private _filter = '';
   private _model: IDebugger.Model.IKernelSources;
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
@@ -109,5 +121,10 @@ export namespace KernelSourcesBody {
      * The sources model.
      */
     model: IDebugger.Model.IKernelSources;
+
+    /**
+     * The filter to apply when showing the kernel sources.
+     */
+    filter: string;
   }
 }

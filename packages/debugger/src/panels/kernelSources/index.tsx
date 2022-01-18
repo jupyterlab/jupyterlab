@@ -23,12 +23,12 @@ export class KernelSources extends PanelWithToolbar {
     const { model, service } = options;
     const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.title.label = trans.__('Kernel Sources');
-
     this.toolbar.addClass('jp-DebuggerKernelSources-header');
 
-    const body = new KernelSourcesBody({
+    this._body = new KernelSourcesBody({
       service,
-      model
+      model,
+      filter: ''
     });
 
     this.toolbar.addItem(
@@ -44,9 +44,18 @@ export class KernelSources extends PanelWithToolbar {
     );
 
     this.addClass('jp-DebuggerKernelSources-header');
-    this.addWidget(body);
+    this.addWidget(this._body);
     this.addClass('jp-DebuggerKenelSources');
   }
+
+  /**
+   * Set the filter to apply when showing the kernel sources.
+   */
+  set filter(filter: string) {
+    this._body.filter = filter;
+  }
+
+  private _body: KernelSourcesBody;
 }
 
 /**
