@@ -84,12 +84,6 @@ class ExampleApp(LabServerApp):
     user_settings_dir = os.path.join(HERE, 'build', 'user_settings')
     workspaces_dir = os.path.join(HERE, 'build', 'workspaces')
 
-    serverapp_config = {
-        "jpserver_extensions": {
-            "nbclassic": True
-        }
-    }
-
     def initialize_handlers(self):
         """Add example handler to Lab Server's handler list.
         """
