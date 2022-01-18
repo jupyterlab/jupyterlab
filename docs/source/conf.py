@@ -22,7 +22,6 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import json
-import os.path as osp
 import shutil
 import time
 from collections import ChainMap
