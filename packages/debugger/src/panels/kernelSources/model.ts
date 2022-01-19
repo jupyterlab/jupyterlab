@@ -5,19 +5,48 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDebugger } from '../../tokens';
 
+const compare = (a: IDebugger.KernelSource, b: IDebugger.KernelSource) => {
+  if (a.name < b.name) {
+    return -1;
+  }
+  if (a.name > b.name) {
+    return 1;
+  }
+  return 0;
+};
+
 /**
  * The model to keep track of the current source being displayed.
  */
 export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
-  private _kernelSources: IDebugger.KernelSource[] | null;
+  /**
+   * Get the filter.
+   */
+  get filter(): string {
+    return this._filter;
+  }
 
-  get kernelSources() {
+  /**
+   * Set the filter.
+   */
+  set filter(filter: string) {
+    this._filter = filter;
+    this.refresh();
+  }
+
+  /**
+   * Get the kernel sources.
+   */
+  get kernelSources(): IDebugger.KernelSource[] | null {
     return this._kernelSources;
   }
 
+  /**
+   * Set the kernel sources and emit a changed signal.
+   */
   set kernelSources(kernelSources: IDebugger.KernelSource[] | null) {
     this._kernelSources = kernelSources;
-    this._changed.emit(kernelSources);
+    this.refresh();
   }
 
   /**
@@ -41,8 +70,25 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     this._kernelSourceOpened.emit(kernelSource);
   }
 
-  private _changed = new Signal<this, IDebugger.KernelSource[] | null>(this);
+  private refresh() {
+    if (this._kernelSources) {
+      this._filteredKernelSources = this._filter
+        ? this._kernelSources.filter(module =>
+            module.name.includes(this._filter)
+          )
+        : this._kernelSources;
+      this._filteredKernelSources.sort(compare);
+    } else {
+      this._kernelSources = new Array<IDebugger.KernelSource>();
+      this._filteredKernelSources = new Array<IDebugger.KernelSource>();
+    }
+    this._changed.emit(this._filteredKernelSources);
+  }
 
+  private _kernelSources: IDebugger.KernelSource[] | null;
+  private _filteredKernelSources: IDebugger.KernelSource[] | null;
+  private _filter = '';
+  private _changed = new Signal<this, IDebugger.KernelSource[] | null>(this);
   private _kernelSourceOpened = new Signal<this, IDebugger.Source | null>(this);
 }
 
