@@ -236,9 +236,6 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension enable -h
     jupyter labextension disable -h
 
-    # Make sure we can run JupyterLab under classic notebook
-    python -m jupyterlab.browser_check --notebook
-
     # Test cli tools
     jlpm run get:dependency mocha
     jlpm run update:dependency mocha
