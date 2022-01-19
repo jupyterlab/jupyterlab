@@ -52,11 +52,6 @@ export interface IDebugger {
   readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession | null>;
 
   /**
-   * Signal emitted upon session changed.
-   */
-  readonly stateRestored: ISignal<IDebugger, null>;
-
-  /**
    * Removes all the breakpoints from the current notebook or console
    */
   clearBreakpoints(): Promise<void>;

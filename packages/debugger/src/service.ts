@@ -132,13 +132,6 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Signal emitted upon session changed.
-   */
-  get stateRestored(): ISignal<IDebugger, null> {
-    return this._stateRestored;
-  }
-
-  /**
    * Dispose the debug service.
    */
   dispose(): void {
@@ -418,7 +411,6 @@ export class DebuggerService implements IDebugger, IDisposable {
       this._clearModel();
       this._clearSignals();
     }
-    this._stateRestored.emit(null);
   }
 
   /**
@@ -950,7 +942,6 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession | null>(
     this
   );
-  private _stateRestored = new Signal<IDebugger, null>(this);
   private _specsManager: KernelSpec.IManager | null;
   private _trans: TranslationBundle;
 }
