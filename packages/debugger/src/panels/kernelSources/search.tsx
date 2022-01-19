@@ -18,8 +18,6 @@ export interface IFilterBoxProps {
 const FilterBox = (props: IFilterBoxProps) => {
   const [filter, setFilter] = useState(props.filter);
 
-  console.log('---', filter);
-
   /**
    * Handler for search input changes.
    */
@@ -42,7 +40,7 @@ const FilterBox = (props: IFilterBoxProps) => {
 /**
  * A widget which hosts a input textbox to filter on file names.
  */
-export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
+export const KernelSourcesFilter = (props: IFilterBoxProps): ReactWidget => {
   return ReactWidget.create(
     <FilterBox model={props.model} filter={props.filter} />
   );
