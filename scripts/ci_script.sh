@@ -290,12 +290,6 @@ if [[ $GROUP == usage2 ]]; then
     cat serverextensions | grep -i "jupyterlab.*enabled"
     cat serverextensions | grep -i "jupyterlab.*OK"
 
-    # TODO: remove when we no longer support classic notebook
-    ./test_install/bin/jupyter serverextension list 1>serverextensions 2>&1
-    cat serverextensions
-    cat serverextensions | grep -i "jupyterlab.*enabled"
-    cat serverextensions | grep -i "jupyterlab.*OK"
-
     ./test_install/bin/python -m jupyterlab.browser_check
     # Make sure we can run the build
     ./test_install/bin/jupyter lab build
