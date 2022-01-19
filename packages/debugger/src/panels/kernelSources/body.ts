@@ -9,7 +9,7 @@ import { Signal } from '@lumino/signaling';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
-import { FilenameSearcher } from './search';
+import { KernelSourcesFilter } from './search';
 
 import { EditorHandler } from '../../handlers/editor';
 
@@ -37,7 +37,7 @@ export class KernelSourcesBody extends Widget {
     this.layout = new PanelLayout();
     this.addClass('jp-DebuggerKernelSources-body');
 
-    this._filenameSearcher = FilenameSearcher({
+    this._filenameSearcher = KernelSourcesFilter({
       model: this._model,
       filter: ''
     });
@@ -73,9 +73,8 @@ export class KernelSourcesBody extends Widget {
   }
 
   set filter(filter: string) {
-    console.log('---', filter);
     (this.layout as PanelLayout).removeWidget(this._filenameSearcher);
-    this._filenameSearcher = FilenameSearcher({
+    this._filenameSearcher = KernelSourcesFilter({
       model: this._model,
       filter: filter
     });
