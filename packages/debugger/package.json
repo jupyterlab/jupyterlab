@@ -73,8 +73,7 @@
     "@lumino/widgets": "^1.30.0",
     "@vscode/debugprotocol": "^1.51.0",
     "codemirror": "~5.61.0",
-    "react": "^17.0.1",
-    "vscode-debugprotocol": "~1.51.0"
+    "react": "^17.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
