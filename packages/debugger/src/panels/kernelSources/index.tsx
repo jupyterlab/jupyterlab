@@ -1,12 +1,14 @@
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+
 import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
+
 import { refreshIcon } from '@jupyterlab/ui-components';
+
 import { IDebugger } from '../../tokens';
+
 import { KernelSourcesBody } from './body';
 
 /**
@@ -21,6 +23,7 @@ export class KernelSources extends PanelWithToolbar {
   constructor(options: KernelSources.IOptions) {
     super();
     const { model, service } = options;
+    this._model = model;
     const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.title.label = trans.__('Kernel Sources');
     this.toolbar.addClass('jp-DebuggerKernelSources-header');
@@ -36,7 +39,7 @@ export class KernelSources extends PanelWithToolbar {
       new ToolbarButton({
         icon: refreshIcon,
         onClick: async (): Promise<void> => {
-          model.kernelSources = [];
+          this._model.kernelSources = [];
           service.displayModules();
         },
         tooltip: trans.__('Refresh kernel sources')
@@ -48,13 +51,12 @@ export class KernelSources extends PanelWithToolbar {
     this.addClass('jp-DebuggerKenelSources');
   }
 
-  /**
-   * Set the filter to apply when showing the kernel sources.
-   */
-  set filter(filter: string) {
+  public set filter(filter: string) {
+    this._model.filter = filter;
     this._body.filter = filter;
   }
 
+  private _model: IDebugger.Model.IKernelSources;
   private _body: KernelSourcesBody;
 }
 

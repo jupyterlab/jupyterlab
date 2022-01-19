@@ -30,3 +30,9 @@
   font-size: var(--jp-ui-font-size0);
   color: var(--jp-ui-font-color1);
 }
+
+.jp-DebuggerKernelSource-filterBox {
+  padding: 0px;
+  flex: 0 0 auto;
+  margin: 0px 0px 0px 0px;
+}

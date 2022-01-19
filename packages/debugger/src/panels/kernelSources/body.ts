@@ -1,27 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { viewBreakpointIcon } from '../../icons';
+import { openKernelSourceIcon } from '../../icons';
 
-import { ToolbarButton } from '@jupyterlab/ui-components';
+import { ReactWidget, ToolbarButton } from '@jupyterlab/ui-components';
 
 import { Signal } from '@lumino/signaling';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
+import { FilenameSearcher } from './search';
+
 import { EditorHandler } from '../../handlers/editor';
 
 import { IDebugger } from '../../tokens';
 
-const compare = (a: IDebugger.KernelSource, b: IDebugger.KernelSource) => {
-  if (a.name < b.name) {
-    return -1;
-  }
-  if (a.name > b.name) {
-    return 1;
-  }
-  return 0;
-};
+/**
+ * The class name added to the filebrowser filterbox node.
+ */
+const FILTERBOX_CLASS = 'jp-DebuggerKernelSource-filterBox';
 
 /**
  * The body for a Sources Panel.
@@ -36,21 +33,26 @@ export class KernelSourcesBody extends Widget {
     super();
     this._model = options.model;
     this._debuggerService = options.service;
-    this._filter = options.filter;
+
     this.layout = new PanelLayout();
     this.addClass('jp-DebuggerKernelSources-body');
+
+    this._filenameSearcher = FilenameSearcher({
+      model: this._model,
+      filter: ''
+    });
+    this._filenameSearcher.addClass(FILTERBOX_CLASS);
+
+    (this.layout as PanelLayout).addWidget(this._filenameSearcher);
+
     this._model.changed.connect((_, kernelSources) => {
       this._clear();
       if (kernelSources) {
-        const filtered = this._filter
-          ? kernelSources.filter(module => module.name.includes(this._filter))
-          : kernelSources;
-        filtered.sort(compare);
-        filtered.forEach(module => {
+        kernelSources.forEach(module => {
           const name = module.name;
           const path = module.path;
           const button = new ToolbarButton({
-            icon: viewBreakpointIcon,
+            icon: openKernelSourceIcon,
             label: name,
             tooltip: path
           });
@@ -70,6 +72,17 @@ export class KernelSourcesBody extends Widget {
     });
   }
 
+  set filter(filter: string) {
+    console.log('---', filter);
+    (this.layout as PanelLayout).removeWidget(this._filenameSearcher);
+    this._filenameSearcher = FilenameSearcher({
+      model: this._model,
+      filter: filter
+    });
+    this._filenameSearcher.addClass(FILTERBOX_CLASS);
+    (this.layout as PanelLayout).insertWidget(0, this._filenameSearcher);
+  }
+
   /**
    * Dispose the sources body widget.
    */
@@ -86,20 +99,13 @@ export class KernelSourcesBody extends Widget {
    * Clear the content of the kernel source read-only editor.
    */
   private _clear(): void {
-    while ((this.layout as PanelLayout).widgets.length > 0) {
-      (this.layout as PanelLayout).removeWidgetAt(0);
+    while ((this.layout as PanelLayout).widgets.length > 1) {
+      (this.layout as PanelLayout).removeWidgetAt(1);
     }
   }
 
-  /**
-   * Set the filter to apply when showing the kernel sources.
-   */
-  set filter(filter: string) {
-    this._filter = filter;
-  }
-
-  private _filter = '';
   private _model: IDebugger.Model.IKernelSources;
+  private _filenameSearcher: ReactWidget;
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
 }
