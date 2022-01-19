@@ -240,7 +240,7 @@ export class SettingsFormEditor extends React.Component<
     this._updateDirtyState = updateDirtyState;
     this.handleChange = this.handleChange.bind(this);
     this._settings = settings;
-    this._debouncer = new Debouncer(this.handleChange, 3000);
+    this._debouncer = new Debouncer(this.handleChange);
 
     /**
      * Construct uiSchema to pass any custom renderers to the form editor.
@@ -271,9 +271,19 @@ export class SettingsFormEditor extends React.Component<
    * @param data - Form data sent from the form editor
    */
   handleChange() {
-    if (JSONExt.deepEqual(this.state.formData, this._settings.user)) {
-      this._updateDirtyState(false);
-      return;
+    // Prevent unnecessary save when opening settings that haven't been modified.
+    if (!this._settings.isModified) {
+      for (const key in this.state.formData) {
+        if (
+          JSONExt.deepEqual(
+            this.state.formData[key],
+            this._settings.default(key) ?? {}
+          )
+        ) {
+          this._updateDirtyState(false);
+          return;
+        }
+      }
     }
     this._settings
       .save(JSON.stringify(this.state.formData))
