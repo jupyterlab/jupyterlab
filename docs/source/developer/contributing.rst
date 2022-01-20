@@ -916,8 +916,8 @@ Writing Style
 -  Avoid words that trivialize using JupyterLab such as "simply" or
    "just." Tasks that developers find simple or easy may not be for
    users.
--  Write in the active tense. Use "drag the notebook cells …" rather
-   than "notebook cells can be dragged …".
+-  Write in the active tense. Use "drag the notebook cells…" rather
+   than "notebook cells can be dragged…".
 -  The beginning of each section should begin with a short (1–2
    sentence) high-level description of the topic, feature or component.
 -  Use "enable" rather than "allow" to indicate what JupyterLab makes
@@ -944,6 +944,18 @@ refer to files in relation to a file system or file name.
 *Activities* are either an opened document or another UI panel that is 
 not related to a file, such as terminals, consoles or the inspector.
 
+Notebook Cells
+""""""""""""""
+
+A notebook contains *cells*, each of which have *input* and one or more 
+*outputs*. When the user runs a cell, the kernel reads and executes the
+input and generates outputs. The notebook then displays the cell's output.
+The term *output* describes one of possibly multiple results of running a
+cell. The term "all output" is ambiguous; it could refer either to all
+outputs of one cell or to all outputs of all cells. The term *cell output*
+describes the collective output of one cell. Use *all cell outputs* to 
+describe all outputs from all cells.
+
 Element Names
 """""""""""""
 
@@ -951,7 +963,7 @@ Element Names
    by its most specific name, such as “File browser.” *Tab bars*
    have *tabs* which let a user view different panels.
 -  The *menu bar* contains *menu items*, which have their own *submenus*.
--  Refer to the main work area as the *work area* when the name
+-  Refer to the *main work area* as the work area when the name
    is unambiguous.
 -  When describing elements in the UI, prefer colloquial names over 
    technical names. For example, “File browser” instead of “Files panel”.
