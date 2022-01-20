@@ -118,6 +118,8 @@ export interface ICodeCellModel extends ICellModel {
    * Clear execution, outputs, and related metadata
    */
   clearExecution(): void;
+
+  sharedModel: models.ISharedCodeCell;
 }
 
 /**
@@ -632,32 +634,35 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     const trusted = this.trusted;
     const cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
-    let execution_count: number | null = null;
     const executionCount = this.modelDB.createValue('executionCount');
-    if (!executionCount.get()) {
-      if (cell && cell.cell_type === 'code') {
-        execution_count = cell.execution_count || null;
-        executionCount.set(execution_count);
-        outputs = cell.outputs ?? [];
-        // If execution count is not null presume the input code was the latest executed
-        // TODO load from the notebook file when the dirty state is stored in it
-        if (cell.execution_count != null) {
-          // True if execution_count is null or undefined
-          this._executedCode = this.value.text.trim();
-        }
-      } else {
-        executionCount.set(null);
+
+    if (cell && cell.cell_type === 'code') {
+      // Initialize from disk
+      executionCount.set(cell.execution_count || null);
+      outputs = cell.outputs ?? [];
+
+      // Add content loaded from disk to sharedModel
+      globalModelDBMutex(() => {
+        this.sharedModel.execution_count = cell.execution_count;
+        this.sharedModel.setOutputs(outputs);
+      });
+
+      // If execution count is not null presume the input code was the latest executed
+      // TODO load from the notebook file when the dirty state is stored in it
+      if (cell.execution_count != null) {
+        // True if execution_count is null or undefined
+        this._executedCode = this.value.text.trim();
       }
+    } else {
+      // Initialize from other clients
+      executionCount.set(this.sharedModel.execution_count);
+      outputs = this.sharedModel.getOutputs();
     }
+
     this.value.changed.connect(this._onValueChanged, this);
 
     executionCount.changed.connect(this._onExecutionCountChanged, this);
 
-    globalModelDBMutex(() => {
-      const sharedCell = this.sharedModel as models.ISharedCodeCell;
-      sharedCell.setOutputs(outputs);
-      sharedCell.execution_count = execution_count;
-    });
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
     this._outputs.changed.connect(this.onGenericChange, this);
     this._outputs.changed.connect(this.onModelDBOutputsChange, this);
@@ -695,10 +700,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     reinitialize?: boolean
   ): void {
     if (reinitialize) {
-      this.clearExecution();
+      this.executionCount = sharedModel.execution_count;
+      this.outputs.clear();
       sharedModel.getOutputs().forEach(output => this._outputs.add(output));
     }
     super.switchSharedModel(sharedModel, reinitialize);
+    this._setDirty(false);
   }
 
   /**
@@ -904,6 +911,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       this._setDirty(false);
     }
   }
+
+  sharedModel: models.ISharedCodeCell;
 
   private _executedCode: string = '';
   private _isDirty = false;
