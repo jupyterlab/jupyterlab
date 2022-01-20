@@ -9,7 +9,7 @@ import { Signal } from '@lumino/signaling';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
-import { KernelSourcesFilter } from './search';
+import { KernelSourcesFilter } from './filter';
 
 import { EditorHandler } from '../../handlers/editor';
 
