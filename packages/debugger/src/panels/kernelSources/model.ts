@@ -70,12 +70,15 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     this._kernelSourceOpened.emit(kernelSource);
   }
 
+  private getFilteredKernelSources() {
+    const regexp = new RegExp(this._filter);
+    return this._kernelSources!.filter(module => regexp.test(module.name));
+  }
+
   private refresh() {
     if (this._kernelSources) {
       this._filteredKernelSources = this._filter
-        ? this._kernelSources.filter(module =>
-            module.name.includes(this._filter)
-          )
+        ? this.getFilteredKernelSources()
         : this._kernelSources;
       this._filteredKernelSources.sort(compare);
     } else {
