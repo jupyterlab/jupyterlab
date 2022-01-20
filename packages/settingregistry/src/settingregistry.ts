@@ -730,15 +730,13 @@ export class Settings implements ISettingRegistry.ISettings {
         value === undefined ||
         value === null ||
         defaultValue === undefined ||
-        defaultValue === null
+        defaultValue === null ||
+        JSONExt.deepEqual(value, JSONExt.emptyObject) ||
+        JSONExt.deepEqual(value, JSONExt.emptyArray)
       ) {
         continue;
       }
-      if (
-        JSONExt.deepEqual(value, JSONExt.emptyObject) ||
-        JSONExt.deepEqual(value, JSONExt.emptyArray) ||
-        !JSONExt.deepEqual(value, defaultValue)
-      ) {
+      if (!JSONExt.deepEqual(value, defaultValue)) {
         return false;
       }
     }
