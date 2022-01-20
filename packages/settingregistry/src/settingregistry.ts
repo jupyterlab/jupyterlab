@@ -722,27 +722,21 @@ export class Settings implements ISettingRegistry.ISettings {
   /**
    * Checks if any fields are different from the default value.
    */
+  isDefault(user: ReadonlyPartialJSONValue): boolean {
+    const defaultValue = this.default();
+    return (
+      user === undefined ||
+      user === null ||
+      defaultValue === undefined ||
+      defaultValue === null ||
+      JSONExt.deepEqual(user, JSONExt.emptyObject) ||
+      JSONExt.deepEqual(user, JSONExt.emptyArray) ||
+      !JSONExt.deepEqual(user, defaultValue)
+    );
+  }
+
   get isModified(): boolean {
-    for (const key in this.schema.properties) {
-      const user = this.get(key).user;
-      const defaultValue = this.default(key);
-      if (user === undefined || user === null) {
-        continue;
-      }
-      if (defaultValue === undefined || defaultValue === null) {
-        return true;
-      }
-      if (
-        JSONExt.deepEqual(user, JSONExt.emptyObject) ||
-        JSONExt.deepEqual(user, JSONExt.emptyArray)
-      ) {
-        continue;
-      }
-      if (!JSONExt.deepEqual(user, defaultValue)) {
-        return true;
-      }
-    }
-    return false;
+    return this.isDefault(this.user);
   }
 
   /**
@@ -773,7 +767,7 @@ export class Settings implements ISettingRegistry.ISettings {
    *
    * @returns A calculated default JSON value for a specific setting.
    */
-  default(key: string): PartialJSONValue | undefined {
+  default(key?: string): PartialJSONValue | undefined {
     return Private.reifyDefault(this.schema, key);
   }
 

@@ -272,18 +272,12 @@ export class SettingsFormEditor extends React.Component<
    */
   handleChange() {
     // Prevent unnecessary save when opening settings that haven't been modified.
-    if (!this._settings.isModified) {
-      for (const key in this.state.formData) {
-        if (
-          JSONExt.deepEqual(
-            this.state.formData[key],
-            this._settings.default(key) ?? {}
-          )
-        ) {
-          this._updateDirtyState(false);
-          return;
-        }
-      }
+    if (
+      !this._settings.isModified &&
+      !this._settings.isDefault(this.state.formData)
+    ) {
+      this._updateDirtyState(false);
+      return;
     }
     this._settings
       .save(JSON.stringify(this.state.formData))
