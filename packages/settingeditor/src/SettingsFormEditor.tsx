@@ -274,7 +274,7 @@ export class SettingsFormEditor extends React.Component<
     // Prevent unnecessary save when opening settings that haven't been modified.
     if (
       !this._settings.isModified &&
-      !this._settings.isDefault(this.state.formData)
+      this._settings.isDefault(this.state.formData)
     ) {
       this._updateDirtyState(false);
       return;
