@@ -112,10 +112,7 @@ export class NotebookModel implements INotebookModel {
     metadata.changed.connect(this._onMetadataChanged, this);
     this._deletedCells = [];
 
-    (this.sharedModel as models.YNotebook).dirty = false;
     this.sharedModel.changed.connect(this._onStateChanged, this);
-    (this.sharedModel as models.YNotebook).nbformat = this._nbformat;
-    (this.sharedModel as models.YNotebook).nbformat_minor = this._nbformatMinor;
   }
   /**
    * A signal emitted when the document content changes.
