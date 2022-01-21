@@ -543,7 +543,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
         if (kernel && filters[kernel]) {
           sidebar.variables.filter = new Set<string>(filters[kernel]);
         }
-        const kernelSourcesFilter = setting.get('kernelSourcesFilter')
+        const kernelSourcesFilter = setting.get('defaultKernelSourcesFilter')
           .composite as string;
         sidebar.kernelSources.filter = kernelSourcesFilter;
       };
