@@ -874,7 +874,6 @@ const main: JupyterFrontEndPlugin<void> = {
         if (!source) {
           return;
         }
-        //        const { content, mimeType, path } = source;
         onSourceOpened(null, source, breakpoint);
       };
 
