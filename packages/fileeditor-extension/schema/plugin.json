@@ -243,9 +243,6 @@
           "type": "boolean",
           "default": false
         },
-        "showTrailingSpace": {
-          "type": "boolean"
-        },
         "tabSize": {
           "type": "number",
           "default": 4
