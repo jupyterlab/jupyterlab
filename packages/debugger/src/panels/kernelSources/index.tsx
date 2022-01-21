@@ -35,7 +35,7 @@ export class KernelSources extends PanelWithToolbar {
     });
 
     this.toolbar.addItem(
-      'closeAll',
+      'refresh',
       new ToolbarButton({
         icon: refreshIcon,
         onClick: async (): Promise<void> => {
