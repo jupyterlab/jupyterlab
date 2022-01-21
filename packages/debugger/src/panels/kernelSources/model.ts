@@ -88,8 +88,8 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     this._changed.emit(this._filteredKernelSources);
   }
 
-  private _kernelSources: IDebugger.KernelSource[] | null;
-  private _filteredKernelSources: IDebugger.KernelSource[] | null;
+  private _kernelSources: IDebugger.KernelSource[] | null = null;
+  private _filteredKernelSources: IDebugger.KernelSource[] | null = null;
   private _filter = '';
   private _changed = new Signal<this, IDebugger.KernelSource[] | null>(this);
   private _kernelSourceOpened = new Signal<this, IDebugger.Source | null>(this);
