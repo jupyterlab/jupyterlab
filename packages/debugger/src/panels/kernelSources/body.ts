@@ -83,18 +83,6 @@ export class KernelSourcesBody extends Widget {
   }
 
   /**
-   * Dispose the sources body widget.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._editorHandler?.dispose();
-    Signal.clearData(this);
-    super.dispose();
-  }
-
-  /**
    * Clear the content of the kernel source read-only editor.
    */
   private _clear(): void {
