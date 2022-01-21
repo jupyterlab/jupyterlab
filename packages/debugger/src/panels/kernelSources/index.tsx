@@ -53,7 +53,6 @@ export class KernelSources extends PanelWithToolbar {
 
   public set filter(filter: string) {
     this._model.filter = filter;
-    this._body.filter = filter;
   }
 
   private _model: IDebugger.Model.IKernelSources;
