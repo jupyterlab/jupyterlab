@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  blankIcon,
   CommandToolbarButton,
-  jupyterIcon,
   ReactiveToolbar,
   SessionContext,
   Toolbar,
@@ -20,7 +18,12 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
-import { bugDotIcon, bugIcon } from '@jupyterlab/ui-components';
+import {
+  blankIcon,
+  bugDotIcon,
+  bugIcon,
+  jupyterIcon
+} from '@jupyterlab/ui-components';
 
 const server = new JupyterServer();
 
