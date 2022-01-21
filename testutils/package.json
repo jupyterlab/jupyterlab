@@ -47,7 +47,7 @@
     "@jupyterlab/rendermime": "^4.0.0-alpha.4",
     "@jupyterlab/services": "^7.0.0-alpha.4",
     "@lumino/algorithm": "^1.9.1",
-    "@lumino/coreutils": "^1.11.1",
+    "@lumino/coreutils": "^1.12.0",
     "@lumino/properties": "^1.8.1",
     "@lumino/signaling": "^1.10.1",
     "child_process": "~1.0.2",
