@@ -113,9 +113,9 @@
         ]
       }
     },
-    "kernelSourcesFilter": {
-      "title": "Kernel sources regexp filter",
-      "description": "A regular expression filter to apply when showing the kernel sources",
+    "defaultKernelSourcesFilter": {
+      "title": "Default kernel sources regexp filter",
+      "description": "A regular expression filter to apply by default when showing the kernel sources",
       "type": "string",
       "default": ""
     }
