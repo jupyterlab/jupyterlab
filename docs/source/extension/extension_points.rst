@@ -258,13 +258,13 @@ Item must follow this definition:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 21-39
+   :lines: 37-55
 
 where ``menuItem`` definition is:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 142-180
+   :lines: 158-196
 
 
 The same example using the API is shown below. See the Lumino `docs
@@ -577,13 +577,13 @@ A menu must respect the following schema:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 85-141
+   :lines: 101-157
 
 And an item must follow:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/plugin-schema.json
    :language: json
-   :lines: 142-180
+   :lines: 158-196
 
 Menus added to the settings system will be editable by users using the ``mainmenu-extension``
 settings. In particular, they can be disabled at the item or the menu level by setting the
