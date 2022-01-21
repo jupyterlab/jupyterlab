@@ -105,7 +105,6 @@ export class KernelSourcesBody extends Widget {
 
   private _model: IDebugger.Model.IKernelSources;
   private _filenameSearcher: ReactWidget;
-  private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
 }
 
