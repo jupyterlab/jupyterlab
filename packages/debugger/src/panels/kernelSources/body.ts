@@ -5,13 +5,9 @@ import { openKernelSourceIcon } from '../../icons';
 
 import { ReactWidget, ToolbarButton } from '@jupyterlab/ui-components';
 
-import { Signal } from '@lumino/signaling';
-
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { KernelSourcesFilter } from './filter';
-
-import { EditorHandler } from '../../handlers/editor';
 
 import { IDebugger } from '../../tokens';
 

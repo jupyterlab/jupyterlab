@@ -329,7 +329,7 @@ export namespace IDebugger {
     /**
      * Returns the initialize response .
      */
-    readonly initializeResponse: DebugProtocol.InitializeResponse | null;
+    readonly capabilities: DebugProtocol.Capabilities | undefined;
 
     /**
      * Whether the debug session is started
