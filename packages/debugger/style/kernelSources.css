@@ -36,3 +36,7 @@
   flex: 0 0 auto;
   margin: 0px 0px 0px 0px;
 }
+
+.jp-DebuggerKernelSource-filterBox-hidden {
+  display: none;
+}

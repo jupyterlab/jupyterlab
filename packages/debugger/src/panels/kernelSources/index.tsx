@@ -5,7 +5,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
 
-import { refreshIcon } from '@jupyterlab/ui-components';
+import { refreshIcon, searchIcon } from '@jupyterlab/ui-components';
 
 import { IDebugger } from '../../tokens';
 
@@ -33,6 +33,17 @@ export class KernelSources extends PanelWithToolbar {
       model,
       filter: ''
     });
+
+    this.toolbar.addItem(
+      'open-filter',
+      new ToolbarButton({
+        icon: searchIcon,
+        onClick: async (): Promise<void> => {
+          this._body.toggleFilterbox();
+        },
+        tooltip: trans.__('Toggle search filter')
+      })
+    );
 
     this.toolbar.addItem(
       'refresh',
