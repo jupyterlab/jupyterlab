@@ -809,9 +809,7 @@ export class Context<
         `${tDisk}`
     );
     if (this._timeConflictModalIsOpen) {
-      return new Promise(() => {
-        return;
-      });
+      return Promise.reject(new Error('Modal is already displayed'));
     }
     const body = this._trans.__(
       `"%1" has changed on disk since the last time it was opened or saved.
