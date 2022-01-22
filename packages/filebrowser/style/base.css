@@ -145,7 +145,7 @@
 }
 
 .jp-DirListing-headerItem {
-  padding: 4px 12px 2px;
+  padding: 5px 12px 2px 6px;
   font-weight: 500;
 }
 
@@ -154,11 +154,11 @@
 }
 
 .jp-DirListing-headerItem.jp-id-name {
-  flex: 1 0 84px;
+  flex: 1 0 94px;
 }
 
 .jp-DirListing-headerItem.jp-id-modified {
-  flex: 0 0 112px;
+  flex: 0 0 102px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
 }
@@ -215,11 +215,34 @@
 .jp-DirListing-item {
   display: flex;
   flex-direction: row;
-  padding: 4px 12px;
+  align-items: center;
+  padding-right: 12px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.jp-DirListing-checkboxWrapper {
+  /* Increases hit area of checkbox. */
+  padding: 4px;
+}
+
+.jp-DirListing-checkboxWrapper.jp-mod-visible {
+  visibility: visible;
+}
+
+/* For devices that support hovering, hide checkboxes until hovered, selected...
+*/
+@media (hover: hover) {
+  .jp-DirListing-checkboxWrapper {
+    visibility: hidden;
+  }
+
+  .jp-DirListing-item:hover .jp-DirListing-checkboxWrapper,
+  .jp-DirListing-item.jp-mod-selected .jp-DirListing-checkboxWrapper {
+    visibility: visible;
+  }
 }
 
 .jp-DirListing-item[data-is-dot] {
@@ -241,11 +264,11 @@
 
 .jp-DirListing-itemIcon {
   flex: 0 0 20px;
-  margin-right: 4px;
+  margin: 0 4px;
 }
 
 .jp-DirListing-itemText {
-  flex: 1 0 64px;
+  flex: 1 0 74px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -253,7 +276,7 @@
 }
 
 .jp-DirListing-itemModified {
-  flex: 0 0 125px;
+  flex: 0 0 115px;
   text-align: right;
 }
 
