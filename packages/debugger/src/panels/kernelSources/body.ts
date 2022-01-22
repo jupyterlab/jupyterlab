@@ -39,8 +39,7 @@ export class KernelSourcesBody extends Widget {
     this.addClass('jp-DebuggerKernelSources-body');
 
     this._kernelSourcesFilter = KernelSourcesFilter({
-      model: this._model,
-      filter: ''
+      model: this._model
     });
     this._kernelSourcesFilter.addClass(FILTERBOX_CLASS);
     this._kernelSourcesFilter.addClass(FILTERBOX_HIDDEN_CLASS);
@@ -72,16 +71,6 @@ export class KernelSourcesBody extends Widget {
         });
       }
     });
-  }
-
-  set filter(filter: string) {
-    (this.layout as PanelLayout).removeWidget(this._kernelSourcesFilter);
-    this._kernelSourcesFilter = KernelSourcesFilter({
-      model: this._model,
-      filter: filter
-    });
-    this._kernelSourcesFilter.addClass(FILTERBOX_CLASS);
-    (this.layout as PanelLayout).insertWidget(0, this._kernelSourcesFilter);
   }
 
   /**
@@ -124,10 +113,5 @@ export namespace KernelSourcesBody {
      * The sources model.
      */
     model: IDebugger.Model.IKernelSources;
-
-    /**
-     * The filter to apply when showing the kernel sources.
-     */
-    filter: string;
   }
 }

@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { InputGroup, ReactWidget } from '@jupyterlab/ui-components';
+import { InputGroup, ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { IDebugger } from '../../tokens';
 
@@ -12,27 +12,24 @@ import { IDebugger } from '../../tokens';
  */
 export interface IFilterBoxProps {
   model: IDebugger.Model.IKernelSources;
-  filter: string;
+  onFilterChange?: (e: any) => void;
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
-  const [filter, setFilter] = useState(props.filter);
-
   /**
    * Handler for search input changes.
-   */
   const handleChange = (e: React.FormEvent<HTMLElement>) => {
     const target = e.target as HTMLInputElement;
     setFilter(target.value);
     props.model.filter = target.value;
   };
-
+  */
   return (
     <InputGroup
       type="text"
-      onChange={handleChange}
+      onChange={props.onFilterChange}
       placeholder="Filter the kernel sources"
-      value={filter}
+      value={props.model.filter}
     />
   );
 };
@@ -42,6 +39,18 @@ const FilterBox = (props: IFilterBoxProps) => {
  */
 export const KernelSourcesFilter = (props: IFilterBoxProps): ReactWidget => {
   return ReactWidget.create(
-    <FilterBox model={props.model} filter={props.filter} />
+    <UseSignal
+      signal={props.model.changed}
+      initialArgs={props.model.kernelSources}
+    >
+      {model => (
+        <FilterBox
+          model={props.model}
+          onFilterChange={(e: any) => {
+            props.model.filter = (e.target as HTMLInputElement).value;
+          }}
+        />
+      )}
+    </UseSignal>
   );
 };

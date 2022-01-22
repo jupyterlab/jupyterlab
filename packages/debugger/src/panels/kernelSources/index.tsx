@@ -30,8 +30,7 @@ export class KernelSources extends PanelWithToolbar {
 
     this._body = new KernelSourcesBody({
       service,
-      model,
-      filter: ''
+      model
     });
 
     this.toolbar.addItem(
