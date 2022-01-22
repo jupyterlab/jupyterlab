@@ -634,7 +634,10 @@ export class Context<
       // If the save has been canceled by the user,
       // throw the error so that whoever called save()
       // can decide what to do.
-      if (err.message === 'Cancel') {
+      if (
+        err.message === 'Cancel' ||
+        err.message === 'Modal is already displayed'
+      ) {
         throw err;
       }
 
