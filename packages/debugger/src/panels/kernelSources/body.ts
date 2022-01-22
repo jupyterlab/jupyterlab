@@ -12,9 +12,14 @@ import { KernelSourcesFilter } from './filter';
 import { IDebugger } from '../../tokens';
 
 /**
- * The class name added to the filebrowser filterbox node.
+ * The class name added to the filterbox node.
  */
 const FILTERBOX_CLASS = 'jp-DebuggerKernelSource-filterBox';
+
+/**
+ * The class name added to hide the filterbox node.
+ */
+const FILTERBOX_HIDDEN_CLASS = 'jp-DebuggerKernelSource-filterBox-hidden';
 
 /**
  * The body for a Sources Panel.
@@ -33,13 +38,14 @@ export class KernelSourcesBody extends Widget {
     this.layout = new PanelLayout();
     this.addClass('jp-DebuggerKernelSources-body');
 
-    this._filenameSearcher = KernelSourcesFilter({
+    this._kernelSourcesFilter = KernelSourcesFilter({
       model: this._model,
       filter: ''
     });
-    this._filenameSearcher.addClass(FILTERBOX_CLASS);
+    this._kernelSourcesFilter.addClass(FILTERBOX_CLASS);
+    this._kernelSourcesFilter.addClass(FILTERBOX_HIDDEN_CLASS);
 
-    (this.layout as PanelLayout).addWidget(this._filenameSearcher);
+    (this.layout as PanelLayout).addWidget(this._kernelSourcesFilter);
 
     this._model.changed.connect((_, kernelSources) => {
       this._clear();
@@ -69,13 +75,22 @@ export class KernelSourcesBody extends Widget {
   }
 
   set filter(filter: string) {
-    (this.layout as PanelLayout).removeWidget(this._filenameSearcher);
-    this._filenameSearcher = KernelSourcesFilter({
+    (this.layout as PanelLayout).removeWidget(this._kernelSourcesFilter);
+    this._kernelSourcesFilter = KernelSourcesFilter({
       model: this._model,
       filter: filter
     });
-    this._filenameSearcher.addClass(FILTERBOX_CLASS);
-    (this.layout as PanelLayout).insertWidget(0, this._filenameSearcher);
+    this._kernelSourcesFilter.addClass(FILTERBOX_CLASS);
+    (this.layout as PanelLayout).insertWidget(0, this._kernelSourcesFilter);
+  }
+
+  /**
+   * Show or hide the filter box.
+   */
+  public toggleFilterbox(): void {
+    this._kernelSourcesFilter.node.classList.contains(FILTERBOX_HIDDEN_CLASS)
+      ? this._kernelSourcesFilter.node.classList.remove(FILTERBOX_HIDDEN_CLASS)
+      : this._kernelSourcesFilter.node.classList.add(FILTERBOX_HIDDEN_CLASS);
   }
 
   /**
@@ -88,7 +103,7 @@ export class KernelSourcesBody extends Widget {
   }
 
   private _model: IDebugger.Model.IKernelSources;
-  private _filenameSearcher: ReactWidget;
+  private _kernelSourcesFilter: ReactWidget;
   private _debuggerService: IDebugger;
 }
 

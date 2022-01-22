@@ -30,7 +30,6 @@ const FilterBox = (props: IFilterBoxProps) => {
   return (
     <InputGroup
       type="text"
-      rightIcon="ui-components:search"
       onChange={handleChange}
       placeholder="Filter the kernel sources"
       value={filter}
