@@ -32,6 +32,7 @@ const FilterBox = (props: IFilterBoxProps) => {
       type="text"
       rightIcon="ui-components:search"
       onChange={handleChange}
+      placeholder="Filter the kernel sources"
       value={filter}
     />
   );
