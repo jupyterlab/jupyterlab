@@ -734,6 +734,16 @@ export function ToolbarButtonComponent(
     }
   };
 
+  const getTooltip = () => {
+    if (props.enabled === false && props.disabledTooltip) {
+      return props.disabledTooltip;
+    } else if (props.pressed && props.pressedTooltip) {
+      return props.pressedTooltip;
+    } else {
+      return props.tooltip || props.iconLabel;
+    }
+  };
+
   return (
     <Button
       className={
@@ -741,18 +751,20 @@ export function ToolbarButtonComponent(
           ? props.className + ' jp-ToolbarButtonComponent'
           : 'jp-ToolbarButtonComponent'
       }
+      aria-pressed={props.pressed}
+      aria-disabled={props.enabled === false}
       disabled={props.enabled === false}
       onClick={props.actualOnClick ?? false ? handleClick : undefined}
       onMouseDown={
         !(props.actualOnClick ?? false) ? handleMouseDown : undefined
       }
       onKeyDown={handleKeyDown}
-      title={props.tooltip || props.iconLabel}
+      title={getTooltip()}
       minimal
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact
-          icon={props.icon}
+          icon={props.pressed ? props.pressedIcon : props.icon}
           iconClass={
             // add some extra classes for proper support of icons-as-css-background
             classes(props.iconClass, 'jp-Icon')
