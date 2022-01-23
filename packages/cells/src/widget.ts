@@ -1487,7 +1487,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     this.renderCollapseButtons(this._renderer!);
     this.renderInput(this._renderer!);
     this._showEditorForReadOnlyMarkdown =
-      options.showEditorForReadOnlyMarkdown ?? MarkdownCell.defaultShowEditorForReadOnlyMarkdown;
+      options.showEditorForReadOnlyMarkdown ??
+      MarkdownCell.defaultShowEditorForReadOnlyMarkdown;
   }
 
   /**

@@ -670,7 +670,8 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false,
       placeholder: false,
-      showEditorForReadOnlyMarkdown: this._notebookConfig.showEditorForReadOnlyMarkdown
+      showEditorForReadOnlyMarkdown: this._notebookConfig
+        .showEditorForReadOnlyMarkdown
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
