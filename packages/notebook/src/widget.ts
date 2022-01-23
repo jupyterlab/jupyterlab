@@ -208,7 +208,6 @@ export class StaticNotebook extends Widget {
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._updateNotebookConfig();
     this._mimetypeService = options.mimeTypeService;
-    this._showEditorForReadOnlyMarkdown = options.showEditorForReadOnlyMarkdown;
     this.renderingLayout = options.notebookConfig?.renderingLayout;
 
     // Section for the virtual-notebook behavior.
@@ -664,7 +663,6 @@ export class StaticNotebook extends Widget {
     const rendermime = this.rendermime;
     const contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.markdown;
-    const showEditorForReadOnlyMarkdown = this._showEditorForReadOnlyMarkdown;
     const options = {
       editorConfig,
       model,
@@ -672,7 +670,7 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false,
       placeholder: false,
-      showEditorForReadOnlyMarkdown
+      showEditorForReadOnlyMarkdown: this._notebookConfig.showEditorForReadOnlyMarkdown
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
@@ -845,7 +843,6 @@ export class StaticNotebook extends Widget {
   private _placeholderCellRendered = new Signal<this, Cell>(this);
   private _observer: IntersectionObserver;
   private _renderedCellsCount = 0;
-  private _showEditorForReadOnlyMarkdown?: boolean;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
   private _cellsArray: Array<Cell>;
   private _renderingLayout: RenderingLayout | undefined;
@@ -893,11 +890,6 @@ export namespace StaticNotebook {
      * The application language translator.
      */
     translator?: ITranslator;
-
-    /**
-     * Show editor for read-only Markdown cells.
-     */
-    showEditorForReadOnlyMarkdown?: boolean;
   }
 
   /**

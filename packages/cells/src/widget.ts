@@ -1487,9 +1487,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     this.renderCollapseButtons(this._renderer!);
     this.renderInput(this._renderer!);
     this._showEditorForReadOnlyMarkdown =
-      typeof options.showEditorForReadOnlyMarkdown === 'undefined'
-        ? MarkdownCell.defaultShowEditorForReadOnlyMarkdown
-        : options.showEditorForReadOnlyMarkdown;
+      options.showEditorForReadOnlyMarkdown ?? MarkdownCell.defaultShowEditorForReadOnlyMarkdown;
   }
 
   /**
@@ -1770,7 +1768,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendered = true;
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
-  private _showEditorForReadOnlyMarkdown: boolean = true;
+  private _showEditorForReadOnlyMarkdown = true;
 }
 
 /**
