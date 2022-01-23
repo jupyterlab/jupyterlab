@@ -586,6 +586,10 @@ export namespace DocumentWidget {
     U extends DocumentRegistry.IModel = DocumentRegistry.IModel
   > extends MainAreaWidget.IOptionsOptionalContent<T> {
     context: DocumentRegistry.IContext<U>;
+
+    /**
+     * The application language translator.
+     */
     translator?: ITranslator;
   }
 }

@@ -10,30 +10,27 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
+  createToolbarFactory,
   Dialog,
   ICommandPalette,
   InputDialog,
   ISessionContextDialogs,
+  IToolbarWidgetRegistry,
   MainAreaWidget,
   sessionContextDialogs,
   showDialog,
+  Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
-
 import { PageConfig } from '@jupyterlab/coreutils';
-
 import { IDocumentManager } from '@jupyterlab/docmanager';
-
+import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import {
   IEditMenu,
   IFileMenu,
@@ -43,9 +40,7 @@ import {
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
 import {
   CommandEditStatus,
   INotebookTools,
@@ -59,31 +54,29 @@ import {
   NotebookTracker,
   NotebookTrustStatus,
   NotebookWidgetFactory,
-  StaticNotebook
+  StaticNotebook,
+  ToolbarItems
 } from '@jupyterlab/notebook';
 import {
   IObservableList,
   IObservableUndoableList
 } from '@jupyterlab/observables';
-
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
-import { buildIcon, notebookIcon } from '@jupyterlab/ui-components';
-
+import {
+  addIcon,
+  buildIcon,
+  copyIcon,
+  cutIcon,
+  notebookIcon,
+  pasteIcon
+} from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import {
   JSONExt,
   JSONObject,
@@ -92,13 +85,9 @@ import {
   ReadonlyPartialJSONObject,
   UUID
 } from '@lumino/coreutils';
-
 import { DisposableSet } from '@lumino/disposable';
-
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { Menu, Panel } from '@lumino/widgets';
-
 import { logNotebookOutput } from './nboutput';
 
 /**
@@ -273,6 +262,11 @@ const FACTORY = 'Notebook';
  * (returned from nbconvert's export list)
  */
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
+
+/**
+ * Setting Id storing the customized toolbar definition.
+ */
+const PANEL_SETTINGS = '@jupyterlab/notebook-extension:panel';
 
 /**
  * The notebook widget tracker provider.
@@ -521,8 +515,10 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
     IEditorServices,
     IRenderMimeRegistry,
     ISessionContextDialogs,
+    IToolbarWidgetRegistry,
     ITranslator
   ],
+  optional: [ISettingRegistry],
   activate: activateWidgetFactory,
   autoStart: true
 };
@@ -700,8 +696,46 @@ function activateWidgetFactory(
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
   sessionContextDialogs: ISessionContextDialogs,
-  translator: ITranslator
+  toolbarRegistry: IToolbarWidgetRegistry,
+  translator: ITranslator,
+  settingRegistry: ISettingRegistry | null
 ): NotebookWidgetFactory.IFactory {
+  const { commands } = app;
+  let toolbarFactory:
+    | ((widget: NotebookPanel) => DocumentRegistry.IToolbarItem[])
+    | undefined;
+
+  // Register notebook toolbar widgets
+  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'save', panel =>
+    DocToolbarItems.createSaveButton(commands, panel.context.fileChanged)
+  );
+  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
+    ToolbarItems.createCellTypeItem(panel, translator)
+  );
+  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'kernelName', panel =>
+    Toolbar.createKernelNameItem(
+      panel.sessionContext,
+      sessionContextDialogs,
+      translator
+    )
+  );
+  toolbarRegistry.registerFactory<NotebookPanel>(
+    FACTORY,
+    'kernelStatus',
+    panel => Toolbar.createKernelStatusItem(panel.sessionContext, translator)
+  );
+
+  if (settingRegistry) {
+    // Create the factory
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      FACTORY,
+      PANEL_SETTINGS,
+      translator
+    );
+  }
+
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
@@ -709,12 +743,13 @@ function activateWidgetFactory(
     defaultFor: ['notebook'],
     preferKernel: true,
     canStartKernel: true,
-    rendermime: rendermime,
+    rendermime,
     contentFactory,
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
     mimeTypeService: editorServices.mimeTypeService,
     sessionDialogs: sessionContextDialogs,
+    toolbarFactory,
     translator: translator
   });
   app.docRegistry.addWidgetFactory(factory);
@@ -1664,6 +1699,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.cut, {
     label: trans.__('Cut Cells'),
+    caption: trans.__('Cut the selected cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1671,10 +1707,12 @@ function addCommands(
         return NotebookActions.cut(current.content);
       }
     },
+    icon: args => (args.toolbar ? cutIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.copy, {
     label: trans.__('Copy Cells'),
+    caption: trans.__('Copy the selected cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1682,10 +1720,12 @@ function addCommands(
         return NotebookActions.copy(current.content);
       }
     },
+    icon: args => (args.toolbar ? copyIcon : ''),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteBelow, {
     label: trans.__('Paste Cells Below'),
+    caption: trans.__('Paste cells from the clipboard'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1693,6 +1733,7 @@ function addCommands(
         return NotebookActions.paste(current.content, 'below');
       }
     },
+    icon: args => (args.toolbar ? pasteIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAbove, {
@@ -1785,6 +1826,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.insertBelow, {
     label: trans.__('Insert Cell Below'),
+    caption: trans.__('Insert a cell below'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1792,6 +1834,7 @@ function addCommands(
         return NotebookActions.insertBelow(current.content);
       }
     },
+    icon: args => (args.toolbar ? addIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.selectAbove, {
@@ -2482,9 +2525,13 @@ function populateMenus(
   mainMenu.runMenu.codeRunners.add({
     tracker,
     runLabel: (n: number) => trans.__('Run Selected Cells'),
+    runCaption: (n: number) => trans.__('Run the selected cells and advance'),
     runAllLabel: (n: number) => trans.__('Run All Cells'),
+    runAllCaption: (n: number) => trans.__('Run the all notebook cells'),
     restartAndRunAllLabel: (n: number) =>
       trans.__('Restart Kernel and Run All Cells…'),
+    restartAndRunAllCaption: (n: number) =>
+      trans.__('Restart the kernel, then re-run the whole notebook'),
     run: current => {
       const { context, content } = current;
       return NotebookActions.runAndAdvance(

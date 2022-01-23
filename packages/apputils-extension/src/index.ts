@@ -37,6 +37,7 @@ import { Debouncer, Throttler } from '@lumino/polling';
 import { Palette } from './palette';
 import { settingsPlugin } from './settingsplugin';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
+import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 
 /**
@@ -629,6 +630,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   themesPlugin,
   themesPaletteMenuPlugin,
   toggleHeader,
+  toolbarRegistry,
   utilityCommands,
   workspacesPlugin
 ];

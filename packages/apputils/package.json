@@ -28,9 +28,7 @@
     "lib": "lib/"
   },
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
+    "lib/**/*.{d.ts,js,js.map}",
     "style/*.css",
     "style/index.js"
   ],
@@ -47,6 +45,7 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^5.3.0-alpha.16",
+    "@jupyterlab/observables": "^4.3.0-alpha.16",
     "@jupyterlab/services": "^6.3.0-alpha.16",
     "@jupyterlab/settingregistry": "^3.3.0-alpha.16",
     "@jupyterlab/statedb": "^3.3.0-alpha.16",

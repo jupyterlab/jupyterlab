@@ -18,7 +18,12 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
-import { bugDotIcon, bugIcon } from '@jupyterlab/ui-components';
+import {
+  blankIcon,
+  bugDotIcon,
+  bugIcon,
+  jupyterIcon
+} from '@jupyterlab/ui-components';
 
 const server = new JupyterServer();
 
@@ -31,18 +36,110 @@ afterAll(async () => {
 });
 
 describe('@jupyterlab/apputils', () => {
-  let widget: Toolbar<Widget>;
+  describe('CommandToolbarButton', () => {
+    let commands: CommandRegistry;
+    const id = 'test-command';
+    const options: CommandRegistry.ICommandOptions = {
+      execute: jest.fn()
+    };
 
-  beforeEach(async () => {
-    jest.setTimeout(20000);
-    widget = new Toolbar();
-  });
+    beforeEach(() => {
+      commands = new CommandRegistry();
+    });
 
-  afterEach(async () => {
-    widget.dispose();
+    it('should render a command', async () => {
+      commands.addCommand(id, options);
+      const button = new CommandToolbarButton({
+        commands,
+        id
+      });
+
+      Widget.attach(button, document.body);
+      await framePromise();
+
+      expect(button.hasClass('jp-CommandToolbarButton')).toBe(true);
+      simulate(button.node.firstElementChild!, 'mousedown');
+      expect(options.execute).toBeCalledTimes(1);
+    });
+
+    it('should render the label command', async () => {
+      const label = 'This is a test label';
+      commands.addCommand(id, { ...options, label });
+      const button = new CommandToolbarButton({
+        commands,
+        id
+      });
+
+      Widget.attach(button, document.body);
+      await framePromise();
+
+      expect(button.node.textContent).toMatch(label);
+    });
+
+    it('should render the customized label command', async () => {
+      const label = 'This is a test label';
+      const buttonLabel = 'This is the button label';
+      commands.addCommand(id, { ...options, label });
+      const button = new CommandToolbarButton({
+        commands,
+        id,
+        label: buttonLabel
+      });
+
+      Widget.attach(button, document.body);
+      await framePromise();
+
+      expect(button.node.textContent).toMatch(buttonLabel);
+      expect(button.node.textContent).not.toMatch(label);
+    });
+
+    it('should render the icon command', async () => {
+      const icon = jupyterIcon;
+      commands.addCommand(id, { ...options, icon });
+      const button = new CommandToolbarButton({
+        commands,
+        id
+      });
+
+      Widget.attach(button, document.body);
+      await framePromise();
+
+      expect(button.node.getElementsByTagName('svg')[0].dataset.icon).toMatch(
+        icon.name
+      );
+    });
+
+    it('should render the customized icon command', async () => {
+      const icon = jupyterIcon;
+      const buttonIcon = blankIcon;
+      commands.addCommand(id, { ...options, icon });
+      const button = new CommandToolbarButton({
+        commands,
+        id,
+        icon: buttonIcon
+      });
+
+      Widget.attach(button, document.body);
+      await framePromise();
+
+      const iconSVG = button.node.getElementsByTagName('svg')[0];
+      expect(iconSVG.dataset.icon).toMatch(buttonIcon.name);
+      expect(iconSVG.dataset.icon).not.toMatch(icon.name);
+    });
   });
 
   describe('Toolbar', () => {
+    let widget: Toolbar<Widget>;
+
+    beforeEach(async () => {
+      jest.setTimeout(20000);
+      widget = new Toolbar();
+    });
+
+    afterEach(async () => {
+      widget.dispose();
+    });
+
     describe('#constructor()', () => {
       it('should construct a new toolbar widget', () => {
         const widget = new Toolbar();
