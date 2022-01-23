@@ -1581,6 +1581,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
   }
 
+  set showEditorForReadOnlyMarkdown(value: boolean) {
+    this._showEditorForReadOnlyMarkdown = value;
+    if (value === false) {
+      this.rendered = true;
+    }
+  }
+
   protected maybeCreateCollapseButton(): void {
     if (
       this.headingInfo.level > 0 &&

@@ -824,6 +824,18 @@ export class StaticNotebook extends Widget {
       HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS,
       this._notebookConfig.showHiddenCellsButton
     );
+    // Control editor visibility for read-only Markdown cells
+    const showEditorForReadOnlyMarkdown = this._notebookConfig
+      .showEditorForReadOnlyMarkdown;
+    // 'this._cellsArray' check is here as '_updateNotebookConfig()'
+    // can be called before 'this._cellsArray' is defined
+    if (showEditorForReadOnlyMarkdown !== undefined && this._cellsArray) {
+      for (const cell of this._cellsArray) {
+        if (cell.model.type === 'markdown') {
+          (cell as MarkdownCell).showEditorForReadOnlyMarkdown = showEditorForReadOnlyMarkdown;
+        }
+      }
+    }
   }
 
   private _incrementRenderedCount() {
