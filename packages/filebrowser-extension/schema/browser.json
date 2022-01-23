@@ -17,6 +17,10 @@
           {
             "command": "filebrowser:open-path",
             "rank": 1
+          },
+          {
+            "command": "filebrowser:open-url",
+            "rank": 1
           }
         ]
       },
