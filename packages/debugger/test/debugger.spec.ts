@@ -98,6 +98,10 @@ describe('Debugger', () => {
         stepOut: '',
         evaluate: ''
       },
+      breakpointsCommands: {
+        registry,
+        pause: ''
+      },
       editorServices: {
         factoryService,
         mimeTypeService
@@ -228,9 +232,9 @@ describe('Debugger', () => {
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Breakpoints');
       });
-      it('should have one button', () => {
+      it('should have two buttons', () => {
         const buttons = toolbar.querySelectorAll('button');
-        expect(buttons.length).toBe(1);
+        expect(buttons.length).toBe(2);
       });
     });
     describe('Source toolbar', () => {

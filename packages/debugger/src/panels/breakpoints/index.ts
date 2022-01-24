@@ -3,7 +3,12 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
+import {
+  CommandToolbarButton,
+  PanelWithToolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
+import { CommandRegistry } from '@lumino/commands';
 import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { closeAllIcon } from '../../icons';
@@ -20,11 +25,20 @@ export class Breakpoints extends PanelWithToolbar {
    */
   constructor(options: Breakpoints.IOptions) {
     super(options);
-    const { model, service } = options;
+    const { model, service, commands } = options;
     const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.title.label = trans.__('Breakpoints');
 
     const body = new BreakpointsBody(model);
+
+    this.toolbar.addItem(
+      'pause',
+      new CommandToolbarButton({
+        commands: commands.registry,
+        id: commands.pause,
+        label: ''
+      })
+    );
 
     this.toolbar.addItem(
       'closeAll',
@@ -63,6 +77,20 @@ export class Breakpoints extends PanelWithToolbar {
  */
 export namespace Breakpoints {
   /**
+   * The toolbar commands and registry for the breakpoints.
+   */
+  export interface ICommands {
+    /**
+     * The command registry.
+     */
+    registry: CommandRegistry;
+
+    /**
+     * The pause command ID.
+     */
+    pause: string;
+  }
+  /**
    * Instantiation options for `Breakpoints`.
    */
   export interface IOptions extends Panel.IOptions {
@@ -75,6 +103,11 @@ export namespace Breakpoints {
      * The debugger service.
      */
     service: IDebugger;
+
+    /**
+     * The toolbar commands interface for the callstack.
+     */
+    commands: ICommands;
 
     /**
      * The application language translator..

@@ -66,6 +66,23 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Whether the current debugger is pausing on exceptions.
+   */
+  get isPausingOnExceptions(): boolean {
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    if (kernel) {
+      const tmpFileParams = this._config.getTmpFileParams(kernel);
+      if (tmpFileParams) {
+        return (
+          this._session?.pausingOnExceptions.includes(tmpFileParams.prefix) ??
+          false
+        );
+      }
+    }
+    return false;
+  }
+
+  /**
    * Returns the debugger service's model.
    */
   get model(): IDebugger.Model.IService {
@@ -496,6 +513,72 @@ export class DebuggerService implements IDebugger, IDisposable {
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
     await this.session.sendRequest('configurationDone', {});
+  }
+
+  /**
+   * Determines if pausing on exceptions is supported by the kernel
+   *
+   */
+  pauseOnExceptionsIsValid(): boolean {
+    if (this.isStarted) {
+      if (this.session?.exceptionBreakpointFilters) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Enable or disable pausing on exceptions.
+   *
+   * @param enable - Whether to enbale or disable pausing on exceptions.
+   */
+  async pauseOnExceptions(enable: boolean): Promise<void> {
+    if (!this.session?.isStarted) {
+      return;
+    }
+
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    if (!kernel) {
+      return;
+    }
+    const tmpFileParams = this._config.getTmpFileParams(kernel);
+    if (!tmpFileParams) {
+      return;
+    }
+    let prefix = tmpFileParams.prefix;
+    const exceptionBreakpointFilters = this.session.exceptionBreakpointFilters;
+    let pauseOnExceptionKernels = this.session.pausingOnExceptions;
+    if (enable) {
+      if (!this.session.pausingOnExceptions.includes(prefix)) {
+        pauseOnExceptionKernels.push(prefix);
+        this.session.pausingOnExceptions = pauseOnExceptionKernels;
+      }
+    } else {
+      let prefixIndex = this.session.pausingOnExceptions.indexOf(prefix);
+      if (prefixIndex > -1) {
+        this.session.pausingOnExceptions = pauseOnExceptionKernels.splice(
+          prefixIndex,
+          1
+        );
+        this.session.pausingOnExceptions = pauseOnExceptionKernels;
+      }
+    }
+    const filters: string[] = [];
+    const exceptionOptions: DebugProtocol.ExceptionOptions[] = [];
+    const breakMode = enable ? 'userUnhandled' : 'never';
+    for (let filterDict of exceptionBreakpointFilters ?? []) {
+      filters.push(filterDict.filter);
+      exceptionOptions.push({
+        path: [{ names: this.session.exceptionPaths }],
+        breakMode: breakMode
+      });
+    }
+    const options: DebugProtocol.SetExceptionBreakpointsArguments = {
+      filters: filters,
+      exceptionOptions: exceptionOptions
+    };
+    await this.session.sendRequest('setExceptionBreakpoints', options);
   }
 
   /**

@@ -25,3 +25,13 @@ button.jp-Button.jp-mod-minimal.jp-TableView:hover {
 .jp-ViewModeSelected {
   background-color: var(--jp-layout-color2);
 }
+
+/* Pause on exceptions */
+button.jp-Button.jp-mod-minimal.jp-PauseOnExceptions:hover {
+  cursor: pointer;
+  background-color: var(--jp-layout-color2);
+}
+
+button.jp-Button.jp-PauseOnExceptions.lm-mod-toggled {
+  background-color: var(--jp-layout-color2);
+}
