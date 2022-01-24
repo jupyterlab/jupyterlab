@@ -814,6 +814,47 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ## v3.3
 
+## 3.3.0a2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.3.0a1...f6ac33636809f310c0fdbe0b84dd8b73be8a8820))
+
+### Enhancements made
+
+- Add startMode setting to define the startup mode [#11881](https://github.com/jupyterlab/jupyterlab/pull/11881) ([@echarles](https://github.com/echarles))
+- Update variable renderer panels [#11874](https://github.com/jupyterlab/jupyterlab/pull/11874) ([@fcollonval](https://github.com/fcollonval))
+- Allow extensions and users to customize easily toolbar items [#11873](https://github.com/jupyterlab/jupyterlab/pull/11873) ([@fcollonval](https://github.com/fcollonval))
+- Add debugger variable renderer based on mime type [#11871](https://github.com/jupyterlab/jupyterlab/pull/11871) ([@fcollonval](https://github.com/fcollonval))
+- Add a command to open a file from a URL [#11870](https://github.com/jupyterlab/jupyterlab/pull/11870) ([@fcollonval](https://github.com/fcollonval))
+- List workspaces [#11869](https://github.com/jupyterlab/jupyterlab/pull/11869) ([@fcollonval](https://github.com/fcollonval))
+- Add closeOnExit terminal option [#11868](https://github.com/jupyterlab/jupyterlab/pull/11868) ([@fcollonval](https://github.com/fcollonval))
+- Table of Contents running cell indicator [#11804](https://github.com/jupyterlab/jupyterlab/pull/11804) ([@andrewfulton9](https://github.com/andrewfulton9))
+
+### Bugs fixed
+
+- Add percent decoding to username [#11865](https://github.com/jupyterlab/jupyterlab/pull/11865) ([@fcollonval](https://github.com/fcollonval))
+- Fix Handling of WebSocket Startup Errors [#11358](https://github.com/jupyterlab/jupyterlab/pull/11358) ([@blink1073](https://github.com/blink1073))
+
+### Maintenance and upkeep improvements
+
+- Use `maintainer-tools` base setup action [#11595](https://github.com/jupyterlab/jupyterlab/pull/11595) ([@jtpio](https://github.com/jtpio))
+- Drop testing Python 3.6, test on Python 3.10 [#11867](https://github.com/jupyterlab/jupyterlab/pull/11867) ([@fcollonval](https://github.com/fcollonval))
+- Drop support for Python 3.6 [#11740](https://github.com/jupyterlab/jupyterlab/pull/11740) ([@jtpio](https://github.com/jtpio))
+- Use the root yarn.lock in staging when making a release [#11433](https://github.com/jupyterlab/jupyterlab/pull/11433) ([@jasongrout](https://github.com/jasongrout))
+
+### Documentation improvements
+
+- Allow extensions and users to customize easily toolbar items [#11873](https://github.com/jupyterlab/jupyterlab/pull/11873) ([@fcollonval](https://github.com/fcollonval))
+
+### API and Breaking Changes
+
+- Table of Contents running cell indicator [#11804](https://github.com/jupyterlab/jupyterlab/pull/11804) ([@andrewfulton9](https://github.com/andrewfulton9))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-01-13&to=2022-01-24&type=c))
+
+[@andrewfulton9](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrewfulton9+updated%3A2022-01-13..2022-01-24&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-01-13..2022-01-24&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-01-13..2022-01-24&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2022-01-13..2022-01-24&type=Issues) | [@isabela-pf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aisabela-pf+updated%3A2022-01-13..2022-01-24&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-01-13..2022-01-24&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-01-13..2022-01-24&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2022-01-13..2022-01-24&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2022-01-13..2022-01-24&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-01-13..2022-01-24&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-01-13..2022-01-24&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AZsailer+updated%3A2022-01-13..2022-01-24&type=Issues)
+
 ## 3.3.0a1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.2.5...a5a0075becdbed3491df972794704f8210b5f636))
