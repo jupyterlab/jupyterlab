@@ -233,13 +233,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
     // Editor settings
     if (options.editorConfig) {
-      let editorOptions: any = {};
-      Object.keys(options.editorConfig).forEach(
-        (key: keyof CodeEditor.IConfig) => {
-          editorOptions[key] = options.editorConfig?.[key] ?? null;
-        }
-      );
-      this.editor.setOptions(editorOptions);
+      this.editor.setOptions({ ...options.editorConfig });
     }
 
     model.metadata.changed.connect(this.onMetadataChanged, this);

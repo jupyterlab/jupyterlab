@@ -106,19 +106,20 @@ export const FACTORY = 'Editor';
 
 const userSettings = [
   'autoClosingBrackets',
+  'codeFolding',
   'cursorBlinkRate',
   'fontFamily',
   'fontSize',
+  'insertSpaces',
   'lineHeight',
   'lineNumbers',
   'lineWrap',
   'matchBrackets',
   'readOnly',
-  'insertSpaces',
-  'tabSize',
-  'wordWrapColumn',
   'rulers',
-  'codeFolding'
+  'showTrailingSpace',
+  'tabSize',
+  'wordWrapColumn'
 ];
 
 function filterUserSettings(config: CodeEditor.IConfig): CodeEditor.IConfig {
@@ -202,11 +203,7 @@ export namespace Commands {
    */
   export function updateWidget(widget: FileEditor): void {
     const editor = widget.editor;
-    let editorOptions: any = {};
-    Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-      editorOptions[key] = config[key];
-    });
-    editor.setOptions(editorOptions);
+    editor.setOptions({ ...config });
   }
 
   /**

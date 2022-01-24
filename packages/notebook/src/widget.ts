@@ -771,7 +771,7 @@ export class StaticNotebook extends Widget {
   private _updateEditorConfig() {
     for (let i = 0; i < this.widgets.length; i++) {
       const cell = this.widgets[i];
-      let config: Partial<CodeEditor.IConfig>;
+      let config: Partial<CodeEditor.IConfig> = {};
       switch (cell.model.type) {
         case 'code':
           config = this._editorConfig.code;
@@ -783,11 +783,7 @@ export class StaticNotebook extends Widget {
           config = this._editorConfig.raw;
           break;
       }
-      let editorOptions: any = {};
-      Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-        editorOptions[key] = config[key] ?? null;
-      });
-      cell.editor.setOptions(editorOptions);
+      cell.editor.setOptions({ ...config });
       cell.editor.refresh();
     }
   }
