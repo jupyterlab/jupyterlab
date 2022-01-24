@@ -1,2 +1,3 @@
 binderUrlSuffix: "?urlpath=lab-dev"
 addBinderLink: true
+triageLabel: "status:Needs Triage"

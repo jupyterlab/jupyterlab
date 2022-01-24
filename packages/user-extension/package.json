@@ -44,7 +44,7 @@
     "@jupyterlab/application": "^4.0.0-alpha.4",
     "@jupyterlab/coreutils": "^6.0.0-alpha.4",
     "@jupyterlab/user": "^4.0.0-alpha.4",
-    "@lumino/widgets": "^1.30.0"
+    "@lumino/widgets": "^1.31.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

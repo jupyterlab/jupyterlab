@@ -1052,11 +1052,10 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
 const topSpacer: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:top-spacer',
   autoStart: true,
-  requires: [ILabShell],
-  activate: (app: JupyterFrontEnd, shell: ILabShell) => {
+  activate: (app: JupyterFrontEnd) => {
     const spacer = new Widget();
     spacer.id = 'jp-topbar-spacer';
-    shell.add(spacer, 'top', { rank: 900 });
+    app.shell.add(spacer, 'top', { rank: 900 });
   }
 };
 

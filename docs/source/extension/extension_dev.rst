@@ -1,11 +1,26 @@
 .. _developer_extensions:
 
-Extension Developer Guide
-=========================
+Develop Extensions
+==================
 
 The JupyterLab application is comprised of a core application object and a set of extensions. JupyterLab extensions provide nearly every function in JupyterLab, including notebooks, document editors and viewers, code consoles, terminals, themes, the file browser, contextual help system, debugger, and settings editor. Extensions even provide more fundamental parts of the application, such as the menu system, status bar, and the underlying communication mechanism with the server.
 
 A JupyterLab extension is a package that contains a number of JupyterLab plugins. We will discuss how to write a plugin, then how to package together a set of plugins into a JupyterLab extension.
+
+See the sections below for more detailed information, or browse the rest of this page for an overview.
+
+.. toctree::
+   :maxdepth: 1
+
+   extension_points
+   ui_components
+   documents
+   notebook
+   virtualdom
+   ui_helpers
+   internationalization
+   extension_tutorial
+   extension_migration
 
 Other resources
 ---------------

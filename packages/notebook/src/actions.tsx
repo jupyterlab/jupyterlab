@@ -1879,7 +1879,7 @@ export namespace NotebookActions {
         )}
         <br />
         {trans.__(
-          'Selecting trust will re-render this notebook in a trusted state.'
+          'Selecting "Trust" will re-render this notebook in a trusted state.'
         )}
         <br />
         {trans.__('For more information, see')}{' '}
@@ -1890,6 +1890,7 @@ export namespace NotebookActions {
         >
           {trans.__('the Jupyter security documentation')}
         </a>
+        .
       </p>
     );
 
@@ -1905,7 +1906,7 @@ export namespace NotebookActions {
       title: trans.__('Trust this notebook?'),
       buttons: [
         Dialog.cancelButton({ label: trans.__('Cancel') }),
-        Dialog.warnButton({ label: trans.__('Ok') })
+        Dialog.warnButton({ label: trans.__('Trust') })
       ] // FIXME?
     }).then(result => {
       if (result.button.accept) {

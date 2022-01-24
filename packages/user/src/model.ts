@@ -153,10 +153,10 @@ export class User implements ICurrentUser {
    * the user as anonymous if doesn't exists.
    */
   private _fetchUser(): void {
-    // Read username and color from URL
-    let name = env.getParam('--username', '');
+    // Read username, color and initials from URL
+    let name = decodeURIComponent(env.getParam('--username', ''));
     let color = env.getParam('--usercolor', '');
-    let initials = env.getParam('--initials', '');
+    let initials = decodeURIComponent(env.getParam('--initials', ''));
 
     const { localStorage } = window;
     const data = localStorage.getItem(USER);

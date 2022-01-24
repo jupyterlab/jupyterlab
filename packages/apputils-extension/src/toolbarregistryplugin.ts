@@ -12,7 +12,7 @@ import {
  * The default toolbar registry.
  */
 export const toolbarRegistry: JupyterFrontEndPlugin<IToolbarWidgetRegistry> = {
-  id: '@jupyter/apputils-extension:toolbar-registry',
+  id: '@jupyterlab/apputils-extension:toolbar-registry',
   autoStart: true,
   provides: IToolbarWidgetRegistry,
   activate: (app: JupyterFrontEnd) => {

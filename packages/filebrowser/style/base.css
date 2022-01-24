@@ -86,7 +86,7 @@
   .jp-Toolbar-item:first-child
   .jp-ToolbarButtonComponent {
   width: 72px;
-  background: var(--jp-accept-color-normal, var(--jp-brand-color1));
+  background: var(--jp-brand-color1);
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar
@@ -99,7 +99,7 @@
   .jp-Toolbar-item:first-child
   .jp-ToolbarButtonComponent
   .jp-icon3 {
-  fill: white;
+  fill: var(--jp-layout-color1);
 }
 
 /*-----------------------------------------------------------------------------

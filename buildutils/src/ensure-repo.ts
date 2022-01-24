@@ -24,6 +24,8 @@ import {
 
 type Dict<T> = { [key: string]: T };
 
+type CoreData = Map<string, any>;
+
 // URL config for this branch
 // Source and target branches
 // Target RTD version name
@@ -50,7 +52,7 @@ const MISSING: Dict<string[]> = {
 
 const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
-  '@jupyterlab/apputils': ['@types/react', 'url'],
+  '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/builder': [
@@ -404,23 +406,12 @@ function ensureMetaPackage(): string[] {
 }
 
 /**
- * Ensure the jupyterlab application package.
+ * Get the core data for the given core paths.
  */
-function ensureJupyterlab(): string[] {
-  const basePath = path.resolve('.');
-  const corePath = path.join(basePath, 'dev_mode', 'package.json');
-  const corePackage = utils.readJSONFile(corePath);
-
-  corePackage.jupyterlab.extensions = {};
-  corePackage.jupyterlab.mimeExtensions = {};
-  corePackage.jupyterlab.linkedPackages = {};
-  corePackage.dependencies = {};
-  corePackage.resolutions = {};
-
-  const singletonPackages: string[] = corePackage.jupyterlab.singletonPackages;
+function getCoreData(corePaths: string[]): CoreData {
   const coreData = new Map<string, any>();
 
-  utils.getCorePaths().forEach(pkgPath => {
+  corePaths.forEach(pkgPath => {
     const dataPath = path.join(pkgPath, 'package.json');
     let data: any;
     try {
@@ -430,6 +421,29 @@ function ensureJupyterlab(): string[] {
     }
 
     coreData.set(data.name, data);
+  });
+
+  return coreData;
+}
+
+/**
+ * Ensure a core package.
+ */
+function ensureCorePackage(corePackage: any, corePaths: string[]) {
+  corePackage.jupyterlab.extensions = {};
+  corePackage.dependencies = {};
+
+  const singletonPackages: string[] = corePackage.jupyterlab.singletonPackages;
+  const coreData = getCoreData(corePaths);
+
+  corePaths.forEach(pkgPath => {
+    const dataPath = path.join(pkgPath, 'package.json');
+    let data: any;
+    try {
+      data = utils.readJSONFile(dataPath);
+    } catch (e) {
+      return;
+    }
 
     // If the package has a tokens.ts file, make sure it is noted as a singleton
     if (
@@ -476,7 +490,66 @@ function ensureJupyterlab(): string[] {
       )}`
     );
   }
+}
 
+/**
+ * Ensure the federated example core package.
+ */
+function ensureFederatedExample(): string[] {
+  const basePath = path.resolve('.');
+  const corePath = path.join(
+    basePath,
+    'examples',
+    'federated',
+    'core_package',
+    'package.json'
+  );
+  const corePackage = utils.readJSONFile(corePath);
+  // the list of dependencies might differ from the main JupyterLab application
+  const dependencies = new Set(Object.keys(corePackage.dependencies));
+
+  const corePaths = utils.getCorePaths().filter(p => {
+    return dependencies.has(`@jupyterlab/${path.basename(p)}`);
+  });
+
+  ensureCorePackage(corePackage, corePaths);
+
+  const coreData = getCoreData(corePaths);
+  corePackage.jupyterlab.extensions = [];
+  coreData.forEach((data, name) => {
+    // Make sure it is included as a dependency.
+    corePackage.dependencies[data.name] = `^${data.version}`;
+
+    const meta = data.jupyterlab;
+    const keep = meta?.extension || meta?.mimeExtension;
+    if (!keep) {
+      return;
+    }
+    corePackage.jupyterlab.extensions.push(name);
+  });
+
+  corePackage.jupyterlab.extensions.sort();
+
+  // Write the package.json back to disk.
+  if (utils.writePackageData(corePath, corePackage)) {
+    return ['Updated federated example'];
+  }
+  return [];
+}
+
+/**
+ * Ensure the jupyterlab application package.
+ */
+function ensureJupyterlab(): string[] {
+  const basePath = path.resolve('.');
+  const corePath = path.join(basePath, 'dev_mode', 'package.json');
+  const corePackage = utils.readJSONFile(corePath);
+  const corePaths = utils.getCorePaths();
+
+  ensureCorePackage(corePackage, corePaths);
+  corePackage.jupyterlab.mimeExtensions = {};
+
+  const coreData = getCoreData(corePaths);
   coreData.forEach((data, name) => {
     // Determine if the package wishes to be included in the top-level
     // dependencies.
@@ -494,7 +567,7 @@ function ensureJupyterlab(): string[] {
 
     // Handle extensions.
     ['extension', 'mimeExtension'].forEach(item => {
-      let ext = meta[item];
+      let ext = data.jupyterlab[item];
       if (ext === true) {
         ext = '';
       }
@@ -505,6 +578,7 @@ function ensureJupyterlab(): string[] {
     });
   });
 
+  corePackage.jupyterlab.linkedPackages = {};
   utils.getLernaPaths().forEach(pkgPath => {
     const dataPath = path.join(pkgPath, 'package.json');
     let data: any;
@@ -753,6 +827,12 @@ export async function ensureIntegrity(): Promise<boolean> {
       messages['top'] = [];
     }
     messages['top'].push('Update npm publish command in pyproject.toml');
+  }
+
+  // Handle the federated example application
+  pkgMessages = ensureFederatedExample();
+  if (pkgMessages.length > 0) {
+    messages['@jupyterlab/example-federated-core'] = pkgMessages;
   }
 
   // Handle the JupyterLab application top package.
