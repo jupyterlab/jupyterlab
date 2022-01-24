@@ -961,12 +961,12 @@ Element Names
 
 -  The generic content area of a tabbed UI is a *panel*. Refer to a panel
    by its most specific name, such as “File browser.” *Tab bars*
-   have *tabs* which let a user view different panels.
--  The *menu bar* contains *menu items*, which have their own *submenus*.
+   have *tabs* that let a user view different panels.
+-  The *menu bar* contains *menu items* that have their own *submenus*.
 -  Refer to the *main work area* as the work area when the name
    is unambiguous.
 -  When describing elements in the UI, prefer colloquial names over 
-   technical names. For example, “File browser” instead of “Files panel”.
+   technical names. For example, use “File browser” instead of “Files panel”.
 
 Write most element names in lowercase. These names include:
 
