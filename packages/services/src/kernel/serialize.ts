@@ -11,8 +11,8 @@ export function serialize(
   protocol: string = ''
 ): string | ArrayBuffer {
   switch (protocol) {
-    case '0.0.1':
-      return serialize_0_0_1(msg);
+    case 'v1.websocket.jupyter.org':
+      return serialize_v1_websocket_jupyter_org(msg);
     default:
       return serialize_default(msg);
   }
@@ -26,8 +26,8 @@ export function deserialize(
   protocol: string = ''
 ): KernelMessage.IMessage {
   switch (protocol) {
-    case '0.0.1':
-      return deserialize_0_0_1(data);
+    case 'v1.websocket.jupyter.org':
+      return deserialize_v1_websocket_jupyter_org(data);
     default:
       return deserialize_default(data);
   }
@@ -35,9 +35,9 @@ export function deserialize(
 
 /**
  * Deserialize and return the unpacked message.
- * Protocol v0.0.1
+ * Protocol v1.websocket.jupyter.org
  */
-function deserialize_0_0_1(binMsg: ArrayBuffer): KernelMessage.IMessage {
+function deserialize_v1_websocket_jupyter_org(binMsg: ArrayBuffer): KernelMessage.IMessage {
   let msg: KernelMessage.IMessage;
   const data = new DataView(binMsg);
   const layoutLength = data.getUint16(0, true /* littleEndian */);
@@ -74,9 +74,9 @@ function deserialize_0_0_1(binMsg: ArrayBuffer): KernelMessage.IMessage {
 
 /**
  * Serialize a kernel message for transport.
- * Protocol v0.0.1
+ * Protocol v1.websocket.jupyter.org
  */
-function serialize_0_0_1(msg: KernelMessage.IMessage): ArrayBuffer {
+function serialize_v1_websocket_jupyter_org(msg: KernelMessage.IMessage): ArrayBuffer {
   const header = JSON.stringify(msg.header);
   const parent_header = JSON.stringify(msg.parent_header);
   const metadata = JSON.stringify(msg.metadata);
