@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Session } from '@jupyterlab/services';
 import { interactiveItem, TextItem } from '@jupyterlab/statusbar';
 import {
