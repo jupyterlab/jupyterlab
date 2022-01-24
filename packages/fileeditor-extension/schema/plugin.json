@@ -166,6 +166,7 @@
         "matchBrackets": true,
         "readOnly": false,
         "rulers": [],
+        "showTrailingSpace": false,
         "tabSize": 4,
         "wordWrapColumn": 80
       }
