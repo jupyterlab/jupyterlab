@@ -951,10 +951,8 @@ A notebook contains *cells*, each of which have *input* and one or more
 *outputs*. When the user runs a cell, the kernel reads and executes the
 input and generates outputs. The notebook then displays the cell's output.
 The term *output* describes one of possibly multiple results of running a
-cell. The term "all output" is ambiguous; it could refer either to all
-outputs of one cell or to all outputs of all cells. The term *cell output*
-describes the collective output of one cell. Use *all cell outputs* to 
-describe all outputs from all cells.
+cell. *Cell output* describes the collective output of one cell. Use 
+*outputs of all cells* to describe all outputs from all cells.
 
 Command Names
 """""""""""""
