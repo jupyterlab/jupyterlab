@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import marked from 'marked';
+import { marked } from 'marked';
 
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
