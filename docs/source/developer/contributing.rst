@@ -956,6 +956,19 @@ outputs of one cell or to all outputs of all cells. The term *cell output*
 describes the collective output of one cell. Use *all cell outputs* to 
 describe all outputs from all cells.
 
+Command Names
+"""""""""""""
+
+Command names appear in menus, in the Command Palette, and in toolbar buttons 
+(where the name typically appears on hover).
+
+-  Keep command names short, concise, and unambiguous.
+-  Add an ellipsis (…) after any command name that requires more options. This 
+   tells the user that they should expect a pop-up window to appear before they
+   execute the command.
+-  Commands should use verbs in the imperative case. Do not use articles with nouns.
+   For example, write "Clear Cell", not "Clear the Cell" or "Clearing Cell".
+
 Element Names
 """""""""""""
 
