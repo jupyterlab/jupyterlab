@@ -916,7 +916,7 @@ Writing Style
 -  Avoid words that trivialize using JupyterLab such as "simply" or
    "just." Tasks that developers find simple or easy may not be for
    users.
--  Write in the active tense. Use "drag the notebook cells…" rather
+-  Write in the active tense. For example, "drag the notebook cells…" rather
    than "notebook cells can be dragged…".
 -  The beginning of each section should begin with a short (1–2
    sentence) high-level description of the topic, feature or component.
