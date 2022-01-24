@@ -38,6 +38,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
 
     const {
       callstackCommands,
+      breakpointsCommands,
       editorServices,
       service,
       themeManager
@@ -61,6 +62,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
 
     this.breakpoints = new BreakpointsPanel({
       service,
+      commands: breakpointsCommands,
       model: model.breakpoints,
       translator
     });
@@ -183,6 +185,12 @@ export namespace DebuggerSidebar {
      * The callstack toolbar commands.
      */
     callstackCommands: CallstackPanel.ICommands;
+
+    /**
+     * The callstack toolbar commands.
+     */
+    breakpointsCommands: BreakpointsPanel.ICommands;
+
     /**
      * The editor services.
      */

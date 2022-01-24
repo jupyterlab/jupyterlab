@@ -14,14 +14,24 @@ button.jp-Button.bp3-button.bp3-minimal.jp-TreeView.jp-TableView {
 
 button.jp-Button.bp3-button.bp3-minimal.jp-TreeView:hover {
   cursor: pointer;
-  background-color: var(--jp-layout-color2);
+  background-color: var(--jp-layout-color1);
 }
 
 button.jp-Button.bp3-button.bp3-minimal.jp-TableView:hover {
   cursor: pointer;
-  background-color: var(--jp-layout-color2);
+  background-color: var(--jp-layout-color1);
 }
 
 .jp-ViewModeSelected {
-  background-color: var(--jp-layout-color2);
+  background-color: var(--jp-layout-color1);
+}
+
+/* Pause on exceptions */
+button.jp-Button.jp-mod-minimal.jp-PauseOnExceptions:hover {
+  cursor: pointer;
+  background-color: var(--jp-layout-color1);
+}
+
+button.jp-Button.jp-PauseOnExceptions.lm-mod-toggled {
+  background-color: var(--jp-layout-color1);
 }

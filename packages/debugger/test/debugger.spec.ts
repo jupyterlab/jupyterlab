@@ -105,6 +105,10 @@ describe('Debugger', () => {
         stepOut: '',
         evaluate: ''
       },
+      breakpointsCommands: {
+        registry,
+        pause: ''
+      },
       editorServices: {
         factoryService,
         mimeTypeService
@@ -152,6 +156,117 @@ describe('Debugger', () => {
   describe('#constructor()', () => {
     it('should create a new debugger sidebar', () => {
       expect(sidebar).toBeInstanceOf(Debugger.Sidebar);
+    });
+  });
+
+  describe('Panel', () => {
+    let toolbarList: any;
+    beforeEach(() => {
+      toolbarList = sidebar.content.node.querySelectorAll(
+        '.jp-AccordionPanel-title'
+      );
+    });
+    it('should have 4 child widgets', () => {
+      expect(sidebar.widgets.length).toBe(4);
+    });
+
+    it('should have 4 toolbars', () => {
+      expect(toolbarList.length).toBe(4);
+    });
+    describe('Variable toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(0);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Variables');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(2);
+        expect(buttons[0].title).toBe('Tree View');
+        expect(buttons[1].title).toBe('Table View');
+      });
+    });
+    describe('Callstack toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(1);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Callstack');
+      });
+      it('should have six buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(6);
+      });
+    });
+    describe('Breakpoints toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(2);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Breakpoints');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(2);
+      });
+    });
+    describe('Source toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(3);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Source');
+      });
+
+      it('should have one button', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(1);
+      });
     });
   });
 

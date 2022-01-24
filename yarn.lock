@@ -4155,6 +4155,11 @@
   resolved "https://registry.yarnpkg.com/@verdaccio/ui-theme/-/ui-theme-3.1.0.tgz#21108f3c1b97e6db5901509d935e1f4ce475950a"
   integrity sha512-NmJOcv25/OtF84YrmYxi31beFde7rt+/y2qlnq0wYR4ZCFRE5TsuqisTVTe1OyJ8D8JwwPMyMSMSMtlMwUfqIQ==
 
+"@vscode/debugprotocol@~1.51.0":
+  version "1.51.0"
+  resolved "https://registry.npmjs.org/@vscode/debugprotocol/-/debugprotocol-1.51.0.tgz#1d28a8581f8ea74b8e2fd465d4448717589a0ae3"
+  integrity sha512-39ShbKzI+0r53haLZQVEhY4XhdMJVSqfcliaDFigQjqiWattno5Ex0jXq2WRHrAtPf+W5Un9/HtED0K3pAiqZg==
+
 "@webassemblyjs/ast@1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.11.1.tgz#2bfd767eae1a6996f432ff7e8d7fc75679c0b6a7"
