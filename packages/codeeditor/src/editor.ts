@@ -548,7 +548,7 @@ export namespace CodeEditor {
     /**
      * Set config options for the editor.
      */
-    setOptions<K extends keyof IConfig>(options: IConfigOptions<K>[]): void;
+    setOptions(options: Partial<IConfig>): void;
 
     /**
      * Returns the content for the given line number.
@@ -799,30 +799,23 @@ export namespace CodeEditor {
    * The default configuration options for an editor.
    */
   export const defaultConfig: IConfig = {
+    autoClosingBrackets: false,
+    codeFolding: false,
     cursorBlinkRate: 530,
     fontFamily: null,
     fontSize: null,
+    handlePaste: true,
+    insertSpaces: true,
     lineHeight: null,
     lineNumbers: false,
     lineWrap: 'on',
-    wordWrapColumn: 80,
+    matchBrackets: true,
     readOnly: false,
     tabSize: 4,
-    insertSpaces: true,
-    matchBrackets: true,
-    autoClosingBrackets: false,
-    handlePaste: true,
     rulers: [],
-    codeFolding: false,
-    showTrailingSpace: false
+    showTrailingSpace: false,
+    wordWrapColumn: 80
   };
-
-  /**
-   * The options used to set several options at once with setOptions.
-   */
-  export interface IConfigOptions<K extends keyof IConfig> {
-    K: IConfig[K];
-  }
 
   /**
    * The options used to initialize an editor.
@@ -861,7 +854,11 @@ export namespace CodeEditor {
 
   export namespace Model {
     export interface IOptions {
+      /**
+       * A unique identifier for the model.
+       */
       id?: string;
+
       /**
        * The initial value of the model.
        */
