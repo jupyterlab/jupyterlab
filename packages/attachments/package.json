@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/attachments",
-  "version": "3.3.0-alpha.16",
+  "version": "3.3.0-alpha.17",
   "description": "JupyterLab - Notebook Cell Attachments",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,10 +36,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/nbformat": "^3.3.0-alpha.16",
-    "@jupyterlab/observables": "^4.3.0-alpha.16",
-    "@jupyterlab/rendermime": "^3.3.0-alpha.16",
-    "@jupyterlab/rendermime-interfaces": "^3.3.0-alpha.16",
+    "@jupyterlab/nbformat": "^3.3.0-alpha.17",
+    "@jupyterlab/observables": "^4.3.0-alpha.17",
+    "@jupyterlab/rendermime": "^3.3.0-alpha.17",
+    "@jupyterlab/rendermime-interfaces": "^3.3.0-alpha.17",
     "@lumino/disposable": "^1.4.3",
     "@lumino/signaling": "^1.4.3"
   },
