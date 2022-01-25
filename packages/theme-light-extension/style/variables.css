@@ -91,6 +91,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-border-color1: var(--md-grey-400);
   --jp-border-color2: var(--md-grey-300);
   --jp-border-color3: var(--md-grey-200);
+  --jp-inverse-border-color: var(--md-grey-600);
   --jp-border-radius: 2px;
 
   /* UI Fonts
@@ -327,7 +328,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-input-active-background: var(--jp-layout-color1);
   --jp-input-hover-background: var(--jp-layout-color1);
   --jp-input-background: var(--md-grey-100);
-  --jp-input-border-color: var(--jp-border-color1);
+  --jp-input-border-color: var(--jp-inverse-border-color);
   --jp-input-active-border-color: var(--jp-brand-color1);
   --jp-input-active-box-shadow-color: rgba(19, 124, 189, 0.3);
 
