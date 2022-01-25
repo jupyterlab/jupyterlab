@@ -104,7 +104,6 @@ describe('@jupyterlab/notebook', () => {
         const items = toArray(panel.toolbar.names());
         expect(items).toEqual(expect.arrayContaining(['save']));
         expect(items).toEqual(expect.arrayContaining(['restart']));
-        expect(items).toEqual(expect.arrayContaining(['kernelStatus']));
       });
 
       it('should populate the customized toolbar items', () => {

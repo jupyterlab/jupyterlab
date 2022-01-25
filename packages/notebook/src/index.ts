@@ -17,3 +17,4 @@ export * from './tracker';
 export * from './truststatus';
 export * from './widget';
 export * from './widgetfactory';
+export * from './executionindicator';
