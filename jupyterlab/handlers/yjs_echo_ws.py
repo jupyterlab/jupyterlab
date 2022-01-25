@@ -32,7 +32,6 @@ class ServerMessageType(IntEnum):
 class YjsRoom:
     def __init__(self):
         self.lock = None
-        self.timeout = None
         self.lock_holder = None
         self.clients = {}
         self.content = bytes([])
@@ -53,7 +52,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         return await super().get(*args, **kwargs)
 
     def open(self, guid):
-        #print("[YJSEchoWS]: open", guid)
+        #print("[YJSEchoWS] OPEN:", guid)
         cls = self.__class__
         self.id = str(uuid.uuid4())
         self.room_id = guid
@@ -66,64 +65,74 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         self.write_message(bytes([0, 0, 1, 0]), binary=True)
 
     def on_message(self, message):
-        #print("[YJSEchoWS]: message, ", message)
+        #print("[YJSEchoWS] MESSAGE:")
+        #print("[YJSEchoWS] MESSAGE: message", message)
         cls = self.__class__
         room_id = self.room_id
         room = cls.rooms.get(room_id)
+
         if message[0] == ServerMessageType.ACQUIRE_LOCK:
+            #print("[YJSEchoWS] ACQUIRE_LOCK:", self.id)
             now = int(time.time())
-            if room.lock is None or now - room.timeout > (10 * len(room.clients)) : # no lock or timeout
+            
+            if room.lock is None or now - room.lock > 25 : # no lock or timeout
+                #print("[YJSEchoWS] ACQUIRE_LOCK: Acquired new lock", room.lock)
                 room.lock = now
-                room.timeout = now
                 room.lock_holder = self.id
-                # print('Acquired new lock: ', room.lock)
-                # return acquired lock
                 self.write_message(bytes([ServerMessageType.ACQUIRE_LOCK]) + room.lock.to_bytes(4, byteorder = 'little'), binary=True)
 
-            elif room.lock_holder == self.id :
-                # print('Update lock: ', room.timeout)
-                room.timeout = now
-
         elif message[0] == ServerMessageType.RELEASE_LOCK:
+            #print("[YJSEchoWS] RELEASE_LOCK:", self.id)
             releasedLock = int.from_bytes(message[1:], byteorder = 'little')
-            # print("trying release lock: ", releasedLock)
             if room.lock == releasedLock:
-                # print('released lock: ', room.lock)
+                #print("[YJSEchoWS] RELEASE_LOCK: released lock", room.lock)
                 room.lock = None
-                room.timeout = None
                 room.lock_holder = None
+
         elif message[0] == ServerMessageType.REQUEST_INITIALIZED_CONTENT:
-            # print("client requested initial content")
+            #print("[YJSEchoWS] REQUEST_INITIALIZED_CONTENT:", self.id)
             self.write_message(bytes([ServerMessageType.REQUEST_INITIALIZED_CONTENT]) + room.content, binary=True)
+
         elif message[0] == ServerMessageType.PUT_INITIALIZED_CONTENT:
-            # print("client put initialized content")
+            #print("[YJSEchoWS] PUT_INITIALIZED_CONTENT:", self.id)
             room.content = message[1:]
+
         elif message[0] == ServerMessageType.RENAME_SESSION:
             # We move the room to a different entry and also change the room_id property of each connected client
             new_room_id = message[1:].decode("utf-8")
+            #print("[YJSEchoWS] RENAME_SESSION: renamed room to " + new_room_id + ". Old room name was " + room_id)
+
             for client_id, (loop, hook_send_message, client) in room.clients.items() :
                 client.room_id = new_room_id
+
             cls.rooms.pop(room_id)
             cls.rooms[new_room_id] = room
-            # print("renamed room to " + new_room_id + ". Old room name was " + room_id)
+            
         elif room:
             for client_id, (loop, hook_send_message, client) in room.clients.items() :
                 if self.id != client_id :
                     loop.add_callback(hook_send_message, message)
 
     def on_close(self):
-        # print("[YJSEchoWS]: close")
+        #print("[YJSEchoWS] CLOSE:", self.id)
         cls = self.__class__
         room = cls.rooms.get(self.room_id)
         room.clients.pop(self.id)
+
+        if room.lock_holder == self.id:
+            #print("[YJSEchoWS] CLOSE: release lock ", room.lock)
+            room.lock = None
+            room.lock_holder = None
+            
+
         if len(room.clients) == 0 :
+            #print("[YJSEchoWS] CLOSE: close room " + self.room_id)
             cls.rooms.pop(self.room_id)
-            # print("[YJSEchoWS]: close room " + self.room_id)
 
         return True
 
     def check_origin(self, origin):
-        #print("[YJSEchoWS]: check origin")
+        #print("[YJSEchoWS] CHECK ORIGIN:")
         return True
 
     def hook_send_message(self, msg):

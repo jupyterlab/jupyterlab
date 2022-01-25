@@ -161,10 +161,7 @@ export class WebSocketProviderWithLocks
     }
     this._sendMessage(new Uint8Array([127]));
     // try to acquire lock in regular interval
-    if (this._requestLockInterval) {
-      clearInterval(this._requestLockInterval);
-    }
-    this._requestLockInterval = setInterval(() => {
+    const intervalID = setInterval(() => {
       if (this.wsconnected) {
         // try to acquire lock
         this._sendMessage(new Uint8Array([127]));
@@ -176,6 +173,10 @@ export class WebSocketProviderWithLocks
       reject = _reject;
     });
     this._currentLockRequest = { promise, resolve, reject };
+    const _finally = () => {
+      clearInterval(intervalID);
+    };
+    promise.then(_finally, _finally);
     return promise;
   }
 
@@ -191,9 +192,6 @@ export class WebSocketProviderWithLocks
     encoding.writeUint32(encoder, lock);
     // releasing lock
     this._sendMessage(encoding.toUint8Array(encoder));
-    if (this._requestLockInterval) {
-      clearInterval(this._requestLockInterval);
-    }
   }
 
   /**
@@ -237,7 +235,6 @@ export class WebSocketProviderWithLocks
   private _contentType: string;
   private _serverUrl: string;
   private _isInitialized: boolean;
-  private _requestLockInterval: number;
   private _currentLockRequest: {
     promise: Promise<number>;
     resolve: (lock: number) => void;
