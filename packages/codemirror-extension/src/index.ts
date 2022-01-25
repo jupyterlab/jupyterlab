@@ -10,7 +10,12 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  IEditorServices,
+  IPositionModel,
+  LineCol
+} from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditor,
   editorServices,
@@ -113,12 +118,80 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin providing a line/column status item to the application.
+ */
+export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
+  id: '@jupyterlab/codemirror-extension:line-col-status',
+  autoStart: true,
+  requires: [IStatusBar, ITranslator],
+  optional: [ILabShell],
+  provides: IPositionModel,
+  activate: (
+    app: JupyterFrontEnd,
+    statusBar: IStatusBar,
+    translator: ITranslator,
+    labShell: ILabShell | null
+  ): IPositionModel => {
+    const item = new LineCol(translator);
+
+    const providers = new Set<
+      (widget: Widget | null) => CodeEditor.IEditor | null
+    >();
+
+    // Add the status item to the status bar.
+    statusBar.registerStatusItem(lineColItem.id, {
+      item,
+      align: 'right',
+      rank: 2,
+      isActive: () => !!item.model.editor
+    });
+
+    const addEditorProvider = (
+      provider: (widget: Widget | null) => CodeEditor.IEditor | null
+    ): void => {
+      providers.add(provider);
+
+      if (app.shell.currentWidget) {
+        updateEditor(app.shell, {
+          newValue: app.shell.currentWidget,
+          oldValue: null
+        });
+      }
+    };
+
+    const update = (): void => {
+      updateEditor(app.shell, {
+        oldValue: app.shell.currentWidget,
+        newValue: app.shell.currentWidget
+      });
+    };
+
+    function updateEditor(
+      shell: JupyterFrontEnd.IShell,
+      changes: ILabShell.IChangedArgs
+    ) {
+      item.model.editor =
+        [...providers]
+          .map(provider => provider(changes.newValue))
+          .filter(editor => editor !== null)[0] ?? null;
+    }
+
+    if (labShell) {
+      labShell.currentChanged.connect(updateEditor);
+    }
+
+    return { addEditorProvider, update };
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
   editorSyntaxStatus,
+  lineColItem,
   codemirrorSingleton
 ];
 export default plugins;

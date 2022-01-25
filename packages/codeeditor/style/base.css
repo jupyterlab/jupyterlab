@@ -3,6 +3,7 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+@import url('./linecol.css');
 
 .jp-JSONEditor {
   display: flex;

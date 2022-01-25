@@ -36,6 +36,7 @@ import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
 import { Palette } from './palette';
 import { settingsPlugin } from './settingsplugin';
+import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
@@ -620,10 +621,12 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  kernelStatus,
   palette,
   paletteRestorer,
   print,
   resolver,
+  runningSessionsStatus,
   sanitizer,
   settingsPlugin,
   state,
