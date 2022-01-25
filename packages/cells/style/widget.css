@@ -128,6 +128,35 @@
   right: 0;
   top: 0;
   bottom: 0;
+  background-position-y: calc(
+    0.5 * var(--jp-content-heading-margin-top)
+  ) !important;
+}
+
+/* collapseHeadingButton should have same position as the corresponding <h> tag
+   these are the same rules as in packages/rendermime/style/base.css */
+.jp-collapseHeadingButton.jp-collapseHeadingButton-h1 {
+  font-size: var(--jp-content-font-size5);
+}
+
+.jp-collapseHeadingButton.jp-collapseHeadingButton-h2 {
+  font-size: var(--jp-content-font-size4);
+}
+
+.jp-collapseHeadingButton.jp-collapseHeadingButton-h3 {
+  font-size: var(--jp-content-font-size3);
+}
+
+.jp-collapseHeadingButton.jp-collapseHeadingButton-h4 {
+  font-size: var(--jp-content-font-size2);
+}
+
+.jp-collapseHeadingButton.jp-collapseHeadingButton-h5 {
+  font-size: var(--jp-content-font-size1);
+}
+
+.jp-collapseHeadingButton.jp-collapseHeadingButton-h6 {
+  font-size: var(--jp-content-font-size0);
 }
 
 /* collapseHeadingButton (show only on (hover,active) if hiddenCellsButton is shown) */

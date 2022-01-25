@@ -1621,7 +1621,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       let collapseButton = this.inputArea.promptNode.appendChild(
         document.createElement('button')
       );
-      collapseButton.className = `jp-Button jp-mod-minimal ${HEADING_COLLAPSER_CLASS}`;
+      collapseButton.className = `jp-Button jp-mod-minimal ${HEADING_COLLAPSER_CLASS} ${HEADING_COLLAPSER_CLASS}-h${this.headingInfo.level}`;
       collapseButton.style.background = `${
         this._headingCollapsed
           ? 'var(--jp-icon-caret-right)'
