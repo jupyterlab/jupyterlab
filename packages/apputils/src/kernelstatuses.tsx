@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, translateKernelStatuses } from '@jupyterlab/apputils';
 import { Session } from '@jupyterlab/services';
+import { interactiveItem, TextItem } from '@jupyterlab/statusbar';
 import {
   ITranslator,
   nullTranslator,
@@ -11,7 +11,37 @@ import {
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { JSONArray, JSONExt } from '@lumino/coreutils';
 import React from 'react';
-import { interactiveItem, TextItem } from '..';
+import { ISessionContext } from './sessioncontext';
+
+/**
+ * Helper function to translate kernel statuses mapping by using
+ * input translator.
+ *
+ * @param translator - Language translator.
+ * @return The translated kernel status mapping.
+ */
+export function translateKernelStatuses(
+  translator?: ITranslator
+): Record<ISessionContext.KernelDisplayStatus, string> {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
+  const translated: Record<ISessionContext.KernelDisplayStatus, string> = {
+    unknown: trans.__('Unknown'),
+    starting: trans.__('Starting'),
+    idle: trans.__('Idle'),
+    busy: trans.__('Busy'),
+    terminating: trans.__('Terminating'),
+    restarting: trans.__('Restarting'),
+    autorestarting: trans.__('Autorestarting'),
+    dead: trans.__('Dead'),
+    connected: trans.__('Connected'),
+    connecting: trans.__('Connecting'),
+    disconnected: trans.__('Disconnected'),
+    initializing: trans.__('Initializing'),
+    '': ''
+  };
+  return translated;
+}
 
 /**
  * A pure functional component for rendering kernel status.
@@ -117,9 +147,8 @@ export namespace KernelStatus {
   export class Model extends VDomModel {
     constructor(translator?: ITranslator) {
       super();
-      translator = translator || nullTranslator;
+      translator = translator ?? nullTranslator;
       this._trans = translator.load('jupyterlab');
-      this._kernelName = this._trans.__('No Kernel!');
       this._statusNames = translateKernelStatuses(translator);
     }
 
@@ -151,7 +180,7 @@ export namespace KernelStatus {
         return;
       }
       this._activityName = val;
-      this.stateChanged.emit(void 0);
+      this.stateChanged.emit();
     }
 
     /**
@@ -215,8 +244,8 @@ export namespace KernelStatus {
 
     protected translation: ITranslator;
     private _trans: TranslationBundle;
-    private _activityName: string = 'activity'; // FIXME-TRANS:?
-    private _kernelName: string; // Initialized in constructor due to localization
+    private _activityName: string = '';
+    private _kernelName: string = '';
     private _kernelStatus: ISessionContext.KernelDisplayStatus | undefined = '';
     private _sessionContext: ISessionContext | null = null;
     private readonly _statusNames: Record<

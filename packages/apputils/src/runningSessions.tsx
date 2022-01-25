@@ -20,7 +20,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import React from 'react';
-import { GroupItem, interactiveItem, TextItem } from '..';
+import { GroupItem, interactiveItem, TextItem } from '@jupyterlab/statusbar';
 
 /**
  * Half spacing between subitems in a status item.

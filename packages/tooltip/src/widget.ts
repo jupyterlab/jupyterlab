@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { HoverBox } from '@jupyterlab/apputils';
+import { HoverBox } from '@jupyterlab/ui-components';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IRenderMime,

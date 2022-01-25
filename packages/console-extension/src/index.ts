@@ -14,13 +14,18 @@ import {
 import {
   Dialog,
   ICommandPalette,
+  IKernelStatusModel,
   ISessionContext,
   ISessionContextDialogs,
   sessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  IEditorServices,
+  IPositionModel
+} from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
@@ -38,7 +43,7 @@ import {
   UUID
 } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
-import { DockLayout } from '@lumino/widgets';
+import { DockLayout, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 
 /**
@@ -123,9 +128,80 @@ const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
 };
 
 /**
+ * Kernel status indicator.
+ */
+const kernelStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/console-extensions:kernel-status',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IConsoleTracker,
+    kernelStatus: IKernelStatusModel
+  ) => {
+    const provider = (widget: Widget | null) => {
+      let session: ISessionContext | null = null;
+
+      if (widget && tracker.has(widget)) {
+        return (widget as ConsolePanel).sessionContext;
+      }
+
+      return session;
+    };
+
+    kernelStatus.addSessionProvider(provider);
+  },
+  requires: [IConsoleTracker, IKernelStatusModel],
+  autoStart: true
+};
+
+/**
+ * Cursor position.
+ */
+const lineColStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/console-extensions:cursor-position',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IConsoleTracker,
+    positionModel: IPositionModel
+  ) => {
+    let previousWidget: ConsolePanel | null = null;
+
+    const provider = (widget: Widget | null) => {
+      let editor: CodeEditor.IEditor | null = null;
+      if (widget !== previousWidget) {
+        previousWidget?.console.promptCellCreated.disconnect(
+          positionModel.update
+        );
+
+        previousWidget = null;
+        if (widget && tracker.has(widget)) {
+          (widget as ConsolePanel).console.promptCellCreated.connect(
+            positionModel.update
+          );
+          editor = (widget as ConsolePanel).console.promptCell?.editor ?? null;
+          previousWidget = widget as ConsolePanel;
+        }
+      } else if (widget) {
+        editor = (widget as ConsolePanel).console.promptCell?.editor ?? null;
+      }
+      return editor;
+    };
+
+    positionModel.addEditorProvider(provider);
+  },
+  requires: [IConsoleTracker, IPositionModel],
+  autoStart: true
+};
+
+/**
  * Export the plugins as the default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [factory, tracker, foreign];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  factory,
+  tracker,
+  foreign,
+  kernelStatus,
+  lineColStatus
+];
 export default plugins;
 
 /**

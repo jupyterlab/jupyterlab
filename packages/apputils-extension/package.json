@@ -46,6 +46,7 @@
     "@jupyterlab/services": "^7.0.0-alpha.4",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.4",
     "@jupyterlab/statedb": "^4.0.0-alpha.4",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.4",
     "@jupyterlab/translation": "^4.0.0-alpha.4",
     "@jupyterlab/ui-components": "^4.0.0-alpha.19",
     "@lumino/algorithm": "^1.9.1",

@@ -15,7 +15,9 @@ import {
   createToolbarFactory,
   Dialog,
   ICommandPalette,
+  IKernelStatusModel,
   InputDialog,
+  ISessionContext,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
@@ -25,7 +27,11 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  IEditorServices,
+  IPositionModel
+} from '@jupyterlab/codeeditor';
 import { PageConfig } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -82,7 +88,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Menu, Panel } from '@lumino/widgets';
+import { Menu, Panel, Widget } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
 
 /**
@@ -675,6 +681,71 @@ const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Kernel status indicator.
+ */
+const kernelStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extensions:kernel-status',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    kernelStatus: IKernelStatusModel
+  ) => {
+    const provider = (widget: Widget | null) => {
+      let session: ISessionContext | null = null;
+
+      if (widget && tracker.has(widget)) {
+        return (widget as NotebookPanel).sessionContext;
+      }
+
+      return session;
+    };
+
+    kernelStatus.addSessionProvider(provider);
+  },
+  requires: [INotebookTracker, IKernelStatusModel],
+  autoStart: true
+};
+
+/**
+ * Cursor position.
+ */
+const lineColStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extensions:cursor-position',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    positionModel: IPositionModel
+  ) => {
+    let previousWidget: NotebookPanel | null = null;
+
+    const provider = (widget: Widget | null) => {
+      let editor: CodeEditor.IEditor | null = null;
+      if (widget !== previousWidget) {
+        previousWidget?.content.activeCellChanged.disconnect(
+          positionModel.update
+        );
+
+        previousWidget = null;
+        if (widget && tracker.has(widget)) {
+          (widget as NotebookPanel).content.activeCellChanged.connect(
+            positionModel.update
+          );
+          editor = (widget as NotebookPanel).content.activeCell?.editor ?? null;
+          previousWidget = widget as NotebookPanel;
+        }
+      } else if (widget) {
+        editor = (widget as NotebookPanel).content.activeCell?.editor ?? null;
+      }
+      return editor;
+    };
+
+    positionModel.addEditorProvider(provider);
+  },
+  requires: [INotebookTracker, IPositionModel],
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -689,7 +760,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   logNotebookOutput,
   clonedOutputsPlugin,
   codeConsolePlugin,
-  copyOutputPlugin
+  copyOutputPlugin,
+  kernelStatus,
+  lineColStatus
 ];
 export default plugins;
 
