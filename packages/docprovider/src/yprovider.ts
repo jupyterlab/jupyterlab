@@ -70,9 +70,7 @@ export class WebSocketProviderWithLocks
       const initialContent = decoding.readTailAsUint8Array(decoder);
       // Apply data from server
       if (initialContent.byteLength > 0) {
-        setTimeout(() => {
-          Y.applyUpdate(this.doc, initialContent);
-        }, 0);
+        Y.applyUpdate(this.doc, initialContent);
       }
       const initialContentRequest = this._initialContentRequest;
       this._initialContentRequest = null;
