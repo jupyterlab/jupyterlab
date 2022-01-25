@@ -30,7 +30,6 @@ We provide several cookiecutters to create JupyterLab extensions:
 - `extension-cookiecutter-ts <https://github.com/jupyterlab/extension-cookiecutter-ts>`_: Create a JupyterLab extension in TypeScript
 - `extension-cookiecutter-js <https://github.com/jupyterlab/extension-cookiecutter-js>`_: Create a JupyterLab extension in JavaScript
 - `mimerender-cookiecutter-ts <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`_: Create a MIME Renderer JupyterLab extension in TypeScript
-- `theme-cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_: Create a theme extension for JupyterLab
 
 API Reference Documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
