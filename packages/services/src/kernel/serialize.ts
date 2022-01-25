@@ -42,10 +42,16 @@ function deserialize_v1_kernel_websocket_jupyter_org(
 ): KernelMessage.IMessage {
   let msg: KernelMessage.IMessage;
   const data = new DataView(binMsg);
-  const offsetNumber = data.getUint32(0, true /* littleEndian */);
+  const offsetNumber: number = Number(
+    data.getBigUint64(0, true /* littleEndian */)
+  );
   let offsets: number[] = [];
   for (let i = 0; i < offsetNumber; i++) {
-    offsets.push(data.getUint32(4 * (i + 1), true /* littleEndian */));
+    // WARNING: we cast our 64-bit unsigned int to a number!
+    // so offsets cannot index up to 2**64 bytes
+    offsets.push(
+      Number(data.getBigUint64(8 * (i + 1), true /* littleEndian */))
+    );
   }
   const decoder = new TextDecoder('utf8');
   const channel = decoder.decode(
@@ -95,9 +101,9 @@ function serialize_v1_kernel_websocket_jupyter_org(
   const content = JSON.stringify(msg.content);
   const buffers: (ArrayBuffer | ArrayBufferView)[] =
     msg.buffers !== undefined ? msg.buffers : [];
-  const offsetNumber = 1 + 4 + buffers.length + 1;
+  const offsetNumber: number = 1 + 4 + buffers.length + 1;
   let offsets: number[] = [];
-  offsets.push(4 * (1 + offsetNumber));
+  offsets.push(8 * (1 + offsetNumber));
   offsets.push(msg.channel.length + offsets[offsets.length - 1]);
   for (let length of [
     header.length,
@@ -118,15 +124,15 @@ function serialize_v1_kernel_websocket_jupyter_org(
     msg.channel + header + parent_header + metadata + content
   );
   const binMsg = new Uint8Array(
-    4 * (1 + offsetNumber) + binMsgNoBuff.byteLength + buffersByteLength
+    8 * (1 + offsetNumber) + binMsgNoBuff.byteLength + buffersByteLength
   );
-  const word = new ArrayBuffer(4);
+  const word = new ArrayBuffer(8);
   const data = new DataView(word);
-  data.setInt32(0, offsetNumber, true /* littleEndian */);
+  data.setBigUint64(0, BigInt(offsetNumber), true /* littleEndian */);
   binMsg.set(new Uint8Array(word), 0);
   for (let i = 0; i < offsets.length; i++) {
-    data.setInt32(0, offsets[i], true /* littleEndian */);
-    binMsg.set(new Uint8Array(word), 4 * (i + 1));
+    data.setBigUint64(0, BigInt(offsets[i]), true /* littleEndian */);
+    binMsg.set(new Uint8Array(word), 8 * (i + 1));
   }
   binMsg.set(binMsgNoBuff, offsets[0]);
   for (let i = 0; i < buffers.length; i++) {
