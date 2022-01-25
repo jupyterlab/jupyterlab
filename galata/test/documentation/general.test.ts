@@ -527,7 +527,7 @@ test.describe('General', () => {
     await page.notebook.run();
 
     // Need to wait for altair to update the canvas
-    await page.waitForTimeout(500);
+    await page.waitForSelector('summary');
     expect(await page.screenshot()).toMatchSnapshot('file_formats_altair.png');
   });
 
