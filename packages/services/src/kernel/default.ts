@@ -1614,7 +1614,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Websocket to communicate with kernel.
    */
   private _ws: WebSocket | null = null;
-  private _supported_protocols: string[] = ['v1.websocket.jupyter.org'];
+  private _supported_protocols: string[] = ['v1.kernel.websocket.jupyter.org'];
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;

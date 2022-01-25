@@ -11,8 +11,8 @@ export function serialize(
   protocol: string = ''
 ): string | ArrayBuffer {
   switch (protocol) {
-    case 'v1.websocket.jupyter.org':
-      return serialize_v1_websocket_jupyter_org(msg);
+    case 'v1.kernel.websocket.jupyter.org':
+      return serialize_v1_kernel_websocket_jupyter_org(msg);
     default:
       return serialize_default(msg);
   }
@@ -26,8 +26,8 @@ export function deserialize(
   protocol: string = ''
 ): KernelMessage.IMessage {
   switch (protocol) {
-    case 'v1.websocket.jupyter.org':
-      return deserialize_v1_websocket_jupyter_org(data);
+    case 'v1.kernel.websocket.jupyter.org':
+      return deserialize_v1_kernel_websocket_jupyter_org(data);
     default:
       return deserialize_default(data);
   }
@@ -35,31 +35,41 @@ export function deserialize(
 
 /**
  * Deserialize and return the unpacked message.
- * Protocol v1.websocket.jupyter.org
+ * Protocol v1.kernel.websocket.jupyter.org
  */
-function deserialize_v1_websocket_jupyter_org(binMsg: ArrayBuffer): KernelMessage.IMessage {
+function deserialize_v1_kernel_websocket_jupyter_org(
+  binMsg: ArrayBuffer
+): KernelMessage.IMessage {
   let msg: KernelMessage.IMessage;
   const data = new DataView(binMsg);
-  const layoutLength = data.getUint16(0, true /* littleEndian */);
-  const layoutBytes = new Uint8Array(binMsg.slice(2, 2 + layoutLength));
+  const offsetNumber = data.getUint32(0, true /* littleEndian */);
+  let offsets: number[] = [];
+  for (let i = 0; i < offsetNumber; i++) {
+    offsets.push(data.getUint32(4 * (i + 1), true /* littleEndian */));
+  }
   const decoder = new TextDecoder('utf8');
-  const layout = JSON.parse(decoder.decode(layoutBytes));
-  const channel = layout.channel;
-  let iter = getParts(
-    new Uint8Array(binMsg.slice(2 + layoutLength)),
-    layout.offsets
+  const channel = decoder.decode(
+    binMsg.slice(offsets[0], offsets[1])
+  ) as KernelMessage.Channel;
+  const header = JSON.parse(
+    decoder.decode(binMsg.slice(offsets[1], offsets[2]))
   );
-  const header = JSON.parse(decoder.decode(iter.next().value as Uint8Array));
   const parent_header = JSON.parse(
-    decoder.decode(iter.next().value as Uint8Array)
+    decoder.decode(binMsg.slice(offsets[2], offsets[3]))
   );
-  const metadata = JSON.parse(decoder.decode(iter.next().value as Uint8Array));
-  const content = JSON.parse(decoder.decode(iter.next().value as Uint8Array));
-  let curr = iter.next();
+  const metadata = JSON.parse(
+    decoder.decode(binMsg.slice(offsets[3], offsets[4]))
+  );
+  const content = JSON.parse(
+    decoder.decode(binMsg.slice(offsets[4], offsets[5]))
+  );
   let buffers = [];
-  while (!curr.done) {
-    buffers.push(curr.value);
-    curr = iter.next();
+  for (let i = 5; i < offsets.length; i++) {
+    if (i == offsets.length - 1) {
+      buffers.push(binMsg.slice(offsets[i]));
+    } else {
+      buffers.push(binMsg.slice(offsets[i], offsets[i + 1]));
+    }
   }
   msg = {
     channel,
@@ -74,69 +84,59 @@ function deserialize_v1_websocket_jupyter_org(binMsg: ArrayBuffer): KernelMessag
 
 /**
  * Serialize a kernel message for transport.
- * Protocol v1.websocket.jupyter.org
+ * Protocol v1.kernel.websocket.jupyter.org
  */
-function serialize_v1_websocket_jupyter_org(msg: KernelMessage.IMessage): ArrayBuffer {
+function serialize_v1_kernel_websocket_jupyter_org(
+  msg: KernelMessage.IMessage
+): ArrayBuffer {
   const header = JSON.stringify(msg.header);
   const parent_header = JSON.stringify(msg.parent_header);
   const metadata = JSON.stringify(msg.metadata);
   const content = JSON.stringify(msg.content);
-  let offsets = [];
-  let curr_sum = 0;
+  const buffers: (ArrayBuffer | ArrayBufferView)[] =
+    msg.buffers !== undefined ? msg.buffers : [];
+  const offsetNumber = 1 + 4 + buffers.length + 1;
+  let offsets: number[] = [];
+  offsets.push(4 * (1 + offsetNumber));
+  offsets.push(msg.channel.length + offsets[offsets.length - 1]);
   for (let length of [
     header.length,
     parent_header.length,
     metadata.length,
     content.length
   ]) {
-    offsets.push(length + curr_sum);
-    curr_sum += length;
+    offsets.push(length + offsets[offsets.length - 1]);
   }
-  let buffersLength = 0;
-  const buffers: (ArrayBuffer | ArrayBufferView)[] =
-    msg.buffers !== undefined ? msg.buffers : [];
+  let buffersByteLength = 0;
   for (let buffer of buffers) {
     let length = buffer.byteLength;
-    offsets.push(length + curr_sum);
-    curr_sum += length;
-    buffersLength += length;
+    offsets.push(length + offsets[offsets.length - 1]);
+    buffersByteLength += length;
   }
-  const layoutJson = {
-    channel: msg.channel,
-    offsets
-  };
-  const layout = JSON.stringify(layoutJson);
-  const layoutLength = new ArrayBuffer(2);
-  new DataView(layoutLength).setInt16(
-    0,
-    layout.length,
-    true /* littleEndian */
-  );
   const encoder = new TextEncoder();
   const binMsgNoBuff = encoder.encode(
-    layout + header + parent_header + metadata + content
+    msg.channel + header + parent_header + metadata + content
   );
-  const binMsg = new Uint8Array(2 + binMsgNoBuff.byteLength + buffersLength);
-  binMsg.set(new Uint8Array(layoutLength), 0);
-  binMsg.set(new Uint8Array(binMsgNoBuff), 2);
-  let pos = 2 + binMsgNoBuff.byteLength;
-  for (let buffer of buffers) {
+  const binMsg = new Uint8Array(
+    4 * (1 + offsetNumber) + binMsgNoBuff.byteLength + buffersByteLength
+  );
+  const word = new ArrayBuffer(4);
+  const data = new DataView(word);
+  data.setInt32(0, offsetNumber, true /* littleEndian */);
+  binMsg.set(new Uint8Array(word), 0);
+  for (let i = 0; i < offsets.length; i++) {
+    data.setInt32(0, offsets[i], true /* littleEndian */);
+    binMsg.set(new Uint8Array(word), 4 * (i + 1));
+  }
+  binMsg.set(binMsgNoBuff, offsets[0]);
+  for (let i = 0; i < buffers.length; i++) {
+    const buffer = buffers[i];
     binMsg.set(
       new Uint8Array(ArrayBuffer.isView(buffer) ? buffer.buffer : buffer),
-      pos
+      offsets[5 + i]
     );
-    pos += buffer.byteLength;
   }
   return binMsg.buffer;
-}
-
-function* getParts(binMsg: Uint8Array, offsets: number[]) {
-  let i0 = 0;
-  for (let i1 of offsets) {
-    yield binMsg.slice(i0, i1);
-    i0 = i1;
-  }
-  yield binMsg.slice(i0);
 }
 
 /**
