@@ -3,9 +3,14 @@
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
+import { showErrorMessage } from '@jupyterlab/apputils';
 
-import { refreshIcon, searchIcon } from '@jupyterlab/ui-components';
+import {
+  PanelWithToolbar,
+  refreshIcon,
+  searchIcon,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
 
 import { IDebugger } from '../../tokens';
 
@@ -30,7 +35,8 @@ export class KernelSources extends PanelWithToolbar {
 
     this._body = new KernelSourcesBody({
       service,
-      model
+      model,
+      translator: options.translator
     });
 
     this.toolbar.addItem(
@@ -48,9 +54,14 @@ export class KernelSources extends PanelWithToolbar {
       'refresh',
       new ToolbarButton({
         icon: refreshIcon,
-        onClick: async (): Promise<void> => {
+        onClick: () => {
           this._model.kernelSources = [];
-          service.displayModules();
+          void service.displayModules().catch(reason => {
+            showErrorMessage(
+              trans.__('Fail to get kernel sources'),
+              trans.__('Fail to get kernel sources:\n%2', reason)
+            );
+          });
         },
         tooltip: trans.__('Refresh kernel sources')
       })

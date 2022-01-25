@@ -5,6 +5,10 @@ import { openKernelSourceIcon } from '../../icons';
 
 import { ReactWidget, ToolbarButton } from '@jupyterlab/ui-components';
 
+import { showErrorMessage } from '@jupyterlab/apputils';
+
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { KernelSourcesFilter } from './filter';
@@ -34,6 +38,7 @@ export class KernelSourcesBody extends Widget {
     super();
     this._model = options.model;
     this._debuggerService = options.service;
+    const trans = (options.translator ?? nullTranslator).load('jupyterlab');
 
     this.layout = new PanelLayout();
     this.addClass('jp-DebuggerKernelSources-body');
@@ -65,6 +70,12 @@ export class KernelSourcesBody extends Widget {
               })
               .then(source => {
                 this._model.open(source);
+              })
+              .catch(reason => {
+                showErrorMessage(
+                  trans.__('Fail to get source'),
+                  trans.__("Fail to get '%1' source:\n%2", path, reason)
+                );
               });
           });
           (this.layout as PanelLayout).addWidget(button);
@@ -113,5 +124,10 @@ export namespace KernelSourcesBody {
      * The sources model.
      */
     model: IDebugger.Model.IKernelSources;
+
+    /**
+     * The application language translator
+     */
+    translator?: ITranslator;
   }
 }
