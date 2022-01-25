@@ -1459,10 +1459,10 @@ function activateNotebookHandler(
     };
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell { 
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
-      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`;
+      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`
     const sideBySideMarginTag = document.getElementById(SIDE_BY_SIDE_STYLE_ID);
     if (sideBySideMarginTag) {
-      sideBySideMarginTag.innerText = sideBySideMarginStyle;
+      sideBySideMarginTag.innerText = sideBySideMarginStyle;  
     } else {
       document.head.insertAdjacentHTML(
         'beforeend',
