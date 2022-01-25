@@ -832,8 +832,7 @@ export class SessionContext implements ISessionContext {
    * Change the kernel.
    */
   private async _changeKernel(
-    model: Partial<Kernel.IModel> = {},
-    isInit = false
+    model: Partial<Kernel.IModel> = {}
   ): Promise<Kernel.IKernelConnection | null> {
     if (model.name) {
       this._pendingKernelName = model.name;
