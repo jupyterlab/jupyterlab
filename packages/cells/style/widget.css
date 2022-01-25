@@ -121,16 +121,29 @@
 
 /* collapseHeadingButton (show always if hiddenCellsButton is _not_ shown) */
 .jp-collapseHeadingButton {
+  --bg-size: 25px;
+
   display: flex;
   min-height: var(--jp-cell-collapser-min-height);
   position: absolute;
-  background-size: 25px !important;
+  background-size: var(--bg-size) !important;
   right: 0;
   top: 0;
   bottom: 0;
+
+  /* Calculate positioning */
+  --header-top-margin: 0.5 * var(--jp-content-heading-margin-top); /* top margin of <h> tags */
+  --collapser-top-offset: 0.5 * var(--bg-size); /* offset to center of --jp-icon-caret scaled by background-size */
   background-position-y: calc(
-    0.5 * var(--jp-content-heading-margin-top)
+    var(--header-top-margin) - var(--collapser-top-offset) + 0.5em
   ) !important;
+}
+
+/* set the container font size to match that of content 
+   so that the nested collapse buttons have the right size
+*/
+.jp-MarkdownCell .jp-InputPrompt {
+  font-size: var(--jp-content-font-size1);
 }
 
 /* collapseHeadingButton should have same position as the corresponding <h> tag
