@@ -1,15 +1,17 @@
 import { ILabStatus } from '@jupyterlab/application';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IFormComponentRegistry, ReactWidget } from '@jupyterlab/ui-components';
-import { SplitLayout, SplitPanel } from '@lumino/widgets';
+import { CommandRegistry } from '@lumino/commands';
+import { IDisposable } from '@lumino/disposable';
+import { Message } from '@lumino/messaging';
+import { ISignal, Signal } from '@lumino/signaling';
+import { SplitPanel } from '@lumino/widgets';
 import React from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsPanel } from './settingspanel';
-import { Message } from '@lumino/messaging';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { CommandRegistry } from '@lumino/commands';
 
 /**
  * Form based interface for editing settings.
@@ -22,14 +24,13 @@ export class SettingsEditor extends SplitPanel {
       spacing: 1
     });
     this.translator = options.translator || nullTranslator;
-    const trans = this.translator.load('jupyterlab');
     this._status = options.status;
     const list = (this._list = new PluginList({
       registry: options.registry,
       translator: this.translator
     }));
     this.addWidget(list);
-    this.updateDirtyState = this.updateDirtyState.bind(this);
+    this.setDirtyState = this.setDirtyState.bind(this);
 
     /**
      * Initializes the settings panel after loading the schema for all plugins.
@@ -45,29 +46,29 @@ export class SettingsEditor extends SplitPanel {
           return !deprecated && (editable || extensible);
         })
         .map(async plugin => await options.registry.load(plugin.id))
-    ).then(settings => {
-      const settingsPanel = ReactWidget.create(
-        <SettingsPanel
-          settings={
-            settings.filter(
-              pluginSettings => !this.skippedPlugins.includes(pluginSettings.id)
-            ) as Settings[]
-          }
-          editorRegistry={options.editorRegistry}
-          handleSelectSignal={this._list.handleSelectSignal}
-          onSelect={(id: string) => (this._list.selection = id)}
-          hasError={this._list.setError}
-          updateDirtyState={this.updateDirtyState}
-        />
-      );
+    )
+      .then(settings => {
+        const settingsPanel = ReactWidget.create(
+          <SettingsPanel
+            settings={
+              settings.filter(
+                pluginSettings =>
+                  !this.skippedPlugins.includes(pluginSettings.id)
+              ) as Settings[]
+            }
+            editorRegistry={options.editorRegistry}
+            handleSelectSignal={this._list.handleSelectSignal}
+            onSelect={(id: string) => (this._list.selection = id)}
+            hasError={this._list.setError}
+            updateDirtyState={this.setDirtyState}
+          />
+        );
 
-      this.addWidget(settingsPanel);
-      this._saveStatusIndicator = ReactWidget.create(
-        <p> {this._dirty ? trans.__('Saving...') : trans.__('Saved')}</p>
-      );
-      this._saveStatusIndicator.addClass('jp-saveStatusIndicator');
-      // this.addWidget(this._saveStatusIndicator);
-    });
+        this.addWidget(settingsPanel);
+      })
+      .catch(reason => {
+        console.error(`Fail to load the setting plugins:\n${reason}`);
+      });
   }
 
   /**
@@ -78,7 +79,19 @@ export class SettingsEditor extends SplitPanel {
     '@jupyterlab/mainmenu-extension:plugin'
   ];
 
-  updateDirtyState(dirty: boolean): void {
+  /**
+   * A signal emitted on the start and end of a saving operation.
+   */
+  get saveStateChanged(): ISignal<this, SettingsEditor.SaveState> {
+    return this._saveStateChange;
+  }
+
+  /**
+   * Set the dirty state status
+   *
+   * @param dirty New status
+   */
+  setDirtyState(dirty: boolean): void {
     this._dirty = dirty;
     if (this._dirty && !this._clearDirty) {
       this._clearDirty = this._status.setDirty();
@@ -86,21 +99,21 @@ export class SettingsEditor extends SplitPanel {
       this._clearDirty.dispose();
       this._clearDirty = null;
     }
-    if (dirty && !this.title.className.includes('jp-mod-dirty')) {
-      this.title.className += ' jp-mod-dirty';
-    }
-    if (!dirty) {
+    if (dirty) {
+      if (!this.title.className.includes('jp-mod-dirty')) {
+        this.title.className += ' jp-mod-dirty';
+      }
+    } else {
       this.title.className = this.title.className.replace('jp-mod-dirty', '');
     }
-    const layout = this.layout as SplitLayout;
-    layout.removeWidget(this._saveStatusIndicator);
-    this._saveStatusIndicator = ReactWidget.create(
-      <p> {dirty ? 'Saving...' : 'Saved'}</p>
-    );
-    this._saveStatusIndicator.addClass('jp-saveStatusIndicator');
-    layout.addWidget(this._saveStatusIndicator);
+    this._saveStateChange.emit(dirty ? 'started' : 'completed');
   }
 
+  /**
+   * A message handler invoked on a `'close-request'` message.
+   *
+   * @param msg Widget message
+   */
   protected onCloseRequest(msg: Message): void {
     if (this._list.hasErrors) {
       showDialog({
@@ -129,16 +142,27 @@ export class SettingsEditor extends SplitPanel {
     }
   }
 
-  private _clearDirty: any;
-  private _status: ILabStatus;
-  private _saveStatusIndicator: ReactWidget;
-  private _dirty: boolean = false;
   protected translator: ITranslator;
+  private _clearDirty: IDisposable | null = null;
+  private _status: ILabStatus;
+  private _dirty: boolean = false;
   private _list: PluginList;
+  private _saveStateChange = new Signal<this, SettingsEditor.SaveState>(this);
 }
 
 export namespace SettingsEditor {
+  /**
+   * Settings editor save state
+   */
+  export type SaveState = 'started' | 'failed' | 'completed';
+
+  /**
+   * Settings editor options
+   */
   export interface IOptions {
+    /**
+     * Form component registry
+     */
     editorRegistry: IFormComponentRegistry;
 
     /**
@@ -161,6 +185,9 @@ export namespace SettingsEditor {
      */
     commands: CommandRegistry;
 
+    /**
+     * Application status
+     */
     status: ILabStatus;
 
     /**

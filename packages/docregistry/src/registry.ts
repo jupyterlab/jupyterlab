@@ -1034,6 +1034,9 @@ export namespace DocumentRegistry {
     addSibling(widget: Widget, options?: IOpenOptions): IDisposable;
   }
 
+  /**
+   * Document save state
+   */
   export type SaveState = 'started' | 'failed' | 'completed';
 
   /**
