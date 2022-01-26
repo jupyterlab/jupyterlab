@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -257,10 +257,6 @@ namespace Private {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     console.error(`Saving setting editor value failed: ${reason.message}`);
-    void showDialog({
-      title: trans.__('Your changes were not saved.'),
-      body: reason.message,
-      buttons: [Dialog.okButton({ label: trans.__('Ok') })]
-    });
+    void showErrorMessage(trans.__('Your changes were not saved.'), reason);
   }
 }

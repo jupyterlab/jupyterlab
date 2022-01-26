@@ -122,6 +122,10 @@ function activate(
           registry,
           state,
           commands,
+          toSkip: [
+            '@jupyterlab/application-extension:context-menu',
+            '@jupyterlab/mainmenu-extension:plugin'
+          ],
           translator,
           status
         })

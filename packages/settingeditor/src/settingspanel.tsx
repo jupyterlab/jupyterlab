@@ -3,12 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { Settings } from '@jupyterlab/settingregistry';
+import { ITranslator } from '@jupyterlab/translation';
+import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
 import React from 'react';
-import { SettingsFormEditor } from './SettingsFormEditor';
 import { PluginList } from './pluginlist';
+import { SettingsFormEditor } from './SettingsFormEditor';
 
 export interface ISettingsPanelProps {
   /**
@@ -35,6 +36,11 @@ export interface ISettingsPanelProps {
   handleSelectSignal: ISignal<PluginList, string>;
 
   /**
+   * Translator object
+   */
+  translator: ITranslator;
+
+  /**
    * Callback to update the plugin list to display plugins with
    * invalid / unsaved settings in red.
    */
@@ -56,8 +62,9 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   onSelect,
   handleSelectSignal,
   hasError,
-  updateDirtyState
-}) => {
+  updateDirtyState,
+  translator
+}: ISettingsPanelProps): JSX.Element => {
   // Refs used to keep track of "selected" plugin based on scroll location
   const editorRefs: {
     [pluginId: string]: React.RefObject<HTMLDivElement>;
@@ -107,6 +114,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
                 updateDirtyStates(pluginSettings.id, dirty);
               }}
               onSelect={onSelect}
+              translator={translator}
             />
           </div>
         );

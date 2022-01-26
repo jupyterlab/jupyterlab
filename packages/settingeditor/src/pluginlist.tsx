@@ -38,7 +38,6 @@ const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
  * A list of plugins with editable settings.
  */
 export class PluginList extends ReactWidget {
-  private _errors: { [id: string]: boolean };
   /**
    * Create a new plugin list.
    */
@@ -67,9 +66,7 @@ export class PluginList extends ReactWidget {
         // If this is the json settings editor, anything is fine
         this._confirm ||
         // If this is the new settings editor, remove context menu / main menu settings.
-        (!this._confirm &&
-          plugin.id !== '@jupyterlab/application-extension:context-menu' &&
-          plugin.id !== '@jupyterlab/mainmenu-extension:plugin');
+        (!this._confirm && !(options.toSkip ?? []).includes(plugin.id));
 
       return (
         !deprecated &&
@@ -240,14 +237,14 @@ export class PluginList extends ReactWidget {
     return typeof hint === 'string' ? hint : '';
   }
 
-  setFilter(filter: (item: string) => boolean) {
+  setFilter(filter: (item: string) => boolean): void {
     this._filter = (value: ISettingRegistry.IPlugin) => {
       return filter(value.schema.title?.toLowerCase() ?? '');
     };
     this.update();
   }
 
-  setError(id: string, error: boolean) {
+  setError(id: string, error: boolean): void {
     if (this._errors[id] !== error) {
       this._errors[id] = error;
       this.update();
@@ -256,7 +253,7 @@ export class PluginList extends ReactWidget {
     }
   }
 
-  mapPlugins(plugin: ISettingRegistry.IPlugin) {
+  mapPlugins(plugin: ISettingRegistry.IPlugin): JSX.Element {
     const { id, schema, version } = plugin;
     const trans = this.translator.load('jupyterlab');
     const title =
@@ -297,7 +294,9 @@ export class PluginList extends ReactWidget {
     );
   }
 
-  render(): React.ReactElement<any> {
+  render(): JSX.Element {
+    const trans = this.translator.load('jupyterlab');
+
     const modifiedItems = this._modifiedPlugins
       .filter(this._filter)
       .map(this.mapPlugins);
@@ -313,16 +312,16 @@ export class PluginList extends ReactWidget {
         <FilterBox
           updateFilter={this.setFilter}
           useFuzzyFilter={true}
-          placeholder={'Search...'}
+          placeholder={trans.__('Search…')}
           forceRefresh={false}
         />
         {modifiedItems.length > 0 && (
           <div>
-            <h1 className="jp-PluginList-header">Modified</h1>
+            <h1 className="jp-PluginList-header">{trans.__('Modified')}</h1>
             <ul>{modifiedItems}</ul>
           </div>
         )}
-        <h1 className="jp-PluginList-header">Settings</h1>
+        <h1 className="jp-PluginList-header">{trans.__('Settings')}</h1>
         <ul>{otherItems}</ul>
       </div>
     );
@@ -330,6 +329,7 @@ export class PluginList extends ReactWidget {
 
   protected translator: ITranslator;
   private _changed = new Signal<this, void>(this);
+  private _errors: { [id: string]: boolean };
   private _filter: (item: ISettingRegistry.IPlugin) => boolean;
   private _handleSelectSignal = new Signal<this, string>(this);
   private _modifiedPlugins: ISettingRegistry.IPlugin[] = [];
@@ -361,6 +361,11 @@ export namespace PluginList {
      * The setting registry for the plugin list.
      */
     registry: ISettingRegistry;
+
+    /**
+     * List of plugins to skip
+     */
+    toSkip?: string[]
 
     /**
      * The setting registry for the plugin list.

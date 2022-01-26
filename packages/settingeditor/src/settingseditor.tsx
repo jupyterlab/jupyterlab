@@ -27,6 +27,7 @@ export class SettingsEditor extends SplitPanel {
     this._status = options.status;
     const list = (this._list = new PluginList({
       registry: options.registry,
+      toSkip: options.toSkip,
       translator: this.translator
     }));
     this.addWidget(list);
@@ -53,7 +54,7 @@ export class SettingsEditor extends SplitPanel {
             settings={
               settings.filter(
                 pluginSettings =>
-                  !this.skippedPlugins.includes(pluginSettings.id)
+                  !(options.toSkip ?? []).includes(pluginSettings.id)
               ) as Settings[]
             }
             editorRegistry={options.editorRegistry}
@@ -61,6 +62,7 @@ export class SettingsEditor extends SplitPanel {
             onSelect={(id: string) => (this._list.selection = id)}
             hasError={this._list.setError}
             updateDirtyState={this.setDirtyState}
+            translator={this.translator}
           />
         );
 
@@ -70,14 +72,6 @@ export class SettingsEditor extends SplitPanel {
         console.error(`Fail to load the setting plugins:\n${reason}`);
       });
   }
-
-  /**
-   * List of settings plugins to not include in the settings editor
-   */
-  skippedPlugins = [
-    '@jupyterlab/application-extension:context-menu',
-    '@jupyterlab/mainmenu-extension:plugin'
-  ];
 
   /**
    * A signal emitted on the start and end of a saving operation.
@@ -193,6 +187,11 @@ export namespace SettingsEditor {
      * Application status
      */
     status: ILabStatus;
+
+    /**
+     * List of plugins to skip
+     */
+    toSkip?: string[]
 
     /**
      * The application language translator.
