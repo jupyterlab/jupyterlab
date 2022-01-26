@@ -13,9 +13,18 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
+import {
+  ICommandPalette,
+  MainAreaWidget,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { IFormComponentRegistry } from '@jupyterlab/ui-components';
+import {
+  CommandToolbarButton,
+  IFormComponentRegistry,
+  launchIcon,
+  Toolbar
+} from '@jupyterlab/ui-components';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   IJSONSettingEditorTracker,
@@ -54,7 +63,7 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     IFormComponentRegistry,
     ILabStatus
   ],
-  optional: [ILayoutRestorer, ICommandPalette],
+  optional: [ILayoutRestorer, ICommandPalette, IJSONSettingEditorTracker],
   autoStart: true,
   provides: ISettingEditorTracker,
   activate
@@ -70,13 +79,14 @@ function activate(
   translator: ITranslator,
   editorRegistry: IFormComponentRegistry,
   status: ILabStatus,
-  restorer?: ILayoutRestorer,
-  palette?: ICommandPalette
+  restorer: ILayoutRestorer | null,
+  palette: ICommandPalette | null,
+  jsonEditor: IJSONSettingEditorTracker | null
 ): ISettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const namespace = 'setting-editor';
-  const tracker = new WidgetTracker<SettingsEditor>({
+  const tracker = new WidgetTracker<MainAreaWidget<SettingsEditor>>({
     namespace
   });
 
@@ -105,15 +115,30 @@ function activate(
 
       const key = plugin.id;
 
-      const editor = new SettingsEditor({
-        editorRegistry,
-        key,
-        registry,
-        state,
-        commands,
-        translator,
-        status
+      const editor = new MainAreaWidget<SettingsEditor>({
+        content: new SettingsEditor({
+          editorRegistry,
+          key,
+          registry,
+          state,
+          commands,
+          translator,
+          status
+        })
       });
+
+      if (jsonEditor) {
+        editor.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+        editor.toolbar.addItem(
+          'open-json-editor',
+          new CommandToolbarButton({
+            commands,
+            id: CommandIDs.openJSON,
+            icon: launchIcon,
+            label: trans.__('JSON Settings Editor')
+          })
+        );
+      }
 
       editor.id = namespace;
       editor.title.icon = settingsIcon;
@@ -167,10 +192,9 @@ function activateJSON(
   const namespace = 'json-setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
-  const tracker = new WidgetTracker<JsonSettingEditor>({
+  const tracker = new WidgetTracker<MainAreaWidget<JsonSettingEditor>>({
     namespace
   });
-  let editor: JsonSettingEditor;
 
   // Handle state restoration.
   if (restorer) {
@@ -191,7 +215,7 @@ function activateJSON(
       const key = plugin.id;
       const when = app.restored;
 
-      editor = new JsonSettingEditor({
+      const editor = new JsonSettingEditor({
         commands: {
           registry: commands,
           revert: CommandIDs.revert,
@@ -229,13 +253,17 @@ function activateJSON(
         });
       });
 
-      editor.id = namespace;
-      editor.title.icon = settingsIcon;
-      editor.title.label = trans.__('Advanced Settings Editor');
-      editor.title.closable = true;
+      const container = new MainAreaWidget<JsonSettingEditor>({
+        content: editor
+      });
 
-      void tracker.add(editor);
-      shell.add(editor);
+      container.id = namespace;
+      container.title.icon = settingsIcon;
+      container.title.label = trans.__('Advanced Settings Editor');
+      container.title.closable = true;
+
+      void tracker.add(container);
+      shell.add(container);
     },
     label: trans.__('Advanced Settings Editor')
   });
@@ -248,18 +276,18 @@ function activateJSON(
 
   commands.addCommand(CommandIDs.revert, {
     execute: () => {
-      tracker.currentWidget?.revert();
+      tracker.currentWidget?.content.revert();
     },
     icon: undoIcon,
     label: trans.__('Revert User Settings'),
-    isEnabled: () => tracker.currentWidget?.canRevertRaw ?? false
+    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
   });
 
   commands.addCommand(CommandIDs.save, {
-    execute: () => tracker.currentWidget?.save(),
+    execute: () => tracker.currentWidget?.content.save(),
     icon: saveIcon,
     label: trans.__('Save User Settings'),
-    isEnabled: () => tracker.currentWidget?.canSaveRaw ?? false
+    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
   });
 
   return tracker;

@@ -2,12 +2,8 @@ import { ILabStatus } from '@jupyterlab/application';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  IFormComponentRegistry,
-  launchIcon,
-  ReactWidget
-} from '@jupyterlab/ui-components';
-import { PanelLayout, SplitPanel, Widget } from '@lumino/widgets';
+import { IFormComponentRegistry, ReactWidget } from '@jupyterlab/ui-components';
+import { SplitLayout, SplitPanel } from '@lumino/widgets';
 import React from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsPanel } from './settingspanel';
@@ -18,23 +14,21 @@ import { CommandRegistry } from '@lumino/commands';
 /**
  * Form based interface for editing settings.
  */
-export class SettingsEditor extends Widget {
+export class SettingsEditor extends SplitPanel {
   constructor(options: SettingsEditor.IOptions) {
-    super();
-    const layout = (this.layout = new PanelLayout());
-    this.translator = options.translator || nullTranslator;
-    this._panel = new SplitPanel({
+    super({
       orientation: 'horizontal',
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
     });
+    this.translator = options.translator || nullTranslator;
+    const trans = this.translator.load('jupyterlab');
     this._status = options.status;
-    layout.addWidget(this._panel);
     const list = (this._list = new PluginList({
       registry: options.registry,
       translator: this.translator
     }));
-    this._panel.addWidget(list);
+    this.addWidget(list);
     this.updateDirtyState = this.updateDirtyState.bind(this);
 
     /**
@@ -66,25 +60,13 @@ export class SettingsEditor extends Widget {
           updateDirtyState={this.updateDirtyState}
         />
       );
-      this._panel.addClass('jp-SettingsPanelWidget');
-      this._panel.addWidget(settingsPanel);
-      const openJSONEditorButton = ReactWidget.create(
-        <button
-          onClick={() => {
-            void options.commands.execute('settingeditor:open-json');
-          }}
-        >
-          JSON Settings Editor
-          <launchIcon.react />
-        </button>
-      );
-      openJSONEditorButton.addClass('jp-openJSONSettingsEditor');
+
+      this.addWidget(settingsPanel);
       this._saveStatusIndicator = ReactWidget.create(
-        <p> {this._dirty ? 'Saving...' : 'Saved'}</p>
+        <p> {this._dirty ? trans.__('Saving...') : trans.__('Saved')}</p>
       );
       this._saveStatusIndicator.addClass('jp-saveStatusIndicator');
-      layout.addWidget(this._saveStatusIndicator);
-      layout.addWidget(openJSONEditorButton);
+      // this.addWidget(this._saveStatusIndicator);
     });
   }
 
@@ -110,7 +92,7 @@ export class SettingsEditor extends Widget {
     if (!dirty) {
       this.title.className = this.title.className.replace('jp-mod-dirty', '');
     }
-    const layout = this.layout as PanelLayout;
+    const layout = this.layout as SplitLayout;
     layout.removeWidget(this._saveStatusIndicator);
     this._saveStatusIndicator = ReactWidget.create(
       <p> {dirty ? 'Saving...' : 'Saved'}</p>
@@ -153,7 +135,6 @@ export class SettingsEditor extends Widget {
   private _dirty: boolean = false;
   protected translator: ITranslator;
   private _list: PluginList;
-  private _panel: SplitPanel;
 }
 
 export namespace SettingsEditor {

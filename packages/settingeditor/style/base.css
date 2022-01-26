@@ -25,7 +25,7 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-#setting-editor > .jp-SettingsPanelWidget,
+#setting-editor > .lm-Widget,
 #json-setting-editor > .lm-Widget {
   position: absolute;
   top: 0;
@@ -71,7 +71,7 @@
 
 .jp-PluginList-wrapper {
   overflow-y: auto;
-  height: calc(100% - 35px);
+  height: 100%;
 }
 
 .jp-PluginList ul {
