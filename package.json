@@ -76,8 +76,8 @@
     "lighthouse:compare": "node testutils/lib/compare-lighthouse.js",
     "lighthouse:throttling:start": "comcast --latency=40 --target-bw=30000 --packet-loss=0.2%",
     "lighthouse:throttling:stop": "comcast --stop",
-    "lint": "jlpm && jlpm run prettier && jlpm run eslint",
-    "lint:check": "jlpm run prettier:check && jlpm run eslint:check",
+    "lint": "jlpm && jlpm prettier && jlpm eslint && jlpm stylelint",
+    "lint:check": "jlpm prettier:check && jlpm eslint:check && jlpm stylelint:check",
     "patch:release": "node buildutils/lib/patch-release.js",
     "prepare:python-release": "node buildutils/lib/prepare-python-release.js",
     "prepublish:check": "node buildutils/lib/prepublish-check.js",
@@ -87,6 +87,8 @@
     "remove:dependency": "node buildutils/lib/remove-dependency.js",
     "remove:package": "node buildutils/lib/remove-package.js",
     "remove:sibling": "node buildutils/lib/remove-package.js",
+    "stylelint": "echo 'not ready to --fix with style lint yet'",
+    "stylelint:check": "stylelint \"packages/*/style/**/*.css\" \"examples/*/*.css\" \"docs/**/*.css\"",
     "test": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream",
     "test:all": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream --no-bail",
     "test:examples": "python examples/test_examples.py",
@@ -122,6 +124,8 @@
     "lint-staged": "^10.2.13",
     "prettier": "~2.1.1",
     "shell-quote": "^1.7.2",
+    "stylelint": "^14.3.0",
+    "stylelint-config-standard": "~24.0.0",
     "typedoc": "~0.22.10",
     "yarn": "1.22.17"
   }
