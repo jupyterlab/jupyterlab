@@ -1,14 +1,11 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ITranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
-import { Menu } from '@lumino/widgets';
 import { IDisposable } from '@lumino/disposable';
-
+import { Menu } from '@lumino/widgets';
 import * as React from 'react';
-
 import { classes } from 'typestyle';
-
 import { CellStyle } from '../componentStyle/ShortcutItemStyle';
-
 import {
   AdvancedOptionsContainerStyle,
   AdvancedOptionsLinkStyle,
@@ -27,18 +24,16 @@ import {
   TopNavStyle,
   TopStyle
 } from '../componentStyle/TopNavStyle';
-
 import { ShortcutTitleItem } from './ShortcutTitleItem';
-
 import { UISize } from './ShortcutUI';
 
 export interface IAdvancedOptionsProps {
   size: UISize;
-  openAdvanced: Function;
   toggleSelectors: Function;
   showSelectors: boolean;
   resetShortcuts: Function;
   menu: Menu;
+  translator: ITranslator;
 }
 
 export interface ISymbolsProps {
@@ -47,9 +42,9 @@ export interface ISymbolsProps {
 
 /** All external actions, setting commands, getting command list ... */
 export interface IShortcutUIexternal {
+  translator: ITranslator;
   getAllShortCutSettings: () => Promise<ISettingRegistry.ISettings>;
   removeShortCut: (key: string) => Promise<void>;
-  openAdvanced: () => void;
   createMenu: () => Menu;
   hasCommand: (id: string) => boolean;
   addCommand: (
@@ -61,7 +56,6 @@ export interface IShortcutUIexternal {
 
 export namespace CommandIDs {
   export const showSelectors = 'shortcutui:showSelectors';
-  export const advancedEditor = 'shortcutui:advancedEditor';
   export const resetAll = 'shortcutui:resetAll';
 }
 
@@ -133,29 +127,26 @@ class Symbols extends React.Component<ISymbolsProps, {}> {
   }
 }
 
-class AdvancedOptions extends React.Component<IAdvancedOptionsProps, {}> {
+class AdvancedOptions extends React.Component<IAdvancedOptionsProps> {
   render() {
+    const trans = this.props.translator.load('jupyterlab');
     if (this.props.size === UISize.Regular) {
       return (
         <div className={AdvancedOptionsContainerStyle}>
           <div className={AdvancedOptionsStyle}>
             <a
               className={AdvancedOptionsLinkStyle(this.props.size)}
-              onClick={() => this.props.openAdvanced()}
-            >
-              Advanced Editor
-            </a>
-            <a
-              className={AdvancedOptionsLinkStyle(this.props.size)}
               onClick={() => this.props.toggleSelectors()}
             >
-              {this.props.showSelectors ? 'Hide Selectors' : 'Show Selectors'}
+              {this.props.showSelectors
+                ? trans.__('Hide Selectors')
+                : trans.__('Show Selectors')}
             </a>
             <a
               className={classes(AdvancedOptionsLinkStyle(this.props.size))}
               onClick={() => this.props.resetShortcuts()}
             >
-              Reset All
+              {trans.__('Reset All')}
             </a>
           </div>
         </div>
@@ -167,21 +158,17 @@ class AdvancedOptions extends React.Component<IAdvancedOptionsProps, {}> {
         >
           <a
             className={AdvancedOptionsLinkStyle(this.props.size)}
-            onClick={() => this.props.openAdvanced()}
-          >
-            Advanced Editor
-          </a>
-          <a
-            className={AdvancedOptionsLinkStyle(this.props.size)}
             onClick={() => this.props.toggleSelectors()}
           >
-            {this.props.showSelectors ? 'Hide Selectors' : 'Show Selectors'}
+            {this.props.showSelectors
+              ? trans.__('Hide Selectors')
+              : trans.__('Show Selectors')}
           </a>
           <a
             className={classes(AdvancedOptionsLinkStyle(this.props.size))}
             onClick={() => this.props.resetShortcuts()}
           >
-            Reset All
+            {trans.__('Reset All')}
           </a>
         </div>
       );
@@ -193,7 +180,6 @@ class AdvancedOptions extends React.Component<IAdvancedOptionsProps, {}> {
 export interface ITopNavProps {
   resetShortcuts: Function;
   updateSearchQuery: Function;
-  openAdvanced: Function;
   toggleSelectors: Function;
   showSelectors: boolean;
   updateSort: Function;
@@ -203,41 +189,33 @@ export interface ITopNavProps {
 }
 
 /** React component for top navigation */
-export class TopNav extends React.Component<ITopNavProps, {}> {
+export class TopNav extends React.Component<ITopNavProps> {
   menu: Menu;
-  constructor(props: any) {
+  constructor(props: ITopNavProps) {
     super(props);
 
     this.addMenuCommands();
     this.menu = this.props.external.createMenu();
     this.menu.addItem({ command: CommandIDs.showSelectors });
-    this.menu.addItem({ command: CommandIDs.advancedEditor });
     this.menu.addItem({ command: CommandIDs.resetAll });
   }
 
   addMenuCommands() {
+    const trans = this.props.external.translator.load('jupyterlab');
     if (!this.props.external.hasCommand(CommandIDs.showSelectors)) {
       this.props.external.addCommand(CommandIDs.showSelectors, {
-        label: 'Toggle Selectors',
-        caption: 'Toggle command selectors',
+        label: trans.__('Toggle Selectors'),
+        caption: trans.__('Toggle command selectors'),
         execute: () => {
           this.props.toggleSelectors();
         }
       });
     }
-    if (!this.props.external.hasCommand(CommandIDs.advancedEditor)) {
-      this.props.external.addCommand(CommandIDs.advancedEditor, {
-        label: 'Advanced Editor',
-        caption: 'Open advanced editor',
-        execute: () => {
-          this.props.openAdvanced();
-        }
-      });
-    }
+
     if (!this.props.external.hasCommand(CommandIDs.resetAll)) {
       this.props.external.addCommand(CommandIDs.resetAll, {
-        label: 'Reset All',
-        caption: 'Reset all shortcuts',
+        label: trans.__('Reset All'),
+        caption: trans.__('Reset all shortcuts'),
         execute: () => {
           this.props.resetShortcuts();
         }
@@ -268,6 +246,7 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
   }
 
   render() {
+    const trans = this.props.external.translator.load('jupyterlab');
     return (
       <div className={TopStyle}>
         <div className={TopNavStyle}>
@@ -276,27 +255,28 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
             <input
               onChange={event => this.props.updateSearchQuery(event)}
               className={SearchStyle}
-              placeholder="Search"
+              placeholder={trans.__('Search')}
             />
           </div>
           <AdvancedOptions
             size={this.getSize(this.props.width)}
-            openAdvanced={this.props.openAdvanced}
             toggleSelectors={this.props.toggleSelectors}
             showSelectors={this.props.showSelectors}
             resetShortcuts={this.props.resetShortcuts}
             menu={this.menu}
+            translator={this.props.external.translator}
           />
         </div>
         <div className={HeaderRowContainerStyle}>
           <div className={HeaderRowStyle}>
-            {this.getShortCutTitleItem('Category')}
-            {this.getShortCutTitleItem('Command')}
+            {this.getShortCutTitleItem(trans.__('Category'))}
+            {this.getShortCutTitleItem(trans.__('Command'))}
             <div className={CellStyle}>
-              <div className="title-div">Shortcut</div>
+              <div className="title-div">{trans.__('Shortcut')}</div>
             </div>
-            {this.getShortCutTitleItem('Source')}
-            {this.props.showSelectors && this.getShortCutTitleItem('Selectors')}
+            {this.getShortCutTitleItem(trans.__('Source'))}
+            {this.props.showSelectors &&
+              this.getShortCutTitleItem(trans.__('Selectors'))}
           </div>
         </div>
       </div>

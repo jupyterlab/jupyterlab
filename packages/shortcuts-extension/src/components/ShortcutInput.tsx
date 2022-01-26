@@ -17,6 +17,7 @@ import {
   SubmitNonFunctionalStyle,
   SubmitStyle
 } from '../componentStyle/ShortcutInputStyle';
+import { ITranslator } from '@jupyterlab/translation';
 
 export interface IShortcutInputProps {
   handleUpdate: Function;
@@ -31,6 +32,7 @@ export interface IShortcutInputProps {
   displayInput: boolean;
   newOrReplace: string;
   placeholder: string;
+  translator: ITranslator;
 }
 
 export interface IShortcutInputState {
@@ -118,20 +120,20 @@ export class ShortcutInput extends React.Component<
   IShortcutInputProps,
   IShortcutInputState
 > {
-  constructor(props: any) {
+  constructor(props: IShortcutInputProps) {
     super(props);
-  }
 
-  state = {
-    value: this.props.placeholder,
-    userInput: '',
-    isAvailable: true,
-    isFunctional: this.props.newOrReplace === 'replace',
-    takenByObject: new TakenByObject(),
-    keys: new Array<string>(),
-    currentChain: '',
-    selected: true
-  };
+    this.state = {
+      value: this.props.placeholder,
+      userInput: '',
+      isAvailable: true,
+      isFunctional: this.props.newOrReplace === 'replace',
+      takenByObject: new TakenByObject(),
+      keys: new Array<string>(),
+      currentChain: '',
+      selected: true
+    };
+  }
 
   handleUpdate = () => {
     let keys = this.state.keys;
@@ -413,6 +415,7 @@ export class ShortcutInput extends React.Component<
   };
 
   render() {
+    const trans = this.props.translator.load('jupyterlab');
     let inputClassName = InputStyle;
     if (!this.state.isAvailable) {
       inputClassName = classes(inputClassName, InputUnavailableStyle);
@@ -444,7 +447,7 @@ export class ShortcutInput extends React.Component<
                 : InputTextStyle
             }
           >
-            {this.state.value === '' ? 'press keys' : this.state.value}
+            {this.state.value === '' ? trans.__('press keys') : this.state.value}
           </p>
         </div>
         <button
@@ -491,7 +494,7 @@ export class ShortcutInput extends React.Component<
               this.props.toggleInput();
             }}
           >
-            Overwrite
+            {trans.__('Overwrite')}
           </button>
         )}
       </div>

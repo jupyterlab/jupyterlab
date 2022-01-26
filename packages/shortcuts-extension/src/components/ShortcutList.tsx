@@ -1,13 +1,11 @@
-import { ShortcutItem } from './ShortcutItem';
-
 import * as React from 'react';
-
 import {
   ShortcutListContainerStyle,
   ShortcutListStyle
 } from '../componentStyle/ShortcutListStyle';
-import { UISize } from './ShortcutUI';
 import { ShortcutObject, TakenByObject } from './ShortcutInput';
+import { ShortcutItem } from './ShortcutItem';
+import { UISize } from './ShortcutUI';
 import { IShortcutUIexternal } from './TopNav';
 
 const TOPNAV_HEIGHT: number = 115;
@@ -29,11 +27,8 @@ export interface IShortcutListProps {
 }
 
 /** React component for list of shortcuts */
-export class ShortcutList extends React.Component<IShortcutListProps, {}> {
-  constructor(props: any) {
-    super(props);
-  }
-  render() {
+export class ShortcutList extends React.Component<IShortcutListProps> {
+  render(): JSX.Element {
     return (
       <div
         className={ShortcutListContainerStyle(TOPNAV_HEIGHT, this.props.height)}

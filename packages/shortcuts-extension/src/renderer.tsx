@@ -1,28 +1,6 @@
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { CommandRegistry } from '@lumino/commands';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { Menu } from '@lumino/widgets';
-
-import { ShortcutUI } from './components';
 import React from 'react';
+import { IShortcutUIexternal, ShortcutUI } from './components';
 
-/** All external actions, setting commands, getting command list ... */
-export interface IShortcutUIexternal {
-  getAllShortCutSettings: () => Promise<ISettingRegistry.ISettings>;
-  removeShortCut: (key: string) => Promise<void>;
-  openAdvanced: () => void;
-  createMenu: () => Menu;
-  hasCommand: (id: string) => boolean;
-  addCommand: (
-    id: string,
-    options: CommandRegistry.ICommandOptions
-  ) => IDisposable;
-  getLabel: (id: string) => string;
-}
-
-export const renderShortCut = (props: any) => {
+export const renderShortCut = (props: { external: IShortcutUIexternal }): JSX.Element => {
   return <ShortcutUI external={props.external} height={1000} width={1000} />;
 };

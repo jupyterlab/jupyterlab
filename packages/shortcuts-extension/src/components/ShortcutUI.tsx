@@ -209,6 +209,7 @@ function getShortcutObjects(
       shortcutObject.category = shortcut.command.split(':')[0];
       shortcutObject.keys[0] = shortcut.keys;
       shortcutObject.selector = shortcut.selector;
+      // TODO needs translation
       shortcutObject.source = 'Default';
       shortcutObject.id = key;
       shortcutObject.numberOfShortcuts = 1;
@@ -222,6 +223,7 @@ function getShortcutObjects(
     const selector: string = userSetting.selector;
     const keyTo = command + '_' + selector;
     if (shortcutObjects[keyTo]) {
+      // TODO needs translation
       shortcutObjects[keyTo].source = 'Custom';
     }
   });
@@ -389,11 +391,6 @@ export class ShortcutUI extends React.Component<
     await this._refreshShortcutList();
   };
 
-  /** Opens advanced setting registry */
-  openAdvanced = (): void => {
-    void this.props.external.openAdvanced();
-  };
-
   /** Toggles showing command selectors */
   toggleSelectors = (): void => {
     this.setState({ showSelectors: !this.state.showSelectors });
@@ -490,7 +487,6 @@ export class ShortcutUI extends React.Component<
         <TopNav
           updateSearchQuery={this.updateSearchQuery}
           resetShortcuts={this.resetShortcuts}
-          openAdvanced={this.openAdvanced}
           toggleSelectors={this.toggleSelectors}
           showSelectors={this.state.showSelectors}
           updateSort={this.updateSort}

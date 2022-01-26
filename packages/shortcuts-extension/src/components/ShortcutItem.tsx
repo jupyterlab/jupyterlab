@@ -1,13 +1,7 @@
-import { ErrorObject, ShortcutObject, TakenByObject } from './ShortcutInput';
-
-import { ShortcutInput } from './ShortcutInput';
-
+import { TranslationBundle } from '@jupyterlab/translation';
 import { Platform } from '@lumino/domutils';
-
-import { classes } from 'typestyle';
-
 import * as React from 'react';
-
+import { classes } from 'typestyle';
 import {
   CellStyle,
   CommaStyle,
@@ -27,7 +21,12 @@ import {
   SingleShortcutCellStyle,
   SourceCellStyle
 } from '../componentStyle/ShortcutItemStyle';
-
+import {
+  ErrorObject,
+  ShortcutInput,
+  ShortcutObject,
+  TakenByObject
+} from './ShortcutInput';
 import { UISize } from './ShortcutUI';
 import { IShortcutUIexternal } from './TopNav';
 
@@ -60,36 +59,40 @@ enum ShortCutLocation {
 }
 
 /** Describe commands that are used by shortcuts */
-namespace Commands {
-  export const shortcutEditLeft = {
-    commandId: 'shortcutui:EditLeft',
-    label: 'Edit First',
-    caption: 'Edit existing shortcut'
-  };
-  export const shortcutEditRight = {
-    commandId: 'shortcutui:EditRight',
-    label: 'Edit Second',
-    caption: 'Edit existing shortcut'
-  };
-  export const shortcutEdit = {
-    commandId: 'shortcutui:Edit',
-    label: 'Edit',
-    caption: 'Edit existing sortcut'
-  };
-  export const shortcutAddNew = {
-    commandId: 'shortcutui:AddNew',
-    label: 'Add',
-    caption: 'Add new shortcut'
-  };
-  export const shortcutAddAnother = {
-    commandId: 'shortcutui:AddAnother',
-    label: 'Add',
-    caption: 'Add another shortcut'
-  };
-  export const shortcutReset = {
-    commandId: 'shortcutui:Reset',
-    label: 'Reset',
-    caption: 'Reset shortcut back to default'
+function getCommands(
+  trans: TranslationBundle
+): { [key: string]: { commandId: string; label: string; caption: string } } {
+  return {
+    shortcutEditLeft: {
+      commandId: 'shortcutui:EditLeft',
+      label: trans.__('Edit First'),
+      caption: trans.__('Edit existing shortcut')
+    },
+    shortcutEditRight: {
+      commandId: 'shortcutui:EditRight',
+      label: trans.__('Edit Second'),
+      caption: trans.__('Edit existing shortcut')
+    },
+    shortcutEdit: {
+      commandId: 'shortcutui:Edit',
+      label: trans.__('Edit'),
+      caption: trans.__('Edit existing sortcut')
+    },
+    shortcutAddNew: {
+      commandId: 'shortcutui:AddNew',
+      label: trans.__('Add'),
+      caption: trans.__('Add new shortcut')
+    },
+    shortcutAddAnother: {
+      commandId: 'shortcutui:AddAnother',
+      label: trans.__('Add'),
+      caption: trans.__('Add another shortcut')
+    },
+    shortcutReset: {
+      commandId: 'shortcutui:Reset',
+      label: trans.__('Reset'),
+      caption: trans.__('Reset shortcut back to default')
+    }
   };
 }
 
@@ -98,8 +101,10 @@ export class ShortcutItem extends React.Component<
   IShortcutItemProps,
   IShortcutItemState
 > {
-  constructor(props: any) {
+  constructor(props: IShortcutItemProps) {
     super(props);
+
+    this._commands = getCommands(props.external.translator.load('jupyterlab'));
 
     this.state = {
       displayNewInput: false,
@@ -144,22 +149,22 @@ export class ShortcutItem extends React.Component<
   };
 
   private handleRightClick = (e: any): void => {
-    this.addCommandIfNeeded(Commands.shortcutEdit, () =>
+    this.addCommandIfNeeded(this._commands.shortcutEdit, () =>
       this.toggleInputReplaceLeft()
     );
-    this.addCommandIfNeeded(Commands.shortcutEditLeft, () =>
+    this.addCommandIfNeeded(this._commands.shortcutEditLeft, () =>
       this.toggleInputReplaceLeft()
     );
-    this.addCommandIfNeeded(Commands.shortcutEditRight, () =>
+    this.addCommandIfNeeded(this._commands.shortcutEditRight, () =>
       this.toggleInputReplaceRight()
     );
-    this.addCommandIfNeeded(Commands.shortcutAddNew, () =>
+    this.addCommandIfNeeded(this._commands.shortcutAddNew, () =>
       this.toggleInputNew()
     );
-    this.addCommandIfNeeded(Commands.shortcutAddAnother, () =>
+    this.addCommandIfNeeded(this._commands.shortcutAddAnother, () =>
       this.toggleInputNew()
     );
-    this.addCommandIfNeeded(Commands.shortcutReset, () =>
+    this.addCommandIfNeeded(this._commands.shortcutReset, () =>
       this.props.resetShortcut(this.props.shortcut)
     );
 
@@ -176,23 +181,23 @@ export class ShortcutItem extends React.Component<
         let commandList: any[] = [];
         if (this.state.numShortcuts == 2) {
           commandList = commandList.concat([
-            Commands.shortcutEditLeft.commandId + key,
-            Commands.shortcutEditRight.commandId + key
+            this._commands.shortcutEditLeft.commandId + key,
+            this._commands.shortcutEditRight.commandId + key
           ]);
         } else if (this.state.numShortcuts == 1) {
           commandList = commandList.concat([
-            Commands.shortcutEdit.commandId + key,
-            Commands.shortcutAddAnother.commandId + key
+            this._commands.shortcutEdit.commandId + key,
+            this._commands.shortcutAddAnother.commandId + key
           ]);
         } else {
           commandList = commandList.concat([
-            Commands.shortcutAddNew.commandId + key
+            this._commands.shortcutAddNew.commandId + key
           ]);
         }
 
         if (this.props.shortcut.source === 'Custom') {
           commandList = commandList.concat([
-            Commands.shortcutReset.commandId + key
+            this._commands.shortcutReset.commandId + key
           ]);
         }
 
@@ -221,6 +226,7 @@ export class ShortcutItem extends React.Component<
   };
 
   getErrorRow(): JSX.Element {
+    const trans = this.props.external.translator.load('jupyterlab');
     return (
       <div className={classes(RowStyle)}>
         <div
@@ -230,19 +236,20 @@ export class ShortcutItem extends React.Component<
           )}
         >
           <div className={ErrorMessageStyle}>
-            {'Shortcut already in use by ' +
-              (this.props.shortcut as ErrorObject).takenBy.takenByLabel +
-              '. Overwrite it?'}
+            {trans.__(
+              'Shortcut already in use by %1. Overwrite it?',
+              (this.props.shortcut as ErrorObject).takenBy.takenByLabel
+            )}
           </div>
           <div className={ErrorButtonStyle}>
-            <button>Cancel</button>
+            <button>{trans.__('Cancel')}</button>
             <button
               id="no-blur"
               onClick={() => {
                 document.getElementById('overwrite')?.click();
               }}
             >
-              Overwrite
+              {trans.__('Overwrite')}
             </button>
           </div>
         </div>
@@ -263,12 +270,13 @@ export class ShortcutItem extends React.Component<
   }
 
   getResetShortCutLink(): JSX.Element {
+    const trans = this.props.external.translator.load('jupyterlab');
     return (
       <a
         className={ResetStyle}
         onClick={() => this.props.resetShortcut(this.props.shortcut)}
       >
-        Reset
+        {trans.__('Reset')}
       </a>
     );
   }
@@ -319,6 +327,7 @@ export class ShortcutItem extends React.Component<
   }
 
   getOrDiplayIfNeeded(nonEmptyKeys: string[]): JSX.Element {
+    const trans = this.props.external.translator.load('jupyterlab');
     return (
       <div
         className={
@@ -334,7 +343,7 @@ export class ShortcutItem extends React.Component<
             : 'or'
         }
       >
-        or
+        {trans.__('or')}
       </div>
     );
   }
@@ -354,6 +363,7 @@ export class ShortcutItem extends React.Component<
         displayInput={this.getDisplayReplaceInput(location)}
         newOrReplace={'replace'}
         placeholder={this.toSymbols(this.props.shortcut.keys[key].join(', '))}
+        translator={this.props.external.translator}
       />
     );
   }
@@ -408,6 +418,7 @@ export class ShortcutItem extends React.Component<
   }
 
   getAddLink(): JSX.Element {
+    const trans = this.props.external.translator.load('jupyterlab');
     return (
       <a
         className={!this.state.displayNewInput ? PlusStyle : ''}
@@ -416,7 +427,7 @@ export class ShortcutItem extends React.Component<
         }}
         id="add-link"
       >
-        Add
+        {trans.__('Add')}
       </a>
     );
   }
@@ -436,6 +447,7 @@ export class ShortcutItem extends React.Component<
         displayInput={this.state.displayNewInput}
         newOrReplace={'new'}
         placeholder={''}
+        translator={this.props.external.translator}
       />
     ) : (
       <div />
@@ -462,7 +474,7 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  render() {
+  render(): JSX.Element {
     const nonEmptyKeys = Object.keys(this.props.shortcut.keys).filter(
       (key: string) => this.props.shortcut.keys[key][0] !== ''
     );
@@ -486,4 +498,8 @@ export class ShortcutItem extends React.Component<
       );
     }
   }
+
+  private _commands: {
+    [key: string]: { commandId: string; label: string; caption: string };
+  };
 }

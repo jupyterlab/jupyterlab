@@ -10,8 +10,8 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { ITranslator } from '@jupyterlab/translation';
+import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
@@ -20,20 +20,22 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Menu } from '@lumino/widgets';
-import { IShortcutUIexternal, renderShortCut } from './renderer';
+import { IShortcutUIexternal } from './components';
+import { renderShortCut } from './renderer';
 
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
-  app: JupyterFrontEnd
+  app: JupyterFrontEnd,
+  translator: ITranslator,
 ): IShortcutUIexternal {
   const { commands } = app;
   const shortcutPluginLocation = '@jupyterlab/shortcuts-extension:shortcuts';
   return {
+    translator,
     getAllShortCutSettings: () =>
       settingRegistry.reload(shortcutPluginLocation),
     removeShortCut: (key: string) =>
       settingRegistry.remove(shortcutPluginLocation, key),
-    openAdvanced: () => app.commands.execute('settingeditor:open'),
     createMenu: () => new Menu({ commands }),
     hasCommand: (id: string) => commands.hasCommand(id),
     addCommand: (id: string, options: CommandRegistry.ICommandOptions) =>
@@ -79,7 +81,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     translator: ITranslator,
-    editorRegistry?: IFormComponentRegistry
+    editorRegistry: IFormComponentRegistry | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
@@ -89,7 +91,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     if (editorRegistry) {
       editorRegistry.addRenderer('shortcuts', (props: any) => {
         return renderShortCut({
-          external: getExternalForJupyterLab(registry, app),
+          external: getExternalForJupyterLab(registry, app, translator),
           ...props
         });
       });
