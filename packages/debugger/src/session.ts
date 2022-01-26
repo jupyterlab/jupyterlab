@@ -165,7 +165,8 @@ export class DebuggerSession implements IDebugger.ISession {
     }
     this._capabilities = initializeResponse.body;
     this._isStarted = true;
-    this._exceptionBreakpointFilters = initializeResponse.body?.exceptionBreakpointFilters;
+    this._exceptionBreakpointFilters =
+      initializeResponse.body?.exceptionBreakpointFilters;
     await this.sendRequest('attach', {});
   }
 
