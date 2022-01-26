@@ -184,8 +184,7 @@ export class User implements ICurrentUser {
         initials !== ''
           ? initials
           : `A${anonymousName.substring(0, 1).toLocaleUpperCase()}`;
-      this._color =
-        '#' + (color !== '' ? color : Private.getRandomColor());
+      this._color = color !== '' ? '#' + color : Private.getRandomColor();
       this._anonymous = true;
       this._cursor = undefined;
       this._save();
