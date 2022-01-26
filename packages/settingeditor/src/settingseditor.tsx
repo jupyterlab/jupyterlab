@@ -56,10 +56,7 @@ export class SettingsEditor extends Widget {
         <SettingsPanel
           settings={
             settings.filter(
-              pluginSettings =>
-                pluginSettings.id !==
-                  '@jupyterlab/application-extension:context-menu' &&
-                pluginSettings.id !== '@jupyterlab/mainmenu-extension:plugin'
+              pluginSettings => !this.skippedPlugins.includes(pluginSettings.id)
             ) as Settings[]
           }
           editorRegistry={options.editorRegistry}
@@ -91,7 +88,15 @@ export class SettingsEditor extends Widget {
     });
   }
 
-  updateDirtyState(dirty: boolean) {
+  /**
+   * List of settings plugins to not include in the settings editor
+   */
+  skippedPlugins = [
+    '@jupyterlab/application-extension:context-menu',
+    '@jupyterlab/mainmenu-extension:plugin'
+  ];
+
+  updateDirtyState(dirty: boolean): void {
     this._dirty = dirty;
     if (this._dirty && !this._clearDirty) {
       this._clearDirty = this._status.setDirty();
