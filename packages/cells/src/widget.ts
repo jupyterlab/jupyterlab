@@ -1581,7 +1581,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
   }
 
-  set showEditorForReadOnlyMarkdown(value: boolean) {
+  /*
+   * Whether the Markdown editor is visible in read-only mode.
+   */
+  get showEditorForReadOnly(): boolean {
+    return this._showEditorForReadOnlyMarkdown;
+  }
+  set showEditorForReadOnly(value: boolean) {
     this._showEditorForReadOnlyMarkdown = value;
     if (value === false) {
       this.rendered = true;

@@ -832,7 +832,7 @@ export class StaticNotebook extends Widget {
     if (showEditorForReadOnlyMarkdown !== undefined && this._cellsArray) {
       for (const cell of this._cellsArray) {
         if (cell.model.type === 'markdown') {
-          (cell as MarkdownCell).showEditorForReadOnlyMarkdown = showEditorForReadOnlyMarkdown;
+          (cell as MarkdownCell).showEditorForReadOnly = showEditorForReadOnlyMarkdown;
         }
       }
     }
