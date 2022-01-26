@@ -120,7 +120,9 @@ export namespace SavingStatus {
         if (oldContext) {
           oldContext.saveState.disconnect(this._onStatusChange);
         } else if ((this._widget as any).content?.saveStateChanged) {
-          (this._widget as any).content.saveStateChanged.disconnect(this._onStatusChange);
+          (this._widget as any).content.saveStateChanged.disconnect(
+            this._onStatusChange
+          );
         }
       }
 
@@ -132,7 +134,9 @@ export namespace SavingStatus {
         if (widgetContext) {
           widgetContext.saveState.connect(this._onStatusChange);
         } else if ((this._widget as any).content?.saveStateChanged) {
-          (this._widget as any).content.saveStateChanged.connect(this._onStatusChange);
+          (this._widget as any).content.saveStateChanged.connect(
+            this._onStatusChange
+          );
         }
       }
     }

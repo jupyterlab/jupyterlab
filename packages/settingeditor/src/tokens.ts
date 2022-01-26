@@ -29,4 +29,5 @@ export interface IJSONSettingEditorTracker
 /**
  * A class that tracks the setting editor.
  */
-export interface ISettingEditorTracker extends IWidgetTracker<MainAreaWidget<SettingsEditor>> {}
+export interface ISettingEditorTracker
+  extends IWidgetTracker<MainAreaWidget<SettingsEditor>> {}

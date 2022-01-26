@@ -62,7 +62,9 @@ export class JsonSettingEditor extends SplitPanel {
             height="auto"
             width="60px"
           />
-          <span className="jp-SettingEditorInstructions-title">{trans.__('Settings')}</span>
+          <span className="jp-SettingEditorInstructions-title">
+            {trans.__('Settings')}
+          </span>
         </h2>
         <span className="jp-SettingEditorInstructions-text">
           {trans.__(
@@ -86,7 +88,6 @@ export class JsonSettingEditor extends SplitPanel {
       translator: this.translator
     }));
     const when = options.when;
-
 
     if (when) {
       this._when = Array.isArray(when) ? Promise.all(when) : when;

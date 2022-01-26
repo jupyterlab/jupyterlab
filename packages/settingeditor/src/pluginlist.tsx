@@ -365,7 +365,7 @@ export namespace PluginList {
     /**
      * List of plugins to skip
      */
-    toSkip?: string[]
+    toSkip?: string[];
 
     /**
      * The setting registry for the plugin list.

@@ -191,7 +191,7 @@ export namespace SettingsEditor {
     /**
      * List of plugins to skip
      */
-    toSkip?: string[]
+    toSkip?: string[];
 
     /**
      * The application language translator.

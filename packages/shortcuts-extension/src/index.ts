@@ -26,7 +26,7 @@ import { renderShortCut } from './renderer';
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd,
-  translator: ITranslator,
+  translator: ITranslator
 ): IShortcutUIexternal {
   const { commands } = app;
   const shortcutPluginLocation = '@jupyterlab/shortcuts-extension:shortcuts';

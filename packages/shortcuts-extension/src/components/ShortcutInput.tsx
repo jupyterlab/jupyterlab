@@ -447,7 +447,9 @@ export class ShortcutInput extends React.Component<
                 : InputTextStyle
             }
           >
-            {this.state.value === '' ? trans.__('press keys') : this.state.value}
+            {this.state.value === ''
+              ? trans.__('press keys')
+              : this.state.value}
           </p>
         </div>
         <button

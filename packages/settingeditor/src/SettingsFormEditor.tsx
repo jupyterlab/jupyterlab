@@ -319,7 +319,9 @@ export class SettingsFormEditor extends React.Component<
      */
     const uiSchema: UiSchema = {};
     for (const id in this.props.renderers) {
-      if (Object.keys(this.props.settings.schema.properties ?? {}).includes(id)) {
+      if (
+        Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
+      ) {
         uiSchema[id] = {
           'ui:field': id
         };
