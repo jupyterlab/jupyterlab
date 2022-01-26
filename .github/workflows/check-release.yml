@@ -16,8 +16,7 @@ jobs:
       matrix:
         group: [check_release, link_check]
     env:
-      PIP_NO_BUILD_ISOLATION: "1"
-      PIP_BUILD_ISOLATION: "no"
+      PIP_ONLY_BINARY: "pyrsistent"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
