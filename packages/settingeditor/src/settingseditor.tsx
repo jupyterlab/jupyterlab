@@ -1,5 +1,5 @@
 import { ILabStatus } from '@jupyterlab/application';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { showDialog } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -115,11 +115,13 @@ export class SettingsEditor extends SplitPanel {
    * @param msg Widget message
    */
   protected onCloseRequest(msg: Message): void {
+    const trans = this.translator.load('jupyterlab');
     if (this._list.hasErrors) {
       showDialog({
-        title:
-          'Unsaved changes due to validation error. Continue without saving?',
-        buttons: [Dialog.okButton(), Dialog.cancelButton()]
+        title: trans.__('Warning'),
+        body: trans.__(
+          'Unsaved changes due to validation error. Continue without saving?'
+        )
       }).then(value => {
         if (value.button.accept) {
           this.dispose();
@@ -128,8 +130,10 @@ export class SettingsEditor extends SplitPanel {
       });
     } else if (this._dirty) {
       showDialog({
-        title: 'Some changes have not been saved. Continue without saving?',
-        buttons: [Dialog.cancelButton(), Dialog.okButton()]
+        title: trans.__('Warning'),
+        body: trans.__(
+          'Some changes have not been saved. Continue without saving?'
+        )
       }).then(value => {
         if (value.button.accept) {
           this.dispose();
