@@ -219,8 +219,9 @@
   padding-left: 4px;
 }
 
-.jp-extensionmanager-entry.jp-extensionmanager-entry-warning {
-}
+/* this is not styled */
+/* .jp-extensionmanager-entry.jp-extensionmanager-entry-warning {
+} */
 
 .jp-extensionmanager-entry-name {
   font-size: var(--jp-ui-font-size1);

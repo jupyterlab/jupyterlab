@@ -461,11 +461,6 @@
 [data-jp-theme-light='true'] .jp-RenderedImage img.jp-needs-dark-background {
   background-color: var(--jp-inverse-layout-color1);
 }
-/* ...or leave it untouched if they don't */
-[data-jp-theme-light='false'] .jp-RenderedImage img.jp-needs-dark-background {
-}
-[data-jp-theme-light='true'] .jp-RenderedImage img.jp-needs-light-background {
-}
 
 .jp-RenderedHTMLCommon img,
 .jp-RenderedImage img,
