@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import {
+  ISessionContext,
+  translateKernelStatuses,
+  VDomModel,
+  VDomRenderer
+} from '@jupyterlab/apputils';
 import { Session } from '@jupyterlab/services';
 import {
   ITranslator,
@@ -119,22 +124,7 @@ export namespace KernelStatus {
       translator = translator || nullTranslator;
       this._trans = translator.load('jupyterlab');
       this._kernelName = this._trans.__('No Kernel!');
-      // TODO-FIXME: this mapping is duplicated in apputils/toolbar.tsx
-      this._statusNames = {
-        unknown: this._trans.__('Unknown'),
-        starting: this._trans.__('Starting'),
-        idle: this._trans.__('Idle'),
-        busy: this._trans.__('Busy'),
-        terminating: this._trans.__('Terminating'),
-        restarting: this._trans.__('Restarting'),
-        autorestarting: this._trans.__('Autorestarting'),
-        dead: this._trans.__('Dead'),
-        connected: this._trans.__('Connected'),
-        connecting: this._trans.__('Connecting'),
-        disconnected: this._trans.__('Disconnected'),
-        initializing: this._trans.__('Initializing'),
-        '': ''
-      };
+      this._statusNames = translateKernelStatuses(translator);
     }
 
     /**

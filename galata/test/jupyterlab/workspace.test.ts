@@ -17,7 +17,7 @@ test.use({
         state: 'detached'
       });
     };
-    use(simpleWait);
+    void use(simpleWait);
   }
 });
 
@@ -147,7 +147,7 @@ test.describe('Workspace', () => {
     ).toBeVisible();
 
     // Wait for the kernel to be ready so it does not unfocus the menu
-    await page.waitForSelector('text=Idle');
+    await page.waitForSelector('text= | Idle');
 
     await expect(page.menu.getMenuItem(`Tabs>${mdFile}`)).toBeDefined();
   });

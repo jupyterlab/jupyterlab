@@ -214,8 +214,7 @@ describe('@jupyterlab/notebook', () => {
             'restart-and-run',
             'cellType',
             'spacer',
-            'kernelName',
-            'kernelStatus'
+            'kernelName'
           ]);
         });
       });

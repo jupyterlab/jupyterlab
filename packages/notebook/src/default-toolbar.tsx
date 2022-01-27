@@ -286,10 +286,6 @@ export namespace ToolbarItems {
           sessionDialogs,
           translator
         )
-      },
-      {
-        name: 'kernelStatus',
-        widget: Toolbar.createKernelStatusItem(panel.sessionContext, translator)
       }
     ];
   }
