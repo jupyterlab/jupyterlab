@@ -54,7 +54,6 @@
   justify-content: space-between;
   flex: 0 0 auto;
   margin: 0px;
-  padding-bottom: 8px;
   font-weight: 600;
   text-transform: uppercase;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
