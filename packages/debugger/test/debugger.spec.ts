@@ -160,33 +160,14 @@ describe('Debugger', () => {
   });
 
   describe('Panel', () => {
-    let toolbarList: any;
-    beforeEach(() => {
-      toolbarList = sidebar.content.node.querySelectorAll(
-        '.jp-AccordionPanel-title'
-      );
-    });
-    it('should have 4 child widgets', () => {
-      expect(sidebar.widgets.length).toBe(4);
-    });
-
-    it('should have 4 toolbars', () => {
-      expect(toolbarList.length).toBe(4);
-    });
     describe('Variable toolbar', () => {
       let toolbar: Element;
       beforeEach(() => {
-        toolbar = toolbarList.item(0);
-      });
-      it('should have expanding icon', () => {
-        const title = toolbar.querySelectorAll(
-          '.lm-AccordionPanel-titleCollapser'
-        );
-        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+        toolbar = sidebar.variables.node;
       });
       it('should have title', () => {
         const title = toolbar.querySelectorAll(
-          'span.lm-AccordionPanel-titleLabel'
+          'div.jp-stack-panel-header > h2'
         );
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Variables');
@@ -201,18 +182,13 @@ describe('Debugger', () => {
     describe('Callstack toolbar', () => {
       let toolbar: Element;
       beforeEach(() => {
-        toolbar = toolbarList.item(1);
-      });
-      it('should have expanding icon', () => {
-        const title = toolbar.querySelectorAll(
-          '.lm-AccordionPanel-titleCollapser'
-        );
-        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+        toolbar = sidebar.callstack.node;
       });
       it('should have title', () => {
         const title = toolbar.querySelectorAll(
-          'span.lm-AccordionPanel-titleLabel'
+          'div.jp-stack-panel-header > h2'
         );
+        console;
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Callstack');
       });
@@ -224,17 +200,11 @@ describe('Debugger', () => {
     describe('Breakpoints toolbar', () => {
       let toolbar: Element;
       beforeEach(() => {
-        toolbar = toolbarList.item(2);
-      });
-      it('should have expanding icon', () => {
-        const title = toolbar.querySelectorAll(
-          '.lm-AccordionPanel-titleCollapser'
-        );
-        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+        toolbar = sidebar.breakpoints.node;
       });
       it('should have title', () => {
         const title = toolbar.querySelectorAll(
-          'span.lm-AccordionPanel-titleLabel'
+          'div.jp-stack-panel-header > h2'
         );
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Breakpoints');
@@ -247,17 +217,11 @@ describe('Debugger', () => {
     describe('Source toolbar', () => {
       let toolbar: Element;
       beforeEach(() => {
-        toolbar = toolbarList.item(3);
-      });
-      it('should have expanding icon', () => {
-        const title = toolbar.querySelectorAll(
-          '.lm-AccordionPanel-titleCollapser'
-        );
-        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+        toolbar = sidebar.sources.node;
       });
       it('should have title', () => {
         const title = toolbar.querySelectorAll(
-          'span.lm-AccordionPanel-titleLabel'
+          'div.jp-stack-panel-header > h2'
         );
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Source');
