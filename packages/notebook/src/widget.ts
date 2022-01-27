@@ -993,6 +993,16 @@ export namespace StaticNotebook {
      * Defines the rendering layout to use.
      */
     renderingLayout: RenderingLayout;
+
+    /**
+     * Override the side-by-side left margin.
+     */
+    sideBySideLeftMarginOverride: string;
+
+    /**
+     * Override the side-by-side right margin.
+     */
+    sideBySideRightMarginOverride: string;
   }
 
   /**
@@ -1008,7 +1018,9 @@ export namespace StaticNotebook {
     observedBottomMargin: '1000px',
     maxNumberOutputs: 50,
     disableDocumentWideUndoRedo: false,
-    renderingLayout: 'default'
+    renderingLayout: 'default',
+    sideBySideLeftMarginOverride: '10px',
+    sideBySideRightMarginOverride: '10px'
   };
 
   /**

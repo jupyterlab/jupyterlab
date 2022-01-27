@@ -844,6 +844,18 @@
       "description": "Global setting to define the rendering layout in notebooks. 'default' or 'side-by-side' are supported.",
       "type": "string",
       "default": "default"
+    },
+    "sideBySideLeftMarginOverride": {
+      "title": "Side-by-side left margin override",
+      "description": "Side-by-side left margin override.",
+      "type": "string",
+      "default": "10px"
+    },
+    "sideBySideRightMarginOverride": {
+      "title": "Side-by-side right margin override",
+      "description": "Side-by-side right margin override.",
+      "type": "string",
+      "default": "10px"
     }
   },
   "additionalProperties": false,
