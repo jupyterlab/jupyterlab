@@ -833,6 +833,12 @@
       "type": "number",
       "default": 50
     },
+    "showEditorForReadOnlyMarkdown": {
+      "title": "Show editor for read-only Markdown cells",
+      "description": "Should an editor be shown for read-only markdown",
+      "type": "boolean",
+      "default": true
+    },
     "experimentalDisableDocumentWideUndoRedo": {
       "title": "Experimental settings to enable the undo/redo on the notebook document level.",
       "description": "Disable the undo/redo on the notebook document level, so actions independent cells can have their own history. The undo/redo never applies on the outputs, in other words, outputs don't have history. A moved cell completely looses history capability for now.",
