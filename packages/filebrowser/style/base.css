@@ -30,7 +30,7 @@
 .jp-FileBrowser-toolbar.jp-Toolbar {
   border-bottom: none;
   height: auto;
-  margin: var(--jp-toolbar-header-margin);
+  margin: 8px 12px 0px 12px;
   box-shadow: none;
   padding: 0px;
   justify-content: flex-start;
