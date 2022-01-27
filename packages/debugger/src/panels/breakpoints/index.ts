@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, showDialog, CommandToolbarButton, ToolbarButton } from '@jupyterlab/apputils';
+import {
+  CommandToolbarButton,
+  Dialog,
+  showDialog,
+  ToolbarButton
+} from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
