@@ -123,6 +123,11 @@ export interface IDebugger {
   displayDefinedVariables(): Promise<void>;
 
   /**
+   * Requests all the loaded modules and display them.
+   */
+  displayModules(): Promise<void>;
+
+  /**
    * Request whether debugging is available for the given session connection.
    *
    * @param connection The session connection.
@@ -224,6 +229,21 @@ export namespace IDebugger {
   };
 
   /**
+   * The type for a kernel source file.
+   */
+  export type KernelSource = {
+    /**
+     * The name of the source.
+     */
+    name: string;
+
+    /**
+     * The path of the source.
+     */
+    path: string;
+  };
+
+  /**
    * Single breakpoint in an editor.
    */
   export interface IBreakpoint extends DebugProtocol.Breakpoint {}
@@ -307,7 +327,12 @@ export namespace IDebugger {
     connection: Session.ISessionConnection | null;
 
     /**
-     * Whether the debug session is started.
+     * Returns the initialize response .
+     */
+    readonly capabilities: DebugProtocol.Capabilities | undefined;
+
+    /**
+     * Whether the debug session is started
      */
     readonly isStarted: boolean;
 
@@ -822,6 +847,11 @@ export namespace IDebugger {
       readonly sources: ISources;
 
       /**
+       * The kernel sources UI model.
+       */
+      readonly kernelSources: IKernelSources;
+
+      /**
        * The set of threads in stopped state.
        */
       stoppedThreads: Set<number>;
@@ -879,6 +909,42 @@ export namespace IDebugger {
        * Open a source in the main area.
        */
       open(): void;
+    }
+
+    /**
+     * The kernel sources UI model.
+     */
+    export interface IKernelSources {
+      /**
+       * The kernel source.
+       */
+      kernelSources: IDebugger.KernelSource[] | null;
+
+      /**
+       * The filter to apply.
+       */
+      filter: string;
+
+      /**
+       * Signal emitted when the kernel sources have changed.
+       */
+      readonly changed: ISignal<
+        IDebugger.Model.IKernelSources,
+        IDebugger.KernelSource[] | null
+      >;
+
+      /**
+       * Signal emitted when a kernel source has be opened in the main area.
+       */
+      readonly kernelSourceOpened: ISignal<
+        IDebugger.Model.IKernelSources,
+        IDebugger.Source | null
+      >;
+
+      /**
+       * Open a source in the main area.
+       */
+      open(source: IDebugger.Source): void;
     }
 
     /**

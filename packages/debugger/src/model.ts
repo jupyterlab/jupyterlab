@@ -11,6 +11,8 @@ import { CallstackModel } from './panels/callstack/model';
 
 import { SourcesModel } from './panels/sources/model';
 
+import { KernelSourcesModel } from './panels/kernelSources/model';
+
 import { VariablesModel } from './panels/variables/model';
 
 /**
@@ -27,6 +29,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged
     });
+    this.kernelSources = new KernelSourcesModel();
   }
 
   /**
@@ -48,6 +51,11 @@ export class DebuggerModel implements IDebugger.Model.IService {
    * The sources model.
    */
   readonly sources: SourcesModel;
+
+  /**
+   * The sources model.
+   */
+  readonly kernelSources: KernelSourcesModel;
 
   /**
    * A signal emitted when the debugger widget is disposed.
@@ -133,6 +141,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.callstack.frames = [];
     this.variables.scopes = [];
     this.sources.currentSource = null;
+    this.kernelSources.kernelSources = null;
     this.title = '-';
   }
 

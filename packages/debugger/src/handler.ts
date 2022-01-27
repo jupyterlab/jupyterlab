@@ -318,6 +318,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       this._previousConnection = connection;
       await this._service.restoreState(true);
       await this._service.displayDefinedVariables();
+      if (this._service.session?.capabilities?.supportsModulesRequest) {
+        await this._service.displayModules();
+      }
     };
 
     const toggleDebugging = async (): Promise<void> => {
@@ -357,6 +360,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     await this._service.restoreState(false);
     if (this._service.isStarted && !this._service.hasStoppedThreads()) {
       await this._service.displayDefinedVariables();
+      if (this._service.session?.capabilities?.supportsModulesRequest) {
+        await this._service.displayModules();
+      }
     }
 
     updateIconButtonState(
