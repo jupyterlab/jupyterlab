@@ -288,6 +288,11 @@ const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
 const PANEL_SETTINGS = '@jupyterlab/notebook-extension:panel';
 
 /**
+ * The id to use on the style tag for the side by side margins.
+ */
+const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
+
+/**
  * The notebook widget tracker provider.
  */
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
@@ -1437,13 +1442,33 @@ function activateNotebookHandler(
       observedBottomMargin: settings.get('observedBottomMargin')
         .composite as string,
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
+      showEditorForReadOnlyMarkdown: settings.get(
+        'showEditorForReadOnlyMarkdown'
+      ).composite as boolean,
       disableDocumentWideUndoRedo: settings.get(
         'experimentalDisableDocumentWideUndoRedo'
       ).composite as boolean,
       renderingLayout: settings.get('renderingLayout').composite as
         | 'default'
-        | 'side-by-side'
+        | 'side-by-side',
+      sideBySideLeftMarginOverride: settings.get('sideBySideLeftMarginOverride')
+        .composite as string,
+      sideBySideRightMarginOverride: settings.get(
+        'sideBySideRightMarginOverride'
+      ).composite as string
     };
+    const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell { 
+      margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
+      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`;
+    const sideBySideMarginTag = document.getElementById(SIDE_BY_SIDE_STYLE_ID);
+    if (sideBySideMarginTag) {
+      sideBySideMarginTag.innerText = sideBySideMarginStyle;
+    } else {
+      document.head.insertAdjacentHTML(
+        'beforeend',
+        `<style id="${SIDE_BY_SIDE_STYLE_ID}">${sideBySideMarginStyle}}</style>`
+      );
+    }
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
 
