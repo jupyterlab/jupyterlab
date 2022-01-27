@@ -4,9 +4,8 @@ extends: stylelint-config-standard
 
 rules:
   # TODO: fix all of these rules violated in stylelint-config-recommended
-  font-family-no-missing-generic-family-keyword: null
   no-descending-specificity: null
-  no-duplicate-selectors: null
+  # TODO: https://github.com/jupyterlab/jupyterlab/pull/11944#issuecomment-1023630962
   no-invalid-position-at-import-rule: null
   # TODO: evaluate these rules violated in stylelint-config-standard
   alpha-value-notation: null

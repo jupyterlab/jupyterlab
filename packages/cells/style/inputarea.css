@@ -19,9 +19,6 @@
   display: table-cell;
   overflow: hidden;
   vertical-align: top;
-}
-
-.jp-InputArea-editor {
   /* This is the non-active, default styling */
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   border-radius: 0px;
