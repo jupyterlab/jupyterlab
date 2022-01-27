@@ -35,8 +35,6 @@ rules:
   length-zero-no-unit: null
   max-empty-lines: null
   max-line-length: null
-  # TODO: observe this failure
-  # no-eol-whitespace: null
   number-leading-zero: null
   number-max-precision: null
   property-no-vendor-prefix: null

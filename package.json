@@ -88,7 +88,7 @@
     "remove:package": "node buildutils/lib/remove-package.js",
     "remove:sibling": "node buildutils/lib/remove-package.js",
     "stylelint": "jlpm stylelint:check --fix",
-    "stylelint:check": "stylelint --cache \"packages/*/style/**/*.css\" \"examples/*/*.css\" \"docs/**/*.css\"",
+    "stylelint:check": "stylelint --cache \"{packages/*,galata}/style/**/*.css\" \"{examples/*,docs/**}/*.css\"",
     "test": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream",
     "test:all": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream --no-bail",
     "test:examples": "python examples/test_examples.py",
