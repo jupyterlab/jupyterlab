@@ -259,7 +259,9 @@ export class SettingsFormEditor extends React.Component<
    * Called immediately after updating occurs. Not called for the initial render.
    */
   componentDidUpdate(prevProps: Readonly<SettingsFormEditor.IProps>): void {
-    prevProps.handleSelectSignal.disconnect(this.onSelect);
+    if (prevProps.handleSelectSignal !== this.props.handleSelectSignal) {
+      prevProps.handleSelectSignal.disconnect(this.onSelect);
+    }
   }
 
   /**
