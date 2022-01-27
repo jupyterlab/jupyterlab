@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         group: [check_release, link_check]
-    env:
-      PIP_ONLY_BINARY: "pyrsistent"
+    # env:
+    #   PIP_ONLY_BINARY: "pyrsistent"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
