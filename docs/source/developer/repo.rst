@@ -83,7 +83,7 @@ Documentation: ``docs/``
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 This directory contains the Sphinx project for this documentation.
-You can create an environment to build the documentation using ``conda create -f environment.yml``,
+You can install the dependencies for building the documentation using ``pip install .[docs]``,
 and you can build the documentation by running ``make html``.
 The entry point to the built docs will then be in ``docs/build/index.html``.
 
