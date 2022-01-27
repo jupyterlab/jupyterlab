@@ -229,6 +229,109 @@ describe('docregistry/registry', () => {
         disposable.dispose();
         expect(registry.fileTypes().next()!.name).toBe(fileType.name);
       });
+
+      it('should add a file type to some factories', () => {
+        registry = new DocumentRegistry({ initialFileTypes: [] });
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        const gFactory = new WidgetFactory({
+          name: 'global',
+          fileTypes: ['*'],
+          defaultFor: ['*']
+        });
+        registry.addWidgetFactory(gFactory);
+
+        expect(registry.defaultWidgetFactory('dummy.test').name).toEqual(
+          gFactory.name
+        );
+
+        const fileType = { name: 'test-file', extensions: ['.test'] };
+        registry.addFileType(fileType, [factory.name]);
+        expect(registry.defaultWidgetFactory('dummy.test').name).toEqual(
+          factory.name
+        );
+      });
+
+      it('should add a file type to some factories without changing the default', () => {
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        const gFactory = new WidgetFactory({
+          name: 'global',
+          fileTypes: ['*'],
+          defaultFor: ['*']
+        });
+        registry.addWidgetFactory(gFactory);
+
+        expect(registry.defaultWidgetFactory('dummy.foo.bar').name).toEqual(
+          factory.name
+        );
+
+        const newFactory = new WidgetFactory({
+          name: 'new-factory',
+          fileTypes: ['new-foobar']
+        });
+        registry.addWidgetFactory(newFactory);
+
+        const fileType = { name: 'test-file', extensions: ['.foo.bar'] };
+        registry.addFileType(fileType, [newFactory.name]);
+
+        expect(registry.defaultWidgetFactory('dummy.foo.bar').name).toEqual(
+          factory.name
+        );
+        expect(
+          registry.preferredWidgetFactories('dummy.foo.bar').map(f => f.name)
+        ).toContain(newFactory.name);
+      });
+
+      it('should remove the link to factory when disposed', () => {
+        registry = new DocumentRegistry({ initialFileTypes: [] });
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        const gFactory = new WidgetFactory({
+          name: 'global',
+          fileTypes: ['*'],
+          defaultFor: ['*']
+        });
+        registry.addWidgetFactory(gFactory);
+
+        const fileType = { name: 'test-file', extensions: ['.test'] };
+        const disposable = registry.addFileType(fileType, [factory.name]);
+
+        disposable.dispose();
+
+        expect(registry.defaultWidgetFactory('dummy.test').name).toBe(
+          gFactory.name
+        );
+      });
+
+      it('should remove the link to factory when disposed without changing the default', () => {
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        const gFactory = new WidgetFactory({
+          name: 'global',
+          fileTypes: ['*'],
+          defaultFor: ['*']
+        });
+        registry.addWidgetFactory(gFactory);
+
+        const newFactory = new WidgetFactory({
+          name: 'new-factory',
+          fileTypes: ['new-foobar']
+        });
+        registry.addWidgetFactory(newFactory);
+
+        const fileType = { name: 'test-file', extensions: ['.foo.bar'] };
+        const disposable = registry.addFileType(fileType, [newFactory.name]);
+
+        disposable.dispose();
+
+        expect(registry.defaultWidgetFactory('dummy.foo.bar').name).toEqual(
+          factory.name
+        );
+        expect(
+          registry.preferredWidgetFactories('dummy.foo.bar').map(f => f.name)
+        ).not.toContain(newFactory.name);
+      });
     });
 
     describe('#preferredWidgetFactories()', () => {
@@ -670,6 +773,17 @@ describe('docregistry/registry', () => {
 
         const ft2 = registry.getFileTypesForPath('foo/bar/baz.temp');
         expect(ft2[0].name).toBe('test');
+      });
+
+      it('should returns all file types', () => {
+        registry.addFileType({
+          name: 'test',
+          extensions: ['.foo.bar']
+        });
+
+        const ft = registry.getFileTypesForPath('foo/bar/test.foo.bar');
+        expect(ft.length).toBeGreaterThanOrEqual(2);
+        expect(ft.map(f => f.name)).toContain('test');
       });
     });
   });
