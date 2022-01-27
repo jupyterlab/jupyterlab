@@ -4,7 +4,6 @@ extends: stylelint-config-standard
 
 rules:
   # TODO: fix all of these rules violated in stylelint-config-recommended
-  declaration-block-no-duplicate-properties: null
   declaration-block-no-shorthand-property-overrides: null
   font-family-no-missing-generic-family-keyword: null
   no-descending-specificity: null
