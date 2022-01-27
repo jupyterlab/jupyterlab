@@ -17,7 +17,7 @@ test.use({
         state: 'detached'
       });
     };
-    use(simpleWait);
+    void use(simpleWait);
   }
 });
 

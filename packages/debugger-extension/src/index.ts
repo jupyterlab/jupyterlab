@@ -471,7 +471,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         const refreshWidget = () => {
           // Refresh the widget only if the active element is the same.
           if (handler.activeWidget === activeWidget) {
-            widget.refresh();
+            void widget.refresh();
           }
         };
         widget.disposed.connect(disposeWidget);

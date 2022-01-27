@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, translateKernelStatuses } from '@jupyterlab/apputils';
+import {
+  ISessionContext,
+  translateKernelStatuses,
+  VDomModel,
+  VDomRenderer
+} from '@jupyterlab/apputils';
 import { Session } from '@jupyterlab/services';
 import {
   ITranslator,

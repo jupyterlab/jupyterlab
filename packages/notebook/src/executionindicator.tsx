@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, translateKernelStatuses } from '@jupyterlab/apputils';
+import {
+  ISessionContext,
+  translateKernelStatuses,
+  VDomModel,
+  VDomRenderer
+} from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import React from 'react';
@@ -10,9 +15,7 @@ import { interactiveItem, ProgressCircle } from '@jupyterlab/statusbar';
 import {
   circleIcon,
   LabIcon,
-  offlineBoltIcon,
-  VDomModel,
-  VDomRenderer
+  offlineBoltIcon
 } from '@jupyterlab/ui-components';
 
 import { Notebook } from './widget';
