@@ -125,11 +125,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install fonts-dejavu fonts-noto
 
-          bash ./scripts/ci_install.sh
           # Freeze the packages to ensure consistent look and feel
           # IPython is frozen because its version is displayed in
           # the console header
           pip install .[docs-screenshots]
+          bash ./scripts/ci_install.sh
 
           # Build dev-mode
           jlpm run build
