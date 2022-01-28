@@ -66,7 +66,7 @@ test.describe('Completer', () => {
 
       await page.click('button:has-text("Select")');
 
-      await page.waitForSelector('[aria-label="Code Cell Content"]');
+      await page.waitForSelector('text=[ ]: ​ >> div[role="presentation"]');
       await page.waitForSelector('text=| Idle');
 
       await page.keyboard.type('import getopt\ngetopt.');
