@@ -411,8 +411,8 @@ all jupyterlab organization extensions.
    }
 
 
-Un-/Installing using ``jupyter labextensions``
-----------------------------------------------
+Un-/Installing using ``jupyter labextension``
+---------------------------------------------
 
 .. note::
 
