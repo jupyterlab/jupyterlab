@@ -35,6 +35,13 @@ export class DebuggerSession implements IDebugger.ISession {
   }
 
   /**
+   * Returns the initialize response .
+   */
+  get capabilities(): DebugProtocol.Capabilities | undefined {
+    return this._capabilities;
+  }
+
+  /**
    * A signal emitted when the debug session is disposed.
    */
   get disposed(): ISignal<this, void> {
@@ -138,7 +145,7 @@ export class DebuggerSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
-    const reply = await this.sendRequest('initialize', {
+    const initializeResponse = await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
       adapterID: this.connection?.kernel?.name ?? '',
@@ -151,11 +158,14 @@ export class DebuggerSession implements IDebugger.ISession {
       locale: document.documentElement.lang
     });
 
-    if (!reply.success) {
-      throw new Error(`Could not start the debugger: ${reply.message}`);
+    if (!initializeResponse.success) {
+      throw new Error(
+        `Could not start the debugger: ${initializeResponse.message}`
+      );
     }
+    this._capabilities = initializeResponse.body;
     this._isStarted = true;
-    this._exceptionBreakpointFilters = reply.body?.exceptionBreakpointFilters;
+    this._exceptionBreakpointFilters = initializeResponse.body?.exceptionBreakpointFilters;
     await this.sendRequest('attach', {});
   }
 
@@ -245,6 +255,7 @@ export class DebuggerSession implements IDebugger.ISession {
   private _seq = 0;
   private _ready = new PromiseDelegate<void>();
   private _connection: Session.ISessionConnection | null;
+  private _capabilities: DebugProtocol.Capabilities | undefined;
   private _isDisposed = false;
   private _isStarted = false;
   private _pausingOnExceptions: string[] = [];

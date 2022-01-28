@@ -8,6 +8,7 @@
 @import './icons.css';
 @import './sidebar.css';
 @import './sources.css';
+@import './kernelSources.css';
 @import './variables.css';
 
 .jp-left-truncated {

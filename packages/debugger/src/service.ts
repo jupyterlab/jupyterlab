@@ -851,6 +851,22 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._model.variables.scopes = variableScopes;
   }
 
+  async displayModules(): Promise<void> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
+
+    const modules = await this.session.sendRequest('modules', {});
+    this._model.kernelSources.kernelSources = modules.body.modules.map(
+      module => {
+        return {
+          name: Object.keys(module)[0],
+          path: Object.values(module)[0]
+        };
+      }
+    );
+  }
+
   /**
    * Handle a variable expanded event and request variables from the kernel.
    *
@@ -913,7 +929,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: Map<string, IDebugger.IBreakpoint[]>
   ): Promise<void> {
     for (const [source, points] of breakpoints) {
-      console.log(source);
       await this._setBreakpoints(
         points
           .filter(({ line }) => typeof line === 'number')
