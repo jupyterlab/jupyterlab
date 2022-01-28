@@ -37,10 +37,6 @@ JupyterLab URLs are an advanced part of the user interface that allows for
 managing :ref:`workspaces <url-workspaces-ui>`. To learn more about URLs in
 Jupyterlab, visit :ref:`urls`.
 
-To open the classic Notebook from JupyterLab, select "Launch Classic Notebook"
-from the JupyterLab Help menu, or you can change the URL
-from ``/lab`` to ``/tree``.
-
 JupyterLab runs on top of Jupyter Server, so see the `security
 section <https://jupyter-server.readthedocs.io/en/latest/operators/security.html>`__
 of Jupyter Server's documentation for security-related information.
