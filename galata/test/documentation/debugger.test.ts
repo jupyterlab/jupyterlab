@@ -3,7 +3,7 @@
 
 import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
-import { positionMouse } from './utils';
+import { generateCaptureArea, positionMouse } from './utils';
 
 test.use({ autoGoto: false, viewport: { height: 720, width: 1280 } });
 
@@ -14,12 +14,12 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 62px; left: 1050px; width: 190px; height: 28px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 62, left: 1050, width: 190, height: 28 })]
+    );
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -35,12 +35,12 @@ test.describe('Debugger', () => {
     await page.waitForCondition(() => page.debugger.isOpen());
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 62px; left: 800px; width: 190px; height: 28px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 62, left: 800, width: 190, height: 28 })]
+    );
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -58,12 +58,12 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 100px; left: 300px; width: 300px; height: 80px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 100, left: 300, width: 300, height: 80 })]
+    );
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -77,14 +77,13 @@ test.describe('Debugger', () => {
 
     // Inject capture zone
     await page.evaluate(
-      ([mouse]) => {
-        document.body.insertAdjacentHTML('beforeend', mouse);
-        document.body.insertAdjacentHTML(
-          'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 62px; left: 400px; width: 190px; height: 80px;"></div>'
-        );
+      ([mouse, zone]) => {
+        document.body.insertAdjacentHTML('beforeend', mouse + zone);
       },
-      [positionMouse({ x: 446, y: 80 })]
+      [
+        positionMouse({ x: 446, y: 80 }),
+        generateCaptureArea({ top: 62, left: 400, width: 190, height: 80 })
+      ]
     );
 
     expect(
@@ -109,12 +108,12 @@ test.describe('Debugger', () => {
     await page.debugger.waitForCallStack();
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 100px; left: 300px; width: 300px; height: 80px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 100, left: 300, width: 300, height: 80 })]
+    );
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -132,14 +131,13 @@ test.describe('Debugger', () => {
 
     // Inject capture zone
     await page.evaluate(
-      ([mouse]) => {
-        document.body.insertAdjacentHTML('beforeend', mouse);
-        document.body.insertAdjacentHTML(
-          'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 22px; left: 1200px; width: 85px; height: 160px;"></div>'
-        );
+      ([mouse, zone]) => {
+        document.body.insertAdjacentHTML('beforeend', mouse + zone);
       },
-      [positionMouse({ x: 1240, y: 115 })]
+      [
+        positionMouse({ x: 1240, y: 115 }),
+        generateCaptureArea({ top: 22, left: 1200, width: 85, height: 160 })
+      ]
     );
 
     expect(
@@ -164,12 +162,12 @@ test.describe('Debugger', () => {
     await page.debugger.waitForCallStack();
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 58px; left: 998px; width: 280px; height: 138px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 58, left: 998, width: 280, height: 138 })]
+    );
 
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -197,12 +195,12 @@ test.describe('Debugger', () => {
     await page.pause();
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 196px; left: 998px; width: 280px; height: 138px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 196, left: 998, width: 280, height: 138 })]
+    );
 
     await expect(
       page.locator('[aria-label="side panel content"] >> text=add').first()
@@ -212,11 +210,6 @@ test.describe('Debugger', () => {
     // Need to set precisely the path
     await (await page.$('#capture-screenshot')).screenshot({
       path: 'test/documentation/screenshots/debugger-callstack.png'
-    });
-
-    // Remove capture area so clicking on the Continue button is possible
-    await page.evaluate(() => {
-      document.body.querySelector('#capture-screenshot').remove();
     });
 
     await page.click('button[title^=Continue]');
@@ -239,12 +232,12 @@ test.describe('Debugger', () => {
     await page.debugger.waitForCallStack();
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 334px; left: 998px; width: 280px; height: 138px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 334, left: 998, width: 280, height: 138 })]
+    );
 
     const breakpointsPanel = await page.debugger.getBreakPointsPanel();
     expect(await breakpointsPanel.innerText()).toMatch(
@@ -277,12 +270,12 @@ test.describe('Debugger', () => {
     await page.debugger.waitForCallStack();
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 478px; left: 998px; width: 280px; height: 138px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 478, left: 998, width: 280, height: 138 })]
+    );
 
     await expect(
       page.locator(

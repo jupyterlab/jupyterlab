@@ -22,6 +22,29 @@ export function generateArrow(
 }
 
 /**
+ * Generate a capture area
+ *
+ * @param position Absolute position of the area
+ * @param id HTML element id (default: "capture-screenshot")
+ * @returns The div element to inject in the page
+ */
+export function generateCaptureArea(
+  position: {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  },
+  id = 'capture-screenshot'
+): string {
+  const { top, left, width, height } = position;
+  return `<div 
+    id="${id}"
+    style="position: absolute; top: ${top}px; left: ${left}px; width: ${width}px; height: ${height}px; pointer-events: none;">
+  </div>`;
+}
+
+/**
  * Generate a SVG mouse pointer to inject in a HTML document.
  *
  * @param position Absolute position
